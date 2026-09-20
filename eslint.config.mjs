@@ -39,6 +39,12 @@ export default [
       'no-case-declarations': 'off',
       'no-empty': 'off',
       'no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: 'express',
+            message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
+          },
+        ],
         patterns: [
           {
             group: ['**/modules/*/infrastructure/repositories/**'],
@@ -54,6 +60,10 @@ export default [
       'max-lines': ['warn', { max: 500, skipComments: true }],
       // Ban expect([array]).toContain(x) and expect([array].includes(x)).toBe(true)
       'no-restricted-syntax': ['error',
+        {
+          selector: "ImportExpression[source.value='express']",
+          message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
+        },
         {
           selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
           message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
@@ -78,7 +88,8 @@ export default [
     },
   },
   {
-    files: ['boot/**/*.ts'],
+    // Approved framework boundaries: the HTTP adapter implementation and composition roots
+    files: ['boot/**/*.ts', 'app.ts', 'libs/http/**/*.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },

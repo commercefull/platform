@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { ContentController } from '../controllers/contentBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 const contentController = new ContentController();
 
 router.use(isOrganizationLoggedIn);

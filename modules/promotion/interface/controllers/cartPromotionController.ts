@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { promotionRuleRepository, type PromotionCart } from '../../application/wired';
 
 type CartCreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmount' | 'status'> &
@@ -13,14 +12,14 @@ interface CartPromotionBody extends CartCreateProps {
 const cartPromotionRepo = promotionRuleRepository.carts;
 
 // Get cart promotions by basket ID
-export const getPromotionsByCartId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPromotionsByCartId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { cartId } = req.params;
   const promotions = await cartPromotionRepo.getByBasketId(cartId);
   res.status(200).json({ success: true, data: promotions || [] });
 };
 
 // Get promotion by ID
-export const getCartPromotionById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCartPromotionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const promotion = await cartPromotionRepo.getById(id);
 
@@ -34,8 +33,8 @@ export const getCartPromotionById = async (req: TypedRequest, res: Response): Pr
 
 // Apply a promotion to a cart
 export const applyPromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, CartPromotionBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CartPromotionBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const promotionData = req.body;
 
@@ -45,8 +44,8 @@ export const applyPromotion = async (
 
 // Update a cart promotion
 export const updateCartPromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
@@ -56,7 +55,7 @@ export const updateCartPromotion = async (
 };
 
 // Remove a promotion from a cart
-export const removePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   await cartPromotionRepo.delete(id);
   res.status(200).json({ success: true, message: 'Cart promotion removed successfully' });

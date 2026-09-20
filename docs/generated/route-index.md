@@ -1087,15 +1087,15 @@ POST /customers/register |
 | <span class="badge badge-get">GET</span> | `/store-credit/ledger` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/stores` | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store |
 | <span class="badge badge-get">GET</span> | `/stores` | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination |
-| <span class="badge badge-get">GET</span> | `/stores` | `async (req: TypedRequest, res: Response) => {
+| <span class="badge badge-get">GET</span> | `/stores` | `async (req: HttpRequest, res: HttpResponse) => {
   try {
-    co` | — |
+   ` | — |
 | <span class="badge badge-get">GET</span> | `/stores/:storeId` | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID |
 | <span class="badge badge-put">PUT</span> | `/stores/:storeId` | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store |
 | <span class="badge badge-delete">DELETE</span> | `/stores/:storeId` | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store |
-| <span class="badge badge-get">GET</span> | `/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
+| <span class="badge badge-get">GET</span> | `/stores/:storeId` | `async (req: HttpRequest, res: HttpResponse) => {
   try {
-    co` | — |
+   ` | — |
 | <span class="badge badge-put">PUT</span> | `/stores/:storeId/local-delivery` | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone |
 | <span class="badge badge-put">PUT</span> | `/stores/:storeId/pickup` | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS) |
 | <span class="badge badge-get">GET</span> | `/stores/active` | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |

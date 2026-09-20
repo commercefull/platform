@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
@@ -9,7 +9,7 @@ import {
   getUserMembershipBenefits,
 } from '../controllers/membershipCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Get all active membership tiers
 router.get('/membership/tiers', asyncHandler(getMembershipTiers));

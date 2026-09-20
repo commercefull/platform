@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
@@ -33,7 +33,7 @@ import {
   updatePreferenceAdmin,
 } from '../controllers/notificationBusinessController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

@@ -4,13 +4,13 @@
  * Routes for inventory management (merchant/admin access).
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as inventoryController from '../controllers/inventoryController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { storeDispatchRouter } from './storeDispatchRouter';
 
-const router = express.Router();
+const router = createHttpRouter();
 router.use(isOrganizationLoggedIn);
 
 // ============================================================================

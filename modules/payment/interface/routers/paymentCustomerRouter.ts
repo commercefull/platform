@@ -2,13 +2,13 @@
  * Payment Customer Router
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as paymentController from '../controllers/PaymentController';
 import * as paymentCustomerController from '../controllers/paymentCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Protected routes
 router.use('/payment/transactions', isCustomerLoggedIn);

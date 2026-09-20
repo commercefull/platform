@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { marketplaceController } from '../../application/useCases/wired';
 
-export const marketplaceBusinessRouter = express.Router();
+export const marketplaceBusinessRouter = createHttpRouter();
 
 // Vendor CRUD + lifecycle
 marketplaceBusinessRouter.get(

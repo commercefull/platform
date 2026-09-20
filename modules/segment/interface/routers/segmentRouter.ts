@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import segmentController from '../controllers/segmentController';
 
-export const segmentBusinessRouter = express.Router();
+export const segmentBusinessRouter = createHttpRouter();
 
 // Segment CRUD
 segmentBusinessRouter.get('/segment', isOrganizationLoggedIn, asyncHandler(segmentController.listSegments.bind(segmentController)));

@@ -3,8 +3,7 @@
  * HTTP interface for business/admin product operations
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { CreateProductCommand } from '../../application/useCases/CreateProduct';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
@@ -199,11 +198,11 @@ interface AttributeSetBody {
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -215,7 +214,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * List all products (admin)
  * GET /products
  */
-export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, visibility, categoryId, organizationId, search, limit, offset, orderBy, orderDirection } = req.query;
 
   const filters: {
@@ -249,7 +248,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
  * Get product details (admin)
  * GET /products/:productId
  */
-export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   // Guard: reject obviously non-UUID values that would cause a DB error
@@ -271,7 +270,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
   respond(req, res, product, 200);
 };
 
-export const getProductStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductStoreAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetProductStoreAvailabilityUseCase(ProductRepo);
   const result = await useCase.execute({
     productId: req.params.productId,
@@ -286,7 +285,7 @@ export const getProductStoreAvailability = async (req: TypedRequest, res: Respon
  * Create a new product
  * POST /products
  */
-export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const body = req.body as CreateProductBody;
   const {
@@ -375,7 +374,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
  * Update a product
  * PUT /products/:productId
  */
-export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const updates = req.body as UpdateProductBody;
 
@@ -395,7 +394,7 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
  * Update product status
  * PUT /products/:productId/status
  */
-export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { status } = req.body as StatusBody;
 
@@ -421,7 +420,7 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
  * Update product visibility
  * PUT /products/:productId/visibility
  */
-export const updateProductVisibility = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductVisibility = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { visibility } = req.body as VisibilityBody;
 
@@ -447,7 +446,7 @@ export const updateProductVisibility = async (req: TypedRequest, res: Response):
  * Delete a product
  * DELETE /products/:productId
  */
-export const deleteProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { permanent } = req.query;
 
@@ -470,7 +469,7 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
  * Publish a product
  * POST /products/:productId/publish
  */
-export const publishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   const product = await ProductRepo.findById(productId);
@@ -494,7 +493,7 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
  * Unpublish a product
  * POST /products/:productId/unpublish
  */
-export const unpublishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const unpublishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   const product = await ProductRepo.findById(productId);
@@ -517,7 +516,7 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
  * Get product by variant barcode
  * GET /products/barcode/:barcode
  */
-export const findByBarcode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const findByBarcode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { barcode } = req.params;
 
   if (!barcode?.trim()) {
@@ -538,12 +537,12 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
 // Variant Management
 // ============================================================================
 
-export const getProductVariants = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductVariants = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const variants = await productVariantRepo.findByProductId(req.params.productId);
   respond(req, res, variants);
 };
 
-export const getProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const variant = await productVariantRepo.findById(req.params.variantId);
   if (!variant) {
     respondError(req, res, 'Variant not found', 404);
@@ -552,7 +551,7 @@ export const getProductVariant = async (req: TypedRequest, res: Response): Promi
   respond(req, res, variant);
 };
 
-export const createProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as VariantBody;
   const variant = await productVariantRepo.create({
     productId: req.params.productId,
@@ -561,13 +560,13 @@ export const createProductVariant = async (req: TypedRequest, res: Response): Pr
   respond(req, res, variant, 201);
 };
 
-export const updateProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as ProductVariantUpdateProps;
   const variant = await productVariantRepo.update(req.params.variantId, body);
   respond(req, res, variant);
 };
 
-export const updateVariantInventory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateVariantInventory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { variantId } = req.params;
   const { inventory } = req.body as InventoryBody;
   if (inventory === undefined || inventory === null) {
@@ -584,7 +583,7 @@ export const updateVariantInventory = async (req: TypedRequest, res: Response): 
   respond(req, res, { ...variant, inventory: parseInt(String(inventory)) });
 };
 
-export const deleteProductVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await productVariantRepo.delete(req.params.variantId);
   respond(req, res, { deleted: true });
 };
@@ -593,12 +592,12 @@ export const deleteProductVariant = async (req: TypedRequest, res: Response): Pr
 // Image Management
 // ============================================================================
 
-export const getProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductImages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const images = await productImageRepo.findByProductId(req.params.productId);
   respond(req, res, images);
 };
 
-export const addProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addProductImage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as {
     url: string;
     position?: number;
@@ -629,7 +628,7 @@ export const addProductImage = async (req: TypedRequest, res: Response): Promise
   respond(req, res, image, 201);
 };
 
-export const updateProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductImage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as {
     url?: string;
     position?: number;
@@ -647,12 +646,12 @@ export const updateProductImage = async (req: TypedRequest, res: Response): Prom
   respond(req, res, image);
 };
 
-export const deleteProductImage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProductImage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await productImageRepo.delete(req.params.imageId);
   respond(req, res, { deleted: true });
 };
 
-export const reorderProductImages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reorderProductImages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { imageIds } = req.body as ImageReorderBody;
   if (!Array.isArray(imageIds)) {
     respondError(req, res, 'imageIds must be an array', 400);
@@ -666,7 +665,7 @@ export const reorderProductImages = async (req: TypedRequest, res: Response): Pr
 // Review Management (Admin)
 // ============================================================================
 
-export const listReviews = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listReviews = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId, status, limit, offset } = req.query;
   const filters: ReviewFilters = {};
   if (productId) filters.productId = productId as string;
@@ -675,7 +674,7 @@ export const listReviews = async (req: TypedRequest, res: Response): Promise<voi
   respond(req, res, reviews);
 };
 
-export const getReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const review = await productReviewRepo.findById(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
@@ -684,7 +683,7 @@ export const getReview = async (req: TypedRequest, res: Response): Promise<void>
   respond(req, res, review);
 };
 
-export const approveReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const review = await productReviewRepo.approve(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
@@ -693,7 +692,7 @@ export const approveReview = async (req: TypedRequest, res: Response): Promise<v
   respond(req, res, review);
 };
 
-export const rejectReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const rejectReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const review = await productReviewRepo.reject(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
@@ -702,7 +701,7 @@ export const rejectReview = async (req: TypedRequest, res: Response): Promise<vo
   respond(req, res, review);
 };
 
-export const respondToReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const respondToReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { response } = req.body as ReviewResponseBody;
   if (!response?.trim()) {
     respondError(req, res, 'Response text is required', 400);
@@ -716,7 +715,7 @@ export const respondToReview = async (req: TypedRequest, res: Response): Promise
   respond(req, res, review);
 };
 
-export const deleteReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await productReviewRepo.delete(req.params.reviewId);
   respond(req, res, { deleted: true });
 };
@@ -729,7 +728,7 @@ export const deleteReview = async (req: TypedRequest, res: Response): Promise<vo
  * List Q&A for a product (admin/business)
  * GET /products/:productId/qa
  */
-export const listProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductQa = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { status } = req.query;
   const qa = await productQaRepo.findByProduct(productId, status as ProductQaStatus | undefined);
@@ -740,7 +739,7 @@ export const listProductQa = async (req: TypedRequest, res: Response): Promise<v
  * Update Q&A status
  * PATCH /products/:productId/qa/:qaId/status
  */
-export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { qaId } = req.params;
   const { status } = req.body as StatusBody;
   if (!status) {
@@ -763,7 +762,7 @@ export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<
  * List review media for a product
  * GET /products/:productId/reviews/media
  */
-export const listReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { reviewId } = req.query;
   if (!reviewId) {
     errorResponse(res, 'reviewId query param is required', 400);
@@ -777,7 +776,7 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
  * Delete review media
  * DELETE /products/:productId/reviews/media/:mediaId
  */
-export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { mediaId } = req.params;
   const deleted = await productReviewMediaRepo.delete(mediaId);
   if (!deleted) {
@@ -795,7 +794,7 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
  * List all collections
  * GET /collections
  */
-export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const collections = await productCollectionRepo.findAll();
   successResponse(res, collections);
 };
@@ -804,7 +803,7 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
  * Create a collection
  * POST /collections
  */
-export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
   if (!name?.trim()) {
@@ -835,7 +834,7 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
  * Update a collection
  * PUT /collections/:collectionId
  */
-export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { collectionId } = req.params;
   const organizationId = req.user?.organizationId || req.user?.id;
   const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
@@ -868,7 +867,7 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
  * Delete a collection
  * DELETE /collections/:collectionId
  */
-export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { collectionId } = req.params;
   const deleted = await productCollectionRepo.softDelete(collectionId);
   if (!deleted) {
@@ -882,14 +881,14 @@ export const deleteCollection = async (req: TypedRequest, res: Response): Promis
 // Download Management (Business)
 // ============================================================================
 
-export const listDownloads = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listDownloads = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { activeOnly } = req.query;
   const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
   successResponse(res, downloads);
 };
 
-export const createDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } =
     req.body as DownloadBody;
@@ -918,7 +917,7 @@ export const createDownload = async (req: TypedRequest, res: Response): Promise<
   successResponse(res, download, 201);
 };
 
-export const updateDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
   const body = req.body as DownloadBody;
   const updated = await productDownloadRepo.update(downloadId, body);
@@ -929,7 +928,7 @@ export const updateDownload = async (req: TypedRequest, res: Response): Promise<
   successResponse(res, updated);
 };
 
-export const deleteDownload = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
   const deleted = await productDownloadRepo.delete(downloadId);
   if (!deleted) {
@@ -943,14 +942,14 @@ export const deleteDownload = async (req: TypedRequest, res: Response): Promise<
 // Product Relationship Management (Business)
 // ============================================================================
 
-export const listRelationships = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listRelationships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { type } = req.query;
   const relationships = await productRelationshipRepo.findByProductId(productId, type as RelationType | undefined);
   successResponse(res, relationships);
 };
 
-export const createRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { relatedProductId, type, position, isAutomated } = req.body as RelationshipBody;
   if (!relatedProductId) {
@@ -971,7 +970,7 @@ export const createRelationship = async (req: TypedRequest, res: Response): Prom
   successResponse(res, relationship, 201);
 };
 
-export const deleteRelationship = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { relationshipId } = req.params;
   const deleted = await productRelationshipRepo.delete(relationshipId);
   if (!deleted) {
@@ -985,7 +984,7 @@ export const deleteRelationship = async (req: TypedRequest, res: Response): Prom
 // Configurable Product Management (Business)
 // ============================================================================
 
-export const getVariantMatrix = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getVariantMatrix = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const variants = await productVariantRepo.findByProductId(productId);
   const product = await ProductRepo.findById(productId);
@@ -1009,7 +1008,7 @@ export const getVariantMatrix = async (req: TypedRequest, res: Response): Promis
   successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
 };
 
-export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as OptionsBody;
   if (!options || !Array.isArray(options) || options.length === 0) {
@@ -1033,7 +1032,7 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
 // Grouped Product Management (Business)
 // ============================================================================
 
-export const listGroupedChildren = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listGroupedChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as RelationType);
   const childIds = relationships.map(r => r.relatedProductId);
@@ -1049,7 +1048,7 @@ export const listGroupedChildren = async (req: TypedRequest, res: Response): Pro
 // Attribute Set Management (Business)
 // ============================================================================
 
-export const applyAttributeSet = async (req: TypedRequest, res: Response): Promise<void> => {
+export const applyAttributeSet = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { attributeSetId } = req.body as AttributeSetBody;
   if (!attributeSetId) {

@@ -29,10 +29,12 @@
 | `secrets.ts`                      | AES-256-GCM encryption for credential storage                      |
 | `session/`                        | Session store factory (Redis/PostgreSQL)                           |
 | `jobs/`                           | Background job utilities                                           |
-| `types/`                          | Shared TypeScript types (e.g. `TypedRequest`)                      |
+| `types/`                          | Shared TypeScript types (HTTP types live in `http/` instead)       |
 | `moduleRegistry/`                 | Module manifest registry & feature flag system                     |
 | `moduleRegistry/types.ts`         | `ModuleManifest`, `RouteDeclaration`, etc.                         |
 | `moduleRegistry/registry.ts`      | Singleton registry with `isEnabled()`, `shouldMountRoutes()`, etc. |
+
+> HTTP types and router factories are project-owned under `libs/http/`; Express is confined to the adapter and composition roots. See the [HTTP Framework Abstraction Guide](../guides/http-framework-abstraction.md).
 
 ## Rules
 

@@ -3,12 +3,12 @@
  * Admin routes for shipping management
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as shippingController from '../controllers/shippingController';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

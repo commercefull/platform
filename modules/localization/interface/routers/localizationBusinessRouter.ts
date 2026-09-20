@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as localizationController from '../controllers/localizationBusinessController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

@@ -3,9 +3,8 @@
  * Manages tax rates, zones, and classes
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageAdminTaxUseCase } from '../../application/useCases/ManageAdminTax';
 import { approveTaxExemptionUseCase } from '../../application/useCases/ApproveTaxExemption';
 import { rejectTaxExemptionUseCase } from '../../application/useCases/RejectTaxExemption';
@@ -20,7 +19,7 @@ const manageAdminTaxUseCase = new ManageAdminTaxUseCase();
 // List Tax Settings
 // ============================================================================
 
-export const listTaxSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTaxSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const taxRates = await manageAdminTaxUseCase.findAllTaxRates();
   const taxZones = await manageAdminTaxUseCase.findAllTaxZones();
   const taxClasses = await manageAdminTaxUseCase.findAllTaxClasses();
@@ -39,10 +38,17 @@ export const listTaxSettings = async (req: TypedRequest, res: Response): Promise
 // Tax Rates CRUD
 // ============================================================================
 
-export const createTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTaxRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, rate, country, state, taxClass, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, rate, country, state, taxClass, isActive } = body as {
+      name: string;
+      rate: string;
+      country?: string;
+      state?: string;
+      taxClass?: string;
+      isActive?: string;
+    };
 
     await manageAdminTaxUseCase.createTaxRate({
       name,
@@ -61,10 +67,17 @@ export const createTaxRate = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const updateTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTaxRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxRateId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, rate, country, state, taxClass, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, rate, country, state, taxClass, isActive } = body as {
+    name: string;
+    rate: string;
+    country?: string;
+    state?: string;
+    taxClass?: string;
+    isActive?: string;
+  };
 
   await manageAdminTaxUseCase.updateTaxRate(taxRateId, {
     name,
@@ -78,7 +91,7 @@ export const updateTaxRate = async (req: TypedRequest, res: Response): Promise<v
   res.redirect('/hub/tax?success=Tax rate updated');
 };
 
-export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTaxRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxRateId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxRate(taxRateId);
   res.json({ success: true });
@@ -88,10 +101,15 @@ export const deleteTaxRate = async (req: TypedRequest, res: Response): Promise<v
 // Tax Zones CRUD
 // ============================================================================
 
-export const createTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTaxZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, countries, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, countries, isActive } = body as {
+      name: string;
+      description?: string;
+      countries?: string;
+      isActive?: string;
+    };
     const countriesArray = countries ? countries.split(',').map((c: string) => c.trim()) : [];
 
     await manageAdminTaxUseCase.createTaxZone({
@@ -109,10 +127,15 @@ export const createTaxZone = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const updateTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTaxZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxZoneId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, description, countries, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, description, countries, isActive } = body as {
+    name: string;
+    description?: string;
+    countries?: string;
+    isActive?: string;
+  };
   const countriesArray = countries ? countries.split(',').map((c: string) => c.trim()) : [];
 
   await manageAdminTaxUseCase.updateTaxZone(taxZoneId, {
@@ -125,7 +148,7 @@ export const updateTaxZone = async (req: TypedRequest, res: Response): Promise<v
   res.redirect('/hub/tax?success=Tax zone updated');
 };
 
-export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTaxZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxZoneId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxZone(taxZoneId);
   res.json({ success: true });
@@ -135,10 +158,10 @@ export const deleteTaxZone = async (req: TypedRequest, res: Response): Promise<v
 // Tax Classes CRUD
 // ============================================================================
 
-export const createTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTaxClass = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description } = body as { name: string; description?: string };
 
     await manageAdminTaxUseCase.createTaxClass({
       name,
@@ -153,10 +176,10 @@ export const createTaxClass = async (req: TypedRequest, res: Response): Promise<
   }
 };
 
-export const updateTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTaxClass = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxClassId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, description } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, description } = body as { name: string; description?: string };
 
   await manageAdminTaxUseCase.updateTaxClass(taxClassId, {
     name,
@@ -166,7 +189,7 @@ export const updateTaxClass = async (req: TypedRequest, res: Response): Promise<
   res.redirect('/hub/tax?success=Tax class updated');
 };
 
-export const deleteTaxClass = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTaxClass = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxClassId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxClass(taxClassId);
   res.json({ success: true });
@@ -176,7 +199,7 @@ export const deleteTaxClass = async (req: TypedRequest, res: Response): Promise<
 // Tax Exemption Management (Epic F)
 // ============================================================================
 
-export const listTaxExemptions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTaxExemptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = (req.query.status as string) || undefined;
   const exemptions = await taxQueryRepo.findAllTaxExemptions(status as never);
 
@@ -189,7 +212,7 @@ export const listTaxExemptions = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const approveTaxExemption = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveTaxExemption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { exemptionId } = req.params;
     const verifiedBy = (req.user as { id?: string })?.id || 'admin';
@@ -201,10 +224,10 @@ export const approveTaxExemption = async (req: TypedRequest, res: Response): Pro
   }
 };
 
-export const rejectTaxExemption = async (req: TypedRequest, res: Response): Promise<void> => {
+export const rejectTaxExemption = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { exemptionId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const reason = body.reason as string | undefined;
     await rejectTaxExemptionUseCase.execute(exemptionId, reason);
     res.redirect('/hub/tax/exemptions?success=Exemption rejected');

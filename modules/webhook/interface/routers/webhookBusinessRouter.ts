@@ -4,12 +4,12 @@
  * Defines API routes for webhook management (business/admin side).
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as webhookController from '../controllers/WebhookBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

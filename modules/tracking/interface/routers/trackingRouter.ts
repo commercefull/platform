@@ -4,11 +4,11 @@
  * Mounted at /business, routes prefixed with /tracking.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { trackingController } from '../controllers/trackingController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // Config CRUD
 router.get('/tracking/config', isOrganizationLoggedIn, trackingController.getConfig.bind(trackingController));
@@ -36,7 +36,11 @@ router.delete(
 router.post('/tracking/config/:storeId/activate', isOrganizationLoggedIn, trackingController.activate.bind(trackingController));
 router.post('/tracking/config/:storeId/disable', isOrganizationLoggedIn, trackingController.disable.bind(trackingController));
 router.post('/tracking/config/:storeId/hash-pii', isOrganizationLoggedIn, trackingController.setHashPii.bind(trackingController));
-router.post('/tracking/config/:storeId/server-side', isOrganizationLoggedIn, trackingController.setServerSideEnabled.bind(trackingController));
+router.post(
+  '/tracking/config/:storeId/server-side',
+  isOrganizationLoggedIn,
+  trackingController.setServerSideEnabled.bind(trackingController),
+);
 
 // Process event (manual trigger)
 router.post('/tracking/process-event', isOrganizationLoggedIn, trackingController.processEvent.bind(trackingController));

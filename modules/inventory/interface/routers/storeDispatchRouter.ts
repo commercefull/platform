@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
@@ -11,7 +11,7 @@ import {
   cancelStoreDispatch,
 } from '../controllers/StoreDispatchController';
 
-const router = express.Router();
+const router = createHttpRouter();
 router.use(isOrganizationLoggedIn);
 
 router.post('/dispatches', asyncHandler(createStoreDispatch));

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from './http';
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
 import expressWinston from 'express-winston';
@@ -30,7 +30,7 @@ export interface TransformableInfo {
   [key: `_${string}`]: unknown; // Allow for custom fields prefixed with underscore
 }
 
-interface ExtendedResponse extends Response {
+interface ExtendedResponse extends HttpResponse {
   responseTime?: number;
 }
 

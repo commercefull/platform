@@ -3,12 +3,11 @@
  * Read-only admin views for audit logs
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { auditRepository } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listAuditLogs = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listAuditLogs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const filters: Record<string, string | undefined> = {
     actorId: req.query.actorId as string | undefined,
     actorType: req.query.actorType as string | undefined,
@@ -34,7 +33,7 @@ export const listAuditLogs = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const viewAuditLog = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewAuditLog = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { logId } = req.params;
   const log = await auditRepository.findById(logId);
 
@@ -49,7 +48,7 @@ export const viewAuditLog = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const auditStats = async (req: TypedRequest, res: Response): Promise<void> => {
+export const auditStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
 
   adminRespond(req, res, 'audit/stats', {
@@ -59,7 +58,7 @@ export const auditStats = async (req: TypedRequest, res: Response): Promise<void
   });
 };
 
-export const verifyChain = async (req: TypedRequest, res: Response): Promise<void> => {
+export const verifyChain = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fromId = req.query.fromId as string | undefined;
   const toId = req.query.toId as string | undefined;
   const result = await auditRepository.verifyChain(fromId, toId);

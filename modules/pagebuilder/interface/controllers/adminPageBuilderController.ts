@@ -3,14 +3,13 @@
  * Renders the page builder admin views (EJS templates)
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { manageDraftsUseCase, publishDraftUseCase, previewDraftUseCase, getBlockTypesUseCase } from '../../application/wired';
 
 // ── Draft List ─────────────────────────────────────────────────
 
-export const listPageBuilderDrafts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPageBuilderDrafts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeId = req.query.storeId as string;
   const orgId = (req.user as { organizationId?: string })?.organizationId;
 
@@ -34,7 +33,7 @@ export const listPageBuilderDrafts = async (req: TypedRequest, res: Response): P
 
 // ── Builder Editor ─────────────────────────────────────────────
 
-export const pageBuilderEditor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const pageBuilderEditor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { draftId } = req.params;
 
   let draft;
@@ -76,7 +75,7 @@ export const pageBuilderEditor = async (req: TypedRequest, res: Response): Promi
 
 // ── Create Draft Form ──────────────────────────────────────────
 
-export const createDraftForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createDraftForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'pagebuilder/drafts/create', {
     pageName: 'Create Page',
   });
@@ -84,8 +83,14 @@ export const createDraftForm = async (req: TypedRequest, res: Response): Promise
 
 // ── Create Draft ───────────────────────────────────────────────
 
-export const createDraft = async (req: TypedRequest, res: Response): Promise<void> => {
-  const { storeId, themeId, title, slug, pageType } = req.body as RequestBody;
+export const createDraft = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { storeId, themeId, title, slug, pageType } = req.body as {
+    storeId?: string;
+    themeId?: string;
+    title: string;
+    slug: string;
+    pageType?: string;
+  };
   const organizationId = (req.user as { organizationId?: string })?.organizationId || '';
 
   try {
@@ -108,7 +113,7 @@ export const createDraft = async (req: TypedRequest, res: Response): Promise<voi
 
 // ── Preview ────────────────────────────────────────────────────
 
-export const pageBuilderPreview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const pageBuilderPreview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { draftId } = req.params;
 
   try {
@@ -130,7 +135,7 @@ export const pageBuilderPreview = async (req: TypedRequest, res: Response): Prom
 
 // ── Publish ────────────────────────────────────────────────────
 
-export const publishDraft = async (req: TypedRequest, res: Response): Promise<void> => {
+export const publishDraft = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { draftId } = req.params;
   try {
     await publishDraftUseCase.publish(draftId);
@@ -142,7 +147,7 @@ export const publishDraft = async (req: TypedRequest, res: Response): Promise<vo
 
 // ── Delete Draft ───────────────────────────────────────────────
 
-export const deleteDraft = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteDraft = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { draftId } = req.params;
   const success = await manageDraftsUseCase.delete(draftId);
   res.json({ success, message: success ? 'Draft deleted' : 'Draft not found' });

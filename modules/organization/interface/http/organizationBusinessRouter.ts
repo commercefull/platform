@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   getOrganizations,
@@ -16,7 +16,7 @@ import {
 } from '../controllers/organizationBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

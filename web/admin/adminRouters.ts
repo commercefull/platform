@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { isAdminLoggedIn } from '../../libs/auth';
 import {
@@ -633,7 +633,7 @@ import {
   resolveImportError,
 } from '../../modules/migration';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Public Routes (no auth required)

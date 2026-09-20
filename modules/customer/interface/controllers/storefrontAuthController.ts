@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { AuthenticateCustomerCommand } from '../../application/useCases/AuthenticateCustomer';
 import { RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
@@ -24,7 +23,7 @@ import { ChangePasswordCommand } from '../../application/useCases/ChangePassword
 // Sign In Form
 // ============================================================================
 
-export const signInForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const signInForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
     res.redirect('/profile');
@@ -41,7 +40,7 @@ export const signInForm = async (req: TypedRequest, res: Response): Promise<void
 // Sign Up Form
 // ============================================================================
 
-export const signUpForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const signUpForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
     res.redirect('/profile');
@@ -57,9 +56,9 @@ export const signUpForm = async (req: TypedRequest, res: Response): Promise<void
 // Sign In Process
 // ============================================================================
 
-export const signIn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { email, password, redirectTo = '/' } = body;
 
     if (!email || !password) {
@@ -97,9 +96,9 @@ export const signIn = async (req: TypedRequest, res: Response): Promise<void> =>
 // Sign Up Process
 // ============================================================================
 
-export const signUp = async (req: TypedRequest, res: Response): Promise<void> => {
+export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { firstName, lastName, email, password, confirmPassword, _acceptsMarketing = false, _acceptsAnalytics = false } = body;
 
     // Basic validation
@@ -144,7 +143,7 @@ export const signUp = async (req: TypedRequest, res: Response): Promise<void> =>
 // Profile View
 // ============================================================================
 
-export const profile = async (req: TypedRequest, res: Response): Promise<void> => {
+export const profile = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     return res.redirect('/signin?redirect=/profile');
   }
@@ -168,13 +167,13 @@ export const profile = async (req: TypedRequest, res: Response): Promise<void> =
 // Update Profile
 // ============================================================================
 
-export const updateProfile = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProfile = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin');
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { firstName, lastName, phone, _acceptsMarketing, _acceptsAnalytics } = body;
 
     const command = new UpdateCustomerCommand(req.user.customerId as string, {
@@ -199,7 +198,7 @@ export const updateProfile = async (req: TypedRequest, res: Response): Promise<v
 // Sign Out
 // ============================================================================
 
-export const signOut = async (req: TypedRequest, res: Response): Promise<void> => {
+export const signOut = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     // Clear user session
     req.user = undefined;
@@ -220,13 +219,13 @@ export const signOut = async (req: TypedRequest, res: Response): Promise<void> =
 // Change Password
 // ============================================================================
 
-export const changePassword = async (req: TypedRequest, res: Response): Promise<void> => {
+export const changePassword = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     if (!req.user) {
       return res.redirect('/signin');
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { currentPassword, newPassword, confirmPassword } = body;
 
     if (!currentPassword || !newPassword || !confirmPassword) {

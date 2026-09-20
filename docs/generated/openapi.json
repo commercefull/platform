@@ -23702,8 +23702,8 @@
         }
       },
       "get": {
-        "summary": "async (req: TypedRequest, res: Response) => {\n  try {\n    co",
-        "operationId": "async (req: TypedRequest, res: Response) => {\n  try {\n    co_store",
+        "summary": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   ",
+        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   _store",
         "tags": [
           "store"
         ],
@@ -23771,8 +23771,8 @@
     },
     "/stores/{storeId}": {
       "get": {
-        "summary": "async (req: TypedRequest, res: Response) => {\n  try {\n    co",
-        "operationId": "async (req: TypedRequest, res: Response) => {\n  try {\n    co_store",
+        "summary": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   ",
+        "operationId": "async (req: HttpRequest, res: HttpResponse) => {\n  try {\n   _store",
         "tags": [
           "store"
         ],

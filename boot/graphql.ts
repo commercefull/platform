@@ -1,4 +1,5 @@
-import { Express, NextFunction, Request, Response } from 'express';
+import type { RequestHandler } from 'express';
+import type { HttpApplication } from 'libs/http';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware, ExpressContextFunctionArgument } from '@as-integrations/express5';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
@@ -104,7 +105,7 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
   return context;
 }
 
-export function configureGraphQL(app: Express): void {
+export function configureGraphQL(app: HttpApplication): void {
   // Build arrays of typeDefs and resolvers, filtered by module enabled state
   const allTypeDefs: { module: string; defs: string }[] = [
     { module: 'product', defs: Product.productTypeDefs },
@@ -236,7 +237,7 @@ export function configureGraphQL(app: Express): void {
 
   // Register /graphql synchronously before storefront routes catch it.
   // The actual Apollo middleware is swapped in once the server has started.
-  let graphqlHandler: ((req: Request, res: Response, next: NextFunction) => void) | null = null;
+  let graphqlHandler: RequestHandler | null = null;
 
   app.use('/graphql', (req, res, next) => {
     // Persisted query enforcement: reject queries not in the allowlist

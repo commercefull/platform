@@ -3,12 +3,12 @@
  * Admin/business routes for basket management
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as basketController from '../controllers/BasketController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

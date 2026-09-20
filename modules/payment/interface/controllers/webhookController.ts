@@ -9,7 +9,7 @@
  * Mount with express.raw({ type: 'application/json' }) so rawBody is available.
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 
 const PaymentRepo = paymentDataRepository.payments;
@@ -30,7 +30,7 @@ const orderStatusSyncPort: OrderStatusSyncPort = new CheckoutOrderStatusSyncAdap
  * Detect the provider from the request.
  * Priority: explicit `?provider=` query param → header hints → fallback 'generic'.
  */
-function detectProvider(req: Request): string {
+function detectProvider(req: HttpRequest): string {
   if (req.query.provider) return String(req.query.provider).toLowerCase();
   if (req.headers['stripe-signature']) return 'stripe';
   if (req.headers['x-adyen-hmac-key'] || req.headers['x-adyen-notification']) return 'adyen';
@@ -41,7 +41,7 @@ function detectProvider(req: Request): string {
 // Handler
 // ============================================================================
 
-export async function handleGatewayWebhook(req: Request, res: Response): Promise<void> {
+export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse): Promise<void> {
   try {
     const rawBody: Buffer = req.body as Buffer;
 

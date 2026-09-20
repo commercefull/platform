@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   calculateTaxForBasket,
@@ -11,7 +11,7 @@ import {
 } from '../controllers/taxCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 
 // Public tax calculation endpoints
 router.post('/tax/calculate', asyncHandler(calculateTaxForLineItem));

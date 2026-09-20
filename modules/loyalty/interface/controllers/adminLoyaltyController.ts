@@ -3,9 +3,8 @@
  * Handles loyalty programs, points, rewards, and redemptions for the Admin Hub
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageLoyaltyAdminUseCase } from '../../application/useCases/ManageLoyalty';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -15,7 +14,7 @@ const manageLoyaltyAdminUseCase = new ManageLoyaltyAdminUseCase();
 // Loyalty Tiers Management
 // ============================================================================
 
-export const listLoyaltyTiers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listLoyaltyTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const includeInactive = req.query.includeInactive === 'true';
 
   const tiers = await manageLoyaltyAdminUseCase.findAllTiers(includeInactive);
@@ -28,16 +27,23 @@ export const listLoyaltyTiers = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const createLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLoyaltyTierForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'programs/loyalty/tiers/create', {
     pageName: 'Create Loyalty Tier',
   });
 };
 
-export const createLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, type, pointsThreshold, multiplier, benefits } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, type, pointsThreshold, multiplier, benefits } = body as {
+      name: string;
+      description?: string;
+      type?: string;
+      pointsThreshold: string;
+      multiplier: string;
+      benefits?: string;
+    };
 
     const tier = await manageLoyaltyAdminUseCase.createTier({
       name,
@@ -55,12 +61,12 @@ export const createLoyaltyTier = async (req: TypedRequest, res: Response): Promi
     adminRespond(req, res, 'programs/loyalty/tiers/create', {
       pageName: 'Create Loyalty Tier',
       error: (error as Error).message || 'Failed to create loyalty tier',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.params;
 
   const tier = await manageLoyaltyAdminUseCase.findTierById(tierId);
@@ -80,7 +86,7 @@ export const viewLoyaltyTier = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const editLoyaltyTierForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editLoyaltyTierForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.params;
 
   const tier = await manageLoyaltyAdminUseCase.findTierById(tierId);
@@ -99,12 +105,20 @@ export const editLoyaltyTierForm = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const updateLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
-  const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = body as {
+    name?: string;
+    description?: string;
+    type?: string;
+    pointsThreshold?: string;
+    multiplier?: string;
+    benefits?: string;
+    isActive?: string;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -119,7 +133,7 @@ export const updateLoyaltyTier = async (req: TypedRequest, res: Response): Promi
   res.redirect(`/hub/loyalty/tiers/${tierId}?success=Loyalty tier updated successfully`);
 };
 
-export const deleteLoyaltyTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.params;
 
   await manageLoyaltyAdminUseCase.deleteTier(tierId);
@@ -131,7 +145,7 @@ export const deleteLoyaltyTier = async (req: TypedRequest, res: Response): Promi
 // Loyalty Rewards Management
 // ============================================================================
 
-export const listLoyaltyRewards = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listLoyaltyRewards = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const includeInactive = req.query.includeInactive === 'true';
 
   const rewards = await manageLoyaltyAdminUseCase.findAllRewards(includeInactive);
@@ -145,16 +159,26 @@ export const listLoyaltyRewards = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const createLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLoyaltyRewardForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'programs/loyalty/rewards/create', {
     pageName: 'Create Loyalty Reward',
   });
 };
 
-export const createLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt } = body as {
+      name: string;
+      description?: string;
+      pointsCost: string;
+      discountAmount?: string;
+      discountPercent?: string;
+      discountCode?: string;
+      freeShipping?: string;
+      productIds?: string;
+      expiresAt?: string;
+    };
 
     const reward = await manageLoyaltyAdminUseCase.createReward({
       name,
@@ -175,12 +199,12 @@ export const createLoyaltyReward = async (req: TypedRequest, res: Response): Pro
     adminRespond(req, res, 'programs/loyalty/rewards/create', {
       pageName: 'Create Loyalty Reward',
       error: (error as Error).message || 'Failed to create loyalty reward',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rewardId } = req.params;
 
   const reward = await manageLoyaltyAdminUseCase.findRewardById(rewardId);
@@ -201,7 +225,7 @@ export const viewLoyaltyReward = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const editLoyaltyRewardForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editLoyaltyRewardForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rewardId } = req.params;
 
   const reward = await manageLoyaltyAdminUseCase.findRewardById(rewardId);
@@ -220,13 +244,24 @@ export const editLoyaltyRewardForm = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rewardId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
-    body;
+    body as {
+      name?: string;
+      description?: string;
+      pointsCost?: string;
+      discountAmount?: string;
+      discountPercent?: string;
+      discountCode?: string;
+      freeShipping?: string;
+      productIds?: string;
+      expiresAt?: string;
+      isActive?: string;
+    };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -244,7 +279,7 @@ export const updateLoyaltyReward = async (req: TypedRequest, res: Response): Pro
   res.redirect(`/hub/loyalty/rewards/${rewardId}?success=Loyalty reward updated successfully`);
 };
 
-export const deleteLoyaltyReward = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rewardId } = req.params;
 
   await manageLoyaltyAdminUseCase.deleteReward(rewardId);
@@ -256,7 +291,7 @@ export const deleteLoyaltyReward = async (req: TypedRequest, res: Response): Pro
 // Customer Loyalty Management
 // ============================================================================
 
-export const listCustomerLoyalty = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCustomerLoyalty = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.query.customerId as string;
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -274,7 +309,7 @@ export const listCustomerLoyalty = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const viewCustomerLoyalty = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCustomerLoyalty = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
 
   const pointsData = await manageLoyaltyAdminUseCase.findCustomerPointsWithTier(customerId);
@@ -303,7 +338,7 @@ export const viewCustomerLoyalty = async (req: TypedRequest, res: Response): Pro
 // Loyalty Analytics
 // ============================================================================
 
-export const loyaltyAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const loyaltyAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get basic analytics (would need to implement proper analytics queries)
   const stats = {
     totalMembers: 0,

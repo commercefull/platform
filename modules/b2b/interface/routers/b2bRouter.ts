@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { b2bController } from '../../application/useCases/wired';
 
-export const b2bBusinessRouter = express.Router();
+export const b2bBusinessRouter = createHttpRouter();
 
 // Company CRUD + lifecycle
 b2bBusinessRouter.get('/companies', isOrganizationLoggedIn, asyncHandler(b2bController.listCompanies.bind(b2bController)));

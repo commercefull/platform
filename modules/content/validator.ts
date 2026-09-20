@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { HttpHandler } from 'libs/http';
 import { check, validationResult } from 'express-validator';
 
 export const userContactUsValidationRules = () => {
@@ -19,7 +19,7 @@ export const userContactFormValidationRules = () => {
   ];
 };
 
-export const validateContactUs = (req: Request, res: Response, next: NextFunction) => {
+export const validateContactUs: HttpHandler = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string[] = [];
@@ -33,7 +33,7 @@ export const validateContactUs = (req: Request, res: Response, next: NextFunctio
   next();
 };
 
-export const validateContactForm = (req: Request, res: Response, next: NextFunction) => {
+export const validateContactForm: HttpHandler = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const messages: string[] = [];

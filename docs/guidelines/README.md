@@ -26,4 +26,9 @@ This folder contains the authoritative coding and engineering standards for the 
 | Environment pipelines                      | [environment-pipelines.md](./environment-pipelines.md)           |
 | Do's and Don'ts (quick reference)          | [do-and-dont.md](./do-and-dont.md)                               |
 
+## Architecture Migration Guides
+
+- [UseCase dependency injection](../guides/repository-dependency-injection.md)
+- [Express-backed HTTP framework abstraction](../guides/http-framework-abstraction.md)
+
 For the high-level architecture overview, see [`ARCHITECTURE.md`](../../ARCHITECTURE.md). For AI agent working instructions, see [`AGENTS.md`](../../AGENTS.md).

@@ -3,8 +3,7 @@
  * Handles customer-facing gift card operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { getGiftCardByCode, getGiftCards, redeemGiftCardRepo, reloadGiftCardRepo } from '../../application/wired';
 
 interface RedeemOrReloadBody {
@@ -13,7 +12,7 @@ interface RedeemOrReloadBody {
   orderId?: string;
 }
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
   const { code } = req.params;

@@ -3,12 +3,12 @@
  * Defines routes for store operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { StoreController } from './StoreController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 const storeController = new StoreController();
 
 router.use(isOrganizationLoggedIn);

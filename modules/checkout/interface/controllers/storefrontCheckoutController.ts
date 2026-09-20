@@ -3,8 +3,7 @@
  * Handles checkout process, payment, and order creation
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { getOrCreateBasketUseCase } from '../../../basket/application/useCases/wired';
 import { createOrderUseCase, getOrderUseCase } from '../../../order/application/useCases/wired';
@@ -20,7 +19,7 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../tax
 // Checkout Page
 // ============================================================================
 
-export const checkout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     return res.redirect('/signin?redirect=/checkout');
   }
@@ -81,7 +80,7 @@ function mapAddressFields(addr: Record<string, unknown>) {
   };
 }
 
-export const processCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     res.status(401).json({ success: false, message: 'Not authenticated' });
     return;
@@ -89,7 +88,7 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
 
   const customerId = req.user.customerId;
   const customerEmail = req.user.email;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const {
     shippingMethodId,
     _paymentMethod,
@@ -167,7 +166,7 @@ export const processCheckout = async (req: TypedRequest, res: Response): Promise
 // Order Confirmation
 // ============================================================================
 
-export const orderConfirmation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const orderConfirmation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     return res.redirect('/signin');
   }

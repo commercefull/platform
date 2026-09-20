@@ -3,11 +3,11 @@
  * Public routes for shipping (customer-facing)
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as shippingController from '../controllers/shippingController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // Get available shipping methods (for checkout)
 router.get('/methods', asyncHandler(shippingController.getMethods));

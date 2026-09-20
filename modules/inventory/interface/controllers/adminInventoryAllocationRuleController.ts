@@ -4,9 +4,9 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
+import type { AllocationRuleScope, AllocationStrategy, ReservationPolicy } from '../../domain/entities/InventoryAllocationRule';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { inventoryAllocationRuleRepo } from '../../application/wired';
 
@@ -14,7 +14,7 @@ import { inventoryAllocationRuleRepo } from '../../application/wired';
 // List Inventory Allocation Rules
 // ============================================================================
 
-export const listAllocationRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listAllocationRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let rules: never[] = [];
   try {
     const activeRules = await inventoryAllocationRuleRepo.findActiveRules();
@@ -35,9 +35,9 @@ export const listAllocationRules = async (req: TypedRequest, res: Response): Pro
 // Create Inventory Allocation Rule
 // ============================================================================
 
-export const createAllocationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createAllocationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       name,
       description,
@@ -54,7 +54,23 @@ export const createAllocationRule = async (req: TypedRequest, res: Response): Pr
       maxAllocationPerOrder,
       priority,
       isActive,
-    } = body;
+    } = body as {
+      name: string;
+      description?: string;
+      scope?: AllocationRuleScope;
+      poolId?: string;
+      categoryId?: string;
+      productId?: string;
+      allocationStrategy?: AllocationStrategy;
+      reservationPolicy?: ReservationPolicy;
+      lowStockThreshold?: string;
+      oversellBuffer?: string;
+      allowBackorder?: string;
+      allowOversell?: string;
+      maxAllocationPerOrder?: string;
+      priority?: string;
+      isActive?: string;
+    };
 
     // Parse conditions from condition-builder form data
     const conditions = parseConditionsFromForm(body.conditions);
@@ -89,7 +105,7 @@ export const createAllocationRule = async (req: TypedRequest, res: Response): Pr
 // Delete Inventory Allocation Rule
 // ============================================================================
 
-export const deleteAllocationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteAllocationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { allocationRuleId: _allocationRuleId } = req.params;
     // Soft delete by deactivating (repo doesn't expose delete yet)

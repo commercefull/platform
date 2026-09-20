@@ -3,8 +3,7 @@
  * Uses customer use cases directly from modules - no HTTP API calls
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { VerifyCustomerCommand } from '../../application/useCases/VerifyCustomer';
 import { AddAddressCommand } from '../../application/useCases/ManageAddresses';
 import {
@@ -24,7 +23,7 @@ const manageCustomersUseCase = new ManageCustomersUseCase();
 // List Customers
 // ============================================================================
 
-export const listCustomers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCustomers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { search, status, limit, offset, orderBy, orderDirection } = req.query;
 
   // For now, using direct repo query until we create ListCustomersUseCase
@@ -70,7 +69,7 @@ export const listCustomers = async (req: TypedRequest, res: Response): Promise<v
 // View Customer
 // ============================================================================
 
-export const viewCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
 
   const customer = await getCustomerUseCase.execute({ customerId });
@@ -99,7 +98,7 @@ export const viewCustomer = async (req: TypedRequest, res: Response): Promise<vo
 // Edit Customer Form
 // ============================================================================
 
-export const editCustomerForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editCustomerForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
 
   const customer = await getCustomerUseCase.execute({ customerId });
@@ -122,9 +121,9 @@ export const editCustomerForm = async (req: TypedRequest, res: Response): Promis
 // Update Customer
 // ============================================================================
 
-export const updateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const updates = req.body as RequestBody;
+  const updates = req.body as HttpRequestBody;
 
   await updateCustomerUseCase.execute({ customerId, updates });
 
@@ -135,10 +134,10 @@ export const updateCustomer = async (req: TypedRequest, res: Response): Promise<
 // Deactivate Customer (AJAX)
 // ============================================================================
 
-export const deactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const body = req.body as RequestBody;
-  const { reason } = body;
+  const body = req.body as HttpRequestBody;
+  const { reason } = body as { reason?: string };
 
   await deactivateCustomerUseCase.execute({ customerId, reason });
 
@@ -149,7 +148,7 @@ export const deactivateCustomer = async (req: TypedRequest, res: Response): Prom
 // Reactivate Customer (AJAX)
 // ============================================================================
 
-export const reactivateCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reactivateCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
 
   await reactivateCustomerUseCase.execute({ customerId });
@@ -161,9 +160,9 @@ export const reactivateCustomer = async (req: TypedRequest, res: Response): Prom
 // Verify Customer (AJAX)
 // ============================================================================
 
-export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const verifyCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const verificationType = ((req.body as RequestBody).verificationType as 'email' | 'phone') || 'email';
+  const verificationType = ((req.body as HttpRequestBody).verificationType as 'email' | 'phone') || 'email';
 
   const command = new VerifyCustomerCommand(customerId, verificationType);
   await verifyCustomerUseCase.execute(command);
@@ -175,7 +174,7 @@ export const verifyCustomer = async (req: TypedRequest, res: Response): Promise<
 // Customer Addresses
 // ============================================================================
 
-export const customerAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
+export const customerAddresses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
 
   const customer = await getCustomerUseCase.execute({ customerId });
@@ -203,9 +202,23 @@ export const customerAddresses = async (req: TypedRequest, res: Response): Promi
 // Add Customer Address
 // ============================================================================
 
-export const addCustomerAddress = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const addressData = req.body as RequestBody;
+  const addressData = req.body as {
+    addressLine1: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    countryCode?: string;
+    addressType?: 'billing' | 'shipping';
+    addressLine2?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    company?: string;
+    isDefault?: string | boolean;
+  };
 
   const addCommand = new AddAddressCommand(
     customerId,

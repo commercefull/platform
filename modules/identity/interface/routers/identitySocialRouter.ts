@@ -4,7 +4,7 @@
  * Routes for OAuth/social login authentication.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn, isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
@@ -17,7 +17,7 @@ import {
   getOrganizationLinkedAccounts,
 } from '../controllers/identitySocialController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Public Routes - OAuth Configuration

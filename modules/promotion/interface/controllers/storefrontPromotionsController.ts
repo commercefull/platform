@@ -3,12 +3,11 @@
  * Displays active promotions and coupons available to customers
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { query } from '../../../../libs/db';
 
-export const getPromotionsPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPromotionsPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const promotionsResult = await query<Array<Record<string, unknown>>>(
     `SELECT * FROM promotion WHERE status = 'active' AND "startDate" <= now() AND "endDate" >= now() ORDER BY priority DESC, "createdAt" DESC LIMIT 20`,
   );

@@ -1,3 +1,5 @@
+import type { HttpNext, HttpRequest, HttpResponse } from './http';
+
 /**
  * Wraps an async route handler so that rejected promises are forwarded
  * to Express's error middleware via next(err).
@@ -12,8 +14,7 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function asyncHandler<T extends (...args: any[]) => any>(fn: T): T {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (async (req: any, res: any, next: any) => {
+  return (async (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
     try {
       return await fn(req, res, next);
     } catch (err) {

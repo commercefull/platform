@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from './http';
 import { logger } from './logger';
 
 type ResponseData = Record<string, unknown>;
@@ -8,7 +7,7 @@ type ResponseData = Record<string, unknown>;
  * Admin Portal Response Helper
  * Renders admin portal views with common admin data
  */
-export async function adminRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
+export async function adminRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
   const successMsg = req.flash ? req.flash('success')[0] : null;
   const errorMsg = req.flash ? req.flash('error')[0] : null;
 

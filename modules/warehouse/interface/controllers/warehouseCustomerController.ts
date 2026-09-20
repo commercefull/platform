@@ -3,8 +3,7 @@
  * Public store locator endpoints for customers
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const warehouseRepo = warehouseDataRepository.warehouses;
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
@@ -15,7 +14,7 @@ import { warehouseDataRepository } from '../../application/wired';
  * Find nearest stores based on customer location
  * GET /stores/nearest?latitude=...&longitude=...&radiusKm=...&limit=...
  */
-export const findNearestStores = async (req: TypedRequest, res: Response): Promise<void> => {
+export const findNearestStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const latitude = (req.query.latitude as string | undefined) ?? (req.query.lat as string | undefined);
   const longitude = (req.query.longitude as string | undefined) ?? (req.query.lng as string | undefined);
   const radiusKm = (req.query.radiusKm as string | undefined) ?? '50';
@@ -73,7 +72,7 @@ export const findNearestStores = async (req: TypedRequest, res: Response): Promi
  * Get store details by ID
  * GET /stores/:id
  */
-export const getStoreById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoreById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   if (!id) {
@@ -126,7 +125,7 @@ export const getStoreById = async (req: TypedRequest, res: Response): Promise<vo
  * Get all stores in a specific city
  * GET /stores/city/:city
  */
-export const getStoresByCity = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoresByCity = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { city } = req.params;
 
   if (!city) {
@@ -168,7 +167,7 @@ export const getStoresByCity = async (req: TypedRequest, res: Response): Promise
  * Get stores by country
  * GET /stores/country/:country
  */
-export const getStoresByCountry = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoresByCountry = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { country } = req.params;
 
   if (!country) {
@@ -201,7 +200,7 @@ export const getStoresByCountry = async (req: TypedRequest, res: Response): Prom
  * Check if a product is available for pickup at a specific store
  * GET /stores/:id/availability/:productId
  */
-export const checkStoreAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkStoreAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id, productId } = req.params;
   const { variantId } = req.query;
 

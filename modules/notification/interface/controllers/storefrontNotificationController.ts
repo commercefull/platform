@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import {
   ManageStorefrontNotificationsUseCase,
@@ -20,7 +19,7 @@ const manageDevicesUseCase = new ManageNotificationDevicesUseCase();
 /**
  * GET: List customer notifications
  */
-export const listNotifications = async (req: TypedRequest, res: Response) => {
+export const listNotifications = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -45,7 +44,7 @@ export const listNotifications = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Mark notification as read
  */
-export const markAsRead = async (req: TypedRequest, res: Response) => {
+export const markAsRead = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -65,7 +64,7 @@ export const markAsRead = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Mark all notifications as read
  */
-export const markAllAsRead = async (req: TypedRequest, res: Response) => {
+export const markAllAsRead = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -83,7 +82,7 @@ export const markAllAsRead = async (req: TypedRequest, res: Response) => {
 /**
  * GET: Notification preferences
  */
-export const getPreferences = async (req: TypedRequest, res: Response) => {
+export const getPreferences = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -98,12 +97,12 @@ export const getPreferences = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Update notification preferences
  */
-export const updatePreferences = async (req: TypedRequest, res: Response) => {
+export const updatePreferences = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = body;
 
     await manageNotificationsUseCase.upsertPreferences(customerId, {
@@ -126,7 +125,7 @@ export const updatePreferences = async (req: TypedRequest, res: Response) => {
  * GET /notifications/devices
  * List registered push notification devices
  */
-export const getDevices = async (req: TypedRequest, res: Response) => {
+export const getDevices = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -142,12 +141,12 @@ export const getDevices = async (req: TypedRequest, res: Response) => {
  * POST /notifications/devices
  * Register a new push notification device
  */
-export const registerDevice = async (req: TypedRequest, res: Response) => {
+export const registerDevice = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { deviceToken, platform } = body;
 
     await registerNotificationDeviceUseCase.execute(
@@ -167,7 +166,7 @@ export const registerDevice = async (req: TypedRequest, res: Response) => {
  * POST /notifications/devices/:deviceToken/delete
  * Remove a registered push notification device
  */
-export const deleteDevice = async (req: TypedRequest, res: Response) => {
+export const deleteDevice = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');

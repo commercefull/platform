@@ -1,21 +1,20 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { productCatalogRepository } from '../../application/wired';
 import { CategoryUpdateProps } from '../../application/wired';
 
 const categoryRepo = productCatalogRepository.categories;
 
-export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await categoryRepo.findAll();
   res.json({ success: true, data: categories });
 };
 
-export const getRootCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getRootCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await categoryRepo.findRootCategories();
   res.json({ success: true, data: categories });
 };
 
-export const getCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const category = await categoryRepo.findOne(id);
   if (!category) {
@@ -25,7 +24,7 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
   res.json({ success: true, data: category });
 };
 
-export const getCategoryBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
   const category = await categoryRepo.findBySlug(slug);
   if (!category) {
@@ -35,13 +34,13 @@ export const getCategoryBySlug = async (req: TypedRequest, res: Response): Promi
   res.json({ success: true, data: category });
 };
 
-export const getCategoryChildren = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const children = await categoryRepo.findChildren(id);
   res.json({ success: true, data: children });
 };
 
-export const createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     name,
     description,
@@ -108,7 +107,7 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
   res.status(201).json({ success: true, data: category });
 };
 
-export const updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const existing = await categoryRepo.findOne(id);
   if (!existing) {
@@ -119,7 +118,7 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: updated });
 };
 
-export const deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const existing = await categoryRepo.findOne(id);
   if (!existing) {

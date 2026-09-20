@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { AddressInput } from '../../taxTypes';
 import type { TaxableBasketPort } from '../../application/ports/TaxableBasketPort';
 import { taxQueryRepository, BasketTaxableBasketAdapter } from '../../application/wired';
@@ -30,7 +29,7 @@ interface ShippingAddressBody {
   city?: string;
 }
 
-export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) => {
+export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpResponse) => {
   const body = req.body as {
     productId?: string;
     quantity?: number;
@@ -148,7 +147,7 @@ export const calculateTaxForLineItem = async (req: TypedRequest, res: Response) 
 /**
  * Calculate tax for an entire basket
  */
-export const calculateTaxForBasket = async (req: TypedRequest, res: Response) => {
+export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse) => {
   const { basketId } = req.params;
   const body = req.body as {
     shippingAddress?: ShippingAddressBody;
@@ -254,7 +253,7 @@ export const calculateTaxForBasket = async (req: TypedRequest, res: Response) =>
 /**
  * Get a tax category by its code
  */
-export const getTaxCategoryByCode = async (req: TypedRequest, res: Response) => {
+export const getTaxCategoryByCode = async (req: HttpRequest, res: HttpResponse) => {
   const { code } = req.params;
 
   if (!code) {
@@ -276,7 +275,7 @@ export const getTaxCategoryByCode = async (req: TypedRequest, res: Response) => 
 /**
  * Get active tax rates
  */
-export const getTaxRates = async (req: TypedRequest, res: Response) => {
+export const getTaxRates = async (req: HttpRequest, res: HttpResponse) => {
   const { country, region } = req.query;
 
   // Call repository - returns data with id field already added
@@ -288,7 +287,7 @@ export const getTaxRates = async (req: TypedRequest, res: Response) => {
 /**
  * Check if a customer has tax exemptions
  */
-export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response) => {
+export const checkCustomerTaxExemption = async (req: HttpRequest, res: HttpResponse) => {
   const { customerId } = req.params;
 
   if (!customerId) {
@@ -309,7 +308,7 @@ export const checkCustomerTaxExemption = async (req: TypedRequest, res: Response
 /**
  * Find the tax zone for a given address
  */
-export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) => {
+export const findTaxZoneForAddress = async (req: HttpRequest, res: HttpResponse) => {
   const body = req.body as { country?: string; region?: string; postalCode?: string; city?: string };
   const { country, region, postalCode, city } = body;
 
@@ -332,7 +331,7 @@ export const findTaxZoneForAddress = async (req: TypedRequest, res: Response) =>
 /**
  * Get customer tax settings (for display on storefront)
  */
-export const getCustomerTaxSettings = async (req: TypedRequest, res: Response) => {
+export const getCustomerTaxSettings = async (req: HttpRequest, res: HttpResponse) => {
   const { organizationId } = req.params;
 
   if (!organizationId) {

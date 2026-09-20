@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { warehouseDataRepository } from '../../application/wired';
@@ -45,7 +44,7 @@ interface ShippingMethodBody {
   method: string;
 }
 
-export const getWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehouses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     activeOnly = 'true',
     fulfillmentCenters,
@@ -82,7 +81,7 @@ export const getWarehouses = async (req: TypedRequest, res: Response): Promise<v
   successResponse(res, warehouses);
 };
 
-export const getWarehouseById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehouseById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const warehouse = await warehouseRepo.findById(id);
 
@@ -94,7 +93,7 @@ export const getWarehouseById = async (req: TypedRequest, res: Response): Promis
   successResponse(res, warehouse);
 };
 
-export const getWarehouseByCode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehouseByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
   const warehouse = await warehouseRepo.findByCode(code);
 
@@ -106,7 +105,7 @@ export const getWarehouseByCode = async (req: TypedRequest, res: Response): Prom
   successResponse(res, warehouse);
 };
 
-export const getDefaultWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let warehouse = await warehouseRepo.findDefault();
   if (!warehouse) {
     // Fallback to first active warehouse to satisfy deterministic 200 for this endpoint
@@ -122,22 +121,22 @@ export const getDefaultWarehouse = async (req: TypedRequest, res: Response): Pro
   successResponse(res, warehouse);
 };
 
-export const getFulfillmentCenters = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFulfillmentCenters = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const warehouses = await warehouseRepo.findFulfillmentCenters();
   successResponse(res, warehouses);
 };
 
-export const getReturnCenters = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReturnCenters = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const warehouses = await warehouseRepo.findReturnCenters();
   successResponse(res, warehouses);
 };
 
-export const getWarehouseStatistics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehouseStatistics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const statistics = await warehouseRepo.getStatistics();
   successResponse(res, statistics);
 };
 
-export const findNearestWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
+export const findNearestWarehouses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const latitude = (req.query.latitude as string | undefined) ?? (req.query.lat as string | undefined);
   const longitude = (req.query.longitude as string | undefined) ?? (req.query.lng as string | undefined);
   const radiusKm = (req.query.radiusKm as string | undefined) ?? '100';
@@ -158,21 +157,21 @@ export const findNearestWarehouses = async (req: TypedRequest, res: Response): P
   successResponse(res, warehouses);
 };
 
-export const getWarehousesByCountry = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehousesByCountry = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { country } = req.params;
   const warehouses = await warehouseRepo.findByCountry(country);
   successResponse(res, warehouses);
 };
 
-export const getWarehousesByMerchant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getWarehousesByMerchant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   const warehouses = await warehouseRepo.findByMerchantId(organizationId);
   successResponse(res, warehouses);
 };
 
 export const createWarehouse = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateWarehouseBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateWarehouseBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const {
     name,
@@ -254,8 +253,8 @@ export const createWarehouse = async (
 };
 
 export const updateWarehouse = async (
-  req: TypedRequest<Record<string, string>, unknown, WarehouseUpdateParams>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, WarehouseUpdateParams>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body;
@@ -270,7 +269,7 @@ export const updateWarehouse = async (
   successResponse(res, warehouse);
 };
 
-export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await warehouseRepo.delete(id);
 
@@ -282,7 +281,7 @@ export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise
   successResponse(res, { message: 'Warehouse deleted successfully' });
 };
 
-export const setDefaultWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const setDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const warehouse = await warehouseRepo.setAsDefault(id);
 
@@ -294,7 +293,7 @@ export const setDefaultWarehouse = async (req: TypedRequest, res: Response): Pro
   successResponse(res, warehouse);
 };
 
-export const activateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const warehouse = await warehouseRepo.activate(id);
 
@@ -306,7 +305,7 @@ export const activateWarehouse = async (req: TypedRequest, res: Response): Promi
   successResponse(res, warehouse);
 };
 
-export const deactivateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const warehouse = await warehouseRepo.deactivate(id);
 
@@ -319,8 +318,8 @@ export const deactivateWarehouse = async (req: TypedRequest, res: Response): Pro
 };
 
 export const addShippingMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ShippingMethodBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   // Accept both { method } and { methodId } as input for compatibility with tests
@@ -342,7 +341,7 @@ export const addShippingMethod = async (
   successResponse(res, warehouse);
 };
 
-export const removeShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id, method } = req.params;
 
   const warehouse = await warehouseRepo.removeShippingMethod(id, method);
@@ -369,7 +368,7 @@ interface CreateZoneBody {
   metadata?: Record<string, unknown>;
 }
 
-export const createZone = async (req: TypedRequest<Record<string, string>, unknown, CreateZoneBody>, res: Response): Promise<void> => {
+export const createZone = async (req: HttpRequest<Record<string, string>, unknown, CreateZoneBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { name, code, description, zoneType, isActive, sortOrder, metadata } = req.body;
 
@@ -399,13 +398,13 @@ export const createZone = async (req: TypedRequest<Record<string, string>, unkno
   successResponse(res, zone, 201);
 };
 
-export const getZones = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const zones = await warehouseZoneRepo.findZonesByWarehouse(id);
   successResponse(res, zones);
 };
 
-export const getZoneById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
   const zone = await warehouseZoneRepo.findZoneById(zoneId);
   if (!zone) {
@@ -415,7 +414,7 @@ export const getZoneById = async (req: TypedRequest, res: Response): Promise<voi
   successResponse(res, zone);
 };
 
-export const updateZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
   const zone = await warehouseZoneRepo.updateZone(zoneId, req.body as Record<string, unknown>);
   if (!zone) {
@@ -426,7 +425,7 @@ export const updateZone = async (req: TypedRequest, res: Response): Promise<void
   successResponse(res, zone);
 };
 
-export const deleteZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
   await warehouseZoneRepo.deleteZone(zoneId);
   eventBus.emit('warehouse.zone.deleted', { zoneId });
@@ -452,7 +451,7 @@ interface CreateBinBody {
   priority?: number;
 }
 
-export const createBin = async (req: TypedRequest<Record<string, string>, unknown, CreateBinBody>, res: Response): Promise<void> => {
+export const createBin = async (req: HttpRequest<Record<string, string>, unknown, CreateBinBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { locationCode, binType, ...rest } = req.body;
 
@@ -477,13 +476,13 @@ export const createBin = async (req: TypedRequest<Record<string, string>, unknow
   successResponse(res, bin, 201);
 };
 
-export const getBins = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBins = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const bins = await warehouseBinRepo.findBinsByWarehouse(id);
   successResponse(res, bins);
 };
 
-export const getBinById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBinById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
   const bin = await warehouseBinRepo.findBinById(binId);
   if (!bin) {
@@ -493,7 +492,7 @@ export const getBinById = async (req: TypedRequest, res: Response): Promise<void
   successResponse(res, bin);
 };
 
-export const updateBin = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
   const bin = await warehouseBinRepo.updateBin(binId, req.body as Record<string, unknown>);
   if (!bin) {
@@ -504,7 +503,7 @@ export const updateBin = async (req: TypedRequest, res: Response): Promise<void>
   successResponse(res, bin);
 };
 
-export const deleteBin = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
   await warehouseBinRepo.deleteBin(binId);
   eventBus.emit('warehouse.bin.deleted', { binId });
@@ -529,8 +528,8 @@ interface CreateReceivingBody {
 }
 
 export const createReceiving = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateReceivingBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateReceivingBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { receiptNumber, sourceType, ...rest } = req.body;
@@ -556,14 +555,14 @@ export const createReceiving = async (
   successResponse(res, record, 201);
 };
 
-export const getReceiving = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const status = req.query.status as string | undefined;
   const records = await warehouseReceivingRepo.findByWarehouse(id, status);
   successResponse(res, records);
 };
 
-export const getReceivingById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceivingById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { receivingId } = req.params;
   const record = await warehouseReceivingRepo.findById(receivingId);
   if (!record) {
@@ -573,7 +572,7 @@ export const getReceivingById = async (req: TypedRequest, res: Response): Promis
   successResponse(res, record);
 };
 
-export const completeReceiving = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { receivingId } = req.params;
   const { receivedBy, items, hasDiscrepancies } = req.body as {
     receivedBy?: string;
@@ -613,8 +612,8 @@ interface CreatePickPackBody {
 }
 
 export const createPickPack = async (
-  req: TypedRequest<Record<string, string>, unknown, CreatePickPackBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreatePickPackBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { pickPackNumber, ...rest } = req.body;
@@ -639,14 +638,14 @@ export const createPickPack = async (
   successResponse(res, record, 201);
 };
 
-export const getPickPacks = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPickPacks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const status = req.query.status as string | undefined;
   const records = await warehousePickPackRepo.findByWarehouse(id, status);
   successResponse(res, records);
 };
 
-export const getPickPackById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPickPackById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const record = await warehousePickPackRepo.findById(pickPackId);
   if (!record) {
@@ -656,7 +655,7 @@ export const getPickPackById = async (req: TypedRequest, res: Response): Promise
   successResponse(res, record);
 };
 
-export const startPicking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const startPicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const record = await warehousePickPackRepo.startPicking(pickPackId);
   if (!record) {
@@ -667,7 +666,7 @@ export const startPicking = async (req: TypedRequest, res: Response): Promise<vo
   successResponse(res, record);
 };
 
-export const completePicking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completePicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const record = await warehousePickPackRepo.completePicking(pickPackId);
   if (!record) {
@@ -678,7 +677,7 @@ export const completePicking = async (req: TypedRequest, res: Response): Promise
   successResponse(res, record);
 };
 
-export const startPacking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const startPacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const record = await warehousePickPackRepo.startPacking(pickPackId);
   if (!record) {
@@ -688,7 +687,7 @@ export const startPacking = async (req: TypedRequest, res: Response): Promise<vo
   successResponse(res, record);
 };
 
-export const completePacking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completePacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const record = await warehousePickPackRepo.completePacking(pickPackId);
   if (!record) {
@@ -699,7 +698,7 @@ export const completePacking = async (req: TypedRequest, res: Response): Promise
   successResponse(res, record);
 };
 
-export const assignPickPack = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignPickPack = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const { assignedTo } = req.body as { assignedTo: string };
   if (!assignedTo) {

@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { ManageSupportTicketsUseCase, ManageFaqUseCase } from '../../application/useCases/ManageSupport';
 
@@ -16,7 +15,7 @@ const manageFaqUseCase = new ManageFaqUseCase();
 // Support Dashboard
 // ============================================================================
 
-export const supportDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const supportDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stats = await manageSupportTicketsUseCase.getSupportStats();
   const tickets = await manageSupportTicketsUseCase.listRecentTickets(20);
   const { data: faqArticles } = await manageFaqUseCase.getArticles({ isPublished: true });
@@ -38,7 +37,7 @@ export const supportDashboard = async (req: TypedRequest, res: Response): Promis
 // Support Tickets
 // ============================================================================
 
-export const listSupportTickets = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSupportTickets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, priority, search, limit, offset } = req.query;
 
   const tickets = await manageSupportTicketsUseCase.listTickets({
@@ -57,7 +56,7 @@ export const listSupportTickets = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const viewSupportTicket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSupportTicket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ticketId } = req.params;
 
   const ticket = await manageSupportTicketsUseCase.findTicketById(ticketId);
@@ -79,10 +78,10 @@ export const viewSupportTicket = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const updateTicketStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTicketStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ticketId } = req.params;
-  const body = req.body as RequestBody;
-  const { status, response } = body;
+  const body = req.body as HttpRequestBody;
+  const { status, response } = body as { status: string; response?: string };
 
   await manageSupportTicketsUseCase.updateTicketStatus(ticketId, status);
 
@@ -97,7 +96,7 @@ export const updateTicketStatus = async (req: TypedRequest, res: Response): Prom
 // FAQ Management
 // ============================================================================
 
-export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFaqs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { data: faqs } = await manageFaqUseCase.getArticles(undefined, { limit: 100 });
 
   adminRespond(req, res, 'support/faqs', {
@@ -106,10 +105,16 @@ export const listFaqs = async (req: TypedRequest, res: Response): Promise<void> 
   });
 };
 
-export const createFaq = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createFaq = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { question, answer, _category, sortOrder, isPublished } = body;
+    const body = req.body as HttpRequestBody;
+    const { question, answer, _category, sortOrder, isPublished } = body as {
+      question: string;
+      answer: string;
+      _category?: string;
+      sortOrder: string;
+      isPublished?: string;
+    };
 
     await manageFaqUseCase.saveArticle({
       title: question,
@@ -126,11 +131,17 @@ export const createFaq = async (req: TypedRequest, res: Response): Promise<void>
   }
 };
 
-export const updateFaq = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateFaq = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { faqId } = req.params;
-    const body = req.body as RequestBody;
-    const { question, answer, _category, sortOrder, isPublished } = body;
+    const body = req.body as HttpRequestBody;
+    const { question, answer, _category, sortOrder, isPublished } = body as {
+      question: string;
+      answer: string;
+      _category?: string;
+      sortOrder: string;
+      isPublished?: string;
+    };
 
     await manageFaqUseCase.saveArticle({
       faqArticleId: faqId,
@@ -148,7 +159,7 @@ export const updateFaq = async (req: TypedRequest, res: Response): Promise<void>
   }
 };
 
-export const deleteFaq = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteFaq = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { faqId } = req.params;
   await manageFaqUseCase.deleteArticle(faqId);
   res.json({ success: true });

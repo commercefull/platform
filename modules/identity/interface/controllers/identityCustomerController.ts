@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const tokenRepo = identityDataRepository.tokens;
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
@@ -54,7 +53,7 @@ interface ResetPasswordBody {
  * Authenticates a customer and returns a basic JWT token
  * Use this for simple session-based auth
  */
-export const loginCustomer = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
+export const loginCustomer = async (req: HttpRequest<Record<string, string>, unknown, LoginBody>, res: HttpResponse): Promise<void> => {
   const { email, password } = req.body;
 
   // Validate required fields
@@ -103,7 +102,10 @@ export const loginCustomer = async (req: TypedRequest<Record<string, string>, un
 /**
  * Registers a new customer account
  */
-export const registerCustomer = async (req: TypedRequest<Record<string, string>, unknown, RegisterBody>, res: Response): Promise<void> => {
+export const registerCustomer = async (
+  req: HttpRequest<Record<string, string>, unknown, RegisterBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const { email, password, firstName, lastName, phone } = req.body;
 
   // Validate required fields
@@ -172,7 +174,7 @@ export const registerCustomer = async (req: TypedRequest<Record<string, string>,
  * Issues both access and refresh tokens for headless/mobile clients
  * More secure than simple login as refresh tokens can be revoked
  */
-export const issueTokenPair = async (req: TypedRequest<Record<string, string>, unknown, LoginBody>, res: Response): Promise<void> => {
+export const issueTokenPair = async (req: HttpRequest<Record<string, string>, unknown, LoginBody>, res: HttpResponse): Promise<void> => {
   const { email, password } = req.body;
 
   // Validate credentials
@@ -229,8 +231,8 @@ export const issueTokenPair = async (req: TypedRequest<Record<string, string>, u
  * Refreshes an expired access token using a valid refresh token
  */
 export const renewAccessToken = async (
-  req: TypedRequest<Record<string, string>, unknown, RefreshTokenBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, RefreshTokenBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { refreshToken } = req.body;
 
@@ -295,7 +297,10 @@ export const renewAccessToken = async (
 /**
  * Validates a customer access token
  */
-export const checkTokenValidity = async (req: TypedRequest<Record<string, string>, unknown, TokenBody>, res: Response): Promise<void> => {
+export const checkTokenValidity = async (
+  req: HttpRequest<Record<string, string>, unknown, TokenBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const { token } = req.body;
 
   if (!token) {
@@ -330,8 +335,8 @@ export const checkTokenValidity = async (req: TypedRequest<Record<string, string
 };
 
 export const requestEmailVerification = async (
-  req: TypedRequest<Record<string, string>, unknown, EmailBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, EmailBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { email } = req.body;
   if (!email) {
@@ -358,16 +363,14 @@ export const requestEmailVerification = async (
   });
 };
 
-export const verifyEmail = async (req: TypedRequest, res: Response): Promise<void> => {
+export const verifyEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const token = String(req.query.token || '');
   if (!token) {
     res.status(400).json({ success: false, message: 'Verification token is required' });
     return;
   }
 
-  const customerId = credentialPort.verifyEmailVerificationToken
-    ? await credentialPort.verifyEmailVerificationToken(token)
-    : null;
+  const customerId = credentialPort.verifyEmailVerificationToken ? await credentialPort.verifyEmailVerificationToken(token) : null;
   if (!customerId) {
     res.status(400).json({ success: false, error: 'Invalid verification token' });
     return;
@@ -379,7 +382,10 @@ export const verifyEmail = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * Initiates password reset flow by generating a reset token
  */
-export const requestPasswordReset = async (req: TypedRequest<Record<string, string>, unknown, EmailBody>, res: Response): Promise<void> => {
+export const requestPasswordReset = async (
+  req: HttpRequest<Record<string, string>, unknown, EmailBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const { email } = req.body;
 
   if (!email) {
@@ -424,8 +430,8 @@ export const requestPasswordReset = async (req: TypedRequest<Record<string, stri
  * Completes password reset using a valid reset token
  */
 export const resetPassword = async (
-  req: TypedRequest<Record<string, string>, unknown, ResetPasswordBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ResetPasswordBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { token, newPassword, password } = req.body;
   const finalPassword = newPassword || password;
@@ -464,7 +470,7 @@ interface LogoutBody {
   refreshToken?: string;
 }
 
-export const logoutCustomer = async (req: TypedRequest<Record<string, string>, unknown, LogoutBody>, res: Response): Promise<void> => {
+export const logoutCustomer = async (req: HttpRequest<Record<string, string>, unknown, LogoutBody>, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id;
   const accessToken = req.headers['authorization']?.split(' ')[1];
   const { refreshToken } = req.body;
@@ -502,7 +508,7 @@ export const logoutCustomer = async (req: TypedRequest<Record<string, string>, u
 /**
  * Get 2FA status for authenticated customer
  */
-export const get2FAStatus = async (req: TypedRequest<Record<string, string>, unknown>, res: Response): Promise<void> => {
+export const get2FAStatus = async (req: HttpRequest<Record<string, string>, unknown>, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id;
 
   if (!customerId) {

@@ -3,7 +3,7 @@
  * Routes for admin operations on GDPR requests
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   listDataRequests,
@@ -18,7 +18,7 @@ import {
 } from '../controllers/GdprController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Apply merchant authentication to all routes
 router.use(isOrganizationLoggedIn);

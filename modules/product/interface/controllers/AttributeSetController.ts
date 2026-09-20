@@ -1,17 +1,16 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { productAttributeRepository } from '../../application/wired';
 import { ProductAttributeSetUpdateInput } from '../../application/wired';
 
 const attributeSetRepo = productAttributeRepository.sets;
 
 class AttributeSetController {
-  async listAttributeSets(req: TypedRequest, res: Response): Promise<void> {
+  async listAttributeSets(req: HttpRequest, res: HttpResponse): Promise<void> {
     const sets = await attributeSetRepo.findAll();
     res.json({ success: true, data: sets });
   }
 
-  async getAttributeSet(req: TypedRequest, res: Response): Promise<void> {
+  async getAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const set = await attributeSetRepo.findByIdWithAttributes(id);
     if (!set) {
@@ -21,7 +20,7 @@ class AttributeSetController {
     res.json({ success: true, data: set });
   }
 
-  async createAttributeSet(req: TypedRequest, res: Response): Promise<void> {
+  async createAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { name, code, description, productTypeId, isActive, isGlobal } = req.body as {
       name?: string;
       code?: string;
@@ -43,7 +42,7 @@ class AttributeSetController {
     res.status(201).json({ success: true, data: set });
   }
 
-  async updateAttributeSet(req: TypedRequest, res: Response): Promise<void> {
+  async updateAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const existing = await attributeSetRepo.findById(id);
     if (!existing) {
@@ -54,7 +53,7 @@ class AttributeSetController {
     res.json({ success: true, data: updated });
   }
 
-  async deleteAttributeSet(req: TypedRequest, res: Response): Promise<void> {
+  async deleteAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const existing = await attributeSetRepo.findById(id);
     if (!existing) {
@@ -65,7 +64,7 @@ class AttributeSetController {
     res.json({ success: true, message: 'Attribute set deleted' });
   }
 
-  async addAttributeToSet(req: TypedRequest, res: Response): Promise<void> {
+  async addAttributeToSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const { attributeId, position, isRequired, defaultValue } = req.body as {
       attributeId?: string;
@@ -82,13 +81,13 @@ class AttributeSetController {
     res.json({ success: true, data: updated });
   }
 
-  async removeAttributeFromSet(req: TypedRequest, res: Response): Promise<void> {
+  async removeAttributeFromSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id, attributeId } = req.params;
     await attributeSetRepo.removeAttribute(id, attributeId);
     res.json({ success: true, message: 'Attribute removed from set' });
   }
 
-  async reorderAttributes(req: TypedRequest, res: Response): Promise<void> {
+  async reorderAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const { attributeIds } = req.body as { attributeIds?: string[] };
     if (!Array.isArray(attributeIds)) {

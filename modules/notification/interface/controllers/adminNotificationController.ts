@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageNotificationTemplatesUseCase } from '../../application/useCases/ManageNotificationTemplates';
 import { ManageNotificationBatchesUseCase } from '../../application/useCases/ManageNotificationBatches';
 import { GetNotificationDeliveryLogsUseCase } from '../../application/useCases/GetNotificationDeliveryLogs';
@@ -23,7 +22,7 @@ const getTranslationsUseCase = new GetTemplateTranslationsUseCase();
 // Notification Templates Management
 // ============================================================================
 
-export const listNotificationTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listNotificationTemplates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly !== 'false'; // Default to true
   const category = req.query.category as string;
   const _limit = parseInt(req.query.limit as string) || 50;
@@ -55,15 +54,15 @@ export const listNotificationTemplates = async (req: TypedRequest, res: Response
   });
 };
 
-export const createNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createNotificationTemplateForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'notifications/templates/create', {
     pageName: 'Create Notification Template',
   });
 };
 
-export const createNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       code,
       name,
@@ -78,7 +77,21 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
       smsTemplate,
       parameters,
       categoryCode,
-    } = body;
+    } = body as {
+      code: string;
+      name: string;
+      description?: string;
+      type: string;
+      supportedChannels: string[];
+      defaultChannel: string;
+      subject?: string;
+      htmlTemplate?: string;
+      textTemplate?: string;
+      pushTemplate?: string;
+      smsTemplate?: string;
+      parameters?: string;
+      categoryCode?: string;
+    };
 
     const template = await manageTemplatesUseCase.create({
       code,
@@ -105,12 +118,12 @@ export const createNotificationTemplate = async (req: TypedRequest, res: Respons
     adminRespond(req, res, 'notifications/templates/create', {
       pageName: 'Create Notification Template',
       error: (error as Error).message || 'Failed to create notification template',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const template = await manageTemplatesUseCase.findById(templateId);
@@ -135,7 +148,7 @@ export const viewNotificationTemplate = async (req: TypedRequest, res: Response)
   });
 };
 
-export const editNotificationTemplateForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editNotificationTemplateForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const template = await manageTemplatesUseCase.findById(templateId);
@@ -154,11 +167,11 @@ export const editNotificationTemplateForm = async (req: TypedRequest, res: Respo
   });
 };
 
-export const updateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const {
     name,
     description,
@@ -172,7 +185,20 @@ export const updateNotificationTemplate = async (req: TypedRequest, res: Respons
     parameters,
     categoryCode,
     isActive,
-  } = body;
+  } = body as {
+    name?: string;
+    description?: string;
+    supportedChannels?: string[];
+    defaultChannel?: string;
+    subject?: string;
+    htmlTemplate?: string;
+    textTemplate?: string;
+    pushTemplate?: string;
+    smsTemplate?: string;
+    parameters?: string;
+    categoryCode?: string;
+    isActive?: string;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -196,7 +222,7 @@ export const updateNotificationTemplate = async (req: TypedRequest, res: Respons
   res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
 };
 
-export const activateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const template = await manageTemplatesUseCase.activate(templateId);
@@ -208,7 +234,7 @@ export const activateNotificationTemplate = async (req: TypedRequest, res: Respo
   res.json({ success: true, message: 'Notification template activated successfully' });
 };
 
-export const deactivateNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const template = await manageTemplatesUseCase.deactivate(templateId);
@@ -220,7 +246,7 @@ export const deactivateNotificationTemplate = async (req: TypedRequest, res: Res
   res.json({ success: true, message: 'Notification template deactivated successfully' });
 };
 
-export const deleteNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const success = await manageTemplatesUseCase.delete(templateId);
@@ -232,10 +258,10 @@ export const deleteNotificationTemplate = async (req: TypedRequest, res: Respons
   res.json({ success: true, message: 'Notification template deleted successfully' });
 };
 
-export const cloneNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cloneNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
-  const body = req.body as RequestBody;
-  const { newCode, newName } = body;
+  const body = req.body as HttpRequestBody;
+  const { newCode, newName } = body as { newCode: string; newName: string };
 
   const clonedTemplate = await manageTemplatesUseCase.clone(templateId, newCode, newName);
 
@@ -246,9 +272,9 @@ export const cloneNotificationTemplate = async (req: TypedRequest, res: Response
   });
 };
 
-export const previewNotificationTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const previewNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
-  const previewData = (req.body as RequestBody).data ? JSON.parse((req.body as RequestBody).data) : undefined;
+  const previewData = (req.body as HttpRequestBody).data ? JSON.parse((req.body as HttpRequestBody).data as string) : undefined;
 
   const preview = await manageTemplatesUseCase.getPreview(templateId, previewData);
 
@@ -262,7 +288,7 @@ export const previewNotificationTemplate = async (req: TypedRequest, res: Respon
 // Notification Batches Management
 // ============================================================================
 
-export const listBatches = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listBatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
@@ -278,7 +304,7 @@ export const listBatches = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const viewBatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewBatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { batchId } = req.params;
 
   const batch = await manageBatchesUseCase.findById(batchId);
@@ -301,7 +327,7 @@ export const viewBatch = async (req: TypedRequest, res: Response): Promise<void>
 // Notification Webhooks Management
 // ============================================================================
 
-export const listWebhooks = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listWebhooks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const webhooks = await manageWebhooksUseCase.findAll();
 
   adminRespond(req, res, 'notifications/webhooks/index', {
@@ -311,17 +337,22 @@ export const listWebhooks = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const createWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWebhookForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'notifications/webhooks/form', {
     pageName: 'Create Webhook',
     webhook: null,
   });
 };
 
-export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { url, secret, events, organizationId } = body;
+    const body = req.body as HttpRequestBody;
+    const { url, secret, events, organizationId } = body as {
+      url: string;
+      secret?: string;
+      events?: string | string[];
+      organizationId?: string;
+    };
     const eventsArray = Array.isArray(events) ? events : events ? [events] : [];
 
     await manageWebhooksUseCase.create({
@@ -339,12 +370,12 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
       pageName: 'Create Webhook',
       webhook: null,
       error: (error as Error).message || 'Failed to create webhook',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deactivateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { webhookId } = req.params;
     await manageWebhooksUseCase.deactivate(webhookId);
@@ -359,7 +390,7 @@ export const deactivateWebhook = async (req: TypedRequest, res: Response): Promi
 // Notification Template Translations
 // ============================================================================
 
-export const listTemplateTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTemplateTranslations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
 
   const template = await manageTemplatesUseCase.findById(templateId);

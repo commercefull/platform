@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageShippingMethodsUseCase } from '../../application/useCases/ManageShippingAdmin';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
@@ -16,7 +15,7 @@ const manageShippingMethodsUseCase = new ManageShippingMethodsUseCase();
 // Shipping Methods
 // ============================================================================
 
-export const listShippingMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listShippingMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const methods = await manageShippingMethodsUseCase.findAll();
 
   adminRespond(req, res, 'shipping/methods/index', {
@@ -27,7 +26,7 @@ export const listShippingMethods = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const createShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingMethodForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'shipping/methods/create', {
     pageName: 'Create Shipping Method',
   });
@@ -57,14 +56,14 @@ const shippingMethodCreateFields: FieldConfig[] = [
   { name: 'createdBy', default: null },
 ];
 
-function parseShippingMethodCreateInput(body: RequestBody) {
+function parseShippingMethodCreateInput(body: HttpRequestBody) {
   return buildFormObject(body as Record<string, unknown>, shippingMethodCreateFields);
 }
 
-export const createShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const method = await manageShippingMethodsUseCase.create(
-      parseShippingMethodCreateInput(req.body as RequestBody) as Parameters<typeof manageShippingMethodsUseCase.create>[0],
+      parseShippingMethodCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageShippingMethodsUseCase.create>[0],
     );
 
     res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
@@ -74,12 +73,12 @@ export const createShippingMethod = async (req: TypedRequest, res: Response): Pr
     adminRespond(req, res, 'shipping/methods/create', {
       pageName: 'Create Shipping Method',
       error: (error as Error).message || 'Failed to create shipping method',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
 
   const method = await manageShippingMethodsUseCase.findById(methodId);
@@ -100,7 +99,7 @@ export const viewShippingMethod = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const editShippingMethodForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editShippingMethodForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
 
   const method = await manageShippingMethodsUseCase.findById(methodId);
@@ -139,13 +138,13 @@ const shippingMethodUpdateFields: FieldConfig[] = [
   { name: 'shippingClass', transform: 'stringOrUndefined' },
 ];
 
-function parseShippingMethodUpdates(body: RequestBody): Record<string, unknown> {
+function parseShippingMethodUpdates(body: HttpRequestBody): Record<string, unknown> {
   return buildFormObject(body as Record<string, unknown>, shippingMethodUpdateFields);
 }
 
-export const updateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
-  const updates = parseShippingMethodUpdates(req.body as RequestBody);
+  const updates = parseShippingMethodUpdates(req.body as HttpRequestBody);
 
   const method = await manageShippingMethodsUseCase.update(methodId, updates);
 
@@ -156,7 +155,7 @@ export const updateShippingMethod = async (req: TypedRequest, res: Response): Pr
   res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
 };
 
-export const deleteShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
 
   const success = await manageShippingMethodsUseCase.delete(methodId);
@@ -168,7 +167,7 @@ export const deleteShippingMethod = async (req: TypedRequest, res: Response): Pr
   res.json({ success: true, message: 'Shipping method deleted successfully' });
 };
 
-export const activateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
 
   const method = await manageShippingMethodsUseCase.activate(methodId);
@@ -180,7 +179,7 @@ export const activateShippingMethod = async (req: TypedRequest, res: Response): 
   res.json({ success: true, message: 'Shipping method activated successfully' });
 };
 
-export const deactivateShippingMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
 
   const method = await manageShippingMethodsUseCase.deactivate(methodId);

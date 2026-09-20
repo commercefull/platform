@@ -4,11 +4,11 @@
  * Mounted at /business, routes prefixed with /theme.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { themeController } from '../controllers/themeController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // Theme CRUD
 router.get('/theme', isOrganizationLoggedIn, themeController.listThemes.bind(themeController));

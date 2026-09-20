@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { AssignUserToStoreUseCase } from '../../application/useCases/store/AssignUserToStore';
 import { GetUserStoresUseCase } from '../../application/useCases/store/GetUserStores';
 import { ListStoreUsersUseCase } from '../../application/useCases/store/ListStoreUsers';
@@ -40,8 +39,8 @@ interface AssignUserBody {
 }
 
 export const assignUserToStore = async (
-  req: TypedRequest<Record<string, string>, unknown, AssignUserBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, AssignUserBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.storeId) {
     res.status(400).json({ success: false, error: 'storeId is required' });
@@ -62,17 +61,17 @@ export const assignUserToStore = async (
   res.status(201).json({ success: true, data: result });
 };
 
-export const getUserStores = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await getUserStoresUseCase.execute(req.params.userId);
   res.json({ success: true, data: result });
 };
 
-export const listStoreUsers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listStoreUsers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await listStoreUsersUseCase.execute(req.params.storeId);
   res.json({ success: true, data: result });
 };
 
-export const removeUserFromStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeUserFromStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
   res.json({ success: true });
 };

@@ -3,8 +3,7 @@
  * HTTP interface for customer-facing category operations
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { productCatalogRepository } from '../../application/wired';
 
 const categoryRepo = productCatalogRepository.categories;
@@ -13,7 +12,7 @@ const categoryRepo = productCatalogRepository.categories;
  * List all active categories
  * GET /categories
  */
-export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { featured, menu, root } = req.query;
 
   let categories;
@@ -34,7 +33,7 @@ export const listCategories = async (req: TypedRequest, res: Response): Promise<
  * Get category by ID or slug
  * GET /categories/:identifier
  */
-export const getCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { identifier } = req.params;
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
@@ -52,7 +51,7 @@ export const getCategory = async (req: TypedRequest, res: Response): Promise<voi
  * Get subcategories of a parent category
  * GET /categories/:categoryId/children
  */
-export const getCategoryChildren = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
 
   const children = await categoryRepo.findChildren(categoryId);

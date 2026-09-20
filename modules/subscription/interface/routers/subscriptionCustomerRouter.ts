@@ -3,7 +3,7 @@
  * Routes for customer-facing subscription operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
@@ -26,7 +26,7 @@ import {
   skipNextDelivery,
 } from '../controllers/subscriptionCustomerController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Public Routes (Browse Subscription Products)

@@ -84,7 +84,8 @@ function respond(req: Request, res: Response, data: any, statusCode = 200, htmlT
 ## Controller Error Handling
 
 ```typescript
-export const getProduct = async (req: TypedRequest, res: Response) => {
+export const getProduct = async (req: HttpRequest, res: HttpResponse) => {
+  // import type { HttpRequest, HttpResponse } from 'libs/http';
   try {
     const { productId } = req.params;
     const product = await productRepo.findById(productId);

@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { FindActiveStoresUseCase } from '../../../store/application/useCases/wired';
 import {
@@ -25,7 +24,7 @@ const findActiveStoresUseCase = new FindActiveStoresUseCase();
 // List Inventory
 // ============================================================================
 
-export const listInventory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listInventory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { search, stockStatus, locationId, page = '1' } = req.query;
   const limit = 50;
   const offset = (parseInt(page as string) - 1) * limit;
@@ -68,9 +67,15 @@ export const listInventory = async (req: TypedRequest, res: Response): Promise<v
 // Adjust Stock
 // ============================================================================
 
-export const adjustStock = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { inventoryLevelId, adjustmentType, quantity, reason, notes } = body;
+export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { inventoryLevelId, adjustmentType, quantity, reason, notes } = body as {
+    inventoryLevelId: string;
+    adjustmentType: string;
+    quantity: string;
+    reason?: string;
+    notes?: string;
+  };
   const userId = req.user?.userId;
 
   if (!inventoryLevelId || quantity === undefined) {
@@ -124,7 +129,7 @@ export const adjustStock = async (req: TypedRequest, res: Response): Promise<voi
 // View Inventory History
 // ============================================================================
 
-export const viewInventoryHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewInventoryHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { inventoryLevelId } = req.params;
   const { page = '1' } = req.query;
   const limit = 50;
@@ -160,7 +165,7 @@ export const viewInventoryHistory = async (req: TypedRequest, res: Response): Pr
 // List Locations
 // ============================================================================
 
-export const listLocations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const locations = await manageAdminInventoryUseCase.findLocationsWithStats();
 
   adminRespond(req, res, 'inventory/locations', {
@@ -173,7 +178,7 @@ export const listLocations = async (req: TypedRequest, res: Response): Promise<v
 // Low Stock Report
 // ============================================================================
 
-export const lowStockReport = async (req: TypedRequest, res: Response): Promise<void> => {
+export const lowStockReport = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const lowStockItems = await manageAdminInventoryUseCase.findLowStockReport();
 
   adminRespond(req, res, 'inventory/low-stock', {
@@ -182,7 +187,7 @@ export const lowStockReport = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const listDispatches = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listDispatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const requestedStatus = req.query.status as string | undefined;
   const status =
     requestedStatus && ['draft', 'approved', 'dispatched', 'in_transit', 'received', 'cancelled'].includes(requestedStatus)
@@ -207,32 +212,43 @@ export const listDispatches = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createDispatchForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createDispatchForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stores = await findActiveStoresUseCase.execute();
   adminRespond(req, res, 'inventory/dispatches/create', { pageName: 'Create Dispatch', stores, formData: {} });
 };
 
-export const createDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const items = Array.isArray((req.body as RequestBody).items)
-      ? (req.body as RequestBody).items
-      : (req.body as RequestBody).productId
+    const body = req.body as {
+      items?: { productId: string; variantId?: string; quantity: number; sku?: string; productName?: string; notes?: string }[];
+      productId?: string;
+      variantId?: string;
+      quantity?: string;
+      sku?: string;
+      productName?: string;
+      fromStoreId: string;
+      toStoreId: string;
+      notes?: string;
+    };
+    const items = Array.isArray(body.items)
+      ? body.items
+      : body.productId
         ? [
             {
-              productId: (req.body as RequestBody).productId,
-              variantId: (req.body as RequestBody).variantId || undefined,
-              quantity: parseInt((req.body as RequestBody).quantity || '0', 10),
-              sku: (req.body as RequestBody).sku || undefined,
-              productName: (req.body as RequestBody).productName || undefined,
+              productId: body.productId,
+              variantId: body.variantId || undefined,
+              quantity: parseInt(body.quantity || '0', 10),
+              sku: body.sku || undefined,
+              productName: body.productName || undefined,
             },
           ]
         : [];
 
     const dispatch = await createStoreDispatchUseCase.execute({
-      fromStoreId: (req.body as RequestBody).fromStoreId,
-      toStoreId: (req.body as RequestBody).toStoreId,
+      fromStoreId: body.fromStoreId,
+      toStoreId: body.toStoreId,
       items,
-      notes: (req.body as RequestBody).notes || undefined,
+      notes: body.notes || undefined,
       requestedBy: req.user?.userId || 'admin',
     });
     res.redirect(`/admin/dispatches/${dispatch.dispatchId}?success=Dispatch created successfully`);
@@ -242,13 +258,13 @@ export const createDispatch = async (req: TypedRequest, res: Response): Promise<
     adminRespond(req, res, 'inventory/dispatches/create', {
       pageName: 'Create Dispatch',
       stores,
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
       error: (error as Error).message || 'Failed to create dispatch',
     });
   }
 };
 
-export const viewDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const dispatch = await getStoreDispatchUseCase.execute(req.params.dispatchId);
   if (!dispatch) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Dispatch not found' });
@@ -257,7 +273,7 @@ export const viewDispatch = async (req: TypedRequest, res: Response): Promise<vo
   adminRespond(req, res, 'inventory/dispatches/view', { pageName: dispatch.dispatchNumber, dispatch });
 };
 
-export const approveDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await approveStoreDispatchUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
@@ -269,7 +285,7 @@ export const approveDispatch = async (req: TypedRequest, res: Response): Promise
   }
 };
 
-export const markDispatched = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markDispatched = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await dispatchFromStoreUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
@@ -281,16 +297,17 @@ export const markDispatched = async (req: TypedRequest, res: Response): Promise<
   }
 };
 
-export const receiveDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const receiveDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const dispatch = await getStoreDispatchUseCase.execute(req.params.dispatchId);
     if (!dispatch) {
       throw new Error('Dispatch not found');
     }
+    const body = req.body as { notes?: string };
     await receiveStoreDispatchUseCase.execute({
       dispatchId: req.params.dispatchId,
       receivedBy: req.user?.userId || 'admin',
-      notes: (req.body as RequestBody).notes || undefined,
+      notes: body.notes || undefined,
       items: (
         (dispatch.items as { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }[] | undefined) || []
       ).map((item: { dispatchItemId: string; dispatchedQuantity: number; requestedQuantity: number }) => ({
@@ -307,9 +324,10 @@ export const receiveDispatch = async (req: TypedRequest, res: Response): Promise
   }
 };
 
-export const cancelDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    await cancelStoreDispatchUseCase.execute(req.params.dispatchId, (req.body as RequestBody).reason || undefined);
+    const body = req.body as { reason?: string };
+    await cancelStoreDispatchUseCase.execute(req.params.dispatchId, body.reason || undefined);
     res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);

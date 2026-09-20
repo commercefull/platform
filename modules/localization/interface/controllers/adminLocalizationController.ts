@@ -3,16 +3,15 @@
  * Handles Languages, Currencies, and Regions management
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================
 // Dashboard
 // ============================================================================
 
-export const localizationDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const localizationDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/index', {
     pageName: 'Localization',
     languages: [],
@@ -26,7 +25,7 @@ export const localizationDashboard = async (req: TypedRequest, res: Response): P
 // Languages
 // ============================================================================
 
-export const listLanguages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listLanguages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/languages/index', {
     pageName: 'Languages',
     languages: [],
@@ -35,13 +34,13 @@ export const listLanguages = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const createLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLanguageForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/languages/create', {
     pageName: 'Add Language',
   });
 };
 
-export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language added successfully');
   } catch (error: unknown) {
@@ -49,19 +48,19 @@ export const createLanguage = async (req: TypedRequest, res: Response): Promise<
     adminRespond(req, res, 'settings/localization/languages/create', {
       pageName: 'Add Language',
       error: (error as Error).message || 'Failed to add language',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const editLanguageForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editLanguageForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/languages/edit', {
     pageName: 'Edit Language',
     language: null,
   });
 };
 
-export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/languages?success=Language updated successfully');
   } catch (error: unknown) {
@@ -70,12 +69,12 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
       pageName: 'Edit Language',
       language: null,
       error: (error as Error).message || 'Failed to update language',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Language deleted successfully' });
 };
 
@@ -83,7 +82,7 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
 // Currencies
 // ============================================================================
 
-export const listCurrencies = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCurrencies = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/currencies/index', {
     pageName: 'Currencies',
     currencies: [],
@@ -92,13 +91,13 @@ export const listCurrencies = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCurrencyForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/currencies/create', {
     pageName: 'Add Currency',
   });
 };
 
-export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency added successfully');
   } catch (error: unknown) {
@@ -106,19 +105,19 @@ export const createCurrency = async (req: TypedRequest, res: Response): Promise<
     adminRespond(req, res, 'settings/localization/currencies/create', {
       pageName: 'Add Currency',
       error: (error as Error).message || 'Failed to add currency',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const editCurrencyForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editCurrencyForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/currencies/edit', {
     pageName: 'Edit Currency',
     currency: null,
   });
 };
 
-export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/currencies?success=Currency updated successfully');
   } catch (error: unknown) {
@@ -127,12 +126,12 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
       pageName: 'Edit Currency',
       currency: null,
       error: (error as Error).message || 'Failed to update currency',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Currency deleted successfully' });
 };
 
@@ -140,7 +139,7 @@ export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<
 // Regions
 // ============================================================================
 
-export const listRegions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listRegions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/regions/index', {
     pageName: 'Regions',
     regions: [],
@@ -149,13 +148,13 @@ export const listRegions = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const createRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRegionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/regions/create', {
     pageName: 'Add Region',
   });
 };
 
-export const createRegion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region added successfully');
   } catch (error: unknown) {
@@ -163,19 +162,19 @@ export const createRegion = async (req: TypedRequest, res: Response): Promise<vo
     adminRespond(req, res, 'settings/localization/regions/create', {
       pageName: 'Add Region',
       error: (error as Error).message || 'Failed to add region',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const editRegionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editRegionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/localization/regions/edit', {
     pageName: 'Edit Region',
     region: null,
   });
 };
 
-export const updateRegion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/localization/regions?success=Region updated successfully');
   } catch (error: unknown) {
@@ -184,11 +183,11 @@ export const updateRegion = async (req: TypedRequest, res: Response): Promise<vo
       pageName: 'Edit Region',
       region: null,
       error: (error as Error).message || 'Failed to update region',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteRegion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Region deleted successfully' });
 };

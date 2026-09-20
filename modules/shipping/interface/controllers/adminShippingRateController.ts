@@ -3,8 +3,7 @@
  * Handles shipping rate management for the Admin Hub
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
   ManageShippingRatesUseCase,
   ManageShippingZonesUseCase,
@@ -21,7 +20,7 @@ const manageShippingMethodsUseCase = new ManageShippingMethodsAdminUseCase();
 // Shipping Rates Management
 // ============================================================================
 
-export const listShippingRates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listShippingRates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const zoneId = req.query.zoneId as string;
   const methodId = req.query.methodId as string;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -45,7 +44,7 @@ export const listShippingRates = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const createShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingRateForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const zones = await manageShippingZonesUseCase.findAll();
   const methods = await manageShippingMethodsUseCase.findAll();
 
@@ -56,8 +55,8 @@ export const createShippingRateForm = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const createShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const {
     shippingZoneId,
     shippingMethodId,
@@ -74,19 +73,35 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
     priority,
     validFrom,
     validTo,
-  } = body;
+  } = body as {
+    shippingZoneId: string;
+    shippingMethodId: string;
+    name?: string;
+    description?: string;
+    rateType: string;
+    baseRate: string;
+    perItemRate?: string;
+    freeThreshold?: string;
+    minRate?: string;
+    maxRate?: string;
+    currency?: string;
+    taxable?: string;
+    priority?: string;
+    validFrom?: string;
+    validTo?: string;
+  };
 
   const rate = await manageShippingRatesUseCase.create({
     shippingZoneId,
     shippingMethodId,
-    name: name || undefined,
-    description: description || undefined,
+    name: name || null,
+    description: description || null,
     rateType,
     baseRate,
-    perItemRate: perItemRate || undefined,
-    freeThreshold: freeThreshold || undefined,
-    minRate: minRate || undefined,
-    maxRate: maxRate || undefined,
+    perItemRate: perItemRate || null,
+    freeThreshold: freeThreshold || null,
+    minRate: minRate || null,
+    maxRate: maxRate || null,
     currency: currency || 'USD',
     taxable: taxable === 'true',
     priority: priority ? parseInt(priority) : 0,
@@ -101,7 +116,7 @@ export const createShippingRate = async (req: TypedRequest, res: Response): Prom
   res.redirect(`/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
 };
 
-export const viewShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
 
   const rate = await manageShippingRatesUseCase.findById(rateId);
@@ -128,7 +143,7 @@ export const viewShippingRate = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const editShippingRateForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editShippingRateForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
 
   const rate = await manageShippingRatesUseCase.findById(rateId);
@@ -169,13 +184,13 @@ const shippingRateUpdateFields: FieldConfig[] = [
   { name: 'isActive', transform: 'boolTrue' },
 ];
 
-function parseShippingRateUpdates(body: RequestBody): Record<string, unknown> {
+function parseShippingRateUpdates(body: HttpRequestBody): Record<string, unknown> {
   return buildFormObject(body as Record<string, unknown>, shippingRateUpdateFields);
 }
 
-export const updateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
-  const updates = parseShippingRateUpdates(req.body as RequestBody);
+  const updates = parseShippingRateUpdates(req.body as HttpRequestBody);
 
   const rate = await manageShippingRatesUseCase.update(rateId, updates);
 
@@ -186,7 +201,7 @@ export const updateShippingRate = async (req: TypedRequest, res: Response): Prom
   res.redirect(`/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
 };
 
-export const activateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
 
   const rate = await manageShippingRatesUseCase.activate(rateId);
@@ -198,7 +213,7 @@ export const activateShippingRate = async (req: TypedRequest, res: Response): Pr
   res.json({ success: true, message: 'Shipping rate activated successfully' });
 };
 
-export const deactivateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
 
   const rate = await manageShippingRatesUseCase.deactivate(rateId);
@@ -210,7 +225,7 @@ export const deactivateShippingRate = async (req: TypedRequest, res: Response): 
   res.json({ success: true, message: 'Shipping rate deactivated successfully' });
 };
 
-export const deleteShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
 
   const success = await manageShippingRatesUseCase.delete(rateId);
@@ -222,9 +237,15 @@ export const deleteShippingRate = async (req: TypedRequest, res: Response): Prom
   res.json({ success: true, message: 'Shipping rate deleted successfully' });
 };
 
-export const calculateShippingRate = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { zoneId, methodId, orderTotal, itemCount, weight } = body;
+export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { zoneId, methodId, orderTotal, itemCount, weight } = body as {
+    zoneId: string;
+    methodId: string;
+    orderTotal: string;
+    itemCount: string;
+    weight?: string;
+  };
 
   const rate = await manageShippingRatesUseCase.findByZoneAndMethod(zoneId, methodId);
 

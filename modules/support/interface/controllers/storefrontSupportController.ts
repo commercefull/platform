@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import {
   ManageStorefrontSupportUseCase,
@@ -26,7 +25,7 @@ interface CustomerUser {
 /**
  * GET: List customer's support tickets
  */
-export const listTickets = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTickets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/support/tickets');
@@ -49,7 +48,7 @@ export const listTickets = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * GET: View a single ticket with messages
  */
-export const viewTicket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewTicket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/support/tickets');
@@ -78,7 +77,7 @@ export const viewTicket = async (req: TypedRequest, res: Response): Promise<void
 /**
  * GET: Create ticket form
  */
-export const createTicketForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTicketForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/support/tickets/new');
@@ -94,21 +93,21 @@ export const createTicketForm = async (req: TypedRequest, res: Response): Promis
 /**
  * POST: Submit a new ticket
  */
-export const createTicketSubmit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTicketSubmit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
       return res.redirect('/signin?redirect=/support/tickets/new');
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { subject, description, category, priority, orderId, email, name, phone } = body;
 
     if (!subject || !description) {
       return storefrontRespond(req, res, 'support/create-ticket', {
         pageName: 'New Support Ticket',
         error: 'Subject and description are required',
-        formData: req.body as RequestBody,
+        formData: req.body as HttpRequestBody,
         orderId: orderId as string | undefined,
       });
     }
@@ -143,8 +142,8 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
     storefrontRespond(req, res, 'support/create-ticket', {
       pageName: 'New Support Ticket',
       error: (error as Error).message || 'Failed to create ticket',
-      formData: req.body as RequestBody,
-      orderId: (req.body as RequestBody).orderId as string | undefined,
+      formData: req.body as HttpRequestBody,
+      orderId: (req.body as HttpRequestBody).orderId as string | undefined,
     });
   }
 };
@@ -152,7 +151,7 @@ export const createTicketSubmit = async (req: TypedRequest, res: Response): Prom
 /**
  * POST: Add a message to a ticket
  */
-export const addTicketMessage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addTicketMessage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -171,7 +170,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
       return res.redirect(`/support/tickets/${req.params.ticketId}`);
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { message } = body;
 
     if (!message) {
@@ -199,7 +198,7 @@ export const addTicketMessage = async (req: TypedRequest, res: Response): Promis
 /**
  * POST: Submit ticket feedback (satisfaction rating)
  */
-export const submitTicketFeedback = async (req: TypedRequest, res: Response): Promise<void> => {
+export const submitTicketFeedback = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
@@ -218,7 +217,7 @@ export const submitTicketFeedback = async (req: TypedRequest, res: Response): Pr
       return res.redirect(`/support/tickets/${req.params.ticketId}`);
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const satisfaction = parseInt(body.satisfaction as string, 10);
     const feedback = body.feedback as string | undefined;
 

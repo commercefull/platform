@@ -4,8 +4,7 @@
  * HTTP interface for customer-facing product operations
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { SearchProductsCommand } from '../../application/useCases/SearchProducts';
@@ -34,11 +33,11 @@ const productDownloadRepo = productCatalogRepository.downloads;
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -50,7 +49,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * List products (storefront)
  * GET /products
  */
-export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId, priceMin, priceMax, isFeatured, tags, limit, offset, orderBy, orderDirection } = req.query;
 
   const filters: {
@@ -89,7 +88,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
  * Get product by ID or slug
  * GET /products/:identifier
  */
-export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { identifier } = req.params;
 
   // Determine if identifier is UUID or slug
@@ -118,7 +117,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
  * Search products
  * GET /products/search
  */
-const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+const searchProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { q, categoryId, priceMin, priceMax, limit, offset, orderBy } = req.query;
 
   if (!q) {
@@ -153,7 +152,7 @@ const searchProducts = async (req: TypedRequest, res: Response): Promise<void> =
  * Get product by variant barcode
  * GET /products/barcode/:barcode
  */
-export const findByBarcode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const findByBarcode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { barcode } = req.params;
 
   if (!barcode?.trim()) {
@@ -180,7 +179,7 @@ export const findByBarcode = async (req: TypedRequest, res: Response): Promise<v
  * Get featured products
  * GET /products/featured
  */
-export const getFeaturedProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFeaturedProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { limit, offset } = req.query;
 
   const command = new ListProductsCommand(
@@ -205,7 +204,7 @@ export const getFeaturedProducts = async (req: TypedRequest, res: Response): Pro
  * Get products by category
  * GET /products/category/:categoryId
  */
-export const getProductsByCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductsByCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const { limit, offset, orderBy, orderDirection } = req.query;
 
@@ -231,7 +230,7 @@ export const getProductsByCategory = async (req: TypedRequest, res: Response): P
  * Get related products
  * GET /products/:productId/related
  */
-export const getRelatedProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getRelatedProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { limit } = req.query;
 
@@ -244,7 +243,7 @@ export const getRelatedProducts = async (req: TypedRequest, res: Response): Prom
 // Customer Review Endpoints
 // ============================================================================
 
-export const getProductReviews = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductReviews = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { limit, offset } = req.query;
   const reviews = await productReviewRepo.findByProductId(
@@ -259,7 +258,7 @@ export const getProductReviews = async (req: TypedRequest, res: Response): Promi
   respond(req, res, { reviews, averageRating, ratingDistribution, totalCount });
 };
 
-export const createReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const customerId = req.user?.customerId || req.user?.id;
   const { rating, title, content, reviewerName, reviewerEmail } = req.body as {
@@ -293,7 +292,7 @@ export const createReview = async (req: TypedRequest, res: Response): Promise<vo
   respond(req, res, review, 201);
 };
 
-export const markReviewHelpful = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const review = await productReviewRepo.incrementHelpful(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
@@ -302,7 +301,7 @@ export const markReviewHelpful = async (req: TypedRequest, res: Response): Promi
   respond(req, res, review);
 };
 
-export const reportReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reportReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const review = await productReviewRepo.incrementReport(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
@@ -319,7 +318,7 @@ export const reportReview = async (req: TypedRequest, res: Response): Promise<vo
  * List approved Q&A for a product (customer-facing)
  * GET /products/:productId/qa
  */
-export const listProductQaCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductQaCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const qa = await productQaRepo.findByProduct(productId, 'answered');
   successResponse(res, qa);
@@ -329,7 +328,7 @@ export const listProductQaCustomer = async (req: TypedRequest, res: Response): P
  * Submit a Q&A question for a product
  * POST /products/:productId/qa
  */
-export const submitProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+export const submitProductQa = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const customerId = req.user?.customerId || req.user?.id;
   const { question, askerName, askerEmail } = req.body as { question?: string; askerName?: string; askerEmail?: string };
@@ -349,7 +348,7 @@ export const submitProductQa = async (req: TypedRequest, res: Response): Promise
  * Vote on a product review
  * POST /products/:productId/reviews/:reviewId/vote
  */
-export const voteOnReview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const voteOnReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { reviewId } = req.params;
   const customerId = req.user?.customerId || req.user?.id;
   const { isHelpful } = req.body as { isHelpful?: boolean };
@@ -373,7 +372,7 @@ export const voteOnReview = async (req: TypedRequest, res: Response): Promise<vo
 // Configurable Product (Customer)
 // ============================================================================
 
-export const configureVariant = async (req: TypedRequest, res: Response): Promise<void> => {
+export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as { options?: Array<{ name: string; value: string }> };
   if (!options || !Array.isArray(options) || options.length === 0) {
@@ -397,7 +396,7 @@ export const configureVariant = async (req: TypedRequest, res: Response): Promis
 // Product Downloads (Customer)
 // ============================================================================
 
-export const getProductDownloads = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductDownloads = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const downloads = await productDownloadRepo.findByProductId(productId, undefined, true);
   successResponse(res, downloads);
@@ -407,7 +406,7 @@ export const getProductDownloads = async (req: TypedRequest, res: Response): Pro
 // Product Availability (Customer)
 // ============================================================================
 
-export const getProductAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProductAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { variantId, quantity } = req.query;
 

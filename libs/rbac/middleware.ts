@@ -8,18 +8,18 @@
  * assertPermission() from checkPermission.ts instead.
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from '../http';
 import type { Resource, Action, PermissionContext } from './types';
 import { checkPermission } from './checkPermission';
 
-const isJsonRequest = (req: Request): boolean => {
+const isJsonRequest = (req: HttpRequest): boolean => {
   return Boolean(req.xhr || req.headers.accept?.indexOf('json') !== -1);
 };
 
 /**
  * Build a PermissionContext from an Express request.
  */
-export function buildContextFromRequest(req: Request): PermissionContext {
+export function buildContextFromRequest(req: HttpRequest): PermissionContext {
   const user = req.user;
   return {
     userId: user?.userId || user?.id || '',
@@ -48,7 +48,7 @@ export function buildContextFromRequest(req: Request): PermissionContext {
  * ```
  */
 export function requirePermission(resource: Resource, action: Action) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
     if (!req.user) {
       if (isJsonRequest(req)) {
         return res.status(401).json({ success: false, message: 'Authentication required' });
@@ -81,7 +81,7 @@ export function requirePermission(resource: Resource, action: Action) {
  * ```
  */
 export function requireStoreAccess(resource?: Resource, action?: Action) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
     if (!req.user) {
       if (isJsonRequest(req)) {
         return res.status(401).json({ success: false, message: 'Authentication required' });

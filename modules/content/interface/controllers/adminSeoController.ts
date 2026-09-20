@@ -4,15 +4,14 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================
 // SEO Settings Management
 // ============================================================================
 
-export const listSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSEOSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // For now, show basic SEO settings interface
   // In a real implementation, this would load from a database
   const seoSettings = {
@@ -40,9 +39,9 @@ export const listSEOSettings = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const updateSEOSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSEOSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       siteName,
       siteDescription,
@@ -81,12 +80,12 @@ export const updateSEOSettings = async (req: TypedRequest, res: Response): Promi
     adminRespond(req, res, 'marketing/seo/index', {
       pageName: 'SEO Settings',
       error: (error as Error).message || 'Failed to update SEO settings',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const generateRobotsTxt = async (req: TypedRequest, res: Response): Promise<void> => {
+export const generateRobotsTxt = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Generate robots.txt content
   const robotsTxt = `User-agent: *
 Allow: /
@@ -107,7 +106,7 @@ Sitemap: https://Commercefull.com/sitemap.xml`;
   res.send(robotsTxt);
 };
 
-export const generateSitemap = async (req: TypedRequest, res: Response): Promise<void> => {
+export const generateSitemap = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Generate basic sitemap XML
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

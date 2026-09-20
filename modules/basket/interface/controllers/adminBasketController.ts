@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageAdminBasketUseCase as manageBasketUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -13,7 +12,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // Abandoned Cart Management
 // ============================================================================
 
-export const listAbandonedCarts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listAbandonedCarts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const olderThanDays = parseInt(req.query.days as string) || 7;
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -50,7 +49,7 @@ export const listAbandonedCarts = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewAbandonedCart = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const basket = await manageBasketUseCase.findById(basketId);
@@ -81,9 +80,9 @@ export const viewAbandonedCart = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Promise<void> => {
+export const recoverAbandonedCart = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { recoveryMethod, message: _message } = body;
 
   const basket = await manageBasketUseCase.findById(basketId);
@@ -115,9 +114,9 @@ export const recoverAbandonedCart = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promise<void> => {
+export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { template, subject, discountCode } = body;
 
   const basket = await manageBasketUseCase.findById(basketId);
@@ -149,7 +148,7 @@ export const sendRecoveryEmail = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const markCartRecovered = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markCartRecovered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { _basketId } = req.params;
 
   // In a real implementation, this would be called when a customer completes purchase from recovered cart
@@ -161,7 +160,7 @@ export const markCartRecovered = async (req: TypedRequest, res: Response): Promi
 // Basket Analytics
 // ============================================================================
 
-export const basketAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get basic cart statistics
   const abandonedBaskets = await manageBasketUseCase.findAbandonedBaskets(30); // Last 30 days
   const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
@@ -230,7 +229,7 @@ export const basketAnalytics = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const cleanupExpiredBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cleanupExpiredBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
 
   let deletedCount = 0;

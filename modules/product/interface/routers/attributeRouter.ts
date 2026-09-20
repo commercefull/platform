@@ -1,11 +1,11 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import attributeController from '../controllers/AttributeController';
 import productSearchController from '../controllers/ProductSearchController';
 import productTypeController from '../controllers/ProductTypeController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ==================== PRODUCT SEARCH (Public) ====================
 

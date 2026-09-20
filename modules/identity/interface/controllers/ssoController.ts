@@ -5,8 +5,7 @@
  * Config routes require organization auth. SSO login routes are public.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUseCase } from '../../application/wired';
@@ -14,7 +13,7 @@ import { manageSamlUseCase, manageOidcUseCase, ssoLoginUseCase, listProvidersUse
 class SsoController {
   // ── List Providers ────────────────────────────────────────────
 
-  async listProviders(req: TypedRequest, res: Response) {
+  async listProviders(req: HttpRequest, res: HttpResponse) {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
@@ -31,7 +30,7 @@ class SsoController {
 
   // ── SAML Config CRUD ──────────────────────────────────────────
 
-  async createSamlProvider(req: TypedRequest, res: Response) {
+  async createSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
@@ -61,7 +60,7 @@ class SsoController {
     }
   }
 
-  async updateSamlProvider(req: TypedRequest, res: Response) {
+  async updateSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -83,7 +82,7 @@ class SsoController {
     }
   }
 
-  async getSamlProvider(req: TypedRequest, res: Response) {
+  async getSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.getById(providerId);
@@ -98,7 +97,7 @@ class SsoController {
     }
   }
 
-  async deleteSamlProvider(req: TypedRequest, res: Response) {
+  async deleteSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       await manageSamlUseCase.delete(providerId);
@@ -108,7 +107,7 @@ class SsoController {
     }
   }
 
-  async activateSamlProvider(req: TypedRequest, res: Response) {
+  async activateSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.activate(providerId);
@@ -118,7 +117,7 @@ class SsoController {
     }
   }
 
-  async deactivateSamlProvider(req: TypedRequest, res: Response) {
+  async deactivateSamlProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.deactivate(providerId);
@@ -130,7 +129,7 @@ class SsoController {
 
   // ── OIDC Config CRUD ──────────────────────────────────────────
 
-  async createOidcProvider(req: TypedRequest, res: Response) {
+  async createOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
@@ -160,7 +159,7 @@ class SsoController {
     }
   }
 
-  async updateOidcProvider(req: TypedRequest, res: Response) {
+  async updateOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -184,7 +183,7 @@ class SsoController {
     }
   }
 
-  async getOidcProvider(req: TypedRequest, res: Response) {
+  async getOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.getById(providerId);
@@ -199,7 +198,7 @@ class SsoController {
     }
   }
 
-  async deleteOidcProvider(req: TypedRequest, res: Response) {
+  async deleteOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       await manageOidcUseCase.delete(providerId);
@@ -209,7 +208,7 @@ class SsoController {
     }
   }
 
-  async activateOidcProvider(req: TypedRequest, res: Response) {
+  async activateOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.activate(providerId);
@@ -219,7 +218,7 @@ class SsoController {
     }
   }
 
-  async deactivateOidcProvider(req: TypedRequest, res: Response) {
+  async deactivateOidcProvider(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.deactivate(providerId);
@@ -231,7 +230,7 @@ class SsoController {
 
   // ── SSO Login Flows (public) ──────────────────────────────────
 
-  async initiateSamlLogin(req: TypedRequest, res: Response) {
+  async initiateSamlLogin(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const result = await ssoLoginUseCase.initiateSamlAsync(providerId);
@@ -241,7 +240,7 @@ class SsoController {
     }
   }
 
-  async samlCallback(req: TypedRequest, res: Response) {
+  async samlCallback(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -257,7 +256,7 @@ class SsoController {
     }
   }
 
-  async initiateOidcLogin(req: TypedRequest, res: Response) {
+  async initiateOidcLogin(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const result = await ssoLoginUseCase.initiateOidc(providerId);
@@ -267,7 +266,7 @@ class SsoController {
     }
   }
 
-  async oidcCallback(req: TypedRequest, res: Response) {
+  async oidcCallback(req: HttpRequest, res: HttpResponse) {
     try {
       const { providerId } = req.params;
       const body = req.body as Record<string, unknown>;

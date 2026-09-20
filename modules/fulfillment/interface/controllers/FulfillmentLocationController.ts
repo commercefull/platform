@@ -4,8 +4,7 @@
  * HTTP interface for managing fulfillment locations and partners.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { fulfillmentPartnerRepository } from '../../application/wired';
 import { CreateFulfillmentLocationParams, UpdateFulfillmentLocationParams, FulfillmentPartner } from '../../application/wired';
 
@@ -16,7 +15,7 @@ const fulfillmentPartnerRepo = fulfillmentPartnerRepository.partners;
 // Fulfillment Locations
 // ============================================================================
 
-export const createLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateFulfillmentLocationParams;
   if (!body.organizationId?.trim()) {
     res.status(400).json({ success: false, error: 'organizationId is required' });
@@ -34,7 +33,7 @@ export const createLocation = async (req: TypedRequest, res: Response): Promise<
   res.status(201).json({ success: true, data: result });
 };
 
-export const getLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentLocationRepo.findById(req.params.locationId);
   if (!result) {
     res.status(404).json({ success: false, error: 'Location not found' });
@@ -43,7 +42,7 @@ export const getLocation = async (req: TypedRequest, res: Response): Promise<voi
   res.json({ success: true, data: result });
 };
 
-export const listLocations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentLocationRepo.findByOrganization(req.query.organizationId as string, {
     type: req.query.type as string,
     isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
@@ -51,7 +50,7 @@ export const listLocations = async (req: TypedRequest, res: Response): Promise<v
   res.json({ success: true, data: result });
 };
 
-export const updateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentLocationRepo.update(req.params.locationId, req.body as UpdateFulfillmentLocationParams);
   if (!result) {
     res.status(404).json({ success: false, error: 'Location not found' });
@@ -60,17 +59,17 @@ export const updateLocation = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result });
 };
 
-export const activateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentLocationRepo.activate(req.params.locationId);
   res.json({ success: true, activated: result });
 };
 
-export const deactivateLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentLocationRepo.deactivate(req.params.locationId);
   res.json({ success: true, deactivated: result });
 };
 
-export const findNearestLocations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const findNearestLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const latitude = parseFloat(req.query.latitude as string);
   const longitude = parseFloat(req.query.longitude as string);
   if (isNaN(latitude) || isNaN(longitude)) {
@@ -89,13 +88,13 @@ export const findNearestLocations = async (req: TypedRequest, res: Response): Pr
 // Fulfillment Partners
 // ============================================================================
 
-export const listPartners = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPartners = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly !== 'false';
   const result = await fulfillmentPartnerRepo.findAll(activeOnly);
   res.json({ success: true, data: result });
 };
 
-export const getPartner = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentPartnerRepo.findById(req.params.partnerId);
   if (!result) {
     res.status(404).json({ success: false, error: 'Partner not found' });
@@ -104,7 +103,7 @@ export const getPartner = async (req: TypedRequest, res: Response): Promise<void
   res.json({ success: true, data: result });
 };
 
-export const createPartner = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>;
   if (!body.name?.trim()) {
     res.status(400).json({ success: false, error: 'name is required' });
@@ -118,7 +117,7 @@ export const createPartner = async (req: TypedRequest, res: Response): Promise<v
   res.status(201).json({ success: true, data: result });
 };
 
-export const updatePartner = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { partnerId } = req.params;
   const result = await fulfillmentPartnerRepo.update(partnerId, req.body as Record<string, unknown>);
   if (!result) {
@@ -128,13 +127,13 @@ export const updatePartner = async (req: TypedRequest, res: Response): Promise<v
   res.status(200).json({ success: true, data: result });
 };
 
-export const deletePartner = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { partnerId } = req.params;
   await fulfillmentPartnerRepo.remove(partnerId);
   res.status(200).json({ success: true, message: 'Partner deleted successfully' });
 };
 
-export const deleteLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { locationId } = req.params;
   await fulfillmentLocationRepo.deleteLocation(locationId);
   res.status(200).json({ success: true, message: 'Location deleted successfully' });

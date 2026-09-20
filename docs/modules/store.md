@@ -75,15 +75,15 @@ The Store feature manages store entities for both marketplace (merchant-owned) a
 |---|---|---|---|
 | POST | `/stores` | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store |
 | GET | `/stores` | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination |
-| GET | `/stores` | `async (req: TypedRequest, res: Response) => {
+| GET | `/stores` | `async (req: HttpRequest, res: HttpResponse) => {
   try {
-    co` | — |
+   ` | — |
 | GET | `/stores/:storeId` | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID |
 | PUT | `/stores/:storeId` | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store |
 | DELETE | `/stores/:storeId` | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store |
-| GET | `/stores/:storeId` | `async (req: TypedRequest, res: Response) => {
+| GET | `/stores/:storeId` | `async (req: HttpRequest, res: HttpResponse) => {
   try {
-    co` | — |
+   ` | — |
 | PUT | `/stores/:storeId/local-delivery` | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone |
 | PUT | `/stores/:storeId/pickup` | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS) |
 | GET | `/stores/active` | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |

@@ -4,12 +4,12 @@
  * Routes for managing fulfillment locations and partners.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as locationController from '../controllers/FulfillmentLocationController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Fulfillment Locations

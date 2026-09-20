@@ -2,8 +2,7 @@
  * Payment Controller
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
@@ -19,11 +18,11 @@ import { query, queryOne } from '../../../../libs/db';
 import { isUuid } from '../../../../libs/uuid';
 import { paymentDataRepository } from '../../application/wired';
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -31,7 +30,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
 // Customer Endpoints
 // ============================================================================
 
-export const getMyTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMyTransactions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
   if (!customerId) {
     respondError(req, res, 'Authentication required', 401);
@@ -47,13 +46,13 @@ export const getMyTransactions = async (req: TypedRequest, res: Response): Promi
   respond(req, res, result);
 };
 
-export const getTransactionByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTransactionByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
   respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
 };
 
-export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { currency } = req.query;
   const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
   respond(req, res, { paymentMethods: methods });
@@ -63,7 +62,7 @@ export const getPaymentMethods = async (req: TypedRequest, res: Response): Promi
 // Business Endpoints
 // ============================================================================
 
-export const listTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTransactions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId, customerId, status, gatewayId, startDate, endDate, limit, offset, orderBy, orderDirection } = req.query;
 
   const filters: {
@@ -95,7 +94,7 @@ export const listTransactions = async (req: TypedRequest, res: Response): Promis
   respond(req, res, result);
 };
 
-export const getTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTransaction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
   if (!isUuid(transactionId)) {
     respondError(req, res, 'Transaction not found', 404);
@@ -113,7 +112,7 @@ export const getTransaction = async (req: TypedRequest, res: Response): Promise<
   respond(req, res, transaction);
 };
 
-export const initiatePayment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as { orderId?: string; amount?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
   const { orderId, amount, currency, paymentMethodConfigId, customerId } = body;
 
@@ -130,7 +129,7 @@ export const initiatePayment = async (req: TypedRequest, res: Response): Promise
   respond(req, res, result, 201);
 };
 
-export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processRefund = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
   const body = req.body as { amount?: number; reason?: string };
   const { amount, reason } = body;
@@ -147,7 +146,7 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
   respond(req, res, result, 201);
 };
 
-export const getRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getRefunds = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
 
   const transaction = await PaymentRepo.findTransactionById(transactionId);
@@ -164,7 +163,7 @@ export const getRefunds = async (req: TypedRequest, res: Response): Promise<void
 // Gateway Management Endpoints
 // ============================================================================
 
-export const listGateways = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listGateways = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
   if (!organizationId) {
     respondError(req, res, 'Authentication required', 401);
@@ -178,7 +177,7 @@ export const listGateways = async (req: TypedRequest, res: Response): Promise<vo
   respond(req, res, rows || []);
 };
 
-export const getGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
   if (!isUuid(gatewayId)) {
     respondError(req, res, 'Gateway not found', 404);
@@ -196,7 +195,7 @@ export const getGateway = async (req: TypedRequest, res: Response): Promise<void
   respond(req, res, gateway);
 };
 
-export const createGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
   if (!organizationId) {
     respondError(req, res, 'Authentication required', 401);
@@ -266,7 +265,7 @@ export const createGateway = async (req: TypedRequest, res: Response): Promise<v
   respond(req, res, result, 201);
 };
 
-export const updateGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
   const updates = req.body as Record<string, unknown>;
 
@@ -311,7 +310,7 @@ export const updateGateway = async (req: TypedRequest, res: Response): Promise<v
   respond(req, res, result);
 };
 
-export const deleteGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
   const now = new Date().toISOString();
 
@@ -324,7 +323,7 @@ export const deleteGateway = async (req: TypedRequest, res: Response): Promise<v
 // Method Config Management Endpoints
 // ============================================================================
 
-export const listMethodConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listMethodConfigs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
   if (!organizationId) {
     respondError(req, res, 'Authentication required', 401);
@@ -338,7 +337,7 @@ export const listMethodConfigs = async (req: TypedRequest, res: Response): Promi
   respond(req, res, rows || []);
 };
 
-export const getMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodConfigId } = req.params;
   if (!isUuid(methodConfigId)) {
     respondError(req, res, 'Method config not found', 404);
@@ -356,7 +355,7 @@ export const getMethodConfig = async (req: TypedRequest, res: Response): Promise
   respond(req, res, config);
 };
 
-export const createMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?._id || req.user?.id;
   if (!organizationId) {
     respondError(req, res, 'Authentication required', 401);
@@ -432,7 +431,7 @@ export const createMethodConfig = async (req: TypedRequest, res: Response): Prom
   respond(req, res, result, 201);
 };
 
-export const updateMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodConfigId } = req.params;
   const updates = req.body as Record<string, unknown>;
 
@@ -479,7 +478,7 @@ export const updateMethodConfig = async (req: TypedRequest, res: Response): Prom
   respond(req, res, result);
 };
 
-export const deleteMethodConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodConfigId } = req.params;
   const now = new Date().toISOString();
 
@@ -488,7 +487,7 @@ export const deleteMethodConfig = async (req: TypedRequest, res: Response): Prom
   respond(req, res, { success: true });
 };
 
-export const deleteTransaction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTransaction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
   const now = new Date().toISOString();
 

@@ -3,12 +3,12 @@
  * Defines routes for system configuration operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { SystemConfigurationController } from './SystemConfigurationController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 const systemConfigurationController = new SystemConfigurationController();
 
 router.use(isOrganizationLoggedIn);

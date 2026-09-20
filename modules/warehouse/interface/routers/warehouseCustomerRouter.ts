@@ -3,11 +3,11 @@
  * Public store locator routes for customers
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as warehouseController from '../controllers/warehouseCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Store Locator Routes (Public)
 router.get('/warehouse/nearest', asyncHandler(warehouseController.findNearestStores));

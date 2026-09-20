@@ -4,7 +4,7 @@
  * Customer-facing routes for notification preferences and device management.
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import { MarkAsReadUseCase } from '../../application/useCases';
@@ -13,7 +13,7 @@ const notificationRepo = notificationDataRepository.notifications;
 import * as notificationCustomerController from '../controllers/notificationCustomerController';
 import { notificationDataRepository } from '../../application/wired';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use('/notifications', isCustomerLoggedIn);
 

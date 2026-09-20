@@ -4,8 +4,7 @@
  * Handles HTTP requests for inventory management.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const inventoryRepo = inventoryDataRepository.stock;
 const inventoryRepository = inventoryDataRepository.items;
@@ -94,11 +93,11 @@ interface ReleaseReservationBody {
 // Helper Functions
 // ============================================================================
 
-function respond(res: Response, data: unknown, statusCode: number = 200): void {
+function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondWithPagination(res: Response, data: unknown[], limit: number, offset: number): void {
+function respondWithPagination(res: HttpResponse, data: unknown[], limit: number, offset: number): void {
   res.json({
     success: true,
     data,
@@ -106,7 +105,7 @@ function respondWithPagination(res: Response, data: unknown[], limit: number, of
   });
 }
 
-function respondError(res: Response, message: string, statusCode: number = 500): void {
+function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -117,7 +116,7 @@ function respondError(res: Response, message: string, statusCode: number = 500):
 /**
  * Get inventory location by ID
  */
-export const getInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getInventoryLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   // Try store location first
   const storeLoc = await pickupLocationPort.findById(inventoryLocationId);
@@ -139,7 +138,7 @@ export const getInventoryLocation = async (req: TypedRequest, res: Response): Pr
 /**
  * List inventory locations with filtering and pagination
  */
-export const listInventoryLocations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listInventoryLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
   const includeInactive = req.query.includeInactive === 'true' || req.query.includeInactive === undefined;
@@ -164,7 +163,7 @@ export const listInventoryLocations = async (req: TypedRequest, res: Response): 
 /**
  * Create a new inventory location
  */
-export const createInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createInventoryLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Support creating store locations (name/type/address...)
   const body = req.body as CreateLocationBody;
   const { name, address, address1, city, country } = body;
@@ -227,7 +226,7 @@ export const createInventoryLocation = async (req: TypedRequest, res: Response):
 /**
  * Update an inventory location
  */
-export const updateInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateInventoryLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { inventoryLocationId } = req.params;
   const body = req.body as UpdateLocationBody;
   const { name, isActive, address, address1, city, state, country, postalCode } = body;
@@ -266,7 +265,7 @@ export const updateInventoryLocation = async (req: TypedRequest, res: Response):
 /**
  * Delete an inventory location
  */
-export const deleteInventoryLocation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteInventoryLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { inventoryLocationId } = req.params;
   // Prefer soft-delete store locations
   const store = await pickupLocationPort.findById(inventoryLocationId);
@@ -291,7 +290,7 @@ export const deleteInventoryLocation = async (req: TypedRequest, res: Response):
 /**
  * Adjust stock quantity (restock, adjustment, etc.)
  */
-export const adjustStock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantityChange, reason, transactionTypeCode } = req.body as AdjustStockBody;
 
@@ -346,7 +345,7 @@ export const adjustStock = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * Reserve stock for an order or basket
  */
-export const reserveStock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reserveStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantity, orderId, basketId } = req.body as ReserveStockBody;
 
@@ -377,7 +376,7 @@ export const reserveStock = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * Release reserved stock
  */
-export const releaseReservation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const releaseReservation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { inventoryLocationId } = req.params;
   const { quantity } = req.body as ReleaseReservationBody;
 
@@ -410,7 +409,7 @@ export const releaseReservation = async (req: TypedRequest, res: Response): Prom
 /**
  * Check product availability
  */
-export const checkAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { sku } = req.params;
   const quantity = parseInt(req.query.quantity as string) || 1;
 
@@ -437,7 +436,7 @@ export const checkAvailability = async (req: TypedRequest, res: Response): Promi
 /**
  * Get low stock items
  */
-export const getLowStock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLowStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const locations = await inventoryRepo.findLowStockLocations();
   respond(res, locations);
 };
@@ -445,7 +444,7 @@ export const getLowStock = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * Get out of stock items
  */
-export const getOutOfStock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOutOfStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const locations = await inventoryRepo.findOutOfStockLocations();
   respond(res, locations);
 };
@@ -457,7 +456,7 @@ export const getOutOfStock = async (req: TypedRequest, res: Response): Promise<v
 /**
  * Get transaction history for a product
  */
-export const getTransactionHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTransactionHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const limit = parseInt(req.query.limit as string) || 50;
 
@@ -468,7 +467,7 @@ export const getTransactionHistory = async (req: TypedRequest, res: Response): P
 /**
  * Get transaction types
  */
-export const getTransactionTypes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTransactionTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const types = await inventoryRepo.findAllTransactionTypes();
   respond(res, types);
 };
@@ -477,7 +476,7 @@ export const getTransactionTypes = async (req: TypedRequest, res: Response): Pro
 // Product Availability (by productId)
 // ============================================================================
 
-export const checkProductAvailability = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkProductAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const variantId = req.query.variantId as string | undefined;
   const quantity = parseInt(req.query.quantity as string) || 1;
@@ -500,8 +499,8 @@ interface TransferStockBody {
 }
 
 export const transferStock = async (
-  req: TypedRequest<Record<string, string>, unknown, TransferStockBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, TransferStockBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.sourceLocationId || !req.body.destinationLocationId || !req.body.items) {
     respondError(res, 'sourceLocationId, destinationLocationId, and items are required', 400);
@@ -546,8 +545,8 @@ interface CreateInventoryItemBody {
 }
 
 export const createInventoryItem = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateInventoryItemBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateInventoryItemBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new CreateInventoryItemUseCase(inventoryRepository);
   const result = await useCase.execute({
@@ -581,8 +580,8 @@ interface CreatePoolBody {
 }
 
 export const createInventoryPool = async (
-  req: TypedRequest<Record<string, string>, unknown, CreatePoolBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreatePoolBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new CreateInventoryPoolUseCase(inventoryPoolRepo);
   const result = await useCase.execute({
@@ -606,8 +605,8 @@ interface AllocateFromPoolBody {
 }
 
 export const allocateFromPool = async (
-  req: TypedRequest<Record<string, string>, unknown, AllocateFromPoolBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, AllocateFromPoolBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.poolId) {
     respondError(res, 'poolId is required', 400);
@@ -632,7 +631,7 @@ export const allocateFromPool = async (
 // Get Inventory Item
 // ============================================================================
 
-export const getInventoryItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getInventoryItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetInventoryItemUseCase(inventoryRepository);
   const result = await useCase.execute({
     inventoryItemId: req.query.inventoryItemId as string | undefined,
@@ -662,7 +661,7 @@ export const getInventoryItem = async (req: TypedRequest, res: Response): Promis
 // List Inventory Items
 // ============================================================================
 
-export const listInventoryItems = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listInventoryItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new ListInventoryItemsUseCase(inventoryRepository);
   const result = await useCase.execute({
     warehouseId: req.query.warehouseId as string | undefined,
@@ -692,8 +691,8 @@ interface TransferBetweenStoresBody {
 }
 
 export const transferBetweenStores = async (
-  req: TypedRequest<Record<string, string>, unknown, TransferBetweenStoresBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, TransferBetweenStoresBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new TransferBetweenStoresUseCase(inventoryRepository);
   const result = await useCase.execute({
@@ -717,8 +716,8 @@ interface ConfirmReservationBody {
 }
 
 export const confirmReservation = async (
-  req: TypedRequest<Record<string, string>, unknown, ConfirmReservationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ConfirmReservationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new ConfirmReservationUseCase(inventoryRepo);
   const result = await useCase.execute({
@@ -745,8 +744,8 @@ interface SetLowStockThresholdBody {
 }
 
 export const setLowStockThreshold = async (
-  req: TypedRequest<Record<string, string>, unknown, SetLowStockThresholdBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, SetLowStockThresholdBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new SetLowStockThresholdUseCase(inventoryRepository);
   const result = await useCase.execute({

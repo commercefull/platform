@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
 import { ManageNotificationWebhookUseCase, ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
 import { UpsertTemplateTranslationUseCase, UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
@@ -60,7 +59,7 @@ interface UpsertTranslationBody {
 }
 
 // Extend Express Request with User
-interface UserRequest extends TypedRequest {
+interface UserRequest extends HttpRequest {
   user?: {
     _id?: string;
     id?: string;
@@ -81,7 +80,7 @@ const notificationRepo = NotificationRepo;
 // Existing notification CRUD handlers
 // ============================================================================
 
-export const getAllNotifications = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
   const notifications = await notificationRepo.findAll(limit, offset);
@@ -92,7 +91,7 @@ export const getAllNotifications = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const getNotificationById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getNotificationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const notification = await notificationRepo.findById(id);
   if (!notification) {
@@ -103,8 +102,8 @@ export const getNotificationById = async (req: TypedRequest, res: Response): Pro
 };
 
 export const createNotification = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateNotificationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateNotificationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
   if (!userId || !type || !title || !content || !channel) {
@@ -127,8 +126,8 @@ export const createNotification = async (
 };
 
 export const updateNotification = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateNotificationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateNotificationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { title, content, priority, category, data, metadata } = req.body;
@@ -141,7 +140,7 @@ export const updateNotification = async (
   res.status(200).json({ success: true, data: updated });
 };
 
-export const markNotificationAsSent = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const notification = await notificationRepo.markAsSent(id);
   if (!notification) {
@@ -151,7 +150,7 @@ export const markNotificationAsSent = async (req: TypedRequest, res: Response): 
   res.status(200).json({ success: true, data: notification });
 };
 
-export const getUnreadNotifications = async (req: UserRequest, res: Response): Promise<void> => {
+export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -161,7 +160,7 @@ export const getUnreadNotifications = async (req: UserRequest, res: Response): P
   res.json({ success: true, data: notifications });
 };
 
-export const getRecentNotifications = async (req: UserRequest, res: Response): Promise<void> => {
+export const getRecentNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -172,7 +171,7 @@ export const getRecentNotifications = async (req: UserRequest, res: Response): P
   res.json({ success: true, data: notifications });
 };
 
-export const markNotificationAsRead = async (req: UserRequest, res: Response): Promise<void> => {
+export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
@@ -191,7 +190,7 @@ export const markNotificationAsRead = async (req: UserRequest, res: Response): P
   res.json({ success: true, data: updatedNotification });
 };
 
-export const markAllNotificationsAsRead = async (req: UserRequest, res: Response): Promise<void> => {
+export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -201,7 +200,7 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: Response
   res.json({ success: true, data: { count: updatedCount } });
 };
 
-export const deleteNotification = async (req: UserRequest, res: Response): Promise<void> => {
+export const deleteNotification = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
@@ -225,7 +224,7 @@ export const deleteNotification = async (req: UserRequest, res: Response): Promi
   res.json({ success: true, data: { id } });
 };
 
-export const getUnreadCount = async (req: UserRequest, res: Response): Promise<void> => {
+export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
@@ -242,7 +241,7 @@ export const getUnreadCount = async (req: UserRequest, res: Response): Promise<v
 /**
  * GET /business/notifications/batches
  */
-export const listBatches = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listBatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
   successResponse(res, { batches: [], limit, offset });
@@ -251,7 +250,7 @@ export const listBatches = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * GET /business/notifications/batches/:batchId
  */
-export const getBatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { batchId } = req.params;
   const batch = await notificationBatchRepo.findById(batchId);
   if (!batch) {
@@ -264,14 +263,22 @@ export const getBatch = async (req: TypedRequest, res: Response): Promise<void> 
 /**
  * POST /business/notifications/batches
  */
-export const sendBatch = async (req: TypedRequest<Record<string, string>, unknown, SendBatchBody>, res: Response): Promise<void> => {
+export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown, SendBatchBody>, res: HttpResponse): Promise<void> => {
   const { name, channel, type, title, content, recipients, userIds, scheduledAt } = req.body;
   // Normalize: accept userIds as shorthand for recipients
   const normalizedRecipients = recipients || (userIds || []).map(userId => ({ userId, userType: 'customer' }));
   const normalizedName = name || title || 'Batch notification';
   const useCase = new SendNotificationBatchUseCase();
   const result = await useCase.execute(
-    new SendNotificationBatchCommand(normalizedName, channel, type, title, content, normalizedRecipients, scheduledAt ? new Date(scheduledAt) : undefined),
+    new SendNotificationBatchCommand(
+      normalizedName,
+      channel,
+      type,
+      title,
+      content,
+      normalizedRecipients,
+      scheduledAt ? new Date(scheduledAt) : undefined,
+    ),
   );
   successResponse(res, result, 201);
 };
@@ -283,7 +290,7 @@ export const sendBatch = async (req: TypedRequest<Record<string, string>, unknow
 /**
  * GET /business/notifications/webhooks
  */
-export const listWebhooks = async (req: UserRequest, res: Response): Promise<void> => {
+export const listWebhooks = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || (req.query.organizationId as string);
   const useCase = new ManageNotificationWebhookUseCase();
   const result = await useCase.execute(new ManageNotificationWebhookCommand('list', organizationId));
@@ -297,7 +304,7 @@ export const listWebhooks = async (req: UserRequest, res: Response): Promise<voi
 /**
  * POST /business/notifications/webhooks
  */
-export const createWebhook = async (req: UserRequest, res: Response): Promise<void> => {
+export const createWebhook = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const { url, secret, events } = req.body as CreateWebhookBody;
   const useCase = new ManageNotificationWebhookUseCase();
@@ -312,7 +319,7 @@ export const createWebhook = async (req: UserRequest, res: Response): Promise<vo
 /**
  * DELETE /business/notifications/webhooks/:webhookId
  */
-export const deactivateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookId } = req.params;
   const useCase = new ManageNotificationWebhookUseCase();
   const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate', undefined, webhookId));
@@ -330,7 +337,7 @@ export const deactivateWebhook = async (req: TypedRequest, res: Response): Promi
 /**
  * GET /business/notifications/templates/:templateId/translations
  */
-export const listTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTranslations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
   const translations = await notificationTemplateTranslationRepo.findByTemplate(templateId);
   successResponse(res, { translations });
@@ -340,8 +347,8 @@ export const listTranslations = async (req: TypedRequest, res: Response): Promis
  * POST /business/notifications/templates/:templateId/translations
  */
 export const upsertTranslation = async (
-  req: TypedRequest<Record<string, string>, unknown, UpsertTranslationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpsertTranslationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { templateId } = req.params;
   const { locale, subject, body } = req.body;
@@ -413,13 +420,13 @@ function mapTemplate(t: NotificationTemplate) {
   };
 }
 
-export const getAllTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getAllTemplates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly === 'true';
   const templates = await notificationTemplateRepo.findAll(activeOnly);
   successResponse(res, templates.map(mapTemplate));
 };
 
-export const getTemplateById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTemplateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const template = await notificationTemplateRepo.findById(String(req.params.id));
   if (!template) {
     errorResponse(res, 'Template not found', 404);
@@ -428,7 +435,7 @@ export const getTemplateById = async (req: TypedRequest, res: Response): Promise
   successResponse(res, mapTemplate(template));
 };
 
-export const getTemplatesByType = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTemplatesByType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { type } = req.params;
   const all = await notificationTemplateRepo.findAll(false);
   const filtered = all.filter(t => t.type === type);
@@ -436,8 +443,8 @@ export const getTemplatesByType = async (req: TypedRequest, res: Response): Prom
 };
 
 export const createTemplate = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateTemplateBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { code, name, type, supportedChannels, defaultChannel } = req.body;
   if (!code || !name || !type || !supportedChannels || !defaultChannel) {
@@ -467,8 +474,8 @@ export const createTemplate = async (
 };
 
 export const updateTemplate = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateTemplateBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const id = String(req.params.id);
   const existing = await notificationTemplateRepo.findById(id);
@@ -497,7 +504,7 @@ export const updateTemplate = async (
   successResponse(res, mapTemplate(updated || existing));
 };
 
-export const deleteTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const id = String(req.params.id);
   const existing = await notificationTemplateRepo.findById(id);
   if (!existing) {
@@ -513,7 +520,7 @@ export const deleteTemplate = async (req: TypedRequest, res: Response): Promise<
   successResponse(res, { id });
 };
 
-export const previewTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const previewTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const id = String(req.params.id);
   const { data, channel } = req.body as { data?: Record<string, unknown>; channel?: string };
   const result = await notificationTemplateRepo.getPreview(id, data);
@@ -543,12 +550,12 @@ function mapPreferenceAdmin(p: NotificationPreference) {
   };
 }
 
-export const getAllPreferences = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getAllPreferences = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const preferences = await notificationPreferenceRepo.findAll();
   successResponse(res, preferences.map(mapPreferenceAdmin));
 };
 
-export const getPreferencesByUser = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPreferencesByUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = String(req.params.userId);
   const preferences = await notificationPreferenceRepo.findByUser(userId, 'customer');
   successResponse(res, preferences.map(mapPreferenceAdmin));
@@ -562,8 +569,8 @@ interface UpdatePreferenceAdminBody {
 }
 
 export const updatePreferenceAdmin = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdatePreferenceAdminBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdatePreferenceAdminBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const id = String(req.params.id);
   const existing = await notificationPreferenceRepo.findById(id);

@@ -3,11 +3,11 @@
  * Defines API routes for customer-facing category operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as categoryController from '../controllers/CategoryCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 /**
  * List all active categories

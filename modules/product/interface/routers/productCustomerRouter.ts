@@ -3,14 +3,14 @@
  * Defines API routes for customer-facing product operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as productController from '../controllers/ProductCustomerController';
 import * as bundleController from '../controllers/BundleController';
 import productSearchController from '../controllers/ProductSearchController';
 import { isCustomerLoggedIn, optionalCustomerAuth } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Public Product Routes

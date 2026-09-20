@@ -2,7 +2,7 @@
  * Fulfillment Business Router
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   createFulfillment,
@@ -20,7 +20,7 @@ import {
 } from '../controllers/FulfillmentController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

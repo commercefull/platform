@@ -3,8 +3,7 @@
  * Manages customer address book
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontAddressesUseCase } from '../../application/useCases/ManageStorefrontAddresses';
 
@@ -19,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: List customer addresses
  */
-export const listAddresses = async (req: TypedRequest, res: Response) => {
+export const listAddresses = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -36,7 +35,7 @@ export const listAddresses = async (req: TypedRequest, res: Response) => {
 /**
  * GET: Add address form
  */
-export const addAddressForm = async (req: TypedRequest, res: Response) => {
+export const addAddressForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -50,14 +49,25 @@ export const addAddressForm = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Add new address
  */
-export const addAddress = async (req: TypedRequest, res: Response) => {
+export const addAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
   }
 
-  const body = req.body as RequestBody;
-  const { firstName, lastName, addressLine1, addressLine2, city, state, postalCode, country, phone, isDefault } = body;
+  const body = req.body as HttpRequestBody;
+  const { firstName, lastName, addressLine1, addressLine2, city, state, postalCode, country, phone, isDefault } = body as {
+    firstName: string;
+    lastName: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state?: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+    isDefault?: unknown;
+  };
 
   await manageStorefrontAddressesUseCase.create({
     customerId: user.customerId,
@@ -79,7 +89,7 @@ export const addAddress = async (req: TypedRequest, res: Response) => {
 /**
  * GET: Edit address form
  */
-export const editAddressForm = async (req: TypedRequest, res: Response) => {
+export const editAddressForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -105,15 +115,26 @@ export const editAddressForm = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Update address
  */
-export const updateAddress = async (req: TypedRequest, res: Response) => {
+export const updateAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
   }
 
   const { addressId } = req.params;
-  const body = req.body as RequestBody;
-  const { firstName, lastName, addressLine1, addressLine2, city, state, postalCode, country, phone, isDefault } = body;
+  const body = req.body as HttpRequestBody;
+  const { firstName, lastName, addressLine1, addressLine2, city, state, postalCode, country, phone, isDefault } = body as {
+    firstName: string;
+    lastName: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    state?: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+    isDefault?: unknown;
+  };
 
   if (isDefault) {
     await manageStorefrontAddressesUseCase.unsetDefaultsExcept(user.customerId, addressId);
@@ -137,7 +158,7 @@ export const updateAddress = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Delete address (soft delete)
  */
-export const deleteAddress = async (req: TypedRequest, res: Response) => {
+export const deleteAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');

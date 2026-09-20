@@ -3,8 +3,7 @@
  * Admin views for managing tracking configurations
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageTrackingConfigUseCase, GetTrackingStatusUseCase } from '../../application/useCases/Tracking';
 import { TrackingConfigRepositoryImpl } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
@@ -13,7 +12,7 @@ const repo = new TrackingConfigRepositoryImpl();
 const manageConfigUseCase = new ManageTrackingConfigUseCase(repo);
 const getStatusUseCase = new GetTrackingStatusUseCase(repo);
 
-export const listTrackingConfigs = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listTrackingConfigs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeId = req.query.storeId as string;
 
   if (!storeId) {
@@ -38,7 +37,7 @@ export const listTrackingConfigs = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const viewTrackingConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   const config = await manageConfigUseCase.getByStoreId(storeId);
 
@@ -55,12 +54,12 @@ export const viewTrackingConfig = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const createTrackingConfigForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createTrackingConfigForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'tracking/create', { pageName: 'Create Tracking Configuration' });
 };
 
-export const createTrackingConfig = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const config = await manageConfigUseCase.create({
     storeId: body.storeId as string,
     organizationId: body.organizationId as string,
@@ -72,7 +71,7 @@ export const createTrackingConfig = async (req: TypedRequest, res: Response): Pr
   res.redirect(`/admin/tracking/${config.storeId}?success=Tracking config created successfully`);
 };
 
-export const editTrackingConfigForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editTrackingConfigForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   const config = await manageConfigUseCase.getByStoreId(storeId);
 
@@ -88,19 +87,19 @@ export const editTrackingConfigForm = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const activateTrackingConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.activate(storeId);
   res.redirect(`/admin/tracking/${storeId}?success=Tracking config activated`);
 };
 
-export const disableTrackingConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const disableTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.disable(storeId);
   res.redirect(`/admin/tracking/${storeId}?success=Tracking config disabled`);
 };
 
-export const deleteTrackingConfig = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.delete(storeId);
   res.redirect('/admin/tracking?success=Tracking config deleted');

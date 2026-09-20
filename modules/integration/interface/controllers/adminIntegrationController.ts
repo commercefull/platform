@@ -3,8 +3,7 @@
  * Handles integration management UI for the Admin panel
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { manageIntegrations, manageSubscriptions, manageIntegrationLogs } from '../../application/useCases/wired';
 import type { CredentialType } from '../../domain/entities/IntegrationCredential';
@@ -48,7 +47,7 @@ const PLATFORM_EVENTS = [
   'loyalty.points_earned',
 ];
 
-export const listIntegrations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listIntegrations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const organizationId = req.user?.organizationId;
     if (!organizationId) {
@@ -66,7 +65,7 @@ export const listIntegrations = async (req: TypedRequest, res: Response): Promis
   }
 };
 
-export const viewIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const integration = await manageIntegrations.getIntegration(req.params.integrationId);
     const credentials = await manageIntegrations.getCredentials(req.params.integrationId);
@@ -88,7 +87,7 @@ export const viewIntegration = async (req: TypedRequest, res: Response): Promise
   }
 };
 
-export const createIntegrationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createIntegrationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     adminRespond(req, res, 'settings/integrations/create', {
       pageName: 'Add Integration',
@@ -99,14 +98,14 @@ export const createIntegrationForm = async (req: TypedRequest, res: Response): P
   }
 };
 
-export const createIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const organizationId = req.user?.organizationId;
     if (!organizationId) {
       adminRespond(req, res, 'error', { pageName: 'Error', error: 'Organization not found' });
       return;
     }
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const integration = await manageIntegrations.createIntegration({
       organizationId,
       name: body.name as string,
@@ -125,9 +124,9 @@ export const createIntegration = async (req: TypedRequest, res: Response): Promi
   }
 };
 
-export const updateIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     await manageIntegrations.updateIntegration(req.params.integrationId, {
       name: body.name as string,
       description: body.description as string | null,
@@ -139,7 +138,7 @@ export const updateIntegration = async (req: TypedRequest, res: Response): Promi
   }
 };
 
-export const activateIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.activateIntegration(req.params.integrationId);
     res.redirect(`/admin/integrations/${req.params.integrationId}`);
@@ -148,7 +147,7 @@ export const activateIntegration = async (req: TypedRequest, res: Response): Pro
   }
 };
 
-export const deactivateIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deactivateIntegration(req.params.integrationId);
     res.redirect(`/admin/integrations/${req.params.integrationId}`);
@@ -157,7 +156,7 @@ export const deactivateIntegration = async (req: TypedRequest, res: Response): P
   }
 };
 
-export const deleteIntegration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deleteIntegration(req.params.integrationId);
     res.redirect('/admin/integrations');
@@ -166,9 +165,9 @@ export const deleteIntegration = async (req: TypedRequest, res: Response): Promi
   }
 };
 
-export const addCredential = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addCredential = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const credentials: Record<string, unknown> = {};
     if (body.apiKey) credentials.apiKey = body.apiKey;
     if (body.token) credentials.token = body.token;
@@ -190,7 +189,7 @@ export const addCredential = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const deleteCredential = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCredential = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deleteCredential(req.params.credentialId);
     res.redirect(`/admin/integrations/${req.params.integrationId}`);
@@ -199,9 +198,9 @@ export const deleteCredential = async (req: TypedRequest, res: Response): Promis
   }
 };
 
-export const createSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     await manageSubscriptions.createSubscription({
       integrationId: req.params.integrationId,
       eventType: body.eventType as string,
@@ -215,9 +214,9 @@ export const createSubscription = async (req: TypedRequest, res: Response): Prom
   }
 };
 
-export const updateSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     await manageSubscriptions.updateSubscription(req.params.subscriptionId, {
       targetAction: body.targetAction as string,
       isActive: body.isActive === 'true',
@@ -228,7 +227,7 @@ export const updateSubscription = async (req: TypedRequest, res: Response): Prom
   }
 };
 
-export const deleteSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageSubscriptions.deleteSubscription(req.params.subscriptionId);
     res.redirect(`/admin/integrations/${req.params.integrationId}`);

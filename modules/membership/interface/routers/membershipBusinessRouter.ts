@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   getMembershipTiers,
@@ -21,7 +21,7 @@ import {
 } from '../controllers/membershipBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

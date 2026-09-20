@@ -3,8 +3,7 @@
  * Handles order fulfillment tracking and warehouse operations
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from '../../../order/application/useCases/ManageOrderFulfillments';
 import { ManageWarehouseAdminUseCase } from '../../../warehouse/application/useCases/ManageWarehouseAdmin';
 import { adminRespond } from '../../../../libs/adminRespond';
@@ -17,7 +16,7 @@ const manageWarehouseUseCase = new ManageWarehouseAdminUseCase();
 // Fulfillment Tracking & Management
 // ============================================================================
 
-export const listFulfillments = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string;
   const warehouseId = req.query.warehouseId as string;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -51,7 +50,7 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const viewFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
 
   const fulfillment = await manageFulfillmentsUseCase.findById(fulfillmentId);
@@ -76,10 +75,17 @@ export const viewFulfillment = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
-  const body = req.body as RequestBody;
-  const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = body;
+  const body = req.body as HttpRequestBody;
+  const { status, trackingNumber, carrierCode, carrierName, trackingUrl, notes } = body as {
+    status: string;
+    trackingNumber?: string;
+    carrierCode?: string;
+    carrierName?: string;
+    trackingUrl?: string;
+    notes?: string;
+  };
 
   // Update fulfillment status
   const fulfillment = await manageFulfillmentsUseCase.updateStatus(fulfillmentId, status);
@@ -105,10 +111,15 @@ export const updateFulfillmentStatus = async (req: TypedRequest, res: Response):
   });
 };
 
-export const markAsShipped = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
-  const body = req.body as RequestBody;
-  const { trackingNumber, carrierCode, carrierName, trackingUrl } = body;
+  const body = req.body as HttpRequestBody;
+  const { trackingNumber, carrierCode, carrierName, trackingUrl } = body as {
+    trackingNumber?: string;
+    carrierCode?: string;
+    carrierName?: string;
+    trackingUrl?: string;
+  };
 
   // Mark as shipped
   const fulfillment = await manageFulfillmentsUseCase.markAsShipped(fulfillmentId);
@@ -129,7 +140,7 @@ export const markAsShipped = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const markAsDelivered = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
 
   const fulfillment = await manageFulfillmentsUseCase.markAsDelivered(fulfillmentId);
@@ -145,10 +156,10 @@ export const markAsDelivered = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
-  const body = req.body as RequestBody;
-  const { notes } = body;
+  const body = req.body as HttpRequestBody;
+  const { notes } = body as { notes?: string };
 
   const fulfillment = await manageFulfillmentsUseCase.cancel(fulfillmentId, notes);
 
@@ -163,7 +174,7 @@ export const cancelFulfillment = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const getFulfillmentStats = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stats = await manageFulfillmentsUseCase.getStatusStatistics();
   const overdue = await manageFulfillmentsUseCase.findOverdue();
   const shippedToday = await manageFulfillmentsUseCase.findShippedToday();
@@ -180,7 +191,7 @@ export const getFulfillmentStats = async (req: TypedRequest, res: Response): Pro
 // Warehouse Operations Dashboard
 // ============================================================================
 
-export const warehouseDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const warehouseDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const warehouseId = req.query.warehouseId as string;
 
   // Get warehouse stats

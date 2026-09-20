@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { migrationController } from '../controllers/migrationController';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

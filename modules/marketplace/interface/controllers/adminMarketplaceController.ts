@@ -3,14 +3,16 @@
  * Admin views for vendors, commission rules, and payouts
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageVendorUseCase, manageCommissionRuleUseCase, managePayoutUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-const getOrgId = (req: TypedRequest): string => (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ?? (req as unknown as { user?: { id?: string } }).user?.id ?? '';
+const getOrgId = (req: HttpRequest): string =>
+  (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ??
+  (req as unknown as { user?: { id?: string } }).user?.id ??
+  '';
 
-export const listVendors = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listVendors = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = getOrgId(req);
   const { status } = req.query as { status?: string };
   const vendors = status
@@ -25,7 +27,7 @@ export const listVendors = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const viewVendor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   const vendor = await manageVendorUseCase.get(vendorId);
 
@@ -41,13 +43,13 @@ export const viewVendor = async (req: TypedRequest, res: Response): Promise<void
   });
 };
 
-export const createVendorForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createVendorForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'marketplace/vendors/create', { pageName: 'Create Vendor' });
 };
 
-export const createVendor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = getOrgId(req);
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const vendor = await manageVendorUseCase.create({
     ...(body as Record<string, unknown>),
     organizationId,
@@ -56,7 +58,7 @@ export const createVendor = async (req: TypedRequest, res: Response): Promise<vo
   res.redirect(`/admin/marketplace/vendors/${vendor.vendorId}?success=Vendor created successfully`);
 };
 
-export const editVendorForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editVendorForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   const vendor = await manageVendorUseCase.get(vendorId);
 
@@ -71,26 +73,26 @@ export const editVendorForm = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const updateVendor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   await manageVendorUseCase.updateProfile(vendorId, body as Parameters<typeof manageVendorUseCase.updateProfile>[1]);
   res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor updated successfully`);
 };
 
-export const approveVendor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   await manageVendorUseCase.approve(vendorId);
   res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor approved`);
 };
 
-export const suspendVendor = async (req: TypedRequest, res: Response): Promise<void> => {
+export const suspendVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   await manageVendorUseCase.suspend(vendorId);
   res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor suspended`);
 };
 
-export const listCommissionRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCommissionRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = getOrgId(req);
   const rules = await manageCommissionRuleUseCase.listByOrganization(organizationId);
 
@@ -101,7 +103,7 @@ export const listCommissionRules = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const viewCommissionRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCommissionRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ruleId } = req.params;
   const rule = await manageCommissionRuleUseCase.get(ruleId);
 
@@ -117,7 +119,7 @@ export const viewCommissionRule = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const listPayouts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPayouts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = getOrgId(req);
   const { vendorId, status } = req.query as { vendorId?: string; status?: string };
 
@@ -138,7 +140,7 @@ export const listPayouts = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const viewPayout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPayout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { payoutId } = req.params;
   const payout = await managePayoutUseCase.get(payoutId);
 

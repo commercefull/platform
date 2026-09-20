@@ -3,8 +3,7 @@
  * Manages customer wishlists
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontWishlistUseCase } from '../../application/useCases/ManageStorefrontWishlist';
 
@@ -19,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: View wishlist
  */
-export const viewWishlist = async (req: TypedRequest, res: Response) => {
+export const viewWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -36,7 +35,7 @@ export const viewWishlist = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Add item to wishlist
  */
-export const addToWishlist = async (req: TypedRequest, res: Response) => {
+export const addToWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.status(401).json({ error: 'Please sign in' });
@@ -59,7 +58,7 @@ export const addToWishlist = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Remove item from wishlist
  */
-export const removeFromWishlist = async (req: TypedRequest, res: Response) => {
+export const removeFromWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.status(401).json({ error: 'Please sign in' });

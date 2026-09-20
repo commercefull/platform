@@ -2,8 +2,7 @@
  * Reporting Controller
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import type { ReportType } from '../../domain/entities/ReportEntities';
 import type { CreateReportScheduleInput } from '../../application/useCases/CreateReportSchedule';
@@ -23,8 +22,8 @@ interface GenerateReportBody {
 }
 
 export const generateReport = async (
-  req: TypedRequest<Record<string, string>, unknown, GenerateReportBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, GenerateReportBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.reportType) {
     res.status(400).json({ success: false, error: 'reportType is required' });
@@ -38,7 +37,7 @@ export const generateReport = async (
   res.json({ success: true, data: result });
 };
 
-export const getReportTemplates = async (_req: TypedRequest, res: Response): Promise<void> => {
+export const getReportTemplates = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetReportTemplatesUseCase();
   const templates = await useCase.execute();
   const templateList = Object.values(templates);
@@ -46,8 +45,8 @@ export const getReportTemplates = async (_req: TypedRequest, res: Response): Pro
 };
 
 export const createSchedule = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateReportScheduleInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateReportScheduleInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.name || !req.body.reportType) {
     res.status(400).json({ success: false, error: 'name and reportType are required' });
@@ -58,14 +57,14 @@ export const createSchedule = async (
   res.status(201).json({ success: true, data: result });
 };
 
-export const listSchedules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSchedules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new ListReportSchedulesUseCase();
   const organizationId = req.query.organizationId as string | undefined;
   const result = await useCase.execute(organizationId);
   res.json({ success: true, data: result });
 };
 
-export const getSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetReportScheduleUseCase();
   const result = await useCase.execute(req.params.scheduleId);
   if (!result) {
@@ -76,8 +75,8 @@ export const getSchedule = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 export const updateSchedule = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateReportScheduleParams>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateReportScheduleParams>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new UpdateReportScheduleUseCase();
   const result = await useCase.execute({
@@ -91,7 +90,7 @@ export const updateSchedule = async (
   res.json({ success: true, data: result });
 };
 
-export const deleteSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new DeleteReportScheduleUseCase();
   const deleted = await useCase.execute(req.params.scheduleId);
   if (!deleted) {
@@ -101,7 +100,7 @@ export const deleteSchedule = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true });
 };
 
-export const listExecutions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listExecutions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new ListReportExecutionsUseCase();
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
   const result = await useCase.execute(req.params.scheduleId, limit);

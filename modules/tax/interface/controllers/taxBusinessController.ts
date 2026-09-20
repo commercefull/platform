@@ -1,10 +1,9 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { TaxRate, TaxCategory, TaxZone, TaxRateType } from '../../taxTypes';
 import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
 import { isUuid } from '../../../../libs/uuid';
 
-export const getTaxRate = async (req: TypedRequest, res: Response) => {
+export const getTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
 
   if (!id) {
@@ -23,7 +22,7 @@ export const getTaxRate = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxRate });
 };
 
-export const getAllTaxRates = async (req: TypedRequest, res: Response) => {
+export const getAllTaxRates = async (req: HttpRequest, res: HttpResponse) => {
   const { country, region, status, limit, offset } = req.query;
   const limitNum = limit ? parseInt(limit as string) : undefined;
   const offsetNum = offset ? parseInt(offset as string) : undefined;
@@ -41,7 +40,7 @@ export const getAllTaxRates = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxRates });
 };
 
-export const createTaxRate = async (req: TypedRequest, res: Response) => {
+export const createTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   const body = req.body as {
     name?: string;
     description?: string;
@@ -99,7 +98,7 @@ export const createTaxRate = async (req: TypedRequest, res: Response) => {
   res.status(201).json({ success: true, data: createdTaxRate });
 };
 
-export const updateTaxRate = async (req: TypedRequest, res: Response) => {
+export const updateTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
@@ -136,7 +135,7 @@ export const updateTaxRate = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: result });
 };
 
-export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
+export const deleteTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
@@ -154,7 +153,7 @@ export const deleteTaxRate = async (req: TypedRequest, res: Response) => {
 };
 
 // Tax Category Methods
-export const getAllTaxCategories = async (req: TypedRequest, res: Response) => {
+export const getAllTaxCategories = async (req: HttpRequest, res: HttpResponse) => {
   const { status } = req.query;
 
   // Convert status string to boolean if needed
@@ -170,7 +169,7 @@ export const getAllTaxCategories = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxCategories });
 };
 
-export const getTaxCategory = async (req: TypedRequest, res: Response) => {
+export const getTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
@@ -184,7 +183,7 @@ export const getTaxCategory = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxCategory });
 };
 
-export const createTaxCategory = async (req: TypedRequest, res: Response) => {
+export const createTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
   const body = req.body as {
     name?: string;
     code?: string;
@@ -213,7 +212,7 @@ export const createTaxCategory = async (req: TypedRequest, res: Response) => {
   res.status(201).json({ success: true, data: createdCategory });
 };
 
-export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
+export const updateTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
@@ -248,7 +247,7 @@ export const updateTaxCategory = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: result });
 };
 
-export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
+export const deleteTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
@@ -266,7 +265,7 @@ export const deleteTaxCategory = async (req: TypedRequest, res: Response) => {
 };
 
 // Tax Zone Methods
-export const getAllTaxZones = async (req: TypedRequest, res: Response) => {
+export const getAllTaxZones = async (req: HttpRequest, res: HttpResponse) => {
   const { status, limit, offset } = req.query;
   const limitNum = limit ? parseInt(limit as string) : undefined;
   const offsetNum = offset ? parseInt(offset as string) : undefined;
@@ -283,7 +282,7 @@ export const getAllTaxZones = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxZones });
 };
 
-export const getTaxZoneById = async (req: TypedRequest, res: Response) => {
+export const getTaxZoneById = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
 
   if (!id) {
@@ -299,7 +298,7 @@ export const getTaxZoneById = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: taxZone });
 };
 
-export const createTaxZone = async (req: TypedRequest, res: Response) => {
+export const createTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const body = req.body as {
     name?: string;
     code?: string;
@@ -334,7 +333,7 @@ export const createTaxZone = async (req: TypedRequest, res: Response) => {
   res.status(201).json({ success: true, data: createdTaxZone });
 };
 
-export const updateTaxZone = async (req: TypedRequest, res: Response) => {
+export const updateTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
   const body = req.body as {
     name?: string;
@@ -377,7 +376,7 @@ export const updateTaxZone = async (req: TypedRequest, res: Response) => {
   res.json({ success: true, data: result });
 };
 
-export const deleteTaxZone = async (req: TypedRequest, res: Response) => {
+export const deleteTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
 
   const existingTaxZone = await taxQueryRepository.query.findTaxZoneById(id);

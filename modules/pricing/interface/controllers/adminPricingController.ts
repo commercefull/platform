@@ -3,9 +3,8 @@
  * Handles Price Lists and Pricing Rules management
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import {
   PricingRuleType,
   PricingRuleStatus,
@@ -23,7 +22,7 @@ import { pricingRuleRepo } from '../../application/wired';
 // Price Lists
 // ============================================================================
 
-export const listPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPriceLists = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/index', {
     pageName: 'Pricing',
     priceLists: [],
@@ -33,13 +32,13 @@ export const listPriceLists = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceListForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/lists/create', {
     pageName: 'Create Price List',
   });
 };
 
-export const createPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/catalog/pricing?success=Price list created successfully');
   } catch (error: unknown) {
@@ -47,12 +46,12 @@ export const createPriceList = async (req: TypedRequest, res: Response): Promise
     adminRespond(req, res, 'catalog/pricing/lists/create', {
       pageName: 'Create Price List',
       error: (error as Error).message || 'Failed to create price list',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/lists/view', {
     pageName: 'Price List Details',
     priceList: null,
@@ -60,14 +59,14 @@ export const viewPriceList = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const editPriceListForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editPriceListForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/lists/edit', {
     pageName: 'Edit Price List',
     priceList: null,
   });
 };
 
-export const updatePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { listId } = req.params;
     res.redirect(`/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
@@ -77,12 +76,12 @@ export const updatePriceList = async (req: TypedRequest, res: Response): Promise
       pageName: 'Edit Price List',
       priceList: null,
       error: (error as Error).message || 'Failed to update price list',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deletePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Price list deleted successfully' });
 };
 
@@ -90,7 +89,7 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
 // Price Rules
 // ============================================================================
 
-export const listPriceRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPriceRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let priceRules: never[] = [];
   try {
     const rules = await pricingRuleRepo.findAllRules();
@@ -115,16 +114,25 @@ export const listPriceRules = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceRuleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/rules/create', {
     pageName: 'Create Price Rule',
   });
 };
 
-export const createPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, ruleType, target, value, priority, status, conditions } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, ruleType, target, value, priority, status, conditions } = body as {
+      name: string;
+      description?: string;
+      ruleType?: string;
+      target?: string;
+      value?: string;
+      priority?: string;
+      status?: string;
+      conditions?: unknown;
+    };
 
     // Parse conditions from the condition-builder form
     const parsedConditions = parsePricingConditionsFromForm(conditions);
@@ -158,12 +166,12 @@ export const createPriceRule = async (req: TypedRequest, res: Response): Promise
     adminRespond(req, res, 'catalog/pricing/rules/create', {
       pageName: 'Create Price Rule',
       error: (error as Error).message || 'Failed to create price rule',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPriceRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ruleId } = req.params;
   let priceRule = null;
   try {
@@ -179,7 +187,7 @@ export const viewPriceRule = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editPriceRuleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ruleId } = req.params;
   let priceRule = null;
   try {
@@ -194,11 +202,20 @@ export const editPriceRuleForm = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const updatePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
-    const body = req.body as RequestBody;
-    const { name, description, ruleType, target, value, priority, status, conditions } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, ruleType, target, value, priority, status, conditions } = body as {
+      name: string;
+      description?: string;
+      ruleType?: string;
+      target?: string;
+      value?: string;
+      priority?: string;
+      status?: string;
+      conditions?: unknown;
+    };
 
     const parsedConditions = parsePricingConditionsFromForm(conditions);
 
@@ -231,12 +248,12 @@ export const updatePriceRule = async (req: TypedRequest, res: Response): Promise
       pageName: 'Edit Price Rule',
       priceRule: null,
       error: (error as Error).message || 'Failed to update price rule',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deletePriceRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
     await pricingRuleRepo.delete(ruleId);

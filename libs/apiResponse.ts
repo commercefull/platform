@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import type { HttpResponse } from './http';
 
 /**
  * Standard API response format for success cases
@@ -6,7 +6,7 @@ import { Response } from 'express';
  * @param data Response data
  * @param statusCode HTTP status code (default: 200)
  */
-export function successResponse(res: Response, data: unknown, statusCode: number = 200): Response {
+export function successResponse(res: HttpResponse, data: unknown, statusCode: number = 200): HttpResponse {
   return res.status(statusCode).json({
     success: true,
     data,
@@ -19,7 +19,7 @@ export function successResponse(res: Response, data: unknown, statusCode: number
  * @param message Error message
  * @param statusCode HTTP status code (default: 500)
  */
-export function errorResponse(res: Response, message: string, statusCode: number = 500): Response {
+export function errorResponse(res: HttpResponse, message: string, statusCode: number = 500): HttpResponse {
   return res.status(statusCode).json({
     success: false,
     error: {
@@ -34,7 +34,7 @@ export function errorResponse(res: Response, message: string, statusCode: number
  * @param res Express response object
  * @param errors Validation errors
  */
-export function validationErrorResponse(res: Response, errors: string[]): Response {
+export function validationErrorResponse(res: HttpResponse, errors: string[]): HttpResponse {
   return res.status(400).json({
     success: false,
     error: {

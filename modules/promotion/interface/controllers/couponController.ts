@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { couponDiscountRepository, type CreateCouponInput, type UpdateCouponInput } from '../../application/wired';
 
 const couponRepo = couponDiscountRepository.coupons;
@@ -21,7 +20,7 @@ interface CalculateDiscountBody {
 /**
  * Get all active coupons
  */
-export const getActiveCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveCoupons = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId, limit, offset, orderBy, direction } = req.query;
 
   const coupons = await couponRepo.findActiveCoupons(organizationId as string | undefined, {
@@ -44,7 +43,7 @@ export const getActiveCoupons = async (req: TypedRequest, res: Response): Promis
 /**
  * Get coupon by ID
  */
-export const getCouponById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCouponById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const coupon = await couponRepo.findById(id);
 
@@ -59,7 +58,7 @@ export const getCouponById = async (req: TypedRequest, res: Response): Promise<v
 /**
  * Get coupon by code
  */
-export const getCouponByCode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCouponByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
   const { organizationId } = req.query;
 
@@ -76,7 +75,10 @@ export const getCouponByCode = async (req: TypedRequest, res: Response): Promise
 /**
  * Create a new coupon
  */
-export const createCoupon = async (req: TypedRequest<Record<string, string>, unknown, CreateCouponInput>, res: Response): Promise<void> => {
+export const createCoupon = async (
+  req: HttpRequest<Record<string, string>, unknown, CreateCouponInput>,
+  res: HttpResponse,
+): Promise<void> => {
   const couponData = { ...req.body } as CreateCouponInput & { type: string };
 
   // Map external type strings to the canonical CouponType enum values
@@ -125,7 +127,10 @@ export const createCoupon = async (req: TypedRequest<Record<string, string>, unk
 /**
  * Update an existing coupon
  */
-export const updateCoupon = async (req: TypedRequest<Record<string, string>, unknown, UpdateCouponInput>, res: Response): Promise<void> => {
+export const updateCoupon = async (
+  req: HttpRequest<Record<string, string>, unknown, UpdateCouponInput>,
+  res: HttpResponse,
+): Promise<void> => {
   const { id } = req.params;
   const couponData = req.body;
 
@@ -153,7 +158,7 @@ export const updateCoupon = async (req: TypedRequest<Record<string, string>, unk
 /**
  * Delete a coupon
  */
-export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if coupon exists
@@ -178,8 +183,8 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
  * Validate a coupon for a cart
  */
 export const validateCoupon = async (
-  req: TypedRequest<Record<string, string>, unknown, ValidateCouponBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ValidateCouponBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { code, orderTotal, customerId, organizationId } = req.body;
 
@@ -212,7 +217,7 @@ export const validateCoupon = async (
 /**
  * Get coupon usage
  */
-export const getCouponUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCouponUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if coupon exists
@@ -242,8 +247,8 @@ export const getCouponUsage = async (req: TypedRequest, res: Response): Promise<
  * Calculate coupon discount for a cart
  */
 export const calculateCouponDiscount = async (
-  req: TypedRequest<Record<string, string>, unknown, CalculateDiscountBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CalculateDiscountBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { code, orderTotal, items: _items, organizationId } = req.body;
 

@@ -1,5 +1,5 @@
-import { Express } from 'express';
-import express, { Router } from 'express';
+import type { HttpApplication, HttpRouter } from 'libs/http';
+import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import swaggerUi from 'swagger-ui-express';
@@ -60,7 +60,7 @@ import { moduleRegistry } from './moduleManifests';
 /**
  * Configure all application routes
  */
-export function configureRoutes(app: Express): void {
+export function configureRoutes(app: HttpApplication): void {
   // Initialize search adapter
   initSearchAdapter();
 
@@ -76,7 +76,7 @@ export function configureRoutes(app: Express): void {
   app.use('/admin', adminRouter);
 
   // Customer API routes — conditionally mounted based on module enabled state
-  const customerRouters: { module: string; router: Router }[] = [
+  const customerRouters: { module: string; router: HttpRouter }[] = [
     { module: 'identity', router: Identity.identityCustomerRouter },
     { module: 'identity', router: Identity.identitySocialRouter },
     { module: 'customer', router: Customer.customerRouter },
@@ -108,7 +108,7 @@ export function configureRoutes(app: Express): void {
   app.use('/customer', enabledCustomerRouters);
 
   // Business/Merchant API routes — conditionally mounted based on module enabled state
-  const businessRouters: { module: string; router: Router }[] = [
+  const businessRouters: { module: string; router: HttpRouter }[] = [
     { module: 'fulfillment', router: Fulfillment.fulfillmentLocationRouter },
     { module: 'identity', router: Identity.identityBusinessRouter },
     { module: 'organization', router: Organization.organizationBusinessRouter },

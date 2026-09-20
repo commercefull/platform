@@ -3,8 +3,7 @@
  * Handles admin user management, roles, and permissions
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import bcrypt from 'bcryptjs';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { ManageAdminUsersUseCase, ManageRolesUseCase } from '../../application/useCases/ManageAdminUsers';
@@ -16,7 +15,7 @@ const manageRolesUseCase = new ManageRolesUseCase();
 // Admin Users Management
 // ============================================================================
 
-export const listUsers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listUsers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, page = '1' } = req.query;
   const limit = 20;
   const offset = (parseInt(page as string) - 1) * limit;
@@ -40,7 +39,7 @@ export const listUsers = async (req: TypedRequest, res: Response): Promise<void>
   });
 };
 
-export const viewUser = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
 
   const user = await manageAdminUsersUseCase.findById(userId);
@@ -66,7 +65,7 @@ export const viewUser = async (req: TypedRequest, res: Response): Promise<void> 
   });
 };
 
-export const createUserForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createUserForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const roles = await manageRolesUseCase.listRoles();
 
   adminRespond(req, res, 'users/create', {
@@ -75,9 +74,15 @@ export const createUserForm = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createUser = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { email, password, firstName, lastName, roleId } = body;
+export const createUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { email, password, firstName, lastName, roleId } = body as {
+    email?: string;
+    password?: string;
+    firstName: string;
+    lastName: string;
+    roleId: string;
+  };
 
   if (!email || !password) {
     res.status(400).json({ success: false, message: 'Email and password are required' });
@@ -103,17 +108,22 @@ export const createUser = async (req: TypedRequest, res: Response): Promise<void
   res.json({ success: true, userId });
 };
 
-export const updateUser = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
-  const body = req.body as RequestBody;
-  const { firstName, lastName, status, roleId } = body;
+  const body = req.body as HttpRequestBody;
+  const { firstName, lastName, status, roleId } = body as {
+    firstName?: string;
+    lastName?: string;
+    status?: string;
+    roleId?: string;
+  };
 
   await manageAdminUsersUseCase.update(userId, { firstName, lastName, status, roleId });
 
   res.json({ success: true });
 };
 
-export const deleteUser = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
 
   if (req.user?.userId === userId) {
@@ -130,7 +140,7 @@ export const deleteUser = async (req: TypedRequest, res: Response): Promise<void
 // Roles Management
 // ============================================================================
 
-export const listRoles = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listRoles = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const roles = await manageRolesUseCase.listRoles();
 
   adminRespond(req, res, 'users/roles', {
@@ -140,9 +150,9 @@ export const listRoles = async (req: TypedRequest, res: Response): Promise<void>
   });
 };
 
-export const createRole = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { name, description, permissions } = body;
+export const createRole = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { name, description, permissions } = body as { name?: string; description?: string; permissions: string[] };
 
   if (!name) {
     res.status(400).json({ success: false, message: 'Role name is required' });
@@ -154,10 +164,10 @@ export const createRole = async (req: TypedRequest, res: Response): Promise<void
   res.json({ success: true, roleId });
 };
 
-export const updateRole = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateRole = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { roleId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, description, permissions } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, description, permissions } = body as { name?: string; description?: string; permissions?: string[] };
 
   const role = await manageRolesUseCase.findById(roleId);
 
@@ -171,7 +181,7 @@ export const updateRole = async (req: TypedRequest, res: Response): Promise<void
   res.json({ success: true });
 };
 
-export const deleteRole = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteRole = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { roleId } = req.params;
 
   const role = await manageRolesUseCase.findById(roleId);

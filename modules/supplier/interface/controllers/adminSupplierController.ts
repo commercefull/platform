@@ -3,9 +3,8 @@
  * Handles supplier management for the Admin Hub
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageSuppliersAdminUseCase } from '../../application/useCases/ManageSuppliersAdmin';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
@@ -16,7 +15,7 @@ const manageSuppliersUseCase = new ManageSuppliersAdminUseCase();
 // Supplier Management
 // ============================================================================
 
-export const listSuppliers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSuppliers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string;
   const isActive = req.query.isActive !== 'false';
   const isApproved = req.query.isApproved !== 'false';
@@ -45,7 +44,7 @@ export const listSuppliers = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const createSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSupplierForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/suppliers/create', {
     pageName: 'Create Supplier',
   });
@@ -72,7 +71,7 @@ const supplierCreateFields: FieldConfig[] = [
   { name: 'tags', transform: 'passthrough', falsyValue: undefined },
 ];
 
-function parseSupplierCreateInput(body: RequestBody) {
+function parseSupplierCreateInput(body: HttpRequestBody) {
   const result = buildFormObject(body as Record<string, unknown>, supplierCreateFields);
   if (typeof result.categories === 'string') {
     result.categories = result.categories.split(',').map((c: string) => c.trim());
@@ -83,10 +82,10 @@ function parseSupplierCreateInput(body: RequestBody) {
   return result;
 }
 
-export const createSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const supplier = await manageSuppliersUseCase.create(
-      parseSupplierCreateInput(req.body as RequestBody) as Parameters<typeof manageSuppliersUseCase.create>[0],
+      parseSupplierCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageSuppliersUseCase.create>[0],
     );
 
     res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
@@ -96,12 +95,12 @@ export const createSupplier = async (req: TypedRequest, res: Response): Promise<
     adminRespond(req, res, 'operations/suppliers/create', {
       pageName: 'Create Supplier',
       error: (error as Error).message || 'Failed to create supplier',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.findById(supplierId);
@@ -122,7 +121,7 @@ export const viewSupplier = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const editSupplierForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editSupplierForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.findById(supplierId);
@@ -160,7 +159,7 @@ const supplierUpdateFields: FieldConfig[] = [
   { name: 'rating', transform: 'float', falsyValue: undefined },
 ];
 
-function parseSupplierUpdates(body: RequestBody): Record<string, unknown> {
+function parseSupplierUpdates(body: HttpRequestBody): Record<string, unknown> {
   const updates = buildFormObject(body as Record<string, unknown>, supplierUpdateFields);
   if (typeof updates.categories === 'string') {
     updates.categories = updates.categories.split(',').map((c: string) => c.trim());
@@ -171,9 +170,9 @@ function parseSupplierUpdates(body: RequestBody): Record<string, unknown> {
   return updates;
 }
 
-export const updateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
-  const updates = parseSupplierUpdates(req.body as RequestBody);
+  const updates = parseSupplierUpdates(req.body as HttpRequestBody);
 
   const supplier = await manageSuppliersUseCase.update(supplierId, updates);
 
@@ -184,7 +183,7 @@ export const updateSupplier = async (req: TypedRequest, res: Response): Promise<
   res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
 };
 
-export const approveSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.approve(supplierId);
@@ -196,7 +195,7 @@ export const approveSupplier = async (req: TypedRequest, res: Response): Promise
   res.json({ success: true, message: 'Supplier approved successfully' });
 };
 
-export const suspendSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const suspendSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.suspend(supplierId);
@@ -208,7 +207,7 @@ export const suspendSupplier = async (req: TypedRequest, res: Response): Promise
   res.json({ success: true, message: 'Supplier suspended successfully' });
 };
 
-export const activateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.activate(supplierId);
@@ -220,7 +219,7 @@ export const activateSupplier = async (req: TypedRequest, res: Response): Promis
   res.json({ success: true, message: 'Supplier activated successfully' });
 };
 
-export const deactivateSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const supplier = await manageSuppliersUseCase.deactivate(supplierId);
@@ -232,7 +231,7 @@ export const deactivateSupplier = async (req: TypedRequest, res: Response): Prom
   res.json({ success: true, message: 'Supplier deactivated successfully' });
 };
 
-export const deleteSupplier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { supplierId } = req.params;
 
   const success = await manageSuppliersUseCase.delete(supplierId);

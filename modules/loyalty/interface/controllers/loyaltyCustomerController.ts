@@ -4,8 +4,7 @@
  * Handles public and customer-facing loyalty endpoints.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { loyaltyDataRepository } from '../../application/wired';
 
 const loyaltyRepo = loyaltyDataRepository.points;
@@ -14,7 +13,7 @@ const loyaltyRepo = loyaltyDataRepository.points;
 // Types
 // ============================================================================
 
-interface UserRequest extends TypedRequest {
+interface UserRequest extends HttpRequest {
   user?: {
     id?: string;
     customerId?: string;
@@ -25,15 +24,15 @@ interface UserRequest extends TypedRequest {
 // Helper Functions
 // ============================================================================
 
-function respond(res: Response, data: unknown, statusCode: number = 200): void {
+function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondWithMessage(res: Response, data: unknown, message: string, statusCode: number = 200): void {
+function respondWithMessage(res: HttpResponse, data: unknown, message: string, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data, message });
 }
 
-function respondError(res: Response, message: string, statusCode: number = 500): void {
+function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, message });
 }
 
@@ -48,7 +47,7 @@ function getCustomerId(req: UserRequest): string | null {
 /**
  * Get publicly available loyalty tiers
  */
-export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPublicTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const tiers = await loyaltyRepo.findAllTiers(false);
 
   // Return limited tier information for public view
@@ -66,7 +65,7 @@ export const getPublicTiers = async (req: TypedRequest, res: Response): Promise<
 /**
  * Get publicly available loyalty rewards
  */
-export const getPublicRewards = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPublicRewards = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const rewards = await loyaltyRepo.findAllRewards(false);
 
   // Return limited reward information for public view
@@ -92,7 +91,7 @@ export const getPublicRewards = async (req: TypedRequest, res: Response): Promis
 /**
  * Get customer's loyalty status and points
  */
-export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promise<void> => {
+export const getMyLoyaltyStatus = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const customerId = getCustomerId(req);
 
   if (!customerId) {
@@ -135,7 +134,7 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: Response): Promi
 /**
  * Get my loyalty transactions
  */
-export const getMyTransactions = async (req: UserRequest, res: Response): Promise<void> => {
+export const getMyTransactions = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const customerId = getCustomerId(req);
 
   if (!customerId) {
@@ -165,7 +164,7 @@ export const getMyTransactions = async (req: UserRequest, res: Response): Promis
 /**
  * Redeem points for a reward
  */
-export const redeemReward = async (req: UserRequest, res: Response): Promise<void> => {
+export const redeemReward = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const customerId = getCustomerId(req);
 
   if (!customerId) {
@@ -196,7 +195,7 @@ export const redeemReward = async (req: UserRequest, res: Response): Promise<voi
 /**
  * Get my active redemptions
  */
-export const getMyRedemptions = async (req: UserRequest, res: Response): Promise<void> => {
+export const getMyRedemptions = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const customerId = getCustomerId(req);
 
   if (!customerId) {

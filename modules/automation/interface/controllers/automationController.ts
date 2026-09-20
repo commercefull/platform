@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from '../../../../libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import {
   createAutomationRuleUseCase,
@@ -13,13 +12,13 @@ import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../d
 import { ExecutionLogRepositoryImpl } from '../../application/wired';
 
 class AutomationController {
-  async listRules(req: TypedRequest, res: Response): Promise<void> {
+  async listRules(req: HttpRequest, res: HttpResponse): Promise<void> {
     const activeOnly = req.query.activeOnly === 'true';
     const rules = await listAutomationRulesUseCase.execute(activeOnly);
     res.json({ success: true, data: rules.map(r => r.toJSON()) });
   }
 
-  async getRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async getRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await getAutomationRuleUseCase.execute(req.params.ruleId);
       res.json({ success: true, data: rule.toJSON() });
@@ -33,7 +32,7 @@ class AutomationController {
   }
 
   async createRule(
-    req: TypedRequest<
+    req: HttpRequest<
       Record<string, never>,
       Record<string, never>,
       {
@@ -51,7 +50,7 @@ class AutomationController {
         createdBy?: string;
       }
     >,
-    res: Response,
+    res: HttpResponse,
   ): Promise<void> {
     try {
       const body = req.body;
@@ -92,7 +91,7 @@ class AutomationController {
   }
 
   async updateRule(
-    req: TypedRequest<
+    req: HttpRequest<
       { ruleId: string },
       Record<string, never>,
       {
@@ -107,7 +106,7 @@ class AutomationController {
         priority?: number;
       }
     >,
-    res: Response,
+    res: HttpResponse,
   ): Promise<void> {
     try {
       const rule = await updateAutomationRuleUseCase.execute(
@@ -124,7 +123,7 @@ class AutomationController {
     }
   }
 
-  async deleteRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async deleteRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       await deleteAutomationRuleUseCase.execute(req.params.ruleId);
       res.json({ success: true });
@@ -138,8 +137,8 @@ class AutomationController {
   }
 
   async triggerRule(
-    req: TypedRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>,
-    res: Response,
+    req: HttpRequest<{ ruleId: string }, Record<string, never>, { context?: Record<string, unknown> }>,
+    res: HttpResponse,
   ): Promise<void> {
     try {
       const result = await executionEngine.triggerManual(req.params.ruleId, req.body?.context);
@@ -153,7 +152,7 @@ class AutomationController {
     }
   }
 
-  async getExecutionLogs(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async getExecutionLogs(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const logRepo = new ExecutionLogRepositoryImpl();
     const logs = await logRepo.findByRule(req.params.ruleId, limit);

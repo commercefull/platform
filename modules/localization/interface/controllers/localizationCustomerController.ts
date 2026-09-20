@@ -3,8 +3,7 @@
  * Public endpoints for customers to get locale and country information
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const localeRepo = localizationDataRepository.locales;
 const countryRepo = localizationDataRepository.countries;
@@ -16,7 +15,7 @@ import { localizationDataRepository } from '../../application/wired';
  * Get all active locales
  * GET /locales
  */
-export const getActiveLocales = async (_req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveLocales = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
   const locales = await localeRepo.findAll(true); // Only active locales
 
   // Map to public-facing data (exclude internal fields)
@@ -39,7 +38,7 @@ export const getActiveLocales = async (_req: TypedRequest, res: Response): Promi
  * Get all active countries
  * GET /countries
  */
-export const getActiveCountries = async (_req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveCountries = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
   const countries = await countryRepo.findAll(true); // Only active countries
 
   // Map to public-facing data
@@ -58,7 +57,7 @@ export const getActiveCountries = async (_req: TypedRequest, res: Response): Pro
  * Detect locale based on request headers or IP
  * GET /detect
  */
-export const detectLocale = async (req: TypedRequest, res: Response): Promise<void> => {
+export const detectLocale = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get Accept-Language header
   const acceptLanguage = req.headers['accept-language'] || '';
 
@@ -126,7 +125,7 @@ export const detectLocale = async (req: TypedRequest, res: Response): Promise<vo
  * Get locale by code
  * GET /locales/:code
  */
-export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLocaleByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
   if (!code) {
@@ -158,7 +157,7 @@ export const getLocaleByCode = async (req: TypedRequest, res: Response): Promise
  * Get country by code
  * GET /countries/:code
  */
-export const getCountryByCode = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCountryByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
   if (!code) {

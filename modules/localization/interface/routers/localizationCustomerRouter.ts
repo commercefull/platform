@@ -3,7 +3,7 @@
  * Public localization routes for customers
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   getActiveLocales,
@@ -13,7 +13,7 @@ import {
   detectLocale,
 } from '../controllers/localizationCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Public routes (no auth required)
 router.get('/localization/locales', asyncHandler(getActiveLocales));

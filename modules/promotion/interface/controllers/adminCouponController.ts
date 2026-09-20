@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageCouponsUseCase } from '../../application/useCases/ManagePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -15,7 +14,7 @@ const manageCouponsUseCase = new ManageCouponsUseCase();
 // Coupon Management
 // ============================================================================
 
-export const listCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCoupons = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string;
   const isActive = req.query.isActive ? req.query.isActive === 'true' : undefined;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -41,15 +40,15 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const createCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCouponForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'promotions/coupons/create', {
     pageName: 'Create Coupon',
   });
 };
 
-export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       code,
       name,
@@ -65,13 +64,28 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
       isOneTimeUse,
       maxUsage,
       maxUsagePerCustomer,
-    } = body;
+    } = body as {
+      code: string;
+      name: string;
+      description?: string;
+      type: 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyXGetY' | 'firstOrder' | 'giftCard';
+      discountAmount?: string;
+      currencyCode?: string;
+      minOrderAmount?: string;
+      maxDiscountAmount?: string;
+      startDate?: string;
+      endDate?: string;
+      isActive?: string;
+      isOneTimeUse?: string;
+      maxUsage?: string;
+      maxUsagePerCustomer?: string;
+    };
 
     const coupon = await manageCouponsUseCase.create({
       code,
       name,
       description: description || undefined,
-      type,
+      type: type as Parameters<typeof manageCouponsUseCase.create>[0]['type'],
       discountAmount: discountAmount ? parseFloat(discountAmount) : undefined,
       currencyCode: currencyCode || 'USD',
       minOrderAmount: minOrderAmount ? parseFloat(minOrderAmount) : undefined,
@@ -92,12 +106,12 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
     adminRespond(req, res, 'promotions/coupons/create', {
       pageName: 'Create Coupon',
       error: (error as Error).message || 'Failed to create coupon',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { couponId } = req.params;
 
   const coupon = await manageCouponsUseCase.findById(couponId);
@@ -122,7 +136,7 @@ export const viewCoupon = async (req: TypedRequest, res: Response): Promise<void
   });
 };
 
-export const editCouponForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editCouponForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { couponId } = req.params;
 
   const coupon = await manageCouponsUseCase.findById(couponId);
@@ -141,11 +155,11 @@ export const editCouponForm = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const updateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { couponId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const {
     name,
     description,
@@ -160,7 +174,21 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
     isOneTimeUse,
     maxUsage,
     maxUsagePerCustomer,
-  } = body;
+  } = body as {
+    name?: string;
+    description?: string;
+    type?: string;
+    discountAmount?: string;
+    currencyCode?: string;
+    minOrderAmount?: string;
+    maxDiscountAmount?: string;
+    startDate?: string;
+    endDate?: string;
+    isActive?: string;
+    isOneTimeUse?: string;
+    maxUsage?: string;
+    maxUsagePerCustomer?: string;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -181,7 +209,7 @@ export const updateCoupon = async (req: TypedRequest, res: Response): Promise<vo
   res.redirect(`/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
 };
 
-export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { couponId } = req.params;
 
   const success = await manageCouponsUseCase.delete(couponId);
@@ -193,9 +221,9 @@ export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<vo
   res.json({ success: true, message: 'Coupon deleted successfully' });
 };
 
-export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { code, orderTotal, customerId } = body;
+export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { code, orderTotal, customerId } = body as { code: string; orderTotal: number; customerId: string };
 
   const result = await manageCouponsUseCase.validate(code, orderTotal, customerId, 'default-organization');
 

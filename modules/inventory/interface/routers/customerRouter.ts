@@ -4,11 +4,11 @@
  * Public routes for checking product availability.
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { checkAvailability, checkProductAvailability } from '../controllers/inventoryController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Check product availability by SKU
 router.get('/inventory/availability/:sku', asyncHandler(checkAvailability));

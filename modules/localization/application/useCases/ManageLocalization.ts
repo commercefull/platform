@@ -1,4 +1,8 @@
-import type { LanguageRepositoryPort, CurrencyRepositoryPort, CountryRepositoryPort } from '../../domain/repositories/LocalizationRepository';
+import type {
+  LanguageRepositoryPort,
+  CurrencyRepositoryPort,
+  CountryRepositoryPort,
+} from '../../domain/repositories/LocalizationRepository';
 import { localizationDataRepository } from '../wired';
 
 const languageRepo: LanguageRepositoryPort = localizationDataRepository.languages;

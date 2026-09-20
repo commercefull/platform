@@ -3,14 +3,13 @@
  * Handles admin/merchant analytics and reporting operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { analyticsDataRepository } from '../../application/wired';
 
 const analyticsRepo = analyticsDataRepository.analytics;
 const reportingRepo = analyticsDataRepository.reporting;
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 // ============================================================================
 // Sales Analytics

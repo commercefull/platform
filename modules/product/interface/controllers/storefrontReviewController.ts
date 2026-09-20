@@ -3,9 +3,9 @@
  * Manages product reviews from customers
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageProductReviewsUseCase } from '../../application/useCases/wired';
+import type { ReviewRating } from '../../domain/repositories/ProductCatalogPorts';
 
 interface CustomerUser {
   id: string;
@@ -17,7 +17,7 @@ interface CustomerUser {
 /**
  * GET: List reviews for a product
  */
-export const getProductReviews = async (req: TypedRequest, res: Response) => {
+export const getProductReviews = async (req: HttpRequest, res: HttpResponse) => {
   const { productId } = req.params;
   const { page = '1' } = req.query;
   const limit = 10;
@@ -39,15 +39,15 @@ export const getProductReviews = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Submit a product review
  */
-export const submitReview = async (req: TypedRequest, res: Response) => {
+export const submitReview = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.status(401).json({ error: 'Please sign in to leave a review' });
   }
 
   const { productId } = req.params;
-  const body = req.body as RequestBody;
-  const { rating, title, content } = body;
+  const body = req.body as HttpRequestBody;
+  const { rating, title, content } = body as { rating: ReviewRating; title?: string; content?: string };
 
   if (!rating || (rating as number) < 1 || (rating as number) > 5) {
     return res.status(400).json({ error: 'Rating must be between 1 and 5' });
@@ -71,7 +71,7 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
     isVerifiedPurchase,
     reviewerName: user.name || 'Anonymous',
     reviewerEmail: user.email,
-  });
+  } as Parameters<typeof manageProductReviewsUseCase.create>[0]);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     return res.json({ success: true, reviewId: result.productReviewId });
@@ -82,7 +82,7 @@ export const submitReview = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Mark review as helpful
  */
-export const markReviewHelpful = async (req: TypedRequest, res: Response) => {
+export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse) => {
   const { reviewId } = req.params;
 
   await manageProductReviewsUseCase.incrementHelpful(reviewId);

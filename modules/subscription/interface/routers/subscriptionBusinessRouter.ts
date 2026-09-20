@@ -3,7 +3,7 @@
  * Routes for admin/merchant subscription operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import {
@@ -38,7 +38,7 @@ import {
   processBillingCycle,
 } from '../controllers/subscriptionBusinessController';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

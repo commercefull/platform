@@ -3,8 +3,7 @@
  * Handles content block management for the Admin Hub
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageContentUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -12,7 +11,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // Content Blocks Management
 // ============================================================================
 
-export const listContentBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listContentBlocks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const pageId = req.query.pageId as string;
   const contentTypeId = req.query.contentTypeId as string;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -43,7 +42,7 @@ export const listContentBlocks = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const createContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createContentBlockForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const pageId = req.query.pageId as string;
 
   if (!pageId) {
@@ -75,9 +74,15 @@ export const createContentBlockForm = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const createContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { contentPageId, blockTypeId, title, sortOrder, content } = body;
+export const createContentBlock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { contentPageId, blockTypeId, title, sortOrder, content } = body as {
+    contentPageId: string;
+    blockTypeId: string;
+    title: string;
+    sortOrder: string;
+    content?: string;
+  };
 
   const _block = await manageContentUseCase.createBlock({
     contentPageId,
@@ -91,7 +96,7 @@ export const createContentBlock = async (req: TypedRequest, res: Response): Prom
   res.redirect(`/hub/content/pages/${contentPageId}?success=Content block created successfully`);
 };
 
-export const editContentBlockForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editContentBlockForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { blockId } = req.params;
 
   const block = await manageContentUseCase.findBlockById(blockId);
@@ -118,12 +123,17 @@ export const editContentBlockForm = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const updateContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateContentBlock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { blockId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
-  const { title, sortOrder, content, isVisible } = body;
+  const body = req.body as HttpRequestBody;
+  const { title, sortOrder, content, isVisible } = body as {
+    title?: string;
+    sortOrder?: string;
+    content?: string;
+    isVisible?: string | boolean;
+  };
 
   if (title !== undefined) updates.title = title;
   if (sortOrder !== undefined) updates.sortOrder = parseInt(sortOrder);
@@ -135,7 +145,7 @@ export const updateContentBlock = async (req: TypedRequest, res: Response): Prom
   res.redirect(`/hub/content/pages/${block.contentPageId}?success=Content block updated successfully`);
 };
 
-export const deleteContentBlock = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteContentBlock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { blockId } = req.params;
 
   // Get block info before deletion
@@ -155,9 +165,9 @@ export const deleteContentBlock = async (req: TypedRequest, res: Response): Prom
   res.json({ success: true, message: 'Content block deleted successfully' });
 };
 
-export const reorderContentBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reorderContentBlocks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { blockOrders } = body;
 
   if (!Array.isArray(blockOrders)) {

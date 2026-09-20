@@ -1,11 +1,11 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import * as supplierController from '../controllers/supplierBusinessController';
 import * as purchaseOrderController from '../controllers/purchaseOrderController';
 import * as receivingController from '../controllers/receivingController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

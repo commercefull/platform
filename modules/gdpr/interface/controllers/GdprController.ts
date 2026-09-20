@@ -3,14 +3,13 @@
  * Handles HTTP requests for GDPR-related operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { query, queryOne } from '../../../../libs/db';
 import { GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
 import { CookiePreferences } from '../../domain/entities/GdprCookieConsent';
 
 // Type for async route handlers
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import {
   ProcessDataRequestUseCase,

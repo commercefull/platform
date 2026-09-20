@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   CustomerPriceList,
   CustomerPrice,
@@ -41,7 +40,7 @@ interface PriceBody {
 /**
  * Get all pricing rules with pagination and filtering
  */
-export const getPricingRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPricingRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { page = '1', limit = '20', status, scope, type, productId, categoryId, customerId, customerGroupId, _search } = req.query;
 
   const pageNum = parseInt(page as string, 10);
@@ -83,7 +82,7 @@ export const getPricingRules = async (req: TypedRequest, res: Response): Promise
 /**
  * Get a pricing rule by ID
  */
-export const getPricingRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPricingRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const rule = await pricingRuleRepository.rules.findById(id);
 
@@ -105,8 +104,8 @@ export const getPricingRule = async (req: TypedRequest, res: Response): Promise<
  * Create a new pricing rule
  */
 export const createPricingRule = async (
-  req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, PricingRuleBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const ruleData = req.body;
 
@@ -140,8 +139,8 @@ export const createPricingRule = async (
  * Update a pricing rule
  */
 export const updatePricingRule = async (
-  req: TypedRequest<Record<string, string>, unknown, PricingRuleBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, PricingRuleBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const ruleData = req.body;
@@ -166,7 +165,7 @@ export const updatePricingRule = async (
 /**
  * Delete a pricing rule
  */
-export const deletePricingRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePricingRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existingRule = await pricingRuleRepository.rules.findById(id);
@@ -189,7 +188,7 @@ export const deletePricingRule = async (req: TypedRequest, res: Response): Promi
 /**
  * Get tier prices with pagination and filtering
  */
-export const getTierPrices = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTierPrices = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { page = '1', limit = '20', productId, variantId, customerGroupId } = req.query;
 
   const pageNum = parseInt(page as string, 10);
@@ -218,7 +217,7 @@ export const getTierPrices = async (req: TypedRequest, res: Response): Promise<v
 /**
  * Get a tier price by ID
  */
-export const getTierPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTierPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const tierPrice = await pricingDataRepository.tierPrices.findById(id);
 
@@ -239,7 +238,10 @@ export const getTierPrice = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * Create a new tier price
  */
-export const createTierPrice = async (req: TypedRequest<Record<string, string>, unknown, TierPriceBody>, res: Response): Promise<void> => {
+export const createTierPrice = async (
+  req: HttpRequest<Record<string, string>, unknown, TierPriceBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const tierPriceData = req.body;
 
   // Validate required fields
@@ -262,7 +264,10 @@ export const createTierPrice = async (req: TypedRequest<Record<string, string>, 
 /**
  * Update a tier price
  */
-export const updateTierPrice = async (req: TypedRequest<Record<string, string>, unknown, TierPriceBody>, res: Response): Promise<void> => {
+export const updateTierPrice = async (
+  req: HttpRequest<Record<string, string>, unknown, TierPriceBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const { id } = req.params;
   const tierPriceData = req.body;
 
@@ -289,7 +294,7 @@ export const updateTierPrice = async (req: TypedRequest<Record<string, string>, 
 /**
  * Delete a tier price
  */
-export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTierPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existingTierPrice = await pricingDataRepository.tierPrices.findById(id);
@@ -312,7 +317,7 @@ export const deleteTierPrice = async (req: TypedRequest, res: Response): Promise
 /**
  * Get customer price lists with pagination and filtering
  */
-export const getPriceLists = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPriceLists = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { page = '1', limit = '20', customerId, customerGroupId, _status } = req.query;
 
   const pageNum = parseInt(page as string, 10);
@@ -345,7 +350,7 @@ export const getPriceLists = async (req: TypedRequest, res: Response): Promise<v
 /**
  * Get a price list by ID
  */
-export const getPriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const priceList = await pricingDataRepository.customerPrices.findPriceListById(id);
 
@@ -372,7 +377,10 @@ export const getPriceList = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * Create a new price list
  */
-export const createPriceList = async (req: TypedRequest<Record<string, string>, unknown, PriceListBody>, res: Response): Promise<void> => {
+export const createPriceList = async (
+  req: HttpRequest<Record<string, string>, unknown, PriceListBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const priceListData = req.body;
 
   // Validate required fields
@@ -397,7 +405,10 @@ export const createPriceList = async (req: TypedRequest<Record<string, string>, 
 /**
  * Update a price list
  */
-export const updatePriceList = async (req: TypedRequest<Record<string, string>, unknown, PriceListBody>, res: Response): Promise<void> => {
+export const updatePriceList = async (
+  req: HttpRequest<Record<string, string>, unknown, PriceListBody>,
+  res: HttpResponse,
+): Promise<void> => {
   const { id } = req.params;
   const priceListData = req.body;
 
@@ -424,7 +435,7 @@ export const updatePriceList = async (req: TypedRequest<Record<string, string>, 
 /**
  * Delete a price list
  */
-export const deletePriceList = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existingPriceList = await pricingDataRepository.customerPrices.findPriceListById(id);
@@ -447,7 +458,7 @@ export const deletePriceList = async (req: TypedRequest, res: Response): Promise
 /**
  * Add a price to a price list
  */
-export const addPriceToList = async (req: TypedRequest<Record<string, string>, unknown, PriceBody>, res: Response): Promise<void> => {
+export const addPriceToList = async (req: HttpRequest<Record<string, string>, unknown, PriceBody>, res: HttpResponse): Promise<void> => {
   const { priceListId } = req.params;
   const priceData = req.body;
 

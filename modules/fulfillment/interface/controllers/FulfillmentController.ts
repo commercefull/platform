@@ -4,8 +4,7 @@
  * HTTP interface for fulfillment management.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { FulfillmentStatus, SourceType, Address } from '../../domain/entities/Fulfillment';
@@ -78,7 +77,7 @@ interface InitiateReturnBody {
   reason: string;
 }
 
-export const createFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateFulfillmentBody;
   if (!body.orderId?.trim()) {
     res.status(400).json({ success: false, error: 'orderId is required' });
@@ -132,7 +131,7 @@ export const createFulfillment = async (req: TypedRequest, res: Response): Promi
   res.status(201).json({ success: true, data: plain });
 };
 
-export const getFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetFulfillmentUseCase(fulfillmentRepository);
   const result = await useCase.execute({
     fulfillmentId: req.params.fulfillmentId,
@@ -145,7 +144,7 @@ export const getFulfillment = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result });
 };
 
-export const processPicking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processPicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as ProcessPickingBody;
   const useCase = new ProcessPickingUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -156,7 +155,7 @@ export const processPicking = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result });
 };
 
-export const shipOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const shipOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as ShipOrderBody;
   const useCase = new ShipOrderUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -170,7 +169,7 @@ export const shipOrder = async (req: TypedRequest, res: Response): Promise<void>
   res.json({ success: true, data: result.fulfillment });
 };
 
-export const markDelivered = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new MarkDeliveredUseCase(fulfillmentRepository);
   const result = await useCase.execute({
     fulfillmentId: req.params.fulfillmentId,
@@ -178,12 +177,12 @@ export const markDelivered = async (req: TypedRequest, res: Response): Promise<v
   res.json({ success: true, data: result.fulfillment });
 };
 
-export const listFulfillmentsByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFulfillmentsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fulfillments = await fulfillmentRepository.findByOrderId(req.params.orderId);
   res.json({ success: true, data: fulfillments });
 };
 
-export const listFulfillments = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await fulfillmentRepository.findAll(
     {
       orderId: req.query.orderId as string | undefined,
@@ -202,7 +201,7 @@ export const listFulfillments = async (req: TypedRequest, res: Response): Promis
   res.json({ success: true, data: result });
 };
 
-export const processPacking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processPacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as ProcessPackingBody;
   const useCase = new ProcessPackingUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -214,7 +213,7 @@ export const processPacking = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result.fulfillment });
 };
 
-export const cancelFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CancelFulfillmentBody;
   const useCase = new CancelFulfillmentUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -224,7 +223,7 @@ export const cancelFulfillment = async (req: TypedRequest, res: Response): Promi
   res.json({ success: true, data: result.fulfillment });
 };
 
-export const updateTracking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateTracking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as UpdateTrackingBody;
   const useCase = new UpdateTrackingUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -235,7 +234,7 @@ export const updateTracking = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result.fulfillment });
 };
 
-export const initiateReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const initiateReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as InitiateReturnBody;
   const useCase = new InitiateReturnUseCase(fulfillmentRepository);
   const result = await useCase.execute({
@@ -245,7 +244,7 @@ export const initiateReturn = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result });
 };
 
-export const getTrackingInfo = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTrackingInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fulfillment = await fulfillmentRepository.findById(req.params.fulfillmentId);
   if (!fulfillment) {
     res.status(404).json({ success: false, error: 'Fulfillment not found' });
@@ -265,7 +264,7 @@ export const getTrackingInfo = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const assignFulfillment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
   const { sourceType, sourceId } = req.body as {
     sourceType: SourceType;

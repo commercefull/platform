@@ -3,8 +3,7 @@
  * Handles theme management, overrides, and assignment via /business/theme routes.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
@@ -28,7 +27,7 @@ const resolveThemeUseCase = new ResolveStoreThemeUseCase(themeRepository);
 class ThemeController {
   // ── Theme CRUD ──────────────────────────────────────────────
 
-  async listThemes(req: TypedRequest, res: Response) {
+  async listThemes(req: HttpRequest, res: HttpResponse) {
     try {
       const status = req.query.status as string | undefined;
       const type = req.query.type as string | undefined;
@@ -43,7 +42,7 @@ class ThemeController {
     }
   }
 
-  async listBuiltInThemes(_req: TypedRequest, res: Response) {
+  async listBuiltInThemes(_req: HttpRequest, res: HttpResponse) {
     try {
       const themes = await manageThemesUseCase.listBuiltIn();
       res.json({ success: true, data: themes });
@@ -53,7 +52,7 @@ class ThemeController {
     }
   }
 
-  async getTheme(req: TypedRequest, res: Response) {
+  async getTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const theme = await manageThemesUseCase.getById(req.params.themeId);
       res.json({ success: true, data: theme });
@@ -62,7 +61,7 @@ class ThemeController {
     }
   }
 
-  async getThemeBySlug(req: TypedRequest, res: Response) {
+  async getThemeBySlug(req: HttpRequest, res: HttpResponse) {
     try {
       const theme = await manageThemesUseCase.getBySlug(req.params.slug);
       res.json({ success: true, data: theme });
@@ -71,7 +70,7 @@ class ThemeController {
     }
   }
 
-  async createTheme(req: TypedRequest, res: Response) {
+  async createTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       // Normalize settingsSchema: accept either {groups:[...]} or a flat array of settings
@@ -106,7 +105,7 @@ class ThemeController {
     }
   }
 
-  async updateTheme(req: TypedRequest, res: Response) {
+  async updateTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await manageThemesUseCase.update(req.params.themeId, {
@@ -125,7 +124,7 @@ class ThemeController {
     }
   }
 
-  async deleteTheme(req: TypedRequest, res: Response) {
+  async deleteTheme(req: HttpRequest, res: HttpResponse) {
     try {
       await manageThemesUseCase.delete(req.params.themeId);
       res.json({ success: true, message: 'Theme deleted' });
@@ -134,7 +133,7 @@ class ThemeController {
     }
   }
 
-  async activateTheme(req: TypedRequest, res: Response) {
+  async activateTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const result = await manageThemesUseCase.activate(req.params.themeId);
       res.json({ success: true, data: result });
@@ -143,7 +142,7 @@ class ThemeController {
     }
   }
 
-  async archiveTheme(req: TypedRequest, res: Response) {
+  async archiveTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const result = await manageThemesUseCase.archive(req.params.themeId);
       res.json({ success: true, data: result });
@@ -154,7 +153,7 @@ class ThemeController {
 
   // ── Theme Overrides ─────────────────────────────────────────
 
-  async getOverrideByStore(req: TypedRequest, res: Response) {
+  async getOverrideByStore(req: HttpRequest, res: HttpResponse) {
     try {
       const override = await manageOverridesUseCase.getByStore(req.params.storeId);
       res.json({ success: true, data: override });
@@ -164,7 +163,7 @@ class ThemeController {
     }
   }
 
-  async getOverridesByOrganization(req: TypedRequest, res: Response) {
+  async getOverridesByOrganization(req: HttpRequest, res: HttpResponse) {
     try {
       const overrides = await manageOverridesUseCase.getByOrganization(req.params.organizationId);
       res.json({ success: true, data: overrides });
@@ -174,7 +173,7 @@ class ThemeController {
     }
   }
 
-  async createOverride(req: TypedRequest, res: Response) {
+  async createOverride(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const command = new CreateThemeOverrideCommand({
@@ -197,7 +196,7 @@ class ThemeController {
     }
   }
 
-  async updateOverride(req: TypedRequest, res: Response) {
+  async updateOverride(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await manageOverridesUseCase.update(req.params.overrideId, {
@@ -215,7 +214,7 @@ class ThemeController {
     }
   }
 
-  async deleteOverride(req: TypedRequest, res: Response) {
+  async deleteOverride(req: HttpRequest, res: HttpResponse) {
     try {
       await manageOverridesUseCase.delete(req.params.overrideId);
       res.json({ success: true, message: 'Override deleted' });
@@ -226,7 +225,7 @@ class ThemeController {
 
   // ── Theme Assignment ────────────────────────────────────────
 
-  async assignTheme(req: TypedRequest, res: Response) {
+  async assignTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const command = new AssignThemeToStoreCommand(
@@ -241,7 +240,7 @@ class ThemeController {
     }
   }
 
-  async unassignTheme(req: TypedRequest, res: Response) {
+  async unassignTheme(req: HttpRequest, res: HttpResponse) {
     try {
       await assignThemeUseCase.unassign(req.params.storeId);
       res.json({ success: true, message: 'Theme unassigned from store' });
@@ -250,7 +249,7 @@ class ThemeController {
     }
   }
 
-  async getAssignment(req: TypedRequest, res: Response) {
+  async getAssignment(req: HttpRequest, res: HttpResponse) {
     try {
       const assignment = await assignThemeUseCase.getAssignment(req.params.storeId);
       res.json({ success: true, data: assignment });
@@ -262,7 +261,7 @@ class ThemeController {
 
   // ── Resolve Theme ───────────────────────────────────────────
 
-  async resolveTheme(req: TypedRequest, res: Response) {
+  async resolveTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const resolved = await resolveThemeUseCase.execute(req.params.storeId);
       if (!resolved) {
@@ -292,7 +291,7 @@ class ThemeController {
 
   // ── Seed Built-in Themes ────────────────────────────────────
 
-  async seedBuiltInThemes(_req: TypedRequest, res: Response) {
+  async seedBuiltInThemes(_req: HttpRequest, res: HttpResponse) {
     try {
       const count = await manageThemesUseCase.seedBuiltInThemes();
       res.json({ success: true, message: `Seeded ${count} built-in themes` });

@@ -5,7 +5,7 @@
  * and that sensitive fields are redacted.
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 // Mock the wired use case
 jest.mock('../../application/useCases/wired', () => ({
@@ -18,8 +18,8 @@ import { auditMiddleware, recordAudit } from './auditMiddleware';
 import { recordAuditLogUseCase } from '../../application/useCases/wired';
 
 describe('auditMiddleware', () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
+  let mockReq: Partial<HttpRequest>;
+  let mockRes: Partial<HttpResponse>;
   let nextFn: jest.Mock;
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('auditMiddleware', () => {
       } as never,
     };
 
-    const sendFn = jest.fn(function (this: Response, _body: unknown) {
+    const sendFn = jest.fn(function (this: HttpResponse, _body: unknown) {
       return this;
     });
     mockRes = {
@@ -59,23 +59,23 @@ describe('auditMiddleware', () => {
 
   it('should call next() for non-mutating requests', () => {
     mockReq.method = 'GET';
-    auditMiddleware(mockReq as Request, mockRes as Response, nextFn);
+    auditMiddleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
     expect(nextFn).toHaveBeenCalled();
   });
 
   it('should call next() for unrecognized paths', () => {
     (mockReq as { path: string }).path = '/health';
     mockReq.route = undefined;
-    auditMiddleware(mockReq as Request, mockRes as Response, nextFn);
+    auditMiddleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
     expect(nextFn).toHaveBeenCalled();
   });
 
   it('should record audit entry on successful POST', async () => {
-    auditMiddleware(mockReq as Request, mockRes as Response, nextFn);
+    auditMiddleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
     expect(nextFn).toHaveBeenCalled();
 
     // Simulate response
-    (mockRes.send as jest.Mock).call(mockRes as Response, JSON.stringify({ name: 'Widget', id: 'prod-1' }));
+    (mockRes.send as jest.Mock).call(mockRes as HttpResponse, JSON.stringify({ name: 'Widget', id: 'prod-1' }));
 
     // Wait for fire-and-forget
     await new Promise(resolve => setTimeout(resolve, 10));
@@ -92,9 +92,9 @@ describe('auditMiddleware', () => {
 
   it('should NOT record audit entry on error responses', async () => {
     mockRes.statusCode = 500;
-    auditMiddleware(mockReq as Request, mockRes as Response, nextFn);
+    auditMiddleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
 
-    (mockRes.send as jest.Mock).call(mockRes as Response, 'Internal Error');
+    (mockRes.send as jest.Mock).call(mockRes as HttpResponse, 'Internal Error');
 
     await new Promise(resolve => setTimeout(resolve, 10));
 
@@ -103,9 +103,9 @@ describe('auditMiddleware', () => {
 
   it('should redact sensitive fields from body', async () => {
     mockReq.body = { name: 'Widget', password: 'secret123', apiKey: 'key-abc' };
-    auditMiddleware(mockReq as Request, mockRes as Response, nextFn);
+    auditMiddleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
 
-    (mockRes.send as jest.Mock).call(mockRes as Response, '{}');
+    (mockRes.send as jest.Mock).call(mockRes as HttpResponse, '{}');
 
     await new Promise(resolve => setTimeout(resolve, 10));
 

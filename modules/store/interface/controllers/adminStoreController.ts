@@ -1,5 +1,5 @@
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
+import type { StoreRole } from '../../../identity/domain/entities/UserStoreAssignment';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
 import type { PaginatedResult } from '../../../../libs/types/shared';
@@ -26,7 +26,7 @@ import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
 const findActiveStoresUseCase = new FindActiveStoresUseCase();
 const getOrdersByStoreUseCase = new GetOrdersByStoreUseCase();
 
-export const listStores = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const page = parseInt((req.query.page as string) || '1', 10);
   const result = await listStoresUseCase.execute(
     new ListStoresQuery(
@@ -47,7 +47,7 @@ export const listStores = async (req: TypedRequest, res: Response): Promise<void
   });
 };
 
-export const viewStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
   if (!storeResult.store) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Store not found' });
@@ -74,35 +74,54 @@ export const viewStore = async (req: TypedRequest, res: Response): Promise<void>
   });
 };
 
-export const createStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createStoreForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizations = await organizationLookupAdapter.findAll();
   const stores = await findActiveStoresUseCase.execute();
   adminRespond(req, res, 'stores/create', { pageName: 'Create Store', organizations, stores, formData: {} });
 };
 
-export const createStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
+    const body = req.body as {
+      name: string;
+      slug?: string;
+      description?: string;
+      storeType?: 'merchant_store' | 'organization_store';
+      organizationId?: string;
+      isHeadquarters?: string;
+      parentStoreId?: string;
+      storeEmail?: string;
+      storePhone?: string;
+      storeUrl?: string;
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+      defaultCurrency?: string;
+    };
     const result = await createStoreUseCase.execute(
       new CreateStoreCommand({
-        name: (req.body as RequestBody).name,
-        slug: (req.body as RequestBody).slug,
-        description: (req.body as RequestBody).description,
-        storeType: (req.body as RequestBody).storeType || 'organization_store',
-        organizationId: (req.body as RequestBody).organizationId || undefined,
-        isHeadquarters: (req.body as RequestBody).isHeadquarters === 'on',
-        parentStoreId: (req.body as RequestBody).parentStoreId || undefined,
-        storeEmail: (req.body as RequestBody).storeEmail || undefined,
-        storePhone: (req.body as RequestBody).storePhone || undefined,
-        storeUrl: (req.body as RequestBody).storeUrl || undefined,
+        name: body.name,
+        slug: body.slug,
+        description: body.description,
+        storeType: body.storeType || 'organization_store',
+        organizationId: body.organizationId || undefined,
+        isHeadquarters: body.isHeadquarters === 'on',
+        parentStoreId: body.parentStoreId || undefined,
+        storeEmail: body.storeEmail || undefined,
+        storePhone: body.storePhone || undefined,
+        storeUrl: body.storeUrl || undefined,
         address: {
-          line1: (req.body as RequestBody).addressLine1,
-          line2: (req.body as RequestBody).addressLine2 || undefined,
-          city: (req.body as RequestBody).city,
-          state: (req.body as RequestBody).state,
-          postalCode: (req.body as RequestBody).postalCode,
-          country: (req.body as RequestBody).country,
+          line1: body.addressLine1,
+          line2: body.addressLine2 || undefined,
+          city: body.city,
+          state: body.state,
+          postalCode: body.postalCode,
+          country: body.country,
         },
-        defaultCurrency: (req.body as RequestBody).defaultCurrency || 'USD',
+        defaultCurrency: body.defaultCurrency || 'USD',
       }),
     );
     res.redirect(`/admin/stores/${result.storeId}?success=Store created successfully`);
@@ -115,12 +134,12 @@ export const createStore = async (req: TypedRequest, res: Response): Promise<voi
       error: (error as Error).message || 'Failed to create store',
       organizations,
       stores,
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const editStoreForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editStoreForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
   const organizations = await organizationLookupAdapter.findAll();
   const stores = await findActiveStoresUseCase.execute();
@@ -133,23 +152,37 @@ export const editStoreForm = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const updateStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
+    const body = req.body as {
+      name?: string;
+      description?: string;
+      storeEmail?: string;
+      storePhone?: string;
+      storeUrl?: string;
+      isActive?: string;
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      postalCode: string;
+      country: string;
+    };
     await updateStoreUseCase.execute(
       new UpdateStoreCommand(req.params.storeId, {
-        name: (req.body as RequestBody).name || undefined,
-        description: (req.body as RequestBody).description || undefined,
-        storeEmail: (req.body as RequestBody).storeEmail || undefined,
-        storePhone: (req.body as RequestBody).storePhone || undefined,
-        storeUrl: (req.body as RequestBody).storeUrl || undefined,
-        isActive: (req.body as RequestBody).isActive === 'on',
+        name: body.name || undefined,
+        description: body.description || undefined,
+        storeEmail: body.storeEmail || undefined,
+        storePhone: body.storePhone || undefined,
+        storeUrl: body.storeUrl || undefined,
+        isActive: body.isActive === 'on',
         address: {
-          line1: (req.body as RequestBody).addressLine1,
-          line2: (req.body as RequestBody).addressLine2 || undefined,
-          city: (req.body as RequestBody).city,
-          state: (req.body as RequestBody).state,
-          postalCode: (req.body as RequestBody).postalCode,
-          country: (req.body as RequestBody).country,
+          line1: body.addressLine1,
+          line2: body.addressLine2 || undefined,
+          city: body.city,
+          state: body.state,
+          postalCode: body.postalCode,
+          country: body.country,
         },
       }),
     );
@@ -164,26 +197,32 @@ export const updateStore = async (req: TypedRequest, res: Response): Promise<voi
       organizations,
       stores,
       store: { storeId: req.params.storeId },
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const manageStoreUsers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const manageStoreUsers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeResult = await getStoreUseCase.execute(new GetStoreQuery(req.params.storeId));
   const users = await listStoreUsersUseCase.execute(req.params.storeId);
   adminRespond(req, res, 'stores/users', { pageName: 'Store Users', store: storeResult.store, users });
 };
 
-export const assignUserToStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignUserToStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
+    const body = req.body as {
+      userId: string;
+      role: StoreRole;
+      isPrimary?: string;
+      permissions?: string;
+    };
     await assignUserToStoreUseCase.execute({
-      userId: (req.body as RequestBody).userId,
+      userId: body.userId,
       storeId: req.params.storeId,
-      role: (req.body as RequestBody).role,
-      isPrimary: (req.body as RequestBody).isPrimary === 'on',
-      permissions: (req.body as RequestBody).permissions
-        ? String((req.body as RequestBody).permissions)
+      role: body.role,
+      isPrimary: body.isPrimary === 'on',
+      permissions: body.permissions
+        ? body.permissions
             .split(',')
             .map((value: string) => value.trim())
             .filter(Boolean)
@@ -198,7 +237,7 @@ export const assignUserToStore = async (req: TypedRequest, res: Response): Promi
   }
 };
 
-export const removeUserFromStore = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeUserFromStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
     res.redirect(`/admin/stores/${req.params.storeId}/users?success=User removed successfully`);

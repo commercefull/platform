@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import {
   createAutomationRuleUseCase,
@@ -20,7 +19,7 @@ import {
 // List Rules
 // ============================================================================
 
-export const listAutomationRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listAutomationRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly === 'true';
   const rules = await listAutomationRulesUseCase.execute(activeOnly);
 
@@ -36,15 +35,15 @@ export const listAutomationRules = async (req: TypedRequest, res: Response): Pro
 // Create Rule
 // ============================================================================
 
-export const createAutomationRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createAutomationRuleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/automation/create', {
     pageName: 'Create Automation Rule',
   });
 };
 
-export const createAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       name,
       description,
@@ -68,13 +67,13 @@ export const createAutomationRule = async (req: TypedRequest, res: Response): Pr
       name,
       description: description || undefined,
       triggerType,
-      triggerConfig: triggerConfig as never,
+      triggerConfig,
       conditions: conditions ? (typeof conditions === 'string' ? JSON.parse(conditions) : conditions) : undefined,
       conditionMatchMode: conditionMatchMode || 'all',
       actions: typeof actions === 'string' ? JSON.parse(actions) : actions,
       actionExecutionMode: actionExecutionMode || 'sequential',
       priority: priority ? parseInt(priority as string, 10) : 0,
-    });
+    } as unknown as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
 
     res.redirect(`/admin/automation/${rule.automationRuleId}?success=Automation rule created successfully`);
   } catch (error: unknown) {
@@ -82,7 +81,7 @@ export const createAutomationRule = async (req: TypedRequest, res: Response): Pr
     adminRespond(req, res, 'operations/automation/create', {
       pageName: 'Create Automation Rule',
       error: (error as Error).message || 'Failed to create automation rule',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
@@ -91,7 +90,7 @@ export const createAutomationRule = async (req: TypedRequest, res: Response): Pr
 // View Rule
 // ============================================================================
 
-export const viewAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ruleId } = req.params;
   const rule = await getAutomationRuleUseCase.execute(ruleId);
 
@@ -114,7 +113,7 @@ export const viewAutomationRule = async (req: TypedRequest, res: Response): Prom
 // Edit Rule
 // ============================================================================
 
-export const editAutomationRuleForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editAutomationRuleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { ruleId } = req.params;
   const rule = await getAutomationRuleUseCase.execute(ruleId);
 
@@ -132,10 +131,10 @@ export const editAutomationRuleForm = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const updateAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       name,
       description,
@@ -175,7 +174,7 @@ export const updateAutomationRule = async (req: TypedRequest, res: Response): Pr
     adminRespond(req, res, 'operations/automation/edit', {
       pageName: 'Edit Automation Rule',
       error: (error as Error).message || 'Failed to update automation rule',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
       rule: { automationRuleId: ruleId },
     });
   }
@@ -185,7 +184,7 @@ export const updateAutomationRule = async (req: TypedRequest, res: Response): Pr
 // Delete Rule
 // ============================================================================
 
-export const deleteAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
     await deleteAutomationRuleUseCase.execute(ruleId);
@@ -200,7 +199,7 @@ export const deleteAutomationRule = async (req: TypedRequest, res: Response): Pr
 // Activate / Deactivate
 // ============================================================================
 
-export const activateAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: true } as never);
@@ -211,7 +210,7 @@ export const activateAutomationRule = async (req: TypedRequest, res: Response): 
   }
 };
 
-export const deactivateAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: false } as never);
@@ -226,7 +225,7 @@ export const deactivateAutomationRule = async (req: TypedRequest, res: Response)
 // Manual Trigger
 // ============================================================================
 
-export const triggerAutomationRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const triggerAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
     await executionEngine.triggerManual(ruleId, req.body as Record<string, unknown>);

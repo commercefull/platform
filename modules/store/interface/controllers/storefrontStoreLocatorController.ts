@@ -3,15 +3,14 @@
  * Displays a list of physical store locations with map and search
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStoresAdminUseCase } from '../../application/useCases/ManageStoresAdmin';
 import { storeDataRepository } from '../../application/wired';
 
 const manageStoresUseCase = new ManageStoresAdminUseCase(storeDataRepository.stores);
 
-export const getStoreLocator = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoreLocator = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stores = await manageStoresUseCase.findActive();
 
   storefrontRespond(req, res, 'page/store-locator', {

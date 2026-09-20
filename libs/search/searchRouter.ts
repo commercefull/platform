@@ -16,19 +16,19 @@
  * - GET /search/health — search backend health
  */
 
-import express from 'express';
+import { createHttpRouter } from '../http';
 import { asyncHandler } from '../asyncHandler';
 import { isOrganizationLoggedIn } from '../auth';
 import searchController from './searchController';
 
 // Customer router (public)
-export const searchCustomerRouter = express.Router();
+export const searchCustomerRouter = createHttpRouter();
 
 searchCustomerRouter.get('/search', asyncHandler(searchController.search.bind(searchController)));
 searchCustomerRouter.get('/search/autocomplete', asyncHandler(searchController.autocomplete.bind(searchController)));
 
 // Business router (auth required)
-export const searchBusinessRouter = express.Router();
+export const searchBusinessRouter = createHttpRouter();
 
 searchBusinessRouter.get('/search/health', isOrganizationLoggedIn, asyncHandler(searchController.health.bind(searchController)));
 

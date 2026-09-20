@@ -48,6 +48,8 @@ export const listProducts = async (req: Request, res: Response) => {
 };
 ```
 
+> **HTTP facade:** Controllers import project-owned Express-backed types (`HttpRequest`, `HttpResponse`, `HttpNext`) from `libs/http` rather than `express`. `res.render`, `res.locals`, `req.flash`, and `req.session` work unchanged through the global Express augmentation. See the [HTTP Framework Abstraction Guide](../guides/http-framework-abstraction.md).
+
 ## Response Helpers (`web/respond.ts`)
 
 | Helper              | Portal     | Layout               |

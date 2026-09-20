@@ -4,12 +4,12 @@
  * Mounted at /business, routes prefixed with /page-builder.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { pageBuilderController } from '../controllers/pageBuilderController';
 
-const router = Router();
+const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
 

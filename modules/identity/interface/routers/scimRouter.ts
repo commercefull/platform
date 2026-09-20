@@ -5,7 +5,7 @@
  * Uses SCIM bearer token auth (separate from JWT auth).
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { ScimController } from '../controllers/scimController';
 import { ScimProvisioningRepositoryImpl, OrganizationCredentialSubjectAdapter } from '../../application/wired';
@@ -14,7 +14,7 @@ const provisioningRepo = new ScimProvisioningRepositoryImpl();
 const orgPort = new OrganizationCredentialSubjectAdapter();
 const scimController = new ScimController(provisioningRepo, orgPort);
 
-const router = Router();
+const router = createHttpRouter();
 
 // SCIM 2.0 /Users endpoints
 router.get('/scim/v2/Users', asyncHandler(scimController.listUsers.bind(scimController)));

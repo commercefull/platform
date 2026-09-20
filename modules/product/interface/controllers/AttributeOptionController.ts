@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { productAttributeRepository } from '../../application/wired';
 import { ProductAttributeOption } from '../../application/wired';
 
@@ -15,7 +14,7 @@ class AttributeOptionController {
    * GET /attribute-options/:id
    * Get a single attribute option by ID
    */
-  async getAttributeOption(req: TypedRequest, res: Response): Promise<void> {
+  async getAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
 
     // Guard against literal "null" or "undefined" strings
@@ -38,7 +37,7 @@ class AttributeOptionController {
    * GET /attribute-options/attribute/:attributeId
    * Get all options for an attribute
    */
-  async getOptionsByAttribute(req: TypedRequest, res: Response): Promise<void> {
+  async getOptionsByAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { attributeId } = req.params;
     const options = await attributeOptionRepo.findByAttribute(attributeId);
 
@@ -49,7 +48,7 @@ class AttributeOptionController {
    * GET /attribute-options/attribute/:attributeId/value/:value
    * Find an option by value
    */
-  async getOptionByValue(req: TypedRequest, res: Response): Promise<void> {
+  async getOptionByValue(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { attributeId, value } = req.params;
     const option = await attributeOptionRepo.findByValue(attributeId, value);
 
@@ -65,7 +64,7 @@ class AttributeOptionController {
    * POST /attribute-options
    * Create a new attribute option
    */
-  async createAttributeOption(req: TypedRequest, res: Response): Promise<void> {
+  async createAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { attributeId, value, label, sortOrder } = req.body as {
       attributeId?: string;
       value?: string;
@@ -92,7 +91,7 @@ class AttributeOptionController {
    * PUT /attribute-options/:id
    * Update an attribute option
    */
-  async updateAttributeOption(req: TypedRequest, res: Response): Promise<void> {
+  async updateAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const { value, label, sortOrder } = req.body as { value?: string; label?: string; sortOrder?: number };
 
@@ -115,7 +114,7 @@ class AttributeOptionController {
    * DELETE /attribute-options/:id
    * Delete an attribute option
    */
-  async deleteAttributeOption(req: TypedRequest, res: Response): Promise<void> {
+  async deleteAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
 
     const existing = await attributeOptionRepo.findOne(id);

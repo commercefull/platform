@@ -3,8 +3,7 @@
  * Handles admin/merchant support operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { supportDataRepository, supportInfoRepository } from '../../application/wired';
 import {
@@ -22,7 +21,7 @@ const supportRepo = supportDataRepository.tickets;
 const faqRepo = supportInfoRepository.faq;
 const alertRepo = supportInfoRepository.alerts;
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 // ============================================================================
 // Support Agents

@@ -3,8 +3,7 @@
  * Handles order history and order details for customers
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { listOrdersUseCase, getOrderUseCase } from '../../application/useCases/wired';
 import { ListOrdersCommand } from '../../application/useCases/ListOrders';
@@ -14,7 +13,7 @@ import { GetOrderCommand } from '../../application/useCases/GetOrder';
 // Order History
 // ============================================================================
 
-export const orderHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const orderHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     return res.redirect('/signin?redirect=/orders');
   }
@@ -55,7 +54,7 @@ export const orderHistory = async (req: TypedRequest, res: Response): Promise<vo
 // Order Details
 // ============================================================================
 
-export const orderDetails = async (req: TypedRequest, res: Response): Promise<void> => {
+export const orderDetails = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
     return res.redirect('/signin?redirect=/orders');
   }
@@ -94,7 +93,7 @@ export const orderDetails = async (req: TypedRequest, res: Response): Promise<vo
 // Order Tracking
 // ============================================================================
 
-export const orderTracking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const orderTracking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderNumber } = req.params;
 
   // For guest tracking, we don't require authentication

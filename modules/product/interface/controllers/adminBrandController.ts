@@ -3,8 +3,7 @@
  * Manages brand CRUD operations using the brand repository directly.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { brandRepo } from '../../application/useCases/wired';
 import { Brand } from '../../domain/entities/Brand';
@@ -16,7 +15,7 @@ const DEFAULT_ORG_ID = process.env.DEFAULT_ORGANIZATION_ID || '01911000-0000-700
 // List Brands
 // ============================================================================
 
-export const listBrands = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { search, status } = req.query;
 
   const result = await brandRepo.findAll({
@@ -42,7 +41,7 @@ export const listBrands = async (req: TypedRequest, res: Response): Promise<void
 // View Brand
 // ============================================================================
 
-export const viewBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
   const brand = await brandRepo.findById(brandId);
 
@@ -61,7 +60,7 @@ export const viewBrand = async (req: TypedRequest, res: Response): Promise<void>
 // Create Brand Form
 // ============================================================================
 
-export const createBrandForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createBrandForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/brands/create', {
     pageName: 'Create Brand',
     brand: { name: '', slug: '', description: '', logoUrl: '', website: '', countryOfOrigin: '' },
@@ -72,7 +71,7 @@ export const createBrandForm = async (req: TypedRequest, res: Response): Promise
 // Create Brand
 // ============================================================================
 
-export const createBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = (req.body || {}) as {
     name?: string;
     slug?: string;
@@ -111,7 +110,7 @@ export const createBrand = async (req: TypedRequest, res: Response): Promise<voi
 // Edit Brand Form
 // ============================================================================
 
-export const editBrandForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editBrandForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
   const brand = await brandRepo.findById(brandId);
 
@@ -130,7 +129,7 @@ export const editBrandForm = async (req: TypedRequest, res: Response): Promise<v
 // Update Brand
 // ============================================================================
 
-export const updateBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
   const body = (req.body || {}) as {
     name?: string;
@@ -178,7 +177,7 @@ export const updateBrand = async (req: TypedRequest, res: Response): Promise<voi
 // Delete Brand (soft delete — archives)
 // ============================================================================
 
-export const deleteBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
 
   try {

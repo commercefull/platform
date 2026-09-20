@@ -3,13 +3,12 @@
  * Admin views for managing import jobs
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageImportJobs, manageImportMappings, manageImportErrors } from '../../application/useCases/wired';
 import type { ImportJobType, ImportSource, ImportJobStatus } from '../../domain/entities/ImportJob';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listImportJobs = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listImportJobs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.user!;
   if (!organizationId) {
     adminRespond(req, res, 'error', { pageName: 'Error', error: 'Organization not found' });
@@ -30,7 +29,7 @@ export const listImportJobs = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const viewImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   const job = await manageImportJobs.getJob(importJobId);
 
@@ -46,18 +45,18 @@ export const viewImportJob = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const createImportJobForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createImportJobForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'migration/create', { pageName: 'Create Import Job' });
 };
 
-export const createImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.user!;
   if (!organizationId) {
     adminRespond(req, res, 'error', { pageName: 'Error', error: 'Organization not found' });
     return;
   }
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const job = await manageImportJobs.createJob({
     organizationId,
     jobType: body.jobType as ImportJobType,
@@ -72,31 +71,31 @@ export const createImportJob = async (req: TypedRequest, res: Response): Promise
   res.redirect(`/admin/migration/${job.importJobId}?success=Import job created successfully`);
 };
 
-export const startImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const startImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.startJob(importJobId);
   res.redirect(`/admin/migration/${importJobId}?success=Import job started`);
 };
 
-export const pauseImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const pauseImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.pauseJob(importJobId);
   res.redirect(`/admin/migration/${importJobId}?success=Import job paused`);
 };
 
-export const cancelImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.cancelJob(importJobId);
   res.redirect(`/admin/migration/${importJobId}?success=Import job cancelled`);
 };
 
-export const deleteImportJob = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.deleteJob(importJobId);
   res.redirect('/admin/migration?success=Import job deleted');
 };
 
-export const viewImportMappings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewImportMappings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   const { entityType } = req.query;
   const mappings = await manageImportMappings.findByJob(importJobId, entityType as string | undefined);
@@ -109,7 +108,7 @@ export const viewImportMappings = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const viewImportErrors = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewImportErrors = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   const { severity, resolved } = req.query;
   const errors = await manageImportErrors.findByJob(importJobId, {
@@ -126,7 +125,7 @@ export const viewImportErrors = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const resolveImportError = async (req: TypedRequest, res: Response): Promise<void> => {
+export const resolveImportError = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importErrorId } = req.params;
   await manageImportErrors.resolveError(importErrorId);
   res.redirect('back');

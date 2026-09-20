@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManagePaymentGatewaysUseCase } from '../../application/useCases/ManagePaymentGateways';
 import { ManagePaymentDisputesUseCase } from '../../application/useCases/ManagePaymentDisputes';
 import { ManagePaymentFeesUseCase } from '../../application/useCases/ManagePaymentFees';
@@ -20,7 +19,7 @@ const managePaymentReportsUseCase = new ManagePaymentReportsUseCase();
 // Payment Gateways
 // ============================================================================
 
-export const listPaymentGateways = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentGateways = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // For now, we'll use a default organization ID. In a real app, this would come from the authenticated user
   const organizationId = 'default-organization';
 
@@ -34,17 +33,28 @@ export const listPaymentGateways = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const createPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPaymentGatewayForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'payments/gateways/create', {
     pageName: 'Create Payment Gateway',
   });
 };
 
-export const createPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const organizationId = 'default-organization';
-    const body = req.body as RequestBody;
-    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body as {
+      name: string;
+      provider: string;
+      isActive?: string | boolean;
+      isDefault?: string | boolean;
+      isTestMode?: string | boolean;
+      apiKey?: string;
+      apiSecret?: string;
+      publicKey?: string;
+      webhookSecret?: string;
+      apiEndpoint?: string;
+    };
 
     const gateway = await managePaymentGatewaysUseCase.create({
       organizationId,
@@ -63,7 +73,7 @@ export const createPaymentGateway = async (req: TypedRequest, res: Response): Pr
       processingFees: { percentage: 2.9, fixed: 0.3 },
       metadata: {},
       checkoutSettings: {},
-    });
+    } as Parameters<typeof managePaymentGatewaysUseCase.create>[0]);
 
     res.redirect(`/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
   } catch (error: unknown) {
@@ -72,12 +82,12 @@ export const createPaymentGateway = async (req: TypedRequest, res: Response): Pr
     adminRespond(req, res, 'payments/gateways/create', {
       pageName: 'Create Payment Gateway',
       error: (error as Error).message || 'Failed to create payment gateway',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewPaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
 
   const gateway = await managePaymentGatewaysUseCase.findById(gatewayId);
@@ -98,7 +108,7 @@ export const viewPaymentGateway = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editPaymentGatewayForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
 
   const gateway = await managePaymentGatewaysUseCase.findById(gatewayId);
@@ -117,11 +127,11 @@ export const editPaymentGatewayForm = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const updatePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
 
   if (name !== undefined) updates.name = name;
@@ -140,7 +150,7 @@ export const updatePaymentGateway = async (req: TypedRequest, res: Response): Pr
   res.redirect(`/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
 };
 
-export const deletePaymentGateway = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
 
   const success = await managePaymentGatewaysUseCase.delete(gatewayId);
@@ -156,7 +166,7 @@ export const deletePaymentGateway = async (req: TypedRequest, res: Response): Pr
 // Payment Methods
 // ============================================================================
 
-export const listPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = 'default-organization';
 
   const methods = await managePaymentGatewaysUseCase.findAllMethodConfigs(organizationId);
@@ -173,7 +183,7 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
 // Payment Transactions
 // ============================================================================
 
-export const listPaymentTransactions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentTransactions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // For demonstration, we'll get recent transactions
   // In a real app, you'd implement pagination and filtering
   const transactions: unknown[] = []; // Would fetch from repository
@@ -190,7 +200,7 @@ export const listPaymentTransactions = async (req: TypedRequest, res: Response):
 // Payment Disputes
 // ============================================================================
 
-export const listDisputes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listDisputes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status } = req.query;
   const allDisputes = await managePaymentDisputesUseCase.findAll(status as string | undefined, 100);
 
@@ -202,7 +212,7 @@ export const listDisputes = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const viewDispute = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewDispute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { disputeId } = req.params;
   const dispute = await managePaymentDisputesUseCase.findById(disputeId);
 
@@ -218,10 +228,10 @@ export const viewDispute = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const updateDisputeStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateDisputeStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { disputeId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as { status: string };
     const { status } = body;
     const resolvedAt = status === 'resolved' ? new Date() : undefined;
 
@@ -237,7 +247,7 @@ export const updateDisputeStatus = async (req: TypedRequest, res: Response): Pro
 // Payment Fees
 // ============================================================================
 
-export const listPaymentFees = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentFees = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fees = await managePaymentFeesUseCase.findAll(100);
 
   adminRespond(req, res, 'payments/fees/index', {
@@ -251,7 +261,7 @@ export const listPaymentFees = async (req: TypedRequest, res: Response): Promise
 // Payment Settings
 // ============================================================================
 
-export const listPaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const allSettings = await managePaymentSettingsUseCase.findAll();
 
   adminRespond(req, res, 'payments/settings/index', {
@@ -261,10 +271,10 @@ export const listPaymentSettings = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const updatePaymentSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePaymentSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { organizationId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
 
     const booleanFields = [
       'capturePaymentsAutomatically',
@@ -308,7 +318,7 @@ export const updatePaymentSettings = async (req: TypedRequest, res: Response): P
 // Payment Balance
 // ============================================================================
 
-export const viewPaymentBalance = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPaymentBalance = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const balances = await getPaymentBalancesUseCase.findAll();
 
   adminRespond(req, res, 'payments/balance/index', {
@@ -322,7 +332,7 @@ export const viewPaymentBalance = async (req: TypedRequest, res: Response): Prom
 // Payment Reports
 // ============================================================================
 
-export const listPaymentReports = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentReports = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const reports = await managePaymentReportsUseCase.findAll(100);
 
   adminRespond(req, res, 'payments/reports/index', {
@@ -332,7 +342,7 @@ export const listPaymentReports = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const viewPaymentReport = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPaymentReport = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { reportId } = req.params;
   const report = await managePaymentReportsUseCase.findById(reportId);
 

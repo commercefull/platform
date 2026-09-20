@@ -3,11 +3,11 @@
  * Manages return policy rules (Epic I + Epic F).
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { ReturnRuleRepo as returnRuleRepo } from '../../application/wired';
+import type { RefundMethod, ReturnRuleScope } from '../../domain/entities/ReturnRule';
 
 // Use the repository via the infrastructure barrel
 
@@ -15,7 +15,7 @@ import { ReturnRuleRepo as returnRuleRepo } from '../../application/wired';
 // List Return Rules
 // ============================================================================
 
-export const listReturnRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listReturnRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // In production this would query the DB; for now we show the management screen
   let rules: never[] = [];
   try {
@@ -36,9 +36,9 @@ export const listReturnRules = async (req: TypedRequest, res: Response): Promise
 // Create Return Rule
 // ============================================================================
 
-export const createReturnRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       name,
       description,
@@ -56,7 +56,24 @@ export const createReturnRule = async (req: TypedRequest, res: Response): Promis
       refundMethod,
       priority,
       isActive,
-    } = body;
+    } = body as {
+      name: string;
+      description?: string;
+      scope?: ReturnRuleScope;
+      categoryId?: string;
+      productId?: string;
+      returnWindowDays?: string;
+      restockingFeePercent?: string;
+      restockingFeeFlat?: string;
+      returnShippingCost?: string;
+      customerPaysReturnShipping?: string;
+      autoApprove?: string;
+      requiresManualReview?: string;
+      requiresInspection?: string;
+      refundMethod?: RefundMethod;
+      priority?: string;
+      isActive?: string;
+    };
 
     await returnRuleRepo.create({
       name,
@@ -88,7 +105,7 @@ export const createReturnRule = async (req: TypedRequest, res: Response): Promis
 // Delete Return Rule
 // ============================================================================
 
-export const deleteReturnRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteReturnRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnRuleId: _returnRuleId } = req.params;
     // Soft delete by deactivating

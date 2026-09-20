@@ -5,12 +5,12 @@
  * Mounted at /business/audit/*
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { auditRepository } from '../../application/useCases/wired';
 
 export class AuditAdminController {
-  listLogs = asyncHandler(async (req: Request, res: Response) => {
+  listLogs = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const filters: Record<string, string | undefined> = {
       actorId: req.query.actorId as string | undefined,
       actorType: req.query.actorType as string | undefined,
@@ -34,7 +34,7 @@ export class AuditAdminController {
     res.json({ success: true, data: result });
   });
 
-  getLog = asyncHandler(async (req: Request, res: Response) => {
+  getLog = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const log = await auditRepository.findById(String(req.params.id));
     if (!log) {
       res.status(404).json({ success: false, error: 'Audit log entry not found' });
@@ -43,19 +43,19 @@ export class AuditAdminController {
     res.json({ success: true, data: log.toJSON() });
   });
 
-  verifyChain = asyncHandler(async (req: Request, res: Response) => {
+  verifyChain = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const fromId = req.query.fromId as string | undefined;
     const toId = req.query.toId as string | undefined;
     const result = await auditRepository.verifyChain(fromId, toId);
     res.json({ success: true, data: result });
   });
 
-  getStats = asyncHandler(async (_req: Request, res: Response) => {
+  getStats = asyncHandler(async (_req: HttpRequest, res: HttpResponse) => {
     const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
     res.json({ success: true, data: { byAction, byActor } });
   });
 
-  findByCorrelationId = asyncHandler(async (req: Request, res: Response) => {
+  findByCorrelationId = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const logs = await auditRepository.findByCorrelationId(String(req.params.correlationId));
     if (logs.length === 0) {
       res.status(404).json({ success: false, error: 'No audit logs found for correlation ID' });

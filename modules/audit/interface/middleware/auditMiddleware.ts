@@ -10,7 +10,7 @@
  * or request params.
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { recordAuditLogUseCase } from '../../application/useCases/wired';
 import { logger } from '../../../../libs/logger';
 import type { AuditAction, ActorType, ResourceType } from '../../domain/enums/AuditAction';
@@ -26,7 +26,7 @@ interface AuditConfig {
  * Map HTTP method + route path to an audit config.
  * This is used for automatic audit logging on mutating routes.
  */
-function inferAuditConfig(req: Request): AuditConfig | null {
+function inferAuditConfig(req: HttpRequest): AuditConfig | null {
   const method = req.method.toUpperCase();
   if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     return null;
@@ -82,7 +82,7 @@ function inferAction(method: string, _segment: string, hasId: boolean): AuditAct
  * Express middleware that records an audit entry after a mutating request.
  * Only logs if the response status is 2xx.
  */
-export function auditMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function auditMiddleware(req: HttpRequest, res: HttpResponse, next: HttpNext): void {
   const config = inferAuditConfig(req);
   if (!config) {
     return next();
@@ -90,7 +90,7 @@ export function auditMiddleware(req: Request, res: Response, next: NextFunction)
 
   // Hook into response finish to capture the result
   const originalSend = res.send.bind(res);
-  res.send = function (body: unknown): Response {
+  res.send = function (body: unknown): HttpResponse {
     // Restore original send
     res.send = originalSend;
 
@@ -186,7 +186,7 @@ export async function recordAudit(
   actor: { id: string; type: ActorType; email?: string; name?: string; organizationId?: string; storeId?: string },
   resource: { id?: string; name?: string },
   metadata?: Record<string, unknown>,
-  req?: Request,
+  req?: HttpRequest,
 ): Promise<void> {
   await recordAuditLogUseCase.execute({
     actorId: actor.id,

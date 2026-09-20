@@ -3,12 +3,12 @@
  * Defines routes for media operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { MediaController } from './MediaController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 const mediaController = new MediaController();
 
 router.use(isOrganizationLoggedIn);

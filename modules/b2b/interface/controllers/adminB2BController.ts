@@ -3,12 +3,11 @@
  * Admin views for B2B companies, users, quotes, and approval workflows
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageCompanyUseCase, manageQuoteUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listB2BCompanies = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listB2BCompanies = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
   const companies = await manageCompanyUseCase.listByOrganization(organizationId);
 
@@ -19,7 +18,7 @@ export const listB2BCompanies = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const viewB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   const company = await manageCompanyUseCase.get(companyId);
 
@@ -38,13 +37,13 @@ export const viewB2BCompany = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createB2BCompanyForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createB2BCompanyForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'b2b/companies/create', { pageName: 'Create B2B Company' });
 };
 
-export const createB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const company = await manageCompanyUseCase.create({
     ...(body as Record<string, unknown>),
     organizationId,
@@ -53,7 +52,7 @@ export const createB2BCompany = async (req: TypedRequest, res: Response): Promis
   res.redirect(`/admin/b2b/companies/${company.companyId}?success=Company created successfully`);
 };
 
-export const editB2BCompanyForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editB2BCompanyForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   const company = await manageCompanyUseCase.get(companyId);
 
@@ -68,32 +67,32 @@ export const editB2BCompanyForm = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const updateB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   await manageCompanyUseCase.updateProfile(companyId, body as Parameters<typeof manageCompanyUseCase.updateProfile>[1]);
   res.redirect(`/admin/b2b/companies/${companyId}?success=Company updated successfully`);
 };
 
-export const approveB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.approve(companyId);
   res.redirect(`/admin/b2b/companies/${companyId}?success=Company approved`);
 };
 
-export const suspendB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const suspendB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.suspend(companyId);
   res.redirect(`/admin/b2b/companies/${companyId}?success=Company suspended`);
 };
 
-export const reactivateB2BCompany = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reactivateB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.reactivate(companyId);
   res.redirect(`/admin/b2b/companies/${companyId}?success=Company reactivated`);
 };
 
-export const listB2BQuotes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listB2BQuotes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
   const { companyId, status } = req.query as { companyId?: string; status?: string };
 
@@ -114,7 +113,7 @@ export const listB2BQuotes = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const viewB2BQuote = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewB2BQuote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { quoteId } = req.params;
   const quote = await manageQuoteUseCase.get(quoteId);
 

@@ -3,7 +3,7 @@
  * Handlers for customer-facing stored payment method operations.
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const PaymentRepo = paymentDataRepository.payments;
@@ -14,7 +14,7 @@ import { paymentDataRepository } from '../../application/wired';
 // Stored Payment Methods
 // ============================================================================
 
-export const listStoredMethods = async (req: Request, res: Response): Promise<void> => {
+export const listStoredMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id;
   if (!customerId) {
     errorResponse(res, 'Authentication required', 401);
@@ -24,13 +24,23 @@ export const listStoredMethods = async (req: Request, res: Response): Promise<vo
   successResponse(res, { methods });
 };
 
-export const saveStoredMethod = async (req: Request, res: Response): Promise<void> => {
+export const saveStoredMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id;
   if (!customerId) {
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const { organizationId, type, provider, providerToken, isDefault, last4, brand, expiryMonth, expiryYear } = req.body;
+  const { organizationId, type, provider, providerToken, isDefault, last4, brand, expiryMonth, expiryYear } = req.body as {
+    organizationId?: string;
+    type?: string;
+    provider?: string;
+    providerToken?: string;
+    isDefault?: boolean;
+    last4?: string;
+    brand?: string;
+    expiryMonth?: number;
+    expiryYear?: number;
+  };
   if (!type || !provider || !providerToken) {
     errorResponse(res, 'type, provider, and providerToken are required', 400);
     return;
@@ -53,7 +63,7 @@ export const saveStoredMethod = async (req: Request, res: Response): Promise<voi
   successResponse(res, result, 201);
 };
 
-export const setDefaultMethod = async (req: Request, res: Response): Promise<void> => {
+export const setDefaultMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id;
   if (!customerId) {
     errorResponse(res, 'Authentication required', 401);
@@ -68,7 +78,7 @@ export const setDefaultMethod = async (req: Request, res: Response): Promise<voi
   successResponse(res, { method });
 };
 
-export const deleteStoredMethod = async (req: Request, res: Response): Promise<void> => {
+export const deleteStoredMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodId } = req.params;
   const customerId = req.user?.customerId || req.user?.id || req.user?._id;
   if (!customerId) {

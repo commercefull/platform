@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { productAttributeRepository } from '../../application/wired';
 
 const attributeGroupRepo = productAttributeRepository.groups;
@@ -9,7 +8,7 @@ class AttributeGroupController {
    * GET /attribute-groups
    * List all attribute groups
    */
-  async listAttributeGroups(req: TypedRequest, res: Response): Promise<void> {
+  async listAttributeGroups(req: HttpRequest, res: HttpResponse): Promise<void> {
     const groups = await attributeGroupRepo.findAll();
 
     res.json({
@@ -22,7 +21,7 @@ class AttributeGroupController {
    * GET /attribute-groups/:id
    * Get a single attribute group by ID
    */
-  async getAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
+  async getAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const group = await attributeGroupRepo.findOne(id);
 
@@ -44,7 +43,7 @@ class AttributeGroupController {
    * GET /attribute-groups/code/:code
    * Get a single attribute group by code
    */
-  async getAttributeGroupByCode(req: TypedRequest, res: Response): Promise<void> {
+  async getAttributeGroupByCode(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { code } = req.params;
     const group = await attributeGroupRepo.findByCode(code);
 
@@ -66,7 +65,7 @@ class AttributeGroupController {
    * POST /attribute-groups
    * Create a new attribute group
    */
-  async createAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
+  async createAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { name, code, description, sortOrder } = req.body as { name?: string; code?: string; description?: string; sortOrder?: number };
 
     // Validate required fields
@@ -105,7 +104,7 @@ class AttributeGroupController {
    * PUT /attribute-groups/:id
    * Update an attribute group
    */
-  async updateAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
+  async updateAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
     const { name, description, sortOrder } = req.body as { name?: string; description?: string; sortOrder?: number };
 
@@ -135,7 +134,7 @@ class AttributeGroupController {
    * DELETE /attribute-groups/:id
    * Delete an attribute group
    */
-  async deleteAttributeGroup(req: TypedRequest, res: Response): Promise<void> {
+  async deleteAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
 
     // Check if group exists

@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { OrganizationRepo, Organization } from '../../application/wired';
 
 interface CreateOrganizationBody {
@@ -65,7 +64,7 @@ interface UpdateOrganizationPaymentInfoBody {
 
 const repo = new OrganizationRepo();
 
-export const getOrganizations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrganizations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
   const status = req.query.status as Organization['status'] | undefined;
@@ -85,7 +84,7 @@ export const getOrganizations = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const getOrganizationById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrganizationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const org = await repo.findById(id);
 
@@ -98,8 +97,8 @@ export const getOrganizationById = async (req: TypedRequest, res: Response): Pro
 };
 
 export const createOrganization = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateOrganizationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateOrganizationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { name, email, phone, website, logoUrl, logo, description, password, status = 'pending' } = req.body;
 
@@ -129,8 +128,8 @@ export const createOrganization = async (
 };
 
 export const updateOrganization = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateOrganizationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { name, email, phone, website, logoUrl, description, status } = req.body;
@@ -154,7 +153,7 @@ export const updateOrganization = async (
   res.status(200).json({ success: true, data: updated, message: 'Organization updated successfully' });
 };
 
-export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existing = await repo.findById(id);
@@ -172,7 +171,7 @@ export const deleteOrganization = async (req: TypedRequest, res: Response): Prom
   }
 };
 
-export const getOrganizationStores = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrganizationStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const org = await repo.findById(id);
 
@@ -186,7 +185,7 @@ export const getOrganizationStores = async (req: TypedRequest, res: Response): P
   res.status(200).json({ success: true, data: stores });
 };
 
-export const getOrganizationAddresses = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrganizationAddresses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
 
   const org = await repo.findById(organizationId);
@@ -201,8 +200,8 @@ export const getOrganizationAddresses = async (req: TypedRequest, res: Response)
 };
 
 export const addOrganizationAddress = async (
-  req: TypedRequest<Record<string, string>, unknown, AddOrganizationAddressBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, AddOrganizationAddressBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { organizationId } = req.params;
   const { addressLine1, addressLine2, city, state, postalCode, country, isPrimary = false } = req.body;
@@ -233,8 +232,8 @@ export const addOrganizationAddress = async (
 };
 
 export const updateOrganizationAddress = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationAddressBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateOrganizationAddressBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { organizationId, addressId } = req.params;
   const { addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
@@ -267,7 +266,7 @@ export const updateOrganizationAddress = async (
   });
 };
 
-export const getOrganizationPaymentInfo = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrganizationPaymentInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
 
   const org = await repo.findById(organizationId);
@@ -282,8 +281,8 @@ export const getOrganizationPaymentInfo = async (req: TypedRequest, res: Respons
 };
 
 export const addOrganizationPaymentInfo = async (
-  req: TypedRequest<Record<string, string>, unknown, AddOrganizationPaymentInfoBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, AddOrganizationPaymentInfoBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { organizationId } = req.params;
   const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified = false } = req.body;
@@ -320,8 +319,8 @@ export const addOrganizationPaymentInfo = async (
 };
 
 export const updateOrganizationPaymentInfo = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateOrganizationPaymentInfoBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateOrganizationPaymentInfoBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { organizationId, paymentInfoId } = req.params;
   const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified } = req.body;

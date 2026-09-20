@@ -4,13 +4,13 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { CreateProductCommand } from '../../application/useCases/CreateProduct';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { UpdateProductCommand } from '../../application/useCases/UpdateProduct';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
+import type { ProductQaStatus } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import {
   deleteProductUseCase,
@@ -40,7 +40,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // List Products
 // ============================================================================
 
-export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, visibility, categoryId, search, limit, offset, orderBy, orderDirection } = req.query;
 
   const filters: Record<string, unknown> = {};
@@ -91,7 +91,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
 // View Product
 // ============================================================================
 
-export const viewProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   const command = new GetProductCommand(productId, undefined, undefined, true, true);
@@ -136,7 +136,7 @@ export const viewProduct = async (req: TypedRequest, res: Response): Promise<voi
 // Create Product Form
 // ============================================================================
 
-export const createProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const [productTypes, categories] = await Promise.all([listProductTypesUseCase.execute(), manageCategoriesUseCase.findActive()]);
 
   adminRespond(req, res, 'products/create', {
@@ -153,10 +153,39 @@ export const createProductForm = async (req: TypedRequest, res: Response): Promi
 // Create Product
 // ============================================================================
 
-export const createProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const organizationId = req.user?.organizationId;
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      name: string;
+      description?: string;
+      productTypeId: string;
+      sku?: string;
+      slug?: string;
+      shortDescription?: string;
+      categoryId?: string;
+      basePrice: string;
+      salePrice?: string;
+      cost?: string;
+      currencyCode?: string;
+      weight?: string;
+      weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
+      length?: string;
+      width?: string;
+      height?: string;
+      dimensionUnit?: 'cm' | 'in' | 'm' | 'mm';
+      isFeatured?: string | boolean;
+      isVirtual?: string | boolean;
+      isDownloadable?: string | boolean;
+      isSubscription?: string | boolean;
+      isTaxable?: string | boolean;
+      taxClass?: string;
+      metaTitle?: string;
+      metaDescription?: string;
+      metaKeywords?: string;
+      tags?: string[];
+      metadata?: Record<string, unknown>;
+    };
     const {
       name,
       description,
@@ -193,7 +222,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
       adminRespond(req, res, 'products/create', {
         pageName: 'Create Product',
         error: 'Product name is required',
-        formData: req.body as RequestBody,
+        formData: req.body as HttpRequestBody,
         productTypes,
         categories,
         attributes: [],
@@ -246,7 +275,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
     adminRespond(req, res, 'products/create', {
       pageName: 'Create Product',
       error: (error as Error).message || 'Failed to create product',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
       productTypes,
       categories,
       attributes: [],
@@ -258,7 +287,7 @@ export const createProduct = async (req: TypedRequest, res: Response): Promise<v
 // Edit Product Form
 // ============================================================================
 
-export const editProductForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editProductForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   const command = new GetProductCommand(productId, undefined, undefined, true, true);
@@ -293,9 +322,9 @@ export const editProductForm = async (req: TypedRequest, res: Response): Promise
 // Update Product
 // ============================================================================
 
-export const updateProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const updates = req.body as RequestBody;
+  const updates = req.body as HttpRequestBody;
 
   const command = new UpdateProductCommand(productId, updates);
   await updateProductUseCase.execute(command);
@@ -307,7 +336,7 @@ export const updateProduct = async (req: TypedRequest, res: Response): Promise<v
 // Delete Product (AJAX)
 // ============================================================================
 
-export const deleteProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { permanent } = req.query;
 
@@ -326,9 +355,9 @@ export const deleteProduct = async (req: TypedRequest, res: Response): Promise<v
 // Update Product Status (AJAX)
 // ============================================================================
 
-export const updateProductStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as { status: ProductStatus };
   const { status } = body;
 
   const validStatuses = Object.values(ProductStatus);
@@ -349,7 +378,7 @@ export const updateProductStatus = async (req: TypedRequest, res: Response): Pro
 // Publish Product (AJAX)
 // ============================================================================
 
-export const publishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   try {
@@ -364,7 +393,7 @@ export const publishProduct = async (req: TypedRequest, res: Response): Promise<
 // Unpublish Product (AJAX)
 // ============================================================================
 
-export const unpublishProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const unpublishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
   try {
@@ -379,7 +408,7 @@ export const unpublishProduct = async (req: TypedRequest, res: Response): Promis
 // Product Categories
 // ============================================================================
 
-export const listProductCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageProductCategoriesUseCase.findAll();
   adminRespond(req, res, 'products/categories/index', {
     pageName: 'Product Categories',
@@ -388,7 +417,7 @@ export const listProductCategories = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const createProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductCategoryForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageProductCategoriesUseCase.findAll();
   adminRespond(req, res, 'products/categories/form', {
     pageName: 'Create Product Category',
@@ -398,9 +427,19 @@ export const createProductCategoryForm = async (req: TypedRequest, res: Response
   });
 };
 
-export const createProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      name: string;
+      slug?: string;
+      description?: string;
+      parentId?: string;
+      position: string;
+      isActive?: string;
+      imageUrl?: string;
+      metaTitle?: string;
+      metaDescription?: string;
+    };
     const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = body;
     await manageProductCategoriesUseCase.create({
       name,
@@ -420,7 +459,7 @@ export const createProductCategory = async (req: TypedRequest, res: Response): P
   }
 };
 
-export const editProductCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editProductCategoryForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const [category, categories] = await Promise.all([
     manageProductCategoriesUseCase.findById(categoryId),
@@ -438,10 +477,20 @@ export const editProductCategoryForm = async (req: TypedRequest, res: Response):
   });
 };
 
-export const updateProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { categoryId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      name?: string;
+      slug?: string;
+      description?: string;
+      parentId?: string;
+      position: string;
+      isActive?: string;
+      imageUrl?: string;
+      metaTitle?: string;
+      metaDescription?: string;
+    };
     const { name, slug, description, parentId, position, isActive, imageUrl, metaTitle, metaDescription } = body;
     await manageProductCategoriesUseCase.update(categoryId, {
       name,
@@ -461,7 +510,7 @@ export const updateProductCategory = async (req: TypedRequest, res: Response): P
   }
 };
 
-export const deleteProductCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProductCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { categoryId } = req.params;
     await manageProductCategoriesUseCase.softDelete(categoryId);
@@ -476,7 +525,7 @@ export const deleteProductCategory = async (req: TypedRequest, res: Response): P
 // Product Tags
 // ============================================================================
 
-export const listProductTags = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductTags = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const tags = await manageProductTagsUseCase.findAll();
   adminRespond(req, res, 'products/tags/index', {
     pageName: 'Product Tags',
@@ -485,9 +534,9 @@ export const listProductTags = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const createProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductTag = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as { name: string; slug?: string; description?: string };
     const { name, slug, description } = body;
     await manageProductTagsUseCase.create({
       name,
@@ -501,7 +550,7 @@ export const createProductTag = async (req: TypedRequest, res: Response): Promis
   }
 };
 
-export const deleteProductTag = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProductTag = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { tagId } = req.params;
     await manageProductTagsUseCase.softDelete(tagId);
@@ -516,7 +565,7 @@ export const deleteProductTag = async (req: TypedRequest, res: Response): Promis
 // Product Collections
 // ============================================================================
 
-export const listProductCollections = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const collections = await manageProductCollectionsUseCase.findAll();
   adminRespond(req, res, 'products/collections/index', {
     pageName: 'Product Collections',
@@ -525,7 +574,7 @@ export const listProductCollections = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const createProductCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'products/collections/form', {
     pageName: 'Create Product Collection',
     collection: null,
@@ -533,9 +582,16 @@ export const createProductCollectionForm = async (req: TypedRequest, res: Respon
   });
 };
 
-export const createProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      name: string;
+      slug?: string;
+      description?: string;
+      imageUrl?: string;
+      isActive?: string;
+      _position?: unknown;
+    };
     const { name, slug, description, imageUrl, isActive, _position } = body;
     await manageProductCollectionsUseCase.create({
       name,
@@ -552,7 +608,7 @@ export const createProductCollection = async (req: TypedRequest, res: Response):
   }
 };
 
-export const editProductCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editProductCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { collectionId } = req.params;
   const collection = await manageProductCollectionsUseCase.findById(collectionId);
   if (!collection) {
@@ -566,10 +622,17 @@ export const editProductCollectionForm = async (req: TypedRequest, res: Response
   });
 };
 
-export const updateProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { collectionId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      name?: string;
+      slug?: string;
+      description?: string;
+      imageUrl?: string;
+      isActive?: string;
+      _position?: unknown;
+    };
     const { name, slug, description, imageUrl, isActive, _position } = body;
     await manageProductCollectionsUseCase.update(collectionId, {
       name,
@@ -585,7 +648,7 @@ export const updateProductCollection = async (req: TypedRequest, res: Response):
   }
 };
 
-export const deleteProductCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { collectionId } = req.params;
     await manageProductCollectionsUseCase.softDelete(collectionId);
@@ -600,16 +663,16 @@ export const deleteProductCollection = async (req: TypedRequest, res: Response):
 // Product Q&A
 // ============================================================================
 
-export const listProductQa = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductQa = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const qaList = await manageProductQaUseCase.findByProduct(productId);
   res.render('admin/views/products/partials/qa', { qaList, productId });
 };
 
-export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId, qaId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as { status: ProductQaStatus };
     const { status } = body;
     await manageProductQaUseCase.updateStatus(qaId, status);
     res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
@@ -625,7 +688,7 @@ export const updateQaStatus = async (req: TypedRequest, res: Response): Promise<
 // Product Review Media
 // ============================================================================
 
-export const listReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const reviews = await manageReviewMediaUseCase.findReviewsByProduct(productId);
   const mediaByReview = await Promise.all(
@@ -637,7 +700,7 @@ export const listReviewMedia = async (req: TypedRequest, res: Response): Promise
   res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
 };
 
-export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId, mediaId } = req.params;
     await manageReviewMediaUseCase.deleteMedia(mediaId);
@@ -654,16 +717,27 @@ export const deleteReviewMedia = async (req: TypedRequest, res: Response): Promi
 // Product Prices
 // ============================================================================
 
-export const listProductPrices = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProductPrices = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const prices = await manageProductPricesUseCase.findByProduct(productId);
   res.render('admin/views/products/partials/prices', { prices, productId });
 };
 
-export const upsertProductPrice = async (req: TypedRequest, res: Response): Promise<void> => {
+export const upsertProductPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as {
+      productPriceId?: string;
+      currencyCode: string;
+      amount: string;
+      compareAtAmount?: string;
+      minQuantity?: string;
+      maxQuantity?: string;
+      startsAt?: string;
+      endsAt?: string;
+      priceListId?: string;
+      productVariantId?: string;
+    };
     const {
       productPriceId,
       currencyCode,

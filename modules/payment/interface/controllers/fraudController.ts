@@ -3,14 +3,13 @@
  * Handles admin/merchant fraud prevention operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { paymentBillingDataRepository } from '../../application/wired';
 import { FraudRule, RuleType, CheckStatus, BlacklistType, RiskLevel } from '../../application/wired';
 
 const fraudRepo = paymentBillingDataRepository.fraud;
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 // ============================================================================
 // Fraud Rules

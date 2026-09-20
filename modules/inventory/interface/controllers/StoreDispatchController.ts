@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const InventoryRepository = inventoryDataRepository.items;
 import { CreateStoreDispatchUseCase } from '../../application/useCases/CreateStoreDispatch';
@@ -39,17 +38,17 @@ interface CancelDispatchBody {
   reason?: string;
 }
 
-function respond(res: Response, data: unknown, statusCode: number = 200): void {
+function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(res: Response, message: string, statusCode: number = 500): void {
+function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
 export const createStoreDispatch = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateDispatchBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateDispatchBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.fromStoreId) {
     respondError(res, 'fromStoreId is required', 400);
@@ -71,7 +70,7 @@ export const createStoreDispatch = async (
   respond(res, result, 201);
 };
 
-export const listStoreDispatches = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listStoreDispatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new ListStoreDispatchesUseCase(storeDispatchRepository);
   const result = await useCase.execute({
     fromStoreId: req.query.fromStoreId as string | undefined,
@@ -86,7 +85,7 @@ export const listStoreDispatches = async (req: TypedRequest, res: Response): Pro
   respond(res, result);
 };
 
-export const getStoreDispatch = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoreDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = new GetStoreDispatchUseCase(storeDispatchRepository);
   const result = await useCase.execute(req.params.dispatchId);
 
@@ -99,8 +98,8 @@ export const getStoreDispatch = async (req: TypedRequest, res: Response): Promis
 };
 
 export const approveStoreDispatch = async (
-  req: TypedRequest<Record<string, string>, unknown, ApproveDispatchBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ApproveDispatchBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new ApproveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const actor = req.body.approvedBy || 'test-admin';
@@ -109,8 +108,8 @@ export const approveStoreDispatch = async (
 };
 
 export const dispatchFromStore = async (
-  req: TypedRequest<Record<string, string>, unknown, DispatchItemsBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, DispatchItemsBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new DispatchFromStoreUseCase(storeDispatchRepository, InventoryRepository);
   const actor = req.body.dispatchedBy || 'test-admin';
@@ -119,8 +118,8 @@ export const dispatchFromStore = async (
 };
 
 export const receiveStoreDispatch = async (
-  req: TypedRequest<Record<string, string>, unknown, ReceiveDispatchBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ReceiveDispatchBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new ReceiveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
   const result = await useCase.execute({
@@ -133,8 +132,8 @@ export const receiveStoreDispatch = async (
 };
 
 export const cancelStoreDispatch = async (
-  req: TypedRequest<Record<string, string>, unknown, CancelDispatchBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CancelDispatchBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const useCase = new CancelStoreDispatchUseCase(storeDispatchRepository);
   const result = await useCase.execute(req.params.dispatchId, req.body.reason);

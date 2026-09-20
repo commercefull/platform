@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageCategoriesUseCase } from '../../application/useCases/wired';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 
@@ -13,7 +12,7 @@ import { storefrontRespond } from '../../../../libs/storefrontRespond';
 // Load Categories for Navigation
 // ============================================================================
 
-export const loadCategoriesForNavigation = async (req: TypedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const loadCategoriesForNavigation = async (req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> => {
   try {
     const categories = await manageCategoriesUseCase.findForMenu();
     res.locals.categories = categories;
@@ -28,7 +27,7 @@ export const loadCategoriesForNavigation = async (req: TypedRequest, res: Respon
 // Get Category Navigation Data
 // ============================================================================
 
-export const getCategoriesForNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoriesForNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findForMenu();
   res.json({
     success: true,
@@ -40,7 +39,7 @@ export const getCategoriesForNavigation = async (req: TypedRequest, res: Respons
 // Get All Categories
 // ============================================================================
 
-export const getAllCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getAllCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findActive();
   res.json({
     success: true,
@@ -52,7 +51,7 @@ export const getAllCategories = async (req: TypedRequest, res: Response): Promis
 // Get Category Details
 // ============================================================================
 
-export const getCategoryDetails = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryDetails = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
 
   const category = await manageCategoriesUseCase.findOne(categoryId);
@@ -78,7 +77,7 @@ export const getCategoryDetails = async (req: TypedRequest, res: Response): Prom
 // Category Landing Page
 // ============================================================================
 
-export const getCategoryPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categorySlug } = req.params;
 
   const category = await manageCategoriesUseCase.findBySlug(categorySlug);

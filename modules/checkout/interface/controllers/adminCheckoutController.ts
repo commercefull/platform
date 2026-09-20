@@ -4,11 +4,10 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const checkoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkoutSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/checkout/index', {
     pageName: 'Checkout Settings',
     settings: {},
@@ -18,7 +17,7 @@ export const checkoutSettings = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const updateCheckoutSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCheckoutSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/settings/checkout?success=Checkout settings updated successfully');
   } catch (error: unknown) {
@@ -33,7 +32,7 @@ export const updateCheckoutSettings = async (req: TypedRequest, res: Response): 
   }
 };
 
-export const listPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/checkout/payment-methods', {
     pageName: 'Checkout Payment Methods',
     paymentMethods: [],
@@ -41,11 +40,11 @@ export const listPaymentMethods = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const updatePaymentMethodOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePaymentMethodOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Payment method order updated successfully' });
 };
 
-export const listShippingOptions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listShippingOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'settings/checkout/shipping-options', {
     pageName: 'Checkout Shipping Options',
     shippingOptions: [],
@@ -53,6 +52,6 @@ export const listShippingOptions = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const updateShippingOptionOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateShippingOptionOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Shipping option order updated successfully' });
 };

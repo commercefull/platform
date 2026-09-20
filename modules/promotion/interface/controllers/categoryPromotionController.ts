@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { promotionRuleRepository } from '../../application/wired';
 
 interface CategoryCreateBody {
@@ -20,20 +19,20 @@ type CategoryUpdateBody = Partial<Omit<CategoryCreateBody, 'productCategoryId' |
 
 const categoryPromotionRepo = promotionRuleRepository.categories;
 
-export const getActiveCategoryPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveCategoryPromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const promotions = await categoryPromotionRepo.getActivePromotions();
   res.status(200).json({ success: true, data: promotions || [] });
 };
 
 // Get promotions by category ID
-export const getPromotionsByCategoryId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPromotionsByCategoryId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
   res.status(200).json({ success: true, data: promotions || [] });
 };
 
 // Get promotion by ID
-export const getCategoryPromotionById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryPromotionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const promotion = await categoryPromotionRepo.getById(id);
 
@@ -47,8 +46,8 @@ export const getCategoryPromotionById = async (req: TypedRequest, res: Response)
 
 // Create a new category promotion
 export const createCategoryPromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, CategoryCreateBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CategoryCreateBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const promotionData = req.body;
 
@@ -58,8 +57,8 @@ export const createCategoryPromotion = async (
 
 // Update an existing category promotion
 export const updateCategoryPromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, CategoryUpdateBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CategoryUpdateBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
@@ -69,7 +68,7 @@ export const updateCategoryPromotion = async (
 };
 
 // Delete a category promotion
-export const deleteCategoryPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCategoryPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   await categoryPromotionRepo.delete(id);
   res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });

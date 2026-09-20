@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { contentDataRepository, contentStructureRepository, contentMediaDataRepository } from '../../application/wired';
 
@@ -329,7 +328,7 @@ export class ContentController {
   /**
    * Get all content types with optional filtering
    */
-  getContentTypes = async (req: TypedRequest, res: Response): Promise<void> => {
+  getContentTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
@@ -350,7 +349,7 @@ export class ContentController {
   /**
    * Get content type by ID
    */
-  getContentTypeById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getContentTypeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const contentType = await this.contentRepo.findContentTypeById(id);
 
@@ -371,7 +370,7 @@ export class ContentController {
   /**
    * Get content type by slug
    */
-  getContentTypeBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
+  getContentTypeBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { slug } = req.params;
     const contentType = await this.contentRepo.findContentTypeBySlug(slug);
 
@@ -392,7 +391,10 @@ export class ContentController {
   /**
    * Create a new content type
    */
-  createContentType = async (req: TypedRequest<Record<string, string>, unknown, CreateContentTypeBody>, res: Response): Promise<void> => {
+  createContentType = async (
+    req: HttpRequest<Record<string, string>, unknown, CreateContentTypeBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const {
       name,
       slug,
@@ -438,7 +440,10 @@ export class ContentController {
   /**
    * Update a content type
    */
-  updateContentType = async (req: TypedRequest<Record<string, string>, unknown, UpdateContentTypeBody>, res: Response): Promise<void> => {
+  updateContentType = async (
+    req: HttpRequest<Record<string, string>, unknown, UpdateContentTypeBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { id } = req.params;
     const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
 
@@ -472,7 +477,7 @@ export class ContentController {
   /**
    * Delete a content type
    */
-  deleteContentType = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteContentType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if content type exists
@@ -498,7 +503,7 @@ export class ContentController {
   /**
    * Get all content pages with optional filtering
    */
-  getPages = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     const status = req.query.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined;
@@ -521,7 +526,7 @@ export class ContentController {
   /**
    * Get page by ID
    */
-  getPageById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const page = await this.contentRepo.findPageById(id);
 
@@ -542,7 +547,7 @@ export class ContentController {
   /**
    * Get page with full content by ID
    */
-  getFullPageById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getFullPageById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Fetch the basic page data
@@ -587,7 +592,7 @@ export class ContentController {
   /**
    * Create a new page
    */
-  createPage = async (req: TypedRequest<Record<string, string>, unknown, CreatePageBody>, res: Response): Promise<void> => {
+  createPage = async (req: HttpRequest<Record<string, string>, unknown, CreatePageBody>, res: HttpResponse): Promise<void> => {
     const {
       title,
       slug,
@@ -645,7 +650,7 @@ export class ContentController {
   /**
    * Update a page
    */
-  updatePage = async (req: TypedRequest<Record<string, string>, unknown, UpdatePageBody>, res: Response): Promise<void> => {
+  updatePage = async (req: HttpRequest<Record<string, string>, unknown, UpdatePageBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
 
@@ -692,7 +697,7 @@ export class ContentController {
   /**
    * Delete a page
    */
-  deletePage = async (req: TypedRequest, res: Response): Promise<void> => {
+  deletePage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if page exists
@@ -718,7 +723,7 @@ export class ContentController {
   /**
    * Get blocks for a page
    */
-  getPageBlocks = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageBlocks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
 
     // Check if page exists
@@ -742,7 +747,7 @@ export class ContentController {
   /**
    * Get block by ID
    */
-  getBlockById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getBlockById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const block = await this.contentRepo.findBlockById(id);
 
@@ -763,7 +768,7 @@ export class ContentController {
   /**
    * Create a new content block
    */
-  createBlock = async (req: TypedRequest<Record<string, string>, unknown, CreateBlockBody>, res: Response): Promise<void> => {
+  createBlock = async (req: HttpRequest<Record<string, string>, unknown, CreateBlockBody>, res: HttpResponse): Promise<void> => {
     const { contentPageId, blockTypeId, title, area: _area, sortOrder, content, isVisible = true } = req.body;
 
     // Basic validation
@@ -824,7 +829,7 @@ export class ContentController {
   /**
    * Update a content block
    */
-  updateBlock = async (req: TypedRequest<Record<string, string>, unknown, UpdateBlockBody>, res: Response): Promise<void> => {
+  updateBlock = async (req: HttpRequest<Record<string, string>, unknown, UpdateBlockBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
 
@@ -893,7 +898,7 @@ export class ContentController {
   /**
    * Delete a content block
    */
-  deleteBlock = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteBlock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if block exists
@@ -917,7 +922,7 @@ export class ContentController {
   /**
    * Reorder content blocks
    */
-  reorderBlocks = async (req: TypedRequest<Record<string, string>, unknown, ReorderBlocksBody>, res: Response): Promise<void> => {
+  reorderBlocks = async (req: HttpRequest<Record<string, string>, unknown, ReorderBlocksBody>, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
     const { blockOrders } = req.body;
 
@@ -961,7 +966,7 @@ export class ContentController {
   /**
    * Get all templates with optional filtering
    */
-  getTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
+  getTemplates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
@@ -982,7 +987,7 @@ export class ContentController {
   /**
    * Get template by ID
    */
-  getTemplateById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getTemplateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const template = await this.contentRepo.findTemplateById(id);
 
@@ -1003,7 +1008,7 @@ export class ContentController {
   /**
    * Create a new template
    */
-  createTemplate = async (req: TypedRequest<Record<string, string>, unknown, CreateTemplateBody>, res: Response): Promise<void> => {
+  createTemplate = async (req: HttpRequest<Record<string, string>, unknown, CreateTemplateBody>, res: HttpResponse): Promise<void> => {
     const {
       name,
       slug,
@@ -1053,7 +1058,7 @@ export class ContentController {
   /**
    * Update a template
    */
-  updateTemplate = async (req: TypedRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: Response): Promise<void> => {
+  updateTemplate = async (req: HttpRequest<Record<string, string>, unknown, UpdateTemplateBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { name, slug, description, htmlStructure, areas, isActive } = req.body;
 
@@ -1086,7 +1091,7 @@ export class ContentController {
   /**
    * Delete a template
    */
-  deleteTemplate = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
 
     // Check if template exists
@@ -1110,7 +1115,10 @@ export class ContentController {
   /**
    * Duplicate a template
    */
-  duplicateTemplate = async (req: TypedRequest<Record<string, string>, unknown, DuplicateTemplateBody>, res: Response): Promise<void> => {
+  duplicateTemplate = async (
+    req: HttpRequest<Record<string, string>, unknown, DuplicateTemplateBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { id } = req.params;
     const { name, slug } = req.body;
 
@@ -1149,7 +1157,7 @@ export class ContentController {
   /**
    * Publish a page
    */
-  publishPage = async (req: TypedRequest, res: Response): Promise<void> => {
+  publishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const page = await this.contentRepo.findPageById(id);
     if (!page) {
@@ -1169,7 +1177,7 @@ export class ContentController {
   /**
    * Unpublish a page
    */
-  unpublishPage = async (req: TypedRequest, res: Response): Promise<void> => {
+  unpublishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const page = await this.contentRepo.findPageById(id);
     if (!page) {
@@ -1185,7 +1193,7 @@ export class ContentController {
   /**
    * Schedule a page for future publication
    */
-  schedulePage = async (req: TypedRequest<Record<string, string>, unknown, SchedulePageBody>, res: Response): Promise<void> => {
+  schedulePage = async (req: HttpRequest<Record<string, string>, unknown, SchedulePageBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { scheduledAt } = req.body;
 
@@ -1207,7 +1215,7 @@ export class ContentController {
   /**
    * Duplicate a page with all its blocks
    */
-  duplicatePage = async (req: TypedRequest<Record<string, string>, unknown, DuplicatePageBody>, res: Response): Promise<void> => {
+  duplicatePage = async (req: HttpRequest<Record<string, string>, unknown, DuplicatePageBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { title, slug } = req.body;
 
@@ -1257,7 +1265,7 @@ export class ContentController {
 
   // Category Handlers
 
-  getCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+  getCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 100;
     const offset = parseInt(req.query.offset as string) || 0;
     const parentId = req.query.parentId as string | undefined;
@@ -1267,13 +1275,13 @@ export class ContentController {
     res.status(200).json({ success: true, data: categories });
   };
 
-  getCategoryTree = async (req: TypedRequest, res: Response): Promise<void> => {
+  getCategoryTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
     const categories = await this.categoryRepo.getCategoryTree(isActive);
     res.status(200).json({ success: true, data: categories });
   };
 
-  createCategory = async (req: TypedRequest<Record<string, string>, unknown, CreateCategoryBody>, res: Response): Promise<void> => {
+  createCategory = async (req: HttpRequest<Record<string, string>, unknown, CreateCategoryBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
     if (!name || !slug) {
@@ -1304,7 +1312,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
   };
 
-  getCategoryById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getCategoryById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const category = await this.categoryRepo.findCategoryById(id);
     if (!category) {
@@ -1314,7 +1322,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: category });
   };
 
-  updateCategory = async (req: TypedRequest<Record<string, string>, unknown, UpdateCategoryBody>, res: Response): Promise<void> => {
+  updateCategory = async (req: HttpRequest<Record<string, string>, unknown, UpdateCategoryBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
@@ -1338,7 +1346,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
   };
 
-  deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const existing = await this.categoryRepo.findCategoryById(id);
     if (!existing) {
@@ -1351,7 +1359,7 @@ export class ContentController {
     res.status(200).json({ success: true, message: 'Category deleted successfully' });
   };
 
-  moveCategory = async (req: TypedRequest<Record<string, string>, unknown, MoveCategoryBody>, res: Response): Promise<void> => {
+  moveCategory = async (req: HttpRequest<Record<string, string>, unknown, MoveCategoryBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { newParentId } = req.body;
 
@@ -1361,13 +1369,13 @@ export class ContentController {
 
   // Navigation Handlers
 
-  getNavigations = async (req: TypedRequest, res: Response): Promise<void> => {
+  getNavigations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
     const navigations = await this.navigationRepo.findAllNavigations(isActive);
     res.status(200).json({ success: true, data: navigations });
   };
 
-  createNavigation = async (req: TypedRequest<Record<string, string>, unknown, CreateNavigationBody>, res: Response): Promise<void> => {
+  createNavigation = async (req: HttpRequest<Record<string, string>, unknown, CreateNavigationBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, description, location, isActive } = req.body;
 
     if (!name || !slug) {
@@ -1393,7 +1401,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
   };
 
-  getNavigationById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getNavigationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const navigation = await this.navigationRepo.findNavigationById(id);
     if (!navigation) {
@@ -1403,7 +1411,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: navigation });
   };
 
-  getNavigationWithItems = async (req: TypedRequest, res: Response): Promise<void> => {
+  getNavigationWithItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const navigation = await this.navigationRepo.findNavigationById(id);
     if (!navigation) {
@@ -1415,7 +1423,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: { navigation, items } });
   };
 
-  updateNavigation = async (req: TypedRequest<Record<string, string>, unknown, UpdateNavigationBody>, res: Response): Promise<void> => {
+  updateNavigation = async (req: HttpRequest<Record<string, string>, unknown, UpdateNavigationBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { name, slug, description, location, isActive } = req.body;
 
@@ -1430,13 +1438,16 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
   };
 
-  deleteNavigation = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.navigationRepo.deleteNavigation(id);
     res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
   };
 
-  addNavigationItem = async (req: TypedRequest<Record<string, string>, unknown, AddNavigationItemBody>, res: Response): Promise<void> => {
+  addNavigationItem = async (
+    req: HttpRequest<Record<string, string>, unknown, AddNavigationItemBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { navigationId } = req.params;
     const {
       parentId,
@@ -1487,8 +1498,8 @@ export class ContentController {
   };
 
   updateNavigationItem = async (
-    req: TypedRequest<Record<string, string>, unknown, UpdateNavigationItemBody>,
-    res: Response,
+    req: HttpRequest<Record<string, string>, unknown, UpdateNavigationItemBody>,
+    res: HttpResponse,
   ): Promise<void> => {
     const { id } = req.params;
     const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
@@ -1506,15 +1517,15 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
   };
 
-  deleteNavigationItem = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteNavigationItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.navigationRepo.deleteNavigationItem(id);
     res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
   };
 
   reorderNavigationItems = async (
-    req: TypedRequest<Record<string, string>, unknown, ReorderNavigationItemsBody>,
-    res: Response,
+    req: HttpRequest<Record<string, string>, unknown, ReorderNavigationItemsBody>,
+    res: HttpResponse,
   ): Promise<void> => {
     const { navigationId } = req.params;
     const { itemOrders } = req.body;
@@ -1530,7 +1541,7 @@ export class ContentController {
 
   // Media Handlers
 
-  getMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
     const folderId = req.query.folderId as string | undefined;
@@ -1540,7 +1551,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: media });
   };
 
-  uploadMedia = async (req: TypedRequest<Record<string, string>, unknown, UploadMediaBody>, res: Response): Promise<void> => {
+  uploadMedia = async (req: HttpRequest<Record<string, string>, unknown, UploadMediaBody>, res: HttpResponse): Promise<void> => {
     const {
       title,
       fileName,
@@ -1601,7 +1612,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
   };
 
-  getMediaById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const media = await this.mediaRepo.findMediaById(id);
     if (!media) {
@@ -1611,7 +1622,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: media });
   };
 
-  updateMedia = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaBody>, res: Response): Promise<void> => {
+  updateMedia = async (req: HttpRequest<Record<string, string>, unknown, UpdateMediaBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
 
@@ -1627,7 +1638,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
   };
 
-  deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const media = await this.mediaRepo.findMediaById(id);
     if (!media) {
@@ -1640,7 +1651,10 @@ export class ContentController {
     res.status(200).json({ success: true, message: 'Media deleted successfully' });
   };
 
-  moveMediaToFolder = async (req: TypedRequest<Record<string, string>, unknown, MoveMediaToFolderBody>, res: Response): Promise<void> => {
+  moveMediaToFolder = async (
+    req: HttpRequest<Record<string, string>, unknown, MoveMediaToFolderBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { mediaIds, folderId } = req.body;
 
     if (!mediaIds || !Array.isArray(mediaIds)) {
@@ -1663,18 +1677,21 @@ export class ContentController {
 
   // Media Folder Handlers
 
-  getMediaFolders = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaFolders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const parentId = req.query.parentId as string | undefined;
     const folders = await this.mediaRepo.findAllFolders(parentId);
     res.status(200).json({ success: true, data: folders });
   };
 
-  getMediaFolderTree = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaFolderTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const folders = await this.mediaRepo.findAllFolders();
     res.status(200).json({ success: true, data: folders });
   };
 
-  createMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, CreateMediaFolderBody>, res: Response): Promise<void> => {
+  createMediaFolder = async (
+    req: HttpRequest<Record<string, string>, unknown, CreateMediaFolderBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { name, parentId } = req.body;
 
     if (!name) {
@@ -1694,7 +1711,10 @@ export class ContentController {
     res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
   };
 
-  updateMediaFolder = async (req: TypedRequest<Record<string, string>, unknown, UpdateMediaFolderBody>, res: Response): Promise<void> => {
+  updateMediaFolder = async (
+    req: HttpRequest<Record<string, string>, unknown, UpdateMediaFolderBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { id } = req.params;
     const { name, parentId, sortOrder } = req.body;
 
@@ -1702,7 +1722,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
   };
 
-  deleteMediaFolder = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteMediaFolder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.mediaRepo.deleteFolder(id);
     res.status(200).json({ success: true, message: 'Folder deleted successfully' });
@@ -1710,7 +1730,7 @@ export class ContentController {
 
   // Redirect Handlers
 
-  getRedirects = async (req: TypedRequest, res: Response): Promise<void> => {
+  getRedirects = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 100;
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
@@ -1719,7 +1739,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: redirects });
   };
 
-  createRedirect = async (req: TypedRequest<Record<string, string>, unknown, CreateRedirectBody>, res: Response): Promise<void> => {
+  createRedirect = async (req: HttpRequest<Record<string, string>, unknown, CreateRedirectBody>, res: HttpResponse): Promise<void> => {
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
     if (!sourceUrl || !targetUrl) {
@@ -1747,7 +1767,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
   };
 
-  getRedirectById = async (req: TypedRequest, res: Response): Promise<void> => {
+  getRedirectById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const redirect = await this.redirectRepo.findRedirectById(id);
     if (!redirect) {
@@ -1757,7 +1777,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: redirect });
   };
 
-  updateRedirect = async (req: TypedRequest<Record<string, string>, unknown, UpdateRedirectBody>, res: Response): Promise<void> => {
+  updateRedirect = async (req: HttpRequest<Record<string, string>, unknown, UpdateRedirectBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
@@ -1766,7 +1786,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
   };
 
-  deleteRedirect = async (req: TypedRequest, res: Response): Promise<void> => {
+  deleteRedirect = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const redirect = await this.redirectRepo.findRedirectById(id);
     if (!redirect) {
@@ -1781,7 +1801,7 @@ export class ContentController {
 
   // Page Version Handlers
 
-  getPageVersions = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageVersions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -1796,7 +1816,10 @@ export class ContentController {
     res.status(200).json({ success: true, data: versions });
   };
 
-  createPageVersion = async (req: TypedRequest<Record<string, string>, unknown, CreatePageVersionBody>, res: Response): Promise<void> => {
+  createPageVersion = async (
+    req: HttpRequest<Record<string, string>, unknown, CreatePageVersionBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { pageId } = req.params;
     const { comment } = req.body;
 
@@ -1821,7 +1844,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
   };
 
-  restorePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+  restorePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, versionId } = req.params;
 
     const page = await this.contentRepo.findPageById(pageId);
@@ -1847,7 +1870,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
   };
 
-  deletePageVersion = async (req: TypedRequest, res: Response): Promise<void> => {
+  deletePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { versionId } = req.params;
 
     const version = await this.pageVersionRepo.findVersionById(versionId);
@@ -1862,7 +1885,7 @@ export class ContentController {
 
   // Page Translation Handlers
 
-  getPageTranslations = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageTranslations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
 
     const page = await this.contentRepo.findPageById(pageId);
@@ -1875,7 +1898,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: translations });
   };
 
-  getPageTranslationByLocale = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageTranslationByLocale = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, localeId } = req.params;
 
     const translation = await this.pageTranslationRepo.findTranslationByPageAndLocale(pageId, localeId);
@@ -1888,8 +1911,8 @@ export class ContentController {
   };
 
   createPageTranslation = async (
-    req: TypedRequest<Record<string, string>, unknown, CreatePageTranslationBody>,
-    res: Response,
+    req: HttpRequest<Record<string, string>, unknown, CreatePageTranslationBody>,
+    res: HttpResponse,
   ): Promise<void> => {
     const { pageId } = req.params;
     const {
@@ -1945,8 +1968,8 @@ export class ContentController {
   };
 
   updatePageTranslation = async (
-    req: TypedRequest<Record<string, string>, unknown, UpdatePageTranslationBody>,
-    res: Response,
+    req: HttpRequest<Record<string, string>, unknown, UpdatePageTranslationBody>,
+    res: HttpResponse,
   ): Promise<void> => {
     const { translationId } = req.params;
     const {
@@ -1995,7 +2018,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
   };
 
-  deletePageTranslation = async (req: TypedRequest, res: Response): Promise<void> => {
+  deletePageTranslation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { translationId } = req.params;
 
     const existing = await this.pageTranslationRepo.findTranslationById(translationId);
@@ -2011,7 +2034,7 @@ export class ContentController {
 
   // Categorization Handlers
 
-  getPageCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPageCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
 
     const page = await this.contentRepo.findPageById(pageId);
@@ -2024,7 +2047,10 @@ export class ContentController {
     res.status(200).json({ success: true, data: categorizations });
   };
 
-  assignPageToCategory = async (req: TypedRequest<Record<string, string>, unknown, AssignCategoryBody>, res: Response): Promise<void> => {
+  assignPageToCategory = async (
+    req: HttpRequest<Record<string, string>, unknown, AssignCategoryBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { pageId } = req.params;
     const { categoryId, isPrimary } = req.body;
 
@@ -2055,7 +2081,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
   };
 
-  removePageFromCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  removePageFromCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, categoryId } = req.params;
 
     const deleted = await this.categorizationRepo.deleteCategorizationByPageAndCategory(pageId, categoryId);
@@ -2068,7 +2094,10 @@ export class ContentController {
     res.status(200).json({ success: true, message: 'Page removed from category successfully' });
   };
 
-  setPrimaryCategory = async (req: TypedRequest<Record<string, string>, unknown, SetPrimaryCategoryBody>, res: Response): Promise<void> => {
+  setPrimaryCategory = async (
+    req: HttpRequest<Record<string, string>, unknown, SetPrimaryCategoryBody>,
+    res: HttpResponse,
+  ): Promise<void> => {
     const { pageId } = req.params;
     const { categorizationId } = req.body;
 
@@ -2082,7 +2111,7 @@ export class ContentController {
     res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
   };
 
-  getPagesByCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+  getPagesByCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { categoryId } = req.params;
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -2103,7 +2132,7 @@ export class ContentController {
 
   // Media Usage Handlers
 
-  getMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { mediaId } = req.params;
 
     const media = await this.mediaRepo.findMediaById(mediaId);
@@ -2116,14 +2145,14 @@ export class ContentController {
     res.status(200).json({ success: true, data: usages });
   };
 
-  getMediaUsageByEntity = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaUsageByEntity = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { entityType, entityId } = req.params;
 
     const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
     res.status(200).json({ success: true, data: usages });
   };
 
-  trackMediaUsage = async (req: TypedRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: Response): Promise<void> => {
+  trackMediaUsage = async (req: HttpRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: HttpResponse): Promise<void> => {
     const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
     if (!mediaId || !entityType || !entityId) {
@@ -2143,7 +2172,7 @@ export class ContentController {
     res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
   };
 
-  untrackMediaUsage = async (req: TypedRequest, res: Response): Promise<void> => {
+  untrackMediaUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { usageId } = req.params;
 
     const deleted = await this.mediaUsageRepo.deleteUsage(usageId);
@@ -2155,7 +2184,7 @@ export class ContentController {
     res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
   };
 
-  getMediaUsageCount = async (req: TypedRequest, res: Response): Promise<void> => {
+  getMediaUsageCount = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { mediaId } = req.params;
 
     const count = await this.mediaUsageRepo.getUsageCount(mediaId);

@@ -222,7 +222,7 @@
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
               <span class="text-sm font-medium text-gray-600"><%= t('shared:common.status') %></span>
               <%
-                let statusColor = 'gray';
+                statusColor = 'gray';
                 if (order.status === 'delivered') statusColor = 'green';
                 else if (order.status === 'shipped') statusColor = 'blue';
                 else if (order.status === 'processing') statusColor = 'yellow';

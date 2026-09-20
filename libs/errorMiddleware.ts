@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from './http';
 import { AppError } from './errors';
 import { logger } from './logger';
 import { getCorrelationId } from './correlationId';
@@ -14,12 +14,13 @@ import { getCorrelationId } from './correlationId';
  *
  * Must be registered as the last middleware via app.use(errorMiddleware).
  */
-export function errorMiddleware(err: unknown, req: Request, res: Response, _next: NextFunction): void {
+export function errorMiddleware(err: unknown, req: HttpRequest, res: HttpResponse, _next: HttpNext): void {
   const isProduction = process.env.NODE_ENV === 'production';
 
   // Handle multer errors (file upload validation)
   const multerCode = (err as Record<string, unknown>)?.code as string | undefined;
-  const isMulterError = multerCode === 'LIMIT_FILE_SIZE' ||
+  const isMulterError =
+    multerCode === 'LIMIT_FILE_SIZE' ||
     multerCode === 'LIMIT_UNEXPECTED_FILE' ||
     multerCode === 'LIMIT_FILE_COUNT' ||
     multerCode === 'LIMIT_FIELD_KEY' ||
@@ -35,9 +36,7 @@ export function errorMiddleware(err: unknown, req: Request, res: Response, _next
         ? new AppError(err instanceof Error ? err.message : 'File upload error', 400)
         : new AppError(
             err instanceof Error ? err.message : 'Internal Server Error',
-            (err as Record<string, number>)?.status ??
-              (err as Record<string, number>)?.statusCode ??
-              500,
+            (err as Record<string, number>)?.status ?? (err as Record<string, number>)?.statusCode ?? 500,
           );
 
   const logMeta = {

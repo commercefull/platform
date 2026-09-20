@@ -3,12 +3,12 @@
  * Defines API routes for business/admin customer operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as customerController from '../controllers/CustomerController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Apply authentication middleware
 router.use(isOrganizationLoggedIn);

@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   searchProductsUseCase,
   getSearchSuggestionsUseCase,
@@ -14,7 +13,7 @@ class ProductSearchController {
    * GET /products/search
    * Search products with filters and facets
    */
-  async search(req: TypedRequest, res: Response): Promise<void> {
+  async search(req: HttpRequest, res: HttpResponse): Promise<void> {
     const {
       q,
       query,
@@ -82,7 +81,7 @@ class ProductSearchController {
    * POST /products/search
    * Search products with filters (POST for complex queries)
    */
-  async searchPost(req: TypedRequest, res: Response): Promise<void> {
+  async searchPost(req: HttpRequest, res: HttpResponse): Promise<void> {
     const result = await searchProductsUseCase.execute(req.body as SearchProductsQuery);
 
     if (!result.success) {
@@ -97,7 +96,7 @@ class ProductSearchController {
    * GET /products/search/suggestions
    * Get search suggestions for autocomplete
    */
-  async getSuggestions(req: TypedRequest, res: Response): Promise<void> {
+  async getSuggestions(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { q, query, limit } = req.query;
 
     const result = await getSearchSuggestionsUseCase.execute({
@@ -117,7 +116,7 @@ class ProductSearchController {
    * GET /products/:productId/similar
    * Get similar products based on attributes
    */
-  async findSimilar(req: TypedRequest, res: Response): Promise<void> {
+  async findSimilar(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { productId } = req.params;
     const { limit } = req.query;
 
@@ -138,7 +137,7 @@ class ProductSearchController {
    * GET /products/by-attribute/:code/:value
    * Find products by a specific attribute value
    */
-  async findByAttribute(req: TypedRequest, res: Response): Promise<void> {
+  async findByAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { code, value } = req.params;
 
     const result = await findByAttributeUseCase.execute({

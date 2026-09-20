@@ -7,8 +7,7 @@
  * Auth: SCIM bearer token (separate from JWT auth), validated against organization config.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { generateUUID } from '../../../../libs/uuid';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
@@ -18,7 +17,7 @@ import type { CredentialSubjectPort } from '../../application/ports/CredentialSu
 
 const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
-function scimError(status: number, detail: string, res: Response): void {
+function scimError(status: number, detail: string, res: HttpResponse): void {
   res.status(status).json({
     schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
     status: status.toString(),
@@ -26,7 +25,7 @@ function scimError(status: number, detail: string, res: Response): void {
   });
 }
 
-function validateScimToken(req: TypedRequest): void {
+function validateScimToken(req: HttpRequest): void {
   if (!SCIM_BEARER_TOKEN) {
     throw new ScimAuthenticationError();
   }
@@ -68,7 +67,7 @@ export class ScimController {
   /**
    * GET /scim/v2/Users — list provisioned users
    */
-  async listUsers(req: TypedRequest, res: Response): Promise<void> {
+  async listUsers(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const organizationId = (req.query.organizationId as string) || '';
@@ -108,7 +107,7 @@ export class ScimController {
   /**
    * GET /scim/v2/Users/:id — get a single provisioned user
    */
-  async getUser(req: TypedRequest, res: Response): Promise<void> {
+  async getUser(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -139,7 +138,7 @@ export class ScimController {
   /**
    * POST /scim/v2/Users — provision a new user
    */
-  async createUser(req: TypedRequest, res: Response): Promise<void> {
+  async createUser(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const body = req.body as Record<string, unknown>;
@@ -239,7 +238,7 @@ export class ScimController {
   /**
    * PUT /scim/v2/Users/:id — replace a user
    */
-  async replaceUser(req: TypedRequest, res: Response): Promise<void> {
+  async replaceUser(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -293,7 +292,7 @@ export class ScimController {
   /**
    * PATCH /scim/v2/Users/:id — update user attributes
    */
-  async patchUser(req: TypedRequest, res: Response): Promise<void> {
+  async patchUser(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const { id } = req.params;
@@ -339,7 +338,7 @@ export class ScimController {
   /**
    * DELETE /scim/v2/Users/:id — deprovision a user
    */
-  async deleteUser(req: TypedRequest, res: Response): Promise<void> {
+  async deleteUser(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       validateScimToken(req);
       const { id } = req.params;

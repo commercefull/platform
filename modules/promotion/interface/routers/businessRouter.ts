@@ -2,7 +2,7 @@
  * Promotion Business Router
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as giftCardController from '../controllers/giftCardBusinessController';
 import * as discountController from '../controllers/discountController';
@@ -12,7 +12,7 @@ import * as cartPromotionController from '../controllers/cartPromotionController
 import * as categoryPromotionController from '../controllers/categoryPromotionController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 router.use(isOrganizationLoggedIn);
 
 // Promotion routes

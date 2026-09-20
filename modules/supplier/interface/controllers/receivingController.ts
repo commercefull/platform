@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { supplierPurchaseOrderDataRepository } from '../../application/wired';
 import {
@@ -21,7 +20,7 @@ const _purchaseOrderRepo = PurchaseOrderRepo;
 
 // ---------- Receiving Record Methods ----------
 
-export const getReceivingRecords = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceivingRecords = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, warehouseId, supplierId, limit = '50' } = req.query;
 
   let receivingRecords;
@@ -39,7 +38,7 @@ export const getReceivingRecords = async (req: TypedRequest, res: Response): Pro
   successResponse(res, receivingRecords);
 };
 
-export const getReceivingRecordById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceivingRecordById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const receivingRecord = await receivingRecordRepo.findById(id);
 
@@ -51,13 +50,13 @@ export const getReceivingRecordById = async (req: TypedRequest, res: Response): 
   successResponse(res, receivingRecord);
 };
 
-export const getReceivingByPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceivingByPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const receivingRecords = await receivingRecordRepo.findByPurchaseOrderId(id);
   successResponse(res, receivingRecords);
 };
 
-export const createReceivingRecord = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReceivingRecord = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     supplierPurchaseOrderId,
     distributionWarehouseId,
@@ -122,7 +121,7 @@ export const createReceivingRecord = async (req: TypedRequest, res: Response): P
   );
 };
 
-export const updateReceivingRecord = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateReceivingRecord = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierReceivingRecordUpdateParams;
 
@@ -136,7 +135,7 @@ export const updateReceivingRecord = async (req: TypedRequest, res: Response): P
   successResponse(res, receivingRecord);
 };
 
-export const completeReceiving = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const receivingRecord = await receivingRecordRepo.complete(id);
 
@@ -150,13 +149,13 @@ export const completeReceiving = async (req: TypedRequest, res: Response): Promi
 
 // ---------- Receiving Item Methods ----------
 
-export const getReceivingItems = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getReceivingItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const items = await receivingItemRepo.findByReceivingRecordId(id);
   successResponse(res, items);
 };
 
-export const createReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const body = req.body as Omit<SupplierReceivingItemCreateParams, 'supplierReceivingRecordId'>;
   const itemParams: SupplierReceivingItemCreateParams = {
@@ -180,7 +179,7 @@ export const createReceivingItem = async (req: TypedRequest, res: Response): Pro
   successResponse(res, item, 201);
 };
 
-export const updateReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierReceivingItemUpdateParams;
 
@@ -194,7 +193,7 @@ export const updateReceivingItem = async (req: TypedRequest, res: Response): Pro
   successResponse(res, item);
 };
 
-export const acceptReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const acceptReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { processedBy } = req.body as { processedBy?: string };
 
@@ -208,7 +207,7 @@ export const acceptReceivingItem = async (req: TypedRequest, res: Response): Pro
   successResponse(res, item);
 };
 
-export const rejectReceivingItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const rejectReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { reason, processedBy } = req.body as { reason?: string; processedBy?: string };
 

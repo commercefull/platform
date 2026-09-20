@@ -13,6 +13,7 @@
   - [Contributing](guides/contributing.md)
   - [Deployment](guides/deployment.md)
   - [Getting Started](guides/getting-started.md)
+  - [Http Framework Abstraction](guides/http-framework-abstraction.md)
   - [Migrating From Shopify](guides/migrating-from-shopify.md)
   - [Module Registry](guides/module-registry.md)
   - [Repository Dependency Injection](guides/repository-dependency-injection.md)

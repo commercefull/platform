@@ -4,8 +4,7 @@
  * HTTP interface for coupon management.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   CreateCouponUseCase,
   CreateCouponCommand,
@@ -62,7 +61,7 @@ interface RedeemCouponBody {
   discountAmount: number;
 }
 
-export const createCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateCouponBody;
   const useCase = new CreateCouponUseCase(couponRepository);
   const command = new CreateCouponCommand(
@@ -91,7 +90,7 @@ export const createCoupon = async (req: TypedRequest, res: Response): Promise<vo
   res.status(201).json({ success: true, data: coupon });
 };
 
-export const validateCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = (req.body || {}) as ValidateCouponBody;
   const useCase = new ValidateCouponUseCase(couponRepository);
   const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValue, body.customerId, body.items);
@@ -103,7 +102,7 @@ export const validateCoupon = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, data: result });
 };
 
-export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const applyCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as ApplyCouponBody;
   const useCase = new ApplyCouponUseCase(couponRepository);
   const result = await useCase.execute({
@@ -116,7 +115,7 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
   res.json({ success: true, data: result });
 };
 
-export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const redeemCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as RedeemCouponBody;
   const useCase = new RedeemCouponUseCase(couponRepository);
   const result = await useCase.execute({
@@ -128,7 +127,7 @@ export const redeemCoupon = async (req: TypedRequest, res: Response): Promise<vo
   res.json({ success: true, data: result });
 };
 
-export const getCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { couponId } = req.params;
 
   // Validate UUID format to prevent route collisions (e.g. /coupons/inventory-receipts)
@@ -146,7 +145,7 @@ export const getCoupon = async (req: TypedRequest, res: Response): Promise<void>
   res.json({ success: true, data: coupon });
 };
 
-export const listCoupons = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCoupons = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await couponRepository.findAll(
     {
       isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
@@ -161,7 +160,7 @@ export const listCoupons = async (req: TypedRequest, res: Response): Promise<voi
   res.json({ success: true, data: result });
 };
 
-export const deleteCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await couponRepository.delete(req.params.couponId);
   res.json({ success: true, message: 'Coupon deleted' });
 };

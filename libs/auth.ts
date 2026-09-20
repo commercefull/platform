@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse, HttpUser } from './http';
 import jwt from 'jsonwebtoken';
 import { SessionService } from './session';
 
-const isJsonRequest = (req: Request): boolean => {
+const isJsonRequest = (req: HttpRequest): boolean => {
   return Boolean(req.xhr || req.headers.accept?.indexOf('json') !== -1);
 };
 
@@ -20,7 +20,7 @@ const SESSION_COOKIE_NAME = 'cf_session';
 /**
  * Authenticate API requests via JWT
  */
-const authenticateToken = (req: Request, res: Response, next: NextFunction, secret: string): void => {
+const authenticateToken = (req: HttpRequest, res: HttpResponse, next: HttpNext, secret: string): void => {
   // Get token from header
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN format
@@ -33,7 +33,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
   try {
     // Verify token
     const decoded = jwt.verify(token, String(secret));
-    req.user = decoded as Express.User;
+    req.user = decoded as HttpUser;
     return next();
   } catch {
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
@@ -45,9 +45,9 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction, secr
  * Authenticate web requests via session
  */
 const authenticateSession = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
+  req: HttpRequest,
+  res: HttpResponse,
+  next: HttpNext,
   userType: 'admin' | 'organization' | 'b2b' | 'customer',
   loginPath: string,
 ): Promise<void> => {
@@ -102,7 +102,7 @@ const authenticateSession = async (
  * Admin authentication middleware
  * Uses session for web, JWT for API
  */
-export const isAdminLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+export const isAdminLoggedIn = async (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
   // Check if it's an API call
   if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, ADMIN_JWT_SECRET);
@@ -116,7 +116,7 @@ export const isAdminLoggedIn = async (req: Request, res: Response, next: NextFun
  * Merchant authentication middleware
  * Uses session for web, JWT for API
  */
-export const isOrganizationLoggedIn = async (req: Request, res: Response, next: NextFunction) => {
+export const isOrganizationLoggedIn = async (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
   // Check if it's an API call
   if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, ORGANIZATION_JWT_SECRET);
@@ -126,7 +126,7 @@ export const isOrganizationLoggedIn = async (req: Request, res: Response, next: 
   return authenticateSession(req, res, next, 'organization', '/organization/login');
 };
 
-export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFunction) => {
+export const isCustomerLoggedIn = (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
   if (isJsonRequest(req)) {
     return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
   }
@@ -138,14 +138,14 @@ export const isCustomerLoggedIn = (req: Request, res: Response, next: NextFuncti
   res.redirect('/login');
 };
 
-export const optionalCustomerAuth = (req: Request, res: Response, next: NextFunction) => {
+export const optionalCustomerAuth = (req: HttpRequest, res: HttpResponse, next: HttpNext) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (token) {
     try {
       const decoded = jwt.verify(token, String(CUSTOMER_JWT_SECRET));
-      req.user = decoded as Express.User;
+      req.user = decoded as HttpUser;
     } catch {
       // Invalid token — continue without user
     }

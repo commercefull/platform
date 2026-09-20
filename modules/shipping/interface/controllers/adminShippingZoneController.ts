@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageShippingZonesUseCase } from '../../application/useCases/ManageShippingAdmin';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -15,7 +14,7 @@ const manageShippingZonesUseCase = new ManageShippingZonesUseCase();
 // Shipping Zones Management
 // ============================================================================
 
-export const listShippingZones = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listShippingZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const zones = await manageShippingZonesUseCase.findAll();
   const activeCount = zones.filter(z => z.isActive).length;
 
@@ -28,20 +27,28 @@ export const listShippingZones = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const createShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingZoneForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'shipping/zones/create', {
     pageName: 'Create Shipping Zone',
   });
 };
 
-export const createShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, locationType, locations, excludedLocations, priority, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, locationType, locations, excludedLocations, priority, isActive } = body as {
+      name: string;
+      description?: string;
+      locationType?: string;
+      locations?: string;
+      excludedLocations?: string;
+      priority?: string;
+      isActive?: string;
+    };
 
     const zone = await manageShippingZonesUseCase.create({
       name,
-      description: description || undefined,
+      description: description || null,
       locationType: locationType || 'country',
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations: excludedLocations ? JSON.parse(excludedLocations) : undefined,
@@ -57,12 +64,12 @@ export const createShippingZone = async (req: TypedRequest, res: Response): Prom
     adminRespond(req, res, 'shipping/zones/create', {
       pageName: 'Create Shipping Zone',
       error: (error as Error).message || 'Failed to create shipping zone',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
   const zone = await manageShippingZonesUseCase.findById(zoneId);
@@ -87,7 +94,7 @@ export const viewShippingZone = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const editShippingZoneForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editShippingZoneForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
   const zone = await manageShippingZonesUseCase.findById(zoneId);
@@ -106,12 +113,20 @@ export const editShippingZoneForm = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const updateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
-  const { name, description, locationType, locations, excludedLocations, priority, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, description, locationType, locations, excludedLocations, priority, isActive } = body as {
+    name?: string;
+    description?: string;
+    locationType?: string;
+    locations?: string;
+    excludedLocations?: string;
+    priority?: string;
+    isActive?: string;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
@@ -130,7 +145,7 @@ export const updateShippingZone = async (req: TypedRequest, res: Response): Prom
   res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
 };
 
-export const activateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
   const zone = await manageShippingZonesUseCase.activate(zoneId);
@@ -142,7 +157,7 @@ export const activateShippingZone = async (req: TypedRequest, res: Response): Pr
   res.json({ success: true, message: 'Shipping zone activated successfully' });
 };
 
-export const deactivateShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
   const zone = await manageShippingZonesUseCase.deactivate(zoneId);
@@ -154,7 +169,7 @@ export const deactivateShippingZone = async (req: TypedRequest, res: Response): 
   res.json({ success: true, message: 'Shipping zone deactivated successfully' });
 };
 
-export const deleteShippingZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
 
   const success = await manageShippingZonesUseCase.delete(zoneId);

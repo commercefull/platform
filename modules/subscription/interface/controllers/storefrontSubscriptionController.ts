@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontSubscriptionsUseCase } from '../../application/useCases/ManageStorefrontSubscriptions';
 
@@ -14,7 +13,7 @@ const manageStorefrontSubscriptionsUseCase = new ManageStorefrontSubscriptionsUs
 /**
  * GET: List available subscription plans
  */
-export const listPlans = async (req: TypedRequest, res: Response) => {
+export const listPlans = async (req: HttpRequest, res: HttpResponse) => {
   const plans = await manageStorefrontSubscriptionsUseCase.findActivePlansWithProduct();
 
   storefrontRespond(req, res, 'subscriptions/plans', {
@@ -26,7 +25,7 @@ export const listPlans = async (req: TypedRequest, res: Response) => {
 /**
  * GET: View my subscriptions
  */
-export const mySubscriptions = async (req: TypedRequest, res: Response) => {
+export const mySubscriptions = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -41,7 +40,7 @@ export const mySubscriptions = async (req: TypedRequest, res: Response) => {
 /**
  * GET: View subscription detail
  */
-export const viewSubscription = async (req: TypedRequest, res: Response) => {
+export const viewSubscription = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -66,13 +65,13 @@ export const viewSubscription = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Cancel subscription
  */
-export const cancelSubscription = async (req: TypedRequest, res: Response) => {
+export const cancelSubscription = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');
 
     const { subscriptionId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { reason } = body;
 
     const subscription = await manageStorefrontSubscriptionsUseCase.findActiveByCustomerId(subscriptionId, customerId);

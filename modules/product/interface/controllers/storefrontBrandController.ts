@@ -3,8 +3,7 @@
  * Handles brand listing and brand landing pages for customers
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { brandRepo, listProductsUseCase } from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
@@ -13,7 +12,7 @@ import { ListProductsCommand } from '../../application/useCases/ListProducts';
 // All Brands Listing
 // ============================================================================
 
-export const listBrands = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const brands = await brandRepo.findActive();
 
   storefrontRespond(req, res, 'brand/index', {
@@ -26,7 +25,7 @@ export const listBrands = async (req: TypedRequest, res: Response): Promise<void
 // Brand Landing Page
 // ============================================================================
 
-export const getBrand = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
 
   const brand = await brandRepo.findBySlug(slug);
@@ -61,7 +60,7 @@ export const getBrand = async (req: TypedRequest, res: Response): Promise<void> 
 // Brand Products (PLP filtered by brand)
 // ============================================================================
 
-export const getBrandProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBrandProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
   const { page = '1', limit = '12' } = req.query;
 

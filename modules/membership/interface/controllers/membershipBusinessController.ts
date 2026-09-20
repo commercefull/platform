@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { membershipSubscriptionDataRepository } from '../../application/wired';
 import { LegacyMembershipBenefit as _MembershipBenefit } from '../../application/wired';
 
@@ -70,7 +69,7 @@ interface UpdateUserMembershipBody {
 }
 
 // Membership Tier Endpoints
-export const getMembershipTiers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const includeInactive = req.query.includeInactive === 'true';
   const tiers = await membershipRepo.findAllTiers(includeInactive);
 
@@ -80,7 +79,7 @@ export const getMembershipTiers = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipTierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const tier = await membershipRepo.findTierById(id);
 
@@ -99,8 +98,8 @@ export const getMembershipTierById = async (req: TypedRequest, res: Response): P
 };
 
 export const createMembershipTier = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateTierBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateTierBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { name, description, monthlyPrice, annualPrice, level, isActive = true } = req.body;
 
@@ -130,8 +129,8 @@ export const createMembershipTier = async (
 };
 
 export const updateMembershipTier = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateTierBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateTierBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { name, description, monthlyPrice, annualPrice, level, isActive } = req.body;
@@ -162,7 +161,7 @@ export const updateMembershipTier = async (
   });
 };
 
-export const deleteMembershipTier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMembershipTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if tier exists
@@ -194,7 +193,7 @@ export const deleteMembershipTier = async (req: TypedRequest, res: Response): Pr
 };
 
 // Membership Benefit Endpoints
-export const getMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.query;
 
   let benefits;
@@ -210,7 +209,7 @@ export const getMembershipBenefits = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const getMembershipBenefitById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipBenefitById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const benefit = await membershipRepo.findBenefitById(id);
 
@@ -229,8 +228,8 @@ export const getMembershipBenefitById = async (req: TypedRequest, res: Response)
 };
 
 export const createMembershipBenefit = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateBenefitBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateBenefitBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive = true } = req.body;
 
@@ -273,8 +272,8 @@ export const createMembershipBenefit = async (
 };
 
 export const updateMembershipBenefit = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateBenefitBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateBenefitBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive } = req.body;
@@ -320,7 +319,7 @@ export const updateMembershipBenefit = async (
   });
 };
 
-export const deleteMembershipBenefit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMembershipBenefit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if benefit exists
@@ -342,7 +341,7 @@ export const deleteMembershipBenefit = async (req: TypedRequest, res: Response):
 };
 
 // User Membership Endpoints
-export const getUserMemberships = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMemberships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId, active } = req.query;
 
   let memberships;
@@ -361,7 +360,7 @@ export const getUserMemberships = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const getUserMembershipById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMembershipById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const membership = await membershipRepo.findUserMembershipById(id);
 
@@ -379,7 +378,7 @@ export const getUserMembershipById = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMembershipByUserId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
   const membership = await membershipRepo.findMembershipByUserId(userId);
 
@@ -398,8 +397,8 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
 };
 
 export const createUserMembership = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateUserMembershipBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateUserMembershipBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const {
     userId,
@@ -464,8 +463,8 @@ export const createUserMembership = async (
 };
 
 export const updateUserMembership = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateUserMembershipBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateUserMembershipBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const { tierId, startDate, endDate, isActive, autoRenew, membershipType, lastRenewalDate, nextRenewalDate, paymentMethod } = req.body;
@@ -511,7 +510,7 @@ export const updateUserMembership = async (
   });
 };
 
-export const cancelUserMembership = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelUserMembership = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if membership exists
@@ -533,7 +532,7 @@ export const cancelUserMembership = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMembershipBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
 
   const benefits = await membershipRepo.getUserMembershipBenefits(userId);

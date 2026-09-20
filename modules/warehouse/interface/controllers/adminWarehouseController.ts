@@ -3,9 +3,8 @@
  * Handles warehouse management and fulfillment tracking for the Admin Hub
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { ManageWarehouseAdminUseCaseV2 } from '../../application/useCases/ManageWarehouseAdminV2';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
@@ -16,7 +15,7 @@ const manageWarehouseUseCase = new ManageWarehouseAdminUseCaseV2();
 // Warehouse Management
 // ============================================================================
 
-export const listWarehouses = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listWarehouses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly !== 'false';
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -35,7 +34,7 @@ export const listWarehouses = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createWarehouseForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWarehouseForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/warehouses/create', {
     pageName: 'Create Warehouse',
   });
@@ -66,14 +65,14 @@ const warehouseCreateFields: FieldConfig[] = [
   { name: 'processingTime', transform: 'int', falsyValue: undefined },
 ];
 
-function parseWarehouseCreateInput(body: RequestBody) {
+function parseWarehouseCreateInput(body: HttpRequestBody) {
   return buildFormObject(body as Record<string, unknown>, warehouseCreateFields);
 }
 
-export const createWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const warehouse = await manageWarehouseUseCase.create(
-      parseWarehouseCreateInput(req.body as RequestBody) as Parameters<typeof manageWarehouseUseCase.create>[0],
+      parseWarehouseCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageWarehouseUseCase.create>[0],
     );
 
     res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
@@ -83,12 +82,12 @@ export const createWarehouse = async (req: TypedRequest, res: Response): Promise
     adminRespond(req, res, 'operations/warehouses/create', {
       pageName: 'Create Warehouse',
       error: (error as Error).message || 'Failed to create warehouse',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
 
   const warehouse = await manageWarehouseUseCase.findById(warehouseId);
@@ -109,7 +108,7 @@ export const viewWarehouse = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const editWarehouseForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editWarehouseForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
 
   const warehouse = await manageWarehouseUseCase.findById(warehouseId);
@@ -152,13 +151,13 @@ const warehouseUpdateFields: FieldConfig[] = [
   { name: 'processingTime', transform: 'int', falsyValue: undefined },
 ];
 
-function parseWarehouseUpdates(body: RequestBody): Record<string, unknown> {
+function parseWarehouseUpdates(body: HttpRequestBody): Record<string, unknown> {
   return buildFormObject(body as Record<string, unknown>, warehouseUpdateFields);
 }
 
-export const updateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
-  const updates = parseWarehouseUpdates(req.body as RequestBody);
+  const updates = parseWarehouseUpdates(req.body as HttpRequestBody);
 
   const warehouse = await manageWarehouseUseCase.update(warehouseId, updates);
 
@@ -169,7 +168,7 @@ export const updateWarehouse = async (req: TypedRequest, res: Response): Promise
   res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
 };
 
-export const activateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
 
   const warehouse = await manageWarehouseUseCase.activate(warehouseId);
@@ -181,7 +180,7 @@ export const activateWarehouse = async (req: TypedRequest, res: Response): Promi
   res.json({ success: true, message: 'Warehouse activated successfully' });
 };
 
-export const deactivateWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
 
   const warehouse = await manageWarehouseUseCase.deactivate(warehouseId);
@@ -193,7 +192,7 @@ export const deactivateWarehouse = async (req: TypedRequest, res: Response): Pro
   res.json({ success: true, message: 'Warehouse deactivated successfully' });
 };
 
-export const deleteWarehouse = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { warehouseId } = req.params;
 
   const success = await manageWarehouseUseCase.delete(warehouseId);

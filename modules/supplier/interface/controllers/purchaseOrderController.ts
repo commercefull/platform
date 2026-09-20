@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { supplierPurchaseOrderDataRepository, supplierDataRepository } from '../../application/wired';
 import {
@@ -16,7 +15,7 @@ const supplierRepoInstance = supplierDataRepository.suppliers;
 const supplierRepo = supplierRepoInstance;
 
 // ---------- Purchase Order CRUD Methods ----------
-export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPurchaseOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, supplierId, warehouseId, limit = '50', offset = '0' } = req.query;
 
   let purchaseOrders;
@@ -42,7 +41,7 @@ export const getPurchaseOrders = async (req: TypedRequest, res: Response): Promi
   successResponse(res, purchaseOrders);
 };
 
-export const getPurchaseOrderById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPurchaseOrderById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const purchaseOrder = await purchaseOrderRepo.findById(id);
 
@@ -54,7 +53,7 @@ export const getPurchaseOrderById = async (req: TypedRequest, res: Response): Pr
   successResponse(res, purchaseOrder);
 };
 
-export const getPurchaseOrdersBySupplierId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPurchaseOrdersBySupplierId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { limit = '50', offset = '0' } = req.query;
 
@@ -63,7 +62,7 @@ export const getPurchaseOrdersBySupplierId = async (req: TypedRequest, res: Resp
   successResponse(res, purchaseOrders);
 };
 
-export const createPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     supplierId,
     distributionWarehouseId,
@@ -156,7 +155,7 @@ export const createPurchaseOrder = async (req: TypedRequest, res: Response): Pro
   );
 };
 
-export const updatePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierPurchaseOrderUpdateParams;
 
@@ -170,7 +169,7 @@ export const updatePurchaseOrder = async (req: TypedRequest, res: Response): Pro
   successResponse(res, purchaseOrder);
 };
 
-export const deletePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await purchaseOrderRepo.delete(id);
 
@@ -182,7 +181,7 @@ export const deletePurchaseOrder = async (req: TypedRequest, res: Response): Pro
   successResponse(res, { message: 'Purchase order deleted successfully' });
 };
 
-export const approvePurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approvePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const purchaseOrder = await purchaseOrderRepo.approve(id);
 
@@ -194,7 +193,7 @@ export const approvePurchaseOrder = async (req: TypedRequest, res: Response): Pr
   successResponse(res, purchaseOrder);
 };
 
-export const cancelPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const purchaseOrder = await purchaseOrderRepo.cancel(id);
 
@@ -206,7 +205,7 @@ export const cancelPurchaseOrder = async (req: TypedRequest, res: Response): Pro
   successResponse(res, purchaseOrder);
 };
 
-export const sendPurchaseOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const sendPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const purchaseOrder = await purchaseOrderRepo.send(id);
 
@@ -220,13 +219,13 @@ export const sendPurchaseOrder = async (req: TypedRequest, res: Response): Promi
 
 // ---------- Purchase Order Items Methods ----------
 
-export const getPurchaseOrderItems = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPurchaseOrderItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const items = await purchaseOrderRepo.findItemsByOrderId(id);
   successResponse(res, items);
 };
 
-export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addPurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const body = req.body as Omit<SupplierPurchaseOrderItemCreateParams, 'supplierPurchaseOrderId'>;
   const itemParams: SupplierPurchaseOrderItemCreateParams = {
@@ -252,7 +251,7 @@ export const addPurchaseOrderItem = async (req: TypedRequest, res: Response): Pr
   successResponse(res, item, 201);
 };
 
-export const updatePurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierPurchaseOrderItemUpdateParams;
 
@@ -266,7 +265,7 @@ export const updatePurchaseOrderItem = async (req: TypedRequest, res: Response):
   successResponse(res, item);
 };
 
-export const deletePurchaseOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await purchaseOrderRepo.deleteItem(id);
 

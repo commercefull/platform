@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageAdminGdprUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -13,7 +12,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // GDPR Dashboard
 // ============================================================================
 
-export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const gdprDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stats = await manageAdminGdprUseCase.getGdprStats();
   const consent = await manageAdminGdprUseCase.getConsentStats();
   const requests = await manageAdminGdprUseCase.findRecentRequests(20);
@@ -34,10 +33,15 @@ export const gdprDashboard = async (req: TypedRequest, res: Response): Promise<v
 // GDPR Requests CRUD
 // ============================================================================
 
-export const createGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createGdprRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { requestType, customerEmail, customerName, description } = body;
+    const body = req.body as HttpRequestBody;
+    const { requestType, customerEmail, customerName, description } = body as {
+      requestType: string;
+      customerEmail: string;
+      customerName?: string;
+      description?: string;
+    };
 
     const customerId = await manageAdminGdprUseCase.findCustomerIdByEmail(customerEmail);
 
@@ -58,7 +62,7 @@ export const createGdprRequest = async (req: TypedRequest, res: Response): Promi
   }
 };
 
-export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewGdprRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { requestId } = req.params;
 
   const request = await manageAdminGdprUseCase.findRequestById(requestId);
@@ -77,7 +81,7 @@ export const viewGdprRequest = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const processGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processGdprRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { requestId } = req.params;
 
   await manageAdminGdprUseCase.updateStatus(requestId, 'processing');
@@ -85,10 +89,10 @@ export const processGdprRequest = async (req: TypedRequest, res: Response): Prom
   res.json({ success: true });
 };
 
-export const completeGdprRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeGdprRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { requestId } = req.params;
-  const body = req.body as RequestBody;
-  const { notes } = body;
+  const body = req.body as HttpRequestBody;
+  const { notes } = body as { notes?: string };
 
   await manageAdminGdprUseCase.completeRequest(requestId, notes);
 
@@ -99,7 +103,7 @@ export const completeGdprRequest = async (req: TypedRequest, res: Response): Pro
 // Consent Management
 // ============================================================================
 
-export const consentManagement = async (req: TypedRequest, res: Response): Promise<void> => {
+export const consentManagement = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const consentSettings = {
     cookieConsentRequired: true,
     marketingConsentRequired: true,

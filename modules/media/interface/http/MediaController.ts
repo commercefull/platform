@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import multer from 'multer';
 import { ProcessImageUseCase } from '../../application/useCases/ProcessImage';
 import { DownloadImageUseCase } from '../../application/useCases/DownloadImage';
@@ -34,7 +33,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req: TypedRequest, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  fileFilter: (req: HttpRequest, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     // Only allow image files
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -66,7 +65,7 @@ export class MediaController {
   /**
    * Upload and process a single image
    */
-  uploadImage = async (req: TypedRequest<Record<string, string>, unknown, MediaUploadBody>, res: Response) => {
+  uploadImage = async (req: HttpRequest<Record<string, string>, unknown, MediaUploadBody>, res: HttpResponse) => {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -102,9 +101,13 @@ export class MediaController {
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       // Map client-side errors to 400
-      const isClientError = errorMessage.includes('invalid') || errorMessage.includes('Invalid') ||
-        errorMessage.includes('Unexpected end') || errorMessage.includes('unsupported') ||
-        errorMessage.includes('Unsupported') || errorMessage.includes('JSON') ||
+      const isClientError =
+        errorMessage.includes('invalid') ||
+        errorMessage.includes('Invalid') ||
+        errorMessage.includes('Unexpected end') ||
+        errorMessage.includes('unsupported') ||
+        errorMessage.includes('Unsupported') ||
+        errorMessage.includes('JSON') ||
         (error as { code?: string }).code === 'LIMIT_FILE_SIZE' ||
         (error as { code?: string }).code === 'LIMIT_UNEXPECTED_FILE';
       const status = isClientError ? 400 : 500;
@@ -119,7 +122,7 @@ export class MediaController {
   /**
    * Upload and process multiple images
    */
-  uploadImages = async (req: TypedRequest<Record<string, string>, unknown, MediaUploadBody>, res: Response) => {
+  uploadImages = async (req: HttpRequest<Record<string, string>, unknown, MediaUploadBody>, res: HttpResponse) => {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         return res.status(400).json({
@@ -169,7 +172,7 @@ export class MediaController {
   /**
    * Download a remote image by URL, process it, and store it
    */
-  downloadImage = async (req: TypedRequest<Record<string, string>, unknown, MediaDownloadBody>, res: Response) => {
+  downloadImage = async (req: HttpRequest<Record<string, string>, unknown, MediaDownloadBody>, res: HttpResponse) => {
     try {
       const body = req.body;
 

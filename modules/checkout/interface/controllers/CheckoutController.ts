@@ -3,8 +3,7 @@
  * HTTP interface for checkout operations with content negotiation (JSON/HTML)
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   InitiateCheckoutCommand,
   InitiateCheckoutUseCase,
@@ -37,11 +36,11 @@ import { CheckoutRepo, getCheckoutPorts } from '../../application/wired';
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -96,8 +95,8 @@ interface CouponBody {
  * POST /checkout
  */
 export const initiateCheckout = async (
-  req: TypedRequest<Record<string, string>, unknown, InitiateCheckoutBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, InitiateCheckoutBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { basketId, guestEmail } = req.body;
   const customerId = req.user?.customerId || ((req.user as Record<string, unknown> | undefined)?.id as string | undefined);
@@ -119,7 +118,7 @@ export const initiateCheckout = async (
  * Get checkout session
  * GET /checkout/:checkoutId
  */
-export const getCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const session = await CheckoutRepo.findById(checkoutId);
@@ -136,7 +135,7 @@ export const getCheckout = async (req: TypedRequest, res: Response): Promise<voi
  * Get checkout summary (totals and selected options)
  * GET /checkout/:checkoutId/summary
  */
-export const getCheckoutSummary = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCheckoutSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const session = await CheckoutRepo.findById(checkoutId);
@@ -155,8 +154,8 @@ export const getCheckoutSummary = async (req: TypedRequest, res: Response): Prom
  * PUT /checkout/:checkoutId/shipping-address
  */
 export const setShippingAddress = async (
-  req: TypedRequest<Record<string, string>, unknown, ShippingAddressBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ShippingAddressBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone } = req.body;
@@ -186,7 +185,7 @@ export const setShippingAddress = async (
  * Get available shipping methods
  * GET /checkout/:checkoutId/shipping-methods
  */
-export const getShippingMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getShippingMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const session = await CheckoutRepo.findById(checkoutId);
@@ -247,7 +246,7 @@ export const getShippingMethods = async (req: TypedRequest, res: Response): Prom
  * Get available pickup locations
  * GET /checkout/pickup-locations
  */
-export const getPickupLocations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPickupLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { latitude, longitude, radius } = req.query;
 
   const ports = getCheckoutPorts();
@@ -270,8 +269,8 @@ export const getPickupLocations = async (req: TypedRequest, res: Response): Prom
  * PUT /checkout/:checkoutId/pickup-location
  */
 export const setPickupLocation = async (
-  req: TypedRequest<Record<string, string>, unknown, PickupLocationBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, PickupLocationBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { pickupLocationId } = req.body;
@@ -344,8 +343,8 @@ export const setPickupLocation = async (
  * PUT /checkout/:checkoutId/fulfillment-method
  */
 export const setFulfillmentMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, FulfillmentMethodBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, FulfillmentMethodBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { fulfillmentType } = req.body;
@@ -367,8 +366,8 @@ export const setFulfillmentMethod = async (
  * PUT /checkout/:checkoutId/shipping-method
  */
 export const setShippingMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, ShippingMethodBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ShippingMethodBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { shippingMethodId } = req.body;
@@ -390,7 +389,7 @@ export const setShippingMethod = async (
  * Get available payment methods
  * GET /checkout/payment-methods
  */
-export const getPaymentMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const methods = await CheckoutRepo.getAvailablePaymentMethods();
   respond(req, res, methods as unknown as unknown, 200);
 };
@@ -400,8 +399,8 @@ export const getPaymentMethods = async (req: TypedRequest, res: Response): Promi
  * PUT /checkout/:checkoutId/payment-method
  */
 export const setPaymentMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, PaymentMethodBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, PaymentMethodBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { paymentMethodId } = req.body;
@@ -422,7 +421,7 @@ export const setPaymentMethod = async (
  * Apply coupon code
  * POST /checkout/:checkoutId/coupon
  */
-export const applyCoupon = async (req: TypedRequest<Record<string, string>, unknown, CouponBody>, res: Response): Promise<void> => {
+export const applyCoupon = async (req: HttpRequest<Record<string, string>, unknown, CouponBody>, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
   const { couponCode } = req.body;
 
@@ -443,7 +442,7 @@ export const applyCoupon = async (req: TypedRequest<Record<string, string>, unkn
  * Remove coupon code
  * DELETE /checkout/:checkoutId/coupon
  */
-export const removeCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const command = new RemoveCouponCommand(checkoutId);
@@ -457,7 +456,7 @@ export const removeCoupon = async (req: TypedRequest, res: Response): Promise<vo
  * Complete checkout and create order
  * POST /checkout/:checkoutId/complete
  */
-export const completeCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const ports = getCheckoutPorts();
@@ -472,7 +471,7 @@ export const completeCheckout = async (req: TypedRequest, res: Response): Promis
  * Abandon checkout
  * POST /checkout/:checkoutId/abandon
  */
-export const abandonCheckout = async (req: TypedRequest, res: Response): Promise<void> => {
+export const abandonCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const ports = getCheckoutPorts();
@@ -488,8 +487,8 @@ export const abandonCheckout = async (req: TypedRequest, res: Response): Promise
  * PUT /checkout/:checkoutId/billing-address
  */
 export const setBillingAddress = async (
-  req: TypedRequest<Record<string, string>, unknown, BillingAddressBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, BillingAddressBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone, sameAsShipping } = req.body;
@@ -519,7 +518,7 @@ export const setBillingAddress = async (
  * Create payment intent and draft order
  * POST /checkout/:checkoutId/payment-intent
  */
-export const createPaymentIntent = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPaymentIntent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
   const customerId = req.user?.customerId || ((req.user as Record<string, unknown> | undefined)?.id as string | undefined);
 
@@ -535,7 +534,7 @@ export const createPaymentIntent = async (req: TypedRequest, res: Response): Pro
  * Get local delivery options for a checkout session
  * GET /checkout/:checkoutId/local-delivery-options
  */
-export const getLocalDeliveryOptions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLocalDeliveryOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const session = await CheckoutRepo.findById(checkoutId);
@@ -569,7 +568,7 @@ export const getLocalDeliveryOptions = async (req: TypedRequest, res: Response):
  * Get all available fulfillment options for a checkout session
  * GET /checkout/:checkoutId/fulfillment-options
  */
-export const getFulfillmentOptions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFulfillmentOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
   const session = await CheckoutRepo.findById(checkoutId);
@@ -666,7 +665,7 @@ export const getFulfillmentOptions = async (req: TypedRequest, res: Response): P
  * Get available pickup time slots
  * GET /checkout/:checkoutId/pickup-slots
  */
-export const getPickupSlots = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPickupSlots = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
   const daysAhead = req.query.days ? parseInt(String(req.query.days), 10) : 7;
 

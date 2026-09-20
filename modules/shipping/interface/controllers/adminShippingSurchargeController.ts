@@ -3,8 +3,7 @@
  * Handles shipping surcharge management for the Admin Hub
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { shippingConfigRepository } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { logger } from '../../../../libs/logger';
@@ -15,7 +14,7 @@ const surchargeRepo = shippingConfigRepository.surcharges;
 // List Surcharges
 // ============================================================================
 
-export const listShippingSurcharges = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listShippingSurcharges = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const rateId = req.query.rateId as string | undefined;
   const activeOnly = req.query.activeOnly !== 'false';
 
@@ -38,7 +37,7 @@ export const listShippingSurcharges = async (req: TypedRequest, res: Response): 
 // Create Surcharge Form
 // ============================================================================
 
-export const createShippingSurchargeForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingSurchargeForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const rateId = req.query.rateId as string | undefined;
 
   adminRespond(req, res, 'shipping/surcharges/create', {
@@ -51,10 +50,17 @@ export const createShippingSurchargeForm = async (req: TypedRequest, res: Respon
 // Create Surcharge
 // ============================================================================
 
-export const createShippingSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { shippingRateId, type, calculationType, value, conditions, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { shippingRateId, type, calculationType, value, conditions, isActive } = body as {
+      shippingRateId: string;
+      type: string;
+      calculationType: string;
+      value: string;
+      conditions?: string;
+      isActive?: string | boolean;
+    };
 
     if (!shippingRateId || !type || !calculationType || value === undefined) {
       adminRespond(req, res, 'shipping/surcharges/create', {
@@ -80,7 +86,7 @@ export const createShippingSurcharge = async (req: TypedRequest, res: Response):
     adminRespond(req, res, 'shipping/surcharges/create', {
       pageName: 'Create Shipping Surcharge',
       error: (error as Error).message || 'Failed to create surcharge',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
@@ -89,7 +95,7 @@ export const createShippingSurcharge = async (req: TypedRequest, res: Response):
 // View Surcharge
 // ============================================================================
 
-export const viewShippingSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
   const surcharge = await surchargeRepo.findById(surchargeId);
@@ -113,7 +119,7 @@ export const viewShippingSurcharge = async (req: TypedRequest, res: Response): P
 // Edit Surcharge Form
 // ============================================================================
 
-export const editShippingSurchargeForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editShippingSurchargeForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
   const surcharge = await surchargeRepo.findById(surchargeId);
@@ -136,10 +142,10 @@ export const editShippingSurchargeForm = async (req: TypedRequest, res: Response
 // Update Surcharge
 // ============================================================================
 
-export const updateShippingSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { surchargeId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const updates: Record<string, unknown> = {};
 
     if (body.type !== undefined) updates.type = body.type;
@@ -176,7 +182,7 @@ export const updateShippingSurcharge = async (req: TypedRequest, res: Response):
 // Delete Surcharge
 // ============================================================================
 
-export const deleteShippingSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
   const deleted = await surchargeRepo.delete(surchargeId);

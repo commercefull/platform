@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const notificationPreferenceRepo = notificationConfigRepository.preferences;
@@ -32,7 +32,7 @@ function mapPreference(p: NotificationPreference) {
  * GET /customer/notifications/preferences
  * Returns notification preferences for the authenticated customer.
  */
-export const getPreferences = async (req: Request, res: Response): Promise<void> => {
+export const getPreferences = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -47,7 +47,7 @@ export const getPreferences = async (req: Request, res: Response): Promise<void>
  * GET /customer/notifications/preferences/:id
  * Returns a single notification preference by ID.
  */
-export const getPreferenceById = async (req: Request, res: Response): Promise<void> => {
+export const getPreferenceById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -70,7 +70,7 @@ export const getPreferenceById = async (req: Request, res: Response): Promise<vo
  * GET /customer/notifications/preferences/type/:type
  * Returns a single notification preference by notification type.
  */
-export const getPreferenceByType = async (req: Request, res: Response): Promise<void> => {
+export const getPreferenceByType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -89,14 +89,20 @@ export const getPreferenceByType = async (req: Request, res: Response): Promise<
  * POST /customer/notifications/preferences
  * Creates a new notification preference for the authenticated customer.
  */
-export const createPreference = async (req: Request, res: Response): Promise<void> => {
+export const createPreference = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
     return;
   }
 
-  const { type, channelPreferences, isEnabled, schedulePreferences, metadata } = req.body;
+  const { type, channelPreferences, isEnabled, schedulePreferences, metadata } = req.body as {
+    type?: string;
+    channelPreferences?: Record<string, boolean>;
+    isEnabled?: boolean;
+    schedulePreferences?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  };
   if (!type) {
     errorResponse(res, 'type is required', 400);
     return;
@@ -110,8 +116,8 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
       type,
       channelPreferences || {},
       isEnabled ?? true,
-      schedulePreferences || null,
-      metadata || null,
+      schedulePreferences || undefined,
+      metadata || undefined,
     ),
   );
 
@@ -122,7 +128,7 @@ export const createPreference = async (req: Request, res: Response): Promise<voi
  * PUT /customer/notifications/preferences/:id
  * Updates a notification preference for the authenticated customer.
  */
-export const updatePreference = async (req: Request, res: Response): Promise<void> => {
+export const updatePreference = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -140,7 +146,12 @@ export const updatePreference = async (req: Request, res: Response): Promise<voi
     return;
   }
 
-  const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body;
+  const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body as {
+    channelPreferences?: Record<string, boolean>;
+    isEnabled?: boolean;
+    schedulePreferences?: Record<string, unknown> | null;
+    metadata?: Record<string, unknown> | null;
+  };
   const updated = await notificationPreferenceRepo.update(id, {
     channelPreferences,
     isEnabled,
@@ -159,7 +170,7 @@ export const updatePreference = async (req: Request, res: Response): Promise<voi
  * PUT /customer/notifications/preferences/:id/schedule
  * Updates schedule preferences only.
  */
-export const updateSchedule = async (req: Request, res: Response): Promise<void> => {
+export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -177,7 +188,7 @@ export const updateSchedule = async (req: Request, res: Response): Promise<void>
     return;
   }
 
-  const { schedulePreferences } = req.body;
+  const { schedulePreferences } = req.body as { schedulePreferences?: Record<string, unknown> | null };
   const updated = await notificationPreferenceRepo.update(id, { schedulePreferences });
 
   if (!updated) {
@@ -191,7 +202,7 @@ export const updateSchedule = async (req: Request, res: Response): Promise<void>
  * DELETE /customer/notifications/preferences/:id
  * Deletes a notification preference.
  */
-export const deletePreference = async (req: Request, res: Response): Promise<void> => {
+export const deletePreference = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -221,14 +232,22 @@ export const deletePreference = async (req: Request, res: Response): Promise<voi
  * POST /customer/notifications/preferences/bulk
  * Bulk upserts notification preferences.
  */
-export const bulkUpdatePreferences = async (req: Request, res: Response): Promise<void> => {
+export const bulkUpdatePreferences = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
     return;
   }
 
-  const { updates } = req.body;
+  const { updates } = req.body as {
+    updates?: Array<{
+      type: string;
+      channelPreferences?: Record<string, boolean>;
+      isEnabled?: boolean;
+      schedulePreferences?: Record<string, unknown>;
+      metadata?: Record<string, unknown>;
+    }>;
+  };
   if (!Array.isArray(updates) || updates.length === 0) {
     errorResponse(res, 'updates array is required', 400);
     return;
@@ -242,7 +261,7 @@ export const bulkUpdatePreferences = async (req: Request, res: Response): Promis
  * GET /customer/notifications/devices
  * Lists push devices for the authenticated customer.
  */
-export const listDevices = async (req: Request, res: Response): Promise<void> => {
+export const listDevices = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
@@ -257,14 +276,14 @@ export const listDevices = async (req: Request, res: Response): Promise<void> =>
  * POST /customer/notifications/devices
  * Registers a push device for the authenticated customer.
  */
-export const registerDevice = async (req: Request, res: Response): Promise<void> => {
+export const registerDevice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?.id || req.user?.userId;
   if (!userId) {
     errorResponse(res, 'Not authenticated', 401);
     return;
   }
 
-  const { deviceToken, platform } = req.body;
+  const { deviceToken, platform } = req.body as { deviceToken: string; platform: string };
   const useCase = new RegisterNotificationDeviceUseCase(notificationDeviceRepo);
   const result = await useCase.execute(new RegisterNotificationDeviceCommand(userId, 'customer', deviceToken, platform));
 
@@ -275,7 +294,7 @@ export const registerDevice = async (req: Request, res: Response): Promise<void>
  * DELETE /customer/notifications/devices/:deviceToken
  * Deactivates a push device for the authenticated customer.
  */
-export const deleteDevice = async (req: Request, res: Response): Promise<void> => {
+export const deleteDevice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { deviceToken } = req.params;
   await notificationDeviceRepo.deactivate(String(deviceToken));
   successResponse(res, { deviceToken });

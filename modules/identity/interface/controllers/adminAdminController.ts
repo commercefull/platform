@@ -1,6 +1,5 @@
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import bcrypt from 'bcryptjs';
 import { SessionService } from '../../../../libs/session';
 import { AdminAuthUseCase, GetDashboardDataUseCase } from '../../application/useCases/AdminAuth';
@@ -13,7 +12,7 @@ const adminAuthUseCase = new AdminAuthUseCase();
 const getDashboardDataUseCase = new GetDashboardDataUseCase();
 
 // GET: admin dashboard
-export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
+export const getAdminDashboard = async (req: HttpRequest, res: HttpResponse) => {
   // Fetch real dashboard data using query repository
   const [stats, recentOrders, topProducts, revenueByDay] = await Promise.all([
     getDashboardDataUseCase.getAdminDashboardStats(),
@@ -34,7 +33,7 @@ export const getAdminDashboard = async (req: TypedRequest, res: Response) => {
 };
 
 // GET: admin login page
-export const getAdminLogin = async (req: TypedRequest, res: Response) => {
+export const getAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
   // Check if already logged in via session
   const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
   if (sessionId) {
@@ -54,10 +53,10 @@ export const getAdminLogin = async (req: TypedRequest, res: Response) => {
 // GET: admin logout (handled by auth routes)
 
 // POST: admin login form submission
-export const postAdminLogin = async (req: TypedRequest, res: Response) => {
+export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
   try {
-    const body = req.body as RequestBody;
-    const { email, password, rememberMe } = body;
+    const body = req.body as HttpRequestBody;
+    const { email, password, rememberMe } = body as { email?: string; password?: string; rememberMe?: string };
 
     // Basic validation
     if (!email || !password) {
@@ -141,7 +140,7 @@ export const postAdminLogin = async (req: TypedRequest, res: Response) => {
 };
 
 // POST: admin logout
-export const postAdminLogout = async (req: TypedRequest, res: Response) => {
+export const postAdminLogout = async (req: HttpRequest, res: HttpResponse) => {
   try {
     // Get session ID from cookie
     const sessionId = req.cookies?.[SESSION_COOKIE_NAME];
@@ -165,7 +164,7 @@ export const postAdminLogout = async (req: TypedRequest, res: Response) => {
 };
 
 // GET: admin profile
-export const getAdminProfile = async (req: TypedRequest, res: Response) => {
+export const getAdminProfile = async (req: HttpRequest, res: HttpResponse) => {
   adminRespond(req, res, 'profile', {
     pageName: 'Admin Profile',
   });

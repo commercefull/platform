@@ -1,18 +1,17 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { couponDiscountRepository, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
 
 const discountRepo = couponDiscountRepository.discounts;
 
 // Get all active discounts
-export const getActiveDiscounts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveDiscounts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.query;
   const discounts = await discountRepo.findActive(organizationId as string | undefined);
   res.status(200).json({ success: true, data: discounts || [] });
 };
 
 // Get discounts by product ID
-export const getDiscountsByProductId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getDiscountsByProductId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { organizationId } = req.query;
   const discounts = await discountRepo.findDiscountsForProduct(productId, organizationId as string | undefined);
@@ -20,7 +19,7 @@ export const getDiscountsByProductId = async (req: TypedRequest, res: Response):
 };
 
 // Get discounts by category ID
-export const getDiscountsByCategoryId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getDiscountsByCategoryId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const { organizationId } = req.query;
   const discounts = await discountRepo.findDiscountsForCategory(categoryId, organizationId as string | undefined);
@@ -28,7 +27,7 @@ export const getDiscountsByCategoryId = async (req: TypedRequest, res: Response)
 };
 
 // Get discount by ID
-export const getDiscountById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getDiscountById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const discount = await discountRepo.findById(id);
 
@@ -42,8 +41,8 @@ export const getDiscountById = async (req: TypedRequest, res: Response): Promise
 
 // Create a new discount
 export const createDiscount = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateProductDiscountInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateProductDiscountInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const discountData = req.body;
 
@@ -59,8 +58,8 @@ export const createDiscount = async (
 
 // Update an existing discount
 export const updateDiscount = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateProductDiscountInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateProductDiscountInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const discountData = req.body;
@@ -70,7 +69,7 @@ export const updateDiscount = async (
 };
 
 // Delete a discount
-export const deleteDiscount = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteDiscount = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const deleted = await discountRepo.delete(id);

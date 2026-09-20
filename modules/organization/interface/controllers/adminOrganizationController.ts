@@ -4,11 +4,10 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listOrganizations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrganizations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/index', {
     pageName: 'Organizations',
     organizations: [],
@@ -17,13 +16,13 @@ export const listOrganizations = async (req: TypedRequest, res: Response): Promi
   });
 };
 
-export const createOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createOrganizationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/create', {
     pageName: 'Add Organization',
   });
 };
 
-export const createOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/operations/organizations?success=Organization created successfully');
   } catch (error: unknown) {
@@ -31,12 +30,12 @@ export const createOrganization = async (req: TypedRequest, res: Response): Prom
     adminRespond(req, res, 'operations/organizations/create', {
       pageName: 'Add Organization',
       error: (error as Error).message || 'Failed to create organization',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/view', {
     pageName: 'Organization Details',
     organization: null,
@@ -44,14 +43,14 @@ export const viewOrganization = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const editOrganizationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editOrganizationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/edit', {
     pageName: 'Edit Organization',
     organization: null,
   });
 };
 
-export const updateOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { organizationId } = req.params;
     res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
@@ -61,21 +60,21 @@ export const updateOrganization = async (req: TypedRequest, res: Response): Prom
       pageName: 'Edit Organization',
       organization: null,
       error: (error as Error).message || 'Failed to update organization',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Organization deleted successfully' });
 };
 
-export const approveOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
 };
 
-export const suspendOrganization = async (req: TypedRequest, res: Response): Promise<void> => {
+export const suspendOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
 };

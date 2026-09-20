@@ -3,8 +3,7 @@
  * Handles product listing, detail, and search for customers
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { listProductsUseCase, getProductUseCase, brandRepo } from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
@@ -23,7 +22,7 @@ interface StoreContext {
   priceDisplayMode: 'inclusive_tax' | 'exclusive_tax';
 }
 
-function getStoreContext(res: Response): StoreContext {
+function getStoreContext(res: HttpResponse): StoreContext {
   const settings = (res.locals.store as { settings?: Record<string, unknown> } | null)?.settings;
   const priceDisplayMode = (settings?.priceDisplayMode as 'inclusive_tax' | 'exclusive_tax' | undefined) || 'exclusive_tax';
   return {
@@ -40,7 +39,7 @@ function getStoreContext(res: Response): StoreContext {
 // Product Listing (PLP)
 // ============================================================================
 
-export const listProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     category,
     search,
@@ -140,7 +139,7 @@ export const listProducts = async (req: TypedRequest, res: Response): Promise<vo
 // Product Detail (PDP)
 // ============================================================================
 
-export const getProduct = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { _categorySlug, productId } = req.params;
   const storeCtx = getStoreContext(res);
 
@@ -194,7 +193,7 @@ export const getProduct = async (req: TypedRequest, res: Response): Promise<void
 // Category Products
 // ============================================================================
 
-export const getCategoryProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categorySlug } = req.params;
   const { page = '1', limit = '12', sort = 'newest', order = 'asc', brand, size, colour, priceMin, priceMax, onSale, inStock } = req.query;
   const storeCtx = getStoreContext(res);
@@ -275,7 +274,7 @@ export const getCategoryProducts = async (req: TypedRequest, res: Response): Pro
 // Search Products
 // ============================================================================
 
-export const searchProducts = async (req: TypedRequest, res: Response): Promise<void> => {
+export const searchProducts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { q: search, page = '1', limit = '12', sort = 'relevance', brand, size, colour, priceMin, priceMax, onSale, inStock } = req.query;
   const storeCtx = getStoreContext(res);
 
@@ -337,7 +336,7 @@ export const searchProducts = async (req: TypedRequest, res: Response): Promise<
 // Search Autocomplete (JSON API)
 // ============================================================================
 
-export const searchAutocomplete = async (req: TypedRequest, res: Response): Promise<void> => {
+export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { q: search } = req.query;
   const storeCtx = getStoreContext(res);
 
@@ -392,7 +391,7 @@ export const searchAutocomplete = async (req: TypedRequest, res: Response): Prom
 // Sitemap Generation
 // ============================================================================
 
-export const generateSitemap = async (req: TypedRequest, res: Response): Promise<void> => {
+export const generateSitemap = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   const urls: { loc: string; lastmod?: string; changefreq: string; priority: string }[] = [];
 

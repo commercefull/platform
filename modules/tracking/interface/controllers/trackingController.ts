@@ -3,8 +3,7 @@
  * Handles tracking configuration and event processing via /business/tracking routes.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
@@ -19,7 +18,7 @@ const getStatusUseCase = new GetTrackingStatusUseCase(repo);
 class TrackingController {
   // ── Config CRUD ─────────────────────────────────────────────
 
-  async getConfig(req: TypedRequest, res: Response) {
+  async getConfig(req: HttpRequest, res: HttpResponse) {
     try {
       const storeId = req.query.storeId as string;
       const organizationId = (req.user?.id as string) || '';
@@ -44,7 +43,7 @@ class TrackingController {
     }
   }
 
-  async getStatus(req: TypedRequest, res: Response) {
+  async getStatus(req: HttpRequest, res: HttpResponse) {
     try {
       const storeId = req.query.storeId as string;
       const organizationId = (req.user?.id as string) || '';
@@ -69,7 +68,7 @@ class TrackingController {
     }
   }
 
-  async createConfig(req: TypedRequest, res: Response) {
+  async createConfig(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const organizationId = (body.organizationId as string) || (req.user?.id as string) || '';
@@ -89,7 +88,7 @@ class TrackingController {
     }
   }
 
-  async updateGtm(req: TypedRequest, res: Response) {
+  async updateGtm(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -100,7 +99,7 @@ class TrackingController {
     }
   }
 
-  async removeGtm(req: TypedRequest, res: Response) {
+  async removeGtm(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.removeGtm(storeId);
@@ -110,7 +109,7 @@ class TrackingController {
     }
   }
 
-  async updateMetaCapi(req: TypedRequest, res: Response) {
+  async updateMetaCapi(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -121,7 +120,7 @@ class TrackingController {
     }
   }
 
-  async removeMetaCapi(req: TypedRequest, res: Response) {
+  async removeMetaCapi(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.removeMetaCapi(storeId);
@@ -133,7 +132,7 @@ class TrackingController {
 
   // ── Event Mappings ──────────────────────────────────────────
 
-  async addEventMapping(req: TypedRequest, res: Response) {
+  async addEventMapping(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -144,7 +143,7 @@ class TrackingController {
     }
   }
 
-  async removeEventMapping(req: TypedRequest, res: Response) {
+  async removeEventMapping(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId, sourceEvent } = req.params;
       const config = await manageConfigUseCase.removeEventMapping(storeId, decodeURIComponent(sourceEvent));
@@ -156,7 +155,7 @@ class TrackingController {
 
   // ── Lifecycle ───────────────────────────────────────────────
 
-  async activate(req: TypedRequest, res: Response) {
+  async activate(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.activate(storeId);
@@ -166,7 +165,7 @@ class TrackingController {
     }
   }
 
-  async disable(req: TypedRequest, res: Response) {
+  async disable(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.disable(storeId);
@@ -176,7 +175,7 @@ class TrackingController {
     }
   }
 
-  async setHashPii(req: TypedRequest, res: Response) {
+  async setHashPii(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -187,7 +186,7 @@ class TrackingController {
     }
   }
 
-  async setServerSideEnabled(req: TypedRequest, res: Response) {
+  async setServerSideEnabled(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
@@ -198,7 +197,7 @@ class TrackingController {
     }
   }
 
-  async deleteConfig(req: TypedRequest, res: Response) {
+  async deleteConfig(req: HttpRequest, res: HttpResponse) {
     try {
       const { storeId } = req.params;
       await manageConfigUseCase.delete(storeId);
@@ -210,7 +209,7 @@ class TrackingController {
 
   // ── Process Event (manual trigger) ──────────────────────────
 
-  async processEvent(req: TypedRequest, res: Response) {
+  async processEvent(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await processEventUseCase.execute({

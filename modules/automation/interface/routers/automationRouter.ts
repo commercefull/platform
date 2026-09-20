@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import automationController from '../controllers/automationController';
 
-export const automationBusinessRouter = express.Router();
+export const automationBusinessRouter = createHttpRouter();
 
 // Rule CRUD
 automationBusinessRouter.get(

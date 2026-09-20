@@ -5,11 +5,11 @@
  * Mounted at /business, routes prefixed with /audit.
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import { AuditAdminController } from './auditAdminController';
 
-const router = Router();
+const router = createHttpRouter();
 const controller = new AuditAdminController();
 
 router.use(isOrganizationLoggedIn);

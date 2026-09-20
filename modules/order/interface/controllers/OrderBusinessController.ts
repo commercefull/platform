@@ -3,8 +3,7 @@
  * HTTP interface for business/admin order operations with content negotiation
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const OrderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;
@@ -27,20 +26,17 @@ import { Money } from '../../domain/valueObjects/Money';
 import { generateUUID, isUuid } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
 import { orderDataRepository, orderFulfillmentDataRepository } from '../../application/wired';
-import {
-  OrderNotFoundError,
-  RefundAmountMustBePositiveError,
-} from '../../domain/errors/OrderErrors';
+import { OrderNotFoundError, RefundAmountMustBePositiveError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -52,7 +48,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * List all orders with filters
  * GET /orders
  */
-export const listOrders = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     customerId,
     storeId,
@@ -106,7 +102,7 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
  * Get order details
  * GET /orders/:orderId
  */
-export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
 
   if (!isUuid(orderId)) {
@@ -128,7 +124,7 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
  * Update order status
  * PUT /orders/:orderId/status
  */
-export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { status: string; reason?: string };
   const { status, reason } = body;
@@ -151,7 +147,7 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
  * Cancel an order (admin)
  * POST /orders/:orderId/cancel
  */
-export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { reason?: string };
   const { reason } = body;
@@ -172,7 +168,7 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
  * Process refund
  * POST /orders/:orderId/refund
  */
-export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processRefund = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { amount: number; reason: string; transactionId?: string };
   const { amount, reason, transactionId } = body;
@@ -197,7 +193,7 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
  * Get order statistics
  * GET /orders/stats
  */
-export const getOrderStats = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { startDate, endDate, customerId, storeId, channelId, createdByUserId, orderSource } = req.query;
 
   const filters: OrderFilters = {};
@@ -214,7 +210,7 @@ export const getOrderStats = async (req: TypedRequest, res: Response): Promise<v
   respond(req, res, stats, 200);
 };
 
-export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStoreSalesSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
   const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
 
@@ -232,7 +228,7 @@ export const getStoreSalesSummary = async (req: TypedRequest, res: Response): Pr
  * Get order status history
  * GET /orders/:orderId/history
  */
-export const getOrderHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
 
   const history = await OrderRepo.getStatusHistory(orderId);
@@ -248,7 +244,7 @@ export const getOrderHistory = async (req: TypedRequest, res: Response): Promise
  * List notes for an order
  * GET /business/orders/:orderId/notes
  */
-export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrderNotes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const notes = await orderQueryRepo.findNotesByOrder(orderId);
   respond(req, res, { orderId, notes });
@@ -258,7 +254,7 @@ export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<
  * Add a note to an order
  * POST /business/orders/:orderId/notes
  */
-export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { content: string; isCustomerVisible?: boolean };
   const { content, isCustomerVisible } = body;
@@ -274,7 +270,7 @@ export const addOrderNote = async (req: TypedRequest, res: Response): Promise<vo
  * Soft-delete a note from an order
  * DELETE /business/orders/:orderId/notes/:noteId
  */
-export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteOrderNote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { noteId } = req.params;
   const deleted = await orderQueryRepo.softDeleteNote(noteId);
   if (!deleted) {
@@ -292,7 +288,7 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
  * List refunds for an order
  * GET /business/orders/:orderId/refunds
  */
-export const listOrderRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrderRefunds = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const refunds = await orderQueryRepo.findRefundsByOrder(orderId);
   respond(req, res, { orderId, refunds });
@@ -302,7 +298,7 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
  * Create a refund for an order payment
  * POST /business/orders/:orderId/refunds
  */
-export const createOrderRefund = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createOrderRefund = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
@@ -321,7 +317,7 @@ export const createOrderRefund = async (req: TypedRequest, res: Response): Promi
  * List packages for a fulfillment
  * GET /business/orders/:orderId/packages
  */
-export const listFulfillmentPackages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFulfillmentPackages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.query;
   if (!fulfillmentId) {
     respondError(req, res, 'fulfillmentId query parameter is required', 400);
@@ -335,7 +331,7 @@ export const listFulfillmentPackages = async (req: TypedRequest, res: Response):
  * Create a fulfillment package
  * POST /business/orders/:orderId/packages
  */
-export const createFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createFulfillmentPackage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as {
     orderFulfillmentId: string;
     packageNumber: string;
@@ -380,7 +376,7 @@ export const createFulfillmentPackage = async (req: TypedRequest, res: Response)
  * Update tracking on a fulfillment package
  * POST /business/orders/:orderId/packages/:packageId/tracking
  */
-export const trackFulfillmentPackage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const trackFulfillmentPackage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { packageId } = req.params;
   const body = req.body as {
     orderFulfillmentId?: string;
@@ -413,7 +409,7 @@ export const trackFulfillmentPackage = async (req: TypedRequest, res: Response):
 // Order Lookup by Number
 // ============================================================================
 
-export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderNumber } = req.params;
 
   const command = new GetOrderCommand(undefined, orderNumber);
@@ -428,7 +424,7 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
   respond(req, res, order, 200);
 };
 
-export const getOrderItems = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const items = await OrderRepo.getOrderItems(orderId);
   respond(
@@ -438,7 +434,7 @@ export const getOrderItems = async (req: TypedRequest, res: Response): Promise<v
   );
 };
 
-export const getOrderItemById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderItemById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
   if (!row) {
@@ -455,7 +451,7 @@ export const getOrderItemById = async (req: TypedRequest, res: Response): Promis
   respond(req, res, item.toJSON());
 };
 
-export const createOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as {
     orderId: string;
     productId: string;
@@ -511,7 +507,7 @@ export const createOrderItem = async (req: TypedRequest, res: Response): Promise
   respond(req, res, item.toJSON(), 201);
 };
 
-export const updateOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
   const body = req.body as { quantity?: number; unitPrice?: number };
 
@@ -539,7 +535,7 @@ export const updateOrderItem = async (req: TypedRequest, res: Response): Promise
   respond(req, res, item.toJSON());
 };
 
-export const deleteOrderItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
   await OrderRepo.removeOrderItem(orderItemId);
   respond(req, res, { deleted: true });
@@ -549,7 +545,7 @@ export const deleteOrderItem = async (req: TypedRequest, res: Response): Promise
 // Payment & Fulfillment Status
 // ============================================================================
 
-export const updatePaymentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePaymentStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { paymentStatus: string };
   const { paymentStatus } = body;
@@ -579,7 +575,7 @@ export const updatePaymentStatus = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const updateFulfillmentStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { fulfillmentStatus: string };
   const { fulfillmentStatus } = body;
@@ -613,7 +609,7 @@ export const updateFulfillmentStatus = async (req: TypedRequest, res: Response):
 // Status History Endpoints
 // ============================================================================
 
-export const getStatusHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getStatusHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const history = await OrderRepo.getStatusHistory(orderId);
   const result = history.map(h => ({
@@ -625,7 +621,7 @@ export const getStatusHistory = async (req: TypedRequest, res: Response): Promis
   respond(req, res, result);
 };
 
-export const getPaymentHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPaymentHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const history = await OrderRepo.getPaymentStatusHistory(orderId);
   const result = history.map(h => ({
@@ -637,7 +633,7 @@ export const getPaymentHistory = async (req: TypedRequest, res: Response): Promi
   respond(req, res, result);
 };
 
-export const getFulfillmentHistory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getFulfillmentHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const history = await OrderRepo.getFulfillmentStatusHistory(orderId);
   const result = history.map(h => ({

@@ -1,8 +1,8 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { getPublishedPages, getPublishedPageBySlug, getActiveContentTypes } from '../controllers/contentCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Public content routes (no auth required, only published/active content)
 router.get('/content/pages', asyncHandler(getPublishedPages));

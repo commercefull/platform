@@ -3,8 +3,7 @@
  * Admin views for managing webhook endpoints
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { RegisterWebhookUseCase } from '../../application/useCases/RegisterWebhook';
 import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
 import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
@@ -13,7 +12,7 @@ import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listWebhookEndpoints = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listWebhookEndpoints = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId, isActive } = req.query;
   const useCase = new ListWebhooksUseCase(WebhookRepo);
   const result = await useCase.execute(
@@ -34,7 +33,7 @@ export const listWebhookEndpoints = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const viewWebhookEndpoint = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewWebhookEndpoint = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
 
@@ -53,15 +52,15 @@ export const viewWebhookEndpoint = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const createWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createWebhookForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'webhook/create', {
     pageName: 'Create Webhook Endpoint',
     availableEvents: SYNC_RELEVANT_EVENTS,
   });
 };
 
-export const createWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const useCase = new RegisterWebhookUseCase(WebhookRepo);
   const result = await useCase.execute({
     name: body.name as string,
@@ -75,7 +74,7 @@ export const createWebhook = async (req: TypedRequest, res: Response): Promise<v
   res.redirect(`/admin/webhooks/${result.webhookEndpointId}?success=Webhook created successfully`);
 };
 
-export const editWebhookForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editWebhookForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
 
@@ -93,9 +92,9 @@ export const editWebhookForm = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const updateWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const updates: Record<string, unknown> = {};
 
   if (body.name !== undefined) updates.name = body.name;
@@ -108,14 +107,14 @@ export const updateWebhook = async (req: TypedRequest, res: Response): Promise<v
   res.redirect(`/admin/webhooks/${webhookEndpointId}?success=Webhook updated successfully`);
 };
 
-export const deleteWebhook = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const useCase = new UnregisterWebhookUseCase(WebhookRepo);
   await useCase.execute(webhookEndpointId);
   res.redirect('/admin/webhooks?success=Webhook deleted');
 };
 
-export const viewWebhookDeliveries = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewWebhookDeliveries = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const { status, limit, offset } = req.query;
 

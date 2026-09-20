@@ -4,8 +4,7 @@
  * for the Commercefull Admin Hub - Phase 8
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { ManageLanguagesUseCase, ManageCurrenciesUseCase, ManageCountriesUseCase } from '../../application/useCases/ManageLocalization';
 
@@ -50,7 +49,7 @@ interface StoreSettings {
 // Store Settings
 // ============================================================================
 
-export const storeSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const storeSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || 'default';
 
   const timezones = getTimezones();
@@ -66,8 +65,8 @@ export const storeSettings = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const updateStoreSettings = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const updateStoreSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const { addressLine1, addressLine2, city, state, postalCode, country } = body;
 
   void { addressLine1, addressLine2, city, state, postalCode, country };
@@ -79,7 +78,7 @@ export const updateStoreSettings = async (req: TypedRequest, res: Response): Pro
 // Business Information
 // ============================================================================
 
-export const businessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
+export const businessInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || 'default';
 
   adminRespond(req, res, 'settings/business', {
@@ -88,8 +87,8 @@ export const businessInfo = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const updateBusinessInfo = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const updateBusinessInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const { legalName, taxId, registrationNumber } = body;
   void { legalName, taxId, registrationNumber };
 
@@ -100,7 +99,7 @@ export const updateBusinessInfo = async (req: TypedRequest, res: Response): Prom
 // Localization Settings
 // ============================================================================
 
-export const localizationSettings = async (req: TypedRequest, res: Response): Promise<void> => {
+export const localizationSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get languages
   const languages = await manageLanguagesUseCase.listLanguages();
 
@@ -122,9 +121,15 @@ export const localizationSettings = async (req: TypedRequest, res: Response): Pr
 // Language Management
 // ============================================================================
 
-export const createLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { code, name, nativeName, isDefault, isActive } = body;
+export const createLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { code, name, nativeName, isDefault, isActive } = body as {
+    code: string;
+    name: string;
+    nativeName?: string;
+    isDefault?: boolean;
+    isActive?: boolean;
+  };
 
   if (!code || !name) {
     res.status(400).json({ success: false, message: 'Code and name are required' });
@@ -136,10 +141,15 @@ export const createLanguage = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, languageId });
 };
 
-export const updateLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { languageId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, nativeName, isDefault, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, nativeName, isDefault, isActive } = body as {
+    name?: string;
+    nativeName?: string;
+    isDefault?: boolean;
+    isActive?: boolean;
+  };
   // const _now = new Date();
 
   await manageLanguagesUseCase.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
@@ -147,7 +157,7 @@ export const updateLanguage = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true });
 };
 
-export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { languageId } = req.params;
 
   const language = await manageLanguagesUseCase.findLanguageById(languageId);
@@ -166,9 +176,16 @@ export const deleteLanguage = async (req: TypedRequest, res: Response): Promise<
 // Currency Management
 // ============================================================================
 
-export const createCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { code, name, symbol, exchangeRate, isDefault, isActive } = body;
+export const createCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { code, name, symbol, exchangeRate, isDefault, isActive } = body as {
+    code: string;
+    name: string;
+    symbol?: string;
+    exchangeRate?: number;
+    isDefault?: boolean;
+    isActive?: boolean;
+  };
 
   if (!code || !name) {
     res.status(400).json({ success: false, message: 'Code and name are required' });
@@ -180,10 +197,16 @@ export const createCurrency = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true, currencyId });
 };
 
-export const updateCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { currencyId } = req.params;
-  const body = req.body as RequestBody;
-  const { name, symbol, exchangeRate, isDefault, isActive } = body;
+  const body = req.body as HttpRequestBody;
+  const { name, symbol, exchangeRate, isDefault, isActive } = body as {
+    name?: string;
+    symbol?: string;
+    exchangeRate?: number;
+    isDefault?: boolean;
+    isActive?: boolean;
+  };
   // const _now = new Date();
 
   await manageCurrenciesUseCase.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
@@ -191,7 +214,7 @@ export const updateCurrency = async (req: TypedRequest, res: Response): Promise<
   res.json({ success: true });
 };
 
-export const deleteCurrency = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { currencyId } = req.params;
 
   const currency = await manageCurrenciesUseCase.findCurrencyById(currencyId);

@@ -3,10 +3,10 @@
  * Handles returns, exchanges & store credit management for the Admin Hub
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { adminRespond } from '../../../../libs/adminRespond';
+import type { ReturnCarrier, ReturnType } from '../../domain/entities/ReturnRequest';
 import {
   createReturnRequestUseCase,
   approveReturnRequestUseCase,
@@ -26,7 +26,7 @@ import {
 // List Returns
 // ============================================================================
 
-export const listReturns = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listReturns = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string | undefined;
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
   const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
@@ -44,7 +44,7 @@ export const listReturns = async (req: TypedRequest, res: Response): Promise<voi
 // View Return
 // ============================================================================
 
-export const viewReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { returnId } = req.params;
   const returnRequest = await getReturnRequestUseCase.execute(returnId);
 
@@ -68,17 +68,27 @@ export const viewReturn = async (req: TypedRequest, res: Response): Promise<void
 // Create Return
 // ============================================================================
 
-export const createReturnForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReturnForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/returns/create', {
     pageName: 'Create Return Request',
   });
 };
 
-export const createReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { orderId, customerId, returnType, returnReason, customerNotes, returnCarrier, returnShippingPaid, requiresInspection, items } =
-      body;
+      body as {
+        orderId: string;
+        customerId?: string;
+        returnType: ReturnType;
+        returnReason?: string;
+        customerNotes?: string;
+        returnCarrier?: ReturnCarrier;
+        returnShippingPaid?: string;
+        requiresInspection?: string;
+        items?: unknown;
+      };
 
     const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
 
@@ -100,7 +110,7 @@ export const createReturn = async (req: TypedRequest, res: Response): Promise<vo
     adminRespond(req, res, 'operations/returns/create', {
       pageName: 'Create Return Request',
       error: (error as Error).message || 'Failed to create return request',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
@@ -109,11 +119,11 @@ export const createReturn = async (req: TypedRequest, res: Response): Promise<vo
 // Return Workflow Actions
 // ============================================================================
 
-export const approveReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const approveReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
-    const body = req.body as RequestBody;
-    await approveReturnRequestUseCase.execute(returnId, body?.rmaNumber);
+    const body = req.body as HttpRequestBody;
+    await approveReturnRequestUseCase.execute(returnId, body?.rmaNumber as string | undefined);
     res.redirect(`/admin/returns/${returnId}?success=Return approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error approving return:', error);
@@ -121,11 +131,11 @@ export const approveReturn = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const denyReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const denyReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
-    const body = req.body as RequestBody;
-    await denyReturnRequestUseCase.execute(returnId, body?.reason);
+    const body = req.body as HttpRequestBody;
+    await denyReturnRequestUseCase.execute(returnId, body?.reason as string | undefined);
     res.redirect(`/admin/returns/${returnId}?success=Return denied`);
   } catch (error: unknown) {
     logger.warn('Error denying return:', error);
@@ -133,11 +143,11 @@ export const denyReturn = async (req: TypedRequest, res: Response): Promise<void
   }
 };
 
-export const markInTransit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markInTransit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
-    const body = req.body as RequestBody;
-    await markReturnInTransitUseCase.execute(returnId, body?.trackingNumber, body?.trackingUrl);
+    const body = req.body as HttpRequestBody;
+    await markReturnInTransitUseCase.execute(returnId, body?.trackingNumber as string | undefined, body?.trackingUrl as string | undefined);
     res.redirect(`/admin/returns/${returnId}?success=Return marked as in transit`);
   } catch (error: unknown) {
     logger.warn('Error marking return in transit:', error);
@@ -145,7 +155,7 @@ export const markInTransit = async (req: TypedRequest, res: Response): Promise<v
   }
 };
 
-export const markReceived = async (req: TypedRequest, res: Response): Promise<void> => {
+export const markReceived = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
     await markReturnReceivedUseCase.execute(returnId);
@@ -156,10 +166,10 @@ export const markReceived = async (req: TypedRequest, res: Response): Promise<vo
   }
 };
 
-export const completeInspection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeInspection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const passedItems = body?.passedItems
       ? typeof body.passedItems === 'string'
         ? JSON.parse(body.passedItems)
@@ -178,7 +188,7 @@ export const completeInspection = async (req: TypedRequest, res: Response): Prom
   }
 };
 
-export const completeReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const completeReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
     await completeReturnRequestUseCase.execute(returnId);
@@ -189,11 +199,11 @@ export const completeReturn = async (req: TypedRequest, res: Response): Promise<
   }
 };
 
-export const cancelReturn = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { returnId } = req.params;
-    const body = req.body as RequestBody;
-    await cancelReturnRequestUseCase.execute(returnId, body?.reason);
+    const body = req.body as HttpRequestBody;
+    await cancelReturnRequestUseCase.execute(returnId, body?.reason as string | undefined);
     res.redirect(`/admin/returns/${returnId}?success=Return cancelled`);
   } catch (error: unknown) {
     logger.warn('Error cancelling return:', error);
@@ -205,7 +215,7 @@ export const cancelReturn = async (req: TypedRequest, res: Response): Promise<vo
 // Store Credit
 // ============================================================================
 
-export const viewStoreCredit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewStoreCredit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.query.customerId as string;
 
   if (customerId) {

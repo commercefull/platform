@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ListOrdersCommand } from '../../application/useCases/ListOrders';
 import { GetOrderCommand } from '../../application/useCases/GetOrder';
 import { UpdateOrderStatusCommand } from '../../application/useCases/UpdateOrderStatus';
@@ -37,7 +36,7 @@ const getFulfillmentPackagesUseCase = new GetFulfillmentPackagesUseCase();
 // List Orders
 // ============================================================================
 
-export const listOrders = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } =
     req.query;
 
@@ -99,7 +98,7 @@ export const listOrders = async (req: TypedRequest, res: Response): Promise<void
 // View Order
 // ============================================================================
 
-export const viewOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
 
   const command = new GetOrderCommand(orderId);
@@ -128,10 +127,10 @@ export const viewOrder = async (req: TypedRequest, res: Response): Promise<void>
 // Update Order Status
 // ============================================================================
 
-export const updateOrderStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const body = req.body as RequestBody;
-  const { status, note } = body;
+  const body = req.body as HttpRequestBody;
+  const { status, note } = body as { status: OrderStatus; note?: string };
   const _updatedBy = req.user?.id || 'admin';
 
   const validStatuses = Object.values(OrderStatus);
@@ -155,10 +154,10 @@ export const updateOrderStatus = async (req: TypedRequest, res: Response): Promi
 // Cancel Order
 // ============================================================================
 
-export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const body = req.body as RequestBody;
-  const { reason } = body;
+  const body = req.body as HttpRequestBody;
+  const { reason } = body as { reason?: string };
   const _cancelledBy = req.user?.id || 'admin';
 
   const command = new CancelOrderCommand(orderId, reason || 'Cancelled by admin');
@@ -175,7 +174,7 @@ export const cancelOrder = async (req: TypedRequest, res: Response): Promise<voi
 // Process Refund Form
 // ============================================================================
 
-export const refundForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const refundForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
 
   const command = new GetOrderCommand(orderId);
@@ -199,10 +198,10 @@ export const refundForm = async (req: TypedRequest, res: Response): Promise<void
 // Process Refund
 // ============================================================================
 
-export const processRefund = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processRefund = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const body = req.body as RequestBody;
-  const { amount, reason, _refundItems } = body;
+  const body = req.body as HttpRequestBody;
+  const { amount, reason, _refundItems } = body as { amount: string; reason?: string; _refundItems?: unknown };
   const _processedBy = req.user?.id || 'admin';
 
   const command = new ProcessRefundCommand(orderId, parseFloat(amount), reason || 'Refund processed by admin');
@@ -220,17 +219,17 @@ export const processRefund = async (req: TypedRequest, res: Response): Promise<v
 // Order Notes
 // ============================================================================
 
-export const listOrderNotes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrderNotes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const notes = await manageOrderNotesUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/notes', { orderId, notes });
 };
 
-export const addOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { orderId } = req.params;
-    const body = req.body as RequestBody;
-    const { content, isCustomerVisible } = body;
+    const body = req.body as HttpRequestBody;
+    const { content, isCustomerVisible } = body as { content: string; isCustomerVisible?: string | boolean };
     const createdBy = req.user?.id || 'admin';
 
     const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible === 'true' || isCustomerVisible === true, createdBy);
@@ -245,7 +244,7 @@ export const addOrderNote = async (req: TypedRequest, res: Response): Promise<vo
   }
 };
 
-export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteOrderNote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { orderId, noteId } = req.params;
     await manageOrderNotesUseCase.softDelete(noteId);
@@ -262,7 +261,7 @@ export const deleteOrderNote = async (req: TypedRequest, res: Response): Promise
 // Order Refunds
 // ============================================================================
 
-export const listOrderRefunds = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listOrderRefunds = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const refunds = await getOrderRefundsUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/refunds', { orderId, refunds });
@@ -272,17 +271,21 @@ export const listOrderRefunds = async (req: TypedRequest, res: Response): Promis
 // Fulfillment Packages
 // ============================================================================
 
-export const listFulfillmentPackages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFulfillmentPackages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const packages = await getFulfillmentPackagesUseCase.findByOrder(orderId);
   adminRespond(req, res, 'orders/partials/packages', { orderId, packages });
 };
 
-export const updatePackageTracking = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePackageTracking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { orderId, packageId } = req.params;
-    const body = req.body as RequestBody;
-    const { trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = body;
+    const body = req.body as HttpRequestBody;
+    const { trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = body as {
+      trackingNumber?: string;
+      shippingLabelUrl?: string;
+      commercialInvoiceUrl?: string;
+    };
 
     const command = new TrackFulfillmentPackageCommand(
       '', // orderFulfillmentId not needed for update path

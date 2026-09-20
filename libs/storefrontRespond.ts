@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from './http';
 import { formatPrice, formatPriceWithTax } from './money';
 
 type ResponseData = Record<string, unknown>;
@@ -12,7 +11,7 @@ const DEFAULT_THEME = 'default';
  * The theme name is resolved by middleware and stored in res.locals.theme.
  * Falls back to 'default' theme, then to 'default' if the themed view is missing.
  */
-export async function storefrontRespond(req: TypedRequest, res: Response, view: string, data: ResponseData) {
+export async function storefrontRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
   const successMsg = req.flash ? req.flash('success')[0] : null;
   const errorMsg = req.flash ? req.flash('error')[0] : null;
 

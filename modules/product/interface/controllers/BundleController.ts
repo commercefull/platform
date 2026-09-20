@@ -3,14 +3,13 @@
  * Handles product bundle operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { productEngagementRepository } from '../../application/wired';
 import { BundleType, ProductBundle, BundleItem } from '../../application/wired';
 
 const bundleRepo = productEngagementRepository.bundles;
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 // ============================================================================
 // Business/Admin Operations

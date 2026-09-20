@@ -3,7 +3,7 @@
  * Routes for customer-facing support operations
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import {
@@ -31,7 +31,7 @@ import {
   cancelMyPriceAlert,
 } from '../controllers/supportCustomerController';
 
-const router = Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // FAQ Routes (Public)

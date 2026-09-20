@@ -3,8 +3,7 @@
  * Manages order returns for customers
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontReturnsUseCase } from '../../application/useCases/ManageStorefrontReturns';
 
@@ -19,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: List customer returns
  */
-export const listReturns = async (req: TypedRequest, res: Response) => {
+export const listReturns = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -36,7 +35,7 @@ export const listReturns = async (req: TypedRequest, res: Response) => {
 /**
  * GET: Return request form
  */
-export const returnRequestForm = async (req: TypedRequest, res: Response) => {
+export const returnRequestForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -65,14 +64,14 @@ export const returnRequestForm = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Submit return request
  */
-export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
+export const submitReturnRequest = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
   }
 
   const { orderId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { reason, description, _itemIds } = body;
 
   const order = await manageStorefrontReturnsUseCase.findOrderForCustomer(orderId, user.customerId);
@@ -100,7 +99,7 @@ export const submitReturnRequest = async (req: TypedRequest, res: Response) => {
 /**
  * GET: View return details
  */
-export const viewReturn = async (req: TypedRequest, res: Response) => {
+export const viewReturn = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');

@@ -3,8 +3,7 @@
  * Handles content management for the Admin Hub
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { CreatePageCommand } from '../../application/useCases/CreatePage';
 import { UpdatePageCommand } from '../../application/useCases/UpdatePage';
 import { PublishPageCommand } from '../../application/useCases/PublishPage';
@@ -15,7 +14,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // Content Pages
 // ============================================================================
 
-export const listContentPages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listContentPages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string | undefined;
   const contentTypeId = req.query.contentTypeId as string | undefined;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -37,7 +36,7 @@ export const listContentPages = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const createContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createContentPageForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const contentTypes = await manageContentUseCase.findAllContentTypes(true);
   const templates = await manageContentUseCase.findAllTemplates(true);
 
@@ -48,8 +47,8 @@ export const createContentPageForm = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const createContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const {
     title,
     slug,
@@ -64,7 +63,21 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
     visibility,
     _accessPassword,
     isHomePage,
-  } = body;
+  } = body as {
+    title: string;
+    slug: string;
+    contentTypeId: string;
+    templateId?: string;
+    summary?: string;
+    featuredImage?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    metaKeywords?: string;
+    status?: string;
+    visibility?: string;
+    _accessPassword?: string;
+    isHomePage?: string;
+  };
 
   const command = new CreatePageCommand(
     title, // 1. title
@@ -91,7 +104,7 @@ export const createContentPage = async (req: TypedRequest, res: Response): Promi
   res.redirect(`/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
 };
 
-export const viewContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
 
   const page = await manageContentUseCase.findPageById(pageId);
@@ -116,7 +129,7 @@ export const viewContentPage = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const editContentPageForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editContentPageForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
 
   const page = await manageContentUseCase.findPageById(pageId);
@@ -140,11 +153,11 @@ export const editContentPageForm = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const updateContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
   const updates: Record<string, unknown> = {};
 
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const {
     title,
     slug,
@@ -197,7 +210,7 @@ export const updateContentPage = async (req: TypedRequest, res: Response): Promi
   res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
 };
 
-export const publishContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const publishContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
 
   const command = new PublishPageCommand(pageId);
@@ -206,7 +219,7 @@ export const publishContentPage = async (req: TypedRequest, res: Response): Prom
   res.json({ success: true, message: 'Content page published successfully' });
 };
 
-export const deleteContentPage = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
 
   const success = await manageContentUseCase.deletePage(pageId);
@@ -222,7 +235,7 @@ export const deleteContentPage = async (req: TypedRequest, res: Response): Promi
 // Content Templates
 // ============================================================================
 
-export const listContentTemplates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listContentTemplates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const templates = await manageContentUseCase.findAllTemplates();
 
   adminRespond(req, res, 'content/templates/index', {
@@ -237,7 +250,7 @@ export const listContentTemplates = async (req: TypedRequest, res: Response): Pr
 // Content Media
 // ============================================================================
 
-export const listContentMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listContentMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // For now, show basic media interface - can be expanded later
   const mediaItems: unknown[] = [];
 

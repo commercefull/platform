@@ -5,8 +5,7 @@
 
 import { randomUUID } from 'crypto';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
 import { SystemConfigurationRepo } from '../../application/wired';
@@ -53,7 +52,7 @@ export class SystemConfigurationController {
    * Create system configuration
    * POST /business/configuration
    */
-  async createSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, CreateConfigBody>, res: Response) {
+  async createSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, CreateConfigBody>, res: HttpResponse) {
     try {
       const body = req.body;
       if (!body.platformName || !body.platformName.trim()) {
@@ -96,7 +95,7 @@ export class SystemConfigurationController {
    * Update system configuration
    * PUT /business/configuration/:configId
    */
-  async updateSystemConfiguration(req: TypedRequest<Record<string, string>, unknown, UpdateConfigBody>, res: Response) {
+  async updateSystemConfiguration(req: HttpRequest<Record<string, string>, unknown, UpdateConfigBody>, res: HttpResponse) {
     try {
       if (!isUuid(req.params.configId)) {
         return res.status(400).json({
@@ -141,7 +140,7 @@ export class SystemConfigurationController {
    * Get system configuration by ID
    * GET /business/configuration/:configId
    */
-  async getSystemConfiguration(req: TypedRequest, res: Response) {
+  async getSystemConfiguration(req: HttpRequest, res: HttpResponse) {
     try {
       if (!isUuid(req.params.configId)) {
         return res.status(400).json({
@@ -179,7 +178,7 @@ export class SystemConfigurationController {
    * Get active system configuration
    * GET /business/configuration/active
    */
-  async getActiveSystemConfiguration(req: TypedRequest, res: Response) {
+  async getActiveSystemConfiguration(req: HttpRequest, res: HttpResponse) {
     try {
       const systemConfigRepository = new SystemConfigurationRepo();
       const config = await systemConfigRepository.findActive();
@@ -211,7 +210,7 @@ export class SystemConfigurationController {
    * List all system configurations
    * GET /business/configuration
    */
-  async listSystemConfigurations(req: TypedRequest, res: Response) {
+  async listSystemConfigurations(req: HttpRequest, res: HttpResponse) {
     try {
       const systemConfigRepository = new SystemConfigurationRepo();
       const configs = await systemConfigRepository.findAll();

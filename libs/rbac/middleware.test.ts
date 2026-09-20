@@ -2,7 +2,7 @@
  * Tests for RBAC middleware.
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse, HttpUser } from '../http';
 import { requirePermission, requireStoreAccess, buildContextFromRequest } from './middleware';
 
 // Mock checkPermission to control results
@@ -16,8 +16,8 @@ import { checkPermission } from './checkPermission';
 import type { PermissionResult } from './types';
 
 describe('RBAC middleware', () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
+  let mockReq: Partial<HttpRequest>;
+  let mockRes: Partial<HttpResponse>;
   let nextFn: jest.Mock;
 
   beforeEach(() => {
@@ -52,14 +52,14 @@ describe('RBAC middleware', () => {
     it('should call next() when permission is allowed', () => {
       (checkPermission as jest.Mock).mockReturnValue({ allowed: true } as PermissionResult);
       const middleware = requirePermission('product', 'create');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(nextFn).toHaveBeenCalled();
     });
 
     it('should return 403 when permission is denied', () => {
       (checkPermission as jest.Mock).mockReturnValue({ allowed: false, reason: 'No permission' } as PermissionResult);
       const middleware = requirePermission('product', 'delete');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }));
       expect(nextFn).not.toHaveBeenCalled();
@@ -68,7 +68,7 @@ describe('RBAC middleware', () => {
     it('should return 401 when no user', () => {
       mockReq.user = undefined;
       const middleware = requirePermission('product', 'create');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(nextFn).not.toHaveBeenCalled();
     });
@@ -79,7 +79,7 @@ describe('RBAC middleware', () => {
       (checkPermission as jest.Mock).mockReturnValue({ allowed: true } as PermissionResult);
       mockReq.params = { storeId: 'store-1' };
       const middleware = requireStoreAccess('inventory', 'adjust');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(nextFn).toHaveBeenCalled();
     });
 
@@ -87,7 +87,7 @@ describe('RBAC middleware', () => {
       (checkPermission as jest.Mock).mockReturnValue({ allowed: true } as PermissionResult);
       mockReq.params = { storeId: 'store-other' };
       const middleware = requireStoreAccess('inventory', 'adjust');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(mockRes.status).toHaveBeenCalledWith(403);
       expect(nextFn).not.toHaveBeenCalled();
     });
@@ -95,16 +95,16 @@ describe('RBAC middleware', () => {
     it('should allow different store when user has storeIds', () => {
       (checkPermission as jest.Mock).mockReturnValue({ allowed: true } as PermissionResult);
       mockReq.params = { storeId: 'store-2' };
-      (mockReq.user as Express.User).storeIds = ['store-1', 'store-2'];
+      (mockReq.user as HttpUser).storeIds = ['store-1', 'store-2'];
       const middleware = requireStoreAccess('inventory', 'adjust');
-      middleware(mockReq as Request, mockRes as Response, nextFn);
+      middleware(mockReq as HttpRequest, mockRes as HttpResponse, nextFn);
       expect(nextFn).toHaveBeenCalled();
     });
   });
 
   describe('buildContextFromRequest', () => {
     it('should build context from request user', () => {
-      const ctx = buildContextFromRequest(mockReq as Request);
+      const ctx = buildContextFromRequest(mockReq as HttpRequest);
       expect(ctx.userId).toBe('user-1');
       expect(ctx.role).toBe('MANAGER');
       expect(ctx.userType).toBe('organization');
@@ -114,7 +114,7 @@ describe('RBAC middleware', () => {
 
     it('should extract resourceStoreId from params', () => {
       mockReq.params = { storeId: 'store-from-param' };
-      const ctx = buildContextFromRequest(mockReq as Request);
+      const ctx = buildContextFromRequest(mockReq as HttpRequest);
       expect(ctx.resourceStoreId).toBe('store-from-param');
     });
   });

@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageAdminSubscriptionsUseCase } from '../../application/useCases/ManageAdminSubscriptions';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
@@ -43,7 +42,7 @@ function calculateNextBillingDate(fromDate: Date, interval: string, count: numbe
 // Subscription Plans Management
 // ============================================================================
 
-export const listSubscriptionPlans = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSubscriptionPlans = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const productId = req.query.productId as string;
   const activeOnly = req.query.activeOnly !== 'false';
   const limit = parseInt(req.query.limit as string) || 50;
@@ -62,7 +61,7 @@ export const listSubscriptionPlans = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const createSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSubscriptionPlanForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const productId = req.query.productId as string;
 
   adminRespond(req, res, 'programs/subscription/plans/create', {
@@ -94,14 +93,16 @@ const subPlanCreateFields: FieldConfig[] = [
   { name: 'isPopular', transform: 'boolTrue' },
 ];
 
-function parseSubscriptionPlanCreateInput(body: RequestBody) {
+function parseSubscriptionPlanCreateInput(body: HttpRequestBody) {
   return buildFormObject(body as Record<string, unknown>, subPlanCreateFields);
 }
 
-export const createSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSubscriptionPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const plan = await manageSubscriptionsUseCase.saveSubscriptionPlan(
-      parseSubscriptionPlanCreateInput(req.body as RequestBody) as Parameters<typeof manageSubscriptionsUseCase.saveSubscriptionPlan>[0],
+      parseSubscriptionPlanCreateInput(req.body as HttpRequestBody) as Parameters<
+        typeof manageSubscriptionsUseCase.saveSubscriptionPlan
+      >[0],
     );
 
     res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
@@ -111,12 +112,12 @@ export const createSubscriptionPlan = async (req: TypedRequest, res: Response): 
     adminRespond(req, res, 'programs/subscription/plans/create', {
       pageName: 'Create Subscription Plan',
       error: (error as Error).message || 'Failed to create subscription plan',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSubscriptionPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await manageSubscriptionsUseCase.getSubscriptionPlan(planId);
@@ -137,7 +138,7 @@ export const viewSubscriptionPlan = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const editSubscriptionPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editSubscriptionPlanForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await manageSubscriptionsUseCase.getSubscriptionPlan(planId);
@@ -179,13 +180,13 @@ const subPlanUpdateFields: FieldConfig[] = [
   { name: 'isActive', transform: 'boolNotFalse' },
 ];
 
-function parseSubscriptionPlanUpdates(body: RequestBody): Record<string, unknown> {
+function parseSubscriptionPlanUpdates(body: HttpRequestBody): Record<string, unknown> {
   return buildFormObject(body as Record<string, unknown>, subPlanUpdateFields);
 }
 
-export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSubscriptionPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
-  const updates = parseSubscriptionPlanUpdates(req.body as RequestBody);
+  const updates = parseSubscriptionPlanUpdates(req.body as HttpRequestBody);
 
   await manageSubscriptionsUseCase.saveSubscriptionPlan({
     subscriptionPlanId: planId,
@@ -195,7 +196,7 @@ export const updateSubscriptionPlan = async (req: TypedRequest, res: Response): 
   res.redirect(`/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
 };
 
-export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSubscriptionPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   await manageSubscriptionsUseCase.deleteSubscriptionPlan(planId);
@@ -207,7 +208,7 @@ export const deleteSubscriptionPlan = async (req: TypedRequest, res: Response): 
 // Customer Subscriptions Management
 // ============================================================================
 
-export const listCustomerSubscriptions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCustomerSubscriptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.query.customerId as string;
   const status = req.query.status as string;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -232,7 +233,7 @@ export const listCustomerSubscriptions = async (req: TypedRequest, res: Response
   });
 };
 
-export const viewCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCustomerSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { subscriptionId } = req.params;
 
   // Get subscription details (would need to implement in repo)
@@ -250,20 +251,20 @@ export const viewCustomerSubscription = async (req: TypedRequest, res: Response)
   });
 };
 
-export const updateSubscriptionStatus = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSubscriptionStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { subscriptionId } = req.params;
-  const body = req.body as RequestBody;
-  const { status } = body;
+  const body = req.body as HttpRequestBody;
+  const { status } = body as { status: 'pending' | 'trialing' | 'active' | 'paused' | 'past_due' | 'cancelled' | 'expired' };
 
   await manageSubscriptionsUseCase.updateSubscriptionStatus(subscriptionId, status);
 
   res.json({ success: true, message: `Subscription status updated to ${status}` });
 };
 
-export const cancelCustomerSubscription = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelCustomerSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { subscriptionId } = req.params;
-  const body = req.body as RequestBody;
-  const { reason, cancelAtPeriodEnd } = body;
+  const body = req.body as HttpRequestBody;
+  const { reason, cancelAtPeriodEnd } = body as { reason?: string; cancelAtPeriodEnd?: string };
 
   await manageSubscriptionsUseCase.cancelSubscription(subscriptionId, reason, 'admin', cancelAtPeriodEnd === 'true');
 
@@ -274,7 +275,7 @@ export const cancelCustomerSubscription = async (req: TypedRequest, res: Respons
 // Billing Management
 // ============================================================================
 
-export const subscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
+export const subscriptionBilling = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get subscriptions due for billing (next billing date <= today + 1 day)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -296,9 +297,9 @@ export const subscriptionBilling = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const processSubscriptionBilling = async (req: TypedRequest, res: Response): Promise<void> => {
+export const processSubscriptionBilling = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { subscriptionId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { processPayment, _billingCycle } = body;
 
   const subscription = await manageSubscriptionsUseCase.getCustomerSubscription(subscriptionId);
@@ -345,10 +346,10 @@ export const processSubscriptionBilling = async (req: TypedRequest, res: Respons
   });
 };
 
-export const manageFailedPayments = async (req: TypedRequest, res: Response): Promise<void> => {
+export const manageFailedPayments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { subscriptionId } = req.params;
-  const body = req.body as RequestBody;
-  const { action, retryDate } = body;
+  const body = req.body as HttpRequestBody;
+  const { action, retryDate } = body as { action: string; retryDate?: string };
 
   if (action === 'retry') {
     // Create dunning attempt

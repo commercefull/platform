@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontMembershipUseCase } from '../../application/useCases/ManageMembershipPrograms';
 
@@ -14,7 +13,7 @@ const manageStorefrontMembershipUseCase = new ManageStorefrontMembershipUseCase(
 /**
  * GET: List available membership plans
  */
-export const listPlans = async (req: TypedRequest, res: Response) => {
+export const listPlans = async (req: HttpRequest, res: HttpResponse) => {
   const plans = await manageStorefrontMembershipUseCase.findActivePlansWithBenefitCount();
 
   storefrontRespond(req, res, 'membership/plans', {
@@ -26,7 +25,7 @@ export const listPlans = async (req: TypedRequest, res: Response) => {
 /**
  * GET: View membership plan detail
  */
-export const viewPlan = async (req: TypedRequest, res: Response) => {
+export const viewPlan = async (req: HttpRequest, res: HttpResponse) => {
   const { planId } = req.params;
 
   const plan = await manageStorefrontMembershipUseCase.findPlanById(planId);
@@ -48,7 +47,7 @@ export const viewPlan = async (req: TypedRequest, res: Response) => {
 /**
  * GET: My membership dashboard
  */
-export const myMembership = async (req: TypedRequest, res: Response) => {
+export const myMembership = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
   if (!customerId) return res.redirect('/signin');
 
@@ -68,7 +67,7 @@ export const myMembership = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Join a membership plan
  */
-export const joinPlan = async (req: TypedRequest, res: Response) => {
+export const joinPlan = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
     if (!customerId) return res.redirect('/signin');

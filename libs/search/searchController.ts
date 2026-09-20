@@ -13,8 +13,7 @@
  * - DELETE /business/search/manual-order/:categoryId — delete manual order
  */
 
-import { Response } from 'express';
-import { TypedRequest } from '../types/express';
+import type { HttpRequest, HttpResponse } from '../http';
 import { getSearchAdapter, isSearchAdapterConfigured } from './types';
 import {
   getMerchandisingRules,
@@ -34,7 +33,7 @@ class SearchController {
    * GET /customer/search
    * Full-text search with filters, facets, and merchandising
    */
-  async search(req: TypedRequest, res: Response): Promise<void> {
+  async search(req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
       res.status(503).json({ success: false, error: 'Search service not available' });
       return;
@@ -124,7 +123,7 @@ class SearchController {
    * GET /customer/search/autocomplete
    * Autocomplete suggestions for partial query
    */
-  async autocomplete(req: TypedRequest, res: Response): Promise<void> {
+  async autocomplete(req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
       res.status(503).json({ success: false, error: 'Search service not available' });
       return;
@@ -147,7 +146,7 @@ class SearchController {
   // Merchandising Admin
   // =========================================================================
 
-  async listMerchandisingRules(req: TypedRequest, res: Response): Promise<void> {
+  async listMerchandisingRules(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { ruleType, categoryId, isActive } = req.query;
     const rules = await listMerchandisingRules({
       ruleType: ruleType as string,
@@ -158,7 +157,7 @@ class SearchController {
   }
 
   async createMerchandisingRule(
-    req: TypedRequest<
+    req: HttpRequest<
       Record<string, never>,
       Record<string, never>,
       {
@@ -170,7 +169,7 @@ class SearchController {
         isActive?: boolean;
       }
     >,
-    res: Response,
+    res: HttpResponse,
   ): Promise<void> {
     const { ruleType, productId, position, searchTerm, categoryId, isActive } = req.body;
     const rule = await createMerchandisingRule({
@@ -185,7 +184,7 @@ class SearchController {
   }
 
   async updateMerchandisingRule(
-    req: TypedRequest<
+    req: HttpRequest<
       { ruleId: string },
       Record<string, never>,
       Partial<{
@@ -197,7 +196,7 @@ class SearchController {
         isActive: boolean;
       }>
     >,
-    res: Response,
+    res: HttpResponse,
   ): Promise<void> {
     const { ruleId } = req.params;
     const rule = await updateMerchandisingRule(ruleId, req.body);
@@ -208,7 +207,7 @@ class SearchController {
     res.json({ success: true, data: rule });
   }
 
-  async deleteMerchandisingRule(req: TypedRequest, res: Response): Promise<void> {
+  async deleteMerchandisingRule(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { ruleId } = req.params;
     await deleteMerchandisingRule(ruleId);
     res.json({ success: true });
@@ -218,15 +217,15 @@ class SearchController {
   // Category Manual Ordering Admin
   // =========================================================================
 
-  async getCategoryManualOrder(req: TypedRequest, res: Response): Promise<void> {
+  async getCategoryManualOrder(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { categoryId } = req.params;
     const orders = await getCategoryManualOrderList(categoryId);
     res.json({ success: true, data: orders });
   }
 
   async setCategoryManualOrder(
-    req: TypedRequest<{ categoryId: string }, Record<string, never>, { productIds: string[] }>,
-    res: Response,
+    req: HttpRequest<{ categoryId: string }, Record<string, never>, { productIds: string[] }>,
+    res: HttpResponse,
   ): Promise<void> {
     const { categoryId } = req.params;
     const { productIds } = req.body;
@@ -234,7 +233,7 @@ class SearchController {
     res.json({ success: true });
   }
 
-  async deleteCategoryManualOrder(req: TypedRequest, res: Response): Promise<void> {
+  async deleteCategoryManualOrder(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { categoryId } = req.params;
     await deleteCategoryManualOrder(categoryId);
     res.json({ success: true });
@@ -244,7 +243,7 @@ class SearchController {
   // Search Health
   // =========================================================================
 
-  async health(_req: TypedRequest, res: Response): Promise<void> {
+  async health(_req: HttpRequest, res: HttpResponse): Promise<void> {
     if (!isSearchAdapterConfigured()) {
       res.json({ healthy: false, details: { error: 'No search adapter configured' } });
       return;

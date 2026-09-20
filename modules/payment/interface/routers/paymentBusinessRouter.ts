@@ -2,14 +2,14 @@
  * Payment Business Router
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as paymentController from '../controllers/PaymentController';
 import * as fraudController from '../controllers/fraudController';
 import * as paymentBusinessController from '../controllers/paymentBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Apply authentication middleware
 router.use(isOrganizationLoggedIn);

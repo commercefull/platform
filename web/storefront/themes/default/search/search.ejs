@@ -5,11 +5,11 @@
     try { return new Intl.NumberFormat(locale || 'en-US', { style: 'currency', currency: (currency || 'USD').toUpperCase() }).format(amt); }
     catch { return (currency || 'USD') + ' ' + (amt || 0).toFixed(2); }
   };
-  const searchQuery = (typeof searchQuery !== 'undefined' ? searchQuery : '') || '';
+  const q = (typeof searchQuery !== 'undefined' ? searchQuery : '') || '';
   const total = (typeof totalProducts !== 'undefined' ? totalProducts : (products ? products.length : 0)) || 0;
   const currentSort = (typeof filters !== 'undefined' && filters && filters.sort) ? filters.sort : 'relevance';
   const buildSortUrl = (sort) => {
-    return '/search?q=' + encodeURIComponent(searchQuery) + '&sort=' + sort;
+    return '/search?q=' + encodeURIComponent(q) + '&sort=' + sort;
   };
 %>
 
@@ -28,7 +28,7 @@
           <input
             type="search"
             name="q"
-            value="<%= searchQuery %>"
+            value="<%= q %>"
             placeholder="Search for products, brands, categories..."
             class="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-none text-lg focus:ring-1 focus:ring-ink-900 focus:border-ink-900"
             data-search-input
@@ -47,12 +47,12 @@
       </div>
 
       <!-- Result count -->
-      <% if (searchQuery) { %>
+      <% if (q) { %>
       <p class="mt-4 text-gray-500">
         <% if (total > 0) { %>
-        Found <strong class="text-ink-900"><%= total %></strong> <%= total === 1 ? 'result' : 'results' %> for "<strong class="text-ink-900"><%= searchQuery %></strong>"
+        Found <strong class="text-ink-900"><%= total %></strong> <%= total === 1 ? 'result' : 'results' %> for "<strong class="text-ink-900"><%= q %></strong>"
         <% } else { %>
-        No results found for "<strong class="text-ink-900"><%= searchQuery %></strong>"
+        No results found for "<strong class="text-ink-900"><%= q %></strong>"
         <% } %>
       </p>
       <% } %>
@@ -61,7 +61,7 @@
 
   <!-- Search Results -->
   <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <% if (searchQuery && products && products.length > 0) { %>
+    <% if (q && products && products.length > 0) { %>
       <!-- Sort toolbar -->
       <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -85,14 +85,14 @@
 
       <!-- Pagination -->
       <% if (typeof pagination !== 'undefined' && pagination) { %>
-      <%- include("../partials/pagination", { pagination: pagination, filters: { search: searchQuery } }) %>
+      <%- include("../partials/pagination", { pagination: pagination, filters: { search: q } }) %>
       <% } %>
 
-    <% } else if (searchQuery) { %>
+    <% } else if (q) { %>
       <!-- No Results -->
       <%- include("../partials/empty-state", {
         title: 'No results found',
-        message: 'We couldn\'t find any products matching "' + searchQuery + '". Try different keywords or browse our categories.',
+        message: 'We couldn\'t find any products matching "' + q + '". Try different keywords or browse our categories.',
         icon: 'search',
         actionUrl: '/products',
         actionLabel: 'Browse All Products'
@@ -102,7 +102,7 @@
       <div class="mt-8 max-w-2xl mx-auto text-center">
         <h3 class="text-lg font-medium text-ink-900 mb-4">Did you mean?</h3>
         <div class="flex flex-wrap justify-center gap-2">
-          <% const query = searchQuery.toLowerCase(); %>
+          <% const query = q.toLowerCase(); %>
           <% const suggestions = []; %>
           <% if (query.includes('shrt') || query.includes('shrit')) suggestions.push({ label: 'Shirts', url: '/search?q=shirt' }); %>
           <% if (query.includes('jean')) suggestions.push({ label: 'Jeans', url: '/search?q=jeans' }); %>

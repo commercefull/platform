@@ -4,8 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { Basket } from '../../domain/entities/Basket';
 import {
   BasketResponse,
@@ -114,7 +113,7 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
 }
 
 // Admin override: apply a coupon without strict customer validations
-export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promise<void> => {
+export const applyCouponAdmin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as ApplyCouponBody;
   const { couponCode } = body;
@@ -163,7 +162,7 @@ export const applyCouponAdmin = async (req: TypedRequest, res: Response): Promis
   respond(req, res, basket.toJSON(), 200);
 };
 
-export const listBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
   const offset = req.query.offset ? parseInt(String(req.query.offset), 10) : 0;
   const rows = await query<Record<string, unknown>[]>(
@@ -187,11 +186,11 @@ function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: numb
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -203,7 +202,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * Get or create basket
  * POST /baskets
  */
-export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrCreateBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id;
   const body = req.body as GetOrCreateBasketBody;
   const sessionId = req.sessionID || body.sessionId;
@@ -226,7 +225,7 @@ export const getOrCreateBasket = async (req: TypedRequest, res: Response): Promi
  * Get basket by ID
  * GET /baskets/:basketId
  */
-export const getBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const basket = await BasketRepo.findById(basketId);
@@ -243,7 +242,7 @@ export const getBasket = async (req: TypedRequest, res: Response): Promise<void>
  * Get basket summary (lightweight)
  * GET /baskets/:basketId/summary
  */
-export const getBasketSummary = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getBasketSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const basket = await BasketRepo.findById(basketId);
@@ -260,7 +259,7 @@ export const getBasketSummary = async (req: TypedRequest, res: Response): Promis
  * Add item to basket
  * POST /baskets/:basketId/items
  */
-export const addItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as AddItemBody;
   let { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = body;
@@ -317,7 +316,7 @@ export const addItem = async (req: TypedRequest, res: Response): Promise<void> =
  * Update item quantity
  * PATCH /baskets/:basketId/items/:basketItemId
  */
-export const updateItemQuantity = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateItemQuantity = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId, basketItemId } = req.params;
   const body = req.body as UpdateItemQuantityBody;
   const { quantity } = body;
@@ -337,7 +336,7 @@ export const updateItemQuantity = async (req: TypedRequest, res: Response): Prom
  * Remove item from basket
  * DELETE /baskets/:basketId/items/:basketItemId
  */
-export const removeItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId, basketItemId } = req.params;
 
   const command = new RemoveItemCommand(basketId, basketItemId);
@@ -350,7 +349,7 @@ export const removeItem = async (req: TypedRequest, res: Response): Promise<void
  * Clear all items from basket
  * DELETE /baskets/:basketId/items
  */
-export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const command = new ClearBasketCommand(basketId);
@@ -363,7 +362,7 @@ export const clearBasket = async (req: TypedRequest, res: Response): Promise<voi
  * Get current user's basket
  * GET /baskets/me
  */
-export const getMyBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMyBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id;
   const sessionId = req.sessionID;
 
@@ -382,7 +381,7 @@ export const getMyBasket = async (req: TypedRequest, res: Response): Promise<voi
  * Merge baskets (typically when guest logs in)
  * POST /baskets/merge
  */
-export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<void> => {
+export const mergeBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as MergeBasketsBody;
   const { sourceBasketId, targetBasketId } = body;
 
@@ -415,7 +414,7 @@ export const mergeBaskets = async (req: TypedRequest, res: Response): Promise<vo
  * Assign basket to customer
  * POST /baskets/:basketId/assign
  */
-export const assignToCustomer = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignToCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as AssignToCustomerBody;
   const { customerId } = body;
@@ -435,7 +434,7 @@ export const assignToCustomer = async (req: TypedRequest, res: Response): Promis
  * Set item as gift
  * POST /baskets/:basketId/items/:basketItemId/gift
  */
-export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<void> => {
+export const setItemAsGift = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId, basketItemId } = req.params;
   const body = req.body as SetItemAsGiftBody;
   const { giftMessage } = body;
@@ -450,7 +449,7 @@ export const setItemAsGift = async (req: TypedRequest, res: Response): Promise<v
  * Extend basket expiration
  * PUT /baskets/:basketId/expiration
  */
-export const extendExpiration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const extendExpiration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as ExtendExpirationBody;
   const { days } = body;
@@ -465,7 +464,7 @@ export const extendExpiration = async (req: TypedRequest, res: Response): Promis
  * Delete basket
  * DELETE /baskets/:basketId
  */
-export const deleteBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const basket = await BasketRepo.findById(basketId);
@@ -483,7 +482,7 @@ export const deleteBasket = async (req: TypedRequest, res: Response): Promise<vo
 // Coupon Actions
 // ============================================================================
 
-export const applyCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const applyCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as ApplyCouponBody;
   const { couponCode } = body;
@@ -499,7 +498,7 @@ export const applyCoupon = async (req: TypedRequest, res: Response): Promise<voi
   respond(req, res, basket, 200);
 };
 
-export const removeCoupon = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
   const command = new RemoveCouponCommand(basketId);

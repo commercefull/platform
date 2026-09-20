@@ -4,7 +4,7 @@
  * Handlers for merchant-facing payment operations.
  */
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
@@ -16,13 +16,13 @@ import { paymentBillingDataRepository, paymentDataRepository } from '../../appli
 // Disputes
 // ============================================================================
 
-export const listDisputes = async (req: Request, res: Response): Promise<void> => {
+export const listDisputes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { paymentId } = req.query;
   const disputes = paymentId ? await paymentBillingRepo.findDisputesByPayment(paymentId as string) : [];
   successResponse(res, { disputes });
 };
 
-export const getDispute = async (req: Request, res: Response): Promise<void> => {
+export const getDispute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { disputeId } = req.params;
   const dispute = await paymentBillingRepo.findDisputeById(String(disputeId));
   if (!dispute) {
@@ -32,9 +32,9 @@ export const getDispute = async (req: Request, res: Response): Promise<void> => 
   successResponse(res, { dispute });
 };
 
-export const updateDisputeStatus = async (req: Request, res: Response): Promise<void> => {
+export const updateDisputeStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { disputeId } = req.params;
-  const { status, resolvedAt } = req.body;
+  const { status, resolvedAt } = req.body as { status?: string; resolvedAt?: string };
   if (!status) {
     errorResponse(res, 'status is required', 400);
     return;
@@ -51,7 +51,7 @@ export const updateDisputeStatus = async (req: Request, res: Response): Promise<
 // Fees
 // ============================================================================
 
-export const listFees = async (req: Request, res: Response): Promise<void> => {
+export const listFees = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.query;
   if (!transactionId) {
     errorResponse(res, 'transactionId query parameter is required', 400);
@@ -65,7 +65,7 @@ export const listFees = async (req: Request, res: Response): Promise<void> => {
 // Settings
 // ============================================================================
 
-export const getSettings = async (req: Request, res: Response): Promise<void> => {
+export const getSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);
@@ -75,7 +75,7 @@ export const getSettings = async (req: Request, res: Response): Promise<void> =>
   successResponse(res, { settings });
 };
 
-export const updateSettings = async (req: Request, res: Response): Promise<void> => {
+export const updateSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);
@@ -117,7 +117,7 @@ export const updateSettings = async (req: Request, res: Response): Promise<void>
 // Balance
 // ============================================================================
 
-export const getBalance = async (req: Request, res: Response): Promise<void> => {
+export const getBalance = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);
@@ -133,7 +133,7 @@ export const getBalance = async (req: Request, res: Response): Promise<void> => 
 // Reports
 // ============================================================================
 
-export const listReports = async (req: Request, res: Response): Promise<void> => {
+export const listReports = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);
@@ -143,7 +143,7 @@ export const listReports = async (req: Request, res: Response): Promise<void> =>
   successResponse(res, { reports });
 };
 
-const getReport = async (req: Request, res: Response): Promise<void> => {
+const getReport = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || req.user?._id;
   if (!organizationId) {
     errorResponse(res, 'Authentication required', 401);

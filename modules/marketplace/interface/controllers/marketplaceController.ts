@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from '../../../../libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
 import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
@@ -27,7 +26,7 @@ export class MarketplaceController {
     this.payoutUseCase = new ManagePayoutUseCase(payoutRepo, vendorRepo);
   }
 
-  private handleError(res: Response, error: unknown): void {
+  private handleError(res: HttpResponse, error: unknown): void {
     if (error instanceof VendorNotFoundError || error instanceof CommissionRuleNotFoundError || error instanceof PayoutNotFoundError) {
       res.status(404).json({ success: false, error: error.message, code: error.code });
     } else if (error instanceof VendorAlreadyExistsError || error instanceof VendorStatusError || error instanceof PayoutStatusError) {
@@ -40,13 +39,17 @@ export class MarketplaceController {
     }
   }
 
-  private getOrgId(req: TypedRequest): string {
-    return (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ?? (req as unknown as { user?: { id?: string } }).user?.id ?? '';
+  private getOrgId(req: HttpRequest): string {
+    return (
+      (req as unknown as { user?: { organizationId?: string; id?: string } }).user?.organizationId ??
+      (req as unknown as { user?: { id?: string } }).user?.id ??
+      ''
+    );
   }
 
   // ─── Vendor endpoints ───
 
-  async listVendors(req: TypedRequest, res: Response): Promise<void> {
+  async listVendors(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const { status } = req.query as { status?: string };
@@ -59,7 +62,7 @@ export class MarketplaceController {
     }
   }
 
-  async getVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async getVendor(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.get(req.params.vendorId);
       res.json({ success: true, data: vendor.toJSON() });
@@ -68,7 +71,7 @@ export class MarketplaceController {
     }
   }
 
-  async createVendor(req: TypedRequest, res: Response): Promise<void> {
+  async createVendor(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const vendor = await this.vendorUseCase.create({ ...(req.body as Record<string, unknown>), organizationId } as Parameters<
@@ -80,7 +83,7 @@ export class MarketplaceController {
     }
   }
 
-  async updateVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async updateVendor(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.updateProfile(
         req.params.vendorId,
@@ -92,7 +95,7 @@ export class MarketplaceController {
     }
   }
 
-  async setVendorAddress(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async setVendorAddress(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.setAddress(
         req.params.vendorId,
@@ -104,7 +107,7 @@ export class MarketplaceController {
     }
   }
 
-  async setVendorBankInfo(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async setVendorBankInfo(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.setBankInfo(
         req.params.vendorId,
@@ -116,7 +119,7 @@ export class MarketplaceController {
     }
   }
 
-  async approveVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async approveVendor(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.approve(req.params.vendorId);
       res.json({ success: true, data: vendor.toJSON() });
@@ -125,7 +128,7 @@ export class MarketplaceController {
     }
   }
 
-  async suspendVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async suspendVendor(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.suspend(req.params.vendorId);
       res.json({ success: true, data: vendor.toJSON() });
@@ -134,7 +137,7 @@ export class MarketplaceController {
     }
   }
 
-  async terminateVendor(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async terminateVendor(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.terminate(req.params.vendorId);
       res.json({ success: true, data: vendor.toJSON() });
@@ -143,7 +146,7 @@ export class MarketplaceController {
     }
   }
 
-  async setVendorTier(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async setVendorTier(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.setTier(req.params.vendorId, (req.body as Record<string, unknown>).tier as VendorTier);
       res.json({ success: true, data: vendor.toJSON() });
@@ -152,7 +155,7 @@ export class MarketplaceController {
     }
   }
 
-  async setVendorCommissionRate(req: TypedRequest<{ vendorId: string }>, res: Response): Promise<void> {
+  async setVendorCommissionRate(req: HttpRequest<{ vendorId: string }>, res: HttpResponse): Promise<void> {
     try {
       const vendor = await this.vendorUseCase.setCommissionRate(
         req.params.vendorId,
@@ -166,7 +169,7 @@ export class MarketplaceController {
 
   // ─── Commission rule endpoints ───
 
-  async listCommissionRules(req: TypedRequest, res: Response): Promise<void> {
+  async listCommissionRules(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const { active, vendorId, categoryId } = req.query as { active?: string; vendorId?: string; categoryId?: string };
@@ -186,7 +189,7 @@ export class MarketplaceController {
     }
   }
 
-  async getCommissionRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async getCommissionRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.get(req.params.ruleId);
       res.json({ success: true, data: rule.toJSON() });
@@ -195,7 +198,7 @@ export class MarketplaceController {
     }
   }
 
-  async createCommissionRule(req: TypedRequest, res: Response): Promise<void> {
+  async createCommissionRule(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const body = req.body as Record<string, unknown>;
@@ -206,16 +209,14 @@ export class MarketplaceController {
         scope: body.scope || 'global',
         organizationId,
       };
-      const rule = await this.commissionUseCase.create(payload as Parameters<
-        typeof this.commissionUseCase.create
-      >[0]);
+      const rule = await this.commissionUseCase.create(payload as Parameters<typeof this.commissionUseCase.create>[0]);
       res.status(201).json({ success: true, data: rule.toJSON() });
     } catch (error) {
       this.handleError(res, error);
     }
   }
 
-  async updateCommissionRate(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async updateCommissionRate(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.updateRate(req.params.ruleId, (req.body as Record<string, unknown>).rate as number);
       res.json({ success: true, data: rule.toJSON() });
@@ -224,7 +225,7 @@ export class MarketplaceController {
     }
   }
 
-  async setCommissionPriority(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async setCommissionPriority(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.setPriority(req.params.ruleId, (req.body as Record<string, unknown>).priority as number);
       res.json({ success: true, data: rule.toJSON() });
@@ -233,7 +234,7 @@ export class MarketplaceController {
     }
   }
 
-  async setCommissionValidity(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async setCommissionValidity(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.setValidity(
         req.params.ruleId,
@@ -246,7 +247,7 @@ export class MarketplaceController {
     }
   }
 
-  async activateCommissionRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async activateCommissionRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.activate(req.params.ruleId);
       res.json({ success: true, data: rule.toJSON() });
@@ -255,7 +256,7 @@ export class MarketplaceController {
     }
   }
 
-  async deactivateCommissionRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async deactivateCommissionRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await this.commissionUseCase.deactivate(req.params.ruleId);
       res.json({ success: true, data: rule.toJSON() });
@@ -264,7 +265,7 @@ export class MarketplaceController {
     }
   }
 
-  async deleteCommissionRule(req: TypedRequest<{ ruleId: string }>, res: Response): Promise<void> {
+  async deleteCommissionRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       await this.commissionUseCase.delete(req.params.ruleId);
       res.json({ success: true });
@@ -273,7 +274,7 @@ export class MarketplaceController {
     }
   }
 
-  async calculateCommission(req: TypedRequest, res: Response): Promise<void> {
+  async calculateCommission(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const { vendorId, amount, categoryId, productId } = req.body as {
@@ -291,7 +292,7 @@ export class MarketplaceController {
 
   // ─── Payout endpoints ───
 
-  async listPayouts(req: TypedRequest, res: Response): Promise<void> {
+  async listPayouts(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const { vendorId, status } = req.query as { vendorId?: string; status?: string };
@@ -309,7 +310,7 @@ export class MarketplaceController {
     }
   }
 
-  async getPayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async getPayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.get(req.params.payoutId);
       res.json({ success: true, data: payout.toJSON() });
@@ -318,7 +319,7 @@ export class MarketplaceController {
     }
   }
 
-  async createPayout(req: TypedRequest, res: Response): Promise<void> {
+  async createPayout(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
       const body = req.body as Record<string, unknown>;
@@ -329,17 +330,19 @@ export class MarketplaceController {
       const now = new Date();
       const periodEnd = body.periodEnd ? new Date(body.periodEnd as string) : now;
       const periodStart = body.periodStart ? new Date(body.periodStart as string) : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      const lineItems = Array.isArray(body.lineItems) ? body.lineItems : [
-        {
-          lineItemId: `li-${Date.now()}`,
-          orderId: body.orderId as string || null,
-          orderNumber: body.orderNumber as string || null,
-          grossRevenue: amount,
-          commissionAmount: 0,
-          netRevenue: amount,
-          currency,
-        },
-      ];
+      const lineItems = Array.isArray(body.lineItems)
+        ? body.lineItems
+        : [
+            {
+              lineItemId: `li-${Date.now()}`,
+              orderId: (body.orderId as string) || null,
+              orderNumber: (body.orderNumber as string) || null,
+              grossRevenue: amount,
+              commissionAmount: 0,
+              netRevenue: amount,
+              currency,
+            },
+          ];
       const payout = await this.payoutUseCase.create({
         vendorId: body.vendorId as string,
         organizationId,
@@ -355,7 +358,7 @@ export class MarketplaceController {
     }
   }
 
-  async addPayoutLineItem(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async addPayoutLineItem(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.addLineItem(
         req.params.payoutId,
@@ -367,7 +370,7 @@ export class MarketplaceController {
     }
   }
 
-  async processPayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async processPayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.startProcessing(req.params.payoutId);
       res.json({ success: true, data: payout.toJSON() });
@@ -376,7 +379,7 @@ export class MarketplaceController {
     }
   }
 
-  async completePayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async completePayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.complete(
         req.params.payoutId,
@@ -388,7 +391,7 @@ export class MarketplaceController {
     }
   }
 
-  async failPayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async failPayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.fail(req.params.payoutId, (req.body as Record<string, unknown>).reason as string);
       res.json({ success: true, data: payout.toJSON() });
@@ -397,7 +400,7 @@ export class MarketplaceController {
     }
   }
 
-  async retryPayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async retryPayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.retry(req.params.payoutId);
       res.json({ success: true, data: payout.toJSON() });
@@ -406,7 +409,7 @@ export class MarketplaceController {
     }
   }
 
-  async cancelPayout(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async cancelPayout(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.cancel(req.params.payoutId);
       res.json({ success: true, data: payout.toJSON() });
@@ -415,7 +418,7 @@ export class MarketplaceController {
     }
   }
 
-  async setPayoutMethod(req: TypedRequest<{ payoutId: string }>, res: Response): Promise<void> {
+  async setPayoutMethod(req: HttpRequest<{ payoutId: string }>, res: HttpResponse): Promise<void> {
     try {
       const payout = await this.payoutUseCase.setMethod(req.params.payoutId, (req.body as Record<string, unknown>).method as PayoutMethod);
       res.json({ success: true, data: payout.toJSON() });

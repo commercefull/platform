@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { resolveTheme } from './themeMiddleware';
 import { resolveStore } from './storeResolutionMiddleware';
@@ -97,7 +97,7 @@ import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, vi
 import { getStoreLocator } from '../../modules/store';
 import { getPromotionsPage } from '../../modules/promotion';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Store Resolution Middleware

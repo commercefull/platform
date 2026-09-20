@@ -5,11 +5,11 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { FraudScreeningService } from '../../application/services/FraudScreeningService';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { FraudRepo as fraudRepo } from '../../application/wired';
+import type { RuleAction, RuleType } from '../../application/wired';
 
 const fraudScreeningService = new FraudScreeningService();
 
@@ -17,7 +17,7 @@ const fraudScreeningService = new FraudScreeningService();
 // List Fraud Rules
 // ============================================================================
 
-export const listFraudRules = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listFraudRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const rules = await fraudRepo.getRules(false);
   const pendingReviews = await fraudRepo.getPendingReviews();
 
@@ -34,10 +34,18 @@ export const listFraudRules = async (req: TypedRequest, res: Response): Promise<
 // Create Fraud Rule
 // ============================================================================
 
-export const createFraudRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createFraudRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, description, ruleType, action, riskScore, conditions, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, ruleType, action, riskScore, conditions, isActive } = body as {
+      name: string;
+      description?: string;
+      ruleType?: RuleType;
+      action?: RuleAction;
+      riskScore: string;
+      conditions?: unknown;
+      isActive?: string | boolean;
+    };
 
     // Parse conditions from condition-builder form data
     const parsedConditions = parseConditionsFromForm(conditions);
@@ -64,11 +72,19 @@ export const createFraudRule = async (req: TypedRequest, res: Response): Promise
 // Update Fraud Rule
 // ============================================================================
 
-export const updateFraudRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { fraudRuleId } = req.params;
-    const body = req.body as RequestBody;
-    const { name, description, ruleType, action, riskScore, conditions, isActive } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, description, ruleType, action, riskScore, conditions, isActive } = body as {
+      name: string;
+      description?: string;
+      ruleType?: RuleType;
+      action?: RuleAction;
+      riskScore: string;
+      conditions?: unknown;
+      isActive?: string | boolean;
+    };
 
     const existing = await fraudRepo.getRule(fraudRuleId);
     if (!existing) {
@@ -100,7 +116,7 @@ export const updateFraudRule = async (req: TypedRequest, res: Response): Promise
 // Delete Fraud Rule
 // ============================================================================
 
-export const deleteFraudRule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteFraudRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { fraudRuleId } = req.params;
     await fraudRepo.deleteRule(fraudRuleId);
@@ -115,10 +131,21 @@ export const deleteFraudRule = async (req: TypedRequest, res: Response): Promise
 // Risk Score Simulator
 // ============================================================================
 
-export const simulateFraudScreening = async (req: TypedRequest, res: Response): Promise<void> => {
+export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { email, ipAddress, billingCountry, shippingCountry, orderAmount, currency, paymentMethod, isFirstOrder, isGuestCheckout } = body;
+    const body = req.body as HttpRequestBody;
+    const { email, ipAddress, billingCountry, shippingCountry, orderAmount, currency, paymentMethod, isFirstOrder, isGuestCheckout } =
+      body as {
+        email?: string;
+        ipAddress?: string;
+        billingCountry?: string;
+        shippingCountry?: string;
+        orderAmount: string;
+        currency?: string;
+        paymentMethod?: string;
+        isFirstOrder?: string;
+        isGuestCheckout?: string;
+      };
 
     const result = await fraudScreeningService.screen({
       email: email || undefined,

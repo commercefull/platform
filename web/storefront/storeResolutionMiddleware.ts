@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { getStoreUseCase } from '../../modules/store';
 
 /**
@@ -86,7 +86,7 @@ function resolveSlugFromHost(host: string): string | null {
 /**
  * Resolve region from request headers (Cloudflare / forwarded).
  */
-function resolveRegionFromHeaders(req: Request): string | null {
+function resolveRegionFromHeaders(req: HttpRequest): string | null {
   const cfCountry = req.headers['cf-ipcountry'] as string | undefined;
   if (cfCountry && cfCountry.length === 2) {
     return cfCountry;
@@ -114,7 +114,7 @@ function regionToStoreSlug(region: string): string {
  * Resolve the store slug using the priority chain:
  * query param → session → hostname → geo-IP → default.
  */
-function resolveStoreSlug(req: Request): string {
+function resolveStoreSlug(req: HttpRequest): string {
   const session = (req.session as unknown as { store?: StoreSession } | undefined)?.store;
   const queryStore = req.query.store as string | undefined;
 
@@ -175,7 +175,7 @@ function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region
 /**
  * Set default store context on res.locals (used on error fallback).
  */
-function setDefaultLocals(res: Response): void {
+function setDefaultLocals(res: HttpResponse): void {
   res.locals.store = null;
   res.locals.storeId = '';
   res.locals.storeSlug = DEFAULT_STORE_SLUG;
@@ -184,7 +184,7 @@ function setDefaultLocals(res: Response): void {
   res.locals.region = DEFAULT_REGION;
 }
 
-export async function resolveStore(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function resolveStore(req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> {
   try {
     const storeSlug = resolveStoreSlug(req);
 

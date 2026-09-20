@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { contentDataRepository } from '../../application/wired';
 
 const contentRepo = contentDataRepository.pages;
@@ -8,7 +7,7 @@ const contentRepo = contentDataRepository.pages;
  * Get published pages with optional filtering
  * Only returns published pages, with limited information
  */
-export const getPublishedPages = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
@@ -40,7 +39,7 @@ export const getPublishedPages = async (req: TypedRequest, res: Response): Promi
 /**
  * Get a published page by its slug with all content blocks
  */
-export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
 
   // First get the page by slug
@@ -135,7 +134,7 @@ export const getPublishedPageBySlug = async (req: TypedRequest, res: Response): 
 /**
  * Get active content types (sanitized for public use)
  */
-export const getActiveContentTypes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getActiveContentTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const contentTypes = await contentRepo.findAllContentTypes(true);
 
   // Sanitize content types to remove sensitive schema information

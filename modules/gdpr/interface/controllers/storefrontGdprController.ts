@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { createDataRequestUseCase, manageGdprRequestsUseCase } from '../../application/useCases/wired';
 import { CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
@@ -41,7 +40,7 @@ const REQUEST_TYPE_DESCRIPTIONS: Record<string, string> = {
 /**
  * GET: List customer's GDPR data requests
  */
-export const listRequests = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listRequests = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/gdpr/requests');
@@ -59,7 +58,7 @@ export const listRequests = async (req: TypedRequest, res: Response): Promise<vo
 /**
  * GET: View a single GDPR data request
  */
-export const viewRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/gdpr/requests');
@@ -82,7 +81,7 @@ export const viewRequest = async (req: TypedRequest, res: Response): Promise<voi
 /**
  * GET: Create data request form
  */
-export const createRequestForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRequestForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin?redirect=/gdpr/requests/new');
@@ -102,21 +101,21 @@ export const createRequestForm = async (req: TypedRequest, res: Response): Promi
 /**
  * POST: Submit a new GDPR data request
  */
-export const createRequestSubmit = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createRequestSubmit = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
       return res.redirect('/signin?redirect=/gdpr/requests/new');
     }
 
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { requestType, reason, requestedData } = body;
 
     if (!requestType || !VALID_TYPES.includes(requestType as GdprRequestType)) {
       return storefrontRespond(req, res, 'gdpr/create-request', {
         pageName: 'New Data Request',
         error: 'Please select a valid request type',
-        formData: req.body as RequestBody,
+        formData: req.body as HttpRequestBody,
         requestType: '',
         requestTypeLabels: REQUEST_TYPE_LABELS,
         requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
@@ -140,8 +139,8 @@ export const createRequestSubmit = async (req: TypedRequest, res: Response): Pro
     storefrontRespond(req, res, 'gdpr/create-request', {
       pageName: 'New Data Request',
       error: (error as Error).message || 'Failed to create request',
-      formData: req.body as RequestBody,
-      requestType: ((req.body as RequestBody).requestType as string) || '',
+      formData: req.body as HttpRequestBody,
+      requestType: ((req.body as HttpRequestBody).requestType as string) || '',
       requestTypeLabels: REQUEST_TYPE_LABELS,
       requestTypeDescriptions: REQUEST_TYPE_DESCRIPTIONS,
     });
@@ -151,7 +150,7 @@ export const createRequestSubmit = async (req: TypedRequest, res: Response): Pro
 /**
  * POST: Cancel a GDPR data request
  */
-export const cancelRequest = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {

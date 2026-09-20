@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
   ManageMembershipPlansUseCase,
   ManageMembershipBenefitsUseCase,
@@ -22,7 +21,7 @@ const manageSubscriptionsUseCase = new ManageMembershipSubscriptionsUseCase();
 // Membership Plans Management
 // ============================================================================
 
-export const listMembershipPlans = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listMembershipPlans = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly !== 'false';
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -41,7 +40,7 @@ export const listMembershipPlans = async (req: TypedRequest, res: Response): Pro
   });
 };
 
-export const createMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMembershipPlanForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'programs/membership/plans/create', {
     pageName: 'Create Membership Plan',
   });
@@ -78,14 +77,14 @@ const planCreateFields: FieldConfig[] = [
   { name: 'createdBy', default: null },
 ];
 
-function parsePlanCreateInput(body: RequestBody) {
+function parsePlanCreateInput(body: HttpRequestBody) {
   return buildFormObject(body as Record<string, unknown>, planCreateFields);
 }
 
-export const createMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const plan = await managePlansUseCase.create(
-      parsePlanCreateInput(req.body as RequestBody) as Parameters<typeof managePlansUseCase.create>[0],
+      parsePlanCreateInput(req.body as HttpRequestBody) as Parameters<typeof managePlansUseCase.create>[0],
     );
 
     res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
@@ -95,12 +94,12 @@ export const createMembershipPlan = async (req: TypedRequest, res: Response): Pr
     adminRespond(req, res, 'programs/membership/plans/create', {
       pageName: 'Create Membership Plan',
       error: (error as Error).message || 'Failed to create membership plan',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await managePlansUseCase.findById(planId);
@@ -140,7 +139,7 @@ export const viewMembershipPlan = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const editMembershipPlanForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editMembershipPlanForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await managePlansUseCase.findById(planId);
@@ -182,13 +181,13 @@ const planUpdateFields: FieldConfig[] = [
   { name: 'gracePeriodDays', transform: 'int', falsyValue: 0 },
 ];
 
-function parsePlanUpdates(body: RequestBody): Record<string, unknown> {
+function parsePlanUpdates(body: HttpRequestBody): Record<string, unknown> {
   return buildFormObject(body as Record<string, unknown>, planUpdateFields);
 }
 
-export const updateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
-  const updates = parsePlanUpdates(req.body as RequestBody);
+  const updates = parsePlanUpdates(req.body as HttpRequestBody);
 
   const plan = await managePlansUseCase.update(planId, updates);
 
@@ -199,7 +198,7 @@ export const updateMembershipPlan = async (req: TypedRequest, res: Response): Pr
   res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
 };
 
-export const activateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await managePlansUseCase.activate(planId);
@@ -211,7 +210,7 @@ export const activateMembershipPlan = async (req: TypedRequest, res: Response): 
   res.json({ success: true, message: 'Membership plan activated successfully' });
 };
 
-export const deactivateMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deactivateMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const plan = await managePlansUseCase.deactivate(planId);
@@ -223,7 +222,7 @@ export const deactivateMembershipPlan = async (req: TypedRequest, res: Response)
   res.json({ success: true, message: 'Membership plan deactivated successfully' });
 };
 
-export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { planId } = req.params;
 
   const success = await managePlansUseCase.remove(planId);
@@ -239,7 +238,7 @@ export const deleteMembershipPlan = async (req: TypedRequest, res: Response): Pr
 // Membership Benefits Management
 // ============================================================================
 
-export const listMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listMembershipBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const planId = req.query.planId as string;
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -270,7 +269,7 @@ export const listMembershipBenefits = async (req: TypedRequest, res: Response): 
 // Membership Management (User memberships)
 // ============================================================================
 
-export const listMemberships = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listMemberships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string;
   const planId = req.query.planId as string;
   const limit = parseInt(req.query.limit as string) || 50;
@@ -297,9 +296,14 @@ export const listMemberships = async (req: TypedRequest, res: Response): Promise
 // Membership Advanced User Management
 // ============================================================================
 
-export const bulkMembershipOperations = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { operation, membershipIds, newTierId, _notes } = body;
+export const bulkMembershipOperations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { operation, membershipIds, newTierId, _notes } = body as {
+    operation: string;
+    membershipIds: string[];
+    newTierId: string;
+    _notes?: string;
+  };
 
   if (!Array.isArray(membershipIds) || membershipIds.length === 0) {
     throw new Error('No memberships selected');
@@ -354,10 +358,15 @@ export const bulkMembershipOperations = async (req: TypedRequest, res: Response)
   });
 };
 
-export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Response): Promise<void> => {
+export const membershipUpgradeDowngrade = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { membershipId } = req.params;
-  const body = req.body as RequestBody;
-  const { newTierId, effectiveDate, prorate, notes } = body;
+  const body = req.body as HttpRequestBody;
+  const { newTierId, effectiveDate, prorate, notes } = body as {
+    newTierId: string;
+    effectiveDate?: string;
+    prorate?: string;
+    notes?: string;
+  };
 
   // Get current membership
   const currentMembership = await findUserMembershipById(membershipId);
@@ -408,7 +417,7 @@ export const membershipUpgradeDowngrade = async (req: TypedRequest, res: Respons
   });
 };
 
-export const membershipAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const membershipAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get membership analytics (would need implementation for proper analytics queries)
   const stats = {
     totalMemberships: 0,

@@ -8,8 +8,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { manageCategoriesUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -17,7 +16,7 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // Categories
 // ============================================================================
 
-export const listCategories = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findAll();
   const total = categories.length;
 
@@ -33,7 +32,7 @@ export const listCategories = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const createCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCategoryForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const parentCategories = await manageCategoriesUseCase.findAll();
 
   adminRespond(req, res, 'catalog/categories/create', {
@@ -42,10 +41,19 @@ export const createCategoryForm = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const createCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
-    const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body as {
+      name: string;
+      slug: string;
+      description: string;
+      parentId?: string;
+      isActive?: string | boolean;
+      position: string;
+      metaTitle: string;
+      metaDescription: string;
+    };
 
     const category = await manageCategoriesUseCase.create({
       name,
@@ -66,12 +74,12 @@ export const createCategory = async (req: TypedRequest, res: Response): Promise<
       pageName: 'Create Category',
       parentCategories,
       error: (error as Error).message || 'Failed to create category',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const category = await manageCategoriesUseCase.findOne(categoryId);
 
@@ -93,7 +101,7 @@ export const viewCategory = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const editCategoryForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editCategoryForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const category = await manageCategoriesUseCase.findOne(categoryId);
 
@@ -114,11 +122,20 @@ export const editCategoryForm = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const updateCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { categoryId } = req.params;
-    const body = req.body as RequestBody;
-    const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body;
+    const body = req.body as HttpRequestBody;
+    const { name, slug, description, parentId, isActive, position, metaTitle, metaDescription } = body as {
+      name: string;
+      slug: string;
+      description: string;
+      parentId?: string;
+      isActive?: string | boolean;
+      position: string;
+      metaTitle: string;
+      metaDescription: string;
+    };
 
     await manageCategoriesUseCase.update(categoryId, {
       name,
@@ -141,20 +158,20 @@ export const updateCategory = async (req: TypedRequest, res: Response): Promise<
       category,
       parentCategories,
       error: (error as Error).message || 'Failed to update category',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteCategory = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   await manageCategoriesUseCase.delete(categoryId);
   res.json({ success: true, message: 'Category deleted successfully' });
 };
 
-export const reorderCategories = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { categories } = body; // Array of { categoryId, position }
+export const reorderCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { categories } = body as { categories: { categoryId: string; position: number }[] }; // Array of { categoryId, position }
 
   for (const cat of categories) {
     await manageCategoriesUseCase.update(cat.categoryId, { position: cat.position });
@@ -170,7 +187,7 @@ export const reorderCategories = async (req: TypedRequest, res: Response): Promi
 // Note: Collections functionality would need a dedicated repository
 // For now, providing placeholder implementations
 
-export const listCollections = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/collections/index', {
     pageName: 'Collections',
     collections: [],
@@ -183,13 +200,13 @@ export const listCollections = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const createCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/collections/create', {
     pageName: 'Create Collection',
   });
 };
 
-export const createCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     // Placeholder - would need collection repository
     res.redirect('/admin/catalog/collections?success=Collection created successfully');
@@ -198,12 +215,12 @@ export const createCollection = async (req: TypedRequest, res: Response): Promis
     adminRespond(req, res, 'catalog/collections/create', {
       pageName: 'Create Collection',
       error: (error as Error).message || 'Failed to create collection',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/collections/view', {
     pageName: 'Collection Details',
     collection: null,
@@ -211,14 +228,14 @@ export const viewCollection = async (req: TypedRequest, res: Response): Promise<
   });
 };
 
-export const editCollectionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/collections/edit', {
     pageName: 'Edit Collection',
     collection: null,
   });
 };
 
-export const updateCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { collectionId } = req.params;
     res.redirect(`/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
@@ -228,11 +245,11 @@ export const updateCollection = async (req: TypedRequest, res: Response): Promis
       pageName: 'Edit Collection',
       collection: null,
       error: (error as Error).message || 'Failed to update collection',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteCollection = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Collection deleted successfully' });
 };

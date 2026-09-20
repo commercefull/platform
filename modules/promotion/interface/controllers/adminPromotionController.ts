@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ListPromotionsCommand } from '../../application/useCases/ListPromotions';
 import { CreatePromotionCommand } from '../../application/useCases/CreatePromotion';
 import { UpdatePromotionCommand } from '../../application/useCases/UpdatePromotion';
@@ -26,7 +25,7 @@ const managePromotionsUseCase = new ManagePromotionsUseCase();
 // List Promotions
 // ============================================================================
 
-export const listPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listPromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, type, search, limit, offset, orderBy, orderDirection } = req.query;
 
   const filters: Record<string, unknown> = {};
@@ -72,7 +71,7 @@ export const listPromotions = async (req: TypedRequest, res: Response): Promise<
 // Create Promotion Form
 // ============================================================================
 
-export const createPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPromotionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'promotions/create', {
     pageName: 'Create Promotion',
   });
@@ -82,11 +81,23 @@ export const createPromotionForm = async (req: TypedRequest, res: Response): Pro
 // Create Promotion
 // ============================================================================
 
-export const createPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
-      body;
+      body as {
+        code?: string;
+        name: string;
+        description?: string;
+        type: 'percentage' | 'fixed_amount' | 'free_shipping';
+        value: string;
+        minOrderAmount?: string;
+        maxDiscountAmount?: string;
+        usageLimit?: string;
+        usageLimitPerCustomer?: string;
+        startsAt?: string;
+        endsAt?: string;
+      };
 
     const command = new CreatePromotionCommand(
       name,
@@ -112,7 +123,7 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
     adminRespond(req, res, 'promotions/create', {
       pageName: 'Create Promotion',
       error: (error as Error).message || 'Failed to create promotion',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
@@ -121,7 +132,7 @@ export const createPromotion = async (req: TypedRequest, res: Response): Promise
 // View Promotion
 // ============================================================================
 
-export const viewPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
 
   // For now, we'll use the repository directly since we don't have a GetPromotion use case
@@ -147,7 +158,7 @@ export const viewPromotion = async (req: TypedRequest, res: Response): Promise<v
 // Edit Promotion Form
 // ============================================================================
 
-export const editPromotionForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editPromotionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
 
   const promotion = await managePromotionsUseCase.findById(promotionId);
@@ -170,12 +181,12 @@ export const editPromotionForm = async (req: TypedRequest, res: Response): Promi
 // Update Promotion
 // ============================================================================
 
-export const updatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
   const updates: Record<string, unknown> = {};
 
   // Map form fields to update object
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const {
     name,
     description,
@@ -188,7 +199,19 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
     startsAt,
     endsAt,
     isActive,
-  } = body;
+  } = body as {
+    name?: string;
+    description?: string | null;
+    status?: string;
+    value?: string;
+    minOrderAmount?: string;
+    maxDiscountAmount?: string;
+    usageLimit?: string;
+    usageLimitPerCustomer?: string;
+    startsAt?: string;
+    endsAt?: string;
+    isActive?: string | boolean;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description;
@@ -213,7 +236,7 @@ export const updatePromotion = async (req: TypedRequest, res: Response): Promise
 // Delete Promotion (AJAX)
 // ============================================================================
 
-export const deletePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
 
   const command = new DeletePromotionCommand(promotionId);
@@ -226,9 +249,9 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
 // Promotion Preview (server-side evaluation via PromotionEvaluationService)
 // ============================================================================
 
-export const previewPromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       items: rawItems,
       subtotal,
@@ -240,7 +263,18 @@ export const previewPromotion = async (req: TypedRequest, res: Response): Promis
       paymentMethodId,
       couponCode,
       currency,
-    } = body;
+    } = body as {
+      items?: Array<{ productId: string; name: string; quantity: number; unitPrice: number; categoryId?: string; isDigital?: boolean }>;
+      subtotal?: string;
+      shippingAmount?: string;
+      customerId?: string;
+      customerGroup?: string;
+      isFirstOrder?: string;
+      shippingMethodId?: string;
+      paymentMethodId?: string;
+      couponCode?: string;
+      currency?: string;
+    };
 
     // Build sample cart items from request
     const items = Array.isArray(rawItems)

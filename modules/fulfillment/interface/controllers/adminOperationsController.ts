@@ -3,8 +3,7 @@
  * Dashboard for operations management
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { ManageOperationsUseCase } from '../../application/useCases/ManageOperations';
 import { adminRespond } from '../../../../libs/adminRespond';
 
@@ -14,7 +13,7 @@ const manageOperationsUseCase = new ManageOperationsUseCase();
 // Operations Dashboard
 // ============================================================================
 
-export const operationsDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const operationsDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stats = await manageOperationsUseCase.getOperationsStats();
   const recentFulfillments = await manageOperationsUseCase.findRecentFulfillments(10);
   const warehouses = await manageOperationsUseCase.findWarehousesWithCounts();

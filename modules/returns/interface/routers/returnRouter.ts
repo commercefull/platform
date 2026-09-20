@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 import returnController from '../controllers/returnController';
 
-export const returnBusinessRouter = express.Router();
+export const returnBusinessRouter = createHttpRouter();
 
 // Return request CRUD + workflow
 returnBusinessRouter.get('/returns', isOrganizationLoggedIn, asyncHandler(returnController.listReturns.bind(returnController)));

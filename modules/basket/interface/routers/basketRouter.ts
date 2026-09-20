@@ -3,11 +3,11 @@
  * Defines API routes for basket operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as basketController from '../controllers/BasketController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Customer/Public Routes

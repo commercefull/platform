@@ -143,13 +143,13 @@
                   <% 
                     const available = (item.quantity || 0) - (item.reserved || 0);
                     let statusClass = 'success';
-                    let statusText = '<%= t("shared:common.inStock") %>';
+                    let statusText = t('shared:common.inStock');
                     if (available <= 0) {
                       statusClass = 'danger';
-                      statusText = '<%= t("shared:common.outOfStock") %>';
+                      statusText = t('shared:common.outOfStock');
                     } else if (available <= (item.reorderPoint || 10)) {
                       statusClass = 'warning';
-                      statusText = '<%= t("shared:common.lowStock") %>';
+                      statusText = t('shared:common.lowStock');
                     }
                   %>
                   <span class="badge bg-<%= statusClass %>"><%= statusText %></span>

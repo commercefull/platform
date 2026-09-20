@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { randomUUID } from 'crypto';
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from './http';
 
 interface CorrelationContext {
   correlationId: string;
@@ -24,7 +24,7 @@ export function getCorrelationId(): string | undefined {
  * - Stores it in AsyncLocalStorage for the request lifecycle
  * - Attaches it to response headers and res.locals
  */
-export function correlationIdMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function correlationIdMiddleware(req: HttpRequest, res: HttpResponse, next: HttpNext): void {
   const correlationId = (req.headers['x-correlation-id'] as string) || randomUUID();
 
   res.setHeader('X-Correlation-Id', correlationId);

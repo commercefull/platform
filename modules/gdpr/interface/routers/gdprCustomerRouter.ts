@@ -3,7 +3,7 @@
  * Routes for customer-facing GDPR operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   createDataRequest,
@@ -17,7 +17,7 @@ import {
 } from '../controllers/GdprController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // ============================================================================
 // Cookie Consent Routes (Public - no auth required)

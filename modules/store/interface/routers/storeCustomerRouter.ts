@@ -4,14 +4,14 @@
  * Public-facing routes for browsing stores and pickup locations.
  */
 
-import { Router, Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import { createHttpRouter } from 'libs/http';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storeDataRepository } from '../../application/wired';
 
 const storeRepo = storeDataRepository.stores;
-const router = Router();
+const router = createHttpRouter();
 
-router.get('/stores', async (req: TypedRequest, res: Response) => {
+router.get('/stores', async (req: HttpRequest, res: HttpResponse) => {
   try {
     const stores = await storeRepo.findAll();
     res.json({ data: stores });
@@ -20,7 +20,7 @@ router.get('/stores', async (req: TypedRequest, res: Response) => {
   }
 });
 
-router.get('/stores/:storeId', async (req: TypedRequest, res: Response) => {
+router.get('/stores/:storeId', async (req: HttpRequest, res: HttpResponse) => {
   try {
     const store = await storeRepo.findById(req.params.storeId);
     if (!store) {

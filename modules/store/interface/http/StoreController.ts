@@ -3,9 +3,8 @@
  * Handles store-related HTTP requests
  */
 
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
 import { AppError, getErrorStatusCode } from '../../../../libs/errors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
@@ -18,7 +17,7 @@ import { storeDataRepository, SystemConfigurationRepo, OrganizationLookupAdapter
 
 const StoreRepo = storeDataRepository.stores;
 
-function handleControllerError(res: Response, action: string, error: unknown): void {
+function handleControllerError(res: HttpResponse, action: string, error: unknown): void {
   logger.error(`${action}:`, error);
   const statusCode = getErrorStatusCode(error);
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -53,7 +52,7 @@ export class StoreController {
    * Create a new store
    * POST /business/stores
    */
-  async createStore(req: TypedRequest, res: Response) {
+  async createStore(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const command = new CreateStoreCommand({
@@ -106,7 +105,7 @@ export class StoreController {
    * Get store by ID
    * GET /business/stores/:storeId
    */
-  async getStore(req: TypedRequest, res: Response) {
+  async getStore(req: HttpRequest, res: HttpResponse) {
     try {
       const storeRepository = StoreRepo;
       const store = await storeRepository.findById(req.params.storeId);
@@ -131,7 +130,7 @@ export class StoreController {
    * Get store by slug
    * GET /business/stores/slug/:slug
    */
-  async getStoreBySlug(req: TypedRequest, res: Response) {
+  async getStoreBySlug(req: HttpRequest, res: HttpResponse) {
     try {
       const storeRepository = StoreRepo;
       const store = await storeRepository.findBySlug(req.params.slug);
@@ -156,7 +155,7 @@ export class StoreController {
    * Get stores by business
    * GET /business/stores/business/:organizationId
    */
-  async getStoresByBusiness(req: TypedRequest, res: Response) {
+  async getStoresByBusiness(req: HttpRequest, res: HttpResponse) {
     try {
       const storeRepository = StoreRepo;
       const stores = await storeRepository.findByBusiness(req.params.organizationId);
@@ -175,7 +174,7 @@ export class StoreController {
    * Get active stores
    * GET /business/stores/active
    */
-  async getActiveStores(req: TypedRequest, res: Response) {
+  async getActiveStores(req: HttpRequest, res: HttpResponse) {
     try {
       const storeRepository = StoreRepo;
       const stores = await storeRepository.findActive();
@@ -194,7 +193,7 @@ export class StoreController {
    * Update store
    * PUT /business/stores/:storeId
    */
-  async updateStore(req: TypedRequest, res: Response) {
+  async updateStore(req: HttpRequest, res: HttpResponse) {
     try {
       const command = new UpdateStoreCommand(req.params.storeId, req.body as UpdateStoreCommand['updates']);
       const result = await this.updateStoreUseCase.execute(command);
@@ -212,7 +211,7 @@ export class StoreController {
    * Delete store
    * DELETE /business/stores/:storeId
    */
-  async deleteStore(req: TypedRequest, res: Response) {
+  async deleteStore(req: HttpRequest, res: HttpResponse) {
     try {
       const storeRepository = StoreRepo;
       await storeRepository.delete(req.params.storeId);
@@ -234,7 +233,7 @@ export class StoreController {
    * Configure store pickup (BOPIS)
    * PUT /business/stores/:storeId/pickup
    */
-  async configurePickup(req: TypedRequest, res: Response) {
+  async configurePickup(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await this.configurePickupUseCase.execute({
@@ -256,7 +255,7 @@ export class StoreController {
    * Set local delivery zone
    * PUT /business/stores/:storeId/local-delivery
    */
-  async setLocalDelivery(req: TypedRequest, res: Response) {
+  async setLocalDelivery(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await this.setLocalDeliveryUseCase.execute({
@@ -284,7 +283,7 @@ export class StoreController {
    * Create store hierarchy
    * POST /business/stores/hierarchy
    */
-  async createStoreHierarchy(req: TypedRequest, res: Response) {
+  async createStoreHierarchy(req: HttpRequest, res: HttpResponse) {
     try {
       const body = req.body as Record<string, unknown>;
       const result = await this.createStoreHierarchyUseCase.execute({
@@ -310,7 +309,7 @@ export class StoreController {
    * List stores with filtering and pagination
    * GET /business/stores
    */
-  async listStores(req: TypedRequest, res: Response) {
+  async listStores(req: HttpRequest, res: HttpResponse) {
     try {
       const query = new ListStoresQuery(
         {

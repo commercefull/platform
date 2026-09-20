@@ -3,8 +3,7 @@
  * Handles shipping-related HTTP requests
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   CalculateShippingRatesCommand,
   calculateShippingRatesUseCase,
@@ -42,13 +41,13 @@ const shippingSurchargeRepo = shippingConfigRepository.surcharges;
 // Carriers
 // ============================================================================
 
-export const getCarriers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCarriers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const carriers = await shippingCarrierRepo.findAll(activeOnly === 'true');
   res.status(200).json({ success: true, data: carriers });
 };
 
-export const getCarrierById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getCarrierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const carrier = await shippingCarrierRepo.findById(id);
 
@@ -61,16 +60,16 @@ export const getCarrierById = async (req: TypedRequest, res: Response): Promise<
 };
 
 export const createCarrier = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateShippingCarrierInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateShippingCarrierInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const carrier = await shippingCarrierRepo.create(req.body);
   res.status(201).json({ success: true, data: carrier });
 };
 
 export const updateCarrier = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateShippingCarrierInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateShippingCarrierInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const carrier = await shippingCarrierRepo.update(id, req.body);
@@ -83,7 +82,7 @@ export const updateCarrier = async (
   res.status(200).json({ success: true, data: carrier });
 };
 
-export const deleteCarrier = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteCarrier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await shippingCarrierRepo.delete(id);
 
@@ -99,7 +98,7 @@ export const deleteCarrier = async (req: TypedRequest, res: Response): Promise<v
 // Methods
 // ============================================================================
 
-export const getMethods = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly, displayOnFrontend, carrierId } = req.query;
 
   const query = new GetShippingMethodsQuery(activeOnly === 'true', displayOnFrontend === 'true', carrierId as string | undefined);
@@ -108,7 +107,7 @@ export const getMethods = async (req: TypedRequest, res: Response): Promise<void
   res.status(200).json({ success: result.success, data: result.methods, total: result.total });
 };
 
-export const getMethodById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMethodById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const method = await shippingMethodRepo.findById(id);
 
@@ -121,16 +120,16 @@ export const getMethodById = async (req: TypedRequest, res: Response): Promise<v
 };
 
 export const createMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateShippingMethodInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateShippingMethodInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const method = await shippingMethodRepo.create(req.body);
   res.status(201).json({ success: true, data: method });
 };
 
 export const updateMethod = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateShippingMethodInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateShippingMethodInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const method = await shippingMethodRepo.update(id, req.body);
@@ -143,7 +142,7 @@ export const updateMethod = async (
   res.status(200).json({ success: true, data: method });
 };
 
-export const deleteMethod = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await shippingMethodRepo.delete(id);
 
@@ -159,13 +158,13 @@ export const deleteMethod = async (req: TypedRequest, res: Response): Promise<vo
 // Zones
 // ============================================================================
 
-export const getZones = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const zones = await shippingZoneRepo.findAll(activeOnly === 'true');
   res.status(200).json({ success: true, data: zones });
 };
 
-export const getZoneById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const zone = await shippingZoneRepo.findById(id);
 
@@ -178,16 +177,16 @@ export const getZoneById = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 export const createZone = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateShippingZoneInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateShippingZoneInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const zone = await shippingZoneRepo.create(req.body);
   res.status(201).json({ success: true, data: zone });
 };
 
 export const updateZone = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateShippingZoneInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateShippingZoneInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const zone = await shippingZoneRepo.update(id, req.body);
@@ -200,7 +199,7 @@ export const updateZone = async (
   res.status(200).json({ success: true, data: zone });
 };
 
-export const deleteZone = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await shippingZoneRepo.delete(id);
 
@@ -216,13 +215,13 @@ export const deleteZone = async (req: TypedRequest, res: Response): Promise<void
 // Rates
 // ============================================================================
 
-export const getRates = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getRates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId, methodId } = req.query;
   const rates = await shippingRateRepo.findActive(zoneId as string | undefined, methodId as string | undefined);
   res.status(200).json({ success: true, data: rates });
 };
 
-export const getRateById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getRateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const rate = await shippingRateRepo.findById(id);
 
@@ -235,16 +234,16 @@ export const getRateById = async (req: TypedRequest, res: Response): Promise<voi
 };
 
 export const createRate = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateShippingRateInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateShippingRateInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const rate = await shippingRateRepo.create(req.body);
   res.status(201).json({ success: true, data: rate });
 };
 
 export const updateRate = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateShippingRateInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateShippingRateInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const rate = await shippingRateRepo.update(id, req.body);
@@ -257,7 +256,7 @@ export const updateRate = async (
   res.status(200).json({ success: true, data: rate });
 };
 
-export const deleteRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await shippingRateRepo.delete(id);
 
@@ -273,13 +272,13 @@ export const deleteRate = async (req: TypedRequest, res: Response): Promise<void
 // Packaging Types
 // ============================================================================
 
-export const getPackagingTypes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPackagingTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const types = await packagingTypeRepo.findAll(activeOnly === 'true');
   res.status(200).json({ success: true, data: types });
 };
 
-export const getPackagingTypeById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPackagingTypeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const type = await packagingTypeRepo.findById(id);
 
@@ -292,16 +291,16 @@ export const getPackagingTypeById = async (req: TypedRequest, res: Response): Pr
 };
 
 export const createPackagingType = async (
-  req: TypedRequest<Record<string, string>, unknown, CreateShippingPackagingTypeInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreateShippingPackagingTypeInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const type = await packagingTypeRepo.create(req.body);
   res.status(201).json({ success: true, data: type });
 };
 
 export const updatePackagingType = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdateShippingPackagingTypeInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdateShippingPackagingTypeInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const type = await packagingTypeRepo.update(id, req.body);
@@ -314,7 +313,7 @@ export const updatePackagingType = async (
   res.status(200).json({ success: true, data: type });
 };
 
-export const deletePackagingType = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePackagingType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await packagingTypeRepo.delete(id);
 
@@ -336,8 +335,8 @@ interface EstimateDeliveryBody {
 }
 
 export const estimateDelivery = async (
-  req: TypedRequest<Record<string, string>, unknown, EstimateDeliveryBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, EstimateDeliveryBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { methodId, destinationAddress } = req.body;
 
@@ -394,8 +393,8 @@ interface CalculateRatesBody {
 }
 
 export const calculateRates = async (
-  req: TypedRequest<Record<string, string>, unknown, CalculateRatesBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CalculateRatesBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { destinationAddress, orderDetails } = req.body;
 
@@ -442,12 +441,12 @@ interface CreateLabelBody {
   shippingCost?: number;
 }
 
-export const createLabel = async (req: TypedRequest<Record<string, string>, unknown, CreateLabelBody>, res: Response): Promise<void> => {
+export const createLabel = async (req: HttpRequest<Record<string, string>, unknown, CreateLabelBody>, res: HttpResponse): Promise<void> => {
   const result = await createShippingLabelUseCase.execute(req.body);
   res.status(201).json({ success: true, data: result });
 };
 
-export const getLabel = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLabel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await getShippingLabelUseCase.execute({
     shippingLabelId: req.params.id,
     trackingNumber: req.query.trackingNumber as string | undefined,
@@ -459,13 +458,13 @@ export const getLabel = async (req: TypedRequest, res: Response): Promise<void> 
   res.status(200).json({ success: true, data: result.label });
 };
 
-export const getLabelsByOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getLabelsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const labels = await shippingLabelRepo.findByOrderId(orderId);
   res.status(200).json({ success: true, data: labels });
 };
 
-export const voidLabel = async (req: TypedRequest, res: Response): Promise<void> => {
+export const voidLabel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { reason } = req.body as { reason?: string };
   const result = await voidShippingLabelUseCase.execute({ shippingLabelId: id, reason });
@@ -480,7 +479,7 @@ export const voidLabel = async (req: TypedRequest, res: Response): Promise<void>
 // Tracking
 // ============================================================================
 
-export const trackShipment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const trackShipment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const result = await trackShipmentUseCase.execute({
     shippingLabelId: req.params.id,
     trackingNumber: req.query.trackingNumber as string | undefined,
@@ -496,14 +495,14 @@ export const trackShipment = async (req: TypedRequest, res: Response): Promise<v
 // Surcharges
 // ============================================================================
 
-export const getSurchargesByRate = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getSurchargesByRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
   const { activeOnly } = req.query;
   const surcharges = await shippingSurchargeRepo.findByRateId(rateId, activeOnly !== 'false');
   res.status(200).json({ success: true, data: surcharges });
 };
 
-export const getSurchargeById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getSurchargeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const surcharge = await shippingSurchargeRepo.findById(id);
   if (!surcharge) {
@@ -513,7 +512,7 @@ export const getSurchargeById = async (req: TypedRequest, res: Response): Promis
   res.status(200).json({ success: true, data: surcharge });
 };
 
-export const createSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const input = req.body as CreateShippingSurchargeInput;
   if (!input.shippingRateId || !input.type || !input.calculationType || input.value === undefined) {
     res.status(400).json({ success: false, message: 'Missing required fields: shippingRateId, type, calculationType, value' });
@@ -523,7 +522,7 @@ export const createSurcharge = async (req: TypedRequest, res: Response): Promise
   res.status(201).json({ success: true, data: surcharge });
 };
 
-export const updateSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const input = req.body as UpdateShippingSurchargeInput;
   const surcharge = await shippingSurchargeRepo.update(id, input);
@@ -534,7 +533,7 @@ export const updateSurcharge = async (req: TypedRequest, res: Response): Promise
   res.status(200).json({ success: true, data: surcharge });
 };
 
-export const deleteSurcharge = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await shippingSurchargeRepo.delete(id);
   if (!deleted) {

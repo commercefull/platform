@@ -3,12 +3,12 @@
  * Defines API routes for checkout operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as checkoutController from '../controllers/CheckoutController';
 import { optionalCustomerAuth } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 router.use(optionalCustomerAuth);
 

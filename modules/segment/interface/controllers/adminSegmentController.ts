@@ -3,8 +3,7 @@
  * Admin views for managing customer segments
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
   createSegmentUseCase,
   updateSegmentUseCase,
@@ -16,7 +15,7 @@ import {
 } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listSegments = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSegments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly === 'true';
   const segments = await listSegmentsUseCase.execute(activeOnly);
 
@@ -28,7 +27,7 @@ export const listSegments = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const viewSegment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   const segment = await getSegmentUseCase.execute(segmentId);
 
@@ -44,17 +43,17 @@ export const viewSegment = async (req: TypedRequest, res: Response): Promise<voi
   });
 };
 
-export const createSegmentForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSegmentForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'segment/create', { pageName: 'Create Segment' });
 };
 
-export const createSegment = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const segment = await createSegmentUseCase.execute(body as Parameters<typeof createSegmentUseCase.execute>[0]);
   res.redirect(`/admin/segments/${segment.segmentId}?success=Segment created successfully`);
 };
 
-export const editSegmentForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editSegmentForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   const segment = await getSegmentUseCase.execute(segmentId);
 
@@ -69,26 +68,26 @@ export const editSegmentForm = async (req: TypedRequest, res: Response): Promise
   });
 };
 
-export const updateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   await updateSegmentUseCase.execute(segmentId, body as Parameters<typeof updateSegmentUseCase.execute>[1]);
   res.redirect(`/admin/segments/${segmentId}?success=Segment updated successfully`);
 };
 
-export const deleteSegment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   await deleteSegmentUseCase.execute(segmentId);
   res.redirect('/admin/segments?success=Segment deleted');
 };
 
-export const evaluateSegment = async (req: TypedRequest, res: Response): Promise<void> => {
+export const evaluateSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   const result = await evaluateSegmentUseCase.execute(segmentId);
   res.redirect(`/admin/segments/${segmentId}?success=Segment evaluated: ${result.matched} customers matched`);
 };
 
-export const viewSegmentMembers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSegmentMembers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   const segment = await getSegmentUseCase.execute(segmentId);
 

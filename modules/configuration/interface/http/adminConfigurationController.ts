@@ -4,13 +4,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { SystemConfigurationRepo } from '../../application/wired';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listSystemConfigurations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listSystemConfigurations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const repo = new SystemConfigurationRepo();
   const configs = await repo.findAll();
 
@@ -21,7 +20,7 @@ export const listSystemConfigurations = async (req: TypedRequest, res: Response)
   });
 };
 
-export const viewSystemConfiguration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
   const repo = new SystemConfigurationRepo();
   const config = await repo.findById(configId);
@@ -38,12 +37,12 @@ export const viewSystemConfiguration = async (req: TypedRequest, res: Response):
   });
 };
 
-export const createSystemConfigurationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createSystemConfigurationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'configuration/create', { pageName: 'Create System Configuration' });
 };
 
-export const createSystemConfiguration = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
+export const createSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
   const config = SystemConfiguration.create({
     configId: randomUUID(),
     platformName: body.platformName as string,
@@ -60,7 +59,7 @@ export const createSystemConfiguration = async (req: TypedRequest, res: Response
   res.redirect(`/admin/configuration/${config.configId}?success=Configuration created successfully`);
 };
 
-export const editSystemConfigurationForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editSystemConfigurationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
   const repo = new SystemConfigurationRepo();
   const config = await repo.findById(configId);
@@ -76,9 +75,9 @@ export const editSystemConfigurationForm = async (req: TypedRequest, res: Respon
   });
 };
 
-export const updateSystemConfiguration = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const repo = new SystemConfigurationRepo();
   const config = await repo.findById(configId);
 

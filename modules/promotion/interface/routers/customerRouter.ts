@@ -2,12 +2,12 @@
  * Promotion Customer Router
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 import * as giftCardController from '../controllers/giftCardCustomerController';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Placeholder routes - implement with DDD controllers
 router.post('/validate', (_req, res) => {

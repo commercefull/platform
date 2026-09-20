@@ -4,11 +4,10 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-export const listMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'content/media/index', {
     pageName: 'Media Library',
     media: [],
@@ -18,14 +17,14 @@ export const listMedia = async (req: TypedRequest, res: Response): Promise<void>
   });
 };
 
-export const uploadMediaForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const uploadMediaForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'content/media/upload', {
     pageName: 'Upload Media',
     folders: [],
   });
 };
 
-export const uploadMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const uploadMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     res.redirect('/admin/content/media?success=Media uploaded successfully');
   } catch (error: unknown) {
@@ -38,7 +37,7 @@ export const uploadMedia = async (req: TypedRequest, res: Response): Promise<voi
   }
 };
 
-export const viewMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'content/media/view', {
     pageName: 'Media Details',
     media: null,
@@ -46,14 +45,14 @@ export const viewMedia = async (req: TypedRequest, res: Response): Promise<void>
   });
 };
 
-export const editMediaForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editMediaForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'content/media/edit', {
     pageName: 'Edit Media',
     media: null,
   });
 };
 
-export const updateMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { mediaId } = req.params;
     res.redirect(`/admin/content/media/${mediaId}?success=Media updated successfully`);
@@ -63,19 +62,19 @@ export const updateMedia = async (req: TypedRequest, res: Response): Promise<voi
       pageName: 'Edit Media',
       media: null,
       error: (error as Error).message || 'Failed to update media',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const deleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Media deleted successfully' });
 };
 
-export const bulkDeleteMedia = async (req: TypedRequest, res: Response): Promise<void> => {
+export const bulkDeleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Media items deleted successfully' });
 };
 
-export const createFolder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createFolder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   res.json({ success: true, message: 'Folder created successfully' });
 };

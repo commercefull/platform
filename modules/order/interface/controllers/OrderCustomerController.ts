@@ -3,8 +3,7 @@
  * HTTP interface for customer-facing order operations with content negotiation
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const OrderRepo = orderDataRepository.commands;
 import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
@@ -19,11 +18,11 @@ import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 // Content Negotiation Helpers
 // ============================================================================
 
-function respond(req: TypedRequest, res: Response, data: unknown, statusCode: number = 200): void {
+function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
 }
 
-function respondError(req: TypedRequest, res: Response, message: string, statusCode: number = 500): void {
+function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   res.status(statusCode).json({ success: false, error: message });
 }
 
@@ -35,7 +34,7 @@ function respondError(req: TypedRequest, res: Response, message: string, statusC
  * Get customer's orders
  * GET /orders
  */
-export const getMyOrders = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMyOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
   if (!customerId) {
@@ -57,7 +56,7 @@ export const getMyOrders = async (req: TypedRequest, res: Response): Promise<voi
  * Get order by ID
  * GET /orders/:orderId
  */
-export const getOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
@@ -80,7 +79,7 @@ export const getOrder = async (req: TypedRequest, res: Response): Promise<void> 
  * Get order by order number
  * GET /orders/number/:orderNumber
  */
-export const getOrderByNumber = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderNumber } = req.params;
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
@@ -100,7 +99,7 @@ export const getOrderByNumber = async (req: TypedRequest, res: Response): Promis
  * Create a new order
  * POST /orders
  */
-export const createOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
   const body = req.body as {
     items: unknown[];
@@ -197,7 +196,7 @@ export const createOrder = async (req: TypedRequest, res: Response): Promise<voi
  * Cancel an order
  * POST /orders/:orderId/cancel
  */
-export const cancelOrder = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const body = req.body as { reason?: string };
   const { reason } = body;

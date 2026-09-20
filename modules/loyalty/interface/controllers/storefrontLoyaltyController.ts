@@ -3,8 +3,7 @@
  * Manages customer loyalty points and rewards
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { ManageStorefrontLoyaltyUseCase } from '../../application/useCases/ManageLoyalty';
 
@@ -19,7 +18,7 @@ interface CustomerUser {
 /**
  * GET: View loyalty dashboard
  */
-export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
+export const loyaltyDashboard = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -42,7 +41,7 @@ export const loyaltyDashboard = async (req: TypedRequest, res: Response) => {
 /**
  * GET: View loyalty points history
  */
-export const pointsHistory = async (req: TypedRequest, res: Response) => {
+export const pointsHistory = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.redirect('/signin');
@@ -74,7 +73,7 @@ export const pointsHistory = async (req: TypedRequest, res: Response) => {
 /**
  * POST: Redeem loyalty reward
  */
-export const redeemReward = async (req: TypedRequest, res: Response) => {
+export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
     return res.status(401).json({ error: 'Please sign in' });

@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ManageGiftCardsUseCase } from '../../application/useCases/ManagePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { PromotionGiftCard } from '../../application/wired';
@@ -16,7 +15,7 @@ const manageGiftCardsUseCase = new ManageGiftCardsUseCase();
 // Gift Card Management
 // ============================================================================
 
-export const listGiftCards = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listGiftCards = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as string;
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
@@ -46,15 +45,15 @@ export const listGiftCards = async (req: TypedRequest, res: Response): Promise<v
   });
 };
 
-export const createGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createGiftCardForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'promotions/gift-cards/create', {
     pageName: 'Create Gift Card',
   });
 };
 
-export const createGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const {
       type,
       initialBalance,
@@ -69,7 +68,21 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
       minReloadAmount,
       maxReloadAmount,
       maxBalance,
-    } = body;
+    } = body as {
+      type?: 'standard' | 'promotional' | 'reward' | 'refund';
+      initialBalance: string;
+      currency?: string;
+      recipientEmail?: string;
+      recipientName?: string;
+      personalMessage?: string;
+      deliveryDate?: string;
+      deliveryMethod?: string;
+      expiresAt?: string;
+      isReloadable?: string;
+      minReloadAmount?: string;
+      maxReloadAmount?: string;
+      maxBalance?: string;
+    };
 
     const giftCard = await manageGiftCardsUseCase.createGiftCard({
       type: type || 'standard',
@@ -99,12 +112,12 @@ export const createGiftCard = async (req: TypedRequest, res: Response): Promise<
     adminRespond(req, res, 'promotions/gift-cards/create', {
       pageName: 'Create Gift Card',
       error: (error as Error).message || 'Failed to create gift card',
-      formData: req.body as RequestBody,
+      formData: req.body as HttpRequestBody,
     });
   }
 };
 
-export const viewGiftCard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewGiftCard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
 
   const giftCard = await manageGiftCardsUseCase.getGiftCard(giftCardId);
@@ -129,7 +142,7 @@ export const viewGiftCard = async (req: TypedRequest, res: Response): Promise<vo
   });
 };
 
-export const editGiftCardForm = async (req: TypedRequest, res: Response): Promise<void> => {
+export const editGiftCardForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
 
   const giftCard = await manageGiftCardsUseCase.getGiftCard(giftCardId);
@@ -148,7 +161,7 @@ export const editGiftCardForm = async (req: TypedRequest, res: Response): Promis
   });
 };
 
-export const activateGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
 
   await manageGiftCardsUseCase.activateGiftCard(giftCardId);
@@ -156,20 +169,20 @@ export const activateGiftCardAction = async (req: TypedRequest, res: Response): 
   res.json({ success: true, message: 'Gift card activated successfully' });
 };
 
-export const assignGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
-  const body = req.body as RequestBody;
-  const { customerId } = body;
+  const body = req.body as HttpRequestBody;
+  const { customerId } = body as { customerId: string };
 
   await manageGiftCardsUseCase.assignGiftCard(giftCardId, customerId);
 
   res.json({ success: true, message: 'Gift card assigned successfully' });
 };
 
-export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
-  const body = req.body as RequestBody;
-  const { amount, orderId } = body;
+  const body = req.body as HttpRequestBody;
+  const { amount, orderId } = body as { amount: string; orderId: string };
 
   const transaction = await manageGiftCardsUseCase.reloadGiftCard(giftCardId, parseFloat(amount), orderId, 'admin');
 
@@ -180,10 +193,10 @@ export const reloadGiftCardAction = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const refundToGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
-  const body = req.body as RequestBody;
-  const { amount, orderId, notes } = body;
+  const body = req.body as HttpRequestBody;
+  const { amount, orderId, notes } = body as { amount: string; orderId: string; notes?: string };
 
   const transaction = await manageGiftCardsUseCase.refundToGiftCard(giftCardId, parseFloat(amount), orderId, 'admin', notes);
 
@@ -194,7 +207,7 @@ export const refundToGiftCardAction = async (req: TypedRequest, res: Response): 
   });
 };
 
-export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Promise<void> => {
+export const cancelGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
 
   await manageGiftCardsUseCase.cancelGiftCard(giftCardId);
@@ -202,7 +215,7 @@ export const cancelGiftCardAction = async (req: TypedRequest, res: Response): Pr
   res.json({ success: true, message: 'Gift card cancelled successfully' });
 };
 
-export const checkGiftCardBalance = async (req: TypedRequest, res: Response): Promise<void> => {
+export const checkGiftCardBalance = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
   const giftCard = await manageGiftCardsUseCase.getGiftCardByCode(code);

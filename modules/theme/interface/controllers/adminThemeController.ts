@@ -3,8 +3,7 @@
  * Renders the theme management admin views (EJS templates)
  */
 
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { manageThemesUseCase, manageOverridesUseCase, assignThemeUseCase, resolveThemeUseCase } from '../../application/wired';
 import { CreateThemeOverrideCommand } from '../../application/useCases/Theme';
@@ -12,7 +11,7 @@ import { themeRegistry } from '../../domain/services/ThemeRegistry';
 
 // ── Theme Gallery ─────────────────────────────────────────────
 
-export const listThemes = async (req: TypedRequest, res: Response): Promise<void> => {
+export const listThemes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let themes: unknown[];
   try {
     themes = await manageThemesUseCase.list();
@@ -31,7 +30,7 @@ export const listThemes = async (req: TypedRequest, res: Response): Promise<void
 
 // ── Theme Detail / Customizer ─────────────────────────────────
 
-export const themeDetail = async (req: TypedRequest, res: Response): Promise<void> => {
+export const themeDetail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
 
   let theme;
@@ -77,9 +76,9 @@ export const themeDetail = async (req: TypedRequest, res: Response): Promise<voi
 
 // ── Assign Theme to Store ─────────────────────────────────────
 
-export const assignTheme = async (req: TypedRequest, res: Response): Promise<void> => {
+export const assignTheme = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
-  const { storeId, organizationId } = req.body as RequestBody;
+  const { storeId, organizationId } = req.body as { storeId: string; organizationId: string };
 
   try {
     await assignThemeUseCase.execute({
@@ -95,9 +94,9 @@ export const assignTheme = async (req: TypedRequest, res: Response): Promise<voi
 
 // ── Unassign Theme ────────────────────────────────────────────
 
-export const unassignTheme = async (req: TypedRequest, res: Response): Promise<void> => {
+export const unassignTheme = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
-  const { storeId } = req.body as RequestBody;
+  const { storeId } = req.body as { storeId: string };
 
   try {
     await assignThemeUseCase.unassign(storeId);
@@ -109,10 +108,18 @@ export const unassignTheme = async (req: TypedRequest, res: Response): Promise<v
 
 // ── Save Override ─────────────────────────────────────────────
 
-export const saveOverride = async (req: TypedRequest, res: Response): Promise<void> => {
+export const saveOverride = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
-  const body = req.body as RequestBody;
-  const { storeId, organizationId, settings, customCss, customLogoUrl, customFaviconUrl, customBannerUrl } = body;
+  const body = req.body as HttpRequestBody;
+  const { storeId, organizationId, settings, customCss, customLogoUrl, customFaviconUrl, customBannerUrl } = body as {
+    storeId: string;
+    organizationId: string;
+    settings?: string | Record<string, unknown>;
+    customCss?: string;
+    customLogoUrl?: string;
+    customFaviconUrl?: string;
+    customBannerUrl?: string;
+  };
 
   try {
     let override;
@@ -149,7 +156,7 @@ export const saveOverride = async (req: TypedRequest, res: Response): Promise<vo
 
 // ── Activate Theme ────────────────────────────────────────────
 
-export const activateTheme = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activateTheme = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.activate(themeId);
@@ -161,7 +168,7 @@ export const activateTheme = async (req: TypedRequest, res: Response): Promise<v
 
 // ── Archive Theme ─────────────────────────────────────────────
 
-export const archiveTheme = async (req: TypedRequest, res: Response): Promise<void> => {
+export const archiveTheme = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.archive(themeId);
@@ -173,7 +180,7 @@ export const archiveTheme = async (req: TypedRequest, res: Response): Promise<vo
 
 // ── Delete Custom Theme ───────────────────────────────────────
 
-export const deleteTheme = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteTheme = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.delete(themeId);
@@ -185,7 +192,7 @@ export const deleteTheme = async (req: TypedRequest, res: Response): Promise<voi
 
 // ── Theme Preview (standalone) ────────────────────────────────
 
-export const themePreview = async (req: TypedRequest, res: Response): Promise<void> => {
+export const themePreview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { themeId } = req.params;
   const storeId = req.query.storeId as string;
 

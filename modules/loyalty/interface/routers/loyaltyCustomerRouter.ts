@@ -1,9 +1,9 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as loyaltyController from '../controllers/loyaltyCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Public routes (no authentication required)
 router.get('/loyalty/tiers', asyncHandler(loyaltyController.getPublicTiers));

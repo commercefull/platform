@@ -4,9 +4,8 @@
  * for the Commercefull Admin Hub - Phase 7
  */
 
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
 import { getAnalyticsDataUseCase } from '../../application/wired';
 import { generateReportUseCase, manageReportSchedulesUseCase } from '../../application/useCases';
 import { predictiveAnalyticsUseCase } from '../../application/useCases/PredictiveAnalytics';
@@ -20,7 +19,7 @@ const findActiveStoresUseCase = new FindActiveStoresUseCase();
 // Advanced Analytics Dashboard
 // ============================================================================
 
-export const analyticsDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const analyticsDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { period = '30d', segment = 'all', category = 'all' } = req.query;
 
   // Parse date range
@@ -94,7 +93,7 @@ export const analyticsDashboard = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const storeSalesDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const storeSalesDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
   const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
   const summary = await new GetStoreSalesSummaryUseCase().execute({
@@ -120,7 +119,7 @@ export const storeSalesDashboard = async (req: TypedRequest, res: Response): Pro
 // Predictive Analytics
 // ============================================================================
 
-export const predictiveAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const predictiveAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get historical sales data for forecasting
   const [startDate] = parsePeriod('90d'); // Last 90 days for forecasting
   const salesData = await getAnalyticsDataUseCase.getSalesSummary(startDate, new Date());
@@ -183,7 +182,7 @@ export const predictiveAnalytics = async (req: TypedRequest, res: Response): Pro
 // Customer Analytics
 // ============================================================================
 
-export const customerAnalytics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const customerAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { _segmentId } = req.params;
 
   // Get customer segmentation analysis
@@ -228,7 +227,7 @@ export const customerAnalytics = async (req: TypedRequest, res: Response): Promi
 // AI Recommendations
 // ============================================================================
 
-export const aiRecommendations = async (req: TypedRequest, res: Response): Promise<void> => {
+export const aiRecommendations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get a sample customer for demonstration
   const sampleCustomerId = await getAnalyticsDataUseCase.findRecentCustomerId();
 
@@ -287,7 +286,7 @@ export const aiRecommendations = async (req: TypedRequest, res: Response): Promi
 // Executive Dashboard
 // ============================================================================
 
-export const executiveDashboard = async (req: TypedRequest, res: Response): Promise<void> => {
+export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get current period KPIs
   const [startDate, endDate] = parsePeriod('30d');
   const currentKPIs = await calculateExecutiveKPIs(startDate, endDate);
@@ -354,7 +353,7 @@ export const executiveDashboard = async (req: TypedRequest, res: Response): Prom
 // Real-time Analytics API
 // ============================================================================
 
-export const realTimeMetrics = async (req: TypedRequest, res: Response): Promise<void> => {
+export const realTimeMetrics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get current real-time metrics
   const metrics = await getCurrentRealTimeMetrics();
 
@@ -369,7 +368,7 @@ export const realTimeMetrics = async (req: TypedRequest, res: Response): Promise
 // Automated Reporting
 // ============================================================================
 
-export const automatedReports = async (req: TypedRequest, res: Response): Promise<void> => {
+export const automatedReports = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const reports = await manageReportSchedulesUseCase.getScheduledReports();
   const reportHistory = await manageReportSchedulesUseCase.getReportExecutionHistory();
 
@@ -384,9 +383,16 @@ export const automatedReports = async (req: TypedRequest, res: Response): Promis
 // Automated Reporting Management
 // ============================================================================
 
-export const createReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { name, type, reportType, recipients, format, parameters } = body;
+export const createReportSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { name, type, reportType, recipients, format, parameters } = body as {
+    name: string;
+    type: string;
+    reportType: string;
+    recipients: string[];
+    format?: string;
+    parameters?: string;
+  };
 
   // Validate input
   if (!name || !type || !reportType || !recipients || !Array.isArray(recipients)) {
@@ -411,9 +417,9 @@ export const createReportSchedule = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const updateReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateReportSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { _scheduleId } = req.params;
-  const _updates = req.body as RequestBody;
+  const _updates = req.body as HttpRequestBody;
 
   // Placeholder - would update schedule in database
 
@@ -423,7 +429,7 @@ export const updateReportSchedule = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const deleteReportSchedule = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deleteReportSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { _scheduleId } = req.params;
 
   // Placeholder - would delete schedule from database
@@ -434,9 +440,13 @@ export const deleteReportSchedule = async (req: TypedRequest, res: Response): Pr
   });
 };
 
-export const runReportNow = async (req: TypedRequest, res: Response): Promise<void> => {
-  const body = req.body as RequestBody;
-  const { reportType, period, parameters } = body;
+export const runReportNow = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as HttpRequestBody;
+  const { reportType, period, parameters } = body as {
+    reportType: string;
+    period?: string;
+    parameters?: string;
+  };
 
   if (!reportType) {
     throw new Error('Report type is required');

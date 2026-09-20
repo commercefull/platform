@@ -4,8 +4,7 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { Response } from 'express';
-import { TypedRequest, RequestBody } from 'libs/types/express';
+import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { GetOrCreateBasketCommand } from '../../application/useCases/GetOrCreateBasket';
 import { AddItemCommand } from '../../application/useCases/AddItem';
@@ -27,7 +26,7 @@ import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../tax
 // View Basket/Cart
 // ============================================================================
 
-export const viewBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const viewBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
@@ -47,10 +46,10 @@ export const viewBasket = async (req: TypedRequest, res: Response): Promise<void
 // Add Item to Basket
 // ============================================================================
 
-export const addToBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId } = req.params;
-    const body = req.body as RequestBody;
+    const body = req.body as HttpRequestBody;
     const { quantity = 1, variantId } = body;
     const customerId = req.user?.customerId;
     const sessionId = req.session?.id;
@@ -83,7 +82,7 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
     await addItemUseCase.execute(addCmd);
 
     // Redirect back to product page or cart with success message
-    const redirectTo = (req.body as RequestBody).redirectTo || '/basket';
+    const redirectTo = (req.body as HttpRequestBody).redirectTo || '/basket';
     res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
@@ -96,9 +95,9 @@ export const addToBasket = async (req: TypedRequest, res: Response): Promise<voi
 // Update Basket Item
 // ============================================================================
 
-export const updateBasketItem = async (req: TypedRequest, res: Response): Promise<void> => {
+export const updateBasketItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketItemId } = req.params;
-  const body = req.body as RequestBody;
+  const body = req.body as HttpRequestBody;
   const { quantity } = body;
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
@@ -121,7 +120,7 @@ export const updateBasketItem = async (req: TypedRequest, res: Response): Promis
 // Remove Item from Basket
 // ============================================================================
 
-export const removeFromBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const removeFromBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketItemId } = req.params;
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
@@ -143,7 +142,7 @@ export const removeFromBasket = async (req: TypedRequest, res: Response): Promis
 // Clear Basket
 // ============================================================================
 
-export const clearBasket = async (req: TypedRequest, res: Response): Promise<void> => {
+export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 

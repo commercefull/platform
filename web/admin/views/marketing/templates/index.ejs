@@ -86,11 +86,11 @@
             </thead>
             <tbody>
               <% const systemTemplates = [
-                { id: 'order-confirmation', name: '<%= t("marketing:templates.orderConfirmation") %>', trigger: '<%= t("marketing:templates.orderPlaced") %>' },
-                { id: 'shipping-notification', name: '<%= t("marketing:templates.shippingNotification") %>', trigger: '<%= t("marketing:templates.orderShipped") %>' },
-                { id: 'password-reset', name: '<%= t("marketing:templates.passwordReset") %>', trigger: '<%= t("marketing:templates.passwordResetRequested") %>' },
-                { id: 'welcome-email', name: '<%= t("marketing:templates.welcomeEmail") %>', trigger: '<%= t("marketing:templates.accountCreated") %>' },
-                { id: 'abandoned-cart', name: '<%= t("marketing:templates.abandonedCart") %>', trigger: '<%= t("marketing:templates.cartAbandoned") %>' }
+                { id: 'order-confirmation', name: t("marketing:templates.orderConfirmation"), trigger: t("marketing:templates.orderPlaced") },
+                { id: 'shipping-notification', name: t("marketing:templates.shippingNotification"), trigger: t("marketing:templates.orderShipped") },
+                { id: 'password-reset', name: t("marketing:templates.passwordReset"), trigger: t("marketing:templates.passwordResetRequested") },
+                { id: 'welcome-email', name: t("marketing:templates.welcomeEmail"), trigger: t("marketing:templates.accountCreated") },
+                { id: 'abandoned-cart', name: t("marketing:templates.abandonedCart"), trigger: t("marketing:templates.cartAbandoned") }
               ]; %>
               <% systemTemplates.forEach(function(st) { %>
               <tr>

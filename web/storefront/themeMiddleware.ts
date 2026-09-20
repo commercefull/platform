@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { resolveThemeUseCase } from '../../modules/theme';
 
 /**
@@ -20,7 +20,7 @@ import { resolveThemeUseCase } from '../../modules/theme';
  *   - themeCustomLogoUrl: custom logo URL from overrides
  *   - themeCustomFaviconUrl: custom favicon URL from overrides
  */
-export async function resolveTheme(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function resolveTheme(req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> {
   try {
     // Use the storeId resolved by storeResolutionMiddleware (already in res.locals)
     const storeId = (res.locals.storeId as string | undefined) || undefined;

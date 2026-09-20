@@ -1,4 +1,4 @@
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 // Import pricing controller functions for existing pricing endpoints
 import {
@@ -44,7 +44,7 @@ import {
 } from '../controllers/pricingBusinessController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Apply authentication and permission middleware for all routes
 router.use('/pricing', isOrganizationLoggedIn);

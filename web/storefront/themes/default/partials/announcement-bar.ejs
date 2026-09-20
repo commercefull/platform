@@ -3,15 +3,15 @@
    * Announcement Bar Partial — Top promo bar
    *
    * Usage:
-   *   <%- include("../partials/announcement-bar") %>
+   *   include("../partials/announcement-bar")
    *
    * Reads from res.locals (set by storeResolutionMiddleware).
    * Shows store-specific announcement based on region.
    */
 %>
 <%
-  const region = (typeof region !== 'undefined' ? region : 'US') || 'US';
-  const announcement = region === 'GB'
+  const regionCode = (typeof region !== 'undefined' ? region : 'US') || 'US';
+  const announcement = regionCode === 'GB'
     ? 'Free UK shipping on orders over £50 — DPD Next Day available'
     : 'Free US shipping on orders over $75 — Free returns within 30 days';
 %>

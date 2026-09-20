@@ -4,8 +4,7 @@
  * Handles OAuth/social login authentication endpoints.
  */
 
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const socialAccountRepo = identityDataRepository.social;
 import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
@@ -84,7 +83,7 @@ function isValidProvider(provider: string): provider is SocialProvider {
 /**
  * Get OAuth configuration for a provider
  */
-export async function getOAuthConfig(req: TypedRequest, res: Response): Promise<void> {
+export async function getOAuthConfig(req: HttpRequest, res: HttpResponse): Promise<void> {
   const { provider } = req.params;
 
   if (!isValidProvider(provider)) {
@@ -145,8 +144,8 @@ export async function getOAuthConfig(req: TypedRequest, res: Response): Promise<
  * Handle social login callback for customers
  */
 export async function customerSocialLogin(
-  req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, SocialLoginBody>,
+  res: HttpResponse,
 ): Promise<void> {
   const { provider } = req.params;
   const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -260,8 +259,8 @@ export async function customerSocialLogin(
  * Handle social login callback for merchants
  */
 export async function merchantSocialLogin(
-  req: TypedRequest<Record<string, string>, unknown, SocialLoginBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, SocialLoginBody>,
+  res: HttpResponse,
 ): Promise<void> {
   const { provider } = req.params;
   const { accessToken, idToken, profile: clientProfile } = req.body;
@@ -371,8 +370,8 @@ export async function merchantSocialLogin(
  * Link a social account to an existing customer
  */
 export async function linkCustomerSocialAccount(
-  req: TypedRequest<Record<string, string>, unknown, LinkAccountBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, LinkAccountBody>,
+  res: HttpResponse,
 ): Promise<void> {
   const { provider } = req.params;
   const customerId = req.user?.id;
@@ -445,7 +444,7 @@ export async function linkCustomerSocialAccount(
 /**
  * Unlink a social account from a customer
  */
-export async function unlinkCustomerSocialAccount(req: TypedRequest, res: Response): Promise<void> {
+export async function unlinkCustomerSocialAccount(req: HttpRequest, res: HttpResponse): Promise<void> {
   const { provider } = req.params;
   const customerId = req.user?.id;
 
@@ -489,7 +488,7 @@ export async function unlinkCustomerSocialAccount(req: TypedRequest, res: Respon
 /**
  * Get linked social accounts for a customer
  */
-export async function getCustomerLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
+export async function getCustomerLinkedAccounts(req: HttpRequest, res: HttpResponse): Promise<void> {
   const customerId = req.user?.id;
 
   if (!customerId) {
@@ -513,7 +512,7 @@ export async function getCustomerLinkedAccounts(req: TypedRequest, res: Response
 /**
  * Get linked social accounts for a merchant
  */
-export async function getOrganizationLinkedAccounts(req: TypedRequest, res: Response): Promise<void> {
+export async function getOrganizationLinkedAccounts(req: HttpRequest, res: HttpResponse): Promise<void> {
   const organizationId = req.user?.id;
 
   if (!organizationId) {

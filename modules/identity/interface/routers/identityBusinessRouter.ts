@@ -3,7 +3,7 @@
  * Routes for merchant/admin authentication
  */
 
-import { Router } from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import {
   loginOrganization,
@@ -21,7 +21,7 @@ import {
 import { userStoreRouter } from './userStoreRouter';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = Router();
+const router = createHttpRouter();
 
 // -------------------- Public Auth Routes --------------------
 

@@ -3,8 +3,7 @@
  * Handles admin/merchant gift card operations
  */
 
-import { Response, NextFunction } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import {
   activateGiftCardRepo,
   assignGiftCardRepo,
@@ -41,7 +40,7 @@ interface RefundBody {
   notes?: string;
 }
 
-type AsyncHandler = (req: TypedRequest, res: Response, _next: NextFunction) => Promise<void>;
+type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
 export const getGiftCards: AsyncHandler = async (req, res, _next) => {
   const { status, purchasedBy, assignedTo, limit, offset } = req.query;

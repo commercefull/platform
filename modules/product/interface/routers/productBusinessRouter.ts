@@ -3,7 +3,7 @@
  * Defines API routes for business/admin product operations
  */
 
-import express from 'express';
+import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import * as productController from '../controllers/ProductBusinessController';
 import * as bundleController from '../controllers/BundleController';
@@ -15,7 +15,7 @@ import attributeSetController from '../controllers/AttributeSetController';
 import productTypeController from '../controllers/ProductTypeController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
 
-const router = express.Router();
+const router = createHttpRouter();
 
 // Apply authentication middleware
 router.use(isOrganizationLoggedIn);

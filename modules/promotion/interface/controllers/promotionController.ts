@@ -1,5 +1,4 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { promotionRepo, CreatePromotionInput, PromotionScope, PromotionStatus, UpdatePromotionInput } from '../../application/wired';
 
 interface ApplyPromotionBody {
@@ -17,7 +16,7 @@ interface ValidatePromotionBody {
 /**
  * Get all active promotions with optional filtering
  */
-export const getActivePromotions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getActivePromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { scope, organizationId } = req.query;
 
   // Handle scope as array or single value
@@ -41,7 +40,7 @@ export const getActivePromotions = async (req: TypedRequest, res: Response): Pro
 /**
  * Get all promotions with filtering and pagination
  */
-export const getPromotions = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const {
     status,
     scope,
@@ -104,7 +103,7 @@ export const getPromotions = async (req: TypedRequest, res: Response): Promise<v
 /**
  * Get a promotion by ID with its rules and actions
  */
-export const getPromotionById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getPromotionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const promotionData = await promotionRepo.getWithDetails(id);
@@ -127,8 +126,8 @@ export const getPromotionById = async (req: TypedRequest, res: Response): Promis
  * Create a new promotion with rules and actions
  */
 export const createPromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, CreatePromotionInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, CreatePromotionInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const promotionData = req.body;
 
@@ -164,8 +163,8 @@ export const createPromotion = async (
  * Update an existing promotion
  */
 export const updatePromotion = async (
-  req: TypedRequest<Record<string, string>, unknown, UpdatePromotionInput>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, UpdatePromotionInput>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
   const promotionData = req.body;
@@ -194,7 +193,7 @@ export const updatePromotion = async (
 /**
  * Delete a promotion
  */
-export const deletePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   // Check if promotion exists
@@ -229,8 +228,8 @@ export const deletePromotion = async (req: TypedRequest, res: Response): Promise
  * Apply a promotion to a cart
  */
 const _applyPromotionToCart = async (
-  req: TypedRequest<Record<string, string>, unknown, ApplyPromotionBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ApplyPromotionBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { cartId, promotionId } = req.body;
 
@@ -276,7 +275,7 @@ const _applyPromotionToCart = async (
 /**
  * Remove a promotion from a cart
  */
-const _removePromotionFromCart = async (req: TypedRequest, res: Response): Promise<void> => {
+const _removePromotionFromCart = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { cartId, promotionId } = req.params;
 
   // Validation
@@ -308,8 +307,8 @@ const _removePromotionFromCart = async (req: TypedRequest, res: Response): Promi
  * Validate a promotion for a cart
  */
 const _validatePromotionForCart = async (
-  req: TypedRequest<Record<string, string>, unknown, ValidatePromotionBody>,
-  res: Response,
+  req: HttpRequest<Record<string, string>, unknown, ValidatePromotionBody>,
+  res: HttpResponse,
 ): Promise<void> => {
   const { promotionId, cartTotal, customerId, items: _items } = req.body;
 
@@ -349,7 +348,7 @@ const _validatePromotionForCart = async (
 /**
  * Activate a promotion
  */
-export const activatePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existingPromotion = await promotionRepo.findById(id);
@@ -370,7 +369,7 @@ export const activatePromotion = async (req: TypedRequest, res: Response): Promi
 /**
  * Pause a promotion
  */
-export const pausePromotion = async (req: TypedRequest, res: Response): Promise<void> => {
+export const pausePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
   const existingPromotion = await promotionRepo.findById(id);

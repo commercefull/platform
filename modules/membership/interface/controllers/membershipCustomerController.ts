@@ -1,11 +1,10 @@
-import { Response } from 'express';
-import { TypedRequest } from 'libs/types/express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { membershipSubscriptionDataRepository } from '../../application/wired';
 
 const membershipRepo = membershipSubscriptionDataRepository.memberships;
 
 // Public Membership Tier Endpoints
-export const getMembershipTiers = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // For storefront, we only want to show active tiers
   const includeInactive = false;
   const tiers = await membershipRepo.findAllTiers(includeInactive);
@@ -16,7 +15,7 @@ export const getMembershipTiers = async (req: TypedRequest, res: Response): Prom
   });
 };
 
-export const getMembershipTierById = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getMembershipTierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const tier = await membershipRepo.findTierById(id);
 
@@ -35,7 +34,7 @@ export const getMembershipTierById = async (req: TypedRequest, res: Response): P
   });
 };
 
-export const getTierBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getTierBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { tierId } = req.params;
 
   // Check if tier exists and is active
@@ -57,7 +56,7 @@ export const getTierBenefits = async (req: TypedRequest, res: Response): Promise
 };
 
 // User Membership Public Endpoints
-export const getUserMembershipByUserId = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMembershipByUserId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
   const authenticatedUserId = req.user?.customerId || req.user?.id;
   if (authenticatedUserId !== userId) {
@@ -95,7 +94,7 @@ export const getUserMembershipByUserId = async (req: TypedRequest, res: Response
   });
 };
 
-export const getUserMembershipBenefits = async (req: TypedRequest, res: Response): Promise<void> => {
+export const getUserMembershipBenefits = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
   const authenticatedUserId = req.user?.customerId || req.user?.id;
   if (authenticatedUserId !== userId) {
