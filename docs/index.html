@@ -68,8 +68,8 @@
       .badge-patch {
         background: #a855f7;
       }
-      /* Cover page links — style as buttons */
-      section.cover .cover-main a {
+      /* Cover page links — style the last paragraph's links as buttons */
+      section.cover .cover-main > p:last-child a {
         border-radius: 2rem;
         border: 1px solid var(--docsify-theme-color, #2563eb);
         box-sizing: border-box;
@@ -82,15 +82,15 @@
         text-decoration: none;
         transition: all .15s ease;
       }
-      section.cover .cover-main a:last-child {
+      section.cover .cover-main > p:last-child a:last-child {
         background-color: var(--docsify-theme-color, #2563eb);
         color: #fff;
       }
-      section.cover .cover-main a:last-child:hover {
-        color: inherit;
+      section.cover .cover-main > p:last-child a:last-child:hover {
+        color: #fff;
         opacity: .8;
       }
-      section.cover .cover-main a:hover {
+      section.cover .cover-main > p:last-child a:hover {
         color: inherit;
       }
     </style>
