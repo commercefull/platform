@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/commercefull/platform/compare/v1.0.1...v1.1.0) (2026-09-21)
+
+
+### Features
+
+* centralize Express behind libs/http facade ([6db2476](https://github.com/commercefull/platform/commit/6db2476b08c3156ae05c26bf67a18406c787bf0b))
+
+
+### Bug Fixes
+
+* docs header backgroung color ([d7373a3](https://github.com/commercefull/platform/commit/d7373a3b9c5a8915201ab7ddfc91c14f5f152964))
+
 ## [1.0.1](https://github.com/commercefull/platform/compare/v1.0.0...v1.0.1) (2026-09-17)
 
 
