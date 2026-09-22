@@ -62,6 +62,9 @@ export const listProducts = async (req: Request, res: Response) => {
 - Views are resolved relative to `web/`.
 - Layouts wrap content via a `body` variable.
 - Flash messages available as `successMsg` / `errorMsg`.
+  - Read them via `popFlashMessages(req)` from `libs/flash` — **never** call `req.flash()`
+    unconditionally in render paths: connect-flash lazily writes `session.flash`, which
+    creates a session row + cookie for every anonymous page view.
 - Current user/session available as `user` and `session`.
 - i18n available via `t('key')`.
 

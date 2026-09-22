@@ -1,5 +1,6 @@
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { getStoreUseCase } from '../../modules/store';
+import { createCache } from '../../libs/cache';
 
 /**
  * Store Resolution Middleware
@@ -62,6 +63,10 @@ const DEFAULT_STORE_SLUG = process.env.DEFAULT_STORE_SLUG || 'us';
 const DEFAULT_LOCALE = 'en-US';
 const DEFAULT_CURRENCY = 'USD';
 const DEFAULT_REGION = 'US';
+
+// Store records change rarely — a short TTL removes the per-request
+// `store WHERE slug` lookup while keeping propagation bounded.
+const storeBySlugCache = createCache<ResolvedStore | null>({ namespace: 'storefront:store', ttlMs: 30_000 });
 
 /**
  * Resolve store slug from hostname.
@@ -188,17 +193,19 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
   try {
     const storeSlug = resolveStoreSlug(req);
 
-    // Fetch store from repository
-    const response = await getStoreUseCase.execute({ slug: storeSlug });
-    const store: ResolvedStore | null = response.store
-      ? {
-          storeId: response.store.storeId,
-          slug: response.store.slug,
-          defaultCurrency: response.store.defaultCurrency,
-          supportedCurrencies: response.store.supportedCurrencies,
-          settings: response.store.settings,
-        }
-      : null;
+    // Fetch store (30s TTL — same slug is resolved on every storefront request)
+    const store = await storeBySlugCache.getOrSet(storeSlug, async () => {
+      const response = await getStoreUseCase.execute({ slug: storeSlug });
+      return response.store
+        ? {
+            storeId: response.store.storeId,
+            slug: response.store.slug,
+            defaultCurrency: response.store.defaultCurrency,
+            supportedCurrencies: response.store.supportedCurrencies,
+            settings: response.store.settings,
+          }
+        : null;
+    });
 
     const { region, locale, currency } = resolveStoreLocale(storeSlug, store);
     const storeId = store?.storeId || '';
@@ -211,15 +218,12 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
     res.locals.locale = locale;
     res.locals.region = region;
 
-    // Persist to session for sticky resolution
-    if (req.session) {
-      (req.session as unknown as { store: StoreSession }).store = {
-        storeId,
-        storeSlug,
-        currency,
-        locale,
-        region,
-      };
+    // Persist to session only for an explicit ?store= choice — hostname/geo/
+    // default resolution is deterministic, so writing it would create a
+    // session row for every anonymous visitor (pure write churn).
+    const session = req.session as unknown as { store?: StoreSession } | undefined;
+    if (session && typeof req.query.store === 'string' && session.store?.storeSlug !== storeSlug) {
+      session.store = { storeId, storeSlug, currency, locale, region };
     }
   } catch {
     // Fall back to defaults on any error — never block the request
