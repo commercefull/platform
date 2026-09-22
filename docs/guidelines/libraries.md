@@ -20,14 +20,16 @@
 | `amount.ts`                       | Money/amount formatting (legacy, unused)                           |
 | `money.ts`                        | **Shared Kernel** — `Money` value object                           |
 | `date.ts`                         | Date formatting utilities                                          |
-| `cache.ts`                        | Caching utilities                                                  |
+| `cache/`                          | Shared cache abstraction — Redis or memory (`CACHE_BACKEND` env)   |
+| `flash.ts`                        | `popFlashMessages` — reads flash without dirtying the session      |
 | `geoip.ts`                        | GeoIP lookup utilities                                             |
 | `roles.ts`                        | Role definitions                                                   |
 | `uuid.ts`                         | UUID generation                                                    |
 | `strings.ts`                      | String manipulation utilities                                      |
 | `errors.ts`                       | Custom error classes (`AppError` base)                             |
 | `secrets.ts`                      | AES-256-GCM encryption for credential storage                      |
-| `session/`                        | Session store factory (Redis/PostgreSQL)                           |
+| `session/`                        | Session backends — `identityUserSession` or Redis (`SESSION_BACKEND`) |
+| `redisClient.ts`                  | Shared ioredis connection (retry/backoff) + `isRedisConfigured`    |
 | `jobs/`                           | Background job utilities                                           |
 | `types/`                          | Shared TypeScript types (HTTP types live in `http/` instead)       |
 | `moduleRegistry/`                 | Module manifest registry & feature flag system                     |

@@ -1,5 +1,6 @@
 import type { HttpRequest, HttpResponse } from './http';
 import { logger } from './logger';
+import { popFlashMessages } from './flash';
 
 type ResponseData = Record<string, unknown>;
 
@@ -8,8 +9,7 @@ type ResponseData = Record<string, unknown>;
  * Renders admin portal views with common admin data
  */
 export async function adminRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
-  const successMsg = req.flash ? req.flash('success')[0] : null;
-  const errorMsg = req.flash ? req.flash('error')[0] : null;
+  const { successMsg, errorMsg } = popFlashMessages(req);
 
   const noAdminLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
 

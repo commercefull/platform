@@ -3,12 +3,15 @@ import session from 'express-session';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
+import { getRedisClient, redisClientOptions } from '../redisClient';
+import { resolveSessionBackendType } from './createSessionBackend';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const pgSession = require('connect-pg-simple')(session);
 
 export interface SessionStoreConfig {
-  type: 'postgres' | 'redis' | 'auto';
+  /** Explicit backend. Omitted → SESSION_BACKEND env (default 'postgres'). */
+  type?: 'postgres' | 'redis';
   postgres?: {
     pool: Pool;
     tableName?: string;
@@ -33,19 +36,19 @@ export interface SessionStoreResult {
 /**
  * Creates a session store based on configuration.
  *
- * Priority (when type is 'auto'):
- * 1. Redis if REDIS_URL or REDIS_HOST is set
- * 2. PostgreSQL as fallback
+ * Backend is explicit only: pass type, or rely on SESSION_BACKEND env
+ * ('postgres' | 'redis', default 'postgres'). 'redis' without
+ * REDIS_URL/REDIS_HOST throws instead of silently falling back.
  *
  * @param config - Session store configuration
  * @returns Session store instance and metadata
  */
 export function createSessionStore(config: SessionStoreConfig): SessionStoreResult {
-  const { type, postgres, redis } = config;
+  const { postgres, redis } = config;
+  const type = config.type ?? resolveSessionBackendType();
 
-  // Determine which store to use
-  const useRedis = type === 'redis' || (type === 'auto' && isRedisConfigured());
-  const usePostgres = type === 'postgres' || (type === 'auto' && !isRedisConfigured());
+  const useRedis = type === 'redis';
+  const usePostgres = type === 'postgres';
 
   if (useRedis) {
     return createRedisStore(redis);
@@ -59,48 +62,30 @@ export function createSessionStore(config: SessionStoreConfig): SessionStoreResu
 }
 
 /**
- * Check if Redis is configured via environment variables
- */
-function isRedisConfigured(): boolean {
-  return !!(process.env.REDIS_URL || process.env.REDIS_HOST);
-}
-
-/**
- * Creates a Redis session store
+ * Creates a Redis session store.
+ * Uses the shared ioredis connection from libs/redisClient unless explicit
+ * connection overrides are passed via config.
  */
 function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreResult {
-  const redisUrl = process.env.REDIS_URL;
-  const redisHost = config?.host || process.env.REDIS_HOST || 'localhost';
-  const redisPort = config?.port || parseInt(process.env.REDIS_PORT || '6379', 10);
-  const redisPassword = config?.password || process.env.REDIS_PASSWORD;
-  const redisDb = config?.db || parseInt(process.env.REDIS_DB || '0', 10);
+  const hasOverrides = !!(config?.host || config?.port || config?.password || config?.db !== undefined || config?.url);
 
   let client: Redis;
+  let ownsClient = false;
 
-  if (redisUrl) {
-    client = new Redis(redisUrl, {
-      maxRetriesPerRequest: 3,
-      enableReadyCheck: true,
-      lazyConnect: false,
-    });
+  if (hasOverrides) {
+    client = config?.url
+      ? new Redis(config.url, redisClientOptions())
+      : new Redis({
+          host: config?.host || 'localhost',
+          port: config?.port || 6379,
+          password: config?.password || undefined,
+          db: config?.db || 0,
+          ...redisClientOptions(),
+        });
+    ownsClient = true;
   } else {
-    client = new Redis({
-      host: redisHost,
-      port: redisPort,
-      password: redisPassword || undefined,
-      db: redisDb,
-      maxRetriesPerRequest: 3,
-      enableReadyCheck: true,
-      lazyConnect: false,
-    });
+    client = getRedisClient();
   }
-
-  // Handle Redis connection events
-  client.on('connect', () => {});
-
-  client.on('error', _err => {});
-
-  client.on('ready', () => {});
 
   const store = new RedisStore({
     client,
@@ -111,7 +96,7 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   return {
     store,
     type: 'redis',
-    client,
+    client: ownsClient ? client : undefined,
   };
 }
 
