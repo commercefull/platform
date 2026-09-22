@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.1](https://github.com/commercefull/platform/compare/v1.2.0...v1.2.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* exempt redis backend impls from ioredis import restriction ([cd765e9](https://github.com/commercefull/platform/commit/cd765e9416c23501a0a31ae1be8c089706bfea88))
+
+## [1.2.0](https://github.com/commercefull/platform/compare/v1.1.0...v1.2.0) (2026-09-22)
+
+
+### Features
+
+* pluggable cache and session backends (postgres/redis) ([493b6be](https://github.com/commercefull/platform/commit/493b6be67bf4877ef55d54d183bdfd36174cef68))
+* pluggable cache and session backends (postgres/redis) ([ab4cf53](https://github.com/commercefull/platform/commit/ab4cf53d0fac017e9ed8bf12c0734cd3cc7fadf5))
+
 ## [1.1.0](https://github.com/commercefull/platform/compare/v1.0.1...v1.1.0) (2026-09-21)
 
 

@@ -1,5 +1,5 @@
 import { queryOne, query } from '../../../../libs/db';
-import bcryptjs from 'bcryptjs';
+import { compareString, hashString } from '../../../../libs/hash';
 import crypto from 'crypto';
 
 import {
@@ -331,7 +331,7 @@ export class OrganizationRepo {
 
     if (!org) return null;
 
-    const passwordMatch = await bcryptjs.compare(credentials.password, org.password);
+    const passwordMatch = await compareString(credentials.password, org.password);
     if (!passwordMatch) return null;
 
     return {
@@ -344,7 +344,7 @@ export class OrganizationRepo {
 
   async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
-    return bcryptjs.hash(password, saltRounds);
+    return hashString(password, saltRounds);
   }
 
   async changePassword(organizationId: string, newPassword: string): Promise<boolean> {
@@ -358,7 +358,7 @@ export class OrganizationRepo {
 
   async createPasswordResetToken(organizationId: string): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
-    const hashedToken = await bcryptjs.hash(token, 10);
+    const hashedToken = await hashString(token);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
     const now = new Date();
 
@@ -384,7 +384,7 @@ export class OrganizationRepo {
 
     if (!record) return null;
 
-    const isValid = await bcryptjs.compare(token, record.token);
+    const isValid = await compareString(token, record.token);
     if (!isValid) return null;
 
     await queryOne(`UPDATE "organizationPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "organizationPasswordResetId" = $2`, [

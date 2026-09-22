@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { Customer } from '../../../../libs/db/types';
 import { withTransaction } from '../../../../libs/db';
+import { hashString } from '../../../../libs/hash';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 import { CustomerEmailAlreadyExistsError, EmailRequiredError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
@@ -112,8 +113,7 @@ export class RegisterCustomerUseCase {
     };
 
     // Hash password before saving so both writes happen in a single transaction
-    const bcrypt = await import('bcryptjs');
-    const passwordHash = await bcrypt.hash(command.password, 12);
+    const passwordHash = await hashString(command.password, 12);
 
     // Save customer + password atomically
     await withTransaction(async () => {

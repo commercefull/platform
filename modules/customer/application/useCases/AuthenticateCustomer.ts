@@ -4,6 +4,7 @@
 
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 import { EmailRequiredError, PasswordRequiredError } from '../../domain/errors/CustomerErrors';
+import { compareString } from '../../../../libs/hash';
 
 // ============================================================================
 // Command
@@ -55,8 +56,7 @@ export class AuthenticateCustomerUseCase {
     }
 
     // Verify password
-    const bcrypt = await import('bcryptjs');
-    const isValid = await bcrypt.compare(command.password, passwordHash);
+    const isValid = await compareString(command.password, passwordHash);
 
     if (!isValid) {
       return null;

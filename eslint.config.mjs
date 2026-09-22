@@ -31,27 +31,47 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', destructuredArrayIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
       'no-console': 'error',
       'no-debugger': globalThis.process?.env?.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-undef': 'off',
       'no-unused-vars': 'off',
       'no-case-declarations': 'off',
       'no-empty': 'off',
-      'no-restricted-imports': ['error', {
-        paths: [
-          {
-            name: 'express',
-            message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
-          },
-        ],
-        patterns: [
-          {
-            group: ['**/modules/*/infrastructure/repositories/**'],
-            message: 'Do not import from modules/*/infrastructure/repositories/** — import from modules/<name> (root) or modules/<name>/infrastructure (barrel) instead.',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'express',
+              message:
+                'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
+            },
+            {
+              name: 'bcryptjs',
+              message: 'Import hashing helpers from libs/hash (hashString, compareString, hashAString).',
+            },
+            {
+              name: 'ioredis',
+              message: 'Use the shared client from libs/redisClient instead of creating Redis connections directly.',
+            },
+            {
+              name: 'winston',
+              message: 'Import the shared logger from libs/logger instead of creating winston loggers.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/modules/*/infrastructure/repositories/**'],
+              message:
+                'Do not import from modules/*/infrastructure/repositories/** — import from modules/<name> (root) or modules/<name>/infrastructure (barrel) instead.',
+            },
+          ],
+        },
+      ],
       // Code complexity rules
       complexity: ['warn', { max: 15 }],
       'max-lines-per-function': ['warn', { max: 150, skipComments: true }],
@@ -59,17 +79,33 @@ export default [
       'max-depth': ['warn', { max: 5 }],
       'max-lines': ['warn', { max: 500, skipComments: true }],
       // Ban expect([array]).toContain(x) and expect([array].includes(x)).toBe(true)
-      'no-restricted-syntax': ['error',
+      'no-restricted-syntax': [
+        'error',
         {
           selector: "ImportExpression[source.value='express']",
-          message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
+          message:
+            'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
         },
         {
-          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
+          selector: "ImportExpression[source.value='bcryptjs']",
+          message: 'Import hashing helpers from libs/hash (hashString, compareString, hashAString).',
+        },
+        {
+          selector: "ImportExpression[source.value='ioredis']",
+          message: 'Use the shared client from libs/redisClient instead of creating Redis connections directly.',
+        },
+        {
+          selector: "ImportExpression[source.value='winston']",
+          message: 'Import the shared logger from libs/logger instead of creating winston loggers.',
+        },
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
           message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
         },
         {
-          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toBe'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='CallExpression'][callee.object.arguments.0.callee.type='MemberExpression'][callee.object.arguments.0.callee.property.name='includes'][callee.object.arguments.0.callee.object.type='ArrayExpression']",
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name='toBe'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='CallExpression'][callee.object.arguments.0.callee.type='MemberExpression'][callee.object.arguments.0.callee.property.name='includes'][callee.object.arguments.0.callee.object.type='ArrayExpression']",
           message: 'Do not use expect([array].includes(x)).toBe(true). Assert a single expected value with expect(x).toBe(y) instead.',
         },
       ],
@@ -89,7 +125,17 @@ export default [
   },
   {
     // Approved framework boundaries: the HTTP adapter implementation and composition roots
-    files: ['boot/**/*.ts', 'app.ts', 'libs/http/**/*.ts'],
+    files: [
+      'boot/**/*.ts',
+      'app.ts',
+      'libs/http/**/*.ts',
+      'libs/hash.ts',
+      'libs/redisClient.ts',
+      'libs/logger.ts',
+      'libs/session/sessionStoreFactory.ts',
+      'libs/session/redisSessionBackend.ts',
+      'libs/cache/redisCache.ts',
+    ],
     rules: {
       'no-restricted-imports': 'off',
     },
