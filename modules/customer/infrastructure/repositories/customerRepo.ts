@@ -1,5 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
-import bcryptjs from 'bcryptjs';
+import { compareString, hashString } from '../../../../libs/hash';
 import crypto from 'crypto';
 
 // Import types from generated DB types - single source of truth
@@ -84,7 +84,7 @@ export class CustomerRepo {
       return null;
     }
 
-    const isPasswordValid = await bcryptjs.compare(password, customer.password);
+    const isPasswordValid = await compareString(password, customer.password);
     if (!isPasswordValid) {
       return null;
     }
@@ -98,7 +98,7 @@ export class CustomerRepo {
   }
 
   async hashPassword(password: string): Promise<string> {
-    return bcryptjs.hash(password, 10);
+    return hashString(password);
   }
 
   async searchCustomers(searchTerm: string, limit: number = 100): Promise<Customer[]> {
@@ -211,7 +211,7 @@ export class CustomerRepo {
 
   async createPasswordResetToken(customerId: string): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
-    const hashedToken = await bcryptjs.hash(token, 10);
+    const hashedToken = await hashString(token);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
     const now = new Date();
 
@@ -233,7 +233,7 @@ export class CustomerRepo {
     if (!resetRecords || resetRecords.length === 0) return null;
 
     for (const resetRecord of resetRecords) {
-      const isValid = await bcryptjs.compare(token, resetRecord.token);
+      const isValid = await compareString(token, resetRecord.token);
       if (isValid) {
         await queryOne('UPDATE "customerPasswordReset" SET "isUsed" = true, "updatedAt" = $1 WHERE "customerPasswordResetId" = $2', [
           new Date(),

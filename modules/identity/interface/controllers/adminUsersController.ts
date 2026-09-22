@@ -4,7 +4,7 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import bcrypt from 'bcryptjs';
+import { hashString } from '../../../../libs/hash';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { ManageAdminUsersUseCase, ManageRolesUseCase } from '../../application/useCases/ManageAdminUsers';
 
@@ -96,7 +96,7 @@ export const createUser = async (req: HttpRequest, res: HttpResponse): Promise<v
     return;
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await hashString(password);
   const userId = await manageAdminUsersUseCase.create({
     email,
     passwordHash,

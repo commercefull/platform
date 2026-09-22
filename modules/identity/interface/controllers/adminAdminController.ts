@@ -1,6 +1,6 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import bcrypt from 'bcryptjs';
+import { compareString } from '../../../../libs/hash';
 import { SessionService } from '../../../../libs/session';
 import { AdminAuthUseCase, GetDashboardDataUseCase } from '../../application/useCases/AdminAuth';
 import { adminRespond } from '../../../../libs/adminRespond';
@@ -79,7 +79,7 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
+    const isValidPassword = await compareString(password, admin.passwordHash);
     if (!isValidPassword) {
       res.status(500);
       return adminRespond(req, res, 'login', {

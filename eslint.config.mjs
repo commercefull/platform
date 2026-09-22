@@ -44,6 +44,18 @@ export default [
             name: 'express',
             message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
           },
+          {
+            name: 'bcryptjs',
+            message: 'Import hashing helpers from libs/hash (hashString, compareString, hashAString).',
+          },
+          {
+            name: 'ioredis',
+            message: 'Use the shared client from libs/redisClient instead of creating Redis connections directly.',
+          },
+          {
+            name: 'winston',
+            message: 'Import the shared logger from libs/logger instead of creating winston loggers.',
+          },
         ],
         patterns: [
           {
@@ -89,7 +101,7 @@ export default [
   },
   {
     // Approved framework boundaries: the HTTP adapter implementation and composition roots
-    files: ['boot/**/*.ts', 'app.ts', 'libs/http/**/*.ts'],
+    files: ['boot/**/*.ts', 'app.ts', 'libs/http/**/*.ts', 'libs/hash.ts', 'libs/redisClient.ts', 'libs/session/sessionStoreFactory.ts', 'libs/logger.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },
