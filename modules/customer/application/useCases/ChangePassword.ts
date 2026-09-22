@@ -5,6 +5,7 @@
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 import { CustomerNotFoundError, CustomerValidationError, InvalidCredentialsError } from '../../domain/errors/CustomerErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
+import { compareString, hashString } from '../../../../libs/hash';
 
 // ============================================================================
 // Command
@@ -52,19 +53,18 @@ export class ChangePasswordUseCase {
     }
 
     // Verify current password
-    const bcrypt = await import('bcryptjs');
     const currentHash = await this.customerRepository.getPasswordHash(command.customerId);
     if (!currentHash) {
       throw new CustomerValidationError('Password not set');
     }
 
-    const isValid = await bcrypt.compare(command.currentPassword, currentHash);
+    const isValid = await compareString(command.currentPassword, currentHash);
     if (!isValid) {
       throw new InvalidCredentialsError();
     }
 
     // Hash and update new password
-    const newHash = await bcrypt.hash(command.newPassword, 12);
+    const newHash = await hashString(command.newPassword, 12);
     await this.customerRepository.updatePassword(command.customerId, newHash);
 
     // Emit event
