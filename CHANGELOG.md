@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/commercefull/platform/compare/v1.2.1...v1.2.2) (2026-09-22)
+
+
+### Performance Improvements
+
+* index-backed product search via pg_trgm + UNION rewrite ([28f35d2](https://github.com/commercefull/platform/commit/28f35d2475b9fda85b7f551319fa77ceba326ebe))
+
 ## [1.2.1](https://github.com/commercefull/platform/compare/v1.2.0...v1.2.1) (2026-09-22)
 
 
