@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/commercefull/platform/compare/v1.2.0...v1.2.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* exempt redis backend impls from ioredis import restriction ([cd765e9](https://github.com/commercefull/platform/commit/cd765e9416c23501a0a31ae1be8c089706bfea88))
+
 ## [1.2.0](https://github.com/commercefull/platform/compare/v1.1.0...v1.2.0) (2026-09-22)
 
 
