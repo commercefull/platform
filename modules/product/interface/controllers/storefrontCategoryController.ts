@@ -7,6 +7,14 @@ import { logger } from '../../../../libs/logger';
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageCategoriesUseCase } from '../../application/useCases/wired';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
+import { createCache } from '../../../../libs/cache';
+
+// Menu categories are global and stable — short TTL removes the per-request
+// `productCategory WHERE includeInMenu` lookup. New categories appear within 30s.
+const menuCategoriesCache = createCache<Awaited<ReturnType<typeof manageCategoriesUseCase.findForMenu>>>({
+  namespace: 'storefront:menuCategories',
+  ttlMs: 30_000,
+});
 
 // ============================================================================
 // Load Categories for Navigation
@@ -14,7 +22,7 @@ import { storefrontRespond } from '../../../../libs/storefrontRespond';
 
 export const loadCategoriesForNavigation = async (req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> => {
   try {
-    const categories = await manageCategoriesUseCase.findForMenu();
+    const categories = await menuCategoriesCache.getOrSet('menu', () => manageCategoriesUseCase.findForMenu());
     res.locals.categories = categories;
   } catch (error) {
     logger.warn('Failed to load categories for navigation', { error });

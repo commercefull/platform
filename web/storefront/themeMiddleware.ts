@@ -1,5 +1,6 @@
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { resolveThemeUseCase } from '../../modules/theme';
+import { createCache } from '../../libs/cache';
 
 /**
  * Theme Resolution Middleware
@@ -20,6 +21,13 @@ import { resolveThemeUseCase } from '../../modules/theme';
  *   - themeCustomLogoUrl: custom logo URL from overrides
  *   - themeCustomFaviconUrl: custom favicon URL from overrides
  */
+// Theme assignments change rarely — short TTL removes the per-request
+// themeAssignment/theme lookups. Theme changes propagate within 30s.
+const resolvedThemeCache = createCache<Awaited<ReturnType<typeof resolveThemeUseCase.execute>>>({
+  namespace: 'storefront:theme',
+  ttlMs: 30_000,
+});
+
 export async function resolveTheme(req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> {
   try {
     // Use the storeId resolved by storeResolutionMiddleware (already in res.locals)
@@ -35,7 +43,7 @@ export async function resolveTheme(req: HttpRequest, res: HttpResponse, next: Ht
     let customBodyAttributes: Record<string, string> | undefined;
 
     if (storeId) {
-      const resolved = await resolveThemeUseCase.execute(storeId);
+      const resolved = await resolvedThemeCache.getOrSet(storeId, () => resolveThemeUseCase.execute(storeId));
       if (resolved) {
         themeSlug = resolved.theme.slug;
         themeSettings = resolved.settings;

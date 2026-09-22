@@ -1,197 +1,47 @@
 /**
- * Session Service
- * Database-backed session management for web applications
+ * Session Service — facade over the configured session backend.
+ * Postgres (identityUserSession table) by default; Redis when
+ * REDIS_URL/REDIS_HOST is configured. See libs/session/index.ts.
  */
 
-import { generateUUID as uuidv4 } from '../uuid';
-import { query, queryOne } from '../db';
+import { createSessionBackend } from './createSessionBackend';
+import type { CreateSessionInput, SessionBackend, SessionData } from './types';
 
-export interface SessionData {
-  sessionId: string;
-  userId: string;
-  userType: 'admin' | 'organization' | 'b2b' | 'customer';
-  email: string;
-  name?: string;
-  role?: string;
-  organizationId?: string;
-  companyId?: string;
-  storeId?: string;
-  storeRole?: string;
-  storeIds?: string[];
-  permissions: string[];
-  expiresAt: Date;
-  createdAt: Date;
-  lastActivityAt: Date;
-  userAgent?: string;
-  ipAddress?: string;
-}
-
-export interface CreateSessionInput {
-  userId: string;
-  userType: 'admin' | 'organization' | 'b2b' | 'customer';
-  email: string;
-  name?: string;
-  role?: string;
-  organizationId?: string;
-  companyId?: string;
-  storeId?: string;
-  storeRole?: string;
-  storeIds?: string[];
-  permissions?: string[];
-  userAgent?: string;
-  ipAddress?: string;
-  expiresInHours?: number;
-}
+export type { SessionData, CreateSessionInput } from './types';
 
 class SessionServiceClass {
-  private readonly tableName = 'identityUserSession';
-  private readonly defaultExpiryHours = 8;
+  private readonly backend: SessionBackend = createSessionBackend();
 
-  /**
-   * Create a new session
-   */
   async createSession(input: CreateSessionInput): Promise<string> {
-    const sessionId = uuidv4();
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + (input.expiresInHours || this.defaultExpiryHours) * 60 * 60 * 1000);
-
-    const sql = `
-      INSERT INTO "${this.tableName}" 
-        ("sessionId", "userId", "userType", "email", "name", "role", 
-         "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt", 
-         "createdAt", "lastActivityAt", "userAgent", "ipAddress")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-      RETURNING "sessionId"
-    `;
-
-    await query(sql, [
-      sessionId,
-      input.userId,
-      input.userType,
-      input.email,
-      input.name || null,
-      input.role || null,
-      input.organizationId || null,
-      input.companyId || null,
-      input.storeId || null,
-      input.storeRole || null,
-      JSON.stringify(input.storeIds || []),
-      JSON.stringify(input.permissions || []),
-      expiresAt,
-      now,
-      now,
-      input.userAgent || null,
-      input.ipAddress || null,
-    ]);
-
-    return sessionId;
+    return this.backend.createSession(input);
   }
 
-  /**
-   * Get session by ID
-   */
   async getSession(sessionId: string): Promise<SessionData | null> {
-    const sql = `
-      SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
-             "createdAt", "lastActivityAt", "userAgent", "ipAddress"
-      FROM "${this.tableName}"
-      WHERE "sessionId" = $1 AND "expiresAt" > NOW()
-    `;
-
-    const result = await queryOne<SessionData>(sql, [sessionId]);
-    if (result) {
-      result.storeIds = Array.isArray(result.storeIds)
-        ? result.storeIds
-        : result.storeIds
-          ? JSON.parse(result.storeIds as unknown as string)
-          : [];
-      result.permissions = result.permissions || [];
-    }
-    return result;
+    return this.backend.getSession(sessionId);
   }
 
-  /**
-   * Update session activity
-   */
   async updateActivity(sessionId: string): Promise<void> {
-    const sql = `
-      UPDATE "${this.tableName}"
-      SET "lastActivityAt" = NOW()
-      WHERE "sessionId" = $1
-    `;
-    await query(sql, [sessionId]);
+    return this.backend.updateActivity(sessionId);
   }
 
-  /**
-   * Invalidate a session
-   */
   async invalidateSession(sessionId: string): Promise<void> {
-    const sql = `
-      DELETE FROM "${this.tableName}"
-      WHERE "sessionId" = $1
-    `;
-    await query(sql, [sessionId]);
+    return this.backend.invalidateSession(sessionId);
   }
 
-  /**
-   * Invalidate all sessions for a user
-   */
   async invalidateUserSessions(userId: string, userType: string): Promise<void> {
-    const sql = `
-      DELETE FROM "${this.tableName}"
-      WHERE "userId" = $1 AND "userType" = $2
-    `;
-    await query(sql, [userId, userType]);
+    return this.backend.invalidateUserSessions(userId, userType);
   }
 
-  /**
-   * Clean up expired sessions
-   */
   async cleanupExpiredSessions(): Promise<number> {
-    const sql = `
-      DELETE FROM "${this.tableName}"
-      WHERE "expiresAt" < NOW()
-    `;
-    const result = (await query(sql)) as { rowCount?: number } | null;
-    return result?.rowCount || 0;
+    return this.backend.cleanupExpiredSessions();
   }
 
-  /**
-   * Extend session expiry
-   */
   async extendSession(sessionId: string, additionalHours: number): Promise<void> {
-    const sql = `
-      UPDATE "${this.tableName}"
-      SET "expiresAt" = "expiresAt" + INTERVAL '${additionalHours} hours',
-          "lastActivityAt" = NOW()
-      WHERE "sessionId" = $1
-    `;
-    await query(sql, [sessionId]);
+    return this.backend.extendSession(sessionId, additionalHours);
   }
 
-  /**
-   * Get all active sessions for a user
-   */
   async getUserSessions(userId: string, userType: string): Promise<SessionData[]> {
-    const sql = `
-      SELECT "sessionId", "userId", "userType", "email", "name", "role",
-             "organizationId", "companyId", "storeId", "storeRole", "storeIds", "permissions", "expiresAt",
-             "createdAt", "lastActivityAt", "userAgent", "ipAddress"
-      FROM "${this.tableName}"
-      WHERE "userId" = $1 AND "userType" = $2 AND "expiresAt" > NOW()
-      ORDER BY "lastActivityAt" DESC
-    `;
-    const sessions = (await query<SessionData[]>(sql, [userId, userType])) || [];
-    return sessions.map(session => ({
-      ...session,
-      storeIds: Array.isArray(session.storeIds)
-        ? session.storeIds
-        : session.storeIds
-          ? JSON.parse(session.storeIds as unknown as string)
-          : [],
-      permissions: session.permissions || [],
-    }));
+    return this.backend.getUserSessions(userId, userType);
   }
 }
 
