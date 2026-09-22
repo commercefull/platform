@@ -95,7 +95,7 @@ exports.up = function (knex) {
     t.jsonb('metadata').defaultTo('{}');
     t.timestamp('deletedAt').nullable();
 
-    t.index('orderNumber');
+    // orderNumber index omitted — the unique constraint already creates a btree
     t.index('customerId');
     t.index('basketId');
     t.index('storeId');
