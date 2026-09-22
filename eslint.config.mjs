@@ -77,6 +77,18 @@ export default [
           message: 'Import HTTP types and router factories from libs/http. Direct express imports are only allowed in the adapter (libs/http) and composition roots (app.ts, boot/).',
         },
         {
+          selector: "ImportExpression[source.value='bcryptjs']",
+          message: 'Import hashing helpers from libs/hash (hashString, compareString, hashAString).',
+        },
+        {
+          selector: "ImportExpression[source.value='ioredis']",
+          message: 'Use the shared client from libs/redisClient instead of creating Redis connections directly.',
+        },
+        {
+          selector: "ImportExpression[source.value='winston']",
+          message: 'Import the shared logger from libs/logger instead of creating winston loggers.',
+        },
+        {
           selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='toContain'][callee.object.type='CallExpression'][callee.object.callee.name='expect'][callee.object.arguments.0.type='ArrayExpression']",
           message: 'Do not use expect([array]).toContain(x). Assert a single expected value with expect(x).toBe(y) instead.',
         },
