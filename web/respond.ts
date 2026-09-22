@@ -1,5 +1,6 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../libs/logger';
+import { popFlashMessages } from '../libs/flash';
 
 type ResponseData = Record<string, unknown>;
 
@@ -9,8 +10,7 @@ type ResponseData = Record<string, unknown>;
  */
 export async function adminRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
   // Get flash messages from middleware
-  const successMsg = req.flash ? req.flash('success')[0] : null;
-  const errorMsg = req.flash ? req.flash('error')[0] : null;
+  const { successMsg, errorMsg } = popFlashMessages(req);
 
   const noAdminLayoutViews = ['login', 'register', 'forgot-password', 'reset-password'];
 
@@ -52,8 +52,7 @@ export async function adminRespond(req: HttpRequest, res: HttpResponse, view: st
  */
 export async function storefrontRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
   // Get flash messages from middleware
-  const successMsg = req.flash ? req.flash('success')[0] : null;
-  const errorMsg = req.flash ? req.flash('error')[0] : null;
+  const { successMsg, errorMsg } = popFlashMessages(req);
 
   res.render(`storefront/themes/default/${view}`, {
     // Common variables needed by header/navbar partials

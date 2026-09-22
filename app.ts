@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import flash from 'connect-flash';
+import { popFlashMessages } from './libs/flash';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
 import bodyParser from 'body-parser';
@@ -326,7 +327,7 @@ const sessionSecret = getSecret('SESSION_SECRET');
 
 // Create session store - uses Redis if REDIS_URL/REDIS_HOST is set, otherwise PostgreSQL
 const sessionStoreResult = createSessionStore({
-  type: 'auto', // Automatically choose based on environment
+  // Backend resolved from SESSION_BACKEND env ('postgres' | 'redis')
   postgres: {
     pool: pool,
     tableName: 'session',
@@ -339,8 +340,8 @@ const sessionStoreResult = createSessionStore({
 
 app.use(
   session({
-    secret: sessionSecret || 'dev-only-insecure-secret-do-not-use-in-production',
-    name: 'sid', // Don't use default 'connect.sid' - reveals tech stack
+    secret: sessionSecret,
+    name: 'sesId', // Don't use default 'connect.sid' - reveals tech stack
     store: sessionStoreResult.store,
     resave: false, // Don't save session if unmodified
     saveUninitialized: false, // Don't create session until something stored (GDPR)
@@ -361,9 +362,11 @@ app.use(passport.session());
 // Make session data available in templates
 app.use((req, res, next) => {
   res.locals.session = req.session;
-  // Make flash messages available to templates (take first message from array)
-  res.locals.successMsg = req.flash('success')[0] || null;
-  res.locals.errorMsg = req.flash('error')[0] || null;
+  // popFlashMessages guards on existing flash content — req.flash() on a fresh
+  // session would dirty it and force a store write + cookie per request.
+  const { successMsg, errorMsg } = popFlashMessages(req);
+  res.locals.successMsg = successMsg;
+  res.locals.errorMsg = errorMsg;
   next();
 });
 

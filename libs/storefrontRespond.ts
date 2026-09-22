@@ -1,5 +1,6 @@
 import type { HttpRequest, HttpResponse } from './http';
 import { formatPrice, formatPriceWithTax } from './money';
+import { popFlashMessages } from './flash';
 
 type ResponseData = Record<string, unknown>;
 
@@ -12,8 +13,7 @@ const DEFAULT_THEME = 'default';
  * Falls back to 'default' theme, then to 'default' if the themed view is missing.
  */
 export async function storefrontRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
-  const successMsg = req.flash ? req.flash('success')[0] : null;
-  const errorMsg = req.flash ? req.flash('error')[0] : null;
+  const { successMsg, errorMsg } = popFlashMessages(req);
 
   const themeName = res.locals.theme || DEFAULT_THEME;
 
