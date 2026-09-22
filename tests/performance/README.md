@@ -112,6 +112,35 @@ Environment variables (all optional, have sensible defaults):
 | `TEST_MERCHANT_EMAIL`    | `merchant@example.com`  | Merchant test email    |
 | `TEST_MERCHANT_PASSWORD` | `password123`           | Merchant test password |
 
+## Realistic-volume testing
+
+The default `yarn db:seed` data is too small to expose real query plans (~36 products —
+PostgreSQL correctly seq-scans everything). Before tuning indexes or interpreting k6
+results, load bulk data:
+
+```bash
+docker exec -i commerce-db psql -U ecomm-user -d ecomm-db < scripts/perf-seed.sql
+```
+
+Idempotent and tunable (`-v perf_products=50000`). Default ≈ 20k products / 30k variants /
+50k orders.
+
+### Finding slow queries
+
+The `yarn db` container preloads `pg_stat_statements`. After a k6 run:
+
+```sql
+SELECT calls, round(mean_exec_time::numeric,1) mean_ms,
+       round(total_exec_time::numeric,0) total_ms, left(query,100) q
+FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 15;
+
+SELECT pg_stat_statements_reset();  -- clean baseline between runs
+```
+
+Then `EXPLAIN (ANALYZE, BUFFERS)` the top offenders. See
+[docs/guides/database-performance-tuning.md](../../docs/guides/database-performance-tuning.md)
+for the full workflow and conventions established by the September 2026 tuning pass.
+
 ## Interpreting Results
 
 k6 outputs several key metrics:

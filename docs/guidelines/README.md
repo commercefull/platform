@@ -30,5 +30,6 @@ This folder contains the authoritative coding and engineering standards for the 
 
 - [UseCase dependency injection](../guides/repository-dependency-injection.md)
 - [Express-backed HTTP framework abstraction](../guides/http-framework-abstraction.md)
+- [Database performance tuning](../guides/database-performance-tuning.md)
 
 For the high-level architecture overview, see [`ARCHITECTURE.md`](../../ARCHITECTURE.md). For AI agent working instructions, see [`AGENTS.md`](../../AGENTS.md).

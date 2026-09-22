@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne, withTransaction } from '../../../../libs/db';
+import { logger } from '../../../../libs/logger';
 import { generateUUID } from '../../../../libs/uuid';
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket, BasketStatus } from '../../domain/entities/Basket';
@@ -143,43 +144,43 @@ export class BasketRepo implements BasketRepository {
     // Clear analytics events referencing this basket (may not exist in all environments)
     try {
       await query('DELETE FROM "analyticsReportEvent" WHERE "basketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist
+    } catch (e) {
+      logger.warn('Skipping analyticsReportEvent cleanup', { basketId, error: (e as Error).message });
     }
 
     // Clear basket analytics (may not exist in all environments)
     try {
       await query('DELETE FROM "basketAnalytics" WHERE "basketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist
+    } catch (e) {
+      logger.warn('Skipping basketAnalytics cleanup', { basketId, error: (e as Error).message });
     }
 
     // Clear basket history
     try {
       await query('DELETE FROM "basketHistory" WHERE "basketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist
+    } catch (e) {
+      logger.warn('Skipping basketHistory cleanup', { basketId, error: (e as Error).message });
     }
 
     // Clear basket discounts
     try {
       await query('DELETE FROM "basketDiscount" WHERE "basketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist
+    } catch (e) {
+      logger.warn('Skipping basketDiscount cleanup', { basketId, error: (e as Error).message });
     }
 
     // Clear basket merge records (both source and target)
     try {
       await query('DELETE FROM "basketMerge" WHERE "sourceBasketId" = $1 OR "targetBasketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist
+    } catch (e) {
+      logger.warn('Skipping basketMerge cleanup', { basketId, error: (e as Error).message });
     }
 
     // Clear checkout sessions referencing this basket (to allow basket deletion without FK violation)
     try {
       await query('DELETE FROM "checkoutSession" WHERE "basketId" = $1', [basketId]);
-    } catch {
-      // Table may not exist or column naming variation
+    } catch (e) {
+      logger.warn('Skipping checkoutSession cleanup', { basketId, error: (e as Error).message });
     }
 
     // Finally delete the basket

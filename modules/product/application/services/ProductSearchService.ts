@@ -1,5 +1,6 @@
 import { query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import { logger } from '../../../../libs/logger';
 import type { Product } from '../../domain/entities/Product';
 
 /**
@@ -134,46 +135,69 @@ class ProductSearchService {
         totalPages,
         facets,
       };
-    } catch {
-      return {
-        products: [],
-        total: 0,
-        page: filters.page || 1,
-        limit: filters.limit || 20,
-        totalPages: 0,
-      };
+    } catch (error) {
+      logger.error('Product search failed', { error: (error as Error).message });
+      throw error;
     }
   }
 
   /**
    * Build the search SQL query
+   *
+   * When a text query is present the search is split into a UNION of two
+   * arms — product-column matches and variant-column matches — because a
+   * single OR across the product/productVariant join boundary cannot use
+   * trigram index scans (Postgres cannot BitmapOr across a join). Each arm
+   * is index-assistable on its own.
    */
   private buildSearchQuery(
     filters: ProductSearchFilters,
     limit: number,
     offset: number,
   ): { sql: string; countSql: string; params: unknown[] } {
+    if (filters.query) {
+      return this.buildUnionSearchQuery(filters, limit, offset);
+    }
+    const arm = this.buildFilterArm(filters, 'none', 1);
+    return this.assembleSearchQuery(arm, filters, limit, offset, 'p');
+  }
+
+  /**
+   * Build the joins/conditions/params for one arm of the search query.
+   * `searchMode` selects which text-search predicate this arm carries:
+   * 'product' (product columns), 'variant' (variant sku/barcode via EXISTS),
+   * or 'none' (no text search).
+   */
+  private buildFilterArm(
+    filters: ProductSearchFilters,
+    searchMode: 'product' | 'variant' | 'none',
+    startParamIndex: number,
+  ): { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number } {
     const conditions: string[] = [];
     const params: unknown[] = [];
-    let paramIndex = 1;
+    let paramIndex = startParamIndex;
 
-    // Base query with joins for attribute filtering
-    let fromClause = `"${this.productTable}" p`;
     const joins: string[] = [];
 
-    // Text search across multiple fields (including variant SKU and barcode)
-    if (filters.query) {
+    // Text search — product columns only; variant columns are handled by a
+    // separate UNION arm so each side can use its own trigram indexes.
+    if (filters.query && searchMode === 'product') {
       const searchTerm = `%${filters.query}%`;
-      // Join productVariant for barcode/variant SKU search
-      joins.push(`LEFT JOIN "productVariant" pv_search ON pv_search."productId" = p."productId"`);
       conditions.push(`(
         p."name" ILIKE $${paramIndex} OR
         p."description" ILIKE $${paramIndex} OR
         p."shortDescription" ILIKE $${paramIndex} OR
         p."sku" ILIKE $${paramIndex} OR
-        p."slug" ILIKE $${paramIndex} OR
-        pv_search."sku" ILIKE $${paramIndex} OR
-        pv_search."barcode" ILIKE $${paramIndex}
+        p."slug" ILIKE $${paramIndex}
+      )`);
+      params.push(searchTerm);
+      paramIndex++;
+    } else if (filters.query && searchMode === 'variant') {
+      const searchTerm = `%${filters.query}%`;
+      conditions.push(`EXISTS (
+        SELECT 1 FROM "productVariant" pv_search
+        WHERE pv_search."productId" = p."productId"
+          AND (pv_search."sku" ILIKE $${paramIndex} OR pv_search."barcode" ILIKE $${paramIndex})
       )`);
       params.push(searchTerm);
       paramIndex++;
@@ -350,66 +374,115 @@ class ProductSearchService {
     // Always exclude deleted products
     conditions.push(`p."deletedAt" IS NULL`);
 
-    // Build WHERE clause
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    return { joins, conditions, params, nextParamIndex: paramIndex };
+  }
 
+  /**
+   * Wrap one or two filter arms in the final SELECT / COUNT queries.
+   * `alias` is the relation name ORDER BY columns reference ('p' for a
+   * single arm, 't' for the UNION subquery).
+   */
+  private assembleSearchQuery(
+    arm: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number },
+    filters: ProductSearchFilters,
+    limit: number,
+    offset: number,
+    alias: 'p' | 't',
+    secondArm?: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number },
+  ): { sql: string; countSql: string; params: unknown[] } {
     // Build ORDER BY clause
-    let orderBy = 'p."createdAt" DESC';
+    let orderBy = `${alias}."createdAt" DESC`;
     const sortOrder = filters.sortOrder || 'desc';
 
     switch (filters.sortBy) {
       case 'name':
-        orderBy = `p."name" ${sortOrder.toUpperCase()}`;
+        orderBy = `${alias}."name" ${sortOrder.toUpperCase()}`;
         break;
       case 'price':
-        orderBy = `p."price" ${sortOrder.toUpperCase()}`;
+        orderBy = `${alias}."price" ${sortOrder.toUpperCase()}`;
         break;
       case 'createdAt':
-        orderBy = `p."createdAt" ${sortOrder.toUpperCase()}`;
+        orderBy = `${alias}."createdAt" ${sortOrder.toUpperCase()}`;
         break;
       case 'popularity':
-        orderBy = `p."reviewCount" ${sortOrder.toUpperCase()}, p."averageRating" ${sortOrder.toUpperCase()}`;
+        orderBy = `${alias}."reviewCount" ${sortOrder.toUpperCase()}, ${alias}."averageRating" ${sortOrder.toUpperCase()}`;
         break;
       case 'rating':
-        orderBy = `p."averageRating" ${sortOrder.toUpperCase()} NULLS LAST`;
+        orderBy = `${alias}."averageRating" ${sortOrder.toUpperCase()} NULLS LAST`;
         break;
       case 'relevance':
         if (filters.query) {
-          // Relevance scoring based on text match
+          // Relevance scoring based on text match; the search term is $1
           orderBy = `
-            CASE 
-              WHEN p."name" ILIKE $1 THEN 1
-              WHEN p."name" ILIKE '%' || $1 || '%' THEN 2
-              WHEN p."sku" = $1 THEN 3
+            CASE
+              WHEN ${alias}."name" ILIKE $1 THEN 1
+              WHEN ${alias}."name" ILIKE '%' || $1 || '%' THEN 2
+              WHEN ${alias}."sku" = $1 THEN 3
               ELSE 4
-            END ASC, p."isFeatured" DESC, p."createdAt" DESC
-          `.replace(/\$1/g, `$${params.indexOf(params[0]) + 1}`);
+            END ASC, ${alias}."isFeatured" DESC, ${alias}."createdAt" DESC
+          `;
         }
         break;
     }
 
-    // Build final queries
-    const joinClause = joins.length > 0 ? joins.join(' ') : '';
+    const armSql = (a: typeof arm, cols: string) => `
+      SELECT DISTINCT ${cols}
+      FROM "${this.productTable}" p
+      ${a.joins.join(' ')}
+      WHERE ${a.conditions.join(' AND ')}
+    `;
+
+    if (!secondArm) {
+      const sql = `
+        ${armSql(arm, 'p.*')}
+        ORDER BY ${orderBy}
+        LIMIT $${arm.nextParamIndex} OFFSET $${arm.nextParamIndex + 1}
+      `;
+
+      const countSql = `
+        SELECT COUNT(DISTINCT p."productId") as count
+        FROM "${this.productTable}" p
+        ${arm.joins.join(' ')}
+        WHERE ${arm.conditions.join(' AND ')}
+      `;
+
+      return { sql, countSql, params: [...arm.params, limit, offset] };
+    }
 
     const sql = `
-      SELECT DISTINCT p.*
-      FROM ${fromClause}
-      ${joinClause}
-      ${whereClause}
+      SELECT * FROM (
+        ${armSql(arm, 'p.*')}
+        UNION
+        ${armSql(secondArm, 'p.*')}
+      ) t
       ORDER BY ${orderBy}
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      LIMIT $${secondArm.nextParamIndex} OFFSET $${secondArm.nextParamIndex + 1}
     `;
-
-    params.push(limit, offset);
 
     const countSql = `
-      SELECT COUNT(DISTINCT p."productId") as count
-      FROM ${fromClause}
-      ${joinClause}
-      ${whereClause}
+      SELECT COUNT(*) as count FROM (
+        ${armSql(arm, 'p."productId"')}
+        UNION
+        ${armSql(secondArm, 'p."productId"')}
+      ) t
     `;
 
-    return { sql, countSql, params };
+    return { sql, countSql, params: [...arm.params, ...secondArm.params, limit, offset] };
+  }
+
+  /**
+   * Text search across product columns and variant SKU/barcode.
+   * UNION keeps each arm index-assistable; a plain OR across the join
+   * boundary forces a full scan of both tables.
+   */
+  private buildUnionSearchQuery(
+    filters: ProductSearchFilters,
+    limit: number,
+    offset: number,
+  ): { sql: string; countSql: string; params: unknown[] } {
+    const productArm = this.buildFilterArm(filters, 'product', 1);
+    const variantArm = this.buildFilterArm(filters, 'variant', productArm.nextParamIndex);
+    return this.assembleSearchQuery(productArm, filters, limit, offset, 't', variantArm);
   }
 
   /**
@@ -506,8 +579,8 @@ class ProductSearchService {
         pa."code" as "attributeCode",
         pa."name" as "attributeName",
         pa."type",
-        pav."value",
-        COALESCE(pavl."displayValue", pav."value") as "displayValue",
+        pavm."value",
+        COALESCE(pavl."displayValue", pavm."value") as "displayValue",
         COUNT(DISTINCT pavm."productId") as count
       FROM "${this.attributeTable}" pa
       JOIN "${this.attributeValueMapTable}" pavm ON pavm."attributeId" = pa."productAttributeId"
@@ -516,7 +589,7 @@ class ProductSearchService {
       WHERE pa."isFilterable" = true
         AND p."deletedAt" IS NULL
         AND p."status" = 'active'
-      GROUP BY pa."productAttributeId", pa."code", pa."name", pa."type", pav."value", pavl."displayValue"
+      GROUP BY pa."productAttributeId", pa."code", pa."name", pa."type", pavm."value", pavl."displayValue"
       ORDER BY pa."position" ASC, count DESC
     `;
 

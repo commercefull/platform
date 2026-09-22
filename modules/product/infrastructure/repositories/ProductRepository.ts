@@ -482,8 +482,10 @@ export class ProductRepo implements IProductRepository {
       params.push(filters.priceMax);
     }
     if (filters?.search) {
+      // UNION inside the IN keeps each arm on its own trigram index — a plain
+      // OR across product columns and the productVariant join can't BitmapOr.
       conditions.push(
-        `(name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex} OR "productId" IN (SELECT pv."productId" FROM "productVariant" pv WHERE pv."sku" ILIKE $${paramIndex} OR pv."barcode" ILIKE $${paramIndex}))`,
+        `"productId" IN (SELECT "productId" FROM product WHERE name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex} UNION SELECT "productId" FROM "productVariant" WHERE sku ILIKE $${paramIndex} OR barcode ILIKE $${paramIndex})`,
       );
       params.push(`%${filters.search}%`);
       paramIndex++;

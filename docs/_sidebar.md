@@ -11,6 +11,7 @@
   - [Automation Engine](guides/automation-engine.md)
   - [Configuration](guides/configuration.md)
   - [Contributing](guides/contributing.md)
+  - [Database Performance Tuning](guides/database-performance-tuning.md)
   - [Deployment](guides/deployment.md)
   - [Getting Started](guides/getting-started.md)
   - [Http Framework Abstraction](guides/http-framework-abstraction.md)

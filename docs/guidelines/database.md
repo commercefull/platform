@@ -96,3 +96,20 @@ const product = await queryOne<Product>(`SELECT * FROM "product" WHERE "productI
 ```
 
 Always use parameterized queries (`$1`, `$2`, …). Never interpolate user input into SQL strings.
+
+## Search & Indexing
+
+- **Substring search (`ILIKE '%…%'`)** uses `pg_trgm` GIN indexes (`idx_product_*_trgm`,
+  `idx_productVariant_*_trgm`). Btree and `to_tsvector` GIN indexes do not serve `ILIKE`.
+- **Never OR predicates across a join boundary** (e.g. `product` cols OR `productVariant`
+  cols) — PostgreSQL can't BitmapOr across it and the query scans. Split into per-table
+  arms combined with `UNION`, or `UNION` inside an `IN`/`EXISTS` subquery. See
+  `ProductSearchService.buildSearchQuery` for the reference implementation.
+- **Don't add a plain btree index on a column that already has a unique constraint** —
+  the unique index covers the same lookups (e.g. `orderNumber`, `store.slug`).
+- Evaluate indexes with `EXPLAIN (ANALYZE, BUFFERS)` and `pg_stat_user_indexes` against
+  realistic volume (`scripts/perf-seed.sql`), not the tiny fixture seeds.
+- New indexes on large tables use `CREATE INDEX CONCURRENTLY` (non-transactional
+  migration) — see [migrations.md](./migrations.md).
+
+Full background: [Database Performance Tuning](../guides/database-performance-tuning.md).

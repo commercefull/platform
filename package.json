@@ -13,7 +13,7 @@
     "prd:run:docker": "NODE_ENV=production node ./app.mjs",
     "prd:run:pm2": "NODE_ENV=production pm2 start -i max node --env-file=.env --name commercefull -- ./app.mjs",
     "prd:build": "yarn css:build && yarn storefront:build && npx esbuild app.ts --bundle --minify --platform=node --target=es2022 --format=esm --outfile=app.mjs --external:./node_modules/* --banner:js='import { createRequire as topLevelCreateRequire } from \"module\"; const require = topLevelCreateRequire(import.meta.url);'",
-    "db": "docker run --rm -d -P -p 127.0.0.1:5433:5432 --env-file ./.env --name commerce-db postgres:18-alpine",
+    "db": "docker run --rm -d -P -p 127.0.0.1:5433:5432 --env-file ./.env --name commerce-db postgres:18-alpine -c shared_preload_libraries=pg_stat_statements -c pg_stat_statements.track=all",
     "db:stop": "docker stop commerce-db",
     "db:migrate": "knex migrate:latest --env ${NODE_ENV:-development}",
     "db:migrate:new": "knex migrate:make",
