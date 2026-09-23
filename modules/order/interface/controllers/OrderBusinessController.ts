@@ -8,19 +8,29 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 const OrderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;
 const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
-import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
-import { ListOrdersCommand, ListOrdersUseCase } from '../../application/useCases/ListOrders';
+import { GetOrderCommand } from '../../application/useCases/GetOrder';
+import { ListOrdersCommand } from '../../application/useCases/ListOrders';
 import { GetStoreSalesSummaryUseCase } from '../../application/useCases/GetStoreSalesSummary';
-import { UpdateOrderStatusCommand, UpdateOrderStatusUseCase } from '../../application/useCases/UpdateOrderStatus';
-import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
-import { ProcessRefundCommand, ProcessRefundUseCase } from '../../application/useCases/ProcessRefund';
+import { UpdateOrderStatusCommand } from '../../application/useCases/UpdateOrderStatus';
+import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
+import { ProcessRefundCommand } from '../../application/useCases/ProcessRefund';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 import { OrderFilters } from '../../domain/repositories/OrderRepository';
-import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../application/useCases/AddOrderNote';
-import { CreateOrderRefundCommand, CreateOrderRefundUseCase } from '../../application/useCases/CreateOrderRefund';
-import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
+import { AddOrderNoteCommand } from '../../application/useCases/AddOrderNote';
+import { CreateOrderRefundCommand } from '../../application/useCases/CreateOrderRefund';
+import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
+import {
+  listOrdersUseCase,
+  getOrderUseCase,
+  updateOrderStatusUseCase,
+  cancelOrderUseCase,
+  processRefundUseCase,
+  addOrderNoteUseCase,
+  createOrderRefundUseCase,
+  trackFulfillmentPackageUseCase,
+} from '../../application/useCases/wired';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { Money } from '../../domain/valueObjects/Money';
 import { generateUUID, isUuid } from '../../../../libs/uuid';
@@ -92,7 +102,7 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListOrdersUseCase(OrderRepo);
+  const useCase = listOrdersUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -110,7 +120,7 @@ export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<voi
   }
 
   const command = new GetOrderCommand(orderId);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {
@@ -137,7 +147,7 @@ export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   const command = new UpdateOrderStatusCommand(orderId, status as OrderStatus, reason);
-  const useCase = new UpdateOrderStatusUseCase(OrderRepo);
+  const useCase = updateOrderStatusUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -158,7 +168,7 @@ export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   }
 
   const command = new CancelOrderCommand(orderId, reason);
-  const useCase = new CancelOrderUseCase(OrderRepo);
+  const useCase = cancelOrderUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -183,7 +193,7 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   const command = new ProcessRefundCommand(orderId, amount, reason, transactionId);
-  const useCase = new ProcessRefundUseCase(OrderRepo);
+  const useCase = processRefundUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -260,7 +270,7 @@ export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise
   const { content, isCustomerVisible } = body;
 
   const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible ?? false, req.user?.userId);
-  const useCase = new AddOrderNoteUseCase();
+  const useCase = addOrderNoteUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -303,7 +313,7 @@ export const createOrderRefund = async (req: HttpRequest, res: HttpResponse): Pr
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
   const command = new CreateOrderRefundCommand(orderPaymentId, parseFloat(amount), reason, notes, transactionId, req.user?.userId);
-  const useCase = new CreateOrderRefundUseCase();
+  const useCase = createOrderRefundUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -366,7 +376,7 @@ export const createFulfillmentPackage = async (req: HttpRequest, res: HttpRespon
     packageType,
     customsInfo,
   );
-  const useCase = new TrackFulfillmentPackageUseCase();
+  const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -399,7 +409,7 @@ export const trackFulfillmentPackage = async (req: HttpRequest, res: HttpRespons
     undefined,
     packageId,
   );
-  const useCase = new TrackFulfillmentPackageUseCase();
+  const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -413,7 +423,7 @@ export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Pro
   const { orderNumber } = req.params;
 
   const command = new GetOrderCommand(undefined, orderNumber);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {

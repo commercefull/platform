@@ -5,10 +5,8 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageShippingZonesUseCase } from '../../application/useCases/ManageShippingAdmin';
+import { manageShippingZonesUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageShippingZonesUseCase = new ManageShippingZonesUseCase();
 
 // ============================================================================
 // Shipping Zones Management

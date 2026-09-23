@@ -1,47 +1,23 @@
-/**
- * Unit Tests for ShipOrder Use Case
- */
-
-jest.mock('../../domain/events/FulfillmentEvents', () => ({
-  __esModule: true,
-  emitFulfillmentShipped: jest.fn(),
-}));
-
+import '../../tests/testUtils';
 import { ShipOrderUseCase } from './ShipOrder';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
-import { Fulfillment } from '../../domain/entities/Fulfillment';
-import { emitFulfillmentShipped } from '../../domain/events/FulfillmentEvents';
+import {
+  createFulfillmentRepository,
+  createFulfillment,
+  emitFulfillmentShippedMock,
+} from '../../tests/testUtils';
 
 describe('ShipOrderUseCase', () => {
-  let useCase: ShipOrderUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const fulfillmentRepository = createFulfillmentRepository();
+  const useCase = new ShipOrderUseCase(fulfillmentRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn(),
-      save: jest.fn().mockImplementation(async (f: unknown) => f),
-    };
-    useCase = new ShipOrderUseCase(mockRepo as never as ConstructorParameters<typeof ShipOrderUseCase>[0]);
-    jest.mocked(emitFulfillmentShipped).mockClear();
+    jest.clearAllMocks();
+    fulfillmentRepository.save.mockImplementation(async (f) => f);
   });
 
-  function createFulfillment(status: string): Fulfillment {
-    return Fulfillment.fromPersistence({
-      fulfillmentId: 'ful-1',
-      orderId: 'ord-1',
-      orderNumber: 'ORD-001',
-      sourceType: 'warehouse',
-      sourceId: 'wh-1',
-      status: status as never as import('../../domain/entities/Fulfillment').FulfillmentStatus,
-      shipFromAddress: { addressLine1: '123 St', city: 'Portland', postalCode: '97201', countryCode: 'US' },
-      shipToAddress: { addressLine1: '456 Ave', city: 'Seattle', postalCode: '98101', countryCode: 'US' },
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01'),
-    });
-  }
-
-  it('should ship from packed status', async () => {
-    mockRepo.findById.mockResolvedValue(createFulfillment('packed'));
+  it('should ship a packed fulfillment with tracking details', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('packed'));
 
     const result = await useCase.execute({
       fulfillmentId: 'ful-1',
@@ -55,25 +31,25 @@ describe('ShipOrderUseCase', () => {
     expect(result.fulfillment.carrierName).toBe('FedEx');
   });
 
-  it('should ship from ready_to_ship status', async () => {
-    mockRepo.findById.mockResolvedValue(createFulfillment('ready_to_ship'));
+  it('should ship a fulfillment that is ready to ship', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('ready_to_ship'));
 
-    const result = await useCase.execute({
-      fulfillmentId: 'ful-1',
-      trackingNumber: 'TRK-456',
-    });
+    const result = await useCase.execute({ fulfillmentId: 'ful-1', trackingNumber: 'TRK-456' });
 
     expect(result.fulfillment.status).toBe('shipped');
   });
 
-  it('should throw FulfillmentNotFoundError when not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' })).rejects.toThrow(FulfillmentNotFoundError);
+    await expect(useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' })).rejects.toThrow(
+      FulfillmentNotFoundError,
+    );
+    expect(emitFulfillmentShippedMock).not.toHaveBeenCalled();
   });
 
-  it('should emit fulfillment.shipped event', async () => {
-    mockRepo.findById.mockResolvedValue(createFulfillment('packed'));
+  it('should emit fulfillment.shipped with the tracking details', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('packed'));
 
     await useCase.execute({
       fulfillmentId: 'ful-1',
@@ -82,7 +58,7 @@ describe('ShipOrderUseCase', () => {
       carrierName: 'FedEx',
     });
 
-    expect(emitFulfillmentShipped).toHaveBeenCalledWith(
+    expect(emitFulfillmentShippedMock).toHaveBeenCalledWith(
       expect.objectContaining({
         fulfillmentId: 'ful-1',
         orderId: 'ord-1',
@@ -93,11 +69,11 @@ describe('ShipOrderUseCase', () => {
     );
   });
 
-  it('should save the fulfillment after shipping', async () => {
-    mockRepo.findById.mockResolvedValue(createFulfillment('packed'));
+  it('should persist the fulfillment after shipping', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('packed'));
 
     await useCase.execute({ fulfillmentId: 'ful-1', trackingNumber: 'TRK-123' });
 
-    expect(mockRepo.save).toHaveBeenCalledTimes(1);
+    expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1);
   });
 });

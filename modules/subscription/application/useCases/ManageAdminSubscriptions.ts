@@ -1,55 +1,57 @@
-import { subscriptionRepo } from '../wired';
+import type { SubscriptionRepository } from '../../domain/repositories/SubscriptionRepository';
 
 export class ManageAdminSubscriptionsUseCase {
+  constructor(private readonly subscriptionRepo: SubscriptionRepository) {}
+
   async getSubscriptionPlan(id: string) {
-    return subscriptionRepo.getSubscriptionPlan(id);
+    return this.subscriptionRepo.getSubscriptionPlan(id);
   }
-  async getSubscriptionPlans(...args: Parameters<typeof subscriptionRepo.getSubscriptionPlans>) {
-    return subscriptionRepo.getSubscriptionPlans(...args);
+  async getSubscriptionPlans(...args: Parameters<SubscriptionRepository['getSubscriptionPlans']>) {
+    return this.subscriptionRepo.getSubscriptionPlans(...args);
   }
-  async saveSubscriptionPlan(...args: Parameters<typeof subscriptionRepo.saveSubscriptionPlan>) {
-    return subscriptionRepo.saveSubscriptionPlan(...args);
+  async saveSubscriptionPlan(...args: Parameters<SubscriptionRepository['saveSubscriptionPlan']>) {
+    return this.subscriptionRepo.saveSubscriptionPlan(...args);
   }
   async deleteSubscriptionPlan(id: string) {
-    return subscriptionRepo.deleteSubscriptionPlan(id);
+    return this.subscriptionRepo.deleteSubscriptionPlan(id);
   }
-  async getCustomerSubscriptions(...args: Parameters<typeof subscriptionRepo.getCustomerSubscriptions>) {
-    return subscriptionRepo.getCustomerSubscriptions(...args);
+  async getCustomerSubscriptions(...args: Parameters<SubscriptionRepository['getCustomerSubscriptions']>) {
+    return this.subscriptionRepo.getCustomerSubscriptions(...args);
   }
-  async updateSubscriptionStatus(...args: Parameters<typeof subscriptionRepo.updateSubscriptionStatus>) {
-    return subscriptionRepo.updateSubscriptionStatus(...args);
+  async updateSubscriptionStatus(...args: Parameters<SubscriptionRepository['updateSubscriptionStatus']>) {
+    return this.subscriptionRepo.updateSubscriptionStatus(...args);
   }
-  async cancelSubscription(...args: Parameters<typeof subscriptionRepo.cancelSubscription>) {
-    return subscriptionRepo.cancelSubscription(...args);
+  async cancelSubscription(...args: Parameters<SubscriptionRepository['cancelSubscription']>) {
+    return this.subscriptionRepo.cancelSubscription(...args);
   }
   async getSubscriptionOrders(customerSubscriptionId: string) {
-    return subscriptionRepo.getSubscriptionOrders(customerSubscriptionId);
+    return this.subscriptionRepo.getSubscriptionOrders(customerSubscriptionId);
   }
   async getCustomerSubscription(id: string) {
-    return subscriptionRepo.getCustomerSubscription(id);
+    return this.subscriptionRepo.getCustomerSubscription(id);
   }
-  async pauseSubscription(...args: Parameters<typeof subscriptionRepo.pauseSubscription>) {
-    return subscriptionRepo.pauseSubscription(...args);
+  async pauseSubscription(...args: Parameters<SubscriptionRepository['pauseSubscription']>) {
+    return this.subscriptionRepo.pauseSubscription(...args);
   }
   async getSubscriptionsDueBilling(beforeDate: Date) {
-    return subscriptionRepo.getSubscriptionsDueBilling(beforeDate);
+    return this.subscriptionRepo.getSubscriptionsDueBilling(beforeDate);
   }
   async getSubscriptionOrdersPending() {
-    return subscriptionRepo.getSubscriptionOrdersPending();
+    return this.subscriptionRepo.getSubscriptionOrdersPending();
   }
   async getFailedSubscriptionPayments() {
-    return subscriptionRepo.getFailedSubscriptionPayments();
+    return this.subscriptionRepo.getFailedSubscriptionPayments();
   }
   async advanceBillingCycle(id: string) {
-    return subscriptionRepo.advanceBillingCycle(id);
+    return this.subscriptionRepo.advanceBillingCycle(id);
   }
-  async createDunningAttempt(...args: Parameters<typeof subscriptionRepo.createDunningAttempt>) {
-    return subscriptionRepo.createDunningAttempt(...args);
+  async createDunningAttempt(...args: Parameters<SubscriptionRepository['createDunningAttempt']>) {
+    return this.subscriptionRepo.createDunningAttempt(...args);
   }
-  async createSubscriptionOrder(...args: Parameters<typeof subscriptionRepo.createSubscriptionOrder>) {
-    return subscriptionRepo.createSubscriptionOrder(...args);
+  async createSubscriptionOrder(...args: Parameters<SubscriptionRepository['createSubscriptionOrder']>) {
+    return this.subscriptionRepo.createSubscriptionOrder(...args);
   }
-  async updateSubscriptionOrderStatus(...args: Parameters<typeof subscriptionRepo.updateSubscriptionOrderStatus>) {
-    return subscriptionRepo.updateSubscriptionOrderStatus(...args);
+  async updateSubscriptionOrderStatus(...args: Parameters<SubscriptionRepository['updateSubscriptionOrderStatus']>) {
+    return this.subscriptionRepo.updateSubscriptionOrderStatus(...args);
   }
 }

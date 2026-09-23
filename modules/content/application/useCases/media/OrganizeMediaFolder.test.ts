@@ -1,28 +1,19 @@
 import { OrganizeMediaFolderUseCase, CreateFolderCommand, MoveFolderCommand } from './OrganizeMediaFolder';
 import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+import { lazyMock, createContentMediaFolder } from '../../../tests/testUtils';
 
 describe('OrganizeMediaFolderUseCase', () => {
   let useCase: OrganizeMediaFolderUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof OrganizeMediaFolderUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findFolderById: jest.fn().mockResolvedValue({ folderId: 'f1', name: 'Parent', path: 'Parent', depth: 0 }),
-      createFolder: jest.fn().mockImplementation(async (input: { name: string; parentId: string | null; path: string; depth: number }) => ({
-        contentMediaFolderId: 'f2',
-        name: input.name,
-        path: input.path,
-        depth: input.depth,
-        createdAt: new Date(),
-      })),
-      updateFolder: jest
-        .fn()
-        .mockResolvedValue({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1, createdAt: new Date() }),
-      moveMediaToFolder: jest.fn().mockResolvedValue(undefined),
-      getFolderTree: jest.fn().mockResolvedValue([]),
-      deleteFolder: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new OrganizeMediaFolderUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof OrganizeMediaFolderUseCase>[0]>();
+    mockRepo.findFolderById.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f1', name: 'Parent', path: 'Parent' }));
+    mockRepo.createFolder.mockImplementation(async (input) => createContentMediaFolder({ ...input, contentMediaFolderId: 'f2' }));
+    mockRepo.updateFolder.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1 }));
+    mockRepo.findAllFolders.mockResolvedValue([]);
+    mockRepo.deleteFolder.mockResolvedValue(true);
+    useCase = new OrganizeMediaFolderUseCase(mockRepo);
   });
 
   it('should create folder (happy path)', async () => {

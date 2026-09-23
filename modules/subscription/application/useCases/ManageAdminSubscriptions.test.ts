@@ -1,55 +1,76 @@
-jest.mock('../../infrastructure/repositories/subscriptionRepo', () => ({
-  getSubscriptionPlan: jest.fn().mockResolvedValue({ subscriptionPlanId: 'p1' }),
-  getSubscriptionPlans: jest.fn().mockResolvedValue([{ subscriptionPlanId: 'p1' }]),
-  saveSubscriptionPlan: jest.fn().mockResolvedValue({ subscriptionPlanId: 'p2' }),
-  deleteSubscriptionPlan: jest.fn().mockResolvedValue(true),
-  getCustomerSubscriptions: jest.fn().mockResolvedValue([{ customerSubscriptionId: 'sub1' }]),
-  updateSubscriptionStatus: jest.fn().mockResolvedValue(true),
-  cancelSubscription: jest.fn().mockResolvedValue(true),
-  getSubscriptionOrders: jest.fn().mockResolvedValue([{ subscriptionOrderId: 'o1' }]),
-  getCustomerSubscription: jest.fn().mockResolvedValue({ customerSubscriptionId: 'sub1' }),
-  pauseSubscription: jest.fn().mockResolvedValue(true),
-  getSubscriptionsDueBilling: jest.fn().mockResolvedValue([{ customerSubscriptionId: 'sub1' }]),
-  getSubscriptionOrdersPending: jest.fn().mockResolvedValue([]),
-  getFailedSubscriptionPayments: jest.fn().mockResolvedValue([]),
-  advanceBillingCycle: jest.fn().mockResolvedValue(true),
-  createDunningAttempt: jest.fn().mockResolvedValue({ dunningAttemptId: 'd1' }),
-  createSubscriptionOrder: jest.fn().mockResolvedValue({ subscriptionOrderId: 'o2' }),
-  updateSubscriptionOrderStatus: jest.fn().mockResolvedValue(true),
-}));
+/**
+ * Unit Tests for ManageAdminSubscriptions Use Case
+ */
 
+import {
+  createSubscriptionRepository,
+  createSubscriptionPlan,
+  createCustomerSubscription,
+} from '../../tests/testUtils';
 import { ManageAdminSubscriptionsUseCase } from './ManageAdminSubscriptions';
 
 describe('ManageAdminSubscriptionsUseCase', () => {
   let useCase: ManageAdminSubscriptionsUseCase;
+  let subscriptionRepo: ReturnType<typeof createSubscriptionRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageAdminSubscriptionsUseCase();
+    subscriptionRepo = createSubscriptionRepository();
+    useCase = new ManageAdminSubscriptionsUseCase(subscriptionRepo);
   });
 
-  it('should get subscription plan', async () => {
-    const result = await useCase.getSubscriptionPlan('p1');
-    expect(result).toEqual({ subscriptionPlanId: 'p1' });
+  it('should return the subscription plan when it exists', async () => {
+    subscriptionRepo.getSubscriptionPlan.mockResolvedValue(createSubscriptionPlan());
+
+    const result = await useCase.getSubscriptionPlan('plan-1');
+
+    expect(result?.name).toBe('Monthly Box');
+    expect(subscriptionRepo.getSubscriptionPlan).toHaveBeenCalledWith('plan-1');
   });
 
-  it('should get subscription plans', async () => {
-    const result = await useCase.getSubscriptionPlans({ active: true } as never);
+  it('should list plans for a product', async () => {
+    subscriptionRepo.getSubscriptionPlans.mockResolvedValue([createSubscriptionPlan()]);
+
+    const result = await useCase.getSubscriptionPlans('prod-1', true);
+
+    expect(subscriptionRepo.getSubscriptionPlans).toHaveBeenCalledWith('prod-1', true);
     expect(result).toHaveLength(1);
   });
 
-  it('should save subscription plan', async () => {
-    const result = await useCase.saveSubscriptionPlan({ name: 'Pro' } as never);
-    expect(result).toEqual({ subscriptionPlanId: 'p2' });
+  it('should save a subscription plan', async () => {
+    const plan = createSubscriptionPlan();
+    subscriptionRepo.saveSubscriptionPlan.mockResolvedValue(plan);
+
+    const result = await useCase.saveSubscriptionPlan({ subscriptionPlanId: 'plan-1', name: 'Monthly Box' });
+
+    expect(subscriptionRepo.saveSubscriptionPlan).toHaveBeenCalledWith({ subscriptionPlanId: 'plan-1', name: 'Monthly Box' });
+    expect(result).toBe(plan);
   });
 
-  it('should cancel subscription', async () => {
-    const result = await useCase.cancelSubscription('sub1', 'user requested');
-    expect(result).toBe(true);
+  it('should cancel a subscription through the admin path', async () => {
+    await useCase.cancelSubscription('sub-1', 'fraud', 'admin-1', false);
+
+    expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', 'fraud', 'admin-1', false);
   });
 
-  it('should advance billing cycle', async () => {
-    const result = await useCase.advanceBillingCycle('sub1');
-    expect(result).toBe(true);
+  it('should advance the billing cycle', async () => {
+    await useCase.advanceBillingCycle('sub-1');
+
+    expect(subscriptionRepo.advanceBillingCycle).toHaveBeenCalledWith('sub-1');
+  });
+
+  it('should update the subscription status', async () => {
+    await useCase.updateSubscriptionStatus('sub-1', 'active');
+
+    expect(subscriptionRepo.updateSubscriptionStatus).toHaveBeenCalledWith('sub-1', 'active');
+  });
+
+  it('should list subscriptions due for billing', async () => {
+    subscriptionRepo.getSubscriptionsDueBilling.mockResolvedValue([createCustomerSubscription()]);
+    const before = new Date('2030-01-01');
+
+    const result = await useCase.getSubscriptionsDueBilling(before);
+
+    expect(subscriptionRepo.getSubscriptionsDueBilling).toHaveBeenCalledWith(before);
+    expect(result).toHaveLength(1);
   });
 });

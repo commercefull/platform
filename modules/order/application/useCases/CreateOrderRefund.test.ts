@@ -53,7 +53,7 @@ function createMockQueryRepo(payment: OrderPayment | null = createMockPayment())
       refundedBy: 'admin-1',
       createdAt: new Date().toISOString(),
     } as OrderPaymentRefund),
-  } as never as jest.Mocked<OrderQueryRepository>;
+  } as unknown as jest.Mocked<OrderQueryRepository>;
 }
 
 describe('CreateOrderRefundUseCase', () => {

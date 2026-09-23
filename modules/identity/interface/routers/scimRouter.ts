@@ -8,10 +8,10 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { ScimController } from '../controllers/scimController';
-import { ScimProvisioningRepositoryImpl, OrganizationCredentialSubjectAdapter } from '../../application/wired';
+import { ScimProvisioningRepositoryImpl, orgCredentialPort } from '../../application/wired';
 
 const provisioningRepo = new ScimProvisioningRepositoryImpl();
-const orgPort = new OrganizationCredentialSubjectAdapter();
+const orgPort = orgCredentialPort;
 const scimController = new ScimController(provisioningRepo, orgPort);
 
 const router = createHttpRouter();

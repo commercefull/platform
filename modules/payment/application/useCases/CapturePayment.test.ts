@@ -2,6 +2,7 @@
  * Unit Tests for CapturePayment Use Case
  */
 
+import { emitMock } from '../../tests/testUtils';
 import { CapturePaymentUseCase } from './CapturePayment';
 import {
   TransactionNotFoundError,
@@ -9,10 +10,6 @@ import {
   CaptureAmountExceedsAuthorizedError,
   CaptureFailedError,
 } from '../../domain/errors/PaymentErrors';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
 
 function createAuthorizedTransaction(overrides: Record<string, unknown> = {}) {
   return {
@@ -43,6 +40,10 @@ function createMockGateway(success: boolean, response?: Record<string, unknown>,
 }
 
 describe('CapturePaymentUseCase', () => {
+  beforeEach(() => {
+    emitMock.mockClear();
+  });
+
   it('should capture full amount successfully', async () => {
     const tx = createAuthorizedTransaction();
     const repo = createMockRepo(tx);

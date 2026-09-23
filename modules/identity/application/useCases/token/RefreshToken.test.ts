@@ -1,3 +1,4 @@
+import { lazyMock } from '../../../tests/testUtils';
 import { RefreshTokenUseCase } from './RefreshToken';
 import {
   RefreshTokenRequiredError,
@@ -10,20 +11,23 @@ import {
 
 describe('RefreshTokenUseCase', () => {
   let useCase: RefreshTokenUseCase;
-  let mockRefreshRepo: Record<string, jest.Mock>;
-  let mockToken: Record<string, jest.Mock>;
-  let mockCustomerRepo: Record<string, jest.Mock>;
-  let mockOrgRepo: Record<string, jest.Mock>;
+  let mockRefreshRepo: jest.Mocked<ConstructorParameters<typeof RefreshTokenUseCase>[0]>;
+  let mockToken: jest.Mocked<ConstructorParameters<typeof RefreshTokenUseCase>[1]>;
+  let mockCustomerRepo: jest.Mocked<ConstructorParameters<typeof RefreshTokenUseCase>[2]>;
+  let mockOrgRepo: jest.Mocked<ConstructorParameters<typeof RefreshTokenUseCase>[3]>;
 
   beforeEach(() => {
-    mockRefreshRepo = { findByToken: jest.fn().mockResolvedValue(null), revoke: jest.fn().mockResolvedValue(undefined) };
-    mockToken = {
-      generateAccessToken: jest.fn().mockResolvedValue('new-access'),
-      generateRefreshToken: jest.fn().mockResolvedValue('new-refresh'),
-    };
-    mockCustomerRepo = { findById: jest.fn().mockResolvedValue(null) };
-    mockOrgRepo = { findById: jest.fn().mockResolvedValue(null) };
-    useCase = new RefreshTokenUseCase(mockRefreshRepo as never, mockToken as never, mockCustomerRepo as never, mockOrgRepo as never);
+    mockRefreshRepo = lazyMock<ConstructorParameters<typeof RefreshTokenUseCase>[0]>();
+    mockRefreshRepo.findByToken.mockResolvedValue(null);
+    mockRefreshRepo.revoke.mockResolvedValue(undefined);
+    mockToken = lazyMock<ConstructorParameters<typeof RefreshTokenUseCase>[1]>();
+    mockToken.generateAccessToken.mockResolvedValue('new-access');
+    mockToken.generateRefreshToken.mockResolvedValue('new-refresh');
+    mockCustomerRepo = lazyMock<ConstructorParameters<typeof RefreshTokenUseCase>[2]>();
+    mockCustomerRepo.findById.mockResolvedValue(null);
+    mockOrgRepo = lazyMock<ConstructorParameters<typeof RefreshTokenUseCase>[3]>();
+    mockOrgRepo.findById.mockResolvedValue(null);
+    useCase = new RefreshTokenUseCase(mockRefreshRepo, mockToken, mockCustomerRepo, mockOrgRepo);
   });
 
   it('should refresh customer token (happy path)', async () => {

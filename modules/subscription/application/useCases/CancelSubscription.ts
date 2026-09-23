@@ -3,9 +3,19 @@
  * Cancels a customer subscription
  */
 
-import { subscriptionRepo } from '../wired';
-import { CustomerSubscription } from '../../domain/repositories/SubscriptionRepository';
+import { CustomerSubscription, SubscriptionProduct } from '../../domain/repositories/SubscriptionRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+
+export interface CancelSubscriptionRepoPort {
+  getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null>;
+  getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null>;
+  cancelSubscription(
+    customerSubscriptionId: string,
+    reason?: string,
+    cancelledBy?: string,
+    cancelAtPeriodEnd?: boolean,
+  ): Promise<void>;
+}
 
 // ============================================================================
 // Command
@@ -38,6 +48,8 @@ export interface CancelSubscriptionResponse {
 // ============================================================================
 
 export class CancelSubscriptionUseCase {
+  constructor(private readonly subscriptionRepo: CancelSubscriptionRepoPort) {}
+
   async execute(command: CancelSubscriptionCommand): Promise<CancelSubscriptionResponse> {
     const { input } = command;
 
@@ -51,7 +63,7 @@ export class CancelSubscriptionUseCase {
 
     try {
       // 1. Get the subscription
-      const subscription = await subscriptionRepo.getCustomerSubscription(input.customerSubscriptionId);
+      const subscription = await this.subscriptionRepo.getCustomerSubscription(input.customerSubscriptionId);
       if (!subscription) {
         return {
           success: false,
@@ -71,7 +83,7 @@ export class CancelSubscriptionUseCase {
 
       // 3. Get the product to check cancellation rules
       const product = subscription.subscriptionProductId
-        ? await subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
+        ? await this.subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
         : null;
 
       // 4. Check if early cancellation is allowed
@@ -84,7 +96,7 @@ export class CancelSubscriptionUseCase {
       }
 
       // 5. Cancel the subscription
-      await subscriptionRepo.cancelSubscription(
+      await this.subscriptionRepo.cancelSubscription(
         input.customerSubscriptionId,
         input.reason,
         input.cancelledBy,
@@ -92,7 +104,7 @@ export class CancelSubscriptionUseCase {
       );
 
       // 6. Get updated subscription
-      const updatedSubscription = await subscriptionRepo.getCustomerSubscription(input.customerSubscriptionId);
+      const updatedSubscription = await this.subscriptionRepo.getCustomerSubscription(input.customerSubscriptionId);
 
       // 6. Emit SubscriptionCancelled event
       await eventBus.emit('subscription.cancelled', {

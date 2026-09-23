@@ -1,40 +1,23 @@
-jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    dataProvider: {
-      generateReport: jest.fn().mockResolvedValue({
-        reportType: 'sales_summary',
-        data: [],
-        generatedAt: new Date(),
-        dateRange: { from: new Date(), to: new Date() },
-        summary: {},
-        rows: [],
-      }),
-    },
-    schedules: {
-      listSchedules: jest.fn().mockResolvedValue([]),
-    },
-  },
-}));
-
+import { createReportingRepository, createReportData } from '../../tests/testUtils';
 import { GenerateReportUseCase } from './GenerateReport';
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
 
 describe('GenerateReportUseCase', () => {
   let useCase: GenerateReportUseCase;
+  let reportingRepo: ReturnType<typeof createReportingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GenerateReportUseCase();
+    reportingRepo = createReportingRepository();
+    useCase = new GenerateReportUseCase(reportingRepo);
   });
 
-  it('should generate report (happy path)', async () => {
-    const result = await useCase.execute({ reportType: 'sales_summary', parameters: { dateFrom: '2024-01-01', dateTo: '2024-12-31' } });
+  it('should generate the report with the given type and parameters', async () => {
+    const data = createReportData();
+    reportingRepo.generateReport.mockResolvedValue(data);
 
-    expect(result.reportType).toBe('sales_summary');
-    expect(reportingDataRepository.dataProvider.generateReport).toHaveBeenCalledWith('sales_summary', {
-      dateFrom: '2024-01-01',
-      dateTo: '2024-12-31',
-    });
+    const parameters = { dateFrom: '2024-01-01', dateTo: '2024-01-31' };
+    const result = await useCase.execute({ reportType: 'sales_summary', parameters });
+
+    expect(result).toBe(data);
+    expect(reportingRepo.generateReport).toHaveBeenCalledWith('sales_summary', parameters);
   });
 });

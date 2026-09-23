@@ -22,10 +22,10 @@ import {
 } from '../../application/useCases';
 import type { PickupLocationPort } from '../../application/ports/PickupLocationPort';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { inventoryDataRepository, StorePickupLocationAdapter } from '../../application/wired';
+import { inventoryDataRepository, pickupLocationAdapter } from '../../application/wired';
 
 // Ports
-const pickupLocationPort: PickupLocationPort = new StorePickupLocationAdapter();
+const pickupLocationPort: PickupLocationPort = pickupLocationAdapter;
 
 // ============================================================================
 // Request Body Interfaces

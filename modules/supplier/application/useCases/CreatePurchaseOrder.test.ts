@@ -1,67 +1,77 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createPoSupplierRepository, createPurchaseOrderCreateRepository, emitMock } from '../../tests/testUtils';
 import { CreatePurchaseOrderUseCase } from './CreatePurchaseOrder';
 import { SupplierNotFoundError, SupplierNotActiveError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('CreatePurchaseOrderUseCase', () => {
-  let useCase: CreatePurchaseOrderUseCase;
-  let mockSupplierRepo: Record<string, jest.Mock>;
-  let mockPORepo: Record<string, jest.Mock>;
+  it('should create the purchase order when the supplier is active and approved', async () => {
+    const supplierRepository = createPoSupplierRepository({ status: 'approved', isActive: true });
+    const purchaseOrderRepository = createPurchaseOrderCreateRepository();
 
-  beforeEach(() => {
-    mockSupplierRepo = {
-      findById: jest.fn().mockResolvedValue({ status: 'approved', isActive: true, minimumOrderValue: 50, leadTimeDays: 7 }),
-    };
-    mockPORepo = {
-      create: jest.fn().mockResolvedValue({
-        purchaseOrderId: 'po-1',
-        poNumber: 'PO-12345678',
-        supplierId: 's1',
-        totalAmount: 100,
-        status: 'draft',
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreatePurchaseOrderUseCase(mockSupplierRepo as never, mockPORepo as never);
-  });
-
-  it('should create purchase order (happy path)', async () => {
-    const result = await useCase.execute({
+    const result = await new CreatePurchaseOrderUseCase(supplierRepository, purchaseOrderRepository).execute({
       supplierId: 's1',
       items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCost: 10 }],
     });
 
-    expect(result.purchaseOrderId).toBe('po-1');
+    expect(result.purchaseOrderId).toMatch(/^po_/);
     expect(result.totalAmount).toBe(100);
-    expect(eventBus.emit).toHaveBeenCalledWith('purchase_order.created', expect.objectContaining({ supplierId: 's1' }));
+    expect(result.status).toBe('draft');
+    expect(purchaseOrderRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ supplierId: 's1', totalAmount: 100, status: 'draft' }),
+    );
   });
 
-  it('should throw SupplierNotFoundError when supplier does not exist', async () => {
-    mockSupplierRepo.findById.mockResolvedValue(null);
+  it('should emit purchase_order.created when the order is created', async () => {
+    await new CreatePurchaseOrderUseCase(
+      createPoSupplierRepository(),
+      createPurchaseOrderCreateRepository(),
+    ).execute({
+      supplierId: 's1',
+      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCost: 10 }],
+    });
 
-    await expect(useCase.execute({ supplierId: 'missing', items: [] })).rejects.toThrow(SupplierNotFoundError);
+    expect(emitMock).toHaveBeenCalledWith(
+      'purchase_order.created',
+      expect.objectContaining({ supplierId: 's1', totalAmount: 100 }),
+    );
   });
 
-  it('should throw SupplierNotActiveError when supplier is not approved', async () => {
-    mockSupplierRepo.findById.mockResolvedValue({ status: 'pending', isActive: false });
+  it('should throw SupplierNotFoundError when the supplier does not exist', async () => {
+    const purchaseOrderRepository = createPurchaseOrderCreateRepository();
 
-    await expect(useCase.execute({ supplierId: 's1', items: [] })).rejects.toThrow(SupplierNotActiveError);
-  });
-
-  it('should throw SupplierValidationError when order total below minimum', async () => {
     await expect(
-      useCase.execute({
+      new CreatePurchaseOrderUseCase(createPoSupplierRepository(null), purchaseOrderRepository).execute({
+        supplierId: 'missing',
+        items: [],
+      }),
+    ).rejects.toThrow(SupplierNotFoundError);
+    expect(purchaseOrderRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('should throw SupplierNotActiveError when the supplier is not approved and active', async () => {
+    const purchaseOrderRepository = createPurchaseOrderCreateRepository();
+
+    await expect(
+      new CreatePurchaseOrderUseCase(
+        createPoSupplierRepository({ status: 'pending', isActive: false }),
+        purchaseOrderRepository,
+      ).execute({ supplierId: 's1', items: [] }),
+    ).rejects.toThrow(SupplierNotActiveError);
+    expect(purchaseOrderRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('should throw SupplierValidationError when the order total is below the supplier minimum', async () => {
+    const purchaseOrderRepository = createPurchaseOrderCreateRepository();
+
+    await expect(
+      new CreatePurchaseOrderUseCase(
+        createPoSupplierRepository({ status: 'approved', isActive: true, minimumOrderValue: 50 }),
+        purchaseOrderRepository,
+      ).execute({
         supplierId: 's1',
         items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitCost: 10 }],
       }),
     ).rejects.toThrow(SupplierValidationError);
+    expect(purchaseOrderRepository.create).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

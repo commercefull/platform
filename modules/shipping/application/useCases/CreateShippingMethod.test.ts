@@ -1,50 +1,45 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock, createShippingMethodEntity } from '../../tests/testUtils';
 import { CreateShippingMethodUseCase } from './CreateShippingMethod';
 import { ShippingValidationError } from '../../domain/errors/ShippingErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+type ShippingMethodRepository = ConstructorParameters<typeof CreateShippingMethodUseCase>[0];
 
 describe('CreateShippingMethodUseCase', () => {
   let useCase: CreateShippingMethodUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let repo: jest.Mocked<ShippingMethodRepository>;
 
   beforeEach(() => {
-    mockRepo = {
-      findMethodByCode: jest.fn().mockResolvedValue(null),
-      saveMethod: jest.fn().mockImplementation(async (m: unknown) => m),
-    };
-    useCase = new CreateShippingMethodUseCase(mockRepo as never);
+    jest.resetAllMocks();
+    repo = lazyMock<ShippingMethodRepository>();
+    repo.findMethodByCode.mockResolvedValue(null);
+    repo.saveMethod.mockImplementation(async method => method);
+    useCase = new CreateShippingMethodUseCase(repo);
   });
 
-  it('should create shipping method (happy path)', async () => {
+  it('should create and persist a shipping method', async () => {
     const result = await useCase.execute({
       name: 'Standard Shipping',
       code: 'std',
-      type: 'flat_rate' as never,
+      type: 'flat_rate',
       basePrice: 9.99,
     });
 
     expect(result.shippingMethod.name).toBe('Standard Shipping');
-    expect(eventBus.emit).toHaveBeenCalledWith('shipping.method_created', expect.objectContaining({ name: 'Standard Shipping' }));
+    expect(repo.saveMethod).toHaveBeenCalledWith(expect.objectContaining({ code: 'std' }));
+    expect(emitMock).toHaveBeenCalledWith('shipping.method_created', expect.objectContaining({ name: 'Standard Shipping' }));
   });
 
-  it('should throw ShippingValidationError when code already exists', async () => {
-    mockRepo.findMethodByCode.mockResolvedValue({ shippingMethodId: 'existing', code: 'std' });
+  it('should throw ShippingValidationError when the code already exists', async () => {
+    repo.findMethodByCode.mockResolvedValue(createShippingMethodEntity({ code: 'std' }));
 
     await expect(
       useCase.execute({
         name: 'Test',
         code: 'std',
-        type: 'flat_rate' as never,
+        type: 'flat_rate',
         basePrice: 5,
       }),
     ).rejects.toThrow(ShippingValidationError);
+    expect(repo.saveMethod).not.toHaveBeenCalled();
   });
 });

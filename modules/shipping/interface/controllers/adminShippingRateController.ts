@@ -5,16 +5,12 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
-  ManageShippingRatesUseCase,
-  ManageShippingZonesUseCase,
-  ManageShippingMethodsAdminUseCase,
-} from '../../application/useCases/ManageShippingRates';
+  manageShippingRatesUseCase,
+  manageShippingZonesLookupUseCase as manageShippingZonesUseCase,
+  manageShippingMethodsAdminUseCase as manageShippingMethodsUseCase,
+} from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageShippingRatesUseCase = new ManageShippingRatesUseCase();
-const manageShippingZonesUseCase = new ManageShippingZonesUseCase();
-const manageShippingMethodsUseCase = new ManageShippingMethodsAdminUseCase();
 
 // ============================================================================
 // Shipping Rates Management

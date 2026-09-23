@@ -1,14 +1,9 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import {
-  CalculateOrderTaxUseCase,
-  CalculateOrderTaxCommand,
-  OrderLineItem,
-  TaxAddress,
-} from '../../application/useCases/CalculateOrderTax';
+import { CalculateOrderTaxCommand, OrderLineItem, TaxAddress } from '../../application/useCases/CalculateOrderTax';
 import { CreateTaxRateUseCase, CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
 import { GetTaxRateForAddressUseCase, GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
 import type { TaxRateType } from '../../taxTypes';
-import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
+import { taxQueryRepository, taxCommandRepository, calculateOrderTaxUseCase } from '../../application/wired';
 
 // Adapter that bridges taxQueryRepo to the TaxRepository port interface
 const taxRepoAdapter = {
@@ -94,7 +89,7 @@ export const taxResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new CalculateOrderTaxUseCase();
+      const useCase = calculateOrderTaxUseCase;
       const command = new CalculateOrderTaxCommand(
         args.input.items,
         args.input.shippingAddress,

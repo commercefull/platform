@@ -13,11 +13,9 @@ import {
   reactivateCustomerUseCase,
   verifyCustomerUseCase,
   manageAddressesUseCase,
+  manageCustomersUseCase,
 } from '../../application/useCases/wired';
-import { ManageCustomersUseCase } from '../../application/useCases/ManageCustomer';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageCustomersUseCase = new ManageCustomersUseCase();
 
 // ============================================================================
 // List Customers

@@ -1,40 +1,30 @@
-jest.mock('../../../../libs/db', () => ({
-  query: jest.fn().mockResolvedValue(undefined),
-  queryOne: jest.fn(),
-  withTransaction: jest.fn(),
-}));
-
-jest.mock('../../../../libs/logger', () => ({
-  logger: { info: jest.fn(), warn: jest.fn() },
-}));
-
+import { queryMock } from '../../tests/testUtils';
 import { UpdateShipmentStatusUseCase } from './UpdateShipmentStatus';
-import { query } from '../../../../libs/db';
 
 describe('UpdateShipmentStatusUseCase', () => {
   let useCase: UpdateShipmentStatusUseCase;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    queryMock.mockResolvedValue(undefined);
     useCase = new UpdateShipmentStatusUseCase();
   });
 
-  it('should update shipment status (happy path)', async () => {
+  it('should update the shipment status', async () => {
     await useCase.execute({ shipmentId: 's1', status: 'shipped' });
-    // No error thrown = success
-    expect(true).toBe(true);
+
+    expect(queryMock).toHaveBeenCalled();
   });
 
   it('should update with tracking info', async () => {
     await useCase.execute({ shipmentId: 's1', status: 'delivered', trackingInfo: { carrier: 'UPS' } });
-    expect(true).toBe(true);
+
+    expect(queryMock).toHaveBeenCalled();
   });
 
-  it('should handle errors gracefully', async () => {
-    (query as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+  it('should not throw when the update fails', async () => {
+    queryMock.mockRejectedValueOnce(new Error('DB error'));
 
-    await useCase.execute({ shipmentId: 's1', status: 'shipped' });
-    // Should not throw
-    expect(true).toBe(true);
+    await expect(useCase.execute({ shipmentId: 's1', status: 'shipped' })).resolves.toBeUndefined();
   });
 });

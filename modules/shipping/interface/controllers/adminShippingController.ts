@@ -5,11 +5,9 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageShippingMethodsUseCase } from '../../application/useCases/ManageShippingAdmin';
+import { manageShippingMethodsUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageShippingMethodsUseCase = new ManageShippingMethodsUseCase();
 
 // ============================================================================
 // Shipping Methods

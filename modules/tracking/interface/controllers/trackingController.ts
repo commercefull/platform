@@ -7,7 +7,9 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
-import { ManageTrackingConfigUseCase, ProcessTrackingEventUseCase, GetTrackingStatusUseCase } from '../../application/useCases/Tracking';
+import { ManageTrackingConfigUseCase } from '../../application/useCases/ManageTrackingConfig';
+import { ProcessTrackingEventUseCase } from '../../application/useCases/ProcessTrackingEvent';
+import { GetTrackingStatusUseCase } from '../../application/useCases/GetTrackingStatus';
 import { TrackingConfigRepositoryImpl } from '../../application/wired';
 
 const repo = new TrackingConfigRepositoryImpl();

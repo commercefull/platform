@@ -1,36 +1,56 @@
+import { createPriceListRepository } from '../../tests/testUtils';
 import { CreatePriceListUseCase } from './CreatePriceList';
 import { PricingValidationError } from '../../domain/errors/PricingErrors';
 
 describe('CreatePriceListUseCase', () => {
-  let useCase: CreatePriceListUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should create the price list when the input is valid', async () => {
+    const repository = createPriceListRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      createPriceList: jest.fn().mockResolvedValue({
-        priceListId: 'pl-1',
-        name: 'Retail',
-        type: 'standard',
-        currencyCode: 'USD',
-        isDefault: false,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreatePriceListUseCase(mockRepo as never);
-  });
+    const result = await new CreatePriceListUseCase(repository).execute({
+      name: 'Retail',
+      currencyCode: 'USD',
+      type: 'standard',
+    });
 
-  it('should create a price list (happy path)', async () => {
-    const result = await useCase.execute({ name: 'Retail', currencyCode: 'USD', type: 'standard' });
-
-    expect(result.priceListId).toBe('pl-1');
+    expect(result.priceListId).toMatch(/^pl_/);
     expect(result.name).toBe('Retail');
+    expect(repository.createPriceList).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Retail', currencyCode: 'USD', type: 'standard', isDefault: false, isActive: true, storeIds: [] }),
+    );
   });
 
-  it('should throw PricingValidationError when name is empty', async () => {
-    await expect(useCase.execute({ name: '', currencyCode: 'USD', type: 'standard' })).rejects.toThrow(PricingValidationError);
+  it('should pass optional fields through when provided', async () => {
+    const repository = createPriceListRepository();
+
+    await new CreatePriceListUseCase(repository).execute({
+      name: 'VIP',
+      currencyCode: 'EUR',
+      type: 'promotional',
+      isDefault: true,
+      description: 'VIP pricing',
+      storeIds: ['store-1'],
+    });
+
+    expect(repository.createPriceList).toHaveBeenCalledWith(
+      expect.objectContaining({ isDefault: true, description: 'VIP pricing', storeIds: ['store-1'], currencyCode: 'EUR' }),
+    );
   });
 
-  it('should throw PricingValidationError when currencyCode is empty', async () => {
-    await expect(useCase.execute({ name: 'Test', currencyCode: '', type: 'standard' })).rejects.toThrow(PricingValidationError);
+  it('should throw PricingValidationError when the name is empty', async () => {
+    const repository = createPriceListRepository();
+
+    await expect(
+      new CreatePriceListUseCase(repository).execute({ name: '', currencyCode: 'USD', type: 'standard' }),
+    ).rejects.toThrow(PricingValidationError);
+    expect(repository.createPriceList).not.toHaveBeenCalled();
+  });
+
+  it('should throw PricingValidationError when the currencyCode is empty', async () => {
+    const repository = createPriceListRepository();
+
+    await expect(
+      new CreatePriceListUseCase(repository).execute({ name: 'Test', currencyCode: '', type: 'standard' }),
+    ).rejects.toThrow(PricingValidationError);
+    expect(repository.createPriceList).not.toHaveBeenCalled();
   });
 });

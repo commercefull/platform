@@ -10,9 +10,7 @@ import {
   OrderFulfillmentPackage,
   OrderFulfillmentPackageCreateParams,
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
-import { orderFulfillmentDataRepository } from '../wired';
 
-const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
 import { FulfillmentPackageNotFoundError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
@@ -59,7 +57,7 @@ export interface TrackFulfillmentPackageResponse {
 // ============================================================================
 
 export class TrackFulfillmentPackageUseCase {
-  constructor(private readonly packageRepo: OrderFulfillmentPackageRepository = orderFulfillmentRepo) {}
+  constructor(private readonly packageRepo: OrderFulfillmentPackageRepository) {}
 
   async execute(command: TrackFulfillmentPackageCommand): Promise<TrackFulfillmentPackageResponse> {
     let pkg: OrderFulfillmentPackage;

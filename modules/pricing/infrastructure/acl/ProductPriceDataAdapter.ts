@@ -9,14 +9,16 @@
  */
 
 import { ProductPriceDataPort, ProductPriceData, VariantPriceData } from '../../application/ports/ProductPriceDataPort';
-import productCatalogRepository from '../../../product/infrastructure/repositories/ProductCatalogRepository';
-
-const productRepo = productCatalogRepository.products;
-const productVariantRepo = productCatalogRepository.variants;
+import type productCatalogRepository from '../../../product/infrastructure/repositories/ProductCatalogRepository';
 
 export class ProductPriceDataAdapter implements ProductPriceDataPort {
+  constructor(
+    private readonly productRepo: Pick<typeof productCatalogRepository.products, 'findById'>,
+    private readonly productVariantRepo: Pick<typeof productCatalogRepository.variants, 'findById' | 'findDefaultForProduct'>,
+  ) {}
+
   async findProductById(productId: string): Promise<ProductPriceData | null> {
-    const product = await productRepo.findById(productId);
+    const product = await this.productRepo.findById(productId);
     if (!product) return null;
     return {
       productId: product.productId,
@@ -25,7 +27,7 @@ export class ProductPriceDataAdapter implements ProductPriceDataPort {
   }
 
   async findVariantById(variantId: string): Promise<VariantPriceData | null> {
-    const variant = await productVariantRepo.findById(variantId);
+    const variant = await this.productVariantRepo.findById(variantId);
     if (!variant) return null;
     return {
       variantId: variant.id,
@@ -35,7 +37,7 @@ export class ProductPriceDataAdapter implements ProductPriceDataPort {
   }
 
   async findDefaultVariantForProduct(productId: string): Promise<VariantPriceData | null> {
-    const variant = await productVariantRepo.findDefaultForProduct(productId);
+    const variant = await this.productVariantRepo.findDefaultForProduct(productId);
     if (!variant) return null;
     return {
       variantId: variant.id,

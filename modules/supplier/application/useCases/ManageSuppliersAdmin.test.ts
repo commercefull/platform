@@ -1,64 +1,66 @@
-jest.mock('../../infrastructure/repositories/SupplierDataRepository', () => ({
-  __esModule: true,
-  default: {
-    suppliers: {
-      findAll: jest.fn().mockResolvedValue([{ supplierId: 'sup1' }]),
-      findByStatus: jest.fn().mockResolvedValue([{ supplierId: 'sup1', status: 'active' }]),
-      getStatistics: jest.fn().mockResolvedValue({ total: 5, active: 3 }),
-      findById: jest.fn().mockResolvedValue({ supplierId: 'sup1' }),
-      create: jest.fn().mockResolvedValue({ supplierId: 'sup2' }),
-      update: jest.fn().mockResolvedValue({ supplierId: 'sup1', name: 'Updated' }),
-      approve: jest.fn().mockResolvedValue(true),
-      suspend: jest.fn().mockResolvedValue(true),
-      activate: jest.fn().mockResolvedValue(true),
-      deactivate: jest.fn().mockResolvedValue(true),
-      delete: jest.fn().mockResolvedValue(true),
-    },
-  },
-}));
-
+import { createSupplier, createSupplierRepository } from '../../tests/testUtils';
 import { ManageSuppliersAdminUseCase } from './ManageSuppliersAdmin';
 
 describe('ManageSuppliersAdminUseCase', () => {
-  let useCase: ManageSuppliersAdminUseCase;
+  it('should list suppliers with the given filters', async () => {
+    const repository = createSupplierRepository();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageSuppliersAdminUseCase();
-  });
+    const result = await new ManageSuppliersAdminUseCase(repository).findAll(true, true);
 
-  it('should find all', async () => {
-    const result = await useCase.findAll();
     expect(result).toHaveLength(1);
+    expect(repository.findAll).toHaveBeenCalledWith(true, true);
   });
 
-  it('should find by status', async () => {
-    const result = await useCase.findByStatus('active');
+  it('should list suppliers by status when a status is given', async () => {
+    const repository = createSupplierRepository();
+
+    const result = await new ManageSuppliersAdminUseCase(repository).findByStatus('active');
+
     expect(result).toHaveLength(1);
+    expect(repository.findByStatus).toHaveBeenCalledWith('active');
   });
 
-  it('should get statistics', async () => {
-    const result = await useCase.getStatistics();
-    expect(result.total).toBe(5);
+  it('should return statistics when asked', async () => {
+    const repository = createSupplierRepository();
+
+    const result = await new ManageSuppliersAdminUseCase(repository).getStatistics();
+
+    expect(result).toEqual({ total: 5, active: 3 });
   });
 
-  it('should find by ID', async () => {
-    const result = await useCase.findById('sup1');
-    expect(result).toEqual({ supplierId: 'sup1' });
+  it('should return the supplier when looking it up by id', async () => {
+    const supplier = createSupplier();
+    const repository = createSupplierRepository(supplier);
+
+    const result = await new ManageSuppliersAdminUseCase(repository).findById('sup-1');
+
+    expect(result).toBe(supplier);
+    expect(repository.findById).toHaveBeenCalledWith('sup-1');
   });
 
-  it('should create', async () => {
-    const result = await useCase.create({ name: 'New Supplier' } as never);
-    expect(result).toEqual({ supplierId: 'sup2' });
+  it('should create the supplier through the repository', async () => {
+    const repository = createSupplierRepository();
+    const supplier = createSupplier({ name: 'New Supplier', code: 'NEW' });
+
+    await new ManageSuppliersAdminUseCase(repository).create(supplier);
+
+    expect(repository.create).toHaveBeenCalledWith(supplier);
   });
 
-  it('should approve', async () => {
-    const result = await useCase.approve('sup1');
+  it('should approve the supplier when an id is given', async () => {
+    const repository = createSupplierRepository();
+
+    await new ManageSuppliersAdminUseCase(repository).approve('sup-1');
+
+    expect(repository.approve).toHaveBeenCalledWith('sup-1');
+  });
+
+  it('should delete the supplier when an id is given', async () => {
+    const repository = createSupplierRepository();
+
+    const result = await new ManageSuppliersAdminUseCase(repository).delete('sup-1');
+
     expect(result).toBe(true);
-  });
-
-  it('should delete', async () => {
-    const result = await useCase.delete('sup1');
-    expect(result).toBe(true);
+    expect(repository.delete).toHaveBeenCalledWith('sup-1');
   });
 });

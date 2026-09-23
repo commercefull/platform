@@ -23,22 +23,88 @@ tests/
     └── ...
 
 modules/[module]/
-├── application/
-│   └── useCases/
-│       └── __tests__/         # Unit tests for use cases
-└── domain/
-    └── __tests__/             # Unit tests for domain logic
+├── application/useCases/
+│   ├── AddItem.ts
+│   └── AddItem.test.ts        # Unit tests co-located with the use case
+├── domain/entities/
+│   ├── Basket.ts
+│   └── Basket.test.ts         # Domain unit tests co-located with the entity
+└── tests/
+    └── testUtils.ts           # Shared unit-test helpers (factories, boundary mocks)
 ```
+
+> **Reference implementation**: `modules/basket/` — see [`modules/basket/tests/testUtils.ts`](../../modules/basket/tests/testUtils.ts) and the use-case tests in `modules/basket/application/useCases/`. All unit tests must follow this pattern.
 
 ## Jest Configuration
 
-- **Preset**: `ts-jest`
+- **Transform**: `@swc/jest` (hoists `jest.mock` calls, so mocks can be registered from a shared helper)
 - **Test timeout**: 30 seconds
 - **Coverage from**: `features/**/*.ts`, `modules/**/*.ts`, `libs/**/*.ts`
 - **Coverage reporters**: text + lcov
 - **Force exit**: true (to handle open handles)
 - **Unit test roots**: `modules/`, `libs/`, `features/`
 - **Integration test roots**: `tests/integration/`
+
+## Unit Test Pattern
+
+Unit tests follow the Kent Beck style: test behavior through the public interface, mock only the boundaries, use real domain objects.
+
+### Location
+
+- `*.test.ts` files are **co-located** with the code under test (`AddItem.ts` next to `AddItem.test.ts`).
+- **One use case per file** — each `*.ts` under `useCases/` defines exactly one `*UseCase` class, and the file is named after it (`ManageThemesUseCase` → `ManageThemes.ts`). Its `Command`/`Query`/`Response` types may live in the same file. The test file mirrors the name (`ManageThemes.test.ts`) and covers only that use case.
+- Shared helpers live in `modules/<module>/tests/testUtils.ts`. The `tests/` directory name matters: it is excluded by the dependency-cruiser config and is unreachable from `app.ts`, so it stays out of both the dependency graph and the production `esbuild` bundle. Do **not** use `__tests__/` — it does not match the dependency-cruiser `tests/` exclusion.
+
+### Shared `testUtils.ts`
+
+Each module's `tests/testUtils.ts` owns three things:
+
+```typescript
+// 1. Boundary mocks — registered once, applied to every importing test file.
+//    Import testUtils FIRST so mocks register before the use case is evaluated,
+//    and USE at least one imported symbol (emitMock, queryMock, a factory) —
+//    an unused named import may be elided, so the module never evaluates and
+//    its jest.mock registrations silently never run.
+jest.mock('../../../libs/events/eventBus', () => ({
+  __esModule: true,
+  eventBus: { emit: jest.fn() },
+}));
+
+export const emitMock = jest.mocked(eventBus.emit);
+
+beforeEach(() => emitMock.mockClear());
+
+// 2. Real domain factories — never hand-build entity-shaped object literals.
+export function createBasket(options: BasketOptions = {}): Basket { /* ... */ }
+
+// 3. Typed port mocks — jest.Mocked<Interface>, never `as never` casts.
+export function createBasketRepository(basket: Basket | null = null): jest.Mocked<BasketRepository> { /* ... */ }
+```
+
+### Naming
+
+Every test reads as a behavioral specification: `it('should <outcome> when <condition>')`.
+
+```typescript
+it('should increase the quantity when the product is already in the basket', ...);
+it('should emit basket.item_added when an item is added', ...);
+it('should throw BasketNotFoundError when the basket does not exist', ...);
+```
+
+### What to assert
+
+- **Outcome** — the returned response or entity state, not merely that a mock was called.
+- **Persistence contract** — repository calls that must happen (`save`, `updateItem`) or must not (`addItem` when merging quantities).
+- **Events** — `emitMock` assertions for every event the use case emits, including payload fields other modules rely on.
+- **Errors** — domain errors for every guard, including input validation that must happen *before* any repository access (`expect(repository.findById).not.toHaveBeenCalled()`).
+
+### What not to do
+
+- Don't mock domain entities (`Basket`, `BasketItem`, `Money`) — use the real objects.
+- Don't mock `infrastructure/` implementations — inject a mock of the domain port.
+- Don't use `Record<string, jest.Mock>` + `as never` casts — they bypass type checking.
+- Don't assert only `result.id === mock.id` — the value comes from the mock itself and proves nothing.
+- Don't leave `eventBus` unmocked — always import the shared `testUtils` so emissions cannot trigger real handlers.
 
 ## Integration Test Pattern
 
@@ -143,6 +209,7 @@ npx jest --testPathPattern=audit             # Run by pattern
 - Design or update tests **before** major implementation work.
 - Never delete or weaken tests without explicit direction.
 - Prefer unit tests at the use-case / domain level and integration tests at the router level.
+- Unit tests must follow the [Unit Test Pattern](#unit-test-pattern) — `modules/basket/` is the reference implementation.
 - Integration tests must exercise real SQL against a test database.
 - All business API tests must authenticate via `loginTestAdmin` and pass `authHeaders()`.
 - Include auth rejection tests for protected routes.

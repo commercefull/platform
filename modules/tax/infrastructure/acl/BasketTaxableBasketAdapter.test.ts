@@ -1,23 +1,15 @@
-jest.mock('../../../basket/infrastructure/repositories/BasketRepository', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn(),
-  },
-}));
-
-import basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
 import { BasketTaxableBasketAdapter } from './BasketTaxableBasketAdapter';
+import type basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
 
 type Basket = NonNullable<Awaited<ReturnType<typeof basketRepo.findById>>>;
 
 describe('BasketTaxableBasketAdapter', () => {
   let adapter: BasketTaxableBasketAdapter;
-  let mockBasketRepo: jest.Mocked<typeof basketRepo>;
+  let mockBasketRepo: jest.Mocked<Pick<typeof basketRepo, 'findById'>>;
 
   beforeEach(() => {
-    mockBasketRepo = basketRepo as unknown as jest.Mocked<typeof basketRepo>;
-    jest.mocked(mockBasketRepo.findById).mockClear();
-    adapter = new BasketTaxableBasketAdapter();
+    mockBasketRepo = { findById: jest.fn() };
+    adapter = new BasketTaxableBasketAdapter(mockBasketRepo);
   });
 
   it('implements TaxableBasketPort', () => {

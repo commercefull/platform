@@ -1,22 +1,30 @@
-const mockMembershipRepoInstance = {
+import { MembershipBenefitsAdapter } from './MembershipBenefitsAdapter';
+import type { MembershipRepo, LegacyMembershipBenefit } from '../../../membership/infrastructure/repositories/membershipRepo';
+
+const benefit = (overrides: Partial<LegacyMembershipBenefit> = {}): LegacyMembershipBenefit => ({
+  id: 'b1',
+  tierIds: [],
+  name: 'Benefit',
+  description: '',
+  benefitType: 'discount',
+  isActive: true,
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+  ...overrides,
+});
+
+const mockMembershipRepoInstance: jest.Mocked<Pick<MembershipRepo, 'getUserMembershipBenefits'>> = {
   getUserMembershipBenefits: jest.fn(),
 };
 
-jest.mock('../../../membership/infrastructure/repositories/membershipRepo', () => ({
-  __esModule: true,
-  MembershipRepo: jest.fn(() => mockMembershipRepoInstance),
-}));
-
-import { MembershipBenefitsAdapter } from './MembershipBenefitsAdapter';
-
 describe('MembershipBenefitsAdapter', () => {
   let adapter: MembershipBenefitsAdapter;
-  let mockMembershipRepo: { getUserMembershipBenefits: jest.Mock };
+  let mockMembershipRepo: jest.Mocked<Pick<MembershipRepo, 'getUserMembershipBenefits'>>;
 
   beforeEach(() => {
     mockMembershipRepo = mockMembershipRepoInstance;
     mockMembershipRepo.getUserMembershipBenefits.mockClear();
-    adapter = new MembershipBenefitsAdapter();
+    adapter = new MembershipBenefitsAdapter(mockMembershipRepo);
   });
 
   it('implements MembershipBenefitsPort', () => {
@@ -25,8 +33,8 @@ describe('MembershipBenefitsAdapter', () => {
 
   it('should map membership benefits to MembershipDiscountBenefit', async () => {
     mockMembershipRepo.getUserMembershipBenefits.mockResolvedValue([
-      { id: 'b1', name: 'Gold 10% off', benefitType: 'discount', discountPercentage: 10 },
-      { id: 'b2', name: 'Silver 5% off', benefitType: 'discount', discountPercentage: 5 },
+      benefit({ id: 'b1', name: 'Gold 10% off', discountPercentage: 10 }),
+      benefit({ id: 'b2', name: 'Silver 5% off', discountPercentage: 5 }),
     ]);
 
     const result = await adapter.getDiscountBenefits('cust-1');
@@ -39,8 +47,8 @@ describe('MembershipBenefitsAdapter', () => {
 
   it('should filter out non-discount benefits', async () => {
     mockMembershipRepo.getUserMembershipBenefits.mockResolvedValue([
-      { id: 'b1', name: 'Free shipping', benefitType: 'shipping', discountPercentage: undefined },
-      { id: 'b2', name: '10% off', benefitType: 'discount', discountPercentage: 10 },
+      benefit({ id: 'b1', name: 'Free shipping', benefitType: 'shipping' }),
+      benefit({ id: 'b2', name: '10% off', discountPercentage: 10 }),
     ]);
 
     const result = await adapter.getDiscountBenefits('cust-1');
@@ -58,7 +66,7 @@ describe('MembershipBenefitsAdapter', () => {
   });
 
   it('should return empty array when null returned', async () => {
-    mockMembershipRepo.getUserMembershipBenefits.mockResolvedValue(null);
+    mockMembershipRepo.getUserMembershipBenefits.mockResolvedValue(null as unknown as LegacyMembershipBenefit[]);
 
     const result = await adapter.getDiscountBenefits('cust-1');
 
@@ -67,7 +75,7 @@ describe('MembershipBenefitsAdapter', () => {
 
   it('should filter out benefits with undefined discountPercentage', async () => {
     mockMembershipRepo.getUserMembershipBenefits.mockResolvedValue([
-      { id: 'b1', name: 'Mystery discount', benefitType: 'discount', discountPercentage: undefined },
+      benefit({ id: 'b1', name: 'Mystery discount' }),
     ]);
 
     const result = await adapter.getDiscountBenefits('cust-1');

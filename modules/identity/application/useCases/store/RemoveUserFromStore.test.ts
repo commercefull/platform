@@ -1,16 +1,16 @@
+import { lazyMock, createUserStoreAssignment } from '../../../tests/testUtils';
 import { RemoveUserFromStoreUseCase } from './RemoveUserFromStore';
 import { UserStoreAssignmentNotFoundError } from '../../../domain/errors/IdentityErrors';
 
 describe('RemoveUserFromStoreUseCase', () => {
   let useCase: RemoveUserFromStoreUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof RemoveUserFromStoreUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findByUserAndStore: jest.fn().mockResolvedValue({ userStoreId: 'us1' }),
-      delete: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RemoveUserFromStoreUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof RemoveUserFromStoreUseCase>[0]>();
+    mockRepo.findByUserAndStore.mockResolvedValue(createUserStoreAssignment({ userStoreId: 'us1', userId: 'u1', storeId: 's1' }));
+    mockRepo.delete.mockResolvedValue(undefined);
+    useCase = new RemoveUserFromStoreUseCase(mockRepo);
   });
 
   it('should remove user from store (happy path)', async () => {

@@ -1,69 +1,92 @@
+import {
+  createNotificationBatch,
+  createNotificationBatchRepository,
+  createNotificationCommandRepository,
+  createNotificationEventLogRepository,
+  createNotificationUnsubscribeRepository,
+} from '../../tests/testUtils';
 import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from './SendNotificationBatch';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
+const command = (overrides: { name?: string; channel?: string; recipients?: { userId: string; userType: string }[] } = {}) =>
+  new SendNotificationBatchCommand(
+    overrides.name ?? 'Promo blast',
+    overrides.channel ?? 'email',
+    'promo',
+    'Sale!',
+    'Check our sale',
+    overrides.recipients ?? [
+      { userId: 'u-1', userType: 'customer' },
+      { userId: 'u-2', userType: 'customer' },
+    ],
+  );
+
 describe('SendNotificationBatchUseCase', () => {
   let useCase: SendNotificationBatchUseCase;
-  let mockBatchRepo: Record<string, jest.Mock>;
-  let mockNotifRepo: Record<string, jest.Mock>;
-  let mockUnsubRepo: Record<string, jest.Mock>;
-  let mockEventLogRepo: Record<string, jest.Mock>;
+  let batchRepo: ReturnType<typeof createNotificationBatchRepository>;
+  let notifRepo: ReturnType<typeof createNotificationCommandRepository>;
+  let unsubscribeRepo: ReturnType<typeof createNotificationUnsubscribeRepository>;
+  let eventLogRepo: ReturnType<typeof createNotificationEventLogRepository>;
 
   beforeEach(() => {
-    mockBatchRepo = {
-      create: jest.fn().mockResolvedValue({
-        notificationBatchId: 'batch-1',
-        name: 'Test',
-        channel: 'email',
-        status: 'pending',
-        createdAt: new Date(),
-      }),
-    };
-    mockNotifRepo = { create: jest.fn().mockResolvedValue(undefined) };
-    mockUnsubRepo = { isUnsubscribed: jest.fn().mockResolvedValue(false) };
-    mockEventLogRepo = { create: jest.fn().mockResolvedValue(undefined) };
-    useCase = new SendNotificationBatchUseCase(
-      mockBatchRepo as never,
-      mockNotifRepo as never,
-      mockUnsubRepo as never,
-      mockEventLogRepo as never,
-    );
+    batchRepo = createNotificationBatchRepository();
+    notifRepo = createNotificationCommandRepository();
+    unsubscribeRepo = createNotificationUnsubscribeRepository();
+    eventLogRepo = createNotificationEventLogRepository();
+    batchRepo.create.mockResolvedValue(createNotificationBatch());
+    unsubscribeRepo.isUnsubscribed.mockResolvedValue(false);
+    useCase = new SendNotificationBatchUseCase(batchRepo, notifRepo, unsubscribeRepo, eventLogRepo);
   });
 
-  it('should send notification batch (happy path)', async () => {
-    const result = await useCase.execute(
-      new SendNotificationBatchCommand('Test', 'email', 'order.confirmation', 'Order Confirmed', 'Your order is confirmed', [
-        { userId: 'u1', userType: 'customer' },
-        { userId: 'u2', userType: 'customer' },
-      ]),
-    );
+  it('should create the batch and enqueue a notification per recipient when none are unsubscribed', async () => {
+    const result = await useCase.execute(command());
 
     expect(result.notificationBatchId).toBe('batch-1');
+    expect(result.targetCount).toBe(2);
     expect(result.enqueuedCount).toBe(2);
     expect(result.suppressedCount).toBe(0);
-    expect(mockNotifRepo.create).toHaveBeenCalledTimes(2);
+    expect(batchRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Promo blast', channel: 'email', targetCount: 2 }),
+    );
+    expect(notifRepo.create).toHaveBeenCalledTimes(2);
+    expect(notifRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'u-1', title: 'Sale!', channel: 'email' }),
+    );
+    expect(eventLogRepo.create).not.toHaveBeenCalled();
   });
 
-  it('should suppress notifications for unsubscribed users', async () => {
-    mockUnsubRepo.isUnsubscribed.mockResolvedValue(true);
+  it('should suppress unsubscribed recipients and log a notification.suppressed event for each', async () => {
+    unsubscribeRepo.isUnsubscribed.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
-    const result = await useCase.execute(
-      new SendNotificationBatchCommand('Test', 'email', 'promo', 'Sale!', 'Check our sale', [{ userId: 'u1', userType: 'customer' }]),
-    );
+    const result = await useCase.execute(command());
 
-    expect(result.enqueuedCount).toBe(0);
+    expect(result.enqueuedCount).toBe(1);
     expect(result.suppressedCount).toBe(1);
-    expect(mockEventLogRepo.create).toHaveBeenCalledWith(expect.objectContaining({ eventType: 'notification.suppressed' }));
-  });
-
-  it('should throw NotificationValidationError when name is empty', async () => {
-    await expect(
-      useCase.execute(new SendNotificationBatchCommand('', 'email', 'test', 'T', 'C', [{ userId: 'u1', userType: 'customer' }])),
-    ).rejects.toThrow(NotificationValidationError);
-  });
-
-  it('should throw NotificationValidationError when no recipients', async () => {
-    await expect(useCase.execute(new SendNotificationBatchCommand('Test', 'email', 'test', 'T', 'C', []))).rejects.toThrow(
-      NotificationValidationError,
+    expect(notifRepo.create).toHaveBeenCalledTimes(1);
+    expect(notifRepo.create).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-1' }));
+    expect(eventLogRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'notification.suppressed',
+        entityId: 'batch-1',
+        entityType: 'notificationBatch',
+        payload: expect.objectContaining({ userId: 'u-2', reason: 'unsubscribed' }),
+      }),
     );
+  });
+
+  it.each([
+    ['name', command({ name: '' })],
+    ['channel', command({ channel: '' })],
+    ['recipients', command({ recipients: [] })],
+  ])('should throw NotificationValidationError when %s is missing', async (_field, cmd) => {
+    await expect(useCase.execute(cmd)).rejects.toThrow(NotificationValidationError);
+    expect(batchRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('should throw NotificationValidationError when the batch cannot be created', async () => {
+    batchRepo.create.mockResolvedValue(null);
+
+    await expect(useCase.execute(command())).rejects.toThrow(NotificationValidationError);
+    expect(notifRepo.create).not.toHaveBeenCalled();
   });
 });

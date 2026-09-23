@@ -1,35 +1,23 @@
 import { ListProductsUseCase, ListProductsCommand } from './ListProducts';
+import { createProduct, lazyMock } from '../../tests/testUtils';
 
 describe('ListProductsUseCase', () => {
   let useCase: ListProductsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ListProductsUseCase>[0]>;
 
-  const makeProduct = (id: string) => ({
-    productId: id,
-    name: `Product ${id}`,
-    slug: `product-${id}`,
-    sku: `SKU-${id}`,
-    status: 'active',
-    visibility: 'public',
-    isFeatured: false,
-    hasVariants: false,
-    price: { basePrice: 10, salePrice: null, effectivePrice: 10, isOnSale: false, cost: 5 },
-    primaryImage: null,
-    categoryId: 'cat-1',
-    createdAt: new Date(),
-  });
+  const makeProduct = (id: string) => createProduct({ productId: id, name: `Product ${id}`, sku: `SKU-${id}` });
 
   beforeEach(() => {
-    mockRepo = {
-      findAll: jest.fn().mockResolvedValue({
-        data: [makeProduct('p1'), makeProduct('p2')],
-        total: 2,
-        limit: 20,
-        offset: 0,
-        hasMore: false,
-      }),
-    };
-    useCase = new ListProductsUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ListProductsUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue({
+      data: [makeProduct('p1'), makeProduct('p2')],
+      total: 2,
+      limit: 20,
+      offset: 0,
+      hasMore: false,
+      length: 2,
+    });
+    useCase = new ListProductsUseCase(mockRepo);
   });
 
   it('should list products (happy path)', async () => {

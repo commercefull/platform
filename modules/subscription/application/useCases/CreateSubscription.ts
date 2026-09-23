@@ -3,9 +3,28 @@
  * Creates a new customer subscription
  */
 
-import { subscriptionRepo } from '../wired';
-import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../domain/repositories/SubscriptionRepository';
+import {
+  CustomerSubscription,
+  SubscriptionPlan,
+  SubscriptionProduct,
+} from '../../domain/repositories/SubscriptionRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
+
+export interface CreateSubscriptionRepoPort {
+  getSubscriptionPlan(subscriptionPlanId: string): Promise<SubscriptionPlan | null>;
+  getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null>;
+  createCustomerSubscription(subscription: {
+    customerId: string;
+    subscriptionPlanId: string;
+    subscriptionProductId?: string;
+    productVariantId?: string;
+    quantity?: number;
+    shippingAddressId?: string;
+    billingAddressId?: string;
+    paymentMethodId?: string;
+    customizations?: Record<string, unknown>;
+  }): Promise<CustomerSubscription>;
+}
 
 // ============================================================================
 // Command
@@ -45,6 +64,8 @@ export interface CreateSubscriptionResponse {
 // ============================================================================
 
 export class CreateSubscriptionUseCase {
+  constructor(private readonly subscriptionRepo: CreateSubscriptionRepoPort) {}
+
   async execute(command: CreateSubscriptionCommand): Promise<CreateSubscriptionResponse> {
     const { input } = command;
 
@@ -67,7 +88,7 @@ export class CreateSubscriptionUseCase {
 
     try {
       // 1. Get the subscription plan
-      const plan = await subscriptionRepo.getSubscriptionPlan(input.subscriptionPlanId);
+      const plan = await this.subscriptionRepo.getSubscriptionPlan(input.subscriptionPlanId);
       if (!plan) {
         return {
           success: false,
@@ -85,7 +106,7 @@ export class CreateSubscriptionUseCase {
       }
 
       // 2. Get the subscription product
-      const product = await subscriptionRepo.getSubscriptionProduct(plan.subscriptionProductId);
+      const product = await this.subscriptionRepo.getSubscriptionProduct(plan.subscriptionProductId);
       if (!product || !product.isActive) {
         return {
           success: false,
@@ -125,7 +146,7 @@ export class CreateSubscriptionUseCase {
       }
 
       // 5. Create the subscription (the repo handles status, trial dates, pricing internally)
-      const subscription = await subscriptionRepo.createCustomerSubscription({
+      const subscription = await this.subscriptionRepo.createCustomerSubscription({
         customerId: input.customerId,
         subscriptionPlanId: input.subscriptionPlanId,
         subscriptionProductId: plan.subscriptionProductId,

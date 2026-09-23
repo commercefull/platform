@@ -10,6 +10,17 @@ import { ManageAddressesUseCase } from './ManageAddresses';
 import { AuthenticateCustomerUseCase } from './AuthenticateCustomer';
 import { RegisterCustomerUseCase } from './RegisterCustomer';
 import { ChangePasswordUseCase } from './ChangePassword';
+import { ManageCustomersUseCase } from './ManageCustomers';
+import { ManageCustomerAddressesUseCase } from './ManageCustomerAddresses';
+import { ManageWishlistUseCase } from './ManageWishlist';
+import { ManageStorefrontAddressesUseCase } from './ManageStorefrontAddresses';
+import { ManageStorefrontWishlistUseCase } from './ManageStorefrontWishlist';
+
+export const manageCustomersUseCase = new ManageCustomersUseCase(customerDataRepository.customers);
+export const manageCustomerAddressesUseCase = new ManageCustomerAddressesUseCase(customerDataRepository.addresses);
+export const manageWishlistUseCase = new ManageWishlistUseCase(customerDataRepository.wishlist);
+export const manageStorefrontAddressesUseCase = new ManageStorefrontAddressesUseCase(customerDataRepository.addresses);
+export const manageStorefrontWishlistUseCase = new ManageStorefrontWishlistUseCase(customerDataRepository.wishlist);
 
 export const getCustomerUseCase = new GetCustomerUseCase(customerRepo);
 export const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepo);

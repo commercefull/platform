@@ -6,9 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { ManageStorefrontSubscriptionsUseCase } from '../../application/useCases/ManageStorefrontSubscriptions';
-
-const manageStorefrontSubscriptionsUseCase = new ManageStorefrontSubscriptionsUseCase();
+import { manageStorefrontSubscriptionsUseCase } from '../../application/wired';
 
 /**
  * GET: List available subscription plans

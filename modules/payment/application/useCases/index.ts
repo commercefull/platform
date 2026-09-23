@@ -6,7 +6,8 @@
 
 export * from './InitiatePayment';
 export * from './ProcessRefund';
-export * from './GetTransactions';
+export * from './GetTransaction';
+export * from './ListTransactions';
 export * from './CapturePayment';
 export * from './VoidPayment';
 export * from './GetPaymentMethods';
@@ -19,4 +20,6 @@ export * from './RecordPaymentFee';
 export * from './ProcessPaymentWebhook';
 export * from './GetPaymentBalance';
 export * from './GeneratePaymentReport';
-export * from './PSPRouting';
+export * from './ManagePSPRoutes';
+export * from './RoutePayment';
+export * from './GetProviderHealth';

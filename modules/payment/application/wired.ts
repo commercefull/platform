@@ -10,6 +10,9 @@ import type {
   RiskLevel,
 } from '../infrastructure/repositories/PaymentBillingDataRepository';
 import { FraudRepo, FraudRepo as fraudRepo } from '../infrastructure';
+import { FraudScreeningService } from './services/FraudScreeningService';
+import CheckoutRepo from '../../checkout/infrastructure/repositories/CheckoutRepository';
+import orderDataRepository from '../../order/infrastructure/repositories/OrderDataRepository';
 
 export {
   paymentDataRepository,
@@ -24,3 +27,10 @@ export {
   fraudRepo,
   FraudRepo,
 };
+
+export const fraudScreeningService = new FraudScreeningService(FraudRepo);
+
+export const orderStatusSyncAdapter = new CheckoutOrderStatusSyncAdapter(
+  CheckoutRepo,
+  orderDataRepository.commands,
+);

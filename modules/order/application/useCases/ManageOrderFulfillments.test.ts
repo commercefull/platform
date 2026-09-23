@@ -1,97 +1,81 @@
-jest.mock('../../infrastructure/repositories/OrderFulfillmentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    fulfillments: {
-      findByStatus: jest.fn().mockResolvedValue([{ fulfillmentId: 'f1' }]),
-      findById: jest.fn().mockResolvedValue({ fulfillmentId: 'f1' }),
-      updateStatus: jest.fn().mockResolvedValue(undefined),
-      addTracking: jest.fn().mockResolvedValue(undefined),
-      update: jest.fn().mockResolvedValue(undefined),
-      markAsShipped: jest.fn().mockResolvedValue(undefined),
-      markAsDelivered: jest.fn().mockResolvedValue(undefined),
-      cancel: jest.fn().mockResolvedValue(undefined),
-      getStatusStatistics: jest.fn().mockResolvedValue({ pending: 5, shipped: 10 }),
-      findOverdue: jest.fn().mockResolvedValue([{ fulfillmentId: 'f1' }]),
-      findShippedToday: jest.fn().mockResolvedValue([{ fulfillmentId: 'f2' }]),
-    },
-    returns: {},
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/OrderDataRepository', () => ({
-  __esModule: true,
-  default: {
-    commands: {
-      findById: jest.fn().mockResolvedValue({ orderId: 'o1' }),
-    },
-    queries: {},
-  },
-}));
-
-import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from './ManageOrderFulfillments';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
-
-const mockRepo = orderFulfillmentDataRepository as unknown as { fulfillments: Record<string, jest.Mock> };
+import { lazyMock, createOrderFulfillment } from '../../tests/testUtils';
+import { ManageOrderFulfillmentsUseCase } from './ManageOrderFulfillments';
+import type { OrderFulfillmentRepository, FulfillmentStatus } from '../../domain/repositories/OrderFulfillmentRepository';
+import type { OrderRepository } from '../../domain/repositories/OrderRepository';
 
 describe('ManageOrderFulfillmentsUseCase', () => {
   let useCase: ManageOrderFulfillmentsUseCase;
+  let fulfillmentRepo: jest.Mocked<OrderFulfillmentRepository>;
+  let orderRepo: jest.Mocked<OrderRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageOrderFulfillmentsUseCase();
+    fulfillmentRepo = lazyMock<OrderFulfillmentRepository>();
+    orderRepo = lazyMock<OrderRepository>();
+    useCase = new ManageOrderFulfillmentsUseCase(fulfillmentRepo, orderRepo);
   });
 
-  it('should find by status', async () => {
+  it('should find fulfillments by status', async () => {
+    fulfillmentRepo.findByStatus.mockResolvedValue([createOrderFulfillment()]);
+
     const result = await useCase.findByStatus('pending', 10, 0);
+
     expect(result).toHaveLength(1);
+    expect(fulfillmentRepo.findByStatus).toHaveBeenCalledWith('pending', 10, 0);
   });
 
-  it('should find by ID', async () => {
+  it('should find a fulfillment by ID', async () => {
+    fulfillmentRepo.findById.mockResolvedValue(createOrderFulfillment({ orderFulfillmentId: 'f1' }));
+
     const result = await useCase.findById('f1');
-    expect(result).toEqual({ fulfillmentId: 'f1' });
+
+    expect(result?.orderFulfillmentId).toBe('f1');
   });
 
-  it('should add tracking', async () => {
+  it('should add tracking to a fulfillment', async () => {
+    fulfillmentRepo.addTracking.mockResolvedValue(createOrderFulfillment({ trackingNumber: 'TRK123' }));
+
     await useCase.addTracking('f1', 'TRK123', 'ups', 'UPS', 'https://ups.com');
-    expect(mockRepo.fulfillments.addTracking).toHaveBeenCalledWith('f1', 'TRK123', 'ups', 'UPS', 'https://ups.com');
+
+    expect(fulfillmentRepo.addTracking).toHaveBeenCalledWith('f1', 'TRK123', 'ups', 'UPS', 'https://ups.com');
   });
 
-  it('should mark as shipped', async () => {
+  it('should mark a fulfillment as shipped', async () => {
+    fulfillmentRepo.markAsShipped.mockResolvedValue(createOrderFulfillment({ status: 'shipped' }));
+
     await useCase.markAsShipped('f1');
-    expect(mockRepo.fulfillments.markAsShipped).toHaveBeenCalledWith('f1');
+
+    expect(fulfillmentRepo.markAsShipped).toHaveBeenCalledWith('f1');
   });
 
-  it('should mark as delivered', async () => {
+  it('should mark a fulfillment as delivered', async () => {
+    fulfillmentRepo.markAsDelivered.mockResolvedValue(createOrderFulfillment({ status: 'delivered' }));
+
     await useCase.markAsDelivered('f1');
-    expect(mockRepo.fulfillments.markAsDelivered).toHaveBeenCalledWith('f1');
+
+    expect(fulfillmentRepo.markAsDelivered).toHaveBeenCalledWith('f1');
   });
 
-  it('should cancel fulfillment', async () => {
+  it('should cancel a fulfillment', async () => {
+    fulfillmentRepo.cancel.mockResolvedValue(createOrderFulfillment({ status: 'cancelled' }));
+
     await useCase.cancel('f1', 'Customer request');
-    expect(mockRepo.fulfillments.cancel).toHaveBeenCalledWith('f1', 'Customer request');
+
+    expect(fulfillmentRepo.cancel).toHaveBeenCalledWith('f1', 'Customer request');
   });
 
-  it('should get status statistics', async () => {
-    const result = (await useCase.getStatusStatistics()) as unknown as Record<string, unknown>;
+  it('should return status statistics', async () => {
+    fulfillmentRepo.getStatusStatistics.mockResolvedValue({ pending: 5, shipped: 10 } as unknown as Record<FulfillmentStatus, number>);
+
+    const result = await useCase.getStatusStatistics();
+
     expect(result.pending).toBe(5);
   });
 
-  it('should find overdue', async () => {
+  it('should find overdue fulfillments', async () => {
+    fulfillmentRepo.findOverdue.mockResolvedValue([createOrderFulfillment()]);
+
     const result = await useCase.findOverdue();
+
     expect(result).toHaveLength(1);
-  });
-});
-
-describe('GetOrderForFulfillmentUseCase', () => {
-  let useCase: GetOrderForFulfillmentUseCase;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetOrderForFulfillmentUseCase();
-  });
-
-  it('should find order by ID', async () => {
-    const result = await useCase.findById('o1');
-    expect(result).toEqual({ orderId: 'o1' });
   });
 });

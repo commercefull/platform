@@ -5,10 +5,8 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageCouponsUseCase } from '../../application/useCases/ManagePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageCouponsUseCase = new ManageCouponsUseCase();
+import { manageCouponsUseCase } from '../../application/wired';
 
 // ============================================================================
 // Coupon Management

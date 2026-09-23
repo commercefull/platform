@@ -5,9 +5,8 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { ManageStorefrontReturnsUseCase } from '../../application/useCases/ManageStorefrontReturns';
+import { manageStorefrontReturnsUseCase } from '../../application/useCases/wired';
 
-const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase();
 
 interface CustomerUser {
   id: string;

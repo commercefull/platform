@@ -1,8 +1,4 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { RegisterOrganizationUseCase } from './RegisterOrganization';
 import {
   OrganizationRegistrationFieldsRequiredError,
@@ -10,30 +6,26 @@ import {
   PasswordTooShortError,
   EmailAlreadyRegisteredError,
 } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('RegisterOrganizationUseCase', () => {
   let useCase: RegisterOrganizationUseCase;
-  let mockOrgRepo: Record<string, jest.Mock>;
-  let mockAuthService: Record<string, jest.Mock>;
-  let mockEmailService: Record<string, jest.Mock>;
+  let mockOrgRepo: jest.Mocked<ConstructorParameters<typeof RegisterOrganizationUseCase>[0]>;
+  let mockAuthService: jest.Mocked<ConstructorParameters<typeof RegisterOrganizationUseCase>[1]>;
+  let mockEmailService: jest.Mocked<ConstructorParameters<typeof RegisterOrganizationUseCase>[2]>;
 
   beforeEach(() => {
-    mockOrgRepo = {
-      findByEmail: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue(undefined),
-    };
-    mockAuthService = {
-      hashPassword: jest.fn().mockResolvedValue('hashed-pw'),
-    };
-    mockEmailService = {
-      sendOrganizationWelcomeEmail: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RegisterOrganizationUseCase(mockOrgRepo as never, mockAuthService as never, mockEmailService as never);
+    mockOrgRepo = lazyMock<ConstructorParameters<typeof RegisterOrganizationUseCase>[0]>();
+    mockOrgRepo.findByEmail.mockResolvedValue(null);
+    mockOrgRepo.create.mockResolvedValue(undefined);
+    mockAuthService = lazyMock<ConstructorParameters<typeof RegisterOrganizationUseCase>[1]>();
+    mockAuthService.hashPassword.mockResolvedValue('hashed-pw');
+    mockEmailService = lazyMock<ConstructorParameters<typeof RegisterOrganizationUseCase>[2]>();
+    mockEmailService.sendOrganizationWelcomeEmail.mockResolvedValue(undefined);
+    useCase = new RegisterOrganizationUseCase(mockOrgRepo, mockAuthService, mockEmailService);
   });
 
   it('should register organization (happy path)', async () => {
@@ -47,7 +39,7 @@ describe('RegisterOrganizationUseCase', () => {
     expect(result.status).toBe('pending_approval');
     expect(mockOrgRepo.create).toHaveBeenCalled();
     expect(mockEmailService.sendOrganizationWelcomeEmail).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalled();
   });
 
   it('should throw OrganizationRegistrationFieldsRequiredError when fields missing', async () => {
@@ -69,7 +61,7 @@ describe('RegisterOrganizationUseCase', () => {
   });
 
   it('should throw EmailAlreadyRegisteredError when email exists', async () => {
-    mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'existing' });
+    mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'existing', email: 'test@test.com' });
 
     await expect(useCase.execute({ email: 'test@test.com', password: 'password123', businessName: 'Test' })).rejects.toThrow(
       EmailAlreadyRegisteredError,

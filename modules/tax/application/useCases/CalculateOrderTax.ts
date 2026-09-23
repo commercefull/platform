@@ -9,9 +9,14 @@
  * longer silently ignored.
  */
 
-import { taxQueryRepository } from '../wired';
 import { TaxExemption } from '../../domain/entities/TaxExemption';
-import type { CustomerTaxExemption, ExemptionVerdict } from '../../taxTypes';
+import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemptionStatus } from '../../taxTypes';
+
+export interface TaxQueryPort {
+  getTaxRateForAddress(address: AddressInput): Promise<number>;
+  getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number>;
+  findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus): Promise<CustomerTaxExemption[]>;
+}
 
 // ============================================================================
 // Command
@@ -72,6 +77,8 @@ export interface CalculateOrderTaxResponse {
 // ============================================================================
 
 export class CalculateOrderTaxUseCase {
+  constructor(private readonly taxQuery: TaxQueryPort) {}
+
   async execute(command: CalculateOrderTaxCommand): Promise<CalculateOrderTaxResponse> {
     try {
       // Validate input
@@ -109,12 +116,12 @@ export class CalculateOrderTaxUseCase {
       };
 
       // Get the default tax rate for the shipping address (backward compat)
-      const defaultTaxRate = await taxQueryRepository.query.getTaxRateForAddress(address);
+      const defaultTaxRate = await this.taxQuery.getTaxRateForAddress(address);
 
       // Load customer tax exemptions and convert to domain entities
       let exemptions: TaxExemption[] = [];
       if (command.customerId) {
-        const rawExemptions = await taxQueryRepository.query.findCustomerTaxExemptions(command.customerId, 'approved');
+        const rawExemptions = await this.taxQuery.findCustomerTaxExemptions(command.customerId, 'approved');
         exemptions = rawExemptions.map(e => this.toDomainEntity(e));
       }
 
@@ -143,7 +150,7 @@ export class CalculateOrderTaxUseCase {
         // Get the tax rate for this item's category (per-category lookup, Epic B5)
         let itemTaxRate = defaultTaxRate;
         if (item.taxCategoryId) {
-          const categoryRate = await taxQueryRepository.query.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
+          const categoryRate = await this.taxQuery.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
           // Only use the category rate if it's non-zero (zero means no specific rate found)
           if (categoryRate > 0) {
             itemTaxRate = categoryRate;
@@ -291,5 +298,3 @@ export class CalculateOrderTaxUseCase {
     return 1;
   }
 }
-
-export const calculateOrderTaxUseCase = new CalculateOrderTaxUseCase();

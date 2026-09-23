@@ -1,61 +1,63 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
+import { createBasket, createBasketItem, createBasketRepository, emitMock } from '../../tests/testUtils';
+import { MergeBasketsCommand, MergeBasketsUseCase } from './MergeBaskets';
+import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
+import type { BasketRepository } from '../../domain/repositories/BasketRepository';
 
-import { MergeBasketsUseCase, MergeBasketsCommand } from './MergeBaskets';
-import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+function repositoryWithTwoBaskets(): jest.Mocked<BasketRepository> {
+  const source = createBasket({ basketId: 'source-1', items: [createBasketItem({ basketId: 'source-1' })] });
+  const target = createBasket({ basketId: 'target-1' });
+  const repository = createBasketRepository();
+  repository.findById.mockImplementation(id =>
+    Promise.resolve(id === 'source-1' ? source : id === 'target-1' ? target : null),
+  );
+  repository.mergeBaskets.mockResolvedValue(target);
+  return repository;
+}
 
 describe('MergeBasketsUseCase', () => {
-  let useCase: MergeBasketsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should merge the source basket into the target when both baskets exist', async () => {
+    const repository = repositoryWithTwoBaskets();
 
-  const makeBasket = (id: string) => ({
-    basketId: id,
-    customerId: 'c1',
-    sessionId: 's1',
-    status: 'active',
-    currency: 'USD',
-    items: id === 'b1' ? [{ basketItemId: 'i1' }] : [],
-    itemCount: 1,
-    subtotal: { amount: 50 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    const result = await new MergeBasketsUseCase(repository).execute(new MergeBasketsCommand('source-1', 'target-1'));
+
+    expect(repository.mergeBaskets).toHaveBeenCalledWith('source-1', 'target-1');
+    expect(result.basketId).toBe('target-1');
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn((id: string) => Promise.resolve(makeBasket(id))),
-      mergeBaskets: jest.fn().mockResolvedValue(makeBasket('b2')),
-    };
-    useCase = new MergeBasketsUseCase(mockRepo as never);
-  });
+  it('should emit basket.merged with the number of merged items when the baskets are merged', async () => {
+    const repository = repositoryWithTwoBaskets();
 
-  it('should merge baskets (happy path)', async () => {
-    const result = await useCase.execute(new MergeBasketsCommand('b1', 'b2'));
+    await new MergeBasketsUseCase(repository).execute(new MergeBasketsCommand('source-1', 'target-1'));
 
-    expect(result.basketId).toBe('b2');
-    expect(mockRepo.mergeBaskets).toHaveBeenCalledWith('b1', 'b2');
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'basket.merged',
-      expect.objectContaining({ sourceBasketId: 'b1', targetBasketId: 'b2', itemsMerged: 1 }),
+      expect.objectContaining({ sourceBasketId: 'source-1', targetBasketId: 'target-1', itemsMerged: 1 }),
     );
   });
 
-  it('should throw BasketNotFoundError when source basket does not exist', async () => {
-    mockRepo.findById.mockImplementation((id: string) => (id === 'missing' ? Promise.resolve(null) : Promise.resolve(makeBasket(id))));
+  it('should throw BasketValidationError when the source and target are the same basket', async () => {
+    const repository = repositoryWithTwoBaskets();
 
-    await expect(useCase.execute(new MergeBasketsCommand('missing', 'b2'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new MergeBasketsUseCase(repository).execute(new MergeBasketsCommand('source-1', 'source-1'))).rejects.toThrow(
+      BasketValidationError,
+    );
+    expect(repository.findById).not.toHaveBeenCalled();
+    expect(repository.mergeBaskets).not.toHaveBeenCalled();
   });
 
-  it('should throw BasketNotFoundError when target basket does not exist', async () => {
-    mockRepo.findById.mockImplementation((id: string) => (id === 'missing' ? Promise.resolve(null) : Promise.resolve(makeBasket(id))));
+  it('should throw BasketNotFoundError when the source basket does not exist', async () => {
+    const repository = repositoryWithTwoBaskets();
 
-    await expect(useCase.execute(new MergeBasketsCommand('b1', 'missing'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new MergeBasketsUseCase(repository).execute(new MergeBasketsCommand('missing', 'target-1'))).rejects.toThrow(
+      BasketNotFoundError,
+    );
+  });
+
+  it('should throw BasketNotFoundError when the target basket does not exist', async () => {
+    const repository = repositoryWithTwoBaskets();
+
+    await expect(new MergeBasketsUseCase(repository).execute(new MergeBasketsCommand('source-1', 'missing'))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

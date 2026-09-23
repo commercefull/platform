@@ -8,15 +8,10 @@
  */
 
 import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData } from '../../application/ports/CredentialSubjectPort';
-import customerDataRepository from '../../../customer/infrastructure/repositories/CustomerDataRepository';
 import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
 
 export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
-  private readonly customerRepo: CustomerRepoType;
-
-  constructor(customerRepo?: CustomerRepoType) {
-    this.customerRepo = customerRepo ?? customerDataRepository.legacy;
-  }
+  constructor(private readonly customerRepo: CustomerRepoType) {}
 
   async authenticate(email: string, password: string): Promise<CredentialSubject | null> {
     const result = await this.customerRepo.authenticateCustomer({ email, password });

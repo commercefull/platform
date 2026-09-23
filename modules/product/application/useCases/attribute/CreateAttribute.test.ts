@@ -1,42 +1,22 @@
-jest.mock('../../../infrastructure/repositories/DynamicAttributeRepository', () => {
-  const mock = {
-    findAttributeByCode: jest.fn().mockResolvedValue(null),
-    findAttributeById: jest.fn().mockResolvedValue(null),
-    createAttribute: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1',
-      name: 'Color',
-      code: 'color',
-      type: 'select',
-      isSystem: false,
-    }),
-    updateAttribute: jest.fn().mockResolvedValue({
-      productAttributeId: 'a1',
-      name: 'Color Updated',
-      code: 'color',
-      type: 'select',
-      isSystem: false,
-    }),
-    findAttributeValues: jest.fn().mockResolvedValue([]),
-    setProductAttribute: jest.fn().mockResolvedValue({ productId: 'p1', attributeId: 'a1', value: 'Red' }),
-  };
-  return {
-    __esModule: true,
-    default: mock,
-    DynamicAttributeRepository: function () { return mock; },
-  };
-});
 
 import { CreateAttributeUseCase } from './CreateAttribute';
-import dynamicAttributeRepository from '../../../infrastructure/repositories/DynamicAttributeRepository';
-
-const mockRepo = dynamicAttributeRepository as unknown as Record<string, jest.Mock>;
+import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
+import { createAttribute, createAttributeData, lazyMock } from '../../../tests/testUtils';
 
 describe('CreateAttributeUseCase', () => {
   let useCase: CreateAttributeUseCase;
+  let mockRepo: jest.Mocked<DynamicAttributePort>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new CreateAttributeUseCase();
+    mockRepo = lazyMock<DynamicAttributePort>();
+    mockRepo.findAttributeByCode.mockResolvedValue(null);
+    mockRepo.findAttributeById.mockResolvedValue(null);
+    mockRepo.createAttribute.mockResolvedValue(createAttribute({ productAttributeId: 'a1' }));
+    mockRepo.updateAttribute.mockResolvedValue(createAttribute({ name: 'Color Updated' }));
+    mockRepo.findAttributeValues.mockResolvedValue([]);
+    mockRepo.setProductAttribute.mockResolvedValue(createAttributeData({ productId: 'p1', attributeId: 'a1', value: 'Red' }));
+    useCase = new CreateAttributeUseCase(mockRepo);
   });
 
   it('should create attribute (happy path)', async () => {
@@ -61,7 +41,7 @@ describe('CreateAttributeUseCase', () => {
   });
 
   it('should return error when code already exists', async () => {
-    mockRepo.findAttributeByCode.mockResolvedValueOnce({ productAttributeId: 'existing' });
+    mockRepo.findAttributeByCode.mockResolvedValueOnce(createAttribute({ productAttributeId: 'existing' }));
 
     const result = await useCase.execute({ name: 'Color', code: 'color' });
 

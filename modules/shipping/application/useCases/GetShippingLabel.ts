@@ -4,8 +4,7 @@
  * Retrieves a shipping label by ID or tracking number.
  */
 
-import { shippingLabelRepo } from '../wired';
-import type { ShippingLabel } from '../../domain/repositories/ShippingLabelRepository';
+import type { ShippingLabel, ShippingLabelPort } from '../../domain/repositories/ShippingLabelRepository';
 
 export interface GetLabelInput {
   shippingLabelId?: string;
@@ -13,14 +12,16 @@ export interface GetLabelInput {
 }
 
 export class GetShippingLabelUseCase {
+  constructor(private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'findById' | 'findByTrackingNumber'>) {}
+
   async execute(input: GetLabelInput): Promise<{ found: boolean; label: ShippingLabel | null }> {
     if (input.shippingLabelId) {
-      const label = await shippingLabelRepo.findById(input.shippingLabelId);
+      const label = await this.shippingLabelRepo.findById(input.shippingLabelId);
       return { found: !!label, label };
     }
 
     if (input.trackingNumber) {
-      const label = await shippingLabelRepo.findByTrackingNumber(input.trackingNumber);
+      const label = await this.shippingLabelRepo.findByTrackingNumber(input.trackingNumber);
       return { found: !!label, label };
     }
 
@@ -28,4 +29,3 @@ export class GetShippingLabelUseCase {
   }
 }
 
-export const getShippingLabelUseCase = new GetShippingLabelUseCase();

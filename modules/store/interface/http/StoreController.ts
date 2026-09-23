@@ -13,7 +13,7 @@ import { ConfigureStorePickupUseCase, type ConfigureStorePickupInput } from '../
 import { SetLocalDeliveryZoneUseCase, type SetLocalDeliveryZoneInput } from '../../application/useCases/SetLocalDeliveryZone';
 import { CreateStoreHierarchyUseCase, type CreateStoreHierarchyInput } from '../../application/useCases/CreateStoreHierarchy';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
-import { storeDataRepository, SystemConfigurationRepo, OrganizationLookupAdapter, SystemConfigAdapter } from '../../application/wired';
+import { storeDataRepository, SystemConfigurationRepo, organizationLookupAdapter, SystemConfigAdapter } from '../../application/wired';
 
 const StoreRepo = storeDataRepository.stores;
 
@@ -40,7 +40,7 @@ export class StoreController {
   constructor() {
     const storeRepository = StoreRepo;
     const systemConfigPort = new SystemConfigAdapter(new SystemConfigurationRepo());
-    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, new OrganizationLookupAdapter());
+    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, organizationLookupAdapter);
     this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository);
     this.configurePickupUseCase = new ConfigureStorePickupUseCase(storeRepository);
     this.setLocalDeliveryUseCase = new SetLocalDeliveryZoneUseCase(storeRepository);

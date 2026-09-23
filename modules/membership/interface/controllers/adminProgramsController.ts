@@ -4,10 +4,8 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { ManageMembershipProgramsUseCase } from '../../application/useCases/ManageMembershipPrograms';
+import { manageMembershipProgramsUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageMembershipProgramsUseCase = new ManageMembershipProgramsUseCase();
 
 // ============================================================================
 // Membership Dashboard

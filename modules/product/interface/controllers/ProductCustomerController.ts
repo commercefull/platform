@@ -20,7 +20,7 @@ import {
   voteOnReviewUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { productCatalogRepository, productEngagementRepository, InventoryStockAvailabilityAdapter } from '../../application/wired';
+import { productCatalogRepository, productEngagementRepository, stockAvailabilityPort } from '../../application/wired';
 import { ReviewRating } from '../../application/wired';
 
 const ProductRepo = productCatalogRepository.productRepository;
@@ -411,14 +411,13 @@ export const getProductAvailability = async (req: HttpRequest, res: HttpResponse
   const { variantId, quantity } = req.query;
 
   const requiredQty = quantity ? parseInt(String(quantity)) : 1;
-  const stockPort = new InventoryStockAvailabilityAdapter();
-  const availability = await stockPort.checkAvailability({
+  const availability = await stockAvailabilityPort.checkAvailability({
     productId,
     productVariantId: variantId ? String(variantId) : undefined,
     quantity: requiredQty,
   });
 
-  const totalStock = await stockPort.getTotalStock(productId);
+  const totalStock = await stockAvailabilityPort.getTotalStock(productId);
 
   respond(
     req,

@@ -3,7 +3,7 @@ import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/g
 import { GetStoreUseCase, GetStoreQuery } from '../../application/useCases/GetStore';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
-import { storeDataRepository, OrganizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
+import { storeDataRepository, organizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
 
 export const storeResolvers = {
   Query: {
@@ -43,7 +43,7 @@ export const storeResolvers = {
       const useCase = new CreateStoreUseCase(
         StoreRepo,
         new SystemConfigAdapter(new SystemConfigurationRepo()),
-        new OrganizationLookupAdapter(),
+        organizationLookupAdapter,
       );
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
       const result = await useCase.execute(command);

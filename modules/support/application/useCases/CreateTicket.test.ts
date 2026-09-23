@@ -1,66 +1,63 @@
+import { createTicketRepository } from '../../tests/testUtils';
 import { CreateTicketUseCase } from './CreateTicket';
 import { SupportValidationError } from '../../domain/errors/SupportErrors';
 
 describe('CreateTicketUseCase', () => {
   let useCase: CreateTicketUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let supportRepository: ReturnType<typeof createTicketRepository>;
 
   beforeEach(() => {
-    mockRepo = {
-      createTicket: jest.fn().mockResolvedValue({
-        ticketId: 'tkt-1',
-        ticketNumber: 'TKT-12345678',
-        subject: 'Help',
-        type: 'question',
-        priority: 'medium',
-        status: 'open',
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateTicketUseCase(mockRepo as never);
+    supportRepository = createTicketRepository();
+    supportRepository.createTicket.mockImplementation(async data => ({
+      ticketId: data.ticketId,
+      ticketNumber: data.ticketNumber,
+      subject: data.subject,
+      type: data.type,
+      priority: data.priority,
+      status: data.status,
+      createdAt: new Date(),
+    }));
+    useCase = new CreateTicketUseCase(supportRepository);
   });
 
-  it('should create a ticket successfully (happy path)', async () => {
-    const result = await useCase.execute({ customerId: 'cust-1', subject: 'Help needed', description: 'I need help', type: 'question' });
+  it('should persist and return an open ticket when the input is valid', async () => {
+    const result = await useCase.execute({
+      customerId: 'cust-1',
+      subject: 'Help needed',
+      description: 'I need help',
+      type: 'question',
+    });
 
-    expect(result.ticketId).toBe('tkt-1');
     expect(result.status).toBe('open');
     expect(result.priority).toBe('medium');
+    expect(supportRepository.createTicket).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: 'cust-1', subject: 'Help needed', status: 'open', attachments: [], tags: [] }),
+    );
   });
 
-  it('should auto-set high priority for return requests', async () => {
-    mockRepo.createTicket.mockResolvedValue({
-      ticketId: 'tkt-2',
-      ticketNumber: 'TKT-12345679',
-      subject: 'Return',
-      type: 'return_request',
-      priority: 'high',
-      status: 'open',
-      createdAt: new Date(),
+  it.each(['return_request', 'refund_request'] as const)(
+    'should force high priority when the ticket is a %s',
+    async type => {
+      const result = await useCase.execute({ customerId: 'cust-1', subject: 'S', description: 'D', type, priority: 'low' });
+
+      expect(result.priority).toBe('high');
+      expect(supportRepository.createTicket).toHaveBeenCalledWith(expect.objectContaining({ priority: 'high' }));
+    },
+  );
+
+  it('should keep the requested priority when the type has no auto-priority', async () => {
+    const result = await useCase.execute({
+      customerId: 'cust-1',
+      subject: 'S',
+      description: 'D',
+      type: 'question',
+      priority: 'urgent',
     });
 
-    const result = await useCase.execute({ customerId: 'cust-1', subject: 'Return', description: 'Want return', type: 'return_request' });
-
-    expect(result.priority).toBe('high');
+    expect(result.priority).toBe('urgent');
   });
 
-  it('should auto-set high priority for refund requests', async () => {
-    mockRepo.createTicket.mockResolvedValue({
-      ticketId: 'tkt-3',
-      ticketNumber: 'TKT-12345680',
-      subject: 'Refund',
-      type: 'refund_request',
-      priority: 'high',
-      status: 'open',
-      createdAt: new Date(),
-    });
-
-    const result = await useCase.execute({ customerId: 'cust-1', subject: 'Refund', description: 'Want refund', type: 'refund_request' });
-
-    expect(result.priority).toBe('high');
-  });
-
-  it('should throw SupportValidationError when required fields missing', async () => {
+  it('should throw SupportValidationError when required fields are missing', async () => {
     await expect(useCase.execute({ customerId: '', subject: 'S', description: 'D', type: 'question' })).rejects.toThrow(
       SupportValidationError,
     );
@@ -70,5 +67,6 @@ describe('CreateTicketUseCase', () => {
     await expect(useCase.execute({ customerId: 'c1', subject: 'S', description: '', type: 'question' })).rejects.toThrow(
       SupportValidationError,
     );
+    expect(supportRepository.createTicket).not.toHaveBeenCalled();
   });
 });

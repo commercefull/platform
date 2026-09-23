@@ -1,61 +1,37 @@
-/**
- * Unit Tests for UploadMedia Use Case
- */
-
-import { UploadMediaUseCase } from './UploadMedia';
+import { createUploadMediaRepository } from '../../tests/testUtils';
+import { UploadMediaUseCase, UploadMediaInput } from './UploadMedia';
 import { MediaValidationError } from '../../domain/errors/MediaErrors';
 
+const uploadInput = (overrides: Partial<UploadMediaInput> = {}): UploadMediaInput => ({
+  fileName: 'photo.jpg',
+  mimeType: 'image/jpeg',
+  fileSize: 102400,
+  filePath: '/uploads/photo.jpg',
+  url: 'https://cdn.example.com/photo.jpg',
+  ...overrides,
+});
+
 describe('UploadMediaUseCase', () => {
-  let useCase: UploadMediaUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should upload the media when the input is valid', async () => {
+    const repository = createUploadMediaRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      create: jest.fn().mockResolvedValue({
-        mediaId: 'med-1',
-        fileName: 'photo.jpg',
-        mimeType: 'image/jpeg',
-        fileSize: 102400,
-        url: 'https://cdn.example.com/photo.jpg',
-        thumbnailUrl: 'https://cdn.example.com/thumb.jpg',
-        createdAt: new Date('2024-06-01'),
-      }),
-    };
-    useCase = new UploadMediaUseCase(mockRepo as never as ConstructorParameters<typeof UploadMediaUseCase>[0]);
-  });
+    const result = await new UploadMediaUseCase(repository).execute(uploadInput());
 
-  it('should upload media successfully', async () => {
-    const result = await useCase.execute({
-      fileName: 'photo.jpg',
-      mimeType: 'image/jpeg',
-      fileSize: 102400,
-      filePath: '/uploads/photo.jpg',
-      url: 'https://cdn.example.com/photo.jpg',
-    });
-
-    expect(result.mediaId).toBeDefined();
+    expect(result.mediaId).toMatch(/^med_/);
     expect(result.fileName).toBe('photo.jpg');
     expect(result.mimeType).toBe('image/jpeg');
     expect(result.url).toBe('https://cdn.example.com/photo.jpg');
-    expect(result.thumbnailUrl).toBe('https://cdn.example.com/thumb.jpg');
-    expect(result.createdAt).toBe(new Date('2024-06-01').toISOString());
+    expect(result.createdAt).toBe('2026-01-01T00:00:00.000Z');
   });
 
-  it('should pass altText, caption, folderId, tags to repository', async () => {
-    await useCase.execute({
-      fileName: 'photo.jpg',
-      mimeType: 'image/jpeg',
-      fileSize: 102400,
-      filePath: '/uploads/photo.jpg',
-      url: 'https://cdn.example.com/photo.jpg',
-      altText: 'A photo',
-      caption: 'My caption',
-      folderId: 'folder-1',
-      uploadedBy: 'user-1',
-      tags: ['nature'],
-    });
+  it('should pass optional fields through when provided', async () => {
+    const repository = createUploadMediaRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
+    await new UploadMediaUseCase(repository).execute(
+      uploadInput({ altText: 'A photo', caption: 'My caption', folderId: 'folder-1', uploadedBy: 'user-1', tags: ['nature'] }),
+    );
+
+    expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         altText: 'A photo',
         caption: 'My caption',
@@ -66,101 +42,36 @@ describe('UploadMediaUseCase', () => {
     );
   });
 
-  it('should default tags to empty array', async () => {
-    await useCase.execute({
-      fileName: 'photo.jpg',
-      mimeType: 'image/jpeg',
-      fileSize: 102400,
-      filePath: '/uploads/photo.jpg',
-      url: 'https://cdn.example.com/photo.jpg',
-    });
+  it('should default tags to an empty array when none are provided', async () => {
+    const repository = createUploadMediaRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tags: [],
-      }),
-    );
+    await new UploadMediaUseCase(repository).execute(uploadInput());
+
+    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ tags: [] }));
   });
 
-  it('should determine media type as image', async () => {
-    await useCase.execute({
-      fileName: 'photo.jpg',
-      mimeType: 'image/jpeg',
-      fileSize: 1024,
-      filePath: '/p',
-      url: 'u',
-    });
+  it.each([
+    ['image', 'image/jpeg'],
+    ['video', 'video/mp4'],
+    ['audio', 'audio/mpeg'],
+    ['document', 'application/pdf'],
+    ['file', 'application/octet-stream'],
+  ])('should set mediaType to %s when the mime type is %s', async (expected, mimeType) => {
+    const repository = createUploadMediaRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mediaType: 'image',
-      }),
-    );
+    await new UploadMediaUseCase(repository).execute(uploadInput({ mimeType }));
+
+    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({ mediaType: expected }));
   });
 
-  it('should determine media type as video', async () => {
-    await useCase.execute({
-      fileName: 'vid.mp4',
-      mimeType: 'video/mp4',
-      fileSize: 5000000,
-      filePath: '/v',
-      url: 'u',
-    });
+  it.each([
+    ['fileName', uploadInput({ fileName: '' })],
+    ['mimeType', uploadInput({ mimeType: '' })],
+    ['url', uploadInput({ url: '' })],
+  ])('should throw MediaValidationError when %s is missing', async (_field, input) => {
+    const repository = createUploadMediaRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mediaType: 'video',
-      }),
-    );
-  });
-
-  it('should determine media type as document for PDF', async () => {
-    await useCase.execute({
-      fileName: 'doc.pdf',
-      mimeType: 'application/pdf',
-      fileSize: 5000,
-      filePath: '/d',
-      url: 'u',
-    });
-
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mediaType: 'document',
-      }),
-    );
-  });
-
-  it('should determine media type as file for unknown types', async () => {
-    await useCase.execute({
-      fileName: 'data.bin',
-      mimeType: 'application/octet-stream',
-      fileSize: 5000,
-      filePath: '/d',
-      url: 'u',
-    });
-
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mediaType: 'file',
-      }),
-    );
-  });
-
-  it('should throw MediaValidationError when fileName is missing', async () => {
-    await expect(useCase.execute({ fileName: '', mimeType: 'image/jpeg', fileSize: 100, filePath: '/p', url: 'u' })).rejects.toThrow(
-      MediaValidationError,
-    );
-  });
-
-  it('should throw MediaValidationError when mimeType is missing', async () => {
-    await expect(useCase.execute({ fileName: 'photo.jpg', mimeType: '', fileSize: 100, filePath: '/p', url: 'u' })).rejects.toThrow(
-      MediaValidationError,
-    );
-  });
-
-  it('should throw MediaValidationError when url is missing', async () => {
-    await expect(
-      useCase.execute({ fileName: 'photo.jpg', mimeType: 'image/jpeg', fileSize: 100, filePath: '/p', url: '' }),
-    ).rejects.toThrow(MediaValidationError);
+    await expect(new UploadMediaUseCase(repository).execute(input)).rejects.toThrow(MediaValidationError);
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });

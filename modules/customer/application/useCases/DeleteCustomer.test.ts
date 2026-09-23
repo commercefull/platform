@@ -1,44 +1,36 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { DeleteCustomerUseCase, DeleteCustomerCommand } from './DeleteCustomer';
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { createCustomerRepository, createCustomerRow, emitMock } from '../../tests/testUtils';
 
 describe('DeleteCustomerUseCase', () => {
-  let useCase: DeleteCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new DeleteCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({ customerId: 'c1', email: 'test@test.com' }),
-      delete: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new DeleteCustomerUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow());
+    customerRepository.delete.mockResolvedValue(undefined);
   });
 
-  it('should delete customer (happy path)', async () => {
-    const result = await useCase.execute(new DeleteCustomerCommand('c1', 'GDPR request'));
+  it('should delete the customer and emit customer.deleted', async () => {
+    const result = await useCase.execute(new DeleteCustomerCommand('cust-1'));
 
     expect(result.success).toBe(true);
-    expect(result.customerId).toBe('c1');
-    expect(mockRepo.delete).toHaveBeenCalledWith('c1');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.deleted', expect.objectContaining({ customerId: 'c1', reason: 'GDPR request' }));
+    expect(customerRepository.delete).toHaveBeenCalledWith('cust-1');
+    expect(emitMock).toHaveBeenCalledWith('customer.deleted', expect.objectContaining({ customerId: 'cust-1' }));
   });
 
   it('should throw CustomerValidationError when customerId is empty', async () => {
     await expect(useCase.execute(new DeleteCustomerCommand(''))).rejects.toThrow(CustomerValidationError);
+    expect(customerRepository.delete).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerNotFoundError when customer does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CustomerNotFoundError when the customer does not exist', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new DeleteCustomerCommand('missing'))).rejects.toThrow(CustomerNotFoundError);
+    expect(customerRepository.delete).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

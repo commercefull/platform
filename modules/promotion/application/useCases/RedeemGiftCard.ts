@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Redeem Gift Card Use Case
  * Handles gift card redemption for orders
  */
 
-import { giftCardRepo } from '../wired';
+import type {
+  GiftCardRepository,
+  PromotionGiftCardTransaction,
+} from '../../domain/repositories/GiftCardRepository';
 
 // ============================================================================
 // Command
@@ -25,7 +28,7 @@ export class RedeemGiftCardCommand {
 
 export interface RedeemGiftCardResponse {
   success: boolean;
-  transaction?: giftCardRepo.PromotionGiftCardTransaction;
+  transaction?: PromotionGiftCardTransaction;
   remainingBalance?: number;
   message?: string;
   errors?: string[];
@@ -36,6 +39,10 @@ export interface RedeemGiftCardResponse {
 // ============================================================================
 
 export class RedeemGiftCardUseCase {
+  constructor(
+    private readonly giftCardRepo: Pick<GiftCardRepository, 'getGiftCardByCode' | 'redeemGiftCard' | 'getGiftCard'>,
+  ) {}
+
   async execute(command: RedeemGiftCardCommand): Promise<RedeemGiftCardResponse> {
     // Validate input
     if (!command.code?.trim()) {
@@ -47,7 +54,7 @@ export class RedeemGiftCardUseCase {
     }
 
     // Find gift card by code
-    const giftCard = await giftCardRepo.getGiftCardByCode(command.code);
+    const giftCard = await this.giftCardRepo.getGiftCardByCode(command.code);
 
     if (!giftCard) {
       return { success: false, message: 'Gift card not found', errors: ['gift_card_not_found'] };
@@ -78,7 +85,7 @@ export class RedeemGiftCardUseCase {
 
     try {
       // Redeem the gift card
-      const transaction = await giftCardRepo.redeemGiftCard(
+      const transaction = await this.giftCardRepo.redeemGiftCard(
         giftCard.promotionGiftCardId,
         command.amount,
         command.orderId,
@@ -86,7 +93,7 @@ export class RedeemGiftCardUseCase {
       );
 
       // Get updated gift card for remaining balance
-      const updatedGiftCard = await giftCardRepo.getGiftCard(giftCard.promotionGiftCardId);
+      const updatedGiftCard = await this.giftCardRepo.getGiftCard(giftCard.promotionGiftCardId);
 
       return {
         success: true,
@@ -103,5 +110,3 @@ export class RedeemGiftCardUseCase {
     }
   }
 }
-
-const redeemGiftCardUseCase = new RedeemGiftCardUseCase();

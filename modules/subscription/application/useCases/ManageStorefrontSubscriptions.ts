@@ -1,22 +1,24 @@
-import { subscriptionRepo } from '../wired';
+import type { SubscriptionRepository } from '../../domain/repositories/SubscriptionRepository';
 
 export class ManageStorefrontSubscriptionsUseCase {
+  constructor(private readonly subscriptionRepo: SubscriptionRepository) {}
+
   async findActivePlansWithProduct() {
-    return subscriptionRepo.findActivePlansWithProduct();
+    return this.subscriptionRepo.findActivePlansWithProduct();
   }
   async findByCustomerIdWithPlan(customerId: string) {
-    return subscriptionRepo.findByCustomerIdWithPlan(customerId);
+    return this.subscriptionRepo.findByCustomerIdWithPlan(customerId);
   }
   async findByIdWithPlan(subscriptionId: string, customerId: string) {
-    return subscriptionRepo.findByIdWithPlan(subscriptionId, customerId);
+    return this.subscriptionRepo.findByIdWithPlan(subscriptionId, customerId);
   }
   async findActiveByCustomerId(subscriptionId: string, customerId: string) {
-    return subscriptionRepo.findActiveByCustomerId(subscriptionId, customerId);
+    return this.subscriptionRepo.findActiveByCustomerId(subscriptionId, customerId);
   }
   async cancelSubscription(subscriptionId: string, reason: string) {
-    return subscriptionRepo.cancelSubscriptionStorefront(subscriptionId, reason);
+    return this.subscriptionRepo.cancelSubscriptionStorefront(subscriptionId, reason);
   }
   async findBillingHistory(subscriptionId: string) {
-    return subscriptionRepo.findBillingHistory(subscriptionId);
+    return this.subscriptionRepo.findBillingHistory(subscriptionId);
   }
 }

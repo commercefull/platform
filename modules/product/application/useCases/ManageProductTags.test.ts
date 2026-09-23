@@ -1,23 +1,20 @@
-jest.mock('../../infrastructure/repositories/productTagRepo', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue([{ tagId: 't1', name: 'New' }]),
-    create: jest.fn().mockResolvedValue({ tagId: 't2', name: 'Sale' }),
-    softDelete: jest.fn().mockResolvedValue(true),
-  },
-}));
 
 import { ManageProductTagsUseCase } from './ManageProductTags';
-import productTagRepo from '../../infrastructure/repositories/productTagRepo';
+import { createProductTag, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productTagRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('ManageProductTagsUseCase', () => {
   let useCase: ManageProductTagsUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductTagsUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductTagsUseCase(productTagRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductTagsUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue([createProductTag({ name: 'New' })]);
+    mockRepo.create.mockResolvedValue(createProductTag({ productTagId: 't2', name: 'Sale' }));
+    mockRepo.softDelete.mockResolvedValue(true);
+    useCase = new ManageProductTagsUseCase(mockRepo);
   });
 
   it('should find all tags', async () => {
@@ -26,8 +23,8 @@ describe('ManageProductTagsUseCase', () => {
   });
 
   it('should create tag', async () => {
-    const result = await useCase.create({ name: 'Sale' } as never);
-    expect(result).toEqual({ tagId: 't2', name: 'Sale' });
+    const result = await useCase.create({ name: 'Sale', slug: 'sale' });
+    expect(result).toEqual(createProductTag({ productTagId: 't2', name: 'Sale' }));
   });
 
   it('should soft delete tag', async () => {

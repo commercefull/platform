@@ -1,30 +1,23 @@
-jest.mock('../../infrastructure/repositories/productReviewRepo', () => ({
-  __esModule: true,
-  default: {
-    findByProductId: jest.fn().mockResolvedValue([{ reviewId: 'r1' }]),
-  },
-}));
 
-jest.mock('../../infrastructure/repositories/productReviewMediaRepo', () => ({
-  __esModule: true,
-  default: {
-    findByReview: jest.fn().mockResolvedValue([{ mediaId: 'm1', url: 'https://example.com/img.jpg' }]),
-    delete: jest.fn().mockResolvedValue(true),
-  },
-}));
 
 import { ManageReviewMediaUseCase } from './ManageReviewMedia';
-import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
-import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
+import { createProductReview, createReviewMedia, lazyMock } from '../../tests/testUtils';
 
-const mockMediaRepo = productReviewMediaRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('ManageReviewMediaUseCase', () => {
   let useCase: ManageReviewMediaUseCase;
+  let mockRepo1: jest.Mocked<ConstructorParameters<typeof ManageReviewMediaUseCase>[0]>;
+  let mockRepo2: jest.Mocked<ConstructorParameters<typeof ManageReviewMediaUseCase>[1]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageReviewMediaUseCase(productReviewRepo, productReviewMediaRepo);
+        mockRepo1 = lazyMock<ConstructorParameters<typeof ManageReviewMediaUseCase>[0]>();
+    mockRepo1.findByProductId.mockResolvedValue([createProductReview()]);
+    mockRepo2 = lazyMock<ConstructorParameters<typeof ManageReviewMediaUseCase>[1]>();
+    mockRepo2.findByReview.mockResolvedValue([createReviewMedia()]);
+    mockRepo2.delete.mockResolvedValue(true);
+    useCase = new ManageReviewMediaUseCase(mockRepo1, mockRepo2);
   });
 
   it('should find reviews by product', async () => {
@@ -40,6 +33,6 @@ describe('ManageReviewMediaUseCase', () => {
   it('should delete media', async () => {
     const result = await useCase.deleteMedia('m1');
     expect(result).toBe(true);
-    expect(mockMediaRepo.delete).toHaveBeenCalledWith('m1');
+    expect(mockRepo2.delete).toHaveBeenCalledWith('m1');
   });
 });

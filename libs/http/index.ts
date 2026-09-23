@@ -2,7 +2,6 @@ import './expressAugmentation';
 
 export type {
   HttpApplication,
-  HttpErrorHandler,
   HttpHandler,
   HttpNext,
   HttpRequest,
@@ -10,5 +9,5 @@ export type {
   HttpResponse,
   HttpRouter,
 } from './types';
-export type { HttpCompanyUser, HttpCustomerContext, HttpUser } from './user';
-export { createHttpRouter, httpRaw } from './expressAdapter';
+export type { HttpUser } from './user';
+export { createHttpRouter } from './expressAdapter';

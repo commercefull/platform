@@ -1,4 +1,4 @@
-import { OrderRouter } from './OrderRouter';
+import { OrderRouter, StoreRepository, InventoryRepository } from './OrderRouter';
 import {
   NoEligibleStoresError,
   NoStoresWithInventoryError,
@@ -8,17 +8,17 @@ import {
 } from '../errors/OrderErrors';
 
 describe('OrderRouter', () => {
-  const mockInventoryRepo = {
+  const mockInventoryRepo: jest.Mocked<InventoryRepository> = {
     getAvailableQuantity: jest.fn(),
   };
-  const mockStoreRepo = {
+  const mockStoreRepo: jest.Mocked<StoreRepository> = {
     findById: jest.fn(),
   };
   let router: OrderRouter;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    router = new OrderRouter(mockStoreRepo as never, mockInventoryRepo as never);
+    router = new OrderRouter(mockStoreRepo, mockInventoryRepo);
   });
 
   const stores = [

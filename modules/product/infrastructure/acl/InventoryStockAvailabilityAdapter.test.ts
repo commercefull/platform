@@ -1,22 +1,14 @@
-jest.mock('../../../inventory/infrastructure/repositories/inventoryRepo', () => ({
-  __esModule: true,
-  default: {
-    checkProductAvailability: jest.fn(),
-    getTotalStockForProduct: jest.fn(),
-  },
-}));
-
-import inventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 import { InventoryStockAvailabilityAdapter } from './InventoryStockAvailabilityAdapter';
+import type InventoryRepoType from '../../../inventory/infrastructure/repositories/inventoryRepo';
+import type { InventoryLocation } from '../../../inventory/infrastructure/repositories/inventoryRepo';
 
 describe('InventoryStockAvailabilityAdapter', () => {
   let adapter: InventoryStockAvailabilityAdapter;
-
-  let InventoryRepo: { checkProductAvailability: jest.Mock; getTotalStockForProduct: jest.Mock };
+  let InventoryRepo: jest.Mocked<Pick<typeof InventoryRepoType, 'checkProductAvailability' | 'getTotalStockForProduct'>>;
 
   beforeEach(() => {
-    InventoryRepo = inventoryRepo as unknown as { checkProductAvailability: jest.Mock; getTotalStockForProduct: jest.Mock };
-    adapter = new InventoryStockAvailabilityAdapter();
+    InventoryRepo = { checkProductAvailability: jest.fn(), getTotalStockForProduct: jest.fn() };
+    adapter = new InventoryStockAvailabilityAdapter(InventoryRepo);
   });
 
   it('implements StockAvailabilityPort', () => {
@@ -28,7 +20,10 @@ describe('InventoryStockAvailabilityAdapter', () => {
     InventoryRepo.checkProductAvailability.mockResolvedValue({
       available: true,
       totalAvailable: 50,
-      locations: [{ locationId: 'loc-1' }, { locationId: 'loc-2' }],
+      locations: [
+        { inventoryLocationId: 'loc-1' } as unknown as InventoryLocation,
+        { inventoryLocationId: 'loc-2' } as unknown as InventoryLocation,
+      ],
     });
 
     const result = await adapter.checkAvailability({

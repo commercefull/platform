@@ -1,9 +1,12 @@
 import { SavePaymentMethodUseCase } from './SavePaymentMethod';
 import { CustomerIdAndProviderMethodIdRequiredError, PaymentMethodAlreadySavedError } from '../../domain/errors/PaymentErrors';
 
+type PaymentRepoPort = ConstructorParameters<typeof SavePaymentMethodUseCase>[0];
+type StoredMethod = Awaited<ReturnType<PaymentRepoPort['createPaymentMethod']>>;
+
 describe('SavePaymentMethodUseCase', () => {
   let useCase: SavePaymentMethodUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<Pick<PaymentRepoPort, 'findPaymentMethodByProviderId' | 'unsetDefaultPaymentMethods' | 'createPaymentMethod'>>;
 
   beforeEach(() => {
     mockRepo = {
@@ -19,7 +22,7 @@ describe('SavePaymentMethodUseCase', () => {
         createdAt: new Date(),
       }),
     };
-    useCase = new SavePaymentMethodUseCase(mockRepo as never);
+    useCase = new SavePaymentMethodUseCase(mockRepo);
   });
 
   it('should save payment method (happy path)', async () => {
@@ -59,7 +62,7 @@ describe('SavePaymentMethodUseCase', () => {
   });
 
   it('should throw error when payment method already saved', async () => {
-    mockRepo.findPaymentMethodByProviderId.mockResolvedValue({ paymentMethodId: 'existing' });
+    mockRepo.findPaymentMethodByProviderId.mockResolvedValue({ paymentMethodId: 'existing' } as unknown as StoredMethod);
 
     await expect(
       useCase.execute({

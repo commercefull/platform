@@ -1,33 +1,25 @@
-jest.mock('../../infrastructure/repositories/productCollectionRepo', () => ({
-  __esModule: true,
-  default: {
-    update: jest.fn().mockResolvedValue({ productCollectionId: 'c1', name: 'Updated', slug: 'updated' }),
-    create: jest.fn().mockResolvedValue({ productCollectionId: 'c2', name: 'New', slug: 'new' }),
-  },
-}));
 
-jest.mock('../../infrastructure/repositories/productCollectionMapRepo', () => ({
-  __esModule: true,
-  default: {
-    findByCollection: jest.fn().mockResolvedValue([{ productCollectionMapId: 'm1', productId: 'p1' }]),
-    addProduct: jest.fn().mockResolvedValue({ productCollectionMapId: 'm2' }),
-    remove: jest.fn().mockResolvedValue(true),
-  },
-}));
 
 import { ManageProductCollectionUseCase, ManageProductCollectionCommand } from './ManageProductCollection';
 import { ProductValidationError, ProductCollectionNotFoundError } from '../../domain/errors/ProductErrors';
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
-import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
+import { createProductCollection, createProductCollectionMap, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productCollectionRepo as unknown as Record<string, jest.Mock>;
 
 describe('ManageProductCollectionUseCase', () => {
   let useCase: ManageProductCollectionUseCase;
+  let mockRepo1: jest.Mocked<ConstructorParameters<typeof ManageProductCollectionUseCase>[0]>;
+  let mockRepo2: jest.Mocked<ConstructorParameters<typeof ManageProductCollectionUseCase>[1]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductCollectionUseCase(productCollectionRepo, productCollectionMapRepo);
+    mockRepo1 = lazyMock<ConstructorParameters<typeof ManageProductCollectionUseCase>[0]>();
+    mockRepo1.update.mockResolvedValue(createProductCollection({ productCollectionId: 'c1', name: 'Updated', slug: 'updated' }));
+    mockRepo1.create.mockResolvedValue(createProductCollection({ productCollectionId: 'c2', name: 'New', slug: 'new' }));
+    mockRepo2 = lazyMock<ConstructorParameters<typeof ManageProductCollectionUseCase>[1]>();
+    mockRepo2.findByCollection.mockResolvedValue([createProductCollectionMap({ productCollectionMapId: 'm1' })]);
+    mockRepo2.create.mockResolvedValue(createProductCollectionMap({ productCollectionMapId: 'm2' }));
+    mockRepo2.delete.mockResolvedValue(true);
+    useCase = new ManageProductCollectionUseCase(mockRepo1, mockRepo2);
   });
 
   it('should create new collection (happy path)', async () => {
@@ -51,7 +43,7 @@ describe('ManageProductCollectionUseCase', () => {
   });
 
   it('should throw ProductCollectionNotFoundError when update fails', async () => {
-    mockRepo.update.mockResolvedValueOnce(null);
+    mockRepo1.update.mockResolvedValueOnce(null);
 
     await expect(useCase.execute(new ManageProductCollectionCommand('Name', 'slug', 'nonexistent'))).rejects.toThrow(
       ProductCollectionNotFoundError,

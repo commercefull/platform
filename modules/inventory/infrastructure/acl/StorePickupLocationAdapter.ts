@@ -14,14 +14,8 @@ import {
   CreatePickupLocationInput,
   UpdatePickupLocationInput,
 } from '../../application/ports/PickupLocationPort';
-import {
-  saveLocation,
-  getLocation,
-  getLocations,
-  deleteLocation,
-  updateLocation,
-  type PickupLocation,
-} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type { PickupLocation } from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 function toSummary(loc: PickupLocation): PickupLocationSummary {
   return {
@@ -35,18 +29,25 @@ function toSummary(loc: PickupLocation): PickupLocationSummary {
 }
 
 export class StorePickupLocationAdapter implements PickupLocationPort {
+  constructor(
+    private readonly locations: Pick<
+      typeof pickupLocationRepo,
+      'saveLocation' | 'getLocation' | 'getLocations' | 'updateLocation' | 'deleteLocation'
+    >,
+  ) {}
+
   async findById(id: string): Promise<PickupLocationSummary | null> {
-    const loc = await getLocation(id);
+    const loc = await this.locations.getLocation(id);
     return loc ? toSummary(loc) : null;
   }
 
   async findAll(storeId?: string): Promise<PickupLocationSummary[]> {
-    const locs = await getLocations(storeId);
+    const locs = await this.locations.getLocations(storeId);
     return locs.map(toSummary);
   }
 
   async create(data: CreatePickupLocationInput): Promise<PickupLocationSummary> {
-    const loc = await saveLocation({
+    const loc = await this.locations.saveLocation({
       storeId: data.storeId,
       name: data.name,
       address: data.address,
@@ -56,7 +57,7 @@ export class StorePickupLocationAdapter implements PickupLocationPort {
   }
 
   async update(id: string, data: UpdatePickupLocationInput): Promise<PickupLocationSummary | null> {
-    const loc = await updateLocation(id, {
+    const loc = await this.locations.updateLocation(id, {
       name: data.name,
       address: data.address,
       isActive: data.isActive,
@@ -65,6 +66,6 @@ export class StorePickupLocationAdapter implements PickupLocationPort {
   }
 
   async delete(id: string): Promise<boolean> {
-    return deleteLocation(id);
+    return this.locations.deleteLocation(id);
   }
 }

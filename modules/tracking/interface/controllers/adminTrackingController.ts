@@ -4,7 +4,8 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageTrackingConfigUseCase, GetTrackingStatusUseCase } from '../../application/useCases/Tracking';
+import { ManageTrackingConfigUseCase } from '../../application/useCases/ManageTrackingConfig';
+import { GetTrackingStatusUseCase } from '../../application/useCases/GetTrackingStatus';
 import { TrackingConfigRepositoryImpl } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 

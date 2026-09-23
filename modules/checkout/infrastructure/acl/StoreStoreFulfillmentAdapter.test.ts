@@ -1,30 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
-jest.mock('../../../store/infrastructure/repositories/StoreRepo', () => ({
-  __esModule: true,
-  default: { findActive: jest.fn() },
-}));
-
-jest.mock('../../../store/infrastructure/repositories/pickupLocationRepo', () => ({
-  __esModule: true,
-  getLocations: jest.fn(),
-  getLocation: jest.fn(),
-  findNearestLocations: jest.fn(),
-}));
-
 import { StoreStoreFulfillmentAdapter } from './StoreStoreFulfillmentAdapter';
+import { Store } from '../../../store/domain/entities/Store';
+import type StoreRepoType from '../../../store/infrastructure/repositories/StoreRepo';
+import type * as pickupLocationRepoModule from '../../../store/infrastructure/repositories/pickupLocationRepo';
+
+type CreateStoreProps = Parameters<typeof Store.create>[0];
+type LocalDelivery = NonNullable<NonNullable<CreateStoreProps['settings']>['localDelivery']>;
+
+const localDelivery = (overrides: Partial<LocalDelivery> = {}): LocalDelivery => ({
+  enabled: true,
+  postalCodes: [],
+  deliveryFee: 0,
+  estimatedDeliveryMinutes: 60,
+  maxDailyOrders: 0,
+  availableSlots: [],
+  ...overrides,
+});
+
+const createStore = (opts: {
+  name?: string;
+  address?: CreateStoreProps['address'];
+  delivery?: LocalDelivery;
+} = {}): Store =>
+  Store.create({
+    storeId: 'store-1',
+    name: opts.name ?? 'Store',
+    storeType: 'merchant_store',
+    organizationId: 'org-1',
+    settings: { localDelivery: opts.delivery },
+    address: opts.address,
+  });
 
 describe('StoreStoreFulfillmentAdapter', () => {
   let adapter: StoreStoreFulfillmentAdapter;
-
-  let StoreRepo: any;
-
-  let pickupLocationRepo: any;
+  let StoreRepo: jest.Mocked<Pick<typeof StoreRepoType, 'findActive'>>;
+  let pickupLocationRepo: jest.Mocked<
+    Pick<typeof pickupLocationRepoModule, 'getLocations' | 'getLocation' | 'findNearestLocations'>
+  >;
 
   beforeEach(() => {
-    StoreRepo = require('../../../store/infrastructure/repositories/StoreRepo').default;
-    pickupLocationRepo = require('../../../store/infrastructure/repositories/pickupLocationRepo');
-    adapter = new StoreStoreFulfillmentAdapter();
+    StoreRepo = { findActive: jest.fn() };
+    pickupLocationRepo = { getLocations: jest.fn(), getLocation: jest.fn(), findNearestLocations: jest.fn() };
+    adapter = new StoreStoreFulfillmentAdapter(StoreRepo, pickupLocationRepo);
   });
 
   it('implements StoreFulfillmentPort', () => {
@@ -36,19 +52,10 @@ describe('StoreStoreFulfillmentAdapter', () => {
 
   it('should return eligible options for postal code match', async () => {
     StoreRepo.findActive.mockResolvedValue([
-      {
-        storeId: 'store-1',
+      createStore({
         name: 'Downtown Store',
-        settings: {
-          localDelivery: {
-            enabled: true,
-            postalCodes: ['97201'],
-            deliveryFee: 5,
-            estimatedDeliveryMinutes: 30,
-            freeDeliveryThreshold: 50,
-          },
-        },
-      },
+        delivery: localDelivery({ postalCodes: ['97201'], deliveryFee: 5, estimatedDeliveryMinutes: 30, freeDeliveryThreshold: 50 }),
+      }),
     ]);
 
     const result = await adapter.checkLocalDeliveryEligibility({ postalCode: '97201' });
@@ -62,13 +69,7 @@ describe('StoreStoreFulfillmentAdapter', () => {
   });
 
   it('should return not eligible when no stores match', async () => {
-    StoreRepo.findActive.mockResolvedValue([
-      {
-        storeId: 'store-1',
-        name: 'Store',
-        settings: { localDelivery: { enabled: true, postalCodes: ['10001'] } },
-      },
-    ]);
+    StoreRepo.findActive.mockResolvedValue([createStore({ delivery: localDelivery({ postalCodes: ['10001'] }) })]);
 
     const result = await adapter.checkLocalDeliveryEligibility({ postalCode: '97201' });
 
@@ -77,13 +78,7 @@ describe('StoreStoreFulfillmentAdapter', () => {
   });
 
   it('should skip stores with local delivery disabled', async () => {
-    StoreRepo.findActive.mockResolvedValue([
-      {
-        storeId: 'store-1',
-        name: 'Store',
-        settings: { localDelivery: { enabled: false } },
-      },
-    ]);
+    StoreRepo.findActive.mockResolvedValue([createStore({ delivery: localDelivery({ enabled: false }) })]);
 
     const result = await adapter.checkLocalDeliveryEligibility({ postalCode: '97201' });
 
@@ -92,20 +87,11 @@ describe('StoreStoreFulfillmentAdapter', () => {
 
   it('should check radius-based eligibility using Haversine distance', async () => {
     StoreRepo.findActive.mockResolvedValue([
-      {
-        storeId: 'store-1',
+      createStore({
         name: 'Nearby Store',
-        address: { latitude: 45.5152, longitude: -122.6784 },
-        settings: {
-          localDelivery: {
-            enabled: true,
-            postalCodes: [],
-            radiusKm: 10,
-            deliveryFee: 3,
-            estimatedDeliveryMinutes: 20,
-          },
-        },
-      },
+        address: { line1: '1 Main St', city: 'Portland', state: 'OR', postalCode: '97201', country: 'US', latitude: 45.5152, longitude: -122.6784 },
+        delivery: localDelivery({ radiusKm: 10, deliveryFee: 3, estimatedDeliveryMinutes: 20 }),
+      }),
     ]);
 
     const result = await adapter.checkLocalDeliveryEligibility({
@@ -126,6 +112,9 @@ describe('StoreStoreFulfillmentAdapter', () => {
         address: { line1: '123 Main St', city: 'Portland', postalCode: '97201', country: 'US' },
         latitude: 45.51,
         longitude: -122.68,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       },
     ]);
 
@@ -148,6 +137,9 @@ describe('StoreStoreFulfillmentAdapter', () => {
       address: { line1: '123 Main St', city: 'Portland', postalCode: '97201', country: 'US' },
       latitude: 45.51,
       longitude: -122.68,
+      isActive: true,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     });
 
     const result = await adapter.getPickupLocation('loc-1');
@@ -174,6 +166,9 @@ describe('StoreStoreFulfillmentAdapter', () => {
         latitude: 45.51,
         longitude: -122.68,
         distance: 2.5,
+        isActive: true,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       },
     ]);
 

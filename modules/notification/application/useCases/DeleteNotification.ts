@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Delete Notification Use Case
  *
  * Deletes a single notification or all notifications for a user.
  */
 
-import { notificationDataRepository } from '../wired';
-
-const notificationRepo = notificationDataRepository.notifications;
+import type { NotificationCommandRepository } from '../../domain/repositories/NotificationCommandRepository';
 
 export interface DeleteNotificationInput {
   notificationId?: string;
@@ -21,19 +19,19 @@ export interface DeleteNotificationOutput {
 }
 
 export class DeleteNotificationUseCase {
+  constructor(private readonly notificationRepo: Pick<NotificationCommandRepository, 'delete' | 'deleteAllForUser'>) {}
+
   async execute(input: DeleteNotificationInput): Promise<DeleteNotificationOutput> {
     if (input.deleteAll && input.userId) {
-      const count = await notificationRepo.deleteAllForUser(input.userId);
+      const count = await this.notificationRepo.deleteAllForUser(input.userId);
       return { deleted: true, deletedCount: count };
     }
 
     if (input.notificationId) {
-      const success = await notificationRepo.delete(input.notificationId);
+      const success = await this.notificationRepo.delete(input.notificationId);
       return { deleted: success, deletedCount: success ? 1 : 0 };
     }
 
     return { deleted: false, deletedCount: 0 };
   }
 }
-
-const deleteNotificationUseCase = new DeleteNotificationUseCase();

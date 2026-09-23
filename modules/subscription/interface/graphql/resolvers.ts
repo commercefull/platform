@@ -1,18 +1,10 @@
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import {
-  CreateSubscriptionUseCase,
-  CreateSubscriptionCommand,
-  CreateSubscriptionInput,
-} from '../../application/useCases/CreateSubscription';
-import {
-  CancelSubscriptionUseCase,
-  CancelSubscriptionCommand,
-  CancelSubscriptionInput,
-} from '../../application/useCases/CancelSubscription';
+import { CreateSubscriptionCommand, CreateSubscriptionInput } from '../../application/useCases/CreateSubscription';
+import { CancelSubscriptionCommand, CancelSubscriptionInput } from '../../application/useCases/CancelSubscription';
 import { ChangeSubscriptionPlanUseCase, ChangeSubscriptionPlanInput } from '../../application/useCases/ChangeSubscriptionPlan';
 import { PauseSubscriptionUseCase, PauseSubscriptionInput } from '../../application/useCases/PauseSubscription';
 import { ResumeSubscriptionUseCase, ResumeSubscriptionInput } from '../../application/useCases/ResumeSubscription';
-import { subscriptionRepo } from '../../application/wired';
+import { subscriptionRepo, createSubscriptionUseCase, cancelSubscriptionUseCase } from '../../application/wired';
 
 // Adapter to adapt the repo module to the port interface expected by use cases
 const subscriptionRepoAdapter = {
@@ -54,14 +46,14 @@ export const subscriptionResolvers = {
   Mutation: {
     createSubscription: async (_parent: unknown, args: { input: CreateSubscriptionInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new CreateSubscriptionUseCase();
+      const useCase = createSubscriptionUseCase;
       const command = new CreateSubscriptionCommand(args.input);
       return useCase.execute(command);
     },
 
     cancelSubscription: async (_parent: unknown, args: { input: CancelSubscriptionInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new CancelSubscriptionUseCase();
+      const useCase = cancelSubscriptionUseCase;
       const command = new CancelSubscriptionCommand(args.input);
       return useCase.execute(command);
     },

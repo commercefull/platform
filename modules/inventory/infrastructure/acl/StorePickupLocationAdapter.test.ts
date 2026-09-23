@@ -1,8 +1,11 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+import { StorePickupLocationAdapter } from './StorePickupLocationAdapter';
+import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 describe('StorePickupLocationAdapter', () => {
-  let adapter: import('./StorePickupLocationAdapter').StorePickupLocationAdapter;
-  let mockRepo: any;
+  let adapter: StorePickupLocationAdapter;
+  let mockRepo: jest.Mocked<
+    Pick<typeof pickupLocationRepo, 'saveLocation' | 'getLocation' | 'getLocations' | 'updateLocation' | 'deleteLocation'>
+  >;
 
   beforeEach(() => {
     mockRepo = {
@@ -12,17 +15,7 @@ describe('StorePickupLocationAdapter', () => {
       updateLocation: jest.fn(),
       deleteLocation: jest.fn(),
     };
-    jest.resetModules();
-    jest.doMock('../../../store/infrastructure/repositories/pickupLocationRepo', () => ({
-      ...mockRepo,
-      default: mockRepo,
-    }));
-    const { StorePickupLocationAdapter } = require('./StorePickupLocationAdapter');
-    adapter = new StorePickupLocationAdapter();
-  });
-
-  afterEach(() => {
-    jest.dontMock('../../../store/infrastructure/repositories/pickupLocationRepo');
+    adapter = new StorePickupLocationAdapter(mockRepo);
   });
 
   const mockLocation = {

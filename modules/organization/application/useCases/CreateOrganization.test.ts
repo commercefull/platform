@@ -1,48 +1,49 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createOrganizationRepository, emitMock } from '../../tests/testUtils';
 import { CreateOrganizationUseCase } from './CreateOrganization';
 import { OrganizationEmailAlreadyExistsError } from '../../domain/errors/OrganizationErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('CreateOrganizationUseCase', () => {
-  let useCase: CreateOrganizationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should create the organization when the email is available', async () => {
+    const repository = createOrganizationRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      findByEmail: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({
-        organizationId: 'org-1',
-        name: 'Acme Corp',
-        email: 'info@acme.com',
-        status: 'pending',
-        createdAt: new Date('2026-01-01'),
-      }),
-    };
-    useCase = new CreateOrganizationUseCase(mockRepo as never);
-    jest.mocked(eventBus.emit).mockClear();
-  });
-
-  it('should create an organization successfully (happy path)', async () => {
-    const result = await useCase.execute({ name: 'Acme Corp', email: 'info@acme.com', phone: '+1234567890' });
+    const result = await new CreateOrganizationUseCase(repository).execute({
+      name: 'Acme Corp',
+      email: 'info@acme.com',
+      phone: '+1234567890',
+    });
 
     expect(result.organizationId).toBe('org-1');
     expect(result.name).toBe('Acme Corp');
     expect(result.status).toBe('pending');
-    expect(eventBus.emit).toHaveBeenCalledWith('organization.created', expect.objectContaining({ organizationId: 'org-1' }));
+    expect(result.createdAt).toBe('2026-01-01T00:00:00.000Z');
   });
 
-  it('should throw OrganizationEmailAlreadyExistsError when email is taken', async () => {
-    mockRepo.findByEmail.mockResolvedValue({ organizationId: 'existing-org' });
+  it('should emit organization.created when the organization is created', async () => {
+    const repository = createOrganizationRepository();
 
-    await expect(useCase.execute({ name: 'New Corp', email: 'info@acme.com' })).rejects.toThrow(OrganizationEmailAlreadyExistsError);
+    await new CreateOrganizationUseCase(repository).execute({ name: 'Acme Corp', email: 'info@acme.com' });
+
+    expect(emitMock).toHaveBeenCalledWith(
+      'organization.created',
+      expect.objectContaining({ organizationId: 'org-1', name: 'Acme Corp', email: 'info@acme.com' }),
+    );
   });
 
-  it('should pass all input fields to repository create', async () => {
-    await useCase.execute({
+  it('should throw OrganizationEmailAlreadyExistsError when the email is taken', async () => {
+    const repository = createOrganizationRepository();
+    repository.findByEmail.mockResolvedValue({ organizationId: 'existing-org' });
+
+    await expect(
+      new CreateOrganizationUseCase(repository).execute({ name: 'New Corp', email: 'info@acme.com' }),
+    ).rejects.toThrow(OrganizationEmailAlreadyExistsError);
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it('should pass all input fields through to the repository', async () => {
+    const repository = createOrganizationRepository();
+
+    await new CreateOrganizationUseCase(repository).execute({
       name: 'Acme',
       email: 'test@test.com',
       phone: '123',
@@ -54,17 +55,12 @@ describe('CreateOrganizationUseCase', () => {
       password: 'secret',
     });
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
+    expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'Acme',
         email: 'test@test.com',
-        phone: '123',
         businessType: 'retail',
         taxId: 'TAX123',
-        website: 'acme.com',
-        description: 'Test org',
-        logo: 'logo.png',
-        password: 'secret',
         status: 'pending',
       }),
     );

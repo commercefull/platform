@@ -5,11 +5,8 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageGiftCardsUseCase } from '../../application/useCases/ManagePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { PromotionGiftCard } from '../../application/wired';
-
-const manageGiftCardsUseCase = new ManageGiftCardsUseCase();
+import { PromotionGiftCard, manageGiftCardsUseCase } from '../../application/wired';
 
 // ============================================================================
 // Gift Card Management

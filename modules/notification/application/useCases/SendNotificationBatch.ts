@@ -8,17 +8,11 @@
  * Validates: Requirements 7.3
  */
 
-import { notificationDataRepository, notificationConfigRepository } from '../wired';
 import type { NotificationBatchRepository } from '../../domain/repositories/NotificationBatchRepository';
 import type { NotificationCommandRepository } from '../../domain/repositories/NotificationCommandRepository';
 import type { NotificationUnsubscribeRepository } from '../../domain/repositories/NotificationUnsubscribeRepository';
 import type { NotificationEventLogRepository } from '../../domain/repositories/NotificationEventLogRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
-
-const notificationBatchRepo = notificationDataRepository.batches;
-const notificationRepo = notificationDataRepository.notifications;
-const notificationUnsubscribeRepo = notificationConfigRepository.unsubscribes;
-const notificationEventLogRepo = notificationDataRepository.eventLogs;
 
 // ============================================================================
 // Command
@@ -62,10 +56,10 @@ export interface SendNotificationBatchResponse {
 
 export class SendNotificationBatchUseCase {
   constructor(
-    private readonly batchRepo: NotificationBatchRepository = notificationBatchRepo,
-    private readonly notifRepo: NotificationCommandRepository = notificationRepo,
-    private readonly unsubscribeRepo: NotificationUnsubscribeRepository = notificationUnsubscribeRepo,
-    private readonly eventLogRepo: NotificationEventLogRepository = notificationEventLogRepo,
+    private readonly batchRepo: NotificationBatchRepository,
+    private readonly notifRepo: NotificationCommandRepository,
+    private readonly unsubscribeRepo: NotificationUnsubscribeRepository,
+    private readonly eventLogRepo: NotificationEventLogRepository,
   ) {}
 
   async execute(command: SendNotificationBatchCommand): Promise<SendNotificationBatchResponse> {

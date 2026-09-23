@@ -15,12 +15,13 @@ import { logger } from '../../../../libs/logger';
 const PaymentRepo = paymentDataRepository.payments;
 import { eventBus } from '../../../../libs/events/eventBus';
 import { getAdapter } from '../../application/services/GatewayAdapterRegistry';
-import { ProcessPaymentWebhookUseCase, ProcessPaymentWebhookCommand } from '../../application/useCases/ProcessPaymentWebhook';
+import { ProcessPaymentWebhookCommand } from '../../application/useCases/ProcessPaymentWebhook';
+import { processPaymentWebhookUseCase } from '../../application/useCases/wired';
 import type { OrderStatusSyncPort } from '../../application/ports/OrderStatusSyncPort';
-import { paymentDataRepository, CheckoutOrderStatusSyncAdapter } from '../../application/wired';
+import { paymentDataRepository, orderStatusSyncAdapter } from '../../application/wired';
 
 // Ports
-const orderStatusSyncPort: OrderStatusSyncPort = new CheckoutOrderStatusSyncAdapter();
+const orderStatusSyncPort: OrderStatusSyncPort = orderStatusSyncAdapter;
 
 // ============================================================================
 // Helpers
@@ -84,7 +85,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
       (dataObject?.id as string) || (rawPayload.externalTransactionId as string) || (notificationItem?.pspReference as string) || '';
 
     if (externalId) {
-      const recordUseCase = new ProcessPaymentWebhookUseCase();
+      const recordUseCase = processPaymentWebhookUseCase;
       const recorded = await recordUseCase
         .execute(
           new ProcessPaymentWebhookCommand(

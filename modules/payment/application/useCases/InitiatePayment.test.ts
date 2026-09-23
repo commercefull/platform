@@ -1,31 +1,24 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('txn-uuid'),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, uuidMock } from '../../tests/testUtils';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from './InitiatePayment';
 import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
+import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
+import type { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+    uuidMock.mockReturnValue('txn-uuid');
+  emitMock.mockClear();
 });
 
 describe('InitiatePaymentUseCase', () => {
   let useCase: InitiatePaymentUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<Pick<PaymentRepository, 'getDefaultGateway' | 'saveTransaction'>>;
 
   beforeEach(() => {
     mockRepo = {
-      getDefaultGateway: jest.fn().mockResolvedValue({ gatewayId: 'gw-1', name: 'Stripe' }),
-      saveTransaction: jest.fn().mockResolvedValue(undefined),
+      getDefaultGateway: jest.fn().mockResolvedValue({ gatewayId: 'gw-1', provider: 'stripe', isTestMode: true }),
+      saveTransaction: jest.fn().mockResolvedValue(undefined as unknown as PaymentTransaction),
     };
-    useCase = new InitiatePaymentUseCase(mockRepo as never);
+    useCase = new InitiatePaymentUseCase(mockRepo as unknown as PaymentRepository);
   });
 
   it('should initiate payment (happy path)', async () => {
@@ -34,7 +27,7 @@ describe('InitiatePaymentUseCase', () => {
     expect(result.transactionId).toBe('txn-uuid');
     expect(result.orderId).toBe('o1');
     expect(result.amount).toBe(100);
-    expect(eventBus.emit).toHaveBeenCalledWith('payment.received', expect.objectContaining({ transactionId: 'txn-uuid' }));
+    expect(emitMock).toHaveBeenCalledWith('payment.received', expect.objectContaining({ transactionId: 'txn-uuid' }));
   });
 
   it('should throw AmountMustBePositiveError for zero amount', async () => {

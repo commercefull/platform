@@ -7,13 +7,18 @@
  */
 
 import { TaxQuotePort, TaxQuoteRequest, TaxQuoteResult } from '../../application/ports/TaxQuotePort';
-import { calculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
-import taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
+import type { CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import type taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
 
 export class TaxTaxQuoteAdapter implements TaxQuotePort {
+  constructor(
+    private readonly taxUseCase: Pick<CalculateOrderTaxUseCase, 'execute'>,
+    private readonly taxSettings: Pick<typeof taxSettingsRepo, 'findByMerchant'>,
+  ) {}
+
   async calculateTax(request: TaxQuoteRequest): Promise<TaxQuoteResult> {
     try {
-      const taxResult = await calculateOrderTaxUseCase.execute({
+      const taxResult = await this.taxUseCase.execute({
         items: request.items,
         shippingAddress: request.shippingAddress,
         shippingAmount: request.shippingAmount,
@@ -30,7 +35,7 @@ export class TaxTaxQuoteAdapter implements TaxQuotePort {
 
   async getTaxSettings(merchantId: string): Promise<{ applyDiscountBeforeTax: boolean; applyTaxToShipping: boolean } | null> {
     try {
-      const settings = await taxSettingsRepo.findByMerchant(merchantId);
+      const settings = await this.taxSettings.findByMerchant(merchantId);
       if (!settings) return null;
       return {
         applyDiscountBeforeTax: settings.applyDiscountBeforeTax,

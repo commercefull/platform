@@ -6,16 +6,12 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
-  ManageMembershipPlansUseCase,
-  ManageMembershipBenefitsUseCase,
-  ManageMembershipSubscriptionsUseCase,
-} from '../../application/useCases/ManageMembership';
+  manageMembershipPlansUseCase as managePlansUseCase,
+  manageMembershipBenefitsUseCase as manageBenefitsUseCase,
+  manageMembershipSubscriptionsUseCase as manageSubscriptionsUseCase,
+} from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const managePlansUseCase = new ManageMembershipPlansUseCase();
-const manageBenefitsUseCase = new ManageMembershipBenefitsUseCase();
-const manageSubscriptionsUseCase = new ManageMembershipSubscriptionsUseCase();
 
 // ============================================================================
 // Membership Plans Management

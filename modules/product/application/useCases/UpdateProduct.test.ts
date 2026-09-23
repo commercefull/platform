@@ -1,47 +1,23 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createProduct, lazyMock, emitMock } from '../../tests/testUtils';
 import { UpdateProductUseCase, UpdateProductCommand } from './UpdateProduct';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
+import { Product } from '../../domain/entities/Product';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('UpdateProductUseCase', () => {
   let useCase: UpdateProductUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockProduct: Record<string, unknown>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof UpdateProductUseCase>[0]>;
+  let mockProduct: Product;
 
   beforeEach(() => {
-    mockProduct = {
-      productId: 'p1',
-      name: 'Old',
-      slug: 'old',
-      status: 'active',
-      tags: [],
-      updatedAt: new Date(),
-      price: { basePrice: 10, salePrice: null, cost: 5 },
-      updateBasicInfo: jest.fn(),
-      updateSeo: jest.fn(),
-      updatePrice: jest.fn(),
-      setSalePrice: jest.fn(),
-      updateDimensions: jest.fn(),
-      assignCategory: jest.fn(),
-      removeCategory: jest.fn(),
-      setFeatured: jest.fn(),
-      addTag: jest.fn(),
-      removeTag: jest.fn(),
-      updateMetadata: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockProduct),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new UpdateProductUseCase(mockRepo as never);
+    mockProduct = createProduct({ productId: 'p1', name: 'Old', slug: 'old', basePrice: 10 });
+    mockRepo = lazyMock<ConstructorParameters<typeof UpdateProductUseCase>[0]>();
+    mockRepo.findById.mockResolvedValue(mockProduct);
+    mockRepo.save.mockResolvedValue(mockProduct);
+    useCase = new UpdateProductUseCase(mockRepo);
   });
 
   it('should update product name (happy path)', async () => {
@@ -49,7 +25,7 @@ describe('UpdateProductUseCase', () => {
 
     expect(result.productId).toBe('p1');
     expect(result.updatedFields).toContain('name');
-    expect(eventBus.emit).toHaveBeenCalledWith('product.updated', expect.objectContaining({ productId: 'p1' }));
+    expect(emitMock).toHaveBeenCalledWith('product.updated', expect.objectContaining({ productId: 'p1' }));
   });
 
   it('should throw ProductNotFoundError when product does not exist', async () => {
@@ -59,15 +35,17 @@ describe('UpdateProductUseCase', () => {
   });
 
   it('should update price when basePrice provided', async () => {
+    const updatePrice = jest.spyOn(mockProduct, 'updatePrice');
     await useCase.execute(new UpdateProductCommand('p1', { basePrice: 99.99 }));
 
-    expect(mockProduct.updatePrice).toHaveBeenCalled();
+    expect(updatePrice).toHaveBeenCalled();
   });
 
   it('should update tags', async () => {
+    const addTag = jest.spyOn(mockProduct, 'addTag');
     await useCase.execute(new UpdateProductCommand('p1', { tags: ['new', 'hot'] }));
 
-    expect(mockProduct.addTag).toHaveBeenCalledWith('new');
-    expect(mockProduct.addTag).toHaveBeenCalledWith('hot');
+    expect(addTag).toHaveBeenCalledWith('new');
+    expect(addTag).toHaveBeenCalledWith('hot');
   });
 });

@@ -10,12 +10,12 @@
  * - Line-item-level discounts for product/category-scoped promotions
  */
 
-import {
-  promotionRuleRepository,
-  type PromotionScope,
-  type RuleCondition,
-  type ActionType,
-} from '../wired';
+import type {
+  PromotionScope,
+  RuleCondition,
+  ActionType,
+  PromotionRepository,
+} from '../../domain/repositories/PromotionRepository';
 import { logger } from '../../../../libs/logger';
 import type {
   Promotion as DbPromotion,
@@ -90,6 +90,13 @@ export interface PromotionEvaluationResult {
 // ============================================================================
 
 export class PromotionEvaluationService {
+  constructor(
+    private readonly promotionRepo: Pick<
+      PromotionRepository,
+      'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'
+    >,
+  ) {}
+
   /**
    * Evaluate all active promotions against the given context.
    * Handles stackable vs exclusive, priority ordering, and per-promotion caps.
@@ -106,7 +113,7 @@ export class PromotionEvaluationService {
 
     try {
       // Fetch active promotions for cart/global scope, ordered by priority DESC
-      const promotions = await promotionRuleRepository.promotions.findActive(['cart', 'global'] as PromotionScope[]);
+      const promotions = await this.promotionRepo.findActive(['cart', 'global'] as PromotionScope[]);
 
       if (promotions.length === 0) return result;
 
@@ -135,12 +142,12 @@ export class PromotionEvaluationService {
         if (promotion.minOrderAmount && context.subtotal < Number(promotion.minOrderAmount)) continue;
 
         // Evaluate rules
-        const rules = await promotionRuleRepository.promotions.findRulesByPromotionId(promotion.promotionId);
+        const rules = await this.promotionRepo.findRulesByPromotionId(promotion.promotionId);
         const rulesPassed = this.evaluateRules(rules, context);
         if (!rulesPassed) continue;
 
         // Get actions
-        const actions = await promotionRuleRepository.promotions.findActionsByPromotionId(promotion.promotionId);
+        const actions = await this.promotionRepo.findActionsByPromotionId(promotion.promotionId);
 
         matched.push({ promotion, rules, actions });
       }
@@ -473,5 +480,3 @@ export class PromotionEvaluationService {
     }
   }
 }
-
-export const promotionEvaluationService = new PromotionEvaluationService();

@@ -1,44 +1,22 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('inv-uuid'),
-}));
-
-jest.mock('../../../../libs/db', () => ({
-  __esModule: true,
-  withTransaction: jest.fn((cb: () => Promise<unknown>) => cb()),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createInventoryMovement, createLocation, lazyMock, createStoreDispatch } from '../../tests/testUtils';
 import { ReceiveStoreDispatchUseCase } from './ReceiveStoreDispatch';
 import { StoreDispatchNotFoundError, InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
 describe('ReceiveStoreDispatchUseCase', () => {
   let useCase: ReceiveStoreDispatchUseCase;
-  let mockDispatchRepo: Record<string, jest.Mock>;
-  let mockInventoryRepo: Record<string, jest.Mock>;
+  let mockDispatchRepo: jest.Mocked<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[0]>;
+  let mockInventoryRepo: jest.Mocked<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[1]>;
 
   beforeEach(() => {
-    mockDispatchRepo = {
-      findById: jest.fn().mockResolvedValue({
-        dispatchId: 'd1',
-        toStoreId: 's2',
-        items: [{ productId: 'p1', variantId: undefined, sku: 'SKU1', receivedQuantity: 0 }],
-        markReceived: jest.fn(),
-        toJSON: () => ({ dispatchId: 'd1', status: 'received' }),
-      }),
-      save: jest.fn().mockImplementation(async (d: unknown) => d),
-    };
-    mockInventoryRepo = {
-      getLocationByStoreId: jest.fn().mockResolvedValue({ locationId: 'loc2' }),
-      findByProductAndLocation: jest.fn().mockResolvedValue(null),
-      save: jest.fn().mockImplementation(async (i: unknown) => i),
-      recordMovement: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ReceiveStoreDispatchUseCase(mockDispatchRepo as never, mockInventoryRepo as never);
+    mockDispatchRepo = lazyMock<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[0]>();
+    mockDispatchRepo.findById.mockResolvedValue(createStoreDispatch({ status: 'in_transit' }));
+    mockDispatchRepo.save.mockImplementation(async (d) => d);
+    mockInventoryRepo = lazyMock<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[1]>();
+    mockInventoryRepo.getLocationByStoreId.mockResolvedValue(createLocation({ locationId: 'loc2' }));
+    mockInventoryRepo.findByProductAndLocation.mockResolvedValue(null);
+    mockInventoryRepo.save.mockImplementation(async (i) => i);
+    mockInventoryRepo.recordMovement.mockResolvedValue(createInventoryMovement());
+    useCase = new ReceiveStoreDispatchUseCase(mockDispatchRepo, mockInventoryRepo);
   });
 
   it('should receive dispatch (happy path)', async () => {

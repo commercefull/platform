@@ -1,39 +1,25 @@
-jest.mock('../../infrastructure/repositories/productRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn().mockResolvedValue({ productId: 'p1', name: 'Widget' }),
-  },
-}));
 
-jest.mock('../../infrastructure/repositories/productQaRepo', () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn().mockResolvedValue({
-      productQaId: 'q1',
-      productId: 'p1',
-      question: 'Is this durable?',
-      status: 'pending',
-      customerId: 'c1',
-      askerName: 'John',
-      askerEmail: 'john@test.com',
-      createdAt: new Date(),
-    }),
-  },
-}));
 
 import { SubmitProductQaUseCase, SubmitProductQaCommand } from './SubmitProductQa';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
-import productRepo from '../../infrastructure/repositories/productRepo';
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import { createProductLookup, createProductQa, lazyMock } from '../../tests/testUtils';
 
-const mockProductRepo = productRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('SubmitProductQaUseCase', () => {
   let useCase: SubmitProductQaUseCase;
+  let mockRepo1: jest.Mocked<ConstructorParameters<typeof SubmitProductQaUseCase>[0]>;
+  let mockRepo2: jest.Mocked<ConstructorParameters<typeof SubmitProductQaUseCase>[1]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new SubmitProductQaUseCase(productRepo, productQaRepo);
+        mockRepo1 = lazyMock<ConstructorParameters<typeof SubmitProductQaUseCase>[0]>();
+    mockRepo1.findById.mockResolvedValue(createProductLookup());
+    mockRepo2 = lazyMock<ConstructorParameters<typeof SubmitProductQaUseCase>[1]>();
+    mockRepo2.create.mockResolvedValue(
+      createProductQa({ question: 'Is this durable?', customerId: 'c1', askerName: 'John', askerEmail: 'john@test.com' }),
+    );
+    useCase = new SubmitProductQaUseCase(mockRepo1, mockRepo2);
   });
 
   it('should submit Q&A (happy path)', async () => {
@@ -52,7 +38,7 @@ describe('SubmitProductQaUseCase', () => {
   });
 
   it('should throw ProductNotFoundError when product does not exist', async () => {
-    mockProductRepo.findById.mockResolvedValueOnce(null);
+    mockRepo1.findById.mockResolvedValueOnce(null);
 
     await expect(useCase.execute(new SubmitProductQaCommand('p999', 'Question'))).rejects.toThrow(ProductNotFoundError);
   });

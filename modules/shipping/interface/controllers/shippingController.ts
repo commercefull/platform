@@ -4,18 +4,18 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
+import { CalculateShippingRatesCommand, ShippingAddress, OrderDetails } from '../../application/useCases/CalculateShippingRates';
+import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import {
-  CalculateShippingRatesCommand,
+  shippingConfigRepository,
+  shippingLabelRepo,
   calculateShippingRatesUseCase,
-  ShippingAddress,
-  OrderDetails,
-} from '../../application/useCases/CalculateShippingRates';
-import { GetShippingMethodsQuery, getShippingMethodsUseCase } from '../../application/useCases/GetShippingMethods';
-import { createShippingLabelUseCase } from '../../application/useCases/CreateShippingLabel';
-import { getShippingLabelUseCase } from '../../application/useCases/GetShippingLabel';
-import { voidShippingLabelUseCase } from '../../application/useCases/VoidShippingLabel';
-import { trackShipmentUseCase } from '../../application/useCases/TrackShipment';
-import { shippingConfigRepository, shippingLabelRepo } from '../../application/wired';
+  getShippingMethodsUseCase,
+  createShippingLabelUseCase,
+  getShippingLabelUseCase,
+  voidShippingLabelUseCase,
+  trackShipmentUseCase,
+} from '../../application/wired';
 import {
   CreateShippingCarrierInput,
   UpdateShippingCarrierInput,

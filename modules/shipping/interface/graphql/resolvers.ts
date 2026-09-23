@@ -1,7 +1,11 @@
-import { CalculateShippingRatesUseCase, CalculateShippingRatesCommand } from '../../application/useCases/CalculateShippingRates';
-import { GetShippingMethodsUseCase, GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
+import { CalculateShippingRatesCommand } from '../../application/useCases/CalculateShippingRates';
+import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { shippingConfigRepository } from '../../application/wired';
+import {
+  shippingConfigRepository,
+  calculateShippingRatesUseCase,
+  getShippingMethodsUseCase,
+} from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
 
 const surchargeRepo = shippingConfigRepository.surcharges;
@@ -17,9 +21,8 @@ export const shippingResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new CalculateShippingRatesUseCase();
       const command = new CalculateShippingRatesCommand(args.destinationAddress, args.orderDetails);
-      return useCase.execute(command);
+      return calculateShippingRatesUseCase.execute(command);
     },
 
     shippingMethods: async (
@@ -32,9 +35,8 @@ export const shippingResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetShippingMethodsUseCase();
       const query = new GetShippingMethodsQuery(args.activeOnly ?? true, args.displayOnFrontend ?? false, args.carrierId);
-      return useCase.execute(query);
+      return getShippingMethodsUseCase.execute(query);
     },
 
     shippingSurcharges: async (_parent: unknown, args: { rateId: string; activeOnly?: boolean }, context: GraphQLAuthContext) => {

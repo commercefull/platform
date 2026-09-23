@@ -6,11 +6,8 @@
  * Validates: Requirements 7.2
  */
 
-import { notificationConfigRepository } from '../wired';
 import type { NotificationDeviceRepository } from '../../domain/repositories/NotificationDeviceRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
-
-const notificationDeviceRepo = notificationConfigRepository.devices;
 
 // ============================================================================
 // Command
@@ -45,7 +42,7 @@ export interface RegisterNotificationDeviceResponse {
 // ============================================================================
 
 export class RegisterNotificationDeviceUseCase {
-  constructor(private readonly deviceRepo: NotificationDeviceRepository = notificationDeviceRepo) {}
+  constructor(private readonly deviceRepo: NotificationDeviceRepository) {}
 
   async execute(command: RegisterNotificationDeviceCommand): Promise<RegisterNotificationDeviceResponse> {
     if (!command.userId) throw new NotificationValidationError('userId is required');

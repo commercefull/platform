@@ -123,4 +123,3 @@ Every business router mounted under `/business` must apply `isOrganizationLogged
 | `ssoRouter`                  | `isOrganizationLoggedIn` (after public SSO login endpoints) |
 | `scimRouter`                 | Bearer token auth (`SCIM_BEARER_TOKEN`)                     |
 | `b2bBusinessRouter`          | `isOrganizationLoggedIn`                                    |
-| `complianceRouter`           | `isOrganizationLoggedIn`                                    |

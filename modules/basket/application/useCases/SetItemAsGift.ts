@@ -49,7 +49,10 @@ export class SetItemAsGiftUseCase {
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
-    return this.mapToResponse(updatedBasket!);
+    if (!updatedBasket) {
+      throw new BasketNotFoundError(command.basketId);
+    }
+    return this.mapToResponse(updatedBasket);
   }
 
   private mapToResponse(basket: Basket): BasketResponse {

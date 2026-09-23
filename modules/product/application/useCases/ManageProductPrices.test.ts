@@ -1,23 +1,20 @@
-jest.mock('../../infrastructure/repositories/productPriceRepo', () => ({
-  __esModule: true,
-  default: {
-    findByProduct: jest.fn().mockResolvedValue([{ priceId: 'pr1', amount: 100 }]),
-    create: jest.fn().mockResolvedValue({ priceId: 'pr2', amount: 200 }),
-    update: jest.fn().mockResolvedValue({ priceId: 'pr1', amount: 150 }),
-  },
-}));
 
 import { ManageProductPricesUseCase } from './ManageProductPrices';
-import productPriceRepo from '../../infrastructure/repositories/productPriceRepo';
+import { createProductPrice, lazyMock } from '../../tests/testUtils';
 
-const _mockRepo = productPriceRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('ManageProductPricesUseCase', () => {
   let useCase: ManageProductPricesUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductPricesUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductPricesUseCase(productPriceRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductPricesUseCase>[0]>();
+    mockRepo.findByProduct.mockResolvedValue([createProductPrice({ productPriceId: 'pr1', amount: 100 })]);
+    mockRepo.create.mockResolvedValue(createProductPrice({ productPriceId: 'pr2', amount: 200 }));
+    mockRepo.update.mockResolvedValue(createProductPrice({ productPriceId: 'pr1', amount: 150 }));
+    useCase = new ManageProductPricesUseCase(mockRepo);
   });
 
   it('should find by product', async () => {
@@ -26,12 +23,12 @@ describe('ManageProductPricesUseCase', () => {
   });
 
   it('should create price', async () => {
-    const result = await useCase.create({ productId: 'p1', amount: 200, currency: 'USD' } as never);
-    expect(result).toEqual({ priceId: 'pr2', amount: 200 });
+    const result = await useCase.create({ productId: 'p1', amount: 200, currencyCode: 'USD' });
+    expect(result).toEqual(createProductPrice({ productPriceId: 'pr2', amount: 200 }));
   });
 
   it('should update price', async () => {
-    const result = await useCase.update('pr1', { amount: 150 } as never);
-    expect(result).toEqual({ priceId: 'pr1', amount: 150 });
+    const result = await useCase.update('pr1', { amount: 150 });
+    expect(result).toEqual(createProductPrice({ productPriceId: 'pr1', amount: 150 }));
   });
 });

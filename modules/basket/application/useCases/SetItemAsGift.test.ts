@@ -1,46 +1,55 @@
-import { SetItemAsGiftUseCase, SetItemAsGiftCommand } from './SetItemAsGift';
+import { createBasket, createBasketItem, createBasketRepository, emitMock, BASKET_ID, ITEM_ID } from '../../tests/testUtils';
+import { SetItemAsGiftCommand, SetItemAsGiftUseCase } from './SetItemAsGift';
 import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
 
 describe('SetItemAsGiftUseCase', () => {
-  let useCase: SetItemAsGiftUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should mark the item as a gift when it exists', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
 
-  const makeBasket = () => ({
-    basketId: 'b1',
-    customerId: 'c1',
-    sessionId: 's1',
-    status: 'active',
-    currency: 'USD',
-    items: [],
-    itemCount: 0,
-    subtotal: { amount: 0 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    findItem: jest.fn((id: string) => (id === 'item-1' ? { basketItemId: 'item-1', productId: 'p1' } : null)),
-    setItemAsGift: jest.fn(),
+    const result = await new SetItemAsGiftUseCase(repository).execute(
+      new SetItemAsGiftCommand(BASKET_ID, ITEM_ID, 'Happy Birthday!'),
+    );
+
+    const updatedItem = repository.updateItem.mock.calls[0][0];
+    expect(updatedItem.isGift).toBe(true);
+    expect(updatedItem.giftMessage).toBe('Happy Birthday!');
+    expect(result.items[0].isGift).toBe(true);
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(makeBasket()),
-      updateItem: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new SetItemAsGiftUseCase(mockRepo as never);
+  it('should emit basket.item_set_as_gift when the item is marked as a gift', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
+
+    await new SetItemAsGiftUseCase(repository).execute(new SetItemAsGiftCommand(BASKET_ID, ITEM_ID, 'Happy Birthday!'));
+
+    expect(emitMock).toHaveBeenCalledWith(
+      'basket.item_set_as_gift',
+      expect.objectContaining({ basketId: BASKET_ID, basketItemId: ITEM_ID, giftMessage: 'Happy Birthday!' }),
+    );
   });
 
-  it('should set item as gift (happy path)', async () => {
-    const result = await useCase.execute(new SetItemAsGiftCommand('b1', 'item-1', 'Happy Birthday!'));
+  it('should throw BasketItemNotFoundError when the item does not exist', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
 
-    expect(result.basketId).toBe('b1');
+    await expect(new SetItemAsGiftUseCase(repository).execute(new SetItemAsGiftCommand(BASKET_ID, 'missing'))).rejects.toThrow(
+      BasketItemNotFoundError,
+    );
+    expect(repository.updateItem).not.toHaveBeenCalled();
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
 
-    await expect(useCase.execute(new SetItemAsGiftCommand('missing', 'item-1'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new SetItemAsGiftUseCase(repository).execute(new SetItemAsGiftCommand('missing', ITEM_ID))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 
-  it('should throw BasketItemNotFoundError when item does not exist', async () => {
-    await expect(useCase.execute(new SetItemAsGiftCommand('b1', 'missing'))).rejects.toThrow(BasketItemNotFoundError);
+  it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
+    const repository = createBasketRepository();
+    repository.findById.mockResolvedValueOnce(createBasket({ items: [createBasketItem()] })).mockResolvedValue(null);
+
+    await expect(new SetItemAsGiftUseCase(repository).execute(new SetItemAsGiftCommand(BASKET_ID, ITEM_ID))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

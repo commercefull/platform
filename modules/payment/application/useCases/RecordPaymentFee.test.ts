@@ -1,36 +1,19 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      createFee: jest.fn().mockResolvedValue({
-        paymentFeeId: 'f1',
-        transactionId: 't1',
-        organizationId: 'org1',
-        type: 'processing',
-        amount: 5,
-        currency: 'USD',
-        description: 'Processing fee',
-        createdAt: new Date(),
-      }),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentFee } from '../../tests/testUtils';
 import { RecordPaymentFeeUseCase, RecordPaymentFeeCommand } from './RecordPaymentFee';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
 import { FailedToCreatePaymentFeeError } from '../../domain/errors/PaymentErrors';
-
-const mockRepo = paymentBillingDataRepository as unknown as { billing: Record<string, jest.Mock> };
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('RecordPaymentFeeUseCase', () => {
   let useCase: RecordPaymentFeeUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new RecordPaymentFeeUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    repo.createFee.mockResolvedValue(createPaymentFee({ paymentFeeId: 'f1', amount: 5 }));
+    useCase = new RecordPaymentFeeUseCase(repo);
   });
 
-  it('should record payment fee (happy path)', async () => {
+  it('should record a payment fee', async () => {
     const result = await useCase.execute(new RecordPaymentFeeCommand('t1', 'org1', 'processing', 5, 'USD', 'Processing fee'));
 
     expect(result.paymentFeeId).toBe('f1');
@@ -38,7 +21,7 @@ describe('RecordPaymentFeeUseCase', () => {
   });
 
   it('should throw FailedToCreatePaymentFeeError when fee creation fails', async () => {
-    mockRepo.billing.createFee.mockResolvedValueOnce(null);
+    repo.createFee.mockResolvedValueOnce(null);
 
     await expect(useCase.execute(new RecordPaymentFeeCommand('t1', 'org1', 'processing', 5, 'USD'))).rejects.toThrow(
       FailedToCreatePaymentFeeError,

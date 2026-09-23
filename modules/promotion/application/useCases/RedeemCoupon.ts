@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Redeem Coupon Use Case
  * Records coupon usage after successful order
  */
 
-import { couponDiscountRepository, type PromotionCouponUsage } from '../wired';
-
-const couponRepo = couponDiscountRepository.coupons;
+import type { PromotionCouponUsage, CouponRepository } from '../../domain/repositories/CouponRepository';
 import { ValidateCouponUseCase, ValidateCouponCommand } from './ValidateCoupon';
 
 // ============================================================================
@@ -40,7 +38,11 @@ export interface RedeemCouponResponse {
 // ============================================================================
 
 export class RedeemCouponUseCase {
-  private validateCouponUseCase = new ValidateCouponUseCase();
+  private readonly validateCouponUseCase: ValidateCouponUseCase;
+
+  constructor(private readonly couponRepo: CouponRepository) {
+    this.validateCouponUseCase = new ValidateCouponUseCase(couponRepo);
+  }
 
   async execute(command: RedeemCouponCommand): Promise<RedeemCouponResponse> {
     // Validate input
@@ -67,7 +69,7 @@ export class RedeemCouponUseCase {
 
     try {
       // Record the usage
-      const usage = await couponRepo.recordUsage(validationResult.coupon.promotionCouponId, command.orderId, command.customerId);
+      const usage = await this.couponRepo.recordUsage(validationResult.coupon.promotionCouponId, command.orderId, command.customerId);
 
       return {
         success: true,
@@ -83,5 +85,3 @@ export class RedeemCouponUseCase {
     }
   }
 }
-
-const redeemCouponUseCase = new RedeemCouponUseCase();

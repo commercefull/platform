@@ -12,14 +12,9 @@ import {
   PaymentAuthorizationResult,
 } from '../../application/ports/PaymentAuthorizationPort';
 import { InitiatePaymentUseCase, InitiatePaymentCommand } from '../../../payment/application/useCases/InitiatePayment';
-import { PaymentRepository } from '../../../payment/domain/repositories/PaymentRepository';
 
 export class PaymentPaymentAuthorizationAdapter implements PaymentAuthorizationPort {
-  private readonly initiatePaymentUseCase: InitiatePaymentUseCase;
-
-  constructor(paymentRepository: PaymentRepository) {
-    this.initiatePaymentUseCase = new InitiatePaymentUseCase(paymentRepository);
-  }
+  constructor(private readonly initiatePaymentUseCase: InitiatePaymentUseCase) {}
 
   async initiatePayment(request: PaymentAuthorizationRequest): Promise<PaymentAuthorizationResult> {
     try {

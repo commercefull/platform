@@ -1,28 +1,23 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { LogoutCustomerUseCase } from './LogoutCustomer';
 import { CustomerIdAndTokenRequiredError } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('LogoutCustomerUseCase', () => {
   let useCase: LogoutCustomerUseCase;
-  let mockTokenBlacklistRepo: Record<string, jest.Mock>;
-  let mockRefreshTokenRepo: Record<string, jest.Mock>;
+  let mockTokenBlacklistRepo: jest.Mocked<ConstructorParameters<typeof LogoutCustomerUseCase>[0]>;
+  let mockRefreshTokenRepo: jest.Mocked<ConstructorParameters<typeof LogoutCustomerUseCase>[1]>;
 
   beforeEach(() => {
-    mockTokenBlacklistRepo = { add: jest.fn().mockResolvedValue(undefined) };
-    mockRefreshTokenRepo = {
-      revokeAllForCustomer: jest.fn().mockResolvedValue(3),
-      revoke: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new LogoutCustomerUseCase(mockTokenBlacklistRepo as never, mockRefreshTokenRepo as never);
+    mockTokenBlacklistRepo = lazyMock<ConstructorParameters<typeof LogoutCustomerUseCase>[0]>();
+    mockTokenBlacklistRepo.add.mockResolvedValue(undefined);
+    mockRefreshTokenRepo = lazyMock<ConstructorParameters<typeof LogoutCustomerUseCase>[1]>();
+    mockRefreshTokenRepo.revokeAllForCustomer.mockResolvedValue(3);
+    mockRefreshTokenRepo.revoke.mockResolvedValue(undefined);
+    useCase = new LogoutCustomerUseCase(mockTokenBlacklistRepo, mockRefreshTokenRepo);
   });
 
   it('should logout customer (happy path)', async () => {
@@ -31,7 +26,7 @@ describe('LogoutCustomerUseCase', () => {
     expect(result.success).toBe(true);
     expect(mockTokenBlacklistRepo.add).toHaveBeenCalled();
     expect(mockRefreshTokenRepo.revoke).toHaveBeenCalledWith('ref456');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.logged_out', expect.objectContaining({ customerId: 'c1' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.logged_out', expect.objectContaining({ customerId: 'c1' }));
   });
 
   it('should logout all sessions when logoutAll is true', async () => {

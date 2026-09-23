@@ -38,7 +38,15 @@ import { StoreStoreFulfillmentAdapter } from './acl/StoreStoreFulfillmentAdapter
 import { InventoryStockAvailabilityAdapter } from './acl/InventoryStockAvailabilityAdapter';
 
 import { CouponRepository } from '../../coupon/infrastructure';
-import { calculateShippingRatesUseCase } from '../../shipping/application/useCases/CalculateShippingRates';
+import { createOrderUseCase, cancelOrderUseCase } from '../../order/application/useCases/wired';
+import { InitiatePaymentUseCase } from '../../payment/application/useCases/InitiatePayment';
+import { calculateShippingRatesUseCase } from '../../shipping/application/wired';
+import { promotionEvaluationService } from '../../promotion/application/wired';
+import { calculateOrderTaxUseCase } from '../../tax/application/wired';
+import taxSettingsRepo from '../../tax/infrastructure/repositories/taxSettingsRepo';
+import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
+import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
+import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 
 export interface CheckoutPorts {
   basketSnapshot: BasketSnapshotPort;
@@ -60,13 +68,13 @@ export function getCheckoutPorts(): CheckoutPorts {
   cachedPorts = {
     basketSnapshot: new BasketBasketSnapshotAdapter(BasketRepo),
     discountQuote: new CouponDiscountQuoteAdapter(CouponRepository),
-    taxQuote: new TaxTaxQuoteAdapter(),
+    taxQuote: new TaxTaxQuoteAdapter(calculateOrderTaxUseCase, taxSettingsRepo),
     shippingQuote: new ShippingShippingQuoteAdapter(calculateShippingRatesUseCase),
-    promotionQuote: new PromotionPromotionQuoteAdapter(),
-    orderPlacement: new OrderOrderPlacementAdapter(OrderRepo),
-    paymentAuthorization: new PaymentPaymentAuthorizationAdapter(PaymentRepo),
-    storeFulfillment: new StoreStoreFulfillmentAdapter(),
-    stockAvailability: new InventoryStockAvailabilityAdapter(),
+    promotionQuote: new PromotionPromotionQuoteAdapter(promotionEvaluationService),
+    orderPlacement: new OrderOrderPlacementAdapter(OrderRepo, createOrderUseCase, cancelOrderUseCase),
+    paymentAuthorization: new PaymentPaymentAuthorizationAdapter(new InitiatePaymentUseCase(PaymentRepo)),
+    storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, pickupLocationRepo),
+    stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),
   };
 
   return cachedPorts;

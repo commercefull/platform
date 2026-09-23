@@ -1,57 +1,51 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-import { RemoveItemUseCase, RemoveItemCommand } from './RemoveItem';
+import { createBasket, createBasketItem, createBasketRepository, emitMock, BASKET_ID, ITEM_ID } from '../../tests/testUtils';
+import { RemoveItemCommand, RemoveItemUseCase } from './RemoveItem';
 import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('RemoveItemUseCase', () => {
-  let useCase: RemoveItemUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should remove the item from the basket when it exists', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
 
-  const makeBasket = () => ({
-    basketId: 'b1',
-    customerId: 'c1',
-    sessionId: 's1',
-    status: 'active',
-    currency: 'USD',
-    items: [],
-    itemCount: 0,
-    subtotal: { amount: 0 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    findItem: jest.fn((id: string) => (id === 'item-1' ? { basketItemId: 'item-1', productId: 'p1' } : null)),
+    const result = await new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, ITEM_ID));
+
+    expect(repository.removeItem).toHaveBeenCalledWith(ITEM_ID);
+    expect(result.basketId).toBe(BASKET_ID);
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(makeBasket()),
-      removeItem: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RemoveItemUseCase(mockRepo as never);
+  it('should emit basket.item_removed with the product id when the item is removed', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
+
+    await new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, ITEM_ID));
+
+    expect(emitMock).toHaveBeenCalledWith(
+      'basket.item_removed',
+      expect.objectContaining({ basketId: BASKET_ID, basketItemId: ITEM_ID, productId: 'product-1' }),
+    );
   });
 
-  it('should remove item from basket (happy path)', async () => {
-    const result = await useCase.execute(new RemoveItemCommand('b1', 'item-1'));
+  it('should throw BasketItemNotFoundError when the item does not exist', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
 
-    expect(result.basketId).toBe('b1');
-    expect(mockRepo.removeItem).toHaveBeenCalledWith('item-1');
-    expect(eventBus.emit).toHaveBeenCalledWith('basket.item_removed', expect.objectContaining({ basketId: 'b1' }));
+    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, 'missing'))).rejects.toThrow(
+      BasketItemNotFoundError,
+    );
+    expect(repository.removeItem).not.toHaveBeenCalled();
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
 
-    await expect(useCase.execute(new RemoveItemCommand('missing', 'item-1'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand('missing', ITEM_ID))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 
-  it('should throw BasketItemNotFoundError when item does not exist', async () => {
-    await expect(useCase.execute(new RemoveItemCommand('b1', 'missing'))).rejects.toThrow(BasketItemNotFoundError);
+  it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
+    const repository = createBasketRepository();
+    repository.findById.mockResolvedValueOnce(createBasket({ items: [createBasketItem()] })).mockResolvedValue(null);
+
+    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, ITEM_ID))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

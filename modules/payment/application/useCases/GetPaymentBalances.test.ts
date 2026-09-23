@@ -1,28 +1,22 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      findAllBalances: jest.fn().mockResolvedValue([{ balanceId: 'b1', amount: 500 }]),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentBalance } from '../../tests/testUtils';
 import { GetPaymentBalancesUseCase } from './GetPaymentBalances';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-
-const mockRepo = paymentBillingDataRepository as unknown as { billing: Record<string, jest.Mock> };
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('GetPaymentBalancesUseCase', () => {
   let useCase: GetPaymentBalancesUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetPaymentBalancesUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    useCase = new GetPaymentBalancesUseCase(repo);
   });
 
   it('should find all balances', async () => {
+    repo.findAllBalances.mockResolvedValue([createPaymentBalance()]);
+
     const result = await useCase.findAll();
+
     expect(result).toHaveLength(1);
-    expect(mockRepo.billing.findAllBalances).toHaveBeenCalled();
+    expect(repo.findAllBalances).toHaveBeenCalled();
   });
 });

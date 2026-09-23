@@ -1,25 +1,15 @@
-jest.mock('../../../organization/infrastructure/repositories/organizationRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn(),
-    findAll: jest.fn(),
-  },
-}));
-
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { OrganizationLookupAdapter } from './OrganizationLookupAdapter';
+import type organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 
 type Organization = NonNullable<Awaited<ReturnType<typeof organizationRepo.findById>>>;
 
 describe('store/OrganizationLookupAdapter', () => {
   let adapter: OrganizationLookupAdapter;
-  let mockOrgRepo: jest.Mocked<typeof organizationRepo>;
+  let mockOrgRepo: jest.Mocked<Pick<typeof organizationRepo, 'findById' | 'findAll'>>;
 
   beforeEach(() => {
-    mockOrgRepo = organizationRepo as unknown as jest.Mocked<typeof organizationRepo>;
-    jest.mocked(mockOrgRepo.findById).mockClear();
-    jest.mocked(mockOrgRepo.findAll).mockClear();
-    adapter = new OrganizationLookupAdapter();
+    mockOrgRepo = { findById: jest.fn(), findAll: jest.fn() };
+    adapter = new OrganizationLookupAdapter(mockOrgRepo);
   });
 
   it('implements OrganizationLookupPort', () => {

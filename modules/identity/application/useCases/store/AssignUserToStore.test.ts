@@ -1,8 +1,5 @@
-jest.mock('../../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('uuid-mock'),
-}));
-
+import { lazyMock, createUserStoreAssignment } from '../../../tests/testUtils';
+import { User } from '../../../domain/entities/User';
 import { AssignUserToStoreUseCase } from './AssignUserToStore';
 import { UserNotFoundError, StoreNotFoundError, UserAlreadyAssignedToStoreError } from '../../../domain/errors/IdentityErrors';
 import { generateUUID } from '../../../../../libs/uuid';
@@ -13,18 +10,19 @@ beforeEach(() => {
 
 describe('AssignUserToStoreUseCase', () => {
   let useCase: AssignUserToStoreUseCase;
-  let mockUserStoreRepo: Record<string, jest.Mock>;
-  let mockUserRepo: Record<string, jest.Mock>;
-  let mockStoreLookup: Record<string, jest.Mock>;
+  let mockUserStoreRepo: jest.Mocked<ConstructorParameters<typeof AssignUserToStoreUseCase>[0]>;
+  let mockUserRepo: jest.Mocked<ConstructorParameters<typeof AssignUserToStoreUseCase>[1]>;
+  let mockStoreLookup: jest.Mocked<ConstructorParameters<typeof AssignUserToStoreUseCase>[2]>;
 
   beforeEach(() => {
-    mockUserStoreRepo = {
-      findByUserAndStore: jest.fn().mockResolvedValue(null),
-      save: jest.fn().mockImplementation(async (assignment: unknown) => assignment),
-    };
-    mockUserRepo = { findById: jest.fn().mockResolvedValue({ userId: 'u1' }) };
-    mockStoreLookup = { findById: jest.fn().mockResolvedValue({ storeId: 's1' }) };
-    useCase = new AssignUserToStoreUseCase(mockUserStoreRepo as never, mockUserRepo as never, mockStoreLookup as never);
+    mockUserStoreRepo = lazyMock<ConstructorParameters<typeof AssignUserToStoreUseCase>[0]>();
+    mockUserStoreRepo.findByUserAndStore.mockResolvedValue(null);
+    mockUserStoreRepo.save.mockImplementation(async assignment => assignment);
+    mockUserRepo = lazyMock<ConstructorParameters<typeof AssignUserToStoreUseCase>[1]>();
+    mockUserRepo.findById.mockResolvedValue(User.create({ userId: 'u1', email: 'u@test.com', passwordHash: 'h', userType: 'customer' }));
+    mockStoreLookup = lazyMock<ConstructorParameters<typeof AssignUserToStoreUseCase>[2]>();
+    mockStoreLookup.findById.mockResolvedValue({ storeId: 's1' });
+    useCase = new AssignUserToStoreUseCase(mockUserStoreRepo, mockUserRepo, mockStoreLookup);
   });
 
   it('should assign user to store (happy path)', async () => {
@@ -49,7 +47,7 @@ describe('AssignUserToStoreUseCase', () => {
   });
 
   it('should throw UserAlreadyAssignedToStoreError when already assigned', async () => {
-    mockUserStoreRepo.findByUserAndStore.mockResolvedValue({ userStoreId: 'existing' });
+    mockUserStoreRepo.findByUserAndStore.mockResolvedValue(createUserStoreAssignment({ userId: 'u1', storeId: 's1' }));
 
     await expect(useCase.execute({ userId: 'u1', storeId: 's1', role: 'manager' })).rejects.toThrow(UserAlreadyAssignedToStoreError);
   });

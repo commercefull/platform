@@ -1,4 +1,4 @@
-import { dynamicAttributeRepo as dynamicAttributeRepository } from '../wired';
+import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
 import type {
   ProductAttributeUpdateInput,
   ProductAttribute,
@@ -34,10 +34,11 @@ export interface UpdateAttributeResponse {
 }
 
 export class UpdateAttributeUseCase {
+  constructor(private readonly attributeRepository: DynamicAttributePort) {}
   async execute(command: UpdateAttributeCommand): Promise<UpdateAttributeResponse> {
     try {
       // Validate attribute exists
-      const existing = await dynamicAttributeRepository.findAttributeById(command.attributeId);
+      const existing = await this.attributeRepository.findAttributeById(command.attributeId);
       if (!existing) {
         return {
           success: false,
@@ -47,7 +48,7 @@ export class UpdateAttributeUseCase {
 
       // Check if code is being changed and if new code already exists
       if (command.code && command.code !== existing.code) {
-        const codeExists = await dynamicAttributeRepository.findAttributeByCode(command.code);
+        const codeExists = await this.attributeRepository.findAttributeByCode(command.code);
         if (codeExists) {
           return {
             success: false,
@@ -86,7 +87,7 @@ export class UpdateAttributeUseCase {
       if (command.defaultValue !== undefined) input.defaultValue = command.defaultValue;
       if (command.validationRules !== undefined) input.validationRules = command.validationRules;
 
-      const updated = await dynamicAttributeRepository.updateAttribute(command.attributeId, input);
+      const updated = await this.attributeRepository.updateAttribute(command.attributeId, input);
 
       if (!updated) {
         return {
@@ -108,4 +109,3 @@ export class UpdateAttributeUseCase {
   }
 }
 
-export default new UpdateAttributeUseCase();

@@ -7,9 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentFee } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { FailedToCreatePaymentFeeError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -47,7 +45,7 @@ export interface RecordPaymentFeeResponse {
 // ============================================================================
 
 export class RecordPaymentFeeUseCase {
-  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository) {}
 
   async execute(command: RecordPaymentFeeCommand): Promise<RecordPaymentFeeResponse> {
     const fee = await this.repo.createFee({

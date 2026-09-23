@@ -1,10 +1,9 @@
 import { requireBusinessAuth, requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { ListPromotionsUseCase, ListPromotionsCommand } from '../../application/useCases/ListPromotions';
-import { CheckGiftCardBalanceUseCase, CheckGiftCardBalanceQuery } from '../../application/useCases/CheckGiftCardBalance';
-import { RedeemGiftCardUseCase, RedeemGiftCardCommand } from '../../application/useCases/RedeemGiftCard';
-import { promotionRuleRepository } from '../../application/wired';
-
-const promotionRepo = promotionRuleRepository.promotions;
+import { ListPromotionsCommand } from '../../application/useCases/ListPromotions';
+import { CheckGiftCardBalanceQuery } from '../../application/useCases/CheckGiftCardBalance';
+import { RedeemGiftCardCommand } from '../../application/useCases/RedeemGiftCard';
+import { checkGiftCardBalanceUseCase, redeemGiftCardUseCase } from '../../application/wired';
+import { listPromotionsUseCase } from '../../application/useCases/wired';
 
 export const promotionResolvers = {
   Query: {
@@ -17,15 +16,13 @@ export const promotionResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ListPromotionsUseCase(promotionRepo);
       const command = new ListPromotionsCommand(args.filters, args.pagination);
-      return useCase.execute(command);
+      return listPromotionsUseCase.execute(command);
     },
 
     giftCardBalance: async (_parent: unknown, args: { code: string }) => {
-      const useCase = new CheckGiftCardBalanceUseCase();
       const query = new CheckGiftCardBalanceQuery(args.code);
-      return useCase.execute(query);
+      return checkGiftCardBalanceUseCase.execute(query);
     },
   },
 
@@ -41,9 +38,8 @@ export const promotionResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new RedeemGiftCardUseCase();
       const command = new RedeemGiftCardCommand(args.code, args.amount, args.orderId, args.customerId);
-      return useCase.execute(command);
+      return redeemGiftCardUseCase.execute(command);
     },
   },
 };

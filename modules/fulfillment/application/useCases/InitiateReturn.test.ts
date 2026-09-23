@@ -1,43 +1,40 @@
+import '../../tests/testUtils';
 import { InitiateReturnUseCase } from './InitiateReturn';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
+import { createFulfillmentRepository, createFulfillment } from '../../tests/testUtils';
 
 describe('InitiateReturnUseCase', () => {
-  let useCase: InitiateReturnUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockFulfillment: Record<string, unknown>;
+  const fulfillmentRepository = createFulfillmentRepository();
+  const useCase = new InitiateReturnUseCase(fulfillmentRepository);
 
   beforeEach(() => {
-    mockFulfillment = {
-      fulfillmentId: 'f1',
-      status: 'delivered',
-      updatedAt: new Date(),
-      markReturned: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockFulfillment),
-      save: jest.fn().mockImplementation(async (f: unknown) => f),
-    };
-    useCase = new InitiateReturnUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    fulfillmentRepository.save.mockImplementation(async (f) => f);
   });
 
-  it('should initiate return (happy path)', async () => {
-    const result = await useCase.execute({ fulfillmentId: 'f1', reason: 'Damaged' });
+  it('should mark a delivered fulfillment as returned', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('delivered'));
 
-    expect(result.fulfillmentId).toBe('f1');
-    expect(mockFulfillment.markReturned).toHaveBeenCalled();
+    const result = await useCase.execute({ fulfillmentId: 'ful-1', reason: 'Damaged' });
+
+    expect(result.fulfillmentId).toBe('ful-1');
+    const saved = fulfillmentRepository.save.mock.calls[0][0];
+    expect(saved.status).toBe('returned');
   });
 
-  it('should be idempotent when already returned', async () => {
-    mockFulfillment.status = 'returned';
+  it('should persist without re-transitioning when the fulfillment is already returned', async () => {
+    const fulfillment = createFulfillment('returned');
+    fulfillmentRepository.findById.mockResolvedValue(fulfillment);
 
-    const result = await useCase.execute({ fulfillmentId: 'f1' });
+    const result = await useCase.execute({ fulfillmentId: 'ful-1' });
 
-    expect(result.fulfillmentId).toBe('f1');
-    expect(mockFulfillment.markReturned).not.toHaveBeenCalled();
+    expect(result.fulfillmentId).toBe('ful-1');
+    expect(fulfillmentRepository.save).toHaveBeenCalledTimes(1);
+    expect(fulfillment.status).toBe('returned');
   });
 
-  it('should throw FulfillmentNotFoundError when not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute({ fulfillmentId: 'missing' })).rejects.toThrow(FulfillmentNotFoundError);
   });

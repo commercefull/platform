@@ -1,14 +1,16 @@
-import { shippingConfigRepository } from '../wired';
-
-const shippingMethodRepo = shippingConfigRepository.methods;
-const shippingRateRepo = shippingConfigRepository.rates;
+import type { ShippingMethodPort, ShippingRatePort } from '../../domain/repositories/ShippingConfigPorts';
 
 export class GetShippingMethodDetailsUseCase {
+  constructor(
+    private readonly shippingMethodRepo: Pick<ShippingMethodPort, 'findById' | 'findDefault'>,
+    private readonly shippingRateRepo: Pick<ShippingRatePort, 'findByMethod'>,
+  ) {}
+
   async getShippingMethod(shippingMethodId: string) {
     if (!shippingMethodId) {
-      const defaultMethod = await shippingMethodRepo.findDefault();
+      const defaultMethod = await this.shippingMethodRepo.findDefault();
       if (defaultMethod) {
-        const rates = await shippingRateRepo.findByMethod(defaultMethod.shippingMethodId, true);
+        const rates = await this.shippingRateRepo.findByMethod(defaultMethod.shippingMethodId, true);
         const rate = rates.length > 0 ? rates[0] : null;
         return {
           shippingMethodId: defaultMethod.shippingMethodId,
@@ -20,12 +22,12 @@ export class GetShippingMethodDetailsUseCase {
       return { cost: '0.00', name: 'Standard Shipping' };
     }
 
-    const method = await shippingMethodRepo.findById(shippingMethodId);
+    const method = await this.shippingMethodRepo.findById(shippingMethodId);
     if (!method) {
       return { cost: '0.00', name: 'Standard Shipping' };
     }
 
-    const rates = await shippingRateRepo.findByMethod(shippingMethodId, true);
+    const rates = await this.shippingRateRepo.findByMethod(shippingMethodId, true);
     const rate = rates.length > 0 ? rates[0] : null;
 
     return {

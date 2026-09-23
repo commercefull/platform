@@ -1,8 +1,10 @@
-import { reportingRepository as reportingRepo } from '../wired';
+import type { ReportingRepository } from '../../domain/repositories/ReportingRepository';
 import type { ReportScheduleProps } from '../../domain/entities/ReportEntities';
 
 export class ListReportSchedulesUseCase {
+  constructor(private readonly reportingRepo: ReportingRepository) {}
+
   async execute(organizationId?: string): Promise<ReportScheduleProps[]> {
-    return reportingRepo.listSchedules(organizationId);
+    return this.reportingRepo.listSchedules(organizationId);
   }
 }

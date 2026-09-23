@@ -2,19 +2,18 @@
  * Unit Tests for MarkAsRead Use Case
  */
 
+import { lazyMock } from '../../tests/testUtils';
 import { MarkAsReadUseCase } from './MarkAsRead';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 describe('MarkAsReadUseCase', () => {
   let useCase: MarkAsReadUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof MarkAsReadUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn(),
-      markAsRead: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new MarkAsReadUseCase(mockRepo as never as ConstructorParameters<typeof MarkAsReadUseCase>[0]);
+    mockRepo = lazyMock();
+    mockRepo.markAsRead.mockResolvedValue(undefined);
+    useCase = new MarkAsReadUseCase(mockRepo);
   });
 
   it('should mark unread notifications as read', async () => {

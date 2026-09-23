@@ -1,50 +1,44 @@
-jest.mock('../../infrastructure/repositories/BasketRepository', () => ({
-  __esModule: true,
-  default: {
-    findAbandonedBaskets: jest.fn().mockResolvedValue([{ basketId: 'b1' }]),
-    findExpiredBaskets: jest.fn().mockResolvedValue([{ basketId: 'b2' }]),
-    findById: jest.fn().mockResolvedValue({ basketId: 'b3' }),
-    delete: jest.fn().mockResolvedValue(true),
-  },
-}));
-
+import { createBasket, createBasketRepository, BASKET_ID } from '../../tests/testUtils';
 import { ManageAdminBasketUseCase } from './ManageAdminBasket';
-import basketRepo from '../../infrastructure/repositories/BasketRepository';
-
-const mockRepo = basketRepo as unknown as Record<string, jest.Mock>;
 
 describe('ManageAdminBasketUseCase', () => {
-  let useCase: ManageAdminBasketUseCase;
+  it('should return abandoned baskets older than the given number of days', async () => {
+    const abandoned = createBasket();
+    const repository = createBasketRepository();
+    repository.findAbandonedBaskets.mockResolvedValue([abandoned]);
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageAdminBasketUseCase(basketRepo);
+    const result = await new ManageAdminBasketUseCase(repository).findAbandonedBaskets(7);
+
+    expect(result).toEqual([abandoned]);
+    expect(repository.findAbandonedBaskets).toHaveBeenCalledWith(7);
   });
 
-  it('should find abandoned baskets', async () => {
-    const result = await useCase.findAbandonedBaskets(7);
+  it('should return expired baskets when asked', async () => {
+    const expired = createBasket({ expiresAt: new Date(Date.now() - 1000) });
+    const repository = createBasketRepository();
+    repository.findExpiredBaskets.mockResolvedValue([expired]);
 
-    expect(result).toHaveLength(1);
-    expect(mockRepo.findAbandonedBaskets).toHaveBeenCalledWith(7);
+    const result = await new ManageAdminBasketUseCase(repository).findExpiredBaskets();
+
+    expect(result).toEqual([expired]);
+    expect(repository.findExpiredBaskets).toHaveBeenCalled();
   });
 
-  it('should find expired baskets', async () => {
-    const result = await useCase.findExpiredBaskets();
+  it('should return the basket when looking it up by id', async () => {
+    const basket = createBasket();
+    const repository = createBasketRepository(basket);
 
-    expect(result).toHaveLength(1);
-    expect(mockRepo.findExpiredBaskets).toHaveBeenCalled();
+    const result = await new ManageAdminBasketUseCase(repository).findById(BASKET_ID);
+
+    expect(result).toBe(basket);
+    expect(repository.findById).toHaveBeenCalledWith(BASKET_ID);
   });
 
-  it('should find basket by ID', async () => {
-    const result = await useCase.findById('b3');
+  it('should delete the basket when an id is given', async () => {
+    const repository = createBasketRepository();
 
-    expect(result).toEqual({ basketId: 'b3' });
-    expect(mockRepo.findById).toHaveBeenCalledWith('b3');
-  });
+    await new ManageAdminBasketUseCase(repository).delete(BASKET_ID);
 
-  it('should delete a basket', async () => {
-    await useCase.delete('b3');
-
-    expect(mockRepo.delete).toHaveBeenCalledWith('b3');
+    expect(repository.delete).toHaveBeenCalledWith(BASKET_ID);
   });
 });

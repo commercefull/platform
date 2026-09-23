@@ -4,13 +4,11 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageOrderFulfillmentsUseCase, GetOrderForFulfillmentUseCase } from '../../../order/application/useCases/ManageOrderFulfillments';
-import { ManageWarehouseAdminUseCase } from '../../../warehouse/application/useCases/ManageWarehouseAdmin';
+import { manageOrderFulfillmentsUseCase, getOrderForFulfillmentUseCase } from '../../../order/application/useCases/wired';
+import { manageWarehouseAdminUseCase } from '../../../warehouse/application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-const manageFulfillmentsUseCase = new ManageOrderFulfillmentsUseCase();
-const getOrderForFulfillmentUseCase = new GetOrderForFulfillmentUseCase();
-const manageWarehouseUseCase = new ManageWarehouseAdminUseCase();
+const manageWarehouseUseCase = manageWarehouseAdminUseCase;
 
 // ============================================================================
 // Fulfillment Tracking & Management
@@ -25,15 +23,15 @@ export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Pro
   let fulfillments: unknown[];
 
   if (status) {
-    fulfillments = await manageFulfillmentsUseCase.findByStatus(status, limit, offset);
+    fulfillments = await manageOrderFulfillmentsUseCase.findByStatus(status, limit, offset);
   } else {
     // Get recent fulfillments (this would need to be implemented in the repo)
     // For now, get pending fulfillments
-    fulfillments = await manageFulfillmentsUseCase.findByStatus('pending', limit, offset);
+    fulfillments = await manageOrderFulfillmentsUseCase.findByStatus('pending', limit, offset);
   }
 
   // Get fulfillment statistics
-  const stats = await manageFulfillmentsUseCase.getStatusStatistics();
+  const stats = await manageOrderFulfillmentsUseCase.getStatusStatistics();
 
   // Get warehouses for filtering
   const warehouses = await manageWarehouseUseCase.findAll(true);
@@ -53,7 +51,7 @@ export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Pro
 export const viewFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
 
-  const fulfillment = await manageFulfillmentsUseCase.findById(fulfillmentId);
+  const fulfillment = await manageOrderFulfillmentsUseCase.findById(fulfillmentId);
 
   if (!fulfillment) {
     adminRespond(req, res, 'error', {
@@ -88,7 +86,7 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
   };
 
   // Update fulfillment status
-  const fulfillment = await manageFulfillmentsUseCase.updateStatus(fulfillmentId, status);
+  const fulfillment = await manageOrderFulfillmentsUseCase.updateStatus(fulfillmentId, status);
 
   if (!fulfillment) {
     throw new Error('Fulfillment not found');
@@ -96,12 +94,12 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
 
   // Add tracking info if provided
   if (trackingNumber && status === 'shipped') {
-    await manageFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
+    await manageOrderFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
   }
 
   // Update notes if provided
   if (notes) {
-    await manageFulfillmentsUseCase.update(fulfillmentId, { notes });
+    await manageOrderFulfillmentsUseCase.update(fulfillmentId, { notes });
   }
 
   res.json({
@@ -122,7 +120,7 @@ export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promis
   };
 
   // Mark as shipped
-  const fulfillment = await manageFulfillmentsUseCase.markAsShipped(fulfillmentId);
+  const fulfillment = await manageOrderFulfillmentsUseCase.markAsShipped(fulfillmentId);
 
   if (!fulfillment) {
     throw new Error('Fulfillment not found');
@@ -130,7 +128,7 @@ export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promis
 
   // Add tracking info
   if (trackingNumber) {
-    await manageFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
+    await manageOrderFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
   }
 
   res.json({
@@ -143,7 +141,7 @@ export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promis
 export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { fulfillmentId } = req.params;
 
-  const fulfillment = await manageFulfillmentsUseCase.markAsDelivered(fulfillmentId);
+  const fulfillment = await manageOrderFulfillmentsUseCase.markAsDelivered(fulfillmentId);
 
   if (!fulfillment) {
     throw new Error('Fulfillment not found');
@@ -161,7 +159,7 @@ export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
   const body = req.body as HttpRequestBody;
   const { notes } = body as { notes?: string };
 
-  const fulfillment = await manageFulfillmentsUseCase.cancel(fulfillmentId, notes);
+  const fulfillment = await manageOrderFulfillmentsUseCase.cancel(fulfillmentId, notes);
 
   if (!fulfillment) {
     throw new Error('Fulfillment not found');
@@ -175,9 +173,9 @@ export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
 };
 
 export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const stats = await manageFulfillmentsUseCase.getStatusStatistics();
-  const overdue = await manageFulfillmentsUseCase.findOverdue();
-  const shippedToday = await manageFulfillmentsUseCase.findShippedToday();
+  const stats = await manageOrderFulfillmentsUseCase.getStatusStatistics();
+  const overdue = await manageOrderFulfillmentsUseCase.findOverdue();
+  const shippedToday = await manageOrderFulfillmentsUseCase.findShippedToday();
 
   res.json({
     success: true,
@@ -198,16 +196,16 @@ export const warehouseDashboard = async (req: HttpRequest, res: HttpResponse): P
   const warehouseStats = await manageWarehouseUseCase.getStatistics();
 
   // Get fulfillment stats
-  const fulfillmentStats = await manageFulfillmentsUseCase.getStatusStatistics();
+  const fulfillmentStats = await manageOrderFulfillmentsUseCase.getStatusStatistics();
 
   // Get overdue fulfillments
-  const overdueFulfillments = await manageFulfillmentsUseCase.findOverdue();
+  const overdueFulfillments = await manageOrderFulfillmentsUseCase.findOverdue();
 
   // Get recent shipments
-  const recentShipments = await manageFulfillmentsUseCase.findShippedToday();
+  const recentShipments = await manageOrderFulfillmentsUseCase.findShippedToday();
 
   // Get pending fulfillments
-  const pendingFulfillments = await manageFulfillmentsUseCase.findByStatus('pending', 10);
+  const pendingFulfillments = await manageOrderFulfillmentsUseCase.findByStatus('pending', 10);
 
   adminRespond(req, res, 'operations/dashboard', {
     pageName: 'Warehouse Operations',

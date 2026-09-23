@@ -156,8 +156,8 @@ export class SetShippingAddressUseCase {
         name: item.name,
         quantity: item.quantity,
         unitPrice: item.unitPrice?.amount ?? 0,
-        taxCategoryId: (item as { taxCategoryId?: string }).taxCategoryId,
-        taxable: (item as { taxable?: boolean }).taxable,
+        taxCategoryId: item.taxCategoryId,
+        taxable: item.taxable,
       }));
     } catch {
       return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];

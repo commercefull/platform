@@ -5,7 +5,7 @@ import {
   ManageB2BUserUseCase,
   ManageQuoteUseCase,
   ManageApprovalWorkflowUseCase,
-} from '../../application/useCases/B2B';
+} from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
 import { CompanyRepository, B2BUserRepository, QuoteRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';

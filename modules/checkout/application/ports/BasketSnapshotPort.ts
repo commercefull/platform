@@ -21,6 +21,8 @@ export interface CheckoutLineSnapshot {
   itemType: string;
   isDigital: boolean;
   imageUrl?: string;
+  taxCategoryId?: string;
+  taxable?: boolean;
 }
 
 export interface BasketSnapshot {

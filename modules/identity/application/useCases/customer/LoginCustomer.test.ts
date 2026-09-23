@@ -1,33 +1,27 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { LoginCustomerUseCase } from './LoginCustomer';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('LoginCustomerUseCase', () => {
   let useCase: LoginCustomerUseCase;
-  let mockCustomerRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
-  let mockToken: Record<string, jest.Mock>;
+  let mockCustomerRepo: jest.Mocked<ConstructorParameters<typeof LoginCustomerUseCase>[0]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof LoginCustomerUseCase>[1]>;
+  let mockToken: jest.Mocked<ConstructorParameters<typeof LoginCustomerUseCase>[2]>;
 
   beforeEach(() => {
-    mockCustomerRepo = {
-      findByEmail: jest.fn().mockResolvedValue({ customerId: 'c1', email: 'c@test.com', passwordHash: 'hash', status: 'active' }),
-      updateLastLogin: jest.fn().mockResolvedValue(undefined),
-    };
-    mockAuth = { verifyPassword: jest.fn().mockResolvedValue(true) };
-    mockToken = {
-      generateAccessToken: jest.fn().mockResolvedValue('access-token'),
-      generateRefreshToken: jest.fn().mockResolvedValue('refresh-token'),
-    };
-    useCase = new LoginCustomerUseCase(mockCustomerRepo as never, mockAuth as never, mockToken as never);
+    mockCustomerRepo = lazyMock<ConstructorParameters<typeof LoginCustomerUseCase>[0]>();
+    mockCustomerRepo.findByEmail.mockResolvedValue({ customerId: 'c1', email: 'c@test.com', passwordHash: 'hash', status: 'active' });
+    mockCustomerRepo.updateLastLogin.mockResolvedValue(undefined);
+    mockAuth = lazyMock<ConstructorParameters<typeof LoginCustomerUseCase>[1]>();
+    mockAuth.verifyPassword.mockResolvedValue(true);
+    mockToken = lazyMock<ConstructorParameters<typeof LoginCustomerUseCase>[2]>();
+    mockToken.generateAccessToken.mockResolvedValue('access-token');
+    mockToken.generateRefreshToken.mockResolvedValue('refresh-token');
+    useCase = new LoginCustomerUseCase(mockCustomerRepo, mockAuth, mockToken);
   });
 
   it('should login customer successfully (happy path)', async () => {
@@ -36,7 +30,7 @@ describe('LoginCustomerUseCase', () => {
     expect(result.customerId).toBe('c1');
     expect(result.accessToken).toBe('access-token');
     expect(result.expiresIn).toBe(86400);
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.logged_in', expect.objectContaining({ customerId: 'c1' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.logged_in', expect.objectContaining({ customerId: 'c1' }));
   });
 
   it('should set 30-day expiry with rememberMe', async () => {

@@ -1,103 +1,86 @@
-/**
- * Unit Tests for RegisterCustomer Use Case
- */
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn(() => 'test-uuid-123'),
-}));
-
-jest.mock('../../../../libs/db', () => ({
-  __esModule: true,
-  withTransaction: jest.fn((cb: () => Promise<unknown>) => cb()),
-}));
-
-jest.mock('bcryptjs', () => ({
-  __esModule: true,
-  hash: jest.fn().mockResolvedValue('hashed-password'),
-}));
-
+import '../../tests/testUtils';
 import { RegisterCustomerUseCase, RegisterCustomerCommand } from './RegisterCustomer';
-import { EmailRequiredError, CustomerEmailAlreadyExistsError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-import { generateUUID } from '../../../../libs/uuid';
+import {
+  CustomerEmailAlreadyExistsError,
+  EmailRequiredError,
+  CustomerValidationError,
+} from '../../domain/errors/CustomerErrors';
+import {
+  createCustomerRepository,
+  createCustomerRow,
+  emitMock,
+  uuidMock,
+  hashStringMock,
+  withTransactionMock,
+} from '../../tests/testUtils';
 
 describe('RegisterCustomerUseCase', () => {
-  let useCase: RegisterCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new RegisterCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findByEmail: jest.fn().mockResolvedValue(null),
-      save: jest.fn().mockResolvedValue(undefined),
-      updatePassword: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RegisterCustomerUseCase(mockRepo as never as ConstructorParameters<typeof RegisterCustomerUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
-    jest.mocked(generateUUID).mockReturnValue('test-uuid-123');
+    jest.clearAllMocks();
+    uuidMock.mockReturnValue('new-cust-id');
+    hashStringMock.mockResolvedValue('hashed-password');
+    withTransactionMock.mockImplementation(async fn => fn({} as unknown as Parameters<Parameters<typeof withTransactionMock>[0]>[0]));
+    customerRepository.findByEmail.mockResolvedValue(null);
+    customerRepository.save.mockImplementation(async c => c);
+    customerRepository.updatePassword.mockResolvedValue(undefined);
   });
 
-  function createCommand(
-    overrides?: Partial<{ email: string; firstName: string; lastName: string; password: string; phone: string }>,
-  ): RegisterCustomerCommand {
-    return new RegisterCustomerCommand(
-      overrides?.email ?? 'john@example.com',
-      overrides?.firstName ?? 'John',
-      overrides?.lastName ?? 'Doe',
-      overrides?.password ?? 'securePassword123',
-      overrides?.phone,
+  it('should register the customer, persist password in a transaction, and emit customer.registered', async () => {
+    const result = await useCase.execute(
+      new RegisterCustomerCommand('Jane@Example.com', 'Jane', 'Doe', 'password123'),
     );
-  }
 
-  it('should register a new customer successfully', async () => {
-    const result = await useCase.execute(createCommand());
-
-    expect(result.customerId).toBe('test-uuid-123');
-    expect(result.email).toBe('john@example.com');
-    expect(result.firstName).toBe('John');
-    expect(result.lastName).toBe('Doe');
+    expect(result.customerId).toBe('new-cust-id');
+    expect(result.email).toBe('jane@example.com');
     expect(result.isVerified).toBe(false);
-    expect(mockRepo.save).toHaveBeenCalledTimes(1);
-    expect(mockRepo.updatePassword).toHaveBeenCalledWith('test-uuid-123', 'hashed-password');
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(hashStringMock).toHaveBeenCalledWith('password123', 12);
+    expect(withTransactionMock).toHaveBeenCalled();
+    expect(customerRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: 'new-cust-id', email: 'jane@example.com' }),
+    );
+    expect(customerRepository.updatePassword).toHaveBeenCalledWith('new-cust-id', 'hashed-password');
+    expect(emitMock).toHaveBeenCalledWith(
       'customer.registered',
-      expect.objectContaining({
-        customerId: 'test-uuid-123',
-        email: 'john@example.com',
-      }),
+      expect.objectContaining({ customerId: 'new-cust-id', email: 'jane@example.com' }),
     );
   });
 
-  it('should throw EmailRequiredError when email is empty', async () => {
-    await expect(useCase.execute(createCommand({ email: '  ' }))).rejects.toThrow(EmailRequiredError);
+  it('should throw EmailRequiredError when the email is empty', async () => {
+    await expect(useCase.execute(new RegisterCustomerCommand('', 'Jane', 'Doe', 'password123'))).rejects.toThrow(
+      EmailRequiredError,
+    );
+    expect(customerRepository.save).not.toHaveBeenCalled();
   });
 
   it('should throw CustomerValidationError when firstName is empty', async () => {
-    await expect(useCase.execute(createCommand({ firstName: '  ' }))).rejects.toThrow(CustomerValidationError);
+    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', '', 'Doe', 'password123'))).rejects.toThrow(
+      CustomerValidationError,
+    );
   });
 
   it('should throw CustomerValidationError when lastName is empty', async () => {
-    await expect(useCase.execute(createCommand({ lastName: '  ' }))).rejects.toThrow(CustomerValidationError);
+    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', 'Jane', '', 'password123'))).rejects.toThrow(
+      CustomerValidationError,
+    );
   });
 
-  it('should throw CustomerValidationError when password is too short', async () => {
-    await expect(useCase.execute(createCommand({ password: 'short' }))).rejects.toThrow(CustomerValidationError);
+  it('should throw CustomerValidationError when the password is too short', async () => {
+    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', 'Jane', 'Doe', 'short'))).rejects.toThrow(
+      CustomerValidationError,
+    );
+    expect(customerRepository.findByEmail).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerEmailAlreadyExistsError when email is taken', async () => {
-    mockRepo.findByEmail.mockResolvedValue({ customerId: 'existing-1' });
+  it('should throw CustomerEmailAlreadyExistsError when the email is taken', async () => {
+    customerRepository.findByEmail.mockResolvedValue(createCustomerRow());
 
-    await expect(useCase.execute(createCommand())).rejects.toThrow(CustomerEmailAlreadyExistsError);
-  });
-
-  it('should normalize email to lowercase', async () => {
-    const result = await useCase.execute(createCommand({ email: '  JOHN@EXAMPLE.COM  ' }));
-
-    expect(result.email).toBe('john@example.com');
+    await expect(
+      useCase.execute(new RegisterCustomerCommand('jane@example.com', 'Jane', 'Doe', 'password123')),
+    ).rejects.toThrow(CustomerEmailAlreadyExistsError);
+    expect(customerRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

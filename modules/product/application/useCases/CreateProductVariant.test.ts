@@ -1,26 +1,18 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('variant-uuid'),
-}));
-
-jest.mock('../../infrastructure/repositories/ProductVariantRepository', () => ({
-  __esModule: true,
-  default: {
-    save: jest.fn().mockImplementation(async (variant: unknown) => variant),
-  },
-}));
-
+import { lazyMock, uuidMock } from '../../tests/testUtils';
 import { CreateProductVariantUseCase, CreateProductVariantCommand } from './CreateProductVariant';
-import ProductVariantRepository from '../../infrastructure/repositories/ProductVariantRepository';
 
-const mockRepo = ProductVariantRepository as unknown as Record<string, jest.Mock>;
+;
 
 describe('CreateProductVariantUseCase', () => {
   let useCase: CreateProductVariantUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>;
 
   beforeEach(() => {
+    uuidMock.mockReturnValue('variant-uuid');
     jest.clearAllMocks();
-    useCase = new CreateProductVariantUseCase(mockRepo as never);
+        mockRepo = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>();
+    mockRepo.save.mockImplementation(async (variant: unknown) => variant);
+    useCase = new CreateProductVariantUseCase(mockRepo);
   });
 
   it('should create product variant (happy path)', async () => {

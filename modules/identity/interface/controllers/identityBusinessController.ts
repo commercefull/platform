@@ -5,7 +5,7 @@ import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
 import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
-import { identityDataRepository, OrganizationCredentialSubjectAdapter, CustomerCredentialSubjectAdapter } from '../../application/wired';
+import { identityDataRepository, orgCredentialPort, customerCredentialPort } from '../../application/wired';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
@@ -13,8 +13,8 @@ const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
-const orgPort: CredentialSubjectPort = new OrganizationCredentialSubjectAdapter();
-const customerPort: CredentialSubjectPort = new CustomerCredentialSubjectAdapter();
+const orgPort: CredentialSubjectPort = orgCredentialPort;
+const customerPort: CredentialSubjectPort = customerCredentialPort;
 const refreshTokenRepo = tokenRepo;
 const tokenBlacklistRepo = tokenRepo;
 

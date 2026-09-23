@@ -1,33 +1,46 @@
-import { RemoveCouponUseCase, RemoveCouponCommand } from './RemoveCoupon';
-import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
+import { createBasket, createBasketItem, createBasketRepository, emitMock, BASKET_ID } from '../../tests/testUtils';
+import { RemoveCouponCommand, RemoveCouponUseCase } from './RemoveCoupon';
+import { BasketNotFoundError, NoCouponAppliedError } from '../../domain/errors/BasketErrors';
 
 describe('RemoveCouponUseCase', () => {
-  let useCase: RemoveCouponUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should remove the coupon when one is applied', async () => {
+    const basket = createBasket({ items: [createBasketItem()] });
+    basket.applyCoupon('SAVE10', 'percentage', 10);
+    const repository = createBasketRepository(basket);
 
-  const makeBasket = () => ({
-    basketId: 'b1',
-    removeCoupon: jest.fn(),
-    toJSON: jest.fn().mockReturnValue({ basketId: 'b1', couponCode: null }),
+    const result = await new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID));
+
+    expect(result.coupon).toBeUndefined();
+    expect(result.discountAmount).toBe(0);
+    expect(repository.save).toHaveBeenCalledWith(basket);
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(makeBasket()),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RemoveCouponUseCase(mockRepo as never);
+  it('should emit promotion.coupon_removed when the coupon is removed', async () => {
+    const basket = createBasket({ items: [createBasketItem()] });
+    basket.applyCoupon('SAVE10', 'percentage', 10);
+    const repository = createBasketRepository(basket);
+
+    await new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID));
+
+    expect(emitMock).toHaveBeenCalledWith(
+      'promotion.coupon_removed',
+      expect.objectContaining({ basketId: BASKET_ID, couponCode: 'SAVE10' }),
+    );
   });
 
-  it('should remove coupon from basket (happy path)', async () => {
-    const result = await useCase.execute(new RemoveCouponCommand('b1'));
+  it('should throw NoCouponAppliedError when the basket has no coupon', async () => {
+    const repository = createBasketRepository(createBasket());
 
-    expect(result.basketId).toBe('b1');
+    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID))).rejects.toThrow(
+      NoCouponAppliedError,
+    );
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
 
-    await expect(useCase.execute(new RemoveCouponCommand('missing'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand('missing'))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

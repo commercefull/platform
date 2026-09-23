@@ -1,91 +1,75 @@
-/**
- * Unit Tests for UpdateItemQuantity Use Case
- */
-
-import { UpdateItemQuantityUseCase, UpdateItemQuantityCommand } from './UpdateItemQuantity';
-import { Basket } from '../../domain/entities/Basket';
-import { BasketItem } from '../../domain/entities/BasketItem';
-import { Money } from '../../domain/valueObjects/Money';
-import { BasketNotFoundError, BasketItemNotFoundError } from '../../domain/errors/BasketErrors';
-
-import type { BasketRepository } from '../../domain/repositories/BasketRepository';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
-function createBasketWithItem(): Basket {
-  const basket = Basket.create({ basketId: 'b-1', customerId: 'cust-1', currency: 'USD' });
-  const item = BasketItem.create({
-    basketItemId: 'item-1',
-    basketId: 'b-1',
-    productId: 'p-1',
-    sku: 'SKU-1',
-    name: 'Widget',
-    quantity: 2,
-    unitPrice: Money.create(50, 'USD'),
-    itemType: 'physical',
-    isGift: false,
-  });
-  basket.addItem(item);
-  return basket;
-}
-
-function createMockBasketRepo(basket: Basket | null = null): jest.Mocked<BasketRepository> {
-  return {
-    findById: jest.fn().mockResolvedValue(basket),
-    findByCustomerId: jest.fn().mockResolvedValue(basket),
-    findBySessionId: jest.fn().mockResolvedValue(basket),
-    findActiveBasket: jest.fn().mockResolvedValue(basket),
-    save: jest.fn().mockResolvedValue(basket),
-    delete: jest.fn().mockResolvedValue(undefined),
-    addItem: jest.fn(),
-    updateItem: jest.fn().mockResolvedValue({} as BasketItem),
-    removeItem: jest.fn().mockResolvedValue(undefined),
-    getItems: jest.fn().mockResolvedValue([]),
-    clearItems: jest.fn().mockResolvedValue(undefined),
-    findAbandonedBaskets: jest.fn().mockResolvedValue([]),
-    findExpiredBaskets: jest.fn().mockResolvedValue([]),
-    markAsAbandoned: jest.fn().mockResolvedValue(undefined),
-    mergeBaskets: jest.fn(),
-  } as never as jest.Mocked<BasketRepository>;
-}
+import { createBasket, createBasketItem, createBasketRepository, emitMock, BASKET_ID, ITEM_ID } from '../../tests/testUtils';
+import { UpdateItemQuantityCommand, UpdateItemQuantityUseCase } from './UpdateItemQuantity';
+import { BasketNotFoundError, BasketItemNotFoundError, BasketItemQuantityError } from '../../domain/errors/BasketErrors';
 
 describe('UpdateItemQuantityUseCase', () => {
-  it('should update item quantity to a positive value', async () => {
-    const basket = createBasketWithItem();
-    const repo = createMockBasketRepo(basket);
-    const useCase = new UpdateItemQuantityUseCase(repo);
+  it('should update the quantity when the new quantity is positive', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
 
-    const result = await useCase.execute(new UpdateItemQuantityCommand('b-1', 'item-1', 5));
+    const result = await new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, ITEM_ID, 5));
 
-    expect(result.basketId).toBe('b-1');
-    expect(repo.updateItem).toHaveBeenCalled();
+    expect(repository.updateItem.mock.calls[0][0].quantity).toBe(5);
+    expect(repository.removeItem).not.toHaveBeenCalled();
+    expect(result.itemCount).toBe(5);
   });
 
-  it('should remove item when quantity is zero or negative', async () => {
-    const basket = createBasketWithItem();
-    const repo = createMockBasketRepo(basket);
-    const useCase = new UpdateItemQuantityUseCase(repo);
+  it('should emit basket.item_updated when the quantity changes', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
 
-    await useCase.execute(new UpdateItemQuantityCommand('b-1', 'item-1', 0));
+    await new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, ITEM_ID, 5));
 
-    expect(repo.removeItem).toHaveBeenCalledWith('item-1');
-    expect(repo.updateItem).not.toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith(
+      'basket.item_updated',
+      expect.objectContaining({ basketId: BASKET_ID, basketItemId: ITEM_ID, quantity: 5 }),
+    );
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    const repo = createMockBasketRepo(null);
-    const useCase = new UpdateItemQuantityUseCase(repo);
+  it.each([0, -3])('should remove the item when the quantity is %i', async quantity => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
 
-    await expect(useCase.execute(new UpdateItemQuantityCommand('nonexistent', 'item-1', 5))).rejects.toThrow(BasketNotFoundError);
+    await new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, ITEM_ID, quantity));
+
+    expect(repository.removeItem).toHaveBeenCalledWith(ITEM_ID);
+    expect(repository.updateItem).not.toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith(
+      'basket.item_removed',
+      expect.objectContaining({ basketId: BASKET_ID, basketItemId: ITEM_ID }),
+    );
   });
 
-  it('should throw BasketItemNotFoundError when item does not exist', async () => {
-    const basket = createBasketWithItem();
-    const repo = createMockBasketRepo(basket);
-    const useCase = new UpdateItemQuantityUseCase(repo);
+  it('should throw BasketItemQuantityError when the quantity exceeds the maximum', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
 
-    await expect(useCase.execute(new UpdateItemQuantityCommand('b-1', 'nonexistent-item', 5))).rejects.toThrow(BasketItemNotFoundError);
+    await expect(
+      new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, ITEM_ID, 101)),
+    ).rejects.toThrow(BasketItemQuantityError);
+    expect(repository.updateItem).not.toHaveBeenCalled();
+  });
+
+  it('should throw BasketItemNotFoundError when the item does not exist', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
+
+    await expect(
+      new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, 'missing', 5)),
+    ).rejects.toThrow(BasketItemNotFoundError);
+  });
+
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
+
+    await expect(
+      new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand('missing', ITEM_ID, 5)),
+    ).rejects.toThrow(BasketNotFoundError);
+  });
+
+  it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
+    const repository = createBasketRepository();
+    repository.findById
+      .mockResolvedValueOnce(createBasket({ items: [createBasketItem({ quantity: 2 })] }))
+      .mockResolvedValue(null);
+
+    await expect(
+      new UpdateItemQuantityUseCase(repository).execute(new UpdateItemQuantityCommand(BASKET_ID, ITEM_ID, 5)),
+    ).rejects.toThrow(BasketNotFoundError);
   });
 });

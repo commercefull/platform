@@ -2,24 +2,21 @@
  * Unit Tests for FraudScreeningService (Epic E)
  */
 
-jest.mock('../../infrastructure/repositories/fraudRepo', () => ({
-  getRules: jest.fn(),
-  isBlacklisted: jest.fn(),
-  incrementRuleTrigger: jest.fn().mockResolvedValue(undefined),
-}));
-
-import { FraudScreeningService } from './FraudScreeningService';
-import * as fraudRepo from '../../infrastructure/repositories/fraudRepo';
-import type { FraudRule } from '../../infrastructure/repositories/fraudRepo';
+import { lazyMock } from '../../tests/testUtils';
+import { FraudScreeningService, FraudScreeningPort } from './FraudScreeningService';
+import type { FraudRule } from '../wired';
 
 describe('FraudScreeningService', () => {
   let service: FraudScreeningService;
+  let fraudRepo: jest.Mocked<FraudScreeningPort>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new FraudScreeningService();
-    jest.mocked(fraudRepo.getRules).mockResolvedValue([]);
-    jest.mocked(fraudRepo.isBlacklisted).mockResolvedValue(false);
+    fraudRepo = lazyMock<FraudScreeningPort>();
+    service = new FraudScreeningService(fraudRepo);
+    fraudRepo.getRules.mockResolvedValue([]);
+    fraudRepo.isBlacklisted.mockResolvedValue(false);
+    fraudRepo.incrementRuleTrigger.mockResolvedValue(undefined);
   });
 
   describe('screen — no rules', () => {
@@ -39,7 +36,7 @@ describe('FraudScreeningService', () => {
 
   describe('screen — blacklist', () => {
     it('blocks when IP is blacklisted', async () => {
-      jest.mocked(fraudRepo.isBlacklisted).mockImplementation(async type => type === 'ip');
+      fraudRepo.isBlacklisted.mockImplementation(async type => type === 'ip');
 
       const result = await service.screen({
         ipAddress: '1.2.3.4',
@@ -54,7 +51,7 @@ describe('FraudScreeningService', () => {
     });
 
     it('blocks when email is blacklisted', async () => {
-      jest.mocked(fraudRepo.isBlacklisted).mockImplementation(async type => type === 'email');
+      fraudRepo.isBlacklisted.mockImplementation(async type => type === 'email');
 
       const result = await service.screen({
         email: 'fraud@bad.com',
@@ -65,7 +62,7 @@ describe('FraudScreeningService', () => {
     });
 
     it('blocks when card BIN is blacklisted', async () => {
-      jest.mocked(fraudRepo.isBlacklisted).mockImplementation(async type => type === 'card_bin');
+      fraudRepo.isBlacklisted.mockImplementation(async type => type === 'card_bin');
 
       const result = await service.screen({
         cardBin: '411111',
@@ -92,7 +89,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         orderAmount: 600,
@@ -120,7 +117,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         orderAmount: 100,
@@ -146,7 +143,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         billingCountry: 'XX',
@@ -174,7 +171,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         orderAmount: 600,
@@ -199,7 +196,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         previousOrders: 6,
@@ -224,7 +221,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         isFirstOrder: true,
@@ -249,7 +246,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         billingCountry: 'XX',
@@ -290,7 +287,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule1, rule2]);
+      fraudRepo.getRules.mockResolvedValue([rule1, rule2]);
 
       const result = await service.screen({
         orderAmount: 600,
@@ -332,7 +329,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule1, rule2]);
+      fraudRepo.getRules.mockResolvedValue([rule1, rule2]);
 
       const result = await service.screen({
         orderAmount: 600,
@@ -359,7 +356,7 @@ describe('FraudScreeningService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      jest.mocked(fraudRepo.getRules).mockResolvedValue([rule]);
+      fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
         avsMatch: false,

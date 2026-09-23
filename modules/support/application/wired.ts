@@ -10,6 +10,14 @@ import type {
   FaqArticle,
 } from '../infrastructure/repositories/SupportInfoRepository';
 
+import { ManageSupportTicketsUseCase } from './useCases/ManageSupportTickets';
+import { ManageFaqUseCase } from './useCases/ManageFaq';
+import { ManageStorefrontSupportUseCase } from './useCases/ManageStorefrontSupport';
+
+export const manageSupportTicketsUseCase = new ManageSupportTicketsUseCase(supportDataRepository.admin);
+export const manageFaqUseCase = new ManageFaqUseCase(supportInfoRepository.faq);
+export const manageStorefrontSupportUseCase = new ManageStorefrontSupportUseCase(supportDataRepository.tickets);
+
 export {
   supportDataRepository,
   supportInfoRepository,

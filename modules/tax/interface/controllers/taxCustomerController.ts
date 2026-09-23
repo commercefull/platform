@@ -1,10 +1,10 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { AddressInput } from '../../taxTypes';
 import type { TaxableBasketPort } from '../../application/ports/TaxableBasketPort';
-import { taxQueryRepository, BasketTaxableBasketAdapter } from '../../application/wired';
+import { taxQueryRepository, taxableBasketAdapter } from '../../application/wired';
 
 // Ports
-const taxableBasketPort: TaxableBasketPort = new BasketTaxableBasketAdapter();
+const taxableBasketPort: TaxableBasketPort = taxableBasketAdapter;
 
 // Define interfaces needed for the controller - keeping application layer in camelCase
 interface TaxableItem {

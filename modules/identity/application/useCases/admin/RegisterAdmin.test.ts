@@ -1,8 +1,4 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { RegisterAdminUseCase } from './RegisterAdmin';
 import {
   AdminFieldsRequiredError,
@@ -10,27 +6,24 @@ import {
   OnlySuperAdminCanCreateError,
   EmailAlreadyRegisteredError,
 } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('RegisterAdminUseCase', () => {
   let useCase: RegisterAdminUseCase;
-  let mockAdminRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
+  let mockAdminRepo: jest.Mocked<ConstructorParameters<typeof RegisterAdminUseCase>[0]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof RegisterAdminUseCase>[1]>;
 
   beforeEach(() => {
-    mockAdminRepo = {
-      findByEmail: jest.fn().mockResolvedValue(null),
-      findById: jest.fn().mockResolvedValue({ adminId: 'creator', role: 'super_admin' }),
-      create: jest
-        .fn()
-        .mockResolvedValue({ adminId: 'a2', email: 'new@test.com', name: 'New Admin', role: 'admin', createdAt: new Date() }),
-    };
-    mockAuth = { hashPassword: jest.fn().mockResolvedValue('hashed') };
-    useCase = new RegisterAdminUseCase(mockAdminRepo as never, mockAuth as never);
+    mockAdminRepo = lazyMock<ConstructorParameters<typeof RegisterAdminUseCase>[0]>();
+    mockAdminRepo.findByEmail.mockResolvedValue(null);
+    mockAdminRepo.findById.mockResolvedValue({ adminId: 'creator', email: 'c@t.com', name: 'C', role: 'super_admin', permissions: [], status: 'active', createdAt: new Date() });
+    mockAdminRepo.create.mockResolvedValue({ adminId: 'a2', email: 'new@test.com', name: 'New Admin', role: 'admin', permissions: [], status: 'active', createdAt: new Date() });
+    mockAuth = lazyMock<ConstructorParameters<typeof RegisterAdminUseCase>[1]>();
+    mockAuth.hashPassword.mockResolvedValue('hashed');
+    useCase = new RegisterAdminUseCase(mockAdminRepo, mockAuth);
   });
 
   it('should register admin successfully (happy path)', async () => {
@@ -43,7 +36,7 @@ describe('RegisterAdminUseCase', () => {
     });
 
     expect(result.adminId).toBe('a2');
-    expect(eventBus.emit).toHaveBeenCalledWith('admin.registered', expect.objectContaining({ adminId: 'a2' }));
+    expect(emitMock).toHaveBeenCalledWith('admin.registered', expect.objectContaining({ adminId: 'a2' }));
   });
 
   it('should throw AdminFieldsRequiredError when required fields missing', async () => {
@@ -59,7 +52,7 @@ describe('RegisterAdminUseCase', () => {
   });
 
   it('should throw OnlySuperAdminCanCreateError when creator is not super_admin', async () => {
-    mockAdminRepo.findById.mockResolvedValue({ adminId: 'creator', role: 'admin' });
+    mockAdminRepo.findById.mockResolvedValue({ adminId: 'creator', email: 'c@t.com', name: 'C', role: 'admin', permissions: [], status: 'active', createdAt: new Date() });
 
     await expect(
       useCase.execute({ email: 'a@b.com', password: 'password123', name: 'N', role: 'admin', createdBy: 'creator' }),
@@ -67,7 +60,7 @@ describe('RegisterAdminUseCase', () => {
   });
 
   it('should throw EmailAlreadyRegisteredError when email exists', async () => {
-    mockAdminRepo.findByEmail.mockResolvedValue({ adminId: 'existing' });
+    mockAdminRepo.findByEmail.mockResolvedValue({ adminId: 'existing', email: 'a@b.com', name: 'E', role: 'admin', permissions: [], status: 'active', createdAt: new Date() });
 
     await expect(
       useCase.execute({ email: 'a@b.com', password: 'password123', name: 'N', role: 'admin', createdBy: 'creator' }),

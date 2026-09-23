@@ -1,71 +1,57 @@
-jest.mock('../../infrastructure/repositories/NotificationConfigRepository', () => ({
-  __esModule: true,
-  default: {
-    templates: {
-      findAll: jest.fn().mockResolvedValue([{ templateId: 't1' }]),
-      findByCategory: jest.fn().mockResolvedValue([{ templateId: 't1' }]),
-      findById: jest.fn().mockResolvedValue({ templateId: 't1' }),
-      count: jest.fn().mockResolvedValue(1),
-      create: jest.fn().mockResolvedValue({ templateId: 't2' }),
-      update: jest.fn().mockResolvedValue(undefined),
-      activate: jest.fn().mockResolvedValue(undefined),
-      deactivate: jest.fn().mockResolvedValue(undefined),
-      delete: jest.fn().mockResolvedValue(undefined),
-      clone: jest.fn().mockResolvedValue({ templateId: 't3' }),
-      getPreview: jest.fn().mockResolvedValue({ subject: 'Test', body: 'Hello' }),
-    },
-    preferences: {},
-    devices: {},
-    templateTranslations: {},
-  },
-}));
-
+import { createNotificationTemplate, createNotificationTemplateRepository } from '../../tests/testUtils';
 import { ManageNotificationTemplatesUseCase } from './ManageNotificationTemplates';
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
-
-const mockRepo = notificationConfigRepository as unknown as { templates: Record<string, jest.Mock> };
 
 describe('ManageNotificationTemplatesUseCase', () => {
   let useCase: ManageNotificationTemplatesUseCase;
+  let templateRepo: ReturnType<typeof createNotificationTemplateRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageNotificationTemplatesUseCase();
+    templateRepo = createNotificationTemplateRepository();
+    useCase = new ManageNotificationTemplatesUseCase(templateRepo);
   });
 
-  it('should find all templates', async () => {
-    const result = await useCase.findAll(true);
-    expect(result).toHaveLength(1);
-    expect(mockRepo.templates.findAll).toHaveBeenCalledWith(true);
+  it('should delegate each read to the repository', async () => {
+    const templates = [createNotificationTemplate()];
+    templateRepo.findAll.mockResolvedValue(templates);
+    templateRepo.findByCategory.mockResolvedValue(templates);
+    templateRepo.findById.mockResolvedValue(templates[0]);
+    templateRepo.count.mockResolvedValue(3);
+
+    expect(await useCase.findAll(true)).toEqual(templates);
+    expect(await useCase.findByCategory('orders', false)).toEqual(templates);
+    expect(await useCase.findById('tpl-1')).toEqual(templates[0]);
+    expect(await useCase.count(true)).toBe(3);
+
+    expect(templateRepo.findAll).toHaveBeenCalledWith(true);
+    expect(templateRepo.findByCategory).toHaveBeenCalledWith('orders', false);
+    expect(templateRepo.findById).toHaveBeenCalledWith('tpl-1');
+    expect(templateRepo.count).toHaveBeenCalledWith(true);
   });
 
-  it('should find by category', async () => {
-    const result = await useCase.findByCategory('order');
-    expect(result).toHaveLength(1);
-  });
+  it('should delegate each write to the repository', async () => {
+    const template = createNotificationTemplate();
+    templateRepo.create.mockResolvedValue(template);
+    templateRepo.update.mockResolvedValue(template);
+    templateRepo.activate.mockResolvedValue(template);
+    templateRepo.deactivate.mockResolvedValue(template);
+    templateRepo.delete.mockResolvedValue(true);
+    templateRepo.clone.mockResolvedValue(template);
+    templateRepo.getPreview.mockResolvedValue({ template });
 
-  it('should find by ID', async () => {
-    const result = await useCase.findById('t1');
-    expect(result).toEqual({ templateId: 't1' });
-  });
+    await useCase.create({ code: 'x', name: 'X', type: 'order', supportedChannels: ['email'], defaultChannel: 'email', isActive: true });
+    await useCase.update('tpl-1', { name: 'Renamed' });
+    await useCase.activate('tpl-1');
+    await useCase.deactivate('tpl-1');
+    await useCase.delete('tpl-1');
+    await useCase.clone('tpl-1', 'new_code', 'New Name');
+    await useCase.getPreview('tpl-1', { name: 'Jane' });
 
-  it('should create template', async () => {
-    const result = await useCase.create({ code: 'welcome', name: 'Welcome' } as never);
-    expect(result).toEqual({ templateId: 't2' });
-  });
-
-  it('should activate template', async () => {
-    await useCase.activate('t1');
-    expect(mockRepo.templates.activate).toHaveBeenCalledWith('t1');
-  });
-
-  it('should clone template', async () => {
-    const result = await useCase.clone('t1', 'new_code', 'New Name');
-    expect(result).toEqual({ templateId: 't3' });
-  });
-
-  it('should get preview', async () => {
-    const result = await useCase.getPreview('t1', { name: 'John' });
-    expect(result).toBeDefined();
+    expect(templateRepo.create).toHaveBeenCalledWith(expect.objectContaining({ code: 'x' }));
+    expect(templateRepo.update).toHaveBeenCalledWith('tpl-1', { name: 'Renamed' });
+    expect(templateRepo.activate).toHaveBeenCalledWith('tpl-1');
+    expect(templateRepo.deactivate).toHaveBeenCalledWith('tpl-1');
+    expect(templateRepo.delete).toHaveBeenCalledWith('tpl-1');
+    expect(templateRepo.clone).toHaveBeenCalledWith('tpl-1', 'new_code', 'New Name');
+    expect(templateRepo.getPreview).toHaveBeenCalledWith('tpl-1', { name: 'Jane' });
   });
 });

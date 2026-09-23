@@ -1,55 +1,45 @@
-import { membershipPlanRepository } from '../wired';
+export interface MembershipAdminProgramsPort {
+  getMembershipStats(): Promise<{ totalMembers: number; activeMembers: number; expiringThisMonth: number }>;
+  findMembershipTiersWithCounts(): Promise<unknown[]>;
+  findRecentMemberships(limit?: number): Promise<unknown[]>;
+  getSubscriptionStats(): Promise<{ totalSubscriptions: number; activeSubscriptions: number; mrr: number }>;
+  findSubscriptionPlansWithCounts(): Promise<unknown[]>;
+  findRecentSubscriptions(limit?: number): Promise<unknown[]>;
+  getLoyaltyStats(): Promise<{ totalMembers: number; totalPointsIssued: number; totalPointsRedeemed: number }>;
+  findLoyaltyRewardsWithCounts(): Promise<unknown[]>;
+  findRecentLoyaltyTransactions(limit?: number): Promise<unknown[]>;
+}
 
-const adminProgramsRepo = membershipPlanRepository.admin;
-const storefrontMembershipRepo = membershipPlanRepository.storefront;
 
 export class ManageMembershipProgramsUseCase {
+  constructor(private readonly adminProgramsRepo: MembershipAdminProgramsPort) {}
+
   async getMembershipStats() {
-    return adminProgramsRepo.getMembershipStats();
+    return this.adminProgramsRepo.getMembershipStats();
   }
   async findMembershipTiersWithCounts() {
-    return adminProgramsRepo.findMembershipTiersWithCounts();
+    return this.adminProgramsRepo.findMembershipTiersWithCounts();
   }
   async findRecentMemberships(limit?: number) {
-    return adminProgramsRepo.findRecentMemberships(limit);
+    return this.adminProgramsRepo.findRecentMemberships(limit);
   }
   async getSubscriptionStats() {
-    return adminProgramsRepo.getSubscriptionStats();
+    return this.adminProgramsRepo.getSubscriptionStats();
   }
   async findSubscriptionPlansWithCounts() {
-    return adminProgramsRepo.findSubscriptionPlansWithCounts();
+    return this.adminProgramsRepo.findSubscriptionPlansWithCounts();
   }
   async findRecentSubscriptions(limit?: number) {
-    return adminProgramsRepo.findRecentSubscriptions(limit);
+    return this.adminProgramsRepo.findRecentSubscriptions(limit);
   }
   async getLoyaltyStats() {
-    return adminProgramsRepo.getLoyaltyStats();
+    return this.adminProgramsRepo.getLoyaltyStats();
   }
   async findLoyaltyRewardsWithCounts() {
-    return adminProgramsRepo.findLoyaltyRewardsWithCounts();
+    return this.adminProgramsRepo.findLoyaltyRewardsWithCounts();
   }
   async findRecentLoyaltyTransactions(limit?: number) {
-    return adminProgramsRepo.findRecentLoyaltyTransactions(limit);
+    return this.adminProgramsRepo.findRecentLoyaltyTransactions(limit);
   }
 }
 
-export class ManageStorefrontMembershipUseCase {
-  async findActivePlansWithBenefitCount() {
-    return storefrontMembershipRepo.findActivePlansWithBenefitCount();
-  }
-  async findPlanById(planId: string) {
-    return storefrontMembershipRepo.findPlanById(planId);
-  }
-  async findBenefitsByPlanId(planId: string) {
-    return storefrontMembershipRepo.findBenefitsByPlanId(planId);
-  }
-  async findActiveMembershipWithPlan(customerId: string) {
-    return storefrontMembershipRepo.findActiveMembershipWithPlan(customerId);
-  }
-  async findActiveMembershipByCustomerId(customerId: string) {
-    return storefrontMembershipRepo.findActiveMembershipByCustomerId(customerId);
-  }
-  async createMembership(customerId: string, planId: string) {
-    return storefrontMembershipRepo.createMembership(customerId, planId);
-  }
-}

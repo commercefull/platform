@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { CouponDiscountQuoteAdapter } from './CouponDiscountQuoteAdapter';
+import type { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
+import type { Coupon } from '../../../coupon/domain/entities/Coupon';
 
 describe('CouponDiscountQuoteAdapter', () => {
-  let adapter: import('./CouponDiscountQuoteAdapter').CouponDiscountQuoteAdapter;
-  let mockCouponRepo: { validateCouponCode: jest.Mock };
+  let adapter: CouponDiscountQuoteAdapter;
+  let mockCouponRepo: jest.Mocked<Pick<CouponRepository, 'validateCouponCode'>>;
 
   beforeEach(() => {
     mockCouponRepo = {
       validateCouponCode: jest.fn(),
     };
-    const { CouponDiscountQuoteAdapter } = require('./CouponDiscountQuoteAdapter');
-    adapter = new CouponDiscountQuoteAdapter(mockCouponRepo as never);
+    adapter = new CouponDiscountQuoteAdapter(mockCouponRepo as unknown as CouponRepository);
   });
 
   it('implements DiscountQuotePort', () => {
@@ -19,7 +20,7 @@ describe('CouponDiscountQuoteAdapter', () => {
   it('should return valid quote when coupon is valid', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'SAVE10' },
+      coupon: { code: 'SAVE10' } as unknown as Coupon,
       discountAmount: 10,
     });
 
@@ -47,7 +48,7 @@ describe('CouponDiscountQuoteAdapter', () => {
   it('should default discountAmount to 0 when not provided', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'FREE' },
+      coupon: { code: 'FREE' } as unknown as Coupon,
       discountAmount: undefined,
     });
 

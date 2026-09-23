@@ -10,12 +10,14 @@
  */
 
 import { PromotionQuotePort, PromotionQuoteRequest, PromotionQuoteResult } from '../../application/ports/PromotionQuotePort';
-import { promotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
+import type { PromotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
 
 export class PromotionPromotionQuoteAdapter implements PromotionQuotePort {
+  constructor(private readonly promotionEvaluationService: PromotionEvaluationService) {}
+
   async evaluatePromotions(request: PromotionQuoteRequest): Promise<PromotionQuoteResult> {
     try {
-      const result = await promotionEvaluationService.evaluate({
+      const result = await this.promotionEvaluationService.evaluate({
         items: request.items,
         subtotal: request.subtotal,
         shippingAmount: request.shippingAmount,

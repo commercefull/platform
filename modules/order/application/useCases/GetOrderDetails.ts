@@ -15,10 +15,7 @@ import {
   OrderPayment,
   OrderPaymentRefund,
 } from '../../domain/repositories/OrderQueryRepository';
-import { orderDataRepository } from '../wired';
 
-const orderRepo = orderDataRepository.commands;
-const orderQueryRepo = orderDataRepository.queries;
 
 // ============================================================================
 // Command
@@ -61,8 +58,8 @@ export interface OrderDetailsResponse {
 
 export class GetOrderDetailsUseCase {
   constructor(
-    private readonly orders: OrderRepository = orderRepo,
-    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
+    private readonly orders: OrderRepository,
+    private readonly queryRepo: OrderQueryRepository,
   ) {}
 
   async execute(command: GetOrderDetailsCommand): Promise<OrderDetailsResponse | null> {

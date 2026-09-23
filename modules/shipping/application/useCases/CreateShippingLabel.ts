@@ -5,11 +5,9 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { shippingLabelRepo, shippingConfigRepository } from '../wired';
-import type { CreateShippingLabelInput, ShippingLabel } from '../../domain/repositories/ShippingLabelRepository';
+import type { CreateShippingLabelInput, ShippingLabel, ShippingLabelPort } from '../../domain/repositories/ShippingLabelRepository';
+import type { ShippingCarrierPort } from '../../domain/repositories/ShippingConfigPorts';
 import { ShippingCarrierNotFoundError, ShippingValidationError } from '../../domain/errors/ShippingErrors';
-
-const shippingCarrierRepo = shippingConfigRepository.carriers;
 
 export interface CreateLabelInput {
   shippingCarrierId: string;
@@ -32,8 +30,13 @@ export interface CreateLabelInput {
 }
 
 export class CreateShippingLabelUseCase {
+  constructor(
+    private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'create'>,
+    private readonly shippingCarrierRepo: Pick<ShippingCarrierPort, 'findById'>,
+  ) {}
+
   async execute(input: CreateLabelInput): Promise<ShippingLabel> {
-    const carrier = await shippingCarrierRepo.findById(input.shippingCarrierId);
+    const carrier = await this.shippingCarrierRepo.findById(input.shippingCarrierId);
     if (!carrier) {
       throw new ShippingCarrierNotFoundError('Carrier not found');
     }
@@ -63,7 +66,7 @@ export class CreateShippingLabelUseCase {
       shippingCost: input.shippingCost,
     };
 
-    const label = await shippingLabelRepo.create(labelInput);
+    const label = await this.shippingLabelRepo.create(labelInput);
 
     eventBus.emit('shipping.label_created', {
       shippingLabelId: label.shippingLabelId,
@@ -77,4 +80,3 @@ export class CreateShippingLabelUseCase {
   }
 }
 
-export const createShippingLabelUseCase = new CreateShippingLabelUseCase();

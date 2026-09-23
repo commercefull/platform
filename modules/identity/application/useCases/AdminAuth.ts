@@ -1,31 +1,17 @@
-import { identityDataRepository } from '../wired';
-import { dashboardQueryRepository } from '../../../analytics/application/wired';
-
-const identityRepo = identityDataRepository.users;
+import type { AdminAuthPort, AdminUser } from '../../domain/repositories/AdminIdentityPorts';
+import type { UserStoreAssignment } from '../../domain/entities/UserStoreAssignment';
 
 export class AdminAuthUseCase {
-  async findByEmail(email: string) {
-    return identityRepo.findAdminByEmail(email);
+  constructor(private readonly identityRepo: AdminAuthPort) {}
+
+  async findByEmail(email: string): Promise<AdminUser | null> {
+    return this.identityRepo.findAdminByEmail(email);
   }
   async updateLastLogin(adminId: string) {
-    return identityRepo.updateAdminLastLogin(adminId);
+    return this.identityRepo.updateAdminLastLogin(adminId);
   }
-  async findStoreAssignmentsByUserId(userId: string) {
-    return identityRepo.findStoreUsersByUserId(userId);
+  async findStoreAssignmentsByUserId(userId: string): Promise<UserStoreAssignment[]> {
+    return this.identityRepo.findStoreUsersByUserId(userId);
   }
 }
 
-export class GetDashboardDataUseCase {
-  async getAdminDashboardStats() {
-    return dashboardQueryRepository.getAdminDashboardStats();
-  }
-  async getRecentOrders(limit: number) {
-    return dashboardQueryRepository.getRecentOrders(limit);
-  }
-  async getTopProducts(limit: number) {
-    return dashboardQueryRepository.getTopProducts(limit);
-  }
-  async getRevenueByDay(days: number) {
-    return dashboardQueryRepository.getRevenueByDay(days);
-  }
-}

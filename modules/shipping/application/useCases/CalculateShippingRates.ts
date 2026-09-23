@@ -3,13 +3,9 @@
  * Calculates available shipping rates for a given destination and order
  */
 
-import { shippingConfigRepository } from '../wired';
-import type { ShippingZone } from '../../../../libs/db/types';
-import type { ShippingRate } from '../../../../libs/db/types';
-
-const shippingZoneRepo = shippingConfigRepository.zones;
-const shippingMethodRepo = shippingConfigRepository.methods;
-const shippingRateRepo = shippingConfigRepository.rates;
+import type { ShippingZone, ShippingRate } from '../../../../libs/db/types';
+import type { ShippingZonePort, ShippingMethodPort } from '../../domain/repositories/ShippingConfigPorts';
+import { calculateRate } from '../../domain/services/calculateRate';
 import { evaluateConditions, ShippingConditionContext } from '../../domain/services/ShippingConditionsEvaluator';
 
 // ============================================================================
@@ -68,7 +64,17 @@ export interface CalculateShippingRatesResponse {
 // Use Case
 // ============================================================================
 
+export interface ShippingRateFinderPort {
+  findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null>;
+}
+
 export class CalculateShippingRatesUseCase {
+  constructor(
+    private readonly shippingZoneRepo: ShippingZonePort,
+    private readonly shippingMethodRepo: Pick<ShippingMethodPort, 'findAll'>,
+    private readonly shippingRateRepo: ShippingRateFinderPort,
+  ) {}
+
   async execute(command: CalculateShippingRatesCommand): Promise<CalculateShippingRatesResponse> {
     const { destinationAddress, orderDetails } = command;
 
@@ -84,7 +90,7 @@ export class CalculateShippingRatesUseCase {
 
     try {
       // 1. Find applicable shipping zone
-      const zones = await shippingZoneRepo.findByLocation(destinationAddress.country, destinationAddress.state);
+      const zones = await this.shippingZoneRepo.findByLocation(destinationAddress.country, destinationAddress.state);
 
       if (zones.length === 0) {
         return {
@@ -99,7 +105,7 @@ export class CalculateShippingRatesUseCase {
       const zone = zones[0];
 
       // 2. Get active shipping methods
-      const methods = await shippingMethodRepo.findAll(true, true);
+      const methods = await this.shippingMethodRepo.findAll(true, true);
       if (methods.length === 0) {
         return {
           success: false,
@@ -129,7 +135,7 @@ export class CalculateShippingRatesUseCase {
         // Find rate for this method across all matching zones
         let rate: ShippingRate | null = null;
         for (const z of zones) {
-          rate = await shippingRateRepo.findByZoneAndMethod(z.shippingZoneId, method.shippingMethodId);
+          rate = await this.shippingRateRepo.findByZoneAndMethod(z.shippingZoneId, method.shippingMethodId);
           if (rate) break;
         }
 
@@ -151,7 +157,7 @@ export class CalculateShippingRatesUseCase {
             continue;
           }
 
-          const calculatedAmount = shippingRateRepo.calculateRate(
+          const calculatedAmount = calculateRate(
             rate,
             orderDetails.subtotal,
             orderDetails.itemCount,
@@ -204,4 +210,3 @@ export class CalculateShippingRatesUseCase {
   }
 }
 
-export const calculateShippingRatesUseCase = new CalculateShippingRatesUseCase();

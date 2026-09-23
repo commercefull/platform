@@ -1,29 +1,20 @@
 import { GetOrderDetailsUseCase, GetOrderDetailsCommand } from './GetOrderDetails';
+import type { OrderRepository } from '../../domain/repositories/OrderRepository';
+import type { OrderQueryRepository } from '../../domain/repositories/OrderQueryRepository';
+import { createOrder } from '../../tests/testUtils';
 
 describe('GetOrderDetailsUseCase', () => {
   let useCase: GetOrderDetailsUseCase;
-  let mockOrderRepo: Record<string, jest.Mock>;
-  let mockQueryRepo: Record<string, jest.Mock>;
-
-  const makeOrder = () => ({
-    orderId: 'o1',
-    orderNumber: 'ORD-001',
-    status: 'processing',
-    paymentStatus: 'paid',
-    fulfillmentStatus: 'unfulfilled',
-    currencyCode: 'USD',
-    customerEmail: 'test@test.com',
-    subtotal: 100,
-    discountTotal: 10,
-    taxTotal: 8,
-    shippingTotal: 5,
-    totalAmount: 103,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  let mockOrderRepo: jest.Mocked<Pick<OrderRepository, 'findById'>>;
+  let mockQueryRepo: jest.Mocked<
+    Pick<
+      OrderQueryRepository,
+      'findShippingByOrder' | 'findShippingRatesByOrder' | 'findTaxesByOrder' | 'findDiscountsByOrder' | 'findPaymentsByOrder' | 'findRefundsByOrder'
+    >
+  >;
 
   beforeEach(() => {
-    mockOrderRepo = { findById: jest.fn().mockResolvedValue(makeOrder()) };
+    mockOrderRepo = { findById: jest.fn().mockResolvedValue(createOrder({ orderId: 'o1', orderNumber: 'ORD-001' })) };
     mockQueryRepo = {
       findShippingByOrder: jest.fn().mockResolvedValue([]),
       findShippingRatesByOrder: jest.fn().mockResolvedValue([]),
@@ -32,7 +23,10 @@ describe('GetOrderDetailsUseCase', () => {
       findPaymentsByOrder: jest.fn().mockResolvedValue([]),
       findRefundsByOrder: jest.fn().mockResolvedValue([]),
     };
-    useCase = new GetOrderDetailsUseCase(mockOrderRepo as never, mockQueryRepo as never);
+    useCase = new GetOrderDetailsUseCase(
+      mockOrderRepo as unknown as OrderRepository,
+      mockQueryRepo as unknown as OrderQueryRepository,
+    );
   });
 
   it('should get order details (happy path)', async () => {

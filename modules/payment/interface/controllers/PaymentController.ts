@@ -12,7 +12,7 @@ import {
   GetTransactionUseCase,
   ListTransactionsCommand,
   ListTransactionsUseCase,
-} from '../../application/useCases/GetTransactions';
+} from '../../application/useCases';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { query, queryOne } from '../../../../libs/db';
 import { isUuid } from '../../../../libs/uuid';

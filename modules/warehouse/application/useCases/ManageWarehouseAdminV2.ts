@@ -1,30 +1,46 @@
-import { warehouseDataRepository } from '../wired';
+import type {
+  WarehouseRecord,
+  WarehouseStatistics,
+  WarehouseCreateParams,
+  WarehouseUpdateParams,
+} from '../../domain/repositories/WarehouseRepository';
 
-const warehouseRepo = warehouseDataRepository.warehouses;
+interface WarehouseAdminRepositoryPort {
+  findAll(activeOnly?: boolean): Promise<WarehouseRecord[]>;
+  getStatistics(): Promise<WarehouseStatistics>;
+  findById(warehouseId: string): Promise<WarehouseRecord | null>;
+  create(params: WarehouseCreateParams): Promise<WarehouseRecord>;
+  update(warehouseId: string, params: WarehouseUpdateParams): Promise<WarehouseRecord | null>;
+  activate(warehouseId: string): Promise<WarehouseRecord | null>;
+  deactivate(warehouseId: string): Promise<WarehouseRecord | null>;
+  delete(warehouseId: string): Promise<boolean>;
+}
 
 export class ManageWarehouseAdminUseCaseV2 {
+  constructor(private readonly warehouseRepo: WarehouseAdminRepositoryPort) {}
+
   async findAll(activeOnly?: boolean) {
-    return warehouseRepo.findAll(activeOnly);
+    return this.warehouseRepo.findAll(activeOnly);
   }
   async getStatistics() {
-    return warehouseRepo.getStatistics();
+    return this.warehouseRepo.getStatistics();
   }
   async findById(id: string) {
-    return warehouseRepo.findById(id);
+    return this.warehouseRepo.findById(id);
   }
-  async create(params: Parameters<typeof warehouseRepo.create>[0]) {
-    return warehouseRepo.create(params);
+  async create(params: WarehouseCreateParams) {
+    return this.warehouseRepo.create(params);
   }
-  async update(id: string, params: Parameters<typeof warehouseRepo.update>[1]) {
-    return warehouseRepo.update(id, params);
+  async update(id: string, params: WarehouseUpdateParams) {
+    return this.warehouseRepo.update(id, params);
   }
   async activate(id: string) {
-    return warehouseRepo.activate(id);
+    return this.warehouseRepo.activate(id);
   }
   async deactivate(id: string) {
-    return warehouseRepo.deactivate(id);
+    return this.warehouseRepo.deactivate(id);
   }
   async delete(id: string) {
-    return warehouseRepo.delete(id);
+    return this.warehouseRepo.delete(id);
   }
 }

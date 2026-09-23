@@ -1,22 +1,17 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
 import { ReorderPageBlocksUseCase, ReorderPageBlocksCommand } from './ReorderPageBlocks';
 import { ContentBlockNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+import { lazyMock, createContentPage, createContentBlock } from '../../../tests/testUtils';
 
 describe('ReorderPageBlocksUseCase', () => {
   let useCase: ReorderPageBlocksUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ReorderPageBlocksUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findPageById: jest.fn().mockResolvedValue({ contentPageId: 'p1' }),
-      findBlocksByPageId: jest.fn().mockResolvedValue([{ contentBlockId: 'b1' }, { contentBlockId: 'b2' }]),
-      reorderBlocks: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ReorderPageBlocksUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ReorderPageBlocksUseCase>[0]>();
+    mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1' }));
+    mockRepo.findBlocksByPageId.mockResolvedValue([createContentBlock({ contentBlockId: 'b1' }), createContentBlock({ contentBlockId: 'b2' })]);
+    mockRepo.reorderBlocks.mockResolvedValue(true);
+    useCase = new ReorderPageBlocksUseCase(mockRepo);
   });
 
   it('should reorder blocks successfully', async () => {

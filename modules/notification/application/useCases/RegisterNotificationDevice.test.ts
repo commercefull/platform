@@ -1,53 +1,45 @@
-jest.mock('../../infrastructure/repositories/NotificationConfigRepository', () => ({
-  __esModule: true,
-  default: {
-    devices: {
-      upsert: jest.fn().mockResolvedValue({
-        notificationDeviceId: 'dev1',
-        userId: 'u1',
-        userType: 'customer',
-        deviceToken: 'token123',
-        platform: 'ios',
-        isActive: true,
-        updatedAt: new Date(),
-      }),
-    },
-    preferences: {},
-  },
-}));
-
+import { createNotificationDevice, createNotificationDeviceRepository } from '../../tests/testUtils';
 import { RegisterNotificationDeviceUseCase, RegisterNotificationDeviceCommand } from './RegisterNotificationDevice';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 describe('RegisterNotificationDeviceUseCase', () => {
   let useCase: RegisterNotificationDeviceUseCase;
+  let deviceRepo: ReturnType<typeof createNotificationDeviceRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new RegisterNotificationDeviceUseCase();
+    deviceRepo = createNotificationDeviceRepository();
+    deviceRepo.upsert.mockResolvedValue(createNotificationDevice());
+    useCase = new RegisterNotificationDeviceUseCase(deviceRepo);
   });
 
-  it('should register device (happy path)', async () => {
-    const result = await useCase.execute(new RegisterNotificationDeviceCommand('u1', 'customer', 'token123', 'ios', true));
+  it('should upsert the device and return its record when the command is valid', async () => {
+    const result = await useCase.execute(new RegisterNotificationDeviceCommand('u-1', 'customer', 'token-abc', 'ios'));
 
-    expect(result.notificationDeviceId).toBe('dev1');
+    expect(result.notificationDeviceId).toBe('dev-1');
+    expect(result.deviceToken).toBe('token-abc');
     expect(result.platform).toBe('ios');
+    expect(deviceRepo.upsert).toHaveBeenCalledWith({
+      userId: 'u-1',
+      userType: 'customer',
+      deviceToken: 'token-abc',
+      platform: 'ios',
+      isActive: true,
+    });
   });
 
-  it('should throw NotificationValidationError when userId is empty', async () => {
-    await expect(useCase.execute(new RegisterNotificationDeviceCommand('', 'customer', 'token', 'ios'))).rejects.toThrow(
-      NotificationValidationError,
-    );
+  it.each([
+    ['userId', new RegisterNotificationDeviceCommand('', 'customer', 'token', 'ios')],
+    ['deviceToken', new RegisterNotificationDeviceCommand('u-1', 'customer', '', 'ios')],
+    ['platform', new RegisterNotificationDeviceCommand('u-1', 'customer', 'token', '')],
+  ])('should throw NotificationValidationError when %s is missing', async (_field, command) => {
+    await expect(useCase.execute(command)).rejects.toThrow(NotificationValidationError);
+    expect(deviceRepo.upsert).not.toHaveBeenCalled();
   });
 
-  it('should throw NotificationValidationError when deviceToken is empty', async () => {
-    await expect(useCase.execute(new RegisterNotificationDeviceCommand('u1', 'customer', '', 'ios'))).rejects.toThrow(
-      NotificationValidationError,
-    );
-  });
+  it('should throw NotificationValidationError when the upsert returns null', async () => {
+    deviceRepo.upsert.mockResolvedValue(null);
 
-  it('should throw NotificationValidationError when platform is empty', async () => {
-    await expect(useCase.execute(new RegisterNotificationDeviceCommand('u1', 'customer', 'token', ''))).rejects.toThrow(
+    await expect(useCase.execute(new RegisterNotificationDeviceCommand('u-1', 'customer', 'token', 'ios'))).rejects.toThrow(
       NotificationValidationError,
     );
   });

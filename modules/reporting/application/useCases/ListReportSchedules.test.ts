@@ -1,49 +1,30 @@
-jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    schedules: {
-      listSchedules: jest.fn().mockResolvedValue([
-        {
-          reportScheduleId: 'rs-1',
-          reportType: 'sales_summary',
-          frequency: 'weekly',
-          organizationId: 'org-1',
-          name: 'Weekly Sales',
-          parameters: {},
-          recipients: [],
-          format: 'pdf',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]),
-    },
-    dataProvider: { generateReport: jest.fn() },
-  },
-}));
-
+import { createReportingRepository, createReportSchedule } from '../../tests/testUtils';
 import { ListReportSchedulesUseCase } from './ListReportSchedules';
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
 
 describe('ListReportSchedulesUseCase', () => {
   let useCase: ListReportSchedulesUseCase;
+  let reportingRepo: ReturnType<typeof createReportingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ListReportSchedulesUseCase();
+    reportingRepo = createReportingRepository();
+    useCase = new ListReportSchedulesUseCase(reportingRepo);
   });
 
-  it('should list report schedules (happy path)', async () => {
+  it('should return the schedules for the organization', async () => {
+    reportingRepo.listSchedules.mockResolvedValue([createReportSchedule()]);
+
     const result = await useCase.execute('org-1');
 
+    expect(reportingRepo.listSchedules).toHaveBeenCalledWith('org-1');
     expect(result).toHaveLength(1);
-    expect(result[0].reportScheduleId).toBe('rs-1');
-    expect(reportingDataRepository.schedules.listSchedules).toHaveBeenCalledWith('org-1');
   });
 
-  it('should list all schedules when no orgId provided', async () => {
-    await useCase.execute();
+  it('should list all schedules when no organization is given', async () => {
+    reportingRepo.listSchedules.mockResolvedValue([createReportSchedule(), createReportSchedule({ reportScheduleId: 's2' })]);
 
-    expect(reportingDataRepository.schedules.listSchedules).toHaveBeenCalledWith(undefined);
+    const result = await useCase.execute();
+
+    expect(reportingRepo.listSchedules).toHaveBeenCalledWith(undefined);
+    expect(result).toHaveLength(2);
   });
 });

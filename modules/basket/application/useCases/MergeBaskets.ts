@@ -7,7 +7,7 @@ import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
-import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
+import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
 
 // ============================================================================
 // Command
@@ -28,6 +28,10 @@ export class MergeBasketsUseCase {
   constructor(private readonly basketRepository: BasketRepository) {}
 
   async execute(command: MergeBasketsCommand): Promise<BasketResponse> {
+    if (command.sourceBasketId === command.targetBasketId) {
+      throw new BasketValidationError('Cannot merge a basket into itself');
+    }
+
     const sourceBasket = await this.basketRepository.findById(command.sourceBasketId);
     if (!sourceBasket) {
       throw new BasketNotFoundError(command.sourceBasketId);

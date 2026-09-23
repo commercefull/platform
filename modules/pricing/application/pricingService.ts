@@ -1,13 +1,10 @@
-import { pricingRuleRepository, pricingDataRepository, currencyRepository } from './wired';
+import type { PricingRuleRepository, PricingDataRepository, CurrencyRepository } from '../infrastructure';
 import { PriceContext, PricingAdjustmentType, PricingResult, PricingRule, PricingRuleScope } from '../domain/pricingRule';
 
 import { Currency, formatCurrency } from '../domain/currency';
 import { ProductPriceDataPort } from '../application/ports/ProductPriceDataPort';
 import { MembershipBenefitsPort } from '../application/ports/MembershipBenefitsPort';
 import { LoyaltyBalancePort } from '../application/ports/LoyaltyBalancePort';
-import { ProductPriceDataAdapter } from '../infrastructure/acl/ProductPriceDataAdapter';
-import { MembershipBenefitsAdapter } from '../infrastructure/acl/MembershipBenefitsAdapter';
-import { LoyaltyBalanceAdapter } from '../infrastructure/acl/LoyaltyBalanceAdapter';
 import { logger } from '../../../libs/logger';
 import { CurrencyNotFoundError, PricingValidationError, PricingRuleNotFoundError } from '../domain/errors/PricingErrors';
 
@@ -28,15 +25,24 @@ export class PricingService {
   private readonly productPriceDataPort: ProductPriceDataPort;
   private readonly membershipBenefitsPort: MembershipBenefitsPort;
   private readonly loyaltyBalancePort: LoyaltyBalancePort;
+  private readonly pricingRuleRepository: typeof PricingRuleRepository;
+  private readonly pricingDataRepository: typeof PricingDataRepository;
+  private readonly currencyRepository: typeof CurrencyRepository;
 
   constructor(
-    productPriceDataPort?: ProductPriceDataPort,
-    membershipBenefitsPort?: MembershipBenefitsPort,
-    loyaltyBalancePort?: LoyaltyBalancePort,
+    productPriceDataPort: ProductPriceDataPort,
+    membershipBenefitsPort: MembershipBenefitsPort,
+    loyaltyBalancePort: LoyaltyBalancePort,
+    pricingRuleRepository: typeof PricingRuleRepository,
+    pricingDataRepository: typeof PricingDataRepository,
+    currencyRepository: typeof CurrencyRepository,
   ) {
-    this.productPriceDataPort = productPriceDataPort ?? new ProductPriceDataAdapter();
-    this.membershipBenefitsPort = membershipBenefitsPort ?? new MembershipBenefitsAdapter();
-    this.loyaltyBalancePort = loyaltyBalancePort ?? new LoyaltyBalanceAdapter();
+    this.productPriceDataPort = productPriceDataPort;
+    this.membershipBenefitsPort = membershipBenefitsPort;
+    this.loyaltyBalancePort = loyaltyBalancePort;
+    this.pricingRuleRepository = pricingRuleRepository;
+    this.pricingDataRepository = pricingDataRepository;
+    this.currencyRepository = currencyRepository;
   }
 
   /**
@@ -49,7 +55,7 @@ export class PricingService {
     }
 
     // Get from database
-    const currency = await currencyRepository.currencies.getCurrencyByCode(code);
+    const currency = await this.currencyRepository.currencies.getCurrencyByCode(code);
 
     // Cache the result
     if (currency) {
@@ -69,7 +75,7 @@ export class PricingService {
     }
 
     // Otherwise get from database
-    const defaultCurrency = await currencyRepository.currencies.getDefaultCurrency();
+    const defaultCurrency = await this.currencyRepository.currencies.getDefaultCurrency();
 
     // Cache for future use
     if (defaultCurrency) {
@@ -110,7 +116,7 @@ export class PricingService {
     }
 
     // Find applicable currency price rules
-    const currencyRules = await pricingRuleRepository.currencyPriceRules.findByCurrencyCode(toCurrencyCode, true);
+    const currencyRules = await this.pricingRuleRepository.currencyPriceRules.findByCurrencyCode(toCurrencyCode, true);
     let appliedRules: PricingResult['appliedRules'] = [];
 
     // If we have currency-specific rules, apply them
@@ -238,7 +244,7 @@ export class PricingService {
 
     // Step 2: Apply tier pricing (quantity discounts)
     if (quantity > 1) {
-      const tierPrice = await pricingDataRepository.tierPrices.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
+      const tierPrice = await this.pricingDataRepository.tierPrices.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
 
       if (tierPrice) {
         const previousPrice = currentPrice;
@@ -257,13 +263,13 @@ export class PricingService {
     // Step 3: Apply customer-specific pricing
     if (customerId) {
       // Find price lists applicable to this customer
-      const priceLists = await pricingDataRepository.customerPrices.findPriceListsForCustomer(customerId, customerGroupIds);
+      const priceLists = await this.pricingDataRepository.customerPrices.findPriceListsForCustomer(customerId, customerGroupIds);
 
       if (priceLists.length > 0) {
         const priceListIds = priceLists.map(list => list.id);
 
         // Find prices for this product in applicable price lists
-        const customerPrices = await pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, priceListIds);
+        const customerPrices = await this.pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, priceListIds);
 
         if (customerPrices.length > 0) {
           // Apply the first applicable price (already sorted by priority)
@@ -294,7 +300,7 @@ export class PricingService {
     }
 
     // Step 4: Apply dynamic pricing rules
-    const applicableRules = await pricingRuleRepository.rules.findActiveRules(productId, product.categoryId, customerId, customerGroupIds);
+    const applicableRules = await this.pricingRuleRepository.rules.findActiveRules(productId, product.categoryId, customerId, customerGroupIds);
 
     // Sort rules by priority (descending) to apply highest priority rules first
     const sortedRules = [...applicableRules].sort((a, b) => b.priority - a.priority);
@@ -459,7 +465,7 @@ export class PricingService {
       context = contextParam || {};
 
       // Fetch the rule
-      const fetchedRule = await pricingRuleRepository.rules.findById(ruleId);
+      const fetchedRule = await this.pricingRuleRepository.rules.findById(ruleId);
       if (!fetchedRule) {
         throw new PricingRuleNotFoundError(ruleId);
       }
@@ -668,4 +674,4 @@ export class PricingService {
   }
 }
 
-export default new PricingService();
+// The wired singleton lives in ./wired (composition root).

@@ -1,22 +1,19 @@
-jest.mock('../../infrastructure/repositories/productQaRepo', () => ({
-  __esModule: true,
-  default: {
-    findByProduct: jest.fn().mockResolvedValue([{ qaId: 'q1', productId: 'p1' }]),
-    updateStatus: jest.fn().mockResolvedValue({ qaId: 'q1', status: 'answered' }),
-  },
-}));
 
 import { ManageProductQaUseCase } from './ManageProductQa';
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
+import { createProductQa, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productQaRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('ManageProductQaUseCase', () => {
   let useCase: ManageProductQaUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductQaUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductQaUseCase(productQaRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductQaUseCase>[0]>();
+    mockRepo.findByProduct.mockResolvedValue([createProductQa()]);
+    mockRepo.updateStatus.mockResolvedValue(createProductQa({ status: 'answered' }));
+    useCase = new ManageProductQaUseCase(mockRepo);
   });
 
   it('should find by product', async () => {
@@ -26,7 +23,7 @@ describe('ManageProductQaUseCase', () => {
 
   it('should update status', async () => {
     const result = await useCase.updateStatus('q1', 'answered');
-    expect(result).toEqual({ qaId: 'q1', status: 'answered' });
+    expect(result).toEqual(createProductQa({ status: 'answered' }));
     expect(mockRepo.updateStatus).toHaveBeenCalledWith('q1', 'answered');
   });
 });

@@ -1,6 +1,8 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
+import { ManageVendorUseCase } from '../../application/useCases/ManageVendor';
+import { ManageCommissionRuleUseCase } from '../../application/useCases/ManageCommissionRule';
+import { ManagePayoutUseCase } from '../../application/useCases/ManagePayout';
 import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import { VendorTier } from '../../domain/entities/Vendor';
 import { PayoutMethod } from '../../domain/entities/VendorPayout';

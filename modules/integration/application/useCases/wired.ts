@@ -2,7 +2,9 @@ import { IntegrationRepositoryImpl } from '../../infrastructure/repositories/Int
 import { IntegrationCredentialRepositoryImpl } from '../../infrastructure/repositories/IntegrationCredentialRepositoryImpl';
 import { IntegrationSubscriptionRepositoryImpl } from '../../infrastructure/repositories/IntegrationSubscriptionRepositoryImpl';
 import { IntegrationLogRepositoryImpl } from '../../infrastructure/repositories/IntegrationLogRepositoryImpl';
-import { ManageIntegrationsUseCase, ManageSubscriptionsUseCase, ManageIntegrationLogsUseCase } from './Integration';
+import { ManageIntegrationsUseCase } from './ManageIntegrations';
+import { ManageSubscriptionsUseCase } from './ManageSubscriptions';
+import { ManageIntegrationLogsUseCase } from './ManageIntegrationLogs';
 
 const integrationRepo = new IntegrationRepositoryImpl();
 const credentialRepo = new IntegrationCredentialRepositoryImpl();

@@ -1,15 +1,13 @@
 import { DeleteProductUseCase } from './DeleteProduct';
+import { lazyMock } from '../../tests/testUtils';
 
 describe('DeleteProductUseCase', () => {
   let useCase: DeleteProductUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof DeleteProductUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      delete: jest.fn().mockResolvedValue(undefined),
-      hardDelete: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new DeleteProductUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof DeleteProductUseCase>[0]>();
+    useCase = new DeleteProductUseCase(mockRepo);
   });
 
   it('should soft delete product (happy path)', async () => {

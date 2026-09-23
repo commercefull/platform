@@ -6,12 +6,20 @@
  * `CalculateOrderTax` (per Epic B).
  */
 
-import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption } from '../../taxTypes';
 
+export interface TaxExemptionUpdatePort {
+  updateTaxExemption(
+    id: string,
+    exemption: Partial<Omit<CustomerTaxExemption, 'id' | 'customerId' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<CustomerTaxExemption>;
+}
+
 export class ApproveTaxExemptionUseCase {
+  constructor(private readonly commandRepo: TaxExemptionUpdatePort) {}
+
   async execute(exemptionId: string, verifiedBy: string): Promise<CustomerTaxExemption> {
-    return taxCommandRepo.updateTaxExemption(exemptionId, {
+    return this.commandRepo.updateTaxExemption(exemptionId, {
       status: 'approved',
       isVerified: true,
       verifiedBy,
@@ -19,5 +27,3 @@ export class ApproveTaxExemptionUseCase {
     });
   }
 }
-
-export const approveTaxExemptionUseCase = new ApproveTaxExemptionUseCase();

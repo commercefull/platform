@@ -1,39 +1,22 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentMedia, createContentMediaFolder, emitMock } from '../../../tests/testUtils';
 import { UploadMediaUseCase, UploadMediaCommand } from './UploadMedia';
 import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('UploadMediaUseCase', () => {
   let useCase: UploadMediaUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof UploadMediaUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findFolderById: jest.fn().mockResolvedValue({ folderId: 'f1' }),
-      createMedia: jest.fn().mockResolvedValue({
-        contentMediaId: 'm1',
-        title: 'Test Image',
-        fileName: 'test.jpg',
-        fileType: 'image/jpeg',
-        fileSize: 1024,
-        url: 'https://cdn.test.com/test.jpg',
-        thumbnailUrl: null,
-        width: 800,
-        height: 600,
-        altText: 'Test',
-        contentMediaFolderId: 'f1',
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new UploadMediaUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof UploadMediaUseCase>[0]>();
+    mockRepo.findFolderById.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f1' }));
+    mockRepo.createMedia.mockResolvedValue(
+      createContentMedia({ contentMediaId: 'm1', title: 'Test Image', fileName: 'test.jpg', fileType: 'image/jpeg', width: 800, height: 600, altText: 'Test', contentMediaFolderId: 'f1' }),
+    );
+    useCase = new UploadMediaUseCase(mockRepo);
   });
 
   it('should upload media (happy path)', async () => {
@@ -43,7 +26,7 @@ describe('UploadMediaUseCase', () => {
 
     expect(result.id).toBe('m1');
     expect(result.title).toBe('Test Image');
-    expect(eventBus.emit).toHaveBeenCalledWith('content.media.uploaded', expect.objectContaining({ mediaId: 'm1' }));
+    expect(emitMock).toHaveBeenCalledWith('content.media.uploaded', expect.objectContaining({ mediaId: 'm1' }));
   });
 
   it('should throw ContentValidationError when title is empty', async () => {

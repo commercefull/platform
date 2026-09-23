@@ -1,37 +1,49 @@
+import { createNotificationUnsubscribeRepository, createNotificationPreferenceRepository } from '../../tests/testUtils';
 import { UnsubscribeNotificationUseCase, UnsubscribeNotificationCommand } from './UnsubscribeNotification';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 describe('UnsubscribeNotificationUseCase', () => {
   let useCase: UnsubscribeNotificationUseCase;
-  let mockUnsubRepo: Record<string, jest.Mock>;
-  let mockPrefRepo: Record<string, jest.Mock>;
+  let unsubscribeRepo: ReturnType<typeof createNotificationUnsubscribeRepository>;
+  let preferenceRepo: ReturnType<typeof createNotificationPreferenceRepository>;
 
   beforeEach(() => {
-    mockUnsubRepo = { unsubscribe: jest.fn().mockResolvedValue(undefined) };
-    mockPrefRepo = { upsert: jest.fn().mockResolvedValue(undefined) };
-    useCase = new UnsubscribeNotificationUseCase(mockUnsubRepo as never, mockPrefRepo as never);
+    unsubscribeRepo = createNotificationUnsubscribeRepository();
+    preferenceRepo = createNotificationPreferenceRepository();
+    useCase = new UnsubscribeNotificationUseCase(unsubscribeRepo, preferenceRepo);
   });
 
-  it('should unsubscribe user (happy path)', async () => {
-    const result = await useCase.execute(new UnsubscribeNotificationCommand('u1', 'customer', 'email', 'promo'));
+  it('should record the unsubscribe and disable the preference when a type is given', async () => {
+    const result = await useCase.execute(new UnsubscribeNotificationCommand('u-1', 'customer', 'email', 'promo', 'too many'));
+
+    expect(result).toEqual({ success: true, userId: 'u-1', channel: 'email', type: 'promo' });
+    expect(unsubscribeRepo.unsubscribe).toHaveBeenCalledWith({
+      userId: 'u-1',
+      category: 'promo',
+      reason: 'too many',
+    });
+    expect(preferenceRepo.upsert).toHaveBeenCalledWith({
+      userId: 'u-1',
+      userType: 'customer',
+      type: 'promo',
+      channelPreferences: { email: false },
+      isEnabled: false,
+    });
+  });
+
+  it('should record the unsubscribe against the channel when no type is given', async () => {
+    const result = await useCase.execute(new UnsubscribeNotificationCommand('u-1', 'customer', 'email'));
 
     expect(result.success).toBe(true);
-    expect(result.userId).toBe('u1');
-    expect(mockUnsubRepo.unsubscribe).toHaveBeenCalled();
-    expect(mockPrefRepo.upsert).toHaveBeenCalled();
+    expect(unsubscribeRepo.unsubscribe).toHaveBeenCalledWith({ userId: 'u-1', category: 'email', reason: undefined });
+    expect(preferenceRepo.upsert).not.toHaveBeenCalled();
   });
 
-  it('should not update preference when type is not specified', async () => {
-    await useCase.execute(new UnsubscribeNotificationCommand('u1', 'customer', 'email'));
-
-    expect(mockPrefRepo.upsert).not.toHaveBeenCalled();
-  });
-
-  it('should throw NotificationValidationError when userId is empty', async () => {
-    await expect(useCase.execute(new UnsubscribeNotificationCommand('', 'customer', 'email'))).rejects.toThrow(NotificationValidationError);
-  });
-
-  it('should throw NotificationValidationError when channel is empty', async () => {
-    await expect(useCase.execute(new UnsubscribeNotificationCommand('u1', 'customer', ''))).rejects.toThrow(NotificationValidationError);
+  it.each([
+    ['userId', new UnsubscribeNotificationCommand('', 'customer', 'email')],
+    ['channel', new UnsubscribeNotificationCommand('u-1', 'customer', '')],
+  ])('should throw NotificationValidationError when %s is missing', async (_field, cmd) => {
+    await expect(useCase.execute(cmd)).rejects.toThrow(NotificationValidationError);
+    expect(unsubscribeRepo.unsubscribe).not.toHaveBeenCalled();
   });
 });

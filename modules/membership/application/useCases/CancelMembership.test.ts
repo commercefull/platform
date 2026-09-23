@@ -1,56 +1,63 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { CancelMembershipUseCase } from './CancelMembership';
 import { MembershipNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
+import { createCancelMembershipRepository, emitMock } from '../../tests/testUtils';
 
 describe('CancelMembershipUseCase', () => {
-  let useCase: CancelMembershipUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const membershipRepository = createCancelMembershipRepository();
+  const useCase = new CancelMembershipUseCase(membershipRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      getMembershipById: jest.fn().mockResolvedValue({
-        status: 'active',
-        customerId: 'c1',
-        tierId: 't1',
-        billingPeriod: 'monthly',
-        currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
-        createdAt: new Date(),
-      }),
-      getTierById: jest.fn().mockResolvedValue({ price: 50 }),
-      updateMembership: jest.fn().mockResolvedValue(undefined),
-      createStatusLog: jest.fn().mockResolvedValue(undefined),
-      recordCancellationFeedback: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new CancelMembershipUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    membershipRepository.getMembershipById.mockResolvedValue({
+      status: 'active',
+      customerId: 'c1',
+      tierId: 't1',
+      billingPeriod: 'monthly',
+      currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
+      createdAt: new Date(),
+    });
+    membershipRepository.getTierById.mockResolvedValue({ price: 50 });
+    membershipRepository.updateMembership.mockResolvedValue(undefined);
+    membershipRepository.createStatusLog.mockResolvedValue(undefined);
+    membershipRepository.recordCancellationFeedback.mockResolvedValue(undefined);
   });
 
-  it('should cancel membership at period end (happy path)', async () => {
+  it('should cancel the membership at the end of the period', async () => {
     const result = await useCase.execute({ membershipId: 'm1', reason: 'Too expensive' });
 
     expect(result.membershipId).toBe('m1');
     expect(result.status).toBe('pending_cancellation');
+    expect(emitMock).toHaveBeenCalledWith(
+      'membership.cancelled',
+      expect.objectContaining({ membershipId: 'm1' }),
+    );
   });
 
-  it('should cancel membership immediately with refund', async () => {
+  it('should cancel immediately and flag refund eligibility when requested', async () => {
     const result = await useCase.execute({ membershipId: 'm1', immediate: true, cancelledBy: 'admin1' });
 
     expect(result.membershipId).toBe('m1');
     expect(result.refundEligible).toBe(true);
   });
 
-  it('should throw MembershipNotFoundError when membership not found', async () => {
-    mockRepo.getMembershipById.mockResolvedValue(null);
+  it('should throw MembershipNotFoundError when the membership does not exist', async () => {
+    membershipRepository.getMembershipById.mockResolvedValue(null);
 
     await expect(useCase.execute({ membershipId: 'missing' })).rejects.toThrow(MembershipNotFoundError);
+    expect(membershipRepository.updateMembership).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should throw MembershipValidationError when already cancelled', async () => {
-    mockRepo.getMembershipById.mockResolvedValue({ status: 'cancelled', customerId: 'c1', tierId: 't1' });
+  it('should throw MembershipValidationError when the membership is already cancelled', async () => {
+    membershipRepository.getMembershipById.mockResolvedValue({
+      status: 'cancelled',
+      customerId: 'c1',
+      tierId: 't1',
+      createdAt: new Date(),
+    });
 
     await expect(useCase.execute({ membershipId: 'm1' })).rejects.toThrow(MembershipValidationError);
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

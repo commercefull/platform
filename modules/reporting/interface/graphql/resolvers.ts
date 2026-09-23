@@ -1,13 +1,15 @@
-import { GenerateReportUseCase } from '../../application/useCases/GenerateReport';
-import { CreateReportScheduleUseCase } from '../../application/useCases/CreateReportSchedule';
-import { ListReportSchedulesUseCase } from '../../application/useCases/ListReportSchedules';
+import {
+  generateReportUseCase,
+  createReportScheduleUseCase,
+  listReportSchedulesUseCase,
+} from '../../application/wired';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 
 export const reportingResolvers = {
   Query: {
     reportSchedules: async (_parent: unknown, args: { organizationId?: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new ListReportSchedulesUseCase();
+      const useCase = listReportSchedulesUseCase;
       const schedules = await useCase.execute(args.organizationId);
       return {
         schedules: schedules.map(s => ({
@@ -33,7 +35,7 @@ export const reportingResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GenerateReportUseCase();
+      const useCase = generateReportUseCase;
       const result = await useCase.execute({
         reportType: args.input.reportType as never,
         parameters: args.input.parameters,
@@ -62,7 +64,7 @@ export const reportingResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new CreateReportScheduleUseCase();
+      const useCase = createReportScheduleUseCase;
       const result = await useCase.execute({
         organizationId: args.input.organizationId,
         name: args.input.name,

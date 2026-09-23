@@ -9,7 +9,8 @@ import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const paymentBillingRepo = paymentBillingDataRepository.billing;
 const PaymentRepo = paymentDataRepository.payments;
-import { GetPaymentBalanceCommand, GetPaymentBalanceUseCase } from '../../application/useCases/GetPaymentBalance';
+import { GetPaymentBalanceCommand } from '../../application/useCases/GetPaymentBalance';
+import { getPaymentBalanceUseCase } from '../../application/useCases/wired';
 import { paymentBillingDataRepository, paymentDataRepository } from '../../application/wired';
 
 // ============================================================================
@@ -124,7 +125,7 @@ export const getBalance = async (req: HttpRequest, res: HttpResponse): Promise<v
     return;
   }
   const { currency } = req.query;
-  const useCase = new GetPaymentBalanceUseCase();
+  const useCase = getPaymentBalanceUseCase;
   const result = await useCase.execute(new GetPaymentBalanceCommand(organizationId, currency as string | undefined));
   successResponse(res, result);
 };

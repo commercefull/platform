@@ -2,20 +2,17 @@
  * Unit Tests for GetInventoryItem Use Case
  */
 
+import { lazyMock } from '../../tests/testUtils';
 import { GetInventoryItemUseCase } from './GetInventoryItem';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('GetInventoryItemUseCase', () => {
   let useCase: GetInventoryItemUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetInventoryItemUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn(),
-      findBySkuAndWarehouse: jest.fn(),
-      findByProductAndWarehouse: jest.fn(),
-    };
-    useCase = new GetInventoryItemUseCase(mockRepo as never as ConstructorParameters<typeof GetInventoryItemUseCase>[0]);
+    mockRepo = lazyMock<ConstructorParameters<typeof GetInventoryItemUseCase>[0]>();
+    useCase = new GetInventoryItemUseCase(mockRepo);
   });
 
   function createInventoryRecord() {

@@ -1,22 +1,20 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const dynamicAttributeRepository = productAttributeRepository.dynamic;
-import createAttributeUseCase from '../../application/useCases/attribute/CreateAttribute';
 import type { CreateAttributeCommand } from '../../application/useCases/attribute/CreateAttribute';
-import updateAttributeUseCase from '../../application/useCases/attribute/UpdateAttribute';
+import type { AddAttributeValueCommand } from '../../application/useCases/attribute/AddAttributeValue';
 import {
+  createAttributeUseCase,
+  updateAttributeUseCase,
   addAttributeValueUseCase,
   removeAttributeValueUseCase,
   getAttributeValuesUseCase,
-} from '../../application/useCases/attribute/ManageAttributeValues';
-import type { AddAttributeValueCommand } from '../../application/useCases/attribute/ManageAttributeValues';
-import {
   setProductAttributeUseCase,
   setProductAttributesUseCase,
-  getProductAttributesUseCase,
+  getAssignedProductAttributesUseCase,
   removeProductAttributeUseCase,
-} from '../../application/useCases/attribute/AssignProductAttributes';
-import type { SetProductAttributeCommand } from '../../application/useCases/attribute/AssignProductAttributes';
+} from '../../application/useCases/wired';
+import type { SetProductAttributeCommand } from '../../application/useCases/attribute/SetProductAttribute';
 import { productAttributeRepository } from '../../application/wired';
 
 class AttributeController {
@@ -263,7 +261,7 @@ class AttributeController {
    */
   async getProductAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { productId } = req.params;
-    const result = await getProductAttributesUseCase.execute({ productId });
+    const result = await getAssignedProductAttributesUseCase.execute({ productId });
 
     if (!result.success) {
       res.status(400).json(result);

@@ -1,31 +1,33 @@
-jest.mock('../../infrastructure/repositories/NotificationConfigRepository', () => ({
-  __esModule: true,
-  default: {
-    templateTranslations: {
-      findByTemplate: jest.fn().mockResolvedValue([{ translationId: 't1', locale: 'en-US' }]),
-    },
-    templates: {},
-    preferences: {},
-    devices: {},
-  },
-}));
-
+import { createNotificationTemplateTranslation, createNotificationTemplateTranslationRepository } from '../../tests/testUtils';
 import { GetTemplateTranslationsUseCase } from './GetTemplateTranslations';
-import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
-
-const mockRepo = notificationConfigRepository as unknown as { templateTranslations: Record<string, jest.Mock> };
 
 describe('GetTemplateTranslationsUseCase', () => {
   let useCase: GetTemplateTranslationsUseCase;
+  let translationRepo: ReturnType<typeof createNotificationTemplateTranslationRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetTemplateTranslationsUseCase();
+    translationRepo = createNotificationTemplateTranslationRepository();
+    useCase = new GetTemplateTranslationsUseCase(translationRepo);
   });
 
-  it('should find translations by template', async () => {
-    const result = await useCase.findByTemplate('t1');
-    expect(result).toHaveLength(1);
-    expect(mockRepo.templateTranslations.findByTemplate).toHaveBeenCalledWith('t1');
+  it('should return all translations for a template', async () => {
+    const translations = [
+      createNotificationTemplateTranslation({ locale: 'en-US' }),
+      createNotificationTemplateTranslation({ notificationTemplateTranslationId: 'tr-2', locale: 'fr-FR' }),
+    ];
+    translationRepo.findByTemplate.mockResolvedValue(translations);
+
+    const result = await useCase.findByTemplate('tpl-1');
+
+    expect(result).toEqual(translations);
+    expect(translationRepo.findByTemplate).toHaveBeenCalledWith('tpl-1');
+  });
+
+  it('should return an empty list when the template has no translations', async () => {
+    translationRepo.findByTemplate.mockResolvedValue([]);
+
+    const result = await useCase.findByTemplate('tpl-none');
+
+    expect(result).toEqual([]);
   });
 });

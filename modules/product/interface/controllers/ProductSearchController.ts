@@ -1,10 +1,10 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
-  searchProductsUseCase,
+  attributeSearchProductsUseCase as searchProductsUseCase,
   getSearchSuggestionsUseCase,
   findSimilarProductsUseCase,
   findByAttributeUseCase,
-} from '../../application/useCases/attribute/SearchProducts';
+} from '../../application/useCases/wired';
 import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
 import type { AttributeFilter } from '../../application/services/ProductSearchService';
 

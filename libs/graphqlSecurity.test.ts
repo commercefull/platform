@@ -44,7 +44,7 @@ const schema = buildSchema(`
 
 function validateQuery(query: string, rules: ReturnType<typeof getGraphQLValidationRules>) {
   const doc = parse(query);
-  return validate(schema, doc, rules as never);
+  return validate(schema, doc, rules as unknown as Parameters<typeof validate>[2]);
 }
 
 describe('graphqlSecurity', () => {
@@ -52,7 +52,7 @@ describe('graphqlSecurity', () => {
     it('allows queries within depth limit', () => {
       const rules = [createDepthLimitRule(5)];
       const query = `query { products { id name } }`;
-      const errors = validate(schema, parse(query), rules as never);
+      const errors = validate(schema, parse(query), rules as unknown as Parameters<typeof validate>[2]);
       expect(errors).toHaveLength(0);
     });
 
@@ -60,7 +60,7 @@ describe('graphqlSecurity', () => {
       const rules = [createDepthLimitRule(2)];
       // depth: products(1) -> variants(2) -> images(3) exceeds limit of 2
       const query = `query { products { variants { images { id } } } }`;
-      const errors = validate(schema, parse(query), rules as never);
+      const errors = validate(schema, parse(query), rules as unknown as Parameters<typeof validate>[2]);
       expect(errors.length).toBeGreaterThan(0);
       expect(errors[0].message).toContain('depth');
     });
@@ -68,7 +68,7 @@ describe('graphqlSecurity', () => {
     it('allows shallow queries with low depth limit', () => {
       const rules = [createDepthLimitRule(2)];
       const query = `query { products { id } }`;
-      const errors = validate(schema, parse(query), rules as never);
+      const errors = validate(schema, parse(query), rules as unknown as Parameters<typeof validate>[2]);
       expect(errors).toHaveLength(0);
     });
 

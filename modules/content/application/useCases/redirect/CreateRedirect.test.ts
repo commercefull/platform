@@ -1,41 +1,26 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentRedirect, emitMock } from '../../../tests/testUtils';
 import { CreateRedirectUseCase, CreateRedirectCommand } from './CreateRedirect';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('CreateRedirectUseCase', () => {
   let useCase: CreateRedirectUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateRedirectUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      createRedirect: jest.fn().mockResolvedValue({
-        contentRedirectId: 'r1',
-        sourceUrl: '/old',
-        targetUrl: '/new',
-        statusCode: '301',
-        isRegex: false,
-        isActive: true,
-        hits: 0,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateRedirectUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateRedirectUseCase>[0]>();
+    mockRepo.createRedirect.mockResolvedValue(createContentRedirect({ contentRedirectId: 'r1' }));
+    useCase = new CreateRedirectUseCase(mockRepo);
   });
 
   it('should create a redirect successfully', async () => {
     const result = await useCase.execute(new CreateRedirectCommand('/old', '/new'));
 
     expect(result.id).toBe('r1');
-    expect(eventBus.emit).toHaveBeenCalledWith('content.redirect.created', expect.objectContaining({ redirectId: 'r1' }));
+    expect(emitMock).toHaveBeenCalledWith('content.redirect.created', expect.objectContaining({ redirectId: 'r1' }));
   });
 
   it('should throw ContentValidationError when source or target missing', async () => {

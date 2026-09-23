@@ -2,117 +2,30 @@ import { query, queryOne } from '../../../../libs/db';
 import { withTransaction } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, CouponNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
+import {
+  CouponType,
+  CouponGenerationMethod,
+  type PromotionCoupon,
+  type PromotionCouponUsage,
+  type CreateCouponInput,
+  type UpdateCouponInput,
+  type CouponValidationResult,
+} from '../../domain/repositories/CouponRepository';
+
+// Re-export domain types for backward compatibility
+export {
+  CouponType,
+  CouponGenerationMethod,
+  type PromotionCoupon,
+  type PromotionCouponUsage,
+  type CreateCouponInput,
+  type UpdateCouponInput,
+  type CouponValidationResult,
+};
 
 // Table name constants
 const COUPON_TABLE = Table.PromotionCoupon;
 const COUPON_USAGE_TABLE = Table.PromotionCouponUsage;
-
-/**
- * Coupon types supported by the system
- */
-export enum CouponType {
-  PERCENTAGE = 'percentage',
-  FIXED_AMOUNT = 'fixedAmount',
-  FREE_SHIPPING = 'freeShipping',
-  BUY_X_GET_Y = 'buyXGetY',
-  FIRST_ORDER = 'firstOrder',
-  GIFT_CARD = 'giftCard',
-}
-
-/**
- * Coupon generation methods
- */
-export enum CouponGenerationMethod {
-  MANUAL = 'manual',
-  AUTOMATIC = 'automatic',
-  PATTERN = 'pattern',
-  IMPORTED = 'imported',
-}
-
-/**
- * Promotion Coupon entity matching the database schema
- */
-export interface PromotionCoupon {
-  promotionCouponId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  code: string;
-  promotionId?: string;
-  name: string;
-  description?: string;
-  type: CouponType;
-  discountAmount?: number;
-  currencyCode: string;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
-  startDate: Date;
-  endDate?: Date;
-  isActive: boolean;
-  isOneTimeUse: boolean;
-  maxUsage?: number;
-  usageCount: number;
-  maxUsagePerCustomer?: number;
-  generationMethod: CouponGenerationMethod;
-  isReferral: boolean;
-  referrerId?: string;
-  isPublic: boolean;
-  organizationId?: string;
-}
-
-/**
- * Promotion Coupon Usage entity matching the database schema
- */
-export interface PromotionCouponUsage {
-  promotionCouponUsageId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  promotionCouponId: string;
-  orderId?: string;
-  customerId?: string;
-  discountAmount: number;
-  currencyCode: string;
-  usedAt: Date;
-}
-
-/**
- * Input for creating a new coupon
- */
-export interface CreateCouponInput {
-  code: string;
-  name: string;
-  description?: string;
-  promotionId?: string;
-  type: CouponType;
-  discountAmount?: number;
-  currencyCode?: string;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
-  startDate?: Date;
-  endDate?: Date;
-  isActive?: boolean;
-  isOneTimeUse?: boolean;
-  maxUsage?: number;
-  maxUsagePerCustomer?: number;
-  generationMethod?: CouponGenerationMethod;
-  isReferral?: boolean;
-  referrerId?: string;
-  isPublic?: boolean;
-  organizationId?: string;
-}
-
-/**
- * Input for updating an existing coupon
- */
-export type UpdateCouponInput = Partial<Omit<CreateCouponInput, 'code'>>;
-
-/**
- * Coupon validation result
- */
-export interface CouponValidationResult {
-  valid: boolean;
-  coupon?: PromotionCoupon;
-  message?: string;
-}
 
 /**
  * Repository for managing promotion coupons

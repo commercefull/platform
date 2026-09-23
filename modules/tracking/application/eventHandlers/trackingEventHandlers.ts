@@ -10,7 +10,7 @@
 import { eventBus, EventPayload, EventType } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
 import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
-import { ProcessTrackingEventUseCase } from '../../application/useCases/Tracking';
+import { ProcessTrackingEventUseCase } from '../../application/useCases/ProcessTrackingEvent';
 import { TrackingEcommerceData } from '../../domain/entities/TrackingEvent';
 import { getDefaultEventMappings } from '../../domain/services/defaultEventMappings';
 import { GdprCookieConsentRepository } from '../../../gdpr/domain/repositories/GdprRepository';

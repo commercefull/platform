@@ -1,42 +1,27 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentType, createContentTemplate, emitMock } from '../../../tests/testUtils';
 import { CreateTemplateUseCase, CreateTemplateCommand } from './CreateTemplate';
 import { ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('CreateTemplateUseCase', () => {
   let useCase: CreateTemplateUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateTemplateUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findContentTypeById: jest.fn().mockResolvedValue({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }),
-      createTemplate: jest.fn().mockResolvedValue({
-        contentTemplateId: 't1',
-        name: 'Blog Template',
-        slug: 'blog-template',
-        description: 'A blog template',
-        thumbnail: null,
-        isSystem: false,
-        isActive: true,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateTemplateUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateTemplateUseCase>[0]>();
+    mockRepo.findContentTypeById.mockResolvedValue(createContentType({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }));
+    mockRepo.createTemplate.mockResolvedValue(createContentTemplate({ contentTemplateId: 't1', name: 'Blog Template', slug: 'blog-template', description: 'A blog template' }));
+    useCase = new CreateTemplateUseCase(mockRepo);
   });
 
   it('should create a template successfully', async () => {
     const result = await useCase.execute(new CreateTemplateCommand('Blog Template', 'blog-template', 'A blog template'));
 
     expect(result.contentTemplateId).toBe('t1');
-    expect(eventBus.emit).toHaveBeenCalledWith('content.template.created', expect.objectContaining({ templateId: 't1' }));
+    expect(emitMock).toHaveBeenCalledWith('content.template.created', expect.objectContaining({ templateId: 't1' }));
   });
 
   it('should throw ContentValidationError when name or slug missing', async () => {

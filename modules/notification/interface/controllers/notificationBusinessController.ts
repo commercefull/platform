@@ -1,7 +1,12 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
-import { ManageNotificationWebhookUseCase, ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
-import { UpsertTemplateTranslationUseCase, UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
+import { SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
+import { ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
+import { UpsertTemplateTranslationCommand } from '../../application/useCases/UpsertTemplateTranslation';
+import {
+  sendNotificationBatchUseCase,
+  manageNotificationWebhookUseCase,
+  upsertTemplateTranslationUseCase,
+} from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { notificationDataRepository, notificationConfigRepository } from '../../application/wired';
 import { NotificationTemplate, NotificationPreference } from '../../application/wired';
@@ -268,7 +273,7 @@ export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown
   // Normalize: accept userIds as shorthand for recipients
   const normalizedRecipients = recipients || (userIds || []).map(userId => ({ userId, userType: 'customer' }));
   const normalizedName = name || title || 'Batch notification';
-  const useCase = new SendNotificationBatchUseCase();
+  const useCase = sendNotificationBatchUseCase;
   const result = await useCase.execute(
     new SendNotificationBatchCommand(
       normalizedName,
@@ -292,7 +297,7 @@ export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown
  */
 export const listWebhooks = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || (req.query.organizationId as string);
-  const useCase = new ManageNotificationWebhookUseCase();
+  const useCase = manageNotificationWebhookUseCase;
   const result = await useCase.execute(new ManageNotificationWebhookCommand('list', organizationId));
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to list webhooks', 400);
@@ -307,7 +312,7 @@ export const listWebhooks = async (req: UserRequest, res: HttpResponse): Promise
 export const createWebhook = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const { url, secret, events } = req.body as CreateWebhookBody;
-  const useCase = new ManageNotificationWebhookUseCase();
+  const useCase = manageNotificationWebhookUseCase;
   const result = await useCase.execute(new ManageNotificationWebhookCommand('create', organizationId, undefined, url, secret, events));
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to create webhook', 400);
@@ -321,7 +326,7 @@ export const createWebhook = async (req: UserRequest, res: HttpResponse): Promis
  */
 export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookId } = req.params;
-  const useCase = new ManageNotificationWebhookUseCase();
+  const useCase = manageNotificationWebhookUseCase;
   const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate', undefined, webhookId));
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to deactivate webhook', 400);
@@ -352,7 +357,7 @@ export const upsertTranslation = async (
 ): Promise<void> => {
   const { templateId } = req.params;
   const { locale, subject, body } = req.body;
-  const useCase = new UpsertTemplateTranslationUseCase(notificationTemplateTranslationRepo);
+  const useCase = upsertTemplateTranslationUseCase;
   const result = await useCase.execute(new UpsertTemplateTranslationCommand(templateId, locale, body, subject));
   successResponse(res, result);
 };

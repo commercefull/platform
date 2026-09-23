@@ -1,15 +1,11 @@
 import { OrderFulfillmentRepository, FulfillmentStatus } from '../../domain/repositories/OrderFulfillmentRepository';
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
-import { orderFulfillmentDataRepository } from '../wired';
-import { orderDataRepository } from '../wired';
 
-const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
-const orderRepo = orderDataRepository.commands;
 
 export class ManageOrderFulfillmentsUseCase {
   constructor(
-    private readonly fulfillmentRepo: OrderFulfillmentRepository = orderFulfillmentRepo,
-    private readonly orders: OrderRepository = orderRepo,
+    private readonly fulfillmentRepo: OrderFulfillmentRepository,
+    private readonly orders: OrderRepository,
   ) {}
 
   async findByStatus(status: string, limit?: number, offset?: number) {
@@ -44,13 +40,5 @@ export class ManageOrderFulfillmentsUseCase {
   }
   async findShippedToday() {
     return this.fulfillmentRepo.findShippedToday();
-  }
-}
-
-export class GetOrderForFulfillmentUseCase {
-  constructor(private readonly orders: OrderRepository = orderRepo) {}
-
-  async findById(id: string) {
-    return this.orders.findById(id);
   }
 }

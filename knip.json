@@ -27,7 +27,6 @@
     "modules/*/hooks/**",
     "modules/*/utils/**",
     "modules/*/eventHandlers.ts",
-    "modules/*/application/useCases/PSPRouting.ts",
     "modules/analytics/**",
     "modules/audit/**",
     "modules/automation/**",
@@ -37,10 +36,12 @@
     "libs/rules/index.ts",
     "libs/db/queryHelpers.ts"
   ],
-  "ignoreDependencies": ["ejs", "nodemailer", "stripe", "@types/ejs", "@types/nodemailer", "@types/sharp", "@typescript/native"],
+  "ignoreDependencies": ["ejs", "stripe", "@types/ejs", "@types/nodemailer", "@types/sharp", "@typescript/native"],
   "ignoreBinaries": ["pm2", "audit", "k6"],
   "ignoreIssues": {
     "libs/db/types.ts": ["exports", "types", "enumMembers"],
+    "infra/aws/**": ["unlisted"],
+    "modules/product/infrastructure/repositories/productRepo.ts": ["enumMembers"],
     "libs/errors.ts": ["exports"],
     "libs/roles.ts": ["exports", "types"],
     "libs/search/types.ts": ["exports", "types"],

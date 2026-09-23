@@ -1,72 +1,35 @@
-jest.mock('../../infrastructure/repositories/OrderFulfillmentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    fulfillments: {
-      findByOrder: jest.fn().mockResolvedValue([{ packageId: 'p1', orderId: 'o1' }]),
-      findPackageById: jest.fn().mockResolvedValue({ packageId: 'p1', trackingNumber: 'TRK123' }),
-      createPackage: jest.fn().mockResolvedValue({
-        orderFulfillmentPackageId: 'pk1',
-        orderFulfillmentId: 'f1',
-        packageNumber: 'PKG-001',
-        trackingNumber: 'TRK123',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-      updatePackage: jest.fn().mockResolvedValue({
-        orderFulfillmentPackageId: 'pk1',
-        orderFulfillmentId: 'f1',
-        packageNumber: 'PKG-001',
-        trackingNumber: 'TRK456',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-      updateTracking: jest.fn().mockResolvedValue({
-        orderFulfillmentPackageId: 'pk1',
-        orderFulfillmentId: 'f1',
-        packageNumber: 'PKG-001',
-        trackingNumber: 'TRK456',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-    },
-    returns: {},
-  },
-}));
-
+import { lazyMock, createOrderFulfillmentPackage } from '../../tests/testUtils';
 import { TrackFulfillmentPackageUseCase, TrackFulfillmentPackageCommand } from './TrackFulfillmentPackage';
+import type { OrderFulfillmentPackageRepository } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
 describe('TrackFulfillmentPackageUseCase', () => {
   let useCase: TrackFulfillmentPackageUseCase;
+  let repo: jest.Mocked<OrderFulfillmentPackageRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new TrackFulfillmentPackageUseCase();
+    repo = lazyMock<OrderFulfillmentPackageRepository>();
+    useCase = new TrackFulfillmentPackageUseCase(repo);
   });
 
-  it('should create new package (happy path)', async () => {
+  it('should create a new package', async () => {
+    repo.createPackage.mockResolvedValue(createOrderFulfillmentPackage({ orderFulfillmentPackageId: 'pk1', trackingNumber: 'TRK123' }));
+
     const result = await useCase.execute(new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK123'));
 
     expect(result.orderFulfillmentPackageId).toBe('pk1');
     expect(result.trackingNumber).toBe('TRK123');
+    expect(repo.createPackage).toHaveBeenCalledWith(expect.objectContaining({ orderFulfillmentId: 'f1', trackingNumber: 'TRK123' }));
   });
 
-  it('should update existing package when ID provided', async () => {
+  it('should update tracking on an existing package when ID provided', async () => {
+    repo.updateTracking.mockResolvedValue(createOrderFulfillmentPackage({ orderFulfillmentPackageId: 'pk1', trackingNumber: 'TRK456' }));
+
     const result = await useCase.execute(
-      new TrackFulfillmentPackageCommand(
-        'f1',
-        'PKG-001',
-        'TRK456',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'pk1',
-      ),
+      new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK456', undefined, undefined, undefined, undefined, undefined, undefined, 'pk1'),
     );
 
     expect(result.orderFulfillmentPackageId).toBe('pk1');
     expect(result.trackingNumber).toBe('TRK456');
+    expect(repo.updateTracking).toHaveBeenCalledWith('pk1', expect.objectContaining({ trackingNumber: 'TRK456' }));
   });
 });

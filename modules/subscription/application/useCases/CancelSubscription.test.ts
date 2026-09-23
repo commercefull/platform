@@ -2,137 +2,113 @@
  * Unit Tests for CancelSubscription Use Case
  */
 
-jest.mock('../../infrastructure/repositories/subscriptionRepo', () => ({
-  __esModule: true,
-  getCustomerSubscription: jest.fn(),
-  getSubscriptionProduct: jest.fn(),
-  cancelSubscription: jest.fn(),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn().mockResolvedValue(undefined) },
-}));
-
+import {
+  emitMock,
+  createCancelSubscriptionRepo,
+  createCustomerSubscription,
+  createSubscriptionProduct,
+} from '../../tests/testUtils';
 import { CancelSubscriptionUseCase, CancelSubscriptionCommand } from './CancelSubscription';
-import * as subscriptionRepo from '../../infrastructure/repositories/subscriptionRepo';
-import type { CustomerSubscription, SubscriptionProduct } from '../../infrastructure/repositories/subscriptionRepo';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('CancelSubscriptionUseCase', () => {
   let useCase: CancelSubscriptionUseCase;
+  let subscriptionRepo: ReturnType<typeof createCancelSubscriptionRepo>;
+
+  const activeSubscription = createCustomerSubscription({ status: 'active' });
 
   beforeEach(() => {
-    useCase = new CancelSubscriptionUseCase();
-    jest.mocked(subscriptionRepo.getCustomerSubscription).mockClear();
-    jest.mocked(subscriptionRepo.getSubscriptionProduct).mockClear();
-    jest.mocked(subscriptionRepo.cancelSubscription).mockClear();
-    jest.mocked(eventBus.emit).mockClear();
+    subscriptionRepo = createCancelSubscriptionRepo();
+    subscriptionRepo.getCustomerSubscription.mockResolvedValue(activeSubscription);
+    subscriptionRepo.getSubscriptionProduct.mockResolvedValue(createSubscriptionProduct());
+    useCase = new CancelSubscriptionUseCase(subscriptionRepo);
   });
 
-  it('should cancel an active subscription immediately', async () => {
-    jest
-      .mocked(subscriptionRepo.getCustomerSubscription)
-      .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription)
-      .mockResolvedValueOnce({
-        customerSubscriptionId: 'sub-1',
-        customerId: 'cust-1',
-        status: 'cancelled',
-      } as never as CustomerSubscription);
-    jest.mocked(subscriptionRepo.cancelSubscription).mockResolvedValue(undefined);
+  it('should cancel immediately and emit subscription.cancelled when cancelImmediately is set', async () => {
+    const cancelled = createCustomerSubscription({ status: 'cancelled' });
+    subscriptionRepo.getCustomerSubscription.mockResolvedValueOnce(activeSubscription).mockResolvedValue(cancelled);
 
     const result = await useCase.execute(
-      new CancelSubscriptionCommand({
-        customerSubscriptionId: 'sub-1',
-        cancelledBy: 'customer',
-        cancelImmediately: true,
-        reason: 'Not needed',
-      }),
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer', cancelImmediately: true }),
     );
 
     expect(result.success).toBe(true);
-    expect(result.subscription?.status).toBe('cancelled');
-    expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', 'Not needed', 'customer', false);
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', undefined, 'customer', false);
+    expect(emitMock).toHaveBeenCalledWith(
       'subscription.cancelled',
-      expect.objectContaining({
-        customerSubscriptionId: 'sub-1',
-        reason: 'Not needed',
-      }),
+      expect.objectContaining({ customerSubscriptionId: 'sub-1', cancelImmediately: true }),
     );
+    expect(result.message).toBe('Subscription cancelled immediately');
   });
 
   it('should cancel at period end when cancelImmediately is false', async () => {
-    jest
-      .mocked(subscriptionRepo.getCustomerSubscription)
-      .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription)
-      .mockResolvedValueOnce({ customerSubscriptionId: 'sub-1', customerId: 'cust-1', status: 'active' } as never as CustomerSubscription);
-    jest.mocked(subscriptionRepo.cancelSubscription).mockResolvedValue(undefined);
+    subscriptionRepo.getCustomerSubscription
+      .mockResolvedValueOnce(activeSubscription)
+      .mockResolvedValue(createCustomerSubscription({ cancelAtPeriodEnd: true }));
 
     const result = await useCase.execute(
-      new CancelSubscriptionCommand({
-        customerSubscriptionId: 'sub-1',
-        cancelledBy: 'customer',
-        cancelImmediately: false,
-      }),
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer', reason: 'Too expensive' }),
     );
 
     expect(result.success).toBe(true);
-    expect(result.message).toContain('end of the current billing period');
-    expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', undefined, 'customer', true);
+    expect(subscriptionRepo.cancelSubscription).toHaveBeenCalledWith('sub-1', 'Too expensive', 'customer', true);
+    expect(result.message).toBe('Subscription will be cancelled at the end of the current billing period');
   });
 
-  it('should return error when subscription ID is missing', async () => {
-    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }));
+  it('should return a failure when the subscription ID is missing', async () => {
+    const result = await useCase.execute(
+      new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_id_required');
   });
 
-  it('should return error when subscription not found', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription).mockResolvedValue(null);
+  it('should return a failure when the subscription does not exist', async () => {
+    subscriptionRepo.getCustomerSubscription.mockResolvedValue(null);
 
-    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-x', cancelledBy: 'admin' }));
+    const result = await useCase.execute(
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'missing', cancelledBy: 'customer' }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_not_found');
   });
 
-  it('should return error when already cancelled', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription).mockResolvedValue({
-      customerSubscriptionId: 'sub-1',
-      status: 'cancelled',
-    } as never as CustomerSubscription);
+  it('should return a failure when the subscription is already cancelled', async () => {
+    subscriptionRepo.getCustomerSubscription.mockResolvedValue(createCustomerSubscription({ status: 'cancelled' }));
 
-    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
+    const result = await useCase.execute(
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('already_cancelled');
+    expect(subscriptionRepo.cancelSubscription).not.toHaveBeenCalled();
   });
 
-  it('should return error when early cancellation is not allowed', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription).mockResolvedValue({
-      customerSubscriptionId: 'sub-1',
-      status: 'active',
-      subscriptionProductId: 'prod-1',
-      contractCyclesRemaining: 3,
-    } as never as CustomerSubscription);
-    jest.mocked(subscriptionRepo.getSubscriptionProduct).mockResolvedValue({
-      allowEarlyCancel: false,
-    } as never as SubscriptionProduct);
+  it('should return a failure when the product does not allow early cancellation and contract cycles remain', async () => {
+    subscriptionRepo.getCustomerSubscription.mockResolvedValue(
+      createCustomerSubscription({ subscriptionProductId: 'prod-1', contractCyclesRemaining: 3 }),
+    );
+    subscriptionRepo.getSubscriptionProduct.mockResolvedValue(createSubscriptionProduct({ allowEarlyCancel: false }));
 
-    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
+    const result = await useCase.execute(
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('early_cancel_not_allowed');
+    expect(subscriptionRepo.cancelSubscription).not.toHaveBeenCalled();
   });
 
-  it('should handle errors gracefully', async () => {
-    jest.mocked(subscriptionRepo.getCustomerSubscription).mockRejectedValue(new Error('DB error'));
+  it('should return a failure when the repository throws', async () => {
+    subscriptionRepo.cancelSubscription.mockRejectedValue(new Error('DB error'));
 
-    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
+    const result = await useCase.execute(
+      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'admin' }),
+    );
 
     expect(result.success).toBe(false);
-    expect(result.message).toContain('DB error');
+    expect(result.errors).toContain('cancellation_failed');
   });
 });

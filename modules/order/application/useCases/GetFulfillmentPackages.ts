@@ -1,10 +1,8 @@
 import { OrderFulfillmentPackageRepository } from '../../domain/repositories/OrderFulfillmentPackageRepository';
-import { orderFulfillmentDataRepository } from '../wired';
 
-const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
 
 export class GetFulfillmentPackagesUseCase {
-  constructor(private readonly packageRepo: OrderFulfillmentPackageRepository = orderFulfillmentRepo) {}
+  constructor(private readonly packageRepo: OrderFulfillmentPackageRepository) {}
 
   async findByOrder(orderId: string) {
     return this.packageRepo.findByOrder(orderId);

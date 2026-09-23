@@ -1,53 +1,42 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-import { ClearBasketUseCase, ClearBasketCommand } from './ClearBasket';
+import { createBasket, createBasketItem, createBasketRepository, emitMock, BASKET_ID } from '../../tests/testUtils';
+import { ClearBasketCommand, ClearBasketUseCase } from './ClearBasket';
 import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('ClearBasketUseCase', () => {
-  let useCase: ClearBasketUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should remove all items when the basket is cleared', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
 
-  const makeBasket = () => ({
-    basketId: 'b1',
-    customerId: 'c1',
-    sessionId: 's1',
-    status: 'active',
-    currency: 'USD',
-    items: [],
-    itemCount: 2,
-    subtotal: { amount: 100 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    clearItems: jest.fn(),
+    const result = await new ClearBasketUseCase(repository).execute(new ClearBasketCommand(BASKET_ID));
+
+    expect(result.items).toHaveLength(0);
+    expect(result.itemCount).toBe(0);
+    expect(repository.clearItems).toHaveBeenCalledWith(BASKET_ID);
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(makeBasket()),
-      clearItems: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ClearBasketUseCase(mockRepo as never);
+  it('should emit basket.cleared with the number of removed items when the basket is cleared', async () => {
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
+
+    await new ClearBasketUseCase(repository).execute(new ClearBasketCommand(BASKET_ID));
+
+    expect(emitMock).toHaveBeenCalledWith('basket.cleared', expect.objectContaining({ basketId: BASKET_ID, itemCount: 2 }));
   });
 
-  it('should clear basket items (happy path)', async () => {
-    const result = await useCase.execute(new ClearBasketCommand('b1'));
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
 
-    expect(result.basketId).toBe('b1');
-    expect(mockRepo.clearItems).toHaveBeenCalledWith('b1');
-    expect(eventBus.emit).toHaveBeenCalledWith('basket.cleared', expect.objectContaining({ basketId: 'b1', itemCount: 2 }));
+    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand('missing'))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
+    const repository = createBasketRepository();
+    repository.findById
+      .mockResolvedValueOnce(createBasket({ items: [createBasketItem()] }))
+      .mockResolvedValue(null);
 
-    await expect(useCase.execute(new ClearBasketCommand('missing'))).rejects.toThrow(BasketNotFoundError);
+    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand(BASKET_ID))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

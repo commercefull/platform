@@ -9,16 +9,14 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 const socialAccountRepo = identityDataRepository.social;
 import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
 import { AccountNotActiveError } from '../../domain/errors/IdentityErrors';
-import {
-  SocialLoginUseCase,
-  LinkSocialAccountUseCase,
-  UnlinkSocialAccountUseCase,
-  GetLinkedAccountsUseCase,
-} from '../../application/useCases/SocialLogin';
+import { SocialLoginUseCase } from '../../application/useCases/SocialLogin';
+import { LinkSocialAccountUseCase } from '../../application/useCases/LinkSocialAccount';
+import { UnlinkSocialAccountUseCase } from '../../application/useCases/UnlinkSocialAccount';
+import { GetLinkedAccountsUseCase } from '../../application/useCases/GetLinkedAccounts';
 import { generateAccessToken } from '../../utils/jwtHelpers';
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
-import { identityDataRepository, CustomerCredentialSubjectAdapter, OrganizationCredentialSubjectAdapter } from '../../application/wired';
+import { identityDataRepository, customerCredentialPort, orgCredentialPort } from '../../application/wired';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
@@ -27,8 +25,8 @@ const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
 
 // Ports
-const customerPort: CredentialSubjectPort = new CustomerCredentialSubjectAdapter();
-const orgPort: CredentialSubjectPort = new OrganizationCredentialSubjectAdapter();
+const customerPort: CredentialSubjectPort = customerCredentialPort;
+const orgPort: CredentialSubjectPort = orgCredentialPort;
 
 // Supported providers
 const SUPPORTED_PROVIDERS: SocialProvider[] = ['google', 'facebook', 'apple', 'github', 'twitter', 'linkedin', 'microsoft'];

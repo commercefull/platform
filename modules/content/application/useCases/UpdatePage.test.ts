@@ -1,44 +1,20 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentPage, emitMock } from '../../tests/testUtils';
 import { UpdatePageUseCase, UpdatePageCommand } from './UpdatePage';
 import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('UpdatePageUseCase', () => {
   let useCase: UpdatePageUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof UpdatePageUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findPageById: jest.fn().mockResolvedValue({
-        contentPageId: 'p1',
-        title: 'Old',
-        slug: 'old',
-        status: 'draft',
-        contentTypeId: 'ct-1',
-        templateId: null,
-        visibility: 'public',
-        summary: null,
-        metaTitle: null,
-        metaDescription: null,
-        publishedAt: null,
-        scheduledAt: null,
-        isHomePage: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-      updatePage: jest
-        .fn()
-        .mockResolvedValue({ contentPageId: 'p1', title: 'New', slug: 'new', status: 'published', updatedAt: new Date() }),
-    };
-    useCase = new UpdatePageUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof UpdatePageUseCase>[0]>();
+    mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1', title: 'Old', slug: 'old' }));
+    mockRepo.updatePage.mockResolvedValue(createContentPage({ contentPageId: 'p1', title: 'New', slug: 'new', status: 'published' }));
+    useCase = new UpdatePageUseCase(mockRepo);
   });
 
   it('should update a page successfully', async () => {
@@ -46,7 +22,7 @@ describe('UpdatePageUseCase', () => {
 
     expect(result.title).toBe('New');
     expect(result.status).toBe('published');
-    expect(eventBus.emit).toHaveBeenCalledWith('content.page.updated', expect.objectContaining({ pageId: 'p1' }));
+    expect(emitMock).toHaveBeenCalledWith('content.page.updated', expect.objectContaining({ pageId: 'p1' }));
   });
 
   it('should throw ContentValidationError when pageId is empty', async () => {

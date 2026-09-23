@@ -62,8 +62,8 @@ describe('ReturnRequestRepositoryImpl', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findById('r1');
     expect(result).not.toBeNull();
     expect(result!.orderReturnId).toBe('r1');
@@ -71,7 +71,7 @@ describe('ReturnRequestRepositoryImpl', () => {
   });
 
   it('findByOrderId returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findByOrderId('o1');
     expect(result).toEqual([]);
   });
@@ -111,14 +111,14 @@ describe('ReturnRequestRepositoryImpl', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
-    mockedQuery.mockResolvedValue([] as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
+    mockedQuery.mockResolvedValue([]);
     const result = await repo.create(ret);
     expect(result.orderReturnId).toBe('r1');
   });
 
   it('delete returns true when deleted', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ orderReturnId: 'r1' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ orderReturnId: 'r1' });
     const result = await repo.delete('r1');
     expect(result).toBe(true);
   });
@@ -130,13 +130,13 @@ describe('ReturnRequestRepositoryImpl', () => {
   });
 
   it('countByStatus returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.countByStatus('requested');
     expect(result).toBe(0);
   });
 
   it('countByStatus returns correct number', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '5' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '5' });
     const result = await repo.countByStatus('completed');
     expect(result).toBe(5);
   });
@@ -145,7 +145,7 @@ describe('ReturnRequestRepositoryImpl', () => {
     mockedQuery.mockResolvedValueOnce([
       { status: 'requested', count: '3' },
       { status: 'completed', count: '7' },
-    ] as never);
+    ]);
     const result = await repo.getStatistics();
     expect(result.requested).toBe(3);
     expect(result.completed).toBe(7);
@@ -156,7 +156,7 @@ describe('ReturnRequestRepositoryImpl', () => {
     mockedQuery.mockResolvedValueOnce([
       { returnType: 'refund', count: '10' },
       { returnType: 'storeCredit', count: '5' },
-    ] as never);
+    ]);
     const result = await repo.getStatisticsByType();
     expect(result.refund).toBe(10);
     expect(result.storeCredit).toBe(5);
@@ -173,7 +173,7 @@ describe('ReturnItemRepositoryImpl', () => {
   });
 
   it('findByReturnId returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findByReturnId('r1');
     expect(result).toEqual([]);
   });
@@ -200,7 +200,7 @@ describe('StoreCreditRepositoryImpl', () => {
       totalDebits: '0',
       pendingExpiry: '0',
       lastEntryAt: null,
-    } as never);
+    });
     const result = await repo.getBalance('c1');
     expect(result.balance).toBe(0);
     expect(result.totalCredits).toBe(0);
@@ -215,7 +215,7 @@ describe('StoreCreditRepositoryImpl', () => {
       totalDebits: '49.50',
       pendingExpiry: '50',
       lastEntryAt: new Date(),
-    } as never);
+    });
     const result = await repo.getBalance('c1');
     expect(result.balance).toBe(150.5);
     expect(result.totalCredits).toBe(200);
@@ -225,7 +225,7 @@ describe('StoreCreditRepositoryImpl', () => {
   });
 
   it('getLedger returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.getLedger('c1');
     expect(result).toEqual([]);
   });

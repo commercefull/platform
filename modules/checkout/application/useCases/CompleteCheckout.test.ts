@@ -1,118 +1,82 @@
-/**
- * Unit Tests for CompleteCheckout Use Case
- */
-
+import { createCheckoutRepository, createCheckoutSession, createOrderPlacementPort, emitMock } from '../../tests/testUtils';
 import { CompleteCheckoutUseCase, CompleteCheckoutCommand } from './CompleteCheckout';
-import { CheckoutSession } from '../../domain/entities/CheckoutSession';
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
+import type { OrderSnapshot } from '../../application/ports/OrderPlacementPort';
 
-import type { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import type { OrderPlacementPort, OrderSnapshot } from '../../application/ports/OrderPlacementPort';
+const paidOrder: OrderSnapshot = { orderId: 'o-1', orderNumber: 'ORD-001', status: 'processing', paymentStatus: 'paid' };
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
-function createMockCheckoutRepo(session: CheckoutSession | null = null): jest.Mocked<CheckoutRepository> {
-  return {
-    findById: jest.fn().mockResolvedValue(session),
-    findByBasketId: jest.fn().mockResolvedValue(null),
-    findActiveByCustomerId: jest.fn().mockResolvedValue(null),
-    save: jest.fn().mockResolvedValue(session),
-    delete: jest.fn().mockResolvedValue(undefined),
-    findExpiredSessions: jest.fn().mockResolvedValue([]),
-    markAsAbandoned: jest.fn().mockResolvedValue(undefined),
-    getAvailableShippingMethods: jest.fn().mockResolvedValue([]),
-    getAvailablePaymentMethods: jest.fn().mockResolvedValue([]),
-    validateShippingAddress: jest.fn().mockResolvedValue({ valid: true, errors: [] }),
-    findByPaymentIntentId: jest.fn().mockResolvedValue(null),
-  } as never as jest.Mocked<CheckoutRepository>;
-}
-
-function createMockOrderPort(order: OrderSnapshot | null = null): jest.Mocked<OrderPlacementPort> {
-  return {
-    createOrder: jest.fn(),
-    findOrder: jest.fn().mockResolvedValue(order),
-    updateOrderStatus: jest.fn().mockResolvedValue(undefined),
-    cancelOrder: jest.fn().mockResolvedValue(undefined),
-  } as never as jest.Mocked<OrderPlacementPort>;
+function processingSession() {
+  const session = createCheckoutSession({ id: 'ck-1', orderId: 'o-1', customerId: 'c-1' });
+  session.setPaymentIntent('pi-1', 'o-1');
+  session.markPaymentAuthorized();
+  return session;
 }
 
 describe('CompleteCheckoutUseCase', () => {
-  it('should complete a processing checkout session', async () => {
-    const session = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-    session.setPaymentIntent('pi-1', 'order-1');
-    session.markPaymentAuthorized();
-    const repo = createMockCheckoutRepo(session);
-    const orderPort = createMockOrderPort({
-      orderId: 'order-1',
-      orderNumber: 'ORD-001',
-      status: 'processing',
-      paymentStatus: 'paid',
-    });
-    const useCase = new CompleteCheckoutUseCase(repo, orderPort);
+  let useCase: CompleteCheckoutUseCase;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
+  let orderPlacementPort: ReturnType<typeof createOrderPlacementPort>;
 
-    const result = await useCase.execute(new CompleteCheckoutCommand('cs-1'));
-
-    expect(result.checkoutId).toBe('cs-1');
-    expect(result.status).toBe('completed');
-    expect(result.orderId).toBe('order-1');
-    expect(repo.save).toHaveBeenCalled();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    orderPlacementPort = createOrderPlacementPort();
+    orderPlacementPort.findOrder.mockResolvedValue(paidOrder);
+    useCase = new CompleteCheckoutUseCase(checkoutRepository, orderPlacementPort);
   });
 
-  it('should return idempotent response when already completed', async () => {
-    const session = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-    session.setPaymentIntent('pi-1', 'order-1');
-    session.markPaymentAuthorized();
+  it('should complete the session, persist it, and emit checkout.completed when the linked order is processing and paid', async () => {
+    const session = processingSession();
+    checkoutRepository.findById.mockResolvedValue(session);
+
+    const result = await useCase.execute(new CompleteCheckoutCommand('ck-1'));
+
+    expect(result.status).toBe('completed');
+    expect(result.orderId).toBe('o-1');
+    expect(session.status).toBe('completed');
+    expect(checkoutRepository.save).toHaveBeenCalledWith(session);
+    expect(emitMock).toHaveBeenCalledWith('checkout.completed', expect.objectContaining({ checkoutId: 'ck-1', orderId: 'o-1' }));
+  });
+
+  it('should return the completed response without side effects when the session is already completed', async () => {
+    const session = processingSession();
     session.complete();
-    const repo = createMockCheckoutRepo(session);
-    const useCase = new CompleteCheckoutUseCase(repo);
+    checkoutRepository.findById.mockResolvedValue(session);
+    useCase = new CompleteCheckoutUseCase(checkoutRepository);
 
-    const result = await useCase.execute(new CompleteCheckoutCommand('cs-1'));
+    const result = await useCase.execute(new CompleteCheckoutCommand('ck-1'));
 
     expect(result.status).toBe('completed');
-    expect(repo.save).not.toHaveBeenCalled();
+    expect(result.orderId).toBe('o-1');
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should throw NotFoundError when checkout session does not exist', async () => {
-    const repo = createMockCheckoutRepo(null);
-    const useCase = new CompleteCheckoutUseCase(repo);
+  it('should throw NotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new CompleteCheckoutCommand('nonexistent'))).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('missing'))).rejects.toThrow(NotFoundError);
   });
 
-  it('should throw BadRequestError when session is still active', async () => {
-    const session = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-    const repo = createMockCheckoutRepo(session);
-    const useCase = new CompleteCheckoutUseCase(repo);
+  it('should throw BadRequestError when the session is still active', async () => {
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession());
 
-    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('ck-1'))).rejects.toThrow(BadRequestError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw NotFoundError when linked order not found', async () => {
-    const session = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-    session.setPaymentIntent('pi-1', 'order-1');
-    session.markPaymentAuthorized();
-    const repo = createMockCheckoutRepo(session);
-    const orderPort = createMockOrderPort(null);
-    const useCase = new CompleteCheckoutUseCase(repo, orderPort);
+  it('should throw NotFoundError when the linked order does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(processingSession());
+    orderPlacementPort.findOrder.mockResolvedValue(null);
 
-    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('ck-1'))).rejects.toThrow(NotFoundError);
   });
 
-  it('should throw BadRequestError when order is not processing/paid', async () => {
-    const session = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-    session.setPaymentIntent('pi-1', 'order-1');
-    session.markPaymentAuthorized();
-    const repo = createMockCheckoutRepo(session);
-    const orderPort = createMockOrderPort({
-      orderId: 'order-1',
-      orderNumber: 'ORD-001',
-      status: 'pending',
-      paymentStatus: 'pending',
-    });
-    const useCase = new CompleteCheckoutUseCase(repo, orderPort);
+  it('should throw BadRequestError when the linked order is not processing and paid', async () => {
+    checkoutRepository.findById.mockResolvedValue(processingSession());
+    orderPlacementPort.findOrder.mockResolvedValue({ ...paidOrder, status: 'pending', paymentStatus: 'pending' });
 
-    await expect(useCase.execute(new CompleteCheckoutCommand('cs-1'))).rejects.toThrow(BadRequestError);
+    await expect(useCase.execute(new CompleteCheckoutCommand('ck-1'))).rejects.toThrow(BadRequestError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 });

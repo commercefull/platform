@@ -4,17 +4,14 @@ import { RedisCache } from './redisCache';
 import type { Cache } from './types';
 
 export type { Cache } from './types';
-export { MemoryCache } from './memoryCache';
-export { RedisCache } from './redisCache';
-
-export type CacheBackendType = 'memory' | 'redis';
+type CacheBackendType = 'memory' | 'redis';
 
 /**
  * Resolve the cache backend type. Explicit only — no auto-detection:
  * CACHE_BACKEND must be 'memory' or 'redis' (default 'memory'). 'redis'
  * fails fast when REDIS_URL/REDIS_HOST is not configured.
  */
-export function resolveCacheBackendType(): CacheBackendType {
+function resolveCacheBackendType(): CacheBackendType {
   const type = process.env.CACHE_BACKEND || 'memory';
   if (type !== 'memory' && type !== 'redis') {
     throw new Error(`Invalid CACHE_BACKEND "${type}" — expected "memory" or "redis"`);

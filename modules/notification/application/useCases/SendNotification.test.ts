@@ -7,21 +7,16 @@ import { NotificationValidationError } from '../../domain/errors/NotificationErr
 
 describe('SendNotificationUseCase', () => {
   let useCase: SendNotificationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockService: Record<string, jest.Mock>;
+  let mockRepo: { create: jest.Mock; updateStatus: jest.Mock };
+  let mockService: { send: jest.Mock };
 
   beforeEach(() => {
     mockRepo = {
       create: jest.fn().mockResolvedValue(undefined),
       updateStatus: jest.fn().mockResolvedValue(undefined),
     };
-    mockService = {
-      send: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new SendNotificationUseCase(
-      mockRepo as never as ConstructorParameters<typeof SendNotificationUseCase>[0],
-      mockService as never as ConstructorParameters<typeof SendNotificationUseCase>[1],
-    );
+    mockService = { send: jest.fn().mockResolvedValue(undefined) };
+    useCase = new SendNotificationUseCase(mockRepo, mockService);
   });
 
   it('should send notification immediately when not scheduled', async () => {
@@ -103,7 +98,7 @@ describe('SendNotificationUseCase', () => {
       useCase.execute({
         recipientId: 'cust-1',
         recipientType: 'customer',
-        channel: '' as never as 'email',
+        channel: '' as unknown as 'email',
         content: 'Test',
       }),
     ).rejects.toThrow(NotificationValidationError);

@@ -6,7 +6,7 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { manageThemesUseCase, manageOverridesUseCase, assignThemeUseCase, resolveThemeUseCase } from '../../application/wired';
-import { CreateThemeOverrideCommand } from '../../application/useCases/Theme';
+import { CreateThemeOverrideCommand } from '../../application/useCases';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
 
 // ── Theme Gallery ─────────────────────────────────────────────

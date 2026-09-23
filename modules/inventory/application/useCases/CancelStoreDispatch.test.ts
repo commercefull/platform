@@ -1,37 +1,27 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createStoreDispatch, emitMock } from '../../tests/testUtils';
 import { CancelStoreDispatchUseCase } from './CancelStoreDispatch';
 import { StoreDispatchNotFoundError } from '../../domain/errors/InventoryErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('CancelStoreDispatchUseCase', () => {
   let useCase: CancelStoreDispatchUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CancelStoreDispatchUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({
-        dispatchId: 'd1',
-        cancel: jest.fn(),
-        toJSON: () => ({ dispatchId: 'd1', status: 'cancelled' }),
-      }),
-      save: jest.fn().mockImplementation(async (d: unknown) => d),
-    };
-    useCase = new CancelStoreDispatchUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof CancelStoreDispatchUseCase>[0]>();
+    mockRepo.findById.mockResolvedValue(createStoreDispatch({ status: 'pending_approval' }));
+    mockRepo.save.mockImplementation(async (d) => d);
+    useCase = new CancelStoreDispatchUseCase(mockRepo);
   });
 
   it('should cancel dispatch (happy path)', async () => {
     const result = await useCase.execute('d1', 'Not needed');
 
     expect(result.dispatchId).toBe('d1');
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'inventory.dispatch.cancelled',
       expect.objectContaining({ dispatchId: 'd1', reason: 'Not needed' }),
     );

@@ -1,16 +1,15 @@
-import { notificationConfigRepository } from '../wired';
 import type { NotificationWebhookCreateParams, NotificationWebhookRepository } from '../../domain/repositories/NotificationWebhookRepository';
 
-const notificationWebhookRepo: NotificationWebhookRepository = notificationConfigRepository.webhooks;
-
 export class ManageNotificationWebhooksAdminUseCase {
+  constructor(private readonly notificationWebhookRepo: NotificationWebhookRepository) {}
+
   async findAll() {
-    return notificationWebhookRepo.findAll();
+    return this.notificationWebhookRepo.findAll();
   }
   async create(params: NotificationWebhookCreateParams) {
-    return notificationWebhookRepo.create(params);
+    return this.notificationWebhookRepo.create(params);
   }
   async deactivate(id: string) {
-    return notificationWebhookRepo.deactivate(id);
+    return this.notificationWebhookRepo.deactivate(id);
   }
 }

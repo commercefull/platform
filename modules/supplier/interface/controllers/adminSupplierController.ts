@@ -5,11 +5,10 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageSuppliersAdminUseCase } from '../../application/useCases/ManageSuppliersAdmin';
+import { manageSuppliersAdminUseCase as manageSuppliersUseCase } from '../../application/wired';
+import type { SupplierStatus } from '../../domain/entities/Supplier';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageSuppliersUseCase = new ManageSuppliersAdminUseCase();
 
 // ============================================================================
 // Supplier Management
@@ -25,7 +24,7 @@ export const listSuppliers = async (req: HttpRequest, res: HttpResponse): Promis
   let suppliers: unknown[];
 
   if (status) {
-    suppliers = await manageSuppliersUseCase.findByStatus(status as 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted');
+    suppliers = await manageSuppliersUseCase.findByStatus(status as SupplierStatus);
   } else {
     suppliers = await manageSuppliersUseCase.findAll(isActive, isApproved);
   }

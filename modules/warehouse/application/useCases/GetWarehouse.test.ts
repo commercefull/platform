@@ -1,35 +1,33 @@
+import '../../tests/testUtils';
 import { GetWarehouseUseCase } from './GetWarehouse';
 import { WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
+import { createGetRepository, createWarehouseRecord } from '../../tests/testUtils';
+
+function warehouseRecord(overrides: Record<string, unknown> = {}) {
+  return createWarehouseRecord({
+    name: 'Main',
+    code: 'WH001',
+    city: 'Portland',
+    state: 'OR',
+    postalCode: '97201',
+    timezone: 'America/Los_Angeles',
+    isDefault: true,
+    ...overrides,
+  });
+}
 
 describe('GetWarehouseUseCase', () => {
-  let useCase: GetWarehouseUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const warehouseRepository = createGetRepository();
+  const useCase = new GetWarehouseUseCase(warehouseRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(null),
-      findByCode: jest.fn().mockResolvedValue(null),
-    };
-    useCase = new GetWarehouseUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    warehouseRepository.findById.mockResolvedValue(null);
+    warehouseRepository.findByCode.mockResolvedValue(null);
   });
 
-  it('should get warehouse by ID (happy path)', async () => {
-    mockRepo.findById.mockResolvedValue({
-      distributionWarehouseId: 'wh-1',
-      name: 'Main',
-      code: 'WH001',
-      description: 'Main WH',
-      addressLine1: '123 St',
-      city: 'Portland',
-      state: 'OR',
-      postalCode: '97201',
-      country: 'US',
-      timezone: 'America/Los_Angeles',
-      isActive: true,
-      isDefault: true,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-02',
-    });
+  it('should return the warehouse when found by id', async () => {
+    warehouseRepository.findById.mockResolvedValue(warehouseRecord());
 
     const result = await useCase.execute({ warehouseId: 'wh-1' });
 
@@ -38,23 +36,8 @@ describe('GetWarehouseUseCase', () => {
     expect(result.warehouse!.name).toBe('Main');
   });
 
-  it('should get warehouse by code', async () => {
-    mockRepo.findByCode.mockResolvedValue({
-      distributionWarehouseId: 'wh-2',
-      name: 'East',
-      code: 'EAST',
-      description: '',
-      addressLine1: '456 Ave',
-      city: 'NYC',
-      state: 'NY',
-      postalCode: '10001',
-      country: 'US',
-      timezone: 'America/New_York',
-      isActive: true,
-      isDefault: false,
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-02',
-    });
+  it('should return the warehouse when found by code', async () => {
+    warehouseRepository.findByCode.mockResolvedValue(warehouseRecord({ distributionWarehouseId: 'wh-2', code: 'EAST' }));
 
     const result = await useCase.execute({ code: 'EAST' });
 
@@ -62,13 +45,15 @@ describe('GetWarehouseUseCase', () => {
     expect(result.warehouse!.code).toBe('EAST');
   });
 
-  it('should return null when warehouse not found', async () => {
+  it('should return null when the warehouse is not found', async () => {
     const result = await useCase.execute({ warehouseId: 'missing' });
 
     expect(result.warehouse).toBeNull();
   });
 
-  it('should throw WarehouseValidationError when no ID or code provided', async () => {
+  it('should throw WarehouseValidationError when neither id nor code is provided', async () => {
     await expect(useCase.execute({})).rejects.toThrow(WarehouseValidationError);
+    expect(warehouseRepository.findById).not.toHaveBeenCalled();
+    expect(warehouseRepository.findByCode).not.toHaveBeenCalled();
   });
 });

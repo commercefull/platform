@@ -1,57 +1,65 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-jest.mock('../../../../libs/logger', () => ({
-  __esModule: true,
-  logger: { warning: jest.fn(), warn: jest.fn(), info: jest.fn(), error: jest.fn() },
-}));
-
+import { createCheckoutRepository, createCheckoutSession, createOrderPlacementPort, emitMock } from '../../tests/testUtils';
 import { AbandonCheckoutUseCase, AbandonCheckoutCommand } from './AbandonCheckout';
 import { NotFoundError } from '../../../../libs/errors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('AbandonCheckoutUseCase', () => {
   let useCase: AbandonCheckoutUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockSession: Record<string, unknown>;
-  let mockOrderPort: Record<string, jest.Mock>;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
+  let orderPlacementPort: ReturnType<typeof createOrderPlacementPort>;
 
   beforeEach(() => {
-    mockSession = { id: 'ck-1', basketId: 'b1', customerId: 'c1', status: 'pending', abandon: jest.fn() };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockSession),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    mockOrderPort = { cancelOrder: jest.fn().mockResolvedValue(undefined) };
-    useCase = new AbandonCheckoutUseCase(mockRepo as never, mockOrderPort as never);
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    orderPlacementPort = createOrderPlacementPort();
+    useCase = new AbandonCheckoutUseCase(checkoutRepository, orderPlacementPort);
   });
 
-  it('should abandon checkout (happy path)', async () => {
+  it('should abandon the session and emit checkout.abandoned when the session exists', async () => {
+    const session = createCheckoutSession();
+    checkoutRepository.findById.mockResolvedValue(session);
+
     const result = await useCase.execute(new AbandonCheckoutCommand('ck-1'));
 
     expect(result.checkoutId).toBe('ck-1');
-    expect(mockSession.abandon).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('checkout.abandoned', expect.objectContaining({ checkoutId: 'ck-1' }));
+    expect(session.status).toBe('abandoned');
+    expect(checkoutRepository.save).toHaveBeenCalledWith(session);
+    expect(emitMock).toHaveBeenCalledWith('checkout.abandoned', expect.objectContaining({ checkoutId: 'ck-1', basketId: 'b-1' }));
   });
 
-  it('should cancel linked order when status is pending_payment', async () => {
-    mockSession.status = 'pending_payment';
-    mockSession.orderId = 'o1';
+  it('should cancel the linked order when the session is pending payment', async () => {
+    const session = createCheckoutSession({ status: 'pending_payment', orderId: 'o-1' });
+    checkoutRepository.findById.mockResolvedValue(session);
 
     await useCase.execute(new AbandonCheckoutCommand('ck-1'));
 
-    expect(mockOrderPort.cancelOrder).toHaveBeenCalledWith('o1', 'Checkout abandoned by customer');
+    expect(orderPlacementPort.cancelOrder).toHaveBeenCalledWith('o-1', 'Checkout abandoned by customer');
+    expect(session.status).toBe('abandoned');
   });
 
-  it('should throw NotFoundError when session does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should still abandon when order cancellation fails', async () => {
+    const session = createCheckoutSession({ status: 'pending_payment', orderId: 'o-1' });
+    checkoutRepository.findById.mockResolvedValue(session);
+    orderPlacementPort.cancelOrder.mockRejectedValue(new Error('order gone'));
+
+    const result = await useCase.execute(new AbandonCheckoutCommand('ck-1'));
+
+    expect(result.checkoutId).toBe('ck-1');
+    expect(session.status).toBe('abandoned');
+  });
+
+  it('should not cancel an order when the session is not pending payment', async () => {
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession({ status: 'active', orderId: 'o-1' }));
+
+    await useCase.execute(new AbandonCheckoutCommand('ck-1'));
+
+    expect(orderPlacementPort.cancelOrder).not.toHaveBeenCalled();
+  });
+
+  it('should throw NotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new AbandonCheckoutCommand('missing'))).rejects.toThrow(NotFoundError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

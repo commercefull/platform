@@ -6,12 +6,9 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { FraudScreeningService } from '../../application/services/FraudScreeningService';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { FraudRepo as fraudRepo } from '../../application/wired';
+import { FraudRepo as fraudRepo, fraudScreeningService } from '../../application/wired';
 import type { RuleAction, RuleType } from '../../application/wired';
-
-const fraudScreeningService = new FraudScreeningService();
 
 // ============================================================================
 // List Fraud Rules

@@ -1,10 +1,8 @@
 import { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 
 export class GetPaymentBalancesUseCase {
-  constructor(private readonly billingRepo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly billingRepo: PaymentBillingRepository) {}
 
   async findAll() {
     return this.billingRepo.findAllBalances();

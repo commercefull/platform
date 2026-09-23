@@ -1,38 +1,37 @@
-jest.mock('../../infrastructure/repositories/PromotionRuleRepository', () => ({
-  __esModule: true,
-  default: {
-    promotions: {
-      findById: jest.fn().mockResolvedValue(null),
-      delete: jest.fn(),
-    },
-  },
-}));
-
+import '../../tests/testUtils';
 import { DeletePromotionUseCase, DeletePromotionCommand } from './DeletePromotion';
 import { PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import { createPromotionRepository, createPromotion } from '../../tests/testUtils';
 
 describe('DeletePromotionUseCase', () => {
-  let useCase: DeletePromotionUseCase;
-  const mockPromotions = promotionRuleRepository.promotions;
+  const promotionRepository = createPromotionRepository();
+  const useCase = new DeletePromotionUseCase(promotionRepository);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPromotions.findById = jest.fn().mockResolvedValue({ promotionId: 'p1' });
-    mockPromotions.delete = jest.fn().mockResolvedValue(true);
-    useCase = new DeletePromotionUseCase(mockPromotions as never);
+    promotionRepository.findById.mockResolvedValue(createPromotion());
+    promotionRepository.delete.mockResolvedValue(true);
   });
 
-  it('should delete promotion (happy path)', async () => {
-    const result = await useCase.execute(new DeletePromotionCommand('p1'));
+  it('should delete the promotion when it exists', async () => {
+    const result = await useCase.execute(new DeletePromotionCommand('promo-1'));
 
-    expect(result.promotionId).toBe('p1');
-    expect(result.deleted).toBe(true);
+    expect(result).toEqual({ promotionId: 'promo-1', deleted: true });
+    expect(promotionRepository.delete).toHaveBeenCalledWith('promo-1');
   });
 
-  it('should throw PromotionNotFoundError when promotion does not exist', async () => {
-    mockPromotions.findById = jest.fn().mockResolvedValue(null);
+  it('should throw PromotionNotFoundError when the promotion does not exist', async () => {
+    promotionRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new DeletePromotionCommand('missing'))).rejects.toThrow(PromotionNotFoundError);
+    expect(promotionRepository.delete).not.toHaveBeenCalled();
+  });
+
+  it('should report deleted=false when the repository does not delete', async () => {
+    promotionRepository.delete.mockResolvedValue(false);
+
+    const result = await useCase.execute(new DeletePromotionCommand('promo-1'));
+
+    expect(result.deleted).toBe(false);
   });
 });

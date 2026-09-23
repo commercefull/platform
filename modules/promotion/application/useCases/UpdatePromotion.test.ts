@@ -1,42 +1,49 @@
-jest.mock('../../infrastructure/repositories/PromotionRuleRepository', () => ({
-  __esModule: true,
-  default: {
-    promotions: {
-      findById: jest.fn().mockResolvedValue(null),
-      update: jest.fn(),
-    },
-  },
-}));
-
+import '../../tests/testUtils';
 import { UpdatePromotionUseCase, UpdatePromotionCommand } from './UpdatePromotion';
 import { PromotionNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import { createPromotionRepository, createPromotion } from '../../tests/testUtils';
 
 describe('UpdatePromotionUseCase', () => {
-  let useCase: UpdatePromotionUseCase;
-  const mockPromotions = promotionRuleRepository.promotions;
+  const promotionRepository = createPromotionRepository();
+  const useCase = new UpdatePromotionUseCase(promotionRepository);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPromotions.findById = jest.fn().mockResolvedValue({ promotionId: 'p1', name: 'Old', status: 'active', updatedAt: new Date() });
-    mockPromotions.update = jest.fn().mockResolvedValue({ promotionId: 'p1', name: 'New', status: 'active', updatedAt: new Date() });
-    useCase = new UpdatePromotionUseCase(mockPromotions as never);
+    promotionRepository.findById.mockResolvedValue(createPromotion());
+    promotionRepository.update.mockResolvedValue(createPromotion({ name: 'New Name' }));
   });
 
-  it('should update promotion name (happy path)', async () => {
-    const result = await useCase.execute(new UpdatePromotionCommand('p1', { name: 'New Name' }));
+  it('should update the promotion fields that were provided', async () => {
+    const result = await useCase.execute(new UpdatePromotionCommand('promo-1', { name: 'New Name' }));
 
-    expect(result.promotionId).toBe('p1');
-    expect(mockPromotions.update).toHaveBeenCalled();
+    expect(result.name).toBe('New Name');
+    expect(promotionRepository.update).toHaveBeenCalledWith('promo-1', { name: 'New Name' });
   });
 
-  it('should throw PromotionNotFoundError when promotion does not exist', async () => {
-    mockPromotions.findById = jest.fn().mockResolvedValue(null);
+  it('should map usageLimit to maxUsage and startsAt to startDate', async () => {
+    const startsAt = new Date('2025-01-01');
+    await useCase.execute(new UpdatePromotionCommand('promo-1', { usageLimit: 100, startsAt, isActive: false }));
 
-    await expect(useCase.execute(new UpdatePromotionCommand('missing', { name: 'X' }))).rejects.toThrow(PromotionNotFoundError);
+    expect(promotionRepository.update).toHaveBeenCalledWith('promo-1', {
+      maxUsage: 100,
+      startDate: startsAt,
+      isActive: false,
+    });
   });
 
-  it('should throw PromotionValidationError when value is negative', async () => {
-    await expect(useCase.execute(new UpdatePromotionCommand('p1', { value: -5 }))).rejects.toThrow(PromotionValidationError);
+  it('should throw PromotionNotFoundError when the promotion does not exist', async () => {
+    promotionRepository.findById.mockResolvedValue(null);
+
+    await expect(useCase.execute(new UpdatePromotionCommand('missing', { name: 'X' }))).rejects.toThrow(
+      PromotionNotFoundError,
+    );
+    expect(promotionRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('should throw PromotionValidationError when the value is negative', async () => {
+    await expect(useCase.execute(new UpdatePromotionCommand('promo-1', { value: -5 }))).rejects.toThrow(
+      PromotionValidationError,
+    );
+    expect(promotionRepository.update).not.toHaveBeenCalled();
   });
 });

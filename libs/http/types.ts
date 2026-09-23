@@ -1,5 +1,4 @@
 import type {
-  ErrorRequestHandler,
   Express,
   NextFunction,
   Request as ExpressRequest,
@@ -22,7 +21,6 @@ export type HttpResponse<Body = unknown, Locals extends Record<string, unknown> 
 
 export type HttpNext = NextFunction;
 export type HttpHandler = RequestHandler;
-export type HttpErrorHandler = ErrorRequestHandler;
 export type HttpRouter = Router;
 export type HttpApplication = Express;
 export type HttpRequestBody = Record<string, unknown>;

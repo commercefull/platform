@@ -1,29 +1,22 @@
-jest.mock('../../infrastructure/repositories/OrderFulfillmentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    fulfillments: {
-      findByOrder: jest.fn().mockResolvedValue([{ packageId: 'p1', orderId: 'o1' }]),
-    },
-    returns: {},
-  },
-}));
-
+import { lazyMock, createOrderFulfillmentPackage } from '../../tests/testUtils';
 import { GetFulfillmentPackagesUseCase } from './GetFulfillmentPackages';
-import orderFulfillmentDataRepository from '../../infrastructure/repositories/OrderFulfillmentDataRepository';
-
-const mockRepo = orderFulfillmentDataRepository as unknown as { fulfillments: Record<string, jest.Mock> };
+import type { OrderFulfillmentPackageRepository } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
 describe('GetFulfillmentPackagesUseCase', () => {
   let useCase: GetFulfillmentPackagesUseCase;
+  let repo: jest.Mocked<OrderFulfillmentPackageRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetFulfillmentPackagesUseCase();
+    repo = lazyMock<OrderFulfillmentPackageRepository>();
+    useCase = new GetFulfillmentPackagesUseCase(repo);
   });
 
   it('should find packages by order', async () => {
+    repo.findByOrder.mockResolvedValue([createOrderFulfillmentPackage({ packageNumber: 'PKG-1' })]);
+
     const result = await useCase.findByOrder('o1');
+
     expect(result).toHaveLength(1);
-    expect(mockRepo.fulfillments.findByOrder).toHaveBeenCalledWith('o1');
+    expect(repo.findByOrder).toHaveBeenCalledWith('o1');
   });
 });

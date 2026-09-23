@@ -6,7 +6,7 @@ import {
   GetTransactionCommand,
   ListTransactionsUseCase,
   ListTransactionsCommand,
-} from '../../application/useCases/GetTransactions';
+} from '../../application/useCases';
 import { ProcessPaymentRefundUseCase, ProcessPaymentRefundCommand } from '../../application/useCases/ProcessRefund';
 import { GetPaymentMethodsUseCase, GetPaymentMethodsInput } from '../../application/useCases/GetPaymentMethods';
 import { CapturePaymentUseCase, CapturePaymentInput } from '../../application/useCases/CapturePayment';

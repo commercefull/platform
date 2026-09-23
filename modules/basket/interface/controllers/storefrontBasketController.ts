@@ -20,7 +20,8 @@ import {
 } from '../../application/useCases/wired';
 import { GetProductCommand } from '../../../product/application/useCases/GetProduct';
 import { getProductUseCase } from '../../../product/application/useCases/wired';
-import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import { CalculateOrderTaxCommand } from '../../../tax/application/useCases/CalculateOrderTax';
+import { calculateOrderTaxUseCase } from '../../../tax/application/wired';
 
 // ============================================================================
 // View Basket/Cart
@@ -195,7 +196,7 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
     user?.customerId as string | undefined,
   );
 
-  const taxUseCase = new CalculateOrderTaxUseCase();
+  const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);
 
   const total = subtotal + taxResult.taxAmount;

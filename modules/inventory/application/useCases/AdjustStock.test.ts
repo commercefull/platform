@@ -2,28 +2,18 @@
  * Unit Tests for AdjustStock Use Case
  */
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, emitMock } from '../../tests/testUtils';
 import { AdjustStockUseCase } from './AdjustStock';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('AdjustStockUseCase', () => {
   let useCase: AdjustStockUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof AdjustStockUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findByProduct: jest.fn(),
-      updateQuantity: jest.fn(),
-      create: jest.fn(),
-      recordTransaction: jest.fn(),
-    };
-    useCase = new AdjustStockUseCase(mockRepo as never as ConstructorParameters<typeof AdjustStockUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
+    mockRepo = lazyMock<ConstructorParameters<typeof AdjustStockUseCase>[0]>();
+    useCase = new AdjustStockUseCase(mockRepo);
+    emitMock.mockClear();
   });
 
   it('should set quantity when adjustmentType is "set"', async () => {
@@ -135,7 +125,7 @@ describe('AdjustStockUseCase', () => {
       reason: 'damage',
     });
 
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'inventory.low',
       expect.objectContaining({
         productId: 'prod-1',
@@ -160,7 +150,7 @@ describe('AdjustStockUseCase', () => {
       reason: 'expired',
     });
 
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'inventory.out_of_stock',
       expect.objectContaining({
         productId: 'prod-1',
@@ -179,7 +169,7 @@ describe('AdjustStockUseCase', () => {
       useCase.execute({
         productId: 'prod-1',
         locationId: 'loc-1',
-        adjustmentType: 'invalid' as never as 'set' | 'increment' | 'decrement',
+        adjustmentType: 'invalid' as 'set' | 'increment' | 'decrement',
         quantity: 10,
         reason: 'manual',
       }),

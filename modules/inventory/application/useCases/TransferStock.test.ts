@@ -2,22 +2,17 @@
  * Unit Tests for TransferStock Use Case
  */
 
+import { lazyMock } from '../../tests/testUtils';
 import { TransferStockUseCase } from './TransferStock';
 import { InventoryLocationNotFoundError } from '../../domain/errors/InventoryErrors';
 
 describe('TransferStockUseCase', () => {
   let useCase: TransferStockUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof TransferStockUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findLocationById: jest.fn(),
-      findByProduct: jest.fn(),
-      updateQuantity: jest.fn(),
-      create: jest.fn(),
-      recordTransaction: jest.fn(),
-    };
-    useCase = new TransferStockUseCase(mockRepo as never as ConstructorParameters<typeof TransferStockUseCase>[0]);
+    mockRepo = lazyMock<ConstructorParameters<typeof TransferStockUseCase>[0]>();
+    useCase = new TransferStockUseCase(mockRepo);
   });
 
   it('should transfer stock between locations', async () => {

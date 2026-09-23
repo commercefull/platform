@@ -1,57 +1,50 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-import { ExtendExpirationUseCase, ExtendExpirationCommand } from './ExtendExpiration';
+import { createBasket, createBasketRepository, emitMock, BASKET_ID } from '../../tests/testUtils';
+import { ExtendExpirationCommand, ExtendExpirationUseCase } from './ExtendExpiration';
 import { BasketNotFoundError, InvalidExpirationDaysError } from '../../domain/errors/BasketErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('ExtendExpirationUseCase', () => {
-  let useCase: ExtendExpirationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should extend the expiration when the number of days is positive', async () => {
+    const basket = createBasket();
+    const previousExpiry = basket.expiresAt?.getTime() ?? 0;
+    const repository = createBasketRepository(basket);
 
-  const makeBasket = () => ({
-    basketId: 'b1',
-    customerId: 'c1',
-    sessionId: 's1',
-    status: 'active',
-    currency: 'USD',
-    items: [],
-    itemCount: 0,
-    subtotal: { amount: 0 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    expiresAt: new Date(),
-    extendExpiration: jest.fn(),
+    await new ExtendExpirationUseCase(repository).execute(new ExtendExpirationCommand(BASKET_ID, 30));
+
+    expect(repository.save).toHaveBeenCalledWith(basket);
+    expect(basket.expiresAt?.getTime() ?? 0).toBeGreaterThan(previousExpiry);
   });
 
-  beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(makeBasket()),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ExtendExpirationUseCase(mockRepo as never);
+  it('should emit basket.expiration_extended when the expiration is extended', async () => {
+    const repository = createBasketRepository(createBasket());
+
+    await new ExtendExpirationUseCase(repository).execute(new ExtendExpirationCommand(BASKET_ID, 7));
+
+    expect(emitMock).toHaveBeenCalledWith('basket.expiration_extended', expect.objectContaining({ basketId: BASKET_ID, days: 7 }));
   });
 
-  it('should extend expiration (happy path)', async () => {
-    const result = await useCase.execute(new ExtendExpirationCommand('b1', 7));
+  it('should throw InvalidExpirationDaysError when days is less than 1', async () => {
+    const repository = createBasketRepository(createBasket());
 
-    expect(result.basketId).toBe('b1');
-    expect(eventBus.emit).toHaveBeenCalledWith('basket.expiration_extended', expect.objectContaining({ basketId: 'b1', days: 7 }));
+    await expect(new ExtendExpirationUseCase(repository).execute(new ExtendExpirationCommand(BASKET_ID, 0))).rejects.toThrow(
+      InvalidExpirationDaysError,
+    );
+    expect(repository.findById).not.toHaveBeenCalled();
   });
 
-  it('should throw InvalidExpirationDaysError for days < 1', async () => {
-    await expect(useCase.execute(new ExtendExpirationCommand('b1', 0))).rejects.toThrow(InvalidExpirationDaysError);
+  it('should throw BasketNotFoundError when the basket does not exist', async () => {
+    const repository = createBasketRepository(null);
+
+    await expect(new ExtendExpirationUseCase(repository).execute(new ExtendExpirationCommand('missing', 7))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 
-  it('should throw BasketNotFoundError when basket does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
+    const repository = createBasketRepository();
+    repository.findById.mockResolvedValueOnce(createBasket()).mockResolvedValue(null);
 
-    await expect(useCase.execute(new ExtendExpirationCommand('missing', 7))).rejects.toThrow(BasketNotFoundError);
+    await expect(new ExtendExpirationUseCase(repository).execute(new ExtendExpirationCommand(BASKET_ID, 7))).rejects.toThrow(
+      BasketNotFoundError,
+    );
   });
 });

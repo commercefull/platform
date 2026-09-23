@@ -1,36 +1,35 @@
+import { createFeatureFlagRepository } from '../../tests/testUtils';
 import { GetFeatureFlagsUseCase } from './GetFeatureFlags';
 
 describe('GetFeatureFlagsUseCase', () => {
-  let useCase: GetFeatureFlagsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should return the flags when the repository has them', async () => {
+    const repository = createFeatureFlagRepository();
+    repository.findFeatureFlags.mockResolvedValue([
+      { key: 'new_checkout', name: 'New Checkout', enabled: true, scope: 'global' },
+      { key: 'loyalty', name: 'Loyalty Program', enabled: false, scope: 'global', rolloutPercentage: 50 },
+    ]);
 
-  beforeEach(() => {
-    mockRepo = {
-      findFeatureFlags: jest.fn().mockResolvedValue([
-        { key: 'new_checkout', name: 'New Checkout', enabled: true, scope: 'global' },
-        { key: 'loyalty', name: 'Loyalty Program', enabled: false, scope: 'global', rolloutPercentage: 50 },
-      ]),
-    };
-    useCase = new GetFeatureFlagsUseCase(mockRepo as never);
-  });
-
-  it('should return feature flags (happy path)', async () => {
-    const result = await useCase.execute({});
+    const result = await new GetFeatureFlagsUseCase(repository).execute({});
 
     expect(result.flags).toHaveLength(2);
     expect(result.total).toBe(2);
-    expect(result.flags[0].key).toBe('new_checkout');
+    expect(result.flags[1]).toMatchObject({ key: 'loyalty', enabled: false, rolloutPercentage: 50 });
   });
 
-  it('should pass scope and includeDisabled to repository', async () => {
-    await useCase.execute({ scope: 'store', scopeId: 's1', includeDisabled: true });
+  it('should pass scope and includeDisabled through when provided', async () => {
+    const repository = createFeatureFlagRepository();
 
-    expect(mockRepo.findFeatureFlags).toHaveBeenCalledWith({ scope: 'store', scopeId: 's1', includeDisabled: true });
+    await new GetFeatureFlagsUseCase(repository).execute({ scope: 'store', scopeId: 's1', includeDisabled: true });
+
+    expect(repository.findFeatureFlags).toHaveBeenCalledWith({ scope: 'store', scopeId: 's1', includeDisabled: true });
   });
 
-  it('should default scope to global and includeDisabled to false', async () => {
-    await useCase.execute({});
+  it('should default to global scope when no scope is given', async () => {
+    const repository = createFeatureFlagRepository();
 
-    expect(mockRepo.findFeatureFlags).toHaveBeenCalledWith({ scope: 'global', scopeId: undefined, includeDisabled: false });
+    const result = await new GetFeatureFlagsUseCase(repository).execute({});
+
+    expect(result.flags).toEqual([]);
+    expect(repository.findFeatureFlags).toHaveBeenCalledWith({ scope: 'global', scopeId: undefined, includeDisabled: false });
   });
 });

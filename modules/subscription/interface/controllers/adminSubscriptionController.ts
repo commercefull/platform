@@ -5,11 +5,9 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageAdminSubscriptionsUseCase } from '../../application/useCases/ManageAdminSubscriptions';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageSubscriptionsUseCase = new ManageAdminSubscriptionsUseCase();
+import { manageAdminSubscriptionsUseCase as manageSubscriptionsUseCase } from '../../application/wired';
 
 // ============================================================================
 // Helper Functions

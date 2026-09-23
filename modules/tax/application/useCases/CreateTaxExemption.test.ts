@@ -2,31 +2,21 @@
  * Unit Tests for CreateTaxExemption Use Case
  */
 
-jest.mock('../../infrastructure/repositories/taxCommandRepo', () => {
-  const mock = {
-    createTaxExemption: jest.fn(),
-  };
-  return {
-    __esModule: true,
-    default: mock,
-    TaxCommandRepo: function () { return mock; },
-  };
-});
-
+import { createExemptionCreatePort, createCustomerTaxExemption } from '../../tests/testUtils';
 import { CreateTaxExemptionUseCase } from './CreateTaxExemption';
-import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';
 
 describe('CreateTaxExemptionUseCase', () => {
   let useCase: CreateTaxExemptionUseCase;
+  let commandRepo: ReturnType<typeof createExemptionCreatePort>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new CreateTaxExemptionUseCase();
+    commandRepo = createExemptionCreatePort();
+    useCase = new CreateTaxExemptionUseCase(commandRepo);
   });
 
-  it('should create a pending exemption with scope fields', async () => {
-    const mockResult = { id: 'ex1', status: 'pending', customerId: 'cust-1' };
-    jest.mocked(taxCommandRepo.createTaxExemption).mockResolvedValue(mockResult as never);
+  it('should persist a pending unverified exemption with the scope fields', async () => {
+    const saved = createCustomerTaxExemption({ status: 'pending' });
+    commandRepo.createTaxExemption.mockResolvedValue(saved);
 
     const result = await useCase.execute({
       customerId: 'cust-1',
@@ -39,8 +29,8 @@ describe('CreateTaxExemptionUseCase', () => {
       exemptionPercent: 100,
     });
 
-    expect(result).toEqual(mockResult);
-    expect(taxCommandRepo.createTaxExemption).toHaveBeenCalledWith(
+    expect(result).toBe(saved);
+    expect(commandRepo.createTaxExemption).toHaveBeenCalledWith(
       expect.objectContaining({
         customerId: 'cust-1',
         type: 'resale',
@@ -55,7 +45,7 @@ describe('CreateTaxExemptionUseCase', () => {
   });
 
   it('should default exemptionPercent to 100 when not provided', async () => {
-    jest.mocked(taxCommandRepo.createTaxExemption).mockResolvedValue({ id: 'ex1' } as never);
+    commandRepo.createTaxExemption.mockResolvedValue(createCustomerTaxExemption());
 
     await useCase.execute({
       customerId: 'cust-1',
@@ -64,15 +54,11 @@ describe('CreateTaxExemptionUseCase', () => {
       exemptionNumber: 'EX456',
     });
 
-    expect(taxCommandRepo.createTaxExemption).toHaveBeenCalledWith(
-      expect.objectContaining({
-        exemptionPercent: 100,
-      }),
-    );
+    expect(commandRepo.createTaxExemption).toHaveBeenCalledWith(expect.objectContaining({ exemptionPercent: 100 }));
   });
 
-  it('should default applicableTaxCategoryIds to null when not provided', async () => {
-    jest.mocked(taxCommandRepo.createTaxExemption).mockResolvedValue({ id: 'ex1' } as never);
+  it('should default the scope bounds to null when not provided', async () => {
+    commandRepo.createTaxExemption.mockResolvedValue(createCustomerTaxExemption());
 
     await useCase.execute({
       customerId: 'cust-1',
@@ -81,9 +67,11 @@ describe('CreateTaxExemptionUseCase', () => {
       exemptionNumber: 'EX789',
     });
 
-    expect(taxCommandRepo.createTaxExemption).toHaveBeenCalledWith(
+    expect(commandRepo.createTaxExemption).toHaveBeenCalledWith(
       expect.objectContaining({
         applicableTaxCategoryIds: null,
+        minOrderAmount: null,
+        maxOrderAmount: null,
       }),
     );
   });

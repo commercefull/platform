@@ -5,15 +5,15 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageAdminTaxUseCase } from '../../application/useCases/ManageAdminTax';
-import { approveTaxExemptionUseCase } from '../../application/useCases/ApproveTaxExemption';
-import { rejectTaxExemptionUseCase } from '../../application/useCases/RejectTaxExemption';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { TaxQueryRepository } from '../../application/wired';
+import {
+  TaxQueryRepository,
+  manageAdminTaxUseCase,
+  approveTaxExemptionUseCase,
+  rejectTaxExemptionUseCase,
+} from '../../application/wired';
 
 const taxQueryRepo = TaxQueryRepository.query;
-
-const manageAdminTaxUseCase = new ManageAdminTaxUseCase();
 
 // ============================================================================
 // List Tax Settings

@@ -8,29 +8,19 @@
 
 import { eventBus } from '../../../libs/events/eventBus';
 import { CheckoutSession } from '../domain/entities/CheckoutSession';
-
-// Mock the CheckoutRepository
-jest.mock('../infrastructure/repositories/CheckoutRepository', () => {
-  const mockSession = CheckoutSession.create({ id: 'cs-1', basketId: 'b-1' });
-  mockSession.setPaymentIntent('pi-1', 'order-1');
-
-  return {
-    __esModule: true,
-    default: {
-      findById: jest.fn(),
-      save: jest.fn().mockResolvedValue(mockSession),
-    },
-  };
-});
-
-import CheckoutRepo from '../infrastructure/repositories/CheckoutRepository';
 import { registerCheckoutEventHandlers } from '../application/eventHandlers';
+import type { CheckoutRepository } from '../domain/repositories/CheckoutRepository';
 
 describe('Checkout event handlers (Published Language)', () => {
+  let repo: jest.Mocked<CheckoutRepository>;
+
   beforeEach(() => {
-    // Clear handlers before each test
     eventBus['handlers'].clear();
-    registerCheckoutEventHandlers(CheckoutRepo);
+    repo = {
+      findById: jest.fn(),
+      save: jest.fn(),
+    } as unknown as jest.Mocked<CheckoutRepository>;
+    registerCheckoutEventHandlers(repo);
   });
 
   afterEach(() => {
@@ -41,7 +31,8 @@ describe('Checkout event handlers (Published Language)', () => {
   it('checkout.payment_captured should mark session as payment authorized', async () => {
     const session = CheckoutSession.create({ id: 'cs-test', basketId: 'b-1' });
     session.setPaymentIntent('pi-1', 'order-1');
-    (CheckoutRepo.findById as jest.Mock).mockResolvedValue(session);
+    repo.findById.mockResolvedValue(session);
+    repo.save.mockResolvedValue(session);
 
     await eventBus.emit('checkout.payment_captured', {
       checkoutId: 'cs-test',
@@ -49,13 +40,13 @@ describe('Checkout event handlers (Published Language)', () => {
       paymentIntentId: 'pi-1',
     });
 
-    expect(CheckoutRepo.findById).toHaveBeenCalledWith('cs-test');
-    expect(CheckoutRepo.save).toHaveBeenCalledWith(session);
+    expect(repo.findById).toHaveBeenCalledWith('cs-test');
+    expect(repo.save).toHaveBeenCalledWith(session);
     expect(session.paymentStatus).toBe('authorized');
   });
 
   it('checkout.payment_captured should not throw if session not found', async () => {
-    (CheckoutRepo.findById as jest.Mock).mockResolvedValue(null);
+    repo.findById.mockResolvedValue(null);
 
     await expect(
       eventBus.emit('checkout.payment_captured', {
@@ -65,7 +56,7 @@ describe('Checkout event handlers (Published Language)', () => {
       }),
     ).resolves.not.toThrow();
 
-    expect(CheckoutRepo.save).not.toHaveBeenCalled();
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('checkout.payment_captured should skip if no checkoutId', async () => {
@@ -74,13 +65,14 @@ describe('Checkout event handlers (Published Language)', () => {
       paymentIntentId: 'pi-1',
     });
 
-    expect(CheckoutRepo.findById).not.toHaveBeenCalled();
+    expect(repo.findById).not.toHaveBeenCalled();
   });
 
   it('checkout.failed should mark session as payment failed', async () => {
     const session = CheckoutSession.create({ id: 'cs-fail', basketId: 'b-1' });
     session.setPaymentIntent('pi-1', 'order-1');
-    (CheckoutRepo.findById as jest.Mock).mockResolvedValue(session);
+    repo.findById.mockResolvedValue(session);
+    repo.save.mockResolvedValue(session);
 
     await eventBus.emit('checkout.failed', {
       checkoutId: 'cs-fail',
@@ -88,14 +80,14 @@ describe('Checkout event handlers (Published Language)', () => {
       reason: 'card declined',
     });
 
-    expect(CheckoutRepo.findById).toHaveBeenCalledWith('cs-fail');
-    expect(CheckoutRepo.save).toHaveBeenCalledWith(session);
+    expect(repo.findById).toHaveBeenCalledWith('cs-fail');
+    expect(repo.save).toHaveBeenCalledWith(session);
     expect(session.paymentStatus).toBe('failed');
     expect(session.status).toBe('failed');
   });
 
   it('checkout.failed should not throw if session not found', async () => {
-    (CheckoutRepo.findById as jest.Mock).mockResolvedValue(null);
+    repo.findById.mockResolvedValue(null);
 
     await expect(
       eventBus.emit('checkout.failed', {
@@ -105,7 +97,7 @@ describe('Checkout event handlers (Published Language)', () => {
       }),
     ).resolves.not.toThrow();
 
-    expect(CheckoutRepo.save).not.toHaveBeenCalled();
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('checkout.failed should skip if no checkoutId', async () => {
@@ -114,6 +106,6 @@ describe('Checkout event handlers (Published Language)', () => {
       reason: 'timeout',
     });
 
-    expect(CheckoutRepo.findById).not.toHaveBeenCalled();
+    expect(repo.findById).not.toHaveBeenCalled();
   });
 });

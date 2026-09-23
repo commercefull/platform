@@ -6,14 +6,10 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import {
-  ManageStorefrontSupportUseCase,
-  type TicketStatus,
-  type TicketPriority,
-  type TicketCategory,
-} from '../../application/useCases/ManageStorefrontSupport';
+import type { TicketStatus, TicketPriority, TicketCategory } from '../../application/useCases/ManageStorefrontSupport';
+import { manageStorefrontSupportUseCase } from '../../application/wired';
 
-const manageSupportUseCase = new ManageStorefrontSupportUseCase();
+const manageSupportUseCase = manageStorefrontSupportUseCase;
 
 interface CustomerUser {
   customerId: string;

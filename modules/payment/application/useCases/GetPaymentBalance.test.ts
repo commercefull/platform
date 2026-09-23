@@ -1,29 +1,19 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      findBalancesByMerchant: jest
-        .fn()
-        .mockResolvedValue([{ paymentBalanceId: 'b1', currency: 'USD', amount: 500, updatedAt: new Date() }]),
-      getBalance: jest.fn().mockResolvedValue(500),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentBalance } from '../../tests/testUtils';
 import { GetPaymentBalanceUseCase, GetPaymentBalanceCommand } from './GetPaymentBalance';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-
-const mockRepo = paymentBillingDataRepository as unknown as { billing: Record<string, jest.Mock> };
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('GetPaymentBalanceUseCase', () => {
   let useCase: GetPaymentBalanceUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetPaymentBalanceUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    useCase = new GetPaymentBalanceUseCase(repo);
   });
 
-  it('should get balances without currency filter (happy path)', async () => {
+  it('should return balances without a currency filter', async () => {
+    repo.findBalancesByMerchant.mockResolvedValue([createPaymentBalance({ amount: 500 })]);
+
     const result = await useCase.execute(new GetPaymentBalanceCommand('org1'));
 
     expect(result.organizationId).toBe('org1');
@@ -31,10 +21,13 @@ describe('GetPaymentBalanceUseCase', () => {
     expect(result.currentBalance).toBeUndefined();
   });
 
-  it('should get current balance when currency specified', async () => {
+  it('should return the current balance when a currency is specified', async () => {
+    repo.findBalancesByMerchant.mockResolvedValue([createPaymentBalance()]);
+    repo.getBalance.mockResolvedValue(500);
+
     const result = await useCase.execute(new GetPaymentBalanceCommand('org1', 'USD'));
 
     expect(result.currentBalance).toBe(500);
-    expect(mockRepo.billing.getBalance).toHaveBeenCalledWith('org1', 'USD');
+    expect(repo.getBalance).toHaveBeenCalledWith('org1', 'USD');
   });
 });

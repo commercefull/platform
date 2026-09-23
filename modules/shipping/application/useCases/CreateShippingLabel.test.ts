@@ -1,92 +1,50 @@
-jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
-  __esModule: true,
-  default: {
-    carriers: {
-      findById: jest.fn().mockResolvedValue({
-        shippingCarrierId: 'c1',
-        name: 'UPS',
-        isActive: true,
-      }),
-    },
-    methods: {},
-    zones: {},
-    rates: {},
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/ShippingLabelAggregateRepository', () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn().mockResolvedValue({
-      shippingLabelId: 'l1',
-      shippingCarrierId: 'c1',
-      trackingNumber: 'TRK123',
-      carrierName: 'UPS',
-      labelFormat: 'PDF',
-      orderId: 'o1',
-    }),
-  },
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
+import {
+  emitMock,
+  createShippingLabelPort,
+  createShippingCarrierPort,
+  createShippingCarrier,
+  createShippingLabel,
+} from '../../tests/testUtils';
 import { CreateShippingLabelUseCase } from './CreateShippingLabel';
 import { ShippingCarrierNotFoundError, ShippingValidationError } from '../../domain/errors/ShippingErrors';
-import shippingConfigRepository from '../../infrastructure/repositories/ShippingConfigRepository';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-const mockCarrierRepo = shippingConfigRepository as unknown as { carriers: Record<string, jest.Mock> };
 
 describe('CreateShippingLabelUseCase', () => {
   let useCase: CreateShippingLabelUseCase;
+  let labelRepo: ReturnType<typeof createShippingLabelPort>;
+  let carrierRepo: ReturnType<typeof createShippingCarrierPort>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new CreateShippingLabelUseCase();
+    jest.resetAllMocks();
+    labelRepo = createShippingLabelPort();
+    carrierRepo = createShippingCarrierPort();
+    carrierRepo.findById.mockResolvedValue(createShippingCarrier({ shippingCarrierId: 'c1', name: 'UPS' }));
+    labelRepo.create.mockImplementation(async input => createShippingLabel({ ...input, shippingLabelId: 'l1' }));
+    useCase = new CreateShippingLabelUseCase(labelRepo, carrierRepo);
   });
 
-  it('should create shipping label (happy path)', async () => {
-    const result = await useCase.execute({
-      shippingCarrierId: 'c1',
-      trackingNumber: 'TRK123',
-      orderId: 'o1',
-    });
+  it('should create a label and emit shipping.label_created', async () => {
+    const result = await useCase.execute({ shippingCarrierId: 'c1', trackingNumber: 'TRK123', orderId: 'o1' });
 
     expect(result.shippingLabelId).toBe('l1');
     expect(result.trackingNumber).toBe('TRK123');
-    expect(eventBus.emit).toHaveBeenCalledWith(
-      'shipping.label_created',
-      expect.objectContaining({
-        shippingLabelId: 'l1',
-      }),
+    expect(labelRepo.create).toHaveBeenCalledWith(expect.objectContaining({ carrierName: 'UPS', labelFormat: 'PDF' }));
+    expect(emitMock).toHaveBeenCalledWith('shipping.label_created', expect.objectContaining({ shippingLabelId: 'l1', orderId: 'o1' }));
+  });
+
+  it('should throw ShippingCarrierNotFoundError when the carrier does not exist', async () => {
+    carrierRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.execute({ shippingCarrierId: 'nonexistent', trackingNumber: 'TRK123' })).rejects.toThrow(
+      ShippingCarrierNotFoundError,
     );
+    expect(labelRepo.create).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should throw ShippingCarrierNotFoundError when carrier not found', async () => {
-    mockCarrierRepo.carriers.findById.mockResolvedValueOnce(null);
+  it('should throw ShippingValidationError when the carrier is inactive', async () => {
+    carrierRepo.findById.mockResolvedValue(createShippingCarrier({ isActive: false }));
 
-    await expect(
-      useCase.execute({
-        shippingCarrierId: 'nonexistent',
-        trackingNumber: 'TRK123',
-      }),
-    ).rejects.toThrow(ShippingCarrierNotFoundError);
-  });
-
-  it('should throw ShippingValidationError when carrier is inactive', async () => {
-    mockCarrierRepo.carriers.findById.mockResolvedValueOnce({
-      shippingCarrierId: 'c1',
-      name: 'UPS',
-      isActive: false,
-    });
-
-    await expect(
-      useCase.execute({
-        shippingCarrierId: 'c1',
-        trackingNumber: 'TRK123',
-      }),
-    ).rejects.toThrow(ShippingValidationError);
+    await expect(useCase.execute({ shippingCarrierId: 'c1', trackingNumber: 'TRK123' })).rejects.toThrow(ShippingValidationError);
+    expect(labelRepo.create).not.toHaveBeenCalled();
   });
 });

@@ -6,9 +6,7 @@
  */
 
 import { OrderQueryRepository, OrderPaymentRefund, OrderPaymentRefundStatus } from '../../domain/repositories/OrderQueryRepository';
-import { orderDataRepository } from '../wired';
 
-const orderQueryRepo = orderDataRepository.queries;
 import {
   OrderPaymentNotFoundError,
   RefundAmountMustBePositiveError,
@@ -52,7 +50,7 @@ export interface CreateOrderRefundResponse {
 // ============================================================================
 
 export class CreateOrderRefundUseCase {
-  constructor(private readonly queryRepo: OrderQueryRepository = orderQueryRepo) {}
+  constructor(private readonly queryRepo: OrderQueryRepository) {}
 
   async execute(command: CreateOrderRefundCommand): Promise<CreateOrderRefundResponse> {
     const payment = await this.queryRepo.findPaymentById(command.orderPaymentId);

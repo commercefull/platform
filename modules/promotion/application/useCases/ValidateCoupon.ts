@@ -3,9 +3,7 @@
  * Validates a coupon code for a given order
  */
 
-import { couponDiscountRepository, type PromotionCoupon } from '../wired';
-
-const couponRepo = couponDiscountRepository.coupons;
+import type { PromotionCoupon, CouponRepository } from '../../domain/repositories/CouponRepository';
 
 // ============================================================================
 // Command
@@ -37,6 +35,8 @@ export interface ValidateCouponResponse {
 // ============================================================================
 
 export class ValidateCouponUseCase {
+  constructor(private readonly couponRepo: Pick<CouponRepository, 'findByCode' | 'getCustomerUsageCount' | 'calculateDiscount'>) {}
+
   async execute(command: ValidateCouponCommand): Promise<ValidateCouponResponse> {
     const _errors: string[] = [];
 
@@ -50,7 +50,7 @@ export class ValidateCouponUseCase {
     }
 
     // Find coupon by code
-    const coupon = await couponRepo.findByCode(command.code.toUpperCase(), command.organizationId);
+    const coupon = await this.couponRepo.findByCode(command.code.toUpperCase(), command.organizationId);
 
     if (!coupon) {
       return { valid: false, message: 'Coupon not found', errors: ['coupon_not_found'] };
@@ -87,7 +87,7 @@ export class ValidateCouponUseCase {
 
     // Check per-customer usage if customerId provided
     if (command.customerId && coupon.maxUsagePerCustomer) {
-      const customerUsage = await couponRepo.getCustomerUsageCount(coupon.promotionCouponId, command.customerId);
+      const customerUsage = await this.couponRepo.getCustomerUsageCount(coupon.promotionCouponId, command.customerId);
 
       if (customerUsage >= coupon.maxUsagePerCustomer) {
         return {
@@ -99,7 +99,7 @@ export class ValidateCouponUseCase {
     }
 
     // Calculate discount
-    const discountAmount = couponRepo.calculateDiscount(coupon, command.orderTotal);
+    const discountAmount = this.couponRepo.calculateDiscount(coupon, command.orderTotal);
 
     return {
       valid: true,

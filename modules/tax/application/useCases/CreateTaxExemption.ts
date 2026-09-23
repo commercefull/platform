@@ -7,8 +7,11 @@
  * `ApproveTaxExemption` before they take effect.
  */
 
-import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption, TaxExemptionType } from '../../taxTypes';
+
+export interface TaxExemptionCreatePort {
+  createTaxExemption(exemption: Omit<CustomerTaxExemption, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerTaxExemption>;
+}
 
 export interface CreateTaxExemptionInput {
   customerId: string;
@@ -30,8 +33,10 @@ export interface CreateTaxExemptionInput {
 }
 
 export class CreateTaxExemptionUseCase {
+  constructor(private readonly commandRepo: TaxExemptionCreatePort) {}
+
   async execute(input: CreateTaxExemptionInput): Promise<CustomerTaxExemption> {
-    return taxCommandRepo.createTaxExemption({
+    return this.commandRepo.createTaxExemption({
       customerId: input.customerId,
       type: input.type,
       status: 'pending',
@@ -52,5 +57,3 @@ export class CreateTaxExemptionUseCase {
     });
   }
 }
-
-export const createTaxExemptionUseCase = new CreateTaxExemptionUseCase();

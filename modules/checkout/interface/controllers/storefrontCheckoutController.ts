@@ -8,13 +8,14 @@ import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { getOrCreateBasketUseCase } from '../../../basket/application/useCases/wired';
 import { createOrderUseCase, getOrderUseCase } from '../../../order/application/useCases/wired';
 import { getCustomerUseCase } from '../../../customer/application/useCases/wired';
-import { GetShippingMethodsQuery, GetShippingMethodsUseCase } from '../../../shipping/application/useCases/GetShippingMethods';
-import { GetShippingMethodDetailsUseCase } from '../../../shipping/application/useCases/GetShippingMethodDetails';
+import { GetShippingMethodsQuery } from '../../../shipping/application/useCases/GetShippingMethods';
+import { getShippingMethodsUseCase, getShippingMethodDetailsUseCase } from '../../../shipping/application/wired';
 import { GetOrCreateBasketCommand } from '../../../basket/application/useCases/GetOrCreateBasket';
 import { CreateOrderCommand } from '../../../order/application/useCases/CreateOrder';
 import { GetCustomerCommand } from '../../../customer/application/useCases/GetCustomer';
 import { GetOrderCommand } from '../../../order/application/useCases/GetOrder';
-import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import { CalculateOrderTaxCommand } from '../../../tax/application/useCases/CalculateOrderTax';
+import { calculateOrderTaxUseCase } from '../../../tax/application/wired';
 // ============================================================================
 // Checkout Page
 // ============================================================================
@@ -42,8 +43,7 @@ export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<voi
   const customer = await customerUseCase.execute(customerCommand);
 
   // Get shipping methods (active + visible on storefront)
-  const shippingUseCase = new GetShippingMethodsUseCase();
-  const shippingResult = await shippingUseCase.execute(new GetShippingMethodsQuery(true, true));
+  const shippingResult = await getShippingMethodsUseCase.execute(new GetShippingMethodsQuery(true, true));
 
   // Calculate totals with tax
   const totals = await calculateCheckoutTotals(
@@ -113,8 +113,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   const billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
 
   // Get shipping method details
-  const getShippingMethodUseCase = new GetShippingMethodDetailsUseCase();
-  const shippingMethod = await getShippingMethodUseCase.getShippingMethod(shippingMethodId as string);
+  const shippingMethod = await getShippingMethodDetailsUseCase.getShippingMethod(shippingMethodId as string);
 
   // Convert basket items to order items
   const orderItems = basket.items.map((item: Record<string, unknown>) => ({
@@ -248,7 +247,7 @@ async function calculateCheckoutTotals(
     customer?.customerId as string | undefined,
   );
 
-  const taxUseCase = new CalculateOrderTaxUseCase();
+  const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);
 
   const total = subtotal + taxResult.taxAmount + shippingCost;

@@ -1,30 +1,19 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('dispatch-uuid'),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createInventory, createLocation, lazyMock } from '../../tests/testUtils';
 import { CreateStoreDispatchUseCase } from './CreateStoreDispatch';
 import { InventoryLocationNotFoundError, InsufficientStockError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('CreateStoreDispatchUseCase', () => {
   let useCase: CreateStoreDispatchUseCase;
-  let mockDispatchRepo: Record<string, jest.Mock>;
-  let mockInventoryRepo: Record<string, jest.Mock>;
+  let mockDispatchRepo: jest.Mocked<ConstructorParameters<typeof CreateStoreDispatchUseCase>[0]>;
+  let mockInventoryRepo: jest.Mocked<ConstructorParameters<typeof CreateStoreDispatchUseCase>[1]>;
 
   beforeEach(() => {
-    mockDispatchRepo = {
-      save: jest.fn().mockImplementation(async (d: unknown) => d),
-    };
-    mockInventoryRepo = {
-      getLocationByStoreId: jest.fn().mockResolvedValue({ locationId: 'loc1', storeId: 's1' }),
-      findByProductAndLocation: jest.fn().mockResolvedValue({ availableQuantity: 100 }),
-    };
-    useCase = new CreateStoreDispatchUseCase(mockDispatchRepo as never, mockInventoryRepo as never);
+    mockDispatchRepo = lazyMock<ConstructorParameters<typeof CreateStoreDispatchUseCase>[0]>();
+    mockDispatchRepo.save.mockImplementation(async (d) => d);
+    mockInventoryRepo = lazyMock<ConstructorParameters<typeof CreateStoreDispatchUseCase>[1]>();
+    mockInventoryRepo.getLocationByStoreId.mockResolvedValue(createLocation({ locationId: 'loc1', storeId: 's1' }));
+    mockInventoryRepo.findByProductAndLocation.mockResolvedValue(createInventory({ quantity: 100 }));
+    useCase = new CreateStoreDispatchUseCase(mockDispatchRepo, mockInventoryRepo);
   });
 
   it('should create store dispatch (happy path)', async () => {
@@ -62,7 +51,7 @@ describe('CreateStoreDispatchUseCase', () => {
   });
 
   it('should throw InventoryLocationNotFoundError when source location not found', async () => {
-    mockInventoryRepo.getLocationByStoreId.mockResolvedValueOnce(null).mockResolvedValueOnce({ locationId: 'loc2' });
+    mockInventoryRepo.getLocationByStoreId.mockResolvedValueOnce(null).mockResolvedValueOnce(createLocation({ locationId: 'loc2' }));
 
     await expect(
       useCase.execute({
@@ -75,7 +64,7 @@ describe('CreateStoreDispatchUseCase', () => {
   });
 
   it('should throw InsufficientStockError when not enough stock', async () => {
-    mockInventoryRepo.findByProductAndLocation.mockResolvedValue({ availableQuantity: 5 });
+    mockInventoryRepo.findByProductAndLocation.mockResolvedValue(createInventory({ quantity: 5 }));
 
     await expect(
       useCase.execute({

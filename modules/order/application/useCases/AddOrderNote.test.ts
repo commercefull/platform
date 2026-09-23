@@ -39,7 +39,7 @@ function createMockOrderRepo(order: Order | null): jest.Mocked<OrderRepository> 
     getPaymentStatusHistory: jest.fn().mockResolvedValue([]),
     getFulfillmentStatusHistory: jest.fn().mockResolvedValue([]),
     getOrderStats: jest.fn().mockResolvedValue({ totalOrders: 0, totalRevenue: 0, averageOrderValue: 0, ordersByStatus: {} }),
-  } as never as jest.Mocked<OrderRepository>;
+  } as unknown as jest.Mocked<OrderRepository>;
 }
 
 function createMockQueryRepo(): jest.Mocked<OrderQueryRepository> {
@@ -69,7 +69,7 @@ function createMockQueryRepo(): jest.Mocked<OrderQueryRepository> {
     findRefundsByOrder: jest.fn().mockResolvedValue([]),
     findRefundById: jest.fn().mockResolvedValue(null),
     createRefund: jest.fn(),
-  } as never as jest.Mocked<OrderQueryRepository>;
+  } as unknown as jest.Mocked<OrderQueryRepository>;
 }
 
 describe('AddOrderNoteUseCase', () => {

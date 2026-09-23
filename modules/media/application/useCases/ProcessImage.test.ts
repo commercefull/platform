@@ -1,47 +1,67 @@
+import { createMediaRepository, createImageProcessingService, createStorageService } from '../../tests/testUtils';
 import { ProcessImageUseCase } from './ProcessImage';
 
+const jpegFile = { buffer: Buffer.from('raw-image'), originalname: 'photo.jpg', mimetype: 'image/jpeg', size: 2048 };
+
 describe('ProcessImageUseCase', () => {
-  let useCase: ProcessImageUseCase;
-  let mockMediaRepo: Record<string, jest.Mock>;
-  let mockImageService: Record<string, jest.Mock>;
-  let mockStorageService: Record<string, jest.Mock>;
+  it('should process and persist the media when a file is provided', async () => {
+    const mediaRepository = createMediaRepository();
+    const storageService = createStorageService();
 
-  beforeEach(() => {
-    mockImageService = {
-      processImage: jest.fn().mockResolvedValue({
-        original: { buffer: Buffer.from('img'), size: 1024 },
-        webp: { buffer: Buffer.from('webp'), size: 512 },
-        thumbnail: { buffer: Buffer.from('thumb'), size: 128 },
-        responsive: { '640': { buffer: Buffer.from('r640'), size: 256 } },
-      }),
-    };
-    mockStorageService = {
-      upload: jest.fn().mockResolvedValue({ url: 'https://cdn.example.com/media/test.jpg' }),
-    };
-    mockMediaRepo = {
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ProcessImageUseCase(mockMediaRepo as never, mockImageService as never, mockStorageService as never);
+    const result = await new ProcessImageUseCase(
+      mediaRepository,
+      createImageProcessingService(),
+      storageService,
+    ).execute({ file: jpegFile, altText: 'Test photo' });
+
+    expect(result.media.mediaId).toBe('test-uuid');
+    expect(result.urls.original).toBe('https://cdn.example.com/media/test-uuid/original.jpg');
+    expect(mediaRepository.save).toHaveBeenCalledWith(result.media);
   });
 
-  it('should process image (happy path)', async () => {
-    const result = await useCase.execute({
-      file: { buffer: Buffer.from('raw-image'), originalname: 'photo.jpg', mimetype: 'image/jpeg', size: 2048 },
-      altText: 'Test photo',
-    });
+  it('should upload the webp and thumbnail variants when processing generates them', async () => {
+    const storageService = createStorageService();
 
-    expect(result.media).toBeDefined();
-    expect(result.urls.original).toContain('cdn.example.com');
-    expect(mockMediaRepo.save).toHaveBeenCalled();
+    const result = await new ProcessImageUseCase(
+      createMediaRepository(),
+      createImageProcessingService(),
+      storageService,
+    ).execute({ file: jpegFile });
+
+    // original + webp + thumbnail
+    expect(storageService.upload).toHaveBeenCalledTimes(3);
+    expect(result.urls.webp).toBe('https://cdn.example.com/media/test-uuid/image.webp');
+    expect(result.urls.thumbnail).toBe('https://cdn.example.com/media/test-uuid/thumbnail.webp');
   });
 
-  it('should upload multiple formats', async () => {
-    const result = await useCase.execute({
-      file: { buffer: Buffer.from('raw'), originalname: 'img.png', mimetype: 'image/png', size: 1024 },
+  it('should upload responsive sizes when they match the requested options', async () => {
+    const storageService = createStorageService();
+    const imageProcessingService = createImageProcessingService({
+      original: { buffer: Buffer.from('img'), format: 'jpeg', size: 1024 },
+      responsiveSizes: [{ buffer: Buffer.from('r640'), width: 640, suffix: '_md', size: 256 }],
     });
 
-    expect(mockStorageService.upload).toHaveBeenCalledTimes(3);
-    expect(result.urls.webp).toBeDefined();
-    expect(result.urls.thumbnail).toBeDefined();
+    const result = await new ProcessImageUseCase(createMediaRepository(), imageProcessingService, storageService).execute({
+      file: jpegFile,
+      options: { responsiveSizes: [{ width: 640, suffix: '_md' }] },
+    });
+
+    expect(result.urls.responsive).toEqual({ _md: 'https://cdn.example.com/media/test-uuid/image_md.webp' });
+  });
+
+  it('should skip the thumbnail upload when thumbnail generation is disabled', async () => {
+    const storageService = createStorageService();
+    const imageProcessingService = createImageProcessingService({
+      original: { buffer: Buffer.from('img'), format: 'jpeg', size: 1024 },
+      thumbnail: { buffer: Buffer.from('thumb'), format: 'webp', size: 128 },
+    });
+
+    const result = await new ProcessImageUseCase(createMediaRepository(), imageProcessingService, storageService).execute({
+      file: jpegFile,
+      options: { generateThumbnail: false },
+    });
+
+    expect(result.urls.thumbnail).toBeUndefined();
+    expect(storageService.upload).toHaveBeenCalledTimes(1);
   });
 });

@@ -24,7 +24,7 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 | Returns management | Loop Returns | ~$50 (revenue share) | Built in |
 | Email/marketing | Klaviyo (5K contacts) | $45 | Built in (notification module) |
 | Helpdesk/support | Gorgias (ticket-based) | $60 | Built in (support module) |
-| GDPR/compliance | Cookie consent app | $15 | Built in (compliance module) |
+| GDPR/compliance | Cookie consent app | $15 | Built in (gdpr module) |
 | **Total** | | **~$772/mo** | **$0** |
 | **Annual** | | **~$9,264/yr** | **$0** |
 
@@ -39,7 +39,7 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 | Returns management | Loop Returns | ~$200 (revenue share) | Built in |
 | Email/marketing | Klaviyo (50K contacts) | $720 | Built in (notification module) |
 | Helpdesk/support | Gorgias (ticket-based) | $150 | Built in (support module) |
-| GDPR/compliance | Cookie consent + DSR app | $30 | Built in (compliance module) |
+| GDPR/compliance | Cookie consent + DSR app | $30 | Built in (gdpr module) |
 | **Total** | | **~$3,942/mo** | **$0** |
 | **Annual** | | **~$47,304/yr** | **$0** |
 
@@ -47,7 +47,7 @@ Every feature a growing merchant needs — loyalty, subscriptions, reviews, retu
 
 ## What's Built In
 
-Commercefull ships 43 modules covering the full commerce lifecycle. The features Shopify merchants pay extra for are native:
+Commercefull ships 42 modules covering the full commerce lifecycle. The features Shopify merchants pay extra for are native:
 
 | Shopify Paid App Category | Commercefull Module | Cost |
 |---|---|---|

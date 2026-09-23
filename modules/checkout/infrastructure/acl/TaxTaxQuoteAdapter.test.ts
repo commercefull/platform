@@ -1,28 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
-jest.mock('../../../tax/application/useCases/CalculateOrderTax', () => ({
-  __esModule: true,
-  calculateOrderTaxUseCase: { execute: jest.fn() },
-}));
-
-jest.mock('../../../tax/infrastructure/repositories/taxSettingsRepo', () => ({
-  __esModule: true,
-  default: { findByMerchant: jest.fn() },
-}));
-
 import { TaxTaxQuoteAdapter } from './TaxTaxQuoteAdapter';
+import type { CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import type taxSettingsRepoModule from '../../../tax/infrastructure/repositories/taxSettingsRepo';
 
 describe('TaxTaxQuoteAdapter', () => {
   let adapter: TaxTaxQuoteAdapter;
-
-  let calculateOrderTaxUseCase: any;
-
-  let taxSettingsRepo: any;
+  let calculateOrderTaxUseCase: jest.Mocked<Pick<CalculateOrderTaxUseCase, 'execute'>>;
+  let taxSettingsRepo: jest.Mocked<Pick<typeof taxSettingsRepoModule, 'findByMerchant'>>;
 
   beforeEach(() => {
-    calculateOrderTaxUseCase = require('../../../tax/application/useCases/CalculateOrderTax').calculateOrderTaxUseCase;
-    taxSettingsRepo = require('../../../tax/infrastructure/repositories/taxSettingsRepo').default;
-    adapter = new TaxTaxQuoteAdapter();
+    calculateOrderTaxUseCase = { execute: jest.fn() };
+    taxSettingsRepo = { findByMerchant: jest.fn() };
+    adapter = new TaxTaxQuoteAdapter(calculateOrderTaxUseCase, taxSettingsRepo);
   });
 
   it('implements TaxQuotePort', () => {
@@ -33,7 +21,12 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should map tax calculation result to checkout vocabulary', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: true,
+      subtotal: 100,
+      shippingAmount: 10,
       taxAmount: 8.5,
+      total: 118.5,
+      taxRate: 0.085,
+      lineItems: [],
     });
 
     const result = await adapter.calculateTax({
@@ -49,7 +42,12 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should return taxAmount 0 when calculation fails', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: false,
+      subtotal: 0,
+      shippingAmount: 0,
       taxAmount: 0,
+      total: 0,
+      taxRate: 0,
+      lineItems: [],
     });
 
     const result = await adapter.calculateTax({
@@ -77,8 +75,19 @@ describe('TaxTaxQuoteAdapter', () => {
 
   it('should map tax settings to checkout vocabulary', async () => {
     taxSettingsRepo.findByMerchant.mockResolvedValue({
-      applyDiscountBeforeTax: true,
+      taxSettingsId: 'ts-1',
+      createdAt: '2024-01-01',
+      updatedAt: '2024-01-01',
+      organizationId: 'merchant-1',
+      calculationMethod: 'itemBased',
+      pricesIncludeTax: false,
+      displayPricesWithTax: false,
+      taxBasedOn: 'shippingAddress',
+      displayTaxTotals: 'itemized',
       applyTaxToShipping: false,
+      applyDiscountBeforeTax: true,
+      roundTaxAtSubtotal: false,
+      taxDecimalPlaces: 2,
     });
 
     const result = await adapter.getTaxSettings('merchant-1');

@@ -1,45 +1,44 @@
+import { createFaqSearchRepository } from '../../tests/testUtils';
 import { SearchFAQUseCase } from './SearchFAQ';
 
 describe('SearchFAQUseCase', () => {
   let useCase: SearchFAQUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let supportRepository: ReturnType<typeof createFaqSearchRepository>;
 
   beforeEach(() => {
-    mockRepo = {
-      searchFAQ: jest
-        .fn()
-        .mockResolvedValue([
-          { faqId: 'f1', question: 'How to return?', answer: 'Use the returns page.', categoryName: 'Returns', helpfulness: 10 },
-        ]),
-    };
-    useCase = new SearchFAQUseCase(mockRepo as never);
+    supportRepository = createFaqSearchRepository();
+    supportRepository.searchFAQ.mockResolvedValue([
+      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: 5 },
+    ]);
+    useCase = new SearchFAQUseCase(supportRepository);
   });
 
-  it('should search FAQ (happy path)', async () => {
-    const result = await useCase.execute({ query: 'return' });
+  it('should return mapped FAQ results when matches exist', async () => {
+    const result = await useCase.execute({ query: 'return order' });
 
-    expect(result.results).toHaveLength(1);
-    expect(result.results[0].faqId).toBe('f1');
+    expect(result.results).toEqual([
+      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: 5 },
+    ]);
     expect(result.total).toBe(1);
   });
 
-  it('should return empty results for query shorter than 2 chars', async () => {
+  it('should return empty results without searching when the query is shorter than 2 chars', async () => {
     const result = await useCase.execute({ query: 'a' });
 
-    expect(result.results).toHaveLength(0);
-    expect(result.total).toBe(0);
-    expect(mockRepo.searchFAQ).not.toHaveBeenCalled();
+    expect(result).toEqual({ results: [], total: 0 });
+    expect(supportRepository.searchFAQ).not.toHaveBeenCalled();
   });
 
-  it('should return empty results for empty query', async () => {
-    const result = await useCase.execute({ query: '' });
+  it('should return empty results without searching when the query is blank', async () => {
+    const result = await useCase.execute({ query: '   ' });
 
-    expect(result.results).toHaveLength(0);
+    expect(result).toEqual({ results: [], total: 0 });
+    expect(supportRepository.searchFAQ).not.toHaveBeenCalled();
   });
 
-  it('should pass categoryId and limit to repository', async () => {
-    await useCase.execute({ query: 'shipping', categoryId: 'cat-1', limit: 5 });
+  it('should pass the trimmed query, category, and limit to the repository', async () => {
+    await useCase.execute({ query: '  return  ', categoryId: 'cat-1', limit: 5 });
 
-    expect(mockRepo.searchFAQ).toHaveBeenCalledWith({ query: 'shipping', categoryId: 'cat-1', limit: 5 });
+    expect(supportRepository.searchFAQ).toHaveBeenCalledWith({ query: 'return', categoryId: 'cat-1', limit: 5 });
   });
 });

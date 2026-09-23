@@ -1,11 +1,9 @@
-jest.mock('../../../../libs/db', () => ({
-  query: jest.fn().mockResolvedValue([]),
-}));
-
+import { queryMock } from '../../tests/testUtils';
 import productSearchService from './ProductSearchService';
 
 describe('ProductSearchService', () => {
   beforeEach(() => {
+    queryMock.mockResolvedValue([]);
     jest.clearAllMocks();
   });
 

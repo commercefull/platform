@@ -14,76 +14,29 @@ import {
   PromotionValidationError,
 } from '../../domain/errors/PromotionErrors';
 
+import type {
+  GiftCardType,
+  GiftCardStatus,
+  DeliveryMethod,
+  TransactionType,
+  PromotionGiftCard,
+  PromotionGiftCardTransaction,
+} from '../../domain/repositories/GiftCardRepository';
+
+// Re-export domain types for backward compatibility
+export type {
+  GiftCardType,
+  GiftCardStatus,
+  DeliveryMethod,
+  TransactionType,
+  PromotionGiftCard,
+  PromotionGiftCardTransaction,
+};
+export type { GiftCard, GiftCardTransaction } from '../../domain/repositories/GiftCardRepository';
+
 // Table name constants
 const GIFT_CARD_TABLE = Table.PromotionGiftCard;
 const GIFT_CARD_TRANSACTION_TABLE = Table.PromotionGiftCardTransaction;
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export type GiftCardType = 'standard' | 'promotional' | 'reward' | 'refund';
-export type GiftCardStatus = 'pending' | 'active' | 'depleted' | 'expired' | 'cancelled' | 'suspended';
-export type DeliveryMethod = 'email' | 'sms' | 'print' | 'physical';
-export type TransactionType = 'purchase' | 'reload' | 'redemption' | 'refund' | 'adjustment' | 'expiration';
-
-export interface PromotionGiftCard {
-  promotionGiftCardId: string;
-  code: string;
-  type: GiftCardType;
-  initialBalance: number;
-  currentBalance: number;
-  currency: string;
-  status: GiftCardStatus;
-  purchasedBy?: string;
-  purchaseOrderId?: string;
-  recipientEmail?: string;
-  recipientName?: string;
-  personalMessage?: string;
-  deliveryDate?: Date;
-  isDelivered: boolean;
-  deliveredAt?: Date;
-  deliveryMethod: DeliveryMethod;
-  assignedTo?: string;
-  assignedAt?: Date;
-  activatedAt?: Date;
-  expiresAt?: Date;
-  lastUsedAt?: Date;
-  usageCount: number;
-  totalRedeemed: number;
-  isReloadable: boolean;
-  minReloadAmount?: number;
-  maxReloadAmount?: number;
-  maxBalance?: number;
-  restrictions?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Alias for backward compatibility
-export type GiftCard = PromotionGiftCard;
-
-export interface PromotionGiftCardTransaction {
-  promotionGiftCardTransactionId: string;
-  promotionGiftCardId: string;
-  type: TransactionType;
-  amount: number;
-  balanceBefore: number;
-  balanceAfter: number;
-  currency: string;
-  orderId?: string;
-  customerId?: string;
-  performedBy?: string;
-  performedByType?: string;
-  notes?: string;
-  referenceNumber?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-}
-
-// Alias for backward compatibility
-export type GiftCardTransaction = PromotionGiftCardTransaction;
 
 // ============================================================================
 // Gift Cards

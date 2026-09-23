@@ -17,24 +17,39 @@
  * See docs/e2e-rule-engine-implementation-plan.md §2 (Cross-Epic Testing Strategy).
  */
 
-jest.mock('../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock } from '../tests/testUtils';
+import {
+  createBasketSnapshotPort,
+  createTaxQuotePort,
+  createPromotionQuotePort,
+  createShippingQuotePort,
+  createDiscountQuotePort,
+  createOrderPlacementPort,
+  createPaymentAuthorizationPort,
+  createFraudScreeningPort,
+} from '../tests/testUtils';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand } from '../../../modules/checkout/application/useCases/InitiateCheckout';
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from '../../../modules/checkout/application/useCases/SetShippingAddress';
 import { ApplyCouponUseCase, ApplyCouponCommand } from '../../../modules/checkout/application/useCases/ApplyCoupon';
 import { SetShippingMethodUseCase, SetShippingMethodCommand } from '../../../modules/checkout/application/useCases/SetShippingMethod';
 import { CreatePaymentIntentUseCase, CreatePaymentIntentCommand } from '../../../modules/checkout/application/useCases/CreatePaymentIntent';
 import type { CheckoutSession } from '../../../modules/checkout/domain/entities/CheckoutSession';
+import type { CheckoutRepository, PaymentMethodData } from '../domain/repositories/CheckoutRepository';
+import type { BasketSnapshotPort } from './ports/BasketSnapshotPort';
+import type { TaxQuotePort } from './ports/TaxQuotePort';
+import type { PromotionQuotePort } from './ports/PromotionQuotePort';
+import type { ShippingQuotePort } from './ports/ShippingQuotePort';
+import type { DiscountQuotePort } from './ports/DiscountQuotePort';
+import type { OrderPlacementPort } from './ports/OrderPlacementPort';
+import type { PaymentAuthorizationPort } from './ports/PaymentAuthorizationPort';
+import type { FraudScreeningPort } from './ports/FraudScreeningPort';
 import { Money } from '../../../libs/money';
 
 // ============================================================================
 // In-memory checkout repository
 // ============================================================================
 
-class InMemoryCheckoutRepository {
+class InMemoryCheckoutRepository implements CheckoutRepository {
   private sessions = new Map<string, CheckoutSession>();
   private basketIndex = new Map<string, string>(); // basketId → checkoutId
 
@@ -76,7 +91,7 @@ class InMemoryCheckoutRepository {
     return [];
   }
 
-  async getAvailablePaymentMethods(): Promise<Array<{ id: string; name: string; type: string; isDefault: boolean }>> {
+  async getAvailablePaymentMethods(): Promise<PaymentMethodData[]> {
     return [{ id: 'pm_card_visa', name: 'Visa', type: 'credit_card', isDefault: true }];
   }
 
@@ -105,7 +120,8 @@ const BASKET_ITEMS = [
     sku: 'PHYS-SKU-1',
     name: 'T-Shirt',
     quantity: 2,
-    unitPrice: { amount: 50, currency: 'USD' },
+    unitPrice: Money.create(50, 'USD'),
+    itemType: 'physical',
     isDigital: false,
     taxCategoryId: 'physical-goods',
   },
@@ -115,7 +131,8 @@ const BASKET_ITEMS = [
     sku: 'DIG-SKU-1',
     name: 'E-Book',
     quantity: 1,
-    unitPrice: { amount: 20, currency: 'USD' },
+    unitPrice: Money.create(20, 'USD'),
+    itemType: 'digital',
     isDigital: true,
     taxCategoryId: 'digital-goods',
   },
@@ -146,91 +163,94 @@ const EXPECTED = {
 // Mock ports
 // ============================================================================
 
-function makeBasketPort() {
-  return {
-    getSnapshot: jest.fn().mockResolvedValue({
+function makeBasketPort(): jest.Mocked<BasketSnapshotPort> {
+  const port = createBasketSnapshotPort();
+  port.getSnapshot.mockResolvedValue({
+      basketId: 'basket-1',
+      isEmpty: false,
+      itemCount: 3,
+      uniqueItemCount: 2,
+      discountAmount: 0,
+      total: Money.create(120, 'USD'),
       items: BASKET_ITEMS,
       currency: 'USD',
       subtotal: Money.create(120, 'USD'),
-    }),
-  };
+    });
+  return port;
 }
 
-function makeTaxPort() {
-  return {
-    calculateTax: jest.fn().mockResolvedValue({
+function makeTaxPort(): jest.Mocked<TaxQuotePort> {
+  const port = createTaxQuotePort();
+  port.calculateTax.mockResolvedValue({
       success: true,
       taxAmount: EXPECTED.tax,
       breakdown: [
         { label: 'Physical Goods Tax (10%)', amount: 10 },
         { label: 'Digital Goods (exempt)', amount: 0 },
       ],
-    }),
-    getTaxSettings: jest.fn().mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: false }),
-  };
+    });
+  port.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: false });
+  return port;
 }
 
-function makePromotionPort() {
-  return {
-    evaluatePromotions: jest.fn().mockResolvedValue({
+function makePromotionPort(): jest.Mocked<PromotionQuotePort> {
+  const port = createPromotionQuotePort();
+  port.evaluatePromotions.mockResolvedValue({
       totalDiscountAmount: EXPECTED.discount,
       appliedPromotions: [
         { id: 'promo-1', name: '10% Off Cart Total', amount: 12 },
         { id: 'promo-2', name: '5% Off (Stackable)', amount: 6 },
       ],
-    }),
-  };
+    });
+  return port;
 }
 
-function makeShippingPort() {
-  return {
-    getShippingOptions: jest.fn().mockResolvedValue([
+function makeShippingPort(): jest.Mocked<ShippingQuotePort> {
+  const port = createShippingQuotePort();
+  port.getShippingOptions.mockResolvedValue([
       {
         methodId: 'standard',
         methodName: 'Standard Shipping',
         amount: 20, // base (15) + oversize surcharge (5)
         currency: 'USD',
-        breakdown: [
-          { label: 'Base Rate', amount: 15 },
-          { label: 'Oversize Surcharge', amount: 5 },
-        ],
       },
-    ]),
-  };
+    ]);
+  return port;
 }
 
-function makeDiscountPort() {
-  return {
-    validateDiscount: jest.fn().mockResolvedValue({
+function makeDiscountPort(): jest.Mocked<DiscountQuotePort> {
+  const port = createDiscountQuotePort();
+  port.validateDiscount.mockResolvedValue({
       valid: true,
-      discount: { discountAmount: EXPECTED.discount, type: 'percentage' },
-    }),
-  };
+      discount: { code: 'SAVE10', discountAmount: EXPECTED.discount },
+    });
+  return port;
 }
 
-function makeOrderPort() {
-  return {
-    createOrder: jest.fn().mockResolvedValue({ orderId: 'order-1', orderNumber: 'ORD-001' }),
-    findOrder: jest.fn().mockResolvedValue(null),
-    updateOrderStatus: jest.fn().mockResolvedValue(undefined),
-  };
+function makeOrderPort(): jest.Mocked<OrderPlacementPort> {
+  const port = createOrderPlacementPort();
+  port.createOrder.mockResolvedValue({ orderId: 'order-1', orderNumber: 'ORD-001', status: 'pending', paymentStatus: 'pending' });
+  port.findOrder.mockResolvedValue(null);
+  port.updateOrderStatus.mockResolvedValue(undefined);
+  port.cancelOrder.mockResolvedValue(undefined);
+  return port;
 }
 
-function makePaymentPort() {
-  return {
-    initiatePayment: jest.fn().mockResolvedValue({ transactionId: 'pi_test_123', clientSecret: 'secret_123' }),
-  };
+function makePaymentPort(): jest.Mocked<PaymentAuthorizationPort> {
+  const port = createPaymentAuthorizationPort();
+  port.initiatePayment.mockResolvedValue({ transactionId: 'pi_test_123', status: 'requires_confirmation' });
+  return port;
 }
 
-function makeFraudPort(decision: 'approved' | 'review' | 'blocked' = 'review') {
-  return {
-    screenOrder: jest.fn().mockResolvedValue({
+function makeFraudPort(decision: 'approved' | 'review' | 'blocked' = 'review'): jest.Mocked<FraudScreeningPort> {
+  const port = createFraudScreeningPort();
+  port.screenOrder.mockResolvedValue({
       decision,
       riskScore: decision === 'blocked' ? 100 : decision === 'review' ? 50 : 0,
       riskLevel: decision === 'blocked' ? 'critical' : decision === 'review' ? 'medium' : 'low',
       triggeredRules: decision === 'approved' ? [] : [{ ruleId: 'fraud-1', name: 'High Value First Order', action: decision }],
-    }),
-  };
+    });
+  return port;
 }
 
 // ============================================================================
@@ -249,6 +269,7 @@ describe('E2E Checkout Full Quote', () => {
   let fraudPort: ReturnType<typeof makeFraudPort>;
 
   beforeEach(() => {
+    emitMock.mockClear();
     checkoutRepo = new InMemoryCheckoutRepository();
     basketPort = makeBasketPort();
     taxPort = makeTaxPort();
@@ -262,7 +283,7 @@ describe('E2E Checkout Full Quote', () => {
 
   it('should drive a full checkout with stacked promos, tax exemption, shipping surcharge, and fraud review', async () => {
     // Step 1: Initiate checkout
-    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo as never, basketPort as never);
+    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo, basketPort);
     const initiateResult = await initiateUseCase.execute(new InitiateCheckoutCommand('basket-1', 'cust-1', undefined));
 
     expect(initiateResult.checkoutId).toBeDefined();
@@ -271,10 +292,10 @@ describe('E2E Checkout Full Quote', () => {
 
     // Step 2: Set shipping address (triggers tax + promo recalc)
     const setAddressUseCase = new SetShippingAddressUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      taxPort as never,
-      promotionPort as never,
+      checkoutRepo,
+      basketPort,
+      taxPort,
+      promotionPort,
     );
     const addressResult = await setAddressUseCase.execute(
       new SetShippingAddressCommand(checkoutId, 'John', 'Doe', '123 Main St', 'New York', '10001', 'US'),
@@ -296,14 +317,14 @@ describe('E2E Checkout Full Quote', () => {
     expect(promoCall.items).toHaveLength(2);
 
     // Step 3: Apply coupon
-    const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo as never, discountPort as never);
+    const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo, discountPort);
     const couponResult = await applyCouponUseCase.execute(new ApplyCouponCommand(checkoutId, 'SAVE18'));
 
     expect(couponResult.couponCode).toBe('SAVE18');
     expect(discountPort.validateDiscount).toHaveBeenCalledWith('SAVE18', expect.any(Number), 'USD');
 
     // Step 4: Set shipping method (with surcharge)
-    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo as never, shippingPort as never);
+    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     const shippingResult = await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
 
     expect(shippingResult.shippingMethodId).toBe('standard');
@@ -327,11 +348,11 @@ describe('E2E Checkout Full Quote', () => {
 
     // Step 6: Create payment intent (with fraud screening)
     const createPaymentUseCase = new CreatePaymentIntentUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      orderPort as never,
-      paymentPort as never,
-      fraudPort as never,
+      checkoutRepo,
+      basketPort,
+      orderPort,
+      paymentPort,
+      fraudPort,
     );
 
     const paymentResult = await createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-1'));
@@ -356,19 +377,19 @@ describe('E2E Checkout Full Quote', () => {
     fraudPort = makeFraudPort('blocked');
 
     // Initiate + set address + apply coupon + set shipping
-    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo as never, basketPort as never);
+    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo, basketPort);
     const initiateResult = await initiateUseCase.execute(new InitiateCheckoutCommand('basket-2', 'cust-2'));
     const checkoutId = initiateResult.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      taxPort as never,
-      promotionPort as never,
+      checkoutRepo,
+      basketPort,
+      taxPort,
+      promotionPort,
     );
     await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Jane', 'Smith', '456 Oak Ave', 'LA', '90001', 'US'));
 
-    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo as never, shippingPort as never);
+    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
 
     const session = await checkoutRepo.findById(checkoutId);
@@ -377,11 +398,11 @@ describe('E2E Checkout Full Quote', () => {
 
     // Create payment intent with blocked fraud verdict
     const createPaymentUseCase = new CreatePaymentIntentUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      orderPort as never,
-      paymentPort as never,
-      fraudPort as never,
+      checkoutRepo,
+      basketPort,
+      orderPort,
+      paymentPort,
+      fraudPort,
     );
 
     await expect(createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-2'))).rejects.toThrow(
@@ -398,19 +419,19 @@ describe('E2E Checkout Full Quote', () => {
   it('should proceed normally when fraud screening approves', async () => {
     fraudPort = makeFraudPort('approved');
 
-    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo as never, basketPort as never);
+    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo, basketPort);
     const initiateResult = await initiateUseCase.execute(new InitiateCheckoutCommand('basket-3', 'cust-3'));
     const checkoutId = initiateResult.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      taxPort as never,
-      promotionPort as never,
+      checkoutRepo,
+      basketPort,
+      taxPort,
+      promotionPort,
     );
     await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Bob', 'Jones', '789 Pine Rd', 'Chicago', '60601', 'US'));
 
-    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo as never, shippingPort as never);
+    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
 
     const session = await checkoutRepo.findById(checkoutId);
@@ -418,11 +439,11 @@ describe('E2E Checkout Full Quote', () => {
     await checkoutRepo.save(session!);
 
     const createPaymentUseCase = new CreatePaymentIntentUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      orderPort as never,
-      paymentPort as never,
-      fraudPort as never,
+      checkoutRepo,
+      basketPort,
+      orderPort,
+      paymentPort,
+      fraudPort,
     );
 
     const paymentResult = await createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-3'));
@@ -433,22 +454,22 @@ describe('E2E Checkout Full Quote', () => {
   });
 
   it('should compute correct itemized total matching hand-computed expectations', async () => {
-    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo as never, basketPort as never);
+    const initiateUseCase = new InitiateCheckoutUseCase(checkoutRepo, basketPort);
     const result = await initiateUseCase.execute(new InitiateCheckoutCommand('basket-4', 'cust-4'));
     const checkoutId = result.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(
-      checkoutRepo as never,
-      basketPort as never,
-      taxPort as never,
-      promotionPort as never,
+      checkoutRepo,
+      basketPort,
+      taxPort,
+      promotionPort,
     );
     await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Alice', 'Brown', '321 Elm St', 'Seattle', '98101', 'US'));
 
-    const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo as never, discountPort as never);
+    const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo, discountPort);
     await applyCouponUseCase.execute(new ApplyCouponCommand(checkoutId, 'SAVE18'));
 
-    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo as never, shippingPort as never);
+    const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
 
     const session = await checkoutRepo.findById(checkoutId);

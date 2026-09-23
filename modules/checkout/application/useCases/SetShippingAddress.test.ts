@@ -1,78 +1,81 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import {
+  createBasketSnapshot,
+  createCheckoutRepository,
+  createCheckoutSession,
+  createBasketSnapshotPort,
+  createTaxQuotePort,
+  emitMock,
+} from '../../tests/testUtils';
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from './SetShippingAddress';
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+const command = () => new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US');
 
 describe('SetShippingAddressUseCase', () => {
   let useCase: SetShippingAddressUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockSession: Record<string, unknown>;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
 
   beforeEach(() => {
-    mockSession = {
-      id: 'ck-1',
-      basketId: 'b1',
-      customerId: 'c1',
-      guestEmail: undefined,
-      status: 'pending',
-      paymentStatus: 'pending',
-      shippingAddress: null,
-      billingAddress: null,
-      shippingMethodId: undefined,
-      shippingMethodName: undefined,
-      paymentMethodId: undefined,
-      subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' },
-      shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' },
-      total: { amount: 100, currency: 'USD' },
-      couponCode: undefined,
-      fulfillmentType: 'shipping',
-      notes: undefined,
-      sameAsShipping: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      expiresAt: new Date(),
-      setShippingAddress: jest.fn(),
-      updateAmounts: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockSession),
-      validateShippingAddress: jest.fn().mockResolvedValue({ valid: true, errors: [] }),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new SetShippingAddressUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession());
+    checkoutRepository.validateShippingAddress.mockResolvedValue({ valid: true, errors: [] });
+    useCase = new SetShippingAddressUseCase(checkoutRepository);
   });
 
-  it('should set shipping address (happy path)', async () => {
-    const result = await useCase.execute(new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US'));
+  it('should set the shipping address, persist the session, and emit checkout.updated when the address validates', async () => {
+    const result = await useCase.execute(command());
 
     expect(result.checkoutId).toBe('ck-1');
-    expect(mockSession.setShippingAddress).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1' }));
+    expect(result.shippingAddress?.city).toBe('NYC');
+    expect(result.shippingAddress?.country).toBe('US');
+    expect(checkoutRepository.save).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'shippingAddress', country: 'US', postalCode: '10001' }),
+    );
   });
 
-  it('should throw NotFoundError when session not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw NotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.execute(new SetShippingAddressCommand('missing', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US')),
-    ).rejects.toThrow(NotFoundError);
+    await expect(useCase.execute(command())).rejects.toThrow(NotFoundError);
+    expect(checkoutRepository.validateShippingAddress).not.toHaveBeenCalled();
   });
 
   it('should throw BadRequestError when address validation fails', async () => {
-    mockRepo.validateShippingAddress.mockResolvedValue({ valid: false, errors: ['Invalid postal code'] });
+    checkoutRepository.validateShippingAddress.mockResolvedValue({ valid: false, errors: ['Invalid postal code'] });
 
-    await expect(useCase.execute(new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', 'bad', 'US'))).rejects.toThrow(
-      BadRequestError,
+    await expect(useCase.execute(command())).rejects.toThrow(BadRequestError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it('should recalculate tax through the tax quote port when configured', async () => {
+    const basketSnapshotPort = createBasketSnapshotPort();
+    basketSnapshotPort.getSnapshot.mockResolvedValue(createBasketSnapshot());
+    const taxQuotePort = createTaxQuotePort();
+    taxQuotePort.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: true });
+    taxQuotePort.calculateTax.mockResolvedValue({ success: true, taxAmount: 8.5, breakdown: [] });
+    useCase = new SetShippingAddressUseCase(checkoutRepository, basketSnapshotPort, taxQuotePort);
+
+    const result = await useCase.execute(command());
+
+    expect(result.taxAmount).toBe(8.5);
+    expect(taxQuotePort.calculateTax).toHaveBeenCalledWith(
+      expect.objectContaining({ shippingAddress: expect.objectContaining({ country: 'US' }) }),
     );
+  });
+
+  it('should fall back to zero tax when the tax quote fails', async () => {
+    const taxQuotePort = createTaxQuotePort();
+    taxQuotePort.getTaxSettings.mockRejectedValue(new Error('tax service down'));
+    taxQuotePort.calculateTax.mockRejectedValue(new Error('tax service down'));
+    useCase = new SetShippingAddressUseCase(checkoutRepository, undefined, taxQuotePort);
+
+    const result = await useCase.execute(command());
+
+    expect(result.taxAmount).toBe(0);
+    expect(checkoutRepository.save).toHaveBeenCalled();
   });
 });

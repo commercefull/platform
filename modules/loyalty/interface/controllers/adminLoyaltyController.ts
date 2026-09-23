@@ -5,10 +5,8 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageLoyaltyAdminUseCase } from '../../application/useCases/ManageLoyalty';
+import { manageLoyaltyAdminUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageLoyaltyAdminUseCase = new ManageLoyaltyAdminUseCase();
 
 // ============================================================================
 // Loyalty Tiers Management

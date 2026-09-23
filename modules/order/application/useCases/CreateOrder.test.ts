@@ -1,21 +1,13 @@
-jest.mock('../../../../libs/uuid', () => ({
-  generateUUID: jest.fn().mockReturnValue('order-uuid-1'),
-}));
-
-jest.mock('../../../../libs/db', () => ({
-  withTransaction: jest.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
-    return fn({});
-  }),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn().mockResolvedValue(undefined) },
-}));
-
+import { emitMock } from '../../tests/testUtils';
 import { CreateOrderUseCase, CreateOrderCommand } from './CreateOrder';
-import { OrderMustContainItemsError, CustomerEmailRequiredError } from '../../domain/errors/OrderErrors';
+import { OrderMustContainItemsError, CustomerEmailRequiredError, ShippingAddressRequiredError } from '../../domain/errors/OrderErrors';
+import type { OrderRepository } from '../../domain/repositories/OrderRepository';
+import type { Order } from '../../domain/entities/Order';
+import type { AddressInput } from './CreateOrder';
 
-const mockOrderRepository = {
+const mockOrderRepository: jest.Mocked<
+  Pick<OrderRepository, 'save' | 'recordStatusChange' | 'recordPaymentStatusChange' | 'recordFulfillmentStatusChange'>
+> = {
   save: jest.fn().mockResolvedValue({
     orderId: 'o1',
     orderNumber: 'ORD-001',
@@ -38,7 +30,7 @@ const mockOrderRepository = {
     currencyCode: 'USD',
     items: [],
     createdAt: new Date('2026-01-01'),
-  }),
+  } as unknown as Order),
   recordStatusChange: jest.fn().mockResolvedValue(undefined),
   recordPaymentStatusChange: jest.fn().mockResolvedValue(undefined),
   recordFulfillmentStatusChange: jest.fn().mockResolvedValue(undefined),
@@ -49,7 +41,7 @@ describe('CreateOrderUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new CreateOrderUseCase(mockOrderRepository as never);
+    useCase = new CreateOrderUseCase(mockOrderRepository as unknown as OrderRepository);
   });
 
   it('should create order (happy path)', async () => {
@@ -68,6 +60,7 @@ describe('CreateOrderUseCase', () => {
 
     expect(result.orderId).toBe('o1');
     expect(result.orderNumber).toBe('ORD-001');
+    expect(emitMock).toHaveBeenCalledWith('order.created', expect.objectContaining({ orderId: 'o1', orderNumber: 'ORD-001' }));
   });
 
   it('should throw OrderMustContainItemsError for empty items', async () => {
@@ -102,5 +95,13 @@ describe('CreateOrderUseCase', () => {
         }),
       ),
     ).rejects.toThrow(CustomerEmailRequiredError);
+  });
+
+  it('should throw ShippingAddressRequiredError when address is missing', async () => {
+    await expect(
+      useCase.execute(
+        new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPrice: 50 }], undefined as unknown as AddressInput),
+      ),
+    ).rejects.toThrow(ShippingAddressRequiredError);
   });
 });

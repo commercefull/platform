@@ -7,9 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentBalance } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 
 // ============================================================================
 // Command
@@ -44,7 +42,7 @@ export interface GetPaymentBalanceResponse {
 // ============================================================================
 
 export class GetPaymentBalanceUseCase {
-  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository) {}
 
   async execute(command: GetPaymentBalanceCommand): Promise<GetPaymentBalanceResponse> {
     const balances = await this.repo.findBalancesByMerchant(command.organizationId);

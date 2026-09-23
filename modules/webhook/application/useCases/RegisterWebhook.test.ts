@@ -1,55 +1,59 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('uuid-mock'),
-}));
-
-import { RegisterWebhookUseCase, RegisterWebhookInput } from './RegisterWebhook';
+import { createWebhookRepository } from '../../tests/testUtils';
+import { RegisterWebhookUseCase } from './RegisterWebhook';
 import { WebhookValidationError } from '../../domain/errors/WebhookErrors';
 
 describe('RegisterWebhookUseCase', () => {
-  let useCase: RegisterWebhookUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should register the endpoint when the input is valid', async () => {
+    const repository = createWebhookRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      createEndpoint: jest.fn().mockResolvedValue({
-        webhookEndpointId: 'wh-1',
-        name: 'Test',
-        url: 'https://example.com/hook',
-        secret: 'secret-123',
-        events: ['product.created'],
-        isActive: true,
-        headers: {},
-        retryPolicy: {},
-      }),
-    };
-    useCase = new RegisterWebhookUseCase(mockRepo as never);
-  });
-
-  it('should register a webhook successfully', async () => {
-    const input: RegisterWebhookInput = {
+    const result = await new RegisterWebhookUseCase(repository).execute({
       name: 'Test',
       url: 'https://example.com/hook',
       events: ['product.created'],
-    };
+    });
 
-    const result = await useCase.execute(input);
-
-    expect(result.webhookEndpointId).toBe('wh-1');
+    expect(result.webhookEndpointId).toBe('test-uuid');
     expect(result.secret).toBeTruthy();
-    expect(result.endpoint).toBeDefined();
-    expect(mockRepo.createEndpoint).toHaveBeenCalled();
+    expect(result.endpoint).toMatchObject({ name: 'Test', url: 'https://example.com/hook', isActive: true });
+    expect(repository.createEndpoint).toHaveBeenCalledWith(
+      expect.objectContaining({ webhookEndpointId: 'test-uuid', url: 'https://example.com/hook', events: ['product.created'] }),
+    );
   });
 
-  it('should throw WebhookValidationError for invalid URL', async () => {
-    await expect(useCase.execute({ name: 'T', url: 'ftp://bad', events: ['e'] })).rejects.toThrow(WebhookValidationError);
+  it('should generate a secret for the endpoint when registering', async () => {
+    const result = await new RegisterWebhookUseCase(createWebhookRepository()).execute({
+      name: 'Test',
+      url: 'https://example.com/hook',
+      events: ['e'],
+    });
+
+    expect(result.secret).toHaveLength(64);
   });
 
-  it('should throw WebhookValidationError when no events specified', async () => {
-    await expect(useCase.execute({ name: 'T', url: 'https://ok.com', events: [] })).rejects.toThrow(WebhookValidationError);
+  it('should throw WebhookValidationError when the url is not http', async () => {
+    const repository = createWebhookRepository();
+
+    await expect(
+      new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'ftp://bad', events: ['e'] }),
+    ).rejects.toThrow(WebhookValidationError);
+    expect(repository.createEndpoint).not.toHaveBeenCalled();
   });
 
-  it('should throw WebhookValidationError when name missing', async () => {
-    await expect(useCase.execute({ name: '', url: 'https://ok.com', events: ['e'] })).rejects.toThrow(WebhookValidationError);
+  it('should throw WebhookValidationError when no events are specified', async () => {
+    const repository = createWebhookRepository();
+
+    await expect(
+      new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'https://ok.com', events: [] }),
+    ).rejects.toThrow(WebhookValidationError);
+    expect(repository.createEndpoint).not.toHaveBeenCalled();
+  });
+
+  it('should throw WebhookValidationError when the name is missing', async () => {
+    const repository = createWebhookRepository();
+
+    await expect(
+      new RegisterWebhookUseCase(repository).execute({ name: '', url: 'https://ok.com', events: ['e'] }),
+    ).rejects.toThrow(WebhookValidationError);
+    expect(repository.createEndpoint).not.toHaveBeenCalled();
   });
 });

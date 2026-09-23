@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { ShippingShippingQuoteAdapter } from './ShippingShippingQuoteAdapter';
+import type { CalculateShippingRatesUseCase } from '../../../shipping/application/useCases/CalculateShippingRates';
 
 describe('ShippingShippingQuoteAdapter', () => {
-  let adapter: import('./ShippingShippingQuoteAdapter').ShippingShippingQuoteAdapter;
-  let mockShippingUseCase: { execute: jest.Mock };
+  let adapter: ShippingShippingQuoteAdapter;
+  let mockShippingUseCase: jest.Mocked<Pick<CalculateShippingRatesUseCase, 'execute'>>;
 
   beforeEach(() => {
     mockShippingUseCase = {
       execute: jest.fn(),
     };
-    const { ShippingShippingQuoteAdapter } = require('./ShippingShippingQuoteAdapter');
-    adapter = new ShippingShippingQuoteAdapter(mockShippingUseCase as never);
+    adapter = new ShippingShippingQuoteAdapter(mockShippingUseCase as unknown as CalculateShippingRatesUseCase);
   });
 
   it('implements ShippingQuotePort', () => {
@@ -17,7 +17,6 @@ describe('ShippingShippingQuoteAdapter', () => {
   });
 
   it('should return empty array when use case is not provided', async () => {
-    const { ShippingShippingQuoteAdapter } = require('./ShippingShippingQuoteAdapter');
     const noUseCaseAdapter = new ShippingShippingQuoteAdapter(undefined);
     const result = await noUseCaseAdapter.getShippingOptions({
       basketId: 'basket-1',
@@ -65,7 +64,7 @@ describe('ShippingShippingQuoteAdapter', () => {
   it('should return empty array when shipping calculation fails', async () => {
     mockShippingUseCase.execute.mockResolvedValue({
       success: false,
-      rates: null,
+      rates: [],
     });
 
     const result = await adapter.getShippingOptions({

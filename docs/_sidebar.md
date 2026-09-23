@@ -52,7 +52,6 @@
   - [B2b](modules/b2b.md)
   - [Basket](modules/basket.md)
   - [Checkout](modules/checkout.md)
-  - [Compliance](modules/compliance.md)
   - [Configuration](modules/configuration.md)
   - [Content](modules/content.md)
   - [Coupon](modules/coupon.md)

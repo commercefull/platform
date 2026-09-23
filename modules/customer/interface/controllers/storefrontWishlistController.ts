@@ -5,9 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { ManageStorefrontWishlistUseCase } from '../../application/useCases/ManageStorefrontWishlist';
-
-const manageWishlistUseCase = new ManageStorefrontWishlistUseCase();
+import { manageStorefrontWishlistUseCase as manageWishlistUseCase } from '../../application/useCases/wired';
 
 interface CustomerUser {
   id: string;

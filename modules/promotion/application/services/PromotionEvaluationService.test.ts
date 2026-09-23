@@ -1,20 +1,20 @@
-jest.mock('../../infrastructure/repositories/PromotionRuleRepository', () => ({
-  __esModule: true,
-  default: {
-    promotions: {
-      findActive: jest.fn(),
-      findRulesByPromotionId: jest.fn(),
-      findActionsByPromotionId: jest.fn(),
-    },
-  },
-}));
-
 jest.mock('../../../../libs/logger', () => ({
   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
 }));
 
-import promotionRuleRepository from '../../infrastructure/repositories/PromotionRuleRepository';
+import {
+  lazyMock,
+  createPromotion,
+  createPromotionRule,
+  createPromotionAction,
+} from '../../tests/testUtils';
+import type { PromotionRepository } from '../../domain/repositories/PromotionRepository';
 import { PromotionEvaluationService, PromotionEvaluationContext } from './PromotionEvaluationService';
+
+type PromotionsPort = Pick<
+  PromotionRepository,
+  'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'
+>;
 
 const baseContext: PromotionEvaluationContext = {
   items: [
@@ -26,7 +26,7 @@ const baseContext: PromotionEvaluationContext = {
   currency: 'USD',
 };
 
-const activePromotion = {
+const activePromotion = createPromotion({
   promotionId: 'promo1',
   name: '20% Off',
   scope: 'cart',
@@ -38,29 +38,31 @@ const activePromotion = {
   maxUsage: null,
   minOrderAmount: null,
   maxDiscountAmount: null,
-  code: null,
-};
+  stackability: undefined,
+});
 
 describe('PromotionEvaluationService', () => {
   let service: PromotionEvaluationService;
+  let promotionsRepo: jest.Mocked<PromotionsPort>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PromotionEvaluationService();
+    promotionsRepo = lazyMock<PromotionsPort>();
+    service = new PromotionEvaluationService(promotionsRepo);
   });
 
   it('should return empty result when no active promotions', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([]);
     const result = await service.evaluate(baseContext);
     expect(result.totalDiscountAmount).toBe(0);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
   it('should apply percentage discount on cart subtotal', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 20, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 20, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -69,10 +71,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should apply fixed amount discount', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByAmount', value: 25, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByAmount', value: 25, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -80,10 +82,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should cap fixed discount at subtotal', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByAmount', value: 500, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByAmount', value: 500, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -91,10 +93,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should apply line-item percentage discount for specific products', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 50, targetIds: ['p1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 50, targetIds: ['p1'] }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -103,10 +105,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should apply line-item fixed discount for specific products', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByAmount', value: 30, targetIds: ['p1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByAmount', value: 30, targetIds: ['p1'] }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -115,10 +117,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should cap line-item fixed discount at item total', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByAmount', value: 500, targetIds: ['p1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByAmount', value: 500, targetIds: ['p1'] }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -126,11 +128,11 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should apply shipping discount alongside cart discount', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
-      { actionType: 'discountShipping', value: 10, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
+      createPromotionAction({ actionType: 'discountShipping', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -139,11 +141,11 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should cap shipping discount at shipping amount', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
-      { actionType: 'discountShipping', value: 50, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
+      createPromotionAction({ actionType: 'discountShipping', value: 50, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -151,10 +153,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should add free items', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'freeItem', value: 'p3', targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'freeItem', value: 'p3', targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -163,9 +165,9 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should set freeShipping for shipping scope', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, scope: 'shipping' }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, scope: 'shipping' }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
     const result = await service.evaluate(baseContext);
     expect(result.freeShipping).toBe(true);
@@ -174,10 +176,10 @@ describe('PromotionEvaluationService', () => {
   it('should apply coupon code promotions first', async () => {
     const couponPromo = { ...activePromotion, promotionId: 'coupon1', name: 'SAVE10', code: 'SAVE10', priority: 5 };
     const autoPromo = { ...activePromotion, promotionId: 'auto1', name: 'Auto 5%', priority: 1 };
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([couponPromo, autoPromo]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([couponPromo, autoPromo]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate({ ...baseContext, couponCode: 'save10' });
@@ -188,10 +190,10 @@ describe('PromotionEvaluationService', () => {
   it('should stop after exclusive promotion', async () => {
     const exclusivePromo = { ...activePromotion, isExclusive: true, priority: 10 };
     const otherPromo = { ...activePromotion, promotionId: 'promo2', priority: 5 };
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([exclusivePromo, otherPromo]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 20, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([exclusivePromo, otherPromo]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 20, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -199,48 +201,48 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should skip inactive promotions', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, isActive: false }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, isActive: false }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
     const result = await service.evaluate(baseContext);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
   it('should skip promotions with status != active', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, status: 'paused' }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, status: 'paused' }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
     const result = await service.evaluate(baseContext);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
   it('should skip promotions at max usage', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, maxUsage: 5, usageCount: 5 }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, maxUsage: 5, usageCount: 5 }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
     const result = await service.evaluate(baseContext);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
   it('should skip promotions below minOrderAmount', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, minOrderAmount: 500 }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, minOrderAmount: '500' }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
     const result = await service.evaluate(baseContext);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
   it('should evaluate cartTotal rule with >= operator', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'cartTotal', operator: '>=', value: 150 },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 150 }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -248,12 +250,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should fail cartTotal rule when below threshold', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'cartTotal', operator: '>=', value: 500 },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 500 }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -261,12 +263,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate itemQuantity rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'itemQuantity', operator: '>=', value: 3 },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'itemQuantity', operator: '>=', value: 3 }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -274,12 +276,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate productCategory rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'productCategory', operator: '=', value: ['cat1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'productCategory', operator: '=', value: ['cat1'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -287,12 +289,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should fail productCategory rule when no match', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'productCategory', operator: '=', value: ['cat99'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'productCategory', operator: '=', value: ['cat99'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -300,12 +302,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate customerGroup rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'customerGroup', operator: '=', value: ['vip'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'customerGroup', operator: '=', value: ['vip'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate({ ...baseContext, customerGroup: 'vip' });
@@ -313,12 +315,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should fail customerGroup rule when no group', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'customerGroup', operator: '=', value: ['vip'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'customerGroup', operator: '=', value: ['vip'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -326,12 +328,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate firstOrder rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'firstOrder', operator: '=', value: true },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'firstOrder', operator: '=', value: true }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate({ ...baseContext, isFirstOrder: true });
@@ -339,12 +341,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate shippingMethod rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'shippingMethod', operator: '=', value: ['sm1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'shippingMethod', operator: '=', value: ['sm1'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate({ ...baseContext, shippingMethodId: 'sm1' });
@@ -352,12 +354,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate paymentMethod rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'paymentMethod', operator: '=', value: ['pm1'] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'paymentMethod', operator: '=', value: ['pm1'] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate({ ...baseContext, paymentMethodId: 'pm1' });
@@ -366,12 +368,12 @@ describe('PromotionEvaluationService', () => {
 
   it('should evaluate dateRange rule', async () => {
     const now = new Date();
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'dateRange', operator: '=', value: { start: now.toISOString(), end: new Date(now.getTime() + 86400000).toISOString() } },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'dateRange', operator: '=', value: { start: now.toISOString(), end: new Date(now.getTime() + 86400000).toISOString() } }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -379,12 +381,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate dayOfWeek rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'dayOfWeek', operator: '=', value: [new Date().getDay()] },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'dayOfWeek', operator: '=', value: [new Date().getDay()] }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -392,12 +394,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should evaluate timeOfDay rule', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'timeOfDay', operator: '=', value: { startHour: 0, endHour: 24 } },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'timeOfDay', operator: '=', value: { startHour: 0, endHour: 24 } }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -405,10 +407,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should cap total discount at maxDiscountAmount', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([{ ...activePromotion, maxDiscountAmount: 30 }]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 50, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, maxDiscountAmount: '30' }]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 50, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -416,10 +418,10 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should cap total discount at subtotal', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 200, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 200, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -427,16 +429,16 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should handle errors gracefully', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockRejectedValue(new Error('DB error'));
+    promotionsRepo.findActive.mockRejectedValue(new Error('DB error'));
     const result = await service.evaluate(baseContext);
     expect(result.totalDiscountAmount).toBe(0);
   });
 
   it('should pass when no rules (always applicable)', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -444,12 +446,12 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should compare with > operator', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-    (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([
-      { condition: 'cartTotal', operator: '>', value: 150 },
+    promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
+      createPromotionRule({ condition: 'cartTotal', operator: '>', value: 150 }),
     ]);
-    (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-      { actionType: 'discountByPercentage', value: 10, targetIds: null },
+    promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+      createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
@@ -457,7 +459,7 @@ describe('PromotionEvaluationService', () => {
   });
 
   it('should handle empty items', async () => {
-    (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([]);
+    promotionsRepo.findActive.mockResolvedValue([]);
     const result = await service.evaluate({ items: [], subtotal: 0, shippingAmount: 0, currency: 'USD' });
     expect(result.totalDiscountAmount).toBe(0);
   });
@@ -470,10 +472,10 @@ describe('PromotionEvaluationService', () => {
     it('should apply two stackable promotions and sum discounts', async () => {
       const promoA = { ...activePromotion, promotionId: 'a', stackability: 'stackable' as const, priority: 10 };
       const promoB = { ...activePromotion, promotionId: 'b', stackability: 'stackable' as const, priority: 5 };
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([promoA, promoB]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'discountByPercentage', value: 10, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([promoA, promoB]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -484,10 +486,10 @@ describe('PromotionEvaluationService', () => {
     it('should block later stackable promotion when exclusive applies (via stackability field)', async () => {
       const exclusivePromo = { ...activePromotion, promotionId: 'exc', stackability: 'exclusive' as const, priority: 10 };
       const stackablePromo = { ...activePromotion, promotionId: 'stk', stackability: 'stackable' as const, priority: 5 };
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([exclusivePromo, stackablePromo]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'discountByPercentage', value: 20, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([exclusivePromo, stackablePromo]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'discountByPercentage', value: 20, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -498,10 +500,10 @@ describe('PromotionEvaluationService', () => {
     it('should drop none-stacked promotion when stackable present', async () => {
       const nonePromo = { ...activePromotion, promotionId: 'none', stackability: 'none' as const, priority: 10 };
       const stackablePromo = { ...activePromotion, promotionId: 'stk', stackability: 'stackable' as const, priority: 5 };
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([nonePromo, stackablePromo]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'discountByPercentage', value: 10, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([nonePromo, stackablePromo]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -510,12 +512,12 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should fall back to isExclusive when stackability is missing (backward compat)', async () => {
-      const exclusivePromo = { ...activePromotion, isExclusive: true, stackability: undefined, priority: 10 };
-      const stackablePromo = { ...activePromotion, promotionId: 'stk', isExclusive: false, stackability: undefined, priority: 5 };
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([exclusivePromo, stackablePromo]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'discountByPercentage', value: 20, targetIds: null },
+      const exclusivePromo = createPromotion({ ...activePromotion, isExclusive: true, stackability: undefined, priority: 10 });
+      const stackablePromo = createPromotion({ ...activePromotion, promotionId: 'stk', isExclusive: false, stackability: undefined, priority: 5 });
+      promotionsRepo.findActive.mockResolvedValue([exclusivePromo, stackablePromo]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'discountByPercentage', value: 20, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -526,10 +528,10 @@ describe('PromotionEvaluationService', () => {
 
   describe('Epic C — discountByTier action', () => {
     it('should pick the correct tier by quantity', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        {
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({
           actionType: 'discountByTier',
           value: [
             { min: 1, max: 2, percentage: 5 },
@@ -537,7 +539,7 @@ describe('PromotionEvaluationService', () => {
             { min: 6, percentage: 15 },
           ],
           targetIds: null,
-        },
+        }),
       ]);
 
       // baseContext has 3 items (qty 2 + 1 = 3 total) → tier 2 (10%)
@@ -546,17 +548,17 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should pick the correct tier at boundary quantity', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        {
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({
           actionType: 'discountByTier',
           value: [
             { min: 1, max: 2, percentage: 5 },
             { min: 3, max: 5, percentage: 10 },
           ],
           targetIds: null,
-        },
+        }),
       ]);
 
       // 3 items total → boundary at min=3 → tier 2 (10%)
@@ -565,17 +567,17 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should fall back to subtotal-based tiering when quantity tier does not match', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        {
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({
           actionType: 'discountByTier',
           value: [
             { min: 100, max: 199, percentage: 5 },
             { min: 200, percentage: 15 },
           ],
           targetIds: null,
-        },
+        }),
       ]);
 
       // qty=3 doesn't match any quantity tier (max is 199), subtotal=200 matches tier 2
@@ -584,14 +586,14 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should apply tiered amount discount', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        {
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({
           actionType: 'discountByTier',
           value: [{ min: 1, amount: 30 }],
           targetIds: null,
-        },
+        }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -599,10 +601,10 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should handle empty tiers array gracefully', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'discountByTier', value: [], targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'discountByTier', value: [], targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -612,10 +614,10 @@ describe('PromotionEvaluationService', () => {
 
   describe('Epic C — freeGift action', () => {
     it('should add free gift when no eligibility conditions', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'freeGift', value: { productId: 'gift1', quantity: 2 }, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', quantity: 2 }, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext);
@@ -625,10 +627,10 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should not add free gift when minCartTotal not met', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 500 }, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 500 }, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext); // subtotal 200 < 500
@@ -636,10 +638,10 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should not add free gift when minQuantity not met', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'freeGift', value: { productId: 'gift1', minQuantity: 10 }, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minQuantity: 10 }, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext); // qty 3 < 10
@@ -647,10 +649,10 @@ describe('PromotionEvaluationService', () => {
     });
 
     it('should add free gift when eligibility conditions met', async () => {
-      (promotionRuleRepository.promotions.findActive as jest.Mock).mockResolvedValue([activePromotion]);
-      (promotionRuleRepository.promotions.findRulesByPromotionId as jest.Mock).mockResolvedValue([]);
-      (promotionRuleRepository.promotions.findActionsByPromotionId as jest.Mock).mockResolvedValue([
-        { actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 100, minQuantity: 2 }, targetIds: null },
+      promotionsRepo.findActive.mockResolvedValue([activePromotion]);
+      promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
+      promotionsRepo.findActionsByPromotionId.mockResolvedValue([
+        createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 100, minQuantity: 2 }, targetIds: null }),
       ]);
 
       const result = await service.evaluate(baseContext); // subtotal 200 >= 100, qty 3 >= 2

@@ -1,76 +1,39 @@
-jest.mock('../../infrastructure/repositories/IdentityDataRepository', () => ({
-  __esModule: true,
-  default: {
-    users: {
-      findAdminByEmail: jest.fn().mockResolvedValue({ adminId: 'a1', email: 'admin@test.com' }),
-      updateAdminLastLogin: jest.fn().mockResolvedValue(undefined),
-      findStoreUsersByUserId: jest.fn().mockResolvedValue([{ storeId: 's1', role: 'admin' }]),
-    },
-  },
-}));
-
-jest.mock('../../../analytics/infrastructure/repositories/DashboardQueryRepository', () => ({
-  __esModule: true,
-  default: {
-    getAdminDashboardStats: jest.fn().mockResolvedValue({ totalOrders: 100, totalRevenue: 5000 }),
-    getRecentOrders: jest.fn().mockResolvedValue([{ orderId: 'o1' }]),
-    getTopProducts: jest.fn().mockResolvedValue([{ productId: 'p1' }]),
-    getRevenueByDay: jest.fn().mockResolvedValue([{ date: '2024-01-01', revenue: 500 }]),
-  },
-}));
-
-import { AdminAuthUseCase, GetDashboardDataUseCase } from './AdminAuth';
-import identityDataRepository from '../../infrastructure/repositories/IdentityDataRepository';
-import dashboardQueryRepository from '../../../analytics/infrastructure/repositories/DashboardQueryRepository';
-
-const mockIdentityRepo = identityDataRepository as unknown as { users: Record<string, jest.Mock> };
-const mockDashboardRepo = dashboardQueryRepository as unknown as Record<string, jest.Mock>;
+import { lazyMock, createAdminUser, createUserStoreAssignment } from '../../tests/testUtils';
+import { AdminAuthUseCase } from './AdminAuth';
+import type { AdminAuthPort } from '../../domain/repositories/AdminIdentityPorts';
 
 describe('AdminAuthUseCase', () => {
   let useCase: AdminAuthUseCase;
+  let identityRepo: jest.Mocked<AdminAuthPort>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new AdminAuthUseCase();
+    jest.resetAllMocks();
+    identityRepo = lazyMock<AdminAuthPort>();
+    useCase = new AdminAuthUseCase(identityRepo);
   });
 
-  it('should find by email', async () => {
+  it('should find an admin by email', async () => {
+    identityRepo.findAdminByEmail.mockResolvedValue(createAdminUser({ adminId: 'a1' }));
+
     const result = await useCase.findByEmail('admin@test.com');
-    expect(result).toEqual({ adminId: 'a1', email: 'admin@test.com' });
+
+    expect(result?.adminId).toBe('a1');
+    expect(identityRepo.findAdminByEmail).toHaveBeenCalledWith('admin@test.com');
   });
 
-  it('should update last login', async () => {
+  it('should update the last login timestamp', async () => {
     await useCase.updateLastLogin('a1');
-    expect(mockIdentityRepo.users.updateAdminLastLogin).toHaveBeenCalledWith('a1');
+
+    expect(identityRepo.updateAdminLastLogin).toHaveBeenCalledWith('a1');
   });
 
-  it('should find store assignments', async () => {
+  it('should return store assignments for a user', async () => {
+    identityRepo.findStoreUsersByUserId.mockResolvedValue([createUserStoreAssignment({ userId: 'u1' })]);
+
     const result = await useCase.findStoreAssignmentsByUserId('u1');
+
     expect(result).toHaveLength(1);
+    expect(result[0].storeId).toBe('store-1');
   });
 });
 
-describe('GetDashboardDataUseCase', () => {
-  let useCase: GetDashboardDataUseCase;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetDashboardDataUseCase();
-  });
-
-  it('should get admin dashboard stats', async () => {
-    const result = await useCase.getAdminDashboardStats();
-    expect(result.totalOrders).toBe(100);
-  });
-
-  it('should get recent orders', async () => {
-    const result = await useCase.getRecentOrders(5);
-    expect(result).toHaveLength(1);
-    expect(mockDashboardRepo.getRecentOrders).toHaveBeenCalledWith(5);
-  });
-
-  it('should get revenue by day', async () => {
-    const result = await useCase.getRevenueByDay(30);
-    expect(result).toHaveLength(1);
-  });
-});

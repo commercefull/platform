@@ -8,7 +8,7 @@ import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
-import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
+import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 
@@ -39,6 +39,10 @@ export class AddItemUseCase {
   constructor(private readonly basketRepository: BasketRepository) {}
 
   async execute(command: AddItemCommand): Promise<BasketResponse> {
+    if (command.quantity < 1) {
+      throw new BasketValidationError('Quantity must be at least 1');
+    }
+
     const basket = await this.basketRepository.findById(command.basketId);
     if (!basket) {
       throw new BasketNotFoundError(command.basketId);
@@ -76,7 +80,10 @@ export class AddItemUseCase {
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
-    return this.mapToResponse(updatedBasket!);
+    if (!updatedBasket) {
+      throw new BasketNotFoundError(command.basketId);
+    }
+    return this.mapToResponse(updatedBasket);
   }
 
   private mapToResponse(basket: Basket): BasketResponse {

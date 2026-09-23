@@ -48,7 +48,7 @@ function createMockProductRepo(product: Product | null = null): jest.Mocked<Prod
     setProductCategories: jest.fn(),
     getTags: jest.fn().mockResolvedValue([]),
     setProductTags: jest.fn(),
-  } as never as jest.Mocked<ProductRepository>;
+  } as unknown as jest.Mocked<ProductRepository>;
 }
 
 describe('GetProductUseCase', () => {

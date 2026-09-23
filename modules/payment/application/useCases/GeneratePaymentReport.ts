@@ -7,9 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentReport } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { PeriodEndMustBeAfterStartError, FailedToGenerateReportError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -50,7 +48,7 @@ export interface GeneratePaymentReportResponse {
 // ============================================================================
 
 export class GeneratePaymentReportUseCase {
-  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository) {}
 
   async execute(command: GeneratePaymentReportCommand): Promise<GeneratePaymentReportResponse> {
     if (command.periodEnd <= command.periodStart) {

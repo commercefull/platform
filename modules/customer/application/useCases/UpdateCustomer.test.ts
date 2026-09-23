@@ -1,103 +1,71 @@
-/**
- * Unit Tests for UpdateCustomer Use Case
- */
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { UpdateCustomerUseCase, UpdateCustomerCommand } from './UpdateCustomer';
 import { CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
+import { createCustomerRepository, createCustomerRow, emitMock } from '../../tests/testUtils';
 
 describe('UpdateCustomerUseCase', () => {
-  let useCase: UpdateCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new UpdateCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn(),
-      save: jest.fn(),
-    };
-    useCase = new UpdateCustomerUseCase(mockRepo as never as ConstructorParameters<typeof UpdateCustomerUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow());
+    customerRepository.save.mockImplementation(async c => c);
   });
 
-  function createCustomerRecord() {
-    return {
-      customerId: 'cust-1',
-      email: 'john@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      phone: '555-1234',
-      dateOfBirth: null,
-      timezone: 'en',
-      taxExempt: false,
-      note: null,
-      tags: [],
-      updatedAt: new Date('2024-01-01'),
-    };
-  }
+  it('should update firstName and lastName and emit customer.updated', async () => {
+    const result = await useCase.execute(
+      new UpdateCustomerCommand('cust-1', { firstName: 'Janet', lastName: 'Smith' }),
+    );
 
-  it('should update firstName and lastName', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-    mockRepo.save.mockResolvedValue(undefined);
-
-    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { firstName: 'Jane', lastName: 'Smith' }));
-
-    expect(result.firstName).toBe('Jane');
+    expect(result.firstName).toBe('Janet');
     expect(result.lastName).toBe('Smith');
-    expect(result.updatedFields).toContain('firstName');
-    expect(result.updatedFields).toContain('lastName');
-    expect(mockRepo.save).toHaveBeenCalledTimes(1);
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(result.updatedFields).toEqual(expect.arrayContaining(['firstName', 'lastName']));
+    expect(customerRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }),
+    );
+    expect(emitMock).toHaveBeenCalledWith(
       'customer.updated',
-      expect.objectContaining({
-        customerId: 'cust-1',
-        updatedFields: expect.arrayContaining(['firstName', 'lastName']),
-      }),
+      expect.objectContaining({ customerId: 'cust-1' }),
     );
   });
 
-  it('should update phone', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-
-    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { phone: '555-9999' }));
+  it('should update the phone field', async () => {
+    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { phone: '+15551234' }));
 
     expect(result.updatedFields).toContain('phone');
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ phone: '+15551234' }));
   });
 
-  it('should update preferredLanguage', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-
-    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { preferredLanguage: 'fr' }));
+  it('should update preferredLanguage into timezone', async () => {
+    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { preferredLanguage: 'de' }));
 
     expect(result.updatedFields).toContain('preferredLanguage');
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ timezone: 'de' }));
   });
 
   it('should update notes', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-
     const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { notes: 'VIP customer' }));
 
     expect(result.updatedFields).toContain('notes');
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ note: 'VIP customer' }));
   });
 
-  it('should throw CustomerNotFoundError when customer does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CustomerNotFoundError when the customer does not exist', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdateCustomerCommand('cust-x', { firstName: 'Jane' }))).rejects.toThrow(CustomerNotFoundError);
+    await expect(useCase.execute(new UpdateCustomerCommand('missing', { firstName: 'X' }))).rejects.toThrow(
+      CustomerNotFoundError,
+    );
+    expect(customerRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
   it('should trim firstName and lastName', async () => {
-    const customer = createCustomerRecord();
-    mockRepo.findById.mockResolvedValue(customer);
-    mockRepo.save.mockImplementation(async (c: unknown) => c);
+    await useCase.execute(new UpdateCustomerCommand('cust-1', { firstName: '  Janet  ', lastName: ' Smith ' }));
 
-    await useCase.execute(new UpdateCustomerCommand('cust-1', { firstName: '  Jane  ', lastName: '  Smith  ' }));
-
-    expect(customer.firstName).toBe('Jane');
-    expect(customer.lastName).toBe('Smith');
+    expect(customerRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }),
+    );
   });
 });

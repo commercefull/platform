@@ -5,12 +5,16 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const OrderRepo = orderDataRepository.commands;
-import { CreateOrderCommand, CreateOrderUseCase, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
-import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
-import { GetCustomerOrdersCommand, GetCustomerOrdersUseCase } from '../../application/useCases/GetCustomerOrders';
-import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
-import { orderDataRepository } from '../../application/wired';
+import { CreateOrderCommand, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
+import { GetOrderCommand } from '../../application/useCases/GetOrder';
+import { GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
+import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
+import {
+  getCustomerOrdersUseCase,
+  getOrderUseCase,
+  createOrderUseCase,
+  cancelOrderUseCase,
+} from '../../application/useCases/wired';
 import { isUuid } from '../../../../libs/uuid';
 import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 
@@ -46,7 +50,7 @@ export const getMyOrders = async (req: HttpRequest, res: HttpResponse): Promise<
   const offset = parseInt(req.query.offset as string) || 0;
 
   const command = new GetCustomerOrdersCommand(customerId, limit, offset);
-  const useCase = new GetCustomerOrdersUseCase(OrderRepo);
+  const useCase = getCustomerOrdersUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -65,7 +69,7 @@ export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<voi
   }
 
   const command = new GetOrderCommand(orderId, undefined, customerId);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {
@@ -84,7 +88,7 @@ export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Pro
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
 
   const command = new GetOrderCommand(undefined, orderNumber, customerId);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {
@@ -186,7 +190,7 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     req.get('User-Agent'),
   );
 
-  const useCase = new CreateOrderUseCase(OrderRepo);
+  const useCase = createOrderUseCase;
   const order = await useCase.execute(command);
 
   respond(req, res, order, 201);
@@ -210,7 +214,7 @@ export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   const cancelReason = reason || 'Cancelled by customer';
 
   const command = new CancelOrderCommand(orderId, cancelReason, customerId);
-  const useCase = new CancelOrderUseCase(OrderRepo);
+  const useCase = cancelOrderUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);

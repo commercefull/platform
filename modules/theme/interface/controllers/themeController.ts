@@ -6,15 +6,11 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import {
-  ManageThemesUseCase,
-  ManageThemeOverridesUseCase,
-  AssignThemeToStoreUseCase,
-  ResolveStoreThemeUseCase,
-  CreateThemeCommand,
-  CreateThemeOverrideCommand,
-  AssignThemeToStoreCommand,
-} from '../../application/useCases/Theme';
+import { CreateThemeCommand, CreateThemeOverrideCommand, AssignThemeToStoreCommand } from '../../application/useCases';
+import { ManageThemesUseCase } from '../../application/useCases/ManageThemes';
+import { ManageThemeOverridesUseCase } from '../../application/useCases/ManageThemeOverrides';
+import { AssignThemeToStoreUseCase } from '../../application/useCases/AssignThemeToStore';
+import { ResolveStoreThemeUseCase } from '../../application/useCases/ResolveStoreTheme';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
 import { ThemeRepositoryImpl } from '../../application/wired';
 

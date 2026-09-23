@@ -1,7 +1,4 @@
-import { reportingRepository } from '../wired';
-import type { ReportParameters } from '../../domain/repositories/ReportingRepository';
-
-const { generateReport } = reportingRepository;
+import type { ReportingRepository, ReportParameters } from '../../domain/repositories/ReportingRepository';
 import type { ReportData, ReportType } from '../../domain/entities/ReportEntities';
 
 export interface GenerateReportInput {
@@ -10,7 +7,9 @@ export interface GenerateReportInput {
 }
 
 export class GenerateReportUseCase {
+  constructor(private readonly reportingRepo: ReportingRepository) {}
+
   async execute(input: GenerateReportInput): Promise<ReportData> {
-    return generateReport(input.reportType, input.parameters);
+    return this.reportingRepo.generateReport(input.reportType, input.parameters);
   }
 }

@@ -7,14 +7,11 @@ import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import {
-  ManageStorefrontNotificationsUseCase,
-  ManageNotificationDevicesUseCase,
+  manageStorefrontNotificationsUseCase as manageNotificationsUseCase,
+  manageNotificationDevicesUseCase as manageDevicesUseCase,
   registerNotificationDeviceUseCase,
 } from '../../application/useCases/wired';
 import { RegisterNotificationDeviceCommand } from '../../application/useCases/RegisterNotificationDevice';
-
-const manageNotificationsUseCase = new ManageStorefrontNotificationsUseCase();
-const manageDevicesUseCase = new ManageNotificationDevicesUseCase();
 
 /**
  * GET: List customer notifications

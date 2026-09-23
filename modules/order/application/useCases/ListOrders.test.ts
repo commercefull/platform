@@ -1,41 +1,24 @@
 import { ListOrdersUseCase, ListOrdersCommand } from './ListOrders';
+import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
+import type { OrderRepository } from '../../domain/repositories/OrderRepository';
+import { createOrder } from '../../tests/testUtils';
 
 describe('ListOrdersUseCase', () => {
   let useCase: ListOrdersUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-
-  const makeOrder = (id: string) => ({
-    orderId: id,
-    orderNumber: `ORD-${id}`,
-    customerId: 'c1',
-    storeId: 's1',
-    channelId: 'ch1',
-    createdByUserId: 'u1',
-    orderSource: 'web',
-    customerEmail: 'test@test.com',
-    customerName: 'Test',
-    status: 'pending',
-    paymentStatus: 'pending',
-    fulfillmentStatus: 'unfulfilled',
-    totalAmount: { amount: 100 },
-    totalItems: 2,
-    currencyCode: 'USD',
-    orderDate: new Date(),
-    createdAt: new Date(),
-    tags: [],
-  });
+  let mockRepo: jest.Mocked<Pick<OrderRepository, 'findAll'>>;
 
   beforeEach(() => {
     mockRepo = {
       findAll: jest.fn().mockResolvedValue({
-        data: [makeOrder('o1'), makeOrder('o2')],
+        data: [createOrder({ orderId: 'o1', orderNumber: 'ORD-o1' }), createOrder({ orderId: 'o2', orderNumber: 'ORD-o2' })],
         total: 2,
         limit: 50,
         offset: 0,
         hasMore: false,
+        length: 2,
       }),
     };
-    useCase = new ListOrdersUseCase(mockRepo as never);
+    useCase = new ListOrdersUseCase(mockRepo as unknown as OrderRepository);
   });
 
   it('should list orders (happy path)', async () => {
@@ -46,7 +29,7 @@ describe('ListOrdersUseCase', () => {
   });
 
   it('should pass filters and pagination to repository', async () => {
-    await useCase.execute(new ListOrdersCommand({ customerId: 'c1', status: 'pending' as never }, 10, 5, 'orderNumber', 'asc'));
+    await useCase.execute(new ListOrdersCommand({ customerId: 'c1', status: OrderStatus.PENDING }, 10, 5, 'orderNumber', 'asc'));
 
     expect(mockRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ customerId: 'c1' }),

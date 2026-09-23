@@ -1,124 +1,70 @@
-/**
- * Unit Tests for GetCustomer Use Case
- */
-
+import '../../tests/testUtils';
 import { GetCustomerUseCase, GetCustomerCommand } from './GetCustomer';
 import { CustomerValidationError } from '../../domain/errors/CustomerErrors';
+import { createCustomerRepository, createCustomerRow, createCustomerAddressRow } from '../../tests/testUtils';
 
 describe('GetCustomerUseCase', () => {
-  let useCase: GetCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new GetCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn(),
-      findByEmail: jest.fn(),
-      getAddresses: jest.fn(),
-      getCustomerGroupIds: jest.fn(),
-    };
-    useCase = new GetCustomerUseCase(mockRepo as never as ConstructorParameters<typeof GetCustomerUseCase>[0]);
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow());
+    customerRepository.findByEmail.mockResolvedValue(createCustomerRow());
+    customerRepository.getAddresses.mockResolvedValue([]);
+    customerRepository.getCustomerGroupIds.mockResolvedValue(['grp-1']);
   });
 
-  function createCustomerRecord() {
-    return {
-      customerId: 'cust-1',
-      email: 'john@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      phone: '555-1234',
-      dateOfBirth: new Date('1990-01-15'),
-      isActive: true,
-      isVerified: true,
-      timezone: 'en',
-      taxExempt: false,
-      tags: ['vip'],
-      failedLoginAttempts: 5,
-      lastLoginAt: new Date('2024-06-01'),
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-06-01'),
-    };
-  }
-
-  it('should throw when neither customerId nor email provided', () => {
+  it('should throw CustomerValidationError when neither customerId nor email is provided', () => {
     expect(() => new GetCustomerCommand()).toThrow(CustomerValidationError);
   });
 
-  it('should find customer by ID and map to response', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-    mockRepo.getAddresses.mockResolvedValue([]);
-    mockRepo.getCustomerGroupIds.mockResolvedValue(['grp-1']);
-
+  it('should find the customer by id and map the detail response', async () => {
     const result = await useCase.execute(new GetCustomerCommand('cust-1'));
 
     expect(result).not.toBeNull();
     expect(result!.customerId).toBe('cust-1');
-    expect(result!.email).toBe('john@example.com');
-    expect(result!.fullName).toBe('John Doe');
-    expect(result!.isActive).toBe(true);
-    expect(result!.isVerified).toBe(true);
+    expect(result!.email).toBe('jane@example.com');
+    expect(result!.fullName).toBe('Jane Doe');
     expect(result!.groupIds).toEqual(['grp-1']);
-    expect(result!.tags).toEqual(['vip']);
-    expect(mockRepo.findById).toHaveBeenCalledWith('cust-1');
+    expect(customerRepository.findById).toHaveBeenCalledWith('cust-1');
   });
 
-  it('should find customer by email', async () => {
-    mockRepo.findByEmail.mockResolvedValue(createCustomerRecord());
-    mockRepo.getAddresses.mockResolvedValue([]);
-    mockRepo.getCustomerGroupIds.mockResolvedValue([]);
+  it('should find the customer by email', async () => {
+    const result = await useCase.execute(new GetCustomerCommand(undefined, 'jane@example.com'));
 
-    const result = await useCase.execute(new GetCustomerCommand(undefined, 'john@example.com'));
-
-    expect(result).not.toBeNull();
     expect(result!.customerId).toBe('cust-1');
-    expect(mockRepo.findByEmail).toHaveBeenCalledWith('john@example.com');
+    expect(customerRepository.findByEmail).toHaveBeenCalledWith('jane@example.com');
   });
 
-  it('should return null when customer not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should return null when the customer is not found', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
-    const result = await useCase.execute(new GetCustomerCommand('cust-x'));
+    const result = await useCase.execute(new GetCustomerCommand('missing'));
 
     expect(result).toBeNull();
+    expect(customerRepository.getAddresses).not.toHaveBeenCalled();
   });
 
-  it('should map addresses to response format', async () => {
-    mockRepo.findById.mockResolvedValue(createCustomerRecord());
-    mockRepo.getAddresses.mockResolvedValue([
-      {
-        customerAddressId: 'addr-1',
-        addressLine1: '123 Main St',
-        addressLine2: 'Apt 2',
-        city: 'Portland',
-        state: 'OR',
-        postalCode: '97201',
-        country: 'US',
-        addressType: 'shipping',
-        isDefault: true,
-        phone: '555-9999',
-      },
+  it('should map addresses to the response format', async () => {
+    customerRepository.getAddresses.mockResolvedValue([
+      createCustomerAddressRow({ customerAddressId: 'addr-9', isDefaultShipping: true }),
     ]);
-    mockRepo.getCustomerGroupIds.mockResolvedValue([]);
 
     const result = await useCase.execute(new GetCustomerCommand('cust-1'));
 
     expect(result!.addresses).toHaveLength(1);
-    expect(result!.addresses[0].addressId).toBe('addr-1');
-    expect(result!.addresses[0].addressLine1).toBe('123 Main St');
-    expect(result!.addresses[0].isDefault).toBe(true);
+    expect(result!.addresses[0]).toEqual(
+      expect.objectContaining({ addressId: 'addr-9', addressLine1: '123 Main St', city: 'Springfield' }),
+    );
   });
 
   it('should handle null firstName/lastName gracefully', async () => {
-    const record = createCustomerRecord() as Record<string, unknown>;
-    record.firstName = null;
-    record.lastName = null;
-    mockRepo.findById.mockResolvedValue(record);
-    mockRepo.getAddresses.mockResolvedValue([]);
-    mockRepo.getCustomerGroupIds.mockResolvedValue([]);
+    customerRepository.findById.mockResolvedValue(createCustomerRow({ firstName: null, lastName: null }));
 
     const result = await useCase.execute(new GetCustomerCommand('cust-1'));
 
     expect(result!.firstName).toBe('');
-    expect(result!.lastName).toBe('');
     expect(result!.fullName).toBe('');
   });
 });

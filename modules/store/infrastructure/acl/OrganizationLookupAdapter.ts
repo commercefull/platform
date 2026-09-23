@@ -9,11 +9,13 @@
  */
 
 import { OrganizationLookupPort, OrganizationSummary } from '../../application/ports/OrganizationLookupPort';
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
+import type organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 
 export class OrganizationLookupAdapter implements OrganizationLookupPort {
+  constructor(private readonly orgRepo: Pick<typeof organizationRepo, 'findById' | 'findAll'>) {}
+
   async findById(id: string): Promise<OrganizationSummary | null> {
-    const org = await organizationRepo.findById(id);
+    const org = await this.orgRepo.findById(id);
     if (!org) return null;
     return {
       id: org.organizationId,
@@ -23,7 +25,7 @@ export class OrganizationLookupAdapter implements OrganizationLookupPort {
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<OrganizationSummary[]> {
-    const orgs = await organizationRepo.findAll(limit, offset);
+    const orgs = await this.orgRepo.findAll(limit, offset);
     return orgs.map(org => ({
       id: org.organizationId,
       name: org.name,
