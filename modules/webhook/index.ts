@@ -20,3 +20,5 @@ export {
   deleteWebhook,
   viewWebhookDeliveries,
 } from './interface/controllers/adminWebhookController';
+
+export { manifest } from './manifest';

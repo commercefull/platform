@@ -14,3 +14,5 @@ export { notificationMerchantRouter } from './interface/routers/notificationBusi
 export { notificationTypeDefs } from './interface/graphql/typeDefs';
 export { notificationResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

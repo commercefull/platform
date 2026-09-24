@@ -368,19 +368,24 @@ registerActionHandler('apply_discount', async (action, context) => {
 The automation engine is designed to integrate with the platform's event bus (`libs/events/eventBus.ts`). To wire event-triggered rules:
 
 1. Register a handler on the event bus that calls `executionEngine.triggerEvent()`
-2. Or add a call in `libs/events/registerEventHandlers.ts` to route events to the automation engine
+2. Add an entry in `boot/registerEventHandlers.ts` that calls the module's `application/eventHandlers.ts` register function
 
-Example wiring in `registerEventHandlers.ts`:
+Example module-owned wiring in `modules/automation/application/eventHandlers.ts`:
 
 ```typescript
-import { executionEngine } from '../../modules/automation/application/useCases/wired';
+import { eventBus } from '../../../libs/events/eventBus';
+import { executionEngine } from './useCases/wired';
 
-// Inside registerAllEventHandlers():
-if (moduleRegistry.shouldRegisterEvents('automation')) {
+export function registerAutomationEventHandlers(): void {
   eventBus.registerHandler('order.completed', async payload => {
     await executionEngine.triggerEvent('order.completed', payload.data, payload.correlationId);
   });
 }
+```
+
+```typescript
+// boot/registerEventHandlers.ts — gated by the module registry
+{ module: 'automation', register: registerAutomationEventHandlers },
 ```
 
 ## Execution Log & Audit Trail

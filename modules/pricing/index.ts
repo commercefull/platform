@@ -18,3 +18,5 @@ export { pricingMerchantRouter } from './interface/routers/pricingBusinessRouter
 export { pricingTypeDefs } from './interface/graphql/typeDefs';
 export { pricingResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

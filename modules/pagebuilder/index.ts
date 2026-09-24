@@ -8,3 +8,5 @@ export * from './application/wired';
 // Interface exports (routers, GraphQL)
 export { pageBuilderBusinessRouter } from './interface/routers/pageBuilderRouter';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

@@ -11,7 +11,6 @@
 | `events/eventBus.ts`              | EventEmitter-based event bus with error boundaries                 |
 | `events/outboxWriter.ts`          | Transactional outbox writer (within DB transaction)                |
 | `events/outboxDispatcher.ts`      | Claim-based polling dispatcher with retry + dead-letter            |
-| `events/registerEventHandlers.ts` | Central event handler registration (gated by module registry)      |
 | `logger.ts`                       | Winston logger with daily rotation                                 |
 | `validation.ts`                   | Input validation utilities                                         |
 | `form.ts`                         | EJS form helper functions                                          |

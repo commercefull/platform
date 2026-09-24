@@ -19,3 +19,5 @@ export {
   editSystemConfigurationForm,
   updateSystemConfiguration,
 } from './interface/http/adminConfigurationController';
+
+export { manifest } from './manifest';

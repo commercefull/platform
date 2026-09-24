@@ -228,6 +228,23 @@ class CronScheduler {
 // Export singleton instance
 export const cronScheduler = new CronScheduler();
 
+/** Time intervals in milliseconds — for scheduled job definitions. */
+export const MINUTES = 60 * 1000;
+export const HOURS = 60 * MINUTES;
+
+/**
+ * Module-owned scheduled job definition.
+ * Each module declares its recurring jobs in `scheduledJobs.ts`;
+ * boot registers them via `cronScheduler.registerJob`.
+ */
+export interface ScheduledJobDefinition {
+  id: string;
+  name: string;
+  handler: () => Promise<void>;
+  intervalMs: number;
+  startImmediately?: boolean;
+}
+
 /**
  * Job data interfaces (for compatibility with existing code)
  */
