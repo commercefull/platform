@@ -50,7 +50,7 @@ export async function create(input: CreateShippingPackagingTypeInput): Promise<S
   const result = await queryOne<ShippingPackagingType>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "isActive", "isDefault", "weight", "length", "width",
-      "height", "volume", "maxWeight", "maxItems", "costCents", "currency", "recyclable",
+      "height", "volume", "maxWeight", "maxItems", "costCents", "currencyCode", "recyclable",
       "imageUrl", "validCarriers", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
     [
@@ -67,7 +67,7 @@ export async function create(input: CreateShippingPackagingTypeInput): Promise<S
       input.maxWeight || null,
       input.maxItems || null,
       input.costCents || null,
-      input.currency || 'USD',
+      input.currencyCode || 'USD',
       input.recyclable ?? false,
       input.imageUrl || null,
       input.validCarriers || null,

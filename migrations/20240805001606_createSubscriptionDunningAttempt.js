@@ -15,7 +15,7 @@ exports.up = function (knex) {
     table.integer('attemptNumber').notNullable();
     table.string('status').defaultTo('pending'); // pending, processing, success, failed, skipped
     table.bigInteger('amountCents').notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.timestamp('scheduledAt').notNullable();
     table.timestamp('attemptedAt');
     table.string('paymentMethodId');

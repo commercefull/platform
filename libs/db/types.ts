@@ -258,6 +258,7 @@ export enum Table {
   ShippingZone = "shippingZone",
   Store = "store",
   StoreCreditLedger = "storeCreditLedger",
+  StoreCurrency = "storeCurrency",
   StoreCurrencySettings = "storeCurrencySettings",
   StoreDispatch = "storeDispatch",
   StoreDispatchItem = "storeDispatchItem",
@@ -569,6 +570,7 @@ export type Tables = {
   "shippingZone": ShippingZone,
   "store": Store,
   "storeCreditLedger": StoreCreditLedger,
+  "storeCurrency": StoreCurrency,
   "storeCurrencySettings": StoreCurrencySettings,
   "storeDispatch": StoreDispatch,
   "storeDispatchItem": StoreDispatchItem,
@@ -733,7 +735,7 @@ export type AnalyticsReportEvent = {
   eventData: unknown | null;
   eventValueCents: number | null;
   eventQuantity: number | null;
-  currency: string | null;
+  currencyCode: string | null;
   ipAddress: string | null;
   userAgent: string | null;
   referrer: string | null;
@@ -786,7 +788,7 @@ export type AnalyticsSalesDaily = {
   organizationId: string | null;
   date: Date;
   channel: string | null;
-  currency: string | null;
+  currencyCode: string | null;
   orderCount: number | null;
   itemsSold: number | null;
   grossRevenueCents: number | null;
@@ -914,7 +916,7 @@ export type B2BApprovalWorkflow = {
   requestedByEmail: string;
   status: string;
   amountCents: number;
-  currency: string;
+  currencyCode: string;
   steps: unknown[];
   currentStep: number;
   description: string | null;
@@ -955,7 +957,7 @@ export type B2BQuote = {
   discountTotalCents: number;
   taxTotalCents: number;
   totalCents: number;
-  currency: string;
+  currencyCode: string;
   notes: string | null;
   internalNotes: string | null;
   validUntil: Date;
@@ -994,7 +996,7 @@ export type Basket = {
   customerId: string | null;
   sessionId: string | null;
   status: string;
-  currency: string;
+  currencyCode: string;
   itemsCount: number;
   subTotalCents: number;
   taxAmountCents: number;
@@ -1742,7 +1744,7 @@ export type CustomerSubscription = {
   discountAmountCents: number | null;
   taxAmountCents: number | null;
   totalPriceCents: number;
-  currency: string | null;
+  currencyCode: string | null;
   billingInterval: string;
   billingIntervalCount: number | null;
   trialStartAt: Date | null;
@@ -1949,7 +1951,7 @@ export type FraudCheck = {
   previousOrders: number | null;
   previousChargebacks: number | null;
   orderAmountCents: number | null;
-  currency: string | null;
+  currencyCode: string | null;
   isFirstOrder: boolean | null;
   isGuestCheckout: boolean | null;
   paymentMethod: string | null;
@@ -2825,7 +2827,7 @@ export type MarketplaceVendorPayout = {
   grossAmountCents: number;
   commissionAmountCents: number;
   netAmountCents: number;
-  currency: string;
+  currencyCode: string;
   transactionRef: string | null;
   failureReason: string | null;
   processedAt: Date | null;
@@ -2876,7 +2878,7 @@ export type MembershipPayment = {
   subscriptionId: string;
   customerId: string;
   amountCents: number;
-  currency: string;
+  currencyCode: string;
   paymentDate: Date;
   status: string;
   paymentType: string;
@@ -2902,7 +2904,7 @@ export type MembershipPlan = {
   priceCents: number;
   salePriceCents: number | null;
   setupFeeCents: number | null;
-  currency: string;
+  currencyCode: string;
   billingCycle: string;
   billingPeriod: number | null;
   maxMembers: number | null;
@@ -3400,7 +3402,7 @@ export type OrderPayment = {
   type: string;
   provider: string;
   amountCents: number;
-  currency: string;
+  currencyCode: string;
   status: string;
   transactionId: string | null;
   authorizationCode: string | null;
@@ -3687,7 +3689,7 @@ export type OrganizationPaymentInfo = {
   paypalEmail: string | null;
   providerId: string | null;
   providerData: unknown | null;
-  currency: string;
+  currencyCode: string;
   isVerified: boolean;
   verifiedAt: Date | null;
   lastPayoutDate: Date | null;
@@ -3835,7 +3837,7 @@ export type PaymentPayout = {
   commissionAmountCents: number;
   feeAmountCents: number | null;
   netAmountCents: number;
-  currency: string;
+  currencyCode: string;
   status: string | null;
   scheduledDate: Date | null;
   processedAt: Date | null;
@@ -3914,7 +3916,6 @@ export type PaymentRefund = {
   refundId: string | null;
   paymentTransactionId: string | null;
   externalRefundId: string | null;
-  currency: string | null;
   gatewayResponse: unknown | null;
   errorCode: string | null;
   errorMessage: string | null;
@@ -4021,7 +4022,6 @@ export type PaymentTransaction = {
   paymentMethodId: string | null;
   paymentGatewayId: string | null;
   externalTransactionId: string | null;
-  currency: string | null;
   paymentMethodDetails: unknown | null;
   refundedAmountCents: number | null;
   metadata: unknown | null;
@@ -4371,7 +4371,7 @@ export type ProductBundle = {
   discountAmountCents: number | null;
   minPriceCents: number | null;
   maxPriceCents: number | null;
-  currency: string | null;
+  currencyCode: string | null;
   minItems: number | null;
   maxItems: number | null;
   minQuantity: number | null;
@@ -4914,7 +4914,7 @@ export type PromotionGiftCard = {
   type: string | null;
   initialBalanceCents: number;
   currentBalanceCents: number;
-  currency: string | null;
+  currencyCode: string | null;
   status: string | null;
   purchasedBy: string | null;
   purchaseOrderId: string | null;
@@ -4949,7 +4949,7 @@ export type PromotionGiftCardTransaction = {
   amountCents: number;
   balanceBeforeCents: number;
   balanceAfterCents: number;
-  currency: string | null;
+  currencyCode: string | null;
   orderId: string | null;
   customerId: string | null;
   performedBy: string | null;
@@ -5284,7 +5284,7 @@ export type ShippingPackagingType = {
   maxWeight: string | null;
   maxItems: number | null;
   costCents: number | null;
-  currency: string;
+  currencyCode: string;
   recyclable: boolean;
   imageUrl: string | null;
   validCarriers: string[] | null;
@@ -5307,7 +5307,7 @@ export type ShippingRate = {
   rateMatrix: unknown | null;
   minRateCents: number | null;
   maxRateCents: number | null;
-  currency: string;
+  currencyCode: string;
   taxable: boolean;
   priority: number | null;
   validFrom: Date | null;
@@ -5350,6 +5350,7 @@ export type Store = {
   slug: string;
   description: string | null;
   storeType: string;
+  channel: string;
   organizationId: string | null;
   isHeadquarters: boolean;
   parentStoreId: string | null;
@@ -5375,8 +5376,6 @@ export type Store = {
   storePolicies: unknown | null;
   shippingMethods: string[] | null;
   paymentMethods: string[] | null;
-  supportedCurrencies: string[] | null;
-  defaultCurrency: string;
   settings: unknown | null;
   metaTitle: string | null;
   metaDescription: string | null;
@@ -5399,7 +5398,7 @@ export type StoreCreditLedger = {
   referenceId: string | null;
   amountCents: number;
   balanceAfterCents: number;
-  currency: string;
+  currencyCode: string;
   reason: string | null;
   notes: string | null;
   createdBy: string | null;
@@ -5408,11 +5407,21 @@ export type StoreCreditLedger = {
   updatedAt: Date;
 };
 
+export type StoreCurrency = {
+  storeCurrencyId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  storeId: string;
+  currencyId: string;
+  isDefault: boolean;
+  isActive: boolean;
+};
+
 export type StoreCurrencySettings = {
   storeCurrencySettingsId: string;
   createdAt: Date;
   updatedAt: Date;
-  storeCurrencyId: string;
+  storeId: string;
   baseCurrencyId: string;
   displayCurrencyId: string;
   allowCustomerCurrencySelection: boolean;
@@ -5423,7 +5432,6 @@ export type StoreCurrencySettings = {
   markupPercentage: string;
   roundPrecision: number;
   roundingMethod: string;
-  enabledCurrencies: string[] | null;
   priceDisplayFormat: string;
   updatedBy: string | null;
 };
@@ -5597,7 +5605,7 @@ export type SubscriptionDunningAttempt = {
   attemptNumber: number;
   status: string | null;
   amountCents: number;
-  currency: string | null;
+  currencyCode: string | null;
   scheduledAt: Date;
   attemptedAt: Date | null;
   paymentMethodId: string | null;
@@ -5655,7 +5663,7 @@ export type SubscriptionOrder = {
   taxAmountCents: number | null;
   shippingAmountCents: number | null;
   totalAmountCents: number;
-  currency: string | null;
+  currencyCode: string | null;
   scheduledAt: Date | null;
   processedAt: Date | null;
   paidAt: Date | null;
@@ -5702,7 +5710,7 @@ export type SubscriptionPlan = {
   billingIntervalCount: number | null;
   priceCents: number;
   compareAtPriceCents: number | null;
-  currency: string | null;
+  currencyCode: string | null;
   setupFeeCents: number | null;
   trialDays: number | null;
   contractLength: number | null;
@@ -5766,7 +5774,7 @@ export type Supplier = {
   taxId: string | null;
   paymentTerms: string | null;
   paymentMethod: string | null;
-  currency: string;
+  currencyCode: string;
   minOrderValueCents: number | null;
   leadTime: number | null;
   notes: string | null;
@@ -5809,7 +5817,7 @@ export type SupplierProduct = {
   status: string;
   isPreferred: boolean;
   unitCostCents: number;
-  currency: string;
+  currencyCode: string;
   minimumOrderQuantity: number | null;
   leadTime: number | null;
   packagingInfo: unknown | null;
@@ -5836,7 +5844,7 @@ export type SupplierPurchaseOrder = {
   trackingNumber: string | null;
   carrierName: string | null;
   paymentTerms: string | null;
-  currency: string;
+  currencyCode: string;
   subtotalCents: number;
   taxCents: number;
   shippingCents: number;
@@ -6049,7 +6057,7 @@ export type SupportPriceAlert = {
   percentageDrop: string | null;
   originalPriceCents: number | null;
   currentPriceCents: number | null;
-  currency: string | null;
+  currencyCode: string | null;
   notificationChannel: string | null;
   notifiedAt: Date | null;
   notifiedPriceCents: number | null;

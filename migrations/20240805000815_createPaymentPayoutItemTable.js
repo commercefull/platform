@@ -6,7 +6,7 @@ exports.up = function (knex) {
     t.bigInteger('amountCents').notNullable();
     t.bigInteger('feeCents').notNullable().defaultTo(0);
     t.bigInteger('netAmountCents').notNullable();
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.text('description');
     t.uuid('orderId').references('orderId').inTable('order');
     t.uuid('orderPaymentId').references('orderPaymentId').inTable('orderPayment');

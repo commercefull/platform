@@ -69,7 +69,7 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
   const result = await queryOne<ShippingRate>(
     `INSERT INTO "${TABLE}" (
       "shippingZoneId", "shippingMethodId", "name", "description", "isActive", "rateType", "baseRateCents",
-      "perItemRateCents", "freeThresholdCents", "rateMatrix", "minRateCents", "maxRateCents", "currency",
+      "perItemRateCents", "freeThresholdCents", "rateMatrix", "minRateCents", "maxRateCents", "currencyCode",
       "taxable", "priority", "validFrom", "validTo", "conditions", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
     [
@@ -85,7 +85,7 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
       input.rateMatrix ? JSON.stringify(input.rateMatrix) : null,
       input.minRateCents || null,
       input.maxRateCents || null,
-      input.currency || 'USD',
+      input.currencyCode || 'USD',
       input.taxable ?? true,
       input.priority ?? 0,
       input.validFrom || null,

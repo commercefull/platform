@@ -11,7 +11,7 @@ export async function up(knex) {
     table.bigInteger('discountTotalCents').notNullable().defaultTo(0);
     table.bigInteger('taxTotalCents').notNullable().defaultTo(0);
     table.bigInteger('totalCents').notNullable().defaultTo(0);
-    table.string('currency').notNullable().defaultTo('USD');
+    table.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     table.text('notes');
     table.text('internalNotes');
     table.timestamp('validUntil').notNullable();

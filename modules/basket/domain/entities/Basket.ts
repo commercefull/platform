@@ -28,6 +28,7 @@ export interface BasketProps {
   basketId: string;
   customerId?: string;
   sessionId?: string;
+  storeId?: string;
   status: BasketStatus;
   currency: string;
   items: BasketItem[];
@@ -49,12 +50,20 @@ export class Basket {
     this.props = props;
   }
 
-  static create(props: { basketId: string; customerId?: string; sessionId?: string; currency?: string; expiresAt?: Date }): Basket {
+  static create(props: {
+    basketId: string;
+    customerId?: string;
+    sessionId?: string;
+    storeId?: string;
+    currency?: string;
+    expiresAt?: Date;
+  }): Basket {
     const now = new Date();
     return new Basket({
       basketId: props.basketId,
       customerId: props.customerId,
       sessionId: props.sessionId,
+      storeId: props.storeId,
       status: 'active',
       currency: props.currency || 'USD',
       items: [],
@@ -80,6 +89,10 @@ export class Basket {
 
   get sessionId(): string | undefined {
     return this.props.sessionId;
+  }
+
+  get storeId(): string | undefined {
+    return this.props.storeId;
   }
 
   get status(): BasketStatus {
@@ -326,6 +339,7 @@ export class Basket {
       basketId: this.props.basketId,
       customerId: this.props.customerId,
       sessionId: this.props.sessionId,
+      storeId: this.props.storeId,
       status: this.props.status,
       currency: this.props.currency,
       items: this.props.items.map(item => item.toJSON()),

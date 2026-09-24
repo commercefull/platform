@@ -6,6 +6,7 @@
 import { StoreValidationError } from '../errors/StoreErrors';
 
 export type StoreType = 'merchant_store' | 'organization_store';
+export type StoreChannel = 'physical' | 'digital' | 'hybrid';
 
 export interface StoreProps {
   storeId: string;
@@ -13,6 +14,7 @@ export interface StoreProps {
   slug: string;
   description?: string;
   storeType: StoreType;
+  channel: StoreChannel;
 
   // Ownership
   organizationId?: string;
@@ -64,8 +66,6 @@ export interface StoreProps {
   // Shipping & Payment
   shippingMethods?: string[];
   paymentMethods?: string[];
-  supportedCurrencies?: string[];
-  defaultCurrency?: string;
 
   // SEO
   metaTitle?: string;
@@ -127,6 +127,7 @@ export class Store {
     name: string;
     slug?: string;
     storeType: StoreType;
+    channel?: StoreChannel;
     organizationId?: string;
     isHeadquarters?: boolean;
     parentStoreId?: string;
@@ -141,8 +142,6 @@ export class Store {
     primaryColor?: string;
     secondaryColor?: string;
     theme?: string;
-    defaultCurrency?: string;
-    supportedCurrencies?: string[];
     settings?: Partial<StoreProps['settings']>;
     storePolicies?: StoreProps['storePolicies'];
     metaTitle?: string;
@@ -183,6 +182,7 @@ export class Store {
       slug: props.slug || Store.generateSlug(props.name),
       description: props.description,
       storeType: props.storeType,
+      channel: props.channel || 'digital',
       organizationId: props.organizationId,
       isHeadquarters: props.isHeadquarters ?? false,
       parentStoreId: props.parentStoreId,
@@ -199,8 +199,6 @@ export class Store {
       isActive: props.isActive ?? true,
       isVerified: props.isVerified ?? false,
       isFeatured: props.isFeatured ?? false,
-      defaultCurrency: props.defaultCurrency || 'USD',
-      supportedCurrencies: props.supportedCurrencies || ['USD'],
       settings: { ...defaultSettings, ...(props.settings as StoreProps['settings'] | undefined) },
       storePolicies: props.storePolicies,
       metaTitle: props.metaTitle,
@@ -235,6 +233,15 @@ export class Store {
   }
   get storeType(): StoreType {
     return this.props.storeType;
+  }
+  get channel(): StoreChannel {
+    return this.props.channel;
+  }
+  get isPhysical(): boolean {
+    return this.props.channel === 'physical' || this.props.channel === 'hybrid';
+  }
+  get isDigital(): boolean {
+    return this.props.channel === 'digital' || this.props.channel === 'hybrid';
   }
   get organizationId(): string | undefined {
     return this.props.organizationId;
@@ -330,12 +337,6 @@ export class Store {
   get paymentMethods(): string[] | undefined {
     return this.props.paymentMethods;
   }
-  get supportedCurrencies(): string[] | undefined {
-    return this.props.supportedCurrencies;
-  }
-  get defaultCurrency(): string | undefined {
-    return this.props.defaultCurrency;
-  }
   get settings(): StoreProps['settings'] | undefined {
     return this.props.settings;
   }
@@ -424,12 +425,6 @@ export class Store {
 
   updatePaymentMethods(methods: string[]): void {
     this.props.paymentMethods = methods;
-    this.touch();
-  }
-
-  updateCurrencies(currencies: string[], defaultCurrency?: string): void {
-    this.props.supportedCurrencies = currencies;
-    if (defaultCurrency) this.props.defaultCurrency = defaultCurrency;
     this.touch();
   }
 
@@ -551,6 +546,7 @@ export class Store {
       slug: this.props.slug,
       description: this.props.description,
       storeType: this.props.storeType,
+      channel: this.props.channel,
       organizationId: this.props.organizationId,
       isHeadquarters: this.props.isHeadquarters,
       parentStoreId: this.props.parentStoreId,
@@ -578,8 +574,6 @@ export class Store {
       storePolicies: this.props.storePolicies,
       shippingMethods: this.props.shippingMethods,
       paymentMethods: this.props.paymentMethods,
-      supportedCurrencies: this.props.supportedCurrencies,
-      defaultCurrency: this.props.defaultCurrency,
       settings: this.props.settings,
       metaTitle: this.props.metaTitle,
       metaDescription: this.props.metaDescription,

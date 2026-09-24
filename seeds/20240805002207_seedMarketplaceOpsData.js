@@ -66,7 +66,7 @@ exports.seed = async function (knex) {
       grossAmountCents: 25000,
       commissionAmountCents: 2500,
       netAmountCents: 22500,
-      currency: 'USD',
+      currencyCode: 'USD',
       createdAt: now,
       updatedAt: now,
     };

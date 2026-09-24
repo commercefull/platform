@@ -230,7 +230,7 @@ export async function upsertSalesDaily(
 
   await query(
     `INSERT INTO "analyticsSalesDaily" (
-      "organizationId", "date", "channel", "currency",
+      "organizationId", "date", "channel", "currencyCode",
       "orderCount", "itemsSold", "grossRevenueCents", "discountTotalCents", "refundTotalCents",
       "netRevenueCents", "taxTotalCents", "shippingRevenueCents", "averageOrderValueCents",
       "newCustomers", "returningCustomers", "guestOrders",
@@ -238,7 +238,7 @@ export async function upsertSalesDaily(
       "paymentSuccessCount", "paymentFailedCount", "paymentSuccessRate",
       "computedAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
-    ON CONFLICT ("organizationId", "date", "channel", "currency") DO UPDATE SET
+    ON CONFLICT ("organizationId", "date", "channel", "currencyCode") DO UPDATE SET
       "orderCount" = "analyticsSalesDaily"."orderCount" + EXCLUDED."orderCount",
       "itemsSold" = "analyticsSalesDaily"."itemsSold" + EXCLUDED."itemsSold",
       "grossRevenueCents" = "analyticsSalesDaily"."grossRevenueCents" + EXCLUDED."grossRevenueCents",
@@ -547,7 +547,7 @@ function mapToSalesDaily(row: AnalyticsSalesDailyRow): SalesDaily {
     organizationId: row.organizationId ?? undefined,
     date: new Date(row.date),
     channel: row.channel ?? 'all',
-    currency: row.currency ?? 'USD',
+    currency: row.currencyCode ?? 'USD',
     orderCount: row.orderCount ?? 0,
     itemsSold: row.itemsSold ?? 0,
     grossRevenueCents: Number(row.grossRevenueCents ?? 0),

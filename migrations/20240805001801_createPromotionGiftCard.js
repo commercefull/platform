@@ -9,7 +9,7 @@ exports.up = function (knex) {
     table.string('type').defaultTo('standard'); // standard, promotional, reward, refund
     table.bigInteger('initialBalanceCents').notNullable();
     table.bigInteger('currentBalanceCents').notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.string('status').defaultTo('active'); // pending, active, depleted, expired, cancelled, suspended
     table.uuid('purchasedBy').references('customerId').inTable('customer').onDelete('SET NULL');
     table.uuid('purchaseOrderId').references('orderId').inTable('order').onDelete('SET NULL');

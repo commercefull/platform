@@ -143,7 +143,7 @@ export async function saveBundle(
       `UPDATE "productBundle" SET
         "name" = $1, "slug" = $2, "description" = $3, "bundleType" = $4,
         "pricingType" = $5, "fixedPriceCents" = $6, "discountPercent" = $7,
-        "discountAmountCents" = $8, "minPriceCents" = $9, "maxPriceCents" = $10, "currency" = $11,
+        "discountAmountCents" = $8, "minPriceCents" = $9, "maxPriceCents" = $10, "currencyCode" = $11,
         "minItems" = $12, "maxItems" = $13, "minQuantity" = $14, "maxQuantity" = $15,
         "requireAllItems" = $16, "allowDuplicates" = $17, "showSavings" = $18,
         "savingsAmountCents" = $19, "savingsPercent" = $20, "imageUrl" = $21,
@@ -187,7 +187,7 @@ export async function saveBundle(
       `INSERT INTO "productBundle" (
         "productId", "name", "slug", "description", "bundleType", "pricingType",
         "fixedPriceCents", "discountPercent", "discountAmountCents", "minPriceCents", "maxPriceCents",
-        "currency", "minItems", "maxItems", "minQuantity", "maxQuantity",
+        "currencyCode", "minItems", "maxItems", "minQuantity", "maxQuantity",
         "requireAllItems", "allowDuplicates", "showSavings", "savingsAmountCents",
         "savingsPercent", "imageUrl", "sortOrder", "isActive", "startDate", "endDate",
         "metadata", "createdAt", "updatedAt"
@@ -410,7 +410,7 @@ function mapToBundle(row: DbProductBundle): ProductBundle {
     discountAmountCents: row.discountAmountCents != null ? Number(row.discountAmountCents) : undefined,
     minPriceCents: row.minPriceCents != null ? Number(row.minPriceCents) : undefined,
     maxPriceCents: row.maxPriceCents != null ? Number(row.maxPriceCents) : undefined,
-    currency: row.currency || 'USD',
+    currency: row.currencyCode || 'USD',
     minItems: row.minItems ?? undefined,
     maxItems: row.maxItems ?? undefined,
     minQuantity: row.minQuantity ?? 1,

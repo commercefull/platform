@@ -40,8 +40,8 @@ export class StoreController {
   constructor() {
     const storeRepository = StoreRepo;
     const systemConfigPort = new SystemConfigAdapter(new SystemConfigurationRepo());
-    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, organizationLookupAdapter);
-    this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository);
+    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, organizationLookupAdapter, storeDataRepository.currencies);
+    this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository, storeDataRepository.currencies);
     this.configurePickupUseCase = new ConfigureStorePickupUseCase(storeRepository);
     this.setLocalDeliveryUseCase = new SetLocalDeliveryZoneUseCase(storeRepository);
     this.createStoreHierarchyUseCase = new CreateStoreHierarchyUseCase(storeRepository);

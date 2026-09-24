@@ -29,18 +29,27 @@ export type { BillingCycle, MembershipPlan, CreateMembershipPlanInput, UpdateMem
 
 const TABLE = Table.MembershipPlan;
 
+type MembershipPlanRow = Omit<MembershipPlan, 'currency'> & { currencyCode?: string };
+
+function toPlan(row: MembershipPlanRow): MembershipPlan {
+  const { currencyCode, ...rest } = row;
+  return { ...rest, currency: currencyCode ?? 'USD' } as MembershipPlan;
+}
+
 /**
  * Find a membership plan by ID
  */
 export async function findById(id: string): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "membershipPlanId" = $1`, [id]);
+  const row = await queryOne<MembershipPlanRow>(`SELECT * FROM "${TABLE}" WHERE "membershipPlanId" = $1`, [id]);
+  return row ? toPlan(row) : null;
 }
 
 /**
  * Find a membership plan by code
  */
 export async function findByCode(code: string): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
+  const row = await queryOne<MembershipPlanRow>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
+  return row ? toPlan(row) : null;
 }
 
 /**
@@ -52,23 +61,25 @@ export async function findAll(activeOnly = false): Promise<MembershipPlan[]> {
     sql += ` WHERE "isActive" = true`;
   }
   sql += ` ORDER BY "priority" DESC, "level" ASC`;
-  return (await query<MembershipPlan[]>(sql)) || [];
+  return ((await query<MembershipPlanRow[]>(sql)) || []).map(toPlan);
 }
 
 /**
  * Find the default membership plan
  */
 export async function findDefault(): Promise<MembershipPlan | null> {
-  return queryOne<MembershipPlan>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+  const row = await queryOne<MembershipPlanRow>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+  return row ? toPlan(row) : null;
 }
 
 /**
  * Find all public membership plans
  */
 export async function findPublic(): Promise<MembershipPlan[]> {
-  return (
-    (await query<MembershipPlan[]>(`SELECT * FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true ORDER BY "priority" DESC`)) || []
-  );
+  const rows =
+    (await query<MembershipPlanRow[]>(`SELECT * FROM "${TABLE}" WHERE "isPublic" = true AND "isActive" = true ORDER BY "priority" DESC`)) ||
+    [];
+  return rows.map(toPlan);
 }
 
 /**
@@ -86,10 +97,10 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
     await unsetAllDefaults();
   }
 
-  const result = await queryOne<MembershipPlan>(
+  const result = await queryOne<MembershipPlanRow>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "shortDescription", "isActive", "isPublic", "isDefault",
-      "priority", "level", "trialDays", "priceCents", "salePriceCents", "setupFeeCents", "currency",
+      "priority", "level", "trialDays", "priceCents", "salePriceCents", "setupFeeCents", "currencyCode",
       "billingCycle", "billingPeriod", "maxMembers", "autoRenew", "duration",
       "gracePeriodsAllowed", "gracePeriodDays", "membershipImage", "publicDetails",
       "privateMeta", "visibilityRules", "availabilityRules", "customFields", "createdBy"
@@ -133,7 +144,7 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
     throw new FailedToCreateMembershipError('Failed to create membership plan');
   }
 
-  return result;
+  return toPlan(result);
 }
 
 /**
@@ -150,10 +161,11 @@ export async function update(id: string, input: UpdateMembershipPlanInput): Prom
   let paramIndex = 1;
 
   const jsonFields = ['publicDetails', 'privateMeta', 'visibilityRules', 'availabilityRules', 'customFields'];
+  const columnMap: Record<string, string> = { currency: 'currencyCode' };
 
   for (const [key, value] of Object.entries(input)) {
     if (value !== undefined) {
-      updateFields.push(`"${key}" = $${paramIndex++}`);
+      updateFields.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
       values.push(jsonFields.includes(key) && value ? JSON.stringify(value) : value);
     }
   }
@@ -165,10 +177,11 @@ export async function update(id: string, input: UpdateMembershipPlanInput): Prom
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<MembershipPlan>(
+  const row = await queryOne<MembershipPlanRow>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "membershipPlanId" = $${paramIndex} RETURNING *`,
     values,
   );
+  return row ? toPlan(row) : null;
 }
 
 /**

@@ -43,6 +43,7 @@ import {
 interface GetOrCreateBasketBody {
   sessionId?: string;
   currency?: string;
+  storeId?: string;
 }
 
 interface AddItemBody {
@@ -165,7 +166,7 @@ export const listBaskets = async (req: HttpRequest, res: HttpResponse): Promise<
   const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
   const offset = req.query.offset ? parseInt(String(req.query.offset), 10) : 0;
   const rows = await query<Record<string, unknown>[]>(
-    `SELECT "basketId", status, currency, "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
+    `SELECT "basketId", status, "currencyCode", "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
      ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
     [limit, offset],
   );
@@ -205,14 +206,16 @@ export const getOrCreateBasket = async (req: HttpRequest, res: HttpResponse): Pr
   const customerId = req.user?.customerId || req.user?.id;
   const body = req.body as GetOrCreateBasketBody;
   const sessionId = req.sessionID || body.sessionId;
-  const currency = body.currency || 'USD';
+  // Store context may be attached by storefront middleware; when present the
+  // currency is validated against the store's supported currencies.
+  const storeId = (res.locals.storeId as string) || body.storeId;
 
   if (!customerId && !sessionId) {
     respondError(req, res, 'Either customer ID or session ID is required', 400);
     return;
   }
 
-  const command = new GetOrCreateBasketCommand(customerId, sessionId, currency);
+  const command = new GetOrCreateBasketCommand(customerId, sessionId, body.currency, storeId);
   const basket = await getOrCreateBasketUseCase.execute(command);
 
   // Return 201 if the basket was newly created, 200 if it already existed

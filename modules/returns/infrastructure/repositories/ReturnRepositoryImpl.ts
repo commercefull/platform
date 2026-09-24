@@ -429,7 +429,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       referenceId: string | null;
       amountCents: string;
       balanceAfterCents: string;
-      currency: string;
+      currencyCode: string;
       reason: string | null;
       notes: string | null;
       createdBy: string | null;
@@ -439,7 +439,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
     }>(
       `INSERT INTO "storeCreditLedger" (
         "customerId", "entryType", "referenceType", "referenceId",
-        "amountCents", "balanceAfterCents", "currency", "reason", "notes",
+        "amountCents", "balanceAfterCents", "currencyCode", "reason", "notes",
         "createdBy", "expiresAt", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
@@ -464,6 +464,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
     return StoreCreditLedgerEntry.reconstitute({
       ...row,
       entryType: row.entryType as StoreCreditEntryType,
+      currency: row.currencyCode,
       amountCents: Number(row.amountCents),
       balanceAfterCents: Number(row.balanceAfterCents),
       referenceType: row.referenceType ?? undefined,
@@ -489,7 +490,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
         referenceId: row.referenceId as string | undefined,
         amountCents: Number(row.amountCents),
         balanceAfterCents: parseFloat(row.balanceAfterCents as string),
-        currency: row.currency as string,
+        currency: row.currencyCode as string,
         reason: row.reason as string | undefined,
         notes: row.notes as string | undefined,
         createdBy: row.createdBy as string | undefined,
@@ -514,7 +515,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       referenceId: row.referenceId as string | undefined,
       amountCents: Number(row.amountCents),
       balanceAfterCents: parseFloat(row.balanceAfterCents as string),
-      currency: row.currency as string,
+      currency: row.currencyCode as string,
       reason: row.reason as string | undefined,
       notes: row.notes as string | undefined,
       createdBy: row.createdBy as string | undefined,
@@ -536,7 +537,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
             SELECT "referenceId" FROM "storeCreditLedger" WHERE "entryType" = 'expiry' AND "referenceType" = 'storeCredit'
           )
       )
-      INSERT INTO "storeCreditLedger" ("customerId", "entryType", "referenceType", "referenceId", "amountCents", "balanceAfterCents", "currency", "reason", "createdAt", "updatedAt")
+      INSERT INTO "storeCreditLedger" ("customerId", "entryType", "referenceType", "referenceId", "amountCents", "balanceAfterCents", "currencyCode", "reason", "createdAt", "updatedAt")
       SELECT e."customerId", 'expiry', 'storeCredit', e."storeCreditLedgerId", e."amountCents", 0, 'USD', 'Credit expired', NOW(), NOW()
       FROM expired e
       RETURNING 1`,

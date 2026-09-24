@@ -4,6 +4,7 @@
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreCurrencyRepository } from '../../domain/repositories/StoreCurrencyRepository';
 import { type StoreProps } from '../../domain/entities/Store';
 import { StoreNotFoundError, StoreSlugAlreadyExistsError, StoreValidationError } from '../../domain/errors/StoreErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
@@ -64,7 +65,10 @@ export interface UpdateStoreResponse {
 // ============================================================================
 
 export class UpdateStoreUseCase {
-  constructor(private readonly storeRepository: StoreRepository) {}
+  constructor(
+    private readonly storeRepository: StoreRepository,
+    private readonly storeCurrencyRepository?: StoreCurrencyRepository,
+  ) {}
 
   async execute(command: UpdateStoreCommand): Promise<UpdateStoreResponse> {
     // Find existing store
@@ -129,9 +133,15 @@ export class UpdateStoreUseCase {
       });
     }
 
-    // Currency updates
-    if (updates.supportedCurrencies || updates.defaultCurrency) {
-      store.updateCurrencies(updates.supportedCurrencies || store.supportedCurrencies || [], updates.defaultCurrency);
+    // Currency updates — supported currencies live in the `storeCurrency`
+    // membership table, not on the store row itself.
+    if ((updates.supportedCurrencies || updates.defaultCurrency) && this.storeCurrencyRepository) {
+      const supportedCurrencies = updates.supportedCurrencies ?? (await this.storeCurrencyRepository.getSupportedCodes(command.storeId));
+      const defaultCurrency =
+        updates.defaultCurrency ??
+        (await this.storeCurrencyRepository.getDefaultCode(command.storeId)) ??
+        supportedCurrencies[0];
+      await this.storeCurrencyRepository.replaceAll(command.storeId, supportedCurrencies, defaultCurrency);
     }
 
     // Settings updates

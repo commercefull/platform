@@ -364,7 +364,7 @@ export async function saveSubscriptionPlan(
         "billingInterval" = COALESCE($4, "billingInterval"),
         "billingIntervalCount" = COALESCE($5, "billingIntervalCount"),
         "priceCents" = COALESCE($6, "priceCents"), "compareAtPriceCents" = $7,
-        "currency" = COALESCE($8, "currency"), "setupFeeCents" = COALESCE($9, "setupFeeCents"),
+        "currencyCode" = COALESCE($8, "currencyCode"), "setupFeeCents" = COALESCE($9, "setupFeeCents"),
         "trialDays" = $10, "contractLength" = $11,
         "isContractRequired" = COALESCE($12, "isContractRequired"),
         "discountPercent" = COALESCE($13, "discountPercent"),
@@ -410,7 +410,7 @@ export async function saveSubscriptionPlan(
     const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "subscriptionPlan" (
         "subscriptionProductId", "name", "slug", "description", "billingInterval",
-        "billingIntervalCount", "priceCents", "compareAtPriceCents", "currency", "setupFeeCents",
+        "billingIntervalCount", "priceCents", "compareAtPriceCents", "currencyCode", "setupFeeCents",
         "trialDays", "contractLength", "isContractRequired", "discountPercent",
         "discountAmountCents", "freeShippingThresholdCents", "includesFreeShipping",
         "includedProducts", "features", "metadata", "sortOrder", "isPopular",
@@ -555,7 +555,7 @@ export async function createCustomerSubscription(subscription: {
     `INSERT INTO "customerSubscription" (
       "subscriptionNumber", "customerId", "subscriptionPlanId", "subscriptionProductId",
       "productVariantId", "status", "quantity", "unitPriceCents", "discountAmountCents",
-      "taxAmountCents", "totalPriceCents", "currency", "billingInterval", "billingIntervalCount",
+      "taxAmountCents", "totalPriceCents", "currencyCode", "billingInterval", "billingIntervalCount",
       "trialStartAt", "trialEndAt", "currentPeriodStart", "currentPeriodEnd",
       "nextBillingAt", "contractCyclesRemaining", "shippingAddressId", "billingAddressId",
       "paymentMethodId", "customizations", "createdAt", "updatedAt"
@@ -862,7 +862,7 @@ export async function createDunningAttempt(attempt: {
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionDunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
-      "status", "amountCents", "currency", "scheduledAt", "createdAt", "updatedAt"
+      "status", "amountCents", "currencyCode", "scheduledAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8)
     RETURNING *`,
     [
@@ -1003,7 +1003,7 @@ function mapToSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
     billingIntervalCount: parseInt(row.billingIntervalCount as string) || 1,
     priceCents: Number(row.priceCents) || 0,
     compareAtPriceCents: row.compareAtPriceCents != null ? Number(row.compareAtPriceCents) : undefined,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     setupFeeCents: Number(row.setupFeeCents) || 0,
     trialDays: row.trialDays ? parseInt(row.trialDays as string) : undefined,
     contractLength: row.contractLength ? parseInt(row.contractLength as string) : undefined,
@@ -1037,7 +1037,7 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     discountAmountCents: parseFloat(row.discountAmountCents as string) || 0,
     taxAmountCents: parseFloat(row.taxAmountCents as string) || 0,
     totalPriceCents: parseFloat(row.totalPriceCents as string) || 0,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     billingInterval: row.billingInterval as BillingInterval,
     billingIntervalCount: parseInt(row.billingIntervalCount as string) || 1,
     trialStartAt: row.trialStartAt ? new Date(row.trialStartAt as string) : undefined,
@@ -1085,7 +1085,7 @@ function mapToSubscriptionOrder(row: Record<string, unknown>): SubscriptionOrder
     taxAmountCents: parseFloat(row.taxAmountCents as string) || 0,
     shippingAmountCents: parseFloat(row.shippingAmountCents as string) || 0,
     totalAmountCents: parseFloat(row.totalAmountCents as string) || 0,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     scheduledAt: row.scheduledAt ? new Date(row.scheduledAt as string) : undefined,
     processedAt: row.processedAt ? new Date(row.processedAt as string) : undefined,
     paidAt: row.paidAt ? new Date(row.paidAt as string) : undefined,
@@ -1133,7 +1133,7 @@ function mapToDunningAttempt(row: Record<string, unknown>): DunningAttempt {
     attemptNumber: parseInt(row.attemptNumber as string) || 1,
     status: row.status as DunningStatus,
     amountCents: parseFloat(row.amountCents as string) || 0,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     scheduledAt: new Date(row.scheduledAt as string),
     attemptedAt: row.attemptedAt ? new Date(row.attemptedAt as string) : undefined,
     paymentMethodId: row.paymentMethodId as string | undefined,
@@ -1172,7 +1172,7 @@ export async function findActivePlansWithProduct(): Promise<unknown[]> {
 
 export async function findByCustomerIdWithPlan(customerId: string): Promise<unknown[]> {
   const results = await query<unknown[]>(
-    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currency"
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currencyCode"
      FROM "customerSubscription" cs
      LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
      WHERE cs."customerId" = $1
@@ -1184,7 +1184,7 @@ export async function findByCustomerIdWithPlan(customerId: string): Promise<unkn
 
 export async function findByIdWithPlan(subscriptionId: string, customerId: string): Promise<unknown | null> {
   return await queryOne<unknown>(
-    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currency",
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currencyCode",
             sp."features", sp."description" as "planDescription"
      FROM "customerSubscription" cs
      LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"

@@ -131,14 +131,14 @@
                       <span class="badge badge-secondary"><%= rate.rateType %></span>
                     </td>
                     <td>
-                      <%= rate.currency %> <%= parseFloat(rate.baseRate).toFixed(2) %>
-                      <% if (rate.perItemRate && rate.perItemRate !== '0') { %>
-                        <br><small class="text-muted">+ <%= rate.currency %> <%= parseFloat(rate.perItemRate).toFixed(2) %>/item</small>
+                      <%= rate.currencyCode %> <%= ((rate.baseRateCents || 0) / 100).toFixed(2) %>
+                      <% if (rate.perItemRateCents && rate.perItemRateCents !== '0') { %>
+                        <br><small class="text-muted">+ <%= rate.currencyCode %> <%= ((rate.perItemRateCents || 0) / 100).toFixed(2) %>/item</small>
                       <% } %>
                     </td>
                     <td>
-                      <% if (rate.freeThreshold) { %>
-                        <%= rate.currency %> <%= parseFloat(rate.freeThreshold).toFixed(2) %>
+                      <% if (rate.freeThresholdCents) { %>
+                        <%= rate.currencyCode %> <%= ((rate.freeThresholdCents || 0) / 100).toFixed(2) %>
                       <% } else { %>
                         <span class="text-muted">-</span>
                       <% } %>

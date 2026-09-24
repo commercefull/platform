@@ -54,7 +54,7 @@ exports.seed = async function (knex) {
       referenceId: '0193c002-0000-7000-8000-000000000001',
       amountCents: 10000,
       balanceAfterCents: 10000,
-      currency: 'USD',
+      currencyCode: 'USD',
       reason: 'Seeded store credit',
       createdAt: now,
       updatedAt: now,

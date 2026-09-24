@@ -8,10 +8,12 @@
  */
 
 import storeRepo from './StoreRepo';
+import storeCurrencyRepo from './StoreCurrencyRepo';
 import pickupLocationRepo from './pickupLocationRepo';
 
 class StoreDataRepository {
   readonly stores = storeRepo;
+  readonly currencies = storeCurrencyRepo;
   readonly pickupLocations = pickupLocationRepo;
 }
 

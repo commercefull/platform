@@ -19,7 +19,7 @@ exports.up = function (knex) {
     table.decimal('percentageDrop', 5, 2);
     table.bigInteger('originalPriceCents');
     table.bigInteger('currentPriceCents');
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.string('notificationChannel').defaultTo('email'); // email, sms, push, all
     table.timestamp('notifiedAt');
     table.bigInteger('notifiedPriceCents');

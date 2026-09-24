@@ -10,7 +10,7 @@ exports.up = function (knex) {
     table.bigInteger('amountCents').notNullable();
     table.bigInteger('balanceBeforeCents').notNullable();
     table.bigInteger('balanceAfterCents').notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.uuid('orderId').references('orderId').inTable('order').onDelete('SET NULL');
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');
     table.string('performedBy');

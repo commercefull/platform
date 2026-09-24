@@ -5,7 +5,7 @@ exports.up = function (knex) {
     t.uuid('customerId').notNullable().references('customerId').inTable('customer');
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization');
     t.bigInteger('amountCents').notNullable();
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.string('status', 20).notNullable().checkIn(['draft', 'open', 'paid', 'past_due', 'failed', 'voided']).defaultTo('draft');
     t.timestamp('dueDate').notNullable();
     t.timestamp('paidDate');

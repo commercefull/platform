@@ -15,7 +15,7 @@ exports.up = async function (knex) {
     table.bigInteger('commissionAmountCents').notNullable();
     table.bigInteger('feeAmountCents').defaultTo(0);
     table.bigInteger('netAmountCents').notNullable();
-    table.string('currency', 3).notNullable();
+    table.string('currencyCode', 3).notNullable().references('code').inTable('currency');
     table.string('status', 20).defaultTo('pending'); // 'pending', 'scheduled', 'processing', 'completed', 'failed'
     table.date('scheduledDate').nullable();
     table.timestamp('processedAt').nullable();

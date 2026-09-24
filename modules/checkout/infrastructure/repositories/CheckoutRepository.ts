@@ -265,10 +265,9 @@ export class CheckoutRepo implements CheckoutRepository {
   }
 
   private mapToCheckoutSession(row: DbCheckoutSession): CheckoutSession {
-    const currency = 'USD';
-
     const rawMeta = row.metadata ? (typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) : {};
     const meta = rawMeta as Record<string, unknown>;
+    const currency = (meta?.currency as string) || 'USD';
 
     let shippingAddress: Address | undefined = undefined;
     if (meta?.shippingAddress) {

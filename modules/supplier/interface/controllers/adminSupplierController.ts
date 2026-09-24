@@ -72,6 +72,10 @@ const supplierCreateFields: FieldConfig[] = [
 
 function parseSupplierCreateInput(body: HttpRequestBody) {
   const result = buildFormObject(body as Record<string, unknown>, supplierCreateFields);
+  if ('currency' in result) {
+    result.currencyCode = result.currency;
+    delete result.currency;
+  }
   if (typeof result.categories === 'string') {
     result.categories = result.categories.split(',').map((c: string) => c.trim());
   }
@@ -160,6 +164,10 @@ const supplierUpdateFields: FieldConfig[] = [
 
 function parseSupplierUpdates(body: HttpRequestBody): Record<string, unknown> {
   const updates = buildFormObject(body as Record<string, unknown>, supplierUpdateFields);
+  if ('currency' in updates) {
+    updates.currencyCode = updates.currency;
+    delete updates.currency;
+  }
   if (typeof updates.categories === 'string') {
     updates.categories = updates.categories.split(',').map((c: string) => c.trim());
   }

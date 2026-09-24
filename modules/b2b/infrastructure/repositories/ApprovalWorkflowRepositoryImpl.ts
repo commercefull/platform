@@ -2,38 +2,45 @@ import { query, queryOne } from '../../../../libs/db';
 import { ApprovalWorkflow, ApprovalWorkflowProps } from '../../domain/entities/ApprovalWorkflow';
 import type { ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 
+type ApprovalWorkflowRow = Omit<ApprovalWorkflowProps, 'currency'> & { currencyCode?: string };
+
+function toProps(row: ApprovalWorkflowRow): ApprovalWorkflowProps {
+  const { currencyCode, ...rest } = row;
+  return { ...rest, currency: currencyCode ?? 'USD' } as ApprovalWorkflowProps;
+}
+
 export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepository {
   async findById(workflowId: string): Promise<ApprovalWorkflow | null> {
-    const row = await queryOne<ApprovalWorkflowProps>(`SELECT * FROM "b2bApprovalWorkflow" WHERE "workflowId" = $1`, [workflowId]);
-    return row ? ApprovalWorkflow.reconstitute(row) : null;
+    const row = await queryOne<ApprovalWorkflowRow>(`SELECT * FROM "b2bApprovalWorkflow" WHERE "workflowId" = $1`, [workflowId]);
+    return row ? ApprovalWorkflow.reconstitute(toProps(row)) : null;
   }
 
   async findByReferenceId(referenceId: string): Promise<ApprovalWorkflow | null> {
-    const row = await queryOne<ApprovalWorkflowProps>(
+    const row = await queryOne<ApprovalWorkflowRow>(
       `SELECT * FROM "b2bApprovalWorkflow" WHERE "referenceId" = $1 ORDER BY "createdAt" DESC LIMIT 1`,
       [referenceId],
     );
-    return row ? ApprovalWorkflow.reconstitute(row) : null;
+    return row ? ApprovalWorkflow.reconstitute(toProps(row)) : null;
   }
 
   async findByCompanyId(companyId: string): Promise<ApprovalWorkflow[]> {
-    const rows = await query<ApprovalWorkflowProps[]>(
+    const rows = await query<ApprovalWorkflowRow[]>(
       `SELECT * FROM "b2bApprovalWorkflow" WHERE "companyId" = $1 ORDER BY "createdAt" DESC`,
       [companyId],
     );
-    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(r));
+    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(toProps(r)));
   }
 
   async findByOrganizationId(organizationId: string): Promise<ApprovalWorkflow[]> {
-    const rows = await query<ApprovalWorkflowProps[]>(
+    const rows = await query<ApprovalWorkflowRow[]>(
       `SELECT * FROM "b2bApprovalWorkflow" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
       [organizationId],
     );
-    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(r));
+    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(toProps(r)));
   }
 
   async findByApproverId(approverId: string, organizationId: string): Promise<ApprovalWorkflow[]> {
-    const rows = await query<ApprovalWorkflowProps[]>(
+    const rows = await query<ApprovalWorkflowRow[]>(
       `SELECT * FROM "b2bApprovalWorkflow"
        WHERE "organizationId" = $1
        AND EXISTS (
@@ -43,15 +50,15 @@ export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepositor
        ORDER BY "createdAt" DESC`,
       [organizationId, approverId],
     );
-    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(r));
+    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(toProps(r)));
   }
 
   async findPendingByOrganizationId(organizationId: string): Promise<ApprovalWorkflow[]> {
-    const rows = await query<ApprovalWorkflowProps[]>(
+    const rows = await query<ApprovalWorkflowRow[]>(
       `SELECT * FROM "b2bApprovalWorkflow" WHERE "organizationId" = $1 AND "status" = 'pending' ORDER BY "createdAt" DESC`,
       [organizationId],
     );
-    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(r));
+    return (rows ?? []).map(r => ApprovalWorkflow.reconstitute(toProps(r)));
   }
 
   async save(workflow: ApprovalWorkflow): Promise<void> {
@@ -60,7 +67,7 @@ export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepositor
       `INSERT INTO "b2bApprovalWorkflow" (
         "workflowId", "companyId", "organizationId", "type", "referenceId",
         "referenceNumber", "requestedBy", "requestedByEmail", "status",
-        "amountCents", "currency", "steps", "currentStep", "description",
+        "amountCents", "currencyCode", "steps", "currentStep", "description",
         "createdAt", "updatedAt", "completedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
       ON CONFLICT ("workflowId") DO UPDATE SET

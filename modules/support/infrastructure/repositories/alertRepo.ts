@@ -323,7 +323,7 @@ export async function createPriceAlert(alert: {
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "alertType",
       "targetPriceCents", "percentageDrop", "originalPriceCents", "currentPriceCents",
-      "currency", "notificationChannel", "expiresAt", "createdAt", "updatedAt"
+      "currencyCode", "notificationChannel", "expiresAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *`,
     [
@@ -446,7 +446,7 @@ function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
     percentageDrop: row.percentageDrop ? parseFloat(row.percentageDrop as string) : undefined,
     originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : undefined,
     currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : undefined,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     notificationChannel: row.notificationChannel as NotificationChannel,
     notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
     notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : undefined,

@@ -271,7 +271,7 @@ exports.seed = async function (knex) {
       type: 'creditCard',
       provider: 'test-gateway',
       amountCents: 4999,
-      currency: 'USD',
+      currencyCode: 'USD',
       status: 'captured',
       refundedAmountCents: 0,
       capturedAt: knex.fn.now(),

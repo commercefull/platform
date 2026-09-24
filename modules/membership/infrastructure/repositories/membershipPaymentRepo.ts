@@ -12,7 +12,7 @@ export interface MembershipPayment {
   subscriptionId: string;
   customerId: string;
   amountCents: number;
-  currency: string;
+  currencyCode: string;
   paymentDate: string;
   status: PaymentStatus;
   paymentType: PaymentType;
@@ -75,7 +75,7 @@ export class MembershipPaymentRepo {
 
     const result = await queryOne<MembershipPayment>(
       `INSERT INTO "membershipPayment" (
-        "subscriptionId", "customerId", "amountCents", "currency", "paymentDate", "status", "paymentType",
+        "subscriptionId", "customerId", "amountCents", "currencyCode", "paymentDate", "status", "paymentType",
         "paymentMethod", "transactionId", "billingPeriodStart", "billingPeriodEnd", "notes",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
@@ -83,7 +83,7 @@ export class MembershipPaymentRepo {
         params.subscriptionId,
         params.customerId,
         params.amountCents,
-        params.currency || 'USD',
+        params.currencyCode || 'USD',
         params.paymentDate || now,
         params.status || 'pending',
         params.paymentType,

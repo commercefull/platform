@@ -24,7 +24,7 @@ export async function findBenefitsByPlanId(planId: string): Promise<unknown[]> {
 
 export async function findActiveMembershipWithPlan(customerId: string): Promise<unknown | null> {
   return await queryOne<unknown>(
-    `SELECT m.*, mp."name" as "planName", mp."tier", mp."priceCents", mp."currency"
+    `SELECT m.*, mp."name" as "planName", mp."tier", mp."priceCents", mp."currencyCode"
      FROM "membership" m
      LEFT JOIN "membershipPlan" mp ON m."membershipPlanId" = mp."membershipPlanId"
      WHERE m."customerId" = $1 AND m."status" = 'active'

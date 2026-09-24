@@ -27,7 +27,7 @@ exports.up = function (knex) {
     table.integer('previousOrders').defaultTo(0);
     table.integer('previousChargebacks').defaultTo(0);
     table.bigInteger('orderAmountCents');
-    table.string('currency', 3);
+    table.string('currencyCode', 3).references('code').inTable('currency');
     table.boolean('isFirstOrder').defaultTo(false);
     table.boolean('isGuestCheckout').defaultTo(false);
     table.string('paymentMethod');

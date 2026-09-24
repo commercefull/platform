@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.jsonb('rateMatrix');
     t.bigInteger('minRateCents');
     t.bigInteger('maxRateCents');
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('taxable').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);
     t.timestamp('validFrom');
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('rateType');
     t.index('priority');
-    t.index('currency');
+    t.index('currencyCode');
     t.index('validFrom');
     t.index('validTo');
     t.unique(['shippingZoneId', 'shippingMethodId']);

@@ -8,7 +8,7 @@ exports.up = function (knex) {
     t.bigInteger('pendingAmountCents').notNullable().defaultTo(0);
     t.bigInteger('reservedAmountCents').notNullable().defaultTo(0);
     t.bigInteger('totalVolumeCents').notNullable().defaultTo(0);
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.timestamp('lastPayoutDate');
     t.timestamp('nextPayoutDate');
     t.bigInteger('nextPayoutAmountCents');

@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.uuid('customerId');
     t.string('sessionId', 255);
     t.enum('status', ['active', 'merged', 'converted', 'abandoned', 'completed']).notNullable().defaultTo('active');
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.integer('itemsCount').notNullable().defaultTo(0);
     t.bigInteger('subTotalCents').notNullable().defaultTo(0);
     t.bigInteger('taxAmountCents').notNullable().defaultTo(0);
@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.bigInteger('shippingAmountCents').notNullable().defaultTo(0);
     t.bigInteger('grandTotalCents').notNullable().defaultTo(0);
     t.jsonb('metadata');
-    t.uuid('storeId').nullable();
+    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     t.uuid('channelId').nullable();
     t.uuid('accountId').nullable();
 

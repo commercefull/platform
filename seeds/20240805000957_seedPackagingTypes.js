@@ -18,7 +18,7 @@ exports.up = function (knex) {
       maxWeight: 2,
       recyclable: true,
       costCents: 50,
-      currency: 'USD',
+      currencyCode: 'USD',
       validCarriers: [],
     },
     {
@@ -35,7 +35,7 @@ exports.up = function (knex) {
       maxWeight: 5,
       recyclable: true,
       costCents: 100,
-      currency: 'USD',
+      currencyCode: 'USD',
       validCarriers: [],
     },
     {
@@ -52,7 +52,7 @@ exports.up = function (knex) {
       maxWeight: 10,
       recyclable: true,
       costCents: 150,
-      currency: 'USD',
+      currencyCode: 'USD',
       validCarriers: [],
     },
     {
@@ -69,7 +69,7 @@ exports.up = function (knex) {
       maxWeight: 0.5,
       recyclable: true,
       costCents: 20,
-      currency: 'USD',
+      currencyCode: 'USD',
       validCarriers: [],
     },
     {
@@ -86,7 +86,7 @@ exports.up = function (knex) {
       maxWeight: 3,
       recyclable: false,
       costCents: 10,
-      currency: 'USD',
+      currencyCode: 'USD',
       validCarriers: [],
     },
   ]);

@@ -163,7 +163,7 @@ export function createShippingRate(overrides: Partial<ShippingRate> = {}): Shipp
     rateMatrix: null,
     minRateCents: null,
     maxRateCents: null,
-    currency: 'USD',
+    currencyCode: 'USD',
     taxable: true,
     priority: null,
     validFrom: null,

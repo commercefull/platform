@@ -9,7 +9,7 @@ exports.up = function (knex) {
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isPublic').notNullable().defaultTo(true);
     t.bigInteger('amountCents').notNullable();
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.string('billingInterval', 20)
       .notNullable()
       .checkIn(['daily', 'weekly', 'monthly', 'quarterly', 'biannually', 'annually'])

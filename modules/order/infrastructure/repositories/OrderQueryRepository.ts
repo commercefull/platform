@@ -351,20 +351,26 @@ class OrderQueryRepo {
 
   // --- Order Payments ---
 
+  private toOrderPayment(row: Omit<OrderPayment, 'currency'> & { currencyCode?: string }): OrderPayment {
+    const { currencyCode, ...rest } = row;
+    return { ...rest, currency: currencyCode ?? 'USD' } as OrderPayment;
+  }
+
   async findPaymentsByOrder(orderId: string): Promise<OrderPayment[]> {
     const results = await query<OrderPayment[]>(`SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
-    return results || [];
+    return (results || []).map(row => this.toOrderPayment(row));
   }
 
   async findPaymentById(orderPaymentId: string): Promise<OrderPayment | null> {
-    return queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
+    const row = await queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
+    return row ? this.toOrderPayment(row) : null;
   }
 
   async createPayment(params: OrderPaymentCreateParams): Promise<OrderPayment> {
     const now = unixTimestamp();
     const result = await queryOne<OrderPayment>(
       `INSERT INTO "orderPayment" (
-        "orderId", "paymentMethodId", "type", "provider", "amountCents", "currency", "status",
+        "orderId", "paymentMethodId", "type", "provider", "amountCents", "currencyCode", "status",
         "transactionId", "authorizationCode", "errorCode", "errorMessage",
         "maskedNumber", "cardType", "gatewayResponse", "refundedAmountCents", "capturedAt",
         "createdAt", "updatedAt"
@@ -392,7 +398,7 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderPaymentError();
-    return result;
+    return this.toOrderPayment(result);
   }
 
   // --- Order Payment Refunds ---

@@ -9,7 +9,7 @@ exports.up = function (knex) {
       table.uuid('organizationId').references('organizationId').inTable('organization');
       table.date('date').notNullable();
       table.string('channel').defaultTo('all'); // web, mobile, api, pos, all
-      table.string('currency', 3).defaultTo('USD');
+      table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
 
       // Order metrics
       table.integer('orderCount').defaultTo(0);
@@ -43,7 +43,7 @@ exports.up = function (knex) {
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-      table.unique(['organizationId', 'date', 'channel', 'currency']);
+      table.unique(['organizationId', 'date', 'channel', 'currencyCode']);
     })
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("date")'))
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("organizationId", "date")'));

@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.bigInteger('taxExemptAmountCents').notNullable().defaultTo(0);
     t.bigInteger('taxAmountCents').notNullable().defaultTo(0);
     t.bigInteger('totalAmountCents').notNullable().defaultTo(0);
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.decimal('exchangeRate', 15, 6).notNullable().defaultTo(1.0);
     t.jsonb('taxProviderResponse');
     t.string('taxProviderReference', 255);

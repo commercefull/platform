@@ -16,7 +16,7 @@ exports.up = function (knex) {
     table.bigInteger('discountAmountCents').defaultTo(0);
     table.bigInteger('taxAmountCents').defaultTo(0);
     table.bigInteger('totalPriceCents').notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.string('billingInterval').notNullable();
     table.integer('billingIntervalCount').defaultTo(1);
     table.timestamp('trialStartAt');

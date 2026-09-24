@@ -23,7 +23,7 @@ exports.up = async function (knex) {
       subscriptionId: subscription.id,
       customerId: sampleCustomer.id,
       amountCents: standardPlan.priceCents,
-      currency: standardPlan.currency,
+      currencyCode: standardPlan.currencyCode,
       status: 'completed',
       paymentType: 'subscription',
       paymentMethod: 'credit_card',

@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.bigInteger('priceCents').notNullable();
     t.bigInteger('salePriceCents');
     t.bigInteger('setupFeeCents').defaultTo(0);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.enum('billingCycle', ['daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime'])
       .notNullable()
       .defaultTo('monthly');

@@ -12,7 +12,7 @@ export async function up(knex) {
     table.bigInteger('grossAmountCents').notNullable().defaultTo(0);
     table.bigInteger('commissionAmountCents').notNullable().defaultTo(0);
     table.bigInteger('netAmountCents').notNullable().defaultTo(0);
-    table.string('currency').notNullable().defaultTo('USD');
+    table.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     table.string('transactionRef');
     table.text('failureReason');
     table.timestamp('processedAt');

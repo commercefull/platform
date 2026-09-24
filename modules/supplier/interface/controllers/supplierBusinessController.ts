@@ -86,7 +86,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     categories,
     tags,
     customFields,
-  } = req.body as SupplierCreateParams;
+  } = req.body as SupplierCreateParams & { currency?: string };
 
   // Validate required fields
   const errors: string[] = [];
@@ -112,7 +112,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     taxId,
     paymentTerms,
     paymentMethod,
-    currency,
+    currencyCode: currency || 'USD',
     minOrderValueCents,
     leadTime,
     notes,
@@ -352,7 +352,7 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
     status: 'active',
     isPreferred: isPreferred || false,
     unitCostCents,
-    currency: currency || 'USD',
+    currencyCode: currency || 'USD',
     minimumOrderQuantity: minimumOrderQuantity || 1,
     leadTime,
     packagingInfo,

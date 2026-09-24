@@ -56,7 +56,7 @@ exports.up = function (knex) {
     ])
       .notNullable()
       .defaultTo('unfulfilled');
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.bigInteger('subtotalCents').notNullable().defaultTo(0);
     t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
     t.bigInteger('taxTotalCents').notNullable().defaultTo(0);

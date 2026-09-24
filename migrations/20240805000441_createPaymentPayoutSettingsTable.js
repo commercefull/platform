@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.integer('payoutDay');
     t.integer('holdPeriod').notNullable().defaultTo(0);
     t.boolean('automaticPayouts').notNullable().defaultTo(true);
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.enum('payoutProvider', ['stripe', 'square', 'other']).notNullable().defaultTo('stripe');
     t.string('payoutMethod', 50).notNullable().checkIn(['bank_transfer', 'paypal', 'check', 'other']).defaultTo('bank_transfer');
     t.jsonb('providerSettings');

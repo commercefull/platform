@@ -20,7 +20,7 @@ exports.up = function (knex) {
     ]).notNullable();
     t.string('provider', 100).notNullable();
     t.bigInteger('amountCents').notNullable();
-    t.string('currency', 3).notNullable();
+    t.string('currencyCode', 3).notNullable().references('code').inTable('currency');
     t.enum('status', ['pending', 'authorized', 'captured', 'refunded', 'partiallyRefunded', 'voided', 'failed'])
       .notNullable()
       .defaultTo('pending');

@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.string('taxId', 50);
     t.string('paymentTerms', 100);
     t.string('paymentMethod', 50);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.bigInteger('minOrderValueCents');
     t.integer('leadTime');
     t.text('notes');

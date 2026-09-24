@@ -110,7 +110,7 @@ export async function createGiftCard(giftCard: {
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TABLE}" (
-      "code", "type", "initialBalanceCents", "currentBalanceCents", "currency", "status",
+      "code", "type", "initialBalanceCents", "currentBalanceCents", "currencyCode", "status",
       "purchasedBy", "purchaseOrderId", "recipientEmail", "recipientName",
       "personalMessage", "deliveryDate", "deliveryMethod", "expiresAt",
       "isReloadable", "restrictions", "createdAt", "updatedAt"
@@ -315,7 +315,7 @@ async function createTransaction(transaction: {
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TRANSACTION_TABLE}" (
-      "promotionGiftCardId", "type", "amountCents", "balanceBeforeCents", "balanceAfterCents", "currency",
+      "promotionGiftCardId", "type", "amountCents", "balanceBeforeCents", "balanceAfterCents", "currencyCode",
       "orderId", "customerId", "performedBy", "performedByType", "notes",
       "referenceNumber", "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -369,7 +369,7 @@ function mapToGiftCard(row: Record<string, unknown>): PromotionGiftCard {
     type: row.type as GiftCardType,
     initialBalanceCents: parseFloat(row.initialBalanceCents as string) || 0,
     currentBalanceCents: parseFloat(row.currentBalanceCents as string) || 0,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     status: row.status as GiftCardStatus,
     purchasedBy: row.purchasedBy as string | undefined,
     purchaseOrderId: row.purchaseOrderId as string | undefined,
@@ -406,7 +406,7 @@ function mapToTransaction(row: Record<string, unknown>): PromotionGiftCardTransa
     amountCents: parseFloat(row.amountCents as string) || 0,
     balanceBeforeCents: parseFloat(row.balanceBeforeCents as string) || 0,
     balanceAfterCents: parseFloat(row.balanceAfterCents as string) || 0,
-    currency: (row.currency as string) || 'USD',
+    currency: (row.currencyCode as string) || 'USD',
     orderId: row.orderId as string | undefined,
     customerId: row.customerId as string | undefined,
     performedBy: row.performedBy as string | undefined,

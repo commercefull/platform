@@ -13,7 +13,7 @@ exports.up = async function (knex) {
         isApproved: true,
         status: 'active',
         paymentTerms: 'Net 30',
-        currency: 'USD',
+        currencyCode: 'USD',
         categories: ['General', 'Electronics', 'Apparel'],
       },
     ])

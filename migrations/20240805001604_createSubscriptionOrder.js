@@ -21,7 +21,7 @@ exports.up = function (knex) {
     table.bigInteger('taxAmountCents').defaultTo(0);
     table.bigInteger('shippingAmountCents').defaultTo(0);
     table.bigInteger('totalAmountCents').notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.timestamp('scheduledAt');
     table.timestamp('processedAt');
     table.timestamp('paidAt');

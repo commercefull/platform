@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.integer('priority').defaultTo(0);
     t.boolean('isActive').notNullable().defaultTo(true);
     t.jsonb('metadata').nullable();
-    t.string('currencyCode', 3).nullable();
+    t.string('currencyCode', 3).nullable().references('code').inTable('currency');
     t.string('regionCode', 10).nullable();
 
     t.index(['ruleType', 'scope']);

@@ -14,7 +14,7 @@ export async function findByCustomer(customerId: string): Promise<unknown[]> {
             pm."url" as "imageUrl"
      FROM "wishlistItem" w
      JOIN "product" p ON w."productId" = p."productId"
-     LEFT JOIN "productBasePrice" bp ON p."productId" = bp."productId" AND bp."currency" = 'USD'
+     LEFT JOIN "productBasePrice" bp ON p."productId" = bp."productId" AND bp."currencyCode" = 'USD'
      LEFT JOIN "productMedia" pm ON p."productId" = pm."productId" AND pm."isPrimary" = true
      WHERE w."customerId" = $1
      ORDER BY w."createdAt" DESC`,

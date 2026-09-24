@@ -6,6 +6,8 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
+import { BasketValidationError } from '../../domain/errors/BasketErrors';
+import type { StoreCurrencyPort } from '../ports/StoreCurrencyPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -16,7 +18,8 @@ export class GetOrCreateBasketCommand {
   constructor(
     public readonly customerId?: string,
     public readonly sessionId?: string,
-    public readonly currency: string = 'USD',
+    public readonly currency?: string,
+    public readonly storeId?: string,
   ) {}
 }
 
@@ -28,6 +31,7 @@ export interface BasketResponse {
   basketId: string;
   customerId?: string;
   sessionId?: string;
+  storeId?: string;
   status: string;
   currency: string;
   items: Array<{
@@ -53,6 +57,7 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
     basketId: basket.basketId,
     customerId: basket.customerId,
     sessionId: basket.sessionId,
+    storeId: basket.storeId,
     status: basket.status,
     currency: basket.currency,
     items: basket.items.map(item => ({
@@ -79,18 +84,36 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
 // ============================================================================
 
 export class GetOrCreateBasketUseCase {
-  constructor(private readonly basketRepository: BasketRepository) {}
+  constructor(
+    private readonly basketRepository: BasketRepository,
+    private readonly storeCurrencyPort?: StoreCurrencyPort,
+  ) {}
 
   async execute(command: GetOrCreateBasketCommand): Promise<BasketResponse> {
     let basket = await this.basketRepository.findActiveBasket(command.customerId, command.sessionId);
     let isNew = false;
 
     if (!basket) {
+      // Resolve the basket currency against the store's supported currencies
+      // when a store context is present.
+      let currency = command.currency;
+      if (command.storeId && this.storeCurrencyPort) {
+        if (currency) {
+          const supported = await this.storeCurrencyPort.isSupported(command.storeId, currency);
+          if (!supported) {
+            throw new BasketValidationError(`Currency '${currency}' is not supported by this store`);
+          }
+        } else {
+          currency = (await this.storeCurrencyPort.getDefaultCode(command.storeId)) ?? undefined;
+        }
+      }
+
       basket = Basket.create({
         basketId: generateUUID(),
         customerId: command.customerId,
         sessionId: command.sessionId,
-        currency: command.currency,
+        storeId: command.storeId,
+        currency: currency || 'USD',
       });
 
       await this.basketRepository.save(basket);

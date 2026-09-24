@@ -288,7 +288,7 @@ export async function createCheck(check: {
       "orderId", "customerId", "checkType", "status", "riskScore", "riskLevel",
       "deviceFingerprint", "ipAddress", "billingCountry", "shippingCountry",
       "addressMismatch", "previousOrders", "previousChargebacks", "orderAmountCents",
-      "currency", "isFirstOrder", "isGuestCheckout", "paymentMethod", "cardBin",
+      "currencyCode", "isFirstOrder", "isGuestCheckout", "paymentMethod", "cardBin",
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, 'pending', 0, 'low', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *`,
@@ -617,7 +617,7 @@ function mapToCheck(row: Record<string, unknown>): FraudCheck {
     previousOrders: parseInt(String(row.previousOrders)) || 0,
     previousChargebacks: parseInt(String(row.previousChargebacks)) || 0,
     orderAmountCents: row.orderAmountCents ? parseFloat(String(row.orderAmountCents)) : undefined,
-    currency: row.currency as string | undefined,
+    currency: row.currencyCode as string | undefined,
     isFirstOrder: Boolean(row.isFirstOrder),
     isGuestCheckout: Boolean(row.isGuestCheckout),
     paymentMethod: row.paymentMethod as string | undefined,

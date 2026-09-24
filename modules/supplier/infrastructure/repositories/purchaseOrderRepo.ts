@@ -43,7 +43,7 @@ export interface SupplierPurchaseOrder {
   trackingNumber?: string;
   carrierName?: string;
   paymentTerms?: string;
-  currency: string;
+  currencyCode: string;
   subtotalCents: number;
   taxCents: number;
   shippingCents: number;
@@ -233,7 +233,7 @@ export class SupplierPurchaseOrderRepo {
       `INSERT INTO "supplierPurchaseOrder" (
         "poNumber", "supplierId", "distributionWarehouseId", "status", "orderType", "priority",
         "orderDate", "expectedDeliveryDate", "deliveryDate", "shippingMethod",
-        "trackingNumber", "carrierName", "paymentTerms", "currency",
+        "trackingNumber", "carrierName", "paymentTerms", "currencyCode",
         "subtotalCents", "taxCents", "shippingCents", "discountCents", "totalCents",
         "notes", "supplierNotes", "attachments",
         "createdAt", "updatedAt"
@@ -255,7 +255,7 @@ export class SupplierPurchaseOrderRepo {
         params.trackingNumber || null,
         params.carrierName || null,
         params.paymentTerms || null,
-        params.currency || 'USD',
+        params.currencyCode || 'USD',
         params.subtotalCents || 0,
         params.taxCents || 0,
         params.shippingCents || 0,

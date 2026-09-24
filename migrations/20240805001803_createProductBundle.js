@@ -16,7 +16,7 @@ exports.up = function (knex) {
     table.bigInteger('discountAmountCents');
     table.bigInteger('minPriceCents');
     table.bigInteger('maxPriceCents');
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.integer('minItems');
     table.integer('maxItems');
     table.integer('minQuantity').defaultTo(1);

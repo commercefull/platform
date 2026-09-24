@@ -181,7 +181,7 @@ export class CalculateShippingRatesUseCase {
             rateName: rate.name,
             rateType: rate.rateType,
             amountCents: adjustedAmountCents,
-            currency: rate.currency,
+            currency: rate.currencyCode,
             estimatedDeliveryDays: estimatedDays,
             isFreeShipping: adjustedAmountCents === 0,
             taxable: rate.taxable,

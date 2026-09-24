@@ -86,7 +86,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     supplierNotes,
     attachments,
     items, // Array of purchase order items
-  } = req.body as SupplierPurchaseOrderCreateParams & { items: SupplierPurchaseOrderItemCreateParams[] };
+  } = req.body as SupplierPurchaseOrderCreateParams & { items: SupplierPurchaseOrderItemCreateParams[]; currency?: string };
 
   // Validate required fields
   const errors: string[] = [];
@@ -120,7 +120,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     trackingNumber,
     carrierName,
     paymentTerms,
-    currency,
+    currencyCode: currency || 'USD',
     subtotalCents,
     taxCents,
     shippingCents,

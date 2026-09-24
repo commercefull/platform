@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.uuid('storeCurrencySettingsId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('storeCurrencyId').notNullable().references('currencyId').inTable('currency');
+    t.uuid('storeId').notNullable().references('storeId').inTable('store').onDelete('CASCADE');
     t.uuid('baseCurrencyId').notNullable().references('currencyId').inTable('currency');
     t.uuid('displayCurrencyId').notNullable().references('currencyId').inTable('currency');
     t.boolean('allowCustomerCurrencySelection').notNullable().defaultTo(true);
@@ -18,10 +18,9 @@ exports.up = function (knex) {
     t.decimal('markupPercentage', 5, 2).notNullable().defaultTo(0);
     t.integer('roundPrecision').notNullable().defaultTo(2);
     t.enum('roundingMethod', ['up', 'down', 'ceiling', 'floor', 'half_up', 'half_down', 'half_even']).notNullable().defaultTo('half_up');
-    t.specificType('enabledCurrencies', 'text[]');
     t.enum('priceDisplayFormat', ['symbol', 'code', 'symbol_code', 'name']).notNullable().defaultTo('symbol');
     t.uuid('updatedBy');
-    t.index('storeCurrencyId');
+    t.unique('storeId');
     t.index('baseCurrencyId');
     t.index('displayCurrencyId');
     t.index('activeProviderCode');

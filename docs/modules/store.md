@@ -4,6 +4,8 @@
 
 The Store feature manages store entities for both marketplace (merchant-owned) and multi-store (organization-owned) scenarios. It supports store hierarchy, BOPIS (Buy Online, Pick Up In Store) configuration, local delivery zones, and store listing with filtering and pagination.
 
+Each store has a `channel` (`physical`, `digital`, or `hybrid`). Supported currencies are store-scoped through the `storeCurrency` membership table — a store sells only in currencies it supports, and exactly one is the default used for storefront/basket resolution. Per-store currency behavior (base/display currency, rounding, exchange-rate updates) is configured in `storeCurrencySettings`.
+
 ---
 
 ## Use Cases

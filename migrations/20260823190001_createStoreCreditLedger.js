@@ -15,7 +15,7 @@ exports.up = async function (knex) {
       t.uuid('referenceId').nullable();
       t.bigInteger('amountCents').notNullable();
       t.bigInteger('balanceAfterCents').notNullable();
-      t.string('currency').notNullable().defaultTo('USD');
+      t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
       t.text('reason').nullable();
       t.text('notes').nullable();
       t.string('createdBy').nullable();

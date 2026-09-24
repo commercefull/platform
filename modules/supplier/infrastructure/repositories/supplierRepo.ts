@@ -34,7 +34,7 @@ export interface Supplier {
   taxId?: string;
   paymentTerms?: string;
   paymentMethod?: string;
-  currency: string;
+  currencyCode: string;
   minOrderValueCents?: number;
   leadTime?: number;
   notes?: string;
@@ -130,7 +130,7 @@ export class SupplierRepo {
     }
 
     if (filters.currency) {
-      conditions.push(`"currency" = $${paramIndex++}`);
+      conditions.push(`"currencyCode" = $${paramIndex++}`);
       params.push(filters.currency);
     }
 
@@ -199,7 +199,7 @@ export class SupplierRepo {
       `INSERT INTO "supplier" (
         "name", "code", "description", "website", "email", "phone",
         "isActive", "isApproved", "status", "rating", "taxId",
-        "paymentTerms", "paymentMethod", "currency", "minOrderValueCents", "leadTime",
+        "paymentTerms", "paymentMethod", "currencyCode", "minOrderValueCents", "leadTime",
         "notes", "categories", "tags", "customFields",
         "createdAt", "updatedAt"
       ) VALUES (
@@ -220,7 +220,7 @@ export class SupplierRepo {
         params.taxId || null,
         params.paymentTerms || null,
         params.paymentMethod || null,
-        params.currency || 'USD',
+        params.currencyCode || 'USD',
         params.minOrderValueCents || null,
         params.leadTime || null,
         params.notes || null,
@@ -247,9 +247,10 @@ export class SupplierRepo {
     const values: unknown[] = [];
     let paramIndex = 1;
 
+    const columnMap: Record<string, string> = { currency: 'currencyCode' };
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex++}`);
+        updateFields.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
         values.push(key === 'customFields' && value ? JSON.stringify(value) : value);
       }
     });

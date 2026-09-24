@@ -17,7 +17,7 @@ export const storeResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetStoreUseCase(StoreRepo);
+      const useCase = new GetStoreUseCase(StoreRepo, storeDataRepository.currencies);
       const query = new GetStoreQuery(args.storeId, args.slug, args.storeUrl);
       return useCase.execute(query);
     },
@@ -44,6 +44,7 @@ export const storeResolvers = {
         StoreRepo,
         new SystemConfigAdapter(new SystemConfigurationRepo()),
         organizationLookupAdapter,
+        storeDataRepository.currencies,
       );
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
       const result = await useCase.execute(command);

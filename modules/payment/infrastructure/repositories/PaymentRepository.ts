@@ -143,7 +143,7 @@ export class PaymentRepo implements IPaymentRepository {
         await query(
           `INSERT INTO "orderPayment" (
             "orderPaymentId", "orderId", "type", "provider",
-            "amountCents", currency, status, "refundedAmountCents",
+            "amountCents", "currencyCode", status, "refundedAmountCents",
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
           [orderPaymentId, transaction.orderId, 'creditCard', 'stripe', transaction.amountCents, transaction.currency, 'pending', 0, now, now],
@@ -153,7 +153,7 @@ export class PaymentRepo implements IPaymentRepository {
           `INSERT INTO "paymentTransaction" (
             "paymentTransactionId", "orderPaymentId", "orderId", "type",
             "customerId", "paymentMethodId", "paymentGatewayId",
-            "amountCents", currency, status, "refundedAmountCents", "customerIp", metadata,
+            "amountCents", "currencyCode", status, "refundedAmountCents", "customerIp", metadata,
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
           [
@@ -229,7 +229,7 @@ export class PaymentRepo implements IPaymentRepository {
     } else {
       await query(
         `INSERT INTO "paymentRefund" (
-          "paymentRefundId", "paymentTransactionId", amountCents, currency, reason, status, metadata, "createdAt", "updatedAt"
+          "paymentRefundId", "paymentTransactionId", "amountCents", "currencyCode", reason, status, metadata, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           refund.refundId,
@@ -383,7 +383,7 @@ export class PaymentRepo implements IPaymentRepository {
       gatewayId: (row.paymentGatewayId as string) || '',
       externalTransactionId: row.externalTransactionId as string | undefined,
       amountCents: Number(row.amountCents),
-      currency: row.currency as string,
+      currency: row.currencyCode as string,
       status: row.status as TransactionStatus,
       paymentMethodDetails: row.paymentMethodDetails
         ? typeof row.paymentMethodDetails === 'string'
@@ -533,7 +533,7 @@ export class PaymentRepo implements IPaymentRepository {
       transactionId: row.paymentTransactionId as string,
       externalRefundId: row.externalRefundId as string | undefined,
       amountCents: Number(row.amountCents),
-      currency: row.currency as string,
+      currency: row.currencyCode as string,
       reason: row.reason as string | undefined,
       status: row.status as RefundStatus,
       gatewayResponse: row.gatewayResponse

@@ -4,6 +4,7 @@
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreCurrencyRepository } from '../../domain/repositories/StoreCurrencyRepository';
 import { Store } from '../../domain/entities/Store';
 import { StoreValidationError } from '../../domain/errors/StoreErrors';
 
@@ -60,7 +61,10 @@ export interface GetStoreResponse {
 // ============================================================================
 
 export class GetStoreUseCase {
-  constructor(private readonly storeRepository: StoreRepository) {}
+  constructor(
+    private readonly storeRepository: StoreRepository,
+    private readonly storeCurrencyRepository?: StoreCurrencyRepository,
+  ) {}
 
   async execute(query: GetStoreQuery): Promise<GetStoreResponse> {
     if (!query.storeId && !query.slug && !query.storeUrl) {
@@ -80,6 +84,14 @@ export class GetStoreUseCase {
     if (!store) {
       return { store: null };
     }
+
+    // Currency support lives on the storeCurrency membership table
+    const supportedCurrencies = this.storeCurrencyRepository
+      ? await this.storeCurrencyRepository.getSupportedCodes(store.storeId)
+      : undefined;
+    const defaultCurrency = this.storeCurrencyRepository
+      ? (await this.storeCurrencyRepository.getDefaultCode(store.storeId)) ?? undefined
+      : undefined;
 
     return {
       store: {
@@ -102,8 +114,8 @@ export class GetStoreUseCase {
         storeRating: store.storeRating,
         reviewCount: store.reviewCount,
         productCount: store.productCount,
-        defaultCurrency: store.defaultCurrency,
-        supportedCurrencies: store.supportedCurrencies,
+        defaultCurrency,
+        supportedCurrencies,
         address: store.address as Record<string, unknown>,
         socialLinks: store.socialLinks,
         openingHours: store.openingHours,

@@ -45,7 +45,7 @@ export type PaymentTransactionCreateParams = MakeOptional<
   | 'paymentMethodId'
   | 'paymentGatewayId'
   | 'externalTransactionId'
-  | 'currency'
+  | 'currencyCode'
   | 'paymentMethodDetails'
   | 'refundedAmountCents'
   | 'metadata'
@@ -62,7 +62,7 @@ export type PaymentRefundCreateParams = MakeOptional<
   | 'refundId'
   | 'paymentTransactionId'
   | 'externalRefundId'
-  | 'currency'
+  | 'currencyCode'
   | 'gatewayResponse'
   | 'errorCode'
   | 'errorMessage'
@@ -367,9 +367,9 @@ export class PaymentRepo {
       `INSERT INTO "paymentTransaction" 
        ("orderPaymentId", "orderId", "type", "amountCents", "currencyCode", "status",
         "customerId", "paymentMethodId", "paymentGatewayId", "externalTransactionId",
-        "currency", "paymentMethodDetails", "gatewayResponse", "errorCode", "errorMessage",
+        "paymentMethodDetails", "gatewayResponse", "errorCode", "errorMessage",
         "refundedAmountCents", "metadata", "customerIp", "capturedAt", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
        RETURNING *`,
       [
         params.orderPaymentId,
@@ -382,7 +382,6 @@ export class PaymentRepo {
         params.paymentMethodId || null,
         params.paymentGatewayId || null,
         params.externalTransactionId || null,
-        params.currency || null,
         params.paymentMethodDetails || null,
         params.gatewayResponse || null,
         params.errorCode || null,
@@ -405,10 +404,11 @@ export class PaymentRepo {
     const updates: string[] = [];
     const values: unknown[] = [];
     let paramIndex = 1;
+    const columnMap: Record<string, string> = { currency: 'currencyCode' };
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updates.push(`"${key}" = $${paramIndex++}`);
+        updates.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
         values.push(value);
       }
     });
@@ -462,9 +462,9 @@ export class PaymentRepo {
     const result = await queryOne<PaymentRefund>(
       `INSERT INTO "paymentRefund" 
        ("orderPaymentId", "orderId", "transactionId", "amountCents", "currencyCode",
-        "reason", "status", "paymentTransactionId", "externalRefundId", "currency",
+        "reason", "status", "paymentTransactionId", "externalRefundId",
         "gatewayResponse", "errorCode", "errorMessage", "metadata", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING *`,
       [
         params.orderPaymentId,
@@ -476,7 +476,6 @@ export class PaymentRepo {
         params.status,
         params.paymentTransactionId || null,
         params.externalRefundId || null,
-        params.currency || null,
         params.gatewayResponse || null,
         params.errorCode || null,
         params.errorMessage || null,
@@ -509,10 +508,11 @@ export class PaymentRepo {
     const updates: string[] = [];
     const values: unknown[] = [];
     let paramIndex = 1;
+    const columnMap: Record<string, string> = { currency: 'currencyCode' };
 
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updates.push(`"${key}" = $${paramIndex++}`);
+        updates.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
         values.push(value);
       }
     });

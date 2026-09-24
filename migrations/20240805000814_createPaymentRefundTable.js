@@ -7,13 +7,12 @@ exports.up = function (knex) {
     t.uuid('orderId').notNullable().references('orderId').inTable('order').onDelete('CASCADE');
     t.uuid('transactionId').references('paymentTransactionId').inTable('paymentTransaction').onDelete('SET NULL');
     t.bigInteger('amountCents').notNullable();
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.string('reason', 255);
     t.string('status', 50).notNullable().defaultTo('pending');
     t.string('refundId', 255);
     t.uuid('paymentTransactionId').references('paymentTransactionId').inTable('paymentTransaction').onDelete('CASCADE');
     t.string('externalRefundId', 255);
-    t.string('currency', 3).defaultTo('USD');
     t.jsonb('gatewayResponse');
     t.string('errorCode', 100);
     t.text('errorMessage');

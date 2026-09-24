@@ -16,7 +16,7 @@ exports.up = function (knex) {
     t.enum('status', ['active', 'inactive', 'discontinued', 'pending']).notNullable().defaultTo('active');
     t.boolean('isPreferred').notNullable().defaultTo(false);
     t.bigInteger('unitCostCents').notNullable();
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.integer('minimumOrderQuantity').defaultTo(1);
     t.integer('leadTime');
     t.jsonb('packagingInfo');

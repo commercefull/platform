@@ -98,7 +98,7 @@ export const createShippingRate = async (req: HttpRequest, res: HttpResponse): P
     freeThresholdCents: freeThreshold ? Math.round(parseFloat(freeThreshold) * 100) : null,
     minRateCents: minRate ? Math.round(parseFloat(minRate) * 100) : null,
     maxRateCents: maxRate ? Math.round(parseFloat(maxRate) * 100) : null,
-    currency: currency || 'USD',
+    currencyCode: currency || 'USD',
     taxable: taxable === 'true',
     priority: priority ? parseInt(priority) : 0,
     validFrom: validFrom ? new Date(validFrom) : null,
@@ -261,6 +261,6 @@ export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse)
     calculatedRate,
     rateId: rate.shippingRateId,
     rateType: rate.rateType,
-    currency: rate.currency,
+    currency: rate.currencyCode,
   });
 };

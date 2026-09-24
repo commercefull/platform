@@ -16,7 +16,7 @@ exports.up = async function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.string('currencyCode', 3).notNullable();
+    t.string('currencyCode', 3).notNullable().references('code').inTable('currency');
     t.bigInteger('priceCents').notNullable();
     t.bigInteger('salePriceCents');
     t.bigInteger('compareAtPriceCents');

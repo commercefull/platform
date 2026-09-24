@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.string('trackingNumber', 100);
     t.string('carrierName', 100);
     t.string('paymentTerms', 100);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.bigInteger('subtotalCents').notNullable().defaultTo(0);
     t.bigInteger('taxCents').notNullable().defaultTo(0);
     t.bigInteger('shippingCents').notNullable().defaultTo(0);

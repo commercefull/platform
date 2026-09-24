@@ -18,7 +18,7 @@ exports.up = function (knex) {
     table.integer('billingIntervalCount').defaultTo(1);
     table.bigInteger('priceCents').notNullable();
     table.bigInteger('compareAtPriceCents');
-    table.string('currency', 3).defaultTo('USD');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.bigInteger('setupFeeCents').defaultTo(0);
     table.integer('trialDays');
     table.integer('contractLength'); // Number of billing cycles

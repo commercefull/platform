@@ -21,7 +21,7 @@ export class BasketRepo implements BasketRepository {
 
     if (!basketRow) return null;
 
-    const items = await this.getItemsWithCurrency(basketId, basketRow.currency);
+    const items = await this.getItemsWithCurrency(basketId, basketRow.currencyCode);
     return this.mapToBasket(basketRow, items);
   }
 
@@ -33,7 +33,7 @@ export class BasketRepo implements BasketRepository {
 
     if (!basketRow) return null;
 
-    const items = await this.getItemsWithCurrency(basketRow.basketId, basketRow.currency);
+    const items = await this.getItemsWithCurrency(basketRow.basketId, basketRow.currencyCode);
     return this.mapToBasket(basketRow, items);
   }
 
@@ -45,7 +45,7 @@ export class BasketRepo implements BasketRepository {
 
     if (!basketRow) return null;
 
-    const items = await this.getItemsWithCurrency(basketRow.basketId, basketRow.currency);
+    const items = await this.getItemsWithCurrency(basketRow.basketId, basketRow.currencyCode);
     return this.mapToBasket(basketRow, items);
   }
 
@@ -83,7 +83,7 @@ export class BasketRepo implements BasketRepository {
           "customerId" = $1,
           "sessionId" = $2,
           status = $3,
-          currency = $4,
+          "currencyCode" = $4,
           metadata = $5,
           "expiresAt" = $6,
           "convertedToOrderId" = $7,
@@ -109,14 +109,15 @@ export class BasketRepo implements BasketRepository {
       // Insert
       await query(
         `INSERT INTO basket (
-          "basketId", "customerId", "sessionId", status, currency,
+          "basketId", "customerId", "sessionId", "storeId", status, "currencyCode",
           metadata, "expiresAt", "convertedToOrderId",
           "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           basket.basketId,
           basket.customerId || null,
           basket.sessionId || null,
+          basket.storeId || null,
           basket.status,
           basket.currency,
           Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
@@ -301,7 +302,7 @@ export class BasketRepo implements BasketRepository {
 
     const baskets: Basket[] = [];
     for (const row of rows || []) {
-      const items = await this.getItemsWithCurrency(row.basketId, row.currency);
+      const items = await this.getItemsWithCurrency(row.basketId, row.currencyCode);
       baskets.push(this.mapToBasket(row, items));
     }
 
@@ -321,7 +322,7 @@ export class BasketRepo implements BasketRepository {
 
     const baskets: Basket[] = [];
     for (const row of rows || []) {
-      const items = await this.getItemsWithCurrency(row.basketId, row.currency);
+      const items = await this.getItemsWithCurrency(row.basketId, row.currencyCode);
       baskets.push(this.mapToBasket(row, items));
     }
 
@@ -439,8 +440,9 @@ export class BasketRepo implements BasketRepository {
       basketId: row.basketId,
       customerId: row.customerId ?? undefined,
       sessionId: row.sessionId ?? undefined,
+      storeId: row.storeId ?? undefined,
       status: row.status as BasketStatus,
-      currency: row.currency,
+      currency: row.currencyCode,
       items,
       metadata: md,
       coupon,

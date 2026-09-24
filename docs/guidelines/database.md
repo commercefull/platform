@@ -85,6 +85,31 @@ Monetary amounts are stored as **integer cents** in `bigint` columns named `*Cen
   `discountAmount`, rule JSON `rate`/`value` fields) may remain `decimal` where
   the same column holds a percentage.
 
+## Currency
+
+The canonical `currency` table is the single reference for ISO codes. Any column
+storing a currency must be named `currencyCode` (`string(3)`) and must reference
+`currency.code`:
+
+```ts
+t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
+```
+
+- Transactional tables (`order`, `paymentTransaction`, `paymentRefund`, `basket`,
+  `taxCalculation`, …) keep `currencyCode` as the immutable snapshot of the
+  currency used at the time. Do not rename or "fix" these on currency changes —
+  they are historical.
+- Currency membership is store-scoped via the `storeCurrency` join table
+  (`storeId` + `currencyId`, `isDefault`, `isActive`) — a store sells only in
+  the currencies it supports, and exactly one is the default. Per-store currency
+  behavior (base/display currency, rounding, rate updates) lives in
+  `storeCurrencySettings` (one row per `storeId`).
+- Do not add `supportedCurrencies`/`defaultCurrency` columns or `text[]` code
+  lists to `store` or other tables — use `storeCurrency` membership rows and
+  `*Id`/`currencyCode` references instead.
+- Payment-gateway `supportedCurrencies` lists are a different concept (gateway
+  capability, not store configuration) and are exempt.
+
 ## Soft Deletes
 
 Most tables use a `deletedAt` column instead of physical deletes.

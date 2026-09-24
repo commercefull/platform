@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.bigInteger('rateCents').notNullable();
     t.integer('estimatedDays');
     t.timestamp('estimatedDeliveryDate');
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('isSelected').notNullable().defaultTo(false);
     t.string('carrierAccountId', 100);
     t.string('shipmentId', 100);
