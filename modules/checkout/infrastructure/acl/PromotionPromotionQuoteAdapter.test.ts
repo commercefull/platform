@@ -1,13 +1,16 @@
 import { PromotionPromotionQuoteAdapter } from './PromotionPromotionQuoteAdapter';
-import type { PromotionEvaluationService, PromotionEvaluationResult } from '../../../promotion/application/services/PromotionEvaluationService';
+import type {
+  EvaluatePromotionsUseCase,
+  PromotionEvaluationResult,
+} from '../../../promotion/application/useCases/EvaluatePromotions';
 
 describe('PromotionPromotionQuoteAdapter', () => {
   let adapter: PromotionPromotionQuoteAdapter;
-  let evaluationService: jest.Mocked<Pick<PromotionEvaluationService, 'evaluate'>>;
+  let evaluatePromotions: jest.Mocked<Pick<EvaluatePromotionsUseCase, 'execute'>>;
 
   beforeEach(() => {
-    evaluationService = { evaluate: jest.fn() };
-    adapter = new PromotionPromotionQuoteAdapter(evaluationService as unknown as PromotionEvaluationService);
+    evaluatePromotions = { execute: jest.fn() };
+    adapter = new PromotionPromotionQuoteAdapter(evaluatePromotions);
   });
 
   it('should implement PromotionQuotePort', () => {
@@ -15,7 +18,7 @@ describe('PromotionPromotionQuoteAdapter', () => {
   });
 
   it('should map promotion evaluation result to checkout vocabulary', async () => {
-    evaluationService.evaluate.mockResolvedValue({
+    evaluatePromotions.execute.mockResolvedValue({
       totalDiscountAmountCents: 15,
       shippingDiscountAmountCents: 0,
       freeShipping: false,
@@ -42,7 +45,7 @@ describe('PromotionPromotionQuoteAdapter', () => {
   });
 
   it('should handle empty appliedPromotions', async () => {
-    evaluationService.evaluate.mockResolvedValue({
+    evaluatePromotions.execute.mockResolvedValue({
       totalDiscountAmountCents: 0,
       shippingDiscountAmountCents: 0,
       freeShipping: false,
@@ -63,7 +66,7 @@ describe('PromotionPromotionQuoteAdapter', () => {
   });
 
   it('should return zero discount when evaluation throws', async () => {
-    evaluationService.evaluate.mockRejectedValue(new Error('Service error'));
+    evaluatePromotions.execute.mockRejectedValue(new Error('Service error'));
 
     const result = await adapter.evaluatePromotions({
       items: [],

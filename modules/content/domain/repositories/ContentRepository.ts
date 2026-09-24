@@ -5,12 +5,12 @@
  */
 
 import type {
-  ContentBlock,
+  ContentBlockRecord as ContentBlock,
   ContentBlockType,
-  ContentPage,
+  ContentPageRecord as ContentPage,
   ContentTemplate,
-  ContentType,
-} from '../../../../libs/db/types';
+  ContentTypeRecord as ContentType,
+} from '../entities/ContentModel';
 
 // Create / Update params derived from generated types
 export type ContentPageCreateParams = Partial<

@@ -9,7 +9,7 @@ jest.mock('./calculateRate', () => ({
 import { ShippingRateCalculator } from './ShippingRateCalculator';
 import { calculateRate } from './calculateRate';
 import type { ShippingSurchargePort } from '../repositories/ShippingSurchargePort';
-import type { ShippingRate, ShippingSurcharge } from '../../../../libs/db/types';
+import type { ShippingRateRecord as ShippingRate, ShippingSurchargeRecord as ShippingSurcharge } from '../entities/ShippingModel';
 
 describe('ShippingRateCalculator', () => {
   let calculator: ShippingRateCalculator;

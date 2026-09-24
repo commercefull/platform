@@ -23,3 +23,4 @@ export * from './GeneratePaymentReport';
 export * from './ManagePSPRoutes';
 export * from './RoutePayment';
 export * from './GetProviderHealth';
+export * from './ScreenForFraud';

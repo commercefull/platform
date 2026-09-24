@@ -12,6 +12,19 @@ module.exports = {
         path: 'modules/[^/]+/(application|infrastructure|interface)/',
       },
     },
+    // Domain must not depend on the database layer at all — not even
+    // libs/db/types. Domain repository ports and services must declare
+    // record types in domain/entities (or the port file) matching the schema;
+    // infrastructure returns structurally identical DB rows.
+    // Baseline: listed files are legacy violations being migrated — remove
+    // each entry as its module's domain types are defined.
+    {
+      name: 'domain-no-db-imports',
+      severity: 'error',
+      comment: 'Domain layer must not import from libs/db (including libs/db/types) — declare record types in domain instead',
+      from: { path: 'modules/[^/]+/domain/' },
+      to: { path: 'libs/db/' },
+    },
     // Infrastructure must not depend on application or interface
     // Exception: infrastructure/acl/ adapters and compositionRoots are allowed
     // to import from other modules' application layer — this is the cross-module

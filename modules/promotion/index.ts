@@ -4,6 +4,7 @@
  */
 
 export * from './application/useCases';
+export * from './domain/services/PromotionEvaluator';
 export * from './domain/repositories/PromotionRepository';
 export { Promotion as PromotionEntity } from './domain/entities/Promotion';
 export * from './domain/errors/PromotionErrors';

@@ -11,6 +11,7 @@ export * from './DeletePromotion';
 
 // Promotion
 export * from './ApplyPromotion';
+export * from './EvaluatePromotions';
 
 // Coupon
 export * from './ValidateCoupon';

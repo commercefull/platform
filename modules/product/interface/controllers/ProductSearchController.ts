@@ -6,7 +6,7 @@ import {
   findByAttributeUseCase,
 } from '../../application/useCases/wired';
 import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
-import type { AttributeFilter } from '../../application/services/ProductSearchService';
+import type { AttributeFilter } from '../../application/ports/ProductSearchPort';
 
 class ProductSearchController {
   /**

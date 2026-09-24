@@ -41,7 +41,7 @@ import { RedeemGiftCardUseCase } from './useCases/RedeemGiftCard';
 import { ManagePromotionsUseCase } from './useCases/ManagePromotions';
 import { ManageCouponsUseCase } from './useCases/ManageCoupons';
 import { ManageGiftCardsUseCase } from './useCases/ManageGiftCards';
-import { PromotionEvaluationService } from './services/PromotionEvaluationService';
+import { EvaluatePromotionsUseCase } from './useCases/EvaluatePromotions';
 
 export {
   promotionRuleRepository,
@@ -94,4 +94,4 @@ export const redeemGiftCardUseCase = new RedeemGiftCardUseCase(giftCardRepositor
 export const managePromotionsUseCase = new ManagePromotionsUseCase(promotionRuleRepository.promotions);
 export const manageCouponsUseCase = new ManageCouponsUseCase(couponDiscountRepository.coupons);
 export const manageGiftCardsUseCase = new ManageGiftCardsUseCase(giftCardRepository);
-export const promotionEvaluationService = new PromotionEvaluationService(promotionRuleRepository.promotions);
+export const evaluatePromotionsUseCase = new EvaluatePromotionsUseCase(promotionRuleRepository.promotions);

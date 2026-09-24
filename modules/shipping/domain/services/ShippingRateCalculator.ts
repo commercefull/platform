@@ -21,7 +21,7 @@ import {
   type SurchargeCalculationType,
 } from '../../domain/entities/ShippingSurcharge';
 import type { ShippingSurchargePort } from '../../domain/repositories/ShippingSurchargePort';
-import type { ShippingRate, ShippingSurcharge } from '../../../../libs/db/types';
+import type { ShippingRateRecord as ShippingRate, ShippingSurchargeRecord as ShippingSurcharge } from '../entities/ShippingModel';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 
 export interface ShippingCalculationInput {

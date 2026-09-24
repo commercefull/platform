@@ -10,7 +10,7 @@
  * that must be remediated before deployment.
  */
 
-import { PaymentRequest } from '../application/services/GatewayAdapter';
+import { PaymentRequest } from '../infrastructure/services/GatewayAdapter';
 import { PaymentTransactionProps } from '../domain/entities/PaymentTransaction';
 import { TransactionStatus } from '../domain/valueObjects/PaymentStatus';
 import { StoredPaymentMethod } from '../domain/repositories/StoredPaymentMethodRepository';

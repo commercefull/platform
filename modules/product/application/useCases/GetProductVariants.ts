@@ -4,7 +4,7 @@
 
 import type { ProductVariantFilters, ProductVariantPort, ProductVariantRow } from '../../domain/repositories/ProductCatalogPorts';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
-import { toProductPriceDto } from '../services/productPriceDto';
+import { toProductPriceDto } from '../dto/productPriceDto';
 
 export class GetProductVariantsCommand {
   constructor(

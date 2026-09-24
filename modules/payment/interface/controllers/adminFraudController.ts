@@ -7,7 +7,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { FraudRepo as fraudRepo, fraudScreeningService } from '../../application/wired';
+import { FraudRepo as fraudRepo, screenForFraudUseCase } from '../../application/wired';
 import type { RuleAction, RuleType } from '../../application/wired';
 
 // ============================================================================
@@ -144,7 +144,7 @@ export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse
         isGuestCheckout?: string;
       };
 
-    const result = await fraudScreeningService.screen({
+    const result = await screenForFraudUseCase.execute({
       email: email || undefined,
       ipAddress: ipAddress || undefined,
       billingCountry: billingCountry || undefined,

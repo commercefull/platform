@@ -2,21 +2,21 @@
  * PaymentFraudScreeningAdapter
  *
  * ACL adapter that bridges checkout's `FraudScreeningPort` to the payment
- * module's `FraudScreeningService`. Translates checkout vocabulary
+ * module's `ScreenForFraudUseCase`. Translates checkout vocabulary
  * (FraudScreeningRequest/Result) to/from the payment domain's
  * FraudScreeningRequest/Result.
  *
  * See `docs/e2e-rule-engine-implementation-plan.md` Epic G.
  */
 
-import { FraudScreeningService } from '../../../payment/application/services/FraudScreeningService';
+import type { ScreenForFraudUseCase } from '../../../payment/application/useCases/ScreenForFraud';
 import type { FraudScreeningPort, FraudScreeningRequest, FraudScreeningResult } from '../../application/ports/FraudScreeningPort';
 
 export class PaymentFraudScreeningAdapter implements FraudScreeningPort {
-  constructor(private readonly fraudScreeningService: Pick<FraudScreeningService, 'screen'>) {}
+  constructor(private readonly screenForFraud: Pick<ScreenForFraudUseCase, 'execute'>) {}
 
   async screenOrder(request: FraudScreeningRequest): Promise<FraudScreeningResult> {
-    const result = await this.fraudScreeningService.screen({
+    const result = await this.screenForFraud.execute({
       orderId: request.orderId,
       customerId: request.customerId,
       email: request.customerEmail,

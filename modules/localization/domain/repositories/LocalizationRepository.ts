@@ -4,7 +4,7 @@
  * Domain interface for localization data access (locales, countries, currencies, languages, translations).
  */
 
-import type { Locale, Country, Currency, Language } from 'libs/db/types';
+import type { LocaleRecord as Locale, Country, Currency, Language } from '../entities/LocalizationModel';
 import type { TranslatableEntityType } from '../entities/Translation';
 
 export type LocaleCreateParams = Omit<Locale, 'localeId' | 'createdAt' | 'updatedAt'>;

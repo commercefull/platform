@@ -6,6 +6,11 @@
 
 import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
 import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
+import { PSPRoutingRepositoryImpl } from '../../infrastructure/repositories/PSPRoutingRepositoryImpl';
+import { FailoverRoutingEngine } from '../../infrastructure/services/FailoverRoutingEngine';
+import { RoutePaymentUseCase } from './RoutePayment';
+import { GetProviderHealthUseCase } from './GetProviderHealth';
+import { ManagePSPRoutesUseCase } from './ManagePSPRoutes';
 import { ProcessPaymentWebhookUseCase } from './ProcessPaymentWebhook';
 import { GetPaymentBalanceUseCase } from './GetPaymentBalance';
 import { GetPaymentBalancesUseCase } from './GetPaymentBalances';
@@ -35,3 +40,19 @@ export const managePaymentSettingsUseCase = new ManagePaymentSettingsUseCase(pay
 export const recordPaymentDisputeUseCase = new RecordPaymentDisputeUseCase(billingRepo, gatewayRepo);
 export const recordPaymentFeeUseCase = new RecordPaymentFeeUseCase(billingRepo);
 export const saveStoredPaymentMethodUseCase = new SaveStoredPaymentMethodUseCase(paymentRepo);
+
+// PSP routing — the engine is a process-level singleton so circuit breaker
+// state persists across requests.
+export const failoverRoutingEngine = new FailoverRoutingEngine({
+  maxRetriesPerProvider: 2,
+  retryBaseDelayMs: 500,
+  retryMaxDelayMs: 5000,
+  circuitBreakerThreshold: 3,
+  circuitBreakerResetMs: 60_000,
+  healthCheckIntervalMs: 0,
+});
+
+const pspRoutingRepo = new PSPRoutingRepositoryImpl(gatewayRepo);
+export const routePaymentUseCase = new RoutePaymentUseCase(pspRoutingRepo, failoverRoutingEngine);
+export const getProviderHealthUseCase = new GetProviderHealthUseCase(pspRoutingRepo);
+export const managePSPRoutesUseCase = new ManagePSPRoutesUseCase(pspRoutingRepo);

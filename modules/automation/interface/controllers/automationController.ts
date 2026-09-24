@@ -6,7 +6,7 @@ import {
   deleteAutomationRuleUseCase,
   getAutomationRuleUseCase,
   listAutomationRulesUseCase,
-  executionEngine,
+  triggerAutomationRuleUseCase,
 } from '../../application/useCases/wired';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
 import { ExecutionLogRepositoryImpl } from '../../application/wired';
@@ -141,7 +141,7 @@ class AutomationController {
     res: HttpResponse,
   ): Promise<void> {
     try {
-      const result = await executionEngine.triggerManual(req.params.ruleId, req.body?.context);
+      const result = await triggerAutomationRuleUseCase.execute(req.params.ruleId, req.body?.context);
       res.json({ success: true, data: result });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {

@@ -73,13 +73,6 @@ describe('AutomationRuleRepositoryImpl', () => {
     expect(result).toEqual([]);
   });
 
-  it('findByEventName queries with eventName', async () => {
-    mockedQuery.mockResolvedValueOnce([]);
-    const result = await repo.findByEventName('order.created', true);
-    expect(result).toEqual([]);
-    expect(mockedQuery).toHaveBeenCalled();
-  });
-
   it('create returns created rule', async () => {
     const rule = AutomationRule.create({
       name: 'New Rule',

@@ -524,7 +524,7 @@ export const createPaymentIntent = async (req: HttpRequest, res: HttpResponse): 
 
   const ports = getCheckoutPorts();
   const command = new CreatePaymentIntentCommand(checkoutId, customerId);
-  const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization);
+  const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization, ports.fraudScreening);
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 201);

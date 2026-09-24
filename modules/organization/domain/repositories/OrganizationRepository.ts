@@ -4,7 +4,7 @@
  * Domain interface for organization data access (organizations, addresses, payment info, authentication).
  */
 
-import type { Organization, OrganizationAddress, OrganizationPaymentInfo } from 'libs/db/types';
+import type { OrganizationRecord as Organization, OrganizationAddress, OrganizationPaymentInfo } from '../entities/OrganizationModel';
 
 export type OrganizationCreateParams = Partial<Omit<Organization, 'organizationId' | 'createdAt' | 'updatedAt'>> & {
   name: string;

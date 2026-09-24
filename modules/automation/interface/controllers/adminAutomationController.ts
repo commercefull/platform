@@ -12,7 +12,7 @@ import {
   deleteAutomationRuleUseCase,
   getAutomationRuleUseCase,
   listAutomationRulesUseCase,
-  executionEngine,
+  triggerAutomationRuleUseCase,
 } from '../../application/useCases/wired';
 
 // ============================================================================
@@ -228,7 +228,7 @@ export const deactivateAutomationRule = async (req: HttpRequest, res: HttpRespon
 export const triggerAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
-    await executionEngine.triggerManual(ruleId, req.body as Record<string, unknown>);
+    await triggerAutomationRuleUseCase.execute(ruleId, req.body as Record<string, unknown>);
     res.redirect(`/admin/automation/${ruleId}?success=Rule triggered successfully`);
   } catch (error: unknown) {
     logger.warn('Error triggering automation rule:', error);

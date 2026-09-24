@@ -3,7 +3,7 @@
  *
  * @deprecated This entity is a legacy model that is NOT wired to checkout.
  * The real promotion system runs through `PromotionRuleRepository` +
- * `PromotionEvaluationService` (the `promotionRule`/`promotionAction` tables),
+ * `EvaluatePromotionsUseCase` (the `promotionRule`/`promotionAction` tables),
  * which implements condition matching, stacking, and all action types.
  * This entity is kept only for backward compatibility with `ApplyPromotion`
  * and `PromotionRepository` port consumers. New code should use the

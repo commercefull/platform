@@ -4,7 +4,7 @@
  */
 
 import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
-import { Customer, CustomerAddress } from '../../../../libs/db/types';
+import { CustomerRecord as Customer, CustomerAddressRecord as CustomerAddress } from '../entities/CustomerModel';
 
 export interface CustomerFilters {
   status?: 'active' | 'inactive' | 'suspended';

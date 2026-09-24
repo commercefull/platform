@@ -3,8 +3,7 @@
  * Updates an existing promotion
  */
 
-import { PromotionRepository, type UpdatePromotionInput } from '../../domain/repositories/PromotionRepository';
-import { Promotion } from '../../../../libs/db/types';
+import { PromotionRepository, type Promotion, type UpdatePromotionInput } from '../../domain/repositories/PromotionRepository';
 import { PromotionNotFoundError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
 // Command

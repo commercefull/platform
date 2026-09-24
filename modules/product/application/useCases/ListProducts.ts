@@ -9,7 +9,7 @@ import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
-import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
+import { toProductPriceDtoOrEmpty } from '../dto/productPriceDto';
 
 // ============================================================================
 // Command

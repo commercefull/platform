@@ -1,7 +1,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { PSPRoutingRepository } from '../../domain/repositories/PSPRoutingRepository';
 import { PSPRoute } from '../../domain/entities/PSPRoute';
-import { getPSPAdapter } from '../services/GatewayAdapterRegistry';
+import { getPSPAdapter } from '../../infrastructu../../infrastructure/services/GatewayAdapterRegistry';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ProviderNotSupportedError } from '../../domain/errors/PaymentErrors';
 

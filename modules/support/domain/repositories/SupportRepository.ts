@@ -12,7 +12,7 @@ import type {
   TicketChannel,
   SenderType,
 } from '../entities/SupportTicket';
-import type { SupportMessage } from 'libs/db/types';
+import type { SupportMessage } from '../entities/SupportModel';
 
 export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType };
 type SupportTicket = SupportTicketProps;

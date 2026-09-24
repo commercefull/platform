@@ -4,7 +4,7 @@
  * Defines the contract for Content Media and Media Folder persistence operations.
  */
 
-import type { ContentMedia, ContentMediaFolder } from '../../../../libs/db/types';
+import type { ContentMedia, ContentMediaFolder } from '../entities/ContentModel';
 
 export type ContentMediaCreateParams = Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>;
 export type ContentMediaUpdateParams = Partial<Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>>;

@@ -4,7 +4,7 @@
  * Domain interface for notification data access (notifications aggregate).
  */
 
-import { Notification } from '../../../../libs/db/types';
+import { NotificationRecord as Notification } from '../entities/NotificationModel';
 
 export type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>> & {
   userId: string;

@@ -3,8 +3,7 @@
  * Creates a new promotion
  */
 
-import { PromotionRepository } from '../../domain/repositories/PromotionRepository';
-import { Promotion } from '../../../../libs/db/types';
+import { PromotionRepository, type Promotion } from '../../domain/repositories/PromotionRepository';
 import { PromotionCodeAlreadyExistsError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
 
 // Command
