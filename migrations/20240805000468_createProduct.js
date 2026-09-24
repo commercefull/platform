@@ -16,15 +16,10 @@ exports.up = function (knex) {
       .defaultTo('simple');
     t.enu('status', ['draft', 'active', 'inactive', 'archived', 'discontinued']).notNullable().defaultTo('draft');
     t.enu('visibility', ['visible', 'not_visible', 'catalog', 'search']).notNullable().defaultTo('visible');
-    t.decimal('price', 15, 2).notNullable();
-    t.decimal('basePrice', 15, 2);
-    t.decimal('salePrice', 15, 2);
-    t.decimal('costPrice', 15, 2);
-    t.decimal('compareAtPrice', 15, 2);
+    // Catalog prices live in the pricing module's productBasePrice table
+    // (integer cents, per product/variant/currency) — no price columns here.
     t.string('taxClass', 50).defaultTo('standard');
-    t.decimal('taxRate', 5, 2);
     t.boolean('isTaxable').notNullable().defaultTo(true);
-    t.string('currency', 3).notNullable().defaultTo('USD');
     t.boolean('isInventoryManaged').notNullable().defaultTo(true);
     t.integer('minOrderQuantity').defaultTo(1);
     t.integer('maxOrderQuantity');
@@ -60,7 +55,6 @@ exports.up = function (knex) {
     t.boolean('isDownloadable').notNullable().defaultTo(false);
     t.boolean('isSubscription').notNullable().defaultTo(false);
 
-    t.string('currencyCode', 3).defaultTo('USD');
     t.uuid('primaryImageId');
     t.timestamp('publishedAt');
     t.timestamp('deletedAt');
@@ -87,8 +81,6 @@ exports.up = function (knex) {
     t.index('type');
     t.index('status');
     t.index('visibility');
-    t.index('price');
-    t.index('salePrice');
     t.index('isFeatured');
     t.index('isNew');
     t.index('isBestseller');

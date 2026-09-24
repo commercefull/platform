@@ -90,8 +90,8 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
   if (fulfillmentStatus) filters.fulfillmentStatus = fulfillmentStatus as FulfillmentStatus;
   if (startDate) filters.startDate = new Date(startDate as string);
   if (endDate) filters.endDate = new Date(endDate as string);
-  if (minAmount) filters.minAmount = parseFloat(minAmount as string);
-  if (maxAmount) filters.maxAmount = parseFloat(maxAmount as string);
+  if (minAmount) filters.minAmountCents = Math.round(parseFloat(minAmount as string) * 100);
+  if (maxAmount) filters.maxAmountCents = Math.round(parseFloat(maxAmount as string) * 100);
   if (search) filters.search = search as string;
 
   const command = new ListOrdersCommand(
@@ -312,7 +312,14 @@ export const createOrderRefund = async (req: HttpRequest, res: HttpResponse): Pr
   const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
-  const command = new CreateOrderRefundCommand(orderPaymentId, parseFloat(amount), reason, notes, transactionId, req.user?.userId);
+  const command = new CreateOrderRefundCommand(
+    orderPaymentId,
+    Math.round(parseFloat(amount) * 100),
+    reason,
+    notes,
+    transactionId,
+    req.user?.userId,
+  );
   const useCase = createOrderRefundUseCase;
   const result = await useCase.execute(command);
 
@@ -468,11 +475,11 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     sku?: string;
     name: string;
     quantity: number;
-    unitPrice: number;
-    discountedUnitPrice?: number;
-    lineTotal?: number;
-    discountTotal?: number;
-    taxTotal?: number;
+    unitPriceCents: number;
+    discountedUnitPriceCents?: number;
+    lineTotalCents?: number;
+    discountTotalCents?: number;
+    taxTotalCents?: number;
     taxRate?: number;
     taxExempt?: boolean;
     fulfillmentStatus?: string;
@@ -481,9 +488,9 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     description?: string;
     variantId?: string;
   };
-  const { orderId, productId, name, quantity, unitPrice } = body;
+  const { orderId, productId, name, quantity, unitPriceCents } = body;
 
-  if (!orderId || !productId || !name || !quantity || !unitPrice) {
+  if (!orderId || !productId || !name || !quantity || unitPriceCents === undefined) {
     respondError(req, res, 'Missing required fields', 400);
     return;
   }
@@ -498,11 +505,11 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     name: body.name,
     sku: body.sku || '',
     quantity: body.quantity,
-    unitPrice: Money.create(body.unitPrice, currency),
-    discountedUnitPrice: Money.create(body.discountedUnitPrice ?? body.unitPrice, currency),
-    lineTotal: Money.create(body.lineTotal ?? body.unitPrice * body.quantity, currency),
-    discountTotal: Money.create(body.discountTotal ?? 0, currency),
-    taxTotal: Money.create(body.taxTotal ?? 0, currency),
+    unitPrice: Money.fromCents(body.unitPriceCents, currency),
+    discountedUnitPrice: Money.fromCents(body.discountedUnitPriceCents ?? body.unitPriceCents, currency),
+    lineTotal: Money.fromCents(body.lineTotalCents ?? body.unitPriceCents * body.quantity, currency),
+    discountTotal: Money.fromCents(body.discountTotalCents ?? 0, currency),
+    taxTotal: Money.fromCents(body.taxTotalCents ?? 0, currency),
     taxRate: body.taxRate ?? 0,
     taxExempt: body.taxExempt ?? false,
     fulfillmentStatus: (body.fulfillmentStatus as FulfillmentStatus) ?? FulfillmentStatus.UNFULFILLED,
@@ -519,7 +526,7 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const updateOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
-  const body = req.body as { quantity?: number; unitPrice?: number };
+  const body = req.body as { quantity?: number; unitPriceCents?: number };
 
   // Find the item across all orders (we need orderId to look it up)
   // Since we don't have orderId in the route, we search by orderItemId

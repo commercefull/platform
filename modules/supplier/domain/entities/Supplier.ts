@@ -23,7 +23,7 @@ export interface SupplierProps {
   contactPerson?: string;
   paymentTerms?: string;
   leadTimeDays?: number;
-  minOrderAmount?: number;
+  minOrderAmountCents?: number;
   rating?: number;
   notes?: string;
   metadata?: Record<string, unknown>;

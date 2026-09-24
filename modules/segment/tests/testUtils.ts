@@ -22,7 +22,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
   });
 }
 
-const CONDITION: SegmentCondition = { field: 'lifetimeValue', operator: 'gte', value: 100 };
+const CONDITION: SegmentCondition = { field: 'lifetimeValueCents', operator: 'gte', value: 100 };
 
 export function createSegment(overrides: Partial<Parameters<typeof SegmentDefinition.create>[0]> = {}): SegmentDefinition {
   return SegmentDefinition.create({

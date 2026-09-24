@@ -334,7 +334,7 @@ export class TaxQueryRepo {
   async calculateTaxForLineItem(
     productId: string,
     quantity: number,
-    price: number,
+    priceCents: number,
     address: {
       country: string;
       region?: string;
@@ -342,10 +342,10 @@ export class TaxQueryRepo {
     },
     _customerId?: string,
   ): Promise<{
-    taxAmount: number;
+    taxAmountCents: number;
     rate: number;
-    taxableAmount: number;
-    total: number;
+    taxableAmountCents: number;
+    totalCents: number;
   }> {
     // Find the appropriate tax zone for this address
     const _taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode);
@@ -358,14 +358,14 @@ export class TaxQueryRepo {
     });
 
     // Calculate the tax amount
-    const taxableAmount = quantity * price;
-    const taxAmount = taxableAmount * (taxRate / 100);
+    const taxableAmountCents = quantity * priceCents;
+    const taxAmountCents = taxableAmountCents * (taxRate / 100);
 
     return {
-      taxAmount,
+      taxAmountCents,
       rate: taxRate,
-      taxableAmount,
-      total: taxableAmount + taxAmount,
+      taxableAmountCents,
+      totalCents: taxableAmountCents + taxAmountCents,
     };
   }
 
@@ -374,12 +374,12 @@ export class TaxQueryRepo {
       productId: string;
       taxCategoryId?: string;
       quantity: number;
-      unitPrice: number;
+      unitPriceCents: number;
       taxable?: boolean;
     }>,
     address: AddressInput,
     customerId?: string,
-    shippingAmount: number = 0,
+    shippingAmountCents: number = 0,
   ): Promise<TaxCalculationResult> {
     // Implementation would go here - calculating taxes for multiple products
     // with potentially different tax categories and exemptions
@@ -392,14 +392,14 @@ export class TaxQueryRepo {
 
     // Calculate taxes for each line item
     for (const item of items) {
-      const itemSubtotal = item.quantity * item.unitPrice;
+      const itemSubtotal = item.quantity * item.unitPriceCents;
       subtotal += itemSubtotal;
 
       if (item.taxable === false) {
         lineItemTaxes.push({
           lineItemId: item.productId, // Using productId as lineItem identifier
           productId: item.productId,
-          taxAmount: 0,
+          taxAmountCents: 0,
           taxBreakdown: [],
         });
       } else {
@@ -409,8 +409,8 @@ export class TaxQueryRepo {
             rateId: 'default',
             rateName: 'Default Tax Rate',
             rateValue: taxRate,
-            taxableAmount: itemSubtotal,
-            taxAmount: itemTaxAmount,
+            taxableAmountCents: itemSubtotal,
+            taxAmountCents: itemTaxAmount,
             jurisdictionLevel: 'national',
             jurisdictionName: address.country || 'Unknown',
           },
@@ -419,29 +419,29 @@ export class TaxQueryRepo {
         lineItemTaxes.push({
           lineItemId: item.productId, // Using productId as lineItem identifier
           productId: item.productId,
-          taxAmount: itemTaxAmount,
+          taxAmountCents: itemTaxAmount,
           taxBreakdown: itemTaxBreakdown,
         });
       }
     }
 
     // Calculate tax on shipping if applicable
-    const shippingTaxAmount = shippingAmount * (taxRate / 100);
+    const shippingTaxAmount = shippingAmountCents * (taxRate / 100);
 
     // Sum up all taxes
-    const totalTaxAmount = lineItemTaxes.reduce((sum, item) => sum + item.taxAmount, 0) + shippingTaxAmount;
+    const totalTaxAmount = lineItemTaxes.reduce((sum, item) => sum + item.taxAmountCents, 0) + shippingTaxAmount;
 
     return {
-      taxAmount: totalTaxAmount,
-      subtotal,
-      total: subtotal + shippingAmount + totalTaxAmount,
+      taxAmountCents: totalTaxAmount,
+      subtotalCents: subtotal,
+      totalCents: subtotal + shippingAmountCents + totalTaxAmount,
       taxBreakdown: [
         {
           rateId: 'default',
           rateName: 'Default Tax Rate',
           rateValue: taxRate,
-          taxableAmount: subtotal + shippingAmount,
-          taxAmount: totalTaxAmount,
+          taxableAmountCents: subtotal + shippingAmountCents,
+          taxAmountCents: totalTaxAmount,
           jurisdictionLevel: 'national',
           jurisdictionName: address.country || 'Unknown',
         },
@@ -459,7 +459,7 @@ export class TaxQueryRepo {
       product_id: string;
       tax_category_id?: string;
       quantity: number;
-      price: number;
+      priceCents: number;
       taxable?: boolean;
     }>,
     dbShippingAddress: {
@@ -475,7 +475,7 @@ export class TaxQueryRepo {
       city?: string;
     },
     subtotal: number,
-    shippingAmount: number = 0,
+    shippingAmountCents: number = 0,
     customerId?: string,
     _organizationId?: string,
   ): Promise<TaxCalculationResult> {
@@ -484,7 +484,7 @@ export class TaxQueryRepo {
       productId: item.product_id,
       taxCategoryId: item.tax_category_id,
       quantity: item.quantity,
-      unitPrice: item.price,
+      unitPriceCents: item.priceCents,
       taxable: item.taxable,
     }));
 
@@ -496,7 +496,7 @@ export class TaxQueryRepo {
     };
 
     // Use the existing calculateTax method for the actual calculation
-    return this.calculateTax(items, address, customerId, shippingAmount);
+    return this.calculateTax(items, address, customerId, shippingAmountCents);
   }
 
   /**
@@ -532,16 +532,16 @@ export class TaxQueryRepo {
     // In a real implementation, you would fetch the basket items and calculate
     // taxes for each item
     return {
-      taxAmount: 0, // This would be calculated based on basket items
-      subtotal: 0, // This would be the basket subtotal
-      total: 0, // This would be subtotal + tax + shipping
+      taxAmountCents: 0, // This would be calculated based on basket items
+      subtotalCents: 0, // This would be the basket subtotal
+      totalCents: 0, // This would be subtotal + tax + shipping
       taxBreakdown: [
         {
           rateId: 'default',
           rateName: 'Default Tax Rate',
           rateValue: taxRate,
-          taxableAmount: 0, // This would be the taxable amount from the basket
-          taxAmount: 0, // This would be calculated based on taxable amount and rate
+          taxableAmountCents: 0, // This would be the taxable amount from the basket
+          taxAmountCents: 0, // This would be calculated based on taxable amount and rate
           jurisdictionLevel: 'national',
           jurisdictionName: address.country || 'Unknown',
         },

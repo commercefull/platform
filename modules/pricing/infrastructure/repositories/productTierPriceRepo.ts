@@ -1,7 +1,23 @@
 import { queryOne, query } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { Table, ProductTierPrice as DbTierPrice } from '../../../../libs/db/types';
 import { TierPrice } from '../../domain/pricingRule';
 import { FailedToCreatePricingError, PriceNotFoundError } from '../../domain/errors/PricingErrors';
+
+/** pg returns bigint as string — map cents columns to numbers. */
+function mapRow(row: DbTierPrice): TierPrice {
+  return {
+    id: row.tierPriceId,
+    tierPriceId: row.tierPriceId,
+    productId: row.productId,
+    variantId: row.productVariantId ?? undefined,
+    productVariantId: row.productVariantId ?? undefined,
+    quantityMin: row.quantityMin,
+    priceCents: Number(row.priceCents),
+    customerGroupId: row.customerGroupId ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 interface FindAllOptions {
   page?: number;
@@ -47,7 +63,7 @@ export class TierPriceRepo {
       ORDER BY "quantityMin" ASC
     `;
 
-    return (await query<TierPrice[]>(sql, params)) || [];
+    return ((await query<DbTierPrice[]>(sql, params)) || []).map(mapRow);
   }
 
   /**
@@ -77,7 +93,8 @@ export class TierPriceRepo {
       LIMIT 1
     `;
 
-    return await queryOne<TierPrice>(sql, params);
+    const row = await queryOne<DbTierPrice>(sql, params);
+    return row ? mapRow(row) : null;
   }
 
   /**
@@ -88,7 +105,7 @@ export class TierPriceRepo {
 
     const sql = `
       INSERT INTO "${this.tableName}" (
-        "productId", "productVariantId", "customerGroupId", "quantityMin", "price",
+        "productId", "productVariantId", "customerGroupId", "quantityMin", "priceCents",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
@@ -99,18 +116,18 @@ export class TierPriceRepo {
       tierPrice.productVariantId || null,
       tierPrice.customerGroupId || null,
       tierPrice.quantityMin,
-      tierPrice.price,
+      tierPrice.priceCents,
       now,
       now,
     ];
 
-    const result = await queryOne<TierPrice>(sql, values);
+    const result = await queryOne<DbTierPrice>(sql, values);
 
     if (!result) {
       throw new FailedToCreatePricingError('Failed to create tier price');
     }
 
-    return result;
+    return mapRow(result);
   }
 
   /**
@@ -137,13 +154,13 @@ export class TierPriceRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<TierPrice>(sql, values);
+    const result = await queryOne<DbTierPrice>(sql, values);
 
     if (!result) {
       throw new PriceNotFoundError(id);
     }
 
-    return result;
+    return mapRow(result);
   }
 
   /**
@@ -214,7 +231,7 @@ export class TierPriceRepo {
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
 
-    const tierPrices = (await query<TierPrice[]>(sql, params)) || [];
+    const tierPrices = ((await query<DbTierPrice[]>(sql, params)) || []).map(mapRow);
 
     return {
       tierPrices,
@@ -227,7 +244,8 @@ export class TierPriceRepo {
    */
   async findById(id: string): Promise<TierPrice | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "tierPriceId" = $1`;
-    return await queryOne<TierPrice>(sql, [id]);
+    const row = await queryOne<DbTierPrice>(sql, [id]);
+    return row ? mapRow(row) : null;
   }
 }
 

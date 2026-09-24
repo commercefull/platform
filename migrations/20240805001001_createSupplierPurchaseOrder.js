@@ -23,11 +23,11 @@ exports.up = function (knex) {
     t.string('carrierName', 100);
     t.string('paymentTerms', 100);
     t.string('currency', 3).notNullable().defaultTo('USD');
-    t.decimal('subtotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('tax', 15, 2).notNullable().defaultTo(0);
-    t.decimal('shipping', 15, 2).notNullable().defaultTo(0);
-    t.decimal('discount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('total', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('subtotalCents').notNullable().defaultTo(0);
+    t.bigInteger('taxCents').notNullable().defaultTo(0);
+    t.bigInteger('shippingCents').notNullable().defaultTo(0);
+    t.bigInteger('discountCents').notNullable().defaultTo(0);
+    t.bigInteger('totalCents').notNullable().defaultTo(0);
     t.text('notes');
     t.text('supplierNotes');
     t.jsonb('attachments');
@@ -46,7 +46,7 @@ exports.up = function (knex) {
     t.index('orderDate');
     t.index('expectedDeliveryDate');
     t.index('deliveryDate');
-    t.index('total');
+    t.index('totalCents');
     t.index('createdAt');
   });
 };

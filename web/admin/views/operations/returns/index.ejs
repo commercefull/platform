@@ -38,7 +38,7 @@
                     <span class="badge bg-<%= statusColors[r.status] || 'secondary' %>"><%= r.status %></span>
                   </td>
                   <td><%= (r.items || []).length %></td>
-                  <td><%= r.items ? r.items.reduce((sum, i) => sum + (i.refundAmount || 0), 0).toFixed(2) : '0.00' %></td>
+                  <td><%= r.items ? (r.items.reduce((sum, i) => sum + (i.refundAmountCents || 0), 0) / 100).toFixed(2) : '0.00' %></td>
                   <td><%= r.requestedAt ? new Date(r.requestedAt).toLocaleDateString() : '-' %></td>
                   <td><a href="/admin/returns/<%= r.orderReturnId %>" class="btn btn-sm btn-outline-primary"><%= t('common.view') %></a></td>
                 </tr>

@@ -14,8 +14,8 @@ export interface PromotionGiftCard {
   promotionGiftCardId: string;
   code: string;
   type: GiftCardType;
-  initialBalance: number;
-  currentBalance: number;
+  initialBalanceCents: number;
+  currentBalanceCents: number;
   currency: string;
   status: GiftCardStatus;
   purchasedBy?: string;
@@ -33,11 +33,11 @@ export interface PromotionGiftCard {
   expiresAt?: Date;
   lastUsedAt?: Date;
   usageCount: number;
-  totalRedeemed: number;
+  totalRedeemedCents: number;
   isReloadable: boolean;
-  minReloadAmount?: number;
-  maxReloadAmount?: number;
-  maxBalance?: number;
+  minReloadAmountCents?: number;
+  maxReloadAmountCents?: number;
+  maxBalanceCents?: number;
   restrictions?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
   createdAt: Date;
@@ -50,9 +50,9 @@ export interface PromotionGiftCardTransaction {
   promotionGiftCardTransactionId: string;
   promotionGiftCardId: string;
   type: TransactionType;
-  amount: number;
-  balanceBefore: number;
-  balanceAfter: number;
+  amountCents: number;
+  balanceBeforeCents: number;
+  balanceAfterCents: number;
   currency: string;
   orderId?: string;
   customerId?: string;
@@ -68,7 +68,7 @@ export type GiftCardTransaction = PromotionGiftCardTransaction;
 
 export interface CreateGiftCardInput {
   type?: GiftCardType;
-  initialBalance: number;
+  initialBalanceCents: number;
   currency?: string;
   purchasedBy?: string;
   purchaseOrderId?: string;
@@ -100,20 +100,20 @@ export interface GiftCardRepository {
   assignGiftCard(giftCardId: string, customerId: string): Promise<void>;
   redeemGiftCard(
     giftCardId: string,
-    amount: number,
+    amountCents: number,
     orderId?: string,
     customerId?: string,
     performedBy?: string,
   ): Promise<PromotionGiftCardTransaction>;
   reloadGiftCard(
     giftCardId: string,
-    amount: number,
+    amountCents: number,
     orderId?: string,
     performedBy?: string,
   ): Promise<PromotionGiftCardTransaction>;
   refundToGiftCard(
     giftCardId: string,
-    amount: number,
+    amountCents: number,
     orderId?: string,
     performedBy?: string,
     notes?: string,

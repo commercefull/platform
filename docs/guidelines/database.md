@@ -41,7 +41,7 @@ t.uuid('customerId').primary().defaultTo(knex.raw('uuidv7()'));
 | Soft delete       | `timestamp`    | `t.timestamp('deletedAt')`                                          |
 | Boolean flags     | `boolean`      | `t.boolean('isActive').notNullable().defaultTo(true)`               |
 | Enum/Status       | `enu`          | `t.enu('status', ['draft', 'active']).defaultTo('draft')`           |
-| Money             | `decimal`      | `t.decimal('price', 15, 2)`                                         |
+| Money             | `bigint`       | `t.bigInteger('priceCents')` — integer cents, never floats         |
 | Flexible data     | `jsonb`        | `t.jsonb('customFields')`                                           |
 | UUID arrays       | `specificType` | `t.specificType('relatedProducts', 'uuid[]')`                       |
 
@@ -55,7 +55,7 @@ Use `is`, `has`, `can` prefixes: `isActive`, `isFeatured`, `hasVariants`, `isVer
 | --------------- | ------------------------------------- |
 | `uuid`          | All primary and foreign keys (UUIDv7) |
 | `timestamp`     | All date/time fields                  |
-| `decimal(15,2)` | Monetary amounts                      |
+| `bigint`        | Monetary amounts (integer cents)      |
 | `decimal(10,2)` | Weights, dimensions                   |
 | `decimal(5,2)`  | Rates, percentages                    |
 | `jsonb`         | Structured flexible data              |
@@ -64,6 +64,26 @@ Use `is`, `has`, `can` prefixes: `isActive`, `isFeatured`, `hasVariants`, `isVer
 | `integer`       | Counts, quantities                    |
 | `boolean`       | Flags                                 |
 | `enu`           | Inline enums (status, type)           |
+
+## Money
+
+Monetary amounts are stored as **integer cents** in `bigint` columns named `*Cents`
+(e.g. `priceCents`, `salePriceCents`, `unitPriceCents`). Rationale: floats and
+`numeric(15,2)` drift on arithmetic; integer cents are exact and sortable.
+
+- Column names carry the `Cents` suffix so units are unambiguous.
+- `libs/db` registers a `bigint` type parser so `*Cents` columns arrive as
+  JavaScript `number` — no `parseFloat`/`Number` mapping is needed on reads.
+- Convert to decimal strings (`(cents / 100).toFixed(2)`) only at the view/API
+  presentation boundary — never inside domain entities, use cases, or
+  repositories.
+- `libs/money` `Money` stores integer cents internally: `Money.create(49.99)`
+  takes major units, `Money.fromCents(4999)` takes cents, `.cents` returns the
+  integer.
+- `decimal` money columns are not allowed — use `bigint` `*Cents` for all
+  monetary values. Polymorphic operands (e.g. a percent-or-amount coupon
+  `discountAmount`, rule JSON `rate`/`value` fields) may remain `decimal` where
+  the same column holds a percentage.
 
 ## Soft Deletes
 

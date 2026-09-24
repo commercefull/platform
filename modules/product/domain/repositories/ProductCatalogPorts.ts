@@ -49,35 +49,6 @@ export interface ProductQaAnswerPort {
 }
 
 // ============================================================================
-// Product Prices
-// ============================================================================
-
-export interface ProductPrice {
-  productPriceId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  productVariantId?: string | null;
-  priceListId?: string | null;
-  currencyCode: string;
-  amount: number;
-  compareAtAmount?: number | null;
-  minQuantity?: number | null;
-  maxQuantity?: number | null;
-  startsAt?: string | null;
-  endsAt?: string | null;
-}
-
-export type ProductPriceCreateParams = Omit<ProductPrice, 'productPriceId' | 'createdAt' | 'updatedAt'>;
-export type ProductPriceUpdateParams = Partial<Omit<ProductPriceCreateParams, 'productId'>>;
-
-export interface ProductPricePort {
-  findByProduct(productId: string): Promise<ProductPrice[]>;
-  create(params: ProductPriceCreateParams): Promise<ProductPrice>;
-  update(id: string, params: ProductPriceUpdateParams): Promise<ProductPrice | null>;
-}
-
-// ============================================================================
 // Product Categories (productCategoryRepo)
 // ============================================================================
 
@@ -427,14 +398,6 @@ export interface ProductVariantRow {
     displayValue?: string;
     displayOrder?: number;
   }>;
-  price: {
-    effectivePrice: number;
-    currency: string;
-    salePrice?: number | null;
-    cost?: number | null;
-    isOnSale: boolean;
-    discountPercentage?: number;
-  };
   stockQuantity: number;
   lowStockThreshold?: number;
   isDefault: boolean;

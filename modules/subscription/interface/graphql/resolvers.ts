@@ -18,7 +18,7 @@ const subscriptionRepoAdapter = {
       nextBillingDate: sub.nextBillingAt?.toISOString() ?? new Date().toISOString(),
       currentPeriodStart: sub.currentPeriodStart?.toISOString(),
       startDate: sub.createdAt.toISOString(),
-      price: sub.totalPrice,
+      priceCents: sub.totalPriceCents,
       billingInterval: sub.billingInterval,
     };
   },
@@ -31,7 +31,7 @@ const planRepoAdapter = {
   async findById(id: string) {
     const plan = await subscriptionRepo.getSubscriptionPlan(id);
     if (!plan) return null;
-    return { price: plan.price };
+    return { priceCents: plan.priceCents };
   },
 };
 

@@ -11,11 +11,11 @@ exports.up = function (knex) {
     table.text('description');
     table.string('bundleType').defaultTo('fixed'); // fixed, customizable, mix_and_match
     table.string('pricingType').defaultTo('fixed'); // fixed, calculated, percentage_discount
-    table.decimal('fixedPrice', 15, 2);
+    table.bigInteger('fixedPriceCents');
     table.decimal('discountPercent', 5, 2);
-    table.decimal('discountAmount', 15, 2);
-    table.decimal('minPrice', 15, 2);
-    table.decimal('maxPrice', 15, 2);
+    table.bigInteger('discountAmountCents');
+    table.bigInteger('minPriceCents');
+    table.bigInteger('maxPriceCents');
     table.string('currency', 3).defaultTo('USD');
     table.integer('minItems');
     table.integer('maxItems');
@@ -24,7 +24,7 @@ exports.up = function (knex) {
     table.boolean('requireAllItems').defaultTo(true);
     table.boolean('allowDuplicates').defaultTo(false);
     table.boolean('showSavings').defaultTo(true);
-    table.decimal('savingsAmount', 15, 2);
+    table.bigInteger('savingsAmountCents');
     table.decimal('savingsPercent', 5, 2);
     table.string('imageUrl');
     table.integer('sortOrder').defaultTo(0);

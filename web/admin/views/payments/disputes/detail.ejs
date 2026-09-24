@@ -36,7 +36,7 @@
               <dd class="col-sm-8"><%= dispute.externalDisputeId || '-' %></dd>
 
               <dt class="col-sm-4"><%= t('common.amount') %></dt>
-              <dd class="col-sm-8"><strong><%= dispute.currency %> <%= (dispute.amount || 0).toFixed(2) %></strong></dd>
+              <dd class="col-sm-8"><strong><%= dispute.currency %> <%= ((dispute.amountCents || 0) / 100).toFixed(2) %></strong></dd>
 
               <dt class="col-sm-4"><%= t('shared:common.reason') %></dt>
               <dd class="col-sm-8"><%= dispute.reason || '-' %></dd>

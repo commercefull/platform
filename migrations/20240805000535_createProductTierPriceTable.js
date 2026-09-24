@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
     t.uuid('customerGroupId').references('customerGroupId').inTable('customerGroup').onDelete('SET NULL');
     t.integer('quantityMin').notNullable();
-    t.decimal('price', 10, 2).notNullable();
+    t.bigInteger('priceCents').notNullable();
 
     t.index(['productId', 'productVariantId', 'quantityMin']);
   });

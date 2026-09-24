@@ -86,7 +86,7 @@ export class ManageQuoteUseCase {
     if (quote.isExpired) throw new QuoteExpiredError(quoteId);
     quote.accept();
     await this.quoteRepo.save(quote);
-    await eventBus.emit('quote.accepted', { quoteId: quote.quoteId, companyId: quote.companyId, total: quote.total });
+    await eventBus.emit('quote.accepted', { quoteId: quote.quoteId, companyId: quote.companyId, totalCents: quote.totalCents });
     return quote;
   }
 

@@ -31,8 +31,8 @@
             <% } else { %><span class="badge bg-secondary"><%= c.status %></span><% } %>
           </td>
           <td><%= c.paymentTerms %></td>
-          <td><%= c.creditLimit != null ? '$' + c.creditLimit.toFixed(2) : '-' %></td>
-          <td>$<%= c.outstandingBalance.toFixed(2) %></td>
+          <td><%= c.creditLimitCents != null ? '$' + (c.creditLimitCents/100).toFixed(2) : '-' %></td>
+          <td>$<%= (c.outstandingBalanceCents/100).toFixed(2) %></td>
           <td><%= c.contactEmail || '-' %></td>
           <td>
             <a href="/admin/b2b/companies/<%= c.companyId %>" class="btn btn-info btn-sm">View</a>

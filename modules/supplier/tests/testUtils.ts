@@ -78,7 +78,7 @@ export function createPurchaseOrderCreateRepository(): jest.Mocked<PurchaseOrder
       purchaseOrderId: String(data.purchaseOrderId),
       poNumber: String(data.poNumber),
       supplierId: String(data.supplierId),
-      totalAmount: Number(data.totalAmount),
+      totalAmountCents: Number(data.totalAmountCents),
       status: String(data.status),
       createdAt: new Date('2026-01-01'),
     }),

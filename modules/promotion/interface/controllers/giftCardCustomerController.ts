@@ -8,7 +8,7 @@ import { getGiftCardByCode, getGiftCards, redeemGiftCardRepo, reloadGiftCardRepo
 
 interface RedeemOrReloadBody {
   code: string;
-  amount: number;
+  amountCents: number;
   orderId?: string;
 }
 
@@ -37,7 +37,7 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
     success: true,
     data: {
       code: giftCard.code,
-      currentBalance: giftCard.currentBalance,
+      currentBalanceCents: giftCard.currentBalanceCents,
       currency: giftCard.currency,
       expiresAt: giftCard.expiresAt,
     },
@@ -46,7 +46,7 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
 
 export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const { code, amount, orderId } = req.body as RedeemOrReloadBody;
+  const { code, amountCents, orderId } = req.body as RedeemOrReloadBody;
 
   const giftCard = await getGiftCardByCode(code);
   if (!giftCard) {
@@ -54,7 +54,7 @@ export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const transaction = await redeemGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
+  const transaction = await redeemGiftCardRepo(giftCard.promotionGiftCardId, amountCents, orderId, customerId);
 
   res.json({ success: true, data: transaction });
 };
@@ -73,7 +73,7 @@ export const getMyGiftCards: AsyncHandler = async (req, res, _next) => {
 
 export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const { code, amount, orderId } = req.body as RedeemOrReloadBody;
+  const { code, amountCents, orderId } = req.body as RedeemOrReloadBody;
 
   const giftCard = await getGiftCardByCode(code);
   if (!giftCard) {
@@ -86,7 +86,7 @@ export const reloadGiftCard: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const transaction = await reloadGiftCardRepo(giftCard.promotionGiftCardId, amount, orderId, customerId);
+  const transaction = await reloadGiftCardRepo(giftCard.promotionGiftCardId, amountCents, orderId, customerId);
 
   res.json({ success: true, data: transaction });
 };

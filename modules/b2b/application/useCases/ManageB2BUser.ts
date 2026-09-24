@@ -113,12 +113,12 @@ export class ManageB2BUserUseCase {
     await this.userRepo.save(user);
   }
 
-  async checkSpendingLimit(userId: string, amount: number, periodSpent: number, period: keyof SpendingLimit): Promise<boolean> {
+  async checkSpendingLimit(userId: string, amountCents: number, periodSpent: number, period: keyof SpendingLimit): Promise<boolean> {
     const user = await this.get(userId);
     if (!user.isActive) throw new B2BUserStatusError(userId, 'place order', user.status);
     const limit = user.spendingLimits[period];
-    if (limit !== undefined && periodSpent + amount > limit) {
-      throw new SpendingLimitExceededError(userId, amount, limit);
+    if (limit !== undefined && periodSpent + amountCents > limit) {
+      throw new SpendingLimitExceededError(userId, amountCents, limit);
     }
     return true;
   }

@@ -36,7 +36,7 @@
                     <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text"><%= t('analytics:predictedRevenue30') %></span>
-                      <span class="info-box-number">$<%= (forecasts.predictions || []).reduce((sum, p) => sum + p.revenue, 0).toLocaleString() %></span>
+                      <span class="info-box-number">$<%= (((forecasts.predictions || []).reduce((sum, p) => sum + p.predicted, 0)) / 100).toLocaleString() %></span>
                     </div>
                   </div>
                   <div class="info-box bg-success">
@@ -179,7 +179,7 @@
       labels: <%- JSON.stringify((forecasts.predictions || []).map(p => p.date)) %>,
       datasets: [{
         label: '<%= t("analytics:predictedRevenue30") %>',
-        data: <%- JSON.stringify((forecasts.predictions || []).map(p => p.revenue)) %>,
+        data: <%- JSON.stringify((forecasts.predictions || []).map(p => p.predicted / 100)) %>,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1,
         fill: true,

@@ -30,8 +30,8 @@ exports.up = async function (knex) {
     table.integer('lengthCm');
     table.integer('widthCm');
     table.integer('heightCm');
-    table.decimal('shippingCost', 12, 2);
-    table.decimal('insuranceCost', 12, 2);
+    table.bigInteger('shippingCostCents');
+    table.bigInteger('insuranceCostCents');
     table.text('notes');
     table.text('internalNotes');
     table.timestamp('assignedAt');

@@ -100,11 +100,11 @@ export const createPromotion = async (req: HttpRequest, res: HttpResponse): Prom
     const command = new CreatePromotionCommand(
       name,
       type,
-      parseFloat(value),
+      type === 'fixed_amount' ? Math.round(parseFloat(value) * 100) : parseFloat(value),
       code,
       description,
-      minOrderAmount ? parseFloat(minOrderAmount) : undefined,
-      maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined,
+      minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined,
+      maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined,
       usageLimit ? parseInt(usageLimit) : undefined,
       usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined,
       startsAt ? new Date(startsAt) : undefined,
@@ -133,10 +133,9 @@ export const createPromotion = async (req: HttpRequest, res: HttpResponse): Prom
 export const viewPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
 
-  // For now, we'll use the repository directly since we don't have a GetPromotion use case
-  const promotion = await managePromotionsUseCase.findById(promotionId);
+  const details = await managePromotionsUseCase.getWithDetails(promotionId);
 
-  if (!promotion) {
+  if (!details) {
     adminRespond(req, res, 'error', {
       pageName: 'Not Found',
       error: 'Promotion not found',
@@ -144,9 +143,16 @@ export const viewPromotion = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
+  const { promotion, actions } = details;
+  const primaryAction = actions[0];
+
   adminRespond(req, res, 'promotions/view', {
     pageName: `Promotion: ${promotion.name}`,
-    promotion,
+    promotion: {
+      ...promotion,
+      type: primaryAction?.actionType,
+      value: primaryAction?.value !== undefined ? Number(primaryAction.value) : undefined,
+    },
 
     success: req.query.success || null,
   });
@@ -215,8 +221,8 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   if (description !== undefined) updates.description = description;
   if (status !== undefined) updates.status = status;
   if (value !== undefined) updates.value = parseFloat(value);
-  if (minOrderAmount !== undefined) updates.minOrderAmount = minOrderAmount ? parseFloat(minOrderAmount) : undefined;
-  if (maxDiscountAmount !== undefined) updates.maxDiscountAmount = maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined;
+  if (minOrderAmount !== undefined) updates.minOrderAmountCents = minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined;
+  if (maxDiscountAmount !== undefined) updates.maxDiscountAmountCents = maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined;
   if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
   if (usageLimitPerCustomer !== undefined)
     updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
@@ -262,7 +268,7 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
       couponCode,
       currency,
     } = body as {
-      items?: Array<{ productId: string; name: string; quantity: number; unitPrice: number; categoryId?: string; isDigital?: boolean }>;
+      items?: Array<{ productId: string; name: string; quantity: number; unitPriceCents: number; categoryId?: string; isDigital?: boolean }>;
       subtotal?: string;
       shippingAmount?: string;
       customerId?: string;
@@ -282,25 +288,27 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
             productId: 'sample-product',
             name: 'Sample Product',
             quantity: parseInt(body.itemQty as string, 10) || 1,
-            unitPrice: parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100,
+            unitPriceCents: Math.round((parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100) * 100),
           },
         ];
 
     const context: PromotionEvaluationContext = {
       items: items.map(
-        (item: { productId: string; name: string; quantity: number; unitPrice: number; categoryId?: string; isDigital?: boolean }) => ({
+        (item: { productId: string; name: string; quantity: number; unitPriceCents: number; categoryId?: string; isDigital?: boolean }) => ({
           productId: item.productId || 'sample-product',
           name: item.name || 'Sample Product',
           quantity: item.quantity || 1,
-          unitPrice: item.unitPrice || 0,
+          unitPriceCents: item.unitPriceCents || 0,
           categoryId: item.categoryId,
           isDigital: item.isDigital,
         }),
       ),
-      subtotal:
-        parseFloat(subtotal as string) ||
-        items.reduce((sum: number, i: { unitPrice: number; quantity: number }) => sum + i.unitPrice * i.quantity, 0),
-      shippingAmount: parseFloat(shippingAmount as string) || 0,
+      subtotalCents: Math.round(
+        (parseFloat(subtotal as string) ||
+          items.reduce((sum: number, i: { unitPriceCents: number; quantity: number }) => sum + i.unitPriceCents * i.quantity, 0) / 100) *
+          100,
+      ),
+      shippingAmountCents: Math.round((parseFloat(shippingAmount as string) || 0) * 100),
       customerId: customerId || undefined,
       customerGroup: customerGroup || undefined,
       isFirstOrder: isFirstOrder === 'true',
@@ -314,14 +322,14 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
 
     res.json({
       success: true,
-      totalDiscountAmount: result.totalDiscountAmount,
-      shippingDiscountAmount: result.shippingDiscountAmount,
+      totalDiscountAmountCents: result.totalDiscountAmountCents,
+      shippingDiscountAmountCents: result.shippingDiscountAmountCents,
       freeShipping: result.freeShipping,
       lineItemDiscounts: result.lineItemDiscounts,
       freeItems: result.freeItems,
       appliedPromotions: result.appliedPromotions,
       message: result.message,
-      finalTotal: context.subtotal - result.totalDiscountAmount,
+      finalTotalCents: context.subtotalCents - result.totalDiscountAmountCents,
     });
   } catch (error: unknown) {
     logger.warn('Error previewing promotion:', error);

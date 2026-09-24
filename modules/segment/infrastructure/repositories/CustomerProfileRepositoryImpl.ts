@@ -12,9 +12,9 @@ interface ProfileDbRow {
   lastName: string | null;
   status: string | null;
   tier: string | null;
-  lifetimeValue: string;
-  totalSpent: string;
-  averageOrderValue: string;
+  lifetimeValueCents: string;
+  totalSpentCents: string;
+  averageOrderValueCents: string;
   totalOrders: number;
   firstOrderDate: Date | null;
   lastOrderDate: Date | null;
@@ -51,9 +51,9 @@ interface ProfileDbRow {
 function rowToEntity(row: ProfileDbRow): CustomerProfile {
   return CustomerProfile.reconstitute({
     ...row,
-    lifetimeValue: parseFloat(row.lifetimeValue),
-    totalSpent: parseFloat(row.totalSpent),
-    averageOrderValue: parseFloat(row.averageOrderValue),
+    lifetimeValueCents: parseFloat(row.lifetimeValueCents),
+    totalSpentCents: parseFloat(row.totalSpentCents),
+    averageOrderValueCents: parseFloat(row.averageOrderValueCents),
     averageReviewRating: row.averageReviewRating ? parseFloat(row.averageReviewRating) : null,
     engagementScore: row.engagementScore ? parseFloat(row.engagementScore) : null,
     churnRisk: row.churnRisk ? parseFloat(row.churnRisk) : null,
@@ -80,19 +80,19 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
       `SELECT cp.* FROM "customerProfile" cp
        INNER JOIN "segmentMembership" sm ON cp."customerId" = sm."customerId"
        WHERE sm."segmentId" = $1 AND sm."isActive" = true
-       ORDER BY cp."lifetimeValue" DESC`,
+       ORDER BY cp."lifetimeValueCents" DESC`,
       [segmentId],
     );
     return (rows || []).map(rowToEntity);
   }
 
   async findByTier(tier: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValue" DESC`, [tier]);
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`, [tier]);
     return (rows || []).map(rowToEntity);
   }
 
   async findByRFM(rfmSegment: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValue" DESC`, [
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`, [
       rfmSegment,
     ]);
     return (rows || []).map(rowToEntity);
@@ -103,7 +103,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     const row = await queryOne<ProfileDbRow>(
       `INSERT INTO "customerProfile" (
         "customerId", "email", "firstName", "lastName", "status", "tier",
-        "lifetimeValue", "totalSpent", "averageOrderValue", "totalOrders",
+        "lifetimeValueCents", "totalSpentCents", "averageOrderValueCents", "totalOrders",
         "firstOrderDate", "lastOrderDate", "daysSinceLastOrder",
         "ordersLast30Days", "ordersLast90Days", "ordersLast12Months",
         "productViews", "cartCount", "abandonedCarts", "wishlistItemCount",
@@ -119,8 +119,8 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
       ON CONFLICT ("customerId") DO UPDATE SET
         "email" = EXCLUDED."email", "firstName" = EXCLUDED."firstName",
         "lastName" = EXCLUDED."lastName", "status" = EXCLUDED."status",
-        "tier" = EXCLUDED."tier", "lifetimeValue" = EXCLUDED."lifetimeValue",
-        "totalSpent" = EXCLUDED."totalSpent", "averageOrderValue" = EXCLUDED."averageOrderValue",
+        "tier" = EXCLUDED."tier", "lifetimeValueCents" = EXCLUDED."lifetimeValueCents",
+        "totalSpentCents" = EXCLUDED."totalSpentCents", "averageOrderValueCents" = EXCLUDED."averageOrderValueCents",
         "totalOrders" = EXCLUDED."totalOrders", "firstOrderDate" = EXCLUDED."firstOrderDate",
         "lastOrderDate" = EXCLUDED."lastOrderDate", "daysSinceLastOrder" = EXCLUDED."daysSinceLastOrder",
         "ordersLast30Days" = EXCLUDED."ordersLast30Days",
@@ -153,9 +153,9 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
         p.lastName,
         p.status,
         p.tier,
-        p.lifetimeValue,
-        p.totalSpent,
-        p.averageOrderValue,
+        p.lifetimeValueCents,
+        p.totalSpentCents,
+        p.averageOrderValueCents,
         p.totalOrders,
         p.firstOrderDate,
         p.lastOrderDate,
@@ -198,9 +198,9 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     let paramIndex = 2;
 
     const fields = [
-      'lifetimeValue',
-      'totalSpent',
-      'averageOrderValue',
+      'lifetimeValueCents',
+      'totalSpentCents',
+      'averageOrderValueCents',
       'totalOrders',
       'firstOrderDate',
       'lastOrderDate',
@@ -258,15 +258,15 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     // Compute aggregates from order table
     const orderStats = await queryOne<{
       totalOrders: string;
-      totalSpent: string;
+      totalSpentCents: string;
       avgOrderValue: string | null;
       firstOrderDate: Date | null;
       lastOrderDate: Date | null;
     }>(
       `SELECT
         COUNT(*) as "totalOrders",
-        COALESCE(SUM("totalAmount"), 0) as "totalSpent",
-        AVG("totalAmount") as "avgOrderValue",
+        COALESCE(SUM("totalAmountCents"), 0) as "totalSpentCents",
+        AVG("totalAmountCents") as "avgOrderValue",
         MIN("createdAt") as "firstOrderDate",
         MAX("createdAt") as "lastOrderDate"
        FROM "order" WHERE "customerId" = $1 AND "status" NOT IN ('cancelled')`,
@@ -276,7 +276,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     if (!orderStats) return null;
 
     const totalOrders = parseInt(orderStats.totalOrders, 10);
-    const totalSpent = parseFloat(orderStats.totalSpent);
+    const totalSpentCents = parseFloat(orderStats.totalSpentCents);
     const avgOrderValue = orderStats.avgOrderValue ? parseFloat(orderStats.avgOrderValue) : 0;
     const daysSinceLastOrder = orderStats.lastOrderDate
       ? Math.floor((Date.now() - new Date(orderStats.lastOrderDate).getTime()) / (1000 * 60 * 60 * 24))
@@ -308,9 +308,9 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
 
     profile.updateAggregates({
       totalOrders,
-      totalSpent,
-      averageOrderValue: avgOrderValue,
-      lifetimeValue: totalSpent,
+      totalSpentCents,
+      averageOrderValueCents: avgOrderValue,
+      lifetimeValueCents: totalSpentCents,
       firstOrderDate: orderStats.firstOrderDate,
       lastOrderDate: orderStats.lastOrderDate,
       daysSinceLastOrder,

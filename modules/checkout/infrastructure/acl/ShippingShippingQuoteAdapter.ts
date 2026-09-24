@@ -27,7 +27,7 @@ export class ShippingShippingQuoteAdapter implements ShippingQuotePort {
           postalCode: request.shippingAddress.postalCode,
         },
         {
-          subtotal: request.totalValue || 0,
+          subtotalCents: request.totalValueCents || 0,
           itemCount: 0,
           totalWeight: request.totalWeight,
           currency: 'USD',
@@ -40,7 +40,7 @@ export class ShippingShippingQuoteAdapter implements ShippingQuotePort {
       return result.rates.map(rate => ({
         methodId: rate.shippingMethodId,
         methodName: rate.shippingMethodName,
-        amount: rate.amount,
+        amountCents: rate.amountCents,
         currency: rate.currency,
         estimatedDays: rate.estimatedDeliveryDays || undefined,
         carrier: rate.shippingCarrierId || undefined,

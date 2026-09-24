@@ -50,7 +50,7 @@ export interface PaymentRepository {
       displayName: string;
       description?: string;
       icon?: string;
-      processingFee?: number;
+      processingFeeCents?: number;
     }>
   >;
 

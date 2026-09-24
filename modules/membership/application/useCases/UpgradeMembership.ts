@@ -19,8 +19,8 @@ export interface UpgradeMembershipOutput {
   previousTierId: string;
   newTierId: string;
   newTierName: string;
-  proratedAmount?: number;
-  newBillingAmount: number;
+  proratedAmountCents?: number;
+  newBillingAmountCents: number;
   effectiveDate: string;
   nextBillingDate: string;
 }
@@ -39,7 +39,7 @@ interface UpdatedMembership {
 
 interface TierRecord {
   name: string;
-  price: number;
+  priceCents: number;
   isActive: boolean;
 }
 
@@ -79,23 +79,23 @@ export class UpgradeMembershipUseCase {
     // Get current tier for comparison
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
 
-    // Validate upgrade (new tier should have higher price or level)
-    if (!currentTier || newTier.price <= currentTier.price) {
-      throw new MembershipValidationError('Cannot upgrade to a tier with equal or lower price. Use downgrade instead.');
+    // Validate upgrade (new tier should have higher priceCents or level)
+    if (!currentTier || newTier.priceCents <= currentTier.priceCents) {
+      throw new MembershipValidationError('Cannot upgrade to a tier with equal or lower priceCents. Use downgrade instead.');
     }
 
     const now = new Date();
     const effective = effectiveDate || now;
 
-    // Calculate prorated amount if applicable
-    let proratedAmount: number | undefined;
+    // Calculate prorated amountCents if applicable
+    let proratedAmountCents: number | undefined;
     if (prorateBilling && membership.currentPeriodEnd) {
       const periodEnd = new Date(membership.currentPeriodEnd);
       const daysRemaining = Math.max(0, Math.ceil((periodEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
       const daysInPeriod = membership.billingPeriod === 'monthly' ? 30 : membership.billingPeriod === 'quarterly' ? 90 : 365;
-      const unusedCredit = (currentTier.price / daysInPeriod) * daysRemaining;
-      const newCharge = (newTier.price / daysInPeriod) * daysRemaining;
-      proratedAmount = Math.max(0, newCharge - unusedCredit);
+      const unusedCredit = (currentTier.priceCents / daysInPeriod) * daysRemaining;
+      const newCharge = (newTier.priceCents / daysInPeriod) * daysRemaining;
+      proratedAmountCents = Math.max(0, newCharge - unusedCredit);
     }
 
     // Update membership
@@ -123,7 +123,7 @@ export class UpgradeMembershipUseCase {
       customerId: membership.customerId,
       previousTierId: membership.tierId,
       newTierId,
-      proratedAmount,
+      proratedAmountCents,
     });
 
     return {
@@ -131,8 +131,8 @@ export class UpgradeMembershipUseCase {
       previousTierId: membership.tierId,
       newTierId,
       newTierName: newTier.name,
-      proratedAmount,
-      newBillingAmount: newTier.price,
+      proratedAmountCents,
+      newBillingAmountCents: newTier.priceCents,
       effectiveDate: effective.toISOString(),
       nextBillingDate: updatedMembership.currentPeriodEnd?.toISOString() || '',
     };

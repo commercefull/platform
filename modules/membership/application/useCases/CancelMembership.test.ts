@@ -17,7 +17,7 @@ describe('CancelMembershipUseCase', () => {
       currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
       createdAt: new Date(),
     });
-    membershipRepository.getTierById.mockResolvedValue({ price: 50 });
+    membershipRepository.getTierById.mockResolvedValue({ priceCents: 50 });
     membershipRepository.updateMembership.mockResolvedValue(undefined);
     membershipRepository.createStatusLog.mockResolvedValue(undefined);
     membershipRepository.recordCancellationFeedback.mockResolvedValue(undefined);

@@ -24,8 +24,8 @@ describe('CreateTaxExemptionUseCase', () => {
       name: 'Resale Certificate',
       exemptionNumber: 'EX123',
       applicableTaxCategoryIds: ['digital-goods'],
-      minOrderAmount: 100,
-      maxOrderAmount: 5000,
+      minOrderAmountCents: 100,
+      maxOrderAmountCents: 5000,
       exemptionPercent: 100,
     });
 
@@ -36,8 +36,8 @@ describe('CreateTaxExemptionUseCase', () => {
         type: 'resale',
         status: 'pending',
         applicableTaxCategoryIds: ['digital-goods'],
-        minOrderAmount: 100,
-        maxOrderAmount: 5000,
+        minOrderAmountCents: 100,
+        maxOrderAmountCents: 5000,
         exemptionPercent: 100,
         isVerified: false,
       }),
@@ -70,8 +70,8 @@ describe('CreateTaxExemptionUseCase', () => {
     expect(commandRepo.createTaxExemption).toHaveBeenCalledWith(
       expect.objectContaining({
         applicableTaxCategoryIds: null,
-        minOrderAmount: null,
-        maxOrderAmount: null,
+        minOrderAmountCents: null,
+        maxOrderAmountCents: null,
       }),
     );
   });

@@ -33,7 +33,7 @@ export interface PromotionItemContext {
   productVariantId?: string;
   name: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   categoryId?: string;
   brandId?: string;
   isDigital?: boolean;
@@ -41,8 +41,8 @@ export interface PromotionItemContext {
 
 export interface PromotionEvaluationContext {
   items: PromotionItemContext[];
-  subtotal: number;
-  shippingAmount: number;
+  subtotalCents: number;
+  shippingAmountCents: number;
   customerId?: string;
   customerGroup?: string;
   isFirstOrder?: boolean;
@@ -58,7 +58,7 @@ export interface PromotionEvaluationContext {
 
 export interface LineItemDiscount {
   productId: string;
-  discountAmount: number;
+  discountAmountCents: number;
   promotionId: string;
   promotionName: string;
 }
@@ -71,8 +71,8 @@ export interface FreeItemAction {
 }
 
 export interface PromotionEvaluationResult {
-  totalDiscountAmount: number;
-  shippingDiscountAmount: number;
+  totalDiscountAmountCents: number;
+  shippingDiscountAmountCents: number;
   freeShipping: boolean;
   lineItemDiscounts: LineItemDiscount[];
   freeItems: FreeItemAction[];
@@ -80,7 +80,7 @@ export interface PromotionEvaluationResult {
     promotionId: string;
     name: string;
     type: string;
-    discountAmount: number;
+    discountAmountCents: number;
   }>;
   message?: string;
 }
@@ -103,8 +103,8 @@ export class PromotionEvaluationService {
    */
   async evaluate(context: PromotionEvaluationContext): Promise<PromotionEvaluationResult> {
     const result: PromotionEvaluationResult = {
-      totalDiscountAmount: 0,
-      shippingDiscountAmount: 0,
+      totalDiscountAmountCents: 0,
+      shippingDiscountAmountCents: 0,
       freeShipping: false,
       lineItemDiscounts: [],
       freeItems: [],
@@ -139,7 +139,7 @@ export class PromotionEvaluationService {
         if (!promotion.isActive) continue;
         if (promotion.status !== 'active') continue;
         if (promotion.maxUsage && promotion.usageCount >= promotion.maxUsage) continue;
-        if (promotion.minOrderAmount && context.subtotal < Number(promotion.minOrderAmount)) continue;
+        if (promotion.minOrderAmountCents && context.subtotalCents < Number(promotion.minOrderAmountCents)) continue;
 
         // Evaluate rules
         const rules = await this.promotionRepo.findRulesByPromotionId(promotion.promotionId);
@@ -174,9 +174,9 @@ export class PromotionEvaluationService {
 
         const promoResult = this.applyActions(promotion, actions, context);
 
-        if (promoResult.discountAmount > 0 || promoResult.freeShipping || promoResult.freeItems.length > 0) {
-          result.totalDiscountAmount += promoResult.discountAmount;
-          result.shippingDiscountAmount += promoResult.shippingDiscountAmount;
+        if (promoResult.discountAmountCents > 0 || promoResult.freeShipping || promoResult.freeItems.length > 0) {
+          result.totalDiscountAmountCents += promoResult.discountAmountCents;
+          result.shippingDiscountAmountCents += promoResult.shippingDiscountAmountCents;
           result.freeShipping = result.freeShipping || promoResult.freeShipping;
           result.lineItemDiscounts.push(...promoResult.lineItemDiscounts);
           result.freeItems.push(...promoResult.freeItems);
@@ -184,19 +184,19 @@ export class PromotionEvaluationService {
             promotionId: promotion.promotionId,
             name: promotion.name,
             type: promotion.scope,
-            discountAmount: promoResult.discountAmount,
+            discountAmountCents: promoResult.discountAmountCents,
           });
 
           // Check max discount cap
-          if (promotion.maxDiscountAmount && result.totalDiscountAmount > Number(promotion.maxDiscountAmount)) {
-            result.totalDiscountAmount = Number(promotion.maxDiscountAmount);
+          if (promotion.maxDiscountAmountCents && result.totalDiscountAmountCents > Number(promotion.maxDiscountAmountCents)) {
+            result.totalDiscountAmountCents = Number(promotion.maxDiscountAmountCents);
           }
         }
       }
 
       // Ensure total discount doesn't exceed subtotal
-      if (result.totalDiscountAmount > context.subtotal) {
-        result.totalDiscountAmount = context.subtotal;
+      if (result.totalDiscountAmountCents > context.subtotalCents) {
+        result.totalDiscountAmountCents = context.subtotalCents;
       }
     } catch (error: unknown) {
       logger.warn(`PromotionEvaluationService error: ${(error as Error).message}`);
@@ -209,7 +209,7 @@ export class PromotionEvaluationService {
    * Evaluate all rules for a promotion. All rules must pass (AND logic).
    */
   private evaluateRules(rules: DbPromotionRule[], context: PromotionEvaluationContext): boolean {
-    const activeRules = rules.filter(r => r.condition && r.operator);
+    const activeRules = rules.filter(r => r.isActive !== false && r.condition && r.operator);
     if (activeRules.length === 0) return true; // No rules = always applicable
 
     for (const rule of activeRules) {
@@ -227,7 +227,7 @@ export class PromotionEvaluationService {
     switch (condition) {
       case 'cartTotal': {
         const threshold = Number(value);
-        return this.compare(context.subtotal, operator, threshold);
+        return this.compare(context.subtotalCents, operator, threshold);
       }
 
       case 'itemQuantity': {
@@ -297,14 +297,14 @@ export class PromotionEvaluationService {
     actions: DbPromotionAction[],
     context: PromotionEvaluationContext,
   ): {
-    discountAmount: number;
-    shippingDiscountAmount: number;
+    discountAmountCents: number;
+    shippingDiscountAmountCents: number;
     freeShipping: boolean;
     lineItemDiscounts: LineItemDiscount[];
     freeItems: FreeItemAction[];
   } {
-    let discountAmount = 0;
-    let shippingDiscountAmount = 0;
+    let discountAmountCents = 0;
+    let shippingDiscountAmountCents = 0;
     let freeShipping = false;
     const lineItemDiscounts: LineItemDiscount[] = [];
     const freeItems: FreeItemAction[] = [];
@@ -319,49 +319,49 @@ export class PromotionEvaluationService {
             // Line-item discount for specific products
             for (const item of context.items) {
               if (targetIds.includes(item.productId)) {
-                const itemDiscount = Math.round(item.unitPrice * item.quantity * (percentage / 100) * 100) / 100;
+                const itemDiscountCents = Math.round(item.unitPriceCents * item.quantity * (percentage / 100));
                 lineItemDiscounts.push({
                   productId: item.productId,
-                  discountAmount: itemDiscount,
+                  discountAmountCents: itemDiscountCents,
                   promotionId: promotion.promotionId,
                   promotionName: promotion.name,
                 });
-                discountAmount += itemDiscount;
+                discountAmountCents += itemDiscountCents;
               }
             }
           } else {
             // Cart-level percentage discount
-            discountAmount += Math.round(context.subtotal * (percentage / 100) * 100) / 100;
+            discountAmountCents += Math.round(context.subtotalCents * (percentage / 100));
           }
           break;
         }
 
         case 'discountByAmount': {
-          const amount = Number(action.value);
+          const amountCents = Math.round(Number(action.value));
           const targetIds = action.targetIds as string[] | null;
 
           if (targetIds && targetIds.length > 0) {
             for (const item of context.items) {
               if (targetIds.includes(item.productId)) {
-                const itemDiscount = Math.min(amount, item.unitPrice * item.quantity);
+                const itemDiscountCents = Math.min(amountCents, item.unitPriceCents * item.quantity);
                 lineItemDiscounts.push({
                   productId: item.productId,
-                  discountAmount: itemDiscount,
+                  discountAmountCents: itemDiscountCents,
                   promotionId: promotion.promotionId,
                   promotionName: promotion.name,
                 });
-                discountAmount += itemDiscount;
+                discountAmountCents += itemDiscountCents;
               }
             }
           } else {
-            discountAmount += Math.min(amount, context.subtotal);
+            discountAmountCents += Math.min(amountCents, context.subtotalCents);
           }
           break;
         }
 
         case 'discountShipping': {
-          const shippingDiscount = Number(action.value);
-          shippingDiscountAmount += Math.min(shippingDiscount, context.shippingAmount);
+          const shippingDiscountCents = Math.round(Number(action.value));
+          shippingDiscountAmountCents += Math.min(shippingDiscountCents, context.shippingAmountCents);
           break;
         }
 
@@ -394,7 +394,7 @@ export class PromotionEvaluationService {
 
           // Fall back to subtotal-based tiering if no quantity tier matched
           if (!tier) {
-            tier = tiers.find(t => context.subtotal >= t.min && (t.max === undefined || context.subtotal <= t.max));
+            tier = tiers.find(t => context.subtotalCents >= t.min && (t.max === undefined || context.subtotalCents <= t.max));
           }
 
           if (!tier) break;
@@ -404,21 +404,21 @@ export class PromotionEvaluationService {
             if (targetIds && targetIds.length > 0) {
               for (const item of context.items) {
                 if (targetIds.includes(item.productId)) {
-                  const itemDiscount = Math.round(item.unitPrice * item.quantity * (tier.percentage! / 100) * 100) / 100;
+                  const itemDiscountCents = Math.round(item.unitPriceCents * item.quantity * (tier.percentage! / 100));
                   lineItemDiscounts.push({
                     productId: item.productId,
-                    discountAmount: itemDiscount,
+                    discountAmountCents: itemDiscountCents,
                     promotionId: promotion.promotionId,
                     promotionName: promotion.name,
                   });
-                  discountAmount += itemDiscount;
+                  discountAmountCents += itemDiscountCents;
                 }
               }
             } else {
-              discountAmount += Math.round(context.subtotal * (tier.percentage / 100) * 100) / 100;
+              discountAmountCents += Math.round(context.subtotalCents * (tier.percentage / 100));
             }
           } else if (tier.amount !== undefined) {
-            discountAmount += Math.min(tier.amount, context.subtotal);
+            discountAmountCents += Math.min(tier.amount, context.subtotalCents);
           }
           break;
         }
@@ -431,7 +431,7 @@ export class PromotionEvaluationService {
 
           // Check gift eligibility conditions
           const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
-          if (giftConfig.minCartTotal !== undefined && context.subtotal < giftConfig.minCartTotal) break;
+          if (giftConfig.minCartTotal !== undefined && context.subtotalCents < giftConfig.minCartTotal) break;
           if (giftConfig.minQuantity !== undefined && totalQty < giftConfig.minQuantity) break;
 
           freeItems.push({
@@ -454,7 +454,7 @@ export class PromotionEvaluationService {
       freeShipping = true;
     }
 
-    return { discountAmount, shippingDiscountAmount, freeShipping, lineItemDiscounts, freeItems };
+    return { discountAmountCents, shippingDiscountAmountCents, freeShipping, lineItemDiscounts, freeItems };
   }
 
   /**

@@ -170,7 +170,7 @@ describe('B2B Business API', () => {
           sku: 'TEST-SKU-002',
           name: 'Second Product',
           quantity: 10,
-          unitPrice: 25.0,
+          unitPriceCents: 2500,
         },
         { headers: authHeaders() },
       );
@@ -182,7 +182,7 @@ describe('B2B Business API', () => {
     it('should update a line item on a draft quote', async () => {
       const response = await client.put(
         `/business/quotes/${quoteId}/line-items/${SEEDED.QUOTE_LINE_ITEM}`,
-        { quantity: 20, unitPrice: 22.5 },
+        { quantity: 20, unitPriceCents: 2250 },
         { headers: authHeaders() },
       );
 
@@ -202,7 +202,7 @@ describe('B2B Business API', () => {
     it('should reject line item changes on a non-draft quote', async () => {
       const response = await client.post(
         `/business/quotes/${SEEDED.QUOTE_REJECT}/line-items`,
-        { productId: randomUUID(), sku: 'X', name: 'X', quantity: 1, unitPrice: 1 },
+        { productId: randomUUID(), sku: 'X', name: 'X', quantity: 1, unitPriceCents: 100 },
         { headers: authHeaders() },
       );
 

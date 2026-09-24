@@ -22,7 +22,7 @@ describe('ApplyPromotionUseCase', () => {
     expect(result.valid).toBe(true);
     expect(result.promotionId).toBe('promo-1');
     expect(result.code).toBe('SUMMER');
-    expect(result.discountAmount).toBe(15);
+    expect(result.discountAmountCents).toBe(15);
     expect(promotionRepository.validateCode).toHaveBeenCalledWith('SUMMER', 100, 'cust-1');
   });
 

@@ -7,7 +7,7 @@ describe('SegmentDefinition', () => {
     const segment = SegmentDefinition.create({
       name: 'VIP Customers',
       code: 'vip',
-      conditions: [{ field: 'lifetimeValue', operator: 'gt', value: 5000 }],
+      conditions: [{ field: 'lifetimeValueCents', operator: 'gt', value: 5000 }],
     });
 
     expect(segment.name).toBe('VIP Customers');
@@ -74,7 +74,7 @@ describe('CustomerProfile', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
 
     expect(profile.customerId).toBe('c1');
-    expect(profile.lifetimeValue).toBe(0);
+    expect(profile.lifetimeValueCents).toBe(0);
     expect(profile.totalOrders).toBe(0);
     expect(profile.rfmSegment).toBeNull();
   });
@@ -83,12 +83,12 @@ describe('CustomerProfile', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
 
     profile.updateAggregates({
-      lifetimeValue: 5000,
+      lifetimeValueCents: 5000,
       totalOrders: 20,
       daysSinceLastOrder: 5,
     });
 
-    expect(profile.lifetimeValue).toBe(5000);
+    expect(profile.lifetimeValueCents).toBe(5000);
     expect(profile.totalOrders).toBe(20);
     expect(profile.daysSinceLastOrder).toBe(5);
     expect(profile.lastComputedAt).not.toBeNull();
@@ -97,7 +97,7 @@ describe('CustomerProfile', () => {
   it('computeRFM assigns champion tier for high R/F/M', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
     profile.updateAggregates({
-      lifetimeValue: 6000,
+      lifetimeValueCents: 6000,
       totalOrders: 25,
       daysSinceLastOrder: 10,
     });
@@ -113,7 +113,7 @@ describe('CustomerProfile', () => {
   it('computeRFM assigns lost tier for low R/F/M', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
     profile.updateAggregates({
-      lifetimeValue: 50,
+      lifetimeValueCents: 50,
       totalOrders: 1,
       daysSinceLastOrder: 400,
     });
@@ -127,7 +127,7 @@ describe('CustomerProfile', () => {
   it('computeRFM assigns at-risk tier for low R, high F', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
     profile.updateAggregates({
-      lifetimeValue: 3000,
+      lifetimeValueCents: 3000,
       totalOrders: 12,
       daysSinceLastOrder: 200,
     });
@@ -142,7 +142,7 @@ describe('CustomerProfile', () => {
   it('computeRFM assigns new tier for high R, low F', () => {
     const profile = CustomerProfile.create({ customerId: 'c1' });
     profile.updateAggregates({
-      lifetimeValue: 200,
+      lifetimeValueCents: 200,
       totalOrders: 1,
       daysSinceLastOrder: 15,
     });
@@ -160,17 +160,17 @@ describe('ConditionEvaluator', () => {
   beforeEach(() => {
     profile = CustomerProfile.create({ customerId: 'c1' });
     profile.updateAggregates({
-      lifetimeValue: 2500,
+      lifetimeValueCents: 2500,
       totalOrders: 8,
       daysSinceLastOrder: 45,
-      averageOrderValue: 312.5,
+      averageOrderValueCents: 312.5,
     });
     profile.computeRFM();
   });
 
   it('evaluates gt condition', () => {
-    expect(evaluateCondition({ field: 'lifetimeValue', operator: 'gt', value: 1000 }, profile)).toBe(true);
-    expect(evaluateCondition({ field: 'lifetimeValue', operator: 'gt', value: 3000 }, profile)).toBe(false);
+    expect(evaluateCondition({ field: 'lifetimeValueCents', operator: 'gt', value: 1000 }, profile)).toBe(true);
+    expect(evaluateCondition({ field: 'lifetimeValueCents', operator: 'gt', value: 3000 }, profile)).toBe(false);
   });
 
   it('evaluates gte condition', () => {
@@ -194,8 +194,8 @@ describe('ConditionEvaluator', () => {
   });
 
   it('evaluates between condition', () => {
-    expect(evaluateCondition({ field: 'lifetimeValue', operator: 'between', values: [1000, 5000] }, profile)).toBe(true);
-    expect(evaluateCondition({ field: 'lifetimeValue', operator: 'between', values: [3000, 5000] }, profile)).toBe(false);
+    expect(evaluateCondition({ field: 'lifetimeValueCents', operator: 'between', values: [1000, 5000] }, profile)).toBe(true);
+    expect(evaluateCondition({ field: 'lifetimeValueCents', operator: 'between', values: [3000, 5000] }, profile)).toBe(false);
   });
 
   it('evaluates isNull / isNotNull conditions', () => {
@@ -205,7 +205,7 @@ describe('ConditionEvaluator', () => {
 
   it('evaluateConditions with matchMode all returns true when all match', () => {
     const conditions = [
-      { field: 'lifetimeValue' as const, operator: 'gt' as const, value: 1000 },
+      { field: 'lifetimeValueCents' as const, operator: 'gt' as const, value: 1000 },
       { field: 'totalOrders' as const, operator: 'gte' as const, value: 5 },
     ];
     expect(evaluateConditions(conditions, 'all', profile)).toBe(true);
@@ -213,7 +213,7 @@ describe('ConditionEvaluator', () => {
 
   it('evaluateConditions with matchMode all returns false when one fails', () => {
     const conditions = [
-      { field: 'lifetimeValue' as const, operator: 'gt' as const, value: 1000 },
+      { field: 'lifetimeValueCents' as const, operator: 'gt' as const, value: 1000 },
       { field: 'totalOrders' as const, operator: 'gte' as const, value: 20 },
     ];
     expect(evaluateConditions(conditions, 'all', profile)).toBe(false);
@@ -221,7 +221,7 @@ describe('ConditionEvaluator', () => {
 
   it('evaluateConditions with matchMode any returns true when at least one matches', () => {
     const conditions = [
-      { field: 'lifetimeValue' as const, operator: 'gt' as const, value: 10000 },
+      { field: 'lifetimeValueCents' as const, operator: 'gt' as const, value: 10000 },
       { field: 'totalOrders' as const, operator: 'gte' as const, value: 5 },
     ];
     expect(evaluateConditions(conditions, 'any', profile)).toBe(true);

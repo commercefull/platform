@@ -10,7 +10,7 @@ exports.up = function (knex) {
     t.text('description');
     t.string('type', 50).notNullable().checkIn(['percentage', 'fixedAmount', 'freeShipping', 'buyXGetY', 'giftCard']);
     t.decimal('value', 15, 2).notNullable();
-    t.decimal('discountAmount', 15, 2).notNullable();
+    t.bigInteger('discountAmountCents').notNullable();
 
     t.index('orderId');
     t.index('orderItemId');

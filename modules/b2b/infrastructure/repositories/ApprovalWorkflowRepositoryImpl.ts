@@ -60,7 +60,7 @@ export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepositor
       `INSERT INTO "b2bApprovalWorkflow" (
         "workflowId", "companyId", "organizationId", "type", "referenceId",
         "referenceNumber", "requestedBy", "requestedByEmail", "status",
-        "amount", "currency", "steps", "currentStep", "description",
+        "amountCents", "currency", "steps", "currentStep", "description",
         "createdAt", "updatedAt", "completedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
       ON CONFLICT ("workflowId") DO UPDATE SET
@@ -80,7 +80,7 @@ export class ApprovalWorkflowRepositoryImpl implements ApprovalWorkflowRepositor
         json.requestedBy,
         json.requestedByEmail,
         json.status,
-        json.amount,
+        json.amountCents,
         json.currency,
         JSON.stringify(json.steps),
         json.currentStep,

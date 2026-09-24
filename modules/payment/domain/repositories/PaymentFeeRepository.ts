@@ -3,7 +3,7 @@ export interface PaymentFee {
   transactionId: string;
   organizationId: string;
   type: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   description?: string;
   createdAt: Date;

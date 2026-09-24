@@ -24,7 +24,7 @@ export class CreateReturnRequestUseCase {
       returnReasonDetail?: string;
       condition: ReturnItemCondition;
       restockItem?: boolean;
-      refundAmount?: number;
+      refundAmountCents?: number;
       exchangeProductId?: string;
       exchangeVariantId?: string;
       notes?: string;

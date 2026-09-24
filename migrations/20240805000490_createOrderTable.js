@@ -57,12 +57,12 @@ exports.up = function (knex) {
       .notNullable()
       .defaultTo('unfulfilled');
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
-    t.decimal('subtotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('discountTotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxTotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('shippingTotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('handlingFee', 15, 2).notNullable().defaultTo(0);
-    t.decimal('totalAmount', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('subtotalCents').notNullable().defaultTo(0);
+    t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
+    t.bigInteger('taxTotalCents').notNullable().defaultTo(0);
+    t.bigInteger('shippingTotalCents').notNullable().defaultTo(0);
+    t.bigInteger('handlingFeeCents').notNullable().defaultTo(0);
+    t.bigInteger('totalAmountCents').notNullable().defaultTo(0);
     t.integer('totalItems').notNullable().defaultTo(0);
     t.integer('totalQuantity').notNullable().defaultTo(0);
     t.boolean('taxExempt').notNullable().defaultTo(false);

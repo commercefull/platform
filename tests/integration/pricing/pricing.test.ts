@@ -185,7 +185,7 @@ describe('Pricing Feature Tests', () => {
 
       const updateData = {
         quantityMin: 20,
-        price: 8.99,
+        priceCents: 899,
       };
 
       const response = await client.put(`/business/pricing/tier-prices/${tierId}`, updateData, {

@@ -13,8 +13,8 @@ export interface GetDashboardMetricsInput {
 
 export interface DashboardMetrics {
   totalOrders: number;
-  totalRevenue: number;
-  averageOrderValue: number;
+  totalRevenueCents: number;
+  averageOrderValueCents: number;
   totalCustomers: number;
   newCustomers: number;
   conversionRate: number;
@@ -22,18 +22,18 @@ export interface DashboardMetrics {
     productId: string;
     name: string;
     quantity: number;
-    revenue: number;
+    revenueCents: number;
   }>;
   recentOrders: Array<{
     orderId: string;
-    total: number;
+    totalCents: number;
     status: string;
     createdAt: string;
   }>;
   previousPeriod?: {
     totalOrders: number;
-    totalRevenue: number;
-    averageOrderValue: number;
+    totalRevenueCents: number;
+    averageOrderValueCents: number;
     totalCustomers: number;
   };
 }
@@ -49,7 +49,7 @@ export interface GetDashboardMetricsOutput {
 export class GetDashboardMetricsUseCase {
   constructor(
     private readonly analyticsRepository: {
-      getOrderMetrics(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ count: number; revenue: number }>;
+      getOrderMetrics(storeId: string | undefined, startDate: Date, endDate: Date): Promise<{ count: number; revenueCents: number }>;
       getCustomerMetrics(
         storeId: string | undefined,
         startDate: Date,
@@ -60,11 +60,11 @@ export class GetDashboardMetricsUseCase {
         startDate: Date,
         endDate: Date,
         limit: number,
-      ): Promise<Array<{ productId: string; name: string; quantity: number; revenue: number }>>;
+      ): Promise<Array<{ productId: string; name: string; quantity: number; revenueCents: number }>>;
       getRecentOrders(
         storeId: string | undefined,
         limit: number,
-      ): Promise<Array<{ orderId: string; total: number; status: string; createdAt: string }>>;
+      ): Promise<Array<{ orderId: string; totalCents: number; status: string; createdAt: string }>>;
     },
   ) {}
 
@@ -82,8 +82,8 @@ export class GetDashboardMetricsUseCase {
 
     const metrics: DashboardMetrics = {
       totalOrders: orders.count,
-      totalRevenue: orders.revenue,
-      averageOrderValue: orders.count > 0 ? orders.revenue / orders.count : 0,
+      totalRevenueCents: orders.revenueCents,
+      averageOrderValueCents: orders.count > 0 ? Math.round(orders.revenueCents / orders.count) : 0,
       totalCustomers: customers.total,
       newCustomers: customers.new,
       conversionRate: customers.conversionRate || 0,
@@ -104,8 +104,8 @@ export class GetDashboardMetricsUseCase {
 
       metrics.previousPeriod = {
         totalOrders: prevOrders.count,
-        totalRevenue: prevOrders.revenue,
-        averageOrderValue: prevOrders.count > 0 ? prevOrders.revenue / prevOrders.count : 0,
+        totalRevenueCents: prevOrders.revenueCents,
+        averageOrderValueCents: prevOrders.count > 0 ? Math.round(prevOrders.revenueCents / prevOrders.count) : 0,
         totalCustomers: prevCustomers.total,
       };
     }

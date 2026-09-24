@@ -80,7 +80,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     paymentTerms,
     paymentMethod,
     currency,
-    minOrderValue,
+    minOrderValueCents,
     leadTime,
     notes,
     categories,
@@ -113,7 +113,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     paymentTerms,
     paymentMethod,
     currency,
-    minOrderValue,
+    minOrderValueCents,
     leadTime,
     notes,
     categories,
@@ -312,7 +312,7 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
     supplierSku,
     supplierProductName,
     isPreferred,
-    unitCost,
+    unitCostCents,
     currency,
     minimumOrderQuantity,
     leadTime,
@@ -327,7 +327,7 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
     supplierSku?: string;
     supplierProductName?: string;
     isPreferred?: boolean;
-    unitCost: number;
+    unitCostCents: number;
     currency?: string;
     minimumOrderQuantity?: number;
     leadTime?: number;
@@ -337,8 +337,8 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
     notes?: string;
   };
 
-  if (!productId || !sku || unitCost === undefined) {
-    validationErrorResponse(res, ['Missing required fields: productId, sku, unitCost']);
+  if (!productId || !sku || unitCostCents === undefined) {
+    validationErrorResponse(res, ['Missing required fields: productId, sku, unitCostCents']);
     return;
   }
 
@@ -351,7 +351,7 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
     supplierProductName,
     status: 'active',
     isPreferred: isPreferred || false,
-    unitCost,
+    unitCostCents,
     currency: currency || 'USD',
     minimumOrderQuantity: minimumOrderQuantity || 1,
     leadTime,

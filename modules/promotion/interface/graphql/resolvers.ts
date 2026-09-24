@@ -31,14 +31,14 @@ export const promotionResolvers = {
       _parent: unknown,
       args: {
         code: string;
-        amount: number;
+        amountCents: number;
         orderId?: string;
         customerId?: string;
       },
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const command = new RedeemGiftCardCommand(args.code, args.amount, args.orderId, args.customerId);
+      const command = new RedeemGiftCardCommand(args.code, args.amountCents, args.orderId, args.customerId);
       return redeemGiftCardUseCase.execute(command);
     },
   },

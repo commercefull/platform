@@ -117,8 +117,8 @@ export class OrderRepo implements IOrderRepository {
           "orderNumber" = $1, "customerId" = $2, "basketId" = $3, "storeId" = $4,
           "channelId" = $5, "createdByUserId" = $6, "orderSource" = $7, "status" = $8,
           "paymentStatus" = $9, "fulfillmentStatus" = $10, "currencyCode" = $11,
-          "subtotal" = $12, "discountTotal" = $13, "taxTotal" = $14, "shippingTotal" = $15,
-          "handlingFee" = $16, "totalAmount" = $17, "totalItems" = $18, "totalQuantity" = $19,
+          "subtotalCents" = $12, "discountTotalCents" = $13, "taxTotalCents" = $14, "shippingTotalCents" = $15,
+          "handlingFeeCents" = $16, "totalAmountCents" = $17, "totalItems" = $18, "totalQuantity" = $19,
           "taxExempt" = $20, "completedAt" = $21, "cancelledAt" = $22, "returnedAt" = $23,
           "customerEmail" = $24, "customerPhone" = $25, "customerName" = $26,
           "customerNotes" = $27, "adminNotes" = $28, "estimatedDeliveryDate" = $29,
@@ -138,12 +138,12 @@ export class OrderRepo implements IOrderRepository {
           order.paymentStatus,
           order.fulfillmentStatus,
           order.currencyCode,
-          order.subtotal.amount,
-          order.discountTotal.amount,
-          order.taxTotal.amount,
-          order.shippingTotal.amount,
-          order.handlingFee.amount,
-          order.totalAmount.amount,
+          order.subtotal.cents,
+          order.discountTotal.cents,
+          order.taxTotal.cents,
+          order.shippingTotal.cents,
+          order.handlingFee.cents,
+          order.totalAmount.cents,
           order.totalItems,
           order.totalQuantity,
           order.taxExempt,
@@ -171,8 +171,8 @@ export class OrderRepo implements IOrderRepository {
       await query(
         `INSERT INTO "order" (
           "orderId", "orderNumber", "customerId", "basketId", "storeId", "channelId", "createdByUserId", "orderSource", "status", "paymentStatus",
-          "fulfillmentStatus", "currencyCode", "subtotal", "discountTotal", "taxTotal",
-          "shippingTotal", "handlingFee", "totalAmount", "totalItems", "totalQuantity",
+          "fulfillmentStatus", "currencyCode", "subtotalCents", "discountTotalCents", "taxTotalCents",
+          "shippingTotalCents", "handlingFeeCents", "totalAmountCents", "totalItems", "totalQuantity",
           "taxExempt", "orderDate", "customerEmail", "customerPhone", "customerName",
           "customerNotes", "ipAddress", "userAgent", "referralSource",
           "hasGiftWrapping", "giftMessage", "isGift", "isSubscriptionOrder",
@@ -195,12 +195,12 @@ export class OrderRepo implements IOrderRepository {
           order.paymentStatus,
           order.fulfillmentStatus,
           order.currencyCode,
-          order.subtotal.amount,
-          order.discountTotal.amount,
-          order.taxTotal.amount,
-          order.shippingTotal.amount,
-          order.handlingFee.amount,
-          order.totalAmount.amount,
+          order.subtotal.cents,
+          order.discountTotal.cents,
+          order.taxTotal.cents,
+          order.shippingTotal.cents,
+          order.handlingFee.cents,
+          order.totalAmount.cents,
           order.totalItems,
           order.totalQuantity,
           order.taxExempt,
@@ -271,8 +271,8 @@ export class OrderRepo implements IOrderRepository {
     await query(
       `INSERT INTO "orderItem" (
         "orderItemId", "orderId", "productId", "productVariantId", "sku", "name",
-        "description", "quantity", "unitPrice", "unitCost", "discountedUnitPrice",
-        "lineTotal", "discountTotal", "taxTotal", "taxRate", "taxExempt",
+        "description", "quantity", "unitPriceCents", "unitCostCents", "discountedUnitPriceCents",
+        "lineTotalCents", "discountTotalCents", "taxTotalCents", "taxRate", "taxExempt",
         "fulfillmentStatus", "options", "attributes", "giftWrapped", "giftMessage",
         "weight", "dimensions", "isDigital", "subscriptionInfo", "metadata",
         "createdAt", "updatedAt"
@@ -286,12 +286,12 @@ export class OrderRepo implements IOrderRepository {
         item.name,
         item.description || null,
         item.quantity,
-        item.unitPrice.amount,
-        item.unitCost?.amount || null,
-        item.discountedUnitPrice?.amount || null,
-        item.lineTotal.amount,
-        item.discountTotal.amount,
-        item.taxTotal.amount,
+        item.unitPrice.cents,
+        item.unitCost?.cents ?? null,
+        item.discountedUnitPrice?.cents ?? null,
+        item.lineTotal.cents,
+        item.discountTotal.cents,
+        item.taxTotal.cents,
         item.taxRate || null,
         item.taxExempt,
         item.fulfillmentStatus,
@@ -315,18 +315,18 @@ export class OrderRepo implements IOrderRepository {
     const now = new Date().toISOString();
     await query(
       `UPDATE "orderItem" SET
-        "quantity" = $1, "unitPrice" = $2, "discountedUnitPrice" = $3,
-        "lineTotal" = $4, "discountTotal" = $5, "taxTotal" = $6,
+        "quantity" = $1, "unitPriceCents" = $2, "discountedUnitPriceCents" = $3,
+        "lineTotalCents" = $4, "discountTotalCents" = $5, "taxTotalCents" = $6,
         "fulfillmentStatus" = $7, "giftWrapped" = $8, "giftMessage" = $9,
         "updatedAt" = $10
       WHERE "orderItemId" = $11`,
       [
         item.quantity,
-        item.unitPrice.amount,
-        item.discountedUnitPrice?.amount || null,
-        item.lineTotal.amount,
-        item.discountTotal.amount,
-        item.taxTotal.amount,
+        item.unitPrice.cents,
+        item.discountedUnitPrice?.cents ?? null,
+        item.lineTotal.cents,
+        item.discountTotal.cents,
+        item.taxTotal.cents,
         item.fulfillmentStatus,
         item.giftWrapped,
         item.giftMessage || null,
@@ -498,15 +498,15 @@ export class OrderRepo implements IOrderRepository {
 
   async getOrderStats(filters?: OrderFilters): Promise<{
     totalOrders: number;
-    totalRevenue: number;
-    averageOrderValue: number;
+    totalRevenueCents: number;
+    averageOrderValueCents: number;
     ordersByStatus: Record<OrderStatus, number>;
   }> {
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const statsResult = await queryOne<{ totalOrders: string; totalRevenue: string; averageOrderValue: string }>(
-      `SELECT COUNT(*) as "totalOrders", COALESCE(SUM("totalAmount"), 0) as "totalRevenue",
-       COALESCE(AVG("totalAmount"), 0) as "averageOrderValue" FROM "order" ${whereClause}`,
+    const statsResult = await queryOne<{ totalOrders: string; totalRevenueCents: string; averageOrderValueCents: string }>(
+      `SELECT COUNT(*) as "totalOrders", COALESCE(SUM("totalAmountCents"), 0) as "totalRevenueCents",
+       COALESCE(AVG("totalAmountCents"), 0) as "averageOrderValueCents" FROM "order" ${whereClause}`,
       params,
     );
 
@@ -525,8 +525,8 @@ export class OrderRepo implements IOrderRepository {
 
     return {
       totalOrders: parseInt(statsResult?.totalOrders || '0'),
-      totalRevenue: parseFloat(statsResult?.totalRevenue || '0'),
-      averageOrderValue: parseFloat(statsResult?.averageOrderValue || '0'),
+      totalRevenueCents: Number(statsResult?.totalRevenueCents || '0'),
+      averageOrderValueCents: Number(statsResult?.averageOrderValueCents || '0'),
       ordersByStatus,
     };
   }
@@ -599,13 +599,13 @@ export class OrderRepo implements IOrderRepository {
       conditions.push(`"createdAt" <= $${paramIndex++}`);
       params.push(filters.endDate.toISOString());
     }
-    if (filters?.minAmount !== undefined) {
-      conditions.push(`"totalAmount" >= $${paramIndex++}`);
-      params.push(filters.minAmount);
+    if (filters?.minAmountCents !== undefined) {
+      conditions.push(`"totalAmountCents" >= $${paramIndex++}`);
+      params.push(filters.minAmountCents);
     }
-    if (filters?.maxAmount !== undefined) {
-      conditions.push(`"totalAmount" <= $${paramIndex++}`);
-      params.push(filters.maxAmount);
+    if (filters?.maxAmountCents !== undefined) {
+      conditions.push(`"totalAmountCents" <= $${paramIndex++}`);
+      params.push(filters.maxAmountCents);
     }
     if (filters?.search) {
       conditions.push(
@@ -673,12 +673,12 @@ export class OrderRepo implements IOrderRepository {
       paymentStatus: row.paymentStatus as PaymentStatus,
       fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,
       currencyCode: currency,
-      subtotal: Money.create(parseFloat(row.subtotal || '0'), currency),
-      discountTotal: Money.create(parseFloat(row.discountTotal || '0'), currency),
-      taxTotal: Money.create(parseFloat(row.taxTotal || '0'), currency),
-      shippingTotal: Money.create(parseFloat(row.shippingTotal || '0'), currency),
-      handlingFee: Money.create(parseFloat(row.handlingFee || '0'), currency),
-      totalAmount: Money.create(parseFloat(row.totalAmount || '0'), currency),
+      subtotal: Money.fromCents(Number(row.subtotalCents || '0'), currency),
+      discountTotal: Money.fromCents(Number(row.discountTotalCents || '0'), currency),
+      taxTotal: Money.fromCents(Number(row.taxTotalCents || '0'), currency),
+      shippingTotal: Money.fromCents(Number(row.shippingTotalCents || '0'), currency),
+      handlingFee: Money.fromCents(Number(row.handlingFeeCents || '0'), currency),
+      totalAmount: Money.fromCents(Number(row.totalAmountCents || '0'), currency),
       totalItems: row.totalItems || 0,
       totalQuantity: row.totalQuantity || 0,
       taxExempt: Boolean(row.taxExempt),
@@ -723,12 +723,12 @@ export class OrderRepo implements IOrderRepository {
       name: row.name,
       description: row.description ?? undefined,
       quantity: row.quantity,
-      unitPrice: Money.create(parseFloat(row.unitPrice), currency),
-      unitCost: row.unitCost ? Money.create(parseFloat(row.unitCost), currency) : undefined,
-      discountedUnitPrice: row.discountedUnitPrice ? Money.create(parseFloat(row.discountedUnitPrice), currency) : undefined,
-      lineTotal: Money.create(parseFloat(row.lineTotal || '0'), currency),
-      discountTotal: Money.create(parseFloat(row.discountTotal || '0'), currency),
-      taxTotal: Money.create(parseFloat(row.taxTotal || '0'), currency),
+      unitPrice: Money.fromCents(Number(row.unitPriceCents), currency),
+      unitCost: row.unitCostCents != null ? Money.fromCents(Number(row.unitCostCents), currency) : undefined,
+      discountedUnitPrice: row.discountedUnitPriceCents != null ? Money.fromCents(Number(row.discountedUnitPriceCents), currency) : undefined,
+      lineTotal: Money.fromCents(Number(row.lineTotalCents || '0'), currency),
+      discountTotal: Money.fromCents(Number(row.discountTotalCents || '0'), currency),
+      taxTotal: Money.fromCents(Number(row.taxTotalCents || '0'), currency),
       taxRate: row.taxRate ? parseFloat(row.taxRate) : undefined,
       taxExempt: Boolean(row.taxExempt),
       fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,

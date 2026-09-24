@@ -26,9 +26,9 @@ exports.up = function (knex) {
       table.integer('refundedOrders').defaultTo(0);
 
       // Revenue metrics
-      table.decimal('totalRevenue', 15, 2).defaultTo(0);
-      table.decimal('pendingRevenue', 15, 2).defaultTo(0);
-      table.decimal('refundedAmount', 15, 2).defaultTo(0);
+      table.bigInteger('totalRevenueCents').defaultTo(0);
+      table.bigInteger('pendingRevenueCents').defaultTo(0);
+      table.bigInteger('refundedAmountCents').defaultTo(0);
 
       // Customer metrics
       table.integer('totalCustomers').defaultTo(0);
@@ -42,7 +42,7 @@ exports.up = function (knex) {
       table.integer('lowStockProducts').defaultTo(0);
 
       // Inventory metrics
-      table.decimal('totalInventoryValue', 15, 2).defaultTo(0);
+      table.bigInteger('totalInventoryValueCents').defaultTo(0);
       table.integer('totalInventoryUnits').defaultTo(0);
 
       // Support metrics
@@ -51,7 +51,7 @@ exports.up = function (knex) {
 
       // Subscription metrics
       table.integer('activeSubscriptions').defaultTo(0);
-      table.decimal('monthlyRecurringRevenue', 15, 2).defaultTo(0);
+      table.bigInteger('monthlyRecurringRevenueCents').defaultTo(0);
 
       table.timestamp('createdAt').defaultTo(knex.fn.now());
 

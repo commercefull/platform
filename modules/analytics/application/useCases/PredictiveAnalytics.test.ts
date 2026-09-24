@@ -6,10 +6,10 @@ import { queryMock } from '../../tests/testUtils';
 describe('PredictiveAnalyticsUseCase', () => {
   const useCase = new PredictiveAnalyticsUseCase();
 
-  it('should forecast sales revenue for the requested horizon', async () => {
+  it('should forecast sales revenueCents for the requested horizon', async () => {
     const historicalData = Array.from({ length: 10 }, (_, i) => ({
       date: new Date(2026, 0, i + 1),
-      revenue: 1000 + i * 100,
+      revenueCents: 1000 + i * 100,
       orders: 10 + i,
     }));
 
@@ -28,7 +28,7 @@ describe('PredictiveAnalyticsUseCase', () => {
     const historicalData = Array.from({ length: 5 }, (_, i) => ({
       date: new Date(2026, 0, i + 1),
       orders: 5 - i,
-      revenue: 500 - i * 50,
+      revenueCents: 500 - i * 50,
     }));
 
     const result = await useCase.predictCustomerChurn('c1', historicalData);
@@ -38,7 +38,7 @@ describe('PredictiveAnalyticsUseCase', () => {
 
   it('should flag high churn risk for an inactive customer', async () => {
     const oldDate = new Date(Date.now() - 120 * 86400000);
-    const result = await useCase.predictCustomerChurn('c1', [{ date: oldDate, orders: 1, revenue: 10 }]);
+    const result = await useCase.predictCustomerChurn('c1', [{ date: oldDate, orders: 1, revenueCents: 10 }]);
 
     expect(result.riskLevel).toBe('high');
     expect(result.recommendations.length).toBeGreaterThan(0);
@@ -51,7 +51,7 @@ describe('PredictiveAnalyticsUseCase', () => {
       Array.from({ length: 20 }, () => ({
         date: recentDate,
         orders: 20,
-        revenue: 20000,
+        revenueCents: 20000,
       })),
     );
 

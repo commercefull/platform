@@ -15,7 +15,7 @@ exports.up = function (knex) {
     t.string('supplierProductName', 255);
     t.enum('status', ['active', 'inactive', 'discontinued', 'pending']).notNullable().defaultTo('active');
     t.boolean('isPreferred').notNullable().defaultTo(false);
-    t.decimal('unitCost', 10, 2).notNullable();
+    t.bigInteger('unitCostCents').notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');
     t.integer('minimumOrderQuantity').defaultTo(1);
     t.integer('leadTime');
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.index('supplierSku');
     t.index('status');
     t.index('isPreferred');
-    t.index('unitCost');
+    t.index('unitCostCents');
   });
 };
 

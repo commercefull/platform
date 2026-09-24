@@ -13,7 +13,7 @@ exports.up = function (knex) {
     t.specificType('customerGroupIds', 'uuid[]');
     t.integer('minimumQuantity');
     t.integer('maximumQuantity');
-    t.decimal('minimumOrderAmount', 10, 2);
+    t.bigInteger('minimumOrderAmountCents');
     t.timestamp('startDate');
     t.timestamp('endDate');
     t.integer('priority').defaultTo(0);

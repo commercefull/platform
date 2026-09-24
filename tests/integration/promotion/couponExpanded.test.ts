@@ -94,8 +94,8 @@ describe('Coupon Expanded Tests', () => {
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
-      expect(resp.data.data).toHaveProperty('discountAmount');
-      expect(resp.data.data.discountAmount).toBeGreaterThan(0);
+      expect(resp.data.data).toHaveProperty('discountAmountCents');
+      expect(resp.data.data.discountAmountCents).toBeGreaterThan(0);
     });
 
     it('should apply percentage coupon correctly', async () => {
@@ -110,7 +110,7 @@ describe('Coupon Expanded Tests', () => {
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
-      expect(resp.data.data).toHaveProperty('discountAmount');
+      expect(resp.data.data).toHaveProperty('discountAmountCents');
     });
 
   });

@@ -13,12 +13,12 @@ exports.up = function (knex) {
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.enum('rateType', ['flat', 'weightBased', 'priceBased', 'itemBased', 'dimensional', 'calculated', 'free']).notNullable();
-    t.decimal('baseRate', 10, 2).notNullable();
-    t.decimal('perItemRate', 10, 2).defaultTo(0);
-    t.decimal('freeThreshold', 10, 2);
+    t.bigInteger('baseRateCents').notNullable();
+    t.bigInteger('perItemRateCents').defaultTo(0);
+    t.bigInteger('freeThresholdCents');
     t.jsonb('rateMatrix');
-    t.decimal('minRate', 10, 2);
-    t.decimal('maxRate', 10, 2);
+    t.bigInteger('minRateCents');
+    t.bigInteger('maxRateCents');
     t.string('currency', 3).notNullable().defaultTo('USD');
     t.boolean('taxable').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);

@@ -16,8 +16,8 @@
             <div class="flex items-center justify-between">
               <h2 class="text-xl font-bold text-white"><%= plan.name %></h2>
               <div>
-                <% if (plan.price > 0) { %>
-                  <span class="text-3xl font-extrabold text-white">$<%= ((plan.price || 0) / 100).toFixed(2) %></span>
+                <% if (plan.priceCents > 0) { %>
+                  <span class="text-3xl font-extrabold text-white">$<%= ((plan.priceCents || 0) / 100).toFixed(2) %></span>
                   <span class="text-indigo-200"><%= t('storefront:perBillingPeriod', { period: plan.billingPeriod || 'year' }) %></span>
                 <% } else { %>
                   <span class="text-3xl font-extrabold text-white"><%= t('shared:common.free') %></span>
@@ -58,9 +58,9 @@
       <div class="space-y-6">
         <div class="bg-white shadow-lg rounded-xl p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4"><%= t('storefront:joinThisPlan') %></h3>
-          <% if (plan.price > 0) { %>
+          <% if (plan.priceCents > 0) { %>
             <div class="text-center mb-4">
-              <span class="text-3xl font-extrabold text-gray-900">$<%= ((plan.price || 0) / 100).toFixed(2) %></span>
+              <span class="text-3xl font-extrabold text-gray-900">$<%= ((plan.priceCents || 0) / 100).toFixed(2) %></span>
               <span class="text-gray-500"><%= t('storefront:perBillingPeriod', { period: plan.billingPeriod || 'year' }) %></span>
             </div>
           <% } %>

@@ -12,7 +12,7 @@ describe('ManagePaymentFeesUseCase', () => {
   });
 
   it('should find all fees', async () => {
-    repo.findAllFees.mockResolvedValue([createPaymentFee({ amount: 5 })]);
+    repo.findAllFees.mockResolvedValue([createPaymentFee({ amountCents: 5 })]);
 
     const result = await useCase.findAll(10);
 

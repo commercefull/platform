@@ -89,7 +89,7 @@ export class BasketRepo implements BasketRepository {
           "convertedToOrderId" = $7,
           "updatedAt" = $8,
           "lastActivityAt" = $9,
-          "discountAmount" = $10
+          "discountAmountCents" = $10
         WHERE "basketId" = $11`,
         [
           basket.customerId || null,
@@ -101,7 +101,7 @@ export class BasketRepo implements BasketRepository {
           basket.convertedToOrderId || null,
           now,
           basket.lastActivityAt.toISOString(),
-          basket.discountAmount,
+          basket.discountAmountCents,
           basket.basketId,
         ],
       );
@@ -111,7 +111,7 @@ export class BasketRepo implements BasketRepository {
         `INSERT INTO basket (
           "basketId", "customerId", "sessionId", status, currency,
           metadata, "expiresAt", "convertedToOrderId",
-          "createdAt", "updatedAt", "lastActivityAt", "discountAmount"
+          "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
         [
           basket.basketId,
@@ -125,7 +125,7 @@ export class BasketRepo implements BasketRepository {
           now,
           now,
           now,
-          basket.discountAmount,
+          basket.discountAmountCents,
         ],
       );
     }
@@ -190,16 +190,16 @@ export class BasketRepo implements BasketRepository {
   async addItem(basketId: string, item: BasketItem): Promise<BasketItem> {
     const now = new Date().toISOString();
     const itemId = item.basketItemId || generateUUID();
-    const totalPrice = item.unitPrice.amount * item.quantity;
-    const discountAmount = 0;
-    const taxAmount = 0;
-    const finalPrice = totalPrice - discountAmount + taxAmount;
+    const totalPriceCents = item.unitPrice.cents * item.quantity;
+    const discountAmountCents = 0;
+    const taxAmountCents = 0;
+    const finalPriceCents = totalPriceCents - discountAmountCents + taxAmountCents;
 
     await query(
       `INSERT INTO "basketItem" (
         "basketItemId", "basketId", "productId", "productVariantId",
-        sku, name, quantity, "unitPrice", "totalPrice", "discountAmount",
-        "taxAmount", "finalPrice", "imageUrl", attributes,
+        sku, name, quantity, "unitPriceCents", "totalPriceCents", "discountAmountCents",
+        "taxAmountCents", "finalPriceCents", "imageUrl", attributes,
         "itemType", "isGift", "giftMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
       [
@@ -210,11 +210,11 @@ export class BasketRepo implements BasketRepository {
         item.sku,
         item.name,
         item.quantity,
-        item.unitPrice.amount,
-        totalPrice,
-        discountAmount,
-        taxAmount,
-        finalPrice,
+        item.unitPrice.cents,
+        totalPriceCents,
+        discountAmountCents,
+        taxAmountCents,
+        finalPriceCents,
         item.imageUrl || null,
         item.attributes ? JSON.stringify(item.attributes) : null,
         item.itemType,
@@ -237,7 +237,7 @@ export class BasketRepo implements BasketRepository {
     await query(
       `UPDATE "basketItem" SET
         quantity = $1,
-        "unitPrice" = $2,
+        "unitPriceCents" = $2,
         attributes = $3,
         "isGift" = $4,
         "giftMessage" = $5,
@@ -245,7 +245,7 @@ export class BasketRepo implements BasketRepository {
       WHERE "basketItemId" = $7`,
       [
         item.quantity,
-        item.unitPrice.amount,
+        item.unitPrice.cents,
         item.attributes ? JSON.stringify(item.attributes) : null,
         item.isGift,
         item.giftMessage || null,
@@ -444,7 +444,7 @@ export class BasketRepo implements BasketRepository {
       items,
       metadata: md,
       coupon,
-      discountAmount: row.discountAmount != null ? Number(row.discountAmount) : undefined,
+      discountAmountCents: row.discountAmountCents != null ? Number(row.discountAmountCents) : undefined,
       expiresAt: row.expiresAt ? new Date(row.expiresAt) : undefined,
       convertedToOrderId: row.convertedToOrderId ?? undefined,
       createdAt: new Date(row.createdAt),
@@ -462,7 +462,7 @@ export class BasketRepo implements BasketRepository {
       sku: row.sku,
       name: row.name,
       quantity: Number(row.quantity),
-      unitPrice: Money.create(Number(row.unitPrice), currency),
+      unitPrice: Money.fromCents(Number(row.unitPriceCents), currency),
       imageUrl: row.imageUrl ?? undefined,
       attributes: (row.attributes as Record<string, unknown> | undefined) ?? undefined,
       itemType: (row.itemType as 'physical' | 'digital' | 'subscription' | 'service') || 'physical',

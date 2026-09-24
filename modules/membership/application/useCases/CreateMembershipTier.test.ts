@@ -14,7 +14,7 @@ describe('CreateMembershipTierUseCase', () => {
       tierId: 't1',
       name: 'Gold',
       level: 1,
-      price: 50,
+      priceCents: 50,
       benefits: [{ type: 'discount', value: 10 }],
       createdAt: new Date(),
     });

@@ -48,7 +48,7 @@ export interface SubscriptionProduct {
   maxSkipsPerYear?: number;
   allowEarlyCancel: boolean;
   cancelNoticeDays: number;
-  earlyTerminationFee?: number;
+  earlyTerminationFeeCents?: number;
   autoRenew: boolean;
   renewalReminderDays: number;
   metadata?: Record<string, unknown>;
@@ -65,16 +65,16 @@ export interface SubscriptionPlan {
   description?: string;
   billingInterval: BillingInterval;
   billingIntervalCount: number;
-  price: number;
-  compareAtPrice?: number;
+  priceCents: number;
+  compareAtPriceCents?: number;
   currency: string;
-  setupFee: number;
+  setupFeeCents: number;
   trialDays?: number;
   contractLength?: number;
   isContractRequired: boolean;
   discountPercent: number;
-  discountAmount: number;
-  freeShippingThreshold?: number;
+  discountAmountCents: number;
+  freeShippingThresholdCents?: number;
   includesFreeShipping: boolean;
   includedProducts?: string[];
   features?: string[];
@@ -95,10 +95,10 @@ export interface CustomerSubscription {
   productVariantId?: string;
   status: SubscriptionStatus;
   quantity: number;
-  unitPrice: number;
-  discountAmount: number;
-  taxAmount: number;
-  totalPrice: number;
+  unitPriceCents: number;
+  discountAmountCents: number;
+  taxAmountCents: number;
+  totalPriceCents: number;
   currency: string;
   billingInterval: BillingInterval;
   billingIntervalCount: number;
@@ -122,7 +122,7 @@ export interface CustomerSubscription {
   billingAddressId?: string;
   paymentMethodId?: string;
   externalSubscriptionId?: string;
-  lifetimeValue: number;
+  lifetimeValueCents: number;
   failedPaymentCount: number;
   lastPaymentAt?: Date;
   lastPaymentFailedAt?: Date;
@@ -140,11 +140,11 @@ export interface SubscriptionOrder {
   periodStart: Date;
   periodEnd: Date;
   status: SubscriptionOrderStatus;
-  subtotal: number;
-  discountAmount: number;
-  taxAmount: number;
-  shippingAmount: number;
-  totalAmount: number;
+  subtotalCents: number;
+  discountAmountCents: number;
+  taxAmountCents: number;
+  shippingAmountCents: number;
+  totalAmountCents: number;
   currency: string;
   scheduledAt?: Date;
   processedAt?: Date;
@@ -175,7 +175,7 @@ export interface SubscriptionPause {
   resumedBy?: string;
   pauseDays?: number;
   billingCyclesSkipped: number;
-  creditAmount: number;
+  creditAmountCents: number;
   creditApplied: boolean;
   metadata?: Record<string, unknown>;
   createdAt: Date;
@@ -188,7 +188,7 @@ export interface DunningAttempt {
   subscriptionOrderId?: string;
   attemptNumber: number;
   status: DunningStatus;
-  amount: number;
+  amountCents: number;
   currency: string;
   scheduledAt: Date;
   attemptedAt?: Date;
@@ -246,7 +246,7 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         "billingAnchor" = $7, "billingAnchorDay" = $8, "prorateOnChange" = $9,
         "allowPause" = $10, "maxPauseDays" = $11, "maxPausesPerYear" = $12,
         "allowSkip" = $13, "maxSkipsPerYear" = $14, "allowEarlyCancel" = $15,
-        "cancelNoticeDays" = $16, "earlyTerminationFee" = $17, "autoRenew" = $18,
+        "cancelNoticeDays" = $16, "earlyTerminationFeeCents" = $17, "autoRenew" = $18,
         "renewalReminderDays" = $19, "metadata" = $20, "isActive" = $21, "updatedAt" = $22
       WHERE "subscriptionProductId" = $23`,
       [
@@ -266,7 +266,7 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         product.maxSkipsPerYear,
         product.allowEarlyCancel !== false,
         product.cancelNoticeDays || 0,
-        product.earlyTerminationFee,
+        product.earlyTerminationFeeCents,
         product.autoRenew !== false,
         product.renewalReminderDays || 7,
         product.metadata ? JSON.stringify(product.metadata) : null,
@@ -283,7 +283,7 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         "maxSubscriptionLength", "trialDays", "trialRequiresPayment", "billingAnchor",
         "billingAnchorDay", "prorateOnChange", "allowPause", "maxPauseDays",
         "maxPausesPerYear", "allowSkip", "maxSkipsPerYear", "allowEarlyCancel",
-        "cancelNoticeDays", "earlyTerminationFee", "autoRenew", "renewalReminderDays",
+        "cancelNoticeDays", "earlyTerminationFeeCents", "autoRenew", "renewalReminderDays",
         "metadata", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
       RETURNING *`,
@@ -305,7 +305,7 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         product.maxSkipsPerYear,
         product.allowEarlyCancel !== false,
         product.cancelNoticeDays || 0,
-        product.earlyTerminationFee,
+        product.earlyTerminationFeeCents,
         product.autoRenew !== false,
         product.renewalReminderDays || 7,
         product.metadata ? JSON.stringify(product.metadata) : null,
@@ -343,7 +343,7 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
   }
 
   const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "price" ASC`,
+    `SELECT * FROM "subscriptionPlan" WHERE ${whereClause} ORDER BY "sortOrder" ASC, "priceCents" ASC`,
     [subscriptionProductId],
   );
   return (rows || []).map(mapToSubscriptionPlan);
@@ -352,7 +352,7 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
 export async function saveSubscriptionPlan(
   plan:
     | (Partial<SubscriptionPlan> & { subscriptionPlanId: string })
-    | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; price: number }),
+    | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; priceCents: number }),
 ): Promise<SubscriptionPlan> {
   const now = new Date().toISOString();
   const slug = plan.slug || plan.name?.toLowerCase().replace(/\s+/g, '-') || '';
@@ -363,13 +363,13 @@ export async function saveSubscriptionPlan(
         "name" = COALESCE($1, "name"), "slug" = COALESCE($2, "slug"), "description" = $3,
         "billingInterval" = COALESCE($4, "billingInterval"),
         "billingIntervalCount" = COALESCE($5, "billingIntervalCount"),
-        "price" = COALESCE($6, "price"), "compareAtPrice" = $7,
-        "currency" = COALESCE($8, "currency"), "setupFee" = COALESCE($9, "setupFee"),
+        "priceCents" = COALESCE($6, "priceCents"), "compareAtPriceCents" = $7,
+        "currency" = COALESCE($8, "currency"), "setupFeeCents" = COALESCE($9, "setupFeeCents"),
         "trialDays" = $10, "contractLength" = $11,
         "isContractRequired" = COALESCE($12, "isContractRequired"),
         "discountPercent" = COALESCE($13, "discountPercent"),
-        "discountAmount" = COALESCE($14, "discountAmount"),
-        "freeShippingThreshold" = $15,
+        "discountAmountCents" = COALESCE($14, "discountAmountCents"),
+        "freeShippingThresholdCents" = $15,
         "includesFreeShipping" = COALESCE($16, "includesFreeShipping"),
         "includedProducts" = COALESCE($17, "includedProducts"),
         "features" = COALESCE($18, "features"),
@@ -384,16 +384,16 @@ export async function saveSubscriptionPlan(
         plan.description,
         plan.billingInterval || 'month',
         plan.billingIntervalCount || 1,
-        plan.price,
-        plan.compareAtPrice,
+        plan.priceCents,
+        plan.compareAtPriceCents,
         plan.currency || 'USD',
-        plan.setupFee || 0,
+        plan.setupFeeCents || 0,
         plan.trialDays,
         plan.contractLength,
         plan.isContractRequired || false,
         plan.discountPercent || 0,
-        plan.discountAmount || 0,
-        plan.freeShippingThreshold,
+        plan.discountAmountCents || 0,
+        plan.freeShippingThresholdCents,
         plan.includesFreeShipping || false,
         plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
         plan.features ? JSON.stringify(plan.features) : null,
@@ -410,9 +410,9 @@ export async function saveSubscriptionPlan(
     const result = await queryOne<Record<string, unknown>>(
       `INSERT INTO "subscriptionPlan" (
         "subscriptionProductId", "name", "slug", "description", "billingInterval",
-        "billingIntervalCount", "price", "compareAtPrice", "currency", "setupFee",
+        "billingIntervalCount", "priceCents", "compareAtPriceCents", "currency", "setupFeeCents",
         "trialDays", "contractLength", "isContractRequired", "discountPercent",
-        "discountAmount", "freeShippingThreshold", "includesFreeShipping",
+        "discountAmountCents", "freeShippingThresholdCents", "includesFreeShipping",
         "includedProducts", "features", "metadata", "sortOrder", "isPopular",
         "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
@@ -424,16 +424,16 @@ export async function saveSubscriptionPlan(
         plan.description,
         plan.billingInterval || 'month',
         plan.billingIntervalCount || 1,
-        plan.price,
-        plan.compareAtPrice,
+        plan.priceCents,
+        plan.compareAtPriceCents,
         plan.currency || 'USD',
-        plan.setupFee || 0,
+        plan.setupFeeCents || 0,
         plan.trialDays,
         plan.contractLength,
         plan.isContractRequired || false,
         plan.discountPercent || 0,
-        plan.discountAmount || 0,
-        plan.freeShippingThreshold,
+        plan.discountAmountCents || 0,
+        plan.freeShippingThresholdCents,
         plan.includesFreeShipping || false,
         plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
         plan.features ? JSON.stringify(plan.features) : null,
@@ -539,9 +539,9 @@ export async function createCustomerSubscription(subscription: {
 
   const subscriptionNumber = await generateSubscriptionNumber();
   const quantity = subscription.quantity || 1;
-  const unitPrice = plan.price;
-  const discountAmount = plan.discountAmount || (unitPrice * (plan.discountPercent || 0)) / 100;
-  const totalPrice = unitPrice * quantity - discountAmount;
+  const unitPriceCents = plan.priceCents;
+  const discountAmountCents = plan.discountAmountCents || (unitPriceCents * (plan.discountPercent || 0)) / 100;
+  const totalPriceCents = unitPriceCents * quantity - discountAmountCents;
 
   // Calculate trial and billing dates
   const trialDays = plan.trialDays || 0;
@@ -554,8 +554,8 @@ export async function createCustomerSubscription(subscription: {
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "customerSubscription" (
       "subscriptionNumber", "customerId", "subscriptionPlanId", "subscriptionProductId",
-      "productVariantId", "status", "quantity", "unitPrice", "discountAmount",
-      "taxAmount", "totalPrice", "currency", "billingInterval", "billingIntervalCount",
+      "productVariantId", "status", "quantity", "unitPriceCents", "discountAmountCents",
+      "taxAmountCents", "totalPriceCents", "currency", "billingInterval", "billingIntervalCount",
       "trialStartAt", "trialEndAt", "currentPeriodStart", "currentPeriodEnd",
       "nextBillingAt", "contractCyclesRemaining", "shippingAddressId", "billingAddressId",
       "paymentMethodId", "customizations", "createdAt", "updatedAt"
@@ -569,10 +569,10 @@ export async function createCustomerSubscription(subscription: {
       subscription.productVariantId,
       trialDays > 0 ? 'trialing' : 'active',
       quantity,
-      unitPrice,
-      discountAmount,
+      unitPriceCents,
+      discountAmountCents,
       0,
-      totalPrice,
+      totalPriceCents,
       plan.currency,
       plan.billingInterval,
       plan.billingIntervalCount,
@@ -771,20 +771,20 @@ export async function createSubscriptionOrder(order: {
   billingCycleNumber: number;
   periodStart: Date;
   periodEnd: Date;
-  subtotal: number;
-  discountAmount?: number;
-  taxAmount?: number;
-  shippingAmount?: number;
+  subtotalCents: number;
+  discountAmountCents?: number;
+  taxAmountCents?: number;
+  shippingAmountCents?: number;
   scheduledAt?: Date;
 }): Promise<SubscriptionOrder> {
   const now = new Date().toISOString();
-  const totalAmount = order.subtotal - (order.discountAmount || 0) + (order.taxAmount || 0) + (order.shippingAmount || 0);
+  const totalAmountCents = order.subtotalCents - (order.discountAmountCents || 0) + (order.taxAmountCents || 0) + (order.shippingAmountCents || 0);
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionOrder" (
       "customerSubscriptionId", "billingCycleNumber", "periodStart", "periodEnd",
-      "status", "subtotal", "discountAmount", "taxAmount", "shippingAmount",
-      "totalAmount", "scheduledAt", "createdAt", "updatedAt"
+      "status", "subtotalCents", "discountAmountCents", "taxAmountCents", "shippingAmountCents",
+      "totalAmountCents", "scheduledAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING *`,
     [
@@ -792,11 +792,11 @@ export async function createSubscriptionOrder(order: {
       order.billingCycleNumber,
       order.periodStart.toISOString(),
       order.periodEnd.toISOString(),
-      order.subtotal,
-      order.discountAmount || 0,
-      order.taxAmount || 0,
-      order.shippingAmount || 0,
-      totalAmount,
+      order.subtotalCents,
+      order.discountAmountCents || 0,
+      order.taxAmountCents || 0,
+      order.shippingAmountCents || 0,
+      totalAmountCents,
       order.scheduledAt?.toISOString(),
       now,
       now,
@@ -853,7 +853,7 @@ export async function createDunningAttempt(attempt: {
   customerSubscriptionId: string;
   subscriptionOrderId?: string;
   attemptNumber: number;
-  amount: number;
+  amountCents: number;
   currency?: string;
   scheduledAt: Date;
 }): Promise<DunningAttempt> {
@@ -862,14 +862,14 @@ export async function createDunningAttempt(attempt: {
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionDunningAttempt" (
       "customerSubscriptionId", "subscriptionOrderId", "attemptNumber",
-      "status", "amount", "currency", "scheduledAt", "createdAt", "updatedAt"
+      "status", "amountCents", "currency", "scheduledAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8)
     RETURNING *`,
     [
       attempt.customerSubscriptionId,
       attempt.subscriptionOrderId,
       attempt.attemptNumber,
-      attempt.amount,
+      attempt.amountCents,
       attempt.currency || 'USD',
       attempt.scheduledAt.toISOString(),
       now,
@@ -982,7 +982,7 @@ function mapToSubscriptionProduct(row: Record<string, unknown>): SubscriptionPro
     maxSkipsPerYear: row.maxSkipsPerYear ? parseInt(row.maxSkipsPerYear as string) : undefined,
     allowEarlyCancel: Boolean(row.allowEarlyCancel),
     cancelNoticeDays: parseInt(row.cancelNoticeDays as string) || 0,
-    earlyTerminationFee: row.earlyTerminationFee ? parseFloat(row.earlyTerminationFee as string) : undefined,
+    earlyTerminationFeeCents: row.earlyTerminationFeeCents != null ? Number(row.earlyTerminationFeeCents) : undefined,
     autoRenew: Boolean(row.autoRenew),
     renewalReminderDays: parseInt(row.renewalReminderDays as string) || 7,
     metadata: row.metadata as Record<string, unknown> | undefined,
@@ -1001,16 +1001,16 @@ function mapToSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
     description: row.description as string | undefined,
     billingInterval: row.billingInterval as BillingInterval,
     billingIntervalCount: parseInt(row.billingIntervalCount as string) || 1,
-    price: parseFloat(row.price as string) || 0,
-    compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice as string) : undefined,
+    priceCents: Number(row.priceCents) || 0,
+    compareAtPriceCents: row.compareAtPriceCents != null ? Number(row.compareAtPriceCents) : undefined,
     currency: (row.currency as string) || 'USD',
-    setupFee: parseFloat(row.setupFee as string) || 0,
+    setupFeeCents: Number(row.setupFeeCents) || 0,
     trialDays: row.trialDays ? parseInt(row.trialDays as string) : undefined,
     contractLength: row.contractLength ? parseInt(row.contractLength as string) : undefined,
     isContractRequired: Boolean(row.isContractRequired),
     discountPercent: parseFloat(row.discountPercent as string) || 0,
-    discountAmount: parseFloat(row.discountAmount as string) || 0,
-    freeShippingThreshold: row.freeShippingThreshold ? parseInt(row.freeShippingThreshold as string) : undefined,
+    discountAmountCents: parseFloat(row.discountAmountCents as string) || 0,
+    freeShippingThresholdCents: row.freeShippingThresholdCents != null ? Number(row.freeShippingThresholdCents) : undefined,
     includesFreeShipping: Boolean(row.includesFreeShipping),
     includedProducts: row.includedProducts as string[] | undefined,
     features: row.features as string[] | undefined,
@@ -1033,10 +1033,10 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     productVariantId: row.productVariantId as string | undefined,
     status: row.status as SubscriptionStatus,
     quantity: parseInt(row.quantity as string) || 1,
-    unitPrice: parseFloat(row.unitPrice as string) || 0,
-    discountAmount: parseFloat(row.discountAmount as string) || 0,
-    taxAmount: parseFloat(row.taxAmount as string) || 0,
-    totalPrice: parseFloat(row.totalPrice as string) || 0,
+    unitPriceCents: parseFloat(row.unitPriceCents as string) || 0,
+    discountAmountCents: parseFloat(row.discountAmountCents as string) || 0,
+    taxAmountCents: parseFloat(row.taxAmountCents as string) || 0,
+    totalPriceCents: parseFloat(row.totalPriceCents as string) || 0,
     currency: (row.currency as string) || 'USD',
     billingInterval: row.billingInterval as BillingInterval,
     billingIntervalCount: parseInt(row.billingIntervalCount as string) || 1,
@@ -1060,7 +1060,7 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     billingAddressId: row.billingAddressId as string | undefined,
     paymentMethodId: row.paymentMethodId as string | undefined,
     externalSubscriptionId: row.externalSubscriptionId as string | undefined,
-    lifetimeValue: parseFloat(row.lifetimeValue as string) || 0,
+    lifetimeValueCents: parseFloat(row.lifetimeValueCents as string) || 0,
     failedPaymentCount: parseInt(row.failedPaymentCount as string) || 0,
     lastPaymentAt: row.lastPaymentAt ? new Date(row.lastPaymentAt as string) : undefined,
     lastPaymentFailedAt: row.lastPaymentFailedAt ? new Date(row.lastPaymentFailedAt as string) : undefined,
@@ -1080,11 +1080,11 @@ function mapToSubscriptionOrder(row: Record<string, unknown>): SubscriptionOrder
     periodStart: new Date(row.periodStart as string),
     periodEnd: new Date(row.periodEnd as string),
     status: row.status as SubscriptionOrderStatus,
-    subtotal: parseFloat(row.subtotal as string) || 0,
-    discountAmount: parseFloat(row.discountAmount as string) || 0,
-    taxAmount: parseFloat(row.taxAmount as string) || 0,
-    shippingAmount: parseFloat(row.shippingAmount as string) || 0,
-    totalAmount: parseFloat(row.totalAmount as string) || 0,
+    subtotalCents: parseFloat(row.subtotalCents as string) || 0,
+    discountAmountCents: parseFloat(row.discountAmountCents as string) || 0,
+    taxAmountCents: parseFloat(row.taxAmountCents as string) || 0,
+    shippingAmountCents: parseFloat(row.shippingAmountCents as string) || 0,
+    totalAmountCents: parseFloat(row.totalAmountCents as string) || 0,
     currency: (row.currency as string) || 'USD',
     scheduledAt: row.scheduledAt ? new Date(row.scheduledAt as string) : undefined,
     processedAt: row.processedAt ? new Date(row.processedAt as string) : undefined,
@@ -1117,7 +1117,7 @@ function mapToSubscriptionPause(row: Record<string, unknown>): SubscriptionPause
     resumedBy: row.resumedBy as string | undefined,
     pauseDays: row.pauseDays ? parseInt(row.pauseDays as string) : undefined,
     billingCyclesSkipped: parseInt(row.billingCyclesSkipped as string) || 0,
-    creditAmount: parseFloat(row.creditAmount as string) || 0,
+    creditAmountCents: parseFloat(row.creditAmountCents as string) || 0,
     creditApplied: Boolean(row.creditApplied),
     metadata: row.metadata as Record<string, unknown> | undefined,
     createdAt: new Date(row.createdAt as string),
@@ -1132,7 +1132,7 @@ function mapToDunningAttempt(row: Record<string, unknown>): DunningAttempt {
     subscriptionOrderId: row.subscriptionOrderId as string | undefined,
     attemptNumber: parseInt(row.attemptNumber as string) || 1,
     status: row.status as DunningStatus,
-    amount: parseFloat(row.amount as string) || 0,
+    amountCents: parseFloat(row.amountCents as string) || 0,
     currency: (row.currency as string) || 'USD',
     scheduledAt: new Date(row.scheduledAt as string),
     attemptedAt: row.attemptedAt ? new Date(row.attemptedAt as string) : undefined,
@@ -1164,7 +1164,7 @@ export async function findActivePlansWithProduct(): Promise<unknown[]> {
      FROM "subscriptionPlan" sp
      LEFT JOIN "subscriptionProduct" sprod ON sp."subscriptionProductId" = sprod."subscriptionProductId"
      WHERE sp."isActive" = true
-     ORDER BY sp."sortOrder", sp."price" ASC`,
+     ORDER BY sp."sortOrder", sp."priceCents" ASC`,
     [],
   );
   return results || [];
@@ -1172,7 +1172,7 @@ export async function findActivePlansWithProduct(): Promise<unknown[]> {
 
 export async function findByCustomerIdWithPlan(customerId: string): Promise<unknown[]> {
   const results = await query<unknown[]>(
-    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency"
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currency"
      FROM "customerSubscription" cs
      LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"
      WHERE cs."customerId" = $1
@@ -1184,7 +1184,7 @@ export async function findByCustomerIdWithPlan(customerId: string): Promise<unkn
 
 export async function findByIdWithPlan(subscriptionId: string, customerId: string): Promise<unknown | null> {
   return await queryOne<unknown>(
-    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."price", sp."currency",
+    `SELECT cs.*, sp."name" as "planName", sp."billingInterval", sp."priceCents", sp."currency",
             sp."features", sp."description" as "planDescription"
      FROM "customerSubscription" cs
      LEFT JOIN "subscriptionPlan" sp ON cs."subscriptionPlanId" = sp."subscriptionPlanId"

@@ -15,7 +15,7 @@ describe('CreateSegmentUseCase', () => {
   });
 
   it('should create a segment when code is unique and conditions are provided', async () => {
-    const result = await useCase.execute({ name: 'VIP', code: 'vip', conditions: [{ field: 'lifetimeValue', operator: 'gte', value: 100 }] });
+    const result = await useCase.execute({ name: 'VIP', code: 'vip', conditions: [{ field: 'lifetimeValueCents', operator: 'gte', value: 100 }] });
 
     expect(result.name).toBe('VIP');
     expect(result.isActive).toBe(true);

@@ -1,19 +1,19 @@
 export interface DashboardStats {
   totalOrders: number;
-  totalRevenue: number;
+  totalRevenueCents: number;
   totalCustomers: number;
   totalProducts: number;
   pendingOrders: number;
   lowStockProducts: number;
   todayOrders: number;
-  todayRevenue: number;
+  todayRevenueCents: number;
 }
 
 export interface RecentOrder {
   orderId: string;
   orderNumber: string;
   customerName: string;
-  totalAmount: number;
+  totalAmountCents: number;
   status: string;
   createdAt: Date;
 }
@@ -22,12 +22,12 @@ export interface TopProduct {
   productId: string;
   name: string;
   totalSold: number;
-  revenue: number;
+  revenueCents: number;
 }
 
 export interface RevenueByDay {
   date: string;
-  revenue: number;
+  revenueCents: number;
   orders: number;
 }
 

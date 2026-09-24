@@ -37,13 +37,13 @@ export interface BasketResponse {
     sku: string;
     name: string;
     quantity: number;
-    unitPrice: number;
-    lineTotal: number;
+    unitPriceCents: number;
+    lineTotalCents: number;
     imageUrl?: string;
     isGift: boolean;
   }>;
   itemCount: number;
-  subtotal: number;
+  subtotalCents: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -62,13 +62,13 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
       sku: item.sku,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice.amount,
-      lineTotal: item.lineTotal.amount,
+      unitPriceCents: item.unitPrice.cents,
+      lineTotalCents: item.lineTotal.cents,
       imageUrl: item.imageUrl,
       isGift: item.isGift,
     })),
     itemCount: basket.itemCount,
-    subtotal: basket.subtotal.amount,
+    subtotalCents: basket.subtotal.cents,
     createdAt: basket.createdAt.toISOString(),
     updatedAt: basket.updatedAt.toISOString(),
   };

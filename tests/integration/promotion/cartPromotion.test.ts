@@ -24,7 +24,7 @@ describe('Cart Promotion Tests', () => {
     const cartPromotionData = {
       basketId: testCartId,
       promotionId: promotionId,
-      discountAmount: 10,
+      discountAmountCents: 1000,
       status: 'active',
     };
 

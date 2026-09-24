@@ -7,7 +7,7 @@ exports.up = function (knex) {
     t.string('type', 50)
       .notNullable()
       .checkIn(['transaction', 'subscription', 'dispute', 'refund', 'chargeback', 'payout', 'platform', 'other']);
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.text('description');
     t.uuid('orderPaymentId').references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');

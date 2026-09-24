@@ -39,9 +39,9 @@ exports.up = function (knex) {
     t.date('effectiveFrom'); // When registration becomes effective
     t.date('effectiveUntil'); // For temporary registrations
     // Thresholds (for distance selling)
-    t.decimal('annualThreshold', 15, 2); // Threshold amount
+    t.bigInteger('annualThresholdCents'); // Threshold amount
     t.string('thresholdCurrency', 3).defaultTo('EUR');
-    t.decimal('currentYearSales', 15, 2).defaultTo(0);
+    t.bigInteger('currentYearSalesCents').defaultTo(0);
     t.boolean('thresholdExceeded').defaultTo(false);
     // Status
     t.boolean('isActive').notNullable().defaultTo(true);

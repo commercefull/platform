@@ -51,16 +51,16 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
       `INSERT INTO "marketplaceVendorPayout" (
         "payoutId", "vendorId", "organizationId", "payoutNumber", "status",
         "method", "periodStart", "periodEnd", "lineItems",
-        "grossAmount", "commissionAmount", "netAmount", "currency",
+        "grossAmountCents", "commissionAmountCents", "netAmountCents", "currency",
         "transactionRef", "failureReason", "processedAt", "completedAt",
         "createdAt", "updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
       ON CONFLICT ("payoutId") DO UPDATE SET
         "status" = EXCLUDED."status",
         "lineItems" = EXCLUDED."lineItems",
-        "grossAmount" = EXCLUDED."grossAmount",
-        "commissionAmount" = EXCLUDED."commissionAmount",
-        "netAmount" = EXCLUDED."netAmount",
+        "grossAmountCents" = EXCLUDED."grossAmountCents",
+        "commissionAmountCents" = EXCLUDED."commissionAmountCents",
+        "netAmountCents" = EXCLUDED."netAmountCents",
         "transactionRef" = EXCLUDED."transactionRef",
         "failureReason" = EXCLUDED."failureReason",
         "processedAt" = EXCLUDED."processedAt",
@@ -77,9 +77,9 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
         json.periodStart,
         json.periodEnd,
         JSON.stringify(json.lineItems),
-        json.grossAmount,
-        json.commissionAmount,
-        json.netAmount,
+        json.grossAmountCents,
+        json.commissionAmountCents,
+        json.netAmountCents,
         json.currency,
         json.transactionRef ?? null,
         json.failureReason ?? null,

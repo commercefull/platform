@@ -26,15 +26,15 @@ describe('InitiatePaymentUseCase', () => {
 
     expect(result.transactionId).toBe('txn-uuid');
     expect(result.orderId).toBe('o1');
-    expect(result.amount).toBe(100);
+    expect(result.amountCents).toBe(100);
     expect(emitMock).toHaveBeenCalledWith('payment.received', expect.objectContaining({ transactionId: 'txn-uuid' }));
   });
 
-  it('should throw AmountMustBePositiveError for zero amount', async () => {
+  it('should throw AmountMustBePositiveError for zero amountCents', async () => {
     await expect(useCase.execute(new InitiatePaymentCommand('o1', 0, 'USD', 'pm-1'))).rejects.toThrow(AmountMustBePositiveError);
   });
 
-  it('should throw AmountMustBePositiveError for negative amount', async () => {
+  it('should throw AmountMustBePositiveError for negative amountCents', async () => {
     await expect(useCase.execute(new InitiatePaymentCommand('o1', -10, 'USD', 'pm-1'))).rejects.toThrow(AmountMustBePositiveError);
   });
 

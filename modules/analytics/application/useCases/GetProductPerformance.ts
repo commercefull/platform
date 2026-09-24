@@ -21,10 +21,10 @@ export interface ProductPerformanceItem {
   views: number;
   addToCarts: number;
   purchases: number;
-  revenue: number;
+  revenueCents: number;
   units: number;
   conversionRate: number;
-  averagePrice: number;
+  averagePriceCents: number;
   returnRate: number;
 }
 
@@ -34,7 +34,7 @@ export interface GetProductPerformanceOutput {
     totalProducts: number;
     totalViews: number;
     totalPurchases: number;
-    totalRevenue: number;
+    totalRevenueCents: number;
     averageConversionRate: number;
   };
   period: {
@@ -50,7 +50,7 @@ interface RawProductData {
   views: number;
   addToCarts: number;
   purchases: number;
-  revenue: number;
+  revenueCents: number;
   units: number;
   returns?: number;
 }
@@ -88,10 +88,10 @@ export class GetProductPerformanceUseCase {
       views: p.views || 0,
       addToCarts: p.addToCarts || 0,
       purchases: p.purchases || 0,
-      revenue: p.revenue || 0,
+      revenueCents: p.revenueCents || 0,
       units: p.units || 0,
       conversionRate: p.views > 0 ? (p.purchases / p.views) * 100 : 0,
-      averagePrice: p.units > 0 ? p.revenue / p.units : 0,
+      averagePriceCents: p.units > 0 ? Math.round(p.revenueCents / p.units) : 0,
       returnRate: p.purchases > 0 ? ((p.returns || 0) / p.purchases) * 100 : 0,
     }));
 
@@ -101,14 +101,14 @@ export class GetProductPerformanceUseCase {
         totalProducts: acc.totalProducts + 1,
         totalViews: acc.totalViews + p.views,
         totalPurchases: acc.totalPurchases + p.purchases,
-        totalRevenue: acc.totalRevenue + p.revenue,
+        totalRevenueCents: acc.totalRevenueCents + p.revenueCents,
         averageConversionRate: 0,
       }),
       {
         totalProducts: 0,
         totalViews: 0,
         totalPurchases: 0,
-        totalRevenue: 0,
+        totalRevenueCents: 0,
         averageConversionRate: 0,
       },
     );

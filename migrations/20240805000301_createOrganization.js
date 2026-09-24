@@ -46,7 +46,7 @@ exports.up = function (knex) {
     t.decimal('commissionRate', 5, 2);
     t.enum('commissionType', ['percentage', 'flat', 'tiered']).defaultTo('percentage');
     t.jsonb('commissionTiers');
-    t.decimal('minimumPayoutAmount', 10, 2).defaultTo(50.0);
+    t.bigInteger('minimumPayoutAmountCents').defaultTo(5000);
     t.enum('payoutSchedule', ['weekly', 'biweekly', 'monthly', 'quarterly']).defaultTo('monthly');
     t.boolean('autoApproveProducts').notNullable().defaultTo(false);
     t.boolean('autoApproveReviews').notNullable().defaultTo(false);

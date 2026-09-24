@@ -128,11 +128,11 @@
                 </td>
                 <td><code><%= product.sku || '-' %></code></td>
                 <td>
-                  <% if (product.salePrice && product.salePrice < product.basePrice) { %>
-                    <span class="text-decoration-line-through text-muted">$<%= product.basePrice.toFixed(2) %></span>
-                    <span class="text-success fw-bold">$<%= product.salePrice.toFixed(2) %></span>
+                  <% if (product.salePriceCents != null && product.salePriceCents < product.basePriceCents) { %>
+                    <span class="text-decoration-line-through text-muted">$<%= (product.basePriceCents / 100).toFixed(2) %></span>
+                    <span class="text-success fw-bold">$<%= (product.salePriceCents / 100).toFixed(2) %></span>
                   <% } else { %>
-                    $<%= (product.basePrice || 0).toFixed(2) %>
+                    $<%= ((product.basePriceCents || 0) / 100).toFixed(2) %>
                   <% } %>
                 </td>
                 <td>

@@ -10,7 +10,7 @@ interface Order {
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
-  totalAmount: number | string;
+  totalAmountCents: number | string;
   items?: OrderItem[];
   [key: string]: unknown;
 }
@@ -19,7 +19,7 @@ interface OrderItem {
   orderItemId: string;
   productId: string;
   variantId: string;
-  unitPrice: number | string;
+  unitPriceCents: number | string;
   [key: string]: unknown;
 }
 
@@ -54,7 +54,7 @@ describe('Order Tests', () => {
       expect(orders[0]).toHaveProperty('orderNumber');
       expect(orders[0]).toHaveProperty('customerId');
       expect(orders[0]).toHaveProperty('paymentStatus');
-      expect(orders[0]).toHaveProperty('totalAmount');
+      expect(orders[0]).toHaveProperty('totalAmountCents');
 
       // Verify no snake_case properties are exposed in the API
       expect(orders[0]).not.toHaveProperty('order_number');
@@ -79,7 +79,7 @@ describe('Order Tests', () => {
       expect(order.fulfillmentStatus).toBe(testOrderData.fulfillmentStatus);
       expect(order.currencyCode).toBe(testOrderData.currencyCode);
       // Total amount is calculated by the server, just verify it's a number
-      expect(typeof parseFloat(String(order.totalAmount))).toBe('number');
+      expect(typeof parseFloat(String(order.totalAmountCents))).toBe('number');
 
       // Verify address data is properly mapped
       expect(order.shippingAddress).toHaveProperty('firstName', testOrderData.shippingAddress.firstName);
@@ -147,7 +147,7 @@ describe('Order Tests', () => {
       // Verify camelCase in order items
       const item = response.data.data.items[0] as OrderItem;
       expect(item).toHaveProperty('productId');
-      expect(item).toHaveProperty('unitPrice');
+      expect(item).toHaveProperty('unitPriceCents');
       expect(item).not.toHaveProperty('product_id');
       expect(item).not.toHaveProperty('unit_price');
     });
@@ -374,7 +374,7 @@ describe('Order Creation Validation', () => {
     const response = await client.post(
       '/customer/order',
       {
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -398,7 +398,7 @@ describe('Order Creation Validation', () => {
       '/customer/order',
       {
         customerEmail: 'test@example.com',
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
       },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
@@ -462,7 +462,7 @@ describe('Order Event Emission', () => {
       '/customer/order',
       {
         customerEmail: 'event-test@example.com',
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -483,7 +483,7 @@ describe('Order Event Emission', () => {
     // Verify the response contains the fields that the order.created event payload includes
     expect(orderData).toHaveProperty('orderId');
     expect(orderData).toHaveProperty('orderNumber');
-    expect(orderData).toHaveProperty('totalAmount');
+    expect(orderData).toHaveProperty('totalAmountCents');
     expect(orderData).toHaveProperty('currencyCode');
 
     await client.delete(`/business/orders/${orderData.orderId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
@@ -494,7 +494,7 @@ describe('Order Event Emission', () => {
       '/customer/order',
       {
         customerEmail: 'cancel-event@example.com',
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -542,7 +542,7 @@ describe('Order Optional Features', () => {
       {
         customerEmail: 'eur@example.com',
         currencyCode: 'EUR',
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',
@@ -570,7 +570,7 @@ describe('Order Optional Features', () => {
         hasGiftWrapping: true,
         giftMessage: 'Happy Birthday!',
         isGift: true,
-        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPrice: 10 }],
+        items: [{ productId: '00000000-0000-0000-0000-000000000001', sku: 'SKU', name: 'P', quantity: 1, unitPriceCents: 1000 }],
         shippingAddress: {
           firstName: 'A',
           lastName: 'B',

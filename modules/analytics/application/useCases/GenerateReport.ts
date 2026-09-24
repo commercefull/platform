@@ -2,6 +2,7 @@
  * Generate Report Use Case
  *
  * Generates a report of the specified type with given parameters.
+ * All monetary values are integer cents.
  */
 
 import { query, queryOne } from '../../../../libs/db';
@@ -58,35 +59,35 @@ export class GenerateReportUseCase {
 
     const salesData = await query<Array<{ date: string; orders: string; revenue: string; customers: string }>>(
       `SELECT
-        DATE(created_at) as date,
+        DATE("createdAt") as date,
         COUNT(*) as orders,
-        SUM(total_amount) as revenue,
-        COUNT(DISTINCT customer_id) as customers
+        SUM("totalAmountCents") as revenue,
+        COUNT(DISTINCT "customerId") as customers
       FROM "order"
-      WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'
-      GROUP BY DATE(created_at)
+      WHERE "createdAt" >= $1 AND "createdAt" <= $2 AND status = 'completed'
+      GROUP BY DATE("createdAt")
       ORDER BY date`,
       [startDate, endDate],
     );
 
     const salesDataSafe = salesData || [];
 
-    const totalRevenue = salesDataSafe.reduce((sum, d) => sum + parseFloat(d.revenue || '0'), 0);
+    const totalRevenueCents = salesDataSafe.reduce((sum, d) => sum + parseFloat(d.revenue || '0'), 0);
     const totalOrders = salesDataSafe.reduce((sum, d) => sum + parseInt(d.orders || '0'), 0);
     const totalCustomers = salesDataSafe.reduce((sum, d) => sum + parseInt(d.customers || '0'), 0);
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const averageOrderValueCents = totalOrders > 0 ? Math.round(totalRevenueCents / totalOrders) : 0;
 
     const topProducts = await query<Array<{ product_id: string; name: string; sales: string; revenue: string }>>(
       `SELECT
-        p.product_id,
+        p."productId" as product_id,
         p.name,
         SUM(oi.quantity) as sales,
-        SUM(oi.total_price) as revenue
-      FROM order_item oi
-      JOIN product p ON oi.product_id = p.product_id
-      JOIN "order" o ON oi.order_id = o.order_id
-      WHERE o.created_at >= $1 AND o.created_at <= $2 AND o.status = 'completed'
-      GROUP BY p.product_id, p.name
+        SUM(oi."lineTotalCents") as revenue
+      FROM "orderItem" oi
+      JOIN product p ON oi."productId" = p."productId"
+      JOIN "order" o ON oi."orderId" = o."orderId"
+      WHERE o."createdAt" >= $1 AND o."createdAt" <= $2 AND o.status = 'completed'
+      GROUP BY p."productId", p.name
       ORDER BY revenue DESC
       LIMIT 10`,
       [startDate, endDate],
@@ -97,16 +98,16 @@ export class GenerateReportUseCase {
       generatedAt,
       period: `${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`,
       summary: {
-        totalRevenue,
+        totalRevenueCents,
         totalOrders,
         totalCustomers,
-        averageOrderValue,
+        averageOrderValueCents,
         conversionRate: 0,
       },
       data: salesDataSafe.map(d => ({
         date: d.date,
         orders: parseInt(d.orders || '0'),
-        revenue: parseFloat(d.revenue || '0'),
+        revenueCents: parseFloat(d.revenue || '0'),
         customers: parseInt(d.customers || '0'),
       })),
       charts: [
@@ -148,18 +149,18 @@ export class GenerateReportUseCase {
     >(
       `WITH customer_orders AS (
         SELECT
-          DATE(o.created_at) as date,
-          o.customer_id,
+          DATE(o."createdAt") as date,
+          o."customerId",
           COUNT(*) as order_count,
-          SUM(o.total_amount) as revenue
+          SUM(o."totalAmountCents") as revenue
         FROM "order" o
-        WHERE o.created_at >= $1 AND o.created_at <= $2 AND o.status = 'completed'
-        GROUP BY DATE(o.created_at), o.customer_id
+        WHERE o."createdAt" >= $1 AND o."createdAt" <= $2 AND o.status = 'completed'
+        GROUP BY DATE(o."createdAt"), o."customerId"
       ),
       customer_classification AS (
         SELECT
           date,
-          customer_id,
+          "customerId",
           order_count,
           revenue,
           CASE
@@ -183,22 +184,22 @@ export class GenerateReportUseCase {
     const segmentData = await query<Array<{ segment: string; customers: string; revenue: string }>>(
       `SELECT
         CASE
-          WHEN total_spent > 500 THEN 'High Value'
-          WHEN total_spent BETWEEN 100 AND 500 THEN 'Regular'
+          WHEN total_spent > 50000 THEN 'High Value'
+          WHEN total_spent BETWEEN 10000 AND 50000 THEN 'Regular'
           ELSE 'Low Value'
         END as segment,
         COUNT(*) as customers,
         SUM(total_spent) as revenue
       FROM (
-        SELECT customer_id, SUM(total_amount) as total_spent
+        SELECT "customerId", SUM("totalAmountCents") as total_spent
         FROM "order"
-        WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'
-        GROUP BY customer_id
+        WHERE "createdAt" >= $1 AND "createdAt" <= $2 AND status = 'completed'
+        GROUP BY "customerId"
       ) customer_totals
       GROUP BY
         CASE
-          WHEN total_spent > 500 THEN 'High Value'
-          WHEN total_spent BETWEEN 100 AND 500 THEN 'Regular'
+          WHEN total_spent > 50000 THEN 'High Value'
+          WHEN total_spent BETWEEN 10000 AND 50000 THEN 'Regular'
           ELSE 'Low Value'
         END`,
       [startDate, endDate],
@@ -207,7 +208,7 @@ export class GenerateReportUseCase {
     const customerDataSafe = customerData || [];
     const segmentDataSafe = segmentData || [];
 
-    const totalRevenue = customerDataSafe.reduce((sum, d) => sum + parseFloat(d.revenue || '0'), 0);
+    const totalRevenueCents = customerDataSafe.reduce((sum, d) => sum + parseFloat(d.revenue || '0'), 0);
     const totalNewCustomers = customerDataSafe.reduce((sum, d) => sum + parseInt(d.new_customers || '0'), 0);
     const totalReturningCustomers = customerDataSafe.reduce((sum, d) => sum + parseInt(d.returning_customers || '0'), 0);
 
@@ -216,7 +217,7 @@ export class GenerateReportUseCase {
       generatedAt: new Date(),
       period: `${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`,
       summary: {
-        totalRevenue,
+        totalRevenueCents,
         newCustomers: totalNewCustomers,
         returningCustomers: totalReturningCustomers,
         customerSegments: segmentDataSafe.length,
@@ -226,7 +227,7 @@ export class GenerateReportUseCase {
         newCustomers: parseInt(d.new_customers || '0'),
         returningCustomers: parseInt(d.returning_customers || '0'),
         orders: parseInt(d.orders || '0'),
-        revenue: parseFloat(d.revenue || '0'),
+        revenueCents: parseFloat(d.revenue || '0'),
       })),
       charts: [
         {
@@ -260,21 +261,21 @@ export class GenerateReportUseCase {
     const [startDate, endDate] = parsePeriod(period);
 
     const productData = await query<
-      Array<{ product_id: string; name: string; category: string; sales: string; revenue: string; stock: string; views: string }>
+      Array<{ product_id: string; name: string; sales: string; revenue: string; stock: string; views: string }>
     >(
       `SELECT
-        p.product_id,
+        p."productId" as product_id,
         p.name,
-        p.category,
         COALESCE(SUM(oi.quantity), 0) as sales,
-        COALESCE(SUM(oi.total_price), 0) as revenue,
-        p.stock_quantity as stock,
-        COALESCE(ap.views, 0) as views
+        COALESCE(SUM(oi."lineTotalCents"), 0) as revenue,
+        COALESCE(SUM(il."onHandQuantity"), 0) as stock,
+        COALESCE(SUM(ap.views), 0) as views
       FROM product p
-      LEFT JOIN order_item oi ON p.product_id = oi.product_id
-      LEFT JOIN "order" o ON oi.order_id = o.order_id AND o.created_at >= $1 AND o.created_at <= $2 AND o.status = 'completed'
-      LEFT JOIN analyticsProductPerformance ap ON p.product_id = ap.productId AND ap.date >= $1 AND ap.date <= $2
-      GROUP BY p.product_id, p.name, p.category, p.stock_quantity, ap.views
+      LEFT JOIN "orderItem" oi ON p."productId" = oi."productId"
+      LEFT JOIN "order" o ON oi."orderId" = o."orderId" AND o."createdAt" >= $1 AND o."createdAt" <= $2 AND o.status = 'completed'
+      LEFT JOIN "inventoryLevel" il ON il."productId" = p."productId" AND il."productVariantId" IS NULL
+      LEFT JOIN "analyticsProductPerformance" ap ON p."productId" = ap."productId" AND ap.date >= $1 AND ap.date <= $2
+      GROUP BY p."productId", p.name
       ORDER BY revenue DESC`,
       [startDate, endDate],
     );
@@ -287,16 +288,15 @@ export class GenerateReportUseCase {
       period: `${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`,
       summary: {
         totalProducts: productDataSafe.length,
-        totalRevenue: productDataSafe.reduce((sum, p) => sum + parseFloat(p.revenue || '0'), 0),
+        totalRevenueCents: productDataSafe.reduce((sum, p) => sum + parseFloat(p.revenue || '0'), 0),
         totalSales: productDataSafe.reduce((sum, p) => sum + parseInt(p.sales || '0'), 0),
         lowStockProducts: productDataSafe.filter(p => parseInt(p.stock || '0') < 10).length,
       },
       data: productDataSafe.map(p => ({
         productId: p.product_id,
         name: p.name,
-        category: p.category,
         sales: parseInt(p.sales || '0'),
-        revenue: parseFloat(p.revenue || '0'),
+        revenueCents: parseFloat(p.revenue || '0'),
         stock: parseInt(p.stock || '0'),
         views: parseInt(p.views || '0'),
       })),
@@ -308,32 +308,35 @@ export class GenerateReportUseCase {
       Array<{
         product_id: string;
         name: string;
-        category: string;
         stock_quantity: string;
         reorder_point: string;
-        cost_price: string;
+        cost_price_cents: string;
         sales_velocity: string;
       }>
     >(
       `SELECT
-        p.product_id,
+        p."productId" as product_id,
         p.name,
-        p.category,
-        p.stock_quantity,
-        p.reorder_point,
-        p.cost_price,
+        COALESCE(SUM(il."onHandQuantity"), 0) as stock_quantity,
+        COALESCE(MAX(il."minStockLevel"), 10) as reorder_point,
+        MAX(bp."costPriceCents") as cost_price_cents,
         COALESCE(AVG(oi.quantity), 0) as sales_velocity
       FROM product p
-      LEFT JOIN order_item oi ON p.product_id = oi.product_id
-      LEFT JOIN "order" o ON oi.order_id = o.order_id AND o.created_at >= CURRENT_DATE - INTERVAL '30 days'
-      GROUP BY p.product_id, p.name, p.category, p.stock_quantity, p.reorder_point, p.cost_price
-      ORDER BY p.stock_quantity ASC`,
+      LEFT JOIN "inventoryLevel" il ON il."productId" = p."productId" AND il."productVariantId" IS NULL
+      LEFT JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."productVariantId" IS NULL
+      LEFT JOIN "orderItem" oi ON p."productId" = oi."productId"
+      LEFT JOIN "order" o ON oi."orderId" = o."orderId" AND o."createdAt" >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY p."productId", p.name
+      ORDER BY stock_quantity ASC`,
     );
 
     const inventoryDataSafe = inventoryData || [];
 
     const lowStock = inventoryDataSafe.filter(p => parseInt(p.stock_quantity || '0') <= parseInt(p.reorder_point || '10'));
-    const totalValue = inventoryDataSafe.reduce((sum, p) => sum + parseInt(p.stock_quantity || '0') * parseFloat(p.cost_price || '0'), 0);
+    const totalValueCents = inventoryDataSafe.reduce(
+      (sum, p) => sum + parseInt(p.stock_quantity || '0') * parseFloat(p.cost_price_cents || '0'),
+      0,
+    );
 
     return {
       title: 'Inventory Status Report',
@@ -342,16 +345,15 @@ export class GenerateReportUseCase {
       summary: {
         totalProducts: inventoryDataSafe.length,
         lowStockProducts: lowStock.length,
-        totalInventoryValue: totalValue,
+        totalInventoryValueCents: totalValueCents,
         stockoutRisk: lowStock.filter(p => parseInt(p.stock_quantity || '0') === 0).length,
       },
       data: inventoryDataSafe.map(p => ({
         productId: p.product_id,
         name: p.name,
-        category: p.category,
         stockQuantity: parseInt(p.stock_quantity || '0'),
         reorderPoint: parseInt(p.reorder_point || '10'),
-        costPrice: parseFloat(p.cost_price || '0'),
+        costPriceCents: parseFloat(p.cost_price_cents || '0'),
         salesVelocity: parseFloat(p.sales_velocity || '0'),
         status: parseInt(p.stock_quantity || '0') <= parseInt(p.reorder_point || '10') ? 'Low Stock' : 'In Stock',
       })),
@@ -363,12 +365,12 @@ export class GenerateReportUseCase {
 
     const executiveData = await queryOne<{ revenue: string; orders: string; customers: string; profit: string }>(
       `SELECT
-        COALESCE(SUM(total_amount), 0) as revenue,
+        COALESCE(SUM("totalAmountCents"), 0) as revenue,
         COUNT(*) as orders,
-        COUNT(DISTINCT customer_id) as customers,
-        COALESCE(SUM(total_amount) * 0.25, 0) as profit
+        COUNT(DISTINCT "customerId") as customers,
+        COALESCE(SUM("totalAmountCents") * 0.25, 0) as profit
       FROM "order"
-      WHERE created_at >= $1 AND created_at <= $2 AND status = 'completed'`,
+      WHERE "createdAt" >= $1 AND "createdAt" <= $2 AND status = 'completed'`,
       [startDate, endDate],
     );
 
@@ -377,10 +379,10 @@ export class GenerateReportUseCase {
       generatedAt: new Date(),
       period: `${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`,
       summary: {
-        totalRevenue: parseFloat(executiveData?.revenue || '0'),
+        totalRevenueCents: parseFloat(executiveData?.revenue || '0'),
         totalOrders: parseInt(executiveData?.orders || '0'),
         totalCustomers: parseInt(executiveData?.customers || '0'),
-        totalProfit: parseFloat(executiveData?.profit || '0'),
+        totalProfitCents: parseFloat(executiveData?.profit || '0'),
         profitMargin:
           parseFloat(executiveData?.revenue || '0') > 0
             ? (parseFloat(executiveData?.profit || '0') / parseFloat(executiveData?.revenue || '0')) * 100

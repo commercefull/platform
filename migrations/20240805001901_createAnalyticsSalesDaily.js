@@ -14,13 +14,13 @@ exports.up = function (knex) {
       // Order metrics
       table.integer('orderCount').defaultTo(0);
       table.integer('itemsSold').defaultTo(0);
-      table.decimal('grossRevenue', 15, 2).defaultTo(0);
-      table.decimal('discountTotal', 15, 2).defaultTo(0);
-      table.decimal('refundTotal', 15, 2).defaultTo(0);
-      table.decimal('netRevenue', 15, 2).defaultTo(0);
-      table.decimal('taxTotal', 15, 2).defaultTo(0);
-      table.decimal('shippingRevenue', 15, 2).defaultTo(0);
-      table.decimal('averageOrderValue', 15, 2).defaultTo(0);
+      table.bigInteger('grossRevenueCents').defaultTo(0);
+      table.bigInteger('discountTotalCents').defaultTo(0);
+      table.bigInteger('refundTotalCents').defaultTo(0);
+      table.bigInteger('netRevenueCents').defaultTo(0);
+      table.bigInteger('taxTotalCents').defaultTo(0);
+      table.bigInteger('shippingRevenueCents').defaultTo(0);
+      table.bigInteger('averageOrderValueCents').defaultTo(0);
 
       // Customer metrics
       table.integer('newCustomers').defaultTo(0);

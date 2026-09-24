@@ -8,7 +8,7 @@
 export interface ShippingOption {
   methodId: string;
   methodName: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   estimatedDays?: number;
   carrier?: string;
@@ -23,7 +23,7 @@ export interface ShippingQuoteRequest {
     city?: string;
   };
   totalWeight?: number;
-  totalValue?: number;
+  totalValueCents?: number;
 }
 
 export interface ShippingQuotePort {

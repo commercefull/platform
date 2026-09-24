@@ -23,7 +23,7 @@ export class PaymentFraudScreeningAdapter implements FraudScreeningPort {
       ipAddress: request.ipAddress,
       billingCountry: request.billingCountry,
       shippingCountry: request.shippingCountry,
-      orderAmount: request.orderAmount,
+      orderAmountCents: request.orderAmountCents,
       currency: request.currency,
       paymentMethod: request.paymentMethodId,
       isFirstOrder: request.isFirstOrder,

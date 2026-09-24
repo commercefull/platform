@@ -132,7 +132,7 @@
                 <td><%= tx.customerName || tx.customerEmail || '-' %></td>
                 <td>
                   <strong class="<%= tx.type === 'refund' ? 'text-danger' : '' %>">
-                    <%= tx.type === 'refund' ? '-' : '' %>$<%= (tx.amount || 0).toFixed(2) %>
+                    <%= tx.type === 'refund' ? '-' : '' %>$<%= ((tx.amountCents || 0) / 100).toFixed(2) %>
                   </strong>
                 </td>
                 <td><span class="badge bg-secondary"><%= tx.gatewayName || tx.gateway %></span></td>

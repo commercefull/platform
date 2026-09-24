@@ -23,7 +23,7 @@ describe('ManageApprovalWorkflowUseCase', () => {
     const result = await useCase.create({
       companyId: 'co-1', organizationId: 'org-1', type: 'purchase_order',
       referenceId: 'r-1', referenceNumber: 'ORD-1', requestedBy: 'u-1',
-      requestedByEmail: 'u@x.test', amount: 500,
+      requestedByEmail: 'u@x.test', amountCents: 500,
       approvers: [{ approverId: 'm-1', approverEmail: 'm@x.test' }],
     });
 
@@ -35,7 +35,7 @@ describe('ManageApprovalWorkflowUseCase', () => {
     await expect(useCase.create({
       companyId: 'co-1', organizationId: 'org-1', type: 'purchase_order',
       referenceId: 'r-1', referenceNumber: 'ORD-1', requestedBy: 'u-1',
-      requestedByEmail: 'u@x.test', amount: 500, approvers: [],
+      requestedByEmail: 'u@x.test', amountCents: 500, approvers: [],
     })).rejects.toThrow(B2BValidationError);
   });
 

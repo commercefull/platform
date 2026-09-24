@@ -46,11 +46,11 @@ describe('Customer: Product Search', () => {
     });
 
     it('should filter by price range', async () => {
-      const res = await client.get('/customer/products/search?minPrice=10&maxPrice=200');
+      const res = await client.get('/customer/products/search?minPriceCents=1000&maxPriceCents=20000');
       expect(res.status).toBe(200);
       res.data.data.products.forEach((p: Record<string, unknown>) => {
-        expect(p.price).toBeGreaterThanOrEqual(10);
-        expect(p.price).toBeLessThanOrEqual(200);
+        expect(p.effectivePriceCents).toBeGreaterThanOrEqual(1000);
+        expect(p.effectivePriceCents).toBeLessThanOrEqual(20000);
       });
     });
 

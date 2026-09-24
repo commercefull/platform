@@ -2,10 +2,8 @@ import pricingDataRepository from '../infrastructure/repositories/PricingDataRep
 import pricingRuleRepository from '../infrastructure/repositories/PricingRuleRepository';
 import currencyRepository from '../infrastructure/repositories/CurrencyRepository';
 import { pricingRuleRepo } from '../infrastructure';
-import { ProductPriceDataAdapter } from '../infrastructure/acl/ProductPriceDataAdapter';
 import { MembershipBenefitsAdapter } from '../infrastructure/acl/MembershipBenefitsAdapter';
 import { LoyaltyBalanceAdapter } from '../infrastructure/acl/LoyaltyBalanceAdapter';
-import productCatalogRepository from '../../product/infrastructure/repositories/ProductCatalogRepository';
 import { MembershipRepo } from '../../membership/infrastructure/repositories/membershipRepo';
 import { LoyaltyRepo } from '../../loyalty/infrastructure/repositories/loyaltyRepo';
 import { PricingService } from './pricingService';
@@ -15,11 +13,9 @@ export { pricingDataRepository, pricingRuleRepository, currencyRepository };
 export { pricingRuleRepo };
 
 export const pricingService = new PricingService(
-  new ProductPriceDataAdapter(productCatalogRepository.products, productCatalogRepository.variants),
   new MembershipBenefitsAdapter(new MembershipRepo()),
   new LoyaltyBalanceAdapter(new LoyaltyRepo()),
   pricingRuleRepository,
   pricingDataRepository,
   currencyRepository,
 );
-

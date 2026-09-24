@@ -26,7 +26,7 @@ import type { AttributeCondition } from '../../../../libs/rules/conditions';
 
 export interface ShippingCalculationInput {
   rate: ShippingRate;
-  orderSubtotal: number;
+  orderSubtotalCents: number;
   itemCount: number;
   totalWeight?: number;
   totalVolume?: number;
@@ -34,14 +34,14 @@ export interface ShippingCalculationInput {
   isResidential?: boolean;
   isRemoteArea?: boolean;
   requiresSignature?: boolean;
-  declaredValue?: number;
+  declaredValueCents?: number;
 }
 
 export interface ShippingCalculationResult {
-  baseAmount: number;
-  surchargeAmount: number;
-  totalAmount: number;
-  surchargeBreakdown: Array<{ type: string; amount: number }>;
+  baseAmountCents: number;
+  surchargeAmountCents: number;
+  totalAmountCents: number;
+  surchargeBreakdown: Array<{ type: string; amountCents: number }>;
   isFreeShipping: boolean;
 }
 
@@ -53,14 +53,14 @@ export class ShippingRateCalculator {
    */
   async calculate(input: ShippingCalculationInput): Promise<ShippingCalculationResult> {
     // 1. Compute the base amount via the existing rate calculator
-    const baseAmount = calculateRate(input.rate, input.orderSubtotal, input.itemCount, input.totalWeight);
+    const baseAmountCents = calculateRate(input.rate, input.orderSubtotalCents, input.itemCount, input.totalWeight);
 
     // 2. Check free shipping
-    if (baseAmount === 0) {
+    if (baseAmountCents === 0) {
       return {
-        baseAmount: 0,
-        surchargeAmount: 0,
-        totalAmount: 0,
+        baseAmountCents: 0,
+        surchargeAmountCents: 0,
+        totalAmountCents: 0,
         surchargeBreakdown: [],
         isFreeShipping: true,
       };
@@ -69,35 +69,35 @@ export class ShippingRateCalculator {
     // 3. Load and apply surcharges
     const rawSurcharges = this.surchargePort ? await this.surchargePort.findActiveByRateId(input.rate.shippingRateId) : [];
     const surchargeContext: SurchargeContext = {
-      baseRate: baseAmount,
+      baseRateCents: baseAmountCents,
       weight: input.totalWeight,
       volume: input.totalVolume,
       destinationZone: input.destinationZone,
-      orderValue: input.orderSubtotal,
+      orderValueCents: input.orderSubtotalCents,
       isResidential: input.isResidential,
       isRemoteArea: input.isRemoteArea,
       requiresSignature: input.requiresSignature,
-      declaredValue: input.declaredValue,
+      declaredValueCents: input.declaredValueCents,
     };
 
-    let surchargeAmount = 0;
-    const surchargeBreakdown: Array<{ type: string; amount: number }> = [];
+    let surchargeAmountCents = 0;
+    const surchargeBreakdown: Array<{ type: string; amountCents: number }> = [];
 
     for (const raw of rawSurcharges) {
       const entity = this.toDomainEntity(raw);
-      const amount = entity.calculate(baseAmount, surchargeContext);
-      if (amount > 0) {
-        surchargeAmount += amount;
-        surchargeBreakdown.push({ type: raw.type, amount });
+      const amountCents = entity.calculate(baseAmountCents, surchargeContext);
+      if (amountCents > 0) {
+        surchargeAmountCents += amountCents;
+        surchargeBreakdown.push({ type: raw.type, amountCents });
       }
     }
 
-    const totalAmount = Math.max(0, baseAmount + surchargeAmount);
+    const totalAmountCents = Math.max(0, baseAmountCents + surchargeAmountCents);
 
     return {
-      baseAmount,
-      surchargeAmount,
-      totalAmount,
+      baseAmountCents,
+      surchargeAmountCents,
+      totalAmountCents,
       surchargeBreakdown,
       isFreeShipping: false,
     };

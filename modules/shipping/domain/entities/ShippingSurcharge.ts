@@ -26,15 +26,15 @@ export interface ShippingSurchargeProps {
 }
 
 export interface SurchargeContext extends ConditionContext {
-  baseRate?: number;
+  baseRateCents?: number;
   weight?: number;
   volume?: number;
   destinationZone?: string;
-  orderValue?: number;
+  orderValueCents?: number;
   isResidential?: boolean;
   isRemoteArea?: boolean;
   requiresSignature?: boolean;
-  declaredValue?: number;
+  declaredValueCents?: number;
 }
 
 export class ShippingSurcharge {
@@ -70,11 +70,11 @@ export class ShippingSurcharge {
    * Calculate the surcharge amount to add to the base rate.
    * Returns 0 if the surcharge is not applicable.
    *
-   * @param baseRate The base shipping rate (before surcharges)
+   * @param baseRateCents The base shipping rate in cents (before surcharges)
    * @param context  The shipping context (weight, destination, etc.)
    * @returns The surcharge amount to add
    */
-  calculate(baseRate: number, context: SurchargeContext): number {
+  calculate(baseRateCents: number, context: SurchargeContext): number {
     if (!this.isApplicable(context)) return 0;
 
     switch (this.props.calculationType) {
@@ -82,7 +82,7 @@ export class ShippingSurcharge {
         return this.props.value;
 
       case 'percentage':
-        return (baseRate * this.props.value) / 100;
+        return Math.round((baseRateCents * this.props.value) / 100);
 
       default:
         return 0;

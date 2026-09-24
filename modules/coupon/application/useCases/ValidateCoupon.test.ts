@@ -7,18 +7,18 @@ describe('ValidateCouponUseCase', () => {
     repository.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: createCoupon({ applicableProducts: ['prod-1', 'prod-2'] }),
-      discountAmount: 15,
+      discountAmountCents: 15,
     });
 
     const result = await new ValidateCouponUseCase(repository).execute(
       new ValidateCouponCommand('SAVE10', 100, 'customer-1', [
-        { productId: 'prod-1', quantity: 2, price: 30 },
-        { productId: 'prod-3', quantity: 1, price: 40 },
+        { productId: 'prod-1', quantity: 2, priceCents: 30 },
+        { productId: 'prod-3', quantity: 1, priceCents: 40 },
       ]),
     );
 
     expect(result.valid).toBe(true);
-    expect(result.coupon?.discountAmount).toBe(15);
+    expect(result.coupon?.discountAmountCents).toBe(15);
     expect(repository.validateCouponCode).toHaveBeenCalledWith('SAVE10', 100, 'customer-1');
   });
 
@@ -51,12 +51,12 @@ describe('ValidateCouponUseCase', () => {
 
     const result = await new ValidateCouponUseCase(repository).execute(
       new ValidateCouponCommand('SAVE10', 100, 'customer-1', [
-        { productId: 'prod-1', quantity: 4, price: 10 },
-        { productId: 'prod-2', quantity: 1, price: 60 },
+        { productId: 'prod-1', quantity: 4, priceCents: 10 },
+        { productId: 'prod-2', quantity: 1, priceCents: 60 },
       ]),
     );
 
-    expect(result.applicableItems).toEqual([{ productId: 'prod-1', discountAmount: 10 }]); // 25% of 4 × 10
+    expect(result.applicableItems).toEqual([{ productId: 'prod-1', discountAmountCents: 10 }]); // 25% of 4 × 10
   });
 
   it('should omit applicableItems when no items are provided', async () => {

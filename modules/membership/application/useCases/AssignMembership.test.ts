@@ -17,7 +17,7 @@ describe('AssignMembershipUseCase', () => {
       name: 'Gold',
       isActive: true,
       billingPeriod: 'monthly',
-      price: 50,
+      priceCents: 50,
     });
     membershipRepository.findActiveByCustomerId.mockResolvedValue(null);
     membershipRepository.createMembership.mockResolvedValue({

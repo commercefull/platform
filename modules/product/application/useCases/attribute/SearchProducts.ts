@@ -1,11 +1,15 @@
-import type { ProductSearchFilters, ProductSearchResult, AttributeFilter } from '../../services/ProductSearchService';
-import type { Product } from '../../../domain/entities/Product';
+import type {
+  ProductSearchFilters,
+  ProductSearchResult,
+  ProductSearchRow,
+  AttributeFilter,
+} from '../../services/ProductSearchService';
 
 export interface ProductSearchServicePort {
   search(filters: ProductSearchFilters): Promise<ProductSearchResult>;
   getSuggestions(partialQuery: string, limit?: number): Promise<string[]>;
-  findByAttribute(attributeCode: string, value: string): Promise<Product[]>;
-  findSimilar(productId: string, limit?: number): Promise<Product[]>;
+  findByAttribute(attributeCode: string, value: string): Promise<ProductSearchRow[]>;
+  findSimilar(productId: string, limit?: number): Promise<ProductSearchRow[]>;
 }
 
 export interface SearchProductsQuery {
@@ -17,9 +21,9 @@ export interface SearchProductsQuery {
   categoryIds?: string[];
   productTypeId?: string;
 
-  // Price filters
-  minPrice?: number;
-  maxPrice?: number;
+  // Price filters — integer cents
+  minPriceCents?: number;
+  maxPriceCents?: number;
 
   // Status filters
   status?: string;
@@ -62,8 +66,8 @@ export class SearchProductsUseCase {
         categoryId: query.categoryId,
         categoryIds: query.categoryIds,
         productTypeId: query.productTypeId,
-        minPrice: query.minPrice,
-        maxPrice: query.maxPrice,
+        minPriceCents: query.minPriceCents,
+        maxPriceCents: query.maxPriceCents,
         status: query.status || 'active',
         visibility: query.visibility || 'visible',
         isFeatured: query.isFeatured,

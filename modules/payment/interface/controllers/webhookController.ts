@@ -140,7 +140,8 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
             orderId: checkoutSummary.orderId,
             orderNumber: orderInfo?.orderNumber ?? checkoutSummary.orderNumber,
             customerId: checkoutSummary.customerId,
-            totalAmount: checkoutSummary.totalAmount,
+            totalAmountCents: checkoutSummary.totalAmountCents,
+            amountCents: checkoutSummary.totalAmountCents,
           });
 
           eventBus.emit('checkout.payment_captured', {

@@ -16,7 +16,7 @@ export interface CheckoutSyncSummary {
   checkoutId: string;
   orderId: string;
   customerId?: string;
-  totalAmount: number;
+  totalAmountCents: number;
   orderNumber?: string;
 }
 

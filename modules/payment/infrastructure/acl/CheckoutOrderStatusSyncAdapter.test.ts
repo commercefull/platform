@@ -38,7 +38,7 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
       id: 'cs-1',
       orderId: 'ord-1',
       customerId: 'cust-1',
-      total: { amount: 99.99 },
+      total: { cents: 9999 },
     } as unknown as CheckoutSession);
     mockOrderRepo.findById.mockResolvedValue({ orderNumber: 'ORD-100' } as unknown as Order);
 
@@ -48,7 +48,7 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
     expect(result!.checkoutId).toBe('cs-1');
     expect(result!.orderId).toBe('ord-1');
     expect(result!.customerId).toBe('cust-1');
-    expect(result!.totalAmount).toBe(99.99);
+    expect(result!.totalAmountCents).toBe(9999);
     expect(result!.orderNumber).toBe('ORD-100');
   });
 

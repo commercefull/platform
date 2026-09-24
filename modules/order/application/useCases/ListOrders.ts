@@ -27,8 +27,8 @@ export class ListOrdersCommand {
       fulfillmentStatus?: FulfillmentStatus;
       startDate?: Date;
       endDate?: Date;
-      minAmount?: number;
-      maxAmount?: number;
+      minAmountCents?: number;
+      maxAmountCents?: number;
       tags?: string[];
       search?: string;
     },
@@ -56,7 +56,7 @@ export interface OrderListItemResponse {
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
-  totalAmount: number;
+  totalAmountCents: number;
   totalItems: number;
   currencyCode: string;
   orderDate: string;
@@ -114,7 +114,7 @@ export class ListOrdersUseCase {
       status: order.status,
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,
-      totalAmount: order.totalAmount.amount,
+      totalAmountCents: order.totalAmount.cents,
       totalItems: order.totalItems,
       currencyCode: order.currencyCode,
       orderDate: order.orderDate.toISOString(),

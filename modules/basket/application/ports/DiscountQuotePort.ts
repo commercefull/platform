@@ -8,8 +8,10 @@
 export interface DiscountQuote {
   code: string;
   type: string;
+  /** Polymorphic operand: percentage points or integer cents depending on type. */
   value: number;
-  discountAmount: number;
+  /** Computed discount amount in integer cents. */
+  discountAmountCents: number;
 }
 
 export interface DiscountQuoteResult {
@@ -19,5 +21,5 @@ export interface DiscountQuoteResult {
 }
 
 export interface DiscountQuotePort {
-  validateDiscount(code: string, subtotal: number, customerId?: string): Promise<DiscountQuoteResult>;
+  validateDiscount(code: string, subtotalCents: number, customerId?: string): Promise<DiscountQuoteResult>;
 }

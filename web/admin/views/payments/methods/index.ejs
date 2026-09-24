@@ -45,8 +45,8 @@
                 <td><span class="badge bg-secondary"><%= method.gatewayName || method.gateway %></span></td>
                 <td><%= (method.countries || []).length > 0 ? method.countries.join(', ') : t('common.all') %></td>
                 <td>
-                  <% if (method.minAmount || method.maxAmount) { %>
-                  $<%= method.minAmount || 0 %> - $<%= method.maxAmount || '∞' %>
+                  <% if (method.minimumAmountCents || method.maximumAmountCents) { %>
+                  $<%= ((method.minimumAmountCents || 0) / 100).toFixed(2) %> - $<%= method.maximumAmountCents != null ? (method.maximumAmountCents / 100).toFixed(2) : '∞' %>
                   <% } else { %>
                   <%= t('common.none') %>
                   <% } %>

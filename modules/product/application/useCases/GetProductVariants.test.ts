@@ -19,7 +19,9 @@ describe('GetProductVariantsUseCase', () => {
       hasMore: false,
       length: 1,
     });
-    useCase = new GetProductVariantsUseCase(mockRepo);
+    const pricingPort = lazyMock<ConstructorParameters<typeof GetProductVariantsUseCase>[1]>();
+    pricingPort.listProductPrices.mockResolvedValue([]);
+    useCase = new GetProductVariantsUseCase(mockRepo, pricingPort);
   });
 
   it('should get product variants (happy path)', async () => {

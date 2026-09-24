@@ -6,8 +6,8 @@ export interface StoreCreditLedgerEntryProps {
   entryType: StoreCreditEntryType;
   referenceType?: string;
   referenceId?: string;
-  amount: number;
-  balanceAfter: number;
+  amountCents: number;
+  balanceAfterCents: number;
   currency: string;
   reason?: string;
   notes?: string;
@@ -29,8 +29,8 @@ export class StoreCreditLedgerEntry {
     entryType: StoreCreditEntryType;
     referenceType?: string;
     referenceId?: string;
-    amount: number;
-    balanceAfter: number;
+    amountCents: number;
+    balanceAfterCents: number;
     currency?: string;
     reason?: string;
     notes?: string;
@@ -44,8 +44,8 @@ export class StoreCreditLedgerEntry {
       entryType: params.entryType,
       referenceType: params.referenceType,
       referenceId: params.referenceId,
-      amount: params.amount,
-      balanceAfter: params.balanceAfter,
+      amountCents: params.amountCents,
+      balanceAfterCents: params.balanceAfterCents,
       currency: params.currency ?? 'USD',
       reason: params.reason,
       notes: params.notes,
@@ -75,11 +75,11 @@ export class StoreCreditLedgerEntry {
   get referenceId(): string | undefined {
     return this.props.referenceId;
   }
-  get amount(): number {
-    return this.props.amount;
+  get amountCents(): number {
+    return this.props.amountCents;
   }
-  get balanceAfter(): number {
-    return this.props.balanceAfter;
+  get balanceAfterCents(): number {
+    return this.props.balanceAfterCents;
   }
   get currency(): string {
     return this.props.currency;
@@ -120,10 +120,10 @@ export class StoreCreditLedgerEntry {
 
 export interface CustomerStoreCreditBalance {
   customerId: string;
-  balance: number;
+  balanceCents: number;
   currency: string;
-  totalCredits: number;
-  totalDebits: number;
-  pendingExpiry: number;
+  totalCreditsCents: number;
+  totalDebitsCents: number;
+  pendingExpiryCents: number;
   lastEntryAt: Date | null;
 }

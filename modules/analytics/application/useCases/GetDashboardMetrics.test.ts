@@ -8,13 +8,13 @@ describe('GetDashboardMetricsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    analyticsRepo.getOrderMetrics.mockResolvedValue({ count: 100, revenue: 5000 });
+    analyticsRepo.getOrderMetrics.mockResolvedValue({ count: 100, revenueCents: 5000 });
     analyticsRepo.getCustomerMetrics.mockResolvedValue({ total: 200, new: 50, conversionRate: 2.5 });
     analyticsRepo.getTopProducts.mockResolvedValue([
-      { productId: 'p1', name: 'Widget', quantity: 30, revenue: 900 },
+      { productId: 'p1', name: 'Widget', quantity: 30, revenueCents: 900 },
     ]);
     analyticsRepo.getRecentOrders.mockResolvedValue([
-      { orderId: 'o1', total: 100, status: 'completed', createdAt: new Date().toISOString() },
+      { orderId: 'o1', totalCents: 100, status: 'completed', createdAt: new Date().toISOString() },
     ]);
   });
 
@@ -25,8 +25,8 @@ describe('GetDashboardMetricsUseCase', () => {
     });
 
     expect(result.metrics.totalOrders).toBe(100);
-    expect(result.metrics.totalRevenue).toBe(5000);
-    expect(result.metrics.averageOrderValue).toBe(50);
+    expect(result.metrics.totalRevenueCents).toBe(5000);
+    expect(result.metrics.averageOrderValueCents).toBe(50);
     expect(result.metrics.topProducts).toHaveLength(1);
   });
 
@@ -43,13 +43,13 @@ describe('GetDashboardMetricsUseCase', () => {
   });
 
   it('should return a zero average order value when there are no orders', async () => {
-    analyticsRepo.getOrderMetrics.mockResolvedValue({ count: 0, revenue: 0 });
+    analyticsRepo.getOrderMetrics.mockResolvedValue({ count: 0, revenueCents: 0 });
 
     const result = await useCase.execute({
       startDate: new Date('2024-01-01'),
       endDate: new Date('2024-12-31'),
     });
 
-    expect(result.metrics.averageOrderValue).toBe(0);
+    expect(result.metrics.averageOrderValueCents).toBe(0);
   });
 });

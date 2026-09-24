@@ -221,7 +221,7 @@ describe('Supplier Feature Tests', () => {
       const linkData = {
         productId: '00000000-0000-0000-0000-000000000001',
         sku: `SUP-SKU-${Date.now()}`,
-        unitCost: 15.0,
+        unitCostCents: 1500,
         minimumOrderQuantity: 10,
       };
 
@@ -348,7 +348,7 @@ describe('Supplier Feature Tests', () => {
           sku: 'TEST-SKU-002',
           name: 'Test Product 2',
           quantity: 5,
-          unitCost: 19.99,
+          unitCostCents: 1999,
         },
         {
           headers: authHeaders(),

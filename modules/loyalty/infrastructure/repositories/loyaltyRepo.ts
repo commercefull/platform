@@ -89,7 +89,7 @@ export interface CreateLoyaltyRewardInput {
   description?: string;
   type?: string;
   pointsCost: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;
@@ -102,7 +102,7 @@ export interface UpdateLoyaltyRewardInput {
   name?: string;
   description?: string;
   pointsCost?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;
@@ -416,8 +416,8 @@ export class LoyaltyRepo {
       input.description || null,
       input.type || 'discount',
       input.pointsCost,
-      input.discountAmount ? String(input.discountAmount) : null,
-      input.discountPercent ? 'percent' : 'amount',
+      input.discountAmountCents ? String(input.discountAmountCents) : null,
+      input.discountPercent ? 'percent' : 'amountCents',
       input.isActive !== false,
       now,
       now,

@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.decimal('volume', 10, 2).notNullable();
     t.decimal('maxWeight', 10, 2);
     t.integer('maxItems');
-    t.decimal('cost', 10, 2);
+    t.bigInteger('costCents');
     t.string('currency', 3).notNullable().defaultTo('USD');
     t.boolean('recyclable').notNullable().defaultTo(false);
     t.text('imageUrl');

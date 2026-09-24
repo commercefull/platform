@@ -15,7 +15,7 @@ describe('CheckGiftCardBalanceUseCase', () => {
     const result = await useCase.execute(new CheckGiftCardBalanceQuery('GIFT1234'));
 
     expect(result.success).toBe(true);
-    expect(result.currentBalance).toBe(100);
+    expect(result.currentBalanceCents).toBe(100);
     expect(result.status).toBe('active');
     expect(result.currency).toBe('USD');
     expect(result.message).toBe('Gift card is valid');
@@ -49,7 +49,7 @@ describe('CheckGiftCardBalanceUseCase', () => {
   });
 
   it('should report the stored status when the gift card is depleted', async () => {
-    giftCardRepository.getGiftCardByCode.mockResolvedValue(createGiftCard({ status: 'depleted', currentBalance: 0 }));
+    giftCardRepository.getGiftCardByCode.mockResolvedValue(createGiftCard({ status: 'depleted', currentBalanceCents: 0 }));
 
     const result = await useCase.execute(new CheckGiftCardBalanceQuery('GIFT1234'));
 

@@ -28,7 +28,7 @@ describe('EarnPointsUseCase', () => {
   });
 
   it('should earn multiplied points and emit loyalty.points_earned for a purchase', async () => {
-    const result = await useCase.execute({ customerId: 'c1', actionType: 'purchase', amount: 100 });
+    const result = await useCase.execute({ customerId: 'c1', actionType: 'purchase', amountCents: 100 });
 
     expect(result.pointsEarned).toBe(150);
     expect(result.newBalance).toBe(250);

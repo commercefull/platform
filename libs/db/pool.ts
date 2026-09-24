@@ -6,6 +6,12 @@ import { ConflictError, BadRequestError, NotFoundError } from '../errors';
 
 const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
 
+// Return PostgreSQL bigint (OID 20) as JS numbers instead of strings.
+// Money columns are integer cents and aggregate results (COUNT/SUM/AVG over
+// them) fit comfortably within Number.MAX_SAFE_INTEGER. Type parsers are
+// global to the `pg` driver, so this covers test pools as well.
+PG.types.setTypeParser(20, (val: string) => (val === null ? val : Number(val)));
+
 export const pool = isTestEnv
   ? (null as unknown as PG.Pool)
   : new PG.Pool({

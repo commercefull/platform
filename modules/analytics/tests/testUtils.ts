@@ -70,9 +70,9 @@ export function createSalesAnalyticsRepository(): jest.Mocked<ConstructorParamet
 
 export function createSalesSummary(overrides: Partial<SalesSummary> = {}): SalesSummary {
   return {
-    totalRevenue: 5000,
+    totalRevenueCents: 5000,
     totalOrders: 100,
-    averageOrderValue: 50,
+    averageOrderValueCents: 50,
     newCustomers: 20,
     conversionRate: 2.5,
     ...overrides,
@@ -80,7 +80,7 @@ export function createSalesSummary(overrides: Partial<SalesSummary> = {}): Sales
 }
 
 export function createRealTimeMetrics(overrides: Partial<RealTimeMetrics> = {}): RealTimeMetrics {
-  return { activeUsers: 10, currentOrders: 3, revenueToday: 1200, conversionRate: 2.1, ...overrides };
+  return { activeUsers: 10, currentOrders: 3, revenueTodayCents: 1200, conversionRate: 2.1, ...overrides };
 }
 
 export function createProductPerformance(overrides: Partial<ProductPerformance> = {}): ProductPerformance {
@@ -97,8 +97,8 @@ export function createProductPerformance(overrides: Partial<ProductPerformance> 
     viewToCartRate: 20,
     purchases: 10,
     quantitySold: 10,
-    revenue: 1000,
-    averagePrice: 100,
+    revenueCents: 1000,
+    averagePriceCents: 100,
     cartToOrderRate: 50,
     returns: 1,
     returnQuantity: 1,
@@ -119,10 +119,10 @@ export function createCustomerCohort(overrides: Partial<CustomerCohort> = {}): C
     customersInCohort: 50,
     activeCustomers: 30,
     retentionRate: 60,
-    revenue: 5000,
+    revenueCents: 5000,
     orders: 100,
-    averageOrderValue: 50,
-    lifetimeValue: 100,
+    averageOrderValueCents: 50,
+    lifetimeValueCents: 100,
     repeatPurchasers: 20,
     repeatPurchaseRate: 40,
     averageOrdersPerCustomer: 2,

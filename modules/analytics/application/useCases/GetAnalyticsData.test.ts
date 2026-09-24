@@ -23,7 +23,7 @@ describe('GetAnalyticsDataUseCase', () => {
 
     const result = await useCase.getSalesSummary(startDate, endDate);
 
-    expect(result.totalRevenue).toBe(5000);
+    expect(result.totalRevenueCents).toBe(5000);
     expect(analyticsDataPort.getSalesSummary).toHaveBeenCalledWith(startDate, endDate);
   });
 

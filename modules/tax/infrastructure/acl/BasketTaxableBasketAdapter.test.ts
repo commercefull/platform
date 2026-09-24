@@ -20,10 +20,10 @@ describe('BasketTaxableBasketAdapter', () => {
     mockBasketRepo.findById.mockResolvedValue({
       basketId: 'basket-1',
       items: [
-        { productId: 'prod-1', quantity: 2, unitPrice: { amount: 10.5 } },
-        { productId: 'prod-2', quantity: 1, unitPrice: { amount: 25 } },
+        { productId: 'prod-1', quantity: 2, unitPrice: { cents: 1050 } },
+        { productId: 'prod-2', quantity: 1, unitPrice: { cents: 2500 } },
       ],
-      subtotal: { amount: 46 },
+      subtotal: { cents: 4600 },
     } as unknown as Basket);
 
     const result = await adapter.findById('basket-1');
@@ -33,9 +33,9 @@ describe('BasketTaxableBasketAdapter', () => {
     expect(result!.items).toHaveLength(2);
     expect(result!.items[0].productId).toBe('prod-1');
     expect(result!.items[0].quantity).toBe(2);
-    expect(result!.items[0].price).toBe(10.5);
-    expect(result!.items[1].price).toBe(25);
-    expect(result!.subtotal).toBe(46);
+    expect(result!.items[0].priceCents).toBe(1050);
+    expect(result!.items[1].priceCents).toBe(2500);
+    expect(result!.subtotalCents).toBe(4600);
   });
 
   it('should return null when basket not found', async () => {
@@ -50,21 +50,21 @@ describe('BasketTaxableBasketAdapter', () => {
     mockBasketRepo.findById.mockResolvedValue({
       basketId: 'basket-empty',
       items: [],
-      subtotal: { amount: 0 },
+      subtotal: { cents: 0 },
     } as unknown as Basket);
 
     const result = await adapter.findById('basket-empty');
 
     expect(result).not.toBeNull();
     expect(result!.items).toEqual([]);
-    expect(result!.subtotal).toBe(0);
+    expect(result!.subtotalCents).toBe(0);
   });
 
   it('should handle null items gracefully', async () => {
     mockBasketRepo.findById.mockResolvedValue({
       basketId: 'basket-null-items',
       items: null,
-      subtotal: { amount: 0 },
+      subtotal: { cents: 0 },
     } as unknown as Basket);
 
     const result = await adapter.findById('basket-null-items');

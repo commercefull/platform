@@ -20,16 +20,16 @@ export class CompleteReturnRequestUseCase {
     if (!updated) throw new ReturnNotFoundError(returnId);
 
     if (updated.returnType === 'storeCredit' && updated.customerId) {
-      const balance = await this.storeCreditRepo.getBalance(updated.customerId);
-      const creditAmount = updated.totalRefundAmount;
-      const newBalance = balance.balance + creditAmount;
+      const balanceCents = await this.storeCreditRepo.getBalance(updated.customerId);
+      const creditAmountCents = updated.totalRefundAmount;
+      const newBalance = balanceCents.balanceCents + creditAmountCents;
       const entry = StoreCreditLedgerEntry.create({
         customerId: updated.customerId,
         entryType: 'credit',
         referenceType: 'return',
         referenceId: updated.orderReturnId,
-        amount: creditAmount,
-        balanceAfter: newBalance,
+        amountCents: creditAmountCents,
+        balanceAfterCents: newBalance,
         reason: `Store credit from return ${updated.returnNumber}`,
       });
       await this.storeCreditRepo.addEntry(entry);

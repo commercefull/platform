@@ -56,12 +56,12 @@ describe('SetShippingAddressUseCase', () => {
     basketSnapshotPort.getSnapshot.mockResolvedValue(createBasketSnapshot());
     const taxQuotePort = createTaxQuotePort();
     taxQuotePort.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: true });
-    taxQuotePort.calculateTax.mockResolvedValue({ success: true, taxAmount: 8.5, breakdown: [] });
+    taxQuotePort.calculateTax.mockResolvedValue({ success: true, taxAmountCents: 850, breakdown: [] });
     useCase = new SetShippingAddressUseCase(checkoutRepository, basketSnapshotPort, taxQuotePort);
 
     const result = await useCase.execute(command());
 
-    expect(result.taxAmount).toBe(8.5);
+    expect(result.taxAmountCents).toBe(850);
     expect(taxQuotePort.calculateTax).toHaveBeenCalledWith(
       expect.objectContaining({ shippingAddress: expect.objectContaining({ country: 'US' }) }),
     );
@@ -75,7 +75,7 @@ describe('SetShippingAddressUseCase', () => {
 
     const result = await useCase.execute(command());
 
-    expect(result.taxAmount).toBe(0);
+    expect(result.taxAmountCents).toBe(0);
     expect(checkoutRepository.save).toHaveBeenCalled();
   });
 });

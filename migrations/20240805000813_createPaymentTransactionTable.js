@@ -6,7 +6,7 @@ exports.up = function (knex) {
     t.uuid('orderPaymentId').notNullable().references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');
     t.uuid('orderId').notNullable().references('orderId').inTable('order').onDelete('CASCADE');
     t.string('type', 50).notNullable().checkIn(['authorization', 'capture', 'sale', 'refund', 'void', 'verification']);
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.string('status', 50).notNullable();
     t.string('transactionId', 255);
@@ -22,7 +22,7 @@ exports.up = function (knex) {
     t.string('externalTransactionId', 255);
     t.string('currency', 3).defaultTo('USD');
     t.jsonb('paymentMethodDetails');
-    t.decimal('refundedAmount', 15, 2).defaultTo(0);
+    t.bigInteger('refundedAmountCents').defaultTo(0);
     t.jsonb('metadata');
     t.string('customerIp', 45);
     t.timestamp('authorizedAt');

@@ -114,7 +114,7 @@ describe('FailoverRoutingEngine', () => {
 
   const paymentRequest: PaymentRequest = {
     orderId: 'order_1',
-    amount: 100,
+    amountCents: 100,
     currency: 'USD',
   };
 

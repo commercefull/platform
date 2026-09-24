@@ -202,7 +202,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
       mediaId: row.mediaId,
       originalName: row.originalName,
       mimeType: row.mimeType,
-      size: parseInt(row.size, 10),
+      size: Number(row.size),
       originalUrl: row.originalUrl,
       processedFiles: (row.processedFiles || []) as MediaFile[],
       thumbnailUrl: row.thumbnailUrl ?? undefined,

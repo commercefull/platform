@@ -166,11 +166,11 @@ export const createLoyaltyRewardForm = async (req: HttpRequest, res: HttpRespons
 export const createLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt } = body as {
+    const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt } = body as {
       name: string;
       description?: string;
       pointsCost: string;
-      discountAmount?: string;
+      discountAmountCents?: string;
       discountPercent?: string;
       discountCode?: string;
       freeShipping?: string;
@@ -182,7 +182,7 @@ export const createLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
       name,
       description: description || undefined,
       pointsCost: parseInt(pointsCost),
-      discountAmount: discountAmount ? parseFloat(discountAmount) : undefined,
+      discountAmountCents: discountAmountCents ? parseFloat(discountAmountCents) : undefined,
       discountPercent: discountPercent ? parseFloat(discountPercent) : undefined,
       discountCode: discountCode || undefined,
       freeShipping: freeShipping === 'true',
@@ -247,12 +247,12 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
   const updates: Record<string, unknown> = {};
 
   const body = req.body as HttpRequestBody;
-  const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
     body as {
       name?: string;
       description?: string;
       pointsCost?: string;
-      discountAmount?: string;
+      discountAmountCents?: string;
       discountPercent?: string;
       discountCode?: string;
       freeShipping?: string;
@@ -264,7 +264,7 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;
   if (pointsCost !== undefined) updates.pointsCost = parseInt(pointsCost);
-  if (discountAmount !== undefined) updates.discountAmount = discountAmount ? parseFloat(discountAmount) : undefined;
+  if (discountAmountCents !== undefined) updates.discountAmountCents = discountAmountCents ? parseFloat(discountAmountCents) : undefined;
   if (discountPercent !== undefined) updates.discountPercent = discountPercent ? parseFloat(discountPercent) : undefined;
   if (discountCode !== undefined) updates.discountCode = discountCode || undefined;
   if (freeShipping !== undefined) updates.freeShipping = freeShipping === 'true';

@@ -73,7 +73,7 @@
                 <% (commissions || []).forEach(function(c) { %>
                 <tr>
                   <td><code><%= c.orderId ? c.orderId.substring(0, 8) + '...' : '—' %></code></td>
-                  <td><%= parseFloat(c.amount).toFixed(2) %></td>
+                  <td><%= ((c.amountCents || 0) / 100).toFixed(2) %></td>
                   <td><%= c.currency %></td>
                   <td>
                     <span class="badge bg-<%= c.status === 'paid' ? 'success' : c.status === 'pending' ? 'warning' : 'secondary' %>">

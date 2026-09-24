@@ -8,9 +8,9 @@ exports.up = function (knex) {
     t.boolean('isEnabled').notNullable().defaultTo(true);
     t.string('displayName', 100);
     t.text('description');
-    t.decimal('processingFee', 10, 2);
-    t.decimal('minimumAmount', 15, 2);
-    t.decimal('maximumAmount', 15, 2);
+    t.bigInteger('processingFeeCents');
+    t.bigInteger('minimumAmountCents');
+    t.bigInteger('maximumAmountCents');
     t.integer('displayOrder').notNullable().defaultTo(0);
     t.text('icon');
     t.specificType('supportedCurrencies', 'varchar(3)[]').notNullable().defaultTo(knex.raw(`'{"USD"}'::varchar[]`));

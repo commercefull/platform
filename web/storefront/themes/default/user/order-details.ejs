@@ -116,11 +116,11 @@
                       </div>
                       <div class="text-center">
                         <p class="text-gray-500"><%= t('shared:common.price') %></p>
-                        <p class="font-semibold text-gray-900">$<%= (item.unitPrice || item.price || 0).toFixed(2) %></p>
+                        <p class="font-semibold text-gray-900">$<%= ((item.unitPriceCents || 0) / 100).toFixed(2) %></p>
                       </div>
                       <div class="text-center">
                         <p class="text-gray-500"><%= t('shared:common.total') %></p>
-                        <p class="font-bold text-gray-900">$<%= (item.lineTotal || (item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></p>
+                        <p class="font-bold text-gray-900">$<%= ((item.lineTotalCents || (item.unitPriceCents || 0) * (item.quantity || 1)) / 100).toFixed(2) %></p>
                       </div>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 import { FindByAttributeUseCase } from './FindByAttribute';
 import type { ProductSearchServicePort } from './SearchProducts';
-import { createProduct, lazyMock } from '../../../tests/testUtils';
+import { createProductSearchRow, lazyMock } from '../../../tests/testUtils';
 
 describe('FindByAttributeUseCase', () => {
   let useCase: FindByAttributeUseCase;
@@ -13,7 +13,7 @@ describe('FindByAttributeUseCase', () => {
   });
 
   it('should return products matching the attribute filter', async () => {
-    const products = [createProduct(), createProduct()];
+    const products = [createProductSearchRow(), createProductSearchRow()];
     mockService.findByAttribute.mockResolvedValue(products);
 
     const result = await useCase.execute({ attributeCode: 'color', value: 'red' });

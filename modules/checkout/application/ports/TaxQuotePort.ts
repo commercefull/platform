@@ -10,7 +10,7 @@ export interface TaxLineItem {
   productId: string;
   name: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   taxCategoryId?: string;
   taxable?: boolean;
 }
@@ -23,14 +23,14 @@ export interface TaxQuoteRequest {
     postalCode?: string;
     city?: string;
   };
-  shippingAmount: number;
+  shippingAmountCents: number;
   customerId?: string;
 }
 
 export interface TaxQuoteResult {
   success: boolean;
-  taxAmount: number;
-  breakdown?: Array<{ label: string; amount: number }>;
+  taxAmountCents: number;
+  breakdown?: Array<{ label: string; amountCents: number }>;
 }
 
 export interface TaxQuotePort {

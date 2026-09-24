@@ -9,14 +9,14 @@ describe('CreatePurchaseOrderUseCase', () => {
 
     const result = await new CreatePurchaseOrderUseCase(supplierRepository, purchaseOrderRepository).execute({
       supplierId: 's1',
-      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCost: 10 }],
+      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCostCents: 10 }],
     });
 
     expect(result.purchaseOrderId).toMatch(/^po_/);
-    expect(result.totalAmount).toBe(100);
+    expect(result.totalAmountCents).toBe(100);
     expect(result.status).toBe('draft');
     expect(purchaseOrderRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ supplierId: 's1', totalAmount: 100, status: 'draft' }),
+      expect.objectContaining({ supplierId: 's1', totalAmountCents: 100, status: 'draft' }),
     );
   });
 
@@ -26,12 +26,12 @@ describe('CreatePurchaseOrderUseCase', () => {
       createPurchaseOrderCreateRepository(),
     ).execute({
       supplierId: 's1',
-      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCost: 10 }],
+      items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCostCents: 10 }],
     });
 
     expect(emitMock).toHaveBeenCalledWith(
       'purchase_order.created',
-      expect.objectContaining({ supplierId: 's1', totalAmount: 100 }),
+      expect.objectContaining({ supplierId: 's1', totalAmountCents: 100 }),
     );
   });
 
@@ -68,7 +68,7 @@ describe('CreatePurchaseOrderUseCase', () => {
         purchaseOrderRepository,
       ).execute({
         supplierId: 's1',
-        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitCost: 10 }],
+        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitCostCents: 10 }],
       }),
     ).rejects.toThrow(SupplierValidationError);
     expect(purchaseOrderRepository.create).not.toHaveBeenCalled();

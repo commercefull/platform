@@ -12,12 +12,15 @@ describe('UpdateProductUseCase', () => {
   let mockRepo: jest.Mocked<ConstructorParameters<typeof UpdateProductUseCase>[0]>;
   let mockProduct: Product;
 
+  let mockPricingPort: jest.Mocked<ConstructorParameters<typeof UpdateProductUseCase>[1]>;
+
   beforeEach(() => {
-    mockProduct = createProduct({ productId: 'p1', name: 'Old', slug: 'old', basePrice: 10 });
+    mockProduct = createProduct({ productId: 'p1', name: 'Old', slug: 'old' });
     mockRepo = lazyMock<ConstructorParameters<typeof UpdateProductUseCase>[0]>();
     mockRepo.findById.mockResolvedValue(mockProduct);
     mockRepo.save.mockResolvedValue(mockProduct);
-    useCase = new UpdateProductUseCase(mockRepo);
+    mockPricingPort = lazyMock<ConstructorParameters<typeof UpdateProductUseCase>[1]>();
+    useCase = new UpdateProductUseCase(mockRepo, mockPricingPort);
   });
 
   it('should update product name (happy path)', async () => {
@@ -34,11 +37,14 @@ describe('UpdateProductUseCase', () => {
     await expect(useCase.execute(new UpdateProductCommand('missing', { name: 'X' }))).rejects.toThrow(ProductNotFoundError);
   });
 
-  it('should update price when basePrice provided', async () => {
-    const updatePrice = jest.spyOn(mockProduct, 'updatePrice');
-    await useCase.execute(new UpdateProductCommand('p1', { basePrice: 99.99 }));
+  it('should persist price via the pricing port when basePriceCents provided', async () => {
+    mockPricingPort.getBasePrice.mockResolvedValue(null);
+    const result = await useCase.execute(new UpdateProductCommand('p1', { basePriceCents: 9999 }));
 
-    expect(updatePrice).toHaveBeenCalled();
+    expect(mockPricingPort.setBasePrice).toHaveBeenCalledWith(
+      expect.objectContaining({ productId: 'p1', priceCents: 9999, currencyCode: 'USD' }),
+    );
+    expect(result.updatedFields).toContain('price');
   });
 
   it('should update tags', async () => {

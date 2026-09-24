@@ -17,7 +17,9 @@ describe('SearchProductsUseCase', () => {
       hasMore: false,
       length: 2,
     });
-    useCase = new SearchProductsUseCase(mockRepo);
+    const pricingPort = lazyMock<ConstructorParameters<typeof SearchProductsUseCase>[1]>();
+    pricingPort.getBasePrices.mockResolvedValue([]);
+    useCase = new SearchProductsUseCase(mockRepo, pricingPort);
   });
 
   it('should search products (happy path)', async () => {
@@ -36,12 +38,12 @@ describe('SearchProductsUseCase', () => {
   });
 
   it('should pass filters and pagination to repository', async () => {
-    await useCase.execute(new SearchProductsCommand('widget', { priceMin: 10, priceMax: 50 }, 10, 5, 'price_asc'));
+    await useCase.execute(new SearchProductsCommand('widget', { priceMinCents: 1000, priceMaxCents: 5000 }, 10, 5, 'price_asc'));
 
     expect(mockRepo.search).toHaveBeenCalledWith(
       'widget',
-      expect.objectContaining({ priceMin: 10, priceMax: 50 }),
-      expect.objectContaining({ limit: 10, offset: 5, orderBy: 'basePrice', orderDirection: 'asc' }),
+      expect.objectContaining({ priceMinCents: 1000, priceMaxCents: 5000 }),
+      expect.objectContaining({ limit: 10, offset: 5, orderBy: 'priceCents', orderDirection: 'asc' }),
     );
   });
 });

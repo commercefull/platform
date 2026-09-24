@@ -25,10 +25,10 @@ export interface TaxCalculation {
   sourceType: TaxCalculationSourceType;
   sourceId?: string;
   taxAddress?: unknown; // JSON
-  taxableAmount: number;
-  taxExemptAmount: number;
-  taxAmount: number;
-  totalAmount: number;
+  taxableAmountCents: number;
+  taxExemptAmountCents: number;
+  taxAmountCents: number;
+  totalAmountCents: number;
   currencyCode: string;
   exchangeRate: number;
   taxProviderResponse?: unknown; // JSON
@@ -82,8 +82,8 @@ export class TaxCalculationRepo {
     const result = await queryOne<TaxCalculation>(
       `INSERT INTO "taxCalculation" (
         "organizationId", "orderId", "invoiceId", "basketId", "customerId", "calculationMethod",
-        "status", "sourceType", "sourceId", "taxAddress", "taxableAmount", "taxExemptAmount",
-        "taxAmount", "totalAmount", "currencyCode", "exchangeRate", "taxProviderResponse",
+        "status", "sourceType", "sourceId", "taxAddress", "taxableAmountCents", "taxExemptAmountCents",
+        "taxAmountCents", "totalAmountCents", "currencyCode", "exchangeRate", "taxProviderResponse",
         "taxProviderReference", "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
       [
@@ -97,10 +97,10 @@ export class TaxCalculationRepo {
         params.sourceType,
         params.sourceId || null,
         JSON.stringify(params.taxAddress || {}),
-        params.taxableAmount || 0,
-        params.taxExemptAmount || 0,
-        params.taxAmount || 0,
-        params.totalAmount || 0,
+        params.taxableAmountCents || 0,
+        params.taxExemptAmountCents || 0,
+        params.taxAmountCents || 0,
+        params.totalAmountCents || 0,
         params.currencyCode || 'USD',
         params.exchangeRate || 1.0,
         JSON.stringify(params.taxProviderResponse || {}),
@@ -141,8 +141,8 @@ export class TaxCalculationRepo {
     );
   }
 
-  async markComplete(id: string, taxAmount: number, totalAmount: number): Promise<TaxCalculation | null> {
-    return this.update(id, { status: 'completed', taxAmount, totalAmount });
+  async markComplete(id: string, taxAmountCents: number, totalAmountCents: number): Promise<TaxCalculation | null> {
+    return this.update(id, { status: 'completed', taxAmountCents, totalAmountCents });
   }
 
   async markFailed(id: string, errorMessage: string): Promise<TaxCalculation | null> {

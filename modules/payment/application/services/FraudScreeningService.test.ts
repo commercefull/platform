@@ -23,7 +23,7 @@ describe('FraudScreeningService', () => {
     it('approves when no rules and no blacklist hits', async () => {
       const result = await service.screen({
         orderId: 'order1',
-        orderAmount: 100,
+        orderAmountCents: 100,
         billingCountry: 'US',
       });
 
@@ -40,7 +40,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         ipAddress: '1.2.3.4',
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('blocked');
@@ -55,7 +55,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         email: 'fraud@bad.com',
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('blocked');
@@ -66,7 +66,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         cardBin: '411111',
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('blocked');
@@ -80,7 +80,7 @@ describe('FraudScreeningService', () => {
         name: 'High Amount Rule',
         ruleType: 'amount',
         entityType: 'order',
-        conditions: [{ attribute: 'orderAmount', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
+        conditions: [{ attribute: 'orderAmountCents', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
         action: 'review',
         riskScore: 50,
         priority: 10,
@@ -92,7 +92,7 @@ describe('FraudScreeningService', () => {
       fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
-        orderAmount: 600,
+        orderAmountCents: 600,
         billingCountry: 'US',
       });
 
@@ -108,7 +108,7 @@ describe('FraudScreeningService', () => {
         name: 'High Amount Rule',
         ruleType: 'amount',
         entityType: 'order',
-        conditions: [{ attribute: 'orderAmount', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
+        conditions: [{ attribute: 'orderAmountCents', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
         action: 'review',
         riskScore: 50,
         priority: 10,
@@ -120,7 +120,7 @@ describe('FraudScreeningService', () => {
       fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
-        orderAmount: 100,
+        orderAmountCents: 100,
         billingCountry: 'US',
       });
 
@@ -147,7 +147,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         billingCountry: 'XX',
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('review');
@@ -156,7 +156,7 @@ describe('FraudScreeningService', () => {
   });
 
   describe('screen — legacy rule evaluation', () => {
-    it('evaluates amount rules with legacy conditions', async () => {
+    it('evaluates amountCents rules with legacy conditions', async () => {
       const rule: FraudRule = {
         fraudRuleId: 'r1',
         name: 'High Amount',
@@ -174,7 +174,7 @@ describe('FraudScreeningService', () => {
       fraudRepo.getRules.mockResolvedValue([rule]);
 
       const result = await service.screen({
-        orderAmount: 600,
+        orderAmountCents: 600,
       });
 
       expect(result.decision).toBe('review');
@@ -200,7 +200,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         previousOrders: 6,
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('review');
@@ -225,7 +225,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         isFirstOrder: true,
-        orderAmount: 600,
+        orderAmountCents: 600,
       });
 
       expect(result.decision).toBe('review');
@@ -250,7 +250,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         billingCountry: 'XX',
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('blocked');
@@ -264,7 +264,7 @@ describe('FraudScreeningService', () => {
         name: 'Rule 1',
         ruleType: 'amount',
         entityType: 'order',
-        conditions: [{ attribute: 'orderAmount', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
+        conditions: [{ attribute: 'orderAmountCents', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
         action: 'flag',
         riskScore: 30,
         priority: 10,
@@ -290,7 +290,7 @@ describe('FraudScreeningService', () => {
       fraudRepo.getRules.mockResolvedValue([rule1, rule2]);
 
       const result = await service.screen({
-        orderAmount: 600,
+        orderAmountCents: 600,
         isFirstOrder: true,
       });
 
@@ -306,7 +306,7 @@ describe('FraudScreeningService', () => {
         name: 'Rule 1',
         ruleType: 'amount',
         entityType: 'order',
-        conditions: [{ attribute: 'orderAmount', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
+        conditions: [{ attribute: 'orderAmountCents', operator: 'gt', value: 500 }] as unknown as Record<string, unknown>,
         action: 'flag',
         riskScore: 60,
         priority: 10,
@@ -332,7 +332,7 @@ describe('FraudScreeningService', () => {
       fraudRepo.getRules.mockResolvedValue([rule1, rule2]);
 
       const result = await service.screen({
-        orderAmount: 600,
+        orderAmountCents: 600,
         isFirstOrder: true,
       });
 
@@ -360,7 +360,7 @@ describe('FraudScreeningService', () => {
 
       const result = await service.screen({
         avsMatch: false,
-        orderAmount: 100,
+        orderAmountCents: 100,
       });
 
       expect(result.decision).toBe('review');

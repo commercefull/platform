@@ -35,14 +35,14 @@ export class AdyenAdapter implements GatewayAdapter {
       if (!hmacSignature) return false;
 
       // Build the signing string per Adyen spec
-      const amount = item.amount as Record<string, unknown> | undefined;
+      const amountCents = item.amountCents as Record<string, unknown> | undefined;
       const fields = [
         item.pspReference as string,
         (item.originalReference as string) || '',
         item.merchantAccountCode as string,
         item.merchantReference as string,
-        String(amount?.value ?? ''),
-        (amount?.currency as string) ?? '',
+        String(amountCents?.value ?? ''),
+        (amountCents?.currency as string) ?? '',
         item.eventCode as string,
         item.success as string,
       ];

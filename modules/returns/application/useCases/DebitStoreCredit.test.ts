@@ -5,21 +5,21 @@ import type { StoreCreditRepository } from '../../domain/repositories/ReturnRepo
 import { lazyMock } from '../../tests/testUtils';
 
 describe('DebitStoreCreditUseCase', () => {
-  it('should debit the balance when sufficient credit exists', async () => {
+  it('should debit the balanceCents when sufficient credit exists', async () => {
     const repo = lazyMock<StoreCreditRepository>();
-    repo.getBalance.mockResolvedValue({ customerId: 'c-1', balance: 100, currency: 'USD', totalCredits: 100, totalDebits: 0, pendingExpiry: 0, lastEntryAt: null });
+    repo.getBalance.mockResolvedValue({ customerId: 'c-1', balanceCents: 100, currency: 'USD', totalCreditsCents: 100, totalDebitsCents: 0, pendingExpiryCents: 0, lastEntryAt: null });
     repo.addEntry.mockImplementation(async e => e);
 
-    const result = await new DebitStoreCreditUseCase(repo).execute({ customerId: 'c-1', amount: 40 });
+    const result = await new DebitStoreCreditUseCase(repo).execute({ customerId: 'c-1', amountCents: 40 });
 
-    expect(result.balanceAfter).toBe(60);
+    expect(result.balanceAfterCents).toBe(60);
   });
 
-  it('should throw InsufficientStoreCreditError when the balance is too low', async () => {
+  it('should throw InsufficientStoreCreditError when the balanceCents is too low', async () => {
     const repo = lazyMock<StoreCreditRepository>();
-    repo.getBalance.mockResolvedValue({ customerId: 'c-1', balance: 10, currency: 'USD', totalCredits: 10, totalDebits: 0, pendingExpiry: 0, lastEntryAt: null });
+    repo.getBalance.mockResolvedValue({ customerId: 'c-1', balanceCents: 10, currency: 'USD', totalCreditsCents: 10, totalDebitsCents: 0, pendingExpiryCents: 0, lastEntryAt: null });
 
-    await expect(new DebitStoreCreditUseCase(repo).execute({ customerId: 'c-1', amount: 40 }))
+    await expect(new DebitStoreCreditUseCase(repo).execute({ customerId: 'c-1', amountCents: 40 }))
       .rejects.toThrow(InsufficientStoreCreditError);
   });
 });

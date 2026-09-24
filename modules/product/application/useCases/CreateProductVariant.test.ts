@@ -12,7 +12,8 @@ describe('CreateProductVariantUseCase', () => {
     jest.clearAllMocks();
         mockRepo = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>();
     mockRepo.save.mockImplementation(async (variant: unknown) => variant);
-    useCase = new CreateProductVariantUseCase(mockRepo);
+    const pricingPort = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[1]>();
+    useCase = new CreateProductVariantUseCase(mockRepo, pricingPort);
   });
 
   it('should create product variant (happy path)', async () => {
@@ -21,8 +22,8 @@ describe('CreateProductVariantUseCase', () => {
         'p1',
         'SKU-1',
         [{ attributeId: 'a1', attributeName: 'Color', value: 'Red' }],
-        100,
-        80,
+        10000,
+        8000,
         'USD',
         true,
         50,

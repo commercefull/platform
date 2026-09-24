@@ -14,7 +14,7 @@ export interface CreateMembershipTierInput {
   name: string;
   description?: string;
   level: number;
-  price?: number;
+  priceCents?: number;
   billingPeriod?: 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
   benefits: TierBenefit[];
   requiredPoints?: number;
@@ -26,7 +26,7 @@ export interface CreateMembershipTierOutput {
   tierId: string;
   name: string;
   level: number;
-  price?: number;
+  priceCents?: number;
   benefitCount: number;
   createdAt: string;
 }
@@ -35,7 +35,7 @@ interface CreatedTier {
   tierId: string;
   name: string;
   level: number;
-  price?: number;
+  priceCents?: number;
   benefits: TierBenefit[];
   createdAt: Date;
 }
@@ -47,7 +47,7 @@ interface CreateMembershipTierRepository {
     name: string;
     description?: string;
     level: number;
-    price?: number;
+    priceCents?: number;
     billingPeriod?: string;
     benefits: TierBenefit[];
     requiredPoints?: number;
@@ -78,7 +78,7 @@ export class CreateMembershipTierUseCase {
       name: input.name,
       description: input.description,
       level: input.level,
-      price: input.price,
+      priceCents: input.priceCents,
       billingPeriod: input.billingPeriod,
       benefits: input.benefits,
       requiredPoints: input.requiredPoints,
@@ -91,7 +91,7 @@ export class CreateMembershipTierUseCase {
       tierId: tier.tierId,
       name: tier.name,
       level: tier.level,
-      price: tier.price,
+      priceCents: tier.priceCents,
       benefitCount: tier.benefits.length,
       createdAt: tier.createdAt.toISOString(),
     };

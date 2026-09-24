@@ -49,7 +49,7 @@ export interface FraudScreeningRequest {
   phone?: string;
   billingCountry?: string;
   shippingCountry?: string;
-  orderAmount?: number;
+  orderAmountCents?: number;
   currency?: string;
   isFirstOrder?: boolean;
   isGuestCheckout?: boolean;
@@ -182,7 +182,7 @@ export class FraudScreeningService {
    */
   private buildConditionContext(request: FraudScreeningRequest): Record<string, unknown> {
     return {
-      orderAmount: request.orderAmount ?? 0,
+      orderAmountCents: request.orderAmountCents ?? 0,
       currency: request.currency,
       customerId: request.customerId,
       ipAddress: request.ipAddress,
@@ -233,8 +233,8 @@ export class FraudScreeningService {
 
     switch (rule.ruleType) {
       case 'amount':
-        if (conditions.minAmount && (request.orderAmount ?? 0) < (conditions.minAmount as number)) return false;
-        if (conditions.maxAmount && (request.orderAmount ?? 0) > (conditions.maxAmount as number)) return true;
+        if (conditions.minAmount && (request.orderAmountCents ?? 0) < (conditions.minAmount as number)) return false;
+        if (conditions.maxAmount && (request.orderAmountCents ?? 0) > (conditions.maxAmount as number)) return true;
         return false;
 
       case 'location':
@@ -251,13 +251,13 @@ export class FraudScreeningService {
         if (
           conditions.firstOrderHighValue &&
           request.isFirstOrder &&
-          (request.orderAmount ?? 0) > ((conditions.threshold as number) || 500)
+          (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 500)
         )
           return true;
         if (
           conditions.guestCheckoutHighValue &&
           request.isGuestCheckout &&
-          (request.orderAmount ?? 0) > ((conditions.threshold as number) || 300)
+          (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 300)
         )
           return true;
         return false;

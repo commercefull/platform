@@ -13,8 +13,8 @@ import { CouponRepository } from '../../../coupon/infrastructure/repositories/Co
 export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
   constructor(private readonly couponRepository: CouponRepository) {}
 
-  async validateDiscount(code: string, subtotal: number, customerId?: string): Promise<DiscountQuoteResult> {
-    const validation = await this.couponRepository.validateCouponCode(code, subtotal, customerId);
+  async validateDiscount(code: string, subtotalCents: number, customerId?: string): Promise<DiscountQuoteResult> {
+    const validation = await this.couponRepository.validateCouponCode(code, subtotalCents, customerId);
 
     if (!validation.valid || !validation.coupon) {
       return { valid: false, error: validation.error };
@@ -26,7 +26,7 @@ export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
         code,
         type: validation.coupon.type,
         value: validation.coupon.value,
-        discountAmount: validation.discountAmount || 0,
+        discountAmountCents: validation.discountAmountCents || 0,
       },
     };
   }

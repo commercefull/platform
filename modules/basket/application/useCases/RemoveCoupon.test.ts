@@ -11,7 +11,7 @@ describe('RemoveCouponUseCase', () => {
     const result = await new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID));
 
     expect(result.coupon).toBeUndefined();
-    expect(result.discountAmount).toBe(0);
+    expect(result.discountAmountCents).toBe(0);
     expect(repository.save).toHaveBeenCalledWith(basket);
   });
 

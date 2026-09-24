@@ -84,10 +84,14 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
       name,
       description: description || undefined,
       type: type as Parameters<typeof manageCouponsUseCase.create>[0]['type'],
-      discountAmount: discountAmount ? parseFloat(discountAmount) : undefined,
+      discountAmountCents: discountAmount
+        ? type === 'percentage'
+          ? parseFloat(discountAmount)
+          : Math.round(parseFloat(discountAmount) * 100)
+        : undefined,
       currencyCode: currencyCode || 'USD',
-      minOrderAmount: minOrderAmount ? parseFloat(minOrderAmount) : undefined,
-      maxDiscountAmount: maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined,
+      minOrderAmountCents: minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined,
+      maxDiscountAmountCents: maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       isActive: isActive === 'true',
@@ -221,14 +225,14 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
 
 export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
-  const { code, orderTotal, customerId } = body as { code: string; orderTotal: number; customerId: string };
+  const { code, orderTotalCents, customerId } = body as { code: string; orderTotalCents: number; customerId: string };
 
-  const result = await manageCouponsUseCase.validate(code, orderTotal, customerId, 'default-organization');
+  const result = await manageCouponsUseCase.validate(code, orderTotalCents, customerId, 'default-organization');
 
   res.json({
     valid: result.valid,
     coupon: result.coupon,
     message: result.message,
-    discountAmount: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotal) : 0,
+    discountAmountCents: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotalCents) : 0,
   });
 };

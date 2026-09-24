@@ -21,31 +21,31 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should map tax calculation result to checkout vocabulary', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: true,
-      subtotal: 100,
-      shippingAmount: 10,
-      taxAmount: 8.5,
-      total: 118.5,
+      subtotalCents: 100,
+      shippingAmountCents: 10,
+      taxAmountCents: 8.5,
+      totalCents: 118.5,
       taxRate: 0.085,
       lineItems: [],
     });
 
     const result = await adapter.calculateTax({
-      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPrice: 100 }],
+      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
       shippingAddress: { country: 'US', region: 'OR' },
-      shippingAmount: 10,
+      shippingAmountCents: 10,
     });
 
     expect(result.success).toBe(true);
-    expect(result.taxAmount).toBe(8.5);
+    expect(result.taxAmountCents).toBe(8.5);
   });
 
-  it('should return taxAmount 0 when calculation fails', async () => {
+  it('should return taxAmountCents 0 when calculation fails', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: false,
-      subtotal: 0,
-      shippingAmount: 0,
-      taxAmount: 0,
-      total: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
+      taxAmountCents: 0,
+      totalCents: 0,
       taxRate: 0,
       lineItems: [],
     });
@@ -53,11 +53,11 @@ describe('TaxTaxQuoteAdapter', () => {
     const result = await adapter.calculateTax({
       items: [],
       shippingAddress: { country: 'US' },
-      shippingAmount: 0,
+      shippingAmountCents: 0,
     });
 
     expect(result.success).toBe(false);
-    expect(result.taxAmount).toBe(0);
+    expect(result.taxAmountCents).toBe(0);
   });
 
   it('should return failure result when use case throws', async () => {
@@ -66,11 +66,11 @@ describe('TaxTaxQuoteAdapter', () => {
     const result = await adapter.calculateTax({
       items: [],
       shippingAddress: { country: 'US' },
-      shippingAmount: 0,
+      shippingAmountCents: 0,
     });
 
     expect(result.success).toBe(false);
-    expect(result.taxAmount).toBe(0);
+    expect(result.taxAmountCents).toBe(0);
   });
 
   it('should map tax settings to checkout vocabulary', async () => {

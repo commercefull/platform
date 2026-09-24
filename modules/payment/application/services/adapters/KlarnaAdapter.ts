@@ -31,8 +31,8 @@ const KLARNA_CAPABILITIES: PSPCapabilities = {
   supportsWebhooks: true,
   supportedCurrencies: ['USD', 'EUR', 'GBP', 'SEK', 'NOK', 'DKK', 'AUD', 'CAD'],
   supportedCountries: ['US', 'GB', 'SE', 'NO', 'DK', 'DE', 'AT', 'NL', 'AU', 'CA'],
-  minAmount: 0,
-  maxAmount: 100000,
+  minAmountCents: 0,
+  maxAmountCents: 100000,
 };
 
 export class KlarnaAdapter implements PSPAdapter {
@@ -93,15 +93,15 @@ export class KlarnaAdapter implements PSPAdapter {
       purchase_country: ((config.extra?.country as string) || 'US').toUpperCase(),
       purchase_currency: request.currency.toUpperCase(),
       locale: (config.extra?.locale as string) || 'en-US',
-      order_amount: Math.round(request.amount * 100),
+      order_amount: Math.round(request.amountCents * 100),
       order_lines: [
         {
           type: 'physical',
           reference: request.orderId,
           name: request.description || `Order ${request.orderId}`,
           quantity: 1,
-          total_amount: Math.round(request.amount * 100),
-          unit_price: Math.round(request.amount * 100),
+          total_amount: Math.round(request.amountCents * 100),
+          unit_price: Math.round(request.amountCents * 100),
         },
       ],
       merchant_urls: {
@@ -145,7 +145,7 @@ export class KlarnaAdapter implements PSPAdapter {
   async capturePayment(request: CaptureRequest, config: PSPConfig): Promise<CaptureResponse> {
     const baseUrl = this.getBaseUrl(config);
 
-    const body = request.amount ? { captured_amount: Math.round(request.amount * 100) } : {};
+    const body = request.amountCents ? { captured_amount: Math.round(request.amountCents * 100) } : {};
 
     const res = await fetch(`${baseUrl}/ordermanagement/v1/orders/${request.externalTransactionId}/captures`, {
       method: 'POST',
@@ -209,7 +209,7 @@ export class KlarnaAdapter implements PSPAdapter {
     const baseUrl = this.getBaseUrl(config);
 
     const body = {
-      refunded_amount: Math.round(request.amount * 100),
+      refunded_amount: Math.round(request.amountCents * 100),
       description: request.reason,
     };
 

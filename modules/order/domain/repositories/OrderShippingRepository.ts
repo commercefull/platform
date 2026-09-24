@@ -6,8 +6,8 @@ export interface OrderShipping {
   shippingMethod: string;
   carrier?: string;
   service?: string;
-  amount: number;
-  taxAmount?: number;
+  amountCents: number;
+  taxAmountCents?: number;
   trackingNumber?: string;
   trackingUrl?: string;
   estimatedDeliveryDate?: string;
@@ -17,7 +17,7 @@ export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 
 export type OrderShippingUpdateParams = Partial<
   Pick<
     OrderShipping,
-    'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
+    'shippingMethod' | 'carrier' | 'service' | 'amountCents' | 'taxAmountCents' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
   >
 >;
 

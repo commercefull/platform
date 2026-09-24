@@ -21,7 +21,7 @@ describe('GenerateReportUseCase', () => {
     const result = await useCase.execute('sales', { period: '7d' });
 
     expect(result.summary.totalOrders).toBe(10);
-    expect(result.summary.totalRevenue).toBe(1000);
+    expect(result.summary.totalRevenueCents).toBe(1000);
     expect(result.charts).toHaveLength(2);
   });
 
@@ -57,7 +57,7 @@ describe('GenerateReportUseCase', () => {
         category: 'electronics',
         stock_quantity: '5',
         reorder_point: '10',
-        cost_price: '20',
+        cost_price_cents: '2000',
         sales_velocity: '2',
       },
     ]);
@@ -65,7 +65,7 @@ describe('GenerateReportUseCase', () => {
     const result = await useCase.execute('inventory', { period: '30d' });
 
     expect(result.summary.lowStockProducts).toBe(1);
-    expect(result.summary.totalInventoryValue).toBe(100);
+    expect(result.summary.totalInventoryValueCents).toBe(10000);
   });
 
   it('should generate an executive summary report with revenue and profit', async () => {
@@ -74,7 +74,7 @@ describe('GenerateReportUseCase', () => {
     const result = await useCase.execute('executive', { period: '30d' });
 
     expect(result.title).toContain('Executive');
-    expect(result.summary.totalRevenue).toBe(5000);
+    expect(result.summary.totalRevenueCents).toBe(5000);
     expect(result.summary.profitMargin).toBe(25);
   });
 

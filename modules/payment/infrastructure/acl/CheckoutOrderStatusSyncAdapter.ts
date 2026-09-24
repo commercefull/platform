@@ -33,7 +33,7 @@ export class CheckoutOrderStatusSyncAdapter implements OrderStatusSyncPort {
       checkoutId: session.id,
       orderId,
       customerId: session.customerId,
-      totalAmount: session.total.amount,
+      totalAmountCents: session.total.cents,
       orderNumber: order?.orderNumber,
     };
   }

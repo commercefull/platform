@@ -68,7 +68,7 @@
                 <tr>
                   <td><code><%= item.productId.substring(0, 8) %>...</code></td>
                   <td><%= item.productVariantId ? item.productVariantId.substring(0, 8) + '...' : '-' %></td>
-                  <td><strong><%= (item.price || 0).toFixed(2) %></strong></td>
+                  <td><strong><%= ((item.priceCents || 0) / 100).toFixed(2) %></strong></td>
                   <td><%= item.currency %></td>
                   <td><%= new Date(item.updatedAt).toLocaleDateString() %></td>
                 </tr>

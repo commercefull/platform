@@ -7,9 +7,9 @@ exports.up = function (knex) {
     table.uuid('promotionGiftCardTransactionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('promotionGiftCardId').notNullable().references('promotionGiftCardId').inTable('promotionGiftCard').onDelete('CASCADE');
     table.string('type').notNullable(); // purchase, reload, redemption, refund, adjustment, expiration
-    table.decimal('amount', 15, 2).notNullable();
-    table.decimal('balanceBefore', 15, 2).notNullable();
-    table.decimal('balanceAfter', 15, 2).notNullable();
+    table.bigInteger('amountCents').notNullable();
+    table.bigInteger('balanceBeforeCents').notNullable();
+    table.bigInteger('balanceAfterCents').notNullable();
     table.string('currency', 3).defaultTo('USD');
     table.uuid('orderId').references('orderId').inTable('order').onDelete('SET NULL');
     table.uuid('customerId').references('customerId').inTable('customer').onDelete('SET NULL');

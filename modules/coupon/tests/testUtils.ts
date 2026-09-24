@@ -86,7 +86,7 @@ export function createCouponRepository(coupon: Coupon | null = null): jest.Mocke
     couponId: coupon?.couponId ?? COUPON_ID,
     orderId: 'order-1',
     customerId: 'customer-1',
-    discountAmount: 0,
+    discountAmountCents: 0,
     usedAt: new Date(),
   });
   repository.createRedemption.mockResolvedValue(undefined);

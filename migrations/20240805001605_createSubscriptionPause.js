@@ -21,7 +21,7 @@ exports.up = function (knex) {
     table.string('resumedBy');
     table.integer('pauseDays');
     table.integer('billingCyclesSkipped').defaultTo(0);
-    table.decimal('creditAmount', 15, 2).defaultTo(0);
+    table.bigInteger('creditAmountCents').defaultTo(0);
     table.boolean('creditApplied').defaultTo(false);
     table.jsonb('metadata');
     table.timestamp('createdAt').defaultTo(knex.fn.now());

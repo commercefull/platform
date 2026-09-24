@@ -131,7 +131,7 @@ export function createBasketSnapshot(overrides: Partial<BasketSnapshot> = {}): B
     itemCount: 2,
     uniqueItemCount: 2,
     subtotal: Money.create(100, 'USD'),
-    discountAmount: 0,
+    discountAmountCents: 0,
     total: Money.create(100, 'USD'),
     items: [],
     ...overrides,

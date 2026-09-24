@@ -10,7 +10,7 @@ export const supplierTypeDefs = `#graphql
     purchaseOrderId: String!
     poNumber: String!
     supplierId: String!
-    totalAmount: Float!
+    totalAmountCents: Float!
     status: String!
     createdAt: String!
   }
@@ -43,7 +43,7 @@ export const supplierTypeDefs = `#graphql
     sku: String!
     name: String!
     quantity: Int!
-    unitCost: Float!
+    unitCostCents: Float!
   }
 
   input CreatePurchaseOrderInput {

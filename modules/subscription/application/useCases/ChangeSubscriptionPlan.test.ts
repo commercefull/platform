@@ -15,13 +15,13 @@ describe('ChangeSubscriptionPlanUseCase', () => {
     planId: 'plan-1',
     customerId: 'cust-1',
     nextBillingDate: '2030-01-01',
-    price: 29.99,
+    priceCents: 2999,
   };
 
   beforeEach(() => {
     ports = createChangePlanPorts();
     ports.subscriptionRepo.findById.mockResolvedValue(subscription);
-    ports.planRepo.findById.mockResolvedValue({ price: 49.99 });
+    ports.planRepo.findById.mockResolvedValue({ priceCents: 4999 });
     useCase = new ChangeSubscriptionPlanUseCase(ports.subscriptionRepo, ports.planRepo);
   });
 
@@ -44,7 +44,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
     const result = await useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'plan-2' });
 
     expect(result.effectiveDate).toEqual(new Date('2030-01-01'));
-    expect(result.proratedAmount).toBeUndefined();
+    expect(result.proratedAmountCents).toBeUndefined();
   });
 
   it('should calculate a prorated amount when applyImmediately and prorateCharges are set', async () => {
@@ -56,7 +56,7 @@ describe('ChangeSubscriptionPlanUseCase', () => {
 
     const result = await useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'plan-2', applyImmediately: true, prorateCharges: true });
 
-    expect(result.proratedAmount).toBeGreaterThan(0); // upgrading 29.99 → 49.99 mid-period
+    expect(result.proratedAmountCents).toBeGreaterThan(0); // upgrading 29.99 → 49.99 mid-period
     expect(result.effectiveDate).toBeInstanceOf(Date);
   });
 

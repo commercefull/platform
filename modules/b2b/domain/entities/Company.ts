@@ -12,8 +12,8 @@ export interface CompanyProps {
   taxId?: string;
   status: CompanyStatus;
   paymentTerms: PaymentTerms;
-  creditLimit?: number;
-  outstandingBalance: number;
+  creditLimitCents?: number;
+  outstandingBalanceCents: number;
   billingAddress?: {
     line1?: string;
     line2?: string;
@@ -51,7 +51,7 @@ export class Company {
     legalName?: string;
     taxId?: string;
     paymentTerms?: PaymentTerms;
-    creditLimit?: number;
+    creditLimitCents?: number;
     billingAddress?: CompanyProps['billingAddress'];
     shippingAddress?: CompanyProps['shippingAddress'];
     contactEmail?: string;
@@ -68,8 +68,8 @@ export class Company {
       taxId: input.taxId,
       status: 'pending',
       paymentTerms: input.paymentTerms ?? 'net30',
-      creditLimit: input.creditLimit,
-      outstandingBalance: 0,
+      creditLimitCents: input.creditLimitCents,
+      outstandingBalanceCents: 0,
       billingAddress: input.billingAddress,
       shippingAddress: input.shippingAddress,
       contactEmail: input.contactEmail,
@@ -106,11 +106,11 @@ export class Company {
   get paymentTerms(): PaymentTerms {
     return this.props.paymentTerms;
   }
-  get creditLimit(): number | undefined {
-    return this.props.creditLimit;
+  get creditLimitCents(): number | undefined {
+    return this.props.creditLimitCents;
   }
-  get outstandingBalance(): number {
-    return this.props.outstandingBalance;
+  get outstandingBalanceCents(): number {
+    return this.props.outstandingBalanceCents;
   }
   get billingAddress(): CompanyProps['billingAddress'] {
     return this.props.billingAddress;
@@ -194,25 +194,25 @@ export class Company {
 
   setCreditLimit(limit: number): void {
     if (limit < 0) throw new B2BValidationError('Credit limit cannot be negative');
-    this.props.creditLimit = limit;
+    this.props.creditLimitCents = limit;
     this.props.updatedAt = new Date();
   }
 
-  increaseBalance(amount: number): void {
-    if (amount <= 0) throw new B2BValidationError('Amount must be positive');
-    this.props.outstandingBalance += amount;
+  increaseBalance(amountCents: number): void {
+    if (amountCents <= 0) throw new B2BValidationError('Amount must be positive');
+    this.props.outstandingBalanceCents += amountCents;
     this.props.updatedAt = new Date();
   }
 
-  decreaseBalance(amount: number): void {
-    if (amount <= 0) throw new B2BValidationError('Amount must be positive');
-    this.props.outstandingBalance = Math.max(0, this.props.outstandingBalance - amount);
+  decreaseBalance(amountCents: number): void {
+    if (amountCents <= 0) throw new B2BValidationError('Amount must be positive');
+    this.props.outstandingBalanceCents = Math.max(0, this.props.outstandingBalanceCents - amountCents);
     this.props.updatedAt = new Date();
   }
 
-  hasAvailableCredit(amount: number): boolean {
-    if (this.props.creditLimit === undefined) return true;
-    return this.props.outstandingBalance + amount <= this.props.creditLimit;
+  hasAvailableCredit(amountCents: number): boolean {
+    if (this.props.creditLimitCents === undefined) return true;
+    return this.props.outstandingBalanceCents + amountCents <= this.props.creditLimitCents;
   }
 
   get isSubsidiary(): boolean {

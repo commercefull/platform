@@ -21,7 +21,7 @@ export interface DowngradeMembershipOutput {
   newTierName: string;
   effectiveDate: string;
   immediateDowngrade: boolean;
-  newBillingAmount: number;
+  newBillingAmountCents: number;
 }
 
 interface MembershipRecord {
@@ -33,7 +33,7 @@ interface MembershipRecord {
 
 interface TierRecord {
   name: string;
-  price: number;
+  priceCents: number;
   isActive: boolean;
 }
 
@@ -73,9 +73,9 @@ export class DowngradeMembershipUseCase {
     // Get current tier for comparison
     const currentTier = await this.membershipRepository.getTierById(membership.tierId);
 
-    // Validate downgrade (new tier should have lower price or level)
-    if (!currentTier || newTier.price >= currentTier.price) {
-      throw new MembershipValidationError('Cannot downgrade to a tier with equal or higher price. Use upgrade instead.');
+    // Validate downgrade (new tier should have lower priceCents or level)
+    if (!currentTier || newTier.priceCents >= currentTier.priceCents) {
+      throw new MembershipValidationError('Cannot downgrade to a tier with equal or higher priceCents. Use upgrade instead.');
     }
 
     const now = new Date();
@@ -131,7 +131,7 @@ export class DowngradeMembershipUseCase {
       newTierName: newTier.name,
       effectiveDate: effectiveDate.toISOString(),
       immediateDowngrade: !effectiveAtPeriodEnd,
-      newBillingAmount: newTier.price,
+      newBillingAmountCents: newTier.priceCents,
     };
   }
 }

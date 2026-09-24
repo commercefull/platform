@@ -13,7 +13,7 @@ describe('ProcessRenewalUseCase', () => {
   const dueSubscription = {
     status: 'active',
     customerId: 'cust-1',
-    price: 29.99,
+    priceCents: 2999,
     planName: 'Monthly Box',
     paymentMethodId: 'pm-1',
     billingInterval: 'monthly',
@@ -33,13 +33,13 @@ describe('ProcessRenewalUseCase', () => {
     const result = await useCase.execute({ subscriptionId: 'sub-1' });
 
     expect(result.renewed).toBe(true);
-    expect(result.amountCharged).toBe(29.99);
+    expect(result.amountChargedCents).toBe(2999);
     expect(result.invoiceId).toBe('inv-1');
     expect(ports.invoiceService.create).toHaveBeenCalledWith(
-      expect.objectContaining({ subscriptionId: 'sub-1', customerId: 'cust-1', amount: 29.99 }),
+      expect.objectContaining({ subscriptionId: 'sub-1', customerId: 'cust-1', amountCents: 2999 }),
     );
     expect(ports.paymentService.charge).toHaveBeenCalledWith(
-      expect.objectContaining({ customerId: 'cust-1', amount: 29.99, paymentMethodId: 'pm-1', invoiceId: 'inv-1' }),
+      expect.objectContaining({ customerId: 'cust-1', amountCents: 2999, paymentMethodId: 'pm-1', invoiceId: 'inv-1' }),
     );
     expect(ports.subscriptionRepo.update).toHaveBeenCalledWith(
       'sub-1',
@@ -63,7 +63,7 @@ describe('ProcessRenewalUseCase', () => {
     );
     expect(emitMock).toHaveBeenCalledWith(
       'subscription.payment.failed',
-      expect.objectContaining({ subscriptionId: 'sub-1', amount: 29.99 }),
+      expect.objectContaining({ subscriptionId: 'sub-1', amountCents: 2999 }),
     );
     expect(emitMock).not.toHaveBeenCalledWith('subscription.renewed', expect.anything());
   });

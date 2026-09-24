@@ -1,7 +1,7 @@
 
 import { SearchProductsUseCase } from './SearchProducts';
 import type { ProductSearchServicePort } from './SearchProducts';
-import { createProduct, lazyMock } from '../../../tests/testUtils';
+import { createProductSearchRow, lazyMock } from '../../../tests/testUtils';
 
 describe('SearchProductsUseCase', () => {
   let useCase: SearchProductsUseCase;
@@ -11,12 +11,12 @@ describe('SearchProductsUseCase', () => {
     jest.clearAllMocks();
     mockService = lazyMock<ProductSearchServicePort>();
     mockService.search.mockResolvedValue({
-      products: [createProduct()],
+      products: [createProductSearchRow({ productId: 'p1', name: 'Widget', priceCents: 4500, effectivePriceCents: 4500 })],
       total: 1,
       page: 1,
       limit: 20,
       totalPages: 1,
-      facets: { categories: [], priceRanges: [], attributes: [] },
+      facets: { categories: [], brands: [], priceRanges: [], attributes: [] },
     });
     useCase = new SearchProductsUseCase(mockService);
   });

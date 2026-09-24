@@ -28,19 +28,19 @@ describe('Coupon Apply/Redeem Tests', () => {
     it('applies a valid percentage coupon', async () => {
       const resp = await client.post(
         '/business/coupons/apply',
-        { code: SEEDED_COUPON_CODE_PERCENTAGE, basketId: randomUUID(), orderTotal: 100 },
+        { code: SEEDED_COUPON_CODE_PERCENTAGE, basketId: randomUUID(), orderTotalCents: 10000 },
         { headers: headers() },
       );
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
       expect(resp.data.data.applied).toBe(true);
-      expect(resp.data.data.discountAmount).toBeGreaterThan(0);
+      expect(resp.data.data.discountAmountCents).toBeGreaterThan(0);
     });
 
     it('returns applied=false for an unknown coupon code', async () => {
       const resp = await client.post(
         '/business/coupons/apply',
-        { code: 'NO-SUCH-CODE', basketId: randomUUID(), orderTotal: 100 },
+        { code: 'NO-SUCH-CODE', basketId: randomUUID(), orderTotalCents: 10000 },
         { headers: headers() },
       );
       expectStatus(resp, 200);
@@ -53,7 +53,7 @@ describe('Coupon Apply/Redeem Tests', () => {
       const resp = await client.post('/customer/coupons/apply', {
         code: SEEDED_COUPON_CODE_FIXED,
         basketId: randomUUID(),
-        orderTotal: 50,
+        orderTotalCents: 5000,
       });
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
@@ -64,7 +64,7 @@ describe('Coupon Apply/Redeem Tests', () => {
     it('redeems a coupon for an order', async () => {
       const resp = await client.post(
         '/business/coupons/redeem',
-        { code: SEEDED_COUPON_CODE_FIXED, orderId: '00000000-0000-0000-0000-000000000200', discountAmount: 10 },
+        { code: SEEDED_COUPON_CODE_FIXED, orderId: '00000000-0000-0000-0000-000000000200', discountAmountCents: 1000 },
         { headers: headers() },
       );
       expectStatus(resp, 200);
@@ -74,7 +74,7 @@ describe('Coupon Apply/Redeem Tests', () => {
     it('returns 404 for an unknown coupon code', async () => {
       const resp = await client.post(
         '/business/coupons/redeem',
-        { code: 'NO-SUCH-CODE', orderId: randomUUID(), discountAmount: 10 },
+        { code: 'NO-SUCH-CODE', orderId: randomUUID(), discountAmountCents: 1000 },
         { headers: headers() },
       );
       expectStatus(resp, 404);

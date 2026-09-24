@@ -30,7 +30,7 @@ describe('SetFulfillmentMethodUseCase', () => {
     const result = await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'pickup'));
 
     expect(result.shippingMethodId).toBeUndefined();
-    expect(result.shippingAmount).toBe(0);
+    expect(result.shippingAmountCents).toBe(0);
   });
 
   it('should throw CheckoutSessionNotFoundError when the session does not exist', async () => {

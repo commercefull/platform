@@ -19,7 +19,7 @@ describe('RedeemCouponUseCase', () => {
 
     expect(result.success).toBe(true);
     expect(result.usage?.promotionCouponUsageId).toBe('usage-1');
-    expect(couponRepository.recordUsage).toHaveBeenCalledWith('coupon-1', 'order-1', undefined);
+    expect(couponRepository.recordUsage).toHaveBeenCalledWith('coupon-1', 'order-1', undefined, 10);
   });
 
   it('should return order_id_required when the order id is empty', async () => {

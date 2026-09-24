@@ -147,8 +147,8 @@ describe('Bundle Management', () => {
       });
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
-      expect(res.data.data).toHaveProperty('price');
-      expect(res.data.data).toHaveProperty('savings');
+      expect(res.data.data).toHaveProperty('priceCents');
+      expect(res.data.data).toHaveProperty('savingsCents');
     });
 
     it('should return 404 for non-existent bundle', async () => {

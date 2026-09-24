@@ -1,6 +1,6 @@
 import { FindSimilarProductsUseCase } from './FindSimilarProducts';
 import type { ProductSearchServicePort } from './SearchProducts';
-import { createProduct, lazyMock } from '../../../tests/testUtils';
+import { createProductSearchRow, lazyMock } from '../../../tests/testUtils';
 
 describe('FindSimilarProductsUseCase', () => {
   let useCase: FindSimilarProductsUseCase;
@@ -13,7 +13,7 @@ describe('FindSimilarProductsUseCase', () => {
   });
 
   it('should return similar products with the default limit', async () => {
-    mockService.findSimilar.mockResolvedValue([createProduct()]);
+    mockService.findSimilar.mockResolvedValue([createProductSearchRow()]);
 
     const result = await useCase.execute({ productId: 'p1' });
 

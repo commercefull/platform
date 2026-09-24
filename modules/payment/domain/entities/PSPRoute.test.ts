@@ -119,7 +119,7 @@ describe('PSPRoute', () => {
     expect(routeWithCaps.supportsCurrency('JPY')).toBe(false);
   });
 
-  it('should check amount support', () => {
+  it('should check amountCents support', () => {
     const route = PSPRoute.reconstitute({
       routeId: 'route_4',
       organizationId: 'org_1',
@@ -137,8 +137,8 @@ describe('PSPRoute', () => {
         supportsWebhooks: true,
         supportedCurrencies: ['USD'],
         supportedCountries: ['US'],
-        minAmount: 50,
-        maxAmount: 30000,
+        minAmountCents: 50,
+        maxAmountCents: 30000,
       },
       createdAt: new Date(),
       updatedAt: new Date(),

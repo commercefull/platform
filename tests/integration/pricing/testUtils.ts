@@ -63,7 +63,7 @@ export function createTestTierPrice(productId: string = TEST_PRODUCT_UUID, overr
   return {
     productId,
     quantityMin: 10,
-    price: 9.99,
+    priceCents: 999,
     ...overrides,
   };
 }

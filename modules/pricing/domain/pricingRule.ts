@@ -67,7 +67,7 @@ export interface PricingRule {
   endDate?: Date;
   minimumQuantity?: number;
   maximumQuantity?: number;
-  minimumOrderAmount?: number;
+  minimumOrderAmountCents?: number;
   createdAt: Date;
   updatedAt: Date;
   organizationId?: string;
@@ -83,8 +83,8 @@ export type PricingRuleUpdateProps = Partial<Omit<PricingRule, 'id' | 'pricingRu
 export interface CurrencyPriceRule extends PricingRule {
   currencyCode: string; // Target currency
   regionCode?: string; // Optional region specificity
-  minOrderValue?: number; // Minimum order value for rule to apply
-  maxOrderValue?: number; // Maximum order value for rule to apply
+  minOrderValueCents?: number; // Minimum order value for rule to apply
+  maxOrderValueCents?: number; // Maximum order value for rule to apply
 }
 
 export type CurrencyPriceRuleCreateProps = Omit<CurrencyPriceRule, 'id' | 'createdAt' | 'updatedAt'>;
@@ -101,19 +101,27 @@ export interface PriceContext {
   variantId?: string; // Single variant ID for single product price calculations
   currencyCode?: string; // Requested currency code
   regionCode?: string; // Customer region for region-specific pricing
+  categoryIds?: string[]; // Product category IDs for category-scoped rules
   additionalData?: Record<string, unknown>;
   excludeRuleIds?: string[]; // IDs of pricing rules to exclude from calculation
 }
 
+/**
+ * Pricing calculation result. All amounts are integer cents.
+ * `originalPriceCents` is the base price in its native currency;
+ * `finalPriceCents` is in `currency` after conversion and adjustments.
+ * Rule `adjustmentValue` operands stay in their stored units
+ * (major units for amount types, percent for percentage).
+ */
 export interface PricingResult {
-  originalPrice: number;
-  finalPrice: number;
+  originalPriceCents: number;
+  finalPriceCents: number;
   appliedRules: {
     ruleId: string;
     ruleName: string;
     adjustmentType: PricingAdjustmentType;
     adjustmentValue: number;
-    impact: number; // How much this rule changed the price
+    impact: number; // How much this rule changed the price, in cents
   }[];
   currency: string;
   exchangeRate?: number; // Added for currency conversion tracking
@@ -128,7 +136,7 @@ export interface TierPrice {
   productVariantId?: string; // Alias for variantId
   quantityMin: number;
   quantityMax?: number;
-  price: number;
+  priceCents: number;
   customerGroupId?: string;
   startDate?: Date;
   endDate?: Date;

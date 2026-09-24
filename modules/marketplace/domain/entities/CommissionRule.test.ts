@@ -21,7 +21,7 @@ describe('CommissionRule Entity', () => {
         name: 'Fixed $5',
         type: 'fixed',
         scope: 'global',
-        fixedAmount: 5,
+        fixedAmountCents: 5,
       });
       expect(r.calculate(100)).toBe(5);
     });
@@ -60,7 +60,7 @@ describe('CommissionRule Entity', () => {
           type: 'fixed',
           scope: 'global',
         }),
-      ).toThrow('Fixed commission requires fixedAmount');
+      ).toThrow('Fixed commission requires fixedAmountCents');
     });
 
     it('should reject tiered without tiers', () => {

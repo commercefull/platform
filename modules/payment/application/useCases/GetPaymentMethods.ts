@@ -9,7 +9,7 @@ export interface GetPaymentMethodsInput {
   storeId?: string;
   channelId?: string;
   currency?: string;
-  amount?: number;
+  amountCents?: number;
   country?: string;
 }
 
@@ -29,8 +29,8 @@ export interface PaymentMethodInfo {
 
   // For new methods
   isAvailable: boolean;
-  minAmount?: number;
-  maxAmount?: number;
+  minAmountCents?: number;
+  maxAmountCents?: number;
   supportedCurrencies?: string[];
 }
 
@@ -57,8 +57,8 @@ interface PaymentConfig {
   provider: string;
   displayName: string;
   isActive: boolean;
-  minAmount?: number;
-  maxAmount?: number;
+  minAmountCents?: number;
+  maxAmountCents?: number;
   supportedCurrencies?: string[];
   supportedCountries?: string[];
 }
@@ -120,8 +120,8 @@ export class GetPaymentMethodsUseCase {
           name: config.displayName,
           isDefault: false,
           isAvailable: true,
-          minAmount: config.minAmount,
-          maxAmount: config.maxAmount,
+          minAmountCents: config.minAmountCents,
+          maxAmountCents: config.maxAmountCents,
           supportedCurrencies: config.supportedCurrencies,
         });
       }
@@ -159,12 +159,12 @@ export class GetPaymentMethodsUseCase {
       }
     }
 
-    // Check amount limits
-    if (input.amount) {
-      if (config.minAmount && input.amount < config.minAmount) {
+    // Check amountCents limits
+    if (input.amountCents) {
+      if (config.minAmountCents && input.amountCents < config.minAmountCents) {
         return false;
       }
-      if (config.maxAmount && input.amount > config.maxAmount) {
+      if (config.maxAmountCents && input.amountCents > config.maxAmountCents) {
         return false;
       }
     }

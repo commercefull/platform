@@ -21,7 +21,7 @@ export class CheckGiftCardBalanceQuery {
 export interface CheckGiftCardBalanceResponse {
   success: boolean;
   code?: string;
-  currentBalance?: number;
+  currentBalanceCents?: number;
   currency?: string;
   status?: string;
   expiresAt?: Date;
@@ -56,7 +56,7 @@ export class CheckGiftCardBalanceUseCase {
     return {
       success: true,
       code: giftCard.code,
-      currentBalance: giftCard.currentBalance,
+      currentBalanceCents: giftCard.currentBalanceCents,
       currency: giftCard.currency,
       status: isExpired ? 'expired' : giftCard.status,
       expiresAt: giftCard.expiresAt,

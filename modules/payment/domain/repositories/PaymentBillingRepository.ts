@@ -19,8 +19,8 @@ export type { PaymentReport } from './PaymentReportRepository';
 export interface PaymentBillingRepository {
   // Balances
   findBalancesByMerchant(organizationId: string): Promise<PaymentBalance[]>;
-  creditBalance(organizationId: string, currency: string, amount: number): Promise<PaymentBalance | null>;
-  debitBalance(organizationId: string, currency: string, amount: number): Promise<PaymentBalance | null>;
+  creditBalance(organizationId: string, currency: string, amountCents: number): Promise<PaymentBalance | null>;
+  debitBalance(organizationId: string, currency: string, amountCents: number): Promise<PaymentBalance | null>;
   getBalance(organizationId: string, currency: string): Promise<number>;
   findAllBalances(): Promise<PaymentBalance[]>;
 

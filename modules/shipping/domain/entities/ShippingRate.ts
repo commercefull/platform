@@ -11,18 +11,18 @@ export interface ShippingRateProps {
   name: string;
   description?: string;
   calculationType: ShippingCalculationType;
-  baseRate: number;
+  baseRateCents: number;
   perUnitRate?: number;
   minWeight?: number;
   maxWeight?: number;
-  minPrice?: number;
-  maxPrice?: number;
+  minPriceCents?: number;
+  maxPriceCents?: number;
   estimatedDaysMin: number;
   estimatedDaysMax: number;
   zones?: string[];
   countries?: string[];
   isActive: boolean;
-  freeShippingThreshold?: number;
+  freeShippingThresholdCents?: number;
   dimensionalFactor?: number;
   metadata?: Record<string, unknown>;
   createdAt: Date;
@@ -56,8 +56,8 @@ export class ShippingRate {
   get name(): string {
     return this.props.name;
   }
-  get baseRate(): number {
-    return this.props.baseRate;
+  get baseRateCents(): number {
+    return this.props.baseRateCents;
   }
   get isActive(): boolean {
     return this.props.isActive;
@@ -77,8 +77,8 @@ export class ShippingRate {
    *                 along with `dimensionalFactor`, billable weight is
    *                 `max(actualWeight, volume / dimensionalFactor)`.
    */
-  calculateRate(weight: number, subtotal: number, quantity: number, volume?: number): number {
-    if (this.props.freeShippingThreshold && subtotal >= this.props.freeShippingThreshold) {
+  calculateRate(weight: number, subtotalCents: number, quantity: number, volume?: number): number {
+    if (this.props.freeShippingThresholdCents && subtotalCents >= this.props.freeShippingThresholdCents) {
       return 0;
     }
 
@@ -89,29 +89,29 @@ export class ShippingRate {
       billableWeight = Math.max(weight, dimWeight);
     }
 
-    let rate = this.props.baseRate;
+    let rateCents = this.props.baseRateCents;
 
     switch (this.props.calculationType) {
       case 'weight':
-        rate += (this.props.perUnitRate || 0) * billableWeight;
+        rateCents += Math.round((this.props.perUnitRate || 0) * 100) * billableWeight;
         break;
       case 'price':
-        rate += (this.props.perUnitRate || 0) * (subtotal / 100);
+        rateCents += (this.props.perUnitRate || 0) * (subtotalCents / 100);
         break;
       case 'quantity':
-        rate += (this.props.perUnitRate || 0) * quantity;
+        rateCents += Math.round((this.props.perUnitRate || 0) * 100) * quantity;
         break;
     }
 
-    return Math.max(0, rate);
+    return Math.max(0, Math.round(rateCents));
   }
 
-  isApplicable(weight: number, subtotal: number, countryCode?: string): boolean {
+  isApplicable(weight: number, subtotalCents: number, countryCode?: string): boolean {
     if (!this.props.isActive) return false;
     if (this.props.minWeight && weight < this.props.minWeight) return false;
     if (this.props.maxWeight && weight > this.props.maxWeight) return false;
-    if (this.props.minPrice && subtotal < this.props.minPrice) return false;
-    if (this.props.maxPrice && subtotal > this.props.maxPrice) return false;
+    if (this.props.minPriceCents && subtotalCents < this.props.minPriceCents) return false;
+    if (this.props.maxPriceCents && subtotalCents > this.props.maxPriceCents) return false;
     if (countryCode && this.props.countries?.length && !this.props.countries.includes(countryCode)) return false;
     return true;
   }

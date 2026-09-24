@@ -8,7 +8,8 @@ export interface OrderShippingRate {
   carrier: ShippingCarrier;
   serviceLevel: string;
   serviceName: string;
-  rate: number;
+  /** Shipping rate amount in integer cents. */
+  rateCents: number;
   estimatedDays?: number;
   estimatedDeliveryDate?: string;
   currencyCode: string;

@@ -16,7 +16,7 @@ describe('GetProductPerformanceUseCase', () => {
         views: 100,
         addToCarts: 20,
         purchases: 10,
-        revenue: 500,
+        revenueCents: 500,
         units: 10,
         returns: 1,
       },
@@ -27,7 +27,7 @@ describe('GetProductPerformanceUseCase', () => {
         views: 50,
         addToCarts: 5,
         purchases: 2,
-        revenue: 100,
+        revenueCents: 100,
         units: 2,
         returns: 0,
       },
@@ -42,7 +42,7 @@ describe('GetProductPerformanceUseCase', () => {
 
     expect(result.products).toHaveLength(2);
     expect(result.products[0].conversionRate).toBe(10);
-    expect(result.summary.totalRevenue).toBe(600);
+    expect(result.summary.totalRevenueCents).toBe(600);
     expect(result.summary.totalViews).toBe(150);
   });
 

@@ -46,8 +46,8 @@ const shippingMethodCreateFields: FieldConfig[] = [
   { name: 'allowFreeShipping', transform: 'boolNotFalse' },
   { name: 'minWeight', transform: 'floatStr', falsyValue: null },
   { name: 'maxWeight', transform: 'floatStr', falsyValue: null },
-  { name: 'minOrderValue', transform: 'floatStr', falsyValue: null },
-  { name: 'maxOrderValue', transform: 'floatStr', falsyValue: null },
+  { name: 'minOrderValue', transform: 'cents', as: 'minOrderValueCents', falsyValue: null },
+  { name: 'maxOrderValue', transform: 'cents', as: 'maxOrderValueCents', falsyValue: null },
   { name: 'dimensionRestrictions', default: undefined },
   { name: 'shippingClass', transform: 'stringOrUndefined' },
   { name: 'customFields', default: undefined },
@@ -131,8 +131,8 @@ const shippingMethodUpdateFields: FieldConfig[] = [
   { name: 'allowFreeShipping', transform: 'boolTrue' },
   { name: 'minWeight', transform: 'floatStr', falsyValue: null },
   { name: 'maxWeight', transform: 'floatStr', falsyValue: null },
-  { name: 'minOrderValue', transform: 'floatStr', falsyValue: null },
-  { name: 'maxOrderValue', transform: 'floatStr', falsyValue: null },
+  { name: 'minOrderValue', transform: 'cents', as: 'minOrderValueCents', falsyValue: null },
+  { name: 'maxOrderValue', transform: 'cents', as: 'maxOrderValueCents', falsyValue: null },
   { name: 'shippingClass', transform: 'stringOrUndefined' },
 ];
 

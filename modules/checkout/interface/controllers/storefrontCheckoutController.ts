@@ -122,10 +122,10 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     sku: item.sku as string,
     name: item.name as string,
     quantity: item.quantity as number,
-    unitPrice: item.unitPrice as number,
+    unitPriceCents: item.unitPriceCents as number,
     taxRate: item.taxRate as number | undefined,
-    taxAmount: item.taxAmount as number | undefined,
-    discountAmount: item.discountAmount as number | undefined,
+    taxAmountCents: item.taxAmountCents as number | undefined,
+    discountAmountCents: item.discountAmountCents as number | undefined,
   }));
 
   // Create order with proper constructor arguments
@@ -144,7 +144,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     shippingAddress.phone as string,
     `${shippingAddress.firstName} ${shippingAddress.lastName}`,
     specialInstructions as string | undefined,
-    parseFloat(shippingMethod?.cost || '0'),
+    Number(shippingMethod?.costCents || 0),
   );
 
   const orderUseCase = createOrderUseCase;
@@ -190,10 +190,10 @@ export const orderConfirmation = async (req: HttpRequest, res: HttpResponse): Pr
   const orderWithTotals = {
     ...order,
     totals: {
-      subtotal: order.subtotal.toFixed(2),
-      tax: order.taxTotal.toFixed(2),
-      shipping: order.shippingTotal.toFixed(2),
-      total: order.totalAmount.toFixed(2),
+      subtotal: (order.subtotalCents / 100).toFixed(2),
+      tax: (order.taxTotalCents / 100).toFixed(2),
+      shipping: (order.shippingTotalCents / 100).toFixed(2),
+      total: (order.totalAmountCents / 100).toFixed(2),
     },
   };
 
@@ -215,14 +215,14 @@ async function calculateCheckoutTotals(
 ) {
   const basketItems = basket.items as Record<string, unknown>[] | undefined;
   // Use basket.subtotal if available, otherwise calculate from items
-  const subtotal =
-    typeof basket.subtotal === 'number'
-      ? basket.subtotal
+  const subtotalCents =
+    typeof basket.subtotalCents === 'number'
+      ? basket.subtotalCents
       : basketItems?.reduce((sum: number, item: Record<string, unknown>) => {
-          return sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number));
+          return sum + ((item.lineTotalCents as number) ?? (item.unitPriceCents as number) * (item.quantity as number));
         }, 0) || 0;
 
-  const shippingCost = shippingMethod ? parseFloat((shippingMethod.cost as string) || '0') : 0;
+  const shippingCostCents = shippingMethod ? Number(shippingMethod.costCents || 0) : 0;
 
   // Use default shipping address or fallback
   const customerAddresses = customer?.addresses as Record<string, unknown>[] | undefined;
@@ -235,7 +235,7 @@ async function calculateCheckoutTotals(
       productId: item.productId as string,
       name: item.name as string,
       quantity: item.quantity as number,
-      unitPrice: item.unitPrice as number,
+      unitPriceCents: item.unitPriceCents as number,
     })) || [],
     {
       country: (shippingAddress as Record<string, unknown>).country as string,
@@ -243,20 +243,20 @@ async function calculateCheckoutTotals(
       postalCode: (shippingAddress as Record<string, unknown>).postalCode as string,
       city: (shippingAddress as Record<string, unknown>).city as string,
     },
-    shippingCost,
+    shippingCostCents,
     customer?.customerId as string | undefined,
   );
 
   const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);
 
-  const total = subtotal + taxResult.taxAmount + shippingCost;
+  const totalCents = subtotalCents + taxResult.taxAmountCents + shippingCostCents;
 
   return {
-    subtotal: subtotal.toFixed(2),
-    tax: taxResult.taxAmount.toFixed(2),
-    shipping: shippingCost.toFixed(2),
-    total: total.toFixed(2),
+    subtotal: (subtotalCents / 100).toFixed(2),
+    tax: (taxResult.taxAmountCents / 100).toFixed(2),
+    shipping: (shippingCostCents / 100).toFixed(2),
+    total: (totalCents / 100).toFixed(2),
     taxRate: taxResult.taxRate,
   };
 }

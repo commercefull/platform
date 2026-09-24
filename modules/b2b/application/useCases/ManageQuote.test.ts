@@ -30,7 +30,7 @@ describe('ManageQuoteUseCase', () => {
 
   it('should accept a sent quote and emit quote.accepted', async () => {
     const quote = createQuote();
-    quote.addLineItem({ productId: 'p-1', sku: 'S-1', name: 'Item', quantity: 1, unitPrice: 10 });
+    quote.addLineItem({ productId: 'p-1', sku: 'S-1', name: 'Item', quantity: 1, unitPriceCents: 10 });
     quote.send();
     repo.findById.mockResolvedValue(quote);
 
@@ -50,7 +50,7 @@ describe('ManageQuoteUseCase', () => {
 
   it('should reject a quote and emit quote.rejected with the reason', async () => {
     const quote = createQuote();
-    quote.addLineItem({ productId: 'p-1', sku: 'S-1', name: 'Item', quantity: 1, unitPrice: 10 });
+    quote.addLineItem({ productId: 'p-1', sku: 'S-1', name: 'Item', quantity: 1, unitPriceCents: 10 });
     quote.send();
     repo.findById.mockResolvedValue(quote);
 

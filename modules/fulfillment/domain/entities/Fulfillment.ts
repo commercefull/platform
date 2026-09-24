@@ -84,8 +84,8 @@ export interface FulfillmentProps {
   heightCm?: number;
 
   // Costs
-  shippingCost?: number;
-  insuranceCost?: number;
+  shippingCostCents?: number;
+  insuranceCostCents?: number;
 
   // Notes
   notes?: string;
@@ -176,8 +176,8 @@ export class Fulfillment {
   get weightGrams(): number | undefined {
     return this.props.weightGrams;
   }
-  get shippingCost(): number | undefined {
-    return this.props.shippingCost;
+  get shippingCostCents(): number | undefined {
+    return this.props.shippingCostCents;
   }
   get notes(): string | undefined {
     return this.props.notes;

@@ -28,12 +28,17 @@ function createMockProductRepo(product: Product | null = null): jest.Mocked<Prod
 }
 
 describe('CreateProductUseCase', () => {
-  it('should create a product successfully', async () => {
-    const repo = createMockProductRepo();
+  function createUseCase(repo: ReturnType<typeof createMockProductRepo>) {
     const attributeSetRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[1]>();
     attributeSetRepo.getAttributesForProductType.mockResolvedValue([]);
     const dynamicAttributeRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[2]>();
-    const useCase = new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo);
+    const pricingPort = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[3]>();
+    return { useCase: new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo, pricingPort), pricingPort };
+  }
+
+  it('should create a product successfully', async () => {
+    const repo = createMockProductRepo();
+    const { useCase } = createUseCase(repo);
 
     const result = await useCase.execute(new CreateProductCommand('Test Product', 'A test product', 'pt-1'));
 
@@ -43,22 +48,41 @@ describe('CreateProductUseCase', () => {
     expect(repo.save).toHaveBeenCalled();
   });
 
+  it('should persist the base price via the pricing port when provided', async () => {
+    const repo = createMockProductRepo();
+    const { useCase, pricingPort } = createUseCase(repo);
+    pricingPort.setBasePrice.mockResolvedValue({
+      productBasePriceId: 'bp1',
+      productId: 'p-1',
+      productVariantId: null,
+      currencyCode: 'USD',
+      priceCents: 1999,
+      salePriceCents: null,
+      compareAtPriceCents: null,
+      costPriceCents: null,
+      updatedAt: new Date(),
+    });
+
+    const result = await useCase.execute(
+      new CreateProductCommand('Test Product', 'A test product', 'pt-1', undefined, undefined, undefined, undefined, undefined, 1999),
+    );
+
+    expect(pricingPort.setBasePrice).toHaveBeenCalledWith(
+      expect.objectContaining({ productId: 'p-1', priceCents: 1999, currencyCode: 'USD' }),
+    );
+    expect(result.basePriceCents).toBe(1999);
+  });
+
   it('should throw ProductValidationError when name is empty', async () => {
     const repo = createMockProductRepo();
-    const attributeSetRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[1]>();
-    attributeSetRepo.getAttributesForProductType.mockResolvedValue([]);
-    const dynamicAttributeRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[2]>();
-    const useCase = new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo);
+    const { useCase } = createUseCase(repo);
 
     await expect(useCase.execute(new CreateProductCommand('', 'desc', 'pt-1'))).rejects.toThrow(ProductValidationError);
   });
 
   it('should throw ProductValidationError when productTypeId is empty', async () => {
     const repo = createMockProductRepo();
-    const attributeSetRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[1]>();
-    attributeSetRepo.getAttributesForProductType.mockResolvedValue([]);
-    const dynamicAttributeRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[2]>();
-    const useCase = new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo);
+    const { useCase } = createUseCase(repo);
 
     await expect(useCase.execute(new CreateProductCommand('Test', 'desc', ''))).rejects.toThrow(ProductValidationError);
   });
@@ -67,10 +91,7 @@ describe('CreateProductUseCase', () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySku.mockResolvedValue(existingProduct);
-    const attributeSetRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[1]>();
-    attributeSetRepo.getAttributesForProductType.mockResolvedValue([]);
-    const dynamicAttributeRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[2]>();
-    const useCase = new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo);
+    const { useCase } = createUseCase(repo);
 
     await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', 'SKU-1'))).rejects.toThrow(ProductSkuAlreadyExistsError);
   });
@@ -79,10 +100,7 @@ describe('CreateProductUseCase', () => {
     const existingProduct = createProduct();
     const repo = createMockProductRepo();
     repo.findBySlug.mockResolvedValue(existingProduct);
-    const attributeSetRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[1]>();
-    attributeSetRepo.getAttributesForProductType.mockResolvedValue([]);
-    const dynamicAttributeRepo = lazyMock<ConstructorParameters<typeof CreateProductUseCase>[2]>();
-    const useCase = new CreateProductUseCase(repo, attributeSetRepo, dynamicAttributeRepo);
+    const { useCase } = createUseCase(repo);
 
     await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', undefined, 'test-slug'))).rejects.toThrow(
       ProductSlugAlreadyExistsError,

@@ -37,7 +37,7 @@ interface CreateRewardBody {
   name: string;
   description?: string;
   pointsCost: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;
@@ -50,7 +50,7 @@ interface UpdateRewardBody {
   name?: string;
   description?: string;
   pointsCost?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;
@@ -180,7 +180,7 @@ export const createReward = async (
   req: HttpRequest<Record<string, string>, unknown, CreateRewardBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
     req.body;
 
   if (!name || pointsCost === undefined) {
@@ -192,7 +192,7 @@ export const createReward = async (
     name,
     description,
     pointsCost,
-    discountAmount,
+    discountAmountCents,
     discountPercent,
     discountCode,
     freeShipping,
@@ -209,14 +209,14 @@ export const updateReward = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { name, description, pointsCost, discountAmount, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
+  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
     req.body;
 
   const reward = await loyaltyRepo.updateReward(id, {
     name,
     description,
     pointsCost,
-    discountAmount,
+    discountAmountCents,
     discountPercent,
     discountCode,
     freeShipping,
@@ -268,7 +268,7 @@ export const adjustCustomerPoints = async (
   const { points, reason, tierId } = req.body;
 
   if (points === undefined) {
-    respondError(res, 'Points adjustment amount is required', 400);
+    respondError(res, 'Points adjustment amountCents is required', 400);
     return;
   }
 
@@ -331,7 +331,7 @@ export const processOrderPoints = async (
   const { orderAmount, customerId } = req.body;
 
   if (!orderAmount || !customerId) {
-    respondError(res, 'Order amount and customer ID are required', 400);
+    respondError(res, 'Order amountCents and customer ID are required', 400);
     return;
   }
 

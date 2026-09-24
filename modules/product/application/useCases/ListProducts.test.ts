@@ -17,7 +17,9 @@ describe('ListProductsUseCase', () => {
       hasMore: false,
       length: 2,
     });
-    useCase = new ListProductsUseCase(mockRepo);
+    const pricingPort = lazyMock<ConstructorParameters<typeof ListProductsUseCase>[1]>();
+    pricingPort.getBasePrices.mockResolvedValue([]);
+    useCase = new ListProductsUseCase(mockRepo, pricingPort);
   });
 
   it('should list products (happy path)', async () => {

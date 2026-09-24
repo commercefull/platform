@@ -18,8 +18,8 @@ export interface ReturnRuleRow {
   productId: string | null;
   returnWindowDays: number | null;
   restockingFeePercent: string | null;
-  restockingFeeFlat: string | null;
-  returnShippingCost: string | null;
+  restockingFeeFlatCents: number | null;
+  returnShippingCostCents: number | null;
   customerPaysReturnShipping: boolean;
   autoApprove: boolean;
   requiresManualReview: boolean;
@@ -40,8 +40,8 @@ function mapToEntity(row: ReturnRuleRow): ReturnRule {
     productId: row.productId ?? undefined,
     returnWindowDays: row.returnWindowDays ?? undefined,
     restockingFeePercent: row.restockingFeePercent ? parseFloat(row.restockingFeePercent) : undefined,
-    restockingFeeFlat: row.restockingFeeFlat ? parseFloat(row.restockingFeeFlat) : undefined,
-    returnShippingCost: row.returnShippingCost ? parseFloat(row.returnShippingCost) : undefined,
+    restockingFeeFlatCents: row.restockingFeeFlatCents ?? undefined,
+    returnShippingCostCents: row.returnShippingCostCents ?? undefined,
     customerPaysReturnShipping: row.customerPaysReturnShipping,
     autoApprove: row.autoApprove,
     requiresManualReview: row.requiresManualReview,
@@ -100,7 +100,7 @@ export async function create(input: CreateReturnRuleInput): Promise<ReturnRule> 
   const row = await queryOne<ReturnRuleRow>(
     `INSERT INTO "returnRule" (
       "name", "description", "scope", "categoryId", "productId",
-      "returnWindowDays", "restockingFeePercent", "restockingFeeFlat", "returnShippingCost",
+      "returnWindowDays", "restockingFeePercent", "restockingFeeFlatCents", "returnShippingCostCents",
       "customerPaysReturnShipping", "autoApprove", "requiresManualReview", "requiresInspection",
       "refundMethod", "conditions", "priority", "isActive"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
@@ -112,8 +112,8 @@ export async function create(input: CreateReturnRuleInput): Promise<ReturnRule> 
       input.productId ?? null,
       input.returnWindowDays ?? null,
       input.restockingFeePercent ?? 0,
-      input.restockingFeeFlat ?? 0,
-      input.returnShippingCost ?? 0,
+      input.restockingFeeFlatCents ?? 0,
+      input.returnShippingCostCents ?? 0,
       input.customerPaysReturnShipping,
       input.autoApprove,
       input.requiresManualReview,

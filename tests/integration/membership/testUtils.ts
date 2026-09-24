@@ -5,8 +5,8 @@ import { MembershipTier, LegacyMembershipBenefit as MembershipBenefit, UserMembe
 export const testTier: Partial<MembershipTier> = {
   name: 'Test Tier',
   description: 'Test tier for integration tests',
-  monthlyPrice: 19.99,
-  annualPrice: 199.99,
+  monthlyPriceCents: 1999,
+  annualPriceCents: 19999,
   level: 2,
   isActive: true,
 };

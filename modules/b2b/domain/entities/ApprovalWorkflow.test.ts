@@ -11,7 +11,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-2024-001',
         requestedBy: 'user-1',
         requestedByEmail: 'buyer@acme.com',
-        amount: 5000,
+        amountCents: 5000,
         approvers: [
           { approverId: 'mgr-1', approverEmail: 'mgr@acme.com' },
           { approverId: 'vp-1', approverEmail: 'vp@acme.com' },
@@ -21,7 +21,7 @@ describe('ApprovalWorkflow Entity', () => {
       expect(wf.status).toBe('pending');
       expect(wf.steps).toHaveLength(2);
       expect(wf.currentStep).toBe(1);
-      expect(wf.amount).toBe(5000);
+      expect(wf.amountCents).toBe(5000);
     });
 
     it('should set step order correctly', () => {
@@ -33,7 +33,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'QT-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 100,
+        amountCents: 100,
         approvers: [{ approverId: 'a1', approverEmail: 'a@b.com' }],
       });
       expect(wf.steps[0].order).toBe(1);
@@ -53,7 +53,7 @@ describe('ApprovalWorkflow Entity', () => {
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
         status: 'approved' as const,
-        amount: 1000,
+        amountCents: 1000,
         currency: 'USD',
         steps: [{ stepId: 's1', approverId: 'a1', approverEmail: 'a@b.com', status: 'approved' as const, order: 1 }],
         currentStep: 1,
@@ -77,7 +77,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [
           { approverId: 'a1', approverEmail: 'a1@b.com' },
           { approverId: 'a2', approverEmail: 'a2@b.com' },
@@ -97,7 +97,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       wf.approve('a1');
@@ -115,7 +115,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [
           { approverId: 'a1', approverEmail: 'a1@b.com' },
           { approverId: 'a2', approverEmail: 'a2@b.com' },
@@ -135,7 +135,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       wf.reject('a1', 'Too expensive');
@@ -154,7 +154,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [
           { approverId: 'a1', approverEmail: 'a1@b.com' },
           { approverId: 'a2', approverEmail: 'a2@b.com' },
@@ -174,7 +174,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       expect(() => wf.escalate()).toThrow('Cannot escalate: no more steps remaining');
@@ -191,7 +191,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       wf.cancel();
@@ -208,7 +208,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       wf.approve('a1');
@@ -226,7 +226,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [
           { approverId: 'a1', approverEmail: 'a1@b.com' },
           { approverId: 'a2', approverEmail: 'a2@b.com' },
@@ -248,7 +248,7 @@ describe('ApprovalWorkflow Entity', () => {
         referenceNumber: 'PO-001',
         requestedBy: 'u-1',
         requestedByEmail: 'a@b.com',
-        amount: 1000,
+        amountCents: 1000,
         approvers: [{ approverId: 'a1', approverEmail: 'a1@b.com' }],
       });
       const json = wf.toJSON();

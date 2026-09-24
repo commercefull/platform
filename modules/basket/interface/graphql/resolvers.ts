@@ -38,7 +38,6 @@ export const basketResolvers = {
         sku: string;
         name: string;
         quantity: number;
-        unitPrice: number;
         productVariantId?: string;
         imageUrl?: string;
         itemType?: string;
@@ -52,7 +51,6 @@ export const basketResolvers = {
         args.sku,
         args.name,
         args.quantity,
-        args.unitPrice,
         args.productVariantId,
         args.imageUrl,
         undefined,

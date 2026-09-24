@@ -19,7 +19,7 @@ describe('PaymentPaymentAuthorizationAdapter', () => {
   it('should initiate payment and return transaction result', async () => {
     const result = await adapter.initiatePayment({
       orderId: 'order-1',
-      amount: 100,
+      amountCents: 100,
       currency: 'USD',
       paymentMethodId: 'pm-1',
       customerId: 'cust-1',
@@ -28,7 +28,7 @@ describe('PaymentPaymentAuthorizationAdapter', () => {
     expect(initiatePaymentUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({
         orderId: 'order-1',
-        amount: 100,
+        amountCents: 100,
         currency: 'USD',
         paymentMethodConfigId: 'pm-1',
         customerId: 'cust-1',
@@ -44,7 +44,7 @@ describe('PaymentPaymentAuthorizationAdapter', () => {
     await expect(
       adapter.initiatePayment({
         orderId: 'order-1',
-        amount: 100,
+        amountCents: 100,
         currency: 'USD',
         paymentMethodId: 'pm-1',
       }),

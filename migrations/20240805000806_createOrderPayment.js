@@ -19,7 +19,7 @@ exports.up = function (knex) {
       'storeCredit',
     ]).notNullable();
     t.string('provider', 100).notNullable();
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currency', 3).notNullable();
     t.enum('status', ['pending', 'authorized', 'captured', 'refunded', 'partiallyRefunded', 'voided', 'failed'])
       .notNullable()
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.string('maskedNumber', 30);
     t.string('cardType', 50);
     t.jsonb('gatewayResponse');
-    t.decimal('refundedAmount', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('refundedAmountCents').notNullable().defaultTo(0);
     t.timestamp('capturedAt');
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());

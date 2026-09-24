@@ -13,6 +13,8 @@ import { SystemConfigPort } from '../../application/ports/SystemConfigPort';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
+import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
+import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
 
 // ============================================================================
 // Command
@@ -28,8 +30,9 @@ export class ListProductsForContextCommand {
       categoryId?: string;
       isFeatured?: boolean;
       search?: string;
-      priceMin?: number;
-      priceMax?: number;
+      /** Price bounds in integer cents. */
+      priceMinCents?: number;
+      priceMaxCents?: number;
     },
     public readonly includeInactive: boolean = false,
     public readonly limit: number = 20,
@@ -48,6 +51,7 @@ export class ListProductsForContextUseCase {
     private readonly productRepository: ProductRepository,
     private readonly storeLookupPort: StoreLookupPort,
     private readonly systemConfigPort: SystemConfigPort,
+    private readonly pricingPort: ProductPricingPort,
     private readonly organizationLookupPort?: OrganizationLookupPort,
   ) {}
 
@@ -67,8 +71,12 @@ export class ListProductsForContextUseCase {
 
     const result = await this.productRepository.findAll(filters, pagination);
 
+    // Batch-load catalog prices from the pricing-owned store
+    const prices = await this.pricingPort.getBasePrices(result.data.map(p => p.productId));
+    const priceByProductId = new Map<string, ProductPriceInfo>(prices.map(p => [p.productId, p]));
+
     return {
-      products: result.data.map(product => this.mapToListItem(product)),
+      products: result.data.map(product => this.mapToListItem(product, priceByProductId.get(product.productId))),
       total: result.total,
       limit: result.limit,
       offset: result.offset,
@@ -119,13 +127,14 @@ export class ListProductsForContextUseCase {
     if (command.context.categoryId) filters.categoryId = command.context.categoryId;
     if (command.context.isFeatured !== undefined) filters.isFeatured = command.context.isFeatured;
     if (command.context.search) filters.search = command.context.search;
-    if (command.context.priceMin !== undefined) filters.priceMin = command.context.priceMin;
-    if (command.context.priceMax !== undefined) filters.priceMax = command.context.priceMax;
+    if (command.context.priceMinCents !== undefined) filters.priceMinCents = command.context.priceMinCents;
+    if (command.context.priceMaxCents !== undefined) filters.priceMaxCents = command.context.priceMaxCents;
 
     return filters;
   }
 
-  private mapToListItem(product: Product): ProductListItemResponse {
+  private mapToListItem(product: Product, price: ProductPriceInfo | undefined): ProductListItemResponse {
+    const priceDto = toProductPriceDtoOrEmpty(price);
     return {
       productId: product.productId,
       name: product.name,
@@ -133,10 +142,10 @@ export class ListProductsForContextUseCase {
       sku: product.sku,
       status: product.status,
       visibility: product.visibility,
-      basePrice: product.price.basePrice,
-      salePrice: product.price.salePrice,
-      effectivePrice: product.price.effectivePrice,
-      isOnSale: product.price.isOnSale,
+      basePriceCents: priceDto.basePriceCents,
+      salePriceCents: priceDto.salePriceCents,
+      effectivePriceCents: priceDto.effectivePriceCents,
+      isOnSale: priceDto.isOnSale,
       isFeatured: product.isFeatured,
       hasVariants: product.hasVariants,
       primaryImageUrl: product.primaryImage?.url,

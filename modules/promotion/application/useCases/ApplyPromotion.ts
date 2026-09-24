@@ -11,7 +11,7 @@ import { PromotionRepository } from '../../domain/repositories/PromotionReposito
 export class ApplyPromotionCommand {
   constructor(
     public readonly code: string,
-    public readonly subtotal: number,
+    public readonly subtotalCents: number,
     public readonly customerId?: string,
   ) {}
 }
@@ -25,7 +25,7 @@ export interface ApplyPromotionResponse {
   promotionId?: string;
   code?: string;
   type?: string;
-  discountAmount?: number;
+  discountAmountCents?: number;
   message?: string;
 }
 
@@ -41,7 +41,7 @@ export class ApplyPromotionUseCase {
       return { valid: false, message: 'Promotion code is required' };
     }
 
-    const result = await this.promotionRepository.validateCode!(command.code.toUpperCase(), command.subtotal, command.customerId);
+    const result = await this.promotionRepository.validateCode!(command.code.toUpperCase(), command.subtotalCents, command.customerId);
 
     if (!result.valid) {
       return { valid: false, message: result.message || 'Invalid promotion code' };
@@ -52,7 +52,7 @@ export class ApplyPromotionUseCase {
       promotionId: result.promotion?.promotionId,
       code: result.promotion?.code,
       type: result.promotion?.type,
-      discountAmount: result.discount,
+      discountAmountCents: result.discount,
       message: 'Promotion applied successfully',
     };
   }

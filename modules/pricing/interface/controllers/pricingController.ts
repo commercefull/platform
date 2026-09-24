@@ -20,7 +20,7 @@ interface PricingRuleBody {
 interface TierPriceBody {
   productId?: string;
   quantityMin?: number;
-  price?: number;
+  priceCents?: number;
   [key: string]: unknown;
 }
 
@@ -245,10 +245,10 @@ export const createTierPrice = async (
   const tierPriceData = req.body;
 
   // Validate required fields
-  if (!tierPriceData.productId || !tierPriceData.quantityMin || !tierPriceData.price) {
+  if (!tierPriceData.productId || !tierPriceData.quantityMin || tierPriceData.priceCents === undefined) {
     res.status(400).json({
       success: false,
-      message: 'Missing required fields: productId, quantityMin, and price are required',
+      message: 'Missing required fields: productId, quantityMin, and priceCents are required',
     });
     return;
   }

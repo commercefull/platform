@@ -15,16 +15,16 @@ export class GetShippingMethodDetailsUseCase {
         return {
           shippingMethodId: defaultMethod.shippingMethodId,
           name: defaultMethod.name,
-          cost: rate?.baseRate || '0.00',
+          costCents: rate ? Number(rate.baseRateCents) : 0,
           estimatedDeliveryDays: defaultMethod.estimatedDeliveryDays,
         };
       }
-      return { cost: '0.00', name: 'Standard Shipping' };
+      return { costCents: 0, name: 'Standard Shipping' };
     }
 
     const method = await this.shippingMethodRepo.findById(shippingMethodId);
     if (!method) {
-      return { cost: '0.00', name: 'Standard Shipping' };
+      return { costCents: 0, name: 'Standard Shipping' };
     }
 
     const rates = await this.shippingRateRepo.findByMethod(shippingMethodId, true);
@@ -33,7 +33,7 @@ export class GetShippingMethodDetailsUseCase {
     return {
       shippingMethodId: method.shippingMethodId,
       name: method.name,
-      cost: rate?.baseRate || '0.00',
+      costCents: rate ? Number(rate.baseRateCents) : 0,
       estimatedDeliveryDays: method.estimatedDeliveryDays,
     };
   }

@@ -25,8 +25,8 @@ export interface TaxExemptionProps {
   expiryDate?: Date | number | null;
   isVerified: boolean;
   applicableTaxCategoryIds?: string[] | null;
-  minOrderAmount?: number | null;
-  maxOrderAmount?: number | null;
+  minOrderAmountCents?: number | null;
+  maxOrderAmountCents?: number | null;
   exemptionPercent?: number;
 }
 
@@ -89,12 +89,12 @@ export class TaxExemption {
     }
 
     // Check order amount bounds
-    const orderSubtotal = context.orderSubtotal;
-    if (this.props.minOrderAmount !== null && this.props.minOrderAmount !== undefined) {
-      if (orderSubtotal < Number(this.props.minOrderAmount)) return 'notExempt';
+    const orderSubtotal = context.orderSubtotalCents;
+    if (this.props.minOrderAmountCents !== null && this.props.minOrderAmountCents !== undefined) {
+      if (orderSubtotal < Number(this.props.minOrderAmountCents)) return 'notExempt';
     }
-    if (this.props.maxOrderAmount !== null && this.props.maxOrderAmount !== undefined) {
-      if (orderSubtotal > Number(this.props.maxOrderAmount)) return 'notExempt';
+    if (this.props.maxOrderAmountCents !== null && this.props.maxOrderAmountCents !== undefined) {
+      if (orderSubtotal > Number(this.props.maxOrderAmountCents)) return 'notExempt';
     }
 
     // Determine verdict based on exemption percent

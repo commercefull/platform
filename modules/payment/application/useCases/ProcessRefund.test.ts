@@ -26,7 +26,7 @@ describe('ProcessPaymentRefundUseCase', () => {
       orderId: 'o1',
       paymentMethodConfigId: 'pm1',
       gatewayId: 'gw1',
-      amount: 100,
+      amountCents: 100,
       currency: 'USD',
     });
     t.markAsPaid('ext-1');
@@ -48,15 +48,15 @@ describe('ProcessPaymentRefundUseCase', () => {
     const result = await useCase.execute(new ProcessPaymentRefundCommand('t1', 50, 'Customer request'));
 
     expect(result.refundId).toBe('refund-uuid');
-    expect(result.amount).toBe(50);
+    expect(result.amountCents).toBe(50);
     expect(recordRefundSpy).toHaveBeenCalledWith(50);
     expect(emitMock).toHaveBeenCalled();
   });
 
-  it('should process a full refund up to the refundable amount', async () => {
+  it('should process a full refund up to the refundable amountCents', async () => {
     const result = await useCase.execute(new ProcessPaymentRefundCommand('t1', 100, 'full refund'));
 
-    expect(result.amount).toBe(100);
+    expect(result.amountCents).toBe(100);
     expect(mockRepo.saveRefund).toHaveBeenCalled();
     expect(mockRepo.saveTransaction).toHaveBeenCalled();
   });
@@ -69,13 +69,13 @@ describe('ProcessPaymentRefundUseCase', () => {
 
   it('should throw TransactionCannotBeRefundedError when transaction cannot be refunded', async () => {
     mockRepo.findTransactionById.mockResolvedValue(
-      PaymentTransaction.create({ transactionId: 't2', orderId: 'o1', paymentMethodConfigId: 'pm1', gatewayId: 'gw1', amount: 100, currency: 'USD' }),
+      PaymentTransaction.create({ transactionId: 't2', orderId: 'o1', paymentMethodConfigId: 'pm1', gatewayId: 'gw1', amountCents: 100, currency: 'USD' }),
     );
 
     await expect(useCase.execute(new ProcessPaymentRefundCommand('t1', 50))).rejects.toThrow(TransactionCannotBeRefundedError);
   });
 
-  it('should throw RefundAmountExceedsRefundableError when amount exceeds refundable', async () => {
+  it('should throw RefundAmountExceedsRefundableError when amountCents exceeds refundable', async () => {
     await expect(useCase.execute(new ProcessPaymentRefundCommand('t1', 200))).rejects.toThrow(RefundAmountExceedsRefundableError);
   });
 });

@@ -17,20 +17,20 @@ describe('GetShippingMethodDetailsUseCase', () => {
     useCase = new GetShippingMethodDetailsUseCase(methodRepo, rateRepo);
   });
 
-  it('should return method details with the rate cost', async () => {
+  it('should return method details with the rate costCents', async () => {
     methodRepo.findById.mockResolvedValue(createShippingMethod({ shippingMethodId: 'm1', name: 'Ground' }));
-    rateRepo.findByMethod.mockResolvedValue([createShippingRate({ baseRate: '15.00' })]);
+    rateRepo.findByMethod.mockResolvedValue([createShippingRate({ baseRateCents: 1500 })]);
 
     const result = await useCase.getShippingMethod('m1');
 
     expect(result.shippingMethodId).toBe('m1');
     expect(result.name).toBe('Ground');
-    expect(result.cost).toBe('15.00');
+    expect(result.costCents).toBe(1500);
   });
 
   it('should return the default method when no ID is provided', async () => {
     methodRepo.findDefault.mockResolvedValue(createShippingMethod({ shippingMethodId: 'm0', name: 'Standard' }));
-    rateRepo.findByMethod.mockResolvedValue([createShippingRate({ baseRate: '5.00' })]);
+    rateRepo.findByMethod.mockResolvedValue([createShippingRate({ baseRateCents: 500 })]);
 
     const result = await useCase.getShippingMethod('');
 
@@ -45,7 +45,7 @@ describe('GetShippingMethodDetailsUseCase', () => {
     const result = await useCase.getShippingMethod('nonexistent');
 
     expect(result.name).toBe('Standard Shipping');
-    expect(result.cost).toBe('0.00');
+    expect(result.costCents).toBe(0);
   });
 
   it('should return fallback details when no default method exists', async () => {
@@ -54,15 +54,15 @@ describe('GetShippingMethodDetailsUseCase', () => {
     const result = await useCase.getShippingMethod('');
 
     expect(result.name).toBe('Standard Shipping');
-    expect(result.cost).toBe('0.00');
+    expect(result.costCents).toBe(0);
   });
 
-  it('should default the cost to zero when the method has no rates', async () => {
+  it('should default the costCents to zero when the method has no rates', async () => {
     methodRepo.findById.mockResolvedValue(createShippingMethod({ shippingMethodId: 'm1' }));
     rateRepo.findByMethod.mockResolvedValue([]);
 
     const result = await useCase.getShippingMethod('m1');
 
-    expect(result.cost).toBe('0.00');
+    expect(result.costCents).toBe(0);
   });
 });

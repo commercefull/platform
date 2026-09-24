@@ -41,8 +41,8 @@ const paymentConfigRepoAdapter = {
       provider: m.paymentMethod,
       displayName: m.displayName,
       isActive: true,
-      minAmount: undefined,
-      maxAmount: undefined,
+      minAmountCents: undefined,
+      maxAmountCents: undefined,
       supportedCurrencies: undefined,
       supportedCountries: undefined,
     }));
@@ -58,7 +58,7 @@ const captureRepoAdapter = {
       transactionId: json.transactionId as string,
       orderId: json.orderId as string,
       gatewayTransactionId: (json.externalTransactionId as string) || '',
-      amount: json.amount as number,
+      amountCents: json.amountCents as number,
       currency: json.currency as string,
       status: json.status as string,
     };
@@ -69,7 +69,7 @@ const captureRepoAdapter = {
 };
 
 const captureGatewayAdapter = {
-  capture: async (_params: { transactionId: string; amount: number; currency: string; metadata?: Record<string, unknown> }) => {
+  capture: async (_params: { transactionId: string; amountCents: number; currency: string; metadata?: Record<string, unknown> }) => {
     // Gateway capture would be implemented via the actual provider SDK
     return { success: true, response: {} };
   },
@@ -126,7 +126,7 @@ export const paymentResolvers = {
       _parent: unknown,
       args: {
         orderId: string;
-        amount: number;
+        amountCents: number;
         currency: string;
         paymentMethodConfigId: string;
         customerId?: string;
@@ -138,7 +138,7 @@ export const paymentResolvers = {
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
       const command = new InitiatePaymentCommand(
         args.orderId,
-        args.amount,
+        args.amountCents,
         args.currency,
         args.paymentMethodConfigId,
         args.customerId,
@@ -151,14 +151,14 @@ export const paymentResolvers = {
       _parent: unknown,
       args: {
         transactionId: string;
-        amount: number;
+        amountCents: number;
         reason?: string;
       },
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
       const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
-      const command = new ProcessPaymentRefundCommand(args.transactionId, args.amount, args.reason);
+      const command = new ProcessPaymentRefundCommand(args.transactionId, args.amountCents, args.reason);
       return useCase.execute(command);
     },
 
@@ -166,7 +166,7 @@ export const paymentResolvers = {
       _parent: unknown,
       args: {
         transactionId: string;
-        amount?: number;
+        amountCents?: number;
       },
       context: GraphQLAuthContext,
     ) => {
@@ -174,7 +174,7 @@ export const paymentResolvers = {
       const useCase = new CapturePaymentUseCase(captureRepoAdapter, captureGatewayAdapter);
       const input: CapturePaymentInput = {
         transactionId: args.transactionId,
-        amount: args.amount,
+        amountCents: args.amountCents,
       };
       return useCase.execute(input);
     },

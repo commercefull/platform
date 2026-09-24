@@ -32,7 +32,7 @@ export interface OrderSummaryResponse {
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
-  totalAmount: number;
+  totalAmountCents: number;
   totalItems: number;
   currencyCode: string;
   orderDate: string;
@@ -84,7 +84,7 @@ export class GetCustomerOrdersUseCase {
       status: order.status,
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,
-      totalAmount: order.totalAmount.amount,
+      totalAmountCents: order.totalAmount.cents,
       totalItems: order.totalItems,
       currencyCode: order.currencyCode,
       orderDate: order.orderDate.toISOString(),

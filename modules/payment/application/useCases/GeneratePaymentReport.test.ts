@@ -19,7 +19,7 @@ describe('GeneratePaymentReportUseCase', () => {
     );
 
     expect(result.paymentReportId).toBe('r1');
-    expect(result.totalAmount).toBe(5000);
+    expect(result.totalAmountCents).toBe(5000);
   });
 
   it('should throw PeriodEndMustBeAfterStartError when end precedes start', async () => {

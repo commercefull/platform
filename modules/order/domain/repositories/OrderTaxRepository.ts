@@ -6,8 +6,10 @@ export interface OrderTax {
   orderItemId?: string;
   taxType: string;
   name: string;
+  /** Tax rate percentage. */
   rate: number;
-  amount: number;
+  /** Tax amount in integer cents. */
+  amountCents: number;
   jurisdiction?: string;
   taxProvider?: string;
   providerTaxId?: string;

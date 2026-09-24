@@ -11,7 +11,7 @@ describe('Company Entity', () => {
       expect(company.name).toBe('Acme Corp');
       expect(company.status).toBe('pending');
       expect(company.paymentTerms).toBe('net30');
-      expect(company.outstandingBalance).toBe(0);
+      expect(company.outstandingBalanceCents).toBe(0);
       expect(company.isSubsidiary).toBe(false);
     });
 
@@ -22,14 +22,14 @@ describe('Company Entity', () => {
         legalName: 'Acme Corporation Inc.',
         taxId: '12-3456789',
         paymentTerms: 'net60',
-        creditLimit: 50000,
+        creditLimitCents: 50000,
         contactEmail: 'billing@acme.com',
         parentId: 'parent-1',
       });
       expect(company.legalName).toBe('Acme Corporation Inc.');
       expect(company.taxId).toBe('12-3456789');
       expect(company.paymentTerms).toBe('net60');
-      expect(company.creditLimit).toBe(50000);
+      expect(company.creditLimitCents).toBe(50000);
       expect(company.isSubsidiary).toBe(true);
     });
   });
@@ -42,7 +42,7 @@ describe('Company Entity', () => {
         name: 'Acme',
         status: 'approved' as const,
         paymentTerms: 'net15' as const,
-        outstandingBalance: 1000,
+        outstandingBalanceCents: 1000,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-02'),
       };
@@ -100,7 +100,7 @@ describe('Company Entity', () => {
     it('should set credit limit', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
       company.setCreditLimit(10000);
-      expect(company.creditLimit).toBe(10000);
+      expect(company.creditLimitCents).toBe(10000);
     });
 
     it('should not set negative credit limit', () => {
@@ -109,7 +109,7 @@ describe('Company Entity', () => {
     });
 
     it('should check available credit', () => {
-      const company = Company.create({ organizationId: 'org-1', name: 'Acme', creditLimit: 1000 });
+      const company = Company.create({ organizationId: 'org-1', name: 'Acme', creditLimitCents: 1000 });
       expect(company.hasAvailableCredit(500)).toBe(true);
       company.increaseBalance(600);
       expect(company.hasAvailableCredit(500)).toBe(false);
@@ -124,16 +124,16 @@ describe('Company Entity', () => {
     it('should increase and decrease balance', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
       company.increaseBalance(500);
-      expect(company.outstandingBalance).toBe(500);
+      expect(company.outstandingBalanceCents).toBe(500);
       company.decreaseBalance(200);
-      expect(company.outstandingBalance).toBe(300);
+      expect(company.outstandingBalanceCents).toBe(300);
     });
 
     it('should not decrease below zero', () => {
       const company = Company.create({ organizationId: 'org-1', name: 'Acme' });
       company.increaseBalance(100);
       company.decreaseBalance(200);
-      expect(company.outstandingBalance).toBe(0);
+      expect(company.outstandingBalanceCents).toBe(0);
     });
   });
 

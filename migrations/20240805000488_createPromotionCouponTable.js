@@ -10,8 +10,8 @@ exports.up = function (knex) {
     t.enum('type', ['percentage', 'fixedAmount', 'freeShipping', 'buyXGetY', 'firstOrder', 'giftCard']).notNullable();
     t.decimal('discountAmount', 15, 2);
     t.string('currencyCode', 3).defaultTo('USD');
-    t.decimal('minOrderAmount', 15, 2);
-    t.decimal('maxDiscountAmount', 15, 2);
+    t.bigInteger('minOrderAmountCents');
+    t.bigInteger('maxDiscountAmountCents');
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('endDate');
     t.boolean('isActive').notNullable().defaultTo(true);

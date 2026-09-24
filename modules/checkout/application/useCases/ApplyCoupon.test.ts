@@ -19,14 +19,14 @@ describe('ApplyCouponUseCase', () => {
     checkoutRepository.findById.mockResolvedValue(session);
     discountQuotePort.validateDiscount.mockResolvedValue({
       valid: true,
-      discount: { code: 'SAVE10', discountAmount: 10 },
+      discount: { code: 'SAVE10', discountAmountCents: 1000 },
     });
 
     const result = await useCase.execute(new ApplyCouponCommand('ck-1', 'SAVE10'));
 
     expect(result.couponCode).toBe('SAVE10');
-    expect(result.discountAmount).toBe(10);
-    expect(discountQuotePort.validateDiscount).toHaveBeenCalledWith('SAVE10', 100, 'USD');
+    expect(result.discountAmountCents).toBe(1000);
+    expect(discountQuotePort.validateDiscount).toHaveBeenCalledWith('SAVE10', 10000, 'USD');
     expect(checkoutRepository.save).toHaveBeenCalledWith(session);
     expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'coupon', couponCode: 'SAVE10' }));
   });

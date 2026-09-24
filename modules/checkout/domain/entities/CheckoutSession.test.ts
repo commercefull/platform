@@ -11,7 +11,7 @@ describe('CheckoutSession', () => {
     expect(session.status).toBe('active');
     expect(session.isActive).toBe(true);
     expect(session.fulfillmentType).toBe('shipping');
-    expect(session.total.amount).toBe(0);
+    expect(session.total.cents).toBe(0);
   });
 
   it('should set shipping address', () => {
@@ -34,14 +34,14 @@ describe('CheckoutSession', () => {
     session.setFulfillmentType('pickup');
     expect(session.fulfillmentType).toBe('pickup');
     expect(session.shippingMethodId).toBeUndefined();
-    expect(session.shippingAmount.amount).toBe(0);
+    expect(session.shippingAmount.cents).toBe(0);
   });
 
   it('should set shipping method and recalculate total', () => {
     const session = CheckoutSession.create({ id: 'cs1', basketId: 'b1' });
     session.updateAmounts(Money.create(100, 'USD'), Money.create(10, 'USD'));
     session.setShippingMethod('sm1', 'Express', Money.create(15, 'USD'));
-    expect(session.total.amount).toBe(125);
+    expect(session.total.cents).toBe(12500);
   });
 
   it('should apply coupon and recalculate', () => {
@@ -49,7 +49,7 @@ describe('CheckoutSession', () => {
     session.updateAmounts(Money.create(100, 'USD'), Money.create(10, 'USD'));
     session.applyCoupon('SAVE20', Money.create(20, 'USD'));
     expect(session.couponCode).toBe('SAVE20');
-    expect(session.total.amount).toBe(90);
+    expect(session.total.cents).toBe(9000);
   });
 
   it('should remove coupon', () => {
@@ -58,7 +58,7 @@ describe('CheckoutSession', () => {
     session.applyCoupon('SAVE20', Money.create(20, 'USD'));
     session.removeCoupon();
     expect(session.couponCode).toBeUndefined();
-    expect(session.total.amount).toBe(110);
+    expect(session.total.cents).toBe(11000);
   });
 
   it('should set payment method', () => {

@@ -286,10 +286,11 @@ export const notifyStockAlerts: AsyncHandler = async (req, res, _next) => {
 
 export const notifyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   const { productId, newPrice } = req.body as { productId: string; newPrice: number };
-  const alerts = await alertRepo.getPriceAlertsToNotify(productId, newPrice);
+  const newPriceCents = Math.round(Number(newPrice) * 100);
+  const alerts = await alertRepo.getPriceAlertsToNotify(productId, newPriceCents);
 
   for (const alert of alerts) {
-    await alertRepo.notifyPriceAlert(alert.priceAlertId, newPrice);
+    await alertRepo.notifyPriceAlert(alert.priceAlertId, newPriceCents);
     await JobScheduler.scheduleNotification({
       userId: alert.customerId || '',
       type: 'price_alert',
@@ -301,7 +302,7 @@ export const notifyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   }
 
   // Update current price for all alerts
-  await alertRepo.updatePriceAlertCurrentPrice(productId, newPrice);
+  await alertRepo.updatePriceAlertCurrentPrice(productId, newPriceCents);
 
   res.json({ success: true, message: `Notified ${alerts.length} alerts` });
 };

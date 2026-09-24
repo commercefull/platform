@@ -14,7 +14,7 @@ describe('ListTransactionsUseCase', () => {
       customerId: 'c1',
       paymentMethodConfigId: 'pm1',
       gatewayId: 'gw1',
-      amount: 100,
+      amountCents: 100,
       currency: 'USD',
     });
     txn.markAsPaid('ext-1');

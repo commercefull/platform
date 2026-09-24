@@ -55,7 +55,7 @@ interface ShipOrderBody {
   trackingUrl?: string;
   carrierId?: string;
   carrierName?: string;
-  shippingCost?: number;
+  shippingCostCents?: number;
 }
 
 interface ProcessPackingBody {
@@ -164,7 +164,7 @@ export const shipOrder = async (req: HttpRequest, res: HttpResponse): Promise<vo
     trackingUrl: body.trackingUrl,
     carrierId: body.carrierId,
     carrierName: body.carrierName,
-    shippingCost: body.shippingCost,
+    shippingCostCents: body.shippingCostCents,
   });
   res.json({ success: true, data: result.fulfillment });
 };

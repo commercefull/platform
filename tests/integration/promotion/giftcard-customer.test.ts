@@ -27,7 +27,7 @@ describe('Gift Card Customer API Tests', () => {
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('code');
-      expect(response.data.data).toHaveProperty('currentBalance');
+      expect(response.data.data).toHaveProperty('currentBalanceCents');
       expect(response.data.data).toHaveProperty('currency');
     });
 
@@ -53,14 +53,14 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post(
         '/customer/gift-cards/redeem',
-        { code: testGiftCardCode, amount: 20 },
+        { code: testGiftCardCode, amountCents: 2000 },
         { headers: customerHeaders() },
       );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('type', 'redemption');
-      expect(response.data.data).toHaveProperty('amount', -20);
+      expect(response.data.data).toHaveProperty('amountCents', -2000);
     });
 
     it('should reject redemption with insufficient balance', async () => {
@@ -68,7 +68,7 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post(
         '/customer/gift-cards/redeem',
-        { code: testGiftCardCode, amount: 99999 },
+        { code: testGiftCardCode, amountCents: 9999900 },
         { headers: customerHeaders() },
       );
 
@@ -81,7 +81,7 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post(
         '/customer/gift-cards/redeem',
-        { code: 'FAKE-CODE-9999', amount: 10 },
+        { code: 'FAKE-CODE-9999', amountCents: 1000 },
         { headers: customerHeaders() },
       );
 
@@ -94,7 +94,7 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post('/customer/gift-cards/redeem', {
         code: testGiftCardCode,
-        amount: 10,
+        amountCents: 1000,
       });
 
       expect(response.status).toBe(401);
@@ -125,7 +125,7 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post(
         '/customer/gift-cards/reload',
-        { code: testGiftCardCode, amount: 50 },
+        { code: testGiftCardCode, amountCents: 5000 },
         { headers: customerHeaders() },
       );
 
@@ -139,7 +139,7 @@ describe('Gift Card Customer API Tests', () => {
 
       const response = await client.post('/customer/gift-cards/reload', {
         code: testGiftCardCode,
-        amount: 50,
+        amountCents: 5000,
       });
 
       expectStatus(response, 401);

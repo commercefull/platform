@@ -104,7 +104,6 @@ import type {
   ProductCategoryRow,
   ProductToCategory,
   ProductTag,
-  ProductPrice,
   ProductQa,
   ProductQaAnswer,
   ProductCollection,
@@ -160,14 +159,20 @@ export function createProductTag(overrides: Partial<ProductTag> = {}): ProductTa
   return { productTagId: 't1', createdAt: ISO, updatedAt: ISO, name: 'Sale', slug: 'sale', ...overrides };
 }
 
-export function createProductPrice(overrides: Partial<ProductPrice> = {}): ProductPrice {
+import type { ProductPriceInfo } from '../application/ports/ProductPricingPort';
+
+/** Pricing-owned catalog base price row (integer cents). */
+export function createProductPriceInfo(overrides: Partial<ProductPriceInfo> = {}): ProductPriceInfo {
   return {
-    productPriceId: 'pr1',
-    createdAt: ISO,
-    updatedAt: ISO,
+    productBasePriceId: 'bp1',
     productId: 'p1',
+    productVariantId: null,
     currencyCode: 'USD',
-    amount: 100,
+    priceCents: 10000,
+    salePriceCents: null,
+    compareAtPriceCents: null,
+    costPriceCents: null,
+    updatedAt: new Date(ISO),
     ...overrides,
   };
 }
@@ -238,7 +243,6 @@ export function createProductVariantRow(overrides: Partial<ProductVariantRow> = 
     sku: 'SKU-1',
     name: 'Default',
     attributes: [],
-    price: { effectivePrice: 100, currency: 'USD', isOnSale: false },
     stockQuantity: 10,
     isDefault: true,
     isActive: true,
@@ -305,6 +309,82 @@ export function createProductLookup(
 }
 
 import { Product } from '../domain/entities/Product';
+import type { ProductSearchRow } from '../application/services/ProductSearchService';
+
+/**
+ * Raw `product` table row enriched with pricing-owned base price columns,
+ * as returned by `ProductSearchService`. Price fields are integer cents.
+ */
+export function createProductSearchRow(overrides: Partial<ProductSearchRow> = {}): ProductSearchRow {
+  return {
+    productId: 'p1',
+    createdAt: new Date(ISO),
+    updatedAt: new Date(ISO),
+    sku: 'SKU-1',
+    name: 'Widget',
+    slug: 'widget',
+    description: 'A test product',
+    type: 'physical',
+    status: 'active',
+    visibility: 'public',
+    taxClass: null,
+    isTaxable: true,
+    isInventoryManaged: true,
+    minOrderQuantity: null,
+    maxOrderQuantity: null,
+    orderIncrementQuantity: null,
+    weight: null,
+    weightUnit: null,
+    length: null,
+    width: null,
+    height: null,
+    dimensionUnit: null,
+    metaTitle: null,
+    metaDescription: null,
+    hsCode: null,
+    countryOfOrigin: null,
+    isFeatured: false,
+    isNew: false,
+    isBestseller: false,
+    warningThreshold: null,
+    preorderEnabled: false,
+    preorderReleaseDate: null,
+    preorderAllowance: null,
+    averageRating: null,
+    reviewCount: null,
+    customFields: null,
+    seoData: null,
+    relatedProducts: null,
+    crossSellProducts: null,
+    upSellProducts: null,
+    shortDescription: null,
+    metaKeywords: null,
+    isVirtual: false,
+    isDownloadable: false,
+    isSubscription: false,
+    primaryImageId: null,
+    publishedAt: null,
+    deletedAt: null,
+    userId: null,
+    organizationId: null,
+    returnPolicy: null,
+    warranty: null,
+    externalId: null,
+    hasVariants: false,
+    variantAttributes: null,
+    storeId: null,
+    approvalStatus: null,
+    platformVisible: null,
+    createdBy: null,
+    updatedBy: null,
+    brandId: null,
+    priceCents: 4500,
+    salePriceCents: null,
+    effectivePriceCents: 4500,
+    currencyCode: 'USD',
+    ...overrides,
+  };
+}
 
 export function createProduct(overrides: Partial<Parameters<typeof Product.create>[0]> = {}): Product {
   return Product.create({
@@ -324,7 +404,6 @@ export function createProductVariant(overrides: Partial<Parameters<typeof Produc
     variantId: 'v1',
     productId: 'p1',
     sku: 'VAR-SKU1',
-    basePrice: 100,
     attributes: [],
     ...overrides,
   });

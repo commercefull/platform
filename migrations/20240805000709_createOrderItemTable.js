@@ -11,12 +11,12 @@ exports.up = function (knex) {
     t.string('name', 255).notNullable();
     t.text('description');
     t.integer('quantity').notNullable();
-    t.decimal('unitPrice', 15, 2).notNullable();
-    t.decimal('unitCost', 15, 2);
-    t.decimal('discountedUnitPrice', 15, 2).notNullable();
-    t.decimal('lineTotal', 15, 2).notNullable();
-    t.decimal('discountTotal', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxTotal', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('unitPriceCents').notNullable();
+    t.bigInteger('unitCostCents');
+    t.bigInteger('discountedUnitPriceCents').notNullable();
+    t.bigInteger('lineTotalCents').notNullable();
+    t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
+    t.bigInteger('taxTotalCents').notNullable().defaultTo(0);
     t.decimal('taxRate', 6, 4).defaultTo(0);
     t.boolean('taxExempt').notNullable().defaultTo(false);
     t.jsonb('options');

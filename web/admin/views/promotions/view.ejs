@@ -65,28 +65,28 @@
 
                 <dt class="col-sm-3"><%= t('shared:common.type') %>:</dt>
                 <dd class="col-sm-9">
-                  <span class="badge badge-secondary"><%= promotion.type.replace('_', ' ') %></span>
+                  <span class="badge badge-secondary"><%= promotion.type ? promotion.type.replace(/([A-Z])/g, ' $1').trim() : '-' %></span>
                 </dd>
 
                 <dt class="col-sm-3"><%= t('shared:common.discount') %>:</dt>
                 <dd class="col-sm-9">
-                  <% if (promotion.type === 'percentage') { %>
+                  <% if (promotion.type === 'discountByPercentage') { %>
                     <%= promotion.value %>% <%= t('promotion:promotions.off') %>
-                  <% } else if (promotion.type === 'fixed_amount') { %>
-                    $<%= promotion.value.toFixed(2) %>
+                  <% } else if (promotion.type === 'discountByAmount') { %>
+                    $<%= (promotion.value / 100).toFixed(2) %>
                   <% } else { %>
                     <%= t('shared:common.freeShipping') %>
                   <% } %>
                 </dd>
 
-                <% if (promotion.minOrderAmount) { %>
+                <% if (promotion.minOrderAmountCents) { %>
                   <dt class="col-sm-3"><%= t('promotion:minOrder') %>:</dt>
-                  <dd class="col-sm-9">$<%= promotion.minOrderAmount.toFixed(2) %></dd>
+                  <dd class="col-sm-9">$<%= (promotion.minOrderAmountCents / 100).toFixed(2) %></dd>
                 <% } %>
 
-                <% if (promotion.maxDiscountAmount) { %>
+                <% if (promotion.maxDiscountAmountCents) { %>
                   <dt class="col-sm-3"><%= t('promotion:promotions.maxDiscount') %>:</dt>
-                  <dd class="col-sm-9">$<%= promotion.maxDiscountAmount.toFixed(2) %></dd>
+                  <dd class="col-sm-9">$<%= (promotion.maxDiscountAmountCents / 100).toFixed(2) %></dd>
                 <% } %>
 
                 <dt class="col-sm-3"><%= t('promotion:giftCard.usage') %>:</dt>

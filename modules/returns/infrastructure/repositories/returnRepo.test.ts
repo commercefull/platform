@@ -47,7 +47,7 @@ describe('ReturnRequestRepositoryImpl', () => {
       rmaNumber: null,
       paymentRefundId: null,
       returnShippingPaid: false,
-      returnShippingAmount: null,
+      returnShippingAmountCents: null,
       returnShippingLabel: null,
       returnCarrier: 'custom',
       returnTrackingNumber: null,
@@ -96,7 +96,7 @@ describe('ReturnRequestRepositoryImpl', () => {
       rmaNumber: null,
       paymentRefundId: null,
       returnShippingPaid: false,
-      returnShippingAmount: null,
+      returnShippingAmountCents: null,
       returnShippingLabel: null,
       returnCarrier: 'custom',
       returnTrackingNumber: null,
@@ -193,34 +193,34 @@ describe('StoreCreditRepositoryImpl', () => {
     repo = new StoreCreditRepositoryImpl();
   });
 
-  it('getBalance returns zero balance for new customer', async () => {
+  it('getBalance returns zero balanceCents for new customer', async () => {
     mockedQueryOne.mockResolvedValueOnce({
-      balance: '0',
-      totalCredits: '0',
-      totalDebits: '0',
-      pendingExpiry: '0',
+      balanceCents: '0',
+      totalCreditsCents: '0',
+      totalDebitsCents: '0',
+      pendingExpiryCents: '0',
       lastEntryAt: null,
     });
     const result = await repo.getBalance('c1');
-    expect(result.balance).toBe(0);
-    expect(result.totalCredits).toBe(0);
-    expect(result.totalDebits).toBe(0);
+    expect(result.balanceCents).toBe(0);
+    expect(result.totalCreditsCents).toBe(0);
+    expect(result.totalDebitsCents).toBe(0);
     expect(result.lastEntryAt).toBeNull();
   });
 
-  it('getBalance returns correct balance', async () => {
+  it('getBalance returns correct balanceCents', async () => {
     mockedQueryOne.mockResolvedValueOnce({
-      balance: '150.50',
-      totalCredits: '200',
-      totalDebits: '49.50',
-      pendingExpiry: '50',
+      balanceCents: '150.50',
+      totalCreditsCents: '200',
+      totalDebitsCents: '49.50',
+      pendingExpiryCents: '50',
       lastEntryAt: new Date(),
     });
     const result = await repo.getBalance('c1');
-    expect(result.balance).toBe(150.5);
-    expect(result.totalCredits).toBe(200);
-    expect(result.totalDebits).toBe(49.5);
-    expect(result.pendingExpiry).toBe(50);
+    expect(result.balanceCents).toBe(150.5);
+    expect(result.totalCreditsCents).toBe(200);
+    expect(result.totalDebitsCents).toBe(49.5);
+    expect(result.pendingExpiryCents).toBe(50);
     expect(result.lastEntryAt).not.toBeNull();
   });
 

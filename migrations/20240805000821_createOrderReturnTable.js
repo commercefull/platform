@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.string('rmaNumber', 100);
     t.uuid('paymentRefundId').references('paymentRefundId').inTable('paymentRefund');
     t.boolean('returnShippingPaid').notNullable().defaultTo(false);
-    t.decimal('returnShippingAmount', 15, 2);
+    t.bigInteger('returnShippingAmountCents');
     t.text('returnShippingLabel');
     t.enum('returnCarrier', ['ups', 'fedex', 'dhl', 'usps', 'custom']).notNullable();
     t.string('returnTrackingNumber', 100);

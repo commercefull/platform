@@ -48,12 +48,12 @@ describe('Basket Edge Cases & Gap Tests', () => {
     return response.data.data.basketId;
   };
 
-  // Helper to add an item
+  // Helper to add an item — the unit price is resolved server-side from the
+  // pricing-owned store; clients never supply it.
   const addItem = async (
     basketId: string,
     productId: string = TEST_PRODUCT_1_ID,
     quantity: number = 1,
-    price: number = 29.99,
   ): Promise<Record<string, unknown>> => {
     const response = await client.post(
       `/customer/basket/${basketId}/items`,
@@ -62,7 +62,6 @@ describe('Basket Edge Cases & Gap Tests', () => {
         sku: 'TEST-SKU-001',
         name: 'Test Product',
         quantity,
-        unitPrice: price,
       },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
@@ -78,8 +77,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
-      await addItem(basketId, TEST_PRODUCT_2_ID, 3, 15.5);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 2);
+      await addItem(basketId, TEST_PRODUCT_2_ID, 3);
 
       const response = await client.get(`/customer/basket/${basketId}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
@@ -88,7 +87,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
       expect(response.status).toBe(200);
       expect(response.data.data.items.length).toBe(2);
       expect(response.data.data.itemCount).toBe(5);
-      expect(response.data.data.subtotal).toBeCloseTo(2 * 29.99 + 3 * 15.5, 2);
+      // Seeded prices: TEST_PRODUCT_1 effective $79.99 (sale), TEST_PRODUCT_2 $149.99
+      expect(response.data.data.subtotal).toBeCloseTo(2 * 79.99 + 3 * 149.99, 2);
 
       // Cleanup
       await client
@@ -102,7 +102,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1, 29.99);
+      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1);
       const addData = addResp?.data as Record<string, unknown> | undefined;
       const items = addData?.items as Array<Record<string, unknown>> | undefined;
       const itemId = items?.[0]?.basketItemId as string | undefined;
@@ -134,8 +134,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
-      await addItem(basketId, TEST_PRODUCT_1_ID, 3, 29.99);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 2);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 3);
 
       const response = await client.get(`/customer/basket/${basketId}`, {
         headers: { Authorization: `Bearer ${customerToken}` },
@@ -166,7 +166,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 2);
 
       const response = await client.post(
         `/customer/basket/${basketId}/coupon`,
@@ -210,7 +210,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 1, 29.99);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 1);
 
       const response = await client.post(
         `/customer/basket/${basketId}/coupon`,
@@ -232,7 +232,7 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 2);
 
       // Apply first (use coupon that requires min order 100 so apply fails for this basket)
       await client.post(
@@ -274,7 +274,6 @@ describe('Basket Edge Cases & Gap Tests', () => {
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: -1,
-          unitPrice: 29.99,
         },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
@@ -300,7 +299,6 @@ describe('Basket Edge Cases & Gap Tests', () => {
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: 0,
-          unitPrice: 29.99,
         },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
@@ -326,7 +324,6 @@ describe('Basket Edge Cases & Gap Tests', () => {
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: 999,
-          unitPrice: 1.0,
         },
         { headers: { Authorization: `Bearer ${customerToken}` } },
       );
@@ -372,8 +369,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 3, 10.0);
-      await addItem(basketId, TEST_PRODUCT_2_ID, 2, 20.0);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 3);
+      await addItem(basketId, TEST_PRODUCT_2_ID, 2);
 
       const response = await client.get(`/customer/basket/${basketId}/summary`, {
         headers: { Authorization: `Bearer ${customerToken}` },
@@ -381,7 +378,8 @@ describe('Basket Edge Cases & Gap Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.data.data.itemCount).toBe(5);
-      expect(response.data.data.subtotal).toBeCloseTo(70, 2);
+      // Seeded prices: TEST_PRODUCT_1 effective $79.99 (sale), TEST_PRODUCT_2 $149.99
+      expect(response.data.data.subtotal).toBeCloseTo(3 * 79.99 + 2 * 149.99, 2);
 
       // Cleanup
       await client
@@ -414,7 +412,6 @@ describe('Basket Edge Cases & Gap Tests', () => {
       const response = await client.post(`/customer/basket/${TEST_GUEST_BASKET_ID}/items`, {
         productId: TEST_PRODUCT_1_ID,
         quantity: 1,
-        unitPrice: 10,
       });
       expect(response.status).toBe(201);
     });

@@ -86,7 +86,7 @@
                   <strong><%= plan.name %></strong>
                   <br><small class="text-muted"><%= plan.description || '' %></small>
                 </td>
-                <td>$<%= (plan.price || 0).toFixed(2) %></td>
+                <td>$<%= ((plan.priceCents || 0) / 100).toFixed(2) %></td>
                 <td><%= plan.billingCycle || 'monthly' %></td>
                 <td><%= plan.subscriberCount || 0 %></td>
                 <td>

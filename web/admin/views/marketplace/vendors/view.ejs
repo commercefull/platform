@@ -47,9 +47,9 @@
   <div class="card-body">
     <table class="table table-sm">
       <tr><th>Total Orders</th><td><%= vendor.stats.totalOrders %></td></tr>
-      <tr><th>Total Revenue</th><td>$<%= vendor.stats.totalRevenue.toFixed(2) %></td></tr>
-      <tr><th>Total Payouts</th><td>$<%= vendor.stats.totalPayouts.toFixed(2) %></td></tr>
-      <tr><th>Outstanding Balance</th><td>$<%= vendor.stats.outstandingBalance.toFixed(2) %></td></tr>
+      <tr><th>Total Revenue</th><td>$<%= (vendor.stats.totalRevenueCents / 100).toFixed(2) %></td></tr>
+      <tr><th>Total Payouts</th><td>$<%= (vendor.stats.totalPayoutsCents / 100).toFixed(2) %></td></tr>
+      <tr><th>Outstanding Balance</th><td>$<%= (vendor.stats.outstandingBalanceCents / 100).toFixed(2) %></td></tr>
       <tr><th>Average Rating</th><td><%= vendor.stats.averageRating.toFixed(1) %></td></tr>
       <tr><th>Product Count</th><td><%= vendor.stats.productCount %></td></tr>
     </table>

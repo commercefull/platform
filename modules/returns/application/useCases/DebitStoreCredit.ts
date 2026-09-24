@@ -7,25 +7,25 @@ export class DebitStoreCreditUseCase {
 
   async execute(params: {
     customerId: string;
-    amount: number;
+    amountCents: number;
     referenceType?: string;
     referenceId?: string;
     reason?: string;
   }): Promise<StoreCreditLedgerEntry> {
-    const balance = await this.storeCreditRepo.getBalance(params.customerId);
+    const balanceCents = await this.storeCreditRepo.getBalance(params.customerId);
 
-    if (balance.balance < params.amount) {
-      throw new InsufficientStoreCreditError(params.customerId, params.amount, balance.balance);
+    if (balanceCents.balanceCents < params.amountCents) {
+      throw new InsufficientStoreCreditError(params.customerId, params.amountCents, balanceCents.balanceCents);
     }
 
-    const newBalance = balance.balance - params.amount;
+    const newBalance = balanceCents.balanceCents - params.amountCents;
     const entry = StoreCreditLedgerEntry.create({
       customerId: params.customerId,
       entryType: 'debit',
       referenceType: params.referenceType,
       referenceId: params.referenceId,
-      amount: params.amount,
-      balanceAfter: newBalance,
+      amountCents: params.amountCents,
+      balanceAfterCents: newBalance,
       reason: params.reason ?? 'Store credit debit',
     });
 

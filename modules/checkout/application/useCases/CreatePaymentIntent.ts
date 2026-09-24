@@ -173,7 +173,7 @@ export class CreatePaymentIntentUseCase {
       sku: item.sku || 'N/A',
       name: item.name || 'Product',
       quantity: item.quantity,
-      unitPrice: item.unitPrice?.amount ?? 0,
+      unitPriceCents: item.unitPrice?.cents ?? 0,
     }));
 
     // Create order in PAYMENT_PENDING status
@@ -187,7 +187,7 @@ export class CreatePaymentIntentUseCase {
       source: 'checkout',
       currency: session.total.currency,
       notes: session.notes,
-      shippingAmount: session.shippingAmount.amount,
+      shippingAmountCents: session.shippingAmount.cents,
       metadata: session.metadata,
     });
 
@@ -209,7 +209,7 @@ export class CreatePaymentIntentUseCase {
           customerEmail,
           billingCountry: billingAddressInput.country,
           shippingCountry: shippingAddressInput.country,
-          orderAmount: session.total.amount,
+          orderAmountCents: session.total.cents,
           currency: session.total.currency,
           paymentMethodId,
           isFirstOrder: false, // Not tracked on session yet; fraud service defaults to false
@@ -249,7 +249,7 @@ export class CreatePaymentIntentUseCase {
     try {
       const paymentResponse = await this.paymentAuthorizationPort.initiatePayment({
         orderId: orderResponse.orderId,
-        amount: session.total.amount,
+        amountCents: session.total.cents,
         currency: session.total.currency,
         paymentMethodId,
         customerId: session.customerId,
@@ -269,7 +269,7 @@ export class CreatePaymentIntentUseCase {
       checkoutId: session.id,
       orderId: orderResponse.orderId,
       paymentIntentId: transactionId,
-      total: session.total.amount,
+      totalCents: session.total.cents,
     });
 
     return {

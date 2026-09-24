@@ -8,6 +8,8 @@ import { PaginationOptions } from 'libs/types/shared';
 import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
+import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
+import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
 
 // ============================================================================
 // Command
@@ -18,8 +20,9 @@ export class SearchProductsCommand {
     public readonly query: string,
     public readonly filters?: {
       categoryId?: string;
-      priceMin?: number;
-      priceMax?: number;
+      /** Price bounds in integer cents. */
+      priceMinCents?: number;
+      priceMaxCents?: number;
       isFeatured?: boolean;
       tags?: string[];
     },
@@ -38,11 +41,12 @@ export interface SearchProductItemResponse {
   name: string;
   slug: string;
   sku?: string;
-  basePrice: number;
-  salePrice: number | null;
-  effectivePrice: number;
+  basePriceCents: number;
+  salePriceCents: number | null;
+  effectivePriceCents: number;
   isOnSale: boolean;
   discountPercentage: number;
+  currency: string;
   isFeatured: boolean;
   primaryImageUrl?: string;
   categoryId?: string;
@@ -63,7 +67,10 @@ export interface SearchProductsResponse {
 // ============================================================================
 
 export class SearchProductsUseCase {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly pricingPort: ProductPricingPort,
+  ) {}
 
   async execute(command: SearchProductsCommand): Promise<SearchProductsResponse> {
     if (!command.query?.trim()) {
@@ -91,11 +98,11 @@ export class SearchProductsUseCase {
 
     switch (command.orderBy) {
       case 'price_asc':
-        orderBy = 'basePrice';
+        orderBy = 'priceCents';
         orderDirection = 'asc';
         break;
       case 'price_desc':
-        orderBy = 'basePrice';
+        orderBy = 'priceCents';
         orderDirection = 'desc';
         break;
       case 'newest':
@@ -124,8 +131,12 @@ export class SearchProductsUseCase {
 
     const result = await this.productRepository.search(command.query, filters, pagination);
 
+    // Batch-load catalog prices from the pricing-owned store
+    const prices = await this.pricingPort.getBasePrices(result.data.map(p => p.productId));
+    const priceByProductId = new Map<string, ProductPriceInfo>(prices.map(p => [p.productId, p]));
+
     return {
-      products: result.data.map(product => this.mapToSearchItem(product)),
+      products: result.data.map(product => this.mapToSearchItem(product, priceByProductId.get(product.productId))),
       total: result.total,
       limit: result.limit,
       offset: result.offset,
@@ -134,17 +145,19 @@ export class SearchProductsUseCase {
     };
   }
 
-  private mapToSearchItem(product: Product): SearchProductItemResponse {
+  private mapToSearchItem(product: Product, price: ProductPriceInfo | undefined): SearchProductItemResponse {
+    const priceDto = toProductPriceDtoOrEmpty(price);
     return {
       productId: product.productId,
       name: product.name,
       slug: product.slug,
       sku: product.sku,
-      basePrice: product.price.basePrice,
-      salePrice: product.price.salePrice,
-      effectivePrice: product.price.effectivePrice,
-      isOnSale: product.price.isOnSale,
-      discountPercentage: product.price.discountPercentage,
+      basePriceCents: priceDto.basePriceCents,
+      salePriceCents: priceDto.salePriceCents,
+      effectivePriceCents: priceDto.effectivePriceCents,
+      isOnSale: priceDto.isOnSale,
+      discountPercentage: priceDto.discountPercentage,
+      currency: priceDto.currency,
       isFeatured: product.isFeatured,
       primaryImageUrl: product.primaryImage?.url,
       categoryId: product.categoryId,

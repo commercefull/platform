@@ -20,7 +20,7 @@ import {
 export class ProcessPaymentRefundCommand {
   constructor(
     public readonly transactionId: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly reason?: string,
     public readonly metadata?: Record<string, unknown>,
   ) {}
@@ -33,7 +33,7 @@ export class ProcessPaymentRefundCommand {
 export interface ProcessRefundResponse {
   refundId: string;
   transactionId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: string;
   createdAt: string;
@@ -57,8 +57,8 @@ export class ProcessPaymentRefundUseCase {
       throw new TransactionCannotBeRefundedError(transaction.status);
     }
 
-    if (command.amount > transaction.refundableAmount) {
-      throw new RefundAmountExceedsRefundableError(command.amount, transaction.refundableAmount);
+    if (command.amountCents > transaction.refundableAmount) {
+      throw new RefundAmountExceedsRefundableError(command.amountCents, transaction.refundableAmount);
     }
 
     const refundId = generateUUID();
@@ -66,7 +66,7 @@ export class ProcessPaymentRefundUseCase {
     const refund = PaymentRefund.create({
       refundId,
       transactionId: command.transactionId,
-      amount: command.amount,
+      amountCents: command.amountCents,
       currency: transaction.currency,
       reason: command.reason,
       metadata: command.metadata,
@@ -76,7 +76,7 @@ export class ProcessPaymentRefundUseCase {
       await this.paymentRepository.saveRefund(refund);
 
       // Update transaction
-      transaction.recordRefund(command.amount);
+      transaction.recordRefund(command.amountCents);
       await this.paymentRepository.saveTransaction(transaction);
     });
 
@@ -84,14 +84,14 @@ export class ProcessPaymentRefundUseCase {
     eventBus.emit('payment.failed', {
       refundId: refund.refundId,
       transactionId: refund.transactionId,
-      amount: refund.amount,
+      amountCents: refund.amountCents,
       reason: refund.reason,
     });
 
     return {
       refundId: refund.refundId,
       transactionId: refund.transactionId,
-      amount: refund.amount,
+      amountCents: refund.amountCents,
       currency: refund.currency,
       status: refund.status,
       createdAt: refund.createdAt.toISOString(),

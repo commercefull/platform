@@ -24,7 +24,7 @@ export interface SubscriptionProps {
   cancelledAt?: string;
   cancelReason?: string;
   nextBillingDate?: string;
-  amount: number;
+  amountCents: number;
   currencyCode: string;
   paymentMethodId?: string;
   metadata?: Record<string, unknown>;

@@ -46,10 +46,10 @@ export type TaxRate = {
   isCompound: boolean;
   includeInPrice: boolean;
   isShippingTaxable: boolean;
-  fixedAmount?: number;
-  minimumAmount?: number;
-  maximumAmount?: number;
-  threshold?: number;
+  fixedAmountCents?: number;
+  minimumAmountCents?: number;
+  maximumAmountCents?: number;
+  thresholdCents?: number;
   startDate: number;
   endDate?: number;
   isActive: boolean;
@@ -91,8 +91,8 @@ export type CustomerTaxExemption = {
   metadata?: unknown;
   // Epic B — exemption scope (category-aware, amount-bounded, partial)
   applicableTaxCategoryIds?: string[] | null;
-  minOrderAmount?: number | null;
-  maxOrderAmount?: number | null;
+  minOrderAmountCents?: number | null;
+  maxOrderAmountCents?: number | null;
   exemptionPercent?: number;
   createdAt: number;
   updatedAt: number;
@@ -124,8 +124,8 @@ export type TaxBreakdownItem = {
   rateId: string;
   rateName: string;
   rateValue: number;
-  taxableAmount: number;
-  taxAmount: number;
+  taxableAmountCents: number;
+  taxAmountCents: number;
   jurisdictionLevel: string;
   jurisdictionName: string;
 };
@@ -133,14 +133,14 @@ export type TaxBreakdownItem = {
 export type LineItemTax = {
   lineItemId: string;
   productId: string;
-  taxAmount: number;
+  taxAmountCents: number;
   taxBreakdown: TaxBreakdownItem[];
 };
 
 export type TaxCalculationResult = {
-  subtotal: number;
-  taxAmount: number;
-  total: number;
+  subtotalCents: number;
+  taxAmountCents: number;
+  totalCents: number;
   taxBreakdown: TaxBreakdownItem[];
   taxZoneApplied?: string;
   taxCategoryApplied?: string;
@@ -161,6 +161,6 @@ export type ExemptionVerdict = 'exempt' | 'notExempt' | 'partiallyExempt' | 'pen
 // Epic B — Context for evaluating an exemption against a line item
 export interface ExemptionEvaluationContext {
   taxCategoryId?: string;
-  orderSubtotal: number;
+  orderSubtotalCents: number;
   now?: Date;
 }

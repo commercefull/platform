@@ -17,7 +17,7 @@ exports.up = async function (knex) {
     table.string('valueType', 20).nullable(); // 'percentage', 'fixed'
     table.string('productId', 50).nullable();
     table.string('categoryId', 50).nullable();
-    table.decimal('minOrderValue', 10, 2).nullable();
+    table.bigInteger('minOrderValueCents').nullable();
     table.integer('maxUsagePerCustomer').nullable();
     table.integer('totalQuantity').nullable();
     table.integer('remainingQuantity').nullable();

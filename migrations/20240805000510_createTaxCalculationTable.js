@@ -13,10 +13,10 @@ exports.up = function (knex) {
     t.enum('sourceType', ['order', 'invoice', 'basket']).notNullable();
     t.uuid('sourceId');
     t.jsonb('taxAddress');
-    t.decimal('taxableAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxExemptAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('totalAmount', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('taxableAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('taxExemptAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('taxAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('totalAmountCents').notNullable().defaultTo(0);
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.decimal('exchangeRate', 15, 6).notNullable().defaultTo(1.0);
     t.jsonb('taxProviderResponse');

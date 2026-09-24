@@ -117,11 +117,11 @@ export class CreateSubscriptionUseCase {
 
       // 3. Calculate pricing
       const quantity = input.quantity || 1;
-      const unitPrice = plan.price;
-      const discountAmount = plan.discountAmount || 0;
-      const subtotal = unitPrice * quantity - discountAmount;
-      const taxAmount = 0; // Would be calculated by tax service
-      const _totalPrice = subtotal + taxAmount;
+      const unitPriceCents = plan.priceCents;
+      const discountAmountCents = plan.discountAmountCents || 0;
+      const subtotalCents = unitPriceCents * quantity - discountAmountCents;
+      const taxAmountCents = 0; // Would be calculated by tax service
+      const _totalPrice = subtotalCents + taxAmountCents;
 
       // 4. Determine trial period
       const trialDays = plan.trialDays || product.trialDays || 0;

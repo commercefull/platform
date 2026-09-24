@@ -21,10 +21,10 @@ export interface TransactionDetailResponse {
   paymentMethodConfigId: string;
   gatewayId: string;
   externalTransactionId?: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: string;
-  refundedAmount: number;
+  refundedAmountCents: number;
   refundableAmount: number;
   isPaid: boolean;
   canBeRefunded: boolean;
@@ -62,10 +62,10 @@ export class GetTransactionUseCase {
       paymentMethodConfigId: t.paymentMethodConfigId,
       gatewayId: t.gatewayId,
       externalTransactionId: t.externalTransactionId,
-      amount: t.amount,
+      amountCents: t.amountCents,
       currency: t.currency,
       status: t.status,
-      refundedAmount: t.refundedAmount,
+      refundedAmountCents: t.refundedAmountCents,
       refundableAmount: t.refundableAmount,
       isPaid: t.isPaid,
       canBeRefunded: t.canBeRefunded,

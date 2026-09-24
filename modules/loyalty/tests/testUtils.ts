@@ -135,7 +135,7 @@ export function createLoyaltyReward(overrides: Partial<LoyaltyReward> = {}): Loy
     valueType: 'percentage',
     productId: null,
     categoryId: null,
-    minOrderValue: null,
+    minOrderValueCents: null,
     maxUsagePerCustomer: null,
     totalQuantity: null,
     remainingQuantity: null,

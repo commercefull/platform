@@ -20,15 +20,15 @@ export interface ShippingMethodProps {
   carrierServiceCode?: string;
 
   // Pricing
-  basePrice: number;
-  pricePerKg?: number;
-  pricePerItem?: number;
-  minPrice?: number;
-  maxPrice?: number;
+  basePriceCents: number;
+  pricePerKgCents?: number;
+  pricePerItemCents?: number;
+  minPriceCents?: number;
+  maxPriceCents?: number;
 
   // Conditions
-  minOrderValue?: number;
-  maxOrderValue?: number;
+  minOrderValueCents?: number;
+  maxOrderValueCents?: number;
   minWeight?: number;
   maxWeight?: number;
 
@@ -80,8 +80,8 @@ export class ShippingMethod {
   get carrierType(): CarrierType | undefined {
     return this.props.carrierType;
   }
-  get basePrice(): number {
-    return this.props.basePrice;
+  get basePriceCents(): number {
+    return this.props.basePriceCents;
   }
   get estimatedDaysMin(): number | undefined {
     return this.props.estimatedDaysMin;
@@ -158,29 +158,29 @@ export class ShippingMethod {
 
   calculateRate(weight: number, _orderValue: number): number {
     if (this.props.type === 'free') return 0;
-    if (this.props.type === 'flat_rate') return this.props.basePrice;
+    if (this.props.type === 'flat_rate') return this.props.basePriceCents;
 
-    let rate = this.props.basePrice;
+    let rate = this.props.basePriceCents;
 
-    if (this.props.type === 'weight_based' && this.props.pricePerKg) {
-      rate += weight * this.props.pricePerKg;
+    if (this.props.type === 'weight_based' && this.props.pricePerKgCents) {
+      rate += weight * this.props.pricePerKgCents;
     }
 
-    if (this.props.minPrice && rate < this.props.minPrice) {
-      rate = this.props.minPrice;
+    if (this.props.minPriceCents && rate < this.props.minPriceCents) {
+      rate = this.props.minPriceCents;
     }
-    if (this.props.maxPrice && rate > this.props.maxPrice) {
-      rate = this.props.maxPrice;
+    if (this.props.maxPriceCents && rate > this.props.maxPriceCents) {
+      rate = this.props.maxPriceCents;
     }
 
     return rate;
   }
 
-  isAvailableFor(weight: number, orderValue: number): boolean {
+  isAvailableFor(weight: number, orderValueCents: number): boolean {
     if (!this.props.isActive) return false;
 
-    if (this.props.minOrderValue && orderValue < this.props.minOrderValue) return false;
-    if (this.props.maxOrderValue && orderValue > this.props.maxOrderValue) return false;
+    if (this.props.minOrderValueCents && orderValueCents < this.props.minOrderValueCents) return false;
+    if (this.props.maxOrderValueCents && orderValueCents > this.props.maxOrderValueCents) return false;
     if (this.props.minWeight && weight < this.props.minWeight) return false;
     if (this.props.maxWeight && weight > this.props.maxWeight) return false;
 

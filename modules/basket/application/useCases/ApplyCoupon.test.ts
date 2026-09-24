@@ -21,7 +21,7 @@ describe('ApplyCouponUseCase', () => {
     expect(result.coupon).toEqual(
       expect.objectContaining({ couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10 }),
     );
-    expect(result.discountAmount).toBe(10);
+    expect(result.discountAmountCents).toBe(1000);
     expect(repository.save).toHaveBeenCalledWith(basket);
   });
 
@@ -29,16 +29,16 @@ describe('ApplyCouponUseCase', () => {
     const repository = createBasketRepository(createBasket({ items: [createBasketItem({ quantity: 2 })] }));
     const discounts = createDiscountQuotePort({
       valid: true,
-      discount: { code: 'FLAT15', type: 'fixed_amount', value: 15, discountAmount: 15 },
+      discount: { code: 'FLAT15', type: 'fixed_amount', value: 15, discountAmountCents: 15 },
     });
 
     const result = await new ApplyCouponUseCase(repository, discounts).execute(new ApplyCouponCommand(BASKET_ID, 'FLAT15'));
 
     expect(result.coupon).toEqual(expect.objectContaining({ couponCode: 'FLAT15', discountType: 'fixed', discountValue: 15 }));
-    expect(result.discountAmount).toBe(15);
+    expect(result.discountAmountCents).toBe(15);
   });
 
-  it('should validate the coupon against the basket subtotal when checking the discount', async () => {
+  it('should validate the coupon against the basket subtotalCents when checking the discount', async () => {
     const repository = createBasketRepository(
       createBasket({ customerId: 'customer-1', items: [createBasketItem({ quantity: 2 })] }),
     );
@@ -46,7 +46,7 @@ describe('ApplyCouponUseCase', () => {
 
     await new ApplyCouponUseCase(repository, discounts).execute(new ApplyCouponCommand(BASKET_ID, 'SAVE10'));
 
-    expect(discounts.validateDiscount).toHaveBeenCalledWith('SAVE10', 100, 'customer-1');
+    expect(discounts.validateDiscount).toHaveBeenCalledWith('SAVE10', 10000, 'customer-1');
   });
 
   it('should emit promotion.coupon_applied when a coupon is applied', async () => {
@@ -57,7 +57,7 @@ describe('ApplyCouponUseCase', () => {
 
     expect(emitMock).toHaveBeenCalledWith(
       'promotion.coupon_applied',
-      expect.objectContaining({ basketId: BASKET_ID, couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10, discountAmount: 10 }),
+      expect.objectContaining({ basketId: BASKET_ID, couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10, discountAmountCents: 1000 }),
     );
   });
 

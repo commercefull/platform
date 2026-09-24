@@ -9,7 +9,7 @@ export async function up(knex) {
     table.string('requestedBy').notNullable();
     table.string('requestedByEmail').notNullable();
     table.string('status').notNullable().defaultTo('pending');
-    table.decimal('amount', 14, 2).notNullable();
+    table.bigInteger('amountCents').notNullable();
     table.string('currency').notNullable().defaultTo('USD');
     table.jsonb('steps').notNullable().defaultTo('[]');
     table.integer('currentStep').notNullable().defaultTo(1);

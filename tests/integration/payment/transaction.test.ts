@@ -34,7 +34,7 @@ describe('Payment Transaction Tests', () => {
 
       const newTransaction = {
         orderId: testOrderId,
-        amount: 49.99,
+        amountCents: 4999,
         currency: 'USD',
         paymentMethodConfigId: testMethodConfigId,
       };
@@ -78,7 +78,7 @@ describe('Payment Transaction Tests', () => {
       const dummyTransactionId = '00000000-0000-0000-0000-000000000001';
 
       const refundRequest = {
-        amount: 25.0,
+        amountCents: 2500,
         reason: 'Test refund',
       };
 

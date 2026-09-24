@@ -26,12 +26,13 @@ export const productTypeDefs = `#graphql
     sku: String!
     name: String!
     barcode: String
-    basePrice: Float!
-    salePrice: Float
-    cost: Float
-    effectivePrice: Float!
+    basePriceCents: Int!
+    salePriceCents: Int
+    costPriceCents: Int
+    effectivePriceCents: Int!
     isOnSale: Boolean!
     discountPercentage: Float!
+    currency: String!
     attributes: [ProductVariantAttribute!]!
     attributeString: String!
     stockQuantity: Int!
@@ -59,14 +60,12 @@ export const productTypeDefs = `#graphql
     organizationId: String
     status: String!
     visibility: String!
-    basePrice: Float!
-    salePrice: Float
-    cost: Float
-    effectivePrice: Float!
+    basePriceCents: Int!
+    salePriceCents: Int
+    costPriceCents: Int
+    effectivePriceCents: Int!
     isOnSale: Boolean!
     discountPercentage: Float!
-    profitMargin: Float
-    profitMarginPercentage: Float
     currency: String!
     isFeatured: Boolean!
     isVirtual: Boolean!
@@ -107,9 +106,9 @@ export const productTypeDefs = `#graphql
     sku: String
     status: String!
     visibility: String!
-    basePrice: Float!
-    salePrice: Float
-    effectivePrice: Float!
+    basePriceCents: Int!
+    salePriceCents: Int
+    effectivePriceCents: Int!
     isOnSale: Boolean!
     isFeatured: Boolean!
     hasVariants: Boolean!
@@ -131,9 +130,9 @@ export const productTypeDefs = `#graphql
     name: String!
     slug: String!
     sku: String
-    basePrice: Float!
-    salePrice: Float
-    effectivePrice: Float!
+    basePriceCents: Int!
+    salePriceCents: Int
+    effectivePriceCents: Int!
     isOnSale: Boolean!
     discountPercentage: Float!
     isFeatured: Boolean!
@@ -158,16 +157,16 @@ export const productTypeDefs = `#graphql
     isFeatured: Boolean
     isVirtual: Boolean
     hasVariants: Boolean
-    priceMin: Float
-    priceMax: Float
+    priceMinCents: Int
+    priceMaxCents: Int
     tags: [String!]
     search: String
   }
 
   input SearchFilterInput {
     categoryId: String
-    priceMin: Float
-    priceMax: Float
+    priceMinCents: Int
+    priceMaxCents: Int
     isFeatured: Boolean
     tags: [String!]
   }

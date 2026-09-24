@@ -20,7 +20,7 @@ export interface ShippingAddress {
 }
 
 export interface OrderDetails {
-  subtotal: number;
+  subtotalCents: number;
   itemCount: number;
   totalWeight?: number;
   currency?: string;
@@ -45,7 +45,7 @@ export interface ShippingRateOption {
   rateId: string;
   rateName: string | null;
   rateType: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   estimatedDeliveryDays: number | null;
   isFreeShipping: boolean;
@@ -121,14 +121,14 @@ export class CalculateShippingRatesUseCase {
 
       for (const method of methods) {
         // Evaluate method-level conditions (minWeight, maxWeight, minOrderValue, maxOrderValue)
-        const minOrderValue = method.minOrderValue ? parseFloat(String(method.minOrderValue)) : null;
-        const maxOrderValue = method.maxOrderValue ? parseFloat(String(method.maxOrderValue)) : null;
+        const minOrderValueCents = method.minOrderValueCents ? Number(method.minOrderValueCents) : null;
+        const maxOrderValueCents = method.maxOrderValueCents ? Number(method.maxOrderValueCents) : null;
         const minWeight = method.minWeight ? parseFloat(String(method.minWeight)) : null;
         const maxWeight = method.maxWeight ? parseFloat(String(method.maxWeight)) : null;
         const orderWeight = orderDetails.totalWeight ?? 0;
 
-        if (minOrderValue !== null && orderDetails.subtotal < minOrderValue) continue;
-        if (maxOrderValue !== null && orderDetails.subtotal > maxOrderValue) continue;
+        if (minOrderValueCents !== null && orderDetails.subtotalCents < minOrderValueCents) continue;
+        if (maxOrderValueCents !== null && orderDetails.subtotalCents > maxOrderValueCents) continue;
         if (minWeight !== null && orderWeight < minWeight) continue;
         if (maxWeight !== null && orderWeight > maxWeight) continue;
 
@@ -142,7 +142,7 @@ export class CalculateShippingRatesUseCase {
         if (rate) {
           // Evaluate conditions JSON field to filter/adjust the rate
           const condCtx: ShippingConditionContext = {
-            subtotal: orderDetails.subtotal,
+            subtotalCents: orderDetails.subtotalCents,
             itemCount: orderDetails.itemCount,
             totalWeight: orderDetails.totalWeight,
             country: destinationAddress.country,
@@ -157,14 +157,14 @@ export class CalculateShippingRatesUseCase {
             continue;
           }
 
-          const calculatedAmount = calculateRate(
+          const calculatedAmountCents = calculateRate(
             rate,
-            orderDetails.subtotal,
+            orderDetails.subtotalCents,
             orderDetails.itemCount,
             orderDetails.totalWeight,
           );
 
-          const adjustedAmount = Math.max(0, calculatedAmount + condResult.adjustment);
+          const adjustedAmountCents = Math.max(0, calculatedAmountCents + condResult.adjustmentCents);
 
           const estimatedDays = method.estimatedDeliveryDays
             ? typeof method.estimatedDeliveryDays === 'object'
@@ -180,17 +180,17 @@ export class CalculateShippingRatesUseCase {
             rateId: rate.shippingRateId,
             rateName: rate.name,
             rateType: rate.rateType,
-            amount: adjustedAmount,
+            amountCents: adjustedAmountCents,
             currency: rate.currency,
             estimatedDeliveryDays: estimatedDays,
-            isFreeShipping: adjustedAmount === 0,
+            isFreeShipping: adjustedAmountCents === 0,
             taxable: rate.taxable,
           });
         }
       }
 
       // Sort by amount (cheapest first)
-      rateOptions.sort((a, b) => a.amount - b.amount);
+      rateOptions.sort((a, b) => a.amountCents - b.amountCents);
 
       return {
         success: true,

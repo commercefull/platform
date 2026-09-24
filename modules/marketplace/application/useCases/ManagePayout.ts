@@ -27,7 +27,7 @@ export class ManagePayoutUseCase {
     await eventBus.emit('marketplace.payout.created', {
       payoutId: payout.payoutId,
       vendorId: payout.vendorId,
-      netAmount: payout.netAmount,
+      netAmountCents: payout.netAmountCents,
     });
     return payout;
   }
@@ -72,13 +72,13 @@ export class ManagePayoutUseCase {
 
     const vendor = await this.vendorRepo.findById(payout.vendorId);
     if (vendor) {
-      vendor.recordPayout(payout.netAmount);
+      vendor.recordPayout(payout.netAmountCents);
       await this.vendorRepo.save(vendor);
     }
     await eventBus.emit('marketplace.payout.completed', {
       payoutId: payout.payoutId,
       vendorId: payout.vendorId,
-      netAmount: payout.netAmount,
+      netAmountCents: payout.netAmountCents,
     });
     return payout;
   }

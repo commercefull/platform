@@ -18,9 +18,9 @@ export interface MembershipPlan {
   priority: number;
   level: number;
   trialDays: number;
-  price: number;
-  salePrice: number | null;
-  setupFee: number;
+  priceCents: number;
+  salePriceCents: number | null;
+  setupFeeCents: number;
   currency: string;
   billingCycle: BillingCycle;
   billingPeriod: number;

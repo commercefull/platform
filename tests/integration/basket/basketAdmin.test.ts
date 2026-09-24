@@ -61,7 +61,6 @@ describe('Basket Admin/Business API Tests', () => {
         sku: 'TEST-SKU-001',
         name: 'Test Product',
         quantity: 2,
-        unitPrice: 29.99,
       },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
@@ -135,7 +134,7 @@ describe('Basket Admin/Business API Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('basketId');
       expect(response.data.data).toHaveProperty('itemCount');
-      expect(response.data.data).toHaveProperty('subtotal');
+      expect(response.data.data).toHaveProperty('subtotalCents');
     });
 
     it('should return 404 for non-existent basket', async () => {

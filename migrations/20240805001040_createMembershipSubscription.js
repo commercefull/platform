@@ -19,7 +19,7 @@ exports.up = function (knex) {
     t.timestamp('cancelledAt');
     t.text('cancelReason');
     t.boolean('isAutoRenew').notNullable().defaultTo(true);
-    t.decimal('priceOverride', 10, 2);
+    t.bigInteger('priceOverrideCents');
     t.string('billingCycleOverride', 20);
     t.uuid('paymentMethodId');
     t.text('notes');

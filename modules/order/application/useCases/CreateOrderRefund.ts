@@ -20,7 +20,7 @@ import {
 export class CreateOrderRefundCommand {
   constructor(
     public readonly orderPaymentId: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly reason?: string,
     public readonly notes?: string,
     public readonly transactionId?: string,
@@ -36,7 +36,7 @@ export class CreateOrderRefundCommand {
 export interface CreateOrderRefundResponse {
   orderPaymentRefundId: string;
   orderPaymentId: string;
-  amount: number;
+  amountCents: number;
   reason?: string;
   notes?: string;
   transactionId?: string;
@@ -58,18 +58,18 @@ export class CreateOrderRefundUseCase {
       throw new OrderPaymentNotFoundError();
     }
 
-    if (command.amount <= 0) {
+    if (command.amountCents <= 0) {
       throw new RefundAmountMustBePositiveError();
     }
 
-    const maxRefundable = payment.amount - payment.refundedAmount;
-    if (command.amount > maxRefundable) {
+    const maxRefundable = payment.amountCents - payment.refundedAmountCents;
+    if (command.amountCents > maxRefundable) {
       throw new RefundExceedsRefundableBalanceError(maxRefundable);
     }
 
     const refund: OrderPaymentRefund = await this.queryRepo.createRefund({
       orderPaymentId: command.orderPaymentId,
-      amount: command.amount,
+      amountCents: command.amountCents,
       reason: command.reason,
       notes: command.notes,
       transactionId: command.transactionId,
@@ -80,7 +80,7 @@ export class CreateOrderRefundUseCase {
     return {
       orderPaymentRefundId: refund.orderPaymentRefundId,
       orderPaymentId: refund.orderPaymentId,
-      amount: refund.amount,
+      amountCents: refund.amountCents,
       reason: refund.reason,
       notes: refund.notes,
       transactionId: refund.transactionId,

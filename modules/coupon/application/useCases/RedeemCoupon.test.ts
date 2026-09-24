@@ -10,13 +10,13 @@ describe('RedeemCouponUseCase', () => {
       couponCode: 'SAVE10',
       orderId: 'order-1',
       customerId: 'customer-1',
-      discountAmount: 10,
+      discountAmountCents: 10,
     });
 
     expect(result.redeemed).toBe(true);
     expect(result.redemptionId).toBe('test-uuid');
     expect(repository.createRedemption).toHaveBeenCalledWith(
-      expect.objectContaining({ couponId: COUPON_ID, orderId: 'order-1', discountAmount: 10 }),
+      expect.objectContaining({ couponId: COUPON_ID, orderId: 'order-1', discountAmountCents: 10 }),
     );
     expect(repository.incrementUsageCount).toHaveBeenCalledWith(COUPON_ID);
   });
@@ -28,12 +28,12 @@ describe('RedeemCouponUseCase', () => {
       couponCode: 'SAVE10',
       orderId: 'order-1',
       customerId: 'customer-1',
-      discountAmount: 10,
+      discountAmountCents: 10,
     });
 
     expect(emitMock).toHaveBeenCalledWith(
       'promotion.coupon_redeemed',
-      expect.objectContaining({ couponId: COUPON_ID, couponCode: 'SAVE10', orderId: 'order-1', discountAmount: 10 }),
+      expect.objectContaining({ couponId: COUPON_ID, couponCode: 'SAVE10', orderId: 'order-1', discountAmountCents: 10 }),
     );
   });
 
@@ -41,7 +41,7 @@ describe('RedeemCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     await expect(
-      new RedeemCouponUseCase(repository).execute({ couponCode: 'MISSING', orderId: 'order-1', discountAmount: 10 }),
+      new RedeemCouponUseCase(repository).execute({ couponCode: 'MISSING', orderId: 'order-1', discountAmountCents: 10 }),
     ).rejects.toThrow(CouponNotFoundError);
     expect(repository.createRedemption).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();

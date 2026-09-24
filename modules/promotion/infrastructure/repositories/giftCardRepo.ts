@@ -92,7 +92,7 @@ export async function getGiftCards(
 
 export async function createGiftCard(giftCard: {
   type?: GiftCardType;
-  initialBalance: number;
+  initialBalanceCents: number;
   currency?: string;
   purchasedBy?: string;
   purchaseOrderId?: string;
@@ -110,7 +110,7 @@ export async function createGiftCard(giftCard: {
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TABLE}" (
-      "code", "type", "initialBalance", "currentBalance", "currency", "status",
+      "code", "type", "initialBalanceCents", "currentBalanceCents", "currency", "status",
       "purchasedBy", "purchaseOrderId", "recipientEmail", "recipientName",
       "personalMessage", "deliveryDate", "deliveryMethod", "expiresAt",
       "isReloadable", "restrictions", "createdAt", "updatedAt"
@@ -119,8 +119,8 @@ export async function createGiftCard(giftCard: {
     [
       code,
       giftCard.type || 'standard',
-      giftCard.initialBalance,
-      giftCard.initialBalance,
+      giftCard.initialBalanceCents,
+      giftCard.initialBalanceCents,
       giftCard.currency || 'USD',
       giftCard.purchasedBy,
       giftCard.purchaseOrderId,
@@ -160,7 +160,7 @@ export async function assignGiftCard(giftCardId: string, customerId: string): Pr
 
 export async function redeemGiftCard(
   giftCardId: string,
-  amount: number,
+  amountCents: number,
   orderId?: string,
   customerId?: string,
   performedBy?: string,
@@ -168,29 +168,29 @@ export async function redeemGiftCard(
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
   if (giftCard.status !== 'active') throw new GiftCardNotActiveError(giftCardId);
-  if (giftCard.currentBalance < amount) throw new GiftCardInsufficientBalanceError(giftCard.currentBalance);
+  if (giftCard.currentBalanceCents < amountCents) throw new GiftCardInsufficientBalanceError(giftCard.currentBalanceCents);
   if (giftCard.expiresAt && new Date(giftCard.expiresAt) < new Date()) {
     throw new GiftCardExpiredError(giftCardId);
   }
 
   const now = new Date().toISOString();
-  const newBalance = giftCard.currentBalance - amount;
+  const newBalance = giftCard.currentBalanceCents - amountCents;
   const newStatus = newBalance <= 0 ? 'depleted' : 'active';
 
   await query(
     `UPDATE "${GIFT_CARD_TABLE}" SET 
-      "currentBalance" = $1, "status" = $2, "lastUsedAt" = $3,
-      "usageCount" = "usageCount" + 1, "totalRedeemed" = "totalRedeemed" + $4, "updatedAt" = $3
+      "currentBalanceCents" = $1, "status" = $2, "lastUsedAt" = $3,
+      "usageCount" = "usageCount" + 1, "totalRedeemedCents" = "totalRedeemedCents" + $4, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $5`,
-    [newBalance, newStatus, now, amount, giftCardId],
+    [newBalance, newStatus, now, amountCents, giftCardId],
   );
 
   return createTransaction({
     promotionGiftCardId: giftCardId,
     type: 'redemption',
-    amount: -amount,
-    balanceBefore: giftCard.currentBalance,
-    balanceAfter: newBalance,
+    amountCents: -amountCents,
+    balanceBeforeCents: giftCard.currentBalanceCents,
+    balanceAfterCents: newBalance,
     currency: giftCard.currency,
     orderId,
     customerId,
@@ -201,30 +201,30 @@ export async function redeemGiftCard(
 
 export async function reloadGiftCard(
   giftCardId: string,
-  amount: number,
+  amountCents: number,
   orderId?: string,
   performedBy?: string,
 ): Promise<PromotionGiftCardTransaction> {
   const giftCard = await getGiftCard(giftCardId);
   if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
   if (!giftCard.isReloadable) throw new GiftCardNotReloadableError(giftCardId);
-  if (giftCard.minReloadAmount && amount < giftCard.minReloadAmount) {
-    throw new PromotionValidationError(`Minimum reload amount is ${giftCard.minReloadAmount}`);
+  if (giftCard.minReloadAmountCents && amountCents < giftCard.minReloadAmountCents) {
+    throw new PromotionValidationError(`Minimum reload amountCents is ${giftCard.minReloadAmountCents}`);
   }
-  if (giftCard.maxReloadAmount && amount > giftCard.maxReloadAmount) {
-    throw new PromotionValidationError(`Maximum reload amount is ${giftCard.maxReloadAmount}`);
+  if (giftCard.maxReloadAmountCents && amountCents > giftCard.maxReloadAmountCents) {
+    throw new PromotionValidationError(`Maximum reload amountCents is ${giftCard.maxReloadAmountCents}`);
   }
 
-  const newBalance = giftCard.currentBalance + amount;
-  if (giftCard.maxBalance && newBalance > giftCard.maxBalance) {
-    throw new PromotionValidationError(`Maximum balance is ${giftCard.maxBalance}`);
+  const newBalance = giftCard.currentBalanceCents + amountCents;
+  if (giftCard.maxBalanceCents && newBalance > giftCard.maxBalanceCents) {
+    throw new PromotionValidationError(`Maximum balance is ${giftCard.maxBalanceCents}`);
   }
 
   const now = new Date().toISOString();
   const newStatus = giftCard.status === 'depleted' ? 'active' : giftCard.status;
 
   await query(
-    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
+    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalanceCents" = $1, "status" = $2, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $4`,
     [newBalance, newStatus, now, giftCardId],
   );
@@ -232,9 +232,9 @@ export async function reloadGiftCard(
   return createTransaction({
     promotionGiftCardId: giftCardId,
     type: 'reload',
-    amount,
-    balanceBefore: giftCard.currentBalance,
-    balanceAfter: newBalance,
+    amountCents,
+    balanceBeforeCents: giftCard.currentBalanceCents,
+    balanceAfterCents: newBalance,
     currency: giftCard.currency,
     orderId,
     performedBy,
@@ -244,7 +244,7 @@ export async function reloadGiftCard(
 
 export async function refundToGiftCard(
   giftCardId: string,
-  amount: number,
+  amountCents: number,
   orderId?: string,
   performedBy?: string,
   notes?: string,
@@ -253,11 +253,11 @@ export async function refundToGiftCard(
   if (!giftCard) throw new GiftCardNotFoundError(giftCardId);
 
   const now = new Date().toISOString();
-  const newBalance = giftCard.currentBalance + amount;
+  const newBalance = giftCard.currentBalanceCents + amountCents;
   const newStatus = giftCard.status === 'depleted' ? 'active' : giftCard.status;
 
   await query(
-    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalance" = $1, "status" = $2, "updatedAt" = $3
+    `UPDATE "${GIFT_CARD_TABLE}" SET "currentBalanceCents" = $1, "status" = $2, "updatedAt" = $3
      WHERE "promotionGiftCardId" = $4`,
     [newBalance, newStatus, now, giftCardId],
   );
@@ -265,9 +265,9 @@ export async function refundToGiftCard(
   return createTransaction({
     promotionGiftCardId: giftCardId,
     type: 'refund',
-    amount,
-    balanceBefore: giftCard.currentBalance,
-    balanceAfter: newBalance,
+    amountCents,
+    balanceBeforeCents: giftCard.currentBalanceCents,
+    balanceAfterCents: newBalance,
     currency: giftCard.currency,
     orderId,
     performedBy,
@@ -300,9 +300,9 @@ export async function expireGiftCards(): Promise<number> {
 async function createTransaction(transaction: {
   promotionGiftCardId: string;
   type: TransactionType;
-  amount: number;
-  balanceBefore: number;
-  balanceAfter: number;
+  amountCents: number;
+  balanceBeforeCents: number;
+  balanceAfterCents: number;
   currency: string;
   orderId?: string;
   customerId?: string;
@@ -315,7 +315,7 @@ async function createTransaction(transaction: {
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "${GIFT_CARD_TRANSACTION_TABLE}" (
-      "promotionGiftCardId", "type", "amount", "balanceBefore", "balanceAfter", "currency",
+      "promotionGiftCardId", "type", "amountCents", "balanceBeforeCents", "balanceAfterCents", "currency",
       "orderId", "customerId", "performedBy", "performedByType", "notes",
       "referenceNumber", "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
@@ -323,9 +323,9 @@ async function createTransaction(transaction: {
     [
       transaction.promotionGiftCardId,
       transaction.type,
-      transaction.amount,
-      transaction.balanceBefore,
-      transaction.balanceAfter,
+      transaction.amountCents,
+      transaction.balanceBeforeCents,
+      transaction.balanceAfterCents,
       transaction.currency,
       transaction.orderId,
       transaction.customerId,
@@ -367,8 +367,8 @@ function mapToGiftCard(row: Record<string, unknown>): PromotionGiftCard {
     promotionGiftCardId: row.promotionGiftCardId as string,
     code: row.code as string,
     type: row.type as GiftCardType,
-    initialBalance: parseFloat(row.initialBalance as string) || 0,
-    currentBalance: parseFloat(row.currentBalance as string) || 0,
+    initialBalanceCents: parseFloat(row.initialBalanceCents as string) || 0,
+    currentBalanceCents: parseFloat(row.currentBalanceCents as string) || 0,
     currency: (row.currency as string) || 'USD',
     status: row.status as GiftCardStatus,
     purchasedBy: row.purchasedBy as string | undefined,
@@ -386,11 +386,11 @@ function mapToGiftCard(row: Record<string, unknown>): PromotionGiftCard {
     expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
     lastUsedAt: row.lastUsedAt ? new Date(row.lastUsedAt as string) : undefined,
     usageCount: parseInt(row.usageCount as string) || 0,
-    totalRedeemed: parseFloat(row.totalRedeemed as string) || 0,
+    totalRedeemedCents: parseFloat(row.totalRedeemedCents as string) || 0,
     isReloadable: Boolean(row.isReloadable),
-    minReloadAmount: row.minReloadAmount ? parseFloat(row.minReloadAmount as string) : undefined,
-    maxReloadAmount: row.maxReloadAmount ? parseFloat(row.maxReloadAmount as string) : undefined,
-    maxBalance: row.maxBalance ? parseFloat(row.maxBalance as string) : undefined,
+    minReloadAmountCents: row.minReloadAmountCents ? parseFloat(row.minReloadAmountCents as string) : undefined,
+    maxReloadAmountCents: row.maxReloadAmountCents ? parseFloat(row.maxReloadAmountCents as string) : undefined,
+    maxBalanceCents: row.maxBalanceCents ? parseFloat(row.maxBalanceCents as string) : undefined,
     restrictions: row.restrictions as Record<string, unknown> | undefined,
     metadata: row.metadata as Record<string, unknown> | undefined,
     createdAt: new Date(row.createdAt as string),
@@ -403,9 +403,9 @@ function mapToTransaction(row: Record<string, unknown>): PromotionGiftCardTransa
     promotionGiftCardTransactionId: row.promotionGiftCardTransactionId as string,
     promotionGiftCardId: row.promotionGiftCardId as string,
     type: row.type as TransactionType,
-    amount: parseFloat(row.amount as string) || 0,
-    balanceBefore: parseFloat(row.balanceBefore as string) || 0,
-    balanceAfter: parseFloat(row.balanceAfter as string) || 0,
+    amountCents: parseFloat(row.amountCents as string) || 0,
+    balanceBeforeCents: parseFloat(row.balanceBeforeCents as string) || 0,
+    balanceAfterCents: parseFloat(row.balanceAfterCents as string) || 0,
     currency: (row.currency as string) || 'USD',
     orderId: row.orderId as string | undefined,
     customerId: row.customerId as string | undefined,

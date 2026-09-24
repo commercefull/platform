@@ -2,7 +2,7 @@
  * Create Tax Exemption Use Case
  *
  * Creates a new customer tax exemption with the new scope fields
- * (applicableTaxCategoryIds, minOrderAmount, maxOrderAmount, exemptionPercent).
+ * (applicableTaxCategoryIds, minOrderAmountCents, maxOrderAmountCents, exemptionPercent).
  * New exemptions start in 'pending' status and must be approved via
  * `ApproveTaxExemption` before they take effect.
  */
@@ -27,8 +27,8 @@ export interface CreateTaxExemptionInput {
   notes?: string;
   // Epic B scope fields
   applicableTaxCategoryIds?: string[] | null;
-  minOrderAmount?: number | null;
-  maxOrderAmount?: number | null;
+  minOrderAmountCents?: number | null;
+  maxOrderAmountCents?: number | null;
   exemptionPercent?: number;
 }
 
@@ -51,8 +51,8 @@ export class CreateTaxExemptionUseCase {
       isVerified: false,
       notes: input.notes,
       applicableTaxCategoryIds: input.applicableTaxCategoryIds ?? null,
-      minOrderAmount: input.minOrderAmount ?? null,
-      maxOrderAmount: input.maxOrderAmount ?? null,
+      minOrderAmountCents: input.minOrderAmountCents ?? null,
+      maxOrderAmountCents: input.maxOrderAmountCents ?? null,
       exemptionPercent: input.exemptionPercent ?? 100,
     });
   }

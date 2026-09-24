@@ -119,7 +119,7 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     customerPhone?: string;
     customerName?: string;
     customerNotes?: string;
-    shippingTotal?: number;
+    shippingTotalCents?: number;
     hasGiftWrapping?: boolean;
     giftMessage?: string;
     isGift?: boolean;
@@ -138,7 +138,7 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     customerPhone,
     customerName,
     customerNotes,
-    shippingTotal,
+    shippingTotalCents,
     hasGiftWrapping,
     giftMessage,
     isGift,
@@ -182,7 +182,7 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     customerPhone,
     customerName,
     customerNotes,
-    shippingTotal,
+    shippingTotalCents,
     hasGiftWrapping,
     giftMessage,
     isGift,

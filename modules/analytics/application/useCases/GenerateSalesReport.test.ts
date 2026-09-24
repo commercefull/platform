@@ -19,7 +19,7 @@ describe('GenerateSalesReportUseCase', () => {
 
     expect(result.success).toBe(true);
     expect(result.report?.summary.totalOrders).toBe(100);
-    expect(result.report?.summary.totalRevenue).toBe(5000);
+    expect(result.report?.summary.totalRevenueCents).toBe(5000);
   });
 
   it('should fail when the start date is not before the end date', async () => {

@@ -40,19 +40,20 @@ export const CUSTOMER_CREDENTIALS = {
   password: 'password123',
 };
 
-// Test Product Data
+// Test Product Data — prices match the seeded productBasePrice rows
+// (integer cents in the DB; effective sale price applies in the basket)
 export const TEST_PRODUCT_1 = {
   productId: TEST_PRODUCT_1_ID,
   name: 'Integration Test Product 1',
   sku: 'TEST-SKU-001',
-  price: 29.99,
+  price: 79.99,
 };
 
 export const TEST_PRODUCT_2 = {
   productId: TEST_PRODUCT_2_ID,
   name: 'Integration Test Product 2',
   sku: 'TEST-SKU-002',
-  price: 15.5,
+  price: 149.99,
 };
 
 // Test Address Data

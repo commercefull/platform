@@ -48,10 +48,9 @@ interface GetOrCreateBasketBody {
 interface AddItemBody {
   productId: string;
   productVariantId?: string;
-  sku: string;
-  name: string;
+  sku?: string;
+  name?: string;
   quantity: number;
-  unitPrice: number;
   imageUrl?: string;
   attributes?: Record<string, unknown>;
   itemType?: 'physical' | 'digital' | 'subscription' | 'service';
@@ -100,13 +99,13 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
       sku: item.sku,
       name: item.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice.amount,
-      lineTotal: item.lineTotal.amount,
+      unitPriceCents: item.unitPrice.cents,
+      lineTotalCents: item.lineTotal.cents,
       imageUrl: item.imageUrl,
       isGift: item.isGift,
     })),
     itemCount: basket.itemCount,
-    subtotal: basket.subtotal.amount,
+    subtotalCents: basket.subtotal.cents,
     createdAt: basket.createdAt.toISOString(),
     updatedAt: basket.updatedAt.toISOString(),
   };
@@ -134,20 +133,20 @@ export const applyCouponAdmin = async (req: HttpRequest, res: HttpResponse): Pro
   let discountValue = 0;
 
   try {
-    const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.amount, basket.customerId);
+    const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.cents, basket.customerId);
     if (validation.valid && validation.discount) {
       discountType = validation.discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
       discountValue = validation.discount.value;
     }
   } catch {
     // Validation failed — admin override: look up the coupon directly
-    const couponRow = await queryOne<{ type: string; value: number }>(
-      `SELECT type, value FROM coupon WHERE code = $1 AND "isActive" = true AND ("expiresAt" IS NULL OR "expiresAt" > NOW()) LIMIT 1`,
+    const couponRow = await queryOne<{ type: string; discountAmount: string | null }>(
+      `SELECT type, "discountAmount" FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true AND ("endDate" IS NULL OR "endDate" > NOW()) LIMIT 1`,
       [couponCode],
     );
     if (couponRow) {
       discountType = couponRow.type === 'fixedAmount' || couponRow.type === 'fixed_amount' ? 'fixed' : 'percentage';
-      discountValue = Number(couponRow.value);
+      discountValue = Number(couponRow.discountAmount ?? 0);
     }
   }
 
@@ -173,11 +172,11 @@ export const listBaskets = async (req: HttpRequest, res: HttpResponse): Promise<
   respond(req, res, { items: rows || [], count: (rows || []).length }, 200);
 };
 
-function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: number; subtotal: number; currency: string } {
+function mapBasketToSummary(basket: Basket): { basketId: string; itemCount: number; subtotalCents: number; currency: string } {
   return {
     basketId: basket.basketId,
     itemCount: basket.itemCount,
-    subtotal: basket.subtotal.amount,
+    subtotalCents: basket.subtotal.cents,
     currency: basket.currency,
   };
 }
@@ -262,11 +261,11 @@ export const getBasketSummary = async (req: HttpRequest, res: HttpResponse): Pro
 export const addItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
   const body = req.body as AddItemBody;
-  let { productId, productVariantId, sku, name, quantity, unitPrice, imageUrl, attributes, itemType } = body;
+  let { productId, productVariantId, sku, name, quantity, imageUrl, attributes, itemType } = body;
 
-  // Validation
-  if (!productId || !quantity || unitPrice === undefined) {
-    respondError(req, res, 'Missing required fields: productId, quantity, unitPrice', 400);
+  // Validation — price is never client-supplied; the use case resolves it via pricing
+  if (!productId || !quantity) {
+    respondError(req, res, 'Missing required fields: productId, quantity', 400);
     return;
   }
 
@@ -300,7 +299,6 @@ export const addItem = async (req: HttpRequest, res: HttpResponse): Promise<void
     sku,
     name,
     quantity,
-    unitPrice,
     productVariantId,
     imageUrl,
     attributes,

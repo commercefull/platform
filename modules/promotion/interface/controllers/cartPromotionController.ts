@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { promotionRuleRepository, type PromotionCart } from '../../application/wired';
 
-type CartCreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmount' | 'status'> &
+type CartCreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmountCents' | 'status'> &
   Partial<Pick<PromotionCart, 'promotionCouponId' | 'couponCode' | 'currencyCode' | 'appliedBy'>>;
 
 interface CartPromotionBody extends CartCreateProps {
@@ -44,7 +44,7 @@ export const applyPromotion = async (
 
 // Update a cart promotion
 export const updateCartPromotion = async (
-  req: HttpRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>>,
+  req: HttpRequest<Record<string, string>, unknown, Partial<Pick<PromotionCart, 'discountAmountCents' | 'status'>>>,
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;

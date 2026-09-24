@@ -18,6 +18,7 @@ import {
   createProductUseCase,
   updateProductUseCase,
   manageProductCollectionUseCase,
+  productPricingPort,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { productCatalogRepository, productAttributeRepository, productEngagementRepository } from '../../application/wired';
@@ -54,9 +55,11 @@ interface CreateProductBody {
   slug?: string;
   shortDescription?: string;
   categoryId?: string;
-  basePrice?: number;
-  salePrice?: number;
-  cost?: number;
+  /** Prices are integer cents — written to the pricing-owned store. */
+  basePriceCents?: number;
+  salePriceCents?: number;
+  costPriceCents?: number;
+  compareAtPriceCents?: number;
   currencyCode?: string;
   weight?: number;
   weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
@@ -84,9 +87,11 @@ interface UpdateProductBody {
   sku?: string;
   slug?: string;
   categoryId?: string;
-  basePrice?: number;
-  salePrice?: number | null;
-  cost?: number;
+  /** Prices are integer cents — written to the pricing-owned store. */
+  basePriceCents?: number;
+  salePriceCents?: number | null;
+  costPriceCents?: number | null;
+  compareAtPriceCents?: number | null;
   currencyCode?: string;
   weight?: number;
   weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
@@ -122,10 +127,11 @@ interface VisibilityBody {
 interface VariantBody {
   sku?: string;
   name?: string;
-  price?: number;
-  salePrice?: number;
-  compareAtPrice?: number | null;
-  costPrice?: number | null;
+  /** Variant-level catalog price in integer cents — written to the pricing-owned store. */
+  priceCents?: number;
+  salePriceCents?: number;
+  compareAtPriceCents?: number | null;
+  costPriceCents?: number | null;
   weight?: number | null;
   length?: number | null;
   width?: number | null;
@@ -297,9 +303,10 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
     slug,
     shortDescription,
     categoryId,
-    basePrice,
-    salePrice,
-    cost,
+    basePriceCents,
+    salePriceCents,
+    costPriceCents,
+    compareAtPriceCents,
     currencyCode,
     weight,
     weightUnit,
@@ -341,9 +348,10 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
     shortDescription,
     categoryId,
     organizationId,
-    basePrice,
-    salePrice,
-    cost,
+    basePriceCents,
+    salePriceCents,
+    costPriceCents,
+    compareAtPriceCents,
     currencyCode,
     weight,
     weightUnit,
@@ -552,17 +560,57 @@ export const getProductVariant = async (req: HttpRequest, res: HttpResponse): Pr
 };
 
 export const createProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const body = req.body as VariantBody;
+  const { productId } = req.params;
+  const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
+    req.body as VariantBody & { currencyCode?: string };
   const variant = await productVariantRepo.create({
-    productId: req.params.productId,
-    ...body,
+    productId,
+    ...variantFields,
   } as ProductVariantCreateProps);
+  const variantId = (variant as unknown as { productVariantId?: string }).productVariantId ?? variant.id;
+
+  // Variant-level catalog price lives in the pricing-owned store
+  if (priceCents !== undefined || salePriceCents !== undefined || compareAtPriceCents !== undefined) {
+    const existing = await productPricingPort.getBasePrice(productId, variantId);
+    const price = await productPricingPort.setBasePrice({
+      productId,
+      productVariantId: variantId,
+      currencyCode: currencyCode ?? existing?.currencyCode ?? 'USD',
+      priceCents: priceCents ?? existing?.priceCents ?? 0,
+      salePriceCents: salePriceCents ?? existing?.salePriceCents ?? null,
+      compareAtPriceCents: compareAtPriceCents ?? existing?.compareAtPriceCents ?? null,
+      costPriceCents: costPriceCents ?? existing?.costPriceCents ?? null,
+    });
+    respond(req, res, { ...variant, priceCents: price.priceCents }, 201);
+    return;
+  }
+
   respond(req, res, variant, 201);
 };
 
 export const updateProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const body = req.body as ProductVariantUpdateProps;
-  const variant = await productVariantRepo.update(req.params.variantId, body);
+  const { variantId } = req.params;
+  const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
+    req.body as ProductVariantUpdateProps & VariantBody & { currencyCode?: string };
+  const variant = await productVariantRepo.update(variantId, variantFields);
+  const productId = req.params.productId ?? variant.productId;
+
+  // Variant-level catalog price lives in the pricing-owned store
+  if (priceCents !== undefined || salePriceCents !== undefined || compareAtPriceCents !== undefined || costPriceCents !== undefined) {
+    const existing = await productPricingPort.getBasePrice(productId, variantId);
+    const price = await productPricingPort.setBasePrice({
+      productId,
+      productVariantId: variantId,
+      currencyCode: currencyCode ?? existing?.currencyCode ?? 'USD',
+      priceCents: priceCents ?? existing?.priceCents ?? 0,
+      salePriceCents: salePriceCents !== undefined ? salePriceCents : (existing?.salePriceCents ?? null),
+      compareAtPriceCents: compareAtPriceCents !== undefined ? compareAtPriceCents : (existing?.compareAtPriceCents ?? null),
+      costPriceCents: costPriceCents !== undefined ? costPriceCents : (existing?.costPriceCents ?? null),
+    });
+    respond(req, res, { ...variant, priceCents: price.priceCents });
+    return;
+  }
+
   respond(req, res, variant);
 };
 
@@ -992,19 +1040,29 @@ export const getVariantMatrix = async (req: HttpRequest, res: HttpResponse): Pro
     errorResponse(res, 'Product not found', 404);
     return;
   }
-  const matrix = variants.map(v => ({
-    variantId: v.id,
-    sku: v.sku,
-    name: v.name,
-    price: v.price,
-    compareAtPrice: v.compareAtPrice,
-    inventory: v.inventory,
-    isDefault: v.isDefault,
-    position: v.position,
-    options: v.options,
-    isActive: v.isActive,
-  }));
-  const optionAxes = matrix.length > 0 ? [...new Set(matrix.flatMap(v => v.options.map(o => o.name)))] : [];
+  // Variant prices come from the pricing-owned store (integer cents)
+  const priceRows = await productPricingPort.listProductPrices(productId);
+  const productLevelPrice = priceRows.find(p => p.productVariantId == null) ?? null;
+  const priceByVariantId = new Map(priceRows.filter(p => p.productVariantId != null).map(p => [p.productVariantId, p]));
+  const matrix = variants.map(v => {
+    const variantId = (v as unknown as { productVariantId?: string }).productVariantId ?? v.id;
+    const price = priceByVariantId.get(variantId) ?? productLevelPrice;
+    return {
+      variantId,
+      sku: v.sku,
+      name: v.name,
+      priceCents: price?.priceCents ?? null,
+      salePriceCents: price?.salePriceCents ?? null,
+      compareAtPriceCents: price?.compareAtPriceCents ?? null,
+      currencyCode: price?.currencyCode ?? null,
+      inventory: v.inventory,
+      isDefault: v.isDefault,
+      position: v.position,
+      options: v.options,
+      isActive: v.isActive,
+    };
+  });
+  const optionAxes = matrix.length > 0 ? [...new Set(matrix.flatMap(v => (v.options ?? []).map(o => o.name)))] : [];
   successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
 };
 

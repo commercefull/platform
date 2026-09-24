@@ -4,6 +4,20 @@
 
 The Product feature manages the product catalog, including products, variants, bundles, media, and categorization. It supports both organization/admin operations and customer-facing product browsing.
 
+## Pricing Boundary
+
+Product is **catalog-only** — `Product` and `ProductVariant` entities and their
+tables carry no price fields. Prices are owned by the
+[pricing module](./pricing.md) (`productBasePrice`, integer cents) and reach
+product use cases through the consumer-owned `ProductPricingPort`
+(`application/ports/`) backed by `infrastructure/acl/ProductPricingAdapter`.
+
+- API DTOs expose `basePriceCents`, `salePriceCents`, `compareAtPriceCents`,
+  `costPriceCents`, `effectivePriceCents`, and `currency` — always integer cents.
+- Search/list filters accept `priceMinCents`/`priceMaxCents`; `price_asc` /
+  `price_desc` ordering sorts on the product-level base price.
+- Views format cents to display strings at render time (`(cents / 100)`).
+
 ---
 
 ## Use Cases

@@ -60,14 +60,14 @@ export interface PriceAlert {
   sku?: string;
   status: AlertStatus;
   alertType: PriceAlertType;
-  targetPrice?: number;
+  targetPriceCents?: number;
   percentageDrop?: number;
-  originalPrice?: number;
-  currentPrice?: number;
+  originalPriceCents?: number;
+  currentPriceCents?: number;
   currency: string;
   notificationChannel: NotificationChannel;
   notifiedAt?: Date;
-  notifiedPrice?: number;
+  notifiedPriceCents?: number;
   notificationCount: number;
   lastNotifiedAt?: Date;
   purchasedAt?: Date;
@@ -283,16 +283,16 @@ export async function getActivePriceAlertsForProduct(productId: string, productV
   return (rows || []).map(mapToPriceAlert);
 }
 
-export async function getPriceAlertsToNotify(productId: string, newPrice: number): Promise<PriceAlert[]> {
+export async function getPriceAlertsToNotify(productId: string, newPriceCents: number): Promise<PriceAlert[]> {
   const rows = await query<Record<string, unknown>[]>(
     `SELECT * FROM "supportPriceAlert" 
      WHERE "productId" = $1 AND "status" = 'active'
      AND (
-       ("alertType" = 'target' AND "targetPrice" >= $2)
-       OR ("alertType" = 'any_drop' AND "originalPrice" > $2)
-       OR ("alertType" = 'percentage_drop' AND "originalPrice" * (1 - "percentageDrop" / 100) >= $2)
+       ("alertType" = 'target' AND "targetPriceCents" >= $2)
+       OR ("alertType" = 'any_drop' AND "originalPriceCents" > $2)
+       OR ("alertType" = 'percentage_drop' AND "originalPriceCents" * (1 - "percentageDrop" / 100) >= $2)
      )`,
-    [productId, newPrice],
+    [productId, newPriceCents],
   );
   return (rows || []).map(mapToPriceAlert);
 }
@@ -307,10 +307,10 @@ export async function createPriceAlert(alert: {
   variantName?: string;
   sku?: string;
   alertType?: PriceAlertType;
-  targetPrice?: number;
+  targetPriceCents?: number;
   percentageDrop?: number;
-  originalPrice?: number;
-  currentPrice?: number;
+  originalPriceCents?: number;
+  currentPriceCents?: number;
   currency?: string;
   notificationChannel?: NotificationChannel;
   expiresAt?: Date;
@@ -322,7 +322,7 @@ export async function createPriceAlert(alert: {
     `INSERT INTO "supportPriceAlert" (
       "customerId", "email", "phone", "productId", "productVariantId",
       "productName", "variantName", "sku", "status", "alertType",
-      "targetPrice", "percentageDrop", "originalPrice", "currentPrice",
+      "targetPriceCents", "percentageDrop", "originalPriceCents", "currentPriceCents",
       "currency", "notificationChannel", "expiresAt", "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active', $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
     RETURNING *`,
@@ -336,10 +336,10 @@ export async function createPriceAlert(alert: {
       alert.variantName,
       alert.sku,
       alert.alertType || 'target',
-      alert.targetPrice,
+      alert.targetPriceCents,
       alert.percentageDrop,
-      alert.originalPrice,
-      alert.currentPrice,
+      alert.originalPriceCents,
+      alert.currentPriceCents,
       alert.currency || 'USD',
       alert.notificationChannel || 'email',
       expiresAt.toISOString(),
@@ -351,14 +351,14 @@ export async function createPriceAlert(alert: {
   return mapToPriceAlert(result!);
 }
 
-export async function notifyPriceAlert(priceAlertId: string, notifiedPrice: number): Promise<void> {
+export async function notifyPriceAlert(priceAlertId: string, notifiedPriceCents: number): Promise<void> {
   const now = new Date().toISOString();
   await query(
     `UPDATE "supportPriceAlert" SET 
       "status" = 'notified', "notifiedAt" = $1, "lastNotifiedAt" = $1,
-      "notifiedPrice" = $2, "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
+      "notifiedPriceCents" = $2, "notificationCount" = "notificationCount" + 1, "updatedAt" = $1
      WHERE "priceAlertId" = $3`,
-    [now, notifiedPrice, priceAlertId],
+    [now, notifiedPriceCents, priceAlertId],
   );
 }
 
@@ -380,11 +380,11 @@ export async function cancelPriceAlert(priceAlertId: string): Promise<void> {
   );
 }
 
-export async function updatePriceAlertCurrentPrice(productId: string, newPrice: number): Promise<void> {
+export async function updatePriceAlertCurrentPrice(productId: string, newPriceCents: number): Promise<void> {
   await query(
-    `UPDATE "supportPriceAlert" SET "currentPrice" = $1, "updatedAt" = $2
+    `UPDATE "supportPriceAlert" SET "currentPriceCents" = $1, "updatedAt" = $2
      WHERE "productId" = $3 AND "status" = 'active'`,
-    [newPrice, new Date().toISOString(), productId],
+    [newPriceCents, new Date().toISOString(), productId],
   );
 }
 
@@ -442,14 +442,14 @@ function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
     sku: row.sku as string | undefined,
     status: row.status as AlertStatus,
     alertType: row.alertType as PriceAlertType,
-    targetPrice: row.targetPrice ? parseFloat(row.targetPrice as string) : undefined,
+    targetPriceCents: row.targetPriceCents != null ? Number(row.targetPriceCents) : undefined,
     percentageDrop: row.percentageDrop ? parseFloat(row.percentageDrop as string) : undefined,
-    originalPrice: row.originalPrice ? parseFloat(row.originalPrice as string) : undefined,
-    currentPrice: row.currentPrice ? parseFloat(row.currentPrice as string) : undefined,
+    originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : undefined,
+    currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : undefined,
     currency: (row.currency as string) || 'USD',
     notificationChannel: row.notificationChannel as NotificationChannel,
     notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
-    notifiedPrice: row.notifiedPrice ? parseFloat(row.notifiedPrice as string) : undefined,
+    notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : undefined,
     notificationCount: parseInt(row.notificationCount as string) || 0,
     lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : undefined,
     purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : undefined,

@@ -16,8 +16,8 @@ export class UpdatePromotionCommand {
       description: string;
       status: string;
       value: number;
-      minOrderAmount: number;
-      maxDiscountAmount: number;
+      minOrderAmountCents: number;
+      maxDiscountAmountCents: number;
       usageLimit: number;
       usageLimitPerCustomer: number;
       startsAt: Date;
@@ -57,8 +57,8 @@ export class UpdatePromotionUseCase {
     if (command.updates.name !== undefined) updateInput.name = command.updates.name;
     if (command.updates.description !== undefined) updateInput.description = command.updates.description;
     if (command.updates.status !== undefined) updateInput.status = command.updates.status as UpdatePromotionInput['status'];
-    if (command.updates.minOrderAmount !== undefined) updateInput.minOrderAmount = command.updates.minOrderAmount;
-    if (command.updates.maxDiscountAmount !== undefined) updateInput.maxDiscountAmount = command.updates.maxDiscountAmount;
+    if (command.updates.minOrderAmountCents !== undefined) updateInput.minOrderAmountCents = command.updates.minOrderAmountCents;
+    if (command.updates.maxDiscountAmountCents !== undefined) updateInput.maxDiscountAmountCents = command.updates.maxDiscountAmountCents;
     if (command.updates.usageLimit !== undefined) updateInput.maxUsage = command.updates.usageLimit;
     if (command.updates.usageLimitPerCustomer !== undefined) updateInput.maxUsagePerCustomer = command.updates.usageLimitPerCustomer;
     if (command.updates.startsAt !== undefined) updateInput.startDate = command.updates.startsAt;

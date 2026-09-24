@@ -23,7 +23,7 @@ export interface ApprovalWorkflowProps {
   requestedBy: string;
   requestedByEmail: string;
   status: ApprovalStatus;
-  amount: number;
+  amountCents: number;
   currency: string;
   steps: ApprovalStep[];
   currentStep: number;
@@ -48,7 +48,7 @@ export class ApprovalWorkflow {
     referenceNumber: string;
     requestedBy: string;
     requestedByEmail: string;
-    amount: number;
+    amountCents: number;
     currency?: string;
     description?: string;
     approvers: Array<{ approverId: string; approverEmail: string }>;
@@ -71,7 +71,7 @@ export class ApprovalWorkflow {
       requestedBy: input.requestedBy,
       requestedByEmail: input.requestedByEmail,
       status: 'pending',
-      amount: input.amount,
+      amountCents: input.amountCents,
       currency: input.currency ?? 'USD',
       steps,
       currentStep: 1,
@@ -112,8 +112,8 @@ export class ApprovalWorkflow {
   get status(): ApprovalStatus {
     return this.props.status;
   }
-  get amount(): number {
-    return this.props.amount;
+  get amountCents(): number {
+    return this.props.amountCents;
   }
   get currency(): string {
     return this.props.currency;

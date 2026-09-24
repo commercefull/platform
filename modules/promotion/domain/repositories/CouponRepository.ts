@@ -30,10 +30,10 @@ export interface PromotionCoupon {
   name: string;
   description?: string;
   type: CouponType;
-  discountAmount?: number;
+  discountAmountCents?: number;
   currencyCode: string;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
+  minOrderAmountCents?: number;
+  maxDiscountAmountCents?: number;
   startDate: Date;
   endDate?: Date;
   isActive: boolean;
@@ -55,7 +55,7 @@ export interface PromotionCouponUsage {
   promotionCouponId: string;
   orderId?: string;
   customerId?: string;
-  discountAmount: number;
+  discountAmountCents: number;
   currencyCode: string;
   usedAt: Date;
 }
@@ -66,10 +66,10 @@ export interface CreateCouponInput {
   description?: string;
   promotionId?: string;
   type: CouponType;
-  discountAmount?: number;
+  discountAmountCents?: number;
   currencyCode?: string;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
+  minOrderAmountCents?: number;
+  maxDiscountAmountCents?: number;
   startDate?: Date;
   endDate?: Date;
   isActive?: boolean;
@@ -111,11 +111,11 @@ export interface CouponRepository {
     couponId: string,
     orderId: string,
     customerId?: string,
-    discountAmount?: number,
+    discountAmountCents?: number,
     currencyCode?: string,
   ): Promise<PromotionCouponUsage>;
   getUsage(couponId: string): Promise<PromotionCouponUsage[]>;
   getCustomerUsageCount(couponId: string, customerId: string): Promise<number>;
-  validate(code: string, orderTotal: number, customerId?: string, organizationId?: string): Promise<CouponValidationResult>;
-  calculateDiscount(coupon: PromotionCoupon, orderTotal: number): number;
+  validate(code: string, orderTotalCents: number, customerId?: string, organizationId?: string): Promise<CouponValidationResult>;
+  calculateDiscount(coupon: PromotionCoupon, orderTotalCents: number): number;
 }

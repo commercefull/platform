@@ -14,11 +14,13 @@
     try { return new Intl.NumberFormat(loc || 'en-US', { style: 'currency', currency: (cur || 'USD').toUpperCase() }).format(amt); }
     catch { return (cur || 'USD') + ' ' + amt.toFixed(2); }
   };
+  // Prices arrive as integer cents — format at the view boundary.
+  const formatCents = (cents, cur, loc) => formatPrice((cents || 0) / 100, cur, loc);
   const cur = (typeof currency !== 'undefined' ? currency : 'USD') || 'USD';
   const loc = (typeof locale !== 'undefined' ? locale : 'en-US') || 'en-US';
-  const isOnSale = product.isOnSale || (product.salePrice !== null && product.salePrice !== undefined && product.basePrice > product.salePrice);
-  const displayPrice = product.effectivePrice || product.salePrice || product.basePrice;
-  const compareAt = isOnSale ? product.basePrice : null;
+  const isOnSale = product.isOnSale || (product.salePriceCents !== null && product.salePriceCents !== undefined && product.basePriceCents > product.salePriceCents);
+  const displayPriceCents = product.effectivePriceCents ?? product.salePriceCents ?? product.basePriceCents ?? 0;
+  const compareAtCents = isOnSale ? product.basePriceCents : null;
 %>
 <div class="product-card group">
   <a href="/products/<%= product.slug %>/<%= product.productId %>" class="block">
@@ -57,9 +59,9 @@
     <div class="p-4">
       <h3 class="font-medium text-ink-900 group-hover:text-gold-600 transition-colors line-clamp-1 text-sm"><%= product.name %></h3>
       <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-base font-semibold <%= isOnSale ? 'text-red-600' : 'text-ink-900' %>"><%= formatPrice(displayPrice, cur, loc) %></span>
-        <% if (compareAt) { %>
-        <span class="text-sm text-gray-400 line-through"><%= formatPrice(compareAt, cur, loc) %></span>
+        <span class="text-base font-semibold <%= isOnSale ? 'text-red-600' : 'text-ink-900' %>"><%= formatCents(displayPriceCents, cur, loc) %></span>
+        <% if (compareAtCents) { %>
+        <span class="text-sm text-gray-400 line-through"><%= formatCents(compareAtCents, cur, loc) %></span>
         <% } %>
       </div>
     </div>

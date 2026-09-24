@@ -23,7 +23,7 @@
               <dt class="col-sm-4"><%= t('merchant:merchants.payoutId') %></dt>
               <dd class="col-sm-8"><code><%= payout.merchantPayoutId %></code></dd>
               <dt class="col-sm-4"><%= t('common.amount') %></dt>
-              <dd class="col-sm-8"><strong><%= payout.currency %> <%= (payout.amount || 0).toFixed(2) %></strong></dd>
+              <dd class="col-sm-8"><strong><%= payout.currency %> <%= ((payout.amountCents || 0) / 100).toFixed(2) %></strong></dd>
               <dt class="col-sm-4"><%= t('common.status') %></dt>
               <dd class="col-sm-8">
                 <span class="badge bg-<%= payout.status === 'completed' ? 'success' : payout.status === 'failed' ? 'danger' : payout.status === 'processing' ? 'info' : 'warning' %>">
@@ -63,7 +63,7 @@
               <td><code><%= item.merchantPayoutItemId.substring(0, 8) %>...</code></td>
               <td><%= item.orderId ? item.orderId.substring(0, 8) + '...' : '-' %></td>
               <td><%= item.description || '-' %></td>
-              <td><strong><%= (item.amount || 0).toFixed(2) %></strong></td>
+              <td><strong><%= ((item.amountCents || 0) / 100).toFixed(2) %></strong></td>
               <td><%= item.currency %></td>
             </tr>
             <% }); %>

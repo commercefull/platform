@@ -77,11 +77,11 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     carrierName,
     paymentTerms,
     currency,
-    subtotal,
-    tax,
-    shipping,
-    discount,
-    total,
+    subtotalCents,
+    taxCents,
+    shippingCents,
+    discountCents,
+    totalCents,
     notes,
     supplierNotes,
     attachments,
@@ -121,11 +121,11 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     carrierName,
     paymentTerms,
     currency,
-    subtotal,
-    tax,
-    shipping,
-    discount,
-    total,
+    subtotalCents,
+    taxCents,
+    shippingCents,
+    discountCents,
+    totalCents,
     notes,
     supplierNotes,
     attachments,
@@ -138,7 +138,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
   for (const item of items) {
     const itemParams: SupplierPurchaseOrderItemCreateParams = {
       ...item,
-      total: item.total ?? item.quantity * item.unitCost,
+      totalCents: item.totalCents ?? item.quantity * item.unitCostCents,
       supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
     };
     const createdItem = await purchaseOrderRepo.createItem(itemParams);
@@ -231,7 +231,7 @@ export const addPurchaseOrderItem = async (req: HttpRequest, res: HttpResponse):
   const itemParams: SupplierPurchaseOrderItemCreateParams = {
     supplierPurchaseOrderId: id,
     ...body,
-    total: body.total ?? body.quantity * body.unitCost,
+    totalCents: body.totalCents ?? body.quantity * body.unitCostCents,
   };
 
   // Validate required fields
@@ -240,7 +240,7 @@ export const addPurchaseOrderItem = async (req: HttpRequest, res: HttpResponse):
   if (!itemParams.sku) errors.push('sku is required');
   if (!itemParams.name) errors.push('name is required');
   if (!itemParams.quantity || itemParams.quantity <= 0) errors.push('quantity must be greater than 0');
-  if (!itemParams.unitCost || itemParams.unitCost < 0) errors.push('unitCost must be non-negative');
+  if (!itemParams.unitCostCents || itemParams.unitCostCents < 0) errors.push('unitCostCents must be non-negative');
 
   if (errors.length > 0) {
     validationErrorResponse(res, errors);

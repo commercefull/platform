@@ -19,23 +19,23 @@ export class PromotionPromotionQuoteAdapter implements PromotionQuotePort {
     try {
       const result = await this.promotionEvaluationService.evaluate({
         items: request.items,
-        subtotal: request.subtotal,
-        shippingAmount: request.shippingAmount,
+        subtotalCents: request.subtotalCents,
+        shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
         currency: request.currency,
         couponCode: request.couponCode,
       });
 
       return {
-        totalDiscountAmount: result.totalDiscountAmount,
+        totalDiscountAmountCents: result.totalDiscountAmountCents,
         appliedPromotions: (result.appliedPromotions || []).map(p => ({
           id: p.promotionId,
           name: p.name,
-          amount: p.discountAmount,
+          amountCents: p.discountAmountCents,
         })),
       };
     } catch {
-      return { totalDiscountAmount: 0, appliedPromotions: [] };
+      return { totalDiscountAmountCents: 0, appliedPromotions: [] };
     }
   }
 }

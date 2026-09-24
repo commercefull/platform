@@ -48,7 +48,7 @@ describe('OrderOrderPlacementAdapter', () => {
     const result = await adapter.createOrder({
       customerId: 'cust-1',
       customerEmail: 'test@test.com',
-      items: [{ productId: 'p1', sku: 'SKU', name: 'Widget', quantity: 1, unitPrice: 100 }],
+      items: [{ productId: 'p1', sku: 'SKU', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
       shippingAddress: {
         firstName: 'Jane',
         lastName: 'Doe',
@@ -72,7 +72,7 @@ describe('OrderOrderPlacementAdapter', () => {
       basketId: 'basket-1',
       source: 'checkout',
       currency: 'USD',
-      shippingAmount: 10,
+      shippingAmountCents: 10,
     });
 
     expect(createOrderUseCase.execute).toHaveBeenCalledWith(

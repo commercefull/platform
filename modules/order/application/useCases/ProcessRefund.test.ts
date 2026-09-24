@@ -42,7 +42,7 @@ describe('ProcessRefundUseCase', () => {
   });
 
   it('should process full refund (happy path)', async () => {
-    const result = await useCase.execute(new ProcessRefundCommand('o1', 100, 'Customer request'));
+    const result = await useCase.execute(new ProcessRefundCommand('o1', 10000, 'Customer request'));
 
     expect(result.orderId).toBe('o1');
     expect(result.isFullRefund).toBe(true);
@@ -65,14 +65,14 @@ describe('ProcessRefundUseCase', () => {
   it('should throw OrderCannotBeRefundedError when order cannot be refunded', async () => {
     mockRepo.findById.mockResolvedValue(createOrder({ orderId: 'o1' }));
 
-    await expect(useCase.execute(new ProcessRefundCommand('o1', 50, 'Test'))).rejects.toThrow(OrderCannotBeRefundedError);
+    await expect(useCase.execute(new ProcessRefundCommand('o1', 5000, 'Test'))).rejects.toThrow(OrderCannotBeRefundedError);
   });
 
-  it('should throw RefundAmountMustBePositiveError for zero amount', async () => {
+  it('should throw RefundAmountMustBePositiveError for zero amountCents', async () => {
     await expect(useCase.execute(new ProcessRefundCommand('o1', 0, 'Test'))).rejects.toThrow(RefundAmountMustBePositiveError);
   });
 
-  it('should throw RefundExceedsOrderTotalError when amount exceeds total', async () => {
-    await expect(useCase.execute(new ProcessRefundCommand('o1', 200, 'Test'))).rejects.toThrow(RefundExceedsOrderTotalError);
+  it('should throw RefundExceedsOrderTotalError when amountCents exceeds total', async () => {
+    await expect(useCase.execute(new ProcessRefundCommand('o1', 20000, 'Test'))).rejects.toThrow(RefundExceedsOrderTotalError);
   });
 });

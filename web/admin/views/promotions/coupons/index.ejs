@@ -112,11 +112,11 @@
                       <span class="badge badge-secondary"><%= coupon.type %></span>
                     </td>
                     <td>
-                      <% if (coupon.discountAmount) { %>
+                      <% if (coupon.discountAmountCents) { %>
                         <% if (coupon.type === 'percentage') { %>
-                          <%= coupon.discountAmount %>%
+                          <%= coupon.discountAmountCents %>%
                         <% } else { %>
-                          <%= coupon.currencyCode %> <%= coupon.discountAmount %>
+                          <%= coupon.currencyCode %> <%= (coupon.discountAmountCents / 100).toFixed(2) %>
                         <% } %>
                       <% } else { %>
                         <span class="text-muted">-</span>

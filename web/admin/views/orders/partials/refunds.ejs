@@ -19,7 +19,7 @@
         <% refunds.forEach(function(refund) { %>
         <tr>
           <td><code><%= refund.orderPaymentRefundId.substring(0, 8) %>…</code></td>
-          <td><%= refund.amount %></td>
+          <td>$<%= ((refund.amountCents || 0) / 100).toFixed(2) %></td>
           <td>
             <% if (refund.status === 'completed') { %>
               <span class="badge badge-success"><%= refund.status %></span>

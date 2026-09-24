@@ -15,7 +15,7 @@ export class ManageCommissionRuleUseCase {
     type: CommissionType;
     scope: CommissionScope;
     rate?: number;
-    fixedAmount?: number;
+    fixedAmountCents?: number;
     tiers?: CommissionTier[];
     categoryId?: string;
     vendorId?: string;
@@ -99,7 +99,7 @@ export class ManageCommissionRuleUseCase {
   async calculateCommission(
     organizationId: string,
     vendorId: string,
-    amount: number,
+    amountCents: number,
     categoryId?: string,
     productId?: string,
   ): Promise<number> {
@@ -115,7 +115,7 @@ export class ManageCommissionRuleUseCase {
       .sort((a, b) => b.priority - a.priority);
 
     if (applicable.length === 0) return 0;
-    return applicable[0].calculate(amount);
+    return applicable[0].calculate(amountCents);
   }
 }
 

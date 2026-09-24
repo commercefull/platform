@@ -90,8 +90,8 @@
 
               <!-- Pricing -->
               <div class="text-right flex-shrink-0">
-                <p class="text-lg font-semibold text-ink-900" data-item-total="<%= item.basketItemId %>"><%= formatPrice(parseFloat(item.price) * item.quantity) %></p>
-                <p class="text-xs text-gray-500 mt-1"><%= formatPrice(item.price) %> each</p>
+                <p class="text-lg font-semibold text-ink-900" data-item-total="<%= item.basketItemId %>"><%= formatPrice((item.lineTotalCents || 0) / 100) %></p>
+                <p class="text-xs text-gray-500 mt-1"><%= formatPrice((item.unitPriceCents || 0) / 100) %> each</p>
               </div>
             </div>
           </div>

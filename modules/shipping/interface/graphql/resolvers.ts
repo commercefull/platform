@@ -16,7 +16,7 @@ export const shippingResolvers = {
       _parent: unknown,
       args: {
         destinationAddress: { country: string; state?: string; city?: string; postalCode?: string };
-        orderDetails: { subtotal: number; itemCount: number; totalWeight?: number; currency?: string };
+        orderDetails: { subtotalCents: number; itemCount: number; totalWeight?: number; currency?: string };
       },
       context: GraphQLAuthContext,
     ) => {

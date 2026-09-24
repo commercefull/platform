@@ -56,14 +56,14 @@ describe('ManageCompanyUseCase', () => {
   });
 
   it('should throw CreditLimitExceededError when the amount exceeds available credit', async () => {
-    const company = createCompany({ creditLimit: 100 });
+    const company = createCompany({ creditLimitCents: 100 });
     repo.findById.mockResolvedValue(company);
 
     await expect(useCase.checkCredit('co-1', 200)).rejects.toThrow(CreditLimitExceededError);
   });
 
   it('should pass the credit check when the amount fits within the limit', async () => {
-    repo.findById.mockResolvedValue(createCompany({ creditLimit: 100 }));
+    repo.findById.mockResolvedValue(createCompany({ creditLimitCents: 100 }));
 
     await expect(useCase.checkCredit('co-1', 50)).resolves.toBe(true);
   });

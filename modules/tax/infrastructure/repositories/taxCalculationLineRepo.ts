@@ -19,11 +19,11 @@ export interface TaxCalculationLine {
   sku?: string;
   name: string;
   quantity: number;
-  unitPrice: number;
-  lineTotal: number;
-  discountAmount: number;
-  taxableAmount: number;
-  taxExemptAmount: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+  discountAmountCents: number;
+  taxableAmountCents: number;
+  taxExemptAmountCents: number;
   taxCategoryId?: string;
   taxCategoryCode?: string;
 }
@@ -59,8 +59,8 @@ export class TaxCalculationLineRepo {
     const result = await queryOne<TaxCalculationLine>(
       `INSERT INTO "taxCalculationLine" (
         "calculationId", "lineItemId", "lineItemType", "productId", "productVariantId", "sku",
-        "name", "quantity", "unitPrice", "lineTotal", "discountAmount", "taxableAmount",
-        "taxExemptAmount", "taxCategoryId", "taxCategoryCode", "createdAt", "updatedAt"
+        "name", "quantity", "unitPriceCents", "lineTotalCents", "discountAmountCents", "taxableAmountCents",
+        "taxExemptAmountCents", "taxCategoryId", "taxCategoryCode", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
         params.calculationId,
@@ -71,11 +71,11 @@ export class TaxCalculationLineRepo {
         params.sku || null,
         params.name,
         params.quantity || 1,
-        params.unitPrice,
-        params.lineTotal,
-        params.discountAmount || 0,
-        params.taxableAmount,
-        params.taxExemptAmount || 0,
+        params.unitPriceCents,
+        params.lineTotalCents,
+        params.discountAmountCents || 0,
+        params.taxableAmountCents,
+        params.taxExemptAmountCents || 0,
         params.taxCategoryId || null,
         params.taxCategoryCode || null,
         now,

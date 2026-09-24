@@ -17,7 +17,7 @@ describe('ValidateCouponUseCase', () => {
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
 
     expect(result.valid).toBe(true);
-    expect(result.discountAmount).toBe(10);
+    expect(result.discountAmountCents).toBe(10);
     expect(result.coupon?.code).toBe('SAVE10');
     expect(couponRepository.findByCode).toHaveBeenCalledWith('SAVE10', undefined);
     expect(couponRepository.calculateDiscount).toHaveBeenCalledWith(expect.objectContaining({ promotionCouponId: 'coupon-1' }), 100);
@@ -87,7 +87,7 @@ describe('ValidateCouponUseCase', () => {
   });
 
   it('should return min_order_not_met when the order total is below the minimum', async () => {
-    couponRepository.findByCode.mockResolvedValue(createPromotionCoupon({ minOrderAmount: 200 }));
+    couponRepository.findByCode.mockResolvedValue(createPromotionCoupon({ minOrderAmountCents: 200 }));
 
     const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
 

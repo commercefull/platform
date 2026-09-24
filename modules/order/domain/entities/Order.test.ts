@@ -38,7 +38,7 @@ describe('Order', () => {
       expect(order.fulfillmentStatus).toBe(FulfillmentStatus.UNFULFILLED);
       expect(order.currencyCode).toBe('USD');
       expect(order.orderSource).toBe('web');
-      expect(order.totalAmount.amount).toBe(0);
+      expect(order.totalAmount.cents).toBe(0);
       expect(order.items).toHaveLength(0);
     });
 
@@ -70,8 +70,8 @@ describe('Order', () => {
       expect(order.items).toHaveLength(1);
       expect(order.totalItems).toBe(1);
       expect(order.totalQuantity).toBe(2);
-      expect(order.subtotal.amount).toBe(100);
-      expect(order.totalAmount.amount).toBe(100);
+      expect(order.subtotal.cents).toBe(10000);
+      expect(order.totalAmount.cents).toBe(10000);
     });
 
     it('should throw OrderCannotBeModifiedError when order is cancelled', () => {
@@ -92,7 +92,7 @@ describe('Order', () => {
 
       expect(order.items).toHaveLength(1);
       expect(order.totalItems).toBe(1);
-      expect(order.subtotal.amount).toBe(30);
+      expect(order.subtotal.cents).toBe(3000);
     });
 
     it('should throw OrderItemNotFoundError for unknown item', () => {
@@ -219,8 +219,8 @@ describe('Order', () => {
       order.addItem(createItem('i-1', 2, 50));
       order.setShippingTotal(Money.create(15, 'USD'));
 
-      expect(order.shippingTotal.amount).toBe(15);
-      expect(order.totalAmount.amount).toBe(115);
+      expect(order.shippingTotal.cents).toBe(1500);
+      expect(order.totalAmount.cents).toBe(11500);
     });
   });
 
@@ -241,7 +241,7 @@ describe('Order', () => {
 
       expect(json.orderId).toBe('o-1');
       expect(json.status).toBe(OrderStatus.PENDING);
-      expect(json.totalAmount).toBe(100);
+      expect(json.totalAmountCents).toBe(10000);
       expect(json.items).toHaveLength(1);
     });
   });

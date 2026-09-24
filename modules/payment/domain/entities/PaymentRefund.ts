@@ -8,7 +8,7 @@ export interface PaymentRefundProps {
   refundId: string;
   transactionId: string;
   externalRefundId?: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   reason?: string;
   status: RefundStatus;
@@ -31,7 +31,7 @@ export class PaymentRefund {
   static create(props: {
     refundId: string;
     transactionId: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     reason?: string;
     metadata?: Record<string, unknown>;
@@ -40,7 +40,7 @@ export class PaymentRefund {
     return new PaymentRefund({
       refundId: props.refundId,
       transactionId: props.transactionId,
-      amount: props.amount,
+      amountCents: props.amountCents,
       currency: props.currency.toUpperCase(),
       reason: props.reason,
       status: RefundStatus.PENDING,
@@ -64,8 +64,8 @@ export class PaymentRefund {
   get externalRefundId(): string | undefined {
     return this.props.externalRefundId;
   }
-  get amount(): number {
-    return this.props.amount;
+  get amountCents(): number {
+    return this.props.amountCents;
   }
   get currency(): string {
     return this.props.currency;
@@ -140,7 +140,7 @@ export class PaymentRefund {
       refundId: this.props.refundId,
       transactionId: this.props.transactionId,
       externalRefundId: this.props.externalRefundId,
-      amount: this.props.amount,
+      amountCents: this.props.amountCents,
       currency: this.props.currency,
       reason: this.props.reason,
       status: this.props.status,

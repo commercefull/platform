@@ -11,7 +11,8 @@ export interface OrderPayment {
   paymentMethodId?: string;
   type: OrderPaymentType;
   provider: string;
-  amount: number;
+  /** Payment amount in integer cents. */
+  amountCents: number;
   currency: string;
   status: OrderPaymentStatus;
   transactionId?: string;
@@ -21,7 +22,8 @@ export interface OrderPayment {
   maskedNumber?: string;
   cardType?: string;
   gatewayResponse?: Record<string, unknown>;
-  refundedAmount: number;
+  /** Refunded amount in integer cents. */
+  refundedAmountCents: number;
   capturedAt?: string;
 }
 

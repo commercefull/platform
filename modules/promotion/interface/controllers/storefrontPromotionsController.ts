@@ -13,7 +13,7 @@ export const getPromotionsPage = async (req: HttpRequest, res: HttpResponse): Pr
   );
 
   const couponsResult = await query<Array<Record<string, unknown>>>(
-    `SELECT * FROM promotionCoupon WHERE "isActive" = true AND ("endDate" IS NULL OR "endDate" >= now()) AND ("maxUsage" IS NULL OR "maxUsage" > "usedCount") ORDER BY "createdAt" DESC LIMIT 20`,
+    `SELECT * FROM "promotionCoupon" WHERE "isActive" = true AND ("endDate" IS NULL OR "endDate" >= now()) AND ("maxUsage" IS NULL OR "maxUsage" > "usageCount") ORDER BY "createdAt" DESC LIMIT 20`,
   );
 
   storefrontRespond(req, res, 'page/promotions', {

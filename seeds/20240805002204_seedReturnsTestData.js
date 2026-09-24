@@ -41,6 +41,26 @@ exports.seed = async function (knex) {
   await knex('orderReturnItem').whereIn('orderReturnItemId', Object.values(RETURN_ITEM_IDS)).del();
   await knex('orderReturn').whereIn('orderReturnId', Object.values(RETURN_IDS)).del();
 
+  // Seed a store credit balance so the debit test has funds to draw on
+  const hasLedger = await knex.schema.hasTable('storeCreditLedger');
+  if (hasLedger) {
+    await knex('storeCreditLedger')
+      .where({ referenceType: 'seed', referenceId: '0193c002-0000-7000-8000-000000000001' })
+      .del();
+    await knex('storeCreditLedger').insert({
+      customerId,
+      entryType: 'credit',
+      referenceType: 'seed',
+      referenceId: '0193c002-0000-7000-8000-000000000001',
+      amountCents: 10000,
+      balanceAfterCents: 10000,
+      currency: 'USD',
+      reason: 'Seeded store credit',
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   await knex('orderReturn').insert([
     {
       orderReturnId: RETURN_IDS.WORKFLOW,
@@ -83,7 +103,7 @@ exports.seed = async function (knex) {
       returnReason: 'damaged',
       condition: 'damaged',
       restockItem: false,
-      refundAmount: 25.0,
+      refundAmountCents: 2500,
       createdAt: now,
     },
     {
@@ -94,7 +114,7 @@ exports.seed = async function (knex) {
       returnReason: 'other',
       condition: 'new',
       restockItem: false,
-      refundAmount: 19.99,
+      refundAmountCents: 1999,
       createdAt: now,
     },
   ]);

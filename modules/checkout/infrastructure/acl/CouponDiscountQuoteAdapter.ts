@@ -11,8 +11,8 @@ import { CouponRepository } from '../../../coupon/infrastructure/repositories/Co
 export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
   constructor(private readonly couponRepository: CouponRepository) {}
 
-  async validateDiscount(code: string, subtotal: number, _currency: string): Promise<DiscountQuoteResult> {
-    const validation = await this.couponRepository.validateCouponCode(code, subtotal);
+  async validateDiscount(code: string, subtotalCents: number, _currency: string): Promise<DiscountQuoteResult> {
+    const validation = await this.couponRepository.validateCouponCode(code, subtotalCents);
 
     if (!validation.valid || !validation.coupon) {
       return { valid: false, error: validation.error };
@@ -22,7 +22,7 @@ export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
       valid: true,
       discount: {
         code,
-        discountAmount: validation.discountAmount || 0,
+        discountAmountCents: validation.discountAmountCents || 0,
       },
     };
   }

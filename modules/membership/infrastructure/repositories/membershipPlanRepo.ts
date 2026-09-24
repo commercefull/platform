@@ -89,7 +89,7 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
   const result = await queryOne<MembershipPlan>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "shortDescription", "isActive", "isPublic", "isDefault",
-      "priority", "level", "trialDays", "price", "salePrice", "setupFee", "currency",
+      "priority", "level", "trialDays", "priceCents", "salePriceCents", "setupFeeCents", "currency",
       "billingCycle", "billingPeriod", "maxMembers", "autoRenew", "duration",
       "gracePeriodsAllowed", "gracePeriodDays", "membershipImage", "publicDetails",
       "privateMeta", "visibilityRules", "availabilityRules", "customFields", "createdBy"
@@ -108,9 +108,9 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
       input.priority ?? 0,
       input.level ?? 1,
       input.trialDays ?? 0,
-      input.price,
-      input.salePrice || null,
-      input.setupFee ?? 0,
+      input.priceCents,
+      input.salePriceCents || null,
+      input.setupFeeCents ?? 0,
       input.currency ?? 'USD',
       input.billingCycle ?? 'monthly',
       input.billingPeriod ?? 1,

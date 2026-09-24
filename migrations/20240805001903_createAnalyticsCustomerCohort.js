@@ -16,10 +16,10 @@ exports.up = function (knex) {
       table.decimal('retentionRate', 5, 4).defaultTo(0);
 
       // Revenue metrics
-      table.decimal('revenue', 15, 2).defaultTo(0);
+      table.bigInteger('revenueCents').defaultTo(0);
       table.integer('orders').defaultTo(0);
-      table.decimal('averageOrderValue', 15, 2).defaultTo(0);
-      table.decimal('lifetimeValue', 15, 2).defaultTo(0);
+      table.bigInteger('averageOrderValueCents').defaultTo(0);
+      table.bigInteger('lifetimeValueCents').defaultTo(0);
 
       // Engagement metrics
       table.integer('repeatPurchasers').defaultTo(0);

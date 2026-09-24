@@ -9,8 +9,6 @@ import {
   TEST_PRODUCT_2_ID,
   TEST_GUEST_BASKET_ID,
   TEST_CUSTOMER_BASKET_ID,
-  TEST_PRODUCT_1,
-  TEST_PRODUCT_2,
   ADMIN_CREDENTIALS,
   CUSTOMER_CREDENTIALS,
 } from '../testConstants';
@@ -38,9 +36,10 @@ describe('Basket Feature Tests', () => {
   let customerBasketId: string | undefined;
   let createdBasketItemId: string;
 
-  // Test product data from constants
-  const basketItem1 = { productId: TEST_PRODUCT_1_ID, quantity: 2, price: TEST_PRODUCT_1.price };
-  const basketItem2 = { productId: TEST_PRODUCT_2_ID, quantity: 1, price: TEST_PRODUCT_2.price };
+  // Test product data from constants — unit prices come from the seeded
+  // pricing-owned productBasePrice rows, never from the request body.
+  const basketItem1 = { productId: TEST_PRODUCT_1_ID, quantity: 2 };
+  const basketItem2 = { productId: TEST_PRODUCT_2_ID, quantity: 1 };
 
   beforeAll(async () => {
     jest.setTimeout(30000);
@@ -144,7 +143,7 @@ describe('Basket Feature Tests', () => {
       // Check that the response has camelCase properties
       expect(response.data.data).toHaveProperty('status');
       expect(response.data.data).toHaveProperty('items');
-      expect(response.data.data).toHaveProperty('subtotal');
+      expect(response.data.data).toHaveProperty('subtotalCents');
       expect(response.data.data).toHaveProperty('itemCount');
       expect(response.data.data).toHaveProperty('createdAt');
 
@@ -167,7 +166,7 @@ describe('Basket Feature Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('basketId', guestBasketId);
       expect(response.data.data).toHaveProperty('itemCount');
-      expect(response.data.data).toHaveProperty('subtotal');
+      expect(response.data.data).toHaveProperty('subtotalCents');
       expect(response.data.data).toHaveProperty('currency');
     });
 
@@ -212,7 +211,6 @@ describe('Basket Feature Tests', () => {
           sku: 'TEST-SKU-001',
           name: 'Test Product',
           quantity: 2,
-          unitPrice: 29.99,
         },
         {
           headers: { Authorization: `Bearer ${customerToken}` },
@@ -240,7 +238,7 @@ describe('Basket Feature Tests', () => {
       expect(addedItem).not.toHaveProperty('basket_item_id');
 
       // Verify subtotal recalculation
-      expect(basket).toHaveProperty('subtotal');
+      expect(basket).toHaveProperty('subtotalCents');
       expect(basket).toHaveProperty('itemCount');
     });
 
@@ -331,7 +329,6 @@ describe('Basket Feature Tests', () => {
           sku: 'CLEAR-SKU-002',
           name: 'Clear Test Product 2',
           quantity: 1,
-          unitPrice: 19.99,
         },
         {
           headers: { Authorization: `Bearer ${customerToken}` },
@@ -353,7 +350,7 @@ describe('Basket Feature Tests', () => {
       expect(basket.items.length).toBe(0);
 
       // Verify totals reset
-      expect(basket.subtotal).toBe(0);
+      expect(basket.subtotalCents).toBe(0);
       expect(basket.itemCount).toBe(0);
 
       // Clean up test basket
@@ -395,7 +392,6 @@ describe('Basket Feature Tests', () => {
           sku: 'MERGE-SKU-001',
           name: 'Merge Test Product 1',
           quantity: 1,
-          unitPrice: 10.0,
         },
         {
           headers: { Authorization: `Bearer ${customerToken}` },
@@ -512,7 +508,6 @@ describe('Basket Feature Tests', () => {
             sku: 'TEST-SKU',
             name: 'Test Product',
             quantity: 0, // Invalid quantity
-            unitPrice: 10.0,
           },
           {
             headers: { Authorization: `Bearer ${customerToken}` },
@@ -531,7 +526,7 @@ describe('Basket Feature Tests', () => {
           `/customer/basket/${guestBasketId}/items`,
           {
             productId: 'test-product',
-            // Missing sku, name, quantity, unitPrice
+            // Missing sku, name, quantity
           },
           {
             headers: { Authorization: `Bearer ${customerToken}` },

@@ -26,13 +26,13 @@ export interface ProcessWebhookOutput {
 interface TransactionRecord {
   transactionId: string;
   orderId: string;
-  amount: number;
+  amountCents: number;
 }
 
 interface RefundRecord {
   refundId: string;
   transactionId: string;
-  amount: number;
+  amountCents: number;
 }
 
 interface PaymentRepositoryPort {
@@ -44,7 +44,7 @@ interface PaymentRepositoryPort {
     transactionId: string;
     provider: string;
     providerDisputeId: string;
-    amount: unknown;
+    amountCents: unknown;
     reason: unknown;
     status: string;
   }): Promise<void>;
@@ -131,7 +131,7 @@ export class ProcessWebhookUseCase {
       eventBus.emit('payment.completed', {
         transactionId: transaction.transactionId,
         orderId: transaction.orderId,
-        amount: transaction.amount,
+        amountCents: transaction.amountCents,
         provider: input.provider,
       });
 
@@ -171,7 +171,7 @@ export class ProcessWebhookUseCase {
       eventBus.emit('payment.refunded', {
         refundId: refund.refundId,
         transactionId: refund.transactionId,
-        amount: refund.amount,
+        amountCents: refund.amountCents,
       });
 
       return refund.transactionId;
@@ -187,7 +187,7 @@ export class ProcessWebhookUseCase {
       transactionId,
       provider: input.provider,
       providerDisputeId: (payloadData.id as string) || '',
-      amount: payloadData.amount,
+      amountCents: payloadData.amountCents,
       reason: payloadData.reason,
       status: 'open',
     });

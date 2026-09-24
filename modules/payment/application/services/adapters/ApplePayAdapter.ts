@@ -102,7 +102,7 @@ export class ApplePayAdapter implements PSPAdapter {
     }
 
     const body = new URLSearchParams({
-      amount: String(Math.round(request.amount * 100)),
+      amountCents: String(Math.round(request.amountCents * 100)),
       currency: request.currency.toLowerCase(),
       'metadata[orderId]': request.orderId,
       payment_method: request.paymentMethodToken,
@@ -149,7 +149,7 @@ export class ApplePayAdapter implements PSPAdapter {
   async capturePayment(request: CaptureRequest, config: PSPConfig): Promise<CaptureResponse> {
     const baseUrl = config.testMode ? 'https://api.stripe.com/v1' : 'https://api.stripe.com/v1';
     const body = new URLSearchParams();
-    if (request.amount) body.append('amount_to_capture', String(Math.round(request.amount * 100)));
+    if (request.amountCents) body.append('amount_to_capture', String(Math.round(request.amountCents * 100)));
 
     const res = await fetch(`${baseUrl}/payment_intents/${request.externalTransactionId}/capture`, {
       method: 'POST',
@@ -217,7 +217,7 @@ export class ApplePayAdapter implements PSPAdapter {
     const baseUrl = config.testMode ? 'https://api.stripe.com/v1' : 'https://api.stripe.com/v1';
     const body = new URLSearchParams({
       payment_intent: request.externalTransactionId,
-      amount: String(Math.round(request.amount * 100)),
+      amountCents: String(Math.round(request.amountCents * 100)),
     });
     if (request.reason) body.append('reason', request.reason);
 

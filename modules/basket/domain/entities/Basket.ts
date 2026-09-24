@@ -32,7 +32,8 @@ export interface BasketProps {
   currency: string;
   items: BasketItem[];
   coupon?: AppliedCoupon;
-  discountAmount?: number;
+  /** Basket-level discount in integer cents. */
+  discountAmountCents?: number;
   metadata?: Record<string, unknown>;
   expiresAt?: Date;
   convertedToOrderId?: string;
@@ -134,13 +135,13 @@ export class Basket {
     return this.props.coupon;
   }
 
-  get discountAmount(): number {
-    return this.props.discountAmount || 0;
+  get discountAmountCents(): number {
+    return this.props.discountAmountCents || 0;
   }
 
   get total(): Money {
     const sub = this.subtotal;
-    const discount = Money.create(this.discountAmount, this.props.currency);
+    const discount = Money.fromCents(this.discountAmountCents, this.props.currency);
     return sub.subtract(discount);
   }
 
@@ -261,6 +262,10 @@ export class Basket {
     this.touch();
   }
 
+  /**
+   * Applies a coupon. `discountValue` is a polymorphic operand: a percentage
+   * when `discountType` is 'percentage', integer cents when 'fixed'.
+   */
   applyCoupon(couponCode: string, discountType: 'percentage' | 'fixed', discountValue: number): void {
     this.ensureActive();
     if (this.props.coupon) {
@@ -277,12 +282,11 @@ export class Basket {
       appliedAt: new Date(),
     };
 
-    // Calculate discount amount
-    const subtotalAmount = this.subtotal.amount;
+    const subtotalCents = this.subtotal.cents;
     if (discountType === 'percentage') {
-      this.props.discountAmount = Math.round(subtotalAmount * (discountValue / 100) * 100) / 100;
+      this.props.discountAmountCents = Math.round((subtotalCents * discountValue) / 100);
     } else {
-      this.props.discountAmount = Math.min(discountValue, subtotalAmount);
+      this.props.discountAmountCents = Math.min(discountValue, subtotalCents);
     }
 
     this.touch();
@@ -294,7 +298,7 @@ export class Basket {
       throw new NoCouponAppliedError();
     }
     this.props.coupon = undefined;
-    this.props.discountAmount = 0;
+    this.props.discountAmountCents = 0;
     this.touch();
   }
 
@@ -327,10 +331,10 @@ export class Basket {
       items: this.props.items.map(item => item.toJSON()),
       itemCount: this.itemCount,
       uniqueItemCount: this.uniqueItemCount,
-      subtotal: this.subtotal.amount,
+      subtotalCents: this.subtotal.cents,
       coupon: this.props.coupon,
-      discountAmount: this.discountAmount,
-      total: this.total.amount,
+      discountAmountCents: this.discountAmountCents,
+      totalCents: this.total.cents,
       metadata: this.props.metadata,
       expiresAt: this.props.expiresAt?.toISOString(),
       convertedToOrderId: this.props.convertedToOrderId,

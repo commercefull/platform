@@ -9,7 +9,7 @@ describe('RecordPaymentFeeUseCase', () => {
 
   beforeEach(() => {
     repo = lazyMock<PaymentBillingRepository>();
-    repo.createFee.mockResolvedValue(createPaymentFee({ paymentFeeId: 'f1', amount: 5 }));
+    repo.createFee.mockResolvedValue(createPaymentFee({ paymentFeeId: 'f1', amountCents: 5 }));
     useCase = new RecordPaymentFeeUseCase(repo);
   });
 
@@ -17,7 +17,7 @@ describe('RecordPaymentFeeUseCase', () => {
     const result = await useCase.execute(new RecordPaymentFeeCommand('t1', 'org1', 'processing', 5, 'USD', 'Processing fee'));
 
     expect(result.paymentFeeId).toBe('f1');
-    expect(result.amount).toBe(5);
+    expect(result.amountCents).toBe(5);
   });
 
   it('should throw FailedToCreatePaymentFeeError when fee creation fails', async () => {

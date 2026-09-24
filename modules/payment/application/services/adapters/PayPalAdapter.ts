@@ -112,9 +112,9 @@ export class PayPalAdapter implements PSPAdapter {
       purchase_units: [
         {
           reference_id: request.orderId,
-          amount: {
+          amountCents: {
             currency_code: request.currency.toUpperCase(),
-            value: request.amount.toFixed(2),
+            value: request.amountCents.toFixed(2),
           },
           description: request.description,
         },
@@ -174,9 +174,9 @@ export class PayPalAdapter implements PSPAdapter {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(
-        request.amount
+        request.amountCents
           ? {
-              amount: { value: request.amount.toFixed(2), currency_code: (request.currency || 'USD').toUpperCase() },
+              amountCents: { value: request.amountCents.toFixed(2), currency_code: (request.currency || 'USD').toUpperCase() },
             }
           : {},
       ),
@@ -234,7 +234,7 @@ export class PayPalAdapter implements PSPAdapter {
     const baseUrl = this.getBaseUrl(config);
 
     const body = {
-      amount: { value: request.amount.toFixed(2), currency_code: request.currency.toUpperCase() },
+      amountCents: { value: request.amountCents.toFixed(2), currency_code: request.currency.toUpperCase() },
       note_to_payer: request.reason,
     };
 

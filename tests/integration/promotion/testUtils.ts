@@ -20,8 +20,8 @@ export const testPromotion = {
   endDate: new Date(new Date().getTime() + 86400000).toISOString(), // Tomorrow
   discountType: 'percentage',
   discountValue: 10,
-  minOrderAmount: 50,
-  maxDiscountAmount: 100,
+  minOrderAmountCents: 5000,
+  maxDiscountAmountCents: 10000,
 };
 
 // Common test data for coupons (matching new schema)
@@ -30,10 +30,10 @@ export const testCoupon = {
   name: 'Test Coupon',
   description: 'Test coupon for integration tests',
   type: 'percentage',
-  discountAmount: 15,
+  discountAmountCents: 15,
   currencyCode: 'USD',
-  minOrderAmount: 25,
-  maxDiscountAmount: 50,
+  minOrderAmountCents: 2500,
+  maxDiscountAmountCents: 5000,
   startDate: new Date(new Date().getTime() - 86400000).toISOString(),
   endDate: new Date(new Date().getTime() + 86400000).toISOString(),
   maxUsage: 100,

@@ -56,8 +56,8 @@ export class TransactionCannotBeRefundedError extends AppError {
 }
 
 export class RefundAmountExceedsRefundableError extends AppError {
-  constructor(amount: number, refundable: number) {
-    super(`Refund amount ($${amount}) exceeds refundable amount ($${refundable})`, 400, {
+  constructor(amountCents: number, refundable: number) {
+    super(`Refund amount ($${amountCents}) exceeds refundable amount ($${refundable})`, 400, {
       code: 'payment.refund_amount_exceeds_refundable',
     });
   }

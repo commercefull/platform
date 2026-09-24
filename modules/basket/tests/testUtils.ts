@@ -12,6 +12,7 @@ import { Money } from '../domain/valueObjects/Money';
 import { eventBus } from '../../../libs/events/eventBus';
 import type { BasketRepository } from '../domain/repositories/BasketRepository';
 import type { DiscountQuotePort, DiscountQuoteResult } from '../application/ports/DiscountQuotePort';
+import type { ProductPricePort, ResolvedProductPrice } from '../application/ports/ProductPricePort';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -111,11 +112,19 @@ export function createBasketRepository(basket: Basket | null = null): jest.Mocke
 
 const validPercentageQuote: DiscountQuoteResult = {
   valid: true,
-  discount: { code: 'SAVE10', type: 'percentage', value: 10, discountAmount: 10 },
+  discount: { code: 'SAVE10', type: 'percentage', value: 10, discountAmountCents: 1000 },
 };
 
 export function createDiscountQuotePort(result: DiscountQuoteResult = validPercentageQuote): jest.Mocked<DiscountQuotePort> {
   const port: jest.Mocked<DiscountQuotePort> = { validateDiscount: jest.fn() };
   port.validateDiscount.mockResolvedValue(result);
+  return port;
+}
+
+export function createProductPricePort(
+  price: ResolvedProductPrice | null = { unitPriceCents: 5000, currency: 'USD' },
+): jest.Mocked<ProductPricePort> {
+  const port: jest.Mocked<ProductPricePort> = { getPrice: jest.fn() };
+  port.getPrice.mockResolvedValue(price);
   return port;
 }

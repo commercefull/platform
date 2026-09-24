@@ -7,10 +7,10 @@ export async function up(knex) {
     table.string('status').notNullable().defaultTo('draft');
     table.string('requestedBy').notNullable();
     table.jsonb('lineItems').notNullable().defaultTo('[]');
-    table.decimal('subtotal', 14, 2).notNullable().defaultTo(0);
-    table.decimal('discountTotal', 14, 2).notNullable().defaultTo(0);
-    table.decimal('taxTotal', 14, 2).notNullable().defaultTo(0);
-    table.decimal('total', 14, 2).notNullable().defaultTo(0);
+    table.bigInteger('subtotalCents').notNullable().defaultTo(0);
+    table.bigInteger('discountTotalCents').notNullable().defaultTo(0);
+    table.bigInteger('taxTotalCents').notNullable().defaultTo(0);
+    table.bigInteger('totalCents').notNullable().defaultTo(0);
     table.string('currency').notNullable().defaultTo('USD');
     table.text('notes');
     table.text('internalNotes');

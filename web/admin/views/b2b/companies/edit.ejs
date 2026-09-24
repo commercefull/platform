@@ -33,7 +33,7 @@
       </div>
       <div class="mb-3">
         <label class="form-label">Credit Limit</label>
-        <input type="number" name="creditLimit" step="0.01" value="<%= company.creditLimit != null ? company.creditLimit : '' %>" class="form-control">
+        <input type="number" name="creditLimit" step="0.01" value="<%= company.creditLimitCents != null ? (company.creditLimitCents/100) : '' %>" class="form-control">
       </div>
       <div class="mb-3">
         <label class="form-label">Contact Email</label>

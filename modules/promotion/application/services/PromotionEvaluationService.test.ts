@@ -18,11 +18,11 @@ type PromotionsPort = Pick<
 
 const baseContext: PromotionEvaluationContext = {
   items: [
-    { productId: 'p1', name: 'Widget', quantity: 2, unitPrice: 50, categoryId: 'cat1' },
-    { productId: 'p2', name: 'Gadget', quantity: 1, unitPrice: 100, categoryId: 'cat2' },
+    { productId: 'p1', name: 'Widget', quantity: 2, unitPriceCents: 50, categoryId: 'cat1' },
+    { productId: 'p2', name: 'Gadget', quantity: 1, unitPriceCents: 100, categoryId: 'cat2' },
   ],
-  subtotal: 200,
-  shippingAmount: 15,
+  subtotalCents: 200,
+  shippingAmountCents: 15,
   currency: 'USD',
 };
 
@@ -36,8 +36,8 @@ const activePromotion = createPromotion({
   isExclusive: false,
   usageCount: 0,
   maxUsage: null,
-  minOrderAmount: null,
-  maxDiscountAmount: null,
+  minOrderAmountCents: null,
+  maxDiscountAmountCents: null,
   stackability: undefined,
 });
 
@@ -54,11 +54,11 @@ describe('PromotionEvaluationService', () => {
   it('should return empty result when no active promotions', async () => {
     promotionsRepo.findActive.mockResolvedValue([]);
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
-  it('should apply percentage discount on cart subtotal', async () => {
+  it('should apply percentage discount on cart subtotalCents', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -66,11 +66,11 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(40);
+    expect(result.totalDiscountAmountCents).toBe(40);
     expect(result.appliedPromotions).toHaveLength(1);
   });
 
-  it('should apply fixed amount discount', async () => {
+  it('should apply fixed amountCents discount', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -78,10 +78,10 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(25);
+    expect(result.totalDiscountAmountCents).toBe(25);
   });
 
-  it('should cap fixed discount at subtotal', async () => {
+  it('should cap fixed discount at subtotalCents', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -89,7 +89,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(200);
+    expect(result.totalDiscountAmountCents).toBe(200);
   });
 
   it('should apply line-item percentage discount for specific products', async () => {
@@ -100,7 +100,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(50);
+    expect(result.totalDiscountAmountCents).toBe(50);
     expect(result.lineItemDiscounts).toHaveLength(1);
   });
 
@@ -112,7 +112,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(30);
+    expect(result.totalDiscountAmountCents).toBe(30);
     expect(result.lineItemDiscounts[0].productId).toBe('p1');
   });
 
@@ -124,7 +124,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(100);
+    expect(result.totalDiscountAmountCents).toBe(100);
   });
 
   it('should apply shipping discount alongside cart discount', async () => {
@@ -136,11 +136,11 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.shippingDiscountAmount).toBe(10);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.shippingDiscountAmountCents).toBe(10);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
-  it('should cap shipping discount at shipping amount', async () => {
+  it('should cap shipping discount at shipping amountCents', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -149,7 +149,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.shippingDiscountAmount).toBe(15);
+    expect(result.shippingDiscountAmountCents).toBe(15);
   });
 
   it('should add free items', async () => {
@@ -227,8 +227,8 @@ describe('PromotionEvaluationService', () => {
     expect(result.appliedPromotions).toHaveLength(0);
   });
 
-  it('should skip promotions below minOrderAmount', async () => {
-    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, minOrderAmount: '500' }]);
+  it('should skip promotions below minOrderAmountCents', async () => {
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, minOrderAmountCents: 500 }]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([]);
 
@@ -246,7 +246,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should fail cartTotal rule when below threshold', async () => {
@@ -259,7 +259,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
   });
 
   it('should evaluate itemQuantity rule', async () => {
@@ -272,7 +272,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate productCategory rule', async () => {
@@ -285,7 +285,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should fail productCategory rule when no match', async () => {
@@ -298,7 +298,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
   });
 
   it('should evaluate customerGroup rule', async () => {
@@ -311,7 +311,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate({ ...baseContext, customerGroup: 'vip' });
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should fail customerGroup rule when no group', async () => {
@@ -324,7 +324,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
   });
 
   it('should evaluate firstOrder rule', async () => {
@@ -337,7 +337,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate({ ...baseContext, isFirstOrder: true });
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate shippingMethod rule', async () => {
@@ -350,7 +350,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate({ ...baseContext, shippingMethodId: 'sm1' });
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate paymentMethod rule', async () => {
@@ -363,7 +363,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate({ ...baseContext, paymentMethodId: 'pm1' });
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate dateRange rule', async () => {
@@ -377,7 +377,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate dayOfWeek rule', async () => {
@@ -390,7 +390,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should evaluate timeOfDay rule', async () => {
@@ -403,21 +403,21 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
-  it('should cap total discount at maxDiscountAmount', async () => {
-    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, maxDiscountAmount: '30' }]);
+  it('should cap total discount at maxDiscountAmountCents', async () => {
+    promotionsRepo.findActive.mockResolvedValue([{ ...activePromotion, maxDiscountAmountCents: 30 }]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 50, targetIds: null }),
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(30);
+    expect(result.totalDiscountAmountCents).toBe(30);
   });
 
-  it('should cap total discount at subtotal', async () => {
+  it('should cap total discount at subtotalCents', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -425,13 +425,13 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(200);
+    expect(result.totalDiscountAmountCents).toBe(200);
   });
 
   it('should handle errors gracefully', async () => {
     promotionsRepo.findActive.mockRejectedValue(new Error('DB error'));
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
   });
 
   it('should pass when no rules (always applicable)', async () => {
@@ -442,7 +442,7 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should compare with > operator', async () => {
@@ -455,13 +455,13 @@ describe('PromotionEvaluationService', () => {
     ]);
 
     const result = await service.evaluate(baseContext);
-    expect(result.totalDiscountAmount).toBe(20);
+    expect(result.totalDiscountAmountCents).toBe(20);
   });
 
   it('should handle empty items', async () => {
     promotionsRepo.findActive.mockResolvedValue([]);
-    const result = await service.evaluate({ items: [], subtotal: 0, shippingAmount: 0, currency: 'USD' });
-    expect(result.totalDiscountAmount).toBe(0);
+    const result = await service.evaluate({ items: [], subtotalCents: 0, shippingAmountCents: 0, currency: 'USD' });
+    expect(result.totalDiscountAmountCents).toBe(0);
   });
 
   // ========================================================================
@@ -480,7 +480,7 @@ describe('PromotionEvaluationService', () => {
 
       const result = await service.evaluate(baseContext);
       expect(result.appliedPromotions).toHaveLength(2);
-      expect(result.totalDiscountAmount).toBe(40); // 10% of 200 twice
+      expect(result.totalDiscountAmountCents).toBe(40); // 10% of 200 twice
     });
 
     it('should block later stackable promotion when exclusive applies (via stackability field)', async () => {
@@ -544,7 +544,7 @@ describe('PromotionEvaluationService', () => {
 
       // baseContext has 3 items (qty 2 + 1 = 3 total) → tier 2 (10%)
       const result = await service.evaluate(baseContext);
-      expect(result.totalDiscountAmount).toBe(20); // 10% of 200
+      expect(result.totalDiscountAmountCents).toBe(20); // 10% of 200
     });
 
     it('should pick the correct tier at boundary quantity', async () => {
@@ -563,10 +563,10 @@ describe('PromotionEvaluationService', () => {
 
       // 3 items total → boundary at min=3 → tier 2 (10%)
       const result = await service.evaluate(baseContext);
-      expect(result.totalDiscountAmount).toBe(20);
+      expect(result.totalDiscountAmountCents).toBe(20);
     });
 
-    it('should fall back to subtotal-based tiering when quantity tier does not match', async () => {
+    it('should fall back to subtotalCents-based tiering when quantity tier does not match', async () => {
       promotionsRepo.findActive.mockResolvedValue([activePromotion]);
       promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
       promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -580,12 +580,12 @@ describe('PromotionEvaluationService', () => {
         }),
       ]);
 
-      // qty=3 doesn't match any quantity tier (max is 199), subtotal=200 matches tier 2
+      // qty=3 doesn't match any quantity tier (max is 199), subtotalCents=200 matches tier 2
       const result = await service.evaluate(baseContext);
-      expect(result.totalDiscountAmount).toBe(30); // 15% of 200
+      expect(result.totalDiscountAmountCents).toBe(30); // 15% of 200
     });
 
-    it('should apply tiered amount discount', async () => {
+    it('should apply tiered amountCents discount', async () => {
       promotionsRepo.findActive.mockResolvedValue([activePromotion]);
       promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
       promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -597,7 +597,7 @@ describe('PromotionEvaluationService', () => {
       ]);
 
       const result = await service.evaluate(baseContext);
-      expect(result.totalDiscountAmount).toBe(30);
+      expect(result.totalDiscountAmountCents).toBe(30);
     });
 
     it('should handle empty tiers array gracefully', async () => {
@@ -608,7 +608,7 @@ describe('PromotionEvaluationService', () => {
       ]);
 
       const result = await service.evaluate(baseContext);
-      expect(result.totalDiscountAmount).toBe(0);
+      expect(result.totalDiscountAmountCents).toBe(0);
     });
   });
 
@@ -633,7 +633,7 @@ describe('PromotionEvaluationService', () => {
         createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 500 }, targetIds: null }),
       ]);
 
-      const result = await service.evaluate(baseContext); // subtotal 200 < 500
+      const result = await service.evaluate(baseContext); // subtotalCents 200 < 500
       expect(result.freeItems).toHaveLength(0);
     });
 
@@ -655,7 +655,7 @@ describe('PromotionEvaluationService', () => {
         createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 100, minQuantity: 2 }, targetIds: null }),
       ]);
 
-      const result = await service.evaluate(baseContext); // subtotal 200 >= 100, qty 3 >= 2
+      const result = await service.evaluate(baseContext); // subtotalCents 200 >= 100, qty 3 >= 2
       expect(result.freeItems).toHaveLength(1);
       expect(result.freeItems[0].productId).toBe('gift1');
     });

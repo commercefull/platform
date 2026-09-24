@@ -73,11 +73,10 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
       product.sku || product.productId,
       product.name,
       parseInt(quantity as string),
-      product.effectivePrice ?? product.basePrice ?? 0,
       variantId as string | undefined,
       product.primaryImage?.url,
       undefined,
-      product.hasVariants ? 'physical' : 'physical',
+      'physical',
     );
 
     await addItemUseCase.execute(addCmd);
@@ -166,12 +165,12 @@ export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<
 
 async function calculateBasketTotals(basket: Record<string, unknown>, user: Record<string, unknown> | undefined) {
   const basketItems = basket.items as Record<string, unknown>[] | undefined;
-  const subtotal =
-    typeof basket.subtotal === 'number'
-      ? basket.subtotal
+  const subtotalCents =
+    typeof basket.subtotalCents === 'number'
+      ? basket.subtotalCents
       : basketItems?.reduce(
           (sum: number, item: Record<string, unknown>) =>
-            sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number)),
+            sum + ((item.lineTotalCents as number) ?? (item.unitPriceCents as number) * (item.quantity as number)),
           0,
         ) || 0;
 
@@ -189,7 +188,7 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
       productId: item.productId as string,
       name: item.name as string,
       quantity: item.quantity as number,
-      unitPrice: item.unitPrice as number,
+      unitPriceCents: item.unitPriceCents as number,
     })) || [],
     defaultAddress,
     0, // No shipping in basket view
@@ -199,12 +198,12 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
   const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);
 
-  const total = subtotal + taxResult.taxAmount;
+  const totalCents = subtotalCents + taxResult.taxAmountCents;
 
   return {
-    subtotal: subtotal.toFixed(2),
-    tax: taxResult.taxAmount.toFixed(2),
-    total: total.toFixed(2),
+    subtotal: (subtotalCents / 100).toFixed(2),
+    tax: (taxResult.taxAmountCents / 100).toFixed(2),
+    total: (totalCents / 100).toFixed(2),
     taxRate: taxResult.taxRate,
   };
 }

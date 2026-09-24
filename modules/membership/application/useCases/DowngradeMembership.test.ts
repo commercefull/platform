@@ -20,8 +20,8 @@ describe('DowngradeMembershipUseCase', () => {
       currentPeriodEnd: new Date(Date.now() + 15 * 86400000).toISOString(),
     });
     membershipRepository.getTierById.mockImplementation(async (id: string) => {
-      if (id === 't1') return { name: 'Gold', price: 50, isActive: true };
-      if (id === 't2') return { name: 'Silver', price: 25, isActive: true };
+      if (id === 't1') return { name: 'Gold', priceCents: 50, isActive: true };
+      if (id === 't2') return { name: 'Silver', priceCents: 25, isActive: true };
       return null;
     });
     membershipRepository.updateMembership.mockResolvedValue(undefined);
@@ -59,8 +59,8 @@ describe('DowngradeMembershipUseCase', () => {
 
   it('should throw MembershipValidationError when the new tier is more expensive', async () => {
     membershipRepository.getTierById.mockImplementation(async (id: string) => {
-      if (id === 't1') return { name: 'Silver', price: 25, isActive: true };
-      if (id === 't2') return { name: 'Gold', price: 50, isActive: true };
+      if (id === 't1') return { name: 'Silver', priceCents: 25, isActive: true };
+      if (id === 't2') return { name: 'Gold', priceCents: 50, isActive: true };
       return null;
     });
 

@@ -46,7 +46,7 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       undefined, // customerPhone
       undefined, // customerName
       request.notes,
-      request.shippingAmount,
+      request.shippingAmountCents,
       undefined, // hasGiftWrapping
       undefined, // giftMessage
       undefined, // isGift

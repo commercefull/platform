@@ -43,7 +43,7 @@ export class ApplyCouponUseCase {
 
     const validation = await this.discountQuotePort.validateDiscount(
       command.couponCode,
-      session.subtotal.amount,
+      session.subtotal.cents,
       session.subtotal.currency,
     );
 
@@ -51,7 +51,7 @@ export class ApplyCouponUseCase {
       throw new BadRequestError(validation.error || `Invalid coupon code: ${command.couponCode}`);
     }
 
-    const discountAmount = Money.create(validation.discount.discountAmount, session.subtotal.currency);
+    const discountAmount = Money.fromCents(validation.discount.discountAmountCents, session.subtotal.currency);
 
     session.applyCoupon(command.couponCode, discountAmount);
     await this.checkoutRepository.save(session);
@@ -60,7 +60,7 @@ export class ApplyCouponUseCase {
       checkoutId: session.id,
       field: 'coupon',
       couponCode: command.couponCode,
-      discountAmount: discountAmount.amount,
+      discountAmountCents: discountAmount.cents,
     });
 
     return mapCheckoutToResponse(session);

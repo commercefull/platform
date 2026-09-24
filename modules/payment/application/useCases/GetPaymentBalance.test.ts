@@ -12,13 +12,13 @@ describe('GetPaymentBalanceUseCase', () => {
   });
 
   it('should return balances without a currency filter', async () => {
-    repo.findBalancesByMerchant.mockResolvedValue([createPaymentBalance({ amount: 500 })]);
+    repo.findBalancesByMerchant.mockResolvedValue([createPaymentBalance({ amountCents: 500 })]);
 
     const result = await useCase.execute(new GetPaymentBalanceCommand('org1'));
 
     expect(result.organizationId).toBe('org1');
     expect(result.balances).toHaveLength(1);
-    expect(result.currentBalance).toBeUndefined();
+    expect(result.currentBalanceCents).toBeUndefined();
   });
 
   it('should return the current balance when a currency is specified', async () => {
@@ -27,7 +27,7 @@ describe('GetPaymentBalanceUseCase', () => {
 
     const result = await useCase.execute(new GetPaymentBalanceCommand('org1', 'USD'));
 
-    expect(result.currentBalance).toBe(500);
+    expect(result.currentBalanceCents).toBe(500);
     expect(repo.getBalance).toHaveBeenCalledWith('org1', 'USD');
   });
 });

@@ -30,7 +30,7 @@ describe('ManageShippingRatesUseCase', () => {
   it('should create a rate', async () => {
     rateRepo.create.mockImplementation(async input => createShippingRate({ ...input, shippingRateId: 'r2' }));
 
-    const { shippingRateId: _r, createdAt: _c, updatedAt: _u, ...input } = createShippingRate({ baseRate: '10.00' });
+    const { shippingRateId: _r, createdAt: _c, updatedAt: _u, ...input } = createShippingRate({ baseRateCents: 1000 });
 
     const result = await useCase.create(input);
 
@@ -54,8 +54,8 @@ describe('ManageShippingRatesUseCase', () => {
   });
 
   it('should calculate a flat rate using the domain service', () => {
-    const result = useCase.calculateRate(createShippingRate({ rateType: 'flat', baseRate: '12.50' }), 100, 2, 5);
+    const result = useCase.calculateRate(createShippingRate({ rateType: 'flat', baseRateCents: 1250 }), 100, 2, 5);
 
-    expect(result).toBe(12.5);
+    expect(result).toBe(1250);
   });
 });

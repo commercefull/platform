@@ -21,7 +21,7 @@ exports.up = function (knex) {
     t.string('paymentTerms', 100);
     t.string('paymentMethod', 50);
     t.string('currency', 3).notNullable().defaultTo('USD');
-    t.decimal('minOrderValue', 10, 2);
+    t.bigInteger('minOrderValueCents');
     t.integer('leadTime');
     t.text('notes');
     t.specificType('categories', 'text[]');

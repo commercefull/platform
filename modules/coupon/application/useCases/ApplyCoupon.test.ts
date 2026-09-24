@@ -4,7 +4,7 @@ import { ApplyCouponUseCase, ApplyCouponInput } from './ApplyCoupon';
 const applyInput = (overrides: Partial<ApplyCouponInput> = {}): ApplyCouponInput => ({
   couponCode: 'SAVE10',
   basketId: 'basket-1',
-  orderTotal: 100,
+  orderTotalCents: 100,
   ...overrides,
 });
 
@@ -15,29 +15,29 @@ describe('ApplyCouponUseCase', () => {
     const result = await new ApplyCouponUseCase(repository).execute(applyInput());
 
     expect(result.applied).toBe(true);
-    expect(result.discountAmount).toBe(10);
-    expect(result.newTotal).toBe(90);
+    expect(result.discountAmountCents).toBe(10);
+    expect(result.newTotalCents).toBe(90);
     expect(repository.recordUsage).toHaveBeenCalledWith(
-      expect.objectContaining({ couponId: COUPON_ID, basketId: 'basket-1', discountAmount: 10 }),
+      expect.objectContaining({ couponId: COUPON_ID, basketId: 'basket-1', discountAmountCents: 10 }),
     );
   });
 
-  it('should apply the fixed amount when the coupon is a fixed_amount type', async () => {
+  it('should apply the fixed amountCents when the coupon is a fixed_amount type', async () => {
     const repository = createCouponRepository(createCoupon({ type: 'fixed_amount', value: 5, currency: 'USD' }));
 
     const result = await new ApplyCouponUseCase(repository).execute(applyInput());
 
     expect(result.applied).toBe(true);
-    expect(result.discountAmount).toBe(5);
-    expect(result.newTotal).toBe(95);
+    expect(result.discountAmountCents).toBe(5);
+    expect(result.newTotalCents).toBe(95);
   });
 
-  it('should cap the discount when it exceeds maxDiscountAmount', async () => {
-    const repository = createCouponRepository(createCoupon({ value: 50, maxDiscountAmount: 20 }));
+  it('should cap the discount when it exceeds maxDiscountAmountCents', async () => {
+    const repository = createCouponRepository(createCoupon({ value: 50, maxDiscountAmountCents: 20 }));
 
     const result = await new ApplyCouponUseCase(repository).execute(applyInput());
 
-    expect(result.discountAmount).toBe(20);
+    expect(result.discountAmountCents).toBe(20);
   });
 
   it('should apply zero discount when the coupon is free_shipping', async () => {
@@ -46,7 +46,7 @@ describe('ApplyCouponUseCase', () => {
     const result = await new ApplyCouponUseCase(repository).execute(applyInput());
 
     expect(result.applied).toBe(true);
-    expect(result.discountAmount).toBe(0);
+    expect(result.discountAmountCents).toBe(0);
     expect(result.discountType).toBe('free_shipping');
   });
 
@@ -88,12 +88,12 @@ describe('ApplyCouponUseCase', () => {
   });
 
   it('should not apply when the order is below the minimum order value', async () => {
-    const repository = createCouponRepository(createCoupon({ minOrderValue: 200 }));
+    const repository = createCouponRepository(createCoupon({ minOrderValueCents: 200 }));
 
     const result = await new ApplyCouponUseCase(repository).execute(applyInput());
 
     expect(result.applied).toBe(false);
-    expect(result.message).toBe('Minimum order amount is 200');
+    expect(result.message).toBe('Minimum order amount is 200 cents');
   });
 
   it('should not apply when the coupon usage limit is reached', async () => {

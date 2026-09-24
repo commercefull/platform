@@ -22,11 +22,11 @@ exports.up = async function (knex) {
     await knex('membershipPayment').insert({
       subscriptionId: subscription.id,
       customerId: sampleCustomer.id,
-      amount: standardPlan.price,
+      amountCents: standardPlan.priceCents,
       currency: standardPlan.currency,
       status: 'completed',
-      payment_type: 'subscription',
-      payment_method: 'credit_card',
+      paymentType: 'subscription',
+      paymentMethod: 'credit_card',
       transactionId: 'txn_123456789',
     });
   }

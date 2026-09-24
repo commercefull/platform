@@ -1,11 +1,11 @@
 import { evaluateConditions } from './ShippingConditionsEvaluator';
 
 describe('ShippingConditionsEvaluator', () => {
-  const baseCtx = { subtotal: 100, itemCount: 3 };
+  const baseCtx = { subtotalCents: 100, itemCount: 3 };
 
   it('should return applicable when no conditions', () => {
-    expect(evaluateConditions(null, baseCtx)).toEqual({ applicable: true, adjustment: 0 });
-    expect(evaluateConditions(undefined, baseCtx)).toEqual({ applicable: true, adjustment: 0 });
+    expect(evaluateConditions(null, baseCtx)).toEqual({ applicable: true, adjustmentCents: 0 });
+    expect(evaluateConditions(undefined, baseCtx)).toEqual({ applicable: true, adjustmentCents: 0 });
   });
 
   it('should check minOrderValue', () => {
@@ -70,17 +70,17 @@ describe('ShippingConditionsEvaluator', () => {
   it('should apply surcharge', () => {
     const result = evaluateConditions({ surcharge: 5 }, baseCtx);
     expect(result.applicable).toBe(true);
-    expect(result.adjustment).toBe(5);
+    expect(result.adjustmentCents).toBe(5);
   });
 
   it('should apply discount', () => {
     const result = evaluateConditions({ discount: 10 }, baseCtx);
     expect(result.applicable).toBe(true);
-    expect(result.adjustment).toBe(-10);
+    expect(result.adjustmentCents).toBe(-10);
   });
 
   it('should apply both surcharge and discount', () => {
     const result = evaluateConditions({ surcharge: 5, discount: 3 }, baseCtx);
-    expect(result.adjustment).toBe(2);
+    expect(result.adjustmentCents).toBe(2);
   });
 });

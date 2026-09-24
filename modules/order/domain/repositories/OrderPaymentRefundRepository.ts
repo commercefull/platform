@@ -5,7 +5,8 @@ export interface OrderPaymentRefund {
   createdAt: string;
   updatedAt: string;
   orderPaymentId: string;
-  amount: number;
+  /** Refund amount in integer cents. */
+  amountCents: number;
   reason?: string;
   notes?: string;
   transactionId?: string;

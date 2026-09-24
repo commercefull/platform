@@ -174,12 +174,12 @@ describe('CheckoutConfig', () => {
   it('should validate order amount', () => {
     const config = CheckoutConfig.create({
       ...baseProps,
-      behavior: { minimumOrderAmount: 10, maximumOrderAmount: 5000 },
+      behavior: { minimumOrderAmountCents: 1000, maximumOrderAmountCents: 500000 },
     });
 
-    expect(config.validateOrderAmount(5)).toEqual({ valid: false, message: 'Minimum order amount is 10' });
-    expect(config.validateOrderAmount(6000)).toEqual({ valid: false, message: 'Maximum order amount is 5000' });
-    expect(config.validateOrderAmount(100)).toEqual({ valid: true });
+    expect(config.validateOrderAmount(500)).toEqual({ valid: false, message: 'Minimum order amount is 1000' });
+    expect(config.validateOrderAmount(600000)).toEqual({ valid: false, message: 'Maximum order amount is 500000' });
+    expect(config.validateOrderAmount(100000)).toEqual({ valid: true });
   });
 
   it('should get ordered steps', () => {

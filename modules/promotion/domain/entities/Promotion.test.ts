@@ -72,7 +72,7 @@ describe('Promotion', () => {
     expect(promo.calculateDiscount(100)).toBe(30);
   });
 
-  it('should cap discount at subtotal', () => {
+  it('should cap discount at subtotalCents', () => {
     const promo = Promotion.create({
       promotionId: 'p1',
       name: 'Sale',

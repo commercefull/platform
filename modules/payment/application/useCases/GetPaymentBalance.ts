@@ -27,14 +27,14 @@ export class GetPaymentBalanceCommand {
 export interface BalanceEntry {
   paymentBalanceId: string;
   currency: string;
-  amount: number;
+  amountCents: number;
   updatedAt: string;
 }
 
 export interface GetPaymentBalanceResponse {
   organizationId: string;
   balances: BalanceEntry[];
-  currentBalance?: number;
+  currentBalanceCents?: number;
 }
 
 // ============================================================================
@@ -47,15 +47,15 @@ export class GetPaymentBalanceUseCase {
   async execute(command: GetPaymentBalanceCommand): Promise<GetPaymentBalanceResponse> {
     const balances = await this.repo.findBalancesByMerchant(command.organizationId);
 
-    let currentBalance: number | undefined;
+    let currentBalanceCents: number | undefined;
     if (command.currency) {
-      currentBalance = await this.repo.getBalance(command.organizationId, command.currency);
+      currentBalanceCents = await this.repo.getBalance(command.organizationId, command.currency);
     }
 
     return {
       organizationId: command.organizationId,
       balances: balances.map(b => this.mapEntry(b)),
-      currentBalance,
+      currentBalanceCents,
     };
   }
 
@@ -63,7 +63,7 @@ export class GetPaymentBalanceUseCase {
     return {
       paymentBalanceId: b.paymentBalanceId,
       currency: b.currency,
-      amount: b.amount,
+      amountCents: b.amountCents,
       updatedAt: b.updatedAt.toISOString(),
     };
   }

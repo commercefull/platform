@@ -12,7 +12,7 @@ describe('GetOrderRefundsUseCase', () => {
   });
 
   it('should find refunds by order', async () => {
-    queryRepo.findRefundsByOrder.mockResolvedValue([createOrderPaymentRefund({ amount: 50 })]);
+    queryRepo.findRefundsByOrder.mockResolvedValue([createOrderPaymentRefund({ amountCents: 50 })]);
 
     const result = await useCase.findByOrder('o1');
 

@@ -58,9 +58,9 @@ export function evaluateConditions(conditions: SegmentCondition[], matchMode: 'a
 
 function getFieldValue(field: string, profile: CustomerProfile): unknown {
   const accessorMap: Record<string, () => unknown> = {
-    lifetimeValue: () => profile.lifetimeValue,
+    lifetimeValueCents: () => profile.lifetimeValueCents,
     totalOrders: () => profile.totalOrders,
-    averageOrderValue: () => profile.averageOrderValue,
+    averageOrderValueCents: () => profile.averageOrderValueCents,
     daysSinceLastOrder: () => profile.daysSinceLastOrder,
     ordersLast30Days: () => profile.ordersLast30Days,
     ordersLast90Days: () => profile.ordersLast90Days,

@@ -5,7 +5,6 @@
 
 import { ProductStatus, canTransitionProductTo } from '../valueObjects/ProductStatus';
 import { ProductVisibility } from '../valueObjects/ProductVisibility';
-import { Price } from '../valueObjects/Price';
 import { Dimensions } from '../valueObjects/Dimensions';
 import { InvalidProductStatusError, ProductImageNotFoundError, ProductValidationError } from '../errors/ProductErrors';
 
@@ -40,7 +39,6 @@ export interface ProductProps {
   storeId?: string; // For store-specific product overrides
   status: ProductStatus;
   visibility: ProductVisibility;
-  price: Price;
   dimensions: Dimensions;
   isFeatured: boolean;
   isVirtual: boolean;
@@ -87,10 +85,6 @@ export class Product {
     categoryId?: string;
     organizationId?: string;
     storeId?: string;
-    basePrice?: number;
-    salePrice?: number;
-    cost?: number;
-    currencyCode?: string;
     weight?: number;
     weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
     length?: number;
@@ -134,7 +128,6 @@ export class Product {
       storeId: props.storeId,
       status: ProductStatus.DRAFT,
       visibility: ProductVisibility.NOT_VISIBLE,
-      price: Price.create(props.basePrice || 0, props.currencyCode || 'USD', props.salePrice, props.cost),
       dimensions: Dimensions.create({
         weight: props.weight,
         weightUnit: props.weightUnit,
@@ -217,9 +210,6 @@ export class Product {
   }
   get visibility(): ProductVisibility {
     return this.props.visibility;
-  }
-  get price(): Price {
-    return this.props.price;
   }
   get dimensions(): Dimensions {
     return this.props.dimensions;
@@ -334,16 +324,6 @@ export class Product {
     if (updates.description !== undefined) this.props.description = updates.description;
     if (updates.shortDescription !== undefined) this.props.shortDescription = updates.shortDescription;
     if (updates.sku !== undefined) this.props.sku = updates.sku;
-    this.touch();
-  }
-
-  updatePrice(basePrice: number, salePrice?: number, cost?: number): void {
-    this.props.price = Price.create(basePrice, this.props.price.currency, salePrice, cost);
-    this.touch();
-  }
-
-  setSalePrice(salePrice: number | null): void {
-    this.props.price = this.props.price.setSalePrice(salePrice);
     this.touch();
   }
 
@@ -559,7 +539,6 @@ export class Product {
       isStoreSpecific: this.isStoreSpecific,
       status: this.props.status,
       visibility: this.props.visibility,
-      price: this.props.price.toJSON(),
       dimensions: this.props.dimensions.toJSON(),
       isFeatured: this.props.isFeatured,
       isVirtual: this.props.isVirtual,

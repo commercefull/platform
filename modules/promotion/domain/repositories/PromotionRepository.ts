@@ -49,8 +49,8 @@ export interface CreatePromotionInput {
   stackability?: 'none' | 'stackable' | 'exclusive';
   maxUsage?: number;
   maxUsagePerCustomer?: number;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
+  minOrderAmountCents?: number;
+  maxDiscountAmountCents?: number;
   organizationId?: string;
   isGlobal?: boolean;
   eligibleCustomerGroups?: string[];
@@ -90,7 +90,7 @@ export interface PromotionRepository {
     promotionId: string,
     orderId: string,
     customerId?: string,
-    discountAmount?: number,
+    discountAmountCents?: number,
     currencyCode?: string,
   ): Promise<unknown>;
   getUsage(promotionId: string): Promise<unknown[]>;
@@ -102,7 +102,7 @@ export interface PromotionRepository {
     rules: PromotionRule[];
     actions: PromotionAction[];
   } | null>;
-  isValidForOrder(promotionId: string, orderTotal: number, customerId?: string): Promise<boolean>;
+  isValidForOrder(promotionId: string, orderTotalCents: number, customerId?: string): Promise<boolean>;
   validateCode?(
     code: string,
     subtotal: number,

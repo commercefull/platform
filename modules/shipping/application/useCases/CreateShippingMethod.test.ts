@@ -21,7 +21,7 @@ describe('CreateShippingMethodUseCase', () => {
       name: 'Standard Shipping',
       code: 'std',
       type: 'flat_rate',
-      basePrice: 9.99,
+      basePriceCents: 9.99,
     });
 
     expect(result.shippingMethod.name).toBe('Standard Shipping');
@@ -37,7 +37,7 @@ describe('CreateShippingMethodUseCase', () => {
         name: 'Test',
         code: 'std',
         type: 'flat_rate',
-        basePrice: 5,
+        basePriceCents: 5,
       }),
     ).rejects.toThrow(ShippingValidationError);
     expect(repo.saveMethod).not.toHaveBeenCalled();

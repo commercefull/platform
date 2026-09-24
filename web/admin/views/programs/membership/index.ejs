@@ -78,8 +78,8 @@
                 </div>
                 <div class="card-body">
                   <h3 class="text-center mb-3">
-                    <% if (tier.price > 0) { %>
-                    $<%= tier.price.toFixed(2) %>/<%= tier.billingPeriod || 'month' %>
+                    <% if (tier.priceCents > 0) { %>
+                    $<%= ((tier.priceCents || 0) / 100).toFixed(2) %>/<%= tier.billingPeriod || 'month' %>
                     <% } else { %>
                     <%= t('shared:common.free') %>
                     <% } %>

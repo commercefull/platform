@@ -23,7 +23,7 @@ describe('Gift Card Business API Tests', () => {
 
       const giftCardData = {
         type: 'standard',
-        initialBalance: 100,
+        initialBalanceCents: 10000,
         currency: 'USD',
         recipientEmail: 'test-recipient@example.com',
         recipientName: 'Test Recipient',
@@ -39,7 +39,7 @@ describe('Gift Card Business API Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('promotionGiftCardId');
       expect(response.data.data).toHaveProperty('code');
-      expect(response.data.data).toHaveProperty('initialBalance', 100);
+      expect(response.data.data).toHaveProperty('initialBalanceCents', 10000);
       expect(response.data.data).toHaveProperty('status', 'pending');
       createdGiftCardIds.push(response.data.data.promotionGiftCardId);
     });
@@ -118,21 +118,21 @@ describe('Gift Card Business API Tests', () => {
 
       const response = await client.post(
         `/business/gift-cards/${createdGiftCardIds[0]}/refund`,
-        { amount: 25, notes: 'Test refund' },
+        { amountCents: 2500, notes: 'Test refund' },
         { headers: authHeaders() },
       );
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('type', 'refund');
-      expect(response.data.data).toHaveProperty('amount', 25);
+      expect(response.data.data).toHaveProperty('amountCents', 2500);
     });
 
     it('UC-PRO-013: should cancel a gift card', async () => {
       if (!adminToken) return;
 
       // Create a new gift card to cancel
-      const createResponse = await client.post('/business/gift-cards', { initialBalance: 50, currency: 'USD' }, { headers: authHeaders() });
+      const createResponse = await client.post('/business/gift-cards', { initialBalanceCents: 5000, currency: 'USD' }, { headers: authHeaders() });
 
       if (!createResponse.data.success) return;
       const cardId = createResponse.data.data.promotionGiftCardId;
@@ -155,7 +155,7 @@ describe('Gift Card Business API Tests', () => {
     });
 
     it('should require auth for creating gift cards', async () => {
-      const response = await client.post('/business/gift-cards', { initialBalance: 50 });
+      const response = await client.post('/business/gift-cards', { initialBalanceCents: 5000 });
       expect(response.status).toBe(401);
     });
 

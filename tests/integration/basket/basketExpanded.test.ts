@@ -43,11 +43,10 @@ describe('Basket Expanded Tests', () => {
     basketId: string,
     productId: string = TEST_PRODUCT_1_ID,
     quantity: number = 1,
-    price: number = 29.99,
   ): Promise<Record<string, unknown>> => {
     const response = await client.post(
       `/customer/basket/${basketId}/items`,
-      { productId, sku: 'TEST-SKU-001', name: 'Test Product', quantity, unitPrice: price },
+      { productId, sku: 'TEST-SKU-001', name: 'Test Product', quantity },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     return response.data as Record<string, unknown>;
@@ -71,8 +70,8 @@ describe('Basket Expanded Tests', () => {
       const targetId = await createBasket();
       if (!sourceId || !targetId) return;
 
-      await addItem(sourceId, TEST_PRODUCT_1_ID, 2, 29.99);
-      await addItem(targetId, TEST_PRODUCT_2_ID, 1, 15.5);
+      await addItem(sourceId, TEST_PRODUCT_1_ID, 2);
+      await addItem(targetId, TEST_PRODUCT_2_ID, 1);
 
       const response = await client.post(
         '/customer/basket/merge',
@@ -111,7 +110,7 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1, 29.99);
+      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1);
       const addData = addResp?.data as Record<string, unknown> | undefined;
       const items = addData?.items as Array<Record<string, unknown>> | undefined;
       const itemId = items?.[0]?.basketItemId as string | undefined;
@@ -133,7 +132,7 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1, 29.99);
+      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 1);
       const addData = addResp?.data as Record<string, unknown> | undefined;
       const items = addData?.items as Array<Record<string, unknown>> | undefined;
       const itemId = items?.[0]?.basketItemId as string | undefined;
@@ -201,8 +200,8 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
-      await addItem(basketId, TEST_PRODUCT_2_ID, 1, 15.5);
+      await addItem(basketId, TEST_PRODUCT_1_ID, 2);
+      await addItem(basketId, TEST_PRODUCT_2_ID, 1);
 
       const response = await client.delete(`/customer/basket/${basketId}/items`, {
         headers: { Authorization: `Bearer ${customerToken}` },
@@ -231,7 +230,7 @@ describe('Basket Expanded Tests', () => {
       const basketId = await createBasket();
       if (!basketId) return;
 
-      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 2, 29.99);
+      const addResp = await addItem(basketId, TEST_PRODUCT_1_ID, 2);
       const addData = addResp?.data as Record<string, unknown> | undefined;
       const items = addData?.items as Array<Record<string, unknown>> | undefined;
       const itemId = items?.[0]?.basketItemId as string | undefined;

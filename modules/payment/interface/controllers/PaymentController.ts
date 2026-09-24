@@ -113,15 +113,15 @@ export const getTransaction = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const body = req.body as { orderId?: string; amount?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
-  const { orderId, amount, currency, paymentMethodConfigId, customerId } = body;
+  const body = req.body as { orderId?: string; amountCents?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
+  const { orderId, amountCents, currency, paymentMethodConfigId, customerId } = body;
 
-  if (!orderId || !amount || !currency || !paymentMethodConfigId) {
+  if (!orderId || !amountCents || !currency || !paymentMethodConfigId) {
     respondError(req, res, 'Missing required fields', 400);
     return;
   }
 
-  const command = new InitiatePaymentCommand(orderId, amount, currency, paymentMethodConfigId, customerId, req.ip);
+  const command = new InitiatePaymentCommand(orderId, amountCents, currency, paymentMethodConfigId, customerId, req.ip);
 
   const useCase = new InitiatePaymentUseCase(PaymentRepo);
   const result = await useCase.execute(command);
@@ -131,15 +131,15 @@ export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const processRefund = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
-  const body = req.body as { amount?: number; reason?: string };
-  const { amount, reason } = body;
+  const body = req.body as { amountCents?: number; reason?: string };
+  const { amountCents, reason } = body;
 
-  if (!amount || amount <= 0) {
+  if (!amountCents || amountCents <= 0) {
     respondError(req, res, 'Amount must be greater than zero', 400);
     return;
   }
 
-  const command = new ProcessPaymentRefundCommand(transactionId, amount, reason);
+  const command = new ProcessPaymentRefundCommand(transactionId, amountCents, reason);
   const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
   const result = await useCase.execute(command);
 
@@ -367,9 +367,9 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     isEnabled?: boolean;
     displayName?: string;
     description?: string;
-    processingFee?: string;
-    minimumAmount?: string;
-    maximumAmount?: string;
+    processingFeeCents?: string;
+    minimumAmountCents?: string;
+    maximumAmountCents?: string;
     displayOrder?: number;
     icon?: string;
     supportedCurrencies?: string[];
@@ -383,9 +383,9 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     isEnabled,
     displayName,
     description,
-    processingFee,
-    minimumAmount,
-    maximumAmount,
+    processingFeeCents,
+    minimumAmountCents,
+    maximumAmountCents,
     displayOrder,
     icon,
     supportedCurrencies,
@@ -403,8 +403,8 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "paymentMethodConfig" (
-      "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFee",
-      "minimumAmount", "maximumAmount", "displayOrder", icon, "supportedCurrencies", countries,
+      "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFeeCents",
+      "minimumAmountCents", "maximumAmountCents", "displayOrder", icon, "supportedCurrencies", countries,
       "gatewayId", configuration, "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
     RETURNING *`,
@@ -414,9 +414,9 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
       isEnabled ?? true,
       displayName,
       description,
-      processingFee,
-      minimumAmount,
-      maximumAmount,
+      processingFeeCents,
+      minimumAmountCents,
+      maximumAmountCents,
       displayOrder ?? 0,
       icon,
       supportedCurrencies || ['USD'],
@@ -443,9 +443,9 @@ export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     'isEnabled',
     'displayName',
     'description',
-    'processingFee',
-    'minimumAmount',
-    'maximumAmount',
+    'processingFeeCents',
+    'minimumAmountCents',
+    'maximumAmountCents',
     'displayOrder',
     'icon',
     'supportedCurrencies',

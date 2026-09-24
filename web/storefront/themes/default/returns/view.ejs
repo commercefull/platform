@@ -78,7 +78,7 @@
                   <tr>
                     <td class="px-6 py-4 text-sm text-gray-900"><%= item.productName || item.name %></td>
                     <td class="px-6 py-4 text-sm text-gray-900"><%= item.quantity %></td>
-                    <td class="px-6 py-4 text-sm text-gray-900 text-right">$<%= ((item.refundAmount || item.price || 0) / 100).toFixed(2) %></td>
+                    <td class="px-6 py-4 text-sm text-gray-900 text-right">$<%= (((item.refundAmountCents || item.unitPriceCents || 0) / 100)).toFixed(2) %></td>
                   </tr>
                 <% }) %>
               </tbody>

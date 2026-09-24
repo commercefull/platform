@@ -74,16 +74,16 @@ const subPlanCreateFields: FieldConfig[] = [
   { name: 'description', transform: 'stringOrUndefined' },
   { name: 'billingInterval', transform: 'stringOrUndefined', default: 'month' },
   { name: 'billingIntervalCount', transform: 'int', default: 1, falsyValue: 1 },
-  { name: 'price', transform: 'float' },
-  { name: 'compareAtPrice', transform: 'float', falsyValue: undefined },
+  { name: 'price', transform: 'cents', as: 'priceCents' },
+  { name: 'compareAtPrice', transform: 'cents', as: 'compareAtPriceCents', falsyValue: undefined },
   { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
-  { name: 'setupFee', transform: 'float', default: 0, falsyValue: 0 },
+  { name: 'setupFee', transform: 'cents', as: 'setupFeeCents', default: 0, falsyValue: 0 },
   { name: 'trialDays', transform: 'int', falsyValue: undefined },
   { name: 'contractLength', transform: 'int', falsyValue: undefined },
   { name: 'isContractRequired', transform: 'boolTrue' },
   { name: 'discountPercent', transform: 'float', default: 0, falsyValue: 0 },
-  { name: 'discountAmount', transform: 'float', default: 0, falsyValue: 0 },
-  { name: 'freeShippingThreshold', transform: 'float', falsyValue: undefined },
+  { name: 'discountAmount', transform: 'cents', as: 'discountAmountCents', default: 0, falsyValue: 0 },
+  { name: 'freeShippingThreshold', transform: 'cents', as: 'freeShippingThresholdCents', falsyValue: undefined },
   { name: 'includesFreeShipping', transform: 'boolTrue' },
   { name: 'includedProducts', transform: 'json', falsyValue: undefined },
   { name: 'features', transform: 'json', falsyValue: undefined },
@@ -160,16 +160,16 @@ const subPlanUpdateFields: FieldConfig[] = [
   { name: 'description', transform: 'stringOrUndefined' },
   { name: 'billingInterval' },
   { name: 'billingIntervalCount', transform: 'int', falsyValue: 1 },
-  { name: 'price', transform: 'float' },
-  { name: 'compareAtPrice', transform: 'float', falsyValue: undefined },
+  { name: 'price', transform: 'cents', as: 'priceCents' },
+  { name: 'compareAtPrice', transform: 'cents', as: 'compareAtPriceCents', falsyValue: undefined },
   { name: 'currency' },
-  { name: 'setupFee', transform: 'float', falsyValue: 0 },
+  { name: 'setupFee', transform: 'cents', as: 'setupFeeCents', falsyValue: 0 },
   { name: 'trialDays', transform: 'int', falsyValue: undefined },
   { name: 'contractLength', transform: 'int', falsyValue: undefined },
   { name: 'isContractRequired', transform: 'boolTrue' },
   { name: 'discountPercent', transform: 'float', falsyValue: 0 },
-  { name: 'discountAmount', transform: 'float', falsyValue: 0 },
-  { name: 'freeShippingThreshold', transform: 'float', falsyValue: undefined },
+  { name: 'discountAmount', transform: 'cents', as: 'discountAmountCents', falsyValue: 0 },
+  { name: 'freeShippingThreshold', transform: 'cents', as: 'freeShippingThresholdCents', falsyValue: undefined },
   { name: 'includesFreeShipping', transform: 'boolTrue' },
   { name: 'includedProducts', transform: 'json', falsyValue: undefined },
   { name: 'features', transform: 'json', falsyValue: undefined },
@@ -318,10 +318,10 @@ export const processSubscriptionBilling = async (req: HttpRequest, res: HttpResp
     billingCycleNumber,
     periodStart,
     periodEnd,
-    subtotal: subscription.unitPrice * subscription.quantity,
-    discountAmount: subscription.discountAmount,
-    taxAmount: 0, // Would calculate based on tax rules
-    shippingAmount: 0, // Would calculate based on shipping rules
+    subtotalCents: subscription.unitPriceCents * subscription.quantity,
+    discountAmountCents: subscription.discountAmountCents,
+    taxAmountCents: 0, // Would calculate based on tax rules
+    shippingAmountCents: 0, // Would calculate based on shipping rules
   });
 
   if (processPayment === 'true') {
@@ -359,7 +359,7 @@ export const manageFailedPayments = async (req: HttpRequest, res: HttpResponse):
     await manageSubscriptionsUseCase.createDunningAttempt({
       customerSubscriptionId: subscriptionId,
       attemptNumber: subscription.failedPaymentCount + 1,
-      amount: subscription.totalPrice,
+      amountCents: subscription.totalPriceCents,
       currency: subscription.currency,
       scheduledAt: retryDate ? new Date(retryDate) : new Date(),
     });

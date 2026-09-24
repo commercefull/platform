@@ -15,7 +15,7 @@ describe('EvaluateSegmentUseCase', () => {
 
   beforeEach(() => {
     segmentRepo = lazyMock<SegmentRepository>();
-    segmentRepo.findById.mockResolvedValue(createSegment({ conditions: [{ field: 'lifetimeValue', operator: 'gte', value: 0 }] }));
+    segmentRepo.findById.mockResolvedValue(createSegment({ conditions: [{ field: 'lifetimeValueCents', operator: 'gte', value: 0 }] }));
     segmentRepo.update.mockImplementation(async s => s);
     profileRepo = lazyMock<CustomerProfileRepository>();
     profileRepo.findAll.mockResolvedValue([createCustomerProfile(), createCustomerProfile({ customerId: 'cust-2' })]);
@@ -34,7 +34,7 @@ describe('EvaluateSegmentUseCase', () => {
 
   it('should match only profiles that satisfy the conditions', async () => {
     segmentRepo.findById.mockResolvedValue(
-      createSegment({ conditions: [{ field: 'lifetimeValue', operator: 'gte', value: 500 }] }),
+      createSegment({ conditions: [{ field: 'lifetimeValueCents', operator: 'gte', value: 500 }] }),
     );
 
     const result = await useCase.execute('seg-1');

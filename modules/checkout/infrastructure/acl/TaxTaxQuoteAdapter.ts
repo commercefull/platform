@@ -21,15 +21,15 @@ export class TaxTaxQuoteAdapter implements TaxQuotePort {
       const taxResult = await this.taxUseCase.execute({
         items: request.items,
         shippingAddress: request.shippingAddress,
-        shippingAmount: request.shippingAmount,
+        shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
       });
       return {
         success: taxResult.success,
-        taxAmount: taxResult.success ? taxResult.taxAmount : 0,
+        taxAmountCents: taxResult.success ? taxResult.taxAmountCents : 0,
       };
     } catch {
-      return { success: false, taxAmount: 0 };
+      return { success: false, taxAmountCents: 0 };
     }
   }
 

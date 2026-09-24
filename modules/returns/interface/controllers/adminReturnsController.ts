@@ -219,7 +219,7 @@ export const viewStoreCredit = async (req: HttpRequest, res: HttpResponse): Prom
   const customerId = req.query.customerId as string;
 
   if (customerId) {
-    const [balance, ledger] = await Promise.all([
+    const [balanceCents, ledger] = await Promise.all([
       getStoreCreditBalanceUseCase.execute(customerId),
       getStoreCreditLedgerUseCase.execute(customerId),
     ]);
@@ -227,7 +227,7 @@ export const viewStoreCredit = async (req: HttpRequest, res: HttpResponse): Prom
     adminRespond(req, res, 'operations/returns/store-credit', {
       pageName: 'Store Credit',
       customerId,
-      balance,
+      balanceCents,
       ledger: ledger.map(e => e.toJSON()),
       success: req.query.success || null,
     });
@@ -235,7 +235,7 @@ export const viewStoreCredit = async (req: HttpRequest, res: HttpResponse): Prom
     adminRespond(req, res, 'operations/returns/store-credit', {
       pageName: 'Store Credit',
       customerId: null,
-      balance: null,
+      balanceCents: null,
       ledger: [],
       success: req.query.success || null,
     });

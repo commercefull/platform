@@ -2,7 +2,6 @@ import type { PricingRuleRepository, PricingDataRepository, CurrencyRepository }
 import { PriceContext, PricingAdjustmentType, PricingResult, PricingRule, PricingRuleScope } from '../domain/pricingRule';
 
 import { Currency, formatCurrency } from '../domain/currency';
-import { ProductPriceDataPort } from '../application/ports/ProductPriceDataPort';
 import { MembershipBenefitsPort } from '../application/ports/MembershipBenefitsPort';
 import { LoyaltyBalancePort } from '../application/ports/LoyaltyBalancePort';
 import { logger } from '../../../libs/logger';
@@ -22,7 +21,6 @@ export class PricingService {
   private defaultCurrencyCode: string | null = null;
 
   // ACL ports
-  private readonly productPriceDataPort: ProductPriceDataPort;
   private readonly membershipBenefitsPort: MembershipBenefitsPort;
   private readonly loyaltyBalancePort: LoyaltyBalancePort;
   private readonly pricingRuleRepository: typeof PricingRuleRepository;
@@ -30,14 +28,12 @@ export class PricingService {
   private readonly currencyRepository: typeof CurrencyRepository;
 
   constructor(
-    productPriceDataPort: ProductPriceDataPort,
     membershipBenefitsPort: MembershipBenefitsPort,
     loyaltyBalancePort: LoyaltyBalancePort,
     pricingRuleRepository: typeof PricingRuleRepository,
     pricingDataRepository: typeof PricingDataRepository,
     currencyRepository: typeof CurrencyRepository,
   ) {
-    this.productPriceDataPort = productPriceDataPort;
     this.membershipBenefitsPort = membershipBenefitsPort;
     this.loyaltyBalancePort = loyaltyBalancePort;
     this.pricingRuleRepository = pricingRuleRepository;
@@ -87,7 +83,9 @@ export class PricingService {
   }
 
   /**
-   * Convert price between currencies
+   * Convert a price between currencies. Amounts are integer cents.
+   * Currency rule operands (adjustment values, order thresholds) are
+   * stored in major units and converted to cents at application time.
    */
   async convertPrice(
     price: number,
@@ -127,9 +125,10 @@ export class PricingService {
       // Apply the first matching rule
       for (const rule of sortedRules) {
         // Check if the rule applies to the current price
+        // (threshold operands and price are both integer cents)
         if (
-          (rule.minOrderValue === undefined || price >= rule.minOrderValue) &&
-          (rule.maxOrderValue === undefined || price <= rule.maxOrderValue)
+          (rule.minOrderValueCents === undefined || price >= rule.minOrderValueCents) &&
+          (rule.maxOrderValueCents === undefined || price <= rule.maxOrderValueCents)
         ) {
           // Apply the rule
           const adjustment = rule.adjustments[0];
@@ -141,7 +140,7 @@ export class PricingService {
 
             // Apply the adjustment
             if (adjustment.type === PricingAdjustmentType.FIXED) {
-              convertedPrice += adjustment.value;
+              convertedPrice += adjustment.value * 100;
             } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
               convertedPrice *= 1 + adjustment.value / 100;
             } else if (adjustment.type === PricingAdjustmentType.EXCHANGE) {
@@ -155,10 +154,10 @@ export class PricingService {
               ruleName: rule.name || `Currency conversion to ${toCurrency.code}`,
               adjustmentType: adjustment.type,
               adjustmentValue: adjustment.value,
-              impact: price * exchangeRate - convertedPrice,
+              impact: Math.round(price * exchangeRate) - Math.round(convertedPrice),
             });
 
-            return { convertedPrice, exchangeRate, appliedRules };
+            return { convertedPrice: Math.round(convertedPrice), exchangeRate, appliedRules };
           }
         }
       }
@@ -166,12 +165,17 @@ export class PricingService {
 
     // No special rules, just use the standard exchange rate
     const exchangeRate = (toCurrency.exchangeRate ?? 1) / (fromCurrency.exchangeRate ?? 1);
-    const convertedPrice = price * exchangeRate;
+    const convertedPrice = Math.round(price * exchangeRate);
 
     return { convertedPrice, exchangeRate, appliedRules };
   }
   /**
-   * Calculate the price for a product or variant based on applicable rules and context
+   * Calculate the price for a product or variant based on applicable rules and context.
+   *
+   * All amounts are integer cents. Base prices come from the pricing-owned
+   * productBasePrice table — a variant-level row wins over the product-level
+   * row. Rule operands (adjustment values) are stored in major units and
+   * converted to cents at application time.
    */
   async calculatePrice(productId: string, context: PriceContext = {}): Promise<PricingResult> {
     const {
@@ -183,63 +187,46 @@ export class PricingService {
       cartTotal: _cartTotal = 0,
       currencyCode,
       regionCode: _regionCode,
+      categoryIds = [],
       additionalData = {},
     } = context;
 
-    // Step 1: Get the base product and variant information
-    const product = await this.productPriceDataPort.findProductById(productId);
-    if (!product) {
-      throw new PricingValidationError(`Product not found with ID: ${productId}`);
+    // Step 1: Resolve the base price (cents) from the pricing-owned store.
+    // Prefer a row in the requested/default currency; fall back to any
+    // currency and convert below.
+    const defaultCurrency = await this.getDefaultCurrency();
+    const requestedCurrency = currencyCode || defaultCurrency?.code || 'USD';
+
+    const basePrice =
+      (await this.pricingDataRepository.basePrices.findEffective(productId, variantId, requestedCurrency)) ||
+      (await this.pricingDataRepository.basePrices.findEffective(productId, variantId));
+
+    if (!basePrice) {
+      throw new PricingValidationError(`No base price for product: ${productId}${variantId ? ` variant: ${variantId}` : ''}`);
     }
 
-    let variant;
-
-    // If a specific variant is requested, use it
-    if (variantId) {
-      variant = await this.productPriceDataPort.findVariantById(variantId);
-      if (!variant) {
-        throw new PricingValidationError(`Variant not found with ID: ${variantId}`);
-      }
-    }
-    // Otherwise, use the master variant
-    else {
-      variant = await this.productPriceDataPort.findDefaultVariantForProduct(productId);
-      if (!variant) {
-        throw new PricingValidationError(`No default variant found for product: ${productId}`);
-      }
-    }
-
-    // Initialize the pricing result with original and final price
-    const originalPrice = variant.price;
-    let currentPrice = originalPrice;
+    // originalPrice stays in the row's native currency; currentPrice is in
+    // the requested currency once conversion runs. A sale price overrides the
+    // list price as the effective starting point.
+    const originalPrice = basePrice.priceCents;
+    let currentPrice = basePrice.salePriceCents ?? originalPrice;
+    let priceCurrency = basePrice.currencyCode;
+    let originalCurrency: string | undefined;
     const appliedRules: PricingResult['appliedRules'] = [];
 
-    // Get default currency if none specified
-    let priceCurrency = 'USD'; // Fallback
-    let originalCurrency: string | undefined;
+    // Handle currency conversion if the requested currency differs
+    if (requestedCurrency !== priceCurrency) {
+      const {
+        convertedPrice,
+        exchangeRate: _exchangeRate,
+        appliedRules: currencyRules,
+      } = await this.convertPrice(currentPrice, priceCurrency, requestedCurrency);
 
-    // Handle currency conversion if requested
-    if (currencyCode) {
-      // Get the default product currency (could be stored with the product/variant)
-      const defaultCurrency = await this.getDefaultCurrency();
-      priceCurrency = defaultCurrency?.code || 'USD';
+      currentPrice = convertedPrice;
+      originalCurrency = priceCurrency;
+      priceCurrency = requestedCurrency;
 
-      // Only convert if the requested currency is different
-      if (currencyCode !== priceCurrency) {
-        const {
-          convertedPrice,
-          exchangeRate: _exchangeRate,
-          appliedRules: currencyRules,
-        } = await this.convertPrice(currentPrice, priceCurrency, currencyCode);
-
-        // Update price and track original currency
-        currentPrice = convertedPrice;
-        originalCurrency = priceCurrency;
-        priceCurrency = currencyCode;
-
-        // Add currency conversion rules
-        appliedRules.push(...currencyRules);
-      }
+      appliedRules.push(...currencyRules);
     }
 
     // Step 2: Apply tier pricing (quantity discounts)
@@ -248,13 +235,13 @@ export class PricingService {
 
       if (tierPrice) {
         const previousPrice = currentPrice;
-        currentPrice = tierPrice.price;
+        currentPrice = tierPrice.priceCents;
 
         appliedRules.push({
           ruleId: tierPrice.id,
           ruleName: `Tier Pricing (${tierPrice.quantityMin}+ units)`,
           adjustmentType: PricingAdjustmentType.OVERRIDE,
-          adjustmentValue: tierPrice.price,
+          adjustmentValue: tierPrice.priceCents,
           impact: previousPrice - currentPrice,
         });
       }
@@ -277,12 +264,13 @@ export class PricingService {
           const previousPrice = currentPrice;
 
           // Apply the price adjustment based on its type
+          // (amount operands are stored in major units — convert to cents)
           if (customerPrice.adjustmentType === PricingAdjustmentType.FIXED) {
-            currentPrice = customerPrice.adjustmentValue;
+            currentPrice = Math.round(customerPrice.adjustmentValue * 100);
           } else if (customerPrice.adjustmentType === PricingAdjustmentType.PERCENTAGE) {
-            currentPrice = currentPrice * (1 - customerPrice.adjustmentValue / 100);
+            currentPrice = Math.round(currentPrice * (1 - customerPrice.adjustmentValue / 100));
           } else if (customerPrice.adjustmentType === PricingAdjustmentType.OVERRIDE) {
-            currentPrice = customerPrice.adjustmentValue;
+            currentPrice = Math.round(customerPrice.adjustmentValue * 100);
           }
 
           // Find the price list name for the rule description
@@ -300,7 +288,7 @@ export class PricingService {
     }
 
     // Step 4: Apply dynamic pricing rules
-    const applicableRules = await this.pricingRuleRepository.rules.findActiveRules(productId, product.categoryId, customerId, customerGroupIds);
+    const applicableRules = await this.pricingRuleRepository.findActiveRules(productId, categoryIds[0], customerId, customerGroupIds);
 
     // Sort rules by priority (descending) to apply highest priority rules first
     const sortedRules = [...applicableRules].sort((a, b) => b.priority - a.priority);
@@ -313,15 +301,16 @@ export class PricingService {
       // Check if the rule conditions are met
       if (await this.evaluateRuleConditions(rule, context)) {
         // Apply the rule's price adjustments
+        // (amount operands are stored in major units — convert to cents)
         for (const adjustment of rule.adjustments) {
           if (adjustment.type === PricingAdjustmentType.FIXED) {
-            currentPrice = adjustment.value;
+            currentPrice = Math.round(adjustment.value * 100);
             ruleApplied = true;
           } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
-            currentPrice = currentPrice * (1 - adjustment.value / 100);
+            currentPrice = Math.round(currentPrice * (1 - adjustment.value / 100));
             ruleApplied = true;
           } else if (adjustment.type === PricingAdjustmentType.OVERRIDE) {
-            currentPrice = adjustment.value;
+            currentPrice = Math.round(adjustment.value * 100);
             ruleApplied = true;
           }
         }
@@ -351,7 +340,7 @@ export class PricingService {
           );
 
           const previousPrice = currentPrice;
-          currentPrice = currentPrice * (1 - bestDiscount.discountPercentage / 100);
+          currentPrice = Math.round(currentPrice * (1 - bestDiscount.discountPercentage / 100));
 
           appliedRules.push({
             ruleId: bestDiscount.id,
@@ -371,7 +360,7 @@ export class PricingService {
       try {
         const currentPoints = await this.loyaltyBalancePort.getCustomerPoints(customerId);
 
-        // Default points-to-money ratio (e.g., 100 points = $1)
+        // Default points-to-money ratio (e.g., 100 points = $1 → 1 cent/point)
         // This should ideally come from a configuration or settings
         const pointsToMoneyRatio = (additionalData.pointsToMoneyRatio as number) || 0.01;
 
@@ -379,17 +368,17 @@ export class PricingService {
 
         // Make sure customer has enough points
         if (pointsToApply > 0 && pointsToApply <= currentPoints) {
-          const pointsValue = pointsToApply * pointsToMoneyRatio;
+          const pointsValueCents = Math.round(pointsToApply * pointsToMoneyRatio * 100);
           const previousPrice = currentPrice;
 
           // Don't go below zero
-          currentPrice = Math.max(0, currentPrice - pointsValue);
+          currentPrice = Math.max(0, currentPrice - pointsValueCents);
 
           appliedRules.push({
             ruleId: 'loyalty_points',
             ruleName: `Loyalty Points (${pointsToApply} points)`,
             adjustmentType: PricingAdjustmentType.FIXED,
-            adjustmentValue: pointsValue,
+            adjustmentValue: pointsValueCents,
             impact: previousPrice - currentPrice,
           });
 
@@ -401,15 +390,12 @@ export class PricingService {
       }
     }
 
-    // Ensure price isn't negative
-    currentPrice = Math.max(0, currentPrice);
-
-    // Round to 2 decimal places
-    currentPrice = Math.round(currentPrice * 100) / 100;
+    // Ensure price isn't negative (cents are already integer)
+    currentPrice = Math.max(0, Math.round(currentPrice));
 
     return {
-      originalPrice,
-      finalPrice: currentPrice,
+      originalPriceCents: originalPrice,
+      finalPriceCents: currentPrice,
       appliedRules,
       currency: priceCurrency,
       originalCurrency,
@@ -497,12 +483,12 @@ export class PricingService {
     }
 
     // Calculate price with only this rule
-    const priceAfterRule = await this.calculateAdjustedPrice(beforeRule.originalPrice, rule, context);
+    const priceAfterRule = await this.calculateAdjustedPrice(beforeRule.originalPriceCents, rule, context);
 
     // Create the afterRule result
     const afterRule: PricingResult = {
-      originalPrice: beforeRule.originalPrice,
-      finalPrice: priceAfterRule,
+      originalPriceCents: beforeRule.originalPriceCents,
+      finalPriceCents: priceAfterRule,
       appliedRules: [
         {
           ruleId: rule.id,
@@ -512,7 +498,7 @@ export class PricingService {
               ? rule.adjustments[0]?.type || PricingAdjustmentType.FIXED
               : PricingAdjustmentType.FIXED,
           adjustmentValue: rule.adjustments && rule.adjustments.length > 0 ? rule.adjustments[0]?.value || 0 : 0,
-          impact: beforeRule.originalPrice - priceAfterRule,
+          impact: beforeRule.originalPriceCents - priceAfterRule,
         },
       ],
       currency: beforeRule.currency,
@@ -521,8 +507,8 @@ export class PricingService {
     };
 
     // Calculate impact metrics
-    const impact = beforeRule.originalPrice - priceAfterRule;
-    const percentageImpact = (impact / beforeRule.originalPrice) * 100;
+    const impact = beforeRule.originalPriceCents - priceAfterRule;
+    const percentageImpact = beforeRule.originalPriceCents === 0 ? 0 : (impact / beforeRule.originalPriceCents) * 100;
 
     return {
       beforeRule,
@@ -533,19 +519,20 @@ export class PricingService {
   }
 
   /**
-   * Calculate price after applying a specific rule
+   * Calculate price after applying a specific rule.
+   * Amounts are integer cents; amount operands are stored in major units.
    */
-  private async calculateAdjustedPrice(originalPrice: number, rule: PricingRule, _context: PriceContext): Promise<number> {
-    let priceAfterRule = originalPrice;
+  private async calculateAdjustedPrice(originalPriceCents: number, rule: PricingRule, _context: PriceContext): Promise<number> {
+    let priceAfterRule = originalPriceCents;
 
     // Apply each adjustment in the rule
     for (const adjustment of rule.adjustments) {
       if (adjustment.type === PricingAdjustmentType.FIXED) {
-        priceAfterRule = adjustment.value;
+        priceAfterRule = Math.round(adjustment.value * 100);
       } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
-        priceAfterRule = priceAfterRule * (1 - adjustment.value / 100);
+        priceAfterRule = Math.round(priceAfterRule * (1 - adjustment.value / 100));
       } else if (adjustment.type === PricingAdjustmentType.OVERRIDE) {
-        priceAfterRule = adjustment.value;
+        priceAfterRule = Math.round(adjustment.value * 100);
       }
     }
 
@@ -580,7 +567,7 @@ export class PricingService {
     }
 
     // Check minimum order amount
-    if (rule.minimumOrderAmount && cartTotal < rule.minimumOrderAmount) {
+    if (rule.minimumOrderAmountCents && cartTotal < rule.minimumOrderAmountCents) {
       return false;
     }
 
@@ -659,18 +646,18 @@ export class PricingService {
   }
 
   /**
-   * Format a price according to currency formatting rules
+   * Format a price (integer cents) according to currency formatting rules
    */
-  async formatPrice(price: number, currencyCode?: string): Promise<string> {
+  async formatPrice(priceCents: number, currencyCode?: string): Promise<string> {
     // Get the currency to use for formatting
     const currency = currencyCode ? await this.getCurrency(currencyCode) : await this.getDefaultCurrency();
 
     if (!currency) {
       // Fallback to basic formatting
-      return price.toFixed(2);
+      return (priceCents / 100).toFixed(2);
     }
 
-    return formatCurrency(price, currency);
+    return formatCurrency(priceCents / 100, currency);
   }
 }
 

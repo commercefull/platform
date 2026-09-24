@@ -21,7 +21,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 } as unknown as Coupon,
-      discountAmount: 10,
+      discountAmountCents: 10,
     });
 
     const result = await adapter.validateDiscount('SAVE10', 100, 'cust-1');
@@ -31,7 +31,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.discount!.code).toBe('SAVE10');
     expect(result.discount!.type).toBe('fixed_amount');
     expect(result.discount!.value).toBe(10);
-    expect(result.discount!.discountAmount).toBe(10);
+    expect(result.discount!.discountAmountCents).toBe(10);
   });
 
   it('should return invalid result when coupon is invalid', async () => {
@@ -47,24 +47,24 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.error).toBe('Coupon expired');
   });
 
-  it('should default discountAmount to 0 when not provided', async () => {
+  it('should default discountAmountCents to 0 when not provided', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'FREE', type: 'percentage', value: 50 } as unknown as Coupon,
-      discountAmount: undefined,
+      discountAmountCents: undefined,
     });
 
     const result = await adapter.validateDiscount('FREE', 100);
 
     expect(result.valid).toBe(true);
-    expect(result.discount!.discountAmount).toBe(0);
+    expect(result.discount!.discountAmountCents).toBe(0);
   });
 
   it('should pass customerId to coupon repository', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 } as unknown as Coupon,
-      discountAmount: 10,
+      discountAmountCents: 10,
     });
 
     await adapter.validateDiscount('SAVE10', 100, 'cust-1');
@@ -76,7 +76,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'SAVE10', type: 'percentage', value: 20 } as unknown as Coupon,
-      discountAmount: 20,
+      discountAmountCents: 20,
     });
 
     const result = await adapter.validateDiscount('SAVE10', 100);

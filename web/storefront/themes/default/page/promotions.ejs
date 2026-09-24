@@ -51,11 +51,11 @@
           </div>
           <div class="p-6">
             <div class="space-y-2 text-sm text-gray-600 mb-4">
-              <% if (promo.minOrderAmount) { %>
-              <p><%= t('storefront:minimumOrder', { amount: promo.minOrderAmount }) %></p>
+              <% if (promo.minOrderAmountCents) { %>
+              <p><%= t('storefront:minimumOrder', { amount: (promo.minOrderAmountCents / 100).toFixed(2) }) %></p>
               <% } %>
-              <% if (promo.maxDiscountAmount) { %>
-              <p><%= t('storefront:maximumDiscount', { amount: promo.maxDiscountAmount }) %></p>
+              <% if (promo.maxDiscountAmountCents) { %>
+              <p><%= t('storefront:maximumDiscount', { amount: (promo.maxDiscountAmountCents / 100).toFixed(2) }) %></p>
               <% } %>
               <% if (promo.endDate) { %>
               <p><%= t('storefront:validUntil', { date: new Date(promo.endDate).toLocaleDateString() }) %></p>
@@ -93,7 +93,7 @@
                 <% if (coupon.type === 'percentage') { %>
                 <span class="text-2xl font-bold text-purple-600"><%= coupon.discountAmount %>%</span>
                 <% } else { %>
-                <span class="text-2xl font-bold text-purple-600">$<%= coupon.discountAmount %></span>
+                <span class="text-2xl font-bold text-purple-600">$<%= ((coupon.discountAmount || 0) / 100).toFixed(2) %></span>
                 <% } %>
                 <p class="text-xs text-gray-500"><%= t('storefront:off') %></p>
               </div>

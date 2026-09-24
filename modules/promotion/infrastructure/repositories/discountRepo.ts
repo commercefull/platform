@@ -40,8 +40,8 @@ export interface CreateProductDiscountInput {
   appliesTo?: AppliesTo;
   minimumQuantity?: number;
   maximumQuantity?: number;
-  minimumAmount?: number;
-  maximumDiscountAmount?: number;
+  minimumAmountCents?: number;
+  maximumDiscountAmountCents?: number;
   stackable?: boolean;
   displayOnProductPage?: boolean;
   displayInListing?: boolean;
@@ -80,8 +80,8 @@ export class DiscountRepo {
       `INSERT INTO "${DISCOUNT_TABLE}" (
         "promotionId", "name", "description", "discountType", "discountValue",
         "currencyCode", "startDate", "endDate", "isActive", "priority",
-        "appliesTo", "minimumQuantity", "maximumQuantity", "minimumAmount",
-        "maximumDiscountAmount", "stackable", "displayOnProductPage", "displayInListing",
+        "appliesTo", "minimumQuantity", "maximumQuantity", "minimumAmountCents",
+        "maximumDiscountAmountCents", "stackable", "displayOnProductPage", "displayInListing",
         "badgeText", "badgeStyle", "organizationId", "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
@@ -100,8 +100,8 @@ export class DiscountRepo {
         input.appliesTo || 'specific_products',
         input.minimumQuantity || 1,
         input.maximumQuantity || null,
-        input.minimumAmount || null,
-        input.maximumDiscountAmount || null,
+        input.minimumAmountCents || null,
+        input.maximumDiscountAmountCents || null,
         input.stackable || false,
         input.displayOnProductPage !== false,
         input.displayInListing !== false,
@@ -142,8 +142,8 @@ export class DiscountRepo {
       'appliesTo',
       'minimumQuantity',
       'maximumQuantity',
-      'minimumAmount',
-      'maximumDiscountAmount',
+      'minimumAmountCents',
+      'maximumDiscountAmountCents',
       'stackable',
       'displayOnProductPage',
       'displayInListing',
@@ -466,7 +466,7 @@ export class DiscountRepo {
   /**
    * Calculate discount amount for a given price
    */
-  calculateDiscount(discount: PromotionProductDiscount, price: number, quantity: number = 1): number {
+  calculateDiscount(discount: PromotionProductDiscount, priceCents: number, quantity: number = 1): number {
     // Check minimum quantity
     if (discount.minimumQuantity && quantity < discount.minimumQuantity) {
       return 0;
@@ -476,25 +476,25 @@ export class DiscountRepo {
     const applicableQuantity = discount.maximumQuantity ? Math.min(quantity, discount.maximumQuantity) : quantity;
 
     // Check minimum amount
-    const totalPrice = price * applicableQuantity;
-    if (discount.minimumAmount && totalPrice < Number(discount.minimumAmount)) {
+    const totalPriceCents = priceCents * applicableQuantity;
+    if (discount.minimumAmountCents && totalPriceCents < Number(discount.minimumAmountCents)) {
       return 0;
     }
 
-    let discountAmount: number;
+    let discountAmountCents: number;
 
     if (discount.discountType === 'percentage') {
-      discountAmount = (totalPrice * Number(discount.discountValue)) / 100;
+      discountAmountCents = Math.round((totalPriceCents * Number(discount.discountValue)) / 100);
     } else {
-      discountAmount = Number(discount.discountValue) * applicableQuantity;
+      discountAmountCents = Math.round(Number(discount.discountValue)) * applicableQuantity;
     }
 
     // Apply maximum discount cap
-    if (discount.maximumDiscountAmount && discountAmount > Number(discount.maximumDiscountAmount)) {
-      discountAmount = Number(discount.maximumDiscountAmount);
+    if (discount.maximumDiscountAmountCents && discountAmountCents > Number(discount.maximumDiscountAmountCents)) {
+      discountAmountCents = Number(discount.maximumDiscountAmountCents);
     }
 
-    return Math.min(discountAmount, totalPrice);
+    return Math.min(discountAmountCents, totalPriceCents);
   }
 }
 

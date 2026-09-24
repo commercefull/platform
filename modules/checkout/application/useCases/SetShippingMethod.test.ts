@@ -3,8 +3,8 @@ import { SetShippingMethodUseCase, SetShippingMethodCommand } from './SetShippin
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
 
 const SHIPPING_OPTIONS = [
-  { methodId: 'sm-1', methodName: 'Standard', amount: 9.99, currency: 'USD' },
-  { methodId: 'sm-2', methodName: 'Express', amount: 19.99, currency: 'USD' },
+  { methodId: 'sm-1', methodName: 'Standard', amountCents: 999, currency: 'USD' },
+  { methodId: 'sm-2', methodName: 'Express', amountCents: 1999, currency: 'USD' },
 ];
 
 describe('SetShippingMethodUseCase', () => {
@@ -27,7 +27,7 @@ describe('SetShippingMethodUseCase', () => {
     expect(result.checkoutId).toBe('ck-1');
     expect(result.shippingMethodId).toBe('sm-1');
     expect(result.shippingMethodName).toBe('Standard');
-    expect(result.shippingAmount).toBe(9.99);
+    expect(result.shippingAmountCents).toBe(999);
     expect(checkoutRepository.save).toHaveBeenCalled();
     expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'shippingMethod', methodId: 'sm-1' }));
   });

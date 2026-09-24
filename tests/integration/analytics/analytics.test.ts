@@ -58,9 +58,9 @@ describe('Analytics Feature Tests', () => {
 
       // Verify summary structure
       const summary = response.data.data.summary;
-      expect(summary).toHaveProperty('totalRevenue');
+      expect(summary).toHaveProperty('totalRevenueCents');
       expect(summary).toHaveProperty('totalOrders');
-      expect(summary).toHaveProperty('averageOrderValue');
+      expect(summary).toHaveProperty('averageOrderValueCents');
       expect(summary).toHaveProperty('newCustomers');
       expect(summary).toHaveProperty('conversionRate');
 

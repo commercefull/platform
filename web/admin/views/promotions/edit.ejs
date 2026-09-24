@@ -105,7 +105,7 @@
                     <div class="form-group">
                       <label for="minimumOrderAmount"><%= t('promotion:coupon.minOrderAmount') %></label>
                       <input type="number" class="form-control" id="minimumOrderAmount" name="minOrderAmount"
-                             value="<%= formData?.minOrderAmount || promotion.minOrderAmount || '' %>" step="0.01" min="0">
+                             value="<%= formData?.minOrderAmount || (promotion.minOrderAmountCents ? promotion.minOrderAmountCents / 100 : '') || '' %>" step="0.01" min="0">
                       <small class="form-text text-muted"><%= t('promotion:promotions.minimumOrderHelp') %></small>
                     </div>
                   </div>
@@ -113,7 +113,7 @@
                     <div class="form-group">
                       <label for="maximumDiscountAmount"><%= t('promotion:coupon.maxDiscountAmount') %></label>
                       <input type="number" class="form-control" id="maximumDiscountAmount" name="maxDiscountAmount"
-                             value="<%= formData?.maxDiscountAmount || promotion.maxDiscountAmount || '' %>" step="0.01" min="0">
+                             value="<%= formData?.maxDiscountAmount || (promotion.maxDiscountAmountCents ? promotion.maxDiscountAmountCents / 100 : '') || '' %>" step="0.01" min="0">
                       <small class="form-text text-muted"><%= t('promotion:promotions.maximumDiscountHelp') %></small>
                     </div>
                   </div>

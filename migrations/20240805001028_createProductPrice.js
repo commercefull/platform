@@ -10,8 +10,8 @@ exports.up = function (knex) {
     t.uuid('priceListId').notNullable().references('priceListId').inTable('pricingPriceList').onDelete('CASCADE');
     t.uuid('productId').notNullable().references('productId').inTable('product').onDelete('CASCADE');
     t.uuid('productVariantId').references('productVariantId').inTable('productVariant').onDelete('CASCADE');
-    t.decimal('price', 15, 2).notNullable();
-    t.decimal('salePrice', 15, 2);
+    t.bigInteger('priceCents').notNullable();
+    t.bigInteger('salePriceCents');
     t.integer('minQuantity').defaultTo(1);
     t.integer('maxQuantity');
     t.timestamp('validFrom');
@@ -21,8 +21,8 @@ exports.up = function (knex) {
     t.index('priceListId');
     t.index('productId');
     t.index('productVariantId');
-    t.index('price');
-    t.index('salePrice');
+    t.index('priceCents');
+    t.index('salePriceCents');
     t.index('minQuantity');
     t.index('maxQuantity');
     t.index('validFrom');

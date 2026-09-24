@@ -6,7 +6,7 @@ exports.up = function (knex) {
   return knex.schema.createTable('orderPaymentRefund', t => {
     t.uuid('orderPaymentRefundId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('orderPaymentId').notNullable().references('orderPaymentId').inTable('orderPayment').onDelete('CASCADE');
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('reason', 255);
     t.text('notes');
     t.string('transactionId', 255);

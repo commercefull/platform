@@ -94,7 +94,7 @@ export const getSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 };
 
 export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<SubscriptionPlan> & { name: string; price: number };
+  const body = req.body as Partial<SubscriptionPlan> & { name: string; priceCents: number };
   const plan = await saveSubscriptionPlan({
     subscriptionProductId: req.params.productId,
     ...body,
@@ -103,7 +103,7 @@ export const createSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
 };
 
 export const updateSubscriptionPlan: AsyncHandler = async (req, res, _next) => {
-  const body = req.body as Partial<SubscriptionPlan> & { name: string; price: number };
+  const body = req.body as Partial<SubscriptionPlan> & { name: string; priceCents: number };
   const plan = await saveSubscriptionPlan({
     subscriptionPlanId: req.params.planId,
     subscriptionProductId: req.params.productId,
@@ -231,9 +231,9 @@ export const processBillingCycle: AsyncHandler = async (req, res, _next) => {
     billingCycleNumber: subscription.billingCycleCount + 1,
     periodStart: subscription.currentPeriodEnd || new Date(),
     periodEnd: new Date(), // Will be calculated properly
-    subtotal: subscription.totalPrice,
-    discountAmount: subscription.discountAmount,
-    taxAmount: subscription.taxAmount,
+    subtotalCents: subscription.totalPriceCents,
+    discountAmountCents: subscription.discountAmountCents,
+    taxAmountCents: subscription.taxAmountCents,
   });
 
   // Advance billing cycle

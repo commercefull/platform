@@ -20,8 +20,8 @@ export interface GenerateSalesReportResponse {
     dateRange: { start: string; end: string };
     summary: {
       totalOrders: number;
-      totalRevenue: number;
-      averageOrderValue: number;
+      totalRevenueCents: number;
+      averageOrderValueCents: number;
       totalItemsSold: number;
     };
     generatedAt: Date;
@@ -38,11 +38,7 @@ export class GenerateSalesReportUseCase {
         return { success: false, error: 'Start date must be before end date' };
       }
 
-      const summary = (await this.port.getSalesSummary(command.startDate, command.endDate, command.organizationId)) as {
-        totalOrders: number;
-        totalRevenue: number;
-        averageOrderValue: number;
-      };
+      const summary = await this.port.getSalesSummary(command.startDate, command.endDate, command.organizationId);
 
       const reportId = `report_${Date.now()}`;
 
@@ -69,8 +65,8 @@ export class GenerateSalesReportUseCase {
           },
           summary: {
             totalOrders: summary.totalOrders,
-            totalRevenue: summary.totalRevenue,
-            averageOrderValue: summary.averageOrderValue,
+            totalRevenueCents: summary.totalRevenueCents,
+            averageOrderValueCents: summary.averageOrderValueCents,
             totalItemsSold: 0, // Not available in current summary, would need daily data
           },
           generatedAt: new Date(),

@@ -20,11 +20,11 @@ const mockOrderRepository: jest.Mocked<
     channelId: undefined,
     createdByUserId: undefined,
     orderSource: undefined,
-    subtotal: { amount: 100 },
-    discountTotal: { amount: 0 },
-    taxTotal: { amount: 0 },
-    shippingTotal: { amount: 0 },
-    totalAmount: { amount: 100 },
+    subtotal: { cents: 10000 },
+    discountTotal: { cents: 0 },
+    taxTotal: { cents: 0 },
+    shippingTotal: { cents: 0 },
+    totalAmount: { cents: 10000 },
     totalItems: 1,
     totalQuantity: 2,
     currencyCode: 'USD',
@@ -46,7 +46,7 @@ describe('CreateOrderUseCase', () => {
 
   it('should create order (happy path)', async () => {
     const result = await useCase.execute(
-      new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 2, unitPrice: 50 }], {
+      new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 2, unitPriceCents: 5000 }], {
         firstName: 'John',
         lastName: 'Doe',
         address1: '123 Main',
@@ -83,7 +83,7 @@ describe('CreateOrderUseCase', () => {
   it('should throw CustomerEmailRequiredError when email missing', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand('c1', '', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPrice: 50 }], {
+        new CreateOrderCommand('c1', '', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }], {
           firstName: 'John',
           lastName: 'Doe',
           address1: '123 Main',
@@ -100,7 +100,7 @@ describe('CreateOrderUseCase', () => {
   it('should throw ShippingAddressRequiredError when address is missing', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPrice: 50 }], undefined as unknown as AddressInput),
+        new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }], undefined as unknown as AddressInput),
       ),
     ).rejects.toThrow(ShippingAddressRequiredError);
   });

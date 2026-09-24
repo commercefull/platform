@@ -33,7 +33,7 @@ describe('ManageGiftCardsUseCase', () => {
 
   it('should delegate gift card creation', async () => {
     giftCardRepository.createGiftCard.mockResolvedValue(createGiftCard());
-    const input = { initialBalance: 100 };
+    const input = { initialBalanceCents: 100 };
 
     const result = await useCase.createGiftCard(input);
 

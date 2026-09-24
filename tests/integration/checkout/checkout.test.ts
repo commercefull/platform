@@ -61,11 +61,11 @@ describe('Checkout Feature Tests', () => {
       expect(response.data.data).toHaveProperty('checkoutId');
       expect(response.data.data).toHaveProperty('basketId');
       expect(response.data.data).toHaveProperty('status');
-      expect(response.data.data).toHaveProperty('subtotal');
-      expect(response.data.data).toHaveProperty('taxAmount');
-      expect(response.data.data).toHaveProperty('shippingAmount');
-      expect(response.data.data).toHaveProperty('discountAmount');
-      expect(response.data.data).toHaveProperty('total');
+      expect(response.data.data).toHaveProperty('subtotalCents');
+      expect(response.data.data).toHaveProperty('taxAmountCents');
+      expect(response.data.data).toHaveProperty('shippingAmountCents');
+      expect(response.data.data).toHaveProperty('discountAmountCents');
+      expect(response.data.data).toHaveProperty('totalCents');
       expect(response.data.data).toHaveProperty('createdAt');
       expect(response.data.data).toHaveProperty('updatedAt');
 
@@ -188,7 +188,7 @@ describe('Checkout Feature Tests', () => {
         // Check camelCase properties
         expect(method).toHaveProperty('id');
         expect(method).toHaveProperty('name');
-        expect(method).toHaveProperty('price');
+        expect(method).toHaveProperty('priceCents');
 
         // Verify no snake_case properties
         expect(method).not.toHaveProperty('is_default');
@@ -230,7 +230,7 @@ describe('Checkout Feature Tests', () => {
 
       // Verify the shipping method was properly set
       expect(response.data.data).toHaveProperty('shippingMethodId');
-      expect(response.data.data).toHaveProperty('shippingAmount');
+      expect(response.data.data).toHaveProperty('shippingAmountCents');
 
       // Verify no snake_case properties leaked through
       expect(response.data.data).not.toHaveProperty('shipping_method_id');
@@ -585,8 +585,8 @@ describe('Checkout Gap Tests', () => {
     );
     if (setResp.status !== 200) return;
 
-    expect(setResp.data.data.shippingAmount).toBeGreaterThan(0);
-    expect(setResp.data.data.total).toBeGreaterThan(0);
+    expect(setResp.data.data.shippingAmountCents).toBeGreaterThan(0);
+    expect(setResp.data.data.totalCents).toBeGreaterThan(0);
   });
 
   it('REQ 2.6.10 — apply coupon → discountAmount > 0, total decreases', async () => {
@@ -597,7 +597,7 @@ describe('Checkout Gap Tests', () => {
     if (!checkoutId) return;
 
     const before = await client.get(`/customer/checkout/${checkoutId}`, { headers: { Authorization: `Bearer ${customerToken}` } });
-    const totalBefore = before.data.data.total;
+    const totalBefore = before.data.data.totalCents;
 
     const resp = await client.post(
       `/customer/checkout/${checkoutId}/coupon`,
@@ -606,8 +606,8 @@ describe('Checkout Gap Tests', () => {
     );
     if (resp.status !== 200) return;
 
-    expect(resp.data.data.discountAmount).toBeGreaterThan(0);
-    expect(resp.data.data.total).toBeLessThan(totalBefore);
+    expect(resp.data.data.discountAmountCents).toBeGreaterThan(0);
+    expect(resp.data.data.totalCents).toBeLessThan(totalBefore);
   });
 
   it('REQ 2.6.11 — remove coupon → discountAmount = 0, total restores', async () => {
@@ -618,7 +618,7 @@ describe('Checkout Gap Tests', () => {
     if (!checkoutId) return;
 
     const before = await client.get(`/customer/checkout/${checkoutId}`, { headers: { Authorization: `Bearer ${customerToken}` } });
-    const totalBefore = before.data.data.total;
+    const totalBefore = before.data.data.totalCents;
 
     await client.post(
       `/customer/checkout/${checkoutId}/coupon`,
@@ -630,8 +630,8 @@ describe('Checkout Gap Tests', () => {
     });
     if (removeResp.status !== 200) return;
 
-    expect(removeResp.data.data.discountAmount).toBe(0);
-    expect(removeResp.data.data.total).toBe(totalBefore);
+    expect(removeResp.data.data.discountAmountCents).toBe(0);
+    expect(removeResp.data.data.totalCents).toBe(totalBefore);
   });
 
   it('REQ 2.7.12 — POST /payment-intent on ready session → 201, orderId present, order in PAYMENT_PENDING', async () => {

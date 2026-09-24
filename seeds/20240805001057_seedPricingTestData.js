@@ -36,6 +36,10 @@ exports.seed = async function (knex) {
     .whereIn('productId', TEST_PRODUCT_IDS)
     .delete()
     .catch(() => {});
+  await knex('productBasePrice')
+    .whereIn('productId', TEST_PRODUCT_IDS)
+    .delete()
+    .catch(() => {});
   await knex('productCategoryMap')
     .whereIn('productId', TEST_PRODUCT_IDS)
     .delete()
@@ -68,7 +72,6 @@ exports.seed = async function (knex) {
     type: 'simple',
     status: 'active',
     visibility: 'visible',
-    price: 99.99 + index * 10,
     weight: 500,
     weightUnit: 'g',
     isInventoryManaged: true,
@@ -79,6 +82,18 @@ exports.seed = async function (knex) {
   }));
 
   await knex('product').insert(testProducts).onConflict('productId').ignore();
+
+  // Catalog base prices live in the pricing-owned store (integer cents)
+  await knex('productBasePrice')
+    .insert(
+      TEST_PRODUCT_IDS.map((productId, index) => ({
+        productId,
+        currencyCode: 'USD',
+        priceCents: Math.round((99.99 + index * 10) * 100),
+      })),
+    )
+    .onConflict(['productId', 'productVariantId', 'currencyCode'])
+    .ignore();
 
   // Link products to category
   const categoryMappings = TEST_PRODUCT_IDS.map((productId, index) => ({
@@ -122,6 +137,7 @@ exports.down = async function (knex) {
   // Clean up test data
   await knex('customerPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('productTierPrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
+  await knex('productBasePrice').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('productCategoryMap').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('product').whereIn('productId', TEST_PRODUCT_IDS).delete();
   await knex('pricingPriceList').where('priceListId', TEST_PRICE_LIST_ID).delete();

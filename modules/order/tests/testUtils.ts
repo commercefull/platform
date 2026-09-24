@@ -153,7 +153,7 @@ export function createOrderPaymentRefund(overrides: Partial<OrderPaymentRefund> 
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     orderPaymentId: 'pay-1',
-    amount: 10,
+    amountCents: 10,
     status: 'pending',
     ...overrides,
   };

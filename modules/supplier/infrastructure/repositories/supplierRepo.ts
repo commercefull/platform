@@ -35,7 +35,7 @@ export interface Supplier {
   paymentTerms?: string;
   paymentMethod?: string;
   currency: string;
-  minOrderValue?: number;
+  minOrderValueCents?: number;
   leadTime?: number;
   notes?: string;
   categories?: string[];
@@ -199,7 +199,7 @@ export class SupplierRepo {
       `INSERT INTO "supplier" (
         "name", "code", "description", "website", "email", "phone",
         "isActive", "isApproved", "status", "rating", "taxId",
-        "paymentTerms", "paymentMethod", "currency", "minOrderValue", "leadTime",
+        "paymentTerms", "paymentMethod", "currency", "minOrderValueCents", "leadTime",
         "notes", "categories", "tags", "customFields",
         "createdAt", "updatedAt"
       ) VALUES (
@@ -221,7 +221,7 @@ export class SupplierRepo {
         params.paymentTerms || null,
         params.paymentMethod || null,
         params.currency || 'USD',
-        params.minOrderValue || null,
+        params.minOrderValueCents || null,
         params.leadTime || null,
         params.notes || null,
         params.categories || null,

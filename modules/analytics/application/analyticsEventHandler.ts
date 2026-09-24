@@ -86,7 +86,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       organizationId: data.organizationId as string | undefined,
       customerId: data.customerId as string | undefined,
       orderId: data.orderId as string | undefined,
-      eventValue: (data.grandTotal || data.total) as number | undefined,
+      eventValueCents: (data.totalAmountCents) as number | undefined,
       eventQuantity: data.itemCount as number | undefined,
       currency: data.currency as string | undefined,
       channel: (data.channel as string) || 'web',
@@ -108,11 +108,11 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       currency: (data.currency as string) || 'USD',
       orderCount: 1,
       itemsSold: (data.itemCount as number) || 0,
-      grossRevenue: ((data.grandTotal || data.total) as number) || 0,
-      discountTotal: (data.discountTotal as number) || 0,
-      taxTotal: (data.taxTotal as number) || 0,
-      shippingRevenue: (data.shippingTotal as number) || 0,
-      netRevenue: (((data.grandTotal || data.total) as number) || 0) - ((data.taxTotal as number) || 0),
+      grossRevenueCents: ((data.totalAmountCents) as number) || 0,
+      discountTotalCents: (data.discountTotalCents as number) || 0,
+      taxTotalCents: (data.taxTotalCents as number) || 0,
+      shippingRevenueCents: (data.shippingTotalCents as number) || 0,
+      netRevenueCents: (((data.totalAmountCents) as number) || 0) - ((data.taxTotalCents as number) || 0),
       newCustomers: isNewCustomer ? 1 : 0,
       returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
       guestOrders: isGuest ? 1 : 0,
@@ -129,8 +129,8 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
           channel: (data.channel as string) || 'all',
           purchases: 1,
           quantitySold: (item.quantity as number) || 1,
-          revenue: (item.total as number) || (item.price as number) * ((item.quantity as number) || 1),
-          averagePrice: item.price as number,
+          revenueCents: (item.lineTotalCents as number) || (item.unitPriceCents as number) * ((item.quantity as number) || 1),
+          averagePriceCents: item.unitPriceCents as number,
         });
       }
     }
@@ -146,7 +146,7 @@ async function handleOrderCompleted(payload: unknown): Promise<void> {
       eventAction: 'completed',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.grandTotal as number | undefined,
+      eventValueCents: data.totalAmountCents as number | undefined,
     });
   } catch {}
 }
@@ -160,7 +160,7 @@ async function handleOrderCancelled(payload: unknown): Promise<void> {
       eventAction: 'cancelled',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.grandTotal as number | undefined,
+      eventValueCents: data.totalAmountCents as number | undefined,
       eventData: { reason: data.reason },
     });
   } catch {}
@@ -178,13 +178,13 @@ async function handleOrderRefunded(payload: unknown): Promise<void> {
       eventAction: 'refunded',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.refundAmount as number | undefined,
+      eventValueCents: data.refundAmountCents as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       organizationId: data.organizationId as string | undefined,
-      refundTotal: (data.refundAmount as number) || 0,
+      refundTotalCents: (data.refundAmountCents as number) || 0,
     });
   } catch {}
 }
@@ -231,7 +231,7 @@ async function handleCartItemAdded(payload: unknown): Promise<void> {
       productId: data.productId as string | undefined,
       customerId: data.customerId as string | undefined,
       eventQuantity: data.quantity as number | undefined,
-      eventValue: data.price as number | undefined,
+      eventValueCents: data.unitPriceCents as number | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
@@ -280,7 +280,7 @@ async function handleCartAbandoned(payload: unknown): Promise<void> {
       eventAction: 'abandoned',
       basketId: data.basketId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.cartValue as number | undefined,
+      eventValueCents: data.totalCents as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
@@ -307,7 +307,7 @@ async function handleCheckoutStarted(payload: unknown): Promise<void> {
       eventAction: 'started',
       basketId: data.basketId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.cartValue as number | undefined,
+      eventValueCents: data.totalCents as number | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
@@ -327,7 +327,7 @@ async function handleCheckoutCompleted(payload: unknown): Promise<void> {
       eventAction: 'completed',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.orderTotal as number | undefined,
+      eventValueCents: data.totalCents as number | undefined,
     });
   } catch {}
 }
@@ -348,7 +348,7 @@ async function handlePaymentSuccess(payload: unknown): Promise<void> {
       eventAction: 'success',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.amount as number | undefined,
+      eventValueCents: data.amountCents as number | undefined,
       eventData: { paymentMethod: data.paymentMethod },
     });
 
@@ -372,7 +372,7 @@ async function handlePaymentFailed(payload: unknown): Promise<void> {
       eventAction: 'failed',
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
-      eventValue: data.amount as number | undefined,
+      eventValueCents: data.amountCents as number | undefined,
       eventData: { reason: data.failureReason },
     });
 
@@ -471,7 +471,7 @@ async function handleSubscriptionCreated(payload: unknown): Promise<void> {
       eventCategory: 'subscription',
       eventAction: 'created',
       customerId: data.customerId as string | undefined,
-      eventValue: data.monthlyValue as number | undefined,
+      eventValueCents: data.monthlyValueCents as number | undefined,
       eventData: { planId: data.planId },
     });
   } catch {}

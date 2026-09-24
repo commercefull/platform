@@ -14,8 +14,8 @@ exports.up = function (knex) {
     t.enum('appliesTo', ['specific_products', 'all_products']).notNullable().defaultTo('specific_products');
     t.integer('minimumQuantity').defaultTo(1);
     t.integer('maximumQuantity');
-    t.decimal('minimumAmount', 15, 2);
-    t.decimal('maximumDiscountAmount', 15, 2);
+    t.bigInteger('minimumAmountCents');
+    t.bigInteger('maximumDiscountAmountCents');
     t.boolean('stackable').notNullable().defaultTo(false);
     t.boolean('displayOnProductPage').notNullable().defaultTo(true);
     t.boolean('displayInListing').notNullable().defaultTo(true);

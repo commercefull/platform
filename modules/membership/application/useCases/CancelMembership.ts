@@ -21,7 +21,7 @@ export interface CancelMembershipOutput {
   cancelledAt: string;
   effectiveEndDate: string;
   refundEligible: boolean;
-  refundAmount?: number;
+  refundAmountCents?: number;
 }
 
 interface MembershipRecord {
@@ -34,7 +34,7 @@ interface MembershipRecord {
 }
 
 interface TierRecord {
-  price: number;
+  priceCents: number;
 }
 
 interface CancelMembershipRepository {
@@ -63,7 +63,7 @@ export class CancelMembershipUseCase {
 
     const now = new Date();
     let effectiveEndDate: Date;
-    let refundAmount: number | undefined;
+    let refundAmountCents: number | undefined;
     let refundEligible = false;
 
     if (immediate) {
@@ -78,8 +78,8 @@ export class CancelMembershipUseCase {
         if (daysRemaining > 0) {
           const tier = await this.membershipRepository.getTierById(membership.tierId);
           const daysInPeriod = membership.billingPeriod === 'monthly' ? 30 : membership.billingPeriod === 'quarterly' ? 90 : 365;
-          refundAmount = (tier.price / daysInPeriod) * daysRemaining;
-          refundEligible = refundAmount > 0;
+          refundAmountCents = (tier.priceCents / daysInPeriod) * daysRemaining;
+          refundEligible = refundAmountCents > 0;
         }
       }
 
@@ -137,7 +137,7 @@ export class CancelMembershipUseCase {
       immediate,
       effectiveEndDate: effectiveEndDate.toISOString(),
       refundEligible,
-      refundAmount,
+      refundAmountCents,
     });
 
     return {
@@ -146,7 +146,7 @@ export class CancelMembershipUseCase {
       cancelledAt: now.toISOString(),
       effectiveEndDate: effectiveEndDate.toISOString(),
       refundEligible,
-      refundAmount,
+      refundAmountCents,
     };
   }
 

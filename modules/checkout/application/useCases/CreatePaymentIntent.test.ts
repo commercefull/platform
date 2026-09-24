@@ -80,7 +80,7 @@ describe('CreatePaymentIntentUseCase', () => {
     );
     expect(orderPlacementPort.updateOrderStatus).toHaveBeenCalledWith('o-1', 'pending_payment');
     expect(paymentAuthorizationPort.initiatePayment).toHaveBeenCalledWith(
-      expect.objectContaining({ orderId: 'o-1', amount: 100, currency: 'USD', paymentMethodId: 'pm-1' }),
+      expect.objectContaining({ orderId: 'o-1', amountCents: 10000, currency: 'USD', paymentMethodId: 'pm-1' }),
     );
     expect(checkoutRepository.save).toHaveBeenCalledWith(expect.objectContaining({ paymentIntentId: 'pi_123', orderId: 'o-1' }));
     expect(emitMock).toHaveBeenCalledWith('checkout.payment_initiated', expect.objectContaining({ checkoutId: 'ck-1', orderId: 'o-1', paymentIntentId: 'pi_123' }));
@@ -128,7 +128,7 @@ describe('CreatePaymentIntentUseCase', () => {
     const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
     expect(result.paymentIntent.id).toBe('pi_123');
-    expect(fraudScreeningPort.screenOrder).toHaveBeenCalledWith(expect.objectContaining({ orderId: 'o-1', orderAmount: 100 }));
+    expect(fraudScreeningPort.screenOrder).toHaveBeenCalledWith(expect.objectContaining({ orderId: 'o-1', orderAmountCents: 10000 }));
     expect(paymentAuthorizationPort.initiatePayment).toHaveBeenCalled();
   });
 

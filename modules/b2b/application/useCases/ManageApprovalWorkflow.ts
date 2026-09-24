@@ -19,7 +19,7 @@ export class ManageApprovalWorkflowUseCase {
     referenceNumber: string;
     requestedBy: string;
     requestedByEmail: string;
-    amount: number;
+    amountCents: number;
     currency?: string;
     description?: string;
     approvers: Array<{ approverId: string; approverEmail: string }>;
@@ -37,7 +37,7 @@ export class ManageApprovalWorkflowUseCase {
       companyId: workflow.companyId,
       type: workflow.type,
       referenceNumber: workflow.referenceNumber,
-      amount: workflow.amount,
+      amountCents: workflow.amountCents,
     });
     return workflow;
   }

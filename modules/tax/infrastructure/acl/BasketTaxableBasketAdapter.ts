@@ -23,9 +23,9 @@ export class BasketTaxableBasketAdapter implements TaxableBasketPort {
       items: (basket.items || []).map(item => ({
         productId: item.productId,
         quantity: item.quantity,
-        price: item.unitPrice.amount,
+        priceCents: item.unitPrice.cents,
       })),
-      subtotal: basket.subtotal.amount,
+      subtotalCents: basket.subtotal.cents,
     };
   }
 }

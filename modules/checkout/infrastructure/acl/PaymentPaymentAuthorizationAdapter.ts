@@ -20,7 +20,7 @@ export class PaymentPaymentAuthorizationAdapter implements PaymentAuthorizationP
     try {
       const command = new InitiatePaymentCommand(
         request.orderId,
-        request.amount,
+        request.amountCents,
         request.currency,
         request.paymentMethodId,
         request.customerId,

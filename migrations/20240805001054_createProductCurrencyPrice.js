@@ -10,8 +10,8 @@ exports.up = function (knex) {
     t.uuid('productId').notNullable();
     t.uuid('productVariantId');
     t.uuid('currencyId').notNullable().references('currencyId').inTable('currency');
-    t.decimal('price', 15, 4).notNullable();
-    t.decimal('compareAtPrice', 15, 4);
+    t.bigInteger('priceCents').notNullable();
+    t.bigInteger('compareAtPriceCents');
     t.boolean('isManual').notNullable().defaultTo(true);
     t.uuid('updatedBy');
     t.index('productId');

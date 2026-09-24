@@ -47,7 +47,7 @@ export type PaymentTransactionCreateParams = MakeOptional<
   | 'externalTransactionId'
   | 'currency'
   | 'paymentMethodDetails'
-  | 'refundedAmount'
+  | 'refundedAmountCents'
   | 'metadata'
   | 'customerIp'
   | 'authorizedAt'
@@ -251,7 +251,7 @@ export class PaymentRepo {
     const result = await queryOne<PaymentMethodConfig>(
       `INSERT INTO "paymentMethodConfig" 
        ("organizationId", "paymentMethod", "isEnabled", "displayName", "description",
-        "processingFee", "minimumAmount", "maximumAmount", "displayOrder", "icon",
+        "processingFeeCents", "minimumAmountCents", "maximumAmountCents", "displayOrder", "icon",
         "supportedCurrencies", "countries", "gatewayId", "configuration",
         "metadata", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
@@ -262,9 +262,9 @@ export class PaymentRepo {
         params.isEnabled ?? true,
         params.displayName || null,
         params.description || null,
-        params.processingFee || null,
-        params.minimumAmount || null,
-        params.maximumAmount || null,
+        params.processingFeeCents || null,
+        params.minimumAmountCents || null,
+        params.maximumAmountCents || null,
         params.displayOrder ?? 0,
         params.icon || null,
         params.supportedCurrencies || [],
@@ -365,17 +365,17 @@ export class PaymentRepo {
     const now = new Date();
     const result = await queryOne<PaymentTransaction>(
       `INSERT INTO "paymentTransaction" 
-       ("orderPaymentId", "orderId", "type", "amount", "currencyCode", "status",
+       ("orderPaymentId", "orderId", "type", "amountCents", "currencyCode", "status",
         "customerId", "paymentMethodId", "paymentGatewayId", "externalTransactionId",
         "currency", "paymentMethodDetails", "gatewayResponse", "errorCode", "errorMessage",
-        "refundedAmount", "metadata", "customerIp", "capturedAt", "createdAt", "updatedAt")
+        "refundedAmountCents", "metadata", "customerIp", "capturedAt", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
        RETURNING *`,
       [
         params.orderPaymentId,
         params.orderId,
         params.type,
-        params.amount,
+        params.amountCents,
         params.currencyCode,
         params.status,
         params.customerId || null,
@@ -387,7 +387,7 @@ export class PaymentRepo {
         params.gatewayResponse || null,
         params.errorCode || null,
         params.errorMessage || null,
-        params.refundedAmount || null,
+        params.refundedAmountCents || null,
         params.metadata || null,
         params.customerIp || null,
         params.capturedAt || null,
@@ -461,7 +461,7 @@ export class PaymentRepo {
     const now = new Date();
     const result = await queryOne<PaymentRefund>(
       `INSERT INTO "paymentRefund" 
-       ("orderPaymentId", "orderId", "transactionId", "amount", "currencyCode",
+       ("orderPaymentId", "orderId", "transactionId", "amountCents", "currencyCode",
         "reason", "status", "paymentTransactionId", "externalRefundId", "currency",
         "gatewayResponse", "errorCode", "errorMessage", "metadata", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
@@ -470,7 +470,7 @@ export class PaymentRepo {
         params.orderPaymentId,
         params.orderId,
         params.transactionId || null,
-        params.amount,
+        params.amountCents,
         params.currencyCode,
         params.reason || null,
         params.status,
@@ -488,17 +488,17 @@ export class PaymentRepo {
 
     if (!result) throw new FailedToCreatePaymentRefundError();
 
-    // Update the transaction's refunded amount
+    // Update the transaction's refunded amountCents
     await query(
       `UPDATE "paymentTransaction" 
-       SET "refundedAmount" = COALESCE("refundedAmount", 0) + $1,
+       SET "refundedAmountCents" = COALESCE("refundedAmountCents", 0) + $1,
            "status" = CASE
-             WHEN COALESCE("refundedAmount", 0) + $1 >= "amount" THEN 'refunded'
+             WHEN COALESCE("refundedAmountCents", 0) + $1 >= "amountCents" THEN 'refunded'
              ELSE 'partially_refunded'
            END,
            "updatedAt" = $2
        WHERE "paymentTransactionId" = $3 AND "deletedAt" IS NULL`,
-      [params.amount, now, params.paymentTransactionId],
+      [params.amountCents, now, params.paymentTransactionId],
     );
 
     return result;
@@ -547,7 +547,7 @@ export class PaymentRepo {
     orderPaymentId: string;
     orderId: string;
     customerId?: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     paymentMethodId?: string;
     paymentGatewayId?: string;
@@ -557,7 +557,7 @@ export class PaymentRepo {
         orderPaymentId: paymentData.orderPaymentId,
         orderId: paymentData.orderId,
         type: 'payment',
-        amount: String(paymentData.amount),
+        amountCents: paymentData.amountCents,
         currencyCode: paymentData.currency,
         status: 'paid',
         customerId: paymentData.customerId || null,
@@ -576,7 +576,7 @@ export class PaymentRepo {
     orderPaymentId: string;
     orderId: string;
     paymentTransactionId: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     reason?: string;
   }): Promise<{ success: boolean; refundId?: string; error?: string }> {
@@ -585,7 +585,7 @@ export class PaymentRepo {
         orderPaymentId: refundData.orderPaymentId,
         orderId: refundData.orderId,
         paymentTransactionId: refundData.paymentTransactionId,
-        amount: String(refundData.amount),
+        amountCents: refundData.amountCents,
         currencyCode: refundData.currency,
         reason: refundData.reason || null,
         status: 'completed',

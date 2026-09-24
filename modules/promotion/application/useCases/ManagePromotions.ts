@@ -6,6 +6,9 @@ export class ManagePromotionsUseCase {
   async findById(id: string) {
     return this.promotionRepo.findById(id);
   }
+  async getWithDetails(id: string) {
+    return this.promotionRepo.getWithDetails(id);
+  }
   async findAll(filters?: Parameters<PromotionRepository['findAll']>[0], pagination?: Parameters<PromotionRepository['findAll']>[1]) {
     return this.promotionRepo.findAll(filters, pagination);
   }

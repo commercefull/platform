@@ -24,14 +24,15 @@ export interface CouponRepository {
   save(coupon: Coupon): Promise<Coupon>;
   delete(couponId: string): Promise<void>;
   recordUsage(
-    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmount: number },
+    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmountCents: number },
   ): Promise<CouponUsage>;
   createRedemption(redemption: {
     redemptionId: string;
     couponId: string;
     orderId: string;
     customerId?: string;
-    discountAmount: number;
+    /** Discount amount in integer cents. */
+    discountAmountCents: number;
     redeemedAt: Date;
   }): Promise<void>;
   incrementUsageCount(couponId: string): Promise<void>;
@@ -40,7 +41,7 @@ export interface CouponRepository {
   getActiveCoupons(limit?: number): Promise<Coupon[]>;
   validateCouponCode(
     code: string,
-    orderValue: number,
+    orderValueCents: number,
     customerId?: string,
-  ): Promise<{ valid: boolean; coupon?: Coupon; discountAmount?: number; error?: string }>;
+  ): Promise<{ valid: boolean; coupon?: Coupon; discountAmountCents?: number; error?: string }>;
 }

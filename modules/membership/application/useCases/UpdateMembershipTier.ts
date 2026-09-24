@@ -10,7 +10,7 @@ export interface UpdateMembershipTierInput {
   tierId: string;
   name?: string;
   description?: string;
-  price?: number;
+  priceCents?: number;
   billingPeriod?: 'monthly' | 'quarterly' | 'annual';
   benefits?: string[];
   discountPercentage?: number;
@@ -25,7 +25,7 @@ export interface UpdateMembershipTierInput {
 export interface UpdateMembershipTierOutput {
   tierId: string;
   name: string;
-  price: number;
+  priceCents: number;
   billingPeriod: string;
   isActive: boolean;
   updatedAt: string;
@@ -34,7 +34,7 @@ export interface UpdateMembershipTierOutput {
 interface TierRecord {
   tierId: string;
   name: string;
-  price: number;
+  priceCents: number;
   billingPeriod: string;
   isActive: boolean;
   updatedAt: Date;
@@ -61,7 +61,7 @@ export class UpdateMembershipTierUseCase {
     const updateData: Record<string, unknown> = {};
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.description !== undefined) updateData.description = updates.description;
-    if (updates.price !== undefined) updateData.price = updates.price;
+    if (updates.priceCents !== undefined) updateData.priceCents = updates.priceCents;
     if (updates.billingPeriod !== undefined) updateData.billingPeriod = updates.billingPeriod;
     if (updates.benefits !== undefined) updateData.benefits = updates.benefits;
     if (updates.discountPercentage !== undefined) updateData.discountPercentage = updates.discountPercentage;
@@ -79,7 +79,7 @@ export class UpdateMembershipTierUseCase {
     return {
       tierId: updatedTier.tierId,
       name: updatedTier.name,
-      price: updatedTier.price,
+      priceCents: updatedTier.priceCents,
       billingPeriod: updatedTier.billingPeriod,
       isActive: updatedTier.isActive,
       updatedAt: updatedTier.updatedAt.toISOString(),

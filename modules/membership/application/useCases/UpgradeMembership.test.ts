@@ -21,8 +21,8 @@ describe('UpgradeMembershipUseCase', () => {
       billingPeriod: 'monthly',
     });
     membershipRepository.getTierById.mockImplementation(async (id: string) => {
-      if (id === 't1') return { name: 'Silver', price: 25, isActive: true };
-      if (id === 't2') return { name: 'Gold', price: 50, isActive: true };
+      if (id === 't1') return { name: 'Silver', priceCents: 25, isActive: true };
+      if (id === 't2') return { name: 'Gold', priceCents: 50, isActive: true };
       return null;
     });
     membershipRepository.updateMembership.mockResolvedValue({
@@ -36,7 +36,7 @@ describe('UpgradeMembershipUseCase', () => {
 
     expect(result.membershipId).toBe('m1');
     expect(result.newTierName).toBe('Gold');
-    expect(result.newBillingAmount).toBe(50);
+    expect(result.newBillingAmountCents).toBe(50);
     expect(emitMock).toHaveBeenCalledWith(
       'membership.upgraded',
       expect.objectContaining({ membershipId: 'm1' }),
@@ -64,8 +64,8 @@ describe('UpgradeMembershipUseCase', () => {
 
   it('should throw MembershipValidationError when the new tier is cheaper', async () => {
     membershipRepository.getTierById.mockImplementation(async (id: string) => {
-      if (id === 't1') return { name: 'Gold', price: 50, isActive: true };
-      if (id === 't2') return { name: 'Silver', price: 25, isActive: true };
+      if (id === 't1') return { name: 'Gold', priceCents: 50, isActive: true };
+      if (id === 't2') return { name: 'Silver', priceCents: 25, isActive: true };
       return null;
     });
 

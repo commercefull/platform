@@ -8,7 +8,7 @@ exports.up = function (knex) {
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isPublic').notNullable().defaultTo(true);
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.string('billingInterval', 20)
       .notNullable()
@@ -16,7 +16,7 @@ exports.up = function (knex) {
       .defaultTo('monthly');
     t.integer('billingFrequency').notNullable().defaultTo(1);
     t.integer('trialPeriodDays').defaultTo(0);
-    t.decimal('setupFee', 15, 2).defaultTo(0);
+    t.bigInteger('setupFeeCents').defaultTo(0);
     t.integer('maxBillingCycles');
     t.boolean('autoRenew').notNullable().defaultTo(true);
     t.integer('gracePeriodDays').notNullable().defaultTo(3);
@@ -27,7 +27,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('isPublic');
     t.index('billingInterval');
-    t.index('amount');
+    t.index('amountCents');
   });
 };
 

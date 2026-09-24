@@ -7,7 +7,7 @@
 
 export interface PaymentAuthorizationRequest {
   orderId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   paymentMethodId: string;
   customerId?: string;

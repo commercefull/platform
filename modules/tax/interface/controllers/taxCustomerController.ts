@@ -10,14 +10,14 @@ const taxableBasketPort: TaxableBasketPort = taxableBasketAdapter;
 interface TaxableItem {
   productId: string;
   quantity: number;
-  price: number;
+  priceCents: number;
   taxCategoryId?: string;
 }
 
 interface _BasketItem {
   productId: string;
   quantity: number;
-  price: number;
+  priceCents: number;
   taxCategoryId?: string;
   [key: string]: unknown;
 }
@@ -33,32 +33,32 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
   const body = req.body as {
     productId?: string;
     quantity?: number;
-    price?: number;
+    priceCents?: number;
     shippingAddress?: ShippingAddressBody;
     customerId?: string;
     organizationId?: string;
   };
 
-  const { productId, quantity, price, shippingAddress, customerId, organizationId } = body;
+  const { productId, quantity, priceCents, shippingAddress, customerId, organizationId } = body;
 
   // Validate required fields
-  if (!productId || !quantity || !price || !shippingAddress || !shippingAddress.country) {
+  if (!productId || !quantity || priceCents === undefined || !shippingAddress || !shippingAddress.country) {
     res.status(400).json({
-      error: 'Product ID, quantity, price, and shipping country are required',
+      error: 'Product ID, quantity, priceCents, and shipping country are required',
     });
     return;
   }
 
   // Ensure quantity and price are valid numbers
   const parsedQuantity = Number(quantity);
-  const parsedPrice = Number(price);
+  const parsedPriceCents = Number(priceCents);
 
   if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
     res.status(400).json({ error: 'Quantity must be a positive number' });
     return;
   }
 
-  if (isNaN(parsedPrice) || parsedPrice < 0) {
+  if (isNaN(parsedPriceCents) || parsedPriceCents < 0) {
     res.status(400).json({ error: 'Price must be a non-negative number' });
     return;
   }
@@ -68,7 +68,7 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
     const taxResult = await taxQueryRepository.query.calculateTaxForLineItem(
       productId,
       parsedQuantity,
-      parsedPrice,
+      parsedPriceCents,
       {
         country: shippingAddress.country,
         region: shippingAddress.region,
@@ -77,21 +77,21 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
       customerId,
     );
 
-    const subtotal = taxResult.taxableAmount;
+    const subtotalCents = taxResult.taxableAmountCents;
     res.json({
-      subtotal,
-      taxAmount: taxResult.taxAmount,
-      total: taxResult.total,
+      subtotalCents,
+      taxAmountCents: taxResult.taxAmountCents,
+      totalCents: taxResult.totalCents,
       rate: taxResult.rate,
       taxBreakdown:
-        taxResult.taxAmount > 0
+        taxResult.taxAmountCents > 0
           ? [
               {
                 rateId: 'default',
                 rateName: 'Tax',
                 rateValue: taxResult.rate,
-                taxableAmount: subtotal,
-                taxAmount: taxResult.taxAmount,
+                taxableAmountCents: subtotalCents,
+                taxAmountCents: taxResult.taxAmountCents,
               },
             ]
           : [],
@@ -104,7 +104,7 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
     {
       productId,
       quantity: parsedQuantity,
-      price: parsedPrice,
+      priceCents: parsedPriceCents,
       taxCategoryId: undefined, // Will be determined by the tax repo
     },
   ];
@@ -121,7 +121,7 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
   const dbItems = items.map(item => ({
     product_id: item.productId,
     quantity: item.quantity,
-    price: item.price,
+    priceCents: item.priceCents,
     tax_category_id: item.taxCategoryId,
   }));
   const dbAddress = {
@@ -135,7 +135,7 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
     dbItems,
     dbAddress,
     dbAddress, // Same address for billing
-    parsedPrice * parsedQuantity, // Subtotal
+    parsedPriceCents * parsedQuantity, // Subtotal in cents
     0, // No shipping amount for single line item
     customerId,
     organizationId,
@@ -196,7 +196,7 @@ export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse)
   const items: TaxableItem[] = basket.items.map(item => ({
     productId: item.productId,
     quantity: item.quantity,
-    price: item.price,
+    priceCents: item.priceCents,
   }));
 
   // Transform addresses to the expected format (camelCase for application layer)
@@ -220,7 +220,7 @@ export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse)
   const dbItems = items.map(item => ({
     product_id: item.productId,
     quantity: item.quantity,
-    price: item.price,
+    priceCents: item.priceCents,
     tax_category_id: item.taxCategoryId,
   }));
   const dbShippingAddr = {
@@ -241,7 +241,7 @@ export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse)
     dbItems,
     dbShippingAddr,
     dbBillingAddr,
-    basket.subtotal,
+    basket.subtotalCents,
     0,
     customerId,
     organizationId,

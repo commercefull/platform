@@ -115,8 +115,12 @@ export const viewReturn = async (req: HttpRequest, res: HttpResponse) => {
     });
   }
 
+  const orderId = (returnRequest as Record<string, unknown>).orderId as string | undefined;
+  const items = orderId ? await manageStorefrontReturnsUseCase.findOrderItemsWithProduct(orderId) : [];
+
   storefrontRespond(req, res, 'returns/view', {
     pageName: `Return #${returnId}`,
     returnRequest,
+    items: items || [],
   });
 };

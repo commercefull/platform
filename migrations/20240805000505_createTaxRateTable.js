@@ -12,10 +12,10 @@ exports.up = function (knex) {
     t.boolean('isCompound').notNullable().defaultTo(false);
     t.boolean('includeInPrice').notNullable().defaultTo(false);
     t.boolean('isShippingTaxable').notNullable().defaultTo(false);
-    t.decimal('fixedAmount', 15, 2);
-    t.decimal('minimumAmount', 15, 2);
-    t.decimal('maximumAmount', 15, 2);
-    t.decimal('threshold', 15, 2);
+    t.bigInteger('fixedAmountCents');
+    t.bigInteger('minimumAmountCents');
+    t.bigInteger('maximumAmountCents');
+    t.bigInteger('thresholdCents');
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('endDate');
     t.boolean('isActive').notNullable().defaultTo(true);

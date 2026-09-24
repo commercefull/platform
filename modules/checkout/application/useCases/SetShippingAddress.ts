@@ -79,9 +79,9 @@ export class SetShippingAddressUseCase {
 
     session.setShippingAddress(address);
 
-    let taxAmount: number;
+    let taxAmountCents: number;
     try {
-      let taxableShipping = session.shippingAmount.amount;
+      let taxableShippingCents = session.shippingAmount.cents;
       let applyDiscountBeforeTax = false;
       try {
         if (this.taxQuotePort) {
@@ -89,7 +89,7 @@ export class SetShippingAddressUseCase {
           if (settings) {
             applyDiscountBeforeTax = settings.applyDiscountBeforeTax;
             if (!settings.applyTaxToShipping) {
-              taxableShipping = 0;
+              taxableShippingCents = 0;
             }
           }
         }
@@ -102,10 +102,10 @@ export class SetShippingAddressUseCase {
         const taxResult = await this.taxQuotePort.calculateTax({
           items: items.map(item => ({
             ...item,
-            unitPrice:
-              applyDiscountBeforeTax && session.discountAmount.amount > 0
-                ? Math.max(0, item.unitPrice - session.discountAmount.amount / items.length)
-                : item.unitPrice,
+            unitPriceCents:
+              applyDiscountBeforeTax && session.discountAmount.cents > 0
+                ? Math.max(0, Math.round(item.unitPriceCents - session.discountAmount.cents / items.length))
+                : item.unitPriceCents,
           })),
           shippingAddress: {
             country: command.country,
@@ -113,17 +113,17 @@ export class SetShippingAddressUseCase {
             postalCode: command.postalCode,
             city: command.city,
           },
-          shippingAmount: taxableShipping,
+          shippingAmountCents: taxableShippingCents,
           customerId: session.customerId,
         });
-        taxAmount = taxResult.success ? taxResult.taxAmount : 0;
+        taxAmountCents = taxResult.success ? taxResult.taxAmountCents : 0;
       } else {
-        taxAmount = 0;
+        taxAmountCents = 0;
       }
     } catch {
-      taxAmount = 0;
+      taxAmountCents = 0;
     }
-    session.updateAmounts(session.subtotal, Money.create(taxAmount, session.subtotal.currency));
+    session.updateAmounts(session.subtotal, Money.fromCents(taxAmountCents, session.subtotal.currency));
 
     // Evaluate auto-applied promotions
     await this.evaluatePromotions(session);
@@ -142,25 +142,25 @@ export class SetShippingAddressUseCase {
 
   private async getTaxLineItems(
     session: CheckoutSessionLike,
-  ): Promise<Array<{ productId: string; name: string; quantity: number; unitPrice: number; taxCategoryId?: string; taxable?: boolean }>> {
+  ): Promise<Array<{ productId: string; name: string; quantity: number; unitPriceCents: number; taxCategoryId?: string; taxable?: boolean }>> {
     if (!this.basketSnapshotPort) {
-      return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
+      return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPriceCents: session.subtotal.cents }];
     }
     try {
       const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
       if (!basket) {
-        return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
+        return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPriceCents: session.subtotal.cents }];
       }
       return basket.items.map(item => ({
         productId: item.productId,
         name: item.name,
         quantity: item.quantity,
-        unitPrice: item.unitPrice?.amount ?? 0,
+        unitPriceCents: item.unitPrice?.cents ?? 0,
         taxCategoryId: item.taxCategoryId,
         taxable: item.taxable,
       }));
     } catch {
-      return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPrice: session.subtotal.amount }];
+      return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPriceCents: session.subtotal.cents }];
     }
   }
 
@@ -175,17 +175,17 @@ export class SetShippingAddressUseCase {
           productVariantId: item.productVariantId,
           name: item.name,
           quantity: item.quantity,
-          unitPrice: item.unitPrice?.amount ?? 0,
+          unitPriceCents: item.unitPrice?.cents ?? 0,
           isDigital: item.isDigital,
         })),
-        subtotal: session.subtotal.amount,
-        shippingAmount: session.shippingAmount?.amount ?? 0,
+        subtotalCents: session.subtotal.cents,
+        shippingAmountCents: session.shippingAmount?.cents ?? 0,
         customerId: session.customerId,
         currency: session.subtotal.currency ?? 'USD',
         couponCode: session.couponCode,
       });
-      if (!session.couponCode && promoResult.totalDiscountAmount > 0) {
-        session.applyCoupon('AUTO_PROMOTION', Money.create(promoResult.totalDiscountAmount, session.subtotal.currency ?? 'USD'));
+      if (!session.couponCode && promoResult.totalDiscountAmountCents > 0) {
+        session.applyCoupon('AUTO_PROMOTION', Money.fromCents(promoResult.totalDiscountAmountCents, session.subtotal.currency ?? 'USD'));
       }
     } catch {
       // Promotion evaluation is best-effort
@@ -195,8 +195,8 @@ export class SetShippingAddressUseCase {
 
 interface CheckoutSessionLike {
   basketId: string;
-  subtotal: { amount: number; currency?: string };
-  shippingAmount?: { amount: number };
+  subtotal: { cents: number; currency?: string };
+  shippingAmount?: { cents: number };
   customerId?: string;
   couponCode?: string;
   applyCoupon(code: string, discount: Money): void;

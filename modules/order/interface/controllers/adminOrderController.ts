@@ -201,7 +201,7 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   const { amount, reason, _refundItems } = body as { amount: string; reason?: string; _refundItems?: unknown };
   const _processedBy = req.user?.id || 'admin';
 
-  const command = new ProcessRefundCommand(orderId, parseFloat(amount), reason || 'Refund processed by admin');
+  const command = new ProcessRefundCommand(orderId, Math.round(parseFloat(amount) * 100), reason || 'Refund processed by admin');
 
   await processRefundUseCase.execute(command);
 

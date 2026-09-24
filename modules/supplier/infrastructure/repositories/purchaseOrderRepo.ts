@@ -44,11 +44,11 @@ export interface SupplierPurchaseOrder {
   carrierName?: string;
   paymentTerms?: string;
   currency: string;
-  subtotal: number;
-  tax: number;
-  shipping: number;
-  discount: number;
-  total: number;
+  subtotalCents: number;
+  taxCents: number;
+  shippingCents: number;
+  discountCents: number;
+  totalCents: number;
   notes?: string;
   supplierNotes?: string;
   attachments?: Record<string, unknown>;
@@ -73,10 +73,10 @@ export interface SupplierPurchaseOrderItem {
   description?: string;
   quantity: number;
   receivedQuantity: number;
-  unitCost: number;
-  tax: number;
-  discount: number;
-  total: number;
+  unitCostCents: number;
+  taxCents: number;
+  discountCents: number;
+  totalCents: number;
   status: SupplierPurchaseOrderItemStatus;
   expectedDeliveryDate?: string;
   receivedAt?: string;
@@ -105,11 +105,11 @@ export type SupplierPurchaseOrderUpdateParams = Partial<
     | 'trackingNumber'
     | 'carrierName'
     | 'paymentTerms'
-    | 'subtotal'
-    | 'tax'
-    | 'shipping'
-    | 'discount'
-    | 'total'
+    | 'subtotalCents'
+    | 'taxCents'
+    | 'shippingCents'
+    | 'discountCents'
+    | 'totalCents'
     | 'notes'
     | 'supplierNotes'
     | 'attachments'
@@ -123,7 +123,7 @@ export type SupplierPurchaseOrderItemCreateParams = Omit<
 export type SupplierPurchaseOrderItemUpdateParams = Partial<
   Pick<
     SupplierPurchaseOrderItem,
-    'quantity' | 'receivedQuantity' | 'unitCost' | 'tax' | 'discount' | 'total' | 'status' | 'expectedDeliveryDate' | 'notes'
+    'quantity' | 'receivedQuantity' | 'unitCostCents' | 'taxCents' | 'discountCents' | 'totalCents' | 'status' | 'expectedDeliveryDate' | 'notes'
   >
 >;
 
@@ -234,7 +234,7 @@ export class SupplierPurchaseOrderRepo {
         "poNumber", "supplierId", "distributionWarehouseId", "status", "orderType", "priority",
         "orderDate", "expectedDeliveryDate", "deliveryDate", "shippingMethod",
         "trackingNumber", "carrierName", "paymentTerms", "currency",
-        "subtotal", "tax", "shipping", "discount", "total",
+        "subtotalCents", "taxCents", "shippingCents", "discountCents", "totalCents",
         "notes", "supplierNotes", "attachments",
         "createdAt", "updatedAt"
       ) VALUES (
@@ -256,11 +256,11 @@ export class SupplierPurchaseOrderRepo {
         params.carrierName || null,
         params.paymentTerms || null,
         params.currency || 'USD',
-        params.subtotal || 0,
-        params.tax || 0,
-        params.shipping || 0,
-        params.discount || 0,
-        params.total || 0,
+        params.subtotalCents || 0,
+        params.taxCents || 0,
+        params.shippingCents || 0,
+        params.discountCents || 0,
+        params.totalCents || 0,
         params.notes || null,
         params.supplierNotes || null,
         params.attachments ? JSON.stringify(params.attachments) : null,
@@ -438,16 +438,16 @@ export class SupplierPurchaseOrderRepo {
   async createItem(params: SupplierPurchaseOrderItemCreateParams): Promise<SupplierPurchaseOrderItem> {
     const now = unixTimestamp();
     const quantity = params.quantity;
-    const unitCost = params.unitCost;
-    const tax = params.tax || 0;
-    const discount = params.discount || 0;
-    const total = params.total ?? quantity * unitCost + tax - discount;
+    const unitCostCents = params.unitCostCents;
+    const taxCents = params.taxCents || 0;
+    const discountCents = params.discountCents || 0;
+    const totalCents = params.totalCents ?? quantity * unitCostCents + taxCents - discountCents;
 
     const result = await queryOne<SupplierPurchaseOrderItem>(
       `INSERT INTO "supplierPurchaseOrderItem" (
         "supplierPurchaseOrderId", "supplierProductId", "productId", "productVariantId",
         "sku", "supplierSku", "name", "description",
-        "quantity", "receivedQuantity", "unitCost", "tax", "discount", "total",
+        "quantity", "receivedQuantity", "unitCostCents", "taxCents", "discountCents", "totalCents",
         "status", "expectedDeliveryDate", "notes",
         "createdAt", "updatedAt"
       ) VALUES (
@@ -465,10 +465,10 @@ export class SupplierPurchaseOrderRepo {
         params.description || null,
         quantity,
         params.receivedQuantity || 0,
-        unitCost,
-        tax,
-        discount,
-        total,
+        unitCostCents,
+        taxCents,
+        discountCents,
+        totalCents,
         params.status || 'pending',
         params.expectedDeliveryDate || null,
         params.notes || null,

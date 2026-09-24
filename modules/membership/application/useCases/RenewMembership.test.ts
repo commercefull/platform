@@ -21,17 +21,17 @@ describe('RenewMembershipUseCase', () => {
       billingPeriod: 'monthly',
       currentPeriodEnd: new Date().toISOString(),
     });
-    membershipRepository.getTierById.mockResolvedValue({ price: 50, billingPeriod: 'monthly' });
+    membershipRepository.getTierById.mockResolvedValue({ priceCents: 50, billingPeriod: 'monthly' });
     membershipRepository.updateMembership.mockResolvedValue(undefined);
     membershipRepository.createStatusLog.mockResolvedValue(undefined);
   });
 
-  it('should renew the membership, charge the tier price and emit membership.renewed', async () => {
+  it('should renew the membership, charge the tier priceCents and emit membership.renewed', async () => {
     const result = await useCase.execute({ membershipId: 'm1' });
 
     expect(result.membershipId).toBe('m1');
     expect(result.status).toBe('active');
-    expect(result.amount).toBe(50);
+    expect(result.amountCents).toBe(50);
     expect(emitMock).toHaveBeenCalledWith(
       'membership.renewed',
       expect.objectContaining({ membershipId: 'm1' }),

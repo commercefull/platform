@@ -12,7 +12,7 @@ import type { PromotionCoupon, CouponRepository } from '../../domain/repositorie
 export class ValidateCouponCommand {
   constructor(
     public readonly code: string,
-    public readonly orderTotal: number,
+    public readonly orderTotalCents: number,
     public readonly customerId?: string,
     public readonly organizationId?: string,
   ) {}
@@ -25,7 +25,7 @@ export class ValidateCouponCommand {
 export interface ValidateCouponResponse {
   valid: boolean;
   coupon?: PromotionCoupon;
-  discountAmount?: number;
+  discountAmountCents?: number;
   message?: string;
   errors?: string[];
 }
@@ -45,7 +45,7 @@ export class ValidateCouponUseCase {
       return { valid: false, message: 'Coupon code is required', errors: ['code_required'] };
     }
 
-    if (command.orderTotal < 0) {
+    if (command.orderTotalCents < 0) {
       return { valid: false, message: 'Order total must be positive', errors: ['invalid_order_total'] };
     }
 
@@ -77,10 +77,10 @@ export class ValidateCouponUseCase {
     }
 
     // Check minimum order amount
-    if (coupon.minOrderAmount && command.orderTotal < Number(coupon.minOrderAmount)) {
+    if (coupon.minOrderAmountCents && command.orderTotalCents < Number(coupon.minOrderAmountCents)) {
       return {
         valid: false,
-        message: `Minimum order amount of ${coupon.minOrderAmount} required`,
+        message: `Minimum order amount of ${coupon.minOrderAmountCents} cents required`,
         errors: ['min_order_not_met'],
       };
     }
@@ -99,12 +99,12 @@ export class ValidateCouponUseCase {
     }
 
     // Calculate discount
-    const discountAmount = this.couponRepo.calculateDiscount(coupon, command.orderTotal);
+    const discountAmountCents = this.couponRepo.calculateDiscount(coupon, command.orderTotalCents);
 
     return {
       valid: true,
       coupon,
-      discountAmount,
+      discountAmountCents,
       message: 'Coupon is valid',
     };
   }

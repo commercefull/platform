@@ -2,11 +2,12 @@
  * Consolidated Product Catalog Repository
  *
  * Merges productRepo, ProductRepository, productVariantRepo, ProductVariantRepository,
- * variantRepo, ProductTypeRepository, productPriceRepo, productSeoRepo, productTagRepo,
+ * variantRepo, ProductTypeRepository, productSeoRepo, productTagRepo,
  * productToCategoryRepo, productCategoryRepo, categoryRepo, productDownloadRepo
  * into a single aggregate-aligned repository.
  *
- * Aggregate: Product Catalog (products, variants, types, categories, tags, SEO, pricing, downloads)
+ * Aggregate: Product Catalog (products, variants, types, categories, tags, SEO, downloads)
+ * Catalog prices are owned by the pricing module — see productBasePrice.
  */
 
 import productRepo from './productRepo';
@@ -15,7 +16,6 @@ import productVariantRepo from './productVariantRepo';
 import productVariantRepository from './ProductVariantRepository';
 import { VariantRepo } from './variantRepo';
 import productTypeRepository from './ProductTypeRepository';
-import productPriceRepo from './productPriceRepo';
 import productSeoRepo from './productSeoRepo';
 import productTagRepo from './productTagRepo';
 import productToCategoryRepo from './productToCategoryRepo';
@@ -28,7 +28,6 @@ export type { Product, ProductStatus as ProductStatusEnum, ProductVisibility as 
 export type { ProductVariant as ProductVariantType, ProductVariantCreateProps, ProductVariantUpdateProps } from './productVariantRepo';
 export type { ProductVariant as DbProductVariant } from './variantRepo';
 export type { ProductType } from './ProductTypeRepository';
-export type { ProductPrice, ProductPriceCreateParams, ProductPriceUpdateParams } from './productPriceRepo';
 export type { ProductSeo, ProductSeoCreateParams, ProductSeoUpdateParams } from './productSeoRepo';
 export type { ProductTag, ProductTagCreateParams } from './productTagRepo';
 export type { ProductToCategory, ProductToCategoryCreateParams } from './productToCategoryRepo';
@@ -45,7 +44,6 @@ class ProductCatalogRepository {
   readonly variantRepository = productVariantRepository;
   readonly variantRepo = variantRepoInstance;
   readonly types = productTypeRepository;
-  readonly prices = productPriceRepo;
   readonly seo = productSeoRepo;
   readonly tags = productTagRepo;
   readonly toCategory = productToCategoryRepo;

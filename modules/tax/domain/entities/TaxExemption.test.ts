@@ -16,7 +16,7 @@ describe('TaxExemption domain entity', () => {
   };
 
   const context: ExemptionEvaluationContext = {
-    orderSubtotal: 100,
+    orderSubtotalCents: 100,
   };
 
   describe('evaluate', () => {
@@ -71,7 +71,7 @@ describe('TaxExemption domain entity', () => {
         ...baseProps,
         applicableTaxCategoryIds: ['digital-goods'],
       });
-      expect(e.evaluate({ taxCategoryId: 'physical-goods', orderSubtotal: 100 })).toBe('notExempt');
+      expect(e.evaluate({ taxCategoryId: 'physical-goods', orderSubtotalCents: 100 })).toBe('notExempt');
     });
 
     it('returns exempt when category matches', () => {
@@ -79,32 +79,32 @@ describe('TaxExemption domain entity', () => {
         ...baseProps,
         applicableTaxCategoryIds: ['digital-goods'],
       });
-      expect(e.evaluate({ taxCategoryId: 'digital-goods', orderSubtotal: 100 })).toBe('exempt');
+      expect(e.evaluate({ taxCategoryId: 'digital-goods', orderSubtotalCents: 100 })).toBe('exempt');
     });
 
     it('returns exempt when applicableTaxCategoryIds is null (all categories)', () => {
       const e = new TaxExemption({ ...baseProps, applicableTaxCategoryIds: null });
-      expect(e.evaluate({ taxCategoryId: 'anything', orderSubtotal: 100 })).toBe('exempt');
+      expect(e.evaluate({ taxCategoryId: 'anything', orderSubtotalCents: 100 })).toBe('exempt');
     });
 
-    it('returns notExempt when order subtotal below minOrderAmount', () => {
-      const e = new TaxExemption({ ...baseProps, minOrderAmount: 500 });
-      expect(e.evaluate({ orderSubtotal: 100 })).toBe('notExempt');
+    it('returns notExempt when order subtotalCents below minOrderAmountCents', () => {
+      const e = new TaxExemption({ ...baseProps, minOrderAmountCents: 500 });
+      expect(e.evaluate({ orderSubtotalCents: 100 })).toBe('notExempt');
     });
 
-    it('returns exempt when order subtotal meets minOrderAmount', () => {
-      const e = new TaxExemption({ ...baseProps, minOrderAmount: 50 });
-      expect(e.evaluate({ orderSubtotal: 100 })).toBe('exempt');
+    it('returns exempt when order subtotalCents meets minOrderAmountCents', () => {
+      const e = new TaxExemption({ ...baseProps, minOrderAmountCents: 50 });
+      expect(e.evaluate({ orderSubtotalCents: 100 })).toBe('exempt');
     });
 
-    it('returns notExempt when order subtotal exceeds maxOrderAmount', () => {
-      const e = new TaxExemption({ ...baseProps, maxOrderAmount: 50 });
-      expect(e.evaluate({ orderSubtotal: 100 })).toBe('notExempt');
+    it('returns notExempt when order subtotalCents exceeds maxOrderAmountCents', () => {
+      const e = new TaxExemption({ ...baseProps, maxOrderAmountCents: 50 });
+      expect(e.evaluate({ orderSubtotalCents: 100 })).toBe('notExempt');
     });
 
-    it('returns exempt when order subtotal is within amount bounds', () => {
-      const e = new TaxExemption({ ...baseProps, minOrderAmount: 50, maxOrderAmount: 200 });
-      expect(e.evaluate({ orderSubtotal: 100 })).toBe('exempt');
+    it('returns exempt when order subtotalCents is within amountCents bounds', () => {
+      const e = new TaxExemption({ ...baseProps, minOrderAmountCents: 50, maxOrderAmountCents: 200 });
+      expect(e.evaluate({ orderSubtotalCents: 100 })).toBe('exempt');
     });
   });
 

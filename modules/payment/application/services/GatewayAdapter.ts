@@ -35,7 +35,7 @@ export interface WebhookEvent {
 
 export interface PaymentRequest {
   orderId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   customerId?: string;
   customerEmail?: string;
@@ -63,7 +63,7 @@ export interface PaymentResponse {
 
 export interface CaptureRequest {
   externalTransactionId: string;
-  amount?: number;
+  amountCents?: number;
   currency?: string;
 }
 
@@ -90,7 +90,7 @@ export interface VoidResponse {
 
 export interface RefundRequest {
   externalTransactionId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   reason?: string;
 }
@@ -195,10 +195,10 @@ export interface PSPCapabilities {
   supportedCurrencies: string[];
   /** Supported countries (empty = all) */
   supportedCountries: string[];
-  /** Minimum transaction amount */
-  minAmount?: number;
-  /** Maximum transaction amount */
-  maxAmount?: number;
+  /** Minimum transaction amountCents */
+  minAmountCents?: number;
+  /** Maximum transaction amountCents */
+  maxAmountCents?: number;
 }
 
 export interface PSPConfig {

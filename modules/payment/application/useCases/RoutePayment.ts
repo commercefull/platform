@@ -10,7 +10,7 @@ export class RoutePaymentCommand {
   constructor(
     public readonly organizationId: string,
     public readonly orderId: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly currency: string,
     public readonly customerId: string | undefined,
     public readonly customerEmail: string | undefined,
@@ -64,9 +64,9 @@ export class RoutePaymentUseCase {
         continue;
       }
 
-      // Check amount support
-      if (!route.supportsAmount(command.amount)) {
-        logger.warn(`Provider ${route.provider} does not support amount ${command.amount}, skipping`);
+      // Check amountCents support
+      if (!route.supportsAmount(command.amountCents)) {
+        logger.warn(`Provider ${route.provider} does not support amountCents ${command.amountCents}, skipping`);
         continue;
       }
 
@@ -103,7 +103,7 @@ export class RoutePaymentUseCase {
 
     const paymentRequest: PaymentRequest = {
       orderId: command.orderId,
-      amount: command.amount,
+      amountCents: command.amountCents,
       currency: command.currency,
       customerId: command.customerId,
       customerEmail: command.customerEmail,

@@ -15,7 +15,7 @@ export class ManageCompanyUseCase {
     legalName?: string;
     taxId?: string;
     paymentTerms?: PaymentTerms;
-    creditLimit?: number;
+    creditLimitCents?: number;
     billingAddress?: Company['billingAddress'];
     shippingAddress?: Company['shippingAddress'];
     contactEmail?: string;
@@ -111,11 +111,11 @@ export class ManageCompanyUseCase {
     return company;
   }
 
-  async checkCredit(companyId: string, amount: number): Promise<boolean> {
+  async checkCredit(companyId: string, amountCents: number): Promise<boolean> {
     const company = await this.get(companyId);
-    if (!company.hasAvailableCredit(amount)) {
-      const available = (company.creditLimit ?? 0) - company.outstandingBalance;
-      throw new CreditLimitExceededError(companyId, amount, available);
+    if (!company.hasAvailableCredit(amountCents)) {
+      const available = (company.creditLimitCents ?? 0) - company.outstandingBalanceCents;
+      throw new CreditLimitExceededError(companyId, amountCents, available);
     }
     return true;
   }

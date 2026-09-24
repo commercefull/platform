@@ -16,35 +16,35 @@ describe('PromotionPromotionQuoteAdapter', () => {
 
   it('should map promotion evaluation result to checkout vocabulary', async () => {
     evaluationService.evaluate.mockResolvedValue({
-      totalDiscountAmount: 15,
-      shippingDiscountAmount: 0,
+      totalDiscountAmountCents: 15,
+      shippingDiscountAmountCents: 0,
       freeShipping: false,
       lineItemDiscounts: [],
       freeItems: [],
       appliedPromotions: [
-        { promotionId: 'promo-1', name: 'Summer Sale', type: 'cart', discountAmount: 10 },
-        { promotionId: 'promo-2', name: 'Loyalty', type: 'cart', discountAmount: 5 },
+        { promotionId: 'promo-1', name: 'Summer Sale', type: 'cart', discountAmountCents: 10 },
+        { promotionId: 'promo-2', name: 'Loyalty', type: 'cart', discountAmountCents: 5 },
       ],
     });
 
     const result = await adapter.evaluatePromotions({
-      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPrice: 100, isDigital: false }],
-      subtotal: 100,
-      shippingAmount: 10,
+      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPriceCents: 100, isDigital: false }],
+      subtotalCents: 100,
+      shippingAmountCents: 10,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(15);
+    expect(result.totalDiscountAmountCents).toBe(15);
     expect(result.appliedPromotions).toHaveLength(2);
     expect(result.appliedPromotions[0].id).toBe('promo-1');
     expect(result.appliedPromotions[0].name).toBe('Summer Sale');
-    expect(result.appliedPromotions[0].amount).toBe(10);
+    expect(result.appliedPromotions[0].amountCents).toBe(10);
   });
 
   it('should handle empty appliedPromotions', async () => {
     evaluationService.evaluate.mockResolvedValue({
-      totalDiscountAmount: 0,
-      shippingDiscountAmount: 0,
+      totalDiscountAmountCents: 0,
+      shippingDiscountAmountCents: 0,
       freeShipping: false,
       lineItemDiscounts: [],
       freeItems: [],
@@ -53,12 +53,12 @@ describe('PromotionPromotionQuoteAdapter', () => {
 
     const result = await adapter.evaluatePromotions({
       items: [],
-      subtotal: 0,
-      shippingAmount: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
     expect(result.appliedPromotions).toEqual([]);
   });
 
@@ -67,12 +67,12 @@ describe('PromotionPromotionQuoteAdapter', () => {
 
     const result = await adapter.evaluatePromotions({
       items: [],
-      subtotal: 0,
-      shippingAmount: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
     expect(result.appliedPromotions).toEqual([]);
   });
 });

@@ -7,8 +7,8 @@ exports.up = function (knex) {
     t.string('shippingMethod', 100).notNullable();
     t.string('carrier', 100);
     t.string('service', 100);
-    t.decimal('amount', 15, 2).notNullable();
-    t.decimal('taxAmount', 15, 2);
+    t.bigInteger('amountCents').notNullable();
+    t.bigInteger('taxAmountCents');
     t.string('trackingNumber', 100);
     t.text('trackingUrl');
     t.timestamp('estimatedDeliveryDate');

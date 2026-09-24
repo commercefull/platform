@@ -100,23 +100,6 @@ describe('Product Entity', () => {
     });
   });
 
-  describe('updatePrice', () => {
-    it('should update price', () => {
-      const product = Product.create({
-        productId: 'p-1',
-        name: 'Test',
-        description: 'desc',
-        productTypeId: 'pt-1',
-        basePrice: 100,
-      });
-
-      product.updatePrice(150, undefined, 80);
-
-      expect(product.price.basePrice).toBe(150);
-      expect(product.price.cost).toBe(80);
-    });
-  });
-
   describe('archive', () => {
     it('should archive a product', () => {
       const product = Product.create({

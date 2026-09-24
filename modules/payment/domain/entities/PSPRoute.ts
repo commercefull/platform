@@ -31,8 +31,8 @@ export interface PSPRouteConfig {
     supportsWebhooks: boolean;
     supportedCurrencies: string[];
     supportedCountries: string[];
-    minAmount?: number;
-    maxAmount?: number;
+    minAmountCents?: number;
+    maxAmountCents?: number;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -136,11 +136,11 @@ export class PSPRoute {
     return caps.supportedCurrencies.includes(currency.toUpperCase());
   }
 
-  supportsAmount(amount: number): boolean {
+  supportsAmount(amountCents: number): boolean {
     const caps = this.props.capabilities;
     if (!caps) return true;
-    if (caps.minAmount !== undefined && amount < caps.minAmount) return false;
-    if (caps.maxAmount !== undefined && amount > caps.maxAmount) return false;
+    if (caps.minAmountCents !== undefined && amountCents < caps.minAmountCents) return false;
+    if (caps.maxAmountCents !== undefined && amountCents > caps.maxAmountCents) return false;
     return true;
   }
 

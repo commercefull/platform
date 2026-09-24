@@ -27,6 +27,30 @@ export {
 const COUPON_TABLE = Table.PromotionCoupon;
 const COUPON_USAGE_TABLE = Table.PromotionCouponUsage;
 
+type PromotionCouponRow = Omit<PromotionCoupon, 'discountAmountCents' | 'minOrderAmountCents' | 'maxDiscountAmountCents'> & {
+  discountAmount: string | null;
+  minOrderAmountCents: string | null;
+  maxDiscountAmountCents: string | null;
+};
+
+type PromotionCouponUsageRow = Omit<PromotionCouponUsage, 'discountAmountCents'> & {
+  discountAmountCents: string;
+};
+
+function mapCoupon(row: PromotionCouponRow): PromotionCoupon {
+  const { discountAmount, minOrderAmountCents, maxDiscountAmountCents, ...rest } = row;
+  return {
+    ...rest,
+    discountAmountCents: discountAmount == null ? undefined : Number(discountAmount),
+    minOrderAmountCents: minOrderAmountCents == null ? undefined : Number(minOrderAmountCents),
+    maxDiscountAmountCents: maxDiscountAmountCents == null ? undefined : Number(maxDiscountAmountCents),
+  };
+}
+
+function mapUsage(row: PromotionCouponUsageRow): PromotionCouponUsage {
+  return { ...row, discountAmountCents: Number(row.discountAmountCents) };
+}
+
 /**
  * Repository for managing promotion coupons
  */
@@ -37,10 +61,10 @@ export class CouponRepo {
   async create(input: CreateCouponInput): Promise<PromotionCoupon> {
     const now = new Date();
 
-    const coupon = await queryOne<PromotionCoupon>(
+    const coupon = await queryOne<PromotionCouponRow>(
       `INSERT INTO "${COUPON_TABLE}" (
         "code", "name", "description", "promotionId", "type", 
-        "discountAmount", "currencyCode", "minOrderAmount", "maxDiscountAmount",
+        "discountAmount", "currencyCode", "minOrderAmountCents", "maxDiscountAmountCents",
         "startDate", "endDate", "isActive", "isOneTimeUse", "maxUsage",
         "usageCount", "maxUsagePerCustomer", "generationMethod", "isReferral",
         "referrerId", "isPublic", "organizationId", "createdAt", "updatedAt"
@@ -53,10 +77,10 @@ export class CouponRepo {
         input.description || null,
         input.promotionId || null,
         input.type,
-        input.discountAmount || null,
+        input.discountAmountCents || null,
         input.currencyCode || 'USD',
-        input.minOrderAmount || null,
-        input.maxDiscountAmount || null,
+        input.minOrderAmountCents || null,
+        input.maxDiscountAmountCents || null,
         input.startDate || now,
         input.endDate || null,
         input.isActive !== false,
@@ -78,7 +102,7 @@ export class CouponRepo {
       throw new FailedToCreatePromotionError('Failed to create coupon');
     }
 
-    return coupon;
+    return mapCoupon(coupon);
   }
 
   /**
@@ -90,15 +114,18 @@ export class CouponRepo {
     let paramIndex = 2;
 
     // Build dynamic update query
+    // discountAmountCents maps to the polymorphic "discountAmount" column
+    // (percent for percentage coupons, cents for money-typed coupons)
+    const columnByField: Record<string, string> = { discountAmountCents: 'discountAmount' };
     const allowedFields = [
       'name',
       'description',
       'promotionId',
       'type',
-      'discountAmount',
+      'discountAmountCents',
       'currencyCode',
-      'minOrderAmount',
-      'maxDiscountAmount',
+      'minOrderAmountCents',
+      'maxDiscountAmountCents',
       'startDate',
       'endDate',
       'isActive',
@@ -114,7 +141,7 @@ export class CouponRepo {
 
     for (const [key, value] of Object.entries(input)) {
       if (allowedFields.includes(key) && value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex}`);
+        updateFields.push(`"${columnByField[key] ?? key}" = $${paramIndex}`);
         params.push(value);
         paramIndex++;
       }
@@ -128,7 +155,7 @@ export class CouponRepo {
       throw new PromotionValidationError('No fields to update');
     }
 
-    const coupon = await queryOne<PromotionCoupon>(
+    const coupon = await queryOne<PromotionCouponRow>(
       `UPDATE "${COUPON_TABLE}" 
        SET ${updateFields.join(', ')} 
        WHERE "promotionCouponId" = $1 
@@ -140,14 +167,15 @@ export class CouponRepo {
       throw new CouponNotFoundError(id);
     }
 
-    return coupon;
+    return mapCoupon(coupon);
   }
 
   /**
    * Find a coupon by its ID
    */
   async findById(id: string): Promise<PromotionCoupon | null> {
-    return await queryOne<PromotionCoupon>(`SELECT * FROM "${COUPON_TABLE}" WHERE "promotionCouponId" = $1`, [id]);
+    const row = await queryOne<PromotionCouponRow>(`SELECT * FROM "${COUPON_TABLE}" WHERE "promotionCouponId" = $1`, [id]);
+    return row ? mapCoupon(row) : null;
   }
 
   /**
@@ -162,7 +190,8 @@ export class CouponRepo {
       params.push(organizationId);
     }
 
-    return await queryOne<PromotionCoupon>(sql, params);
+    const row = await queryOne<PromotionCouponRow>(sql, params);
+    return row ? mapCoupon(row) : null;
   }
 
   /**
@@ -199,7 +228,7 @@ export class CouponRepo {
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    return (await query<PromotionCoupon[]>(sql, params)) || [];
+    return ((await query<PromotionCouponRow[]>(sql, params)) || []).map(mapCoupon);
   }
 
   /**
@@ -236,7 +265,7 @@ export class CouponRepo {
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    return (await query<PromotionCoupon[]>(sql, params)) || [];
+    return ((await query<PromotionCouponRow[]>(sql, params)) || []).map(mapCoupon);
   }
 
   /**
@@ -258,20 +287,20 @@ export class CouponRepo {
     couponId: string,
     orderId: string,
     customerId?: string,
-    discountAmount: number = 0,
+    discountAmountCents: number = 0,
     currencyCode: string = 'USD',
   ): Promise<PromotionCouponUsage> {
     const now = new Date();
 
     return withTransaction(async tx => {
       // Insert usage record
-      const usage = await tx.queryOne<PromotionCouponUsage>(
+      const usage = await tx.queryOne<PromotionCouponUsageRow>(
         `INSERT INTO "${COUPON_USAGE_TABLE}" (
           "promotionCouponId", "orderId", "customerId",
-          "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"
+          "discountAmountCents", "currencyCode", "usedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
         RETURNING *`,
-        [couponId, orderId, customerId || null, discountAmount, currencyCode, now, now, now],
+        [couponId, orderId, customerId || null, discountAmountCents, currencyCode, now, now, now],
       );
 
       if (!usage) {
@@ -284,7 +313,7 @@ export class CouponRepo {
         now,
       ]);
 
-      return usage;
+      return mapUsage(usage);
     });
   }
 
@@ -293,13 +322,13 @@ export class CouponRepo {
    */
   async getUsage(couponId: string): Promise<PromotionCouponUsage[]> {
     return (
-      (await query<PromotionCouponUsage[]>(
+      ((await query<PromotionCouponUsageRow[]>(
         `SELECT * FROM "${COUPON_USAGE_TABLE}" 
        WHERE "promotionCouponId" = $1 
        ORDER BY "usedAt" DESC`,
         [couponId],
-      )) || []
-    );
+      )) || []) as PromotionCouponUsageRow[]
+    ).map(mapUsage);
   }
 
   /**
@@ -318,7 +347,7 @@ export class CouponRepo {
   /**
    * Validate a coupon for use
    */
-  async validate(code: string, orderTotal: number, customerId?: string, organizationId?: string): Promise<CouponValidationResult> {
+  async validate(code: string, orderTotalCents: number, customerId?: string, organizationId?: string): Promise<CouponValidationResult> {
     // Find coupon by code
     const coupon = await this.findByCode(code, organizationId);
 
@@ -347,11 +376,11 @@ export class CouponRepo {
     }
 
     // Check minimum order amount
-    if (coupon.minOrderAmount && orderTotal < coupon.minOrderAmount) {
+    if (coupon.minOrderAmountCents && orderTotalCents < coupon.minOrderAmountCents) {
       return {
         valid: false,
         coupon,
-        message: `Order total must be at least ${coupon.minOrderAmount}`,
+        message: `Order total must be at least ${coupon.minOrderAmountCents} cents`,
       };
     }
 
@@ -374,35 +403,36 @@ export class CouponRepo {
   /**
    * Calculate the discount amount for a coupon
    */
-  calculateDiscount(coupon: PromotionCoupon, orderTotal: number): number {
+  calculateDiscount(coupon: PromotionCoupon, orderTotalCents: number): number {
     let discountAmount = 0;
 
     switch (coupon.type) {
       case CouponType.PERCENTAGE:
-        if (coupon.discountAmount) {
-          discountAmount = (orderTotal * coupon.discountAmount) / 100;
+        if (coupon.discountAmountCents) {
+          discountAmount = Math.round((orderTotalCents * coupon.discountAmountCents) / 100);
         }
         break;
 
       case CouponType.FIXED_AMOUNT:
-        discountAmount = Math.min(coupon.discountAmount || 0, orderTotal);
+        // discountAmountCents holds the fixed discount in integer cents
+        discountAmount = Math.min(coupon.discountAmountCents || 0, orderTotalCents);
         break;
 
       case CouponType.FREE_SHIPPING:
         // This would require shipping cost information
-        discountAmount = coupon.discountAmount || 0;
+        discountAmount = coupon.discountAmountCents || 0;
         break;
 
       case CouponType.BUY_X_GET_Y:
       case CouponType.FIRST_ORDER:
       case CouponType.GIFT_CARD:
-        discountAmount = Math.min(coupon.discountAmount || 0, orderTotal);
+        discountAmount = Math.min(coupon.discountAmountCents || 0, orderTotalCents);
         break;
     }
 
     // Apply maximum discount cap if set
-    if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
-      discountAmount = coupon.maxDiscountAmount;
+    if (coupon.maxDiscountAmountCents && discountAmount > coupon.maxDiscountAmountCents) {
+      discountAmount = coupon.maxDiscountAmountCents;
     }
 
     return discountAmount;

@@ -4,7 +4,7 @@ exports.up = function (knex) {
     t.uuid('paymentSubscriptionId').notNullable().references('paymentSubscriptionId').inTable('paymentSubscription').onDelete('CASCADE');
     t.uuid('customerId').notNullable().references('customerId').inTable('customer');
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization');
-    t.decimal('amount', 15, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.string('status', 20).notNullable().checkIn(['draft', 'open', 'paid', 'past_due', 'failed', 'voided']).defaultTo('draft');
     t.timestamp('dueDate').notNullable();
@@ -15,9 +15,9 @@ exports.up = function (knex) {
     t.string('invoiceNumber', 50);
     t.text('invoiceUrl');
     t.jsonb('items').notNullable();
-    t.decimal('subtotal', 15, 2).notNullable();
-    t.decimal('tax', 15, 2).notNullable().defaultTo(0);
-    t.decimal('discount', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('subtotalCents').notNullable();
+    t.bigInteger('taxCents').notNullable().defaultTo(0);
+    t.bigInteger('discountCents').notNullable().defaultTo(0);
     t.string('gatewayInvoiceId', 255);
 
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());

@@ -116,7 +116,7 @@ export class PaymentRepo implements IPaymentRepository {
         `UPDATE "paymentTransaction" SET
           "externalTransactionId" = $1, status = $2, "paymentMethodDetails" = $3,
           "gatewayResponse" = $4, "errorCode" = $5, "errorMessage" = $6,
-          "refundedAmount" = $7, "authorizedAt" = $8, "capturedAt" = $9,
+          "refundedAmountCents" = $7, "authorizedAt" = $8, "capturedAt" = $9,
           metadata = $10, "updatedAt" = $11
         WHERE "paymentTransactionId" = $12`,
         [
@@ -126,7 +126,7 @@ export class PaymentRepo implements IPaymentRepository {
           transaction.gatewayResponse ? JSON.stringify(transaction.gatewayResponse) : null,
           transaction.errorCode,
           transaction.errorMessage,
-          transaction.refundedAmount,
+          transaction.refundedAmountCents,
           transaction.authorizedAt?.toISOString(),
           transaction.capturedAt?.toISOString(),
           transaction.metadata ? JSON.stringify(transaction.metadata) : null,
@@ -143,17 +143,17 @@ export class PaymentRepo implements IPaymentRepository {
         await query(
           `INSERT INTO "orderPayment" (
             "orderPaymentId", "orderId", "type", "provider",
-            amount, currency, status, "refundedAmount",
+            "amountCents", currency, status, "refundedAmountCents",
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-          [orderPaymentId, transaction.orderId, 'creditCard', 'stripe', transaction.amount, transaction.currency, 'pending', 0, now, now],
+          [orderPaymentId, transaction.orderId, 'creditCard', 'stripe', transaction.amountCents, transaction.currency, 'pending', 0, now, now],
         );
 
         await query(
           `INSERT INTO "paymentTransaction" (
             "paymentTransactionId", "orderPaymentId", "orderId", "type",
             "customerId", "paymentMethodId", "paymentGatewayId",
-            amount, currency, status, "refundedAmount", "customerIp", metadata,
+            "amountCents", currency, status, "refundedAmountCents", "customerIp", metadata,
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
           [
@@ -164,10 +164,10 @@ export class PaymentRepo implements IPaymentRepository {
             transaction.customerId,
             null,
             transaction.gatewayId,
-            transaction.amount,
+            transaction.amountCents,
             transaction.currency,
             transaction.status,
-            transaction.refundedAmount,
+            transaction.refundedAmountCents,
             transaction.customerIp,
             transaction.metadata ? JSON.stringify(transaction.metadata) : null,
             now,
@@ -229,12 +229,12 @@ export class PaymentRepo implements IPaymentRepository {
     } else {
       await query(
         `INSERT INTO "paymentRefund" (
-          "paymentRefundId", "paymentTransactionId", amount, currency, reason, status, metadata, "createdAt", "updatedAt"
+          "paymentRefundId", "paymentTransactionId", amountCents, currency, reason, status, metadata, "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
         [
           refund.refundId,
           refund.transactionId,
-          refund.amount,
+          refund.amountCents,
           refund.currency,
           refund.reason,
           refund.status,
@@ -259,7 +259,7 @@ export class PaymentRepo implements IPaymentRepository {
       displayName: string;
       description?: string;
       icon?: string;
-      processingFee?: number;
+      processingFeeCents?: number;
     }>
   > {
     const conditions = ['"isEnabled" = true', '"deletedAt" IS NULL'];
@@ -284,7 +284,7 @@ export class PaymentRepo implements IPaymentRepository {
       displayName: (row.displayName as string) || (row.type as string),
       description: row.description as string | undefined,
       icon: row.icon as string | undefined,
-      processingFee: row.processingFee ? parseFloat(String(row.processingFee)) : undefined,
+      processingFeeCents: row.processingFeeCents ? Number(row.processingFeeCents) : undefined,
     }));
   }
 
@@ -382,7 +382,7 @@ export class PaymentRepo implements IPaymentRepository {
       paymentMethodConfigId: (row.paymentMethodId as string) || '',
       gatewayId: (row.paymentGatewayId as string) || '',
       externalTransactionId: row.externalTransactionId as string | undefined,
-      amount: parseFloat(String(row.amount)),
+      amountCents: Number(row.amountCents),
       currency: row.currency as string,
       status: row.status as TransactionStatus,
       paymentMethodDetails: row.paymentMethodDetails
@@ -397,7 +397,7 @@ export class PaymentRepo implements IPaymentRepository {
         : undefined,
       errorCode: row.errorCode as string | undefined,
       errorMessage: row.errorMessage as string | undefined,
-      refundedAmount: parseFloat(String(row.refundedAmount || 0)),
+      refundedAmountCents: parseFloat(String(row.refundedAmountCents || 0)),
       customerIp: row.customerIp as string | undefined,
       authorizedAt: row.authorizedAt ? new Date(row.authorizedAt as string) : undefined,
       capturedAt: row.capturedAt ? new Date(row.capturedAt as string) : undefined,
@@ -532,7 +532,7 @@ export class PaymentRepo implements IPaymentRepository {
       refundId: row.paymentRefundId as string,
       transactionId: row.paymentTransactionId as string,
       externalRefundId: row.externalRefundId as string | undefined,
-      amount: parseFloat(String(row.amount)),
+      amountCents: Number(row.amountCents),
       currency: row.currency as string,
       reason: row.reason as string | undefined,
       status: row.status as RefundStatus,

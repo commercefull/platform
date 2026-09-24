@@ -68,7 +68,7 @@ export function createApprovalWorkflow(
     referenceNumber: 'ORD-1',
     requestedBy: 'user-1',
     requestedByEmail: 'user@acme.test',
-    amount: 1000,
+    amountCents: 1000,
     approvers: [{ approverId: 'mgr-1', approverEmail: 'mgr@acme.test' }],
     ...overrides,
   });

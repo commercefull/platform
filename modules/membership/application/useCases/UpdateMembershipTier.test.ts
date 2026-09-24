@@ -12,7 +12,7 @@ describe('UpdateMembershipTierUseCase', () => {
     membershipRepository.getTierById.mockResolvedValue({
       tierId: 't1',
       name: 'Gold',
-      price: 50,
+      priceCents: 50,
       billingPeriod: 'monthly',
       isActive: true,
       updatedAt: new Date(),
@@ -20,7 +20,7 @@ describe('UpdateMembershipTierUseCase', () => {
     membershipRepository.updateTier.mockResolvedValue({
       tierId: 't1',
       name: 'Gold Pro',
-      price: 60,
+      priceCents: 60,
       billingPeriod: 'monthly',
       isActive: true,
       updatedAt: new Date(),
@@ -28,14 +28,14 @@ describe('UpdateMembershipTierUseCase', () => {
   });
 
   it('should update the tier and return the new values', async () => {
-    const result = await useCase.execute({ tierId: 't1', name: 'Gold Pro', price: 60 });
+    const result = await useCase.execute({ tierId: 't1', name: 'Gold Pro', priceCents: 60 });
 
     expect(result.tierId).toBe('t1');
     expect(result.name).toBe('Gold Pro');
-    expect(result.price).toBe(60);
+    expect(result.priceCents).toBe(60);
     expect(membershipRepository.updateTier).toHaveBeenCalledWith(
       't1',
-      expect.objectContaining({ name: 'Gold Pro', price: 60 }),
+      expect.objectContaining({ name: 'Gold Pro', priceCents: 60 }),
     );
   });
 

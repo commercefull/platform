@@ -50,8 +50,8 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
     `INSERT INTO "${TABLE}" (
       "shippingCarrierId", "name", "code", "description", "isActive", "isDefault", "serviceCode",
       "domesticInternational", "estimatedDeliveryDays", "handlingDays", "priority",
-      "displayOnFrontend", "allowFreeShipping", "minWeight", "maxWeight", "minOrderValue",
-      "maxOrderValue", "dimensionRestrictions", "shippingClass", "customFields", "createdBy"
+      "displayOnFrontend", "allowFreeShipping", "minWeight", "maxWeight", "minOrderValueCents",
+      "maxOrderValueCents", "dimensionRestrictions", "shippingClass", "customFields", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
     [
       input.shippingCarrierId || null,
@@ -69,8 +69,8 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
       input.allowFreeShipping ?? true,
       input.minWeight || null,
       input.maxWeight || null,
-      input.minOrderValue || null,
-      input.maxOrderValue || null,
+      input.minOrderValueCents || null,
+      input.maxOrderValueCents || null,
       input.dimensionRestrictions ? JSON.stringify(input.dimensionRestrictions) : null,
       input.shippingClass || null,
       input.customFields ? JSON.stringify(input.customFields) : null,

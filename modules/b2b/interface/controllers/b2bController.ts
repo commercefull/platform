@@ -148,7 +148,7 @@ export class B2BController {
     try {
       const company = await this.companyUseCase.setCreditLimit(
         req.params.companyId,
-        (req.body as Record<string, unknown>).creditLimit as number,
+        (req.body as Record<string, unknown>).creditLimitCents as number,
       );
       res.json({ success: true, data: company.toJSON() });
     } catch (error) {

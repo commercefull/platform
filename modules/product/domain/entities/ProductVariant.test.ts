@@ -6,7 +6,6 @@ describe('ProductVariant', () => {
     variantId: 'v1',
     productId: 'p1',
     sku: 'SKU1',
-    basePrice: 100,
     attributes: [
       { attributeId: 'a1', attributeName: 'Color', value: 'red', displayValue: 'Red' },
       { attributeId: 'a2', attributeName: 'Size', value: 'm', displayValue: 'M' },
@@ -17,7 +16,6 @@ describe('ProductVariant', () => {
     const v = ProductVariant.create(baseProps);
     expect(v.variantId).toBe('v1');
     expect(v.sku).toBe('SKU1');
-    expect(v.price.basePrice).toBe(100);
     expect(v.isActive).toBe(true);
     expect(v.isInStock).toBe(false);
     expect(v.isOutOfStock).toBe(true);
@@ -37,13 +35,6 @@ describe('ProductVariant', () => {
     const v = ProductVariant.create({ ...baseProps, stockQuantity: 3, lowStockThreshold: 5 });
     expect(v.isLowStock).toBe(true);
     expect(v.isInStock).toBe(true);
-  });
-
-  it('should update price', () => {
-    const v = ProductVariant.create(baseProps);
-    v.updatePrice(150, 120);
-    expect(v.price.basePrice).toBe(150);
-    expect(v.price.effectivePrice).toBe(120);
   });
 
   it('should update stock', () => {

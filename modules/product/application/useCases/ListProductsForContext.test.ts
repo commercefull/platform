@@ -5,7 +5,8 @@ import { createProduct, lazyMock } from '../../tests/testUtils';
 let mockProductRepository: jest.Mocked<ConstructorParameters<typeof ListProductsForContextUseCase>[0]>;
 let mockStoreLookupPort: jest.Mocked<ConstructorParameters<typeof ListProductsForContextUseCase>[1]>;
 let mockSystemConfigPort: jest.Mocked<ConstructorParameters<typeof ListProductsForContextUseCase>[2]>;
-let mockOrganizationLookupPort: jest.Mocked<NonNullable<ConstructorParameters<typeof ListProductsForContextUseCase>[3]>>;
+let mockPricingPort: jest.Mocked<ConstructorParameters<typeof ListProductsForContextUseCase>[3]>;
+let mockOrganizationLookupPort: jest.Mocked<NonNullable<ConstructorParameters<typeof ListProductsForContextUseCase>[4]>>;
 
 describe('ListProductsForContextUseCase', () => {
   let useCase: ListProductsForContextUseCase;
@@ -24,13 +25,16 @@ describe('ListProductsForContextUseCase', () => {
     mockStoreLookupPort.findById.mockResolvedValue({ storeId: 's1', organizationId: 'org1' });
     mockSystemConfigPort = lazyMock<ConstructorParameters<typeof ListProductsForContextUseCase>[2]>();
     mockSystemConfigPort.findActive.mockResolvedValue({ isMarketplace: false, isMultiStore: false, isSingleStore: true });
-    mockOrganizationLookupPort = lazyMock<NonNullable<ConstructorParameters<typeof ListProductsForContextUseCase>[3]>>();
+    mockPricingPort = lazyMock<ConstructorParameters<typeof ListProductsForContextUseCase>[3]>();
+    mockPricingPort.getBasePrices.mockResolvedValue([]);
+    mockOrganizationLookupPort = lazyMock<NonNullable<ConstructorParameters<typeof ListProductsForContextUseCase>[4]>>();
     mockOrganizationLookupPort.findById.mockResolvedValue({ id: 'org1', name: 'Org', status: 'active' });
     mockOrganizationLookupPort.findAll.mockResolvedValue([{ id: 'org1', name: 'Org', status: 'active' }]);
     useCase = new ListProductsForContextUseCase(
       mockProductRepository,
       mockStoreLookupPort,
       mockSystemConfigPort,
+      mockPricingPort,
       mockOrganizationLookupPort,
     );
   });
@@ -61,6 +65,7 @@ describe('ListProductsForContextUseCase', () => {
       mockProductRepository,
       mockStoreLookupPort,
       mockSystemConfigPort,
+      mockPricingPort,
     );
 
     await expect(useCaseNoOrg.execute(new ListProductsForContextCommand({}))).rejects.toThrow(ProductValidationError);

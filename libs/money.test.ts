@@ -122,7 +122,7 @@ describe('libs/money', () => {
     });
 
     it('toJSON', () => {
-      expect(Money.create(10, 'USD').toJSON()).toEqual({ amount: 10, currency: 'USD' });
+      expect(Money.create(10, 'USD').toJSON()).toEqual({ cents: 1000, currency: 'USD' });
     });
   });
 });

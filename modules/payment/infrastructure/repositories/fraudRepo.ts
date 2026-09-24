@@ -58,7 +58,7 @@ export interface FraudCheck {
   highRiskCountry: boolean;
   previousOrders: number;
   previousChargebacks: number;
-  orderAmount?: number;
+  orderAmountCents?: number;
   currency?: string;
   isFirstOrder: boolean;
   isGuestCheckout: boolean;
@@ -253,7 +253,7 @@ export async function createCheck(check: {
   orderId?: string;
   customerId?: string;
   checkType: string;
-  orderAmount?: number;
+  orderAmountCents?: number;
   currency?: string;
   ipAddress?: string;
   deviceFingerprint?: Record<string, unknown>;
@@ -287,7 +287,7 @@ export async function createCheck(check: {
     `INSERT INTO "fraudCheck" (
       "orderId", "customerId", "checkType", "status", "riskScore", "riskLevel",
       "deviceFingerprint", "ipAddress", "billingCountry", "shippingCountry",
-      "addressMismatch", "previousOrders", "previousChargebacks", "orderAmount",
+      "addressMismatch", "previousOrders", "previousChargebacks", "orderAmountCents",
       "currency", "isFirstOrder", "isGuestCheckout", "paymentMethod", "cardBin",
       "createdAt", "updatedAt"
     ) VALUES ($1, $2, $3, 'pending', 0, 'low', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
@@ -303,7 +303,7 @@ export async function createCheck(check: {
       check.billingCountry !== check.shippingCountry,
       previousOrders,
       previousChargebacks,
-      check.orderAmount,
+      check.orderAmountCents,
       check.currency,
       isFirstOrder,
       check.isGuestCheckout || false,
@@ -507,8 +507,8 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
 
   switch (rule.ruleType) {
     case 'amount':
-      if (conditions.minAmount && (check.orderAmount || 0) < (conditions.minAmount as number)) return false;
-      if (conditions.maxAmount && (check.orderAmount || 0) > (conditions.maxAmount as number)) return true;
+      if (conditions.minAmount && (check.orderAmountCents || 0) < (conditions.minAmount as number)) return false;
+      if (conditions.maxAmount && (check.orderAmountCents || 0) > (conditions.maxAmount as number)) return true;
       return false;
 
     case 'location':
@@ -522,12 +522,12 @@ function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
       return false;
 
     case 'pattern':
-      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmount || 0) > ((conditions.threshold as number) || 500))
+      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmountCents || 0) > ((conditions.threshold as number) || 500))
         return true;
       if (
         conditions.guestCheckoutHighValue &&
         check.isGuestCheckout &&
-        (check.orderAmount || 0) > ((conditions.threshold as number) || 300)
+        (check.orderAmountCents || 0) > ((conditions.threshold as number) || 300)
       )
         return true;
       return false;
@@ -616,7 +616,7 @@ function mapToCheck(row: Record<string, unknown>): FraudCheck {
     highRiskCountry: Boolean(row.highRiskCountry),
     previousOrders: parseInt(String(row.previousOrders)) || 0,
     previousChargebacks: parseInt(String(row.previousChargebacks)) || 0,
-    orderAmount: row.orderAmount ? parseFloat(String(row.orderAmount)) : undefined,
+    orderAmountCents: row.orderAmountCents ? parseFloat(String(row.orderAmountCents)) : undefined,
     currency: row.currency as string | undefined,
     isFirstOrder: Boolean(row.isFirstOrder),
     isGuestCheckout: Boolean(row.isGuestCheckout),

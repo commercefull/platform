@@ -24,7 +24,7 @@ describe('InitiateCheckoutUseCase', () => {
     expect(result.basketId).toBe('b-1');
     expect(result.customerId).toBe('cust-1');
     expect(result.status).toBe('active');
-    expect(result.subtotal).toBe(100);
+    expect(result.subtotalCents).toBe(10000);
     expect(checkoutRepository.save).toHaveBeenCalledWith(expect.objectContaining({ basketId: 'b-1' }));
     expect(emitMock).toHaveBeenCalledWith('checkout.started', expect.objectContaining({ checkoutId: 'checkout-uuid-123', basketId: 'b-1', customerId: 'cust-1' }));
   });

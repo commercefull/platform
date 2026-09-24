@@ -16,7 +16,7 @@ import type {
 export class RedeemGiftCardCommand {
   constructor(
     public readonly code: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly orderId?: string,
     public readonly customerId?: string,
   ) {}
@@ -29,7 +29,7 @@ export class RedeemGiftCardCommand {
 export interface RedeemGiftCardResponse {
   success: boolean;
   transaction?: PromotionGiftCardTransaction;
-  remainingBalance?: number;
+  remainingBalanceCents?: number;
   message?: string;
   errors?: string[];
 }
@@ -49,7 +49,7 @@ export class RedeemGiftCardUseCase {
       return { success: false, message: 'Gift card code is required', errors: ['code_required'] };
     }
 
-    if (command.amount <= 0) {
+    if (command.amountCents <= 0) {
       return { success: false, message: 'Amount must be positive', errors: ['invalid_amount'] };
     }
 
@@ -75,10 +75,10 @@ export class RedeemGiftCardUseCase {
     }
 
     // Check balance
-    if (giftCard.currentBalance < command.amount) {
+    if (giftCard.currentBalanceCents < command.amountCents) {
       return {
         success: false,
-        message: `Insufficient balance. Available: ${giftCard.currentBalance}`,
+        message: `Insufficient balance. Available: ${giftCard.currentBalanceCents}`,
         errors: ['insufficient_balance'],
       };
     }
@@ -87,7 +87,7 @@ export class RedeemGiftCardUseCase {
       // Redeem the gift card
       const transaction = await this.giftCardRepo.redeemGiftCard(
         giftCard.promotionGiftCardId,
-        command.amount,
+        command.amountCents,
         command.orderId,
         command.customerId,
       );
@@ -98,7 +98,7 @@ export class RedeemGiftCardUseCase {
       return {
         success: true,
         transaction,
-        remainingBalance: updatedGiftCard?.currentBalance ?? 0,
+        remainingBalanceCents: updatedGiftCard?.currentBalanceCents ?? 0,
         message: 'Gift card redeemed successfully',
       };
     } catch (error: unknown) {

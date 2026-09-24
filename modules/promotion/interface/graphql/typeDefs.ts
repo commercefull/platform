@@ -24,7 +24,7 @@ export const promotionTypeDefs = `#graphql
   type GiftCardBalanceResult {
     success: Boolean!
     code: String
-    currentBalance: Float
+    currentBalanceCents: Float
     currency: String
     status: String
     expiresAt: String
@@ -35,7 +35,7 @@ export const promotionTypeDefs = `#graphql
 
   type RedeemGiftCardResult {
     success: Boolean!
-    remainingBalance: Float
+    remainingBalanceCents: Int
     message: String
     errors: [String!]
   }
@@ -61,7 +61,7 @@ export const promotionTypeDefs = `#graphql
   type Mutation {
     redeemGiftCard(
       code: String!
-      amount: Float!
+      amountCents: Int!
       orderId: String
       customerId: String
     ): RedeemGiftCardResult!

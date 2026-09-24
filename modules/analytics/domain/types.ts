@@ -12,8 +12,8 @@ export interface ProductPerformance {
   viewToCartRate: number;
   purchases: number;
   quantitySold: number;
-  revenue: number;
-  averagePrice: number;
+  revenueCents: number;
+  averagePriceCents: number;
   cartToOrderRate: number;
   returns: number;
   returnQuantity: number;
@@ -34,10 +34,10 @@ export interface CustomerCohort {
   customersInCohort: number;
   activeCustomers: number;
   retentionRate: number;
-  revenue: number;
+  revenueCents: number;
   orders: number;
-  averageOrderValue: number;
-  lifetimeValue: number;
+  averageOrderValueCents: number;
+  lifetimeValueCents: number;
   repeatPurchasers: number;
   repeatPurchaseRate: number;
   averageOrdersPerCustomer: number;

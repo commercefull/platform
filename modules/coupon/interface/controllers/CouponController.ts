@@ -23,8 +23,8 @@ interface CreateCouponBody {
   createdBy: string;
   description?: string;
   currency?: string;
-  minOrderValue?: number;
-  maxDiscountAmount?: number;
+  minOrderValueCents?: number;
+  maxDiscountAmountCents?: number;
   usageType?: 'single_use' | 'multi_use' | 'unlimited';
   usageLimit?: number;
   customerUsageLimit?: number;
@@ -40,9 +40,9 @@ interface CreateCouponBody {
 
 interface ValidateCouponBody {
   code?: string;
-  orderValue: number;
+  orderValueCents: number;
   customerId?: string;
-  items?: Array<{ productId: string; categoryId?: string; quantity: number; price: number }>;
+  items?: Array<{ productId: string; categoryId?: string; quantity: number; priceCents: number }>;
 }
 
 interface ApplyCouponBody {
@@ -50,15 +50,15 @@ interface ApplyCouponBody {
   code?: string;
   basketId: string;
   customerId?: string;
-  orderTotal: number;
-  items?: Array<{ productId: string; categoryId?: string; quantity: number; price: number }>;
+  orderTotalCents: number;
+  items?: Array<{ productId: string; categoryId?: string; quantity: number; priceCents: number }>;
 }
 
 interface RedeemCouponBody {
   code: string;
   orderId: string;
   customerId?: string;
-  discountAmount: number;
+  discountAmountCents: number;
 }
 
 export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -72,8 +72,8 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     body.createdBy,
     body.description,
     body.currency,
-    body.minOrderValue,
-    body.maxDiscountAmount,
+    body.minOrderValueCents,
+    body.maxDiscountAmountCents,
     body.usageType,
     body.usageLimit,
     body.customerUsageLimit,
@@ -93,7 +93,7 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
 export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = (req.body || {}) as ValidateCouponBody;
   const useCase = new ValidateCouponUseCase(couponRepository);
-  const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValue, body.customerId, body.items);
+  const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValueCents, body.customerId, body.items);
   const result = await useCase.execute(command);
   if (!result.valid) {
     res.status(400).json({ success: false, error: { message: result.error || 'Invalid coupon' } });
@@ -109,7 +109,7 @@ export const applyCoupon = async (req: HttpRequest, res: HttpResponse): Promise<
     couponCode: body.couponCode || body.code || '',
     basketId: body.basketId,
     customerId: body.customerId,
-    orderTotal: body.orderTotal,
+    orderTotalCents: body.orderTotalCents,
     items: body.items,
   });
   res.json({ success: true, data: result });
@@ -122,7 +122,7 @@ export const redeemCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     couponCode: body.code,
     orderId: body.orderId,
     customerId: body.customerId,
-    discountAmount: body.discountAmount,
+    discountAmountCents: body.discountAmountCents,
   });
   res.json({ success: true, data: result });
 };

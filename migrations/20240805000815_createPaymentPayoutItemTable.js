@@ -2,10 +2,10 @@ exports.up = function (knex) {
   return knex.schema.createTable('paymentPayoutItem', t => {
     t.uuid('payoutItemId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('payoutId').notNullable().references('payoutId').inTable('paymentPayout').onDelete('CASCADE');
-    t.string('type', 50).notNullable().checkIn(['payment', 'refund', 'dispute', 'fee', 'adjustment', 'other']);
-    t.decimal('amount', 15, 2).notNullable();
-    t.decimal('fee', 15, 2).notNullable().defaultTo(0);
-    t.decimal('netAmount', 15, 2).notNullable();
+    t.string('type', 50).notNullable().checkIn(['payment', 'refund', 'dispute', 'feeCents', 'adjustment', 'other']);
+    t.bigInteger('amountCents').notNullable();
+    t.bigInteger('feeCents').notNullable().defaultTo(0);
+    t.bigInteger('netAmountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD');
     t.text('description');
     t.uuid('orderId').references('orderId').inTable('order');

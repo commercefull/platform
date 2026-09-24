@@ -17,7 +17,7 @@ export interface CheckoutLineSnapshot {
   name: string;
   quantity: number;
   unitPrice: Money;
-  discountAmount?: number;
+  discountAmountCents?: number;
   itemType: string;
   isDigital: boolean;
   imageUrl?: string;
@@ -32,7 +32,7 @@ export interface BasketSnapshot {
   itemCount: number;
   uniqueItemCount: number;
   subtotal: Money;
-  discountAmount: number;
+  discountAmountCents: number;
   total: Money;
   couponCode?: string;
   items: CheckoutLineSnapshot[];

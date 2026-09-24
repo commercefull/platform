@@ -9,7 +9,7 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('subscriptionId').notNullable().references('membershipSubscriptionId').inTable('membershipSubscription').onDelete('CASCADE');
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
-    t.decimal('amount', 10, 2).notNullable();
+    t.bigInteger('amountCents').notNullable();
     t.string('currency', 3).notNullable().defaultTo('USD');
     t.timestamp('paymentDate').notNullable().defaultTo(knex.fn.now());
     t.enum('status', ['pending', 'completed', 'failed', 'refunded', 'partiallyRefunded']).notNullable().defaultTo('pending');

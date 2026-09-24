@@ -8,7 +8,7 @@ exports.up = function (knex) {
     t.text('returnReasonDetail');
     t.string('condition', 50).notNullable().checkIn(['new', 'likeNew', 'used', 'damaged', 'unsellable']);
     t.boolean('restockItem').notNullable().defaultTo(false);
-    t.decimal('refundAmount', 15, 2);
+    t.bigInteger('refundAmountCents');
     t.uuid('exchangeProductId').references('productId').inTable('product');
     t.uuid('exchangeVariantId').references('productVariantId').inTable('productVariant');
 

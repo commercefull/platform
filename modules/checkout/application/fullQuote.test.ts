@@ -143,7 +143,7 @@ const BASKET_ITEMS = [
 // Promotion 1 (10% off cart total) = 12.00
 // Promotion 2 (5% off, stackable) = 6.00
 // Total discount = 18.00
-// Discounted subtotal = 120 - 18 = 102
+// Discounted subtotalCents = 120 - 18 = 102
 // Tax (physical goods only @ 10%, digital exempt) = 2*50 * 0.10 = 10.00
 //   (tax on pre-discount physical = 100 * 0.10 = 10.00)
 // Shipping base = 15.00
@@ -152,11 +152,11 @@ const BASKET_ITEMS = [
 // Total = 102 + 10 + 20 = 132.00
 
 const EXPECTED = {
-  subtotal: 120,
-  discount: 18,
-  tax: 10,
-  shipping: 20,
-  total: 132,
+  subtotalCents: 12000,
+  discount: 1800,
+  tax: 1000,
+  shipping: 2000,
+  total: 13200,
 };
 
 // ============================================================================
@@ -170,7 +170,7 @@ function makeBasketPort(): jest.Mocked<BasketSnapshotPort> {
       isEmpty: false,
       itemCount: 3,
       uniqueItemCount: 2,
-      discountAmount: 0,
+      discountAmountCents: 0,
       total: Money.create(120, 'USD'),
       items: BASKET_ITEMS,
       currency: 'USD',
@@ -183,10 +183,10 @@ function makeTaxPort(): jest.Mocked<TaxQuotePort> {
   const port = createTaxQuotePort();
   port.calculateTax.mockResolvedValue({
       success: true,
-      taxAmount: EXPECTED.tax,
+      taxAmountCents: EXPECTED.tax,
       breakdown: [
-        { label: 'Physical Goods Tax (10%)', amount: 10 },
-        { label: 'Digital Goods (exempt)', amount: 0 },
+        { label: 'Physical Goods Tax (10%)', amountCents: 1000 },
+        { label: 'Digital Goods (exempt)', amountCents: 0 },
       ],
     });
   port.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: false });
@@ -196,10 +196,10 @@ function makeTaxPort(): jest.Mocked<TaxQuotePort> {
 function makePromotionPort(): jest.Mocked<PromotionQuotePort> {
   const port = createPromotionQuotePort();
   port.evaluatePromotions.mockResolvedValue({
-      totalDiscountAmount: EXPECTED.discount,
+      totalDiscountAmountCents: EXPECTED.discount,
       appliedPromotions: [
-        { id: 'promo-1', name: '10% Off Cart Total', amount: 12 },
-        { id: 'promo-2', name: '5% Off (Stackable)', amount: 6 },
+        { id: 'promo-1', name: '10% Off Cart Total', amountCents: 1200 },
+        { id: 'promo-2', name: '5% Off (Stackable)', amountCents: 600 },
       ],
     });
   return port;
@@ -211,7 +211,7 @@ function makeShippingPort(): jest.Mocked<ShippingQuotePort> {
       {
         methodId: 'standard',
         methodName: 'Standard Shipping',
-        amount: 20, // base (15) + oversize surcharge (5)
+        amountCents: 2000, // base (1500) + oversize surcharge (500)
         currency: 'USD',
       },
     ]);
@@ -222,7 +222,7 @@ function makeDiscountPort(): jest.Mocked<DiscountQuotePort> {
   const port = createDiscountQuotePort();
   port.validateDiscount.mockResolvedValue({
       valid: true,
-      discount: { code: 'SAVE10', discountAmount: EXPECTED.discount },
+      discount: { code: 'SAVE10', discountAmountCents: EXPECTED.discount },
     });
   return port;
 }
@@ -333,14 +333,14 @@ describe('E2E Checkout Full Quote', () => {
     // Verify the session state before payment
     const session = await checkoutRepo.findById(checkoutId);
     expect(session).not.toBeNull();
-    expect(session!.subtotal.amount).toBe(EXPECTED.subtotal);
-    expect(session!.discountAmount.amount).toBe(EXPECTED.discount);
-    expect(session!.shippingAmount.amount).toBe(EXPECTED.shipping);
-    expect(session!.taxAmount.amount).toBe(EXPECTED.tax);
+    expect(session!.subtotal.cents).toBe(EXPECTED.subtotalCents);
+    expect(session!.discountAmount.cents).toBe(EXPECTED.discount);
+    expect(session!.shippingAmount.cents).toBe(EXPECTED.shipping);
+    expect(session!.taxAmount.cents).toBe(EXPECTED.tax);
 
-    // Total = subtotal - discount + tax + shipping
+    // Total = subtotalCents - discount + tax + shipping
     // = 120 - 18 + 10 + 20 = 132
-    expect(session!.total.amount).toBe(EXPECTED.total);
+    expect(session!.total.cents).toBe(EXPECTED.total);
 
     // Step 5: Set payment method (required before CreatePaymentIntent)
     session!.setPaymentMethod('pm_card_visa');
@@ -360,7 +360,7 @@ describe('E2E Checkout Full Quote', () => {
     // Fraud screening was called
     expect(fraudPort.screenOrder).toHaveBeenCalled();
     const fraudCall = fraudPort.screenOrder.mock.calls[0][0];
-    expect(fraudCall.orderAmount).toBe(EXPECTED.total);
+    expect(fraudCall.orderAmountCents).toBe(EXPECTED.total);
     expect(fraudCall.customerId).toBe('cust-1');
 
     // Order was created
@@ -475,15 +475,15 @@ describe('E2E Checkout Full Quote', () => {
     const session = await checkoutRepo.findById(checkoutId);
 
     // Assert the full itemized breakdown
-    expect(session!.subtotal.amount).toBe(EXPECTED.subtotal); // 120.00
-    expect(session!.discountAmount.amount).toBe(EXPECTED.discount); // 18.00
-    expect(session!.taxAmount.amount).toBe(EXPECTED.tax); // 10.00
-    expect(session!.shippingAmount.amount).toBe(EXPECTED.shipping); // 20.00
+    expect(session!.subtotal.cents).toBe(EXPECTED.subtotalCents); // 120.00
+    expect(session!.discountAmount.cents).toBe(EXPECTED.discount); // 18.00
+    expect(session!.taxAmount.cents).toBe(EXPECTED.tax); // 10.00
+    expect(session!.shippingAmount.cents).toBe(EXPECTED.shipping); // 20.00
 
-    // Total = subtotal - discount + tax + shipping
+    // Total = subtotalCents - discount + tax + shipping
     const computedTotal =
-      session!.subtotal.amount - session!.discountAmount.amount + session!.taxAmount.amount + session!.shippingAmount.amount;
-    expect(session!.total.amount).toBe(computedTotal);
-    expect(session!.total.amount).toBe(EXPECTED.total); // 132.00
+      session!.subtotal.cents - session!.discountAmount.cents + session!.taxAmount.cents + session!.shippingAmount.cents;
+    expect(session!.total.cents).toBe(computedTotal);
+    expect(session!.total.cents).toBe(EXPECTED.total); // 132.00
   });
 });

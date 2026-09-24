@@ -38,7 +38,7 @@
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500"><%= t('shared:common.price') %></dt>
-                <dd class="mt-1 text-lg font-semibold text-gray-900">$<%= ((subscription.price || 0) / 100).toFixed(2) %>/<%= subscription.billingInterval || 'month' %></dd>
+                <dd class="mt-1 text-lg font-semibold text-gray-900">$<%= ((subscription.priceCents || 0) / 100).toFixed(2) %>/<%= subscription.billingInterval || 'month' %></dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500"><%= t('shared:common.startDate') %></dt>
@@ -82,8 +82,8 @@
                 <% if (billingHistory && billingHistory.length > 0) { %>
                   <% billingHistory.forEach(entry => { %>
                     <tr>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= entry.date ? new Date(entry.date).toLocaleDateString() : '-' %></td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$<%= ((entry.amount || 0) / 100).toFixed(2) %></td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= entry.billingDate ? new Date(entry.billingDate).toLocaleDateString() : '-' %></td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$<%= ((entry.amountCents || 0) / 100).toFixed(2) %></td>
                       <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= entry.status === 'paid' || entry.status === 'completed' ? 'green' : 'yellow' %>-100 text-<%= entry.status === 'paid' || entry.status === 'completed' ? 'green' : 'yellow' %>-800">
                           <%= entry.status %>

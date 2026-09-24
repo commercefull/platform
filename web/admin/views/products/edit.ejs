@@ -78,7 +78,7 @@
                       <label class="form-label"><%= t('product:basePrice') %> <span class="text-danger">*</span></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="basePrice" value="<%= product.basePrice || 0 %>" step="0.01" min="0" required>
+                        <input type="number" class="form-control" name="basePrice" value="<%= ((product.basePriceCents || 0) / 100).toFixed(2) %>" step="0.01" min="0" required>
                       </div>
                     </div>
                   </div>
@@ -87,7 +87,7 @@
                       <label class="form-label"><%= t('product:salePrice') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="salePrice" value="<%= product.salePrice || '' %>" step="0.01" min="0">
+                        <input type="number" class="form-control" name="salePrice" value="<%= product.salePriceCents != null ? (product.salePriceCents / 100).toFixed(2) : '' %>" step="0.01" min="0">
                       </div>
                     </div>
                   </div>
@@ -96,7 +96,7 @@
                       <label class="form-label"><%= t('shared:common.cost') %></label>
                       <div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" name="cost" value="<%= product.cost || '' %>" step="0.01" min="0">
+                        <input type="number" class="form-control" name="cost" value="<%= product.costPriceCents != null ? (product.costPriceCents / 100).toFixed(2) : '' %>" step="0.01" min="0">
                       </div>
                     </div>
                   </div>
@@ -260,7 +260,7 @@
                           <span class="text-muted">-</span>
                         <% } %>
                       </td>
-                      <td class="text-right"><%= product.currency %> <%= variant.effectivePrice.toFixed(2) %></td>
+                      <td class="text-right"><%= product.currency %> <%= (variant.effectivePriceCents / 100).toFixed(2) %></td>
                       <td class="text-center">
                         <% if (variant.isLowStock) { %>
                           <span class="badge badge-warning"><%= variant.stockQuantity %></span>

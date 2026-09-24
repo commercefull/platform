@@ -21,7 +21,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'SAVE10' } as unknown as Coupon,
-      discountAmount: 10,
+      discountAmountCents: 10,
     });
 
     const result = await adapter.validateDiscount('SAVE10', 100, 'USD');
@@ -29,7 +29,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.valid).toBe(true);
     expect(result.discount).toBeDefined();
     expect(result.discount!.code).toBe('SAVE10');
-    expect(result.discount!.discountAmount).toBe(10);
+    expect(result.discount!.discountAmountCents).toBe(10);
   });
 
   it('should return invalid result when coupon is invalid', async () => {
@@ -45,16 +45,16 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.error).toBe('Coupon expired');
   });
 
-  it('should default discountAmount to 0 when not provided', async () => {
+  it('should default discountAmountCents to 0 when not provided', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
       coupon: { code: 'FREE' } as unknown as Coupon,
-      discountAmount: undefined,
+      discountAmountCents: undefined,
     });
 
     const result = await adapter.validateDiscount('FREE', 100, 'USD');
 
     expect(result.valid).toBe(true);
-    expect(result.discount!.discountAmount).toBe(0);
+    expect(result.discount!.discountAmountCents).toBe(0);
   });
 });

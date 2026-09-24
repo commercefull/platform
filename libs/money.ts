@@ -8,19 +8,24 @@
  * Admission criteria (§5.4 of the roadmap):
  * - No dependencies, no I/O, no module-specific business rules.
  * - Stable API, agreed by all consuming contexts.
+ *
+ * Internally stores an exact integer number of minor units (cents). Use
+ * `Money.fromCents` at the DB/API boundary (columns are bigint cents) and
+ * `Money.create` when the source value is in major units (e.g. 49.99).
+ * Convert to a display string only at the view layer via format()/formatCents().
  */
 
 export class Money {
-  private readonly _amount: number;
+  private readonly _cents: number;
   private readonly _currency: string;
 
-  private constructor(amount: number, currency: string) {
-    this._amount = Math.round(amount * 100) / 100;
+  private constructor(cents: number, currency: string) {
+    this._cents = Math.round(cents);
     this._currency = currency.toUpperCase();
   }
 
   static create(amount: number, currency: string = 'USD'): Money {
-    return new Money(amount, currency);
+    return new Money(amount * 100, currency);
   }
 
   static zero(currency: string = 'USD'): Money {
@@ -28,11 +33,11 @@ export class Money {
   }
 
   static fromCents(cents: number, currency: string = 'USD'): Money {
-    return new Money(cents / 100, currency);
+    return new Money(cents, currency);
   }
 
   get amount(): number {
-    return this._amount;
+    return this._cents / 100;
   }
 
   get currency(): string {
@@ -40,32 +45,32 @@ export class Money {
   }
 
   get cents(): number {
-    return Math.round(this._amount * 100);
+    return this._cents;
   }
 
   add(other: Money): Money {
     this.ensureSameCurrency(other);
-    return new Money(this._amount + other._amount, this._currency);
+    return new Money(this._cents + other._cents, this._currency);
   }
 
   subtract(other: Money): Money {
     this.ensureSameCurrency(other);
-    return new Money(this._amount - other._amount, this._currency);
+    return new Money(this._cents - other._cents, this._currency);
   }
 
   multiply(factor: number): Money {
-    return new Money(this._amount * factor, this._currency);
+    return new Money(this._cents * factor, this._currency);
   }
 
   divide(divisor: number): Money {
     if (divisor === 0) {
       throw new Error('Cannot divide by zero');
     }
-    return new Money(this._amount / divisor, this._currency);
+    return new Money(this._cents / divisor, this._currency);
   }
 
   percentage(percent: number): Money {
-    return new Money((this._amount * percent) / 100, this._currency);
+    return new Money((this._cents * percent) / 100, this._currency);
   }
 
   /**
@@ -78,11 +83,10 @@ export class Money {
     const weightSum = weights.reduce((s, w) => s + w, 0);
     if (weightSum === 0) return weights.map(() => new Money(0, this._currency));
 
-    const rawCents = weights.map(w => (this.cents * w) / weightSum);
+    const rawCents = weights.map(w => (this._cents * w) / weightSum);
     const roundedCents = rawCents.map(c => Math.round(c));
-    const totalCents = Math.round(this.cents);
     const currentSum = roundedCents.reduce((s, c) => s + c, 0);
-    const delta = totalCents - currentSum;
+    const delta = this._cents - currentSum;
 
     if (delta !== 0) {
       // Apply delta to the largest-weight line to minimise relative distortion.
@@ -97,59 +101,57 @@ export class Money {
       roundedCents[maxIdx] += delta;
     }
 
-    return roundedCents.map(c => new Money(c / 100, this._currency));
+    return roundedCents.map(c => new Money(c, this._currency));
   }
 
   isZero(): boolean {
-    return this._amount === 0;
+    return this._cents === 0;
   }
 
   isPositive(): boolean {
-    return this._amount > 0;
+    return this._cents > 0;
   }
 
   isNegative(): boolean {
-    return this._amount < 0;
+    return this._cents < 0;
   }
 
   equals(other: Money): boolean {
-    return this._amount === other._amount && this._currency === other._currency;
+    return this._cents === other._cents && this._currency === other._currency;
   }
 
   greaterThan(other: Money): boolean {
     this.ensureSameCurrency(other);
-    return this._amount > other._amount;
+    return this._cents > other._cents;
   }
 
   lessThan(other: Money): boolean {
     this.ensureSameCurrency(other);
-    return this._amount < other._amount;
+    return this._cents < other._cents;
   }
 
   isGreaterThan(other: Money): boolean {
-    this.ensureSameCurrency(other);
-    return this._amount > other._amount;
+    return this.greaterThan(other);
   }
 
   isLessThan(other: Money): boolean {
-    this.ensureSameCurrency(other);
-    return this._amount < other._amount;
+    return this.lessThan(other);
   }
 
   format(locale: string = 'en-US'): string {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: this._currency,
-    }).format(this._amount);
+    }).format(this.amount);
   }
 
   toString(): string {
-    return `${this._currency} ${this._amount.toFixed(2)}`;
+    return `${this._currency} ${this.amount.toFixed(2)}`;
   }
 
-  toJSON(): { amount: number; currency: string } {
+  toJSON(): { cents: number; currency: string } {
     return {
-      amount: this._amount,
+      cents: this._cents,
       currency: this._currency,
     };
   }
@@ -180,6 +182,18 @@ export function formatPrice(amount: number, currency: string = 'USD', locale: st
 }
 
 /**
+ * Format an integer-cent amount with currency using Intl.NumberFormat.
+ * This is the boundary helper for the cents-based wire/storage model.
+ *
+ * @example
+ *   formatCents(4999, 'GBP', 'en-GB')  → "£49.99"
+ *   formatCents(4999, 'USD', 'en-US')  → "$49.99"
+ */
+export function formatCents(cents: number, currency: string = 'USD', locale: string = 'en-US'): string {
+  return formatPrice(cents / 100, currency, locale);
+}
+
+/**
  * Format a price with optional tax-inclusive suffix.
  *
  * @example
@@ -197,4 +211,20 @@ export function formatPriceWithTax(
     return `${formatted} (incl. VAT)`;
   }
   return formatted;
+}
+
+/**
+ * Format an integer-cent amount with optional tax-inclusive suffix.
+ *
+ * @example
+ *   formatCentsWithTax(4999, 'GBP', 'en-GB', 'inclusive_tax')  → "£49.99 (incl. VAT)"
+ *   formatCentsWithTax(4999, 'USD', 'en-US', 'exclusive_tax')  → "$49.99"
+ */
+export function formatCentsWithTax(
+  cents: number,
+  currency: string,
+  locale: string,
+  priceDisplayMode: 'inclusive_tax' | 'exclusive_tax' = 'exclusive_tax',
+): string {
+  return formatPriceWithTax(cents / 100, currency, locale, priceDisplayMode);
 }

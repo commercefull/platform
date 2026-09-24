@@ -11,8 +11,8 @@ export const paymentTypeDefs = `#graphql
     expiryMonth: Int
     expiryYear: Int
     isAvailable: Boolean!
-    minAmount: Float
-    maxAmount: Float
+    minAmountCents: Float
+    maxAmountCents: Float
     supportedCurrencies: [String!]
   }
 
@@ -28,10 +28,10 @@ export const paymentTypeDefs = `#graphql
     paymentMethodConfigId: String!
     gatewayId: String!
     externalTransactionId: String
-    amount: Float!
+    amountCents: Float!
     currency: String!
     status: String!
-    refundedAmount: Float!
+    refundedAmountCents: Float!
     refundableAmount: Float!
     isPaid: Boolean!
     canBeRefunded: Boolean!
@@ -52,7 +52,7 @@ export const paymentTypeDefs = `#graphql
   type InitiatePaymentResult {
     transactionId: String!
     orderId: String!
-    amount: Float!
+    amountCents: Float!
     currency: String!
     status: String!
     createdAt: String!
@@ -61,7 +61,7 @@ export const paymentTypeDefs = `#graphql
   type ProcessRefundResult {
     refundId: String!
     transactionId: String!
-    amount: Float!
+    amountCents: Float!
     currency: String!
     status: String!
     createdAt: String!
@@ -80,7 +80,7 @@ export const paymentTypeDefs = `#graphql
     storeId: String
     channelId: String
     currency: String
-    amount: Float
+    amountCents: Float
     country: String
   }
 
@@ -102,7 +102,7 @@ export const paymentTypeDefs = `#graphql
   type Mutation {
     initiatePayment(
       orderId: String!
-      amount: Float!
+      amountCents: Float!
       currency: String!
       paymentMethodConfigId: String!
       customerId: String
@@ -111,13 +111,13 @@ export const paymentTypeDefs = `#graphql
 
     processRefund(
       transactionId: String!
-      amount: Float!
+      amountCents: Float!
       reason: String
     ): ProcessRefundResult!
 
     capturePayment(
       transactionId: String!
-      amount: Float
+      amountCents: Float
     ): CapturePaymentResult!
   }
 `;

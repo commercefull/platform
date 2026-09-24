@@ -26,7 +26,7 @@ exports.up = function (knex) {
       table.integer('addToCartCount').defaultTo(0);
       table.integer('purchaseCount').defaultTo(0);
       table.decimal('conversionRate', 5, 4).defaultTo(0);
-      table.decimal('revenue', 15, 2).defaultTo(0);
+      table.bigInteger('revenueCents').defaultTo(0);
 
       // Refinement metrics
       table.integer('refinementCount').defaultTo(0);

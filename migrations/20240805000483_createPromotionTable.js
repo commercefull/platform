@@ -18,8 +18,8 @@ exports.up = function (knex) {
     t.integer('maxUsage');
     t.integer('usageCount').notNullable().defaultTo(0);
     t.integer('maxUsagePerCustomer');
-    t.decimal('minOrderAmount', 15, 2);
-    t.decimal('maxDiscountAmount', 15, 2);
+    t.bigInteger('minOrderAmountCents');
+    t.bigInteger('maxDiscountAmountCents');
     t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isGlobal').notNullable().defaultTo(false);
     t.jsonb('eligibleCustomerGroups');

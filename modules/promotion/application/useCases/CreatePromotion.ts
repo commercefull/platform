@@ -15,8 +15,8 @@ export class CreatePromotionCommand {
     public readonly value: number,
     public readonly code?: string,
     public readonly description?: string,
-    public readonly minOrderAmount?: number,
-    public readonly maxDiscountAmount?: number,
+    public readonly minOrderAmountCents?: number,
+    public readonly maxDiscountAmountCents?: number,
     public readonly usageLimit?: number,
     public readonly usageLimitPerCustomer?: number,
     public readonly startsAt?: Date,
@@ -69,8 +69,8 @@ export class CreatePromotionUseCase {
       isActive: true,
       maxUsage: command.usageLimit,
       maxUsagePerCustomer: command.usageLimitPerCustomer,
-      minOrderAmount: command.minOrderAmount,
-      maxDiscountAmount: command.maxDiscountAmount,
+      minOrderAmountCents: command.minOrderAmountCents,
+      maxDiscountAmountCents: command.maxDiscountAmountCents,
       organizationId: command.organizationId,
       // Add actions based on type
       actions: [

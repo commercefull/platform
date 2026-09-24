@@ -22,6 +22,7 @@ exports.seed = async function (knex) {
 
   // Only delete and re-insert variants/images if products don't exist yet
   if (existingIds.length === 0) {
+    await knex('productBasePrice').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
     await knex('productVariant').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
     await knex('productCategoryMap').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
     await knex('productImage').whereIn('productId', [TEST_PRODUCT_1_ID, TEST_PRODUCT_2_ID, TEST_PRODUCT_3_ID]).delete();
@@ -40,10 +41,6 @@ exports.seed = async function (knex) {
         type: 'simple',
         status: 'active',
         visibility: 'visible',
-        price: 99.99,
-        basePrice: 99.99,
-        salePrice: 79.99,
-        costPrice: 50.0,
         weight: 500,
         weightUnit: 'g',
         length: 10,
@@ -71,10 +68,6 @@ exports.seed = async function (knex) {
         type: 'configurable',
         status: 'active',
         visibility: 'visible',
-        price: 149.99,
-        basePrice: 149.99,
-        salePrice: null,
-        costPrice: 75.0,
         weight: 1000,
         weightUnit: 'g',
         length: 20,
@@ -103,10 +96,6 @@ exports.seed = async function (knex) {
         type: 'virtual',
         status: 'draft',
         visibility: 'not_visible',
-        price: 29.99,
-        basePrice: 29.99,
-        salePrice: null,
-        costPrice: 0,
         weight: null,
         weightUnit: null,
         length: null,
@@ -126,6 +115,34 @@ exports.seed = async function (knex) {
       },
     ])
     .onConflict('productId')
+    .ignore();
+
+  // Catalog base prices live in the pricing-owned store (integer cents)
+  await knex('productBasePrice')
+    .insert([
+      {
+        productId: TEST_PRODUCT_1_ID,
+        currencyCode: 'USD',
+        priceCents: 9999,
+        salePriceCents: 7999,
+        costPriceCents: 5000,
+      },
+      {
+        productId: TEST_PRODUCT_2_ID,
+        currencyCode: 'USD',
+        priceCents: 14999,
+        salePriceCents: null,
+        costPriceCents: 7500,
+      },
+      {
+        productId: TEST_PRODUCT_3_ID,
+        currencyCode: 'USD',
+        priceCents: 2999,
+        salePriceCents: null,
+        costPriceCents: 0,
+      },
+    ])
+    .onConflict(['productId', 'productVariantId', 'currencyCode'])
     .ignore();
 
   // Link products to categories
@@ -155,8 +172,6 @@ exports.seed = async function (knex) {
         sku: 'TEST-PROD-002-RED-M',
         name: 'Red Medium',
         status: 'active',
-        price: 149.99,
-        compareAtPrice: null,
         weight: 1000,
         isDefault: true,
         position: 0,
@@ -169,8 +184,6 @@ exports.seed = async function (knex) {
         sku: 'TEST-PROD-002-BLUE-L',
         name: 'Blue Large',
         status: 'active',
-        price: 159.99,
-        compareAtPrice: 179.99,
         weight: 1100,
         isDefault: false,
         position: 1,
@@ -179,5 +192,26 @@ exports.seed = async function (knex) {
       },
     ])
     .onConflict('productVariantId')
+    .ignore();
+
+  // Variant-level base prices (pricing-owned, integer cents)
+  await knex('productBasePrice')
+    .insert([
+      {
+        productId: TEST_PRODUCT_2_ID,
+        productVariantId: TEST_VARIANT_1_ID,
+        currencyCode: 'USD',
+        priceCents: 14999,
+        compareAtPriceCents: null,
+      },
+      {
+        productId: TEST_PRODUCT_2_ID,
+        productVariantId: TEST_VARIANT_2_ID,
+        currencyCode: 'USD',
+        priceCents: 15999,
+        compareAtPriceCents: 17999,
+      },
+    ])
+    .onConflict(['productId', 'productVariantId', 'currencyCode'])
     .ignore();
 };

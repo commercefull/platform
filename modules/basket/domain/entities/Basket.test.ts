@@ -88,25 +88,25 @@ describe('Basket', () => {
     expect(basket.isEmpty).toBe(true);
   });
 
-  it('should calculate subtotal and total', () => {
+  it('should calculate subtotalCents and total', () => {
     basket.addItem(item);
-    expect(basket.subtotal.amount).toBe(100);
-    expect(basket.total.amount).toBe(100);
+    expect(basket.subtotal.cents).toBe(10000);
+    expect(basket.total.cents).toBe(10000);
   });
 
   it('should apply percentage coupon', () => {
     basket.addItem(item);
     basket.applyCoupon('SAVE10', 'percentage', 10);
     expect(basket.coupon?.couponCode).toBe('SAVE10');
-    expect(basket.discountAmount).toBe(10);
-    expect(basket.total.amount).toBe(90);
+    expect(basket.discountAmountCents).toBe(1000);
+    expect(basket.total.cents).toBe(9000);
   });
 
   it('should apply fixed coupon', () => {
     basket.addItem(item);
-    basket.applyCoupon('SAVE20', 'fixed', 20);
-    expect(basket.discountAmount).toBe(20);
-    expect(basket.total.amount).toBe(80);
+    basket.applyCoupon('SAVE20', 'fixed', 2000);
+    expect(basket.discountAmountCents).toBe(2000);
+    expect(basket.total.cents).toBe(8000);
   });
 
   it('should throw on apply coupon when one already applied', () => {
@@ -125,7 +125,7 @@ describe('Basket', () => {
     basket.applyCoupon('SAVE10', 'percentage', 10);
     basket.removeCoupon();
     expect(basket.coupon).toBeUndefined();
-    expect(basket.discountAmount).toBe(0);
+    expect(basket.discountAmountCents).toBe(0);
   });
 
   it('should throw on remove coupon when none applied', () => {
@@ -189,7 +189,7 @@ describe('Basket', () => {
     const json = basket.toJSON();
     expect(json.basketId).toBe('b1');
     expect(json.itemCount).toBe(2);
-    expect(json.subtotal).toBe(100);
+    expect(json.subtotalCents).toBe(10000);
   });
 });
 
@@ -208,7 +208,7 @@ describe('BasketItem', () => {
     });
     expect(item.basketItemId).toBe('i1');
     expect(item.quantity).toBe(2);
-    expect(item.lineTotal.amount).toBe(100);
+    expect(item.lineTotal.cents).toBe(10000);
   });
 
   it('should update quantity', () => {
@@ -295,7 +295,7 @@ describe('BasketItem', () => {
     expect(item.giftMessage).toBeUndefined();
   });
 
-  it('should set discount amount', () => {
+  it('should set discount amountCents', () => {
     const item = BasketItem.create({
       basketItemId: 'i1',
       basketId: 'b1',
@@ -307,9 +307,9 @@ describe('BasketItem', () => {
       itemType: 'physical',
       isGift: false,
     });
-    item.setDiscountAmount(20);
-    expect(item.discountAmount).toBe(20);
-    expect(item.lineTotal.amount).toBe(80);
+    item.setDiscountAmountCents(2000);
+    expect(item.discountAmountCents).toBe(2000);
+    expect(item.lineTotal.cents).toBe(8000);
   });
 
   it('should throw on negative discount', () => {
@@ -324,7 +324,7 @@ describe('BasketItem', () => {
       itemType: 'physical',
       isGift: false,
     });
-    expect(() => item.setDiscountAmount(-5)).toThrow();
+    expect(() => item.setDiscountAmountCents(-5)).toThrow();
   });
 
   it('should check same product', () => {
@@ -374,6 +374,6 @@ describe('BasketItem', () => {
     });
     const json = item.toJSON();
     expect(json.basketItemId).toBe('i1');
-    expect(json.lineTotal).toBe(100);
+    expect(json.lineTotalCents).toBe(10000);
   });
 });

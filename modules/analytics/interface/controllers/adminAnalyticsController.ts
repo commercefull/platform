@@ -37,7 +37,7 @@ export const analyticsDashboard = async (req: HttpRequest, res: HttpResponse): P
   // Build comprehensive dashboard data
   const dashboardData = {
     revenue: {
-      total: salesSummary.totalRevenue,
+      totalCents: salesSummary.totalRevenueCents,
       growth: 0, // Would calculate from previous period
       byPeriod: [], // Would aggregate from daily sales
       forecast: [], // Would implement forecasting
@@ -55,7 +55,7 @@ export const analyticsDashboard = async (req: HttpRequest, res: HttpResponse): P
         productId: p.productId,
         name: `Product ${p.productId.slice(-8)}`, // Would join with product table
         sales: p.quantitySold,
-        revenue: p.revenue,
+        revenueCents: p.revenueCents,
       })),
       lowStock: [], // Would implement inventory alerts
       recommendations: [], // Would implement AI recommendations
@@ -128,7 +128,7 @@ export const predictiveAnalytics = async (req: HttpRequest, res: HttpResponse): 
   const historicalData = [
     {
       date: new Date(),
-      revenue: salesData.totalRevenue,
+      revenueCents: salesData.totalRevenueCents,
       orders: salesData.totalOrders,
     },
   ]; // Simplified - would get daily data
@@ -145,10 +145,10 @@ export const predictiveAnalytics = async (req: HttpRequest, res: HttpResponse): 
 
       const analysis = await predictiveAnalyticsUseCase.predictCustomerChurn(
         customerId,
-        (history as Array<{ date: Date; orders: number; revenue: number }>).map(h => ({
-          date: h.date,
-          orders: parseInt(String(h.orders)),
-          revenue: parseFloat(String(h.revenue)),
+        history.map(h => ({
+          date: new Date((h as { date: string | Date }).date),
+          orders: Number((h as { orders: number }).orders),
+          revenueCents: Number((h as { revenueCents: number }).revenueCents),
         })),
       );
 
@@ -298,16 +298,16 @@ export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): P
   // Calculate KPI changes
   const kpis = {
     revenue: {
-      current: currentKPIs.revenue,
-      target: currentKPIs.revenue * 1.15, // 15% growth target
-      growth: ((currentKPIs.revenue - previousKPIs.revenue) / previousKPIs.revenue) * 100,
-      change: currentKPIs.revenue - previousKPIs.revenue,
+      current: currentKPIs.revenueCents,
+      target: currentKPIs.revenueCents * 1.15, // 15% growth target
+      growth: ((currentKPIs.revenueCents - previousKPIs.revenueCents) / previousKPIs.revenueCents) * 100,
+      change: currentKPIs.revenueCents - previousKPIs.revenueCents,
     },
     profit: {
-      current: currentKPIs.profit,
-      margin: (currentKPIs.profit / currentKPIs.revenue) * 100,
-      growth: previousKPIs.profit > 0 ? ((currentKPIs.profit - previousKPIs.profit) / previousKPIs.profit) * 100 : 0,
-      change: currentKPIs.profit - previousKPIs.profit,
+      current: currentKPIs.profitCents,
+      margin: (currentKPIs.profitCents / currentKPIs.revenueCents) * 100,
+      growth: previousKPIs.profitCents > 0 ? ((currentKPIs.profitCents - previousKPIs.profitCents) / previousKPIs.profitCents) * 100 : 0,
+      change: currentKPIs.profitCents - previousKPIs.profitCents,
     },
     customers: {
       total: currentKPIs.customers.total,
@@ -317,7 +317,7 @@ export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): P
     },
     orders: {
       total: currentKPIs.orders.total,
-      average: currentKPIs.orders.average,
+      average: currentKPIs.orders.averageCents,
       conversion: currentKPIs.orders.conversion,
       growth: ((currentKPIs.orders.total - previousKPIs.orders.total) / previousKPIs.orders.total) * 100,
     },
@@ -325,12 +325,12 @@ export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): P
       turnover: currentKPIs.inventory.turnover,
       stockouts: currentKPIs.inventory.stockouts,
       optimization: 0, // Would calculate optimization score
-      value: currentKPIs.inventory.value,
+      value: currentKPIs.inventory.valueCents,
     },
     marketing: {
       roi: currentKPIs.marketing.roi,
       cac: currentKPIs.marketing.cac,
-      ltv: currentKPIs.customers.ltv,
+      ltv: currentKPIs.customers.ltvCents,
       spend: currentKPIs.marketing.spend,
     },
   };
@@ -556,22 +556,22 @@ async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
   const inventoryData = await getAnalyticsDataUseCase.getInventoryData(startDate, endDate);
 
   return {
-    revenue: revenueData.revenue,
-    profit: revenueData.revenue * 0.25,
+    revenueCents: revenueData.revenueCents,
+    profitCents: Math.round(revenueData.revenueCents * 0.25),
     customers: {
       total: customerData.total,
       active: customerData.active,
-      ltv: customerData.ltv,
+      ltvCents: customerData.ltvCents,
     },
     orders: {
       total: revenueData.orders,
-      average: revenueData.averageOrder,
+      averageCents: revenueData.averageOrderCents,
       conversion: 0.03,
     },
     inventory: {
       turnover: inventoryData.turnover,
       stockouts: inventoryData.stockouts,
-      value: inventoryData.value,
+      valueCents: inventoryData.valueCents,
     },
     marketing: {
       roi: 2.5,
@@ -660,7 +660,7 @@ async function getBusinessAlerts(kpis: BusinessKPIs) {
 // Business Trends Analysis
 // ============================================================================
 
-async function analyzeBusinessTrends(currentKPIs: BusinessKPIs, previousKPIs: { orders: { average: number } }) {
+async function analyzeBusinessTrends(currentKPIs: BusinessKPIs, previousKPIs: { orders: { averageCents: number } }) {
   const trends = [];
 
   // Revenue trend
@@ -691,7 +691,7 @@ async function analyzeBusinessTrends(currentKPIs: BusinessKPIs, previousKPIs: { 
   }
 
   // Order value trend
-  const orderValueChange = ((currentKPIs.orders.average - previousKPIs.orders.average) / previousKPIs.orders.average) * 100;
+  const orderValueChange = ((currentKPIs.orders.average - previousKPIs.orders.averageCents) / previousKPIs.orders.averageCents) * 100;
   if (Math.abs(orderValueChange) > 10) {
     trends.push({
       metric: 'Average Order Value',

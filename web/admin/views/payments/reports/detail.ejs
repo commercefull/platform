@@ -35,7 +35,7 @@
               <dd class="col-sm-8"><%= report.currency %></dd>
 
               <dt class="col-sm-4"><%= t('common.amount') %></dt>
-              <dd class="col-sm-8"><strong><%= report.currency %> <%= (report.totalAmount || 0).toFixed(2) %></strong></dd>
+              <dd class="col-sm-8"><strong><%= report.currency %> <%= ((report.totalAmountCents || 0) / 100).toFixed(2) %></strong></dd>
 
               <dt class="col-sm-4"><%= t('shared:common.transactions') %></dt>
               <dd class="col-sm-8"><%= report.transactionCount || 0 %></dd>

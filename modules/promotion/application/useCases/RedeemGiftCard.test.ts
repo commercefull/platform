@@ -10,15 +10,15 @@ describe('RedeemGiftCardUseCase', () => {
     jest.clearAllMocks();
     giftCardRepository.getGiftCardByCode.mockResolvedValue(createGiftCard());
     giftCardRepository.redeemGiftCard.mockResolvedValue(createGiftCardTransaction());
-    giftCardRepository.getGiftCard.mockResolvedValue(createGiftCard({ currentBalance: 75 }));
+    giftCardRepository.getGiftCard.mockResolvedValue(createGiftCard({ currentBalanceCents: 75 }));
   });
 
-  it('should redeem the amount and return the remaining balance when the card is valid', async () => {
+  it('should redeem the amountCents and return the remaining balance when the card is valid', async () => {
     const result = await useCase.execute(new RedeemGiftCardCommand('GIFT1234', 25, 'order-1', 'cust-1'));
 
     expect(result.success).toBe(true);
     expect(result.transaction?.promotionGiftCardTransactionId).toBe('txn-1');
-    expect(result.remainingBalance).toBe(75);
+    expect(result.remainingBalanceCents).toBe(75);
     expect(giftCardRepository.redeemGiftCard).toHaveBeenCalledWith('gc-1', 25, 'order-1', 'cust-1');
   });
 
@@ -30,7 +30,7 @@ describe('RedeemGiftCardUseCase', () => {
     expect(giftCardRepository.redeemGiftCard).not.toHaveBeenCalled();
   });
 
-  it('should return invalid_amount when the amount is not positive', async () => {
+  it('should return invalid_amount when the amountCents is not positive', async () => {
     const result = await useCase.execute(new RedeemGiftCardCommand('GIFT1234', 0));
 
     expect(result.success).toBe(false);
@@ -65,8 +65,8 @@ describe('RedeemGiftCardUseCase', () => {
     expect(result.errors).toContain('gift_card_expired');
   });
 
-  it('should return insufficient_balance when the amount exceeds the balance', async () => {
-    giftCardRepository.getGiftCardByCode.mockResolvedValue(createGiftCard({ currentBalance: 10 }));
+  it('should return insufficient_balance when the amountCents exceeds the balance', async () => {
+    giftCardRepository.getGiftCardByCode.mockResolvedValue(createGiftCard({ currentBalanceCents: 10 }));
 
     const result = await useCase.execute(new RedeemGiftCardCommand('GIFT1234', 25));
 

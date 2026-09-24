@@ -16,7 +16,7 @@ export interface ShipOrderInput {
   trackingUrl?: string;
   carrierId?: string;
   carrierName?: string;
-  shippingCost?: number;
+  shippingCostCents?: number;
 }
 
 export interface ShipOrderOutput {

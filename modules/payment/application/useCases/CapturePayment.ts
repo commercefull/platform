@@ -14,7 +14,7 @@ import {
 
 export interface CapturePaymentInput {
   transactionId: string;
-  amount?: number; // Optional partial capture amount
+  amountCents?: number; // Optional partial capture amountCents
   metadata?: Record<string, unknown>;
 }
 
@@ -34,7 +34,7 @@ interface PaymentRepositoryPort {
 interface PaymentGatewayPort {
   capture(params: {
     transactionId: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     metadata?: Record<string, unknown>;
   }): Promise<{ success: boolean; response?: Record<string, unknown>; error?: string }>;
@@ -44,7 +44,7 @@ interface TransactionRecord {
   transactionId: string;
   orderId: string;
   gatewayTransactionId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: string;
   capturedAmount?: number;
@@ -70,16 +70,16 @@ export class CapturePaymentUseCase {
       throw new TransactionCannotBeCapturedError(transaction.status);
     }
 
-    // Determine capture amount
-    const captureAmount = input.amount ?? transaction.amount;
-    if (captureAmount > transaction.amount) {
+    // Determine capture amountCents
+    const captureAmount = input.amountCents ?? transaction.amountCents;
+    if (captureAmount > transaction.amountCents) {
       throw new CaptureAmountExceedsAuthorizedError();
     }
 
     // Call payment gateway to capture
     const gatewayResult = await this.paymentGateway.capture({
       transactionId: transaction.gatewayTransactionId,
-      amount: captureAmount,
+      amountCents: captureAmount,
       currency: transaction.currency,
       metadata: input.metadata,
     });
@@ -94,7 +94,7 @@ export class CapturePaymentUseCase {
     }
 
     // Update transaction
-    const isPartialCapture = captureAmount < transaction.amount;
+    const isPartialCapture = captureAmount < transaction.amountCents;
     transaction.status = isPartialCapture ? 'partial_captured' : 'captured';
     transaction.capturedAmount = captureAmount;
     transaction.capturedAt = new Date();
@@ -106,7 +106,7 @@ export class CapturePaymentUseCase {
     eventBus.emit('payment.received', {
       transactionId: transaction.transactionId,
       orderId: transaction.orderId,
-      amount: captureAmount,
+      amountCents: captureAmount,
       currency: transaction.currency,
     });
 
@@ -115,7 +115,7 @@ export class CapturePaymentUseCase {
       capturedAmount: captureAmount,
       status: transaction.status as 'captured' | 'partial_captured',
       capturedAt: transaction.capturedAt.toISOString(),
-      remainingAmount: isPartialCapture ? transaction.amount - captureAmount : undefined,
+      remainingAmount: isPartialCapture ? transaction.amountCents - captureAmount : undefined,
     };
   }
 }
