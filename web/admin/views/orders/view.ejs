@@ -101,33 +101,33 @@
                     </td>
                     <td><code><%= item.sku %></code></td>
                     <td><%= item.quantity %></td>
-                    <td>$<%= item.unitPrice.toFixed(2) %></td>
-                    <td class="text-danger">-$<%= item.discountTotal.toFixed(2) %></td>
-                    <td>$<%= item.taxTotal.toFixed(2) %></td>
-                    <td><strong>$<%= item.lineTotal.toFixed(2) %></strong></td>
+                    <td>$<%= (item.unitPriceCents / 100).toFixed(2) %></td>
+                    <td class="text-danger">-$<%= (item.discountTotalCents / 100).toFixed(2) %></td>
+                    <td>$<%= (item.taxTotalCents / 100).toFixed(2) %></td>
+                    <td><strong>$<%= (item.lineTotalCents / 100).toFixed(2) %></strong></td>
                   </tr>
                   <% }); %>
                 </tbody>
                 <tfoot>
                   <tr>
                     <td colspan="6" class="text-right"><strong><%= t('order:subtotal') %></strong></td>
-                    <td>$<%= order.subtotal.toFixed(2) %></td>
+                    <td>$<%= (order.subtotalCents / 100).toFixed(2) %></td>
                   </tr>
                   <tr>
                     <td colspan="6" class="text-right"><%= t('shared:common.discount') %>:</td>
-                    <td class="text-danger">-$<%= order.discountTotal.toFixed(2) %></td>
+                    <td class="text-danger">-$<%= (order.discountTotalCents / 100).toFixed(2) %></td>
                   </tr>
                   <tr>
                     <td colspan="6" class="text-right"><%= t('shared:common.tax') %>:</td>
-                    <td>$<%= order.taxTotal.toFixed(2) %></td>
+                    <td>$<%= (order.taxTotalCents / 100).toFixed(2) %></td>
                   </tr>
                   <tr>
                     <td colspan="6" class="text-right"><%= t('order:shipping') %></td>
-                    <td>$<%= order.shippingTotal.toFixed(2) %></td>
+                    <td>$<%= (order.shippingTotalCents / 100).toFixed(2) %></td>
                   </tr>
                   <tr class="table-active">
                     <td colspan="6" class="text-right"><strong><%= t('common.total') %>:</strong></td>
-                    <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+                    <td><strong>$<%= (order.totalAmountCents / 100).toFixed(2) %></strong></td>
                   </tr>
                 </tfoot>
               </table>

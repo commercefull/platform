@@ -57,8 +57,8 @@ export class CurrencyPriceRuleRepo {
     const metadata = {
       currencyCode: data.currencyCode,
       regionCode: data.regionCode,
-      minOrderValue: data.minOrderValue,
-      maxOrderValue: data.maxOrderValue,
+      minOrderValueCents: data.minOrderValueCents,
+      maxOrderValueCents: data.maxOrderValueCents,
     };
 
     // Create the base pricing rule with currencyCode stored directly
@@ -90,8 +90,8 @@ export class CurrencyPriceRuleRepo {
       ...(existingRule.metadata || {}),
       ...(data.currencyCode ? { currencyCode: data.currencyCode } : {}),
       ...(data.regionCode !== undefined ? { regionCode: data.regionCode } : {}),
-      ...(data.minOrderValue !== undefined ? { minOrderValue: data.minOrderValue } : {}),
-      ...(data.maxOrderValue !== undefined ? { maxOrderValue: data.maxOrderValue } : {}),
+      ...(data.minOrderValueCents !== undefined ? { minOrderValueCents: data.minOrderValueCents } : {}),
+      ...(data.maxOrderValueCents !== undefined ? { maxOrderValueCents: data.maxOrderValueCents } : {}),
     };
 
     // Update the rule - remove type/ruleType to avoid column issues
@@ -158,8 +158,8 @@ export class CurrencyPriceRuleRepo {
       ...rule,
       currencyCode: (meta.currencyCode as string) || '',
       regionCode: meta.regionCode as string | undefined,
-      minOrderValue: meta.minOrderValue as number | undefined,
-      maxOrderValue: meta.maxOrderValue as number | undefined,
+      minOrderValueCents: meta.minOrderValueCents as number | undefined,
+      maxOrderValueCents: meta.maxOrderValueCents as number | undefined,
     };
   }
 }

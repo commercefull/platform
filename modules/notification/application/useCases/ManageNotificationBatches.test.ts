@@ -1,42 +1,46 @@
-jest.mock('../../infrastructure/repositories/NotificationDataRepository', () => ({
-  __esModule: true,
-  default: {
-    notifications: {},
-    eventLogs: {},
-    deliveryLogs: {},
-    batches: {
-      findAll: jest.fn().mockResolvedValue([{ batchId: 'b1' }]),
-      findById: jest.fn().mockResolvedValue({ batchId: 'b1' }),
-      count: jest.fn().mockResolvedValue(1),
-    },
-  },
-}));
-
+import { createNotificationBatch, createNotificationBatchRepository } from '../../tests/testUtils';
 import { ManageNotificationBatchesUseCase } from './ManageNotificationBatches';
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
-
-const _mockRepo = notificationDataRepository as unknown as { batches: Record<string, jest.Mock> };
 
 describe('ManageNotificationBatchesUseCase', () => {
   let useCase: ManageNotificationBatchesUseCase;
+  let batchRepo: ReturnType<typeof createNotificationBatchRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageNotificationBatchesUseCase();
+    batchRepo = createNotificationBatchRepository();
+    useCase = new ManageNotificationBatchesUseCase(batchRepo);
   });
 
-  it('should find all batches', async () => {
-    const result = await useCase.findAll(10, 0);
-    expect(result).toHaveLength(1);
+  it('should return all batches with pagination args', async () => {
+    const batches = [createNotificationBatch()];
+    batchRepo.findAll.mockResolvedValue(batches);
+
+    const result = await useCase.findAll(10, 20);
+
+    expect(result).toEqual(batches);
+    expect(batchRepo.findAll).toHaveBeenCalledWith(10, 20);
   });
 
-  it('should find by ID', async () => {
-    const result = await useCase.findById('b1');
-    expect(result).toEqual({ batchId: 'b1' });
+  it('should return a batch by id', async () => {
+    const batch = createNotificationBatch({ notificationBatchId: 'b-9' });
+    batchRepo.findById.mockResolvedValue(batch);
+
+    const result = await useCase.findById('b-9');
+
+    expect(result).toEqual(batch);
+    expect(batchRepo.findById).toHaveBeenCalledWith('b-9');
   });
 
-  it('should count batches', async () => {
-    const result = await useCase.count();
-    expect(result).toBe(1);
+  it('should return null when the batch does not exist', async () => {
+    batchRepo.findById.mockResolvedValue(null);
+
+    const result = await useCase.findById('missing');
+
+    expect(result).toBeNull();
+  });
+
+  it('should return the total batch count', async () => {
+    batchRepo.count.mockResolvedValue(7);
+
+    expect(await useCase.count()).toBe(7);
   });
 });

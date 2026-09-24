@@ -3,7 +3,6 @@
  * Represents a specific variation of a product
  */
 
-import { Price } from '../valueObjects/Price';
 import { Dimensions } from '../valueObjects/Dimensions';
 import { ProductValidationError } from '../errors/ProductErrors';
 
@@ -19,7 +18,6 @@ export interface ProductVariantProps {
   productId: string;
   sku: string;
   name: string;
-  price: Price;
   dimensions: Dimensions;
   attributes: VariantAttribute[];
   imageId?: string;
@@ -48,10 +46,6 @@ export class ProductVariant {
     productId: string;
     sku: string;
     name?: string;
-    basePrice: number;
-    salePrice?: number;
-    cost?: number;
-    currencyCode?: string;
     attributes: VariantAttribute[];
     weight?: number;
     weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
@@ -77,7 +71,6 @@ export class ProductVariant {
       productId: props.productId,
       sku: props.sku,
       name: variantName,
-      price: Price.create(props.basePrice, props.currencyCode || 'USD', props.salePrice, props.cost),
       dimensions: Dimensions.create({
         weight: props.weight,
         weightUnit: props.weightUnit,
@@ -118,9 +111,6 @@ export class ProductVariant {
   }
   get name(): string {
     return this.props.name;
-  }
-  get price(): Price {
-    return this.props.price;
   }
   get dimensions(): Dimensions {
     return this.props.dimensions;
@@ -178,25 +168,11 @@ export class ProductVariant {
     return this.props.stockQuantity <= 0;
   }
 
-  get effectivePrice(): number {
-    return this.props.price.effectivePrice;
-  }
-
   get attributeString(): string {
     return this.props.attributes.map(attr => `${attr.attributeName}: ${attr.displayValue || attr.value}`).join(', ');
   }
 
   // Domain methods
-  updatePrice(basePrice: number, salePrice?: number, cost?: number): void {
-    this.props.price = Price.create(basePrice, this.props.price.currency, salePrice, cost);
-    this.touch();
-  }
-
-  setSalePrice(salePrice: number | null): void {
-    this.props.price = this.props.price.setSalePrice(salePrice);
-    this.touch();
-  }
-
   updateDimensions(dimensions: {
     weight?: number;
     weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
@@ -304,7 +280,6 @@ export class ProductVariant {
       productId: this.props.productId,
       sku: this.props.sku,
       name: this.props.name,
-      price: this.props.price.toJSON(),
       dimensions: this.props.dimensions.toJSON(),
       attributes: this.props.attributes,
       attributeString: this.attributeString,

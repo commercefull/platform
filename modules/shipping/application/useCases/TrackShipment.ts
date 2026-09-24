@@ -4,7 +4,7 @@
  * Retrieves tracking information for a shipment.
  */
 
-import { shippingLabelRepo } from '../wired';
+import type { ShippingLabelPort } from '../../domain/repositories/ShippingLabelRepository';
 
 export interface TrackShipmentInput {
   trackingNumber?: string;
@@ -22,13 +22,15 @@ export interface TrackingInfo {
 }
 
 export class TrackShipmentUseCase {
+  constructor(private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'findById' | 'findByTrackingNumber'>) {}
+
   async execute(input: TrackShipmentInput): Promise<{ found: boolean; tracking: TrackingInfo | null }> {
     let label = null;
 
     if (input.shippingLabelId) {
-      label = await shippingLabelRepo.findById(input.shippingLabelId);
+      label = await this.shippingLabelRepo.findById(input.shippingLabelId);
     } else if (input.trackingNumber) {
-      label = await shippingLabelRepo.findByTrackingNumber(input.trackingNumber);
+      label = await this.shippingLabelRepo.findByTrackingNumber(input.trackingNumber);
     }
 
     if (!label) {
@@ -50,4 +52,3 @@ export class TrackShipmentUseCase {
   }
 }
 
-export const trackShipmentUseCase = new TrackShipmentUseCase();

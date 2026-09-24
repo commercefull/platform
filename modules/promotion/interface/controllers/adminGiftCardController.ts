@@ -5,11 +5,8 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageGiftCardsUseCase } from '../../application/useCases/ManagePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { PromotionGiftCard } from '../../application/wired';
-
-const manageGiftCardsUseCase = new ManageGiftCardsUseCase();
+import { PromotionGiftCard, manageGiftCardsUseCase } from '../../application/wired';
 
 // ============================================================================
 // Gift Card Management
@@ -27,7 +24,7 @@ export const listGiftCards = async (req: HttpRequest, res: HttpResponse): Promis
 
   // Get total stats
   const totalResult = await manageGiftCardsUseCase.getGiftCards();
-  const totalValue = totalResult.data.reduce((sum: number, card: PromotionGiftCard) => sum + card.currentBalance, 0);
+  const totalValue = totalResult.data.reduce((sum: number, card: PromotionGiftCard) => sum + card.currentBalanceCents, 0);
   const activeCards = totalResult.data.filter((card: PromotionGiftCard) => card.status === 'active').length;
 
   adminRespond(req, res, 'promotions/gift-cards/index', {
@@ -56,7 +53,7 @@ export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promi
     const body = req.body as HttpRequestBody;
     const {
       type,
-      initialBalance,
+      initialBalanceCents,
       currency,
       recipientEmail,
       recipientName,
@@ -65,12 +62,12 @@ export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promi
       deliveryMethod,
       expiresAt,
       isReloadable,
-      minReloadAmount,
-      maxReloadAmount,
-      maxBalance,
+      minReloadAmountCents,
+      maxReloadAmountCents,
+      maxBalanceCents,
     } = body as {
       type?: 'standard' | 'promotional' | 'reward' | 'refund';
-      initialBalance: string;
+      initialBalanceCents: string;
       currency?: string;
       recipientEmail?: string;
       recipientName?: string;
@@ -79,14 +76,14 @@ export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promi
       deliveryMethod?: string;
       expiresAt?: string;
       isReloadable?: string;
-      minReloadAmount?: string;
-      maxReloadAmount?: string;
-      maxBalance?: string;
+      minReloadAmountCents?: string;
+      maxReloadAmountCents?: string;
+      maxBalanceCents?: string;
     };
 
     const giftCard = await manageGiftCardsUseCase.createGiftCard({
       type: type || 'standard',
-      initialBalance: parseFloat(initialBalance),
+      initialBalanceCents: parseFloat(initialBalanceCents),
       currency: currency || 'USD',
       recipientEmail: recipientEmail || undefined,
       recipientName: recipientName || undefined,
@@ -96,11 +93,11 @@ export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promi
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
       isReloadable: isReloadable === 'true',
       restrictions:
-        minReloadAmount || maxReloadAmount || maxBalance
+        minReloadAmountCents || maxReloadAmountCents || maxBalanceCents
           ? {
-              minReloadAmount: minReloadAmount ? parseFloat(minReloadAmount) : undefined,
-              maxReloadAmount: maxReloadAmount ? parseFloat(maxReloadAmount) : undefined,
-              maxBalance: maxBalance ? parseFloat(maxBalance) : undefined,
+              minReloadAmountCents: minReloadAmountCents ? parseFloat(minReloadAmountCents) : undefined,
+              maxReloadAmountCents: maxReloadAmountCents ? parseFloat(maxReloadAmountCents) : undefined,
+              maxBalanceCents: maxBalanceCents ? parseFloat(maxBalanceCents) : undefined,
             }
           : undefined,
     });
@@ -182,9 +179,9 @@ export const assignGiftCardAction = async (req: HttpRequest, res: HttpResponse):
 export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
   const body = req.body as HttpRequestBody;
-  const { amount, orderId } = body as { amount: string; orderId: string };
+  const { amountCents, orderId } = body as { amountCents: string; orderId: string };
 
-  const transaction = await manageGiftCardsUseCase.reloadGiftCard(giftCardId, parseFloat(amount), orderId, 'admin');
+  const transaction = await manageGiftCardsUseCase.reloadGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin');
 
   res.json({
     success: true,
@@ -196,9 +193,9 @@ export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse):
 export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { giftCardId } = req.params;
   const body = req.body as HttpRequestBody;
-  const { amount, orderId, notes } = body as { amount: string; orderId: string; notes?: string };
+  const { amountCents, orderId, notes } = body as { amountCents: string; orderId: string; notes?: string };
 
-  const transaction = await manageGiftCardsUseCase.refundToGiftCard(giftCardId, parseFloat(amount), orderId, 'admin', notes);
+  const transaction = await manageGiftCardsUseCase.refundToGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin', notes);
 
   res.json({
     success: true,
@@ -227,7 +224,7 @@ export const checkGiftCardBalance = async (req: HttpRequest, res: HttpResponse):
 
   res.json({
     valid: true,
-    balance: giftCard.currentBalance,
+    balanceCents: giftCard.currentBalanceCents,
     currency: giftCard.currency,
     status: giftCard.status,
     expiresAt: giftCard.expiresAt,

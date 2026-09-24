@@ -2,18 +2,16 @@
  * Unit Tests for GetNotifications Use Case
  */
 
+import { lazyMock } from '../../tests/testUtils';
 import { GetNotificationsUseCase } from './GetNotifications';
 
 describe('GetNotificationsUseCase', () => {
   let useCase: GetNotificationsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetNotificationsUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findAll: jest.fn(),
-      countUnread: jest.fn(),
-    };
-    useCase = new GetNotificationsUseCase(mockRepo as never as ConstructorParameters<typeof GetNotificationsUseCase>[0]);
+    mockRepo = lazyMock();
+    useCase = new GetNotificationsUseCase(mockRepo);
   });
 
   it('should return notifications with default pagination', async () => {

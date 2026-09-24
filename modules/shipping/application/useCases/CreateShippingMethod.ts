@@ -14,13 +14,13 @@ export interface CreateShippingMethodInput {
   carrierId?: string;
   carrierType?: CarrierType;
   carrierServiceCode?: string;
-  basePrice: number;
-  pricePerKg?: number;
-  pricePerItem?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  minOrderValue?: number;
-  maxOrderValue?: number;
+  basePriceCents: number;
+  pricePerKgCents?: number;
+  pricePerItemCents?: number;
+  minPriceCents?: number;
+  maxPriceCents?: number;
+  minOrderValueCents?: number;
+  maxOrderValueCents?: number;
   minWeight?: number;
   maxWeight?: number;
   estimatedDaysMin?: number;
@@ -59,13 +59,13 @@ export class CreateShippingMethodUseCase {
       carrierId: input.carrierId,
       carrierType: input.carrierType,
       carrierServiceCode: input.carrierServiceCode,
-      basePrice: input.basePrice,
-      pricePerKg: input.pricePerKg,
-      pricePerItem: input.pricePerItem,
-      minPrice: input.minPrice,
-      maxPrice: input.maxPrice,
-      minOrderValue: input.minOrderValue,
-      maxOrderValue: input.maxOrderValue,
+      basePriceCents: input.basePriceCents,
+      pricePerKgCents: input.pricePerKgCents,
+      pricePerItemCents: input.pricePerItemCents,
+      minPriceCents: input.minPriceCents,
+      maxPriceCents: input.maxPriceCents,
+      minOrderValueCents: input.minOrderValueCents,
+      maxOrderValueCents: input.maxOrderValueCents,
       minWeight: input.minWeight,
       maxWeight: input.maxWeight,
       estimatedDaysMin: input.estimatedDaysMin,

@@ -16,16 +16,16 @@ exports.up = function (knex) {
     table.text('description');
     table.string('billingInterval').notNullable().defaultTo('month'); // day, week, month, year
     table.integer('billingIntervalCount').defaultTo(1);
-    table.decimal('price', 15, 2).notNullable();
-    table.decimal('compareAtPrice', 15, 2);
-    table.string('currency', 3).defaultTo('USD');
-    table.decimal('setupFee', 15, 2).defaultTo(0);
+    table.bigInteger('priceCents').notNullable();
+    table.bigInteger('compareAtPriceCents');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
+    table.bigInteger('setupFeeCents').defaultTo(0);
     table.integer('trialDays');
     table.integer('contractLength'); // Number of billing cycles
     table.boolean('isContractRequired').defaultTo(false);
     table.decimal('discountPercent', 5, 2).defaultTo(0);
-    table.decimal('discountAmount', 15, 2).defaultTo(0);
-    table.integer('freeShippingThreshold');
+    table.bigInteger('discountAmountCents').defaultTo(0);
+    table.bigInteger('freeShippingThresholdCents');
     table.boolean('includesFreeShipping').defaultTo(false);
     table.jsonb('includedProducts'); // For bundle subscriptions
     table.jsonb('features'); // Feature list for display

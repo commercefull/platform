@@ -1,24 +1,15 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { MembershipPlanBenefitAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
+import type { MembershipPlanBenefit } from '../../domain/repositories/MembershipRepository';
 
-export interface MembershipPlanBenefit {
-  membershipPlanBenefitId: string;
-  createdAt: string;
-  updatedAt: string;
-  planId: string;
-  benefitId: string;
-  isActive: boolean;
-  priority: number;
-  valueOverride?: Record<string, unknown>;
-  rulesOverride?: Record<string, unknown>;
-  notes?: string;
-}
-
+export type { MembershipPlanBenefit };
 export type MembershipPlanBenefitCreateParams = Omit<MembershipPlanBenefit, 'membershipPlanBenefitId' | 'createdAt' | 'updatedAt'>;
 export type MembershipPlanBenefitUpdateParams = Partial<
   Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>
 >;
+
+
 
 export class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {

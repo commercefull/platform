@@ -11,10 +11,8 @@ exports.up = function (knex) {
     t.string('sku', 100).notNullable().unique();
     t.string('name', 255);
     t.enum('status', ['active', 'inactive', 'archived', 'discontinued']).notNullable().defaultTo('active');
-    t.decimal('price', 15, 2);
-    t.decimal('salePrice', 15, 2);
-    t.decimal('costPrice', 15, 2);
-    t.decimal('compareAtPrice', 15, 2);
+    // Variant prices live in the pricing module's productBasePrice table
+    // (integer cents) keyed by productVariantId — no price columns here.
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.decimal('weight', 10, 2);
     t.decimal('length', 10, 2);

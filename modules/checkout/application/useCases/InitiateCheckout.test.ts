@@ -1,104 +1,65 @@
-/**
- * Unit Tests for InitiateCheckout Use Case
- */
-
+import { createBasketSnapshot, createCheckoutRepository, createCheckoutSession, createBasketSnapshotPort, emitMock } from '../../tests/testUtils';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand } from './InitiateCheckout';
-import { CheckoutSession } from '../../domain/entities/CheckoutSession';
 import { CheckoutValidationError, CheckoutBasketNotFoundError } from '../../domain/errors/CheckoutErrors';
-import { Money } from '../../../../libs/money';
-
-import type { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
-import type { BasketSnapshotPort, BasketSnapshot } from '../../application/ports/BasketSnapshotPort';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
-jest.mock('../../../../libs/uuid', () => ({
-  generateUUID: jest.fn(() => 'checkout-uuid-123'),
-}));
-
-function createBasketSnapshot(overrides: Partial<BasketSnapshot> = {}): BasketSnapshot {
-  return {
-    basketId: 'b-1',
-    currency: 'USD',
-    isEmpty: false,
-    itemCount: 2,
-    uniqueItemCount: 2,
-    subtotal: Money.create(100, 'USD'),
-    discountAmount: 0,
-    total: Money.create(100, 'USD'),
-    items: [],
-    ...overrides,
-  };
-}
-
-function createMockBasketPort(snapshot: BasketSnapshot | null): jest.Mocked<BasketSnapshotPort> {
-  return {
-    getSnapshot: jest.fn().mockResolvedValue(snapshot),
-  } as never as jest.Mocked<BasketSnapshotPort>;
-}
-
-function createMockCheckoutRepo(session: CheckoutSession | null = null): jest.Mocked<CheckoutRepository> {
-  return {
-    findById: jest.fn().mockResolvedValue(session),
-    findByBasketId: jest.fn().mockResolvedValue(session),
-    findActiveByCustomerId: jest.fn().mockResolvedValue(null),
-    save: jest.fn().mockResolvedValue(session),
-    delete: jest.fn().mockResolvedValue(undefined),
-    findExpiredSessions: jest.fn().mockResolvedValue([]),
-    markAsAbandoned: jest.fn().mockResolvedValue(undefined),
-    getAvailableShippingMethods: jest.fn().mockResolvedValue([]),
-    getAvailablePaymentMethods: jest.fn().mockResolvedValue([]),
-    validateShippingAddress: jest.fn().mockResolvedValue({ valid: true, errors: [] }),
-    findByPaymentIntentId: jest.fn().mockResolvedValue(null),
-  } as never as jest.Mocked<CheckoutRepository>;
-}
 
 describe('InitiateCheckoutUseCase', () => {
-  it('should create a new checkout session from a valid basket', async () => {
-    const snapshot = createBasketSnapshot();
-    const basketPort = createMockBasketPort(snapshot);
-    const repo = createMockCheckoutRepo(null);
-    const useCase = new InitiateCheckoutUseCase(repo, basketPort);
+  let useCase: InitiateCheckoutUseCase;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
+  let basketSnapshotPort: ReturnType<typeof createBasketSnapshotPort>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    basketSnapshotPort = createBasketSnapshotPort();
+    basketSnapshotPort.getSnapshot.mockResolvedValue(createBasketSnapshot());
+    useCase = new InitiateCheckoutUseCase(checkoutRepository, basketSnapshotPort);
+  });
+
+  it('should create, persist, and emit checkout.started for a valid basket', async () => {
+    checkoutRepository.findByBasketId.mockResolvedValue(null);
 
     const result = await useCase.execute(new InitiateCheckoutCommand('b-1', 'cust-1'));
 
-    expect(result.checkoutId).toBeDefined();
+    expect(result.checkoutId).toBe('checkout-uuid-123');
     expect(result.basketId).toBe('b-1');
     expect(result.customerId).toBe('cust-1');
     expect(result.status).toBe('active');
-    expect(result.subtotal).toBe(100);
-    expect(repo.save).toHaveBeenCalled();
+    expect(result.subtotalCents).toBe(10000);
+    expect(checkoutRepository.save).toHaveBeenCalledWith(expect.objectContaining({ basketId: 'b-1' }));
+    expect(emitMock).toHaveBeenCalledWith('checkout.started', expect.objectContaining({ checkoutId: 'checkout-uuid-123', basketId: 'b-1', customerId: 'cust-1' }));
   });
 
-  it('should throw CheckoutBasketNotFoundError when basket not found', async () => {
-    const basketPort = createMockBasketPort(null);
-    const repo = createMockCheckoutRepo(null);
-    const useCase = new InitiateCheckoutUseCase(repo, basketPort);
+  it('should throw CheckoutBasketNotFoundError when the basket does not exist', async () => {
+    basketSnapshotPort.getSnapshot.mockResolvedValue(null);
 
-    await expect(useCase.execute(new InitiateCheckoutCommand('nonexistent'))).rejects.toThrow(CheckoutBasketNotFoundError);
+    await expect(useCase.execute(new InitiateCheckoutCommand('missing'))).rejects.toThrow(CheckoutBasketNotFoundError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw CheckoutValidationError when basket is empty', async () => {
-    const snapshot = createBasketSnapshot({ isEmpty: true });
-    const basketPort = createMockBasketPort(snapshot);
-    const repo = createMockCheckoutRepo(null);
-    const useCase = new InitiateCheckoutUseCase(repo, basketPort);
+  it('should throw CheckoutValidationError when the basket is empty', async () => {
+    basketSnapshotPort.getSnapshot.mockResolvedValue(createBasketSnapshot({ isEmpty: true }));
 
     await expect(useCase.execute(new InitiateCheckoutCommand('b-1'))).rejects.toThrow(CheckoutValidationError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should extend expiration when an active session already exists', async () => {
-    const snapshot = createBasketSnapshot();
-    const basketPort = createMockBasketPort(snapshot);
-    const existingSession = CheckoutSession.create({ id: 'existing-1', basketId: 'b-1' });
-    const repo = createMockCheckoutRepo(existingSession);
-    const useCase = new InitiateCheckoutUseCase(repo, basketPort);
+  it('should extend the existing session instead of creating a new one when the basket already has an active checkout', async () => {
+    const existing = createCheckoutSession({ id: 'existing-1' });
+    checkoutRepository.findByBasketId.mockResolvedValue(existing);
 
     const result = await useCase.execute(new InitiateCheckoutCommand('b-1'));
 
     expect(result.checkoutId).toBe('existing-1');
-    expect(repo.save).toHaveBeenCalled();
+    expect(checkoutRepository.save).toHaveBeenCalledWith(existing);
+    expect(emitMock).not.toHaveBeenCalledWith('checkout.started', expect.anything());
+  });
+
+  it('should create a new session when the existing session is no longer active', async () => {
+    checkoutRepository.findByBasketId.mockResolvedValue(createCheckoutSession({ id: 'old-1', status: 'abandoned' }));
+
+    const result = await useCase.execute(new InitiateCheckoutCommand('b-1'));
+
+    expect(result.checkoutId).toBe('checkout-uuid-123');
+    expect(emitMock).toHaveBeenCalledWith('checkout.started', expect.anything());
   });
 });

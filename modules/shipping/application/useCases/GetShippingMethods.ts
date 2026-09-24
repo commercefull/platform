@@ -3,12 +3,9 @@
  * Retrieves available shipping methods with optional filtering
  */
 
-import { shippingConfigRepository } from '../wired';
 import type { ShippingMethod } from '../../../../libs/db/types';
 import type { ShippingCarrier } from '../../../../libs/db/types';
-
-const shippingMethodRepo = shippingConfigRepository.methods;
-const shippingCarrierRepo = shippingConfigRepository.carriers;
+import type { ShippingCarrierPort, ShippingMethodPort } from '../../domain/repositories/ShippingConfigPorts';
 
 // ============================================================================
 // Query
@@ -42,14 +39,19 @@ export interface GetShippingMethodsResponse {
 // ============================================================================
 
 export class GetShippingMethodsUseCase {
+  constructor(
+    private readonly shippingMethodRepo: Pick<ShippingMethodPort, 'findAll' | 'findByCarrier'>,
+    private readonly shippingCarrierRepo: Pick<ShippingCarrierPort, 'findById'>,
+  ) {}
+
   async execute(query: GetShippingMethodsQuery): Promise<GetShippingMethodsResponse> {
     try {
       let methods: ShippingMethod[];
 
       if (query.carrierId) {
-        methods = await shippingMethodRepo.findByCarrier(query.carrierId, query.activeOnly);
+        methods = await this.shippingMethodRepo.findByCarrier(query.carrierId, query.activeOnly);
       } else {
-        methods = await shippingMethodRepo.findAll(query.activeOnly, query.displayOnFrontend);
+        methods = await this.shippingMethodRepo.findAll(query.activeOnly, query.displayOnFrontend);
       }
 
       // Enrich with carrier information
@@ -62,7 +64,7 @@ export class GetShippingMethodsUseCase {
         if (method.shippingCarrierId) {
           let carrier = carrierCache.get(method.shippingCarrierId);
           if (!carrier) {
-            carrier = (await shippingCarrierRepo.findById(method.shippingCarrierId)) || undefined;
+            carrier = (await this.shippingCarrierRepo.findById(method.shippingCarrierId)) || undefined;
             if (carrier) {
               carrierCache.set(method.shippingCarrierId, carrier);
             }
@@ -90,4 +92,3 @@ export class GetShippingMethodsUseCase {
   }
 }
 
-export const getShippingMethodsUseCase = new GetShippingMethodsUseCase();

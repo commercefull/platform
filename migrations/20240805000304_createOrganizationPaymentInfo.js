@@ -18,7 +18,7 @@ exports.up = function (knex) {
     t.string('paypalEmail', 255);
     t.string('providerId', 255);
     t.jsonb('providerData');
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('isVerified').notNullable().defaultTo(false);
     t.timestamp('verifiedAt');
     t.timestamp('lastPayoutDate');

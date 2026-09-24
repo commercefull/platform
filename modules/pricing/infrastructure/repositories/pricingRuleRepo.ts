@@ -152,25 +152,25 @@ export class PricingRuleRepo {
     // Add filter for product
     if (filters.productId) {
       params.push(filters.productId);
-      conditions.push(`"product_ids" @> ARRAY[$${params.length}]::uuid[]`);
+      conditions.push(`"productIds" @> ARRAY[$${params.length}]::uuid[]`);
     }
 
     // Add filter for category
     if (filters.categoryId) {
       params.push(filters.categoryId);
-      conditions.push(`"category_ids" @> ARRAY[$${params.length}]::uuid[]`);
+      conditions.push(`"categoryIds" @> ARRAY[$${params.length}]::uuid[]`);
     }
 
     // Add filter for customer
     if (filters.customerId) {
       params.push(filters.customerId);
-      conditions.push(`"customer_ids" @> ARRAY[$${params.length}]::uuid[]`);
+      conditions.push(`"customerIds" @> ARRAY[$${params.length}]::uuid[]`);
     }
 
     // Add filter for customer group
     if (filters.customerGroupId) {
       params.push(filters.customerGroupId);
-      conditions.push(`"customer_group_ids" @> ARRAY[$${params.length}]::uuid[]`);
+      conditions.push(`"customerGroupIds" @> ARRAY[$${params.length}]::uuid[]`);
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -263,7 +263,7 @@ export class PricingRuleRepo {
       INSERT INTO "${this.tableName}" (
         "name", "description", "ruleType", "scope", 
         "productIds", "categoryIds", "customerIds", "customerGroupIds",
-        "minimumQuantity", "maximumQuantity", "minimumOrderAmount",
+        "minimumQuantity", "maximumQuantity", "minimumOrderAmountCents",
         "startDate", "endDate", "priority", "isActive",
         "metadata", "currencyCode", "regionCode",
         "createdAt", "updatedAt"
@@ -284,7 +284,7 @@ export class PricingRuleRepo {
       data.customerGroupIds || null,
       data.minimumQuantity || null,
       data.maximumQuantity || null,
-      data.minimumOrderAmount || null,
+      data.minimumOrderAmountCents || null,
       data.startDate || null,
       data.endDate || null,
       data.priority || 0,
@@ -328,7 +328,7 @@ export class PricingRuleRepo {
       customerGroupIds: 'customerGroupIds',
       minimumQuantity: 'minimumQuantity',
       maximumQuantity: 'maximumQuantity',
-      minimumOrderAmount: 'minimumOrderAmount',
+      minimumOrderAmountCents: 'minimumOrderAmountCents',
       startDate: 'startDate',
       endDate: 'endDate',
       priority: 'priority',

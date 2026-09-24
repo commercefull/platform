@@ -8,8 +8,8 @@ const membershipRepo = membershipSubscriptionDataRepository.memberships;
 interface CreateTierBody {
   name: string;
   description?: string;
-  monthlyPrice: number;
-  annualPrice: number;
+  monthlyPriceCents: number;
+  annualPriceCents: number;
   level: number;
   isActive?: boolean;
 }
@@ -17,8 +17,8 @@ interface CreateTierBody {
 interface UpdateTierBody {
   name?: string;
   description?: string;
-  monthlyPrice?: number;
-  annualPrice?: number;
+  monthlyPriceCents?: number;
+  annualPriceCents?: number;
   level?: number;
   isActive?: boolean;
 }
@@ -29,7 +29,7 @@ interface CreateBenefitBody {
   tierIds: string[];
   benefitType: string;
   discountPercentage?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   isActive?: boolean;
 }
 
@@ -39,7 +39,7 @@ interface UpdateBenefitBody {
   tierIds?: string[];
   benefitType?: string;
   discountPercentage?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   isActive?: boolean;
 }
 
@@ -101,13 +101,13 @@ export const createMembershipTier = async (
   req: HttpRequest<Record<string, string>, unknown, CreateTierBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { name, description, monthlyPrice, annualPrice, level, isActive = true } = req.body;
+  const { name, description, monthlyPriceCents, annualPriceCents, level, isActive = true } = req.body;
 
   // Basic validation
-  if (!name || typeof monthlyPrice !== 'number' || typeof annualPrice !== 'number' || typeof level !== 'number') {
+  if (!name || typeof monthlyPriceCents !== 'number' || typeof annualPriceCents !== 'number' || typeof level !== 'number') {
     res.status(400).json({
       success: false,
-      message: 'Name, monthlyPrice, annualPrice, and level are required',
+      message: 'Name, monthlyPriceCents, annualPriceCents, and level are required',
     });
     return;
   }
@@ -115,8 +115,8 @@ export const createMembershipTier = async (
   const tier = await membershipRepo.createTier({
     name,
     description: description || '',
-    monthlyPrice,
-    annualPrice,
+    monthlyPriceCents,
+    annualPriceCents,
     level,
     isActive,
   });
@@ -133,7 +133,7 @@ export const updateMembershipTier = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { name, description, monthlyPrice, annualPrice, level, isActive } = req.body;
+  const { name, description, monthlyPriceCents, annualPriceCents, level, isActive } = req.body;
 
   // Check if tier exists
   const existingTier = await membershipRepo.findTierById(id);
@@ -148,8 +148,8 @@ export const updateMembershipTier = async (
   const updatedTier = await membershipRepo.updateTier(id, {
     name,
     description,
-    monthlyPrice,
-    annualPrice,
+    monthlyPriceCents,
+    annualPriceCents,
     level,
     isActive,
   });
@@ -231,7 +231,7 @@ export const createMembershipBenefit = async (
   req: HttpRequest<Record<string, string>, unknown, CreateBenefitBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive = true } = req.body;
+  const { name, description, tierIds, benefitType, discountPercentage, discountAmountCents, isActive = true } = req.body;
 
   const tierId = tierIds[0];
 
@@ -260,7 +260,7 @@ export const createMembershipBenefit = async (
     tierIds: [tierId],
     benefitType,
     discountPercentage,
-    discountAmount,
+    discountAmountCents,
     isActive,
   });
 
@@ -276,7 +276,7 @@ export const updateMembershipBenefit = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { name, description, tierIds, benefitType, discountPercentage, discountAmount, isActive } = req.body;
+  const { name, description, tierIds, benefitType, discountPercentage, discountAmountCents, isActive } = req.body;
 
   const tierId = tierIds ? tierIds[0] : undefined;
 
@@ -308,7 +308,7 @@ export const updateMembershipBenefit = async (
     tierIds: tierId ? [tierId] : undefined,
     benefitType,
     discountPercentage,
-    discountAmount,
+    discountAmountCents,
     isActive,
   });
 

@@ -1,35 +1,17 @@
+import { lazyMock } from '../../tests/testUtils';
 import { GetLowStockItemsUseCase } from './GetLowStockItems';
 
 describe('GetLowStockItemsUseCase', () => {
   let useCase: GetLowStockItemsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetLowStockItemsUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findLowStock: jest.fn().mockResolvedValue([
-        {
-          inventoryItemId: 'i1',
-          productId: 'p1',
-          sku: 'SKU1',
-          warehouseId: 'w1',
-          quantity: 5,
-          reservedQuantity: 0,
-          reorderPoint: 10,
-          reorderQuantity: 50,
-        },
-        {
-          inventoryItemId: 'i2',
-          productId: 'p2',
-          sku: 'SKU2',
-          warehouseId: 'w1',
-          quantity: 2,
-          reservedQuantity: 1,
-          reorderPoint: 5,
-          reorderQuantity: 20,
-        },
-      ]),
-    };
-    useCase = new GetLowStockItemsUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof GetLowStockItemsUseCase>[0]>();
+    mockRepo.findLowStock.mockResolvedValue([
+      { inventoryItemId: 'i1', productId: 'p1', sku: 'SKU1', warehouseId: 'w1', quantity: 5, reservedQuantity: 0, reorderPoint: 10, reorderQuantity: 50 },
+      { inventoryItemId: 'i2', productId: 'p2', sku: 'SKU2', warehouseId: 'w1', quantity: 2, reservedQuantity: 1, reorderPoint: 5, reorderQuantity: 20 },
+    ]);
+    useCase = new GetLowStockItemsUseCase(mockRepo);
   });
 
   it('should get low stock items (happy path)', async () => {

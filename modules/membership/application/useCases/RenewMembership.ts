@@ -19,7 +19,7 @@ export interface RenewMembershipOutput {
   renewedAt: string;
   newPeriodStart: string;
   newPeriodEnd: string;
-  amount: number;
+  amountCents: number;
   paymentStatus: string;
 }
 
@@ -35,7 +35,7 @@ interface MembershipRecord {
 }
 
 interface TierRecord {
-  price: number;
+  priceCents: number;
   billingPeriod?: string;
 }
 
@@ -102,7 +102,7 @@ export class RenewMembershipUseCase {
     // Process payment
     let paymentStatus: string;
     try {
-      const payment = await this.processRenewalPayment(membership, tier.price, paymentMethodId || membership.defaultPaymentMethodId);
+      const payment = await this.processRenewalPayment(membership, tier.priceCents, paymentMethodId || membership.defaultPaymentMethodId);
       paymentStatus = payment.status;
     } catch (error: unknown) {
       paymentStatus = 'failed';
@@ -141,7 +141,7 @@ export class RenewMembershipUseCase {
       membershipId,
       customerId: membership.customerId,
       tierId: membership.tierId,
-      amount: tier.price,
+      amountCents: tier.priceCents,
       paymentStatus,
       newPeriodEnd: newPeriodEnd.toISOString(),
     });
@@ -152,14 +152,14 @@ export class RenewMembershipUseCase {
       renewedAt: now.toISOString(),
       newPeriodStart: newPeriodStart.toISOString(),
       newPeriodEnd: newPeriodEnd.toISOString(),
-      amount: tier.price,
+      amountCents: tier.priceCents,
       paymentStatus,
     };
   }
 
   private async processRenewalPayment(
     membership: MembershipRecord,
-    amount: number,
+    amountCents: number,
     paymentMethodId?: string,
   ): Promise<{ status: string; transactionId?: string }> {
     // This would integrate with the payment module

@@ -2,7 +2,10 @@ import inventoryDataRepository from '../infrastructure/repositories/InventoryDat
 import storeDispatchRepository from '../infrastructure/repositories/StoreDispatchAggregateRepository';
 import { StorePickupLocationAdapter } from '../infrastructure/acl/StorePickupLocationAdapter';
 import { inventoryAllocationRuleRepo } from '../infrastructure';
+import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
 
-export { inventoryDataRepository, storeDispatchRepository, StorePickupLocationAdapter };
+export const pickupLocationAdapter = new StorePickupLocationAdapter(pickupLocationRepo);
+
+export { inventoryDataRepository, storeDispatchRepository };
 
 export { inventoryAllocationRuleRepo };

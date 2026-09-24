@@ -20,7 +20,8 @@ import {
 } from '../../application/useCases/wired';
 import { GetProductCommand } from '../../../product/application/useCases/GetProduct';
 import { getProductUseCase } from '../../../product/application/useCases/wired';
-import { CalculateOrderTaxCommand, CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import { CalculateOrderTaxCommand } from '../../../tax/application/useCases/CalculateOrderTax';
+import { calculateOrderTaxUseCase } from '../../../tax/application/wired';
 
 // ============================================================================
 // View Basket/Cart
@@ -30,7 +31,7 @@ export const viewBasket = async (req: HttpRequest, res: HttpResponse): Promise<v
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   // Calculate totals with tax
@@ -55,7 +56,7 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
     const sessionId = req.session?.id;
 
     // Get or create basket
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
     const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
     // Verify product exists and is available
@@ -72,11 +73,10 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
       product.sku || product.productId,
       product.name,
       parseInt(quantity as string),
-      product.effectivePrice ?? product.basePrice ?? 0,
       variantId as string | undefined,
       product.primaryImage?.url,
       undefined,
-      product.hasVariants ? 'physical' : 'physical',
+      'physical',
     );
 
     await addItemUseCase.execute(addCmd);
@@ -102,7 +102,7 @@ export const updateBasketItem = async (req: HttpRequest, res: HttpResponse): Pro
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const updCmd = new UpdateItemQuantityCommand(basket.basketId, basketItemId, parseInt(quantity as string));
@@ -125,7 +125,7 @@ export const removeFromBasket = async (req: HttpRequest, res: HttpResponse): Pro
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const remCmd = new RemoveItemCommand(basket.basketId, basketItemId);
@@ -146,7 +146,7 @@ export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId);
+  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const clrCmd = new ClearBasketCommand(basket.basketId);
@@ -165,12 +165,12 @@ export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<
 
 async function calculateBasketTotals(basket: Record<string, unknown>, user: Record<string, unknown> | undefined) {
   const basketItems = basket.items as Record<string, unknown>[] | undefined;
-  const subtotal =
-    typeof basket.subtotal === 'number'
-      ? basket.subtotal
+  const subtotalCents =
+    typeof basket.subtotalCents === 'number'
+      ? basket.subtotalCents
       : basketItems?.reduce(
           (sum: number, item: Record<string, unknown>) =>
-            sum + ((item.lineTotal as number) ?? (item.unitPrice as number) * (item.quantity as number)),
+            sum + ((item.lineTotalCents as number) ?? (item.unitPriceCents as number) * (item.quantity as number)),
           0,
         ) || 0;
 
@@ -188,22 +188,22 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
       productId: item.productId as string,
       name: item.name as string,
       quantity: item.quantity as number,
-      unitPrice: item.unitPrice as number,
+      unitPriceCents: item.unitPriceCents as number,
     })) || [],
     defaultAddress,
     0, // No shipping in basket view
     user?.customerId as string | undefined,
   );
 
-  const taxUseCase = new CalculateOrderTaxUseCase();
+  const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);
 
-  const total = subtotal + taxResult.taxAmount;
+  const totalCents = subtotalCents + taxResult.taxAmountCents;
 
   return {
-    subtotal: subtotal.toFixed(2),
-    tax: taxResult.taxAmount.toFixed(2),
-    total: total.toFixed(2),
+    subtotal: (subtotalCents / 100).toFixed(2),
+    tax: (taxResult.taxAmountCents / 100).toFixed(2),
+    total: (totalCents / 100).toFixed(2),
     taxRate: taxResult.taxRate,
   };
 }

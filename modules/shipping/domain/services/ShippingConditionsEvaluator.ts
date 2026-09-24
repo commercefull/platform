@@ -6,8 +6,8 @@
  * condition-based rate adjustments (e.g., surcharges or discounts).
  *
  * Supported condition keys (all optional):
- *   minOrderValue   number        Rate applies only if subtotal >= value
- *   maxOrderValue   number        Rate applies only if subtotal <= value
+ *   minOrderValue   number        Rate applies only if subtotal >= value (cents)
+ *   maxOrderValue   number        Rate applies only if subtotal <= value (cents)
  *   minWeight       number        Rate applies only if totalWeight >= value
  *   maxWeight       number        Rate applies only if totalWeight <= value
  *   minItemCount    number        Rate applies only if itemCount >= value
@@ -17,12 +17,12 @@
  *   states          string[]      Rate applies only if destination state is in list
  *   postalCodePatterns string[]   Glob patterns matched against destination postalCode
  *   dateRange       { from: string, to: string }  ISO date window
- *   surcharge       number        Flat surcharge added to the calculated rate
- *   discount        number        Flat discount subtracted from the calculated rate
+ *   surcharge       number        Flat surcharge added to the calculated rate (cents)
+ *   discount        number        Flat discount subtracted from the calculated rate (cents)
  */
 
 export interface ShippingConditionContext {
-  subtotal: number;
+  subtotalCents: number;
   itemCount: number;
   totalWeight?: number;
   country?: string;
@@ -34,7 +34,7 @@ export interface ShippingConditionContext {
 
 export interface ShippingConditionsResult {
   applicable: boolean;
-  adjustment: number;
+  adjustmentCents: number;
   reason?: string;
 }
 
@@ -53,65 +53,65 @@ function matchGlob(pattern: string, value: string): boolean {
 
 export function evaluateConditions(conditions: unknown, ctx: ShippingConditionContext): ShippingConditionsResult {
   if (!conditions || typeof conditions !== 'object') {
-    return { applicable: true, adjustment: 0 };
+    return { applicable: true, adjustmentCents: 0 };
   }
 
   const cond = conditions as Record<string, unknown>;
   const _adjustment = 0;
 
   // Order value range
-  if (cond.minOrderValue !== undefined && ctx.subtotal < Number(cond.minOrderValue)) {
-    return { applicable: false, adjustment: 0, reason: `Order subtotal below minimum ${cond.minOrderValue}` };
+  if (cond.minOrderValue !== undefined && ctx.subtotalCents < Number(cond.minOrderValue)) {
+    return { applicable: false, adjustmentCents: 0, reason: `Order subtotal below minimum ${cond.minOrderValue}` };
   }
-  if (cond.maxOrderValue !== undefined && ctx.subtotal > Number(cond.maxOrderValue)) {
-    return { applicable: false, adjustment: 0, reason: `Order subtotal above maximum ${cond.maxOrderValue}` };
+  if (cond.maxOrderValue !== undefined && ctx.subtotalCents > Number(cond.maxOrderValue)) {
+    return { applicable: false, adjustmentCents: 0, reason: `Order subtotal above maximum ${cond.maxOrderValue}` };
   }
 
   // Weight range
   if (cond.minWeight !== undefined) {
     const w = ctx.totalWeight ?? 0;
     if (w < Number(cond.minWeight)) {
-      return { applicable: false, adjustment: 0, reason: `Order weight below minimum ${cond.minWeight}` };
+      return { applicable: false, adjustmentCents: 0, reason: `Order weight below minimum ${cond.minWeight}` };
     }
   }
   if (cond.maxWeight !== undefined) {
     const w = ctx.totalWeight ?? 0;
     if (w > Number(cond.maxWeight)) {
-      return { applicable: false, adjustment: 0, reason: `Order weight above maximum ${cond.maxWeight}` };
+      return { applicable: false, adjustmentCents: 0, reason: `Order weight above maximum ${cond.maxWeight}` };
     }
   }
 
   // Item count range
   if (cond.minItemCount !== undefined && ctx.itemCount < Number(cond.minItemCount)) {
-    return { applicable: false, adjustment: 0, reason: `Item count below minimum ${cond.minItemCount}` };
+    return { applicable: false, adjustmentCents: 0, reason: `Item count below minimum ${cond.minItemCount}` };
   }
   if (cond.maxItemCount !== undefined && ctx.itemCount > Number(cond.maxItemCount)) {
-    return { applicable: false, adjustment: 0, reason: `Item count above maximum ${cond.maxItemCount}` };
+    return { applicable: false, adjustmentCents: 0, reason: `Item count above maximum ${cond.maxItemCount}` };
   }
 
   // Country restrictions
   if (Array.isArray(cond.countries) && cond.countries.length > 0) {
     if (!ctx.country || !cond.countries.includes(ctx.country)) {
-      return { applicable: false, adjustment: 0, reason: `Country ${ctx.country} not in allowed list` };
+      return { applicable: false, adjustmentCents: 0, reason: `Country ${ctx.country} not in allowed list` };
     }
   }
   if (Array.isArray(cond.excludeCountries) && cond.excludeCountries.length > 0) {
     if (ctx.country && cond.excludeCountries.includes(ctx.country)) {
-      return { applicable: false, adjustment: 0, reason: `Country ${ctx.country} is excluded` };
+      return { applicable: false, adjustmentCents: 0, reason: `Country ${ctx.country} is excluded` };
     }
   }
 
   // State restrictions
   if (Array.isArray(cond.states) && cond.states.length > 0) {
     if (!ctx.state || !cond.states.includes(ctx.state)) {
-      return { applicable: false, adjustment: 0, reason: `State ${ctx.state} not in allowed list` };
+      return { applicable: false, adjustmentCents: 0, reason: `State ${ctx.state} not in allowed list` };
     }
   }
 
   // Postal code patterns
   if (Array.isArray(cond.postalCodePatterns) && cond.postalCodePatterns.length > 0) {
     if (!ctx.postalCode || !cond.postalCodePatterns.some((p: string) => matchGlob(p, ctx.postalCode!))) {
-      return { applicable: false, adjustment: 0, reason: `Postal code ${ctx.postalCode} does not match allowed patterns` };
+      return { applicable: false, adjustmentCents: 0, reason: `Postal code ${ctx.postalCode} does not match allowed patterns` };
     }
   }
 
@@ -122,13 +122,13 @@ export function evaluateConditions(conditions: unknown, ctx: ShippingConditionCo
     if (dateRange.from) {
       const from = new Date(dateRange.from);
       if (now < from) {
-        return { applicable: false, adjustment: 0, reason: `Rate not yet valid (valid from ${dateRange.from})` };
+        return { applicable: false, adjustmentCents: 0, reason: `Rate not yet valid (valid from ${dateRange.from})` };
       }
     }
     if (dateRange.to) {
       const to = new Date(dateRange.to);
       if (now > to) {
-        return { applicable: false, adjustment: 0, reason: `Rate expired (valid until ${dateRange.to})` };
+        return { applicable: false, adjustmentCents: 0, reason: `Rate expired (valid until ${dateRange.to})` };
       }
     }
   }
@@ -142,5 +142,5 @@ export function evaluateConditions(conditions: unknown, ctx: ShippingConditionCo
     adj -= cond.discount;
   }
 
-  return { applicable: true, adjustment: adj };
+  return { applicable: true, adjustmentCents: adj };
 }

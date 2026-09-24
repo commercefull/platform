@@ -9,9 +9,14 @@
  * longer silently ignored.
  */
 
-import { taxQueryRepository } from '../wired';
 import { TaxExemption } from '../../domain/entities/TaxExemption';
-import type { CustomerTaxExemption, ExemptionVerdict } from '../../taxTypes';
+import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemptionStatus } from '../../taxTypes';
+
+export interface TaxQueryPort {
+  getTaxRateForAddress(address: AddressInput): Promise<number>;
+  getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number>;
+  findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus): Promise<CustomerTaxExemption[]>;
+}
 
 // ============================================================================
 // Command
@@ -21,7 +26,7 @@ export interface OrderLineItem {
   productId: string;
   name: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   taxCategoryId?: string;
   taxable?: boolean;
 }
@@ -38,7 +43,7 @@ export class CalculateOrderTaxCommand {
   constructor(
     public readonly items: OrderLineItem[],
     public readonly shippingAddress: TaxAddress,
-    public readonly shippingAmount: number = 0,
+    public readonly shippingAmountCents: number = 0,
     public readonly customerId?: string,
   ) {}
 }
@@ -50,18 +55,18 @@ export class CalculateOrderTaxCommand {
 export interface TaxLineItem {
   productId: string;
   name: string;
-  subtotal: number;
-  taxAmount: number;
+  subtotalCents: number;
+  taxAmountCents: number;
   taxRate: number;
   exemptionVerdict?: ExemptionVerdict;
 }
 
 export interface CalculateOrderTaxResponse {
   success: boolean;
-  subtotal: number;
-  shippingAmount: number;
-  taxAmount: number;
-  total: number;
+  subtotalCents: number;
+  shippingAmountCents: number;
+  taxAmountCents: number;
+  totalCents: number;
   taxRate: number;
   lineItems: TaxLineItem[];
   message?: string;
@@ -72,16 +77,18 @@ export interface CalculateOrderTaxResponse {
 // ============================================================================
 
 export class CalculateOrderTaxUseCase {
+  constructor(private readonly taxQuery: TaxQueryPort) {}
+
   async execute(command: CalculateOrderTaxCommand): Promise<CalculateOrderTaxResponse> {
     try {
       // Validate input
       if (!command.items || command.items.length === 0) {
         return {
           success: false,
-          subtotal: 0,
-          shippingAmount: command.shippingAmount,
-          taxAmount: 0,
-          total: command.shippingAmount,
+          subtotalCents: 0,
+          shippingAmountCents: command.shippingAmountCents,
+          taxAmountCents: 0,
+          totalCents: command.shippingAmountCents,
           taxRate: 0,
           lineItems: [],
           message: 'No items to calculate tax for',
@@ -91,10 +98,10 @@ export class CalculateOrderTaxUseCase {
       if (!command.shippingAddress?.country) {
         return {
           success: false,
-          subtotal: 0,
-          shippingAmount: command.shippingAmount,
-          taxAmount: 0,
-          total: command.shippingAmount,
+          subtotalCents: 0,
+          shippingAmountCents: command.shippingAmountCents,
+          taxAmountCents: 0,
+          totalCents: command.shippingAmountCents,
           taxRate: 0,
           lineItems: [],
           message: 'Shipping address country is required for tax calculation',
@@ -109,32 +116,32 @@ export class CalculateOrderTaxUseCase {
       };
 
       // Get the default tax rate for the shipping address (backward compat)
-      const defaultTaxRate = await taxQueryRepository.query.getTaxRateForAddress(address);
+      const defaultTaxRate = await this.taxQuery.getTaxRateForAddress(address);
 
       // Load customer tax exemptions and convert to domain entities
       let exemptions: TaxExemption[] = [];
       if (command.customerId) {
-        const rawExemptions = await taxQueryRepository.query.findCustomerTaxExemptions(command.customerId, 'approved');
+        const rawExemptions = await this.taxQuery.findCustomerTaxExemptions(command.customerId, 'approved');
         exemptions = rawExemptions.map(e => this.toDomainEntity(e));
       }
 
       // Calculate subtotal first (needed for exemption amount-bounds checks)
-      const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+      const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
 
       // Calculate tax for each line item
       const lineItems: TaxLineItem[] = [];
       let hasAnyExemption = false;
 
       for (const item of command.items) {
-        const itemSubtotal = item.quantity * item.unitPrice;
+        const itemSubtotal = item.quantity * item.unitPriceCents;
 
         // Skip non-taxable items
         if (item.taxable === false) {
           lineItems.push({
             productId: item.productId,
             name: item.name,
-            subtotal: itemSubtotal,
-            taxAmount: 0,
+            subtotalCents: itemSubtotal,
+            taxAmountCents: 0,
             taxRate: 0,
           });
           continue;
@@ -143,7 +150,7 @@ export class CalculateOrderTaxUseCase {
         // Get the tax rate for this item's category (per-category lookup, Epic B5)
         let itemTaxRate = defaultTaxRate;
         if (item.taxCategoryId) {
-          const categoryRate = await taxQueryRepository.query.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
+          const categoryRate = await this.taxQuery.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
           // Only use the category rate if it's non-zero (zero means no specific rate found)
           if (categoryRate > 0) {
             itemTaxRate = categoryRate;
@@ -170,8 +177,8 @@ export class CalculateOrderTaxUseCase {
         lineItems.push({
           productId: item.productId,
           name: item.name,
-          subtotal: itemSubtotal,
-          taxAmount: itemTaxAmount,
+          subtotalCents: itemSubtotal,
+          taxAmountCents: Math.round(itemTaxAmount),
           taxRate: exemptionMultiplier < 1 ? itemTaxRate * exemptionMultiplier : itemTaxRate,
           exemptionVerdict,
         });
@@ -179,40 +186,40 @@ export class CalculateOrderTaxUseCase {
 
       // Calculate tax on shipping (if applicable and not fully exempt)
       const shippingExemptionMultiplier = this.shippingExemptionMultiplier(exemptions, subtotal);
-      const shippingTaxAmount = (command.shippingAmount * defaultTaxRate * shippingExemptionMultiplier) / 100;
+      const shippingTaxAmountCents = Math.round((command.shippingAmountCents * defaultTaxRate * shippingExemptionMultiplier) / 100);
 
       // Calculate total tax
-      const totalTaxAmount = lineItems.reduce((sum, item) => sum + item.taxAmount, 0) + shippingTaxAmount;
+      const totalTaxAmountCents = lineItems.reduce((sum, item) => sum + item.taxAmountCents, 0) + shippingTaxAmountCents;
 
       // Calculate grand total
-      const total = subtotal + command.shippingAmount + totalTaxAmount;
+      const totalCents = subtotal + command.shippingAmountCents + totalTaxAmountCents;
 
       return {
         success: true,
-        subtotal,
-        shippingAmount: command.shippingAmount,
-        taxAmount: totalTaxAmount,
-        total,
+        subtotalCents: subtotal,
+        shippingAmountCents: command.shippingAmountCents,
+        taxAmountCents: totalTaxAmountCents,
+        totalCents,
         taxRate: defaultTaxRate,
         lineItems,
         message: hasAnyExemption ? 'Tax exemption applied' : undefined,
       };
     } catch (error: unknown) {
       // Return a safe fallback with zero tax
-      const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+      const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
 
       return {
         success: false,
-        subtotal,
-        shippingAmount: command.shippingAmount,
-        taxAmount: 0,
-        total: subtotal + command.shippingAmount,
+        subtotalCents: subtotal,
+        shippingAmountCents: command.shippingAmountCents,
+        taxAmountCents: 0,
+        totalCents: subtotal + command.shippingAmountCents,
         taxRate: 0,
         lineItems: command.items.map(item => ({
           productId: item.productId,
           name: item.name,
-          subtotal: item.quantity * item.unitPrice,
-          taxAmount: 0,
+          subtotalCents: item.quantity * item.unitPriceCents,
+          taxAmountCents: 0,
           taxRate: 0,
         })),
         message: (error as Error).message || 'Failed to calculate tax',
@@ -235,8 +242,8 @@ export class CalculateOrderTaxUseCase {
       expiryDate: raw.expiryDate,
       isVerified: raw.isVerified,
       applicableTaxCategoryIds: raw.applicableTaxCategoryIds ?? null,
-      minOrderAmount: raw.minOrderAmount ?? null,
-      maxOrderAmount: raw.maxOrderAmount ?? null,
+      minOrderAmountCents: raw.minOrderAmountCents ?? null,
+      maxOrderAmountCents: raw.maxOrderAmountCents ?? null,
       exemptionPercent: raw.exemptionPercent ?? 100,
     });
   }
@@ -251,7 +258,7 @@ export class CalculateOrderTaxUseCase {
     taxCategoryId: string | undefined,
     orderSubtotal: number,
   ): { multiplier: number; verdict: ExemptionVerdict } | null {
-    const context = { taxCategoryId, orderSubtotal };
+    const context = { taxCategoryId, orderSubtotalCents: orderSubtotal };
 
     // First, try category-specific exemptions
     if (taxCategoryId) {
@@ -284,12 +291,10 @@ export class CalculateOrderTaxUseCase {
     for (const e of exemptions) {
       // Category-agnostic exemptions (null applicableTaxCategoryIds) apply to shipping
       if (e.applicableTaxCategoryIds === null || e.applicableTaxCategoryIds === undefined) {
-        const multiplier = e.effectiveTaxRateMultiplier({ orderSubtotal });
+        const multiplier = e.effectiveTaxRateMultiplier({ orderSubtotalCents: orderSubtotal });
         if (multiplier < 1) return multiplier;
       }
     }
     return 1;
   }
 }
-
-export const calculateOrderTaxUseCase = new CalculateOrderTaxUseCase();

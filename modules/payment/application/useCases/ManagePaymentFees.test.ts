@@ -1,28 +1,22 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      findAllFees: jest.fn().mockResolvedValue([{ feeId: 'f1', amount: 5 }]),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentFee } from '../../tests/testUtils';
 import { ManagePaymentFeesUseCase } from './ManagePaymentFees';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-
-const mockRepo = paymentBillingDataRepository as unknown as { billing: Record<string, jest.Mock> };
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('ManagePaymentFeesUseCase', () => {
   let useCase: ManagePaymentFeesUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManagePaymentFeesUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    useCase = new ManagePaymentFeesUseCase(repo);
   });
 
   it('should find all fees', async () => {
+    repo.findAllFees.mockResolvedValue([createPaymentFee({ amountCents: 5 })]);
+
     const result = await useCase.findAll(10);
+
     expect(result).toHaveLength(1);
-    expect(mockRepo.billing.findAllFees).toHaveBeenCalledWith(10);
+    expect(repo.findAllFees).toHaveBeenCalledWith(10);
   });
 });

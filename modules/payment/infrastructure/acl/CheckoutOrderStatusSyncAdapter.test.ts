@@ -1,50 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
-jest.mock('../../../checkout/infrastructure/repositories/CheckoutRepository', () => ({
-  __esModule: true,
-  default: {
-    findByPaymentIntentId: jest.fn(),
-    findById: jest.fn(),
-    save: jest.fn(),
-  },
-}));
-
-jest.mock('../../../order/infrastructure/repositories/OrderDataRepository', () => ({
-  __esModule: true,
-  default: {
-    commands: {
-      findById: jest.fn(),
-      save: jest.fn(),
-    },
-  },
-}));
-
 jest.mock('../../../order/application/useCases/UpdateOrderStatus', () => ({
   __esModule: true,
-  UpdateOrderStatusUseCase: jest.fn().mockImplementation(() => ({
-    execute: jest.fn(),
-  })),
+  UpdateOrderStatusUseCase: jest.fn(),
   UpdateOrderStatusCommand: jest.fn(),
 }));
 
 import { CheckoutOrderStatusSyncAdapter } from './CheckoutOrderStatusSyncAdapter';
+import { UpdateOrderStatusUseCase } from '../../../order/application/useCases/UpdateOrderStatus';
+import type CheckoutRepo from '../../../checkout/infrastructure/repositories/CheckoutRepository';
+import type { CheckoutSession } from '../../../checkout/domain/entities/CheckoutSession';
+import type { Order } from '../../../order/domain/entities/Order';
+import type { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
 
 describe('CheckoutOrderStatusSyncAdapter', () => {
   let adapter: CheckoutOrderStatusSyncAdapter;
-  let mockCheckoutRepo: any;
-  let mockOrderRepo: any;
-  let mockExecute: any;
+  let mockCheckoutRepo: jest.Mocked<Pick<typeof CheckoutRepo, 'findByPaymentIntentId'>>;
+  let mockOrderRepo: jest.Mocked<Pick<OrderRepository, 'findById' | 'save'>>;
+  let mockExecute: jest.Mock;
 
   beforeEach(() => {
-    mockCheckoutRepo = require('../../../checkout/infrastructure/repositories/CheckoutRepository').default;
-    mockOrderRepo = require('../../../order/infrastructure/repositories/OrderDataRepository').default.commands;
-    const { UpdateOrderStatusUseCase } = require('../../../order/application/useCases/UpdateOrderStatus');
+    mockCheckoutRepo = { findByPaymentIntentId: jest.fn() };
+    mockOrderRepo = { findById: jest.fn(), save: jest.fn() };
     mockExecute = jest.fn();
-    UpdateOrderStatusUseCase.mockImplementation(() => ({
+    (UpdateOrderStatusUseCase as unknown as jest.Mock).mockImplementation(() => ({
       execute: mockExecute,
     }));
 
-    adapter = new CheckoutOrderStatusSyncAdapter();
+    adapter = new CheckoutOrderStatusSyncAdapter(mockCheckoutRepo, mockOrderRepo as unknown as OrderRepository);
   });
 
   it('implements OrderStatusSyncPort', () => {
@@ -57,9 +38,9 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
       id: 'cs-1',
       orderId: 'ord-1',
       customerId: 'cust-1',
-      total: { amount: 99.99 },
-    });
-    mockOrderRepo.findById.mockResolvedValue({ orderNumber: 'ORD-100' });
+      total: { cents: 9999 },
+    } as unknown as CheckoutSession);
+    mockOrderRepo.findById.mockResolvedValue({ orderNumber: 'ORD-100' } as unknown as Order);
 
     const result = await adapter.findCheckoutByPaymentIntentId('pi_123');
 
@@ -67,7 +48,7 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
     expect(result!.checkoutId).toBe('cs-1');
     expect(result!.orderId).toBe('ord-1');
     expect(result!.customerId).toBe('cust-1');
-    expect(result!.totalAmount).toBe(99.99);
+    expect(result!.totalAmountCents).toBe(9999);
     expect(result!.orderNumber).toBe('ORD-100');
   });
 
@@ -85,7 +66,7 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
       orderId: null,
       customerId: 'cust-1',
       total: { amount: 50 },
-    });
+    } as unknown as CheckoutSession);
 
     const result = await adapter.findCheckoutByPaymentIntentId('pi_123');
 
@@ -93,7 +74,7 @@ describe('CheckoutOrderStatusSyncAdapter', () => {
   });
 
   it('should mark order paid and return orderNumber', async () => {
-    mockOrderRepo.findById.mockResolvedValue({ orderNumber: 'ORD-200', updatePaymentStatus: jest.fn() });
+    mockOrderRepo.findById.mockResolvedValue({ orderNumber: 'ORD-200', updatePaymentStatus: jest.fn() } as unknown as Order);
 
     const result = await adapter.markOrderPaid('ord-1');
 

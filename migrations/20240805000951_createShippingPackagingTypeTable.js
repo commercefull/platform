@@ -19,8 +19,8 @@ exports.up = function (knex) {
     t.decimal('volume', 10, 2).notNullable();
     t.decimal('maxWeight', 10, 2);
     t.integer('maxItems');
-    t.decimal('cost', 10, 2);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.bigInteger('costCents');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('recyclable').notNullable().defaultTo(false);
     t.text('imageUrl');
     t.specificType('validCarriers', 'text[]');

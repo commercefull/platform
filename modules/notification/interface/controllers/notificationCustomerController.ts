@@ -3,14 +3,12 @@ import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const notificationPreferenceRepo = notificationConfigRepository.preferences;
 const notificationDeviceRepo = notificationConfigRepository.devices;
+import { ManageNotificationPreferenceCommand } from '../../application/useCases/ManageNotificationPreference';
+import { RegisterNotificationDeviceCommand } from '../../application/useCases/RegisterNotificationDevice';
 import {
-  ManageNotificationPreferenceUseCase,
-  ManageNotificationPreferenceCommand,
-} from '../../application/useCases/ManageNotificationPreference';
-import {
-  RegisterNotificationDeviceUseCase,
-  RegisterNotificationDeviceCommand,
-} from '../../application/useCases/RegisterNotificationDevice';
+  manageNotificationPreferenceUseCase,
+  registerNotificationDeviceUseCase,
+} from '../../application/useCases/wired';
 import { notificationConfigRepository } from '../../application/wired';
 import { NotificationPreference } from '../../application/wired';
 
@@ -108,7 +106,7 @@ export const createPreference = async (req: HttpRequest, res: HttpResponse): Pro
     return;
   }
 
-  const useCase = new ManageNotificationPreferenceUseCase(notificationPreferenceRepo);
+  const useCase = manageNotificationPreferenceUseCase;
   const result = await useCase.execute(
     new ManageNotificationPreferenceCommand(
       userId,
@@ -284,7 +282,7 @@ export const registerDevice = async (req: HttpRequest, res: HttpResponse): Promi
   }
 
   const { deviceToken, platform } = req.body as { deviceToken: string; platform: string };
-  const useCase = new RegisterNotificationDeviceUseCase(notificationDeviceRepo);
+  const useCase = registerNotificationDeviceUseCase;
   const result = await useCase.execute(new RegisterNotificationDeviceCommand(userId, 'customer', deviceToken, platform));
 
   successResponse(res, result, 201);

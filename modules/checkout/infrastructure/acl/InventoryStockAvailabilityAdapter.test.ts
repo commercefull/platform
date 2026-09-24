@@ -1,22 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
-jest.mock('../../../inventory/infrastructure/repositories/inventoryRepo', () => ({
-  __esModule: true,
-  default: {
-    checkProductAvailability: jest.fn(),
-  },
-}));
-
 import { InventoryStockAvailabilityAdapter } from './InventoryStockAvailabilityAdapter';
+import type InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 
 describe('InventoryStockAvailabilityAdapter', () => {
   let adapter: InventoryStockAvailabilityAdapter;
-
-  let InventoryRepo: any;
+  let inventoryRepo: jest.Mocked<Pick<typeof InventoryRepo, 'checkProductAvailability'>>;
 
   beforeEach(() => {
-    InventoryRepo = require('../../../inventory/infrastructure/repositories/inventoryRepo').default;
-    adapter = new InventoryStockAvailabilityAdapter();
+    inventoryRepo = { checkProductAvailability: jest.fn() };
+    adapter = new InventoryStockAvailabilityAdapter(inventoryRepo);
   });
 
   it('implements StockAvailabilityPort', () => {
@@ -24,7 +15,7 @@ describe('InventoryStockAvailabilityAdapter', () => {
   });
 
   it('should map inventory result to checkout vocabulary', async () => {
-    InventoryRepo.checkProductAvailability.mockResolvedValue({
+    inventoryRepo.checkProductAvailability.mockResolvedValue({
       available: true,
       totalAvailable: 50,
       locations: [],
@@ -40,7 +31,7 @@ describe('InventoryStockAvailabilityAdapter', () => {
   });
 
   it('should report unavailable when stock is insufficient', async () => {
-    InventoryRepo.checkProductAvailability.mockResolvedValue({
+    inventoryRepo.checkProductAvailability.mockResolvedValue({
       available: false,
       totalAvailable: 2,
       locations: [],
@@ -56,7 +47,7 @@ describe('InventoryStockAvailabilityAdapter', () => {
   });
 
   it('should pass productVariantId to inventory repo', async () => {
-    InventoryRepo.checkProductAvailability.mockResolvedValue({
+    inventoryRepo.checkProductAvailability.mockResolvedValue({
       available: true,
       totalAvailable: 100,
       locations: [],
@@ -68,6 +59,6 @@ describe('InventoryStockAvailabilityAdapter', () => {
       quantity: 1,
     });
 
-    expect(InventoryRepo.checkProductAvailability).toHaveBeenCalledWith('prod-1', 'var-1', 1);
+    expect(inventoryRepo.checkProductAvailability).toHaveBeenCalledWith('prod-1', 'var-1', 1);
   });
 });

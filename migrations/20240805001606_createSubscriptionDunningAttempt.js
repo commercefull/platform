@@ -14,8 +14,8 @@ exports.up = function (knex) {
     table.uuid('subscriptionOrderId').references('subscriptionOrderId').inTable('subscriptionOrder');
     table.integer('attemptNumber').notNullable();
     table.string('status').defaultTo('pending'); // pending, processing, success, failed, skipped
-    table.decimal('amount', 15, 2).notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.bigInteger('amountCents').notNullable();
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.timestamp('scheduledAt').notNullable();
     table.timestamp('attemptedAt');
     table.string('paymentMethodId');

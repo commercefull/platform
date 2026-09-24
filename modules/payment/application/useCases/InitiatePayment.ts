@@ -15,7 +15,7 @@ import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../.
 export class InitiatePaymentCommand {
   constructor(
     public readonly orderId: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly currency: string,
     public readonly paymentMethodConfigId: string,
     public readonly customerId?: string,
@@ -31,7 +31,7 @@ export class InitiatePaymentCommand {
 export interface InitiatePaymentResponse {
   transactionId: string;
   orderId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: string;
   createdAt: string;
@@ -45,7 +45,7 @@ export class InitiatePaymentUseCase {
   constructor(private readonly paymentRepository: PaymentRepository) {}
 
   async execute(command: InitiatePaymentCommand): Promise<InitiatePaymentResponse> {
-    if (command.amount <= 0) {
+    if (command.amountCents <= 0) {
       throw new AmountMustBePositiveError();
     }
 
@@ -63,7 +63,7 @@ export class InitiatePaymentUseCase {
       customerId: command.customerId,
       paymentMethodConfigId: command.paymentMethodConfigId,
       gatewayId: gateway.gatewayId,
-      amount: command.amount,
+      amountCents: command.amountCents,
       currency: command.currency,
       customerIp: command.customerIp,
       metadata: command.metadata,
@@ -75,14 +75,14 @@ export class InitiatePaymentUseCase {
     eventBus.emit('payment.received', {
       transactionId: transaction.transactionId,
       orderId: transaction.orderId,
-      amount: transaction.amount,
+      amountCents: transaction.amountCents,
       currency: transaction.currency,
     });
 
     return {
       transactionId: transaction.transactionId,
       orderId: transaction.orderId,
-      amount: transaction.amount,
+      amountCents: transaction.amountCents,
       currency: transaction.currency,
       status: transaction.status,
       createdAt: transaction.createdAt.toISOString(),

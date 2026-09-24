@@ -14,7 +14,7 @@ exports.up = function (knex) {
     table.integer('maxQuantity');
     table.boolean('isRequired').defaultTo(true);
     table.boolean('isDefault').defaultTo(false);
-    table.decimal('priceAdjustment', 15, 2).defaultTo(0);
+    table.bigInteger('priceAdjustmentCents').defaultTo(0);
     table.decimal('discountPercent', 5, 2).defaultTo(0);
     table.integer('sortOrder').defaultTo(0);
     table.jsonb('metadata');

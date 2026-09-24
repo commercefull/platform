@@ -2,42 +2,25 @@
  * Unit Tests for PublishPage Use Case
  */
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentPage, emitMock } from '../../tests/testUtils';
 import { PublishPageUseCase, PublishPageCommand } from './PublishPage';
 import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('PublishPageUseCase', () => {
   let useCase: PublishPageUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof PublishPageUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findPageById: jest.fn(),
-      updatePage: jest.fn(),
-    };
-    useCase = new PublishPageUseCase(mockRepo as never as ConstructorParameters<typeof PublishPageUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
+    mockRepo = lazyMock<ConstructorParameters<typeof PublishPageUseCase>[0]>();
+    useCase = new PublishPageUseCase(mockRepo);
+    emitMock.mockClear();
   });
 
   it('should publish a draft page', async () => {
-    mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'page-1',
-      title: 'About Us',
-      slug: 'about-us',
-      status: 'draft',
-    });
-    mockRepo.updatePage.mockResolvedValue({
-      contentPageId: 'page-1',
-      title: 'About Us',
-      slug: 'about-us',
-      status: 'published',
-      publishedAt: new Date('2024-06-01'),
-    });
+    mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us' }));
+    mockRepo.updatePage.mockResolvedValue(
+      createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published', publishedAt: new Date('2024-06-01') }),
+    );
 
     const result = await useCase.execute(new PublishPageCommand('page-1', 'user-1'));
 
@@ -50,7 +33,7 @@ describe('PublishPageUseCase', () => {
         status: 'published',
       }),
     );
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'content.page.published',
       expect.objectContaining({
         pageId: 'page-1',
@@ -70,12 +53,7 @@ describe('PublishPageUseCase', () => {
   });
 
   it('should throw ContentValidationError when page is already published', async () => {
-    mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'page-1',
-      title: 'About Us',
-      slug: 'about-us',
-      status: 'published',
-    });
+    mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }));
 
     await expect(useCase.execute(new PublishPageCommand('page-1'))).rejects.toThrow(ContentValidationError);
   });

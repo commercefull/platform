@@ -1,20 +1,17 @@
-jest.mock('../../infrastructure/repositories/DynamicAttributeRepository', () => ({
-  __esModule: true,
-  DynamicAttributeRepository: jest.fn().mockImplementation(() => ({
-    getProductAttributes: jest.fn().mockResolvedValue([{ attributeId: 'a1', name: 'Color', value: 'Red' }]),
-    findAllAttributes: jest.fn().mockResolvedValue([{ attributeId: 'a1', name: 'Color' }]),
-  })),
-}));
 
 import { GetProductAttributesUseCase } from './GetProductAttributes';
-import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
+import { createAttribute, createAttributeData, lazyMock } from '../../tests/testUtils';
 
 describe('GetProductAttributesUseCase', () => {
   let useCase: GetProductAttributesUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetProductAttributesUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetProductAttributesUseCase(new DynamicAttributeRepository() as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof GetProductAttributesUseCase>[0]>();
+    mockRepo.getProductAttributes.mockResolvedValue([{ ...createAttributeData(), attribute: createAttribute() }]);
+    mockRepo.findAllAttributes.mockResolvedValue([createAttribute()]);
+    useCase = new GetProductAttributesUseCase(mockRepo);
   });
 
   it('should get product attributes', async () => {

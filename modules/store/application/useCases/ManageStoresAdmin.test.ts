@@ -1,77 +1,91 @@
-import { ManageStoresAdminUseCase } from './ManageStoresAdmin';
-import type { StoreRepository } from '../../domain/repositories/StoreRepository';
+/**
+ * Unit Tests for ManageStoresAdmin Use Case
+ */
 
-const mockStoreRepository: StoreRepository = {
-  findById: jest.fn().mockResolvedValue({ storeId: 's1' }),
-  findBySlug: jest.fn().mockResolvedValue({ storeId: 's1', slug: 'main' }),
-  findByUrl: jest.fn().mockResolvedValue(null),
-  findAll: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-  save: jest.fn().mockResolvedValue({ storeId: 's2' }),
-  delete: jest.fn().mockResolvedValue(true),
-  count: jest.fn().mockResolvedValue(1),
-  findByMerchant: jest.fn().mockResolvedValue([]),
-  findByBusiness: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-  findHeadquarters: jest.fn().mockResolvedValue(null),
-  findOutlets: jest.fn().mockResolvedValue([]),
-  findActive: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-  findFeatured: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-  findByType: jest.fn().mockResolvedValue([{ storeId: 's1' }]),
-  updateStats: jest.fn().mockResolvedValue(undefined),
-  updatePickupSettings: jest.fn().mockResolvedValue({ storeId: 's1' }),
-  updateLocalDeliverySettings: jest.fn().mockResolvedValue({ storeId: 's1' }),
-  createHierarchy: jest.fn().mockResolvedValue({ hierarchyId: 'h1' }),
-};
+import { createStoreRepository, createStore } from '../../tests/testUtils';
+import { ManageStoresAdminUseCase } from './ManageStoresAdmin';
 
 describe('ManageStoresAdminUseCase', () => {
   let useCase: ManageStoresAdminUseCase;
+  let storeRepository: ReturnType<typeof createStoreRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageStoresAdminUseCase(mockStoreRepository);
+    storeRepository = createStoreRepository();
+    useCase = new ManageStoresAdminUseCase(storeRepository);
   });
 
-  it('should find by ID', async () => {
-    const result = await useCase.findById('s1');
-    expect(result).toEqual({ storeId: 's1' });
+  it('should return the store by id', async () => {
+    storeRepository.findById.mockResolvedValue(createStore());
+
+    const result = await useCase.findById('store-1');
+
+    expect(result?.storeId).toBe('store-1');
   });
 
-  it('should find by slug', async () => {
-    const result = await useCase.findBySlug('main');
-    expect(result).toEqual({ storeId: 's1', slug: 'main' });
+  it('should return the store by slug', async () => {
+    storeRepository.findBySlug.mockResolvedValue(createStore({ slug: 'flagship' }));
+
+    const result = await useCase.findBySlug('flagship');
+
+    expect(result?.slug).toBe('flagship');
   });
 
-  it('should find all', async () => {
-    const result = await useCase.findAll();
+  it('should list stores with the given filters', async () => {
+    storeRepository.findAll.mockResolvedValue([createStore()]);
+
+    const result = await useCase.findAll({ isActive: true });
+
+    expect(storeRepository.findAll).toHaveBeenCalledWith({ isActive: true });
     expect(result).toHaveLength(1);
   });
 
-  it('should save', async () => {
-    const result = await useCase.save({ name: 'New Store' } as never);
-    expect(result).toEqual({ storeId: 's2' });
+  it('should save the store', async () => {
+    const store = createStore();
+    storeRepository.save.mockResolvedValue(store);
+
+    const result = await useCase.save(store);
+
+    expect(storeRepository.save).toHaveBeenCalledWith(store);
+    expect(result).toBe(store);
   });
 
-  it('should delete', async () => {
-    const result = await useCase.delete('s1');
-    expect(result).toBe(true);
+  it('should delete the store', async () => {
+    await useCase.delete('store-1');
+
+    expect(storeRepository.delete).toHaveBeenCalledWith('store-1');
   });
 
-  it('should count', async () => {
-    const result = await useCase.count();
-    expect(result).toBe(1);
+  it('should count stores with the given filters', async () => {
+    storeRepository.count.mockResolvedValue(7);
+
+    const result = await useCase.count({ isActive: true });
+
+    expect(result).toBe(7);
   });
 
-  it('should find by business', async () => {
-    const result = await useCase.findByBusiness('org1');
+  it('should list stores for a business', async () => {
+    storeRepository.findByBusiness.mockResolvedValue([createStore()]);
+
+    const result = await useCase.findByBusiness('org-1');
+
+    expect(storeRepository.findByBusiness).toHaveBeenCalledWith('org-1');
     expect(result).toHaveLength(1);
   });
 
-  it('should find active', async () => {
+  it('should list active stores', async () => {
+    storeRepository.findActive.mockResolvedValue([createStore()]);
+
     const result = await useCase.findActive();
+
     expect(result).toHaveLength(1);
   });
 
-  it('should find by type', async () => {
-    const result = await useCase.findByType('physical');
+  it('should list stores by type', async () => {
+    storeRepository.findByType.mockResolvedValue([createStore({ storeType: 'merchant_store' })]);
+
+    const result = await useCase.findByType('merchant_store');
+
+    expect(storeRepository.findByType).toHaveBeenCalledWith('merchant_store');
     expect(result).toHaveLength(1);
   });
 });

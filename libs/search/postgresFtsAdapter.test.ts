@@ -22,7 +22,7 @@ describe('PostgresFtsAdapter', () => {
 
   describe('search', () => {
     it('returns empty results when no data', async () => {
-      mockedQuery.mockResolvedValue([] as never);
+      mockedQuery.mockResolvedValue([] as never[]);
 
       const result = await adapter.search({ query: 'test' });
 
@@ -39,7 +39,7 @@ describe('PostgresFtsAdapter', () => {
           name: 'Test Product',
           slug: 'test-product',
           sku: 'SKU001',
-          price: 29.99,
+          priceCents: 2999,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -49,9 +49,9 @@ describe('PostgresFtsAdapter', () => {
       ];
 
       mockedQuery
-        .mockResolvedValueOnce(mockProducts as never)
-        .mockResolvedValueOnce([{ count: '1' }] as never)
-        .mockResolvedValue([] as never); // facets
+        .mockResolvedValueOnce(mockProducts as never[])
+        .mockResolvedValueOnce([{ count: '1' }] as never[])
+        .mockResolvedValue([] as never[]); // facets
 
       const result = await adapter.search({ query: 'test', includeFacets: false });
 
@@ -66,7 +66,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'normal1',
           name: 'Normal 1',
           slug: 'n1',
-          price: 10,
+          priceCents: 1000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -77,7 +77,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'boosted1',
           name: 'Boosted 1',
           slug: 'b1',
-          price: 20,
+          priceCents: 2000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -88,7 +88,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'buried1',
           name: 'Buried 1',
           slug: 'br1',
-          price: 30,
+          priceCents: 3000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -99,7 +99,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'pinned1',
           name: 'Pinned 1',
           slug: 'p1',
-          price: 40,
+          priceCents: 4000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -108,7 +108,7 @@ describe('PostgresFtsAdapter', () => {
         },
       ];
 
-      mockedQuery.mockResolvedValueOnce(mockProducts as never).mockResolvedValueOnce([{ count: '4' }] as never);
+      mockedQuery.mockResolvedValueOnce(mockProducts as never[]).mockResolvedValueOnce([{ count: '4' }] as never[]);
 
       const result = await adapter.search({
         query: 'test',
@@ -135,7 +135,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'p3',
           name: 'Product 3',
           slug: 'p3',
-          price: 30,
+          priceCents: 3000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -146,7 +146,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'p1',
           name: 'Product 1',
           slug: 'p1',
-          price: 10,
+          priceCents: 1000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -157,7 +157,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'p2',
           name: 'Product 2',
           slug: 'p2',
-          price: 20,
+          priceCents: 2000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -168,7 +168,7 @@ describe('PostgresFtsAdapter', () => {
           productId: 'p4',
           name: 'Product 4',
           slug: 'p4',
-          price: 40,
+          priceCents: 4000,
           status: 'active',
           visibility: 'visible',
           isFeatured: false,
@@ -177,7 +177,7 @@ describe('PostgresFtsAdapter', () => {
         },
       ];
 
-      mockedQuery.mockResolvedValueOnce(mockProducts as never).mockResolvedValueOnce([{ count: '4' }] as never);
+      mockedQuery.mockResolvedValueOnce(mockProducts as never[]).mockResolvedValueOnce([{ count: '4' }] as never[]);
 
       const result = await adapter.search({
         categoryId: 'cat1',
@@ -215,8 +215,8 @@ describe('PostgresFtsAdapter', () => {
         .mockResolvedValueOnce([
           { text: 'Red Shirt', type: 'product', productId: 'p1' },
           { text: 'Red Dress', type: 'product', productId: 'p2' },
-        ] as never)
-        .mockResolvedValueOnce([{ text: 'Red Collection', type: 'category', categoryId: 'c1' }] as never);
+        ] as never[])
+        .mockResolvedValueOnce([{ text: 'Red Collection', type: 'category', categoryId: 'c1' }] as never[]);
 
       const result = await adapter.autocomplete('red', 10);
 
@@ -234,7 +234,7 @@ describe('PostgresFtsAdapter', () => {
     });
 
     it('indexAll returns product count', async () => {
-      mockedQuery.mockResolvedValueOnce([{ count: '42' }] as never);
+      mockedQuery.mockResolvedValueOnce([{ count: '42' }] as never[]);
       const count = await adapter.indexAll();
       expect(count).toBe(42);
     });
@@ -246,14 +246,14 @@ describe('PostgresFtsAdapter', () => {
 
   describe('health', () => {
     it('returns healthy when DB responds', async () => {
-      mockedQuery.mockResolvedValueOnce([{ '?column?': 1 }] as never);
+      mockedQuery.mockResolvedValueOnce([{ '?column?': 1 }] as never[]);
       const result = await adapter.health();
       expect(result.healthy).toBe(true);
       expect(result.details?.backend).toBe('postgres-fts');
     });
 
     it('returns unhealthy when DB fails', async () => {
-      mockedQuery.mockRejectedValueOnce(new Error('Connection refused') as never);
+      mockedQuery.mockRejectedValueOnce(new Error('Connection refused'));
       const result = await adapter.health();
       expect(result.healthy).toBe(false);
     });

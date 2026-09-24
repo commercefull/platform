@@ -15,14 +15,14 @@ exports.up = function (knex) {
     table.string('sku');
     table.string('status').defaultTo('active'); // active, notified, purchased, cancelled, expired
     table.string('alertType').defaultTo('target'); // target, any_drop, percentage_drop
-    table.decimal('targetPrice', 15, 2);
+    table.bigInteger('targetPriceCents');
     table.decimal('percentageDrop', 5, 2);
-    table.decimal('originalPrice', 15, 2);
-    table.decimal('currentPrice', 15, 2);
-    table.string('currency', 3).defaultTo('USD');
+    table.bigInteger('originalPriceCents');
+    table.bigInteger('currentPriceCents');
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.string('notificationChannel').defaultTo('email'); // email, sms, push, all
     table.timestamp('notifiedAt');
-    table.decimal('notifiedPrice', 15, 2);
+    table.bigInteger('notifiedPriceCents');
     table.integer('notificationCount').defaultTo(0);
     table.timestamp('lastNotifiedAt');
     table.timestamp('purchasedAt');
@@ -36,7 +36,7 @@ exports.up = function (knex) {
     table.index(['productVariantId', 'status']);
     table.index('customerId');
     table.index('email');
-    table.index('targetPrice');
+    table.index('targetPriceCents');
   });
 };
 

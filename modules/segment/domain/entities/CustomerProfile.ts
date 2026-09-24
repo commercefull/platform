@@ -7,9 +7,9 @@ export interface CustomerProfileProps {
   status: string | null;
   tier: string | null;
 
-  lifetimeValue: number;
-  totalSpent: number;
-  averageOrderValue: number;
+  lifetimeValueCents: number;
+  totalSpentCents: number;
+  averageOrderValueCents: number;
   totalOrders: number;
 
   firstOrderDate: Date | null;
@@ -70,9 +70,9 @@ export class CustomerProfile {
       lastName: params.lastName ?? null,
       status: null,
       tier: null,
-      lifetimeValue: 0,
-      totalSpent: 0,
-      averageOrderValue: 0,
+      lifetimeValueCents: 0,
+      totalSpentCents: 0,
+      averageOrderValueCents: 0,
       totalOrders: 0,
       firstOrderDate: null,
       lastOrderDate: null,
@@ -123,14 +123,14 @@ export class CustomerProfile {
   get lastName(): string | null {
     return this.props.lastName;
   }
-  get lifetimeValue(): number {
-    return this.props.lifetimeValue;
+  get lifetimeValueCents(): number {
+    return this.props.lifetimeValueCents;
   }
-  get totalSpent(): number {
-    return this.props.totalSpent;
+  get totalSpentCents(): number {
+    return this.props.totalSpentCents;
   }
-  get averageOrderValue(): number {
-    return this.props.averageOrderValue;
+  get averageOrderValueCents(): number {
+    return this.props.averageOrderValueCents;
   }
   get totalOrders(): number {
     return this.props.totalOrders;
@@ -178,7 +178,7 @@ export class CustomerProfile {
   computeRFM(): void {
     const r = this.props.daysSinceLastOrder ?? 999;
     const f = this.props.totalOrders;
-    const m = this.props.lifetimeValue;
+    const m = this.props.lifetimeValueCents;
 
     let rScore: number, fScore: number, mScore: number;
 

@@ -21,9 +21,9 @@ export type PaymentTransactionCreateParams = MakeOptional<
   | 'paymentMethodId'
   | 'paymentGatewayId'
   | 'externalTransactionId'
-  | 'currency'
+  | 'currencyCode'
   | 'paymentMethodDetails'
-  | 'refundedAmount'
+  | 'refundedAmountCents'
   | 'metadata'
   | 'customerIp'
   | 'authorizedAt'
@@ -38,7 +38,7 @@ export type PaymentRefundCreateParams = MakeOptional<
   | 'refundId'
   | 'paymentTransactionId'
   | 'externalRefundId'
-  | 'currency'
+  | 'currencyCode'
   | 'gatewayResponse'
   | 'errorCode'
   | 'errorMessage'
@@ -82,7 +82,7 @@ export interface PaymentGatewayRepository {
     orderPaymentId: string;
     orderId: string;
     customerId?: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     paymentMethodId?: string;
     paymentGatewayId?: string;
@@ -91,7 +91,7 @@ export interface PaymentGatewayRepository {
     orderPaymentId: string;
     orderId: string;
     paymentTransactionId: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     reason?: string;
   }): Promise<{ success: boolean; refundId?: string; error?: string }>;

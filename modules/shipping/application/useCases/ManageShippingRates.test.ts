@@ -1,66 +1,61 @@
-jest.mock('../../infrastructure/repositories/ShippingConfigRepository', () => ({
-  __esModule: true,
-  default: {
-    carriers: {},
-    methods: {
-      findAll: jest.fn().mockResolvedValue([{ shippingMethodId: 'm1' }]),
-      findById: jest.fn().mockResolvedValue({ shippingMethodId: 'm1', name: 'Ground' }),
-    },
-    zones: {
-      findAll: jest.fn().mockResolvedValue([{ shippingZoneId: 'z1' }]),
-      findById: jest.fn().mockResolvedValue({ shippingZoneId: 'z1', name: 'US' }),
-    },
-    rates: {
-      findActive: jest.fn().mockResolvedValue([{ shippingRateId: 'r1' }]),
-      findById: jest.fn().mockResolvedValue({ shippingRateId: 'r1', baseRate: 10 }),
-      create: jest.fn().mockResolvedValue({ shippingRateId: 'r2' }),
-      update: jest.fn().mockResolvedValue({ shippingRateId: 'r1', baseRate: 15 }),
-      activate: jest.fn().mockResolvedValue(true),
-      deactivate: jest.fn().mockResolvedValue(true),
-      delete: jest.fn().mockResolvedValue(true),
-      findByZoneAndMethod: jest.fn().mockResolvedValue({ shippingRateId: 'r1' }),
-      calculateRate: jest.fn().mockReturnValue(12.5),
-    },
-  },
-}));
-
+import { createShippingRatePort, createShippingRate } from '../../tests/testUtils';
 import { ManageShippingRatesUseCase } from './ManageShippingRates';
 
 describe('ManageShippingRatesUseCase', () => {
   let useCase: ManageShippingRatesUseCase;
+  let rateRepo: ReturnType<typeof createShippingRatePort>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManageShippingRatesUseCase();
+    rateRepo = createShippingRatePort();
+    useCase = new ManageShippingRatesUseCase(rateRepo);
   });
 
-  it('should find active rates', async () => {
+  it('should find active rates for a zone and method', async () => {
+    rateRepo.findActive.mockResolvedValue([createShippingRate()]);
+
     const result = await useCase.findActive('z1', 'm1');
+
     expect(result).toHaveLength(1);
+    expect(rateRepo.findActive).toHaveBeenCalledWith('z1', 'm1');
   });
 
-  it('should find by ID', async () => {
+  it('should find a rate by ID', async () => {
+    rateRepo.findById.mockResolvedValue(createShippingRate({ shippingRateId: 'r1' }));
+
     const result = await useCase.findById('r1');
-    expect(result).toEqual({ shippingRateId: 'r1', baseRate: 10 });
+
+    expect(result?.shippingRateId).toBe('r1');
   });
 
-  it('should create', async () => {
-    const result = await useCase.create({ baseRate: 10 } as never);
-    expect(result).toEqual({ shippingRateId: 'r2' });
+  it('should create a rate', async () => {
+    rateRepo.create.mockImplementation(async input => createShippingRate({ ...input, shippingRateId: 'r2' }));
+
+    const { shippingRateId: _r, createdAt: _c, updatedAt: _u, ...input } = createShippingRate({ baseRateCents: 1000 });
+
+    const result = await useCase.create(input);
+
+    expect(result.shippingRateId).toBe('r2');
   });
 
-  it('should activate', async () => {
+  it('should activate a rate', async () => {
+    rateRepo.activate.mockResolvedValue(createShippingRate({ isActive: true }));
+
     const result = await useCase.activate('r1');
-    expect(result).toBe(true);
+
+    expect(result?.isActive).toBe(true);
   });
 
-  it('should find by zone and method', async () => {
+  it('should find a rate by zone and method', async () => {
+    rateRepo.findByZoneAndMethod.mockResolvedValue(createShippingRate({ shippingRateId: 'r1' }));
+
     const result = await useCase.findByZoneAndMethod('z1', 'm1');
-    expect(result).toEqual({ shippingRateId: 'r1' });
+
+    expect(result?.shippingRateId).toBe('r1');
   });
 
-  it('should calculate rate', () => {
-    const result = useCase.calculateRate({ baseRate: 10 } as never, 100, 2, 5);
-    expect(result).toBe(12.5);
+  it('should calculate a flat rate using the domain service', () => {
+    const result = useCase.calculateRate(createShippingRate({ rateType: 'flat', baseRateCents: 1250 }), 100, 2, 5);
+
+    expect(result).toBe(1250);
   });
 });

@@ -1,60 +1,57 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { VerifyCustomerUseCase, VerifyCustomerCommand } from './VerifyCustomer';
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { createCustomerRepository, createCustomerRow, emitMock } from '../../tests/testUtils';
 
 describe('VerifyCustomerUseCase', () => {
-  let useCase: VerifyCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new VerifyCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({ customerId: 'c1', email: 'test@test.com', isVerified: false }),
-      verifyEmail: jest.fn().mockResolvedValue(undefined),
-      verifyPhone: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new VerifyCustomerUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow({ isVerified: false }));
+    customerRepository.verifyEmail.mockResolvedValue(undefined);
+    customerRepository.verifyPhone.mockResolvedValue(undefined);
   });
 
-  it('should verify customer email (happy path)', async () => {
-    const result = await useCase.execute(new VerifyCustomerCommand('c1', 'email'));
+  it('should verify the email and emit customer.verified when verification type is email', async () => {
+    const result = await useCase.execute(new VerifyCustomerCommand('cust-1', 'email'));
 
     expect(result.success).toBe(true);
-    expect(result.customerId).toBe('c1');
-    expect(mockRepo.verifyEmail).toHaveBeenCalledWith('c1');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.verified', expect.objectContaining({ customerId: 'c1' }));
+    expect(customerRepository.verifyEmail).toHaveBeenCalledWith('cust-1');
+    expect(customerRepository.verifyPhone).not.toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith(
+      'customer.verified',
+      expect.objectContaining({ customerId: 'cust-1', verificationType: 'email' }),
+    );
   });
 
-  it('should verify customer phone', async () => {
-    await useCase.execute(new VerifyCustomerCommand('c1', 'phone'));
+  it('should verify the phone when verification type is phone', async () => {
+    const result = await useCase.execute(new VerifyCustomerCommand('cust-1', 'phone'));
 
-    expect(mockRepo.verifyPhone).toHaveBeenCalledWith('c1');
+    expect(result.success).toBe(true);
+    expect(customerRepository.verifyPhone).toHaveBeenCalledWith('cust-1');
+    expect(customerRepository.verifyEmail).not.toHaveBeenCalled();
   });
 
   it('should throw CustomerValidationError when customerId is empty', async () => {
-    await expect(useCase.execute(new VerifyCustomerCommand(''))).rejects.toThrow(CustomerValidationError);
+    await expect(useCase.execute(new VerifyCustomerCommand('', 'email'))).rejects.toThrow(CustomerValidationError);
   });
 
-  it('should throw CustomerNotFoundError when customer does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CustomerNotFoundError when the customer does not exist', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new VerifyCustomerCommand('missing'))).rejects.toThrow(CustomerNotFoundError);
+    await expect(useCase.execute(new VerifyCustomerCommand('missing', 'email'))).rejects.toThrow(CustomerNotFoundError);
+    expect(customerRepository.verifyEmail).not.toHaveBeenCalled();
   });
 
-  it('should return success when already verified', async () => {
-    mockRepo.findById.mockResolvedValue({ customerId: 'c1', email: 'test@test.com', isVerified: true });
+  it('should return success without re-verifying when the customer is already verified', async () => {
+    customerRepository.findById.mockResolvedValue(createCustomerRow({ isVerified: true }));
 
-    const result = await useCase.execute(new VerifyCustomerCommand('c1'));
+    const result = await useCase.execute(new VerifyCustomerCommand('cust-1', 'email'));
+
     expect(result.success).toBe(true);
-    expect(result.customerId).toBe('c1');
-    expect(result.email).toBe('test@test.com');
+    expect(customerRepository.verifyEmail).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

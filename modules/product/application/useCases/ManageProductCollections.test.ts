@@ -1,25 +1,22 @@
-jest.mock('../../infrastructure/repositories/productCollectionRepo', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue([{ productCollectionId: 'c1' }]),
-    findById: jest.fn().mockResolvedValue({ productCollectionId: 'c1', name: 'Summer' }),
-    create: jest.fn().mockResolvedValue({ productCollectionId: 'c2', name: 'Winter' }),
-    update: jest.fn().mockResolvedValue({ productCollectionId: 'c1', name: 'Updated' }),
-    softDelete: jest.fn().mockResolvedValue(true),
-  },
-}));
 
 import { ManageProductCollectionsUseCase } from './ManageProductCollections';
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
+import { createProductCollection, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productCollectionRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('ManageProductCollectionsUseCase', () => {
   let useCase: ManageProductCollectionsUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductCollectionsUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductCollectionsUseCase(productCollectionRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductCollectionsUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue([createProductCollection({ productCollectionId: 'c1' })]);
+    mockRepo.findById.mockResolvedValue(createProductCollection({ productCollectionId: 'c1' }));
+    mockRepo.create.mockResolvedValue(createProductCollection({ productCollectionId: 'c2', name: 'Winter', slug: 'winter' }));
+    mockRepo.update.mockResolvedValue(createProductCollection({ productCollectionId: 'c1', name: 'Updated' }));
+    mockRepo.softDelete.mockResolvedValue(true);
+    useCase = new ManageProductCollectionsUseCase(mockRepo);
   });
 
   it('should find all', async () => {
@@ -29,17 +26,17 @@ describe('ManageProductCollectionsUseCase', () => {
 
   it('should find by ID', async () => {
     const result = await useCase.findById('c1');
-    expect(result).toEqual({ productCollectionId: 'c1', name: 'Summer' });
+    expect(result).toEqual(createProductCollection({ productCollectionId: 'c1' }));
   });
 
   it('should create', async () => {
-    const result = await useCase.create({ name: 'Winter' } as never);
-    expect(result).toEqual({ productCollectionId: 'c2', name: 'Winter' });
+    const result = await useCase.create({ name: 'Winter', slug: 'winter', isActive: true });
+    expect(result).toEqual(createProductCollection({ productCollectionId: 'c2', name: 'Winter', slug: 'winter' }));
   });
 
   it('should update', async () => {
-    const result = await useCase.update('c1', { name: 'Updated' } as never);
-    expect(result).toEqual({ productCollectionId: 'c1', name: 'Updated' });
+    const result = await useCase.update('c1', { name: 'Updated' });
+    expect(result).toEqual(createProductCollection({ productCollectionId: 'c1', name: 'Updated' }));
   });
 
   it('should soft delete', async () => {

@@ -78,7 +78,7 @@ describe('Customer', () => {
 
     it('should allow clearing phone by passing null', () => {
       const customer = createCustomer();
-      customer.updateProfile({ phone: null as never as string | undefined });
+      customer.updateProfile({ phone: null as unknown as string | undefined });
       expect(customer.phone).toBeUndefined();
     });
   });

@@ -32,6 +32,16 @@ import couponDiscountRepository, {
   type PromotionCouponUsage,
 } from '../infrastructure/repositories/CouponDiscountRepository';
 import { PromotionGiftCard } from '../infrastructure';
+import * as giftCardRepository from '../infrastructure/repositories/GiftCardRepository';
+import { ValidateCouponUseCase } from './useCases/ValidateCoupon';
+import { RedeemCouponUseCase } from './useCases/RedeemCoupon';
+import { ApplyProductDiscountUseCase } from './useCases/ApplyProductDiscount';
+import { CheckGiftCardBalanceUseCase } from './useCases/CheckGiftCardBalance';
+import { RedeemGiftCardUseCase } from './useCases/RedeemGiftCard';
+import { ManagePromotionsUseCase } from './useCases/ManagePromotions';
+import { ManageCouponsUseCase } from './useCases/ManageCoupons';
+import { ManageGiftCardsUseCase } from './useCases/ManageGiftCards';
+import { PromotionEvaluationService } from './services/PromotionEvaluationService';
 
 export {
   promotionRuleRepository,
@@ -71,3 +81,17 @@ export {
 export { PromotionGiftCard };
 
 export * as giftCardRepo from '../infrastructure/repositories/GiftCardRepository';
+
+// ============================================================================
+// Wired use-case instances (composition root)
+// ============================================================================
+
+export const validateCouponUseCase = new ValidateCouponUseCase(couponDiscountRepository.coupons);
+export const redeemCouponUseCase = new RedeemCouponUseCase(couponDiscountRepository.coupons);
+export const applyProductDiscountUseCase = new ApplyProductDiscountUseCase(couponDiscountRepository.discounts);
+export const checkGiftCardBalanceUseCase = new CheckGiftCardBalanceUseCase(giftCardRepository);
+export const redeemGiftCardUseCase = new RedeemGiftCardUseCase(giftCardRepository);
+export const managePromotionsUseCase = new ManagePromotionsUseCase(promotionRuleRepository.promotions);
+export const manageCouponsUseCase = new ManageCouponsUseCase(couponDiscountRepository.coupons);
+export const manageGiftCardsUseCase = new ManageGiftCardsUseCase(giftCardRepository);
+export const promotionEvaluationService = new PromotionEvaluationService(promotionRuleRepository.promotions);

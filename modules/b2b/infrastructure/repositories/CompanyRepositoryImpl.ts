@@ -33,7 +33,7 @@ export class CompanyRepositoryImpl implements CompanyRepository {
     await query(
       `INSERT INTO "b2bCompany" (
         "companyId", "organizationId", "name", "legalName", "taxId",
-        "status", "paymentTerms", "creditLimit", "outstandingBalance",
+        "status", "paymentTerms", "creditLimitCents", "outstandingBalanceCents",
         "billingAddress", "shippingAddress", "contactEmail", "contactPhone",
         "website", "parentId", "createdAt", "updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
@@ -43,8 +43,8 @@ export class CompanyRepositoryImpl implements CompanyRepository {
         "taxId" = EXCLUDED."taxId",
         "status" = EXCLUDED."status",
         "paymentTerms" = EXCLUDED."paymentTerms",
-        "creditLimit" = EXCLUDED."creditLimit",
-        "outstandingBalance" = EXCLUDED."outstandingBalance",
+        "creditLimitCents" = EXCLUDED."creditLimitCents",
+        "outstandingBalanceCents" = EXCLUDED."outstandingBalanceCents",
         "billingAddress" = EXCLUDED."billingAddress",
         "shippingAddress" = EXCLUDED."shippingAddress",
         "contactEmail" = EXCLUDED."contactEmail",
@@ -61,8 +61,8 @@ export class CompanyRepositoryImpl implements CompanyRepository {
         json.taxId ?? null,
         json.status,
         json.paymentTerms,
-        json.creditLimit ?? null,
-        json.outstandingBalance,
+        json.creditLimitCents ?? null,
+        json.outstandingBalanceCents,
         JSON.stringify(json.billingAddress ?? null),
         JSON.stringify(json.shippingAddress ?? null),
         json.contactEmail ?? null,

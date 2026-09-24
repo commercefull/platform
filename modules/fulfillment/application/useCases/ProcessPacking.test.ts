@@ -1,54 +1,47 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { ProcessPackingUseCase, ProcessPackingCommand } from './ProcessPacking';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { createFulfillmentRepository, createFulfillment, emitMock } from '../../tests/testUtils';
 
 describe('ProcessPackingUseCase', () => {
-  let useCase: ProcessPackingUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockFulfillment: Record<string, unknown>;
+  const fulfillmentRepository = createFulfillmentRepository();
+  const useCase = new ProcessPackingUseCase(fulfillmentRepository);
 
   beforeEach(() => {
-    mockFulfillment = {
-      fulfillmentId: 'f1',
-      orderId: 'o1',
-      status: 'picking_complete',
-      startPacking: jest.fn(),
-      completePacking: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockFulfillment),
-      save: jest.fn().mockImplementation(async (f: unknown) => f),
-    };
-    useCase = new ProcessPackingUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    fulfillmentRepository.save.mockImplementation(async (f) => f);
   });
 
-  it('should start packing (happy path)', async () => {
-    const result = await useCase.execute(new ProcessPackingCommand('f1'));
+  it('should start packing a picked fulfillment and emit fulfillment.packing_started', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('picked'));
 
-    expect(result.fulfillment.fulfillmentId).toBe('f1');
-    expect(mockFulfillment.startPacking).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('fulfillment.packing_started', expect.objectContaining({ fulfillmentId: 'f1' }));
+    const result = await useCase.execute(new ProcessPackingCommand('ful-1'));
+
+    expect(result.fulfillment.status).toBe('packing');
+    expect(emitMock).toHaveBeenCalledWith(
+      'fulfillment.packing_started',
+      expect.objectContaining({ fulfillmentId: 'ful-1' }),
+    );
   });
 
-  it('should complete packing when flag is set', async () => {
-    const _result = await useCase.execute(new ProcessPackingCommand('f1', true, 2.5, { length: 10, width: 5, height: 3 }));
+  it('should complete packing with weight and dimensions when the flag is set', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('picked'));
 
-    expect(mockFulfillment.completePacking).toHaveBeenCalledWith(2.5, { length: 10, width: 5, height: 3 });
-    expect(eventBus.emit).toHaveBeenCalledWith('fulfillment.packing_completed', expect.objectContaining({ fulfillmentId: 'f1' }));
+    const result = await useCase.execute(
+      new ProcessPackingCommand('ful-1', true, 2.5, { length: 10, width: 5, height: 3 }),
+    );
+
+    expect(result.fulfillment.status).toBe('packed');
+    expect(emitMock).toHaveBeenCalledWith(
+      'fulfillment.packing_completed',
+      expect.objectContaining({ fulfillmentId: 'ful-1' }),
+    );
   });
 
-  it('should throw FulfillmentNotFoundError when fulfillment not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new ProcessPackingCommand('missing'))).rejects.toThrow(FulfillmentNotFoundError);
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

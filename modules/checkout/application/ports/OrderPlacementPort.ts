@@ -28,7 +28,16 @@ export interface OrderItemInput {
   sku: string;
   name: string;
   quantity: number;
-  unitPrice: number;
+  /** Unit price in integer cents. */
+  unitPriceCents: number;
+  /** Discounted unit price in integer cents. */
+  discountedUnitPriceCents?: number;
+  /** Tax rate percentage. */
+  taxRate?: number;
+  /** Tax amount in integer cents. */
+  taxAmountCents?: number;
+  /** Line discount in integer cents. */
+  discountAmountCents?: number;
 }
 
 export interface CreateOrderRequest {
@@ -41,7 +50,8 @@ export interface CreateOrderRequest {
   source: string;
   currency: string;
   notes?: string;
-  shippingAmount: number;
+  /** Shipping total in integer cents. */
+  shippingAmountCents: number;
   metadata?: Record<string, unknown>;
 }
 

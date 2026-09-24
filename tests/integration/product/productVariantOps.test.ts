@@ -39,7 +39,7 @@ describe('Product Variant Operations Tests', () => {
   it('PUT /business/products/:productId/variants/:variantId updates the variant', async () => {
     const resp = await client.put(
       `/business/products/${productId}/variants/${variantId}`,
-      { name: 'Updated Variant', price: 79.99 },
+      { name: 'Updated Variant', priceCents: 7999 },
       { headers: headers() },
     );
     expectStatus(resp, 200);

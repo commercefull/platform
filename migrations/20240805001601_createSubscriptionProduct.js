@@ -22,7 +22,7 @@ exports.up = function (knex) {
     table.integer('maxSkipsPerYear');
     table.boolean('allowEarlyCancel').defaultTo(true);
     table.integer('cancelNoticeDays').defaultTo(0);
-    table.decimal('earlyTerminationFee', 15, 2);
+    table.bigInteger('earlyTerminationFeeCents');
     table.boolean('autoRenew').defaultTo(true);
     table.integer('renewalReminderDays').defaultTo(7);
     table.jsonb('metadata');

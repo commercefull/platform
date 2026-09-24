@@ -60,7 +60,7 @@ describe('AutomationRuleRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.findById('r1');
     expect(result).not.toBeNull();
     expect(result!.name).toBe('Test Rule');
@@ -68,13 +68,13 @@ describe('AutomationRuleRepositoryImpl', () => {
   });
 
   it('findAll returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findAll();
     expect(result).toEqual([]);
   });
 
   it('findByEventName queries with eventName', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findByEventName('order.created', true);
     expect(result).toEqual([]);
     expect(mockedQuery).toHaveBeenCalled();
@@ -110,13 +110,13 @@ describe('AutomationRuleRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.create(rule);
     expect(result.name).toBe('New Rule');
   });
 
   it('delete returns true when deleted', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ automationRuleId: 'r1' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ automationRuleId: 'r1' });
     const result = await repo.delete('r1');
     expect(result).toBe(true);
   });
@@ -128,7 +128,7 @@ describe('AutomationRuleRepositoryImpl', () => {
   });
 
   it('count returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.count();
     expect(result).toBe(0);
   });
@@ -157,7 +157,7 @@ describe('AutomationRuleRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.activate('r1');
     expect(result).not.toBeNull();
     expect(result!.isActive).toBe(true);
@@ -187,7 +187,7 @@ describe('AutomationRuleRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.deactivate('r1');
     expect(result).not.toBeNull();
     expect(result!.isActive).toBe(false);
@@ -203,7 +203,7 @@ describe('ExecutionLogRepositoryImpl', () => {
   });
 
   it('create returns executionLogId', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ executionLogId: 'log1' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ executionLogId: 'log1' });
     const id = await repo.create({
       automationRuleId: 'r1',
       triggerType: 'event',
@@ -223,25 +223,25 @@ describe('ExecutionLogRepositoryImpl', () => {
   });
 
   it('findByRule returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findByRule('r1');
     expect(result).toEqual([]);
   });
 
   it('countByRule returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.countByRule('r1');
     expect(result).toBe(0);
   });
 
   it('countByStatus returns correct number', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '5' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '5' });
     const result = await repo.countByStatus('success');
     expect(result).toBe(5);
   });
 
   it('update calls query without error', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     await repo.update('log1', { status: 'success', completedAt: new Date() });
     expect(mockedQuery).toHaveBeenCalled();
   });

@@ -73,23 +73,23 @@ describe('Vendor Entity', () => {
       const v = Vendor.create({ organizationId: 'org-1', name: 'A', email: 'a@b.com' });
       v.recordOrder(500);
       expect(v.stats.totalOrders).toBe(1);
-      expect(v.stats.totalRevenue).toBe(500);
-      expect(v.stats.outstandingBalance).toBe(500);
+      expect(v.stats.totalRevenueCents).toBe(500);
+      expect(v.stats.outstandingBalanceCents).toBe(500);
     });
 
     it('should record payouts', () => {
       const v = Vendor.create({ organizationId: 'org-1', name: 'A', email: 'a@b.com' });
       v.recordOrder(500);
       v.recordPayout(300);
-      expect(v.stats.outstandingBalance).toBe(200);
-      expect(v.stats.totalPayouts).toBe(300);
+      expect(v.stats.outstandingBalanceCents).toBe(200);
+      expect(v.stats.totalPayoutsCents).toBe(300);
     });
 
     it('should not decrease balance below zero', () => {
       const v = Vendor.create({ organizationId: 'org-1', name: 'A', email: 'a@b.com' });
       v.recordOrder(100);
       v.recordPayout(200);
-      expect(v.stats.outstandingBalance).toBe(0);
+      expect(v.stats.outstandingBalanceCents).toBe(0);
     });
   });
 

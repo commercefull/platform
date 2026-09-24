@@ -8,6 +8,8 @@ import { PaginationOptions } from 'libs/types/shared';
 import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
+import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
+import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
 
 // ============================================================================
 // Command
@@ -24,8 +26,9 @@ export class ListProductsCommand {
       isFeatured?: boolean;
       isVirtual?: boolean;
       hasVariants?: boolean;
-      priceMin?: number;
-      priceMax?: number;
+      /** Price bounds in integer cents. */
+      priceMinCents?: number;
+      priceMaxCents?: number;
       tags?: string[];
       search?: string;
     },
@@ -47,9 +50,9 @@ export interface ProductListItemResponse {
   sku?: string;
   status: string;
   visibility: string;
-  basePrice: number;
-  salePrice: number | null;
-  effectivePrice: number;
+  basePriceCents: number;
+  salePriceCents: number | null;
+  effectivePriceCents: number;
   isOnSale: boolean;
   isFeatured: boolean;
   hasVariants: boolean;
@@ -78,7 +81,10 @@ export interface ListProductsResponse {
 // ============================================================================
 
 export class ListProductsUseCase {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly pricingPort: ProductPricingPort,
+  ) {}
 
   async execute(command: ListProductsCommand): Promise<ListProductsResponse> {
     const filters: ProductFilters = command.filters || {};
@@ -92,8 +98,12 @@ export class ListProductsUseCase {
 
     const result = await this.productRepository.findAll(filters, pagination);
 
+    // Batch-load catalog prices from the pricing-owned store
+    const prices = await this.pricingPort.getBasePrices(result.data.map(p => p.productId));
+    const priceByProductId = new Map<string, ProductPriceInfo>(prices.map(p => [p.productId, p]));
+
     return {
-      products: result.data.map(product => this.mapToListItem(product)),
+      products: result.data.map(product => this.mapToListItem(product, priceByProductId.get(product.productId))),
       total: result.total,
       limit: result.limit,
       offset: result.offset,
@@ -101,7 +111,8 @@ export class ListProductsUseCase {
     };
   }
 
-  private mapToListItem(product: Product): ProductListItemResponse {
+  private mapToListItem(product: Product, price: ProductPriceInfo | undefined): ProductListItemResponse {
+    const priceDto = toProductPriceDtoOrEmpty(price);
     return {
       productId: product.productId,
       name: product.name,
@@ -109,10 +120,10 @@ export class ListProductsUseCase {
       sku: product.sku,
       status: product.status,
       visibility: product.visibility,
-      basePrice: product.price.basePrice,
-      salePrice: product.price.salePrice,
-      effectivePrice: product.price.effectivePrice,
-      isOnSale: product.price.isOnSale,
+      basePriceCents: priceDto.basePriceCents,
+      salePriceCents: priceDto.salePriceCents,
+      effectivePriceCents: priceDto.effectivePriceCents,
+      isOnSale: priceDto.isOnSale,
       isFeatured: product.isFeatured,
       hasVariants: product.hasVariants,
       primaryImageUrl: product.primaryImage?.url,

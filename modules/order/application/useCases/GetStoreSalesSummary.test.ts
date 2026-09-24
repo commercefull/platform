@@ -1,9 +1,4 @@
-jest.mock('../../../../libs/db', () => ({
-  query: jest.fn().mockResolvedValue([]),
-  queryOne: jest.fn(),
-  withTransaction: jest.fn(),
-}));
-
+import { queryMock } from '../../tests/testUtils';
 import { GetStoreSalesSummaryUseCase } from './GetStoreSalesSummary';
 
 describe('GetStoreSalesSummaryUseCase', () => {
@@ -11,6 +6,7 @@ describe('GetStoreSalesSummaryUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    queryMock.mockResolvedValue([]);
     useCase = new GetStoreSalesSummaryUseCase();
   });
 

@@ -1,53 +1,39 @@
-import { shippingConfigRepository } from '../wired';
-
-const shippingRateRepo = shippingConfigRepository.rates;
-const shippingZoneRepo = shippingConfigRepository.zones;
-const shippingMethodRepo = shippingConfigRepository.methods;
+import type {
+  ShippingRatePort,
+  CreateShippingRateInput,
+} from '../../domain/repositories/ShippingConfigPorts';
+import type { ShippingRate } from '../../../../libs/db/types';
+import { calculateRate } from '../../domain/services/calculateRate';
 
 export class ManageShippingRatesUseCase {
+  constructor(private readonly shippingRateRepo: ShippingRatePort) {}
+
   async findActive(zoneId?: string, methodId?: string) {
-    return shippingRateRepo.findActive(zoneId, methodId);
+    return this.shippingRateRepo.findActive(zoneId, methodId);
   }
   async findById(id: string) {
-    return shippingRateRepo.findById(id);
+    return this.shippingRateRepo.findById(id);
   }
-  async create(params: Parameters<typeof shippingRateRepo.create>[0]) {
-    return shippingRateRepo.create(params);
+  async create(params: CreateShippingRateInput) {
+    return this.shippingRateRepo.create(params);
   }
   async update(id: string, updates: Record<string, unknown>) {
-    return shippingRateRepo.update(id, updates);
+    return this.shippingRateRepo.update(id, updates);
   }
   async activate(id: string) {
-    return shippingRateRepo.activate(id);
+    return this.shippingRateRepo.activate(id);
   }
   async deactivate(id: string) {
-    return shippingRateRepo.deactivate(id);
+    return this.shippingRateRepo.deactivate(id);
   }
   async delete(id: string) {
-    return shippingRateRepo.delete(id);
+    return this.shippingRateRepo.delete(id);
   }
   async findByZoneAndMethod(zoneId: string, methodId: string) {
-    return shippingRateRepo.findByZoneAndMethod(zoneId, methodId);
+    return this.shippingRateRepo.findByZoneAndMethod(zoneId, methodId);
   }
-  calculateRate(rate: Parameters<typeof shippingRateRepo.calculateRate>[0], orderTotal: number, itemCount: number, weight?: number) {
-    return shippingRateRepo.calculateRate(rate, orderTotal, itemCount, weight);
-  }
-}
-
-export class ManageShippingZonesUseCase {
-  async findAll() {
-    return shippingZoneRepo.findAll();
-  }
-  async findById(id: string) {
-    return shippingZoneRepo.findById(id);
+  calculateRate(rate: ShippingRate, orderTotal: number, itemCount: number, weight?: number) {
+    return calculateRate(rate, orderTotal, itemCount, weight);
   }
 }
 
-export class ManageShippingMethodsAdminUseCase {
-  async findAll() {
-    return shippingMethodRepo.findAll();
-  }
-  async findById(id: string) {
-    return shippingMethodRepo.findById(id);
-  }
-}

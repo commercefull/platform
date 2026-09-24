@@ -53,7 +53,7 @@ export class SetShippingMethodUseCase {
         city: session.shippingAddress.city,
         postalCode: session.shippingAddress.postalCode,
       },
-      totalValue: session.subtotal.amount,
+      totalValueCents: session.subtotal.cents,
     });
 
     if (shippingOptions.length === 0) {
@@ -65,7 +65,7 @@ export class SetShippingMethodUseCase {
       throw new BadRequestError('Invalid shipping method');
     }
 
-    session.setShippingMethod(selectedRate.methodId, selectedRate.methodName, Money.create(selectedRate.amount, selectedRate.currency));
+    session.setShippingMethod(selectedRate.methodId, selectedRate.methodName, Money.fromCents(selectedRate.amountCents, selectedRate.currency));
 
     await this.checkoutRepository.save(session);
 
@@ -74,7 +74,7 @@ export class SetShippingMethodUseCase {
       field: 'shippingMethod',
       methodId: selectedRate.methodId,
       methodName: selectedRate.methodName,
-      amount: selectedRate.amount,
+      amountCents: selectedRate.amountCents,
     });
 
     return mapCheckoutToResponse(session);

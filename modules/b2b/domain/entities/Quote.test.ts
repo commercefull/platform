@@ -12,7 +12,7 @@ describe('Quote Entity', () => {
       expect(quote.quoteNumber).toMatch(/^QT-\d{4}-\d{2}-/);
       expect(quote.status).toBe('draft');
       expect(quote.currency).toBe('USD');
-      expect(quote.total).toBe(0);
+      expect(quote.totalCents).toBe(0);
       expect(quote.lineItems).toEqual([]);
     });
 
@@ -39,10 +39,10 @@ describe('Quote Entity', () => {
         status: 'sent' as const,
         requestedBy: 'user-1',
         lineItems: [],
-        subtotal: 100,
-        discountTotal: 0,
-        taxTotal: 0,
-        total: 100,
+        subtotalCents: 100,
+        discountTotalCents: 0,
+        taxTotalCents: 0,
+        totalCents: 100,
         currency: 'EUR',
         validUntil: new Date('2025-12-31'),
         createdAt: new Date('2024-01-01'),
@@ -63,11 +63,11 @@ describe('Quote Entity', () => {
         sku: 'SKU-001',
         name: 'Widget',
         quantity: 10,
-        unitPrice: 50,
+        unitPriceCents: 50,
       });
       expect(quote.lineItemCount).toBe(1);
-      expect(quote.subtotal).toBe(500);
-      expect(quote.total).toBe(500);
+      expect(quote.subtotalCents).toBe(500);
+      expect(quote.totalCents).toBe(500);
     });
 
     it('should calculate discount and tax', () => {
@@ -77,39 +77,39 @@ describe('Quote Entity', () => {
         sku: 'SKU-001',
         name: 'Widget',
         quantity: 10,
-        unitPrice: 100,
+        unitPriceCents: 100,
         discountPercent: 10,
         taxRate: 5,
       });
-      expect(quote.subtotal).toBe(1000);
-      expect(quote.discountTotal).toBe(100);
-      expect(quote.taxTotal).toBe(45);
-      expect(quote.total).toBe(945);
+      expect(quote.subtotalCents).toBe(1000);
+      expect(quote.discountTotalCents).toBe(100);
+      expect(quote.taxTotalCents).toBe(45);
+      expect(quote.totalCents).toBe(945);
     });
 
     it('should update a line item', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 5, unitPrice: 100 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 5, unitPriceCents: 100 });
       const itemId = quote.lineItems[0].lineItemId;
       quote.updateLineItem(itemId, { quantity: 10 });
       expect(quote.lineItems[0].quantity).toBe(10);
-      expect(quote.subtotal).toBe(1000);
+      expect(quote.subtotalCents).toBe(1000);
     });
 
     it('should remove a line item', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 5, unitPrice: 100 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 5, unitPriceCents: 100 });
       const itemId = quote.lineItems[0].lineItemId;
       quote.removeLineItem(itemId);
       expect(quote.lineItemCount).toBe(0);
-      expect(quote.total).toBe(0);
+      expect(quote.totalCents).toBe(0);
     });
 
     it('should not add items to non-draft quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
-      expect(() => quote.addLineItem({ productId: 'p-2', sku: 'SKU-002', name: 'Gadget', quantity: 1, unitPrice: 20 })).toThrow(
+      expect(() => quote.addLineItem({ productId: 'p-2', sku: 'SKU-002', name: 'Gadget', quantity: 1, unitPriceCents: 20 })).toThrow(
         'in status: sent',
       );
     });
@@ -118,7 +118,7 @@ describe('Quote Entity', () => {
   describe('workflow', () => {
     it('should send a draft quote with items', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       expect(quote.status).toBe('sent');
       expect(quote.sentAt).toBeDefined();
@@ -131,7 +131,7 @@ describe('Quote Entity', () => {
 
     it('should mark as viewed', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       quote.markViewed();
       expect(quote.status).toBe('viewed');
@@ -139,7 +139,7 @@ describe('Quote Entity', () => {
 
     it('should accept a sent quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1', validUntilDays: 30 });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       quote.accept();
       expect(quote.status).toBe('accepted');
@@ -148,7 +148,7 @@ describe('Quote Entity', () => {
 
     it('should reject a sent quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       quote.reject('Too expensive');
       expect(quote.status).toBe('rejected');
@@ -157,7 +157,7 @@ describe('Quote Entity', () => {
 
     it('should convert an accepted quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       quote.accept();
       quote.convert('order-123');
@@ -172,7 +172,7 @@ describe('Quote Entity', () => {
 
     it('should not convert a non-accepted quote', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       expect(() => quote.convert('order-1')).toThrow('in status: sent');
     });
@@ -186,7 +186,7 @@ describe('Quote Entity', () => {
 
     it('should not be expired if accepted', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1', validUntilDays: 30 });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       quote.send();
       quote.accept();
       expect(quote.isExpired).toBe(false);
@@ -196,7 +196,7 @@ describe('Quote Entity', () => {
   describe('toJSON', () => {
     it('should return all props with line items', () => {
       const quote = Quote.create({ companyId: 'comp-1', organizationId: 'org-1', requestedBy: 'u-1' });
-      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPrice: 10 });
+      quote.addLineItem({ productId: 'p-1', sku: 'SKU-001', name: 'Widget', quantity: 1, unitPriceCents: 10 });
       const json = quote.toJSON();
       expect(json.quoteId).toBeDefined();
       expect(Array.isArray(json.lineItems)).toBe(true);

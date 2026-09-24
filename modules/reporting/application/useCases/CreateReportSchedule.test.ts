@@ -1,49 +1,29 @@
-jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    schedules: {
-      createSchedule: jest.fn().mockResolvedValue({
-        reportScheduleId: 'rs1',
-        name: 'Weekly Sales',
-        reportType: 'sales_summary',
-        frequency: 'weekly',
-        recipients: ['admin@test.com'],
-        parameters: {},
-        format: 'pdf',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-    },
-    dataProvider: { generateReport: jest.fn() },
-    executions: {},
-    templates: {},
-  },
-}));
-
+import { createReportingRepository, createReportSchedule } from '../../tests/testUtils';
 import { CreateReportScheduleUseCase } from './CreateReportSchedule';
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-
-const mockRepo = reportingDataRepository as unknown as { schedules: Record<string, jest.Mock> };
 
 describe('CreateReportScheduleUseCase', () => {
   let useCase: CreateReportScheduleUseCase;
+  let reportingRepo: ReturnType<typeof createReportingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new CreateReportScheduleUseCase();
+    reportingRepo = createReportingRepository();
+    useCase = new CreateReportScheduleUseCase(reportingRepo);
   });
 
-  it('should create report schedule (happy path)', async () => {
-    const result = await useCase.execute({
-      name: 'Weekly Sales',
-      reportType: 'sales_summary',
-      frequency: 'weekly',
-      recipients: ['admin@test.com'],
-    });
+  it('should create and return the schedule when the input is valid', async () => {
+    const saved = createReportSchedule();
+    reportingRepo.createSchedule.mockResolvedValue(saved);
 
-    expect(result.reportScheduleId).toBe('rs1');
-    expect(result.name).toBe('Weekly Sales');
-    expect(mockRepo.schedules.createSchedule).toHaveBeenCalled();
+    const input = {
+      name: 'Daily Sales',
+      reportType: 'sales_summary' as const,
+      frequency: 'daily' as const,
+      recipients: ['ops@example.com'],
+      format: 'pdf' as const,
+    };
+    const result = await useCase.execute(input);
+
+    expect(result).toBe(saved);
+    expect(reportingRepo.createSchedule).toHaveBeenCalledWith(input);
   });
 });

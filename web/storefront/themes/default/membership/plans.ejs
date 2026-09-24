@@ -14,9 +14,9 @@
           <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
             <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-6 text-center">
               <h3 class="text-xl font-bold text-white"><%= plan.name %></h3>
-              <% if (plan.price > 0) { %>
+              <% if (plan.priceCents > 0) { %>
                 <div class="mt-2">
-                  <span class="text-4xl font-extrabold text-white">$<%= ((plan.price || 0) / 100).toFixed(2) %></span>
+                  <span class="text-4xl font-extrabold text-white">$<%= ((plan.priceCents || 0) / 100).toFixed(2) %></span>
                   <span class="text-indigo-200"><%= t('storefront:perBillingPeriod', { period: plan.billingPeriod || 'year' }) %></span>
                 </div>
               <% } else { %>

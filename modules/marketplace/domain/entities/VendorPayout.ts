@@ -9,9 +9,9 @@ export interface PayoutLineItem {
   orderNumber: string;
   productId: string;
   productName: string;
-  grossRevenue: number;
-  commissionAmount: number;
-  netAmount: number;
+  grossRevenueCents: number;
+  commissionAmountCents: number;
+  netAmountCents: number;
   payoutDate?: Date;
 }
 
@@ -25,9 +25,9 @@ export interface VendorPayoutProps {
   periodStart: Date;
   periodEnd: Date;
   lineItems: PayoutLineItem[];
-  grossAmount: number;
-  commissionAmount: number;
-  netAmount: number;
+  grossAmountCents: number;
+  commissionAmountCents: number;
+  netAmountCents: number;
   currency: string;
   transactionRef?: string;
   failureReason?: string;
@@ -47,9 +47,9 @@ export class VendorPayout {
   private _periodStart: Date;
   private _periodEnd: Date;
   private _lineItems: PayoutLineItem[];
-  private _grossAmount: number;
-  private _commissionAmount: number;
-  private _netAmount: number;
+  private _grossAmountCents: number;
+  private _commissionAmountCents: number;
+  private _netAmountCents: number;
   private _currency: string;
   private _transactionRef?: string;
   private _failureReason?: string;
@@ -68,9 +68,9 @@ export class VendorPayout {
     this._periodStart = props.periodStart;
     this._periodEnd = props.periodEnd;
     this._lineItems = props.lineItems;
-    this._grossAmount = props.grossAmount;
-    this._commissionAmount = props.commissionAmount;
-    this._netAmount = props.netAmount;
+    this._grossAmountCents = props.grossAmountCents;
+    this._commissionAmountCents = props.commissionAmountCents;
+    this._netAmountCents = props.netAmountCents;
     this._currency = props.currency;
     this._transactionRef = props.transactionRef;
     this._failureReason = props.failureReason;
@@ -94,9 +94,9 @@ export class VendorPayout {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const lineItems = input.lineItems ?? [];
-    const grossAmount = lineItems.reduce((sum, li) => sum + li.grossRevenue, 0);
-    const commissionAmount = lineItems.reduce((sum, li) => sum + li.commissionAmount, 0);
-    const netAmount = grossAmount - commissionAmount;
+    const grossAmountCents = lineItems.reduce((sum, li) => sum + li.grossRevenueCents, 0);
+    const commissionAmountCents = lineItems.reduce((sum, li) => sum + li.commissionAmountCents, 0);
+    const netAmountCents = grossAmountCents - commissionAmountCents;
     return new VendorPayout({
       payoutId: randomUUID(),
       vendorId: input.vendorId,
@@ -107,9 +107,9 @@ export class VendorPayout {
       periodStart: input.periodStart,
       periodEnd: input.periodEnd,
       lineItems,
-      grossAmount,
-      commissionAmount,
-      netAmount,
+      grossAmountCents,
+      commissionAmountCents,
+      netAmountCents,
       currency: input.currency ?? 'USD',
       createdAt: now,
       updatedAt: now,
@@ -147,14 +147,14 @@ export class VendorPayout {
   get lineItems(): PayoutLineItem[] {
     return this._lineItems;
   }
-  get grossAmount(): number {
-    return this._grossAmount;
+  get grossAmountCents(): number {
+    return this._grossAmountCents;
   }
-  get commissionAmount(): number {
-    return this._commissionAmount;
+  get commissionAmountCents(): number {
+    return this._commissionAmountCents;
   }
-  get netAmount(): number {
-    return this._netAmount;
+  get netAmountCents(): number {
+    return this._netAmountCents;
   }
   get currency(): string {
     return this._currency;
@@ -196,9 +196,9 @@ export class VendorPayout {
       throw new PayoutStatusError(this._payoutId, 'add_line_items_to', this._status);
     }
     this._lineItems.push({ ...item });
-    this._grossAmount += item.grossRevenue;
-    this._commissionAmount += item.commissionAmount;
-    this._netAmount = this._grossAmount - this._commissionAmount;
+    this._grossAmountCents += item.grossRevenueCents;
+    this._commissionAmountCents += item.commissionAmountCents;
+    this._netAmountCents = this._grossAmountCents - this._commissionAmountCents;
     this._updatedAt = new Date();
   }
 
@@ -268,9 +268,9 @@ export class VendorPayout {
       periodStart: this._periodStart,
       periodEnd: this._periodEnd,
       lineItems: this._lineItems,
-      grossAmount: this._grossAmount,
-      commissionAmount: this._commissionAmount,
-      netAmount: this._netAmount,
+      grossAmountCents: this._grossAmountCents,
+      commissionAmountCents: this._commissionAmountCents,
+      netAmountCents: this._netAmountCents,
       currency: this._currency,
       transactionRef: this._transactionRef,
       failureReason: this._failureReason,

@@ -38,7 +38,7 @@ export async function findMembershipTiersWithCounts(): Promise<unknown[]> {
        LEFT JOIN "userMembership" um ON mt."membershipTierId" = um."membershipTierId"
        WHERE mt."deletedAt" IS NULL
        GROUP BY mt."membershipTierId"
-       ORDER BY mt."sortOrder", mt."price"`,
+       ORDER BY mt."sortOrder", mt."priceCents"`,
     )) || []
   );
 }
@@ -75,7 +75,7 @@ export async function getSubscriptionStats(): Promise<{
   );
 
   const mrrResult = await queryOne<{ mrr: string }>(
-    `SELECT COALESCE(SUM(sp."price"), 0) as "mrr"
+    `SELECT COALESCE(SUM(sp."priceCents"), 0) as "mrr"
      FROM "subscription" s
      JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
      WHERE s."status" = 'active' AND sp."billingCycle" = 'monthly'`,
@@ -96,7 +96,7 @@ export async function findSubscriptionPlansWithCounts(): Promise<unknown[]> {
        LEFT JOIN "subscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
        WHERE sp."deletedAt" IS NULL
        GROUP BY sp."subscriptionPlanId"
-       ORDER BY sp."price"`,
+       ORDER BY sp."priceCents"`,
     )) || []
   );
 }

@@ -5,12 +5,12 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').unique();
     t.enum('frequency', ['daily', 'weekly', 'monthly']).notNullable().defaultTo('weekly');
-    t.decimal('minimumAmount', 15, 2).notNullable().defaultTo(1.0);
+    t.bigInteger('minimumAmountCents').notNullable().defaultTo(100);
     t.uuid('bankAccountId');
     t.integer('payoutDay');
     t.integer('holdPeriod').notNullable().defaultTo(0);
     t.boolean('automaticPayouts').notNullable().defaultTo(true);
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.enum('payoutProvider', ['stripe', 'square', 'other']).notNullable().defaultTo('stripe');
     t.string('payoutMethod', 50).notNullable().checkIn(['bank_transfer', 'paypal', 'check', 'other']).defaultTo('bank_transfer');
     t.jsonb('providerSettings');

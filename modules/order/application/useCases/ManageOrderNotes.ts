@@ -1,10 +1,8 @@
 import { OrderQueryRepository } from '../../domain/repositories/OrderQueryRepository';
-import { orderDataRepository } from '../wired';
 
-const orderQueryRepo = orderDataRepository.queries;
 
 export class ManageOrderNotesUseCase {
-  constructor(private readonly queryRepo: OrderQueryRepository = orderQueryRepo) {}
+  constructor(private readonly queryRepo: OrderQueryRepository) {}
 
   async findByOrder(orderId: string) {
     return this.queryRepo.findNotesByOrder(orderId);

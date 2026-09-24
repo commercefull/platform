@@ -5,6 +5,8 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import type { ProductVariantPort } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductPricingPort } from '../ports/ProductPricingPort';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 export class CreateProductVariantCommand {
   constructor(
@@ -17,8 +19,9 @@ export class CreateProductVariantCommand {
       displayValue?: string;
       displayOrder?: number;
     }>,
-    public readonly basePrice?: number,
-    public readonly compareAtPrice?: number,
+    /** Variant-level base price in integer cents — written to the pricing-owned store. */
+    public readonly basePriceCents?: number,
+    public readonly compareAtPriceCents?: number,
     public readonly currencyCode?: string,
     public readonly trackInventory?: boolean,
     public readonly inventoryQuantity?: number,
@@ -31,7 +34,10 @@ export class CreateProductVariantCommand {
 }
 
 export class CreateProductVariantUseCase {
-  constructor(private readonly variantRepository: ProductVariantPort) {}
+  constructor(
+    private readonly variantRepository: ProductVariantPort,
+    private readonly pricingPort: ProductPricingPort,
+  ) {}
 
   async execute(command: CreateProductVariantCommand): Promise<ProductVariant> {
     const variantId = generateUUID();
@@ -53,9 +59,6 @@ export class CreateProductVariantUseCase {
       sku: command.sku,
       name: variantName,
       attributes,
-      basePrice: command.basePrice || 0,
-      salePrice: command.compareAtPrice,
-      currencyCode: command.currencyCode,
       stockQuantity: command.inventoryQuantity,
       lowStockThreshold: command.lowStockThreshold,
       isDefault: command.isDefault,
@@ -63,6 +66,22 @@ export class CreateProductVariantUseCase {
       metadata: command.metadata,
     });
 
-    return (await this.variantRepository.save(variant)) as ProductVariant;
+    const saved = (await this.variantRepository.save(variant)) as ProductVariant;
+
+    // Persist the variant-level base price in the pricing-owned store when provided
+    if (command.basePriceCents !== undefined) {
+      if (!Number.isInteger(command.basePriceCents) || command.basePriceCents < 0) {
+        throw new ProductValidationError('basePriceCents must be a non-negative integer');
+      }
+      await this.pricingPort.setBasePrice({
+        productId: command.productId,
+        productVariantId: variantId,
+        currencyCode: command.currencyCode || 'USD',
+        priceCents: command.basePriceCents,
+        compareAtPriceCents: command.compareAtPriceCents ?? null,
+      });
+    }
+
+    return saved;
   }
 }

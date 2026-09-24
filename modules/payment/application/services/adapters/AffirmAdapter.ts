@@ -31,8 +31,8 @@ const AFFIRM_CAPABILITIES: PSPCapabilities = {
   supportsWebhooks: true,
   supportedCurrencies: ['USD', 'CAD'],
   supportedCountries: ['US', 'CA'],
-  minAmount: 50,
-  maxAmount: 30000,
+  minAmountCents: 50,
+  maxAmountCents: 30000,
 };
 
 export class AffirmAdapter implements PSPAdapter {
@@ -90,13 +90,13 @@ export class AffirmAdapter implements PSPAdapter {
 
     const body = {
       merchant_internal_reference_id: request.orderId,
-      amount: Math.round(request.amount * 100),
+      amountCents: Math.round(request.amountCents * 100),
       currency: request.currency.toUpperCase(),
       items: [
         {
           display_name: request.description || `Order ${request.orderId}`,
           sku: request.orderId,
-          unit_price: Math.round(request.amount * 100),
+          unit_price: Math.round(request.amountCents * 100),
           qty: 1,
           item_image_url: '',
           item_url: '',
@@ -205,7 +205,7 @@ export class AffirmAdapter implements PSPAdapter {
     const baseUrl = this.getBaseUrl(config);
 
     const body = {
-      amount: Math.round(request.amount * 100),
+      amountCents: Math.round(request.amountCents * 100),
       reference_id: request.reason || 'refund',
     };
 
@@ -246,7 +246,7 @@ export class AffirmAdapter implements PSPAdapter {
           Authorization: this.getAuthHeader(config),
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ amount: 100, currency: 'USD' }),
+        body: JSON.stringify({ amountCents: 100, currency: 'USD' }),
       });
       return {
         healthy: res.status === 200 || res.status === 400 || res.status === 422,

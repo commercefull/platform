@@ -11,7 +11,7 @@ export interface PurchaseOrderItem {
   sku: string;
   name: string;
   quantity: number;
-  unitCost: number;
+  unitCostCents: number;
 }
 
 export interface CreatePurchaseOrderInput {
@@ -33,7 +33,7 @@ export interface CreatePurchaseOrderOutput {
   purchaseOrderId: string;
   poNumber: string;
   supplierId: string;
-  totalAmount: number;
+  totalAmountCents: number;
   status: string;
   createdAt: string;
 }
@@ -49,7 +49,7 @@ interface PurchaseOrderRecord {
   purchaseOrderId: string;
   poNumber: string;
   supplierId: string;
-  totalAmount: number;
+  totalAmountCents: number;
   status: string;
   createdAt: Date;
 }
@@ -79,11 +79,11 @@ export class CreatePurchaseOrderUseCase {
     }
 
     // Calculate total
-    const totalAmount = input.items.reduce((sum, item) => sum + item.quantity * item.unitCost, 0);
+    const totalAmountCents = input.items.reduce((sum, item) => sum + item.quantity * item.unitCostCents, 0);
 
     // Check minimum order value
-    if (supplier.minimumOrderValue && totalAmount < supplier.minimumOrderValue) {
-      throw new SupplierValidationError(`Order total ${totalAmount} is below minimum ${supplier.minimumOrderValue}`);
+    if (supplier.minimumOrderValue && totalAmountCents < supplier.minimumOrderValue) {
+      throw new SupplierValidationError(`Order total ${totalAmountCents} is below minimum ${supplier.minimumOrderValue}`);
     }
 
     const purchaseOrderId = `po_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
@@ -96,7 +96,7 @@ export class CreatePurchaseOrderUseCase {
       poNumber,
       supplierId: input.supplierId,
       items: input.items,
-      totalAmount,
+      totalAmountCents,
       status: 'draft',
       expectedDeliveryDate: expectedDelivery,
       shippingAddress: input.shippingAddress,
@@ -106,14 +106,14 @@ export class CreatePurchaseOrderUseCase {
     eventBus.emit('purchase_order.created', {
       purchaseOrderId,
       supplierId: input.supplierId,
-      totalAmount,
+      totalAmountCents,
     });
 
     return {
       purchaseOrderId: purchaseOrder.purchaseOrderId,
       poNumber: purchaseOrder.poNumber,
       supplierId: purchaseOrder.supplierId,
-      totalAmount: purchaseOrder.totalAmount,
+      totalAmountCents: purchaseOrder.totalAmountCents,
       status: purchaseOrder.status,
       createdAt: purchaseOrder.createdAt.toISOString(),
     };

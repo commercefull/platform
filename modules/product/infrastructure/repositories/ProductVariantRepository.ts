@@ -5,7 +5,6 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
-import { Price } from '../../domain/valueObjects/Price';
 import { Dimensions } from '../../domain/valueObjects/Dimensions';
 import { ProductVariant as DbProductVariant } from '../../../../libs/db/types';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
@@ -119,18 +118,13 @@ export class ProductVariantRepository {
       await query(
         `UPDATE "productVariant" SET
           sku = $1, name = $2,
-          price = $3, "salePrice" = $4, "costPrice" = $5, "compareAtPrice" = $6,
-          weight = $7, length = $8, width = $9, height = $10,
-          "isDefault" = $11, status = $12, position = $13,
-          "optionValues" = $14, barcode = $15, mpn = $16, "updatedAt" = $17
-        WHERE "productVariantId" = $18`,
+          weight = $3, length = $4, width = $5, height = $6,
+          "isDefault" = $7, status = $8, position = $9,
+          "optionValues" = $10, barcode = $11, mpn = $12, "updatedAt" = $13
+        WHERE "productVariantId" = $14`,
         [
           variant.sku,
           variant.name,
-          String(variant.price.effectivePrice),
-          variant.price.salePrice ? String(variant.price.salePrice) : null,
-          variant.price.cost ? String(variant.price.cost) : null,
-          null,
           variant.dimensions.weight ? String(variant.dimensions.weight) : null,
           variant.dimensions.length ? String(variant.dimensions.length) : null,
           variant.dimensions.width ? String(variant.dimensions.width) : null,
@@ -149,19 +143,14 @@ export class ProductVariantRepository {
       await query(
         `INSERT INTO "productVariant" (
           "productVariantId", "productId", sku, name,
-          price, "salePrice", "costPrice", "compareAtPrice",
           weight, length, width, height,
           "isDefault", status, position, "optionValues", barcode, mpn, "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
         [
           variant.variantId,
           variant.productId,
           variant.sku,
           variant.name,
-          String(variant.price.effectivePrice),
-          variant.price.salePrice ? String(variant.price.salePrice) : null,
-          variant.price.cost ? String(variant.price.cost) : null,
-          null,
           variant.dimensions.weight ? String(variant.dimensions.weight) : null,
           variant.dimensions.length ? String(variant.dimensions.length) : null,
           variant.dimensions.width ? String(variant.dimensions.width) : null,
@@ -255,12 +244,6 @@ export class ProductVariantRepository {
       productId: row.productId,
       sku: row.sku,
       name: row.name ?? '',
-      price: Price.create(
-        row.price ? parseFloat(row.price) : 0,
-        'USD',
-        row.salePrice ? parseFloat(row.salePrice) : undefined,
-        row.costPrice ? parseFloat(row.costPrice) : undefined,
-      ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         length: row.length ? parseFloat(row.length) : undefined,

@@ -58,7 +58,7 @@ describe('Payment Error Handling (AppError)', () => {
       '/business/payments/initiate',
       {
         orderId: testOrderId,
-        amount: 50,
+        amountCents: 5000,
         currency: 'USD',
         paymentMethodConfigId: testMethodConfigId || 'default',
       },
@@ -75,7 +75,7 @@ describe('Payment Error Handling (AppError)', () => {
     // Transaction is PENDING — not refundable
     const res = await client.post(
       `/business/transactions/${txId}/refund`,
-      { amount: 25, reason: 'test' },
+      { amountCents: 2500, reason: 'test' },
       { headers: { Authorization: `Bearer ${adminToken}` } },
     );
 
@@ -95,7 +95,7 @@ describe('Payment Error Handling (AppError)', () => {
     // This test is for the amount check which happens after the transaction lookup
     const res = await client.post(
       '/business/transactions/00000000-0000-0000-0000-000000000099/refund',
-      { amount: 999999, reason: 'test' },
+      { amountCents: 99999900, reason: 'test' },
       { headers: { Authorization: `Bearer ${adminToken}` } },
     );
 

@@ -67,9 +67,9 @@ exports.up = async function (knex) {
       t.string('tier').nullable();
 
       // LTV & spend metrics
-      t.decimal('lifetimeValue', 14, 2).notNullable().defaultTo(0);
-      t.decimal('totalSpent', 14, 2).notNullable().defaultTo(0);
-      t.decimal('averageOrderValue', 14, 2).notNullable().defaultTo(0);
+      t.bigInteger('lifetimeValueCents').notNullable().defaultTo(0);
+      t.bigInteger('totalSpentCents').notNullable().defaultTo(0);
+      t.bigInteger('averageOrderValueCents').notNullable().defaultTo(0);
       t.integer('totalOrders').notNullable().defaultTo(0);
 
       // Frequency & recency
@@ -114,7 +114,7 @@ exports.up = async function (knex) {
       t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
 
       t.index(['customerId'], 'idx_customerProfile_customer');
-      t.index(['lifetimeValue'], 'idx_customerProfile_ltv');
+      t.index(['lifetimeValueCents'], 'idx_customerProfile_ltv');
       t.index(['totalOrders'], 'idx_customerProfile_orders');
       t.index(['lastOrderDate'], 'idx_customerProfile_lastOrder');
       t.index(['organizationId'], 'idx_customerProfile_org');

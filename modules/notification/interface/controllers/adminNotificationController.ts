@@ -5,18 +5,14 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageNotificationTemplatesUseCase } from '../../application/useCases/ManageNotificationTemplates';
-import { ManageNotificationBatchesUseCase } from '../../application/useCases/ManageNotificationBatches';
-import { GetNotificationDeliveryLogsUseCase } from '../../application/useCases/GetNotificationDeliveryLogs';
-import { ManageNotificationWebhooksAdminUseCase } from '../../application/useCases/ManageNotificationWebhooksAdmin';
-import { GetTemplateTranslationsUseCase } from '../../application/useCases/GetTemplateTranslations';
+import {
+  manageNotificationTemplatesUseCase as manageTemplatesUseCase,
+  manageNotificationBatchesUseCase as manageBatchesUseCase,
+  getNotificationDeliveryLogsUseCase as getDeliveryLogsUseCase,
+  manageNotificationWebhooksAdminUseCase as manageWebhooksUseCase,
+  getTemplateTranslationsUseCase as getTranslationsUseCase,
+} from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageTemplatesUseCase = new ManageNotificationTemplatesUseCase();
-const manageBatchesUseCase = new ManageNotificationBatchesUseCase();
-const getDeliveryLogsUseCase = new GetNotificationDeliveryLogsUseCase();
-const manageWebhooksUseCase = new ManageNotificationWebhooksAdminUseCase();
-const getTranslationsUseCase = new GetTemplateTranslationsUseCase();
 
 // ============================================================================
 // Notification Templates Management

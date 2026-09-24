@@ -11,11 +11,7 @@ import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData }
 import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 
 export class OrganizationCredentialSubjectAdapter implements CredentialSubjectPort {
-  private readonly repo: typeof organizationRepo;
-
-  constructor(repo?: typeof organizationRepo) {
-    this.repo = repo ?? organizationRepo;
-  }
+  constructor(private readonly repo: typeof organizationRepo) {}
 
   async authenticate(email: string, password: string): Promise<CredentialSubject | null> {
     const result = await this.repo.authenticate({ email, password });

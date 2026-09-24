@@ -188,7 +188,7 @@ describe('Marketplace Module Integration Tests', () => {
       if (!orgToken) return;
       const resp = await client.post(
         '/business/commission-rules/calculate',
-        { vendorId: vendorId || '00000000-0000-0000-0000-000000000001', amount: 100.0 },
+        { vendorId: vendorId || '00000000-0000-0000-0000-000000000001', amountCents: 10000 },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(200);
@@ -202,7 +202,7 @@ describe('Marketplace Module Integration Tests', () => {
       await client.post(`/business/vendors/${vendorId}/approve`, {}, { headers: { Authorization: `Bearer ${orgToken}` } });
       const resp = await client.post(
         '/business/payouts',
-        { vendorId, amount: 50.0, currency: 'USD' },
+        { vendorId, amountCents: 5000, currency: 'USD' },
         { headers: { Authorization: `Bearer ${orgToken}` } },
       );
       expect(resp.status).toBe(201);

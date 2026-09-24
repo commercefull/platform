@@ -2,12 +2,9 @@
  * Unit Tests for VoidPayment Use Case
  */
 
+import { emitMock } from '../../tests/testUtils';
 import { VoidPaymentUseCase } from './VoidPayment';
 import { TransactionNotFoundError, TransactionCannotBeVoidedError, VoidFailedError } from '../../domain/errors/PaymentErrors';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
 
 function createAuthorizedTransaction(overrides: Record<string, unknown> = {}) {
   return {
@@ -36,6 +33,10 @@ function createMockGateway(success: boolean, response?: Record<string, unknown>,
 }
 
 describe('VoidPaymentUseCase', () => {
+  beforeEach(() => {
+    emitMock.mockClear();
+  });
+
   it('should void an authorized transaction successfully', async () => {
     const tx = createAuthorizedTransaction();
     const repo = createMockRepo(tx);

@@ -3,7 +3,7 @@ export interface PaymentReport {
   organizationId: string;
   type: string;
   currency: string;
-  totalAmount: number;
+  totalAmountCents: number;
   transactionCount: number;
   data?: Record<string, unknown>;
   periodStart: Date;

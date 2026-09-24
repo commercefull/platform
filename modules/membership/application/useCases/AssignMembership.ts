@@ -29,7 +29,7 @@ interface MembershipTierRecord {
   maxMembers?: number;
   currentMembers?: number;
   billingPeriod?: string;
-  price?: number;
+  priceCents?: number;
 }
 
 interface CreatedMembership {
@@ -112,7 +112,7 @@ export class AssignMembershipUseCase {
       endDate,
       paymentMethodId: input.paymentMethodId,
       source: input.source || 'purchase',
-      autoRenew: tier.price ? true : false,
+      autoRenew: tier.priceCents ? true : false,
     });
 
     // Update tier member count

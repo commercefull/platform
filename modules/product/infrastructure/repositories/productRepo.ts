@@ -42,16 +42,8 @@ export interface Product {
   type: ProductType;
   status: ProductStatus;
   visibility: ProductVisibility;
-  price: number;
-  basePrice?: number;
-  salePrice?: number;
-  costPrice?: number;
-  compareAtPrice?: number;
   taxClass?: string;
-  taxRate?: number;
   isTaxable: boolean;
-  currency: string;
-  currencyCode?: string;
   isInventoryManaged: boolean;
   minOrderQuantity?: number;
   maxOrderQuantity?: number;
@@ -101,18 +93,7 @@ export interface Product {
 // Alias for backward compatibility
 export type ProductListItem = Pick<
   Product,
-  | 'productId'
-  | 'name'
-  | 'sku'
-  | 'status'
-  | 'visibility'
-  | 'price'
-  | 'basePrice'
-  | 'salePrice'
-  | 'isFeatured'
-  | 'hasVariants'
-  | 'createdAt'
-  | 'updatedAt'
+  'productId' | 'name' | 'sku' | 'status' | 'visibility' | 'isFeatured' | 'hasVariants' | 'createdAt' | 'updatedAt'
 > & { id?: string }; // Include id alias for compatibility
 
 export type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
@@ -126,8 +107,9 @@ export interface ProductFilterOptions {
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;
-  priceMin?: number;
-  priceMax?: number;
+  /** Price bounds are integer cents, matched against the pricing-owned productBasePrice table. */
+  priceMinCents?: number;
+  priceMaxCents?: number;
   organizationId?: string;
   searchTerm?: string;
   limit?: number;
@@ -183,8 +165,8 @@ export class ProductRepo {
       isFeatured,
       isVirtual,
       hasVariants,
-      priceMin,
-      priceMax,
+      priceMinCents,
+      priceMaxCents,
       organizationId,
       searchTerm,
       limit = 50,
@@ -245,14 +227,14 @@ export class ProductRepo {
       params.push(hasVariants);
     }
 
-    if (priceMin !== undefined) {
-      sql += ` AND "price" >= $${paramIndex++}`;
-      params.push(priceMin);
+    if (priceMinCents !== undefined) {
+      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`;
+      params.push(priceMinCents);
     }
 
-    if (priceMax !== undefined) {
-      sql += ` AND "price" <= $${paramIndex++}`;
-      params.push(priceMax);
+    if (priceMaxCents !== undefined) {
+      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`;
+      params.push(priceMaxCents);
     }
 
     if (organizationId) {
@@ -267,7 +249,7 @@ export class ProductRepo {
     }
 
     // Validate orderBy to prevent SQL injection
-    const validOrderColumns = ['createdAt', 'updatedAt', 'name', 'price', 'sku', 'status'];
+    const validOrderColumns = ['createdAt', 'updatedAt', 'name', 'sku', 'status'];
     const safeOrderBy = validOrderColumns.includes(orderBy) ? orderBy : 'createdAt';
     const safeDirection = orderDirection === 'ASC' ? 'ASC' : 'DESC';
 
@@ -282,7 +264,8 @@ export class ProductRepo {
    * Count products based on filter options
    */
   async count(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMin, priceMax, organizationId, searchTerm } = options;
+    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMinCents, priceMaxCents, organizationId, searchTerm } =
+      options;
 
     let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
     const params: unknown[] = [];
@@ -336,14 +319,14 @@ export class ProductRepo {
       params.push(hasVariants);
     }
 
-    if (priceMin !== undefined) {
-      sql += ` AND "price" >= $${paramIndex++}`;
-      params.push(priceMin);
+    if (priceMinCents !== undefined) {
+      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`;
+      params.push(priceMinCents);
     }
 
-    if (priceMax !== undefined) {
-      sql += ` AND "price" <= $${paramIndex++}`;
-      params.push(priceMax);
+    if (priceMaxCents !== undefined) {
+      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`;
+      params.push(priceMaxCents);
     }
 
     if (organizationId) {
@@ -369,8 +352,7 @@ export class ProductRepo {
       INSERT INTO "${this.tableName}" (
         "sku", "name", "slug", "description", "shortDescription",
         "type", "status", "visibility",
-        "price", "basePrice", "salePrice", "costPrice", "compareAtPrice",
-        "taxClass", "taxRate", "isTaxable", "currency", "currencyCode",
+        "taxClass", "isTaxable",
         "isInventoryManaged", "minOrderQuantity", "maxOrderQuantity", "orderIncrementQuantity",
         "weight", "weightUnit", "length", "width", "height", "dimensionUnit",
         "metaTitle", "metaDescription", "metaKeywords",
@@ -388,22 +370,21 @@ export class ProductRepo {
       ) VALUES (
         $1, $2, $3, $4, $5,
         $6, $7, $8,
-        $9, $10, $11, $12, $13,
-        $14, $15, $16, $17, $18,
-        $19, $20, $21, $22,
-        $23, $24, $25, $26, $27, $28,
-        $29, $30, $31,
-        $32, $33,
-        $34, $35, $36,
-        $37, $38, $39, $40,
+        $9, $10,
+        $11, $12, $13, $14,
+        $15, $16, $17, $18, $19, $20,
+        $21, $22, $23,
+        $24, $25,
+        $26, $27, $28,
+        $29, $30, $31, $32,
+        $33, $34,
+        $35, $36, $37,
+        $38, $39, $40,
         $41, $42,
-        $43, $44, $45,
-        $46, $47, $48,
-        $49, $50,
-        $51, $52,
-        $53, $54, $55,
-        $56, $57,
-        $58, $59
+        $43, $44,
+        $45, $46, $47,
+        $48, $49,
+        $50, $51
       )
       RETURNING *
     `;
@@ -417,16 +398,8 @@ export class ProductRepo {
       data.type || ProductType.SIMPLE,
       data.status || ProductStatus.DRAFT,
       data.visibility || ProductVisibility.VISIBLE,
-      data.price,
-      data.basePrice || null,
-      data.salePrice || null,
-      data.costPrice || null,
-      data.compareAtPrice || null,
       data.taxClass || 'standard',
-      data.taxRate || null,
       data.isTaxable !== false,
-      data.currency || 'USD',
-      data.currencyCode || 'USD',
       data.isInventoryManaged !== false,
       data.minOrderQuantity || 1,
       data.maxOrderQuantity || null,
@@ -497,16 +470,8 @@ export class ProductRepo {
       'type',
       'status',
       'visibility',
-      'price',
-      'basePrice',
-      'salePrice',
-      'costPrice',
-      'compareAtPrice',
       'taxClass',
-      'taxRate',
       'isTaxable',
-      'currency',
-      'currencyCode',
       'isInventoryManaged',
       'minOrderQuantity',
       'maxOrderQuantity',

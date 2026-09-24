@@ -24,13 +24,11 @@ const outcomeToOrderStatus: Record<CheckoutOutcome, OrderStatus> = {
 };
 
 export class OrderOrderPlacementAdapter implements OrderPlacementPort {
-  private readonly createOrderUseCase: CreateOrderUseCase;
-  private readonly cancelOrderUseCase: CancelOrderUseCase;
-
-  constructor(private readonly orderRepository: OrderRepository) {
-    this.createOrderUseCase = new CreateOrderUseCase(orderRepository);
-    this.cancelOrderUseCase = new CancelOrderUseCase(orderRepository);
-  }
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly createOrderUseCase: CreateOrderUseCase,
+    private readonly cancelOrderUseCase: CancelOrderUseCase,
+  ) {}
 
   async createOrder(request: CreateOrderRequest): Promise<OrderSnapshot> {
     const command = new CreateOrderCommand(
@@ -48,7 +46,7 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       undefined, // customerPhone
       undefined, // customerName
       request.notes,
-      request.shippingAmount,
+      request.shippingAmountCents,
       undefined, // hasGiftWrapping
       undefined, // giftMessage
       undefined, // isGift

@@ -2,12 +2,9 @@
  * Unit Tests for RetryPayment Use Case
  */
 
+import { emitMock } from '../../tests/testUtils';
 import { RetryPaymentUseCase } from './RetryPayment';
 import { TransactionNotFoundError, CannotRetryTransactionError, MaxRetryAttemptsReachedError } from '../../domain/errors/PaymentErrors';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
 
 function createFailedTransaction(overrides: Record<string, unknown> = {}) {
   return {
@@ -34,6 +31,10 @@ function createMockRepo(tx: ReturnType<typeof createFailedTransaction> | null, r
 }
 
 describe('RetryPaymentUseCase', () => {
+  beforeEach(() => {
+    emitMock.mockClear();
+  });
+
   it('should retry a failed payment successfully', async () => {
     const tx = createFailedTransaction();
     const repo = createMockRepo(tx, 0);

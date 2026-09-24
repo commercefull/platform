@@ -6,8 +6,53 @@
 
 import type { Warehouse } from '../entities/Warehouse';
 
-export type WarehouseCreateParams = Omit<Warehouse, 'distributionWarehouseId' | 'createdAt' | 'updatedAt'>;
-export type WarehouseUpdateParams = Partial<Omit<Warehouse, 'distributionWarehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>>;
+/**
+ * Normalized warehouse record as returned by the repository layer
+ * (flat `distributionWarehouse` row shape).
+ */
+export interface WarehouseRecord {
+  distributionWarehouseId: string;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  code: string;
+  description?: string;
+  isActive: boolean;
+  isDefault: boolean;
+  isFulfillmentCenter: boolean;
+  isReturnCenter: boolean;
+  isVirtual: boolean;
+  organizationId?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  email?: string;
+  phone?: string;
+  contactName?: string;
+  timezone: string;
+  cutoffTime?: string;
+  processingTime?: number;
+  operatingHours?: Record<string, unknown>;
+  capabilities?: Record<string, unknown>;
+  shippingMethods?: string[];
+  createdBy?: string;
+}
+
+export type WarehouseCreateParams = Omit<WarehouseRecord, 'distributionWarehouseId' | 'createdAt' | 'updatedAt'>;
+export type WarehouseUpdateParams = Partial<Omit<WarehouseRecord, 'distributionWarehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>>;
+
+export interface WarehouseStatistics {
+  total: number;
+  active: number;
+  fulfillmentCenters: number;
+  returnCenters: number;
+  virtual: number;
+}
 
 export interface WarehouseBin {
   distributionWarehouseBinId: string;

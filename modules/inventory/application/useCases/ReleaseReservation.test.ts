@@ -2,29 +2,18 @@
  * Unit Tests for ReleaseReservation Use Case
  */
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, emitMock } from '../../tests/testUtils';
 import { ReleaseReservationUseCase } from './ReleaseReservation';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('ReleaseReservationUseCase', () => {
   let useCase: ReleaseReservationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ReleaseReservationUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findReservationById: jest.fn(),
-      findReservationsByOrderId: jest.fn(),
-      findById: jest.fn(),
-      updateReservedQuantity: jest.fn(),
-      updateReservationStatus: jest.fn(),
-    };
-    useCase = new ReleaseReservationUseCase(mockRepo as never as ConstructorParameters<typeof ReleaseReservationUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
+    mockRepo = lazyMock<ConstructorParameters<typeof ReleaseReservationUseCase>[0]>();
+    useCase = new ReleaseReservationUseCase(mockRepo);
+    emitMock.mockClear();
   });
 
   it('should release reservation by reservationId', async () => {
@@ -44,7 +33,7 @@ describe('ReleaseReservationUseCase', () => {
     expect(result.items[0].releasedQuantity).toBe(10);
     expect(mockRepo.updateReservedQuantity).toHaveBeenCalledWith('inv-1', 20);
     expect(mockRepo.updateReservationStatus).toHaveBeenCalledWith('res-1', 'released', 'cancelled');
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'inventory.released',
       expect.objectContaining({
         reservationId: 'res-1',

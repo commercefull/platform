@@ -99,9 +99,9 @@
               <h3 class="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
                 <%= product.name %>
               </h3>
-              <% if (product.price) { %>
+              <% if (product.effectivePriceCents != null || product.basePriceCents != null) { %>
               <p class="text-lg font-bold text-gray-900">
-                $<%= product.price.toFixed(2) %>
+                $<%= (((product.effectivePriceCents ?? product.basePriceCents) || 0) / 100).toFixed(2) %>
               </p>
               <% } %>
             </div>

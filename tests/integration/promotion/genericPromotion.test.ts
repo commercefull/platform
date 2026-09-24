@@ -85,7 +85,7 @@ describe('Generic Promotion API Tests', () => {
       {
         basketId: testCartId,
         promotionId: promotionId,
-        discountAmount: 10,
+        discountAmountCents: 1000,
         currencyCode: 'USD',
         status: 'active',
         isAutoApplied: false,

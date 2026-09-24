@@ -1,52 +1,57 @@
+import { createSystemConfiguration, createSystemConfigurationRepository } from '../../tests/testUtils';
 import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from './UpdateSystemConfiguration';
 import { ConfigurationNotFoundError } from '../../domain/errors/ConfigurationErrors';
 
 describe('UpdateSystemConfigurationUseCase', () => {
-  let useCase: UpdateSystemConfigurationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockConfig: Record<string, unknown>;
+  it('should change the system mode when a new mode is provided', async () => {
+    const repository = createSystemConfigurationRepository(createSystemConfiguration({ systemMode: 'multi_store' }));
 
-  beforeEach(() => {
-    mockConfig = {
-      changeSystemMode: jest.fn(),
-      updatePlatformSettings: jest.fn(),
-      updateFeatures: jest.fn(),
-      updateOrganizationSettings: jest.fn(),
-      updateSecuritySettings: jest.fn(),
-      updateNotificationSettings: jest.fn(),
-      updateIntegrationSettings: jest.fn(),
-      updateMetadata: jest.fn(),
-      toJSON: jest.fn(),
-      configId: 'cfg-1',
-      systemMode: 'multi_store',
-      platformSettings: { platformName: 'Updated' },
-      updatedAt: new Date(),
-    };
-    (mockConfig.toJSON as jest.Mock).mockReturnValue(mockConfig);
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockConfig),
-      save: jest.fn().mockResolvedValue(mockConfig),
-    };
-    useCase = new UpdateSystemConfigurationUseCase(mockRepo as never);
+    const result = await new UpdateSystemConfigurationUseCase(repository).execute(
+      new UpdateSystemConfigurationCommand('cfg-1', { systemMode: 'single_store' }),
+    );
+
+    expect(result.systemMode).toBe('single_store');
+    expect(repository.save).toHaveBeenCalled();
+    expect(repository.save.mock.calls[0][0].features.enableMultiStore).toBe(false);
   });
 
-  it('should update system mode (happy path)', async () => {
-    const result = await useCase.execute(new UpdateSystemConfigurationCommand('cfg-1', { systemMode: 'single_store' }));
+  it('should update the platform settings when platform fields are provided', async () => {
+    const repository = createSystemConfigurationRepository();
 
-    expect(result.configId).toBe('cfg-1');
-    expect(mockConfig.changeSystemMode).toHaveBeenCalledWith('single_store');
-    expect(mockRepo.save).toHaveBeenCalled();
+    const result = await new UpdateSystemConfigurationUseCase(repository).execute(
+      new UpdateSystemConfigurationCommand('cfg-1', { platformName: 'New Name', defaultCurrency: 'EUR' }),
+    );
+
+    expect(result.platformName).toBe('New Name');
+    expect(repository.save.mock.calls[0][0].platformSettings.defaultCurrency).toBe('EUR');
   });
 
-  it('should update platform settings', async () => {
-    await useCase.execute(new UpdateSystemConfigurationCommand('cfg-1', { platformName: 'New Name', defaultCurrency: 'EUR' }));
+  it('should update features when feature flags are provided', async () => {
+    const repository = createSystemConfigurationRepository();
 
-    expect(mockConfig.updatePlatformSettings).toHaveBeenCalled();
+    await new UpdateSystemConfigurationUseCase(repository).execute(
+      new UpdateSystemConfigurationCommand('cfg-1', { features: { enableCoupons: false } }),
+    );
+
+    expect(repository.save.mock.calls[0][0].features.enableCoupons).toBe(false);
   });
 
-  it('should throw ConfigurationNotFoundError when config not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should merge metadata when metadata is provided', async () => {
+    const repository = createSystemConfigurationRepository(createSystemConfiguration({ metadata: { tier: 'gold' } }));
 
-    await expect(useCase.execute(new UpdateSystemConfigurationCommand('missing', {}))).rejects.toThrow(ConfigurationNotFoundError);
+    await new UpdateSystemConfigurationUseCase(repository).execute(
+      new UpdateSystemConfigurationCommand('cfg-1', { metadata: { region: 'eu' } }),
+    );
+
+    expect(repository.save.mock.calls[0][0].metadata).toEqual({ tier: 'gold', region: 'eu' });
+  });
+
+  it('should throw ConfigurationNotFoundError when the configuration does not exist', async () => {
+    const repository = createSystemConfigurationRepository(null);
+
+    await expect(
+      new UpdateSystemConfigurationUseCase(repository).execute(new UpdateSystemConfigurationCommand('missing', {})),
+    ).rejects.toThrow(ConfigurationNotFoundError);
+    expect(repository.save).not.toHaveBeenCalled();
   });
 });

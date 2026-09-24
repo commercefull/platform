@@ -51,3 +51,10 @@ export interface CreateShippingLabelInput {
   dimensions?: Record<string, unknown>;
   shippingCost?: number;
 }
+
+export interface ShippingLabelPort {
+  create(input: CreateShippingLabelInput): Promise<ShippingLabel>;
+  findById(shippingLabelId: string): Promise<ShippingLabel | null>;
+  findByTrackingNumber(trackingNumber: string): Promise<ShippingLabel | null>;
+  voidLabel(shippingLabelId: string, reason?: string): Promise<ShippingLabel | null>;
+}

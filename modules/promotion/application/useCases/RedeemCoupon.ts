@@ -1,12 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Redeem Coupon Use Case
  * Records coupon usage after successful order
  */
 
-import { couponDiscountRepository, type PromotionCouponUsage } from '../wired';
-
-const couponRepo = couponDiscountRepository.coupons;
+import type { PromotionCouponUsage, CouponRepository } from '../../domain/repositories/CouponRepository';
 import { ValidateCouponUseCase, ValidateCouponCommand } from './ValidateCoupon';
 
 // ============================================================================
@@ -17,8 +15,8 @@ export class RedeemCouponCommand {
   constructor(
     public readonly code: string,
     public readonly orderId: string,
-    public readonly orderTotal: number,
-    public readonly discountAmount: number,
+    public readonly orderTotalCents: number,
+    public readonly discountAmountCents: number,
     public readonly customerId?: string,
     public readonly organizationId?: string,
   ) {}
@@ -40,7 +38,11 @@ export interface RedeemCouponResponse {
 // ============================================================================
 
 export class RedeemCouponUseCase {
-  private validateCouponUseCase = new ValidateCouponUseCase();
+  private readonly validateCouponUseCase: ValidateCouponUseCase;
+
+  constructor(private readonly couponRepo: CouponRepository) {
+    this.validateCouponUseCase = new ValidateCouponUseCase(couponRepo);
+  }
 
   async execute(command: RedeemCouponCommand): Promise<RedeemCouponResponse> {
     // Validate input
@@ -48,13 +50,13 @@ export class RedeemCouponUseCase {
       return { success: false, message: 'Order ID is required', errors: ['order_id_required'] };
     }
 
-    if (command.discountAmount < 0) {
+    if (command.discountAmountCents < 0) {
       return { success: false, message: 'Discount amount must be positive', errors: ['invalid_discount'] };
     }
 
     // First validate the coupon
     const validationResult = await this.validateCouponUseCase.execute(
-      new ValidateCouponCommand(command.code, command.orderTotal, command.customerId, command.organizationId),
+      new ValidateCouponCommand(command.code, command.orderTotalCents, command.customerId, command.organizationId),
     );
 
     if (!validationResult.valid || !validationResult.coupon) {
@@ -67,7 +69,12 @@ export class RedeemCouponUseCase {
 
     try {
       // Record the usage
-      const usage = await couponRepo.recordUsage(validationResult.coupon.promotionCouponId, command.orderId, command.customerId);
+      const usage = await this.couponRepo.recordUsage(
+        validationResult.coupon.promotionCouponId,
+        command.orderId,
+        command.customerId,
+        command.discountAmountCents,
+      );
 
       return {
         success: true,
@@ -83,5 +90,3 @@ export class RedeemCouponUseCase {
     }
   }
 }
-
-const redeemCouponUseCase = new RedeemCouponUseCase();

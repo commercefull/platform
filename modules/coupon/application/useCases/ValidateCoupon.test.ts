@@ -1,112 +1,71 @@
-/**
- * Unit Tests for ValidateCoupon Use Case
- */
-
+import { createCoupon, createCouponRepository } from '../../tests/testUtils';
 import { ValidateCouponUseCase, ValidateCouponCommand } from './ValidateCoupon';
-import { Coupon } from '../../domain/entities/Coupon';
 
 describe('ValidateCouponUseCase', () => {
-  let useCase: ValidateCouponUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-
-  beforeEach(() => {
-    mockRepo = {
-      validateCouponCode: jest.fn(),
-    };
-    useCase = new ValidateCouponUseCase(mockRepo as never as ConstructorParameters<typeof ValidateCouponUseCase>[0]);
-  });
-
-  function createCoupon(): Coupon {
-    return Coupon.create({
-      couponId: 'c-1',
-      code: 'SAVE10',
-      name: 'Save 10%',
-      type: 'percentage',
-      value: 10,
-      usageType: 'multi_use',
-      usageLimit: 100,
-      createdBy: 'admin',
-    });
-  }
-
-  it('should return valid result when coupon is valid', async () => {
-    const coupon = createCoupon();
-    mockRepo.validateCouponCode.mockResolvedValue({
+  it('should return a valid result when the coupon code validates', async () => {
+    const repository = createCouponRepository();
+    repository.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon,
-      discountAmount: 10,
+      coupon: createCoupon({ applicableProducts: ['prod-1', 'prod-2'] }),
+      discountAmountCents: 15,
     });
 
-    const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100, 'cust-1'));
+    const result = await new ValidateCouponUseCase(repository).execute(
+      new ValidateCouponCommand('SAVE10', 100, 'customer-1', [
+        { productId: 'prod-1', quantity: 2, priceCents: 30 },
+        { productId: 'prod-3', quantity: 1, priceCents: 40 },
+      ]),
+    );
 
     expect(result.valid).toBe(true);
-    expect(result.coupon!.couponId).toBe('c-1');
-    expect(result.coupon!.code).toBe('SAVE10');
-    expect(result.coupon!.discountAmount).toBe(10);
+    expect(result.coupon?.discountAmountCents).toBe(15);
+    expect(repository.validateCouponCode).toHaveBeenCalledWith('SAVE10', 100, 'customer-1');
   });
 
-  it('should return invalid when repo returns invalid', async () => {
-    mockRepo.validateCouponCode.mockResolvedValue({
-      valid: false,
-      error: 'Coupon expired',
-    });
+  it('should return invalid when the repository rejects the code', async () => {
+    const repository = createCouponRepository();
+    repository.validateCouponCode.mockResolvedValue({ valid: false, error: 'Coupon expired' });
 
-    const result = await useCase.execute(new ValidateCouponCommand('EXPIRED', 100));
+    const result = await new ValidateCouponUseCase(repository).execute(new ValidateCouponCommand('EXPIRED', 100));
 
     expect(result.valid).toBe(false);
     expect(result.error).toBe('Coupon expired');
   });
 
-  it('should return invalid with default error when no error provided', async () => {
-    mockRepo.validateCouponCode.mockResolvedValue({ valid: false });
+  it('should return invalid with a default error when the repository gives none', async () => {
+    const repository = createCouponRepository();
+    repository.validateCouponCode.mockResolvedValue({ valid: false });
 
-    const result = await useCase.execute(new ValidateCouponCommand('UNKNOWN', 100));
+    const result = await new ValidateCouponUseCase(repository).execute(new ValidateCouponCommand('BAD', 100));
 
     expect(result.valid).toBe(false);
     expect(result.error).toBe('Invalid coupon');
   });
 
-  it('should calculate item-level discounts for applicable products', async () => {
-    const coupon = Coupon.create({
-      couponId: 'c-1',
-      code: 'SAVE10',
-      name: 'Save 10%',
-      type: 'percentage',
-      value: 10,
-      usageType: 'multi_use',
-      usageLimit: 100,
-      applicableProducts: ['prod-1', 'prod-2'],
-      createdBy: 'admin',
-    });
-    mockRepo.validateCouponCode.mockResolvedValue({
+  it('should calculate item-level discounts when items match applicable products', async () => {
+    const repository = createCouponRepository();
+    repository.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon,
-      discountAmount: 10,
+      coupon: createCoupon({ value: 25, applicableProducts: ['prod-1'] }),
     });
 
-    const result = await useCase.execute(
-      new ValidateCouponCommand('SAVE10', 100, 'cust-1', [
-        { productId: 'prod-1', quantity: 2, price: 20 },
-        { productId: 'prod-3', quantity: 1, price: 50 },
+    const result = await new ValidateCouponUseCase(repository).execute(
+      new ValidateCouponCommand('SAVE10', 100, 'customer-1', [
+        { productId: 'prod-1', quantity: 4, priceCents: 10 },
+        { productId: 'prod-2', quantity: 1, priceCents: 60 },
       ]),
     );
 
-    expect(result.applicableItems).toBeDefined();
-    expect(result.applicableItems).toHaveLength(1);
-    expect(result.applicableItems![0].productId).toBe('prod-1');
-    expect(result.applicableItems![0].discountAmount).toBe(4); // 10% of 40
+    expect(result.applicableItems).toEqual([{ productId: 'prod-1', discountAmountCents: 10 }]); // 25% of 4 × 10
   });
 
-  it('should not return applicableItems when no items provided', async () => {
-    const coupon = createCoupon();
-    mockRepo.validateCouponCode.mockResolvedValue({
-      valid: true,
-      coupon,
-      discountAmount: 10,
-    });
+  it('should omit applicableItems when no items are provided', async () => {
+    const repository = createCouponRepository();
+    repository.validateCouponCode.mockResolvedValue({ valid: true, coupon: createCoupon() });
 
-    const result = await useCase.execute(new ValidateCouponCommand('SAVE10', 100));
+    const result = await new ValidateCouponUseCase(repository).execute(new ValidateCouponCommand('SAVE10', 100, 'customer-1'));
 
+    expect(result.valid).toBe(true);
     expect(result.applicableItems).toBeUndefined();
   });
 });

@@ -5,7 +5,7 @@ export interface PaymentDispute {
   externalDisputeId?: string;
   status: string;
   reason?: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   evidence?: Record<string, unknown>;
   dueBy?: Date;

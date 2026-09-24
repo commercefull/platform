@@ -38,13 +38,13 @@ export class ItemAddedToBasketEvent implements DomainEvent {
     productId: string;
     productVariantId?: string;
     quantity: number;
-    unitPrice: number;
+    unitPriceCents: number;
   };
 
-  constructor(basketId: string, basketItemId: string, productId: string, quantity: number, unitPrice: number, productVariantId?: string) {
+  constructor(basketId: string, basketItemId: string, productId: string, quantity: number, unitPriceCents: number, productVariantId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = basketId;
-    this.payload = { basketId, basketItemId, productId, productVariantId, quantity, unitPrice };
+    this.payload = { basketId, basketItemId, productId, productVariantId, quantity, unitPriceCents };
   }
 }
 
@@ -107,13 +107,13 @@ export class BasketAbandonedEvent implements DomainEvent {
     basketId: string;
     customerId?: string;
     itemCount: number;
-    totalValue: number;
+    totalValueCents: number;
   };
 
-  constructor(basketId: string, itemCount: number, totalValue: number, customerId?: string) {
+  constructor(basketId: string, itemCount: number, totalValueCents: number, customerId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = basketId;
-    this.payload = { basketId, customerId, itemCount, totalValue };
+    this.payload = { basketId, customerId, itemCount, totalValueCents };
   }
 }
 
@@ -125,13 +125,13 @@ export class BasketConvertedToOrderEvent implements DomainEvent {
     basketId: string;
     orderId: string;
     customerId?: string;
-    totalValue: number;
+    totalValueCents: number;
   };
 
-  constructor(basketId: string, orderId: string, totalValue: number, customerId?: string) {
+  constructor(basketId: string, orderId: string, totalValueCents: number, customerId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = basketId;
-    this.payload = { basketId, orderId, customerId, totalValue };
+    this.payload = { basketId, orderId, customerId, totalValueCents };
   }
 }
 

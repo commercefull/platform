@@ -5,7 +5,8 @@
 
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
+import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
+import type { ProductPricingPort } from '../ports/ProductPricingPort';
 
 // ============================================================================
 // Command
@@ -21,9 +22,12 @@ export class UpdateProductCommand {
       sku?: string;
       slug?: string;
       categoryId?: string;
-      basePrice?: number;
-      salePrice?: number | null;
-      cost?: number;
+      /** Price fields are integer cents — written to the pricing-owned store. */
+      basePriceCents?: number;
+      salePriceCents?: number | null;
+      costPriceCents?: number | null;
+      compareAtPriceCents?: number | null;
+      currencyCode?: string;
       weight?: number;
       weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
       length?: number;
@@ -64,7 +68,10 @@ export interface UpdateProductResponse {
 // ============================================================================
 
 export class UpdateProductUseCase {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly pricingPort: ProductPricingPort,
+  ) {}
 
   async execute(command: UpdateProductCommand): Promise<UpdateProductResponse> {
     const product = await this.productRepository.findById(command.productId);
@@ -100,17 +107,44 @@ export class UpdateProductUseCase {
       updatedFields.push('slug');
     }
 
-    // Update price
-    if (command.updates.basePrice !== undefined) {
-      product.updatePrice(
-        command.updates.basePrice,
-        command.updates.salePrice ?? product.price.salePrice ?? undefined,
-        command.updates.cost ?? product.price.cost ?? undefined,
-      );
+    // Update price — the pricing module owns catalog prices (integer cents)
+    if (
+      command.updates.basePriceCents !== undefined ||
+      command.updates.salePriceCents !== undefined ||
+      command.updates.costPriceCents !== undefined ||
+      command.updates.compareAtPriceCents !== undefined
+    ) {
+      const existing = await this.pricingPort.getBasePrice(product.productId);
+      const priceCents = command.updates.basePriceCents ?? existing?.priceCents;
+      if (priceCents === undefined || !Number.isInteger(priceCents) || priceCents < 0) {
+        throw new ProductValidationError('basePriceCents must be a non-negative integer');
+      }
+      const salePriceCents =
+        command.updates.salePriceCents !== undefined ? command.updates.salePriceCents : (existing?.salePriceCents ?? null);
+      const costPriceCents =
+        command.updates.costPriceCents !== undefined ? command.updates.costPriceCents : (existing?.costPriceCents ?? null);
+      const compareAtPriceCents =
+        command.updates.compareAtPriceCents !== undefined
+          ? command.updates.compareAtPriceCents
+          : (existing?.compareAtPriceCents ?? null);
+      for (const [field, value] of Object.entries({ salePriceCents, costPriceCents, compareAtPriceCents })) {
+        if (value !== null && (!Number.isInteger(value) || value < 0)) {
+          throw new ProductValidationError(`${field} must be a non-negative integer or null`);
+        }
+      }
+      if (salePriceCents !== null && salePriceCents > priceCents) {
+        throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
+      }
+      await this.pricingPort.setBasePrice({
+        productId: product.productId,
+        currencyCode: command.updates.currencyCode ?? existing?.currencyCode ?? 'USD',
+        priceCents,
+        salePriceCents,
+        costPriceCents,
+        compareAtPriceCents,
+        taxRate: null,
+      });
       updatedFields.push('price');
-    } else if (command.updates.salePrice !== undefined) {
-      product.setSalePrice(command.updates.salePrice);
-      updatedFields.push('salePrice');
     }
 
     // Update dimensions

@@ -55,8 +55,8 @@ function createMockOrderRepo(order: Order | null): jest.Mocked<OrderRepository> 
     getStatusHistory: jest.fn().mockResolvedValue([]),
     getPaymentStatusHistory: jest.fn().mockResolvedValue([]),
     getFulfillmentStatusHistory: jest.fn().mockResolvedValue([]),
-    getOrderStats: jest.fn().mockResolvedValue({ totalOrders: 0, totalRevenue: 0, averageOrderValue: 0, ordersByStatus: {} }),
-  } as never as jest.Mocked<OrderRepository>;
+    getOrderStats: jest.fn().mockResolvedValue({ totalOrders: 0, totalRevenueCents: 0, averageOrderValueCents: 0, ordersByStatus: {} }),
+  } as unknown as jest.Mocked<OrderRepository>;
 }
 
 describe('GetOrderUseCase', () => {

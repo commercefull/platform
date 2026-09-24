@@ -214,7 +214,7 @@
                 </span>
               </td>
               <td><%= order.totalItems %></td>
-              <td><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+              <td><strong>$<%= (order.totalAmountCents / 100).toFixed(2) %></strong></td>
               <td>
                 <div class="btn-group">
                   <a href="/admin/orders/<%= order.orderId %>" class="btn btn-sm btn-info" title="<%= t('common.view') %>">

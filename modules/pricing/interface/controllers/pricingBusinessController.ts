@@ -1,8 +1,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
 import { Currency, CurrencyRegion } from '../../domain/currency';
-import pricingService from '../../application/pricingService';
-import { currencyRepository, pricingRuleRepository } from '../../application/wired';
+import { currencyRepository, pricingRuleRepository, pricingService } from '../../application/wired';
 
 interface ExchangeRateBody {
   source: string;

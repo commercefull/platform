@@ -5,7 +5,7 @@ import {
   ManageB2BUserUseCase,
   ManageQuoteUseCase,
   ManageApprovalWorkflowUseCase,
-} from '../../application/useCases/B2B';
+} from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
 import { CompanyRepository, B2BUserRepository, QuoteRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
@@ -148,7 +148,7 @@ export class B2BController {
     try {
       const company = await this.companyUseCase.setCreditLimit(
         req.params.companyId,
-        (req.body as Record<string, unknown>).creditLimit as number,
+        (req.body as Record<string, unknown>).creditLimitCents as number,
       );
       res.json({ success: true, data: company.toJSON() });
     } catch (error) {

@@ -19,7 +19,7 @@ export interface FraudScreeningRequest {
   ipAddress?: string;
   billingCountry?: string;
   shippingCountry?: string;
-  orderAmount: number;
+  orderAmountCents: number;
   currency: string;
   paymentMethodId?: string;
   isFirstOrder?: boolean;

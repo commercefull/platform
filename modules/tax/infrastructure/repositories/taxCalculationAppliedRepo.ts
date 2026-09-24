@@ -25,8 +25,8 @@ export interface TaxCalculationApplied {
   jurisdictionName: string;
   rate: number;
   isCompound: boolean;
-  taxableAmount: number;
-  taxAmount: number;
+  taxableAmountCents: number;
+  taxAmountCents: number;
 }
 
 export type TaxCalculationAppliedCreateParams = Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'createdAt' | 'updatedAt'>;
@@ -72,7 +72,7 @@ export class TaxCalculationAppliedRepo {
       `INSERT INTO "taxCalculationApplied" (
         "calculationId", "calculationLineId", "taxRateId", "taxRateName", "taxZoneId", "taxZoneName",
         "taxCategoryId", "taxCategoryName", "jurisdictionLevel", "jurisdictionName", "rate",
-        "isCompound", "taxableAmount", "taxAmount", "createdAt", "updatedAt"
+        "isCompound", "taxableAmountCents", "taxAmountCents", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
       [
         params.calculationId,
@@ -87,8 +87,8 @@ export class TaxCalculationAppliedRepo {
         params.jurisdictionName,
         params.rate,
         params.isCompound || false,
-        params.taxableAmount,
-        params.taxAmount,
+        params.taxableAmountCents,
+        params.taxAmountCents,
         now,
         now,
       ],
@@ -138,7 +138,7 @@ export class TaxCalculationAppliedRepo {
 
   async getTotalTaxAmount(calculationId: string): Promise<number> {
     const result = await queryOne<{ total: string }>(
-      `SELECT SUM("taxAmount") as total FROM "taxCalculationApplied" WHERE "calculationId" = $1`,
+      `SELECT SUM("taxAmountCents") as total FROM "taxCalculationApplied" WHERE "calculationId" = $1`,
       [calculationId],
     );
     return result ? parseFloat(result.total) || 0 : 0;

@@ -1,19 +1,15 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManagePaymentGatewaysUseCase } from '../../application/useCases/ManagePaymentGateways';
-import { ManagePaymentDisputesUseCase } from '../../application/useCases/ManagePaymentDisputes';
-import { ManagePaymentFeesUseCase } from '../../application/useCases/ManagePaymentFees';
-import { ManagePaymentSettingsUseCase } from '../../application/useCases/ManagePaymentSettings';
-import { GetPaymentBalancesUseCase } from '../../application/useCases/GetPaymentBalances';
-import { ManagePaymentReportsUseCase } from '../../application/useCases/ManagePaymentReports';
+import {
+  managePaymentGatewaysUseCase,
+  managePaymentDisputesUseCase,
+  managePaymentFeesUseCase,
+  managePaymentSettingsUseCase,
+  getPaymentBalancesUseCase,
+  managePaymentReportsUseCase,
+} from '../../application/useCases/wired';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
 
-const managePaymentGatewaysUseCase = new ManagePaymentGatewaysUseCase();
-const managePaymentDisputesUseCase = new ManagePaymentDisputesUseCase();
-const managePaymentFeesUseCase = new ManagePaymentFeesUseCase();
-const managePaymentSettingsUseCase = new ManagePaymentSettingsUseCase();
-const getPaymentBalancesUseCase = new GetPaymentBalancesUseCase();
-const managePaymentReportsUseCase = new ManagePaymentReportsUseCase();
 
 // ============================================================================
 // Payment Gateways

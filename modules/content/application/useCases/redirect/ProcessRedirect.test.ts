@@ -1,25 +1,21 @@
 import { ProcessRedirectUseCase, ProcessRedirectQuery } from './ProcessRedirect';
+import { lazyMock, createContentRedirect } from '../../../tests/testUtils';
 
 describe('ProcessRedirectUseCase', () => {
   let useCase: ProcessRedirectUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ProcessRedirectUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findMatchingRedirect: jest.fn().mockResolvedValue(null),
-      recordHit: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ProcessRedirectUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ProcessRedirectUseCase>[0]>();
+    mockRepo.findMatchingRedirect.mockResolvedValue(null);
+    mockRepo.recordHit.mockResolvedValue(undefined);
+    useCase = new ProcessRedirectUseCase(mockRepo);
   });
 
   it('should return redirect when match found', async () => {
-    mockRepo.findMatchingRedirect.mockResolvedValue({
-      contentRedirectId: 'r1',
-      sourceUrl: '/old',
-      targetUrl: '/new',
-      statusCode: '301',
-      isRegex: false,
-    });
+    mockRepo.findMatchingRedirect.mockResolvedValue(
+      createContentRedirect({ contentRedirectId: 'r1', sourceUrl: '/old', targetUrl: '/new' }),
+    );
 
     const result = await useCase.execute(new ProcessRedirectQuery('/old'));
 
@@ -41,13 +37,9 @@ describe('ProcessRedirectUseCase', () => {
   });
 
   it('should handle regex redirects with replacement', async () => {
-    mockRepo.findMatchingRedirect.mockResolvedValue({
-      contentRedirectId: 'r1',
-      sourceUrl: '/old/(.*)',
-      targetUrl: '/new/$1',
-      statusCode: '301',
-      isRegex: true,
-    });
+    mockRepo.findMatchingRedirect.mockResolvedValue(
+      createContentRedirect({ contentRedirectId: 'r1', sourceUrl: '/old/(.*)', targetUrl: '/new/$1', isRegex: true }),
+    );
 
     const result = await useCase.execute(new ProcessRedirectQuery('/old/page'));
 

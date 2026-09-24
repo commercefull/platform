@@ -29,8 +29,8 @@ export interface ReturnRuleProps {
   productId?: string;
   returnWindowDays?: number;
   restockingFeePercent?: number;
-  restockingFeeFlat?: number;
-  returnShippingCost?: number;
+  restockingFeeFlatCents?: number;
+  returnShippingCostCents?: number;
   customerPaysReturnShipping: boolean;
   autoApprove: boolean;
   requiresManualReview: boolean;
@@ -46,7 +46,7 @@ export interface ReturnEvaluationContext {
   returnDate?: Date;
   categoryId?: string;
   productId?: string;
-  orderTotal?: number;
+  orderTotalCents?: number;
   itemCondition?: string;
   returnType?: string;
   customerOrdersCount?: number;
@@ -57,8 +57,8 @@ export interface ReturnRuleEvaluationResult {
   isWithinWindow: boolean;
   daysSinceOrder: number;
   restockingFeePercent: number;
-  restockingFeeFlat: number;
-  returnShippingCost: number;
+  restockingFeeFlatCents: number;
+  returnShippingCostCents: number;
   customerPaysReturnShipping: boolean;
   autoApprove: boolean;
   requiresManualReview: boolean;
@@ -97,12 +97,12 @@ export class ReturnRule {
     return this.props.restockingFeePercent ?? 0;
   }
 
-  get restockingFeeFlat(): number {
-    return this.props.restockingFeeFlat ?? 0;
+  get restockingFeeFlatCents(): number {
+    return this.props.restockingFeeFlatCents ?? 0;
   }
 
-  get returnShippingCost(): number {
-    return this.props.returnShippingCost ?? 0;
+  get returnShippingCostCents(): number {
+    return this.props.returnShippingCostCents ?? 0;
   }
 
   get customerPaysReturnShipping(): boolean {

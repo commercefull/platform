@@ -24,8 +24,8 @@ exports.up = function (knex) {
       // Purchase metrics
       table.integer('purchases').defaultTo(0);
       table.integer('quantitySold').defaultTo(0);
-      table.decimal('revenue', 15, 2).defaultTo(0);
-      table.decimal('averagePrice', 15, 2).defaultTo(0);
+      table.bigInteger('revenueCents').defaultTo(0);
+      table.bigInteger('averagePriceCents').defaultTo(0);
       table.decimal('cartToOrderRate', 5, 4).defaultTo(0);
 
       // Return metrics

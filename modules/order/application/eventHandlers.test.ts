@@ -7,53 +7,38 @@
  */
 
 import { eventBus } from '../../../libs/events/eventBus';
+import { Order } from '../domain/entities/Order';
+import { OrderStatus } from '../domain/valueObjects/OrderStatus';
+import { registerOrderPaymentEventHandlers } from '../application/eventHandlers';
+import type { OrderRepository } from '../domain/repositories/OrderRepository';
 
 // Mock withTransaction to bypass real DB connection
 jest.mock('../../../libs/db', () => ({
   withTransaction: jest.fn((fn: (tx: unknown) => Promise<unknown>) => fn({})),
 }));
 
-// Mock the OrderDataRepository
-jest.mock('../infrastructure/repositories/OrderDataRepository', () => ({
-  __esModule: true,
-  default: {
-    commands: {
+describe('Order payment event handlers (Published Language)', () => {
+  let orders: jest.Mocked<OrderRepository>;
+
+  beforeEach(() => {
+    eventBus['handlers'].clear();
+    orders = {
       findById: jest.fn(),
       save: jest.fn(),
       recordStatusChange: jest.fn(),
-    },
-  },
-}));
-
-import orderDataRepository from '../infrastructure/repositories/OrderDataRepository';
-import { registerOrderPaymentEventHandlers } from '../application/eventHandlers';
-
-const OrderRepo = orderDataRepository.commands;
-
-describe('Order payment event handlers (Published Language)', () => {
-  beforeEach(() => {
-    eventBus['handlers'].clear();
-    registerOrderPaymentEventHandlers();
+    } as unknown as jest.Mocked<OrderRepository>;
+    registerOrderPaymentEventHandlers(orders);
   });
 
   afterEach(() => {
     eventBus['handlers'].clear();
-    jest.clearAllMocks();
   });
 
-  it('order.payment_failed should update order status to PAYMENT_FAILED', async () => {
-    // Create a mock order that can be updated
-    const mockOrder = {
-      orderId: 'order-1',
-      orderNumber: 'ORD-001',
-      status: 'pending',
-      updatedAt: new Date(),
-      updateStatus: jest.fn(),
-    };
-
-    (OrderRepo.findById as jest.Mock).mockResolvedValue(mockOrder);
-    (OrderRepo.save as jest.Mock).mockResolvedValue(undefined);
-    (OrderRepo.recordStatusChange as jest.Mock).mockResolvedValue(undefined);
+  it('should mark the order as payment failed when payment fails', async () => {
+    const order = Order.create({ orderId: 'order-1', customerEmail: 't@e.com' });
+    order.updateStatus(OrderStatus.PAYMENT_PENDING);
+    orders.findById.mockResolvedValue(order);
+    orders.save.mockResolvedValue(order);
 
     await eventBus.emit('order.payment_failed', {
       orderId: 'order-1',
@@ -61,17 +46,18 @@ describe('Order payment event handlers (Published Language)', () => {
       reason: 'card declined',
     });
 
-    expect(OrderRepo.findById).toHaveBeenCalledWith('order-1');
-    expect(mockOrder.updateStatus).toHaveBeenCalled();
-    expect(OrderRepo.save).toHaveBeenCalled();
+    expect(orders.findById).toHaveBeenCalledWith('order-1');
+    expect(order.status).toBe(OrderStatus.PAYMENT_FAILED);
+    expect(orders.save).toHaveBeenCalledWith(order);
+    expect(orders.recordStatusChange).toHaveBeenCalledWith('order-1', OrderStatus.PAYMENT_FAILED, undefined, OrderStatus.PAYMENT_PENDING);
   });
 
-  it('order.payment_failed should skip if no orderId', async () => {
+  it('should do nothing when the event has no orderId', async () => {
     await eventBus.emit('order.payment_failed', {
       customerId: 'cust-1',
       reason: 'timeout',
     });
 
-    expect(OrderRepo.findById).not.toHaveBeenCalled();
+    expect(orders.findById).not.toHaveBeenCalled();
   });
 });

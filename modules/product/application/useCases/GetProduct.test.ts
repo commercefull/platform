@@ -5,8 +5,22 @@
 import { GetProductUseCase, GetProductCommand } from './GetProduct';
 import { Product } from '../../domain/entities/Product';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
+import { lazyMock } from '../../tests/testUtils';
+import type { ProductPricingPort } from '../ports/ProductPricingPort';
 
 import type { ProductRepository } from '../../domain/repositories/ProductRepository';
+
+function createMockPricingPort(): jest.Mocked<ProductPricingPort> {
+  const port = lazyMock<ProductPricingPort>();
+  port.listProductPrices.mockResolvedValue([]);
+  port.getBasePrice.mockResolvedValue(null);
+  port.getBasePrices.mockResolvedValue([]);
+  return port;
+}
+
+function createUseCase(repo: jest.Mocked<ProductRepository>): GetProductUseCase {
+  return new GetProductUseCase(repo, createMockPricingPort());
+}
 
 function createProduct(): Product {
   return Product.create({
@@ -48,14 +62,14 @@ function createMockProductRepo(product: Product | null = null): jest.Mocked<Prod
     setProductCategories: jest.fn(),
     getTags: jest.fn().mockResolvedValue([]),
     setProductTags: jest.fn(),
-  } as never as jest.Mocked<ProductRepository>;
+  } as unknown as jest.Mocked<ProductRepository>;
 }
 
 describe('GetProductUseCase', () => {
   it('should return product by ID', async () => {
     const product = createProduct();
     const repo = createMockProductRepo(product);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     const result = await useCase.execute(new GetProductCommand('p-1'));
 
@@ -67,7 +81,7 @@ describe('GetProductUseCase', () => {
   it('should return product by slug', async () => {
     const product = createProduct();
     const repo = createMockProductRepo(product);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     const result = await useCase.execute(new GetProductCommand(undefined, 'test-product'));
 
@@ -78,7 +92,7 @@ describe('GetProductUseCase', () => {
   it('should return product by SKU', async () => {
     const product = createProduct();
     const repo = createMockProductRepo(product);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     const result = await useCase.execute(new GetProductCommand(undefined, undefined, 'SKU-1'));
 
@@ -88,7 +102,7 @@ describe('GetProductUseCase', () => {
 
   it('should return null when product does not exist', async () => {
     const repo = createMockProductRepo(null);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     const result = await useCase.execute(new GetProductCommand('nonexistent'));
 
@@ -102,7 +116,7 @@ describe('GetProductUseCase', () => {
   it('should include variants when requested', async () => {
     const product = createProduct();
     const repo = createMockProductRepo(product);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     await useCase.execute(new GetProductCommand('p-1', undefined, undefined, true));
 
@@ -112,7 +126,7 @@ describe('GetProductUseCase', () => {
   it('should not include variants when not requested', async () => {
     const product = createProduct();
     const repo = createMockProductRepo(product);
-    const useCase = new GetProductUseCase(repo);
+    const useCase = createUseCase(repo);
 
     await useCase.execute(new GetProductCommand('p-1', undefined, undefined, false));
 

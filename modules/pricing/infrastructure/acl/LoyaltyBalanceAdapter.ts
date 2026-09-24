@@ -9,11 +9,13 @@
  */
 
 import { LoyaltyBalancePort } from '../../application/ports/LoyaltyBalancePort';
-import { LoyaltyRepo } from '../../../loyalty/infrastructure/repositories/loyaltyRepo';
+import type { LoyaltyRepo } from '../../../loyalty/infrastructure/repositories/loyaltyRepo';
 
 export class LoyaltyBalanceAdapter implements LoyaltyBalancePort {
+  constructor(private readonly loyaltyRepo: Pick<LoyaltyRepo, 'findCustomerPoints'>) {}
+
   async getCustomerPoints(customerId: string): Promise<number> {
-    const points = await new LoyaltyRepo().findCustomerPoints(customerId);
+    const points = await this.loyaltyRepo.findCustomerPoints(customerId);
     return points?.currentPoints ?? 0;
   }
 }

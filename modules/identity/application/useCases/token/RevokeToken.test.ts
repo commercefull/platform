@@ -1,29 +1,24 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { RevokeTokenUseCase } from './RevokeToken';
 import { TokenRequiredOnlyError, UserIdRequiredError } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('RevokeTokenUseCase', () => {
   let useCase: RevokeTokenUseCase;
-  let mockBlacklist: Record<string, jest.Mock>;
-  let mockRefresh: Record<string, jest.Mock>;
+  let mockBlacklist: jest.Mocked<ConstructorParameters<typeof RevokeTokenUseCase>[0]>;
+  let mockRefresh: jest.Mocked<ConstructorParameters<typeof RevokeTokenUseCase>[1]>;
 
   beforeEach(() => {
-    mockBlacklist = { add: jest.fn().mockResolvedValue(undefined) };
-    mockRefresh = {
-      revoke: jest.fn().mockResolvedValue(undefined),
-      revokeAllForCustomer: jest.fn().mockResolvedValue(3),
-      revokeAllForMerchant: jest.fn().mockResolvedValue(5),
-    };
-    useCase = new RevokeTokenUseCase(mockBlacklist as never, mockRefresh as never);
+    mockBlacklist = lazyMock<ConstructorParameters<typeof RevokeTokenUseCase>[0]>();
+    mockBlacklist.add.mockResolvedValue(undefined);
+    mockRefresh = lazyMock<ConstructorParameters<typeof RevokeTokenUseCase>[1]>();
+    mockRefresh.revoke.mockResolvedValue(undefined);
+    mockRefresh.revokeAllForCustomer.mockResolvedValue(3);
+    mockRefresh.revokeAllForMerchant.mockResolvedValue(5);
+    useCase = new RevokeTokenUseCase(mockBlacklist, mockRefresh);
   });
 
   it('should revoke access token (happy path)', async () => {
@@ -52,7 +47,7 @@ describe('RevokeTokenUseCase', () => {
 
     expect(result.revokedCount).toBe(3);
     expect(mockRefresh.revokeAllForCustomer).toHaveBeenCalledWith('c1');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.all_tokens_revoked', expect.objectContaining({ userId: 'c1' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.all_tokens_revoked', expect.objectContaining({ userId: 'c1' }));
   });
 
   it('should revoke all tokens for organization', async () => {

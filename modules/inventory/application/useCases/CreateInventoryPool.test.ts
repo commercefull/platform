@@ -1,27 +1,20 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('pool-uuid'),
-}));
-
+import { lazyMock, uuidMock } from '../../tests/testUtils';
 import { CreateInventoryPoolUseCase } from './CreateInventoryPool';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('CreateInventoryPoolUseCase', () => {
   let useCase: CreateInventoryPoolUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateInventoryPoolUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      createPool: jest.fn().mockResolvedValue({
-        poolId: 'pool-uuid',
-        name: 'Main Pool',
-        poolType: 'shared',
-        linkedInventoryIds: ['inv1', 'inv2'],
-        allocationStrategy: 'fifo',
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateInventoryPoolUseCase(mockRepo as never);
+    uuidMock.mockReturnValue('pool-uuid');
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateInventoryPoolUseCase>[0]>();
+    mockRepo.createPool.mockImplementation(async (params) => ({
+      ...params,
+      linkedInventoryIds: ['inv1', 'inv2'],
+      createdAt: new Date(),
+    }));
+    useCase = new CreateInventoryPoolUseCase(mockRepo);
   });
 
   it('should create inventory pool (happy path)', async () => {

@@ -90,7 +90,7 @@ describe('Coupon API Tests', () => {
 
       const updateData = {
         name: 'Updated Test Coupon',
-        discountAmount: 20,
+        discountAmountCents: 2000,
       };
 
       const response = await client.put(`/business/coupons/${couponId}`, updateData, {
@@ -126,7 +126,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: testCoupon.code,
-          orderTotal: 50,
+          orderTotalCents: 5000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -149,7 +149,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: testCoupon.code,
-          orderTotal: 99.98,
+          orderTotalCents: 9998,
           items: cartItems,
         },
         {
@@ -168,7 +168,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: '',
-          orderTotal: 50,
+          orderTotalCents: 5000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -185,7 +185,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: 'NONEXISTENT12345',
-          orderTotal: 50,
+          orderTotalCents: 5000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -237,7 +237,7 @@ describe('Coupon API Tests', () => {
     it('should require auth for validating coupons', async () => {
       const response = await client.post('/business/coupons/validate', {
         code: 'TEST',
-        orderTotal: 50,
+        orderTotalCents: 5000,
       });
       expect(response.status).toBe(401);
     });
@@ -262,7 +262,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: 'TESTFIXED10',
-          orderTotal: 100,
+          orderTotalCents: 10000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -280,7 +280,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: 'TESTPERCENT15',
-          orderTotal: 100,
+          orderTotalCents: 10000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },
@@ -298,7 +298,7 @@ describe('Coupon API Tests', () => {
         '/business/coupons/validate',
         {
           code: 'EXPIRED20',
-          orderTotal: 100,
+          orderTotalCents: 10000,
         },
         {
           headers: { Authorization: `Bearer ${adminToken}` },

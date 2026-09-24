@@ -13,11 +13,11 @@ exports.up = function (knex) {
     t.string('sku', 100).notNullable();
     t.string('name', 255).notNullable();
     t.integer('quantity').notNullable().defaultTo(1);
-    t.decimal('unitPrice', 15, 2).notNullable();
-    t.decimal('totalPrice', 15, 2).notNullable();
-    t.decimal('discountAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('finalPrice', 15, 2).notNullable();
+    t.bigInteger('unitPriceCents').notNullable();
+    t.bigInteger('totalPriceCents').notNullable();
+    t.bigInteger('discountAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('taxAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('finalPriceCents').notNullable();
     t.text('imageUrl');
     t.jsonb('attributes');
     t.string('itemType', 20).notNullable().defaultTo('standard');

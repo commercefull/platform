@@ -1,76 +1,48 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createCheckoutRepository, createCheckoutSession, emitMock } from '../../tests/testUtils';
 import { SetFulfillmentMethodUseCase, SetFulfillmentMethodCommand } from './SetFulfillmentMethod';
 import { CheckoutSessionNotFoundError, CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import type { FulfillmentType } from '../../domain/entities/CheckoutSession';
 
 describe('SetFulfillmentMethodUseCase', () => {
   let useCase: SetFulfillmentMethodUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockSession: Record<string, unknown>;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
 
   beforeEach(() => {
-    mockSession = {
-      id: 'ck-1',
-      basketId: 'b1',
-      customerId: 'c1',
-      guestEmail: undefined,
-      status: 'pending',
-      paymentStatus: 'pending',
-      shippingAddress: null,
-      billingAddress: null,
-      shippingMethodId: undefined,
-      shippingMethodName: undefined,
-      paymentMethodId: undefined,
-      subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' },
-      shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' },
-      total: { amount: 100, currency: 'USD' },
-      couponCode: undefined,
-      fulfillmentType: 'shipping',
-      notes: undefined,
-      sameAsShipping: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      expiresAt: new Date(),
-      setFulfillmentType: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockSession),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new SetFulfillmentMethodUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession());
+    useCase = new SetFulfillmentMethodUseCase(checkoutRepository);
   });
 
-  it('should set fulfillment type to shipping (happy path)', async () => {
-    const result = await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'shipping'));
+  it('should set the fulfillment type, persist the session, and emit checkout.updated when the type is valid', async () => {
+    const result = await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'pickup'));
 
-    expect(result.checkoutId).toBe('ck-1');
-    expect(mockSession.setFulfillmentType).toHaveBeenCalledWith('shipping');
-    expect(eventBus.emit).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ fulfillmentType: 'shipping' }));
+    expect(result.fulfillmentType).toBe('pickup');
+    expect(checkoutRepository.save).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'fulfillmentType', fulfillmentType: 'pickup' }));
   });
 
-  it('should set fulfillment type to pickup', async () => {
-    await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'pickup'));
+  it('should clear the shipping method when switching to pickup', async () => {
+    checkoutRepository.findById.mockResolvedValue(
+      createCheckoutSession({ shippingMethodId: 'sm-1', shippingMethodName: 'Standard' }),
+    );
 
-    expect(mockSession.setFulfillmentType).toHaveBeenCalledWith('pickup');
+    const result = await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'pickup'));
+
+    expect(result.shippingMethodId).toBeUndefined();
+    expect(result.shippingAmountCents).toBe(0);
   });
 
-  it('should throw CheckoutSessionNotFoundError when session does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CheckoutSessionNotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new SetFulfillmentMethodCommand('missing', 'shipping'))).rejects.toThrow(CheckoutSessionNotFoundError);
+    await expect(useCase.execute(new SetFulfillmentMethodCommand('missing', 'pickup'))).rejects.toThrow(CheckoutSessionNotFoundError);
   });
 
-  it('should throw CheckoutValidationError for invalid fulfillment type', async () => {
-    await expect(useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'invalid' as never))).rejects.toThrow(CheckoutValidationError);
+  it('should throw CheckoutValidationError when the fulfillment type is invalid', async () => {
+    await expect(
+      useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'teleport' as unknown as FulfillmentType)),
+    ).rejects.toThrow(CheckoutValidationError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 });

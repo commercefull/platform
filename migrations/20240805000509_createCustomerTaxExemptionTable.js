@@ -32,8 +32,8 @@ exports.up = function (knex) {
     t.timestamp('verifiedAt');
     t.text('notes');
     t.jsonb('applicableTaxCategoryIds');
-    t.decimal('minOrderAmount', 15, 2);
-    t.decimal('maxOrderAmount', 15, 2);
+    t.bigInteger('minOrderAmountCents');
+    t.bigInteger('maxOrderAmountCents');
     t.decimal('exemptionPercent', 5, 2).notNullable().defaultTo(100);
 
     t.index('customerId');

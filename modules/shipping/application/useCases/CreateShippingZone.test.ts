@@ -1,25 +1,20 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../tests/testUtils';
 import { CreateShippingZoneUseCase } from './CreateShippingZone';
-import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+type ShippingZoneRepository = ConstructorParameters<typeof CreateShippingZoneUseCase>[0];
 
 describe('CreateShippingZoneUseCase', () => {
   let useCase: CreateShippingZoneUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let repo: jest.Mocked<ShippingZoneRepository>;
 
   beforeEach(() => {
-    mockRepo = { saveZone: jest.fn().mockImplementation(async (zone: unknown) => zone) };
-    useCase = new CreateShippingZoneUseCase(mockRepo as never);
+    jest.resetAllMocks();
+    repo = lazyMock<ShippingZoneRepository>();
+    repo.saveZone.mockImplementation(async zone => zone);
+    useCase = new CreateShippingZoneUseCase(repo);
   });
 
-  it('should create a shipping zone (happy path)', async () => {
+  it('should create and persist a shipping zone', async () => {
     const result = await useCase.execute({
       name: 'US Zone',
       locations: [{ countryCode: 'US' }],
@@ -28,7 +23,8 @@ describe('CreateShippingZoneUseCase', () => {
 
     expect(result.shippingZone.name).toBe('US Zone');
     expect(result.shippingZone.isDefault).toBe(true);
-    expect(eventBus.emit).toHaveBeenCalledWith('shipping.zone_created', expect.objectContaining({ name: 'US Zone' }));
+    expect(repo.saveZone).toHaveBeenCalledWith(result.shippingZone);
+    expect(emitMock).toHaveBeenCalledWith('shipping.zone_created', expect.objectContaining({ name: 'US Zone' }));
   });
 
   it('should default isActive to true', async () => {

@@ -26,7 +26,7 @@
             <span class="info-box-icon bg-info"><i class="fas fa-dollar-sign"></i></span>
             <div class="info-box-content">
               <span class="info-box-text"><%= t('shared:common.revenue') %></span>
-              <span class="info-box-number">$<%= (kpis.revenue.current || 0).toLocaleString() %></span>
+              <span class="info-box-number">$<%= ((kpis.revenue.current || 0) / 100).toLocaleString() %></span>
               <div class="progress">
                 <div class="progress-bar bg-info" style="width: <%= Math.min(100, (kpis.revenue.current / kpis.revenue.target * 100) || 0) %>%"></div>
               </div>
@@ -51,7 +51,7 @@
                 <div class="progress-bar bg-success" style="width: <%= Math.min(100, kpis.profit.margin || 0) %>%"></div>
               </div>
               <span class="progress-description">
-                <%= t('analytics:profit') %>: $<%= (kpis.profit.current || 0).toLocaleString() %>
+                <%= t('analytics:profit') %>: $<%= ((kpis.profit.current || 0) / 100).toLocaleString() %>
               </span>
             </div>
           </div>
@@ -86,7 +86,7 @@
               <span class="info-box-text"><%= t('shared:common.orders') %></span>
               <span class="info-box-number"><%= kpis.orders.total || 0 %></span>
               <span class="progress-description">
-                <%= t('analytics:aov') %>: $<%= (kpis.orders.average || 0).toFixed(2) %> | <%= t('analytics:conversion') %>: <%= ((kpis.orders.conversion || 0) * 100).toFixed(1) %>%
+                <%= t('analytics:aov') %>: $<%= ((kpis.orders.average || 0) / 100).toFixed(2) %> | <%= t('analytics:conversion') %>: <%= ((kpis.orders.conversion || 0) * 100).toFixed(1) %>%
               </span>
             </div>
           </div>
@@ -96,7 +96,7 @@
             <span class="info-box-icon bg-danger"><i class="fas fa-boxes"></i></span>
             <div class="info-box-content">
               <span class="info-box-text"><%= t('shared:common.inventory') %></span>
-              <span class="info-box-number">$<%= (kpis.inventory.value || 0).toLocaleString() %></span>
+              <span class="info-box-number">$<%= ((kpis.inventory.value || 0) / 100).toLocaleString() %></span>
               <span class="progress-description">
                 <%= t('analytics:turnover') %>: <%= (kpis.inventory.turnover || 0).toFixed(2) %> | <%= t('analytics:stockouts') %>: <%= kpis.inventory.stockouts || 0 %>
               </span>
@@ -110,7 +110,7 @@
               <span class="info-box-text"><%= t('shared:common.marketing') %></span>
               <span class="info-box-number"><%= t('common.roi') %>: <%= (kpis.marketing.roi || 0).toFixed(1) %>x</span>
               <span class="progress-description">
-                <%= t('common.cac') %>: $<%= (kpis.marketing.cac || 0).toFixed(2) %> | <%= t('common.ltv') %>: $<%= (kpis.marketing.ltv || 0).toFixed(2) %>
+                <%= t('common.cac') %>: $<%= (kpis.marketing.cac || 0).toFixed(2) %> | <%= t('common.ltv') %>: $<%= ((kpis.marketing.ltv || 0) / 100).toFixed(2) %>
               </span>
             </div>
           </div>

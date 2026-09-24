@@ -1,8 +1,4 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { RegisterCustomerUseCase } from './RegisterCustomer';
 import {
   EmailAndPasswordRequiredError,
@@ -10,26 +6,27 @@ import {
   PasswordTooShortError,
   EmailAlreadyRegisteredError,
 } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('RegisterCustomerUseCase', () => {
   let useCase: RegisterCustomerUseCase;
-  let mockCustomerRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
-  let mockEmail: Record<string, jest.Mock>;
+  let mockCustomerRepo: jest.Mocked<ConstructorParameters<typeof RegisterCustomerUseCase>[0]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof RegisterCustomerUseCase>[1]>;
+  let mockEmail: jest.Mocked<ConstructorParameters<typeof RegisterCustomerUseCase>[2]>;
 
   beforeEach(() => {
-    mockCustomerRepo = { findByEmail: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue(undefined) };
-    mockAuth = {
-      hashPassword: jest.fn().mockResolvedValue('hashed'),
-      generateVerificationToken: jest.fn().mockResolvedValue('verify-token'),
-    };
-    mockEmail = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
-    useCase = new RegisterCustomerUseCase(mockCustomerRepo as never, mockAuth as never, mockEmail as never);
+    mockCustomerRepo = lazyMock<ConstructorParameters<typeof RegisterCustomerUseCase>[0]>();
+    mockCustomerRepo.findByEmail.mockResolvedValue(null);
+    mockCustomerRepo.create.mockResolvedValue(undefined);
+    mockAuth = lazyMock<ConstructorParameters<typeof RegisterCustomerUseCase>[1]>();
+    mockAuth.hashPassword.mockResolvedValue('hashed');
+    mockAuth.generateVerificationToken.mockResolvedValue('verify-token');
+    mockEmail = lazyMock<ConstructorParameters<typeof RegisterCustomerUseCase>[2]>();
+    mockEmail.sendVerificationEmail.mockResolvedValue(undefined);
+    useCase = new RegisterCustomerUseCase(mockCustomerRepo, mockAuth, mockEmail);
   });
 
   it('should register customer successfully (happy path)', async () => {
@@ -38,7 +35,7 @@ describe('RegisterCustomerUseCase', () => {
     expect(result.customerId).toBeDefined();
     expect(result.requiresVerification).toBe(true);
     expect(mockCustomerRepo.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'pending_verification', emailVerified: false }));
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.registered', expect.objectContaining({ email: 'new@test.com' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.registered', expect.objectContaining({ email: 'new@test.com' }));
   });
 
   it('should throw EmailAndPasswordRequiredError when fields missing', async () => {
@@ -54,7 +51,7 @@ describe('RegisterCustomerUseCase', () => {
   });
 
   it('should throw EmailAlreadyRegisteredError when email exists', async () => {
-    mockCustomerRepo.findByEmail.mockResolvedValue({ customerId: 'existing' });
+    mockCustomerRepo.findByEmail.mockResolvedValue({ customerId: 'existing', email: 'a@b.com' });
 
     await expect(useCase.execute({ email: 'a@b.com', password: 'password123' })).rejects.toThrow(EmailAlreadyRegisteredError);
   });

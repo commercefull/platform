@@ -2,47 +2,37 @@
  * Unit Tests for RejectTaxExemption Use Case
  */
 
-jest.mock('../../infrastructure/repositories/taxCommandRepo', () => {
-  const mock = {
-    updateTaxExemption: jest.fn(),
-  };
-  return {
-    __esModule: true,
-    default: mock,
-    TaxCommandRepo: function () { return mock; },
-  };
-});
-
+import { createExemptionUpdatePort, createCustomerTaxExemption } from '../../tests/testUtils';
 import { RejectTaxExemptionUseCase } from './RejectTaxExemption';
-import taxCommandRepo from '../../infrastructure/repositories/taxCommandRepo';
 
 describe('RejectTaxExemptionUseCase', () => {
   let useCase: RejectTaxExemptionUseCase;
+  let commandRepo: ReturnType<typeof createExemptionUpdatePort>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new RejectTaxExemptionUseCase();
+    commandRepo = createExemptionUpdatePort();
+    useCase = new RejectTaxExemptionUseCase(commandRepo);
   });
 
-  it('should reject an exemption with a reason', async () => {
-    const mockResult = { id: 'ex1', status: 'rejected' };
-    jest.mocked(taxCommandRepo.updateTaxExemption).mockResolvedValue(mockResult as never);
+  it('should reject the exemption and record the reason', async () => {
+    const rejected = createCustomerTaxExemption({ status: 'rejected', notes: 'Invalid certificate' });
+    commandRepo.updateTaxExemption.mockResolvedValue(rejected);
 
-    const result = await useCase.execute('ex1', 'Invalid certificate');
+    const result = await useCase.execute('ex-1', 'Invalid certificate');
 
-    expect(result).toEqual(mockResult);
-    expect(taxCommandRepo.updateTaxExemption).toHaveBeenCalledWith('ex1', {
+    expect(result).toBe(rejected);
+    expect(commandRepo.updateTaxExemption).toHaveBeenCalledWith('ex-1', {
       status: 'rejected',
       notes: 'Invalid certificate',
     });
   });
 
-  it('should reject an exemption without a reason', async () => {
-    jest.mocked(taxCommandRepo.updateTaxExemption).mockResolvedValue({ id: 'ex1' } as never);
+  it('should reject the exemption without a reason when none is given', async () => {
+    commandRepo.updateTaxExemption.mockResolvedValue(createCustomerTaxExemption({ status: 'rejected' }));
 
-    await useCase.execute('ex1');
+    await useCase.execute('ex-1');
 
-    expect(taxCommandRepo.updateTaxExemption).toHaveBeenCalledWith('ex1', {
+    expect(commandRepo.updateTaxExemption).toHaveBeenCalledWith('ex-1', {
       status: 'rejected',
       notes: undefined,
     });

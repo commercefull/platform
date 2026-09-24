@@ -7,20 +7,20 @@ import { query, queryOne } from '../../../../libs/db';
 
 export interface DashboardStats {
   totalOrders: number;
-  totalRevenue: number;
+  totalRevenueCents: number;
   totalCustomers: number;
   totalProducts: number;
   pendingOrders: number;
   lowStockProducts: number;
   todayOrders: number;
-  todayRevenue: number;
+  todayRevenueCents: number;
 }
 
 export interface RecentOrder {
   orderId: string;
   orderNumber: string;
   customerName: string;
-  totalAmount: number;
+  totalAmountCents: number;
   status: string;
   createdAt: Date;
 }
@@ -29,12 +29,12 @@ export interface TopProduct {
   productId: string;
   name: string;
   totalSold: number;
-  revenue: number;
+  revenueCents: number;
 }
 
 export interface RevenueByDay {
   date: string;
-  revenue: number;
+  revenueCents: number;
   orders: number;
 }
 
@@ -49,7 +49,7 @@ class DashboardQueryRepositoryClass {
     const [ordersResult, revenueResult, customersResult, productsResult, pendingResult, lowStockResult, todayResult] = await Promise.all([
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" WHERE "deletedAt" IS NULL`),
       queryOne<{ total: string }>(
-        `SELECT COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "paymentStatus" = 'paid'`,
+        `SELECT COALESCE(SUM("totalAmountCents"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "paymentStatus" = 'paid'`,
       ),
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "customer" WHERE "deletedAt" IS NULL`),
       queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "product" WHERE "deletedAt" IS NULL`),
@@ -60,20 +60,20 @@ class DashboardQueryRepositoryClass {
         `SELECT COUNT(*) as count FROM "inventoryLevel" WHERE ("availableQuantity" - "reservedQuantity") <= "reorderQuantity"`,
       ),
       queryOne<{ count: string; total: string }>(
-        `SELECT COUNT(*) as count, COALESCE(SUM("totalAmount"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "createdAt" >= $1`,
+        `SELECT COUNT(*) as count, COALESCE(SUM("totalAmountCents"), 0) as total FROM "order" WHERE "deletedAt" IS NULL AND "createdAt" >= $1`,
         [today],
       ),
     ]);
 
     return {
       totalOrders: parseInt(ordersResult?.count || '0'),
-      totalRevenue: parseFloat(revenueResult?.total || '0'),
+      totalRevenueCents: parseFloat(revenueResult?.total || '0'),
       totalCustomers: parseInt(customersResult?.count || '0'),
       totalProducts: parseInt(productsResult?.count || '0'),
       pendingOrders: parseInt(pendingResult?.count || '0'),
       lowStockProducts: parseInt(lowStockResult?.count || '0'),
       todayOrders: parseInt(todayResult?.count || '0'),
-      todayRevenue: parseFloat(todayResult?.total || '0'),
+      todayRevenueCents: parseFloat(todayResult?.total || '0'),
     };
   }
 
@@ -85,7 +85,7 @@ class DashboardQueryRepositoryClass {
     today.setHours(0, 0, 0, 0);
 
     const ordersResult = await queryOne<{ count: string; total: string }>(
-      `SELECT COUNT(DISTINCT o."orderId") as count, COALESCE(SUM(oi."lineTotal"), 0) as total
+      `SELECT COUNT(DISTINCT o."orderId") as count, COALESCE(SUM(oi."lineTotalCents"), 0) as total
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
@@ -94,7 +94,7 @@ class DashboardQueryRepositoryClass {
     );
 
     const todayResult = await queryOne<{ count: string; total: string }>(
-      `SELECT COUNT(DISTINCT o."orderId") as count, COALESCE(SUM(oi."lineTotal"), 0) as total
+      `SELECT COUNT(DISTINCT o."orderId") as count, COALESCE(SUM(oi."lineTotalCents"), 0) as total
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
@@ -126,13 +126,13 @@ class DashboardQueryRepositoryClass {
 
     return {
       totalOrders: parseInt(ordersResult?.count || '0'),
-      totalRevenue: parseFloat(ordersResult?.total || '0'),
+      totalRevenueCents: parseFloat(ordersResult?.total || '0'),
       totalCustomers: 0,
       totalProducts: parseInt(productsResult?.count || '0'),
       pendingOrders: parseInt(pendingResult?.count || '0'),
       lowStockProducts: parseInt(lowStockResult?.count || '0'),
       todayOrders: parseInt(todayResult?.count || '0'),
-      todayRevenue: parseFloat(todayResult?.total || '0'),
+      todayRevenueCents: parseFloat(todayResult?.total || '0'),
     };
   }
 
@@ -144,7 +144,7 @@ class DashboardQueryRepositoryClass {
       `SELECT 
         o."orderId", o."orderNumber",
         COALESCE(c."firstName" || ' ' || c."lastName", 'Guest') as "customerName",
-        o."totalAmount", o."status", o."createdAt"
+        o."totalAmountCents", o."status", o."createdAt"
        FROM "order" o
        LEFT JOIN "customer" c ON o."customerId" = c."customerId"
        WHERE o."deletedAt" IS NULL
@@ -163,7 +163,7 @@ class DashboardQueryRepositoryClass {
       `SELECT DISTINCT ON (o."orderId")
          o."orderId", o."orderNumber", 
          COALESCE(c."firstName" || ' ' || c."lastName", 'Guest') as "customerName",
-         o."totalAmount", o."status", o."createdAt"
+         o."totalAmountCents", o."status", o."createdAt"
        FROM "order" o
        JOIN "orderItem" oi ON o."orderId" = oi."orderId"
        JOIN "product" p ON oi."productId" = p."productId"
@@ -184,7 +184,7 @@ class DashboardQueryRepositoryClass {
       `SELECT 
         p."productId", p."name",
         COALESCE(SUM(oi."quantity"), 0)::int as "totalSold",
-        COALESCE(SUM(oi."lineTotal"), 0) as "revenue"
+        COALESCE(SUM(oi."lineTotalCents"), 0) as "revenue"
        FROM "product" p
        LEFT JOIN "orderItem" oi ON p."productId" = oi."productId"
        WHERE p."deletedAt" IS NULL
@@ -204,7 +204,7 @@ class DashboardQueryRepositoryClass {
       `SELECT 
          p."productId", p."name",
          COALESCE(SUM(oi."quantity"), 0)::int as "totalSold",
-         COALESCE(SUM(oi."lineTotal"), 0) as "revenue"
+         COALESCE(SUM(oi."lineTotalCents"), 0) as "revenue"
        FROM "product" p
        LEFT JOIN "orderItem" oi ON p."productId" = oi."productId"
        WHERE p."organizationId" = $1 AND p."deletedAt" IS NULL
@@ -223,7 +223,7 @@ class DashboardQueryRepositoryClass {
     const result = await query<Array<{ date: string; revenue: string; orders: string }>>(
       `SELECT 
         DATE("createdAt") as date,
-        COALESCE(SUM("totalAmount"), 0) as revenue,
+        COALESCE(SUM("totalAmountCents"), 0) as revenue,
         COUNT(*) as orders
        FROM "order"
        WHERE "deletedAt" IS NULL 
@@ -233,7 +233,7 @@ class DashboardQueryRepositoryClass {
     );
     return (result || []).map(r => ({
       date: r.date,
-      revenue: parseFloat(r.revenue || '0'),
+      revenueCents: parseFloat(r.revenue || '0'),
       orders: parseInt(r.orders || '0'),
     }));
   }

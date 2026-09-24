@@ -10,39 +10,42 @@
  */
 
 import { OrderStatusSyncPort, CheckoutSyncSummary } from '../../application/ports/OrderStatusSyncPort';
-import CheckoutRepo from '../../../checkout/infrastructure/repositories/CheckoutRepository';
-import orderDataRepository from '../../../order/infrastructure/repositories/OrderDataRepository';
-
-const OrderRepo = orderDataRepository.commands;
+import type CheckoutRepo from '../../../checkout/infrastructure/repositories/CheckoutRepository';
+import type { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
 import { UpdateOrderStatusUseCase, UpdateOrderStatusCommand } from '../../../order/application/useCases/UpdateOrderStatus';
 import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus';
 
 export class CheckoutOrderStatusSyncAdapter implements OrderStatusSyncPort {
+  constructor(
+    private readonly checkoutRepo: Pick<typeof CheckoutRepo, 'findByPaymentIntentId'>,
+    private readonly orderRepo: OrderRepository,
+  ) {}
+
   async findCheckoutByPaymentIntentId(paymentIntentId: string): Promise<CheckoutSyncSummary | null> {
-    const session = await CheckoutRepo.findByPaymentIntentId(paymentIntentId);
+    const session = await this.checkoutRepo.findByPaymentIntentId(paymentIntentId);
     if (!session?.orderId) return null;
     const orderId = session.orderId;
 
-    const order = await OrderRepo.findById(orderId);
+    const order = await this.orderRepo.findById(orderId);
 
     return {
       checkoutId: session.id,
       orderId,
       customerId: session.customerId,
-      totalAmount: session.total.amount,
+      totalAmountCents: session.total.cents,
       orderNumber: order?.orderNumber,
     };
   }
 
   async markOrderPaid(orderId: string): Promise<{ orderNumber?: string } | null> {
-    const updateOrderStatus = new UpdateOrderStatusUseCase(OrderRepo);
+    const updateOrderStatus = new UpdateOrderStatusUseCase(this.orderRepo);
     await updateOrderStatus.execute(new UpdateOrderStatusCommand(orderId, OrderStatus.PROCESSING));
 
-    const order = await OrderRepo.findById(orderId);
+    const order = await this.orderRepo.findById(orderId);
     if (order) {
       order.updatePaymentStatus(PaymentStatus.PAID);
-      await OrderRepo.save(order);
+      await this.orderRepo.save(order);
       return { orderNumber: order.orderNumber };
     }
     return null;

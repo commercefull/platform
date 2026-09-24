@@ -1,9 +1,12 @@
 import { GetPaymentMethodsUseCase } from './GetPaymentMethods';
 
+type PaymentRepoPort = ConstructorParameters<typeof GetPaymentMethodsUseCase>[0];
+type ConfigRepoPort = ConstructorParameters<typeof GetPaymentMethodsUseCase>[1];
+
 describe('GetPaymentMethodsUseCase', () => {
   let useCase: GetPaymentMethodsUseCase;
-  let mockPaymentRepo: Record<string, jest.Mock>;
-  let mockConfigRepo: Record<string, jest.Mock>;
+  let mockPaymentRepo: jest.Mocked<Pick<PaymentRepoPort, 'findSavedPaymentMethods'>>;
+  let mockConfigRepo: jest.Mocked<Pick<ConfigRepoPort, 'findActiveConfigs'>>;
 
   beforeEach(() => {
     mockPaymentRepo = {
@@ -19,7 +22,7 @@ describe('GetPaymentMethodsUseCase', () => {
         { paymentMethodConfigId: 'cfg2', type: 'wallet', provider: 'paypal', displayName: 'PayPal', isActive: true },
       ]),
     };
-    useCase = new GetPaymentMethodsUseCase(mockPaymentRepo as never, mockConfigRepo as never);
+    useCase = new GetPaymentMethodsUseCase(mockPaymentRepo, mockConfigRepo);
   });
 
   it('should get payment methods (happy path)', async () => {

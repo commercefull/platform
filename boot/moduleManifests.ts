@@ -644,26 +644,6 @@ const manifests: ModuleManifest[] = [
     featureFlagKey: 'module.marketplace.enabled',
   },
   {
-    name: 'compliance',
-    description: 'Compliance — SOC2 audit logging, key rotation policy, CCPA data subject requests',
-    requirement: 'optional',
-    dependsOn: ['identity'],
-    routes: [{ path: '/business/compliance', auth: 'organization' }],
-    graphql: { enabled: false },
-    events: {
-      subscribes: [],
-      publishes: [
-        'compliance.audit_log.created',
-        'compliance.key_rotation.scheduled',
-        'compliance.key_rotation.completed',
-        'compliance.ccpa.dsr_created',
-        'compliance.ccpa.dsr_completed',
-      ],
-    },
-    tables: { names: ['auditLog', 'keyRotationPolicy', 'ccpaDsr'] },
-    featureFlagKey: 'module.compliance.enabled',
-  },
-  {
     name: 'migration',
     description: 'External platform migration — import jobs, source-to-platform ID mappings, error tracking',
     requirement: 'optional',

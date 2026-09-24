@@ -1,34 +1,30 @@
-jest.mock('../../infrastructure/repositories/PaymentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    payments: {
-      findAllSettings: jest.fn().mockResolvedValue([{ settingId: 's1' }]),
-      upsertSettings: jest.fn().mockResolvedValue(undefined),
-    },
-    gateways: {},
-  },
-}));
-
+import { lazyMock, createPaymentSettings } from '../../tests/testUtils';
 import { ManagePaymentSettingsUseCase } from './ManagePaymentSettings';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
-
-const mockRepo = paymentDataRepository as unknown as { payments: Record<string, jest.Mock> };
+import type { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
 
 describe('ManagePaymentSettingsUseCase', () => {
   let useCase: ManagePaymentSettingsUseCase;
+  let repo: jest.Mocked<PaymentRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManagePaymentSettingsUseCase();
+    repo = lazyMock<PaymentRepository>();
+    useCase = new ManagePaymentSettingsUseCase(repo);
   });
 
   it('should find all settings', async () => {
+    repo.findAllSettings.mockResolvedValue([createPaymentSettings()]);
+
     const result = await useCase.findAll();
+
     expect(result).toHaveLength(1);
   });
 
   it('should upsert settings', async () => {
-    await useCase.upsert({ key: 'auto_capture', value: 'true' } as never);
-    expect(mockRepo.payments.upsertSettings).toHaveBeenCalled();
+    repo.upsertSettings.mockResolvedValue(createPaymentSettings());
+    const params = { organizationId: 'org1', capturePaymentsAutomatically: true };
+
+    await useCase.upsert(params as unknown as PaymentSettingsUpsertParams);
+
+    expect(repo.upsertSettings).toHaveBeenCalledWith(params);
   });
 });

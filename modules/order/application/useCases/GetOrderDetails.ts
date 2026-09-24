@@ -15,10 +15,7 @@ import {
   OrderPayment,
   OrderPaymentRefund,
 } from '../../domain/repositories/OrderQueryRepository';
-import { orderDataRepository } from '../wired';
 
-const orderRepo = orderDataRepository.commands;
-const orderQueryRepo = orderDataRepository.queries;
 
 // ============================================================================
 // Command
@@ -39,11 +36,11 @@ export interface OrderDetailsResponse {
   paymentStatus: string;
   fulfillmentStatus: string;
   currencyCode: string;
-  subtotal: number;
-  discountTotal: number;
-  taxTotal: number;
-  shippingTotal: number;
-  totalAmount: number;
+  subtotalCents: number;
+  discountTotalCents: number;
+  taxTotalCents: number;
+  shippingTotalCents: number;
+  totalAmountCents: number;
   customerEmail: string;
   createdAt: string;
   updatedAt: string;
@@ -61,8 +58,8 @@ export interface OrderDetailsResponse {
 
 export class GetOrderDetailsUseCase {
   constructor(
-    private readonly orders: OrderRepository = orderRepo,
-    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
+    private readonly orders: OrderRepository,
+    private readonly queryRepo: OrderQueryRepository,
   ) {}
 
   async execute(command: GetOrderDetailsCommand): Promise<OrderDetailsResponse | null> {
@@ -85,11 +82,11 @@ export class GetOrderDetailsUseCase {
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,
       currencyCode: order.currencyCode,
-      subtotal: Number(order.subtotal),
-      discountTotal: Number(order.discountTotal),
-      taxTotal: Number(order.taxTotal),
-      shippingTotal: Number(order.shippingTotal),
-      totalAmount: Number(order.totalAmount),
+      subtotalCents: order.subtotal.cents,
+      discountTotalCents: order.discountTotal.cents,
+      taxTotalCents: order.taxTotal.cents,
+      shippingTotalCents: order.shippingTotal.cents,
+      totalAmountCents: order.totalAmount.cents,
       customerEmail: order.customerEmail,
       createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : String(order.createdAt),
       updatedAt: order.updatedAt instanceof Date ? order.updatedAt.toISOString() : String(order.updatedAt),

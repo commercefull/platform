@@ -68,8 +68,8 @@ export async function findActive(zoneId?: string, methodId?: string): Promise<Sh
 export async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
   const result = await queryOne<ShippingRate>(
     `INSERT INTO "${TABLE}" (
-      "shippingZoneId", "shippingMethodId", "name", "description", "isActive", "rateType", "baseRate",
-      "perItemRate", "freeThreshold", "rateMatrix", "minRate", "maxRate", "currency",
+      "shippingZoneId", "shippingMethodId", "name", "description", "isActive", "rateType", "baseRateCents",
+      "perItemRateCents", "freeThresholdCents", "rateMatrix", "minRateCents", "maxRateCents", "currencyCode",
       "taxable", "priority", "validFrom", "validTo", "conditions", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
     [
@@ -79,13 +79,13 @@ export async function create(input: CreateShippingRateInput): Promise<ShippingRa
       input.description || null,
       input.isActive ?? true,
       input.rateType,
-      input.baseRate,
-      input.perItemRate || '0',
-      input.freeThreshold || null,
+      input.baseRateCents,
+      input.perItemRateCents || 0,
+      input.freeThresholdCents || null,
       input.rateMatrix ? JSON.stringify(input.rateMatrix) : null,
-      input.minRate || null,
-      input.maxRate || null,
-      input.currency || 'USD',
+      input.minRateCents || null,
+      input.maxRateCents || null,
+      input.currencyCode || 'USD',
       input.taxable ?? true,
       input.priority ?? 0,
       input.validFrom || null,

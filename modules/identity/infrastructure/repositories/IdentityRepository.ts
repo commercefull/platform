@@ -7,7 +7,7 @@
 
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
-import type { StoreUser as DbStoreUser, IdentityAdminUser, Role } from '../../../../libs/db/types';
+import type { StoreUser as DbStoreUser } from '../../../../libs/db/types';
 import { UserStoreAssignment, StoreRole } from '../../domain/entities/UserStoreAssignment';
 import { StoreUserRepository as IStoreUserRepository } from '../../domain/repositories/StoreUserRepository';
 
@@ -15,18 +15,8 @@ import { StoreUserRepository as IStoreUserRepository } from '../../domain/reposi
 // Types — Admin User (from AdminRepository)
 // ============================================================================
 
-export interface AdminUser {
-  adminId: string;
-  email: string;
-  name: string;
-  passwordHash: string;
-  role: 'super_admin' | 'admin' | 'support' | 'operations';
-  permissions: string[];
-  status: 'active' | 'inactive' | 'suspended';
-  lastLoginAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type { AdminUser } from '../../domain/repositories/AdminIdentityPorts';
+import type { AdminUser } from '../../domain/repositories/AdminIdentityPorts';
 
 export interface CreateAdminInput {
   email: string;
@@ -41,21 +31,8 @@ export interface CreateAdminInput {
 // Types — Admin User Management (from identityAdminUserManagementRepo)
 // ============================================================================
 
-export type AdminUserRecord = IdentityAdminUser & { roleId?: string; roleName?: string };
-
-export interface CreateAdminUserParams {
-  email: string;
-  passwordHash: string;
-  firstName?: string;
-  lastName?: string;
-  roleId?: string;
-}
-
-// ============================================================================
-// Types — Role (from roleRepo)
-// ============================================================================
-
-export type RoleRecord = Role & { userCount?: number };
+export type { AdminUserRecord, CreateAdminUserParams, RoleRecord } from '../../domain/repositories/AdminIdentityPorts';
+import type { AdminUserRecord, CreateAdminUserParams, RoleRecord } from '../../domain/repositories/AdminIdentityPorts';
 
 // ============================================================================
 // Identity Repository Class

@@ -34,7 +34,7 @@
             <tr>
               <td><strong><%= inv.invoiceNumber %></strong></td>
               <td><%= inv.type %></td>
-              <td><%= (inv.amount || 0).toFixed(2) %></td>
+              <td><%= ((inv.amountCents || 0) / 100).toFixed(2) %></td>
               <td><%= inv.currency %></td>
               <td>
                 <span class="badge bg-<%= inv.status === 'paid' ? 'success' : inv.status === 'overdue' ? 'danger' : inv.status === 'cancelled' ? 'secondary' : 'warning' %>">

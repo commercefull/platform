@@ -25,7 +25,7 @@ import {
   manageProductCollectionsUseCase,
   manageProductQaUseCase,
   manageReviewMediaUseCase,
-  manageProductPricesUseCase,
+  productPricingPort,
   manageCategoriesUseCase,
   getProductAttributesUseCase,
   getReviewStatsUseCase,
@@ -167,6 +167,7 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
       basePrice: string;
       salePrice?: string;
       cost?: string;
+      compareAtPrice?: string;
       currencyCode?: string;
       weight?: string;
       weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
@@ -197,6 +198,7 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
       basePrice,
       salePrice,
       cost,
+      compareAtPrice,
       currencyCode,
       weight,
       weightUnit,
@@ -230,6 +232,12 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
       return;
     }
 
+    // Form prices are major units (dollars) — the domain works in integer cents
+    const basePriceCents = basePrice !== undefined && basePrice !== '' ? Math.round(parseFloat(basePrice) * 100) : undefined;
+    const salePriceCents = salePrice ? Math.round(parseFloat(salePrice) * 100) : undefined;
+    const costPriceCents = cost ? Math.round(parseFloat(cost) * 100) : undefined;
+    const compareAtPriceCents = compareAtPrice ? Math.round(parseFloat(compareAtPrice) * 100) : undefined;
+
     const command = new CreateProductCommand(
       name,
       description || '',
@@ -239,9 +247,10 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
       shortDescription,
       categoryId,
       organizationId,
-      parseFloat(basePrice) || 0,
-      salePrice ? parseFloat(salePrice) : undefined,
-      cost ? parseFloat(cost) : undefined,
+      basePriceCents,
+      salePriceCents,
+      costPriceCents,
+      compareAtPriceCents,
       currencyCode || 'USD',
       weight ? parseFloat(weight) : undefined,
       weightUnit,
@@ -324,9 +333,27 @@ export const editProductForm = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const updateProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const updates = req.body as HttpRequestBody;
+  const body = req.body as HttpRequestBody & {
+    basePrice?: string;
+    salePrice?: string;
+    cost?: string;
+    compareAtPrice?: string;
+    currencyCode?: string;
+  };
 
-  const command = new UpdateProductCommand(productId, updates);
+  // Form prices are major units (dollars) — the domain works in integer cents
+  const updates: Record<string, unknown> = { ...body };
+  delete updates.basePrice;
+  delete updates.salePrice;
+  delete updates.cost;
+  delete updates.compareAtPrice;
+  if (body.basePrice !== undefined && body.basePrice !== '') updates.basePriceCents = Math.round(parseFloat(body.basePrice) * 100);
+  if (body.salePrice !== undefined) updates.salePriceCents = body.salePrice === '' ? null : Math.round(parseFloat(body.salePrice) * 100);
+  if (body.cost !== undefined) updates.costPriceCents = body.cost === '' ? null : Math.round(parseFloat(body.cost) * 100);
+  if (body.compareAtPrice !== undefined)
+    updates.compareAtPriceCents = body.compareAtPrice === '' ? null : Math.round(parseFloat(body.compareAtPrice) * 100);
+
+  const command = new UpdateProductCommand(productId, updates as UpdateProductCommand['updates']);
   await updateProductUseCase.execute(command);
 
   res.redirect(`/admin/products/${productId}?success=Product updated successfully`);
@@ -719,63 +746,41 @@ export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const listProductPrices = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const prices = await manageProductPricesUseCase.findByProduct(productId);
+  const prices = await productPricingPort.listProductPrices(productId);
   res.render('admin/views/products/partials/prices', { prices, productId });
 };
 
+/**
+ * Upserts a base price into the pricing-owned productBasePrice store.
+ * Form amounts are major units (dollars); they are converted to integer cents here.
+ */
 export const upsertProductPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId } = req.params;
     const body = req.body as {
-      productPriceId?: string;
       currencyCode: string;
       amount: string;
+      saleAmount?: string;
       compareAtAmount?: string;
-      minQuantity?: string;
-      maxQuantity?: string;
-      startsAt?: string;
-      endsAt?: string;
-      priceListId?: string;
+      costAmount?: string;
       productVariantId?: string;
     };
-    const {
-      productPriceId,
-      currencyCode,
-      amount,
-      compareAtAmount,
-      minQuantity,
-      maxQuantity,
-      startsAt,
-      endsAt,
-      priceListId,
-      productVariantId,
-    } = body;
+    const { currencyCode, amount, saleAmount, compareAtAmount, costAmount, productVariantId } = body;
 
-    if (productPriceId) {
-      await manageProductPricesUseCase.update(productPriceId, {
-        currencyCode,
-        amount: parseFloat(amount),
-        compareAtAmount: compareAtAmount ? parseFloat(compareAtAmount) : null,
-        minQuantity: minQuantity ? parseInt(minQuantity) : null,
-        maxQuantity: maxQuantity ? parseInt(maxQuantity) : null,
-        startsAt: startsAt || null,
-        endsAt: endsAt || null,
-        priceListId: priceListId || null,
-      });
-    } else {
-      await manageProductPricesUseCase.create({
-        productId,
-        productVariantId: productVariantId || null,
-        priceListId: priceListId || null,
-        currencyCode,
-        amount: parseFloat(amount),
-        compareAtAmount: compareAtAmount ? parseFloat(compareAtAmount) : null,
-        minQuantity: minQuantity ? parseInt(minQuantity) : null,
-        maxQuantity: maxQuantity ? parseInt(maxQuantity) : null,
-        startsAt: startsAt || null,
-        endsAt: endsAt || null,
-      });
+    const priceCents = Math.round(parseFloat(amount) * 100);
+    if (!Number.isInteger(priceCents) || priceCents < 0) {
+      throw new Error('A non-negative price is required');
     }
+
+    await productPricingPort.setBasePrice({
+      productId,
+      productVariantId: productVariantId || null,
+      currencyCode: (currencyCode || 'USD').toUpperCase(),
+      priceCents,
+      salePriceCents: saleAmount ? Math.round(parseFloat(saleAmount) * 100) : null,
+      compareAtPriceCents: compareAtAmount ? Math.round(parseFloat(compareAtAmount) * 100) : null,
+      costPriceCents: costAmount ? Math.round(parseFloat(costAmount) * 100) : null,
+    });
     res.redirect(`/admin/products/${productId}?success=Price saved`);
   } catch (error: unknown) {
     logger.warn('Error:', error);

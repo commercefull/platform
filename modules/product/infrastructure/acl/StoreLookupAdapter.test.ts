@@ -10,7 +10,7 @@ describe('StoreLookupAdapter (product)', () => {
     mockStoreRepo = {
       findById: jest.fn(),
     };
-    adapter = new StoreLookupAdapter(mockStoreRepo as never as StoreRepository);
+    adapter = new StoreLookupAdapter(mockStoreRepo as unknown as StoreRepository);
   });
 
   it('should return StoreSummary when store exists', async () => {

@@ -8,7 +8,7 @@ describe('PaymentTransaction', () => {
     orderId: 'order-1',
     paymentMethodConfigId: 'pmc-1',
     gatewayId: 'gw-1',
-    amount: 100,
+    amountCents: 100,
     currency: 'usd',
   };
 
@@ -18,13 +18,13 @@ describe('PaymentTransaction', () => {
 
       expect(tx.transactionId).toBe('tx-1');
       expect(tx.status).toBe(TransactionStatus.PENDING);
-      expect(tx.refundedAmount).toBe(0);
+      expect(tx.refundedAmountCents).toBe(0);
       expect(tx.currency).toBe('USD');
     });
 
-    it('should default refundedAmount to 0', () => {
+    it('should default refundedAmountCents to 0', () => {
       const tx = PaymentTransaction.create(baseProps);
-      expect(tx.refundedAmount).toBe(0);
+      expect(tx.refundedAmountCents).toBe(0);
     });
   });
 
@@ -99,7 +99,7 @@ describe('PaymentTransaction', () => {
       tx.markAsPaid('ext-1');
       tx.recordRefund(30);
 
-      expect(tx.refundedAmount).toBe(30);
+      expect(tx.refundedAmountCents).toBe(30);
       expect(tx.status).toBe(TransactionStatus.PARTIALLY_REFUNDED);
       expect(tx.canBeRefunded).toBe(true);
     });
@@ -109,7 +109,7 @@ describe('PaymentTransaction', () => {
       tx.markAsPaid('ext-1');
       tx.recordRefund(100);
 
-      expect(tx.refundedAmount).toBe(100);
+      expect(tx.refundedAmountCents).toBe(100);
       expect(tx.status).toBe(TransactionStatus.REFUNDED);
       expect(tx.isRefunded).toBe(true);
     });
@@ -121,7 +121,7 @@ describe('PaymentTransaction', () => {
       expect(() => tx.recordRefund(150)).toThrow(RefundAmountExceedsRefundableError);
     });
 
-    it('should throw when refunding more than refundable amount on PENDING', () => {
+    it('should throw when refunding more than refundable amountCents on PENDING', () => {
       const tx = PaymentTransaction.create(baseProps);
       // PENDING — refundableAmount is 100, so 150 should throw
 
@@ -130,7 +130,7 @@ describe('PaymentTransaction', () => {
   });
 
   describe('refundableAmount', () => {
-    it('should return amount - refundedAmount', () => {
+    it('should return amountCents - refundedAmountCents', () => {
       const tx = PaymentTransaction.create(baseProps);
       tx.markAsPaid('ext-1');
       tx.recordRefund(40);
@@ -187,7 +187,7 @@ describe('PaymentTransaction', () => {
 
       expect(json.transactionId).toBe('tx-1');
       expect(json.status).toBe(TransactionStatus.PAID);
-      expect(json.amount).toBe(100);
+      expect(json.amountCents).toBe(100);
       expect(json.canBeRefunded).toBe(true);
     });
   });

@@ -2,6 +2,7 @@
  * Unit Tests for CapturePayment Use Case
  */
 
+import { emitMock } from '../../tests/testUtils';
 import { CapturePaymentUseCase } from './CapturePayment';
 import {
   TransactionNotFoundError,
@@ -10,16 +11,12 @@ import {
   CaptureFailedError,
 } from '../../domain/errors/PaymentErrors';
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
 function createAuthorizedTransaction(overrides: Record<string, unknown> = {}) {
   return {
     transactionId: 'tx-1',
     orderId: 'order-1',
     gatewayTransactionId: 'gw-tx-1',
-    amount: 100,
+    amountCents: 100,
     currency: 'USD',
     status: 'authorized',
     capturedAmount: undefined,
@@ -43,7 +40,11 @@ function createMockGateway(success: boolean, response?: Record<string, unknown>,
 }
 
 describe('CapturePaymentUseCase', () => {
-  it('should capture full amount successfully', async () => {
+  beforeEach(() => {
+    emitMock.mockClear();
+  });
+
+  it('should capture full amountCents successfully', async () => {
     const tx = createAuthorizedTransaction();
     const repo = createMockRepo(tx);
     const gateway = createMockGateway(true, { id: 'cap-1' });
@@ -58,13 +59,13 @@ describe('CapturePaymentUseCase', () => {
     expect(repo.updateTransaction).toHaveBeenCalled();
   });
 
-  it('should capture partial amount successfully', async () => {
+  it('should capture partial amountCents successfully', async () => {
     const tx = createAuthorizedTransaction();
     const repo = createMockRepo(tx);
     const gateway = createMockGateway(true, { id: 'cap-2' });
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    const result = await useCase.execute({ transactionId: 'tx-1', amount: 40 });
+    const result = await useCase.execute({ transactionId: 'tx-1', amountCents: 40 });
 
     expect(result.capturedAmount).toBe(40);
     expect(result.status).toBe('partial_captured');
@@ -88,13 +89,13 @@ describe('CapturePaymentUseCase', () => {
     await expect(useCase.execute({ transactionId: 'tx-1' })).rejects.toThrow(TransactionCannotBeCapturedError);
   });
 
-  it('should throw CaptureAmountExceedsAuthorizedError when amount exceeds authorized', async () => {
+  it('should throw CaptureAmountExceedsAuthorizedError when amountCents exceeds authorized', async () => {
     const tx = createAuthorizedTransaction();
     const repo = createMockRepo(tx);
     const gateway = createMockGateway(true);
     const useCase = new CapturePaymentUseCase(repo, gateway);
 
-    await expect(useCase.execute({ transactionId: 'tx-1', amount: 150 })).rejects.toThrow(CaptureAmountExceedsAuthorizedError);
+    await expect(useCase.execute({ transactionId: 'tx-1', amountCents: 150 })).rejects.toThrow(CaptureAmountExceedsAuthorizedError);
   });
 
   it('should throw CaptureFailedError when gateway returns failure', async () => {

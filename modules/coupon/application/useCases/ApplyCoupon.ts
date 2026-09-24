@@ -7,28 +7,28 @@ import { Coupon } from '../../domain/entities/Coupon';
 export interface CouponRepositoryPort {
   findByCode(code: string): Promise<Coupon | null>;
   getCustomerUsageCount(couponId: string, customerId: string): Promise<number>;
-  recordUsage(usage: { couponId: string; basketId: string; customerId?: string; discountAmount: number }): Promise<unknown>;
+  recordUsage(usage: { couponId: string; basketId: string; customerId?: string; discountAmountCents: number }): Promise<unknown>;
 }
 
 export interface ApplyCouponInput {
   couponCode: string;
   basketId: string;
   customerId?: string;
-  orderTotal: number;
+  orderTotalCents: number;
   items?: Array<{
     productId: string;
     categoryId?: string;
     quantity: number;
-    price: number;
+    priceCents: number;
   }>;
 }
 
 export interface ApplyCouponOutput {
   applied: boolean;
-  discountAmount: number;
+  discountAmountCents: number;
   discountType: 'percentage' | 'fixed' | 'free_shipping';
   message?: string;
-  newTotal: number;
+  newTotalCents: number;
 }
 
 export class ApplyCouponUseCase {
@@ -39,10 +39,10 @@ export class ApplyCouponUseCase {
     if (!coupon) {
       return {
         applied: false,
-        discountAmount: 0,
+        discountAmountCents: 0,
         discountType: 'fixed',
         message: 'Invalid coupon code',
-        newTotal: input.orderTotal,
+        newTotalCents: input.orderTotalCents,
       };
     }
 
@@ -51,25 +51,25 @@ export class ApplyCouponUseCase {
     if (!validation.valid) {
       return {
         applied: false,
-        discountAmount: 0,
+        discountAmountCents: 0,
         discountType: coupon.type as 'percentage' | 'fixed' | 'free_shipping',
         message: validation.message,
-        newTotal: input.orderTotal,
+        newTotalCents: input.orderTotalCents,
       };
     }
 
     // Calculate discount
-    let discountAmount = 0;
+    let discountAmountCents = 0;
     if (coupon.type === 'percentage') {
-      discountAmount = input.orderTotal * (coupon.value / 100);
-      if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
-        discountAmount = coupon.maxDiscountAmount;
+      discountAmountCents = Math.round(input.orderTotalCents * (coupon.value / 100));
+      if (coupon.maxDiscountAmountCents && discountAmountCents > coupon.maxDiscountAmountCents) {
+        discountAmountCents = coupon.maxDiscountAmountCents;
       }
     } else if (coupon.type === 'fixed_amount') {
-      discountAmount = Math.min(coupon.value, input.orderTotal);
+      discountAmountCents = Math.min(coupon.value, input.orderTotalCents);
     } else if (coupon.type === 'free_shipping') {
       // Free shipping handled separately
-      discountAmount = 0;
+      discountAmountCents = 0;
     }
 
     // Track usage
@@ -77,14 +77,14 @@ export class ApplyCouponUseCase {
       couponId: coupon.couponId,
       basketId: input.basketId,
       customerId: input.customerId,
-      discountAmount,
+      discountAmountCents,
     });
 
     return {
       applied: true,
-      discountAmount,
+      discountAmountCents,
       discountType: coupon.type as 'percentage' | 'fixed' | 'free_shipping',
-      newTotal: input.orderTotal - discountAmount,
+      newTotalCents: input.orderTotalCents - discountAmountCents,
     };
   }
 
@@ -103,8 +103,8 @@ export class ApplyCouponUseCase {
       return { valid: false, message: 'Coupon has expired' };
     }
 
-    if (coupon.minOrderValue && input.orderTotal < coupon.minOrderValue) {
-      return { valid: false, message: `Minimum order amount is ${coupon.minOrderValue}` };
+    if (coupon.minOrderValueCents && input.orderTotalCents < coupon.minOrderValueCents) {
+      return { valid: false, message: `Minimum order amount is ${coupon.minOrderValueCents} cents` };
     }
 
     if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {

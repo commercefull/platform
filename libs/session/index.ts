@@ -7,9 +7,5 @@
  * API so callers don't change.
  */
 
-export type { SessionData, CreateSessionInput, SessionBackend } from './types';
-export { PostgresSessionBackend } from './postgresSessionBackend';
-export { RedisSessionBackend } from './redisSessionBackend';
 export { SessionService } from './SessionService';
 export { createSessionBackend, resolveSessionBackendType } from './createSessionBackend';
-export type { SessionBackendType } from './createSessionBackend';

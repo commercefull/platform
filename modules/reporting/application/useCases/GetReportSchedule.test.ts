@@ -1,49 +1,29 @@
-jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    schedules: {
-      findScheduleById: jest.fn().mockResolvedValue({
-        reportScheduleId: 'rs1',
-        name: 'Weekly Sales',
-        reportType: 'sales_summary',
-        frequency: 'weekly',
-        recipients: [],
-        parameters: {},
-        format: 'pdf',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }),
-    },
-    dataProvider: { generateReport: jest.fn() },
-    executions: {},
-    templates: {},
-  },
-}));
-
+import { createReportingRepository, createReportSchedule } from '../../tests/testUtils';
 import { GetReportScheduleUseCase } from './GetReportSchedule';
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-
-const mockRepo = reportingDataRepository as unknown as { schedules: Record<string, jest.Mock> };
 
 describe('GetReportScheduleUseCase', () => {
   let useCase: GetReportScheduleUseCase;
+  let reportingRepo: ReturnType<typeof createReportingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetReportScheduleUseCase();
+    reportingRepo = createReportingRepository();
+    useCase = new GetReportScheduleUseCase(reportingRepo);
   });
 
-  it('should find schedule by ID (happy path)', async () => {
-    const result = await useCase.execute('rs1');
-    expect(result?.reportScheduleId).toBe('rs1');
-    expect(result?.name).toBe('Weekly Sales');
+  it('should return the schedule when it exists', async () => {
+    reportingRepo.findScheduleById.mockResolvedValue(createReportSchedule());
+
+    const result = await useCase.execute('sched-1');
+
+    expect(result?.name).toBe('Daily Sales');
+    expect(reportingRepo.findScheduleById).toHaveBeenCalledWith('sched-1');
   });
 
-  it('should return null when not found', async () => {
-    mockRepo.schedules.findScheduleById.mockResolvedValueOnce(null);
+  it('should return null when the schedule does not exist', async () => {
+    reportingRepo.findScheduleById.mockResolvedValue(null);
 
-    const result = await useCase.execute('nonexistent');
+    const result = await useCase.execute('missing');
+
     expect(result).toBeNull();
   });
 });

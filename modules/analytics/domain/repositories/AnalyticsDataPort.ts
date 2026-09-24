@@ -8,36 +8,36 @@
 import type { ProductPerformance, CustomerCohort } from '../types';
 
 export interface SalesSummary {
-  totalRevenue: number;
+  totalRevenueCents: number;
   totalOrders: number;
-  averageOrderValue: number;
+  averageOrderValueCents: number;
   newCustomers: number;
   conversionRate: number;
 }
 
 export interface RevenueData {
-  revenue: number;
+  revenueCents: number;
   orders: number;
-  averageOrder: number;
+  averageOrderCents: number;
   customers: number;
 }
 
 export interface CustomerData {
   total: number;
   active: number;
-  ltv: number;
+  ltvCents: number;
 }
 
 export interface InventoryData {
   turnover: number;
   stockouts: number;
-  value: number;
+  valueCents: number;
 }
 
 export interface RealTimeMetrics {
   activeUsers: number;
   currentOrders: number;
-  revenueToday: number;
+  revenueTodayCents: number;
   conversionRate: number;
 }
 

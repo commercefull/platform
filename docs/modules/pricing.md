@@ -4,6 +4,25 @@
 
 The Pricing feature manages product pricing including pricing rules, tier/volume pricing, customer-specific price lists, and multi-currency support. It enables dynamic pricing strategies and localized pricing.
 
+## Ownership Model
+
+Pricing is the **sole owner of catalog prices**. The `product` and
+`productVariant` tables carry no price columns — catalog base prices live in the
+pricing-owned `productBasePrice` table (`productId`, nullable `productVariantId`,
+`currencyCode`, `priceCents`, `salePriceCents`, `compareAtPriceCents`,
+`costPriceCents`, `taxRate`).
+
+- All stored and exchanged amounts are **integer cents** (`*Cents` fields).
+- Other modules consume prices through their own **consumer-owned ACL ports**
+  (e.g. product's `ProductPricingPort`, basket's `ProductPricePort`) backed by
+  adapters in the consumer's `infrastructure/acl/` — never by importing pricing
+  internals directly.
+- `PricingService.calculatePrice(productId, context)` resolves the effective
+  price: base/sale price → currency conversion → tier pricing → customer price
+  lists → dynamic rules → membership/loyalty discounts. Purchase flows (basket,
+  checkout) must resolve prices through this path — clients never supply prices.
+- String formatting (`$49.99`) happens only at view/API boundaries.
+
 ---
 
 ## Use Cases

@@ -1,9 +1,9 @@
-import { notificationConfigRepository } from '../wired';
-
-const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
+import type { NotificationTemplateTranslationRepository } from '../../domain/repositories/NotificationTemplateTranslationRepository';
 
 export class GetTemplateTranslationsUseCase {
+  constructor(private readonly notificationTemplateTranslationRepo: NotificationTemplateTranslationRepository) {}
+
   async findByTemplate(templateId: string) {
-    return notificationTemplateTranslationRepo.findByTemplate(templateId);
+    return this.notificationTemplateTranslationRepo.findByTemplate(templateId);
   }
 }

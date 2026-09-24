@@ -7,10 +7,10 @@ exports.up = function (knex) {
     t.enum('carrier', ['ups', 'usps', 'fedex', 'dhl', 'custom']).notNullable();
     t.string('serviceLevel', 100).notNullable();
     t.string('serviceName', 255).notNullable();
-    t.decimal('rate', 15, 2).notNullable();
+    t.bigInteger('rateCents').notNullable();
     t.integer('estimatedDays');
     t.timestamp('estimatedDeliveryDate');
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('isSelected').notNullable().defaultTo(false);
     t.string('carrierAccountId', 100);
     t.string('shipmentId', 100);
@@ -20,7 +20,7 @@ exports.up = function (knex) {
     t.index('orderId');
     t.index('carrier');
     t.index('serviceLevel');
-    t.index('rate');
+    t.index('rateCents');
     t.index('estimatedDays');
     t.index('isSelected');
     t.index('shipmentId');

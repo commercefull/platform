@@ -5,11 +5,10 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageSuppliersAdminUseCase } from '../../application/useCases/ManageSuppliersAdmin';
+import { manageSuppliersAdminUseCase as manageSuppliersUseCase } from '../../application/wired';
+import type { SupplierStatus } from '../../domain/entities/Supplier';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageSuppliersUseCase = new ManageSuppliersAdminUseCase();
 
 // ============================================================================
 // Supplier Management
@@ -25,7 +24,7 @@ export const listSuppliers = async (req: HttpRequest, res: HttpResponse): Promis
   let suppliers: unknown[];
 
   if (status) {
-    suppliers = await manageSuppliersUseCase.findByStatus(status as 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted');
+    suppliers = await manageSuppliersUseCase.findByStatus(status as SupplierStatus);
   } else {
     suppliers = await manageSuppliersUseCase.findAll(isActive, isApproved);
   }
@@ -61,7 +60,7 @@ const supplierCreateFields: FieldConfig[] = [
   { name: 'isActive', default: true },
   { name: 'isApproved', default: false },
   { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
-  { name: 'minOrderValue', transform: 'float', falsyValue: undefined },
+  { name: 'minOrderValueCents', transform: 'float', falsyValue: undefined },
   { name: 'leadTime', transform: 'int', falsyValue: undefined },
   { name: 'paymentTerms', transform: 'stringOrUndefined' },
   { name: 'paymentMethod', transform: 'stringOrUndefined' },
@@ -73,6 +72,10 @@ const supplierCreateFields: FieldConfig[] = [
 
 function parseSupplierCreateInput(body: HttpRequestBody) {
   const result = buildFormObject(body as Record<string, unknown>, supplierCreateFields);
+  if ('currency' in result) {
+    result.currencyCode = result.currency;
+    delete result.currency;
+  }
   if (typeof result.categories === 'string') {
     result.categories = result.categories.split(',').map((c: string) => c.trim());
   }
@@ -148,7 +151,7 @@ const supplierUpdateFields: FieldConfig[] = [
   { name: 'phone', transform: 'stringOrUndefined' },
   { name: 'status' },
   { name: 'currency' },
-  { name: 'minOrderValue', transform: 'float', falsyValue: undefined },
+  { name: 'minOrderValueCents', transform: 'float', falsyValue: undefined },
   { name: 'leadTime', transform: 'int', falsyValue: undefined },
   { name: 'paymentTerms', transform: 'stringOrUndefined' },
   { name: 'paymentMethod', transform: 'stringOrUndefined' },
@@ -161,6 +164,10 @@ const supplierUpdateFields: FieldConfig[] = [
 
 function parseSupplierUpdates(body: HttpRequestBody): Record<string, unknown> {
   const updates = buildFormObject(body as Record<string, unknown>, supplierUpdateFields);
+  if ('currency' in updates) {
+    updates.currencyCode = updates.currency;
+    delete updates.currency;
+  }
   if (typeof updates.categories === 'string') {
     updates.categories = updates.categories.split(',').map((c: string) => c.trim());
   }

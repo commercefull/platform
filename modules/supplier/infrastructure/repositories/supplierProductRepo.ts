@@ -16,8 +16,8 @@ export interface SupplierProduct {
   supplierProductName?: string;
   status: SupplierProductStatus;
   isPreferred: boolean;
-  unitCost: number;
-  currency: string;
+  unitCostCents: number;
+  currencyCode: string;
   minimumOrderQuantity: number;
   leadTime?: number;
   packagingInfo?: Record<string, unknown>;
@@ -40,7 +40,7 @@ export class SupplierProductRepo {
   async findBySupplierId(supplierId: string, activeOnly = false): Promise<SupplierProduct[]> {
     let sql = `SELECT * FROM "supplierProduct" WHERE "supplierId" = $1`;
     if (activeOnly) sql += ` AND "status" = 'active'`;
-    sql += ` ORDER BY "isPreferred" DESC, "unitCost" ASC`;
+    sql += ` ORDER BY "isPreferred" DESC, "unitCostCents" ASC`;
     return (await query<SupplierProduct[]>(sql, [supplierId])) || [];
   }
 
@@ -53,12 +53,12 @@ export class SupplierProductRepo {
       params.push(productVariantId);
     }
 
-    sql += ` ORDER BY "isPreferred" DESC, "unitCost" ASC`;
+    sql += ` ORDER BY "isPreferred" DESC, "unitCostCents" ASC`;
     return (await query<SupplierProduct[]>(sql, params)) || [];
   }
 
   async findBySku(sku: string): Promise<SupplierProduct[]> {
-    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCost" ASC`, [sku])) || [];
+    return (await query<SupplierProduct[]>(`SELECT * FROM "supplierProduct" WHERE "sku" = $1 ORDER BY "unitCostCents" ASC`, [sku])) || [];
   }
 
   async findBySupplierSku(supplierSku: string): Promise<SupplierProduct[]> {
@@ -93,7 +93,7 @@ export class SupplierProductRepo {
     const result = await queryOne<SupplierProduct>(
       `INSERT INTO "supplierProduct" (
         "supplierId", "productId", "productVariantId", "sku", "supplierSku", "supplierProductName",
-        "status", "isPreferred", "unitCost", "currency", "minimumOrderQuantity", "leadTime",
+        "status", "isPreferred", "unitCostCents", "currencyCode", "minimumOrderQuantity", "leadTime",
         "packagingInfo", "dimensions", "weight", "notes", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
       [
@@ -105,8 +105,8 @@ export class SupplierProductRepo {
         params.supplierProductName || null,
         params.status || 'active',
         params.isPreferred || false,
-        params.unitCost,
-        params.currency || 'USD',
+        params.unitCostCents,
+        params.currencyCode || 'USD',
         params.minimumOrderQuantity || 1,
         params.leadTime || null,
         params.packagingInfo ? JSON.stringify(params.packagingInfo) : null,
@@ -127,9 +127,10 @@ export class SupplierProductRepo {
     const values: unknown[] = [];
     let paramIndex = 1;
 
+    const columnMap: Record<string, string> = { currency: 'currencyCode' };
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
-        updateFields.push(`"${key}" = $${paramIndex++}`);
+        updateFields.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
         const jsonFields = ['packagingInfo', 'dimensions'];
         values.push(jsonFields.includes(key) && value ? JSON.stringify(value) : value);
       }

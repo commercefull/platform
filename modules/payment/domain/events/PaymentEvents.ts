@@ -13,12 +13,12 @@ export class PaymentInitiatedEvent implements DomainEvent {
   readonly eventType = 'payment.initiated';
   readonly occurredAt: Date;
   readonly aggregateId: string;
-  readonly payload: { transactionId: string; orderId: string; amount: number; currency: string };
+  readonly payload: { transactionId: string; orderId: string; amountCents: number; currency: string };
 
-  constructor(transactionId: string, orderId: string, amount: number, currency: string) {
+  constructor(transactionId: string, orderId: string, amountCents: number, currency: string) {
     this.occurredAt = new Date();
     this.aggregateId = transactionId;
-    this.payload = { transactionId, orderId, amount, currency };
+    this.payload = { transactionId, orderId, amountCents, currency };
   }
 }
 
@@ -39,12 +39,12 @@ export class PaymentCapturedEvent implements DomainEvent {
   readonly eventType = 'payment.captured';
   readonly occurredAt: Date;
   readonly aggregateId: string;
-  readonly payload: { transactionId: string; orderId: string; amount: number };
+  readonly payload: { transactionId: string; orderId: string; amountCents: number };
 
-  constructor(transactionId: string, orderId: string, amount: number) {
+  constructor(transactionId: string, orderId: string, amountCents: number) {
     this.occurredAt = new Date();
     this.aggregateId = transactionId;
-    this.payload = { transactionId, orderId, amount };
+    this.payload = { transactionId, orderId, amountCents };
   }
 }
 
@@ -65,12 +65,12 @@ export class RefundInitiatedEvent implements DomainEvent {
   readonly eventType = 'payment.refund_initiated';
   readonly occurredAt: Date;
   readonly aggregateId: string;
-  readonly payload: { refundId: string; transactionId: string; amount: number; reason?: string };
+  readonly payload: { refundId: string; transactionId: string; amountCents: number; reason?: string };
 
-  constructor(refundId: string, transactionId: string, amount: number, reason?: string) {
+  constructor(refundId: string, transactionId: string, amountCents: number, reason?: string) {
     this.occurredAt = new Date();
     this.aggregateId = refundId;
-    this.payload = { refundId, transactionId, amount, reason };
+    this.payload = { refundId, transactionId, amountCents, reason };
   }
 }
 
@@ -78,11 +78,11 @@ export class RefundCompletedEvent implements DomainEvent {
   readonly eventType = 'payment.refund_completed';
   readonly occurredAt: Date;
   readonly aggregateId: string;
-  readonly payload: { refundId: string; transactionId: string; amount: number };
+  readonly payload: { refundId: string; transactionId: string; amountCents: number };
 
-  constructor(refundId: string, transactionId: string, amount: number) {
+  constructor(refundId: string, transactionId: string, amountCents: number) {
     this.occurredAt = new Date();
     this.aggregateId = refundId;
-    this.payload = { refundId, transactionId, amount };
+    this.payload = { refundId, transactionId, amountCents };
   }
 }

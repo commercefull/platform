@@ -3,41 +3,31 @@ import { CalculatePriceUseCase, CalculatePriceInput } from '../../application/us
 import { CreatePriceListUseCase, CreatePriceListInput } from '../../application/useCases/CreatePriceList';
 import { SetProductPriceUseCase, SetProductPriceInput } from '../../application/useCases/SetProductPrice';
 import { pricingDataRepository } from '../../application/wired';
+import { PricingAdjustmentType } from '../../domain/pricingRule';
 
 export const pricingResolvers = {
   Query: {
     calculatePrice: async (_parent: unknown, args: { input: CalculatePriceInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
       const pricingRepository = {
-        getPriceListItem: async (priceListId: string, productId: string, _variantId?: string) => {
-          const price = await pricingDataRepository.productCurrencyPrices.findByProductAndCurrency(productId, priceListId);
-          return price ? { price: parseFloat(price.price) } : null;
+        getBasePrice: async (productId: string, variantId?: string) => {
+          const row = await pricingDataRepository.basePrices.findEffective(productId, variantId);
+          return row ? { priceCents: row.priceCents, salePriceCents: row.salePriceCents, currencyCode: row.currencyCode } : null;
         },
-        getVolumeDiscount: async (productId: string, quantity: number) => {
-          const tierPrices = await pricingDataRepository.tierPrices.findForProduct(productId);
-          const applicable = tierPrices.find(tp => tp.quantityMin <= quantity);
-          if (!applicable) return null;
-          return { discountPercent: 0 };
+        getPriceListItem: async (priceListId: string, productId: string, variantId?: string) => {
+          const prices = await pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, [priceListId]);
+          const entry = prices.find(
+            p => p.adjustmentType === PricingAdjustmentType.OVERRIDE || p.adjustmentType === PricingAdjustmentType.FIXED,
+          );
+          // Price-list amounts are stored in major units — convert to cents
+          return entry ? { priceCents: Math.round(entry.adjustmentValue * 100) } : null;
         },
-        getActiveSalePrice: async (productId: string, _variantId?: string) => {
-          const prices = await pricingDataRepository.productCurrencyPrices.findByProduct(productId);
-          const salePrice = prices.find(p => p.compareAtPrice !== null);
-          return salePrice ? parseFloat(salePrice.price) : null;
-        },
-      };
-      const productRepository = {
-        findById: async (id: string) => {
-          const prices = await pricingDataRepository.productCurrencyPrices.findByProduct(id);
-          if (prices.length === 0) return null;
-          return { price: parseFloat(prices[0].price), currencyCode: undefined };
-        },
-        findVariantById: async (id: string) => {
-          const prices = await pricingDataRepository.productCurrencyPrices.findByVariant(id);
-          if (prices.length === 0) return null;
-          return { price: parseFloat(prices[0].price) };
+        getTierPrice: async (productId: string, quantity: number, variantId?: string) => {
+          const tier = await pricingDataRepository.tierPrices.findApplicableTier(productId, quantity, variantId);
+          return tier ? { priceCents: tier.priceCents } : null;
         },
       };
-      const useCase = new CalculatePriceUseCase(pricingRepository, productRepository);
+      const useCase = new CalculatePriceUseCase(pricingRepository);
       return useCase.execute(args.input);
     },
   },
@@ -91,53 +81,28 @@ export const pricingResolvers = {
         setPrice: async (data: {
           productId: string;
           variantId?: string;
-          priceListId?: string;
-          price: number;
-          salePrice?: number;
-          saleStartDate?: Date;
-          saleEndDate?: Date;
+          priceCents: number;
+          salePriceCents?: number;
           currencyCode: string;
         }) => {
-          const existing = await pricingDataRepository.productCurrencyPrices.findByProductAndCurrency(
-            data.productId,
-            data.currencyCode,
-            data.variantId,
-          );
-          if (existing) {
-            const updated = await pricingDataRepository.productCurrencyPrices.updatePrice(existing.productCurrencyPriceId, data.price);
-            return {
-              productId: data.productId,
-              variantId: data.variantId,
-              price: data.price,
-              salePrice: data.salePrice,
-              updatedAt: updated ? new Date(updated.updatedAt) : new Date(),
-            };
-          }
-          const created = await pricingDataRepository.productCurrencyPrices.upsert({
+          const saved = await pricingDataRepository.basePrices.upsert({
             productId: data.productId,
             productVariantId: data.variantId ?? null,
-            currencyId: data.currencyCode,
-            price: String(data.price),
-            compareAtPrice: data.salePrice ? String(data.salePrice) : null,
-            isManual: true,
-            updatedBy: null,
+            currencyCode: data.currencyCode,
+            priceCents: data.priceCents,
+            salePriceCents: data.salePriceCents ?? null,
           });
           return {
-            productId: created.productId,
-            variantId: data.variantId,
-            price: data.price,
-            salePrice: data.salePrice,
-            updatedAt: new Date(created.updatedAt),
+            productId: saved.productId,
+            variantId: saved.productVariantId ?? undefined,
+            priceCents: saved.priceCents,
+            salePriceCents: saved.salePriceCents,
+            updatedAt: saved.updatedAt,
           };
         },
       };
       const useCase = new SetProductPriceUseCase(repository);
-      const input: SetProductPriceInput = {
-        ...args.input,
-        saleStartDate: args.input.saleStartDate ? new Date(args.input.saleStartDate) : undefined,
-        saleEndDate: args.input.saleEndDate ? new Date(args.input.saleEndDate) : undefined,
-      };
-      return useCase.execute(input);
+      return useCase.execute(args.input);
     },
   },
 };

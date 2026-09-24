@@ -166,9 +166,9 @@ describe('AutomationRule', () => {
 
 describe('ConditionEvaluator', () => {
   const context = {
-    event: { type: 'order.completed', data: { orderId: 'o1', totalAmount: 500 } },
+    event: { type: 'order.completed', data: { orderId: 'o1', totalAmountCents: 500 } },
     customer: { customerId: 'c1', tier: 'loyal', lifetimeValue: 5000, totalOrders: 20, tags: ['vip', 'newsletter'] },
-    order: { totalAmount: 500, itemCount: 3, status: 'completed' },
+    order: { totalAmountCents: 500, itemCount: 3, status: 'completed' },
   };
 
   it('evaluates eq condition', () => {
@@ -222,7 +222,7 @@ describe('ConditionEvaluator', () => {
   });
 
   it('evaluates dataPath condition', () => {
-    expect(evaluateCondition({ field: 'custom', operator: 'eq', value: 500, dataPath: 'order.totalAmount' }, context)).toBe(true);
+    expect(evaluateCondition({ field: 'custom', operator: 'eq', value: 500, dataPath: 'order.totalAmountCents' }, context)).toBe(true);
     expect(evaluateCondition({ field: 'custom', operator: 'eq', value: 'o1', dataPath: 'event.data.orderId' }, context)).toBe(true);
   });
 

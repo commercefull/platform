@@ -1,6 +1,8 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
+import { ManageVendorUseCase } from '../../application/useCases/ManageVendor';
+import { ManageCommissionRuleUseCase } from '../../application/useCases/ManageCommissionRule';
+import { ManagePayoutUseCase } from '../../application/useCases/ManagePayout';
 import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import { VendorTier } from '../../domain/entities/Vendor';
 import { PayoutMethod } from '../../domain/entities/VendorPayout';
@@ -277,13 +279,13 @@ export class MarketplaceController {
   async calculateCommission(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const organizationId = this.getOrgId(req);
-      const { vendorId, amount, categoryId, productId } = req.body as {
+      const { vendorId, amountCents, categoryId, productId } = req.body as {
         vendorId: string;
-        amount: number;
+        amountCents: number;
         categoryId?: string;
         productId?: string;
       };
-      const commission = await this.commissionUseCase.calculateCommission(organizationId, vendorId, amount, categoryId, productId);
+      const commission = await this.commissionUseCase.calculateCommission(organizationId, vendorId, amountCents, categoryId, productId);
       res.json({ success: true, data: { commission } });
     } catch (error) {
       this.handleError(res, error);
@@ -323,8 +325,8 @@ export class MarketplaceController {
     try {
       const organizationId = this.getOrgId(req);
       const body = req.body as Record<string, unknown>;
-      // Map simple payload (amount, currency) to full use case input
-      const amount = typeof body.amount === 'number' ? body.amount : Number(body.amount) || 0;
+      // Map simple payload (amountCents, currency) to full use case input
+      const amountCents = typeof body.amountCents === 'number' ? body.amountCents : Number(body.amountCents) || 0;
       const currency = (body.currency as string) || 'USD';
       const method = (body.method as string) || 'bank_transfer';
       const now = new Date();
@@ -337,9 +339,9 @@ export class MarketplaceController {
               lineItemId: `li-${Date.now()}`,
               orderId: (body.orderId as string) || null,
               orderNumber: (body.orderNumber as string) || null,
-              grossRevenue: amount,
-              commissionAmount: 0,
-              netRevenue: amount,
+              grossRevenueCents: amountCents,
+              commissionAmountCents: 0,
+              netAmountCents: amountCents,
               currency,
             },
           ];

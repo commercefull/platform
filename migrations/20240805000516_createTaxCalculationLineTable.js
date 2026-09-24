@@ -11,11 +11,11 @@ exports.up = function (knex) {
     t.string('sku', 255);
     t.string('name', 255).notNullable();
     t.integer('quantity').notNullable().defaultTo(1);
-    t.decimal('unitPrice', 15, 2).notNullable();
-    t.decimal('lineTotal', 15, 2).notNullable();
-    t.decimal('discountAmount', 15, 2).notNullable().defaultTo(0);
-    t.decimal('taxableAmount', 15, 2).notNullable();
-    t.decimal('taxExemptAmount', 15, 2).notNullable().defaultTo(0);
+    t.bigInteger('unitPriceCents').notNullable();
+    t.bigInteger('lineTotalCents').notNullable();
+    t.bigInteger('discountAmountCents').notNullable().defaultTo(0);
+    t.bigInteger('taxableAmountCents').notNullable();
+    t.bigInteger('taxExemptAmountCents').notNullable().defaultTo(0);
     t.uuid('taxCategoryId').references('taxCategoryId').inTable('taxCategory');
     t.string('taxCategoryCode', 50);
 

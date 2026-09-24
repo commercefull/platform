@@ -1,6 +1,9 @@
 import { PageDraftRepositoryImpl } from '../infrastructure/repositories/PageDraftRepositoryImpl';
 import { ThemeRepositoryImpl } from '../../theme/infrastructure/repositories/ThemeRepositoryImpl';
-import { ManageDraftsUseCase, PublishDraftUseCase, PreviewDraftUseCase, GetBlockTypesUseCase } from './useCases/PageBuilder';
+import { ManageDraftsUseCase } from './useCases/ManageDrafts';
+import { PublishDraftUseCase } from './useCases/PublishDraft';
+import { PreviewDraftUseCase } from './useCases/PreviewDraft';
+import { GetBlockTypesUseCase } from './useCases/GetBlockTypes';
 
 const draftRepo = new PageDraftRepositoryImpl();
 const themeRepo = new ThemeRepositoryImpl();

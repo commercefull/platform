@@ -290,6 +290,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
     notificationChannel?: NotificationChannel;
   };
 
+  const toCents = (v?: number) => (v != null ? Math.round(Number(v) * 100) : undefined);
   const alert = await alertRepo.createPriceAlert({
     customerId,
     email: body.email,
@@ -300,10 +301,10 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
     variantName: body.variantName,
     sku: body.sku,
     alertType: body.alertType,
-    targetPrice: body.targetPrice,
+    targetPriceCents: toCents(body.targetPrice),
     percentageDrop: body.percentageDrop,
-    originalPrice: body.originalPrice,
-    currentPrice: body.currentPrice,
+    originalPriceCents: toCents(body.originalPrice),
+    currentPriceCents: toCents(body.currentPrice),
     currency: body.currency,
     notificationChannel: body.notificationChannel,
   });

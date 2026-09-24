@@ -171,11 +171,11 @@ export class B2BUser {
     this.props.updatedAt = new Date();
   }
 
-  canPlaceOrder(amount: number, currentPeriodSpent: number, period: keyof SpendingLimit): boolean {
+  canPlaceOrder(amountCents: number, currentPeriodSpent: number, period: keyof SpendingLimit): boolean {
     const limit = this.props.spendingLimits[period];
     if (limit === undefined) return true;
-    if (period === 'perOrderLimit') return amount <= limit;
-    return currentPeriodSpent + amount <= limit;
+    if (period === 'perOrderLimit') return amountCents <= limit;
+    return currentPeriodSpent + amountCents <= limit;
   }
 
   updateProfile(input: { firstName?: string; lastName?: string; department?: string; costCenter?: string }): void {

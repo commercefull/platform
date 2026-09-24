@@ -18,7 +18,7 @@ export interface ProcessRenewalOutput {
   renewed: boolean;
   newPeriodStart: Date;
   newPeriodEnd: Date;
-  amountCharged: number;
+  amountChargedCents: number;
   invoiceId?: string;
 }
 
@@ -26,7 +26,7 @@ interface SubscriptionRecord {
   status: string;
   customerId: string;
   nextBillingDate: string;
-  price: number;
+  priceCents: number;
   planName: string;
   paymentMethodId: string;
   billingInterval: string;
@@ -43,11 +43,11 @@ interface SubscriptionRepoPort {
 }
 
 interface PaymentServicePort {
-  charge(params: { customerId: string; amount: number; paymentMethodId: string; invoiceId: string }): Promise<void>;
+  charge(params: { customerId: string; amountCents: number; paymentMethodId: string; invoiceId: string }): Promise<void>;
 }
 
 interface InvoiceServicePort {
-  create(params: { subscriptionId: string; customerId: string; amount: number; description: string }): Promise<InvoiceRecord>;
+  create(params: { subscriptionId: string; customerId: string; amountCents: number; description: string }): Promise<InvoiceRecord>;
 }
 
 export class ProcessRenewalUseCase {
@@ -82,7 +82,7 @@ export class ProcessRenewalUseCase {
     const invoice = await this.invoiceService.create({
       subscriptionId: input.subscriptionId,
       customerId: subscription.customerId,
-      amount: subscription.price,
+      amountCents: subscription.priceCents,
       description: `Subscription renewal - ${subscription.planName}`,
     });
 
@@ -92,7 +92,7 @@ export class ProcessRenewalUseCase {
     try {
       await this.paymentService.charge({
         customerId: subscription.customerId,
-        amount: subscription.price,
+        amountCents: subscription.priceCents,
         paymentMethodId: subscription.paymentMethodId,
         invoiceId: invoice.invoiceId,
       });
@@ -107,7 +107,7 @@ export class ProcessRenewalUseCase {
       eventBus.emit('subscription.payment.failed', {
         subscriptionId: input.subscriptionId,
         customerId: subscription.customerId,
-        amount: subscription.price,
+        amountCents: subscription.priceCents,
       });
 
       throw new FailedToProcessRenewalError();
@@ -129,13 +129,13 @@ export class ProcessRenewalUseCase {
     eventBus.emit('subscription.renewed', {
       subscriptionId: input.subscriptionId,
       customerId: subscription.customerId,
-      amount: subscription.price,
+      amountCents: subscription.priceCents,
     });
 
     eventBus.emit('subscription.payment.success', {
       subscriptionId: input.subscriptionId,
       customerId: subscription.customerId,
-      amount: subscription.price,
+      amountCents: subscription.priceCents,
       invoiceId: invoice.invoiceId,
     });
 
@@ -144,7 +144,7 @@ export class ProcessRenewalUseCase {
       renewed: true,
       newPeriodStart,
       newPeriodEnd,
-      amountCharged: subscription.price,
+      amountChargedCents: subscription.priceCents,
       invoiceId: invoice.invoiceId,
     };
   }

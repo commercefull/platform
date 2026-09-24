@@ -7,8 +7,8 @@ export async function up(knex) {
     table.string('taxId');
     table.string('status').notNullable().defaultTo('pending');
     table.string('paymentTerms').notNullable().defaultTo('net30');
-    table.decimal('creditLimit', 14, 2);
-    table.decimal('outstandingBalance', 14, 2).notNullable().defaultTo(0);
+    table.bigInteger('creditLimitCents');
+    table.bigInteger('outstandingBalanceCents').notNullable().defaultTo(0);
     table.jsonb('billingAddress');
     table.jsonb('shippingAddress');
     table.string('contactEmail');

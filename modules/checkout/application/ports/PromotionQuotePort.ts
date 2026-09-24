@@ -11,19 +11,19 @@ export interface PromotionQuoteRequest {
     productVariantId?: string;
     name: string;
     quantity: number;
-    unitPrice: number;
+    unitPriceCents: number;
     isDigital: boolean;
   }>;
-  subtotal: number;
-  shippingAmount: number;
+  subtotalCents: number;
+  shippingAmountCents: number;
   customerId?: string;
   currency: string;
   couponCode?: string;
 }
 
 export interface PromotionQuoteResult {
-  totalDiscountAmount: number;
-  appliedPromotions: Array<{ id: string; name: string; amount: number }>;
+  totalDiscountAmountCents: number;
+  appliedPromotions: Array<{ id: string; name: string; amountCents: number }>;
 }
 
 export interface PromotionQuotePort {

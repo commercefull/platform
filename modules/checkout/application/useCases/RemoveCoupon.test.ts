@@ -1,66 +1,36 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createCheckoutRepository, createCheckoutSession, emitMock } from '../../tests/testUtils';
 import { RemoveCouponUseCase, RemoveCouponCommand } from './RemoveCoupon';
 import { NotFoundError } from '../../../../libs/errors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { Money } from '../../../../libs/money';
 
 describe('RemoveCouponUseCase', () => {
   let useCase: RemoveCouponUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockSession: Record<string, unknown>;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
 
   beforeEach(() => {
-    mockSession = {
-      id: 'ck-1',
-      basketId: 'b1',
-      customerId: 'c1',
-      guestEmail: undefined,
-      status: 'pending',
-      paymentStatus: 'pending',
-      shippingAddress: null,
-      billingAddress: null,
-      shippingMethodId: undefined,
-      shippingMethodName: undefined,
-      paymentMethodId: undefined,
-      subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' },
-      shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 10, currency: 'USD' },
-      total: { amount: 90, currency: 'USD' },
-      couponCode: 'SAVE10',
-      fulfillmentType: 'shipping',
-      notes: undefined,
-      sameAsShipping: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      expiresAt: new Date(),
-      removeCoupon: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockSession),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new RemoveCouponUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    useCase = new RemoveCouponUseCase(checkoutRepository);
   });
 
-  it('should remove coupon (happy path)', async () => {
+  it('should remove the coupon, persist the session, and emit checkout.updated when the session exists', async () => {
+    const session = createCheckoutSession({ couponCode: 'SAVE10', discountAmount: Money.create(10, 'USD') });
+    checkoutRepository.findById.mockResolvedValue(session);
+
     const result = await useCase.execute(new RemoveCouponCommand('ck-1'));
 
-    expect(result.checkoutId).toBe('ck-1');
-    expect(mockSession.removeCoupon).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', couponCode: null }));
+    expect(result.couponCode).toBeUndefined();
+    expect(session.couponCode).toBeUndefined();
+    expect(session.discountAmount.cents).toBe(0);
+    expect(checkoutRepository.save).toHaveBeenCalledWith(session);
+    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'coupon', couponCode: null, previousCoupon: 'SAVE10' }));
   });
 
-  it('should throw NotFoundError when session not found', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw NotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new RemoveCouponCommand('missing'))).rejects.toThrow(NotFoundError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

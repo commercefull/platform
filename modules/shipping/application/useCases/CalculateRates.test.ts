@@ -1,143 +1,77 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock, createShippingMethodEntity, createShippingZoneEntity } from '../../tests/testUtils';
 import { CalculateRatesUseCase } from './CalculateRates';
-import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+type ShippingRepository = ConstructorParameters<typeof CalculateRatesUseCase>[0];
 
 describe('CalculateRatesUseCase', () => {
   let useCase: CalculateRatesUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let repo: jest.Mocked<ShippingRepository>;
 
   beforeEach(() => {
-    mockRepo = {
-      findZonesForAddress: jest.fn().mockResolvedValue([{ shippingZoneId: 'z1', name: 'US', isActive: true }]),
-      findDefaultZone: jest.fn().mockResolvedValue(null),
-      findMethodsForZones: jest.fn().mockResolvedValue([
-        {
-          shippingMethodId: 'm1',
-          name: 'Standard',
-          code: 'std',
-          isDefault: true,
-          estimatedDaysMin: 3,
-          estimatedDaysMax: 5,
-          carrierType: 'fedex',
-          isAvailableFor: jest.fn().mockReturnValue(true),
-          calculateRate: jest.fn().mockReturnValue(9.99),
-        },
-        {
-          shippingMethodId: 'm2',
-          name: 'Express',
-          code: 'exp',
-          isDefault: false,
-          estimatedDaysMin: 1,
-          estimatedDaysMax: 2,
-          carrierType: 'ups',
-          isAvailableFor: jest.fn().mockReturnValue(true),
-          calculateRate: jest.fn().mockReturnValue(19.99),
-        },
-      ]),
-    };
-    useCase = new CalculateRatesUseCase(mockRepo as never);
+    jest.resetAllMocks();
+    repo = lazyMock<ShippingRepository>();
+    repo.findZonesForAddress.mockResolvedValue([createShippingZoneEntity()]);
+    repo.findDefaultZone.mockResolvedValue(null);
+    repo.findMethodsForZones.mockResolvedValue([
+      createShippingMethodEntity({ shippingMethodId: 'm1', basePriceCents: 9.99, isDefault: true }),
+      createShippingMethodEntity({ shippingMethodId: 'm2', name: 'Express', code: 'exp', basePriceCents: 19.99, isDefault: false }),
+    ]);
+    useCase = new CalculateRatesUseCase(repo);
   });
 
-  it('should calculate shipping rates (happy path)', async () => {
+  it('should calculate rates for all available methods', async () => {
     const result = await useCase.execute({
       destinationAddress: { countryCode: 'US', stateCode: 'CA' },
       items: [{ productId: 'p1', quantity: 2, weight: 1.5, price: 50 }],
-      orderValue: 100,
+      orderValueCents: 100,
     });
 
     expect(result.rates).toHaveLength(2);
-    expect(result.rates[0].rate).toBe(9.99);
+    expect(result.rates[0].rateCents).toBe(9.99);
     expect(result.defaultRateId).toBe('m1');
-    expect(eventBus.emit).toHaveBeenCalledWith('shipping.rate_calculated', expect.objectContaining({ destinationCountry: 'US' }));
+    expect(emitMock).toHaveBeenCalledWith('shipping.rate_calculated', expect.objectContaining({ destinationCountry: 'US' }));
   });
 
-  it('should use default zone when no zones match', async () => {
-    mockRepo.findZonesForAddress.mockResolvedValue([]);
-    mockRepo.findDefaultZone.mockResolvedValue({ shippingZoneId: 'default-z', name: 'Default', isActive: true });
+  it('should fall back to the default zone when no zones match', async () => {
+    repo.findZonesForAddress.mockResolvedValue([]);
+    repo.findDefaultZone.mockResolvedValue(createShippingZoneEntity({ shippingZoneId: 'default-z' }));
 
     await useCase.execute({
       destinationAddress: { countryCode: 'XX' },
       items: [{ productId: 'p1', quantity: 1, price: 10 }],
-      orderValue: 10,
+      orderValueCents: 10,
     });
 
-    expect(mockRepo.findDefaultZone).toHaveBeenCalled();
+    expect(repo.findDefaultZone).toHaveBeenCalled();
+    expect(repo.findMethodsForZones).toHaveBeenCalledWith(['default-z'], expect.anything());
   });
 
-  it('should skip unavailable methods', async () => {
-    mockRepo.findMethodsForZones.mockResolvedValue([
-      {
-        shippingMethodId: 'm1',
-        name: 'Standard',
-        code: 'std',
-        isDefault: true,
-        estimatedDaysMin: 3,
-        estimatedDaysMax: 5,
-        carrierType: 'fedex',
-        isAvailableFor: jest.fn().mockReturnValue(false),
-        calculateRate: jest.fn().mockReturnValue(9.99),
-      },
-      {
-        shippingMethodId: 'm2',
-        name: 'Express',
-        code: 'exp',
-        isDefault: false,
-        estimatedDaysMin: 1,
-        estimatedDaysMax: 2,
-        carrierType: 'ups',
-        isAvailableFor: jest.fn().mockReturnValue(true),
-        calculateRate: jest.fn().mockReturnValue(19.99),
-      },
+  it('should skip methods unavailable for the order weight', async () => {
+    repo.findMethodsForZones.mockResolvedValue([
+      createShippingMethodEntity({ shippingMethodId: 'm1', maxWeight: 10 }),
+      createShippingMethodEntity({ shippingMethodId: 'm2', code: 'exp', basePriceCents: 19.99 }),
     ]);
 
     const result = await useCase.execute({
       destinationAddress: { countryCode: 'US' },
       items: [{ productId: 'p1', quantity: 1, weight: 100, price: 10 }],
-      orderValue: 10,
+      orderValueCents: 10,
     });
 
     expect(result.rates).toHaveLength(1);
     expect(result.rates[0].code).toBe('exp');
   });
 
-  it('should set defaultRateId to cheapest when no default method', async () => {
-    mockRepo.findMethodsForZones.mockResolvedValue([
-      {
-        shippingMethodId: 'm1',
-        name: 'Standard',
-        code: 'std',
-        isDefault: false,
-        estimatedDaysMin: 3,
-        estimatedDaysMax: 5,
-        carrierType: 'fedex',
-        isAvailableFor: jest.fn().mockReturnValue(true),
-        calculateRate: jest.fn().mockReturnValue(9.99),
-      },
-      {
-        shippingMethodId: 'm2',
-        name: 'Express',
-        code: 'exp',
-        isDefault: false,
-        estimatedDaysMin: 1,
-        estimatedDaysMax: 2,
-        carrierType: 'ups',
-        isAvailableFor: jest.fn().mockReturnValue(true),
-        calculateRate: jest.fn().mockReturnValue(19.99),
-      },
+  it('should use the cheapest rate as default when no method is marked default', async () => {
+    repo.findMethodsForZones.mockResolvedValue([
+      createShippingMethodEntity({ shippingMethodId: 'm1', basePriceCents: 9.99, isDefault: false }),
+      createShippingMethodEntity({ shippingMethodId: 'm2', code: 'exp', basePriceCents: 19.99, isDefault: false }),
     ]);
 
     const result = await useCase.execute({
       destinationAddress: { countryCode: 'US' },
       items: [{ productId: 'p1', quantity: 1, price: 10 }],
-      orderValue: 10,
+      orderValueCents: 10,
     });
 
     expect(result.defaultRateId).toBe('m1');

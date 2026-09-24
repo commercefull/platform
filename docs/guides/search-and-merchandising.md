@@ -75,6 +75,7 @@ GET /customer/search?q=red+shirt&page=1&limit=20
     "totalPages": 8,
     "facets": {
       "categories": [...],
+      "brands": [...],
       "priceRanges": [...],
       "attributes": [...]
     }
@@ -95,9 +96,15 @@ GET /customer/search?categoryIds=uuid1,uuid2,uuid3
 
 ### Price Range
 
+Price filters are **integer cents** — `1000` means $10.00:
+
 ```
-GET /customer/search?minPrice=10&maxPrice=100
+GET /customer/search?minPriceCents=1000&maxPriceCents=10000
 ```
+
+Products in search results expose `priceCents`, `salePriceCents`,
+`effectivePriceCents`, and `currencyCode` (integer cents; format at the view
+boundary).
 
 ### Status & Visibility
 
@@ -208,11 +215,12 @@ Enable facets with `includeFacets=true`:
 GET /customer/search?q=shirt&includeFacets=true
 ```
 
-**Returns three types of facets:**
+**Returns four types of facets:**
 
 1. **Category facets** — `{ id, name, count }` for each matching category
-2. **Price range facets** — `{ min, max, count }` for price buckets
-3. **Attribute facets** — `{ attributeId, attributeCode, attributeName, type, values[] }` for each dynamic attribute
+2. **Brand facets** — `{ id, name, count }` for each matching brand
+3. **Price range facets** — `{ min, max, count }` for price buckets (`min`/`max` in integer cents)
+4. **Attribute facets** — `{ attributeId, attributeCode, attributeName, type, values[] }` for each dynamic attribute
 
 Use these facets to build filter UIs (sidebar filters, drill-down navigation).
 
@@ -344,8 +352,8 @@ const adapter = getSearchAdapter();
 const result = await adapter.search({
   query: 'laptop',
   categoryIds: ['cat-1', 'cat-2'],
-  minPrice: 500,
-  maxPrice: 2000,
+  minPriceCents: 50000,
+  maxPriceCents: 200000,
   attributes: [
     { attributeCode: 'ram', operator: 'gte', minValue: 16 },
     { attributeCode: 'brand', operator: 'in', values: ['Dell', 'HP', 'Lenovo'] },

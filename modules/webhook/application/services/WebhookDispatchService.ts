@@ -129,10 +129,10 @@ export class WebhookDispatchService {
       ...(endpoint.headers || {}),
     };
 
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
+    try {
       const response = await fetch(endpoint.url, {
         method: 'POST',
         headers,
@@ -140,7 +140,6 @@ export class WebhookDispatchService {
         signal: controller.signal,
       });
 
-      clearTimeout(timeout);
       const durationMs = Date.now() - startTime;
       const responseBody = await response.text();
 
@@ -168,6 +167,8 @@ export class WebhookDispatchService {
         endpoint.retryPolicy.retryIntervalMs,
         endpoint.retryPolicy.backoffMultiplier,
       );
+    } finally {
+      clearTimeout(timeout);
     }
 
     // Persist delivery result

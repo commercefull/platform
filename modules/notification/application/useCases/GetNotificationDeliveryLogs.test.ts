@@ -1,37 +1,30 @@
-jest.mock('../../infrastructure/repositories/NotificationDataRepository', () => ({
-  __esModule: true,
-  default: {
-    notifications: {},
-    eventLogs: {},
-    deliveryLogs: {
-      findByBatchId: jest.fn().mockResolvedValue([{ logId: 'l1', status: 'delivered' }]),
-    },
-  },
-}));
-
+import { createNotificationDeliveryLog, createNotificationDeliveryLogRepository } from '../../tests/testUtils';
 import { GetNotificationDeliveryLogsUseCase } from './GetNotificationDeliveryLogs';
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
-
-const mockRepo = notificationDataRepository as unknown as { deliveryLogs: Record<string, jest.Mock> };
 
 describe('GetNotificationDeliveryLogsUseCase', () => {
   let useCase: GetNotificationDeliveryLogsUseCase;
+  let deliveryLogRepo: ReturnType<typeof createNotificationDeliveryLogRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetNotificationDeliveryLogsUseCase();
+    deliveryLogRepo = createNotificationDeliveryLogRepository();
+    useCase = new GetNotificationDeliveryLogsUseCase(deliveryLogRepo);
   });
 
-  it('should find delivery logs by batch ID (happy path)', async () => {
-    const result = await useCase.findByBatchId('b1');
+  it('should return the delivery logs for a batch', async () => {
+    const logs = [createNotificationDeliveryLog({ notificationDeliveryLogId: 'l-1' })];
+    deliveryLogRepo.findByBatchId.mockResolvedValue(logs);
 
-    expect(result).toHaveLength(1);
-    expect(mockRepo.deliveryLogs.findByBatchId).toHaveBeenCalledWith('b1', undefined);
+    const result = await useCase.findByBatchId('batch-1');
+
+    expect(result).toEqual(logs);
+    expect(deliveryLogRepo.findByBatchId).toHaveBeenCalledWith('batch-1', undefined);
   });
 
-  it('should pass limit to repository', async () => {
-    await useCase.findByBatchId('b1', 50);
+  it('should pass the limit through to the repository', async () => {
+    deliveryLogRepo.findByBatchId.mockResolvedValue([]);
 
-    expect(mockRepo.deliveryLogs.findByBatchId).toHaveBeenCalledWith('b1', 50);
+    await useCase.findByBatchId('batch-1', 10);
+
+    expect(deliveryLogRepo.findByBatchId).toHaveBeenCalledWith('batch-1', 10);
   });
 });

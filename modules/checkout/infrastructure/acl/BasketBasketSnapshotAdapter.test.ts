@@ -1,21 +1,19 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-
-jest.mock('../../../basket/domain/entities/Basket');
-jest.mock('../../../basket/domain/entities/BasketItem');
-
 import { Money } from '../../../../libs/money';
+import { BasketBasketSnapshotAdapter } from './BasketBasketSnapshotAdapter';
+import type { BasketRepository } from '../../../basket/domain/repositories/BasketRepository';
+import type { Basket } from '../../../basket/domain/entities/Basket';
+import type { BasketItem } from '../../../basket/domain/entities/BasketItem';
 
 describe('BasketBasketSnapshotAdapter', () => {
-  let adapter: import('./BasketBasketSnapshotAdapter').BasketBasketSnapshotAdapter;
-  let mockBasketRepo: { findById: jest.Mock; getItems: jest.Mock };
+  let adapter: BasketBasketSnapshotAdapter;
+  let mockBasketRepo: jest.Mocked<Pick<BasketRepository, 'findById' | 'getItems'>>;
 
   beforeEach(() => {
     mockBasketRepo = {
       findById: jest.fn(),
       getItems: jest.fn(),
     };
-    const { BasketBasketSnapshotAdapter } = require('./BasketBasketSnapshotAdapter');
-    adapter = new BasketBasketSnapshotAdapter(mockBasketRepo as never);
+    adapter = new BasketBasketSnapshotAdapter(mockBasketRepo as unknown as BasketRepository);
   });
 
   it('implements BasketSnapshotPort', () => {
@@ -35,8 +33,8 @@ describe('BasketBasketSnapshotAdapter', () => {
       isEmpty: false,
       itemCount: 2,
       uniqueItemCount: 2,
-      subtotal: Money.create(100, 'USD'),
-      discountAmount: 0,
+      subtotalCents: Money.create(100, 'USD'),
+      discountAmountCents: 0,
       total: Money.create(100, 'USD'),
       coupon: { couponCode: 'SAVE10' },
     };
@@ -47,15 +45,15 @@ describe('BasketBasketSnapshotAdapter', () => {
         sku: 'SKU-1',
         name: 'Product 1',
         quantity: 2,
-        unitPrice: Money.create(50, 'USD'),
-        discountAmount: 0,
+        unitPriceCents: Money.create(50, 'USD'),
+        discountAmountCents: 0,
         itemType: 'physical',
         isDigital: false,
         imageUrl: 'https://example.com/img.jpg',
       },
     ];
-    mockBasketRepo.findById.mockResolvedValue(mockBasket);
-    mockBasketRepo.getItems.mockResolvedValue(mockItems);
+    mockBasketRepo.findById.mockResolvedValue(mockBasket as unknown as Basket);
+    mockBasketRepo.getItems.mockResolvedValue(mockItems as unknown as BasketItem[]);
 
     const result = await adapter.getSnapshot('basket-1');
 

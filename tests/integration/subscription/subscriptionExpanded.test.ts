@@ -101,7 +101,7 @@ describe('Subscription Expanded Tests', () => {
     it('should update a subscription plan', async () => {
       const response = await client.put(
         `/business/subscriptions/products/${subscriptionProductId}/plans/${SEEDED.PLAN_MUTABLE_ID}`,
-        createTestSubscriptionPlan(subscriptionProductId, { name: 'Updated Ops Plan', price: 39.99 }),
+        createTestSubscriptionPlan(subscriptionProductId, { name: 'Updated Ops Plan', priceCents: 3999 }),
         { headers: adminHeaders() },
       );
 

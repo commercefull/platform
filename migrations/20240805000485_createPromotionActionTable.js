@@ -6,7 +6,14 @@ exports.up = function (knex) {
     t.uuid('promotionId').notNullable().references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.string('name', 255);
     t.text('description');
-    t.enum('actionType', ['discount', 'freeShipping', 'giftCard', 'coupon', 'custom']).notNullable();
+    t.enum('actionType', [
+      'discountByPercentage',
+      'discountByAmount',
+      'discountShipping',
+      'freeItem',
+      'discountByTier',
+      'freeGift',
+    ]).notNullable();
     t.jsonb('value').notNullable();
     t.string('targetType', 100);
     t.jsonb('targetIds');

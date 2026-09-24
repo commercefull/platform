@@ -22,7 +22,8 @@ export interface CouponUsage {
   couponId: string;
   orderId: string;
   customerId: string;
-  discountAmount: number;
+  /** Discount amount in integer cents. */
+  discountAmountCents: number;
   usedAt: Date;
 }
 
@@ -32,10 +33,12 @@ export interface CouponProps {
   name: string;
   description?: string;
   type: DiscountType;
-  value: number; // Percentage (0-100) or fixed amount
+  value: number; // Percentage (0-100) or fixed amount in integer cents
   currency?: string; // Required for fixed_amount type
-  minOrderValue?: number;
-  maxDiscountAmount?: number; // Cap for percentage discounts
+  /** Minimum order total in integer cents. */
+  minOrderValueCents?: number;
+  /** Cap for percentage discounts, in integer cents. */
+  maxDiscountAmountCents?: number;
   usageType: CouponType;
   usageLimit?: number; // For multi_use type
   usageCount: number;
@@ -70,8 +73,8 @@ export class Coupon {
     type: DiscountType;
     value: number;
     currency?: string;
-    minOrderValue?: number;
-    maxDiscountAmount?: number;
+    minOrderValueCents?: number;
+    maxDiscountAmountCents?: number;
     usageType: CouponType;
     usageLimit?: number;
     customerUsageLimit?: number;
@@ -117,8 +120,8 @@ export class Coupon {
       type: props.type,
       value: props.value,
       currency: props.currency,
-      minOrderValue: props.minOrderValue,
-      maxDiscountAmount: props.maxDiscountAmount,
+      minOrderValueCents: props.minOrderValueCents,
+      maxDiscountAmountCents: props.maxDiscountAmountCents,
       usageType: props.usageType,
       usageLimit: props.usageLimit,
       usageCount: 0,
@@ -165,11 +168,11 @@ export class Coupon {
   get currency(): string | undefined {
     return this.props.currency;
   }
-  get minOrderValue(): number | undefined {
-    return this.props.minOrderValue;
+  get minOrderValueCents(): number | undefined {
+    return this.props.minOrderValueCents;
   }
-  get maxDiscountAmount(): number | undefined {
-    return this.props.maxDiscountAmount;
+  get maxDiscountAmountCents(): number | undefined {
+    return this.props.maxDiscountAmountCents;
   }
   get usageType(): CouponType {
     return this.props.usageType;
@@ -264,14 +267,14 @@ export class Coupon {
     type?: DiscountType;
     value?: number;
     currency?: string;
-    minOrderValue?: number;
-    maxDiscountAmount?: number;
+    minOrderValueCents?: number;
+    maxDiscountAmountCents?: number;
   }): void {
     if (updates.type !== undefined) this.props.type = updates.type;
     if (updates.value !== undefined) this.props.value = updates.value;
     if (updates.currency !== undefined) this.props.currency = updates.currency;
-    if (updates.minOrderValue !== undefined) this.props.minOrderValue = updates.minOrderValue;
-    if (updates.maxDiscountAmount !== undefined) this.props.maxDiscountAmount = updates.maxDiscountAmount;
+    if (updates.minOrderValueCents !== undefined) this.props.minOrderValueCents = updates.minOrderValueCents;
+    if (updates.maxDiscountAmountCents !== undefined) this.props.maxDiscountAmountCents = updates.maxDiscountAmountCents;
     this.touch();
   }
 
@@ -315,11 +318,11 @@ export class Coupon {
     }
   }
 
-  canBeApplied(orderValue: number, customerId?: string, _customerGroupIds?: string[]): boolean {
+  canBeApplied(orderValueCents: number, customerId?: string, _customerGroupIds?: string[]): boolean {
     if (this.status !== 'active') return false;
 
     // Check minimum order value
-    if (this.props.minOrderValue && orderValue < this.props.minOrderValue) {
+    if (this.props.minOrderValueCents && orderValueCents < this.props.minOrderValueCents) {
       return false;
     }
 
@@ -332,28 +335,32 @@ export class Coupon {
     return true;
   }
 
-  calculateDiscount(orderValue: number, productValue?: number): number {
-    let discountAmount = 0;
+  /**
+   * Computes the discount in integer cents. `orderValueCents`/`productValueCents`
+   * are integer-cent amounts; `value` is a percent or fixed cents depending on type.
+   */
+  calculateDiscount(orderValueCents: number, productValueCents?: number): number {
+    let discountCents = 0;
 
     if (this.props.type === 'percentage') {
-      const targetValue = productValue || orderValue;
-      discountAmount = (targetValue * this.props.value) / 100;
+      const targetCents = productValueCents || orderValueCents;
+      discountCents = (targetCents * this.props.value) / 100;
     } else if (this.props.type === 'fixed_amount') {
-      discountAmount = this.props.value;
+      discountCents = this.props.value;
     } else if (this.props.type === 'free_shipping') {
       // Free shipping is handled separately in shipping calculation
-      discountAmount = 0;
+      discountCents = 0;
     }
 
     // Apply maximum discount cap
-    if (this.props.maxDiscountAmount && discountAmount > this.props.maxDiscountAmount) {
-      discountAmount = this.props.maxDiscountAmount;
+    if (this.props.maxDiscountAmountCents && discountCents > this.props.maxDiscountAmountCents) {
+      discountCents = this.props.maxDiscountAmountCents;
     }
 
-    return Math.round(discountAmount * 100) / 100; // Round to 2 decimal places
+    return Math.round(discountCents);
   }
 
-  recordUsage(orderId: string, customerId: string, discountAmount: number): CouponUsage {
+  recordUsage(orderId: string, customerId: string, discountAmountCents: number): CouponUsage {
     this.props.usageCount++;
     this.touch();
 
@@ -362,7 +369,7 @@ export class Coupon {
       couponId: this.props.couponId,
       orderId,
       customerId,
-      discountAmount,
+      discountAmountCents,
       usedAt: new Date(),
     };
   }
@@ -385,8 +392,8 @@ export class Coupon {
       type: this.props.type,
       value: this.props.value,
       currency: this.props.currency,
-      minOrderValue: this.props.minOrderValue,
-      maxDiscountAmount: this.props.maxDiscountAmount,
+      minOrderValueCents: this.props.minOrderValueCents,
+      maxDiscountAmountCents: this.props.maxDiscountAmountCents,
       usageType: this.props.usageType,
       usageLimit: this.props.usageLimit,
       usageCount: this.props.usageCount,

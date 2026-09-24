@@ -1,22 +1,15 @@
-jest.mock('../../../organization/infrastructure/repositories/organizationRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn(),
-    findAll: jest.fn(),
-  },
-}));
-
-import organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
 import { OrganizationLookupAdapter } from './OrganizationLookupAdapter';
+import type organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
+
+type Organization = NonNullable<Awaited<ReturnType<typeof organizationRepo.findById>>>;
 
 describe('product/OrganizationLookupAdapter', () => {
   let adapter: OrganizationLookupAdapter;
-
-  let mockOrgRepo: { findById: jest.Mock; findAll: jest.Mock };
+  let mockOrgRepo: jest.Mocked<Pick<typeof organizationRepo, 'findById' | 'findAll'>>;
 
   beforeEach(() => {
-    mockOrgRepo = organizationRepo as unknown as { findById: jest.Mock; findAll: jest.Mock };
-    adapter = new OrganizationLookupAdapter();
+    mockOrgRepo = { findById: jest.fn(), findAll: jest.fn() };
+    adapter = new OrganizationLookupAdapter(mockOrgRepo);
   });
 
   it('implements OrganizationLookupPort', () => {
@@ -29,7 +22,7 @@ describe('product/OrganizationLookupAdapter', () => {
       organizationId: 'org-1',
       name: 'Test Org',
       status: 'active',
-    });
+    } as unknown as Organization);
 
     const result = await adapter.findById('org-1');
 
@@ -51,7 +44,7 @@ describe('product/OrganizationLookupAdapter', () => {
     mockOrgRepo.findAll.mockResolvedValue([
       { organizationId: 'org-1', name: 'Org One', status: 'active' },
       { organizationId: 'org-2', name: 'Org Two', status: 'pending' },
-    ]);
+    ] as unknown as Organization[]);
 
     const results = await adapter.findAll();
 

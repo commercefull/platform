@@ -4,9 +4,6 @@
  * Barrel export for all inventory-related use cases.
  */
 
-// Legacy manage stock use cases
-export * from './ManageStock';
-
 // New granular use cases
 export { ReserveStockUseCase, type ReserveStockInput, type ReserveStockOutput } from './ReserveStock';
 export { ReleaseReservationUseCase, type ReleaseReservationInput, type ReleaseReservationOutput } from './ReleaseReservation';

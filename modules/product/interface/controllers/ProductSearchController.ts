@@ -1,10 +1,10 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
-  searchProductsUseCase,
+  attributeSearchProductsUseCase as searchProductsUseCase,
   getSearchSuggestionsUseCase,
   findSimilarProductsUseCase,
   findByAttributeUseCase,
-} from '../../application/useCases/attribute/SearchProducts';
+} from '../../application/useCases/wired';
 import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
 import type { AttributeFilter } from '../../application/services/ProductSearchService';
 
@@ -20,8 +20,8 @@ class ProductSearchController {
       categoryId,
       categoryIds,
       productTypeId,
-      minPrice,
-      maxPrice,
+      minPriceCents,
+      maxPriceCents,
       status,
       visibility,
       isFeatured,
@@ -53,8 +53,8 @@ class ProductSearchController {
       categoryId: categoryId as string,
       categoryIds: categoryIds ? (categoryIds as string).split(',') : undefined,
       productTypeId: productTypeId as string,
-      minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
+      minPriceCents: minPriceCents ? parseInt(minPriceCents as string, 10) : undefined,
+      maxPriceCents: maxPriceCents ? parseInt(maxPriceCents as string, 10) : undefined,
       status: status as string,
       visibility: visibility as string,
       isFeatured: isFeatured === 'true' ? true : isFeatured === 'false' ? false : undefined,

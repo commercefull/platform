@@ -30,7 +30,7 @@ export const membershipTypeDefs = `#graphql
     cancelledAt: String!
     effectiveEndDate: String!
     refundEligible: Boolean!
-    refundAmount: Float
+    refundAmountCents: Float
   }
 
   type UpgradeMembershipResult {
@@ -38,8 +38,8 @@ export const membershipTypeDefs = `#graphql
     previousTierId: String!
     newTierId: String!
     newTierName: String!
-    proratedAmount: Float
-    newBillingAmount: Float!
+    proratedAmountCents: Float
+    newBillingAmountCents: Float!
     effectiveDate: String!
     nextBillingDate: String!
   }
@@ -50,7 +50,7 @@ export const membershipTypeDefs = `#graphql
     renewedAt: String!
     newPeriodStart: String!
     newPeriodEnd: String!
-    amount: Float!
+    amountCents: Float!
     paymentStatus: String!
   }
 

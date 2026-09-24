@@ -92,12 +92,9 @@ These tests verify at the code level that:
 
 ## Key-Rotation Policy
 
-Key-rotation is managed by:
+Key rotation is currently a manual/ops process — secrets are rotated via environment configuration. A dedicated key-rotation policy module is not yet implemented.
 
-- `modules/compliance/domain/entities/KeyRotationPolicy.ts`
-- `modules/compliance/application/useCases/ManageKeyRotation.ts`
-
-Default rotation schedule:
+Recommended rotation schedule:
 
 - Payment webhook secrets: 90 days
 - API keys (PSP configs): 90 days

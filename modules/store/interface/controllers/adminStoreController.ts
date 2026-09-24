@@ -16,7 +16,7 @@ import {
   assignUserToStoreUseCase,
   removeUserFromStoreUseCase,
 } from '../../../identity/application/useCases/store/wired';
-import { GetOrdersByStoreUseCase } from '../../../order/application/useCases/GetOrdersByStore';
+import { getOrdersByStoreUseCase } from '../../../order/application/useCases/wired';
 import { getDispatchesByStoreUseCase } from '../../../inventory/application/useCases/wired';
 import { ListStoresQuery } from '../../application/useCases/ListStores';
 import { GetStoreQuery } from '../../application/useCases/GetStore';
@@ -24,7 +24,6 @@ import { CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
 
 const findActiveStoresUseCase = new FindActiveStoresUseCase();
-const getOrdersByStoreUseCase = new GetOrdersByStoreUseCase();
 
 export const listStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const page = parseInt((req.query.page as string) || '1', 10);

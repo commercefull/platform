@@ -32,7 +32,7 @@ export interface CreateLoyaltyRewardInput {
   description?: string;
   type?: string;
   pointsCost: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;
@@ -45,7 +45,7 @@ export interface UpdateLoyaltyRewardInput {
   name?: string;
   description?: string;
   pointsCost?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   discountPercent?: number;
   discountCode?: string;
   freeShipping?: boolean;

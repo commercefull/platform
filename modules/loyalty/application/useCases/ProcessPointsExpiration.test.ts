@@ -1,49 +1,52 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { ProcessPointsExpirationUseCase } from './ProcessPointsExpiration';
+import { createExpirationRepository, emitMock } from '../../tests/testUtils';
 
 describe('ProcessPointsExpirationUseCase', () => {
-  let useCase: ProcessPointsExpirationUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const loyaltyRepository = createExpirationRepository();
+  const useCase = new ProcessPointsExpirationUseCase(loyaltyRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      getExpiringPoints: jest.fn().mockResolvedValue([
-        { customerId: 'c1', points: 50 },
-        { customerId: 'c2', points: 30 },
-      ]),
-      getCustomerLoyalty: jest.fn().mockResolvedValue({ pointsBalance: 100 }),
-      updatePointsBalance: jest.fn().mockResolvedValue(undefined),
-      markPointsAsExpired: jest.fn().mockResolvedValue(undefined),
-      createTransaction: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ProcessPointsExpirationUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    loyaltyRepository.getExpiringPoints.mockResolvedValue([
+      { customerId: 'c1', points: 50 },
+      { customerId: 'c2', points: 30 },
+    ]);
+    loyaltyRepository.getCustomerLoyalty.mockResolvedValue({ pointsBalance: 100 });
+    loyaltyRepository.updatePointsBalance.mockResolvedValue(undefined);
+    loyaltyRepository.markPointsAsExpired.mockResolvedValue(undefined);
+    loyaltyRepository.createTransaction.mockResolvedValue(undefined);
   });
 
-  it('should process expiring points (happy path)', async () => {
+  it('should expire points, update balances and emit loyalty.points_expired for each customer', async () => {
     const result = await useCase.execute({});
 
     expect(result.processedCount).toBe(2);
     expect(result.totalPointsExpired).toBe(80);
-    expect(mockRepo.updatePointsBalance).toHaveBeenCalledTimes(2);
+    expect(loyaltyRepository.updatePointsBalance).toHaveBeenCalledTimes(2);
+    expect(emitMock).toHaveBeenCalledWith(
+      'loyalty.points_expired',
+      expect.objectContaining({ customerId: 'c1', pointsExpired: 50 }),
+    );
   });
 
-  it('should not update balances in dry run mode', async () => {
+  it('should report expirations without persisting changes when dry run is enabled', async () => {
     const result = await useCase.execute({ dryRun: true });
 
     expect(result.dryRun).toBe(true);
     expect(result.processedCount).toBe(2);
-    expect(mockRepo.updatePointsBalance).not.toHaveBeenCalled();
+    expect(loyaltyRepository.updatePointsBalance).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should skip customers not found', async () => {
-    mockRepo.getCustomerLoyalty.mockResolvedValueOnce(null).mockResolvedValueOnce({ pointsBalance: 100 });
+  it('should skip customers whose loyalty record is missing', async () => {
+    loyaltyRepository.getCustomerLoyalty
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ pointsBalance: 100 });
 
     const result = await useCase.execute({});
 
     expect(result.processedCount).toBe(1);
+    expect(loyaltyRepository.updatePointsBalance).toHaveBeenCalledTimes(1);
   });
 });

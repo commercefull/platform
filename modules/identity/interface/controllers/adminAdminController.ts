@@ -2,14 +2,11 @@ import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { compareString } from '../../../../libs/hash';
 import { SessionService } from '../../../../libs/session';
-import { AdminAuthUseCase, GetDashboardDataUseCase } from '../../application/useCases/AdminAuth';
+import { adminAuthUseCase, getDashboardDataUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // Session cookie name
 const SESSION_COOKIE_NAME = 'cf_session';
-
-const adminAuthUseCase = new AdminAuthUseCase();
-const getDashboardDataUseCase = new GetDashboardDataUseCase();
 
 // GET: admin dashboard
 export const getAdminDashboard = async (req: HttpRequest, res: HttpResponse) => {

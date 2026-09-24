@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Apply Product Discount Use Case
  * Calculates applicable discounts for products
  */
 
-import { couponDiscountRepository } from '../wired';
+import type { ProductDiscountRepository } from '../../domain/repositories/ProductDiscountRepository';
 
 // ============================================================================
 // Command
@@ -14,7 +14,7 @@ export interface ProductItem {
   productId: string;
   variantId?: string;
   categoryId?: string;
-  price: number;
+  priceCents: number;
   quantity: number;
 }
 
@@ -32,25 +32,25 @@ export class ApplyProductDiscountCommand {
 export interface DiscountedItem {
   productId: string;
   variantId?: string;
-  originalPrice: number;
+  originalPriceCents: number;
   quantity: number;
   discounts: {
     discountId: string;
     discountName: string;
     discountType: string;
     discountValue: number;
-    discountAmount: number;
+    discountAmountCents: number;
   }[];
-  totalDiscount: number;
-  finalPrice: number;
+  totalDiscountCents: number;
+  finalPriceCents: number;
 }
 
 export interface ApplyProductDiscountResponse {
   success: boolean;
   items: DiscountedItem[];
-  totalOriginal: number;
-  totalDiscount: number;
-  totalFinal: number;
+  totalOriginalCents: number;
+  totalDiscountCents: number;
+  totalFinalCents: number;
   appliedDiscounts: string[];
   message?: string;
 }
@@ -60,14 +60,16 @@ export interface ApplyProductDiscountResponse {
 // ============================================================================
 
 export class ApplyProductDiscountUseCase {
+  constructor(private readonly discountRepo: ProductDiscountRepository) {}
+
   async execute(command: ApplyProductDiscountCommand): Promise<ApplyProductDiscountResponse> {
     if (!command.items || command.items.length === 0) {
       return {
         success: true,
         items: [],
-        totalOriginal: 0,
-        totalDiscount: 0,
-        totalFinal: 0,
+        totalOriginalCents: 0,
+        totalDiscountCents: 0,
+        totalFinalCents: 0,
         appliedDiscounts: [],
         message: 'No items to process',
       };
@@ -75,18 +77,18 @@ export class ApplyProductDiscountUseCase {
 
     const discountedItems: DiscountedItem[] = [];
     const appliedDiscountIds = new Set<string>();
-    let totalOriginal = 0;
-    let totalDiscount = 0;
+    let totalOriginalCents = 0;
+    let totalDiscountCents = 0;
 
     for (const item of command.items) {
-      const itemTotal = item.price * item.quantity;
-      totalOriginal += itemTotal;
+      const itemTotalCents = item.priceCents * item.quantity;
+      totalOriginalCents += itemTotalCents;
 
       // Find applicable discounts for this product
-      const discounts = await couponDiscountRepository.discounts.findDiscountsForProduct(item.productId, command.organizationId);
+      const discounts = await this.discountRepo.findDiscountsForProduct(item.productId, command.organizationId);
 
       const itemDiscounts: DiscountedItem['discounts'] = [];
-      let itemTotalDiscount = 0;
+      let itemTotalDiscountCents = 0;
 
       // Apply non-stackable discounts (highest priority first)
       const nonStackable = discounts.filter(d => !d.stackable);
@@ -95,63 +97,61 @@ export class ApplyProductDiscountUseCase {
       // Apply best non-stackable discount
       if (nonStackable.length > 0) {
         const bestDiscount = nonStackable[0]; // Already sorted by priority
-        const discountAmount = couponDiscountRepository.discounts.calculateDiscount(bestDiscount, item.price, item.quantity);
+        const discountAmountCents = this.discountRepo.calculateDiscount(bestDiscount, item.priceCents, item.quantity);
 
-        if (discountAmount > 0) {
+        if (discountAmountCents > 0) {
           itemDiscounts.push({
             discountId: bestDiscount.promotionProductDiscountId,
             discountName: bestDiscount.name,
             discountType: bestDiscount.discountType,
             discountValue: Number(bestDiscount.discountValue),
-            discountAmount,
+            discountAmountCents,
           });
-          itemTotalDiscount += discountAmount;
+          itemTotalDiscountCents += discountAmountCents;
           appliedDiscountIds.add(bestDiscount.promotionProductDiscountId);
         }
       }
 
       // Apply stackable discounts
       for (const discount of stackable) {
-        const discountAmount = couponDiscountRepository.discounts.calculateDiscount(discount, item.price, item.quantity);
+        const discountAmountCents = this.discountRepo.calculateDiscount(discount, item.priceCents, item.quantity);
 
-        if (discountAmount > 0) {
+        if (discountAmountCents > 0) {
           itemDiscounts.push({
             discountId: discount.promotionProductDiscountId,
             discountName: discount.name,
             discountType: discount.discountType,
             discountValue: Number(discount.discountValue),
-            discountAmount,
+            discountAmountCents,
           });
-          itemTotalDiscount += discountAmount;
+          itemTotalDiscountCents += discountAmountCents;
           appliedDiscountIds.add(discount.promotionProductDiscountId);
         }
       }
 
       // Ensure discount doesn't exceed item total
-      itemTotalDiscount = Math.min(itemTotalDiscount, itemTotal);
-      totalDiscount += itemTotalDiscount;
+      itemTotalDiscountCents = Math.min(itemTotalDiscountCents, itemTotalCents);
+      totalDiscountCents += itemTotalDiscountCents;
 
       discountedItems.push({
         productId: item.productId,
         variantId: item.variantId,
-        originalPrice: item.price,
+        originalPriceCents: item.priceCents,
         quantity: item.quantity,
         discounts: itemDiscounts,
-        totalDiscount: itemTotalDiscount,
-        finalPrice: item.price - itemTotalDiscount / item.quantity,
+        totalDiscountCents: itemTotalDiscountCents,
+        finalPriceCents: Math.round(item.priceCents - itemTotalDiscountCents / item.quantity),
       });
     }
 
     return {
       success: true,
       items: discountedItems,
-      totalOriginal,
-      totalDiscount,
-      totalFinal: totalOriginal - totalDiscount,
+      totalOriginalCents,
+      totalDiscountCents,
+      totalFinalCents: totalOriginalCents - totalDiscountCents,
       appliedDiscounts: Array.from(appliedDiscountIds),
-      message: totalDiscount > 0 ? `Applied ${appliedDiscountIds.size} discount(s)` : 'No discounts applicable',
+      message: totalDiscountCents > 0 ? `Applied ${appliedDiscountIds.size} discount(s)` : 'No discounts applicable',
     };
   }
 }
-
-const applyProductDiscountUseCase = new ApplyProductDiscountUseCase();

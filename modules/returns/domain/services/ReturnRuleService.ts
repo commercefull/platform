@@ -46,8 +46,8 @@ export class ReturnRuleService {
         isWithinWindow: daysSinceOrder <= 30, // Default 30-day window
         daysSinceOrder,
         restockingFeePercent: 0,
-        restockingFeeFlat: 0,
-        returnShippingCost: 0,
+        restockingFeeFlatCents: 0,
+        returnShippingCostCents: 0,
         customerPaysReturnShipping: true,
         autoApprove: false,
         requiresManualReview: true,
@@ -61,8 +61,8 @@ export class ReturnRuleService {
       isWithinWindow: applicableRule.isWithinWindow(context),
       daysSinceOrder,
       restockingFeePercent: applicableRule.restockingFeePercent,
-      restockingFeeFlat: applicableRule.restockingFeeFlat,
-      returnShippingCost: applicableRule.returnShippingCost,
+      restockingFeeFlatCents: applicableRule.restockingFeeFlatCents,
+      returnShippingCostCents: applicableRule.returnShippingCostCents,
       customerPaysReturnShipping: applicableRule.customerPaysReturnShipping,
       autoApprove: applicableRule.autoApprove,
       requiresManualReview: applicableRule.requiresManualReview,
@@ -72,11 +72,11 @@ export class ReturnRuleService {
   }
 
   /**
-   * Compute the restocking fee for a given refund amount.
+   * Compute the restocking fee for a given refund amountCents.
    */
-  computeRestockingFee(result: ReturnRuleEvaluationResult, refundAmount: number): number {
-    const percentFee = (refundAmount * result.restockingFeePercent) / 100;
-    return Math.min(percentFee + result.restockingFeeFlat, refundAmount);
+  computeRestockingFee(result: ReturnRuleEvaluationResult, refundAmountCents: number): number {
+    const percentFee = (refundAmountCents * result.restockingFeePercent) / 100;
+    return Math.min(percentFee + result.restockingFeeFlatCents, refundAmountCents);
   }
 }
 

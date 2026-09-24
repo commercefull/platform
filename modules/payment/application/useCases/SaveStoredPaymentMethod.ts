@@ -8,9 +8,7 @@
  */
 
 import { PaymentRepository, StoredPaymentMethod } from '../../domain/repositories/PaymentRepository';
-import { paymentDataRepository } from '../wired';
 
-const PaymentRepo = paymentDataRepository.payments;
 import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -55,7 +53,7 @@ export interface SaveStoredPaymentMethodResponse {
 // ============================================================================
 
 export class SaveStoredPaymentMethodUseCase {
-  constructor(private readonly repo: PaymentRepository = PaymentRepo) {}
+  constructor(private readonly repo: PaymentRepository) {}
 
   async execute(command: SaveStoredPaymentMethodCommand): Promise<SaveStoredPaymentMethodResponse> {
     const method = await this.repo.createStoredMethod({

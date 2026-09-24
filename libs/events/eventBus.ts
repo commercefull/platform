@@ -316,6 +316,7 @@ export type EventType =
   // Promotion & Coupon events
   | 'promotion.coupon_created'
   | 'promotion.coupon_applied'
+  | 'promotion.coupon_removed'
   | 'promotion.coupon_redeemed'
   | 'promotion.coupon_expired'
   | 'promotion.discount_applied'

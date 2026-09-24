@@ -11,6 +11,7 @@ import pricingRuleRepo from './pricingRuleRepo';
 import { RuleConditionRepo } from './pricingRuleConditionRepo';
 import { RuleAdjustmentRepo } from './pricingRuleAdjustmentRepo';
 import { CurrencyPriceRuleRepo } from './currencyPriceRuleRepo';
+import { PricingAdjustmentType, PricingCondition } from '../../domain/pricingRule';
 
 // Re-export types for backward compatibility
 export type {
@@ -51,7 +52,27 @@ class PricingRuleRepository {
     return pricingRuleRepo.findById(id);
   }
   async findActiveRules(productId?: string, categoryId?: string, customerId?: string, customerGroupIds?: string[]) {
-    return pricingRuleRepo.findActiveRules(productId, categoryId, customerId, customerGroupIds);
+    const rules = await pricingRuleRepo.findActiveRules(productId, categoryId, customerId, customerGroupIds);
+    return Promise.all(
+      rules.map(async rule => {
+        const ruleId = rule.pricingRuleId ?? rule.id;
+        const [conditions, adjustments] = await Promise.all([
+          ruleConditionRepo.findByPricingRule(ruleId),
+          ruleAdjustmentRepo.findByPricingRule(ruleId),
+        ]);
+        return {
+          ...rule,
+          id: ruleId,
+          conditions: conditions.map(
+            (c): PricingCondition => ({
+              type: c.type,
+              parameters: (c.parameters ?? {}) as Record<string, unknown>,
+            }),
+          ),
+          adjustments: adjustments.map(a => ({ type: a.type as PricingAdjustmentType, value: Number(a.value) })),
+        };
+      }),
+    );
   }
   async create(params: Parameters<typeof pricingRuleRepo.create>[0]) {
     return pricingRuleRepo.create(params);

@@ -1,10 +1,8 @@
 import { PaymentGatewayRepository, PaymentGatewayCreateParams } from '../../domain/repositories/PaymentGatewayRepository';
-import { paymentDataRepository } from '../wired';
 
-const paymentRepo = paymentDataRepository.gateways;
 
 export class ManagePaymentGatewaysUseCase {
-  constructor(private readonly gatewayRepo: PaymentGatewayRepository = paymentRepo) {}
+  constructor(private readonly gatewayRepo: PaymentGatewayRepository) {}
 
   async findAll(organizationId: string) {
     return this.gatewayRepo.findAllGateways(organizationId);

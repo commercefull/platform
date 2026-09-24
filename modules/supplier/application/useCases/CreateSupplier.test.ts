@@ -1,46 +1,44 @@
+import { createSupplierCreateRepository } from '../../tests/testUtils';
 import { CreateSupplierUseCase } from './CreateSupplier';
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
 describe('CreateSupplierUseCase', () => {
-  let useCase: CreateSupplierUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should create the supplier when the email is available', async () => {
+    const repository = createSupplierCreateRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      findByEmail: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({
-        supplierId: 'sup-1',
-        name: 'Acme Supplies',
-        status: 'pending',
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateSupplierUseCase(mockRepo as never);
-  });
-
-  it('should create a supplier successfully (happy path)', async () => {
-    const result = await useCase.execute({
+    const result = await new CreateSupplierUseCase(repository).execute({
       name: 'Acme Supplies',
       email: 'contact@acme.com',
       phone: '+1234567890',
       contactPerson: 'John Doe',
     });
 
-    expect(result.supplierId).toBe('sup-1');
+    expect(result.supplierId).toMatch(/^sup_/);
     expect(result.name).toBe('Acme Supplies');
     expect(result.status).toBe('pending');
   });
 
-  it('should throw SupplierValidationError when email already exists', async () => {
-    mockRepo.findByEmail.mockResolvedValue({ supplierId: 'existing-sup' });
+  it('should throw SupplierValidationError when the email is already taken', async () => {
+    const repository = createSupplierCreateRepository();
+    repository.findByEmail.mockResolvedValue({
+      supplierId: 'existing-sup',
+      name: 'Existing',
+      status: 'active',
+      createdAt: new Date('2026-01-01'),
+    });
 
-    await expect(useCase.execute({ name: 'New', email: 'contact@acme.com' })).rejects.toThrow(SupplierValidationError);
+    await expect(
+      new CreateSupplierUseCase(repository).execute({ name: 'New', email: 'contact@acme.com' }),
+    ).rejects.toThrow(SupplierValidationError);
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it('should set default payment terms and lead time', async () => {
-    await useCase.execute({ name: 'Test', email: 'test@test.com' });
+  it('should apply default terms when payment terms and lead time are not provided', async () => {
+    const repository = createSupplierCreateRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
+    await new CreateSupplierUseCase(repository).execute({ name: 'Test', email: 'test@test.com' });
+
+    expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         paymentTermsDays: 30,
         leadTimeDays: 7,
@@ -51,15 +49,19 @@ describe('CreateSupplierUseCase', () => {
     );
   });
 
-  it('should pass custom payment terms and lead time', async () => {
-    await useCase.execute({ name: 'Test', email: 'test@test.com', paymentTermsDays: 60, leadTimeDays: 14, dropshipEnabled: true });
+  it('should pass custom terms through when payment terms and lead time are provided', async () => {
+    const repository = createSupplierCreateRepository();
 
-    expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        paymentTermsDays: 60,
-        leadTimeDays: 14,
-        dropshipEnabled: true,
-      }),
+    await new CreateSupplierUseCase(repository).execute({
+      name: 'Test',
+      email: 'test@test.com',
+      paymentTermsDays: 60,
+      leadTimeDays: 14,
+      dropshipEnabled: true,
+    });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ paymentTermsDays: 60, leadTimeDays: 14, dropshipEnabled: true }),
     );
   });
 });

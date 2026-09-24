@@ -5,14 +5,14 @@ const couponRepo = couponDiscountRepository.coupons;
 
 interface ValidateCouponBody {
   code: string;
-  orderTotal: string;
+  orderTotalCents: string;
   customerId?: string;
   organizationId?: string;
 }
 
 interface CalculateDiscountBody {
   code: string;
-  orderTotal: string;
+  orderTotalCents: string;
   items?: unknown[];
   organizationId?: string;
 }
@@ -186,10 +186,10 @@ export const validateCoupon = async (
   req: HttpRequest<Record<string, string>, unknown, ValidateCouponBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { code, orderTotal, customerId, organizationId } = req.body;
+  const { code, orderTotalCents, customerId, organizationId } = req.body;
 
   // Validation
-  if (!code || orderTotal === undefined) {
+  if (!code || orderTotalCents === undefined) {
     res.status(400).json({
       success: false,
       message: 'Coupon code and order total are required',
@@ -198,7 +198,7 @@ export const validateCoupon = async (
   }
 
   // Validate the coupon
-  const result = await couponRepo.validate(code, parseFloat(orderTotal), customerId, organizationId);
+  const result = await couponRepo.validate(code, parseFloat(orderTotalCents), customerId, organizationId);
 
   if (!result.valid) {
     res.status(400).json({
@@ -250,10 +250,10 @@ export const calculateCouponDiscount = async (
   req: HttpRequest<Record<string, string>, unknown, CalculateDiscountBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { code, orderTotal, items: _items, organizationId } = req.body;
+  const { code, orderTotalCents, items: _items, organizationId } = req.body;
 
   // Validation
-  if (!code || orderTotal === undefined) {
+  if (!code || orderTotalCents === undefined) {
     res.status(400).json({
       success: false,
       message: 'Coupon code and order total are required',
@@ -272,15 +272,15 @@ export const calculateCouponDiscount = async (
   }
 
   // Calculate discount
-  const discountAmount = couponRepo.calculateDiscount(coupon, parseFloat(orderTotal));
+  const discountAmountCents = couponRepo.calculateDiscount(coupon, parseFloat(orderTotalCents));
 
   res.status(200).json({
     success: true,
     data: {
       coupon,
-      orderTotal: parseFloat(orderTotal),
-      discountAmount,
-      finalTotal: parseFloat(orderTotal) - discountAmount,
+      orderTotalCents: parseFloat(orderTotalCents),
+      discountAmountCents,
+      finalTotalCents: parseFloat(orderTotalCents) - discountAmountCents,
     },
   });
 };

@@ -37,7 +37,7 @@
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
                     <%= sub.status %>
                   </span>
-                  <span class="text-lg font-bold text-gray-900">$<%= ((sub.price || 0) / 100).toFixed(2) %>/<%= sub.billingInterval || 'mo' %></span>
+                  <span class="text-lg font-bold text-gray-900">$<%= ((sub.priceCents || 0) / 100).toFixed(2) %>/<%= sub.billingInterval || 'mo' %></span>
                 </div>
               </div>
             </div>

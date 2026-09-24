@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Check Gift Card Balance Use Case
  * Retrieves gift card balance and status
  */
 
-import { giftCardRepo } from '../wired';
+import type { GiftCardRepository } from '../../domain/repositories/GiftCardRepository';
 
 // ============================================================================
 // Query
@@ -21,7 +21,7 @@ export class CheckGiftCardBalanceQuery {
 export interface CheckGiftCardBalanceResponse {
   success: boolean;
   code?: string;
-  currentBalance?: number;
+  currentBalanceCents?: number;
   currency?: string;
   status?: string;
   expiresAt?: Date;
@@ -35,6 +35,8 @@ export interface CheckGiftCardBalanceResponse {
 // ============================================================================
 
 export class CheckGiftCardBalanceUseCase {
+  constructor(private readonly giftCardRepo: Pick<GiftCardRepository, 'getGiftCardByCode'>) {}
+
   async execute(query: CheckGiftCardBalanceQuery): Promise<CheckGiftCardBalanceResponse> {
     // Validate input
     if (!query.code?.trim()) {
@@ -42,7 +44,7 @@ export class CheckGiftCardBalanceUseCase {
     }
 
     // Find gift card by code
-    const giftCard = await giftCardRepo.getGiftCardByCode(query.code);
+    const giftCard = await this.giftCardRepo.getGiftCardByCode(query.code);
 
     if (!giftCard) {
       return { success: false, message: 'Gift card not found', errors: ['gift_card_not_found'] };
@@ -54,7 +56,7 @@ export class CheckGiftCardBalanceUseCase {
     return {
       success: true,
       code: giftCard.code,
-      currentBalance: giftCard.currentBalance,
+      currentBalanceCents: giftCard.currentBalanceCents,
       currency: giftCard.currency,
       status: isExpired ? 'expired' : giftCard.status,
       expiresAt: giftCard.expiresAt,
@@ -64,5 +66,3 @@ export class CheckGiftCardBalanceUseCase {
     };
   }
 }
-
-const checkGiftCardBalanceUseCase = new CheckGiftCardBalanceUseCase();

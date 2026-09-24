@@ -107,6 +107,7 @@ yarn job:new:organization   # Create a new organization
 - **Root-cause, not workarounds** — prefer minimal upstream fixes over downstream patches.
 - **One step in progress** — use a concise plan and mark steps as completed when done.
 - **Tests first for real changes** — design or update tests before major implementation. Never weaken or delete tests without explicit direction.
+- **Unit tests follow the basket pattern** — co-located `*.test.ts` files, shared `modules/<module>/tests/testUtils.ts` (boundary mocks + domain factories + typed port mocks), real domain entities, `it('should … when …')` naming. Reference: `modules/basket/`; see [guidelines/testing.md](./docs/guidelines/testing.md).
 - **Direct use-case imports in `web/`** — portals call module use cases directly; no HTTP overhead.
 - **No `require()` in TypeScript files** — ES `import` only, always at the top of the file.
 - **camelCase everywhere in the database** — tables, columns, JSON fields, and FK columns all use camelCase with double-quoted PostgreSQL identifiers.

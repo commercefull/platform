@@ -20,12 +20,12 @@ describe('ShippingRateCalculator', () => {
     shippingZoneId: 'zone1',
     shippingMethodId: 'method1',
     rateType: 'weightBased',
-    baseRate: '10',
-    perItemRate: '0.5',
-    freeThreshold: null,
+    baseRateCents: '10',
+    perItemRateCents: '0.5',
+    freeThresholdCents: null,
     rateMatrix: null,
-    minRate: null,
-    maxRate: null,
+    minRateCents: null,
+    maxRateCents: null,
     currency: 'USD',
     taxable: false,
     isActive: true,
@@ -40,34 +40,34 @@ describe('ShippingRateCalculator', () => {
     jest.mocked(calculateRate).mockReturnValue(10);
   });
 
-  it('returns base amount with no surcharges', async () => {
+  it('returns base amountCents with no surcharges', async () => {
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
     });
 
-    expect(result.baseAmount).toBe(10);
-    expect(result.surchargeAmount).toBe(0);
-    expect(result.totalAmount).toBe(10);
+    expect(result.baseAmountCents).toBe(10);
+    expect(result.surchargeAmountCents).toBe(0);
+    expect(result.totalAmountCents).toBe(10);
     expect(result.surchargeBreakdown).toEqual([]);
     expect(result.isFreeShipping).toBe(false);
   });
 
-  it('returns free shipping when base amount is zero', async () => {
+  it('returns free shipping when base amountCents is zero', async () => {
     jest.mocked(calculateRate).mockReturnValue(0);
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 500,
+      orderSubtotalCents: 500,
       itemCount: 2,
       totalWeight: 5,
     });
 
     expect(result.isFreeShipping).toBe(true);
-    expect(result.totalAmount).toBe(0);
-    expect(result.surchargeAmount).toBe(0);
+    expect(result.totalAmountCents).toBe(0);
+    expect(result.surchargeAmountCents).toBe(0);
   });
 
   it('adds a flat fuel surcharge', async () => {
@@ -87,15 +87,15 @@ describe('ShippingRateCalculator', () => {
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
     });
 
-    expect(result.baseAmount).toBe(10);
-    expect(result.surchargeAmount).toBe(5);
-    expect(result.totalAmount).toBe(15);
-    expect(result.surchargeBreakdown).toEqual([{ type: 'fuel', amount: 5 }]);
+    expect(result.baseAmountCents).toBe(10);
+    expect(result.surchargeAmountCents).toBe(5);
+    expect(result.totalAmountCents).toBe(15);
+    expect(result.surchargeBreakdown).toEqual([{ type: 'fuel', amountCents: 5 }]);
   });
 
   it('adds a percentage fuel surcharge', async () => {
@@ -115,14 +115,14 @@ describe('ShippingRateCalculator', () => {
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
     });
 
-    // 10% of baseRate 10 = 1
-    expect(result.surchargeAmount).toBe(1);
-    expect(result.totalAmount).toBe(11);
+    // 10% of baseRateCents 10 = 1
+    expect(result.surchargeAmountCents).toBe(1);
+    expect(result.totalAmountCents).toBe(11);
   });
 
   it('adds multiple surcharges', async () => {
@@ -154,15 +154,15 @@ describe('ShippingRateCalculator', () => {
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
       isResidential: true,
     });
 
     // fuel: 10% of 10 = 1, residential: 3 (flat) → total surcharge = 4
-    expect(result.surchargeAmount).toBe(4);
-    expect(result.totalAmount).toBe(14);
+    expect(result.surchargeAmountCents).toBe(4);
+    expect(result.totalAmountCents).toBe(14);
     expect(result.surchargeBreakdown).toHaveLength(2);
   });
 
@@ -183,14 +183,14 @@ describe('ShippingRateCalculator', () => {
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
       isRemoteArea: false,
     });
 
-    expect(result.surchargeAmount).toBe(0);
-    expect(result.totalAmount).toBe(10);
+    expect(result.surchargeAmountCents).toBe(0);
+    expect(result.totalAmountCents).toBe(10);
     expect(result.surchargeBreakdown).toEqual([]);
   });
 
@@ -211,12 +211,12 @@ describe('ShippingRateCalculator', () => {
 
     const result = await calculator.calculate({
       rate: mockRate,
-      orderSubtotal: 100,
+      orderSubtotalCents: 100,
       itemCount: 2,
       totalWeight: 5,
     });
 
-    expect(result.surchargeAmount).toBe(0);
-    expect(result.totalAmount).toBe(10);
+    expect(result.surchargeAmountCents).toBe(0);
+    expect(result.totalAmountCents).toBe(10);
   });
 });

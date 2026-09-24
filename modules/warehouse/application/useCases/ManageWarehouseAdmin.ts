@@ -1,12 +1,17 @@
-import { warehouseDataRepository } from '../wired';
+import type { WarehouseRecord, WarehouseStatistics } from '../../domain/repositories/WarehouseRepository';
 
-const warehouseRepo = warehouseDataRepository.warehouses;
+interface WarehouseAdminRepositoryPort {
+  findAll(activeOnly?: boolean): Promise<WarehouseRecord[]>;
+  getStatistics(): Promise<WarehouseStatistics>;
+}
 
 export class ManageWarehouseAdminUseCase {
+  constructor(private readonly warehouseRepo: WarehouseAdminRepositoryPort) {}
+
   async findAll(activeOnly?: boolean) {
-    return warehouseRepo.findAll(activeOnly);
+    return this.warehouseRepo.findAll(activeOnly);
   }
   async getStatistics() {
-    return warehouseRepo.getStatistics();
+    return this.warehouseRepo.getStatistics();
   }
 }

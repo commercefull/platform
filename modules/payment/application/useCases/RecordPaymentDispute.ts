@@ -10,10 +10,7 @@
 import { PaymentBillingRepository, PaymentDispute } from '../../domain/repositories/PaymentBillingRepository';
 import { PaymentGatewayRepository } from '../../domain/repositories/PaymentGatewayRepository';
 import { FailedToCreatePaymentDisputeError } from '../../domain/errors/PaymentErrors';
-import { paymentBillingDataRepository, paymentDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
-const paymentRepo = paymentDataRepository.gateways;
 
 // ============================================================================
 // Command
@@ -23,7 +20,7 @@ export class RecordPaymentDisputeCommand {
   constructor(
     public readonly paymentId: string,
     public readonly organizationId: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly currency: string,
     public readonly status: string = 'pending',
     public readonly externalDisputeId?: string,
@@ -44,7 +41,7 @@ export interface RecordPaymentDisputeResponse {
   externalDisputeId?: string;
   status: string;
   reason?: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   dueBy?: string;
   createdAt: string;
@@ -56,8 +53,8 @@ export interface RecordPaymentDisputeResponse {
 
 export class RecordPaymentDisputeUseCase {
   constructor(
-    private readonly billingRepo: PaymentBillingRepository = paymentBillingRepo,
-    private readonly txRepo: PaymentGatewayRepository = paymentRepo,
+    private readonly billingRepo: PaymentBillingRepository,
+    private readonly txRepo: PaymentGatewayRepository,
   ) {}
 
   async execute(command: RecordPaymentDisputeCommand): Promise<RecordPaymentDisputeResponse> {
@@ -67,7 +64,7 @@ export class RecordPaymentDisputeUseCase {
       externalDisputeId: command.externalDisputeId,
       status: command.status,
       reason: command.reason,
-      amount: command.amount,
+      amountCents: command.amountCents,
       currency: command.currency,
       evidence: command.evidence,
       dueBy: command.dueBy,
@@ -95,7 +92,7 @@ export class RecordPaymentDisputeUseCase {
       externalDisputeId: d.externalDisputeId,
       status: d.status,
       reason: d.reason,
-      amount: d.amount,
+      amountCents: d.amountCents,
       currency: d.currency,
       dueBy: d.dueBy?.toISOString(),
       createdAt: d.createdAt.toISOString(),

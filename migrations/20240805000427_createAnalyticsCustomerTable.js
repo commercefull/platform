@@ -5,8 +5,8 @@ exports.up = function (knex) {
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
     t.integer('totalOrders').notNullable().defaultTo(0);
-    t.decimal('totalSpent', 15, 2).notNullable().defaultTo(0);
-    t.decimal('averageOrderValue', 15, 2);
+    t.bigInteger('totalSpentCents').notNullable().defaultTo(0);
+    t.bigInteger('averageOrderValueCents');
     t.timestamp('firstOrderDate');
     t.timestamp('lastOrderDate');
     t.timestamp('lastVisitDate');
@@ -17,7 +17,7 @@ exports.up = function (knex) {
     t.integer('wishlistItemCount').notNullable().defaultTo(0);
     t.integer('reviewCount').notNullable().defaultTo(0);
     t.decimal('averageReviewRating', 3, 2);
-    t.decimal('lifetimeValue', 15, 2);
+    t.bigInteger('lifetimeValueCents');
     t.decimal('riskScore', 5, 2);
     t.decimal('engagementScore', 5, 2);
     t.decimal('churnRisk', 5, 2);
@@ -30,10 +30,10 @@ exports.up = function (knex) {
 
     t.unique('customerId');
     t.index('totalOrders');
-    t.index('totalSpent');
-    t.index('averageOrderValue');
+    t.index('totalSpentCents');
+    t.index('averageOrderValueCents');
     t.index('lastOrderDate');
-    t.index('lifetimeValue');
+    t.index('lifetimeValueCents');
     t.index('engagementScore');
     t.index('churnRisk');
   });

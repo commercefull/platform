@@ -22,8 +22,10 @@ export interface OrderFilters {
   fulfillmentStatus?: FulfillmentStatus;
   startDate?: Date;
   endDate?: Date;
-  minAmount?: number;
-  maxAmount?: number;
+  /** Minimum order total in integer cents. */
+  minAmountCents?: number;
+  /** Maximum order total in integer cents. */
+  maxAmountCents?: number;
   tags?: string[];
   search?: string;
 }
@@ -175,8 +177,8 @@ export interface OrderRepository {
    */
   getOrderStats(filters?: OrderFilters): Promise<{
     totalOrders: number;
-    totalRevenue: number;
-    averageOrderValue: number;
+    totalRevenueCents: number;
+    averageOrderValueCents: number;
     ordersByStatus: Record<OrderStatus, number>;
   }>;
 }

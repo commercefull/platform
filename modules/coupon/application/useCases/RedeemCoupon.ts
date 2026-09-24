@@ -16,7 +16,7 @@ export interface RedeemCouponRepositoryPort {
     couponId: string;
     orderId: string;
     customerId?: string;
-    discountAmount: number;
+    discountAmountCents: number;
     redeemedAt: Date;
   }): Promise<unknown>;
   incrementUsageCount(couponId: string): Promise<unknown>;
@@ -26,7 +26,7 @@ export interface RedeemCouponInput {
   couponCode: string;
   orderId: string;
   customerId?: string;
-  discountAmount: number;
+  discountAmountCents: number;
 }
 
 export interface RedeemCouponOutput {
@@ -54,7 +54,7 @@ export class RedeemCouponUseCase {
       couponId: coupon.couponId,
       orderId: input.orderId,
       customerId: input.customerId,
-      discountAmount: input.discountAmount,
+      discountAmountCents: input.discountAmountCents,
       redeemedAt: now,
     });
 
@@ -66,7 +66,7 @@ export class RedeemCouponUseCase {
       couponCode: input.couponCode,
       orderId: input.orderId,
       customerId: input.customerId,
-      discountAmount: input.discountAmount,
+      discountAmountCents: input.discountAmountCents,
     });
 
     return {

@@ -8,19 +8,29 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 const OrderRepo = orderDataRepository.commands;
 const orderQueryRepo = orderDataRepository.queries;
 const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
-import { GetOrderCommand, GetOrderUseCase } from '../../application/useCases/GetOrder';
-import { ListOrdersCommand, ListOrdersUseCase } from '../../application/useCases/ListOrders';
+import { GetOrderCommand } from '../../application/useCases/GetOrder';
+import { ListOrdersCommand } from '../../application/useCases/ListOrders';
 import { GetStoreSalesSummaryUseCase } from '../../application/useCases/GetStoreSalesSummary';
-import { UpdateOrderStatusCommand, UpdateOrderStatusUseCase } from '../../application/useCases/UpdateOrderStatus';
-import { CancelOrderCommand, CancelOrderUseCase } from '../../application/useCases/CancelOrder';
-import { ProcessRefundCommand, ProcessRefundUseCase } from '../../application/useCases/ProcessRefund';
+import { UpdateOrderStatusCommand } from '../../application/useCases/UpdateOrderStatus';
+import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
+import { ProcessRefundCommand } from '../../application/useCases/ProcessRefund';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 import { OrderFilters } from '../../domain/repositories/OrderRepository';
-import { AddOrderNoteCommand, AddOrderNoteUseCase } from '../../application/useCases/AddOrderNote';
-import { CreateOrderRefundCommand, CreateOrderRefundUseCase } from '../../application/useCases/CreateOrderRefund';
-import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
+import { AddOrderNoteCommand } from '../../application/useCases/AddOrderNote';
+import { CreateOrderRefundCommand } from '../../application/useCases/CreateOrderRefund';
+import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
+import {
+  listOrdersUseCase,
+  getOrderUseCase,
+  updateOrderStatusUseCase,
+  cancelOrderUseCase,
+  processRefundUseCase,
+  addOrderNoteUseCase,
+  createOrderRefundUseCase,
+  trackFulfillmentPackageUseCase,
+} from '../../application/useCases/wired';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { Money } from '../../domain/valueObjects/Money';
 import { generateUUID, isUuid } from '../../../../libs/uuid';
@@ -80,8 +90,8 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
   if (fulfillmentStatus) filters.fulfillmentStatus = fulfillmentStatus as FulfillmentStatus;
   if (startDate) filters.startDate = new Date(startDate as string);
   if (endDate) filters.endDate = new Date(endDate as string);
-  if (minAmount) filters.minAmount = parseFloat(minAmount as string);
-  if (maxAmount) filters.maxAmount = parseFloat(maxAmount as string);
+  if (minAmount) filters.minAmountCents = Math.round(parseFloat(minAmount as string) * 100);
+  if (maxAmount) filters.maxAmountCents = Math.round(parseFloat(maxAmount as string) * 100);
   if (search) filters.search = search as string;
 
   const command = new ListOrdersCommand(
@@ -92,7 +102,7 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListOrdersUseCase(OrderRepo);
+  const useCase = listOrdersUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -110,7 +120,7 @@ export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<voi
   }
 
   const command = new GetOrderCommand(orderId);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {
@@ -137,7 +147,7 @@ export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   const command = new UpdateOrderStatusCommand(orderId, status as OrderStatus, reason);
-  const useCase = new UpdateOrderStatusUseCase(OrderRepo);
+  const useCase = updateOrderStatusUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -158,7 +168,7 @@ export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   }
 
   const command = new CancelOrderCommand(orderId, reason);
-  const useCase = new CancelOrderUseCase(OrderRepo);
+  const useCase = cancelOrderUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -183,7 +193,7 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   const command = new ProcessRefundCommand(orderId, amount, reason, transactionId);
-  const useCase = new ProcessRefundUseCase(OrderRepo);
+  const useCase = processRefundUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
@@ -260,7 +270,7 @@ export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise
   const { content, isCustomerVisible } = body;
 
   const command = new AddOrderNoteCommand(orderId, content, isCustomerVisible ?? false, req.user?.userId);
-  const useCase = new AddOrderNoteUseCase();
+  const useCase = addOrderNoteUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -302,8 +312,15 @@ export const createOrderRefund = async (req: HttpRequest, res: HttpResponse): Pr
   const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
-  const command = new CreateOrderRefundCommand(orderPaymentId, parseFloat(amount), reason, notes, transactionId, req.user?.userId);
-  const useCase = new CreateOrderRefundUseCase();
+  const command = new CreateOrderRefundCommand(
+    orderPaymentId,
+    Math.round(parseFloat(amount) * 100),
+    reason,
+    notes,
+    transactionId,
+    req.user?.userId,
+  );
+  const useCase = createOrderRefundUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -366,7 +383,7 @@ export const createFulfillmentPackage = async (req: HttpRequest, res: HttpRespon
     packageType,
     customsInfo,
   );
-  const useCase = new TrackFulfillmentPackageUseCase();
+  const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -399,7 +416,7 @@ export const trackFulfillmentPackage = async (req: HttpRequest, res: HttpRespons
     undefined,
     packageId,
   );
-  const useCase = new TrackFulfillmentPackageUseCase();
+  const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -413,7 +430,7 @@ export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Pro
   const { orderNumber } = req.params;
 
   const command = new GetOrderCommand(undefined, orderNumber);
-  const useCase = new GetOrderUseCase(OrderRepo);
+  const useCase = getOrderUseCase;
   const order = await useCase.execute(command);
 
   if (!order) {
@@ -458,11 +475,11 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     sku?: string;
     name: string;
     quantity: number;
-    unitPrice: number;
-    discountedUnitPrice?: number;
-    lineTotal?: number;
-    discountTotal?: number;
-    taxTotal?: number;
+    unitPriceCents: number;
+    discountedUnitPriceCents?: number;
+    lineTotalCents?: number;
+    discountTotalCents?: number;
+    taxTotalCents?: number;
     taxRate?: number;
     taxExempt?: boolean;
     fulfillmentStatus?: string;
@@ -471,9 +488,9 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     description?: string;
     variantId?: string;
   };
-  const { orderId, productId, name, quantity, unitPrice } = body;
+  const { orderId, productId, name, quantity, unitPriceCents } = body;
 
-  if (!orderId || !productId || !name || !quantity || !unitPrice) {
+  if (!orderId || !productId || !name || !quantity || unitPriceCents === undefined) {
     respondError(req, res, 'Missing required fields', 400);
     return;
   }
@@ -488,11 +505,11 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     name: body.name,
     sku: body.sku || '',
     quantity: body.quantity,
-    unitPrice: Money.create(body.unitPrice, currency),
-    discountedUnitPrice: Money.create(body.discountedUnitPrice ?? body.unitPrice, currency),
-    lineTotal: Money.create(body.lineTotal ?? body.unitPrice * body.quantity, currency),
-    discountTotal: Money.create(body.discountTotal ?? 0, currency),
-    taxTotal: Money.create(body.taxTotal ?? 0, currency),
+    unitPrice: Money.fromCents(body.unitPriceCents, currency),
+    discountedUnitPrice: Money.fromCents(body.discountedUnitPriceCents ?? body.unitPriceCents, currency),
+    lineTotal: Money.fromCents(body.lineTotalCents ?? body.unitPriceCents * body.quantity, currency),
+    discountTotal: Money.fromCents(body.discountTotalCents ?? 0, currency),
+    taxTotal: Money.fromCents(body.taxTotalCents ?? 0, currency),
     taxRate: body.taxRate ?? 0,
     taxExempt: body.taxExempt ?? false,
     fulfillmentStatus: (body.fulfillmentStatus as FulfillmentStatus) ?? FulfillmentStatus.UNFULFILLED,
@@ -509,7 +526,7 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const updateOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
-  const body = req.body as { quantity?: number; unitPrice?: number };
+  const body = req.body as { quantity?: number; unitPriceCents?: number };
 
   // Find the item across all orders (we need orderId to look it up)
   // Since we don't have orderId in the route, we search by orderItemId

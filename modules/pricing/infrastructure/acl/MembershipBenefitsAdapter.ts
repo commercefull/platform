@@ -9,11 +9,13 @@
  */
 
 import { MembershipBenefitsPort, MembershipDiscountBenefit } from '../../application/ports/MembershipBenefitsPort';
-import { MembershipRepo } from '../../../membership/infrastructure/repositories/membershipRepo';
+import type { MembershipRepo } from '../../../membership/infrastructure/repositories/membershipRepo';
 
 export class MembershipBenefitsAdapter implements MembershipBenefitsPort {
+  constructor(private readonly membershipRepo: Pick<MembershipRepo, 'getUserMembershipBenefits'>) {}
+
   async getDiscountBenefits(customerId: string): Promise<MembershipDiscountBenefit[]> {
-    const benefits = await new MembershipRepo().getUserMembershipBenefits(customerId);
+    const benefits = await this.membershipRepo.getUserMembershipBenefits(customerId);
     return (benefits || [])
       .filter(b => b.benefitType === 'discount' && b.discountPercentage !== undefined)
       .map(b => ({

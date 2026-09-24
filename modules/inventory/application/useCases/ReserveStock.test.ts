@@ -2,26 +2,17 @@
  * Unit Tests for ReserveStock Use Case
  */
 
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, emitMock } from '../../tests/testUtils';
 import { ReserveStockUseCase } from './ReserveStock';
-import { eventBus } from '../../../../libs/events/eventBus';
 
 describe('ReserveStockUseCase', () => {
   let useCase: ReserveStockUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ReserveStockUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findByProduct: jest.fn(),
-      createReservation: jest.fn(),
-      updateReservedQuantity: jest.fn(),
-    };
-    useCase = new ReserveStockUseCase(mockRepo as never as ConstructorParameters<typeof ReserveStockUseCase>[0]);
-    jest.mocked(eventBus.emit).mockClear();
+    mockRepo = lazyMock<ConstructorParameters<typeof ReserveStockUseCase>[0]>();
+    useCase = new ReserveStockUseCase(mockRepo);
+    emitMock.mockClear();
   });
 
   it('should reserve stock when inventory is available', async () => {
@@ -42,7 +33,7 @@ describe('ReserveStockUseCase', () => {
     expect(result.results[0].isFullyReserved).toBe(true);
     expect(mockRepo.createReservation).toHaveBeenCalledTimes(1);
     expect(mockRepo.updateReservedQuantity).toHaveBeenCalledWith('inv-1', 30);
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'inventory.reserved',
       expect.objectContaining({
         orderId: 'ord-1',

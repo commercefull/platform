@@ -13,8 +13,8 @@ export interface TaxRepository {
   delete(taxRateId: string): Promise<void>;
 
   // Tax calculation
-  calculateTax(params: { subtotal: number; shippingCost: number; country: string; state?: string; postalCode?: string }): Promise<{
-    taxAmount: number;
+  calculateTax(params: { subtotalCents: number; shippingCostCents: number; country: string; state?: string; postalCode?: string }): Promise<{
+    taxAmountCents: number;
     taxBreakdown: Array<{ name: string; rate: number; amount: number }>;
   }>;
 }

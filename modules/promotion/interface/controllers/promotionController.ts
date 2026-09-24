@@ -322,7 +322,7 @@ const _validatePromotionForCart = async (
   }
 
   // Validate the promotion
-  const isValid = await promotionRepo.isValidForOrder(promotionId, parseFloat(cartTotal), customerId);
+  const isValid = await promotionRepo.isValidForOrder(promotionId, Math.round(parseFloat(cartTotal) * 100), customerId);
 
   if (isValid) {
     res.status(200).json({

@@ -1,49 +1,43 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { ReactivateCustomerUseCase, ReactivateCustomerCommand } from './ReactivateCustomer';
 import { CustomerNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { createCustomerRepository, createCustomerRow, emitMock } from '../../tests/testUtils';
 
 describe('ReactivateCustomerUseCase', () => {
-  let useCase: ReactivateCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new ReactivateCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({ customerId: 'c1', isActive: false, updatedAt: new Date() }),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ReactivateCustomerUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow({ isActive: false }));
+    customerRepository.save.mockImplementation(async c => c);
   });
 
-  it('should reactivate customer (happy path)', async () => {
-    const result = await useCase.execute(new ReactivateCustomerCommand('c1'));
+  it('should reactivate the customer and emit customer.reactivated', async () => {
+    const result = await useCase.execute(new ReactivateCustomerCommand('cust-1'));
 
     expect(result.success).toBe(true);
-    expect(result.customerId).toBe('c1');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.reactivated', expect.objectContaining({ customerId: 'c1' }));
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isActive: true }));
+    expect(emitMock).toHaveBeenCalledWith('customer.reactivated', { customerId: 'cust-1' });
   });
 
   it('should throw CustomerValidationError when customerId is empty', async () => {
     await expect(useCase.execute(new ReactivateCustomerCommand(''))).rejects.toThrow(CustomerValidationError);
+    expect(customerRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerNotFoundError when customer does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CustomerNotFoundError when the customer does not exist', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new ReactivateCustomerCommand('missing'))).rejects.toThrow(CustomerNotFoundError);
+    expect(customerRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerValidationError when already active', async () => {
-    mockRepo.findById.mockResolvedValue({ customerId: 'c1', isActive: true, updatedAt: new Date() });
+  it('should throw CustomerValidationError when the customer is already active', async () => {
+    customerRepository.findById.mockResolvedValue(createCustomerRow({ isActive: true }));
 
-    await expect(useCase.execute(new ReactivateCustomerCommand('c1'))).rejects.toThrow(CustomerValidationError);
+    await expect(useCase.execute(new ReactivateCustomerCommand('cust-1'))).rejects.toThrow(CustomerValidationError);
+    expect(customerRepository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

@@ -5,8 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { shippingLabelRepo } from '../wired';
-import type { ShippingLabel } from '../../domain/repositories/ShippingLabelRepository';
+import type { ShippingLabel, ShippingLabelPort } from '../../domain/repositories/ShippingLabelRepository';
 
 export interface VoidLabelInput {
   shippingLabelId: string;
@@ -14,8 +13,10 @@ export interface VoidLabelInput {
 }
 
 export class VoidShippingLabelUseCase {
+  constructor(private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'voidLabel'>) {}
+
   async execute(input: VoidLabelInput): Promise<{ voided: boolean; label: ShippingLabel | null }> {
-    const label = await shippingLabelRepo.voidLabel(input.shippingLabelId, input.reason);
+    const label = await this.shippingLabelRepo.voidLabel(input.shippingLabelId, input.reason);
 
     if (!label) {
       return { voided: false, label: null };
@@ -31,4 +32,3 @@ export class VoidShippingLabelUseCase {
   }
 }
 
-export const voidShippingLabelUseCase = new VoidShippingLabelUseCase();

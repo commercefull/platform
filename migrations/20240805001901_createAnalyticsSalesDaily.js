@@ -9,18 +9,18 @@ exports.up = function (knex) {
       table.uuid('organizationId').references('organizationId').inTable('organization');
       table.date('date').notNullable();
       table.string('channel').defaultTo('all'); // web, mobile, api, pos, all
-      table.string('currency', 3).defaultTo('USD');
+      table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
 
       // Order metrics
       table.integer('orderCount').defaultTo(0);
       table.integer('itemsSold').defaultTo(0);
-      table.decimal('grossRevenue', 15, 2).defaultTo(0);
-      table.decimal('discountTotal', 15, 2).defaultTo(0);
-      table.decimal('refundTotal', 15, 2).defaultTo(0);
-      table.decimal('netRevenue', 15, 2).defaultTo(0);
-      table.decimal('taxTotal', 15, 2).defaultTo(0);
-      table.decimal('shippingRevenue', 15, 2).defaultTo(0);
-      table.decimal('averageOrderValue', 15, 2).defaultTo(0);
+      table.bigInteger('grossRevenueCents').defaultTo(0);
+      table.bigInteger('discountTotalCents').defaultTo(0);
+      table.bigInteger('refundTotalCents').defaultTo(0);
+      table.bigInteger('netRevenueCents').defaultTo(0);
+      table.bigInteger('taxTotalCents').defaultTo(0);
+      table.bigInteger('shippingRevenueCents').defaultTo(0);
+      table.bigInteger('averageOrderValueCents').defaultTo(0);
 
       // Customer metrics
       table.integer('newCustomers').defaultTo(0);
@@ -43,7 +43,7 @@ exports.up = function (knex) {
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-      table.unique(['organizationId', 'date', 'channel', 'currency']);
+      table.unique(['organizationId', 'date', 'channel', 'currencyCode']);
     })
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("date")'))
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("organizationId", "date")'));

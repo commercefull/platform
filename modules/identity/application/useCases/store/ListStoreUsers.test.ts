@@ -1,17 +1,17 @@
+import { lazyMock, createUserStoreAssignment } from '../../../tests/testUtils';
 import { ListStoreUsersUseCase } from './ListStoreUsers';
 
 describe('ListStoreUsersUseCase', () => {
   let useCase: ListStoreUsersUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ListStoreUsersUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findByStoreId: jest.fn().mockResolvedValue([
-        { userStoreId: 'us1', userId: 'u1', storeId: 's1', role: 'admin', isPrimary: true, isActive: true, permissions: ['read', 'write'] },
-        { userStoreId: 'us2', userId: 'u2', storeId: 's1', role: 'staff', isPrimary: false, isActive: true, permissions: ['read'] },
-      ]),
-    };
-    useCase = new ListStoreUsersUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ListStoreUsersUseCase>[0]>();
+    mockRepo.findByStoreId.mockResolvedValue([
+      createUserStoreAssignment({ userId: 'u1', storeId: 's1', isPrimary: true }),
+      createUserStoreAssignment({ userId: 'u2', storeId: 's1', role: 'manager' }),
+    ]);
+    useCase = new ListStoreUsersUseCase(mockRepo);
   });
 
   it('should list store users (happy path)', async () => {

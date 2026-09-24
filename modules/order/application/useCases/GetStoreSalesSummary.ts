@@ -10,19 +10,19 @@ export interface StoreSalesSummaryOutput {
   storeId: string;
   storeName: string;
   totalOrders: number;
-  totalRevenue: number;
-  averageOrderValue: number;
-  topProducts: Array<{ productId: string; name: string; quantity: number; revenue: number }>;
+  totalRevenueCents: number;
+  averageOrderValueCents: number;
+  topProducts: Array<{ productId: string; name: string; quantity: number; revenueCents: number }>;
   ordersByStatus: Record<string, number>;
-  ordersByDate: Array<{ date: string; orders: number; revenue: number }>;
+  ordersByDate: Array<{ date: string; orders: number; revenueCents: number }>;
 }
 
 interface StoreAggRow {
   storeId: string;
   storeName: string;
   totalOrders: string;
-  totalRevenue: string;
-  averageOrderValue: string;
+  totalRevenueCents: string;
+  averageOrderValueCents: string;
 }
 
 interface StatusRow {
@@ -34,13 +34,13 @@ interface TopProductRow {
   productId: string;
   name: string;
   quantity: string;
-  revenue: string;
+  revenueCents: string;
 }
 
 interface OrdersByDateRow {
   date: string;
   orders: string;
-  revenue: string;
+  revenueCents: string;
 }
 
 export class GetStoreSalesSummaryUseCase {
@@ -56,15 +56,15 @@ export class GetStoreSalesSummaryUseCase {
     const storeRows = await query<StoreAggRow[]>(
       `SELECT o."storeId", COALESCE(s.name, 'Unknown Store') as "storeName",
               COUNT(*) as "totalOrders",
-              COALESCE(SUM(o."totalAmount"), 0) as "totalRevenue",
-              COALESCE(AVG(o."totalAmount"), 0) as "averageOrderValue"
+              COALESCE(SUM(o."totalAmountCents"), 0) as "totalRevenueCents",
+              COALESCE(AVG(o."totalAmountCents"), 0) as "averageOrderValueCents"
        FROM "order" o
        LEFT JOIN store s ON s."storeId" = o."storeId"
        WHERE o."deletedAt" IS NULL
          AND o."createdAt" >= $1
          AND o."createdAt" <= $2${storeFilter}
        GROUP BY o."storeId", s.name
-       ORDER BY "totalRevenue" DESC`,
+       ORDER BY "totalRevenueCents" DESC`,
       params,
     );
 
@@ -90,7 +90,7 @@ export class GetStoreSalesSummaryUseCase {
       const topProducts = await query<TopProductRow[]>(
         `SELECT oi."productId", MAX(oi.name) as name,
                 SUM(oi.quantity) as quantity,
-                COALESCE(SUM(oi."lineTotal"), 0) as revenue
+                COALESCE(SUM(oi."lineTotalCents"), 0) as "revenueCents"
          FROM "orderItem" oi
          INNER JOIN "order" o ON o."orderId" = oi."orderId"
          WHERE o."deletedAt" IS NULL
@@ -98,7 +98,7 @@ export class GetStoreSalesSummaryUseCase {
            AND o."createdAt" >= $2
            AND o."createdAt" <= $3
          GROUP BY oi."productId"
-         ORDER BY revenue DESC, quantity DESC
+         ORDER BY "revenueCents" DESC, quantity DESC
          LIMIT 5`,
         [storeId, input.dateFrom.toISOString(), input.dateTo.toISOString()],
       );
@@ -106,7 +106,7 @@ export class GetStoreSalesSummaryUseCase {
       const ordersByDate = await query<OrdersByDateRow[]>(
         `SELECT DATE("createdAt")::text as date,
                 COUNT(*) as orders,
-                COALESCE(SUM("totalAmount"), 0) as revenue
+                COALESCE(SUM("totalAmountCents"), 0) as "revenueCents"
          FROM "order"
          WHERE "deletedAt" IS NULL
            AND "storeId" = $1
@@ -123,19 +123,19 @@ export class GetStoreSalesSummaryUseCase {
         storeId,
         storeName: storeRow.storeName,
         totalOrders: parseInt(storeRow.totalOrders || '0', 10),
-        totalRevenue: parseFloat(storeRow.totalRevenue || '0'),
-        averageOrderValue: parseFloat(storeRow.averageOrderValue || '0'),
+        totalRevenueCents: Number(storeRow.totalRevenueCents || 0),
+        averageOrderValueCents: Number(storeRow.averageOrderValueCents || 0),
         topProducts: (topProducts || []).map(row => ({
           productId: row.productId,
           name: row.name,
           quantity: parseInt(row.quantity || '0', 10),
-          revenue: parseFloat(row.revenue || '0'),
+          revenueCents: Number(row.revenueCents || 0),
         })),
         ordersByStatus,
         ordersByDate: (ordersByDate || []).map(row => ({
           date: row.date,
           orders: parseInt(row.orders || '0', 10),
-          revenue: parseFloat(row.revenue || '0'),
+          revenueCents: Number(row.revenueCents || 0),
         })),
       });
     }

@@ -1,5 +1,7 @@
 import supplierDataRepository from '../infrastructure/repositories/SupplierDataRepository';
 import supplierPurchaseOrderDataRepository from '../infrastructure/repositories/SupplierPurchaseOrderDataRepository';
+import { ManageSuppliersAdminUseCase } from './useCases/ManageSuppliersAdmin';
+import type { SupplierRepository } from '../domain/repositories/SupplierRepository';
 import type {
   SupplierFilters,
   SupplierStatus,
@@ -21,6 +23,10 @@ import type {
   SupplierPurchaseOrderItemCreateParams,
   SupplierPurchaseOrderItemUpdateParams,
 } from '../infrastructure/repositories/SupplierPurchaseOrderDataRepository';
+
+export const manageSuppliersAdminUseCase = new ManageSuppliersAdminUseCase(
+  supplierDataRepository.suppliers as unknown as SupplierRepository,
+);
 
 export {
   supplierDataRepository,

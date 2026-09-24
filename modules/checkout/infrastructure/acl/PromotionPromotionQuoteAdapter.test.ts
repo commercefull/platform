@@ -1,79 +1,78 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { PromotionPromotionQuoteAdapter } from './PromotionPromotionQuoteAdapter';
+import type { PromotionEvaluationService, PromotionEvaluationResult } from '../../../promotion/application/services/PromotionEvaluationService';
 
 describe('PromotionPromotionQuoteAdapter', () => {
-  let adapter: import('./PromotionPromotionQuoteAdapter').PromotionPromotionQuoteAdapter;
+  let adapter: PromotionPromotionQuoteAdapter;
+  let evaluationService: jest.Mocked<Pick<PromotionEvaluationService, 'evaluate'>>;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.doMock('../../../promotion/application/services/PromotionEvaluationService', () => ({
-      promotionEvaluationService: { evaluate: jest.fn() },
-    }));
-    const { PromotionPromotionQuoteAdapter } = require('./PromotionPromotionQuoteAdapter');
-    adapter = new PromotionPromotionQuoteAdapter();
+    evaluationService = { evaluate: jest.fn() };
+    adapter = new PromotionPromotionQuoteAdapter(evaluationService as unknown as PromotionEvaluationService);
   });
 
-  afterEach(() => {
-    jest.dontMock('../../../promotion/application/services/PromotionEvaluationService');
-  });
-
-  it('implements PromotionQuotePort', () => {
+  it('should implement PromotionQuotePort', () => {
     expect(typeof adapter.evaluatePromotions).toBe('function');
   });
 
   it('should map promotion evaluation result to checkout vocabulary', async () => {
-    const { promotionEvaluationService } = require('../../../promotion/application/services/PromotionEvaluationService');
-    promotionEvaluationService.evaluate.mockResolvedValue({
-      totalDiscountAmount: 15,
+    evaluationService.evaluate.mockResolvedValue({
+      totalDiscountAmountCents: 15,
+      shippingDiscountAmountCents: 0,
+      freeShipping: false,
+      lineItemDiscounts: [],
+      freeItems: [],
       appliedPromotions: [
-        { promotionId: 'promo-1', name: 'Summer Sale', discountAmount: 10 },
-        { promotionId: 'promo-2', name: 'Loyalty', discountAmount: 5 },
+        { promotionId: 'promo-1', name: 'Summer Sale', type: 'cart', discountAmountCents: 10 },
+        { promotionId: 'promo-2', name: 'Loyalty', type: 'cart', discountAmountCents: 5 },
       ],
     });
 
     const result = await adapter.evaluatePromotions({
-      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPrice: 100, isDigital: false }],
-      subtotal: 100,
-      shippingAmount: 10,
+      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPriceCents: 100, isDigital: false }],
+      subtotalCents: 100,
+      shippingAmountCents: 10,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(15);
+    expect(result.totalDiscountAmountCents).toBe(15);
     expect(result.appliedPromotions).toHaveLength(2);
     expect(result.appliedPromotions[0].id).toBe('promo-1');
     expect(result.appliedPromotions[0].name).toBe('Summer Sale');
-    expect(result.appliedPromotions[0].amount).toBe(10);
+    expect(result.appliedPromotions[0].amountCents).toBe(10);
   });
 
   it('should handle empty appliedPromotions', async () => {
-    const { promotionEvaluationService } = require('../../../promotion/application/services/PromotionEvaluationService');
-    promotionEvaluationService.evaluate.mockResolvedValue({
-      totalDiscountAmount: 0,
+    evaluationService.evaluate.mockResolvedValue({
+      totalDiscountAmountCents: 0,
+      shippingDiscountAmountCents: 0,
+      freeShipping: false,
+      lineItemDiscounts: [],
+      freeItems: [],
       appliedPromotions: null,
-    });
+    } as unknown as PromotionEvaluationResult);
 
     const result = await adapter.evaluatePromotions({
       items: [],
-      subtotal: 0,
-      shippingAmount: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
     expect(result.appliedPromotions).toEqual([]);
   });
 
   it('should return zero discount when evaluation throws', async () => {
-    const { promotionEvaluationService } = require('../../../promotion/application/services/PromotionEvaluationService');
-    promotionEvaluationService.evaluate.mockRejectedValue(new Error('Service error'));
+    evaluationService.evaluate.mockRejectedValue(new Error('Service error'));
 
     const result = await adapter.evaluatePromotions({
       items: [],
-      subtotal: 0,
-      shippingAmount: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
       currency: 'USD',
     });
 
-    expect(result.totalDiscountAmount).toBe(0);
+    expect(result.totalDiscountAmountCents).toBe(0);
     expect(result.appliedPromotions).toEqual([]);
   });
 });

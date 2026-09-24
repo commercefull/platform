@@ -24,8 +24,11 @@ export interface OrderItemInput {
   name: string;
   description?: string;
   quantity: number;
-  unitPrice: number;
-  discountedUnitPrice?: number;
+  /** Unit price in integer cents. */
+  unitPriceCents: number;
+  /** Discounted unit price in integer cents. */
+  discountedUnitPriceCents?: number;
+  /** Tax rate percentage. */
   taxRate?: number;
   options?: Record<string, unknown>;
   attributes?: Record<string, unknown>;
@@ -63,7 +66,8 @@ export class CreateOrderCommand {
     public readonly customerPhone?: string,
     public readonly customerName?: string,
     public readonly customerNotes?: string,
-    public readonly shippingTotal?: number,
+    /** Shipping total in integer cents. */
+    public readonly shippingTotalCents?: number,
     public readonly hasGiftWrapping?: boolean,
     public readonly giftMessage?: string,
     public readonly isGift?: boolean,
@@ -89,11 +93,11 @@ export interface OrderResponse {
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
-  subtotal: number;
-  discountTotal: number;
-  taxTotal: number;
-  shippingTotal: number;
-  totalAmount: number;
+  subtotalCents: number;
+  discountTotalCents: number;
+  taxTotalCents: number;
+  shippingTotalCents: number;
+  totalAmountCents: number;
   totalItems: number;
   totalQuantity: number;
   currencyCode: string;
@@ -160,8 +164,8 @@ export class CreateOrderUseCase {
         name: itemInput.name,
         description: itemInput.description,
         quantity: itemInput.quantity,
-        unitPrice: Money.create(itemInput.unitPrice, currency),
-        discountedUnitPrice: itemInput.discountedUnitPrice ? Money.create(itemInput.discountedUnitPrice, currency) : undefined,
+        unitPrice: Money.fromCents(itemInput.unitPriceCents, currency),
+        discountedUnitPrice: itemInput.discountedUnitPriceCents != null ? Money.fromCents(itemInput.discountedUnitPriceCents, currency) : undefined,
         taxRate: itemInput.taxRate,
         options: itemInput.options,
         attributes: itemInput.attributes,
@@ -171,8 +175,8 @@ export class CreateOrderUseCase {
     }
 
     // Set shipping total
-    if (command.shippingTotal) {
-      order.setShippingTotal(Money.create(command.shippingTotal, currency));
+    if (command.shippingTotalCents) {
+      order.setShippingTotal(Money.fromCents(command.shippingTotalCents, currency));
     }
 
     // Create shipping address
@@ -210,8 +214,19 @@ export class CreateOrderUseCase {
       orderId: savedOrder.orderId,
       orderNumber: savedOrder.orderNumber,
       customerId: savedOrder.customerId,
-      totalAmount: savedOrder.totalAmount.amount,
+      totalAmountCents: savedOrder.totalAmount.cents,
+      discountTotalCents: savedOrder.discountTotal.cents,
+      taxTotalCents: savedOrder.taxTotal.cents,
+      shippingTotalCents: savedOrder.shippingTotal.cents,
+      itemCount: savedOrder.totalQuantity,
       currency: savedOrder.currencyCode,
+      items: savedOrder.items.map(i => ({
+        productId: i.productId,
+        productVariantId: i.productVariantId,
+        quantity: i.quantity,
+        unitPriceCents: i.unitPrice.cents,
+        lineTotalCents: i.lineTotal.cents,
+      })),
     });
 
     return this.mapToResponse(savedOrder);
@@ -229,11 +244,11 @@ export class CreateOrderUseCase {
       status: order.status,
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,
-      subtotal: order.subtotal.amount,
-      discountTotal: order.discountTotal.amount,
-      taxTotal: order.taxTotal.amount,
-      shippingTotal: order.shippingTotal.amount,
-      totalAmount: order.totalAmount.amount,
+      subtotalCents: order.subtotal.cents,
+      discountTotalCents: order.discountTotal.cents,
+      taxTotalCents: order.taxTotal.cents,
+      shippingTotalCents: order.shippingTotal.cents,
+      totalAmountCents: order.totalAmount.cents,
       totalItems: order.totalItems,
       totalQuantity: order.totalQuantity,
       currencyCode: order.currencyCode,

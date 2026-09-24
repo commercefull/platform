@@ -1,69 +1,33 @@
-jest.mock('../../infrastructure/repositories/productRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn().mockResolvedValue({ productId: 'p1', name: 'Widget', sku: 'SKU1' }),
-  },
-}));
 
-jest.mock('../../infrastructure/repositories/productToCategoryRepo', () => ({
-  __esModule: true,
-  default: {
-    findByProduct: jest.fn().mockResolvedValue([{ productCategoryId: 'cat1' }]),
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/productCategoryRepo', () => ({
-  __esModule: true,
-  default: {
-    findById: jest.fn().mockResolvedValue({ productCategoryId: 'cat1', name: 'Electronics' }),
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/productTagRepo', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue([{ productTagId: 't1', name: 'new' }]),
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/productQaRepo', () => ({
-  __esModule: true,
-  default: {
-    findByProduct: jest.fn().mockResolvedValue([{ productQaId: 'q1', question: 'Is it good?' }]),
-  },
-}));
-
-jest.mock('../../infrastructure/repositories/productQaAnswerRepo', () => ({
-  __esModule: true,
-  default: {
-    findByQuestion: jest.fn().mockResolvedValue([{ productQaAnswerId: 'a1', answer: 'Yes!' }]),
-  },
-}));
 
 import { GetProductCatalogEnrichmentUseCase, GetProductCatalogEnrichmentCommand } from './GetProductCatalogEnrichment';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
-import productRepo from '../../infrastructure/repositories/productRepo';
-import productToCategoryRepo from '../../infrastructure/repositories/productToCategoryRepo';
-import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
-import productTagRepo from '../../infrastructure/repositories/productTagRepo';
-import productQaRepo from '../../infrastructure/repositories/productQaRepo';
-import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
-
-const mockProductRepo = productRepo as unknown as { findById: jest.Mock };
+import { createProductCategory, createProductLookup, createProductQa, createProductQaAnswer, createProductTag, createProductToCategory, lazyMock } from '../../tests/testUtils';
 
 describe('GetProductCatalogEnrichmentUseCase', () => {
   let useCase: GetProductCatalogEnrichmentUseCase;
+  let mockRepo1: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>;
+  let mockRepo2: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[1]>;
+  let mockRepo3: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[2]>;
+  let mockRepo4: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[3]>;
+  let mockRepo5: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[4]>;
+  let mockRepo6: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[5]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetProductCatalogEnrichmentUseCase(
-      productRepo,
-      productToCategoryRepo,
-      productCategoryRepo,
-      productTagRepo,
-      productQaRepo,
-      productQaAnswerRepo,
-    );
+        mockRepo1 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>();
+    mockRepo1.findById.mockResolvedValue(createProductLookup());
+    mockRepo2 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[1]>();
+    mockRepo2.findByProduct.mockResolvedValue([createProductToCategory({ productCategoryId: 'cat1' })]);
+    mockRepo3 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[2]>();
+    mockRepo3.findById.mockResolvedValue(createProductCategory({ productCategoryId: 'cat1' }));
+    mockRepo4 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[3]>();
+    mockRepo4.findAll.mockResolvedValue([createProductTag({ name: 'new' })]);
+    mockRepo5 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[4]>();
+    mockRepo5.findByProduct.mockResolvedValue([createProductQa()]);
+    mockRepo6 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[5]>();
+    mockRepo6.findByQuestion.mockResolvedValue([createProductQaAnswer({ answer: 'Yes!' })]);
+    useCase = new GetProductCatalogEnrichmentUseCase(mockRepo1, mockRepo2, mockRepo3, mockRepo4, mockRepo5, mockRepo6);
   });
 
   it('should return enriched product (happy path)', async () => {
@@ -82,7 +46,7 @@ describe('GetProductCatalogEnrichmentUseCase', () => {
   });
 
   it('should throw ProductNotFoundError when product not found', async () => {
-    mockProductRepo.findById.mockResolvedValueOnce(null);
+    mockRepo1.findById.mockResolvedValueOnce(null);
 
     await expect(useCase.execute(new GetProductCatalogEnrichmentCommand('nonexistent'))).rejects.toThrow(ProductNotFoundError);
   });

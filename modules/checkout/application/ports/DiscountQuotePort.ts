@@ -7,7 +7,7 @@
 
 export interface DiscountQuote {
   code: string;
-  discountAmount: number;
+  discountAmountCents: number;
   reason?: string;
 }
 
@@ -18,5 +18,5 @@ export interface DiscountQuoteResult {
 }
 
 export interface DiscountQuotePort {
-  validateDiscount(code: string, subtotal: number, currency: string): Promise<DiscountQuoteResult>;
+  validateDiscount(code: string, subtotalCents: number, currency: string): Promise<DiscountQuoteResult>;
 }

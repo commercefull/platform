@@ -1,14 +1,16 @@
 import { SegmentRepositoryImpl, CustomerProfileRepositoryImpl, SegmentMembershipRepositoryImpl } from '../../infrastructure';
-import { CreateSegmentUseCase, UpdateSegmentUseCase, DeleteSegmentUseCase, GetSegmentUseCase, ListSegmentsUseCase } from './SegmentCrud';
-import {
-  GetCustomerProfileUseCase,
-  ListCustomerProfilesUseCase,
-  ComputeCustomerProfileUseCase,
-  RecomputeAllProfilesUseCase,
-  EvaluateSegmentUseCase,
-  GetSegmentMembersUseCase,
-  GetCustomerSegmentsUseCase,
-} from './CustomerProfile';
+import { CreateSegmentUseCase } from './CreateSegment';
+import { UpdateSegmentUseCase } from './UpdateSegment';
+import { DeleteSegmentUseCase } from './DeleteSegment';
+import { GetSegmentUseCase } from './GetSegment';
+import { ListSegmentsUseCase } from './ListSegments';
+import { GetCustomerProfileUseCase } from './GetCustomerProfile';
+import { ListCustomerProfilesUseCase } from './ListCustomerProfiles';
+import { ComputeCustomerProfileUseCase } from './ComputeCustomerProfile';
+import { RecomputeAllProfilesUseCase } from './RecomputeAllProfiles';
+import { EvaluateSegmentUseCase } from './EvaluateSegment';
+import { GetSegmentMembersUseCase } from './GetSegmentMembers';
+import { GetCustomerSegmentsUseCase } from './GetCustomerSegments';
 
 const segmentRepo = new SegmentRepositoryImpl();
 const profileRepo = new CustomerProfileRepositoryImpl();

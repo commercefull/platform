@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+import { OrganizationCredentialSubjectAdapter } from './OrganizationCredentialSubjectAdapter';
+import type organizationRepo from '../../../organization/infrastructure/repositories/organizationRepo';
+
+type OrgRepo = typeof organizationRepo;
+type RepoOrg = NonNullable<Awaited<ReturnType<OrgRepo['findById']>>>;
 
 describe('OrganizationCredentialSubjectAdapter', () => {
-  let adapter: import('./OrganizationCredentialSubjectAdapter').OrganizationCredentialSubjectAdapter;
-  let mockOrgRepo: any;
+  let adapter: OrganizationCredentialSubjectAdapter;
+  let mockOrgRepo: jest.Mocked<Pick<OrgRepo, 'authenticate' | 'findById' | 'findByEmail' | 'createWithPassword' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
 
   beforeEach(() => {
     mockOrgRepo = {
@@ -14,8 +18,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       createPasswordResetToken: jest.fn(),
       verifyPasswordResetToken: jest.fn(),
     };
-    const { OrganizationCredentialSubjectAdapter } = require('./OrganizationCredentialSubjectAdapter');
-    adapter = new OrganizationCredentialSubjectAdapter(mockOrgRepo);
+    adapter = new OrganizationCredentialSubjectAdapter(mockOrgRepo as unknown as OrgRepo);
   });
 
   it('implements CredentialSubjectPort', () => {
@@ -35,7 +38,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'active',
-    });
+  } as unknown as RepoOrg);
 
     const result = await adapter.authenticate('org@test.com', 'password');
 
@@ -61,7 +64,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'active',
-    });
+  } as unknown as RepoOrg);
 
     const result = await adapter.findById('org-1');
 
@@ -86,7 +89,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'pending',
-    });
+  } as unknown as RepoOrg);
 
     const result = await adapter.findByEmail('org@test.com');
 
@@ -102,7 +105,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'new@test.com',
       name: 'New Org',
       status: 'pending',
-    });
+  } as unknown as RepoOrg);
 
     const result = await adapter.createWithPassword({
       email: 'new@test.com',
@@ -121,7 +124,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'new@test.com',
       name: 'Jane Smith',
       status: 'pending',
-    });
+  } as unknown as RepoOrg);
 
     await adapter.createWithPassword({
       email: 'new@test.com',
@@ -139,7 +142,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'user@test.com',
       name: 'user',
       status: 'pending',
-    });
+  } as unknown as RepoOrg);
 
     await adapter.createWithPassword({
       email: 'user@test.com',
@@ -152,7 +155,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
   it('should no-op updateLoginTimestamp (orgs do not track login timestamps)', async () => {
     await adapter.updateLoginTimestamp('org-1');
     // Should not throw, should not call repo
-    expect(mockOrgRepo.updateLoginTimestamp).toBeUndefined();
+    Object.values(mockOrgRepo).forEach(fn => expect(fn).not.toHaveBeenCalled());
   });
 
   it('should delegate changePassword', async () => {

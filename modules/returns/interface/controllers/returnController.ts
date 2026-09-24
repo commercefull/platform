@@ -53,7 +53,7 @@ class ReturnController {
           returnReasonDetail?: string;
           condition?: string;
           restockItem?: boolean;
-          refundAmount?: number;
+          refundAmountCents?: number;
           exchangeProductId?: string;
           exchangeVariantId?: string;
           notes?: string;
@@ -176,11 +176,11 @@ class ReturnController {
   async getStoreCreditBalance(req: HttpRequest, res: HttpResponse): Promise<void> {
     const customerId = (req.query.customerId as string) || '';
     if (!customerId) {
-      res.json({ success: true, data: { customerId: '', balance: 0, currency: 'USD' } });
+      res.json({ success: true, data: { customerId: '', balanceCents: 0, currency: 'USD' } });
       return;
     }
-    const balance = await getStoreCreditBalanceUseCase.execute(customerId);
-    res.json({ success: true, data: balance });
+    const balanceCents = await getStoreCreditBalanceUseCase.execute(customerId);
+    res.json({ success: true, data: balanceCents });
   }
 
   async getStoreCreditLedger(req: HttpRequest, res: HttpResponse): Promise<void> {
@@ -200,7 +200,7 @@ class ReturnController {
       Record<string, never>,
       {
         customerId: string;
-        amount: number;
+        amountCents: number;
         referenceType?: string;
         referenceId?: string;
         reason?: string;

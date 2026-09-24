@@ -15,10 +15,10 @@ exports.up = function (knex) {
     t.integer('priority').defaultTo(0);
     t.integer('level').defaultTo(1);
     t.integer('trialDays').defaultTo(0);
-    t.decimal('price', 10, 2).notNullable();
-    t.decimal('salePrice', 10, 2);
-    t.decimal('setupFee', 10, 2).defaultTo(0);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.bigInteger('priceCents').notNullable();
+    t.bigInteger('salePriceCents');
+    t.bigInteger('setupFeeCents').defaultTo(0);
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.enum('billingCycle', ['daily', 'weekly', 'monthly', 'quarterly', 'biannual', 'annual', 'lifetime'])
       .notNullable()
       .defaultTo('monthly');
@@ -42,7 +42,7 @@ exports.up = function (knex) {
     t.index('isPublic');
     t.index('priority');
     t.index('level');
-    t.index('price');
+    t.index('priceCents');
     t.index('billingCycle');
   });
 };

@@ -186,8 +186,8 @@ describe('Coupon', () => {
       expect(c.calculateDiscount(100)).toBe(0);
     });
 
-    it('should cap at maxDiscountAmount', () => {
-      const c = createCoupon({ type: 'percentage', value: 50, maxDiscountAmount: 20 });
+    it('should cap at maxDiscountAmountCents', () => {
+      const c = createCoupon({ type: 'percentage', value: 50, maxDiscountAmountCents: 20 });
       expect(c.calculateDiscount(100)).toBe(20);
     });
   });
@@ -199,7 +199,7 @@ describe('Coupon', () => {
     });
 
     it('should return false when order value below minimum', () => {
-      const c = createCoupon({ minOrderValue: 50 });
+      const c = createCoupon({ minOrderValueCents: 50 });
       expect(c.canBeApplied(30)).toBe(false);
     });
 
@@ -230,7 +230,7 @@ describe('Coupon', () => {
       expect(c.usageCount).toBe(1);
       expect(usage.orderId).toBe('ord-1');
       expect(usage.customerId).toBe('cust-1');
-      expect(usage.discountAmount).toBe(10);
+      expect(usage.discountAmountCents).toBe(10);
       expect(usage.usageId).toBeDefined();
     });
   });

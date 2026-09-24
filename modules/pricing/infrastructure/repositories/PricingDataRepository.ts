@@ -10,6 +10,7 @@
 import priceListRepo from './pricingPriceListRepo';
 import customerPriceRepo from './customerPriceRepo';
 import productTierPriceRepo from './productTierPriceRepo';
+import productBasePriceRepo from './productBasePriceRepo';
 import { ProductCurrencyPriceRepo } from './productCurrencyPriceRepo';
 
 // Re-export types for backward compatibility
@@ -25,6 +26,8 @@ class PricingDataRepository {
   readonly customerPrices = customerPriceRepo;
   // Tier Prices
   readonly tierPrices = productTierPriceRepo;
+  // Product Base Prices (catalog prices, integer cents)
+  readonly basePrices = productBasePriceRepo;
   // Product Currency Prices
   readonly productCurrencyPrices = productCurrencyPriceRepoInstance;
 

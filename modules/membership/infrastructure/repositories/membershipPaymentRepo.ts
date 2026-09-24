@@ -11,8 +11,8 @@ export interface MembershipPayment {
   updatedAt: string;
   subscriptionId: string;
   customerId: string;
-  amount: number;
-  currency: string;
+  amountCents: number;
+  currencyCode: string;
   paymentDate: string;
   status: PaymentStatus;
   paymentType: PaymentType;
@@ -75,15 +75,15 @@ export class MembershipPaymentRepo {
 
     const result = await queryOne<MembershipPayment>(
       `INSERT INTO "membershipPayment" (
-        "subscriptionId", "customerId", "amount", "currency", "paymentDate", "status", "paymentType",
+        "subscriptionId", "customerId", "amountCents", "currencyCode", "paymentDate", "status", "paymentType",
         "paymentMethod", "transactionId", "billingPeriodStart", "billingPeriodEnd", "notes",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
         params.subscriptionId,
         params.customerId,
-        params.amount,
-        params.currency || 'USD',
+        params.amountCents,
+        params.currencyCode || 'USD',
         params.paymentDate || now,
         params.status || 'pending',
         params.paymentType,
@@ -145,7 +145,7 @@ export class MembershipPaymentRepo {
   }
 
   async getTotalRevenue(subscriptionId?: string): Promise<number> {
-    let sql = `SELECT SUM("amount") as total FROM "membershipPayment" WHERE "status" = 'completed' AND "paymentType" != 'refund'`;
+    let sql = `SELECT SUM("amountCents") as total FROM "membershipPayment" WHERE "status" = 'completed' AND "paymentType" != 'refund'`;
     const params: unknown[] = [];
 
     if (subscriptionId) {

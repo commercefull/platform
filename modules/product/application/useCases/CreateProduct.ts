@@ -8,6 +8,7 @@ import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { ProductAttributeSetPort, DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductPricingPort } from '../ports/ProductPricingPort';
 import { ProductSkuAlreadyExistsError, ProductSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 // ============================================================================
@@ -24,9 +25,11 @@ export class CreateProductCommand {
     public readonly shortDescription?: string,
     public readonly categoryId?: string,
     public readonly organizationId?: string,
-    public readonly basePrice?: number,
-    public readonly salePrice?: number,
-    public readonly cost?: number,
+    /** Base price in integer cents — written to the pricing-owned store. */
+    public readonly basePriceCents?: number,
+    public readonly salePriceCents?: number,
+    public readonly costPriceCents?: number,
+    public readonly compareAtPriceCents?: number,
     public readonly currencyCode?: string,
     public readonly weight?: number,
     public readonly weightUnit?: 'kg' | 'lb' | 'oz' | 'g',
@@ -59,8 +62,8 @@ export interface CreateProductResponse {
   sku?: string;
   status: string;
   visibility: string;
-  basePrice: number;
-  effectivePrice: number;
+  basePriceCents: number | null;
+  effectivePriceCents: number | null;
   createdAt: string;
 }
 
@@ -73,6 +76,7 @@ export class CreateProductUseCase {
     private readonly productRepository: ProductRepository,
     private readonly attributeSetRepo: ProductAttributeSetPort,
     private readonly dynamicAttrRepo: DynamicAttributePort,
+    private readonly pricingPort: ProductPricingPort,
   ) {}
 
   async execute(command: CreateProductCommand): Promise<CreateProductResponse> {
@@ -112,10 +116,6 @@ export class CreateProductUseCase {
       shortDescription: command.shortDescription,
       categoryId: command.categoryId,
       organizationId: command.organizationId,
-      basePrice: command.basePrice,
-      salePrice: command.salePrice,
-      cost: command.cost,
-      currencyCode: command.currencyCode,
       weight: command.weight,
       weightUnit: command.weightUnit,
       length: command.length,
@@ -137,6 +137,35 @@ export class CreateProductUseCase {
 
     // Save product
     const savedProduct = await this.productRepository.save(product);
+
+    // Persist the base price in the pricing-owned store when provided
+    let savedPrice: { priceCents: number; salePriceCents: number | null } | null = null;
+    if (command.basePriceCents !== undefined) {
+      if (!Number.isInteger(command.basePriceCents) || command.basePriceCents < 0) {
+        throw new ProductValidationError('basePriceCents must be a non-negative integer');
+      }
+      for (const [field, value] of Object.entries({
+        salePriceCents: command.salePriceCents,
+        costPriceCents: command.costPriceCents,
+        compareAtPriceCents: command.compareAtPriceCents,
+      })) {
+        if (value !== undefined && value !== null && (!Number.isInteger(value) || value < 0)) {
+          throw new ProductValidationError(`${field} must be a non-negative integer`);
+        }
+      }
+      if (command.salePriceCents !== undefined && command.salePriceCents !== null && command.salePriceCents > command.basePriceCents) {
+        throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
+      }
+      const row = await this.pricingPort.setBasePrice({
+        productId: savedProduct.productId,
+        currencyCode: command.currencyCode || 'USD',
+        priceCents: command.basePriceCents,
+        salePriceCents: command.salePriceCents ?? null,
+        costPriceCents: command.costPriceCents ?? null,
+        compareAtPriceCents: command.compareAtPriceCents ?? null,
+      });
+      savedPrice = { priceCents: row.priceCents, salePriceCents: row.salePriceCents };
+    }
 
     // Auto-assign attributes from the product type's attribute sets
     try {
@@ -165,10 +194,10 @@ export class CreateProductUseCase {
       organizationId: savedProduct.organizationId,
     });
 
-    return this.mapToResponse(savedProduct);
+    return this.mapToResponse(savedProduct, savedPrice);
   }
 
-  private mapToResponse(product: Product): CreateProductResponse {
+  private mapToResponse(product: Product, price: { priceCents: number; salePriceCents: number | null } | null): CreateProductResponse {
     return {
       productId: product.productId,
       name: product.name,
@@ -176,8 +205,8 @@ export class CreateProductUseCase {
       sku: product.sku,
       status: product.status,
       visibility: product.visibility,
-      basePrice: product.price.basePrice,
-      effectivePrice: product.price.effectivePrice,
+      basePriceCents: price?.priceCents ?? null,
+      effectivePriceCents: price ? (price.salePriceCents ?? price.priceCents) : null,
       createdAt: product.createdAt.toISOString(),
     };
   }

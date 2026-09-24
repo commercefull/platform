@@ -21,8 +21,19 @@
  */
 
 import { matchesConditions, type AttributeCondition } from '../../../../libs/rules/conditions';
-import { fraudRepo } from '../wired';
-import type { FraudRule, RuleAction, RiskLevel, CheckStatus, BlacklistType } from '../wired';
+import type { FraudRepo } from '../../infrastructure';
+
+type FraudRule = FraudRepo.FraudRule;
+type RuleAction = FraudRepo.RuleAction;
+type RiskLevel = FraudRepo.RiskLevel;
+type CheckStatus = FraudRepo.CheckStatus;
+type BlacklistType = FraudRepo.BlacklistType;
+
+export interface FraudScreeningPort {
+  getRules(activeOnly?: boolean): Promise<FraudRule[]>;
+  incrementRuleTrigger(fraudRuleId: string): Promise<void>;
+  isBlacklisted(type: BlacklistType, value: string): Promise<boolean>;
+}
 
 // ============================================================================
 // Types
@@ -38,7 +49,7 @@ export interface FraudScreeningRequest {
   phone?: string;
   billingCountry?: string;
   shippingCountry?: string;
-  orderAmount?: number;
+  orderAmountCents?: number;
   currency?: string;
   isFirstOrder?: boolean;
   isGuestCheckout?: boolean;
@@ -74,11 +85,13 @@ export interface FraudScreeningResult {
 // ============================================================================
 
 export class FraudScreeningService {
+  constructor(private readonly fraudRepo: FraudScreeningPort) {}
+
   /**
    * Screen an order against all active fraud rules and blacklists.
    */
   async screen(request: FraudScreeningRequest): Promise<FraudScreeningResult> {
-    const rules = await fraudRepo.getRules(true);
+    const rules = await this.fraudRepo.getRules(true);
     const triggeredRules: TriggeredRuleInfo[] = [];
     let totalRiskScore = 0;
     let highestAction: RuleAction = 'allow';
@@ -118,7 +131,7 @@ export class FraudScreeningService {
             highestAction = rule.action;
           }
           // Increment trigger count asynchronously (fire-and-forget)
-          fraudRepo.incrementRuleTrigger(rule.fraudRuleId).catch(() => {});
+          this.fraudRepo.incrementRuleTrigger(rule.fraudRuleId).catch(() => {});
         }
       }
     }
@@ -155,7 +168,7 @@ export class FraudScreeningService {
 
     for (const { type, value } of checks) {
       if (value) {
-        const hit = await fraudRepo.isBlacklisted(type, value);
+        const hit = await this.fraudRepo.isBlacklisted(type, value);
         if (hit) return { hit: true, type, value };
       }
     }
@@ -169,7 +182,7 @@ export class FraudScreeningService {
    */
   private buildConditionContext(request: FraudScreeningRequest): Record<string, unknown> {
     return {
-      orderAmount: request.orderAmount ?? 0,
+      orderAmountCents: request.orderAmountCents ?? 0,
       currency: request.currency,
       customerId: request.customerId,
       ipAddress: request.ipAddress,
@@ -220,8 +233,8 @@ export class FraudScreeningService {
 
     switch (rule.ruleType) {
       case 'amount':
-        if (conditions.minAmount && (request.orderAmount ?? 0) < (conditions.minAmount as number)) return false;
-        if (conditions.maxAmount && (request.orderAmount ?? 0) > (conditions.maxAmount as number)) return true;
+        if (conditions.minAmount && (request.orderAmountCents ?? 0) < (conditions.minAmount as number)) return false;
+        if (conditions.maxAmount && (request.orderAmountCents ?? 0) > (conditions.maxAmount as number)) return true;
         return false;
 
       case 'location':
@@ -238,13 +251,13 @@ export class FraudScreeningService {
         if (
           conditions.firstOrderHighValue &&
           request.isFirstOrder &&
-          (request.orderAmount ?? 0) > ((conditions.threshold as number) || 500)
+          (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 500)
         )
           return true;
         if (
           conditions.guestCheckoutHighValue &&
           request.isGuestCheckout &&
-          (request.orderAmount ?? 0) > ((conditions.threshold as number) || 300)
+          (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 300)
         )
           return true;
         return false;
@@ -320,5 +333,3 @@ function getRiskLevel(score: number): RiskLevel {
   if (score >= 30) return 'medium';
   return 'low';
 }
-
-export const fraudScreeningService = new FraudScreeningService();

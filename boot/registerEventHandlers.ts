@@ -66,7 +66,7 @@ export function registerAllEventHandlers(): void {
 
     // Order payment event handlers (Published Language: reacts to payment events)
     if (moduleRegistry.shouldRegisterEvents('order')) {
-      registerOrderPaymentEventHandlers();
+      registerOrderPaymentEventHandlers(OrderDataRepo.commands);
     }
 
     // Inventory handlers (stock alerts, reorder triggers)

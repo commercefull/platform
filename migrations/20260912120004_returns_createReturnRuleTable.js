@@ -16,8 +16,8 @@ exports.up = function (knex) {
     t.uuid('productId');
     t.integer('returnWindowDays');
     t.decimal('restockingFeePercent', 5, 2).defaultTo(0);
-    t.decimal('restockingFeeFlat', 15, 2).defaultTo(0);
-    t.decimal('returnShippingCost', 15, 2).defaultTo(0);
+    t.bigInteger('restockingFeeFlatCents').defaultTo(0);
+    t.bigInteger('returnShippingCostCents').defaultTo(0);
     t.boolean('customerPaysReturnShipping').notNullable().defaultTo(false);
     t.boolean('autoApprove').notNullable().defaultTo(false);
     t.boolean('requiresManualReview').notNullable().defaultTo(false);

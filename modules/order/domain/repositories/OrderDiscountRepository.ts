@@ -10,8 +10,10 @@ export interface OrderDiscount {
   name: string;
   description?: string;
   type: DiscountType;
+  /** Polymorphic operand: percentage or fixed amount. */
   value: number;
-  discountAmount: number;
+  /** Discount amount in integer cents. */
+  discountAmountCents: number;
 }
 
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;

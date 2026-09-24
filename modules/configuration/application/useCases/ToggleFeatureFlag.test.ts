@@ -1,42 +1,65 @@
+import { createToggleFlagRepository } from '../../tests/testUtils';
 import { ToggleFeatureFlagUseCase } from './ToggleFeatureFlag';
 import { ConfigurationValidationError } from '../../domain/errors/ConfigurationErrors';
 
 describe('ToggleFeatureFlagUseCase', () => {
-  let useCase: ToggleFeatureFlagUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should enable the flag when it does not exist yet', async () => {
+    const repository = createToggleFlagRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      findFeatureFlag: jest.fn().mockResolvedValue(null),
-      upsertFeatureFlag: jest.fn().mockResolvedValue({
-        key: 'new_checkout',
-        enabled: true,
-        scope: 'global',
-        updatedAt: new Date(),
-      }),
-    };
-    useCase = new ToggleFeatureFlagUseCase(mockRepo as never);
-  });
-
-  it('should toggle feature flag on (happy path)', async () => {
-    const result = await useCase.execute({ key: 'new_checkout', enabled: true, updatedBy: 'admin' });
+    const result = await new ToggleFeatureFlagUseCase(repository).execute({
+      key: 'new_checkout',
+      enabled: true,
+      updatedBy: 'admin',
+    });
 
     expect(result.key).toBe('new_checkout');
     expect(result.enabled).toBe(true);
     expect(result.previousState).toBe(false);
+    expect(repository.upsertFeatureFlag).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'new_checkout', enabled: true, scope: 'global', updatedBy: 'admin' }),
+    );
   });
 
-  it('should report previousState correctly when flag exists', async () => {
-    mockRepo.findFeatureFlag.mockResolvedValue({ key: 'new_checkout', enabled: true, scope: 'global', updatedAt: new Date() });
-    mockRepo.upsertFeatureFlag.mockResolvedValue({ key: 'new_checkout', enabled: false, scope: 'global', updatedAt: new Date() });
+  it('should report the previous state when toggling an existing flag', async () => {
+    const repository = createToggleFlagRepository();
+    repository.findFeatureFlag.mockResolvedValue({
+      key: 'new_checkout',
+      enabled: true,
+      scope: 'global',
+      updatedAt: new Date('2026-01-01'),
+    });
 
-    const result = await useCase.execute({ key: 'new_checkout', enabled: false, updatedBy: 'admin' });
+    const result = await new ToggleFeatureFlagUseCase(repository).execute({
+      key: 'new_checkout',
+      enabled: false,
+      updatedBy: 'admin',
+    });
 
     expect(result.previousState).toBe(true);
     expect(result.enabled).toBe(false);
   });
 
-  it('should throw ConfigurationValidationError when key is empty', async () => {
-    await expect(useCase.execute({ key: '', enabled: true, updatedBy: 'admin' })).rejects.toThrow(ConfigurationValidationError);
+  it('should look up the flag at the requested scope when a scope is given', async () => {
+    const repository = createToggleFlagRepository();
+
+    await new ToggleFeatureFlagUseCase(repository).execute({
+      key: 'flag',
+      enabled: true,
+      scope: 'store',
+      scopeId: 's1',
+      updatedBy: 'admin',
+    });
+
+    expect(repository.findFeatureFlag).toHaveBeenCalledWith('flag', 'store', 's1');
+    expect(repository.upsertFeatureFlag).toHaveBeenCalledWith(expect.objectContaining({ scope: 'store', scopeId: 's1' }));
+  });
+
+  it('should throw ConfigurationValidationError when the key is empty', async () => {
+    const repository = createToggleFlagRepository();
+
+    await expect(
+      new ToggleFeatureFlagUseCase(repository).execute({ key: '', enabled: true, updatedBy: 'admin' }),
+    ).rejects.toThrow(ConfigurationValidationError);
+    expect(repository.upsertFeatureFlag).not.toHaveBeenCalled();
   });
 });

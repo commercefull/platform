@@ -58,7 +58,7 @@
         <div class="col-lg-3 col-6">
           <div class="small-box bg-warning">
             <div class="inner">
-              <h3><%= stats.totalValue.toFixed(2) %></h3>
+              <h3><%= (stats.totalValue / 100).toFixed(2) %></h3>
               <p><%= t('promotion:giftCard.totalValue') %></p>
             </div>
             <div class="icon">
@@ -145,9 +145,9 @@
                       <span class="badge badge-secondary"><%= card.type %></span>
                     </td>
                     <td>
-                      <strong><%= card.currency %> <%= card.currentBalance.toFixed(2) %></strong>
-                      <% if (card.initialBalance !== card.currentBalance) { %>
-                        <br><small class="text-muted"><%= t('shared:common.of') %> <%= card.initialBalance.toFixed(2) %></small>
+                      <strong><%= card.currency %> <%= (card.currentBalanceCents/100).toFixed(2) %></strong>
+                      <% if (card.initialBalanceCents !== card.currentBalanceCents) { %>
+                        <br><small class="text-muted"><%= t('shared:common.of') %> <%= (card.initialBalanceCents/100).toFixed(2) %></small>
                       <% } %>
                     </td>
                     <td>
@@ -174,8 +174,8 @@
                     </td>
                     <td>
                       <%= card.usageCount %> <%= t('promotion:giftCard.uses') %>
-                      <% if (card.totalRedeemed > 0) { %>
-                        <br><small class="text-muted"><%= card.currency %> <%= card.totalRedeemed.toFixed(2) %> <%= t('promotion:giftCard.redeemed') %></small>
+                      <% if (card.totalRedeemedCents > 0) { %>
+                        <br><small class="text-muted"><%= card.currency %> <%= (card.totalRedeemedCents / 100).toFixed(2) %> <%= t('promotion:giftCard.redeemed') %></small>
                       <% } %>
                     </td>
                     <td>

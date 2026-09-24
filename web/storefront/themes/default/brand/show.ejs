@@ -89,7 +89,7 @@
         </div>
         <div class="p-4">
           <h3 class="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1"><%= product.name %></h3>
-          <%- include("../partials/price", { price: product.effectivePrice, compareAtPrice: product.isOnSale ? product.basePrice : null }) %>
+          <%- include("../partials/price", { price: (product.effectivePriceCents ?? product.basePriceCents ?? 0) / 100, compareAtPrice: product.isOnSale ? (product.basePriceCents ?? 0) / 100 : null }) %>
         </div>
       </a>
       <% }); %>

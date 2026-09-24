@@ -16,12 +16,12 @@ exports.up = function (knex) {
     table.timestamp('periodStart').notNullable();
     table.timestamp('periodEnd').notNullable();
     table.string('status').defaultTo('pending'); // pending, processing, paid, failed, refunded, skipped
-    table.decimal('subtotal', 15, 2).notNullable();
-    table.decimal('discountAmount', 15, 2).defaultTo(0);
-    table.decimal('taxAmount', 15, 2).defaultTo(0);
-    table.decimal('shippingAmount', 15, 2).defaultTo(0);
-    table.decimal('totalAmount', 15, 2).notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.bigInteger('subtotalCents').notNullable();
+    table.bigInteger('discountAmountCents').defaultTo(0);
+    table.bigInteger('taxAmountCents').defaultTo(0);
+    table.bigInteger('shippingAmountCents').defaultTo(0);
+    table.bigInteger('totalAmountCents').notNullable();
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.timestamp('scheduledAt');
     table.timestamp('processedAt');
     table.timestamp('paidAt');

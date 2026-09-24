@@ -1,77 +1,57 @@
-/**
- * Unit Tests for GetOrCreateBasket Use Case
- */
-
-import { GetOrCreateBasketUseCase, GetOrCreateBasketCommand } from './GetOrCreateBasket';
-import { Basket } from '../../domain/entities/Basket';
-
-import type { BasketRepository } from '../../domain/repositories/BasketRepository';
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
-jest.mock('../../../../libs/uuid', () => ({
-  generateUUID: jest.fn(() => 'basket-uuid-123'),
-}));
-
-function createBasket(): Basket {
-  return Basket.create({ basketId: 'b-1', customerId: 'cust-1', currency: 'USD' });
-}
-
-function createMockBasketRepo(basket: Basket | null = null): jest.Mocked<BasketRepository> {
-  return {
-    findById: jest.fn().mockResolvedValue(basket),
-    findByCustomerId: jest.fn().mockResolvedValue(basket),
-    findBySessionId: jest.fn().mockResolvedValue(basket),
-    findActiveBasket: jest.fn().mockResolvedValue(basket),
-    save: jest.fn().mockResolvedValue(basket),
-    delete: jest.fn().mockResolvedValue(undefined),
-    addItem: jest.fn(),
-    updateItem: jest.fn(),
-    removeItem: jest.fn().mockResolvedValue(undefined),
-    getItems: jest.fn().mockResolvedValue([]),
-    clearItems: jest.fn().mockResolvedValue(undefined),
-    findAbandonedBaskets: jest.fn().mockResolvedValue([]),
-    findExpiredBaskets: jest.fn().mockResolvedValue([]),
-    markAsAbandoned: jest.fn().mockResolvedValue(undefined),
-    mergeBaskets: jest.fn(),
-  } as never as jest.Mocked<BasketRepository>;
-}
+import { createBasket, createBasketRepository, emitMock, BASKET_ID } from '../../tests/testUtils';
+import { GetOrCreateBasketCommand, GetOrCreateBasketUseCase } from './GetOrCreateBasket';
 
 describe('GetOrCreateBasketUseCase', () => {
-  it('should return existing active basket for customer', async () => {
-    const basket = createBasket();
-    const repo = createMockBasketRepo(basket);
-    const useCase = new GetOrCreateBasketUseCase(repo);
+  it('should return the existing basket when the customer already has an active basket', async () => {
+    const repository = createBasketRepository(createBasket({ customerId: 'customer-1' }));
 
-    const result = await useCase.execute(new GetOrCreateBasketCommand('cust-1'));
+    const result = await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand('customer-1'));
 
-    expect(result.basketId).toBe('b-1');
-    expect(result.customerId).toBe('cust-1');
-    expect(repo.save).not.toHaveBeenCalled();
+    expect(result.basketId).toBe(BASKET_ID);
+    expect(result.customerId).toBe('customer-1');
+    expect(result).toHaveProperty('isNew', false);
+    expect(repository.save).not.toHaveBeenCalled();
   });
 
-  it('should create a new basket when none exists', async () => {
-    const repo = createMockBasketRepo(null);
-    const useCase = new GetOrCreateBasketUseCase(repo);
+  it('should create and save a new basket when the customer has none', async () => {
+    const repository = createBasketRepository(null);
 
-    const result = await useCase.execute(new GetOrCreateBasketCommand('cust-2'));
+    const result = await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand('customer-2'));
 
-    expect(result.basketId).toBe('basket-uuid-123');
-    expect(result.customerId).toBe('cust-2');
-    expect(repo.save).toHaveBeenCalled();
+    expect(result.basketId).toBe('test-uuid');
+    expect(result.customerId).toBe('customer-2');
+    expect(result).toHaveProperty('isNew', true);
+    expect(repository.save).toHaveBeenCalled();
   });
 
-  it('should create a new basket for session when none exists', async () => {
-    const repo = createMockBasketRepo(null);
-    const useCase = new GetOrCreateBasketUseCase(repo);
+  it('should emit basket.created when a new basket is created', async () => {
+    const repository = createBasketRepository(null);
 
-    const result = await useCase.execute(new GetOrCreateBasketCommand(undefined, 'sess-1', 'EUR'));
+    await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand('customer-2'));
 
-    expect(result.basketId).toBe('basket-uuid-123');
-    expect(result.sessionId).toBe('sess-1');
+    expect(emitMock).toHaveBeenCalledWith(
+      'basket.created',
+      expect.objectContaining({ basketId: 'test-uuid', customerId: 'customer-2' }),
+    );
+  });
+
+  it('should not emit basket.created when an existing basket is returned', async () => {
+    const repository = createBasketRepository(createBasket({ customerId: 'customer-1' }));
+
+    await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand('customer-1'));
+
+    expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it('should create a session basket with the requested currency when only a session is provided', async () => {
+    const repository = createBasketRepository(null);
+
+    const result = await new GetOrCreateBasketUseCase(repository).execute(
+      new GetOrCreateBasketCommand(undefined, 'session-1', 'EUR'),
+    );
+
+    expect(repository.findActiveBasket).toHaveBeenCalledWith(undefined, 'session-1');
+    expect(result.sessionId).toBe('session-1');
     expect(result.currency).toBe('EUR');
-    expect(repo.save).toHaveBeenCalled();
   });
 });

@@ -4,10 +4,8 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { ManageOperationsUseCase } from '../../application/useCases/ManageOperations';
+import { manageOperationsUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageOperationsUseCase = new ManageOperationsUseCase();
 
 // ============================================================================
 // Operations Dashboard

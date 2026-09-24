@@ -1,26 +1,27 @@
 import type { ShippingRate } from '../../../../libs/db/types';
 
-export function calculateRate(rate: ShippingRate, orderTotal: number, itemCount: number, weight?: number): number {
+export function calculateRate(rate: ShippingRate, orderTotalCents: number, itemCount: number, weight?: number): number {
   if (rate.rateType === 'free') return 0;
 
-  if (rate.freeThreshold && orderTotal >= parseFloat(rate.freeThreshold)) {
+  if (rate.freeThresholdCents && orderTotalCents >= Number(rate.freeThresholdCents)) {
     return 0;
   }
 
-  let calculatedRate = parseFloat(rate.baseRate);
+  let calculatedRateCents = Number(rate.baseRateCents);
 
   switch (rate.rateType) {
     case 'flat':
       break;
     case 'itemBased':
-      calculatedRate += parseFloat(rate.perItemRate || '0') * itemCount;
+      calculatedRateCents += Number(rate.perItemRateCents || 0) * itemCount;
       break;
     case 'priceBased':
       if (rate.rateMatrix) {
         const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
         for (const tier of matrix.tiers || []) {
-          if (orderTotal >= tier.min && orderTotal < tier.max) {
-            calculatedRate = tier.rate;
+          // tier.min/tier.max are order totals in cents; tier.rate is a rate in cents
+          if (orderTotalCents >= tier.min && orderTotalCents < tier.max) {
+            calculatedRateCents = tier.rate;
             break;
           }
         }
@@ -31,7 +32,7 @@ export function calculateRate(rate: ShippingRate, orderTotal: number, itemCount:
         const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
         for (const tier of matrix.tiers || []) {
           if (weight >= tier.min && weight < tier.max) {
-            calculatedRate = tier.rate;
+            calculatedRateCents = tier.rate;
             break;
           }
         }
@@ -39,8 +40,8 @@ export function calculateRate(rate: ShippingRate, orderTotal: number, itemCount:
       break;
   }
 
-  if (rate.minRate) calculatedRate = Math.max(calculatedRate, parseFloat(rate.minRate));
-  if (rate.maxRate) calculatedRate = Math.min(calculatedRate, parseFloat(rate.maxRate));
+  if (rate.minRateCents) calculatedRateCents = Math.max(calculatedRateCents, Number(rate.minRateCents));
+  if (rate.maxRateCents) calculatedRateCents = Math.min(calculatedRateCents, Number(rate.maxRateCents));
 
-  return calculatedRate;
+  return calculatedRateCents;
 }

@@ -1,19 +1,17 @@
 import { ReturnRequestRepositoryImpl, ReturnItemRepositoryImpl, StoreCreditRepositoryImpl } from '../../infrastructure';
-import {
-  CreateReturnRequestUseCase,
-  ApproveReturnRequestUseCase,
-  DenyReturnRequestUseCase,
-  MarkReturnInTransitUseCase,
-  MarkReturnReceivedUseCase,
-  CompleteReturnInspectionUseCase,
-  CompleteReturnRequestUseCase,
-  CancelReturnRequestUseCase,
-  GetReturnRequestUseCase,
-  ListReturnRequestsUseCase,
-  GetStoreCreditBalanceUseCase,
-  GetStoreCreditLedgerUseCase,
-  DebitStoreCreditUseCase,
-} from './ReturnUseCases';
+import { CreateReturnRequestUseCase } from './CreateReturnRequest';
+import { ApproveReturnRequestUseCase } from './ApproveReturnRequest';
+import { DenyReturnRequestUseCase } from './DenyReturnRequest';
+import { MarkReturnInTransitUseCase } from './MarkReturnInTransit';
+import { MarkReturnReceivedUseCase } from './MarkReturnReceived';
+import { CompleteReturnInspectionUseCase } from './CompleteReturnInspection';
+import { CompleteReturnRequestUseCase } from './CompleteReturnRequest';
+import { CancelReturnRequestUseCase } from './CancelReturnRequest';
+import { GetReturnRequestUseCase } from './GetReturnRequest';
+import { ListReturnRequestsUseCase } from './ListReturnRequests';
+import { GetStoreCreditBalanceUseCase } from './GetStoreCreditBalance';
+import { GetStoreCreditLedgerUseCase } from './GetStoreCreditLedger';
+import { DebitStoreCreditUseCase } from './DebitStoreCredit';
 
 const returnRepo = new ReturnRequestRepositoryImpl();
 const itemRepo = new ReturnItemRepositoryImpl();

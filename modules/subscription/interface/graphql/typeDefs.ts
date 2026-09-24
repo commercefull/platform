@@ -36,7 +36,7 @@ export const subscriptionTypeDefs = `#graphql
     previousPlanId: String!
     newPlanId: String!
     effectiveDate: String!
-    proratedAmount: Float
+    proratedAmountCents: Int
   }
 
   type PauseSubscriptionResult {

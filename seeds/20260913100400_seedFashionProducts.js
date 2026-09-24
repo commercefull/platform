@@ -502,6 +502,7 @@ exports.seed = async function (knex) {
   const fashionSlugs = products.map(p => p.slug);
   const existingProducts = await knex('product').whereIn('slug', fashionSlugs).pluck('productId');
   if (existingProducts.length > 0) {
+    await knex('productBasePrice').whereIn('productId', existingProducts).del();
     await knex('productCategoryMap').whereIn('productId', existingProducts).del();
     await knex('productVariant').whereIn('productId', existingProducts).del();
     await knex('productImage').whereIn('productId', existingProducts).del();
@@ -529,8 +530,6 @@ exports.seed = async function (knex) {
         type: 'configurable',
         status: 'active',
         visibility: 'visible',
-        price: p.price,
-        salePrice: p.salePrice,
         weight: 500,
         weightUnit: 'g',
         isInventoryManaged: true,
@@ -546,6 +545,14 @@ exports.seed = async function (knex) {
       .returning(['productId']);
 
     const productId = productRow.productId || productRow;
+
+    // Catalog base price lives in the pricing-owned store (integer cents)
+    await knex('productBasePrice').insert({
+      productId,
+      currencyCode: 'USD',
+      priceCents: Math.round(p.price * 100),
+      salePriceCents: p.salePrice != null ? Math.round(p.salePrice * 100) : null,
+    });
 
     // Link to category
     await knex('productCategoryMap').insert({
@@ -568,20 +575,29 @@ exports.seed = async function (knex) {
       const v = p.variants[i];
       const variantSku = `${p.slug.substring(0, 15)}-${v.size}-${v.colour}`.toUpperCase();
 
-      await knex('productVariant').insert({
+      const [variantRow] = await knex('productVariant')
+        .insert({
+          productId,
+          sku: variantSku,
+          name: `${p.name} - ${v.size.toUpperCase()} / ${v.colour}`,
+          optionValues: JSON.stringify([
+            { name: 'size', value: v.size },
+            { name: 'color', value: v.colour },
+          ]),
+          status: 'active',
+          position: i + 1,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning(['productVariantId']);
+
+      // Variant-level base price (pricing-owned, integer cents)
+      await knex('productBasePrice').insert({
         productId,
-        sku: variantSku,
-        name: `${p.name} - ${v.size.toUpperCase()} / ${v.colour}`,
-        price: p.price,
-        salePrice: p.salePrice,
-        optionValues: JSON.stringify([
-          { name: 'size', value: v.size },
-          { name: 'color', value: v.colour },
-        ]),
-        status: 'active',
-        position: i + 1,
-        createdAt: now,
-        updatedAt: now,
+        productVariantId: variantRow.productVariantId || variantRow,
+        currencyCode: 'USD',
+        priceCents: Math.round(p.price * 100),
+        salePriceCents: p.salePrice != null ? Math.round(p.salePrice * 100) : null,
       });
     }
   }

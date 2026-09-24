@@ -79,7 +79,7 @@
                         </div>
                       </div>
                       <div class="text-sm font-semibold text-gray-900">
-                        $<%= ((item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %>
+                        $<%= ((item.lineTotalCents || (item.unitPriceCents || 0) * (item.quantity || 1)) / 100).toFixed(2) %>
                       </div>
                     </div>
                   <% }); %>

@@ -1,47 +1,29 @@
-jest.mock('../../infrastructure/repositories/ReportingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    schedules: {
-      listExecutions: jest.fn().mockResolvedValue([
-        {
-          reportExecutionId: 'e1',
-          reportScheduleId: 'rs1',
-          status: 'completed',
-          startedAt: new Date(),
-          completedAt: new Date(),
-          recipientCount: 3,
-          deliveryStatus: {},
-          createdAt: new Date(),
-        },
-      ]),
-    },
-    dataProvider: { generateReport: jest.fn() },
-    executions: {},
-    templates: {},
-  },
-}));
-
+import { createReportingRepository, createReportExecution } from '../../tests/testUtils';
 import { ListReportExecutionsUseCase } from './ListReportExecutions';
-import reportingDataRepository from '../../infrastructure/repositories/ReportingDataRepository';
-
-const mockRepo = reportingDataRepository as unknown as { schedules: Record<string, jest.Mock> };
 
 describe('ListReportExecutionsUseCase', () => {
   let useCase: ListReportExecutionsUseCase;
+  let reportingRepo: ReturnType<typeof createReportingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ListReportExecutionsUseCase();
+    reportingRepo = createReportingRepository();
+    useCase = new ListReportExecutionsUseCase(reportingRepo);
   });
 
-  it('should list executions for a schedule', async () => {
-    const result = await useCase.execute('rs1');
+  it('should return the executions for the schedule', async () => {
+    reportingRepo.listExecutions.mockResolvedValue([createReportExecution()]);
+
+    const result = await useCase.execute('sched-1');
+
+    expect(reportingRepo.listExecutions).toHaveBeenCalledWith('sched-1', undefined);
     expect(result).toHaveLength(1);
-    expect(result[0].reportExecutionId).toBe('e1');
   });
 
-  it('should pass limit parameter', async () => {
-    await useCase.execute('rs1', 10);
-    expect(mockRepo.schedules.listExecutions).toHaveBeenCalledWith('rs1', 10);
+  it('should pass the limit to the repository', async () => {
+    reportingRepo.listExecutions.mockResolvedValue([]);
+
+    await useCase.execute('sched-1', 5);
+
+    expect(reportingRepo.listExecutions).toHaveBeenCalledWith('sched-1', 5);
   });
 });

@@ -9,11 +9,13 @@
  */
 
 import { TaxableBasketPort, TaxableBasket } from '../../application/ports/TaxableBasketPort';
-import basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
+import type basketRepo from '../../../basket/infrastructure/repositories/BasketRepository';
 
 export class BasketTaxableBasketAdapter implements TaxableBasketPort {
+  constructor(private readonly baskets: Pick<typeof basketRepo, 'findById'>) {}
+
   async findById(basketId: string): Promise<TaxableBasket | null> {
-    const basket = await basketRepo.findById(basketId);
+    const basket = await this.baskets.findById(basketId);
     if (!basket) return null;
 
     return {
@@ -21,9 +23,9 @@ export class BasketTaxableBasketAdapter implements TaxableBasketPort {
       items: (basket.items || []).map(item => ({
         productId: item.productId,
         quantity: item.quantity,
-        price: item.unitPrice.amount,
+        priceCents: item.unitPrice.cents,
       })),
-      subtotal: basket.subtotal.amount,
+      subtotalCents: basket.subtotal.cents,
     };
   }
 }

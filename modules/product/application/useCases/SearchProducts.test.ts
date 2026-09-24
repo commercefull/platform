@@ -1,32 +1,25 @@
 import { SearchProductsUseCase, SearchProductsCommand } from './SearchProducts';
+import { createProduct, lazyMock } from '../../tests/testUtils';
 
 describe('SearchProductsUseCase', () => {
   let useCase: SearchProductsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof SearchProductsUseCase>[0]>;
 
-  const makeProduct = (id: string) => ({
-    productId: id,
-    name: `Product ${id}`,
-    slug: `product-${id}`,
-    sku: `SKU${id}`,
-    price: { basePrice: 100, salePrice: null, effectivePrice: 100, isOnSale: false, discountPercentage: 0 },
-    isFeatured: false,
-    primaryImage: null,
-    categoryId: 'cat1',
-    shortDescription: 'A product',
-  });
+  const makeProduct = (id: string) => createProduct({ productId: id, name: `Product ${id}`, sku: `SKU${id}` });
 
   beforeEach(() => {
-    mockRepo = {
-      search: jest.fn().mockResolvedValue({
-        data: [makeProduct('p1'), makeProduct('p2')],
-        total: 2,
-        limit: 20,
-        offset: 0,
-        hasMore: false,
-      }),
-    };
-    useCase = new SearchProductsUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof SearchProductsUseCase>[0]>();
+    mockRepo.search.mockResolvedValue({
+      data: [makeProduct('p1'), makeProduct('p2')],
+      total: 2,
+      limit: 20,
+      offset: 0,
+      hasMore: false,
+      length: 2,
+    });
+    const pricingPort = lazyMock<ConstructorParameters<typeof SearchProductsUseCase>[1]>();
+    pricingPort.getBasePrices.mockResolvedValue([]);
+    useCase = new SearchProductsUseCase(mockRepo, pricingPort);
   });
 
   it('should search products (happy path)', async () => {
@@ -45,12 +38,12 @@ describe('SearchProductsUseCase', () => {
   });
 
   it('should pass filters and pagination to repository', async () => {
-    await useCase.execute(new SearchProductsCommand('widget', { priceMin: 10, priceMax: 50 }, 10, 5, 'price_asc'));
+    await useCase.execute(new SearchProductsCommand('widget', { priceMinCents: 1000, priceMaxCents: 5000 }, 10, 5, 'price_asc'));
 
     expect(mockRepo.search).toHaveBeenCalledWith(
       'widget',
-      expect.objectContaining({ priceMin: 10, priceMax: 50 }),
-      expect.objectContaining({ limit: 10, offset: 5, orderBy: 'basePrice', orderDirection: 'asc' }),
+      expect.objectContaining({ priceMinCents: 1000, priceMaxCents: 5000 }),
+      expect.objectContaining({ limit: 10, offset: 5, orderBy: 'priceCents', orderDirection: 'asc' }),
     );
   });
 });

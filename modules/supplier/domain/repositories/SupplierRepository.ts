@@ -42,7 +42,7 @@ export interface SupplierProduct {
   supplierProductName?: string;
   status: SupplierProductStatus;
   isPreferred: boolean;
-  unitCost: number;
+  unitCostCents: number;
   currency: string;
   minimumOrderQuantity: number;
   leadTime?: number;

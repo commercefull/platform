@@ -1,38 +1,17 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn().mockResolvedValue(undefined) },
-}));
-
+import '../../tests/testUtils';
 import { GenerateSalesReportUseCase } from './GenerateSalesReport';
-import type { AnalyticsDataPort } from '../../domain/repositories/AnalyticsDataPort';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-const mockPort: AnalyticsDataPort = {
-  getSalesSummary: jest.fn().mockResolvedValue({
-    totalOrders: 100,
-    totalRevenue: 5000,
-    averageOrderValue: 50,
-  }),
-  getTopProducts: jest.fn(),
-  getCustomerCohorts: jest.fn(),
-  findRecentCustomerIds: jest.fn(),
-  findCustomerPurchaseHistory: jest.fn(),
-  findRecentCustomerId: jest.fn(),
-  getRevenueData: jest.fn(),
-  getCustomerData: jest.fn(),
-  getInventoryData: jest.fn(),
-  getRealTimeMetrics: jest.fn(),
-};
+import { createAnalyticsDataPort, createSalesSummary, emitMock } from '../../tests/testUtils';
 
 describe('GenerateSalesReportUseCase', () => {
-  let useCase: GenerateSalesReportUseCase;
+  const analyticsDataPort = createAnalyticsDataPort();
+  const useCase = new GenerateSalesReportUseCase(analyticsDataPort);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GenerateSalesReportUseCase(mockPort);
+    analyticsDataPort.getSalesSummary.mockResolvedValue(createSalesSummary());
   });
 
-  it('should generate sales report (happy path)', async () => {
+  it('should generate a sales report with summary metrics', async () => {
     const result = await useCase.execute({
       startDate: new Date('2026-01-01'),
       endDate: new Date('2026-01-31'),
@@ -40,10 +19,10 @@ describe('GenerateSalesReportUseCase', () => {
 
     expect(result.success).toBe(true);
     expect(result.report?.summary.totalOrders).toBe(100);
-    expect(result.report?.summary.totalRevenue).toBe(5000);
+    expect(result.report?.summary.totalRevenueCents).toBe(5000);
   });
 
-  it('should return error when start date >= end date', async () => {
+  it('should fail when the start date is not before the end date', async () => {
     const result = await useCase.execute({
       startDate: new Date('2026-01-31'),
       endDate: new Date('2026-01-01'),
@@ -51,10 +30,12 @@ describe('GenerateSalesReportUseCase', () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('Start date must be before');
+    expect(analyticsDataPort.getSalesSummary).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should handle errors from analytics repo', async () => {
-    (mockPort.getSalesSummary as jest.Mock).mockRejectedValueOnce(new Error('DB error'));
+  it('should return the repository error when the summary query fails', async () => {
+    analyticsDataPort.getSalesSummary.mockRejectedValueOnce(new Error('DB error'));
 
     const result = await useCase.execute({
       startDate: new Date('2026-01-01'),
@@ -63,9 +44,10 @@ describe('GenerateSalesReportUseCase', () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('DB error');
+    expect(emitMock).not.toHaveBeenCalled();
   });
 
-  it('should emit event on successful report generation', async () => {
+  it('should emit analytics.report.generated when the report is generated', async () => {
     const result = await useCase.execute({
       startDate: new Date('2026-01-01'),
       endDate: new Date('2026-01-31'),
@@ -73,11 +55,9 @@ describe('GenerateSalesReportUseCase', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(eventBus.emit).toHaveBeenCalledWith(
+    expect(emitMock).toHaveBeenCalledWith(
       'analytics.report.generated',
-      expect.objectContaining({
-        generatedBy: 'admin1',
-      }),
+      expect.objectContaining({ generatedBy: 'admin1' }),
     );
   });
 });

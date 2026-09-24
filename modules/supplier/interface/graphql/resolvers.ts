@@ -18,7 +18,7 @@ const supplierRepoAdapter = {
     return {
       status: supplier.status,
       isActive: supplier.isActive,
-      minimumOrderValue: supplier.minOrderValue,
+      minimumOrderValue: supplier.minOrderValueCents,
       leadTimeDays: supplier.leadTime,
     };
   },
@@ -49,7 +49,7 @@ const purchaseOrderRepoAdapter = {
       purchaseOrderId: result.supplierPurchaseOrderId,
       poNumber: result.poNumber,
       supplierId: result.supplierId,
-      totalAmount: result.total,
+      totalAmountCents: result.totalCents,
       status: result.status,
       createdAt: new Date(result.createdAt),
     };

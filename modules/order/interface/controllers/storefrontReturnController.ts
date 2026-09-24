@@ -5,9 +5,8 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { ManageStorefrontReturnsUseCase } from '../../application/useCases/ManageStorefrontReturns';
+import { manageStorefrontReturnsUseCase } from '../../application/useCases/wired';
 
-const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase();
 
 interface CustomerUser {
   id: string;
@@ -116,8 +115,12 @@ export const viewReturn = async (req: HttpRequest, res: HttpResponse) => {
     });
   }
 
+  const orderId = (returnRequest as Record<string, unknown>).orderId as string | undefined;
+  const items = orderId ? await manageStorefrontReturnsUseCase.findOrderItemsWithProduct(orderId) : [];
+
   storefrontRespond(req, res, 'returns/view', {
     pageName: `Return #${returnId}`,
     returnRequest,
+    items: items || [],
   });
 };

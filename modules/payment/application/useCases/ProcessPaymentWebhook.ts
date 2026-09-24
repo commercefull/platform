@@ -8,9 +8,7 @@
  */
 
 import { PaymentRepository, PaymentWebhook } from '../../domain/repositories/PaymentRepository';
-import { paymentDataRepository } from '../wired';
 
-const PaymentRepo = paymentDataRepository.payments;
 import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -45,7 +43,7 @@ export interface ProcessPaymentWebhookResponse {
 // ============================================================================
 
 export class ProcessPaymentWebhookUseCase {
-  constructor(private readonly repo: PaymentRepository = PaymentRepo) {}
+  constructor(private readonly repo: PaymentRepository) {}
 
   async execute(command: ProcessPaymentWebhookCommand): Promise<ProcessPaymentWebhookResponse> {
     // Idempotency check: skip insert if this externalId already exists

@@ -15,7 +15,7 @@ describe('Tax Calculation API Integration Tests', () => {
       const calculationRequest = {
         productId: 'test-product-123',
         quantity: 2,
-        price: 19.99,
+        priceCents: 1999,
         shippingAddress: {
           country: 'US',
           region: 'CA',
@@ -31,17 +31,17 @@ describe('Tax Calculation API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      expect(response.data).toHaveProperty('subtotal');
-      expect(response.data).toHaveProperty('taxAmount');
-      expect(response.data).toHaveProperty('total');
+      expect(response.data).toHaveProperty('subtotalCents');
+      expect(response.data).toHaveProperty('taxAmountCents');
+      expect(response.data).toHaveProperty('totalCents');
       expect(response.data).toHaveProperty('taxBreakdown');
 
       // Basic validation of the tax calculation
-      expect(response.data.subtotal).toBe(calculationRequest.quantity * calculationRequest.price);
-      expect(response.data.total).toBe(response.data.subtotal + response.data.taxAmount);
+      expect(response.data.subtotalCents).toBe(calculationRequest.quantity * calculationRequest.priceCents);
+      expect(response.data.totalCents).toBe(response.data.subtotalCents + response.data.taxAmountCents);
 
       // Check if tax breakdown is present
-      if (response.data.taxAmount > 0) {
+      if (response.data.taxAmountCents > 0) {
         expect(Array.isArray(response.data.taxBreakdown)).toBeTruthy();
         expect(response.data.taxBreakdown.length).toBeGreaterThan(0);
 
@@ -50,8 +50,8 @@ describe('Tax Calculation API Integration Tests', () => {
         expect(firstBreakdown).toHaveProperty('rateId');
         expect(firstBreakdown).toHaveProperty('rateName');
         expect(firstBreakdown).toHaveProperty('rateValue');
-        expect(firstBreakdown).toHaveProperty('taxableAmount');
-        expect(firstBreakdown).toHaveProperty('taxAmount');
+        expect(firstBreakdown).toHaveProperty('taxableAmountCents');
+        expect(firstBreakdown).toHaveProperty('taxAmountCents');
       }
     });
 
@@ -59,7 +59,7 @@ describe('Tax Calculation API Integration Tests', () => {
       const invalidRequest = {
         // Missing required productId
         quantity: 2,
-        price: 19.99,
+        priceCents: 1999,
         shippingAddress: {
           country: 'US',
         },
@@ -76,7 +76,7 @@ describe('Tax Calculation API Integration Tests', () => {
       const calculationRequest = {
         productId: 'test-product-123',
         quantity: 1,
-        price: 10.0,
+        priceCents: 1000,
         shippingAddress: {
           // Using a country code that likely doesn't have tax rates configured in test data
           country: 'ZZ', // Non-existent country code for testing
@@ -91,9 +91,9 @@ describe('Tax Calculation API Integration Tests', () => {
 
       expect(response.status).toBe(200);
 
-      expect(response.data.taxAmount).toBe(0);
-      expect(response.data.subtotal).toBe(10.0);
-      expect(response.data.total).toBe(10.0);
+      expect(response.data.taxAmountCents).toBe(0);
+      expect(response.data.subtotalCents).toBe(1000);
+      expect(response.data.totalCents).toBe(1000);
     });
   });
 
@@ -118,16 +118,16 @@ describe('Tax Calculation API Integration Tests', () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.data).toHaveProperty('subtotal');
-      expect(response.data).toHaveProperty('taxAmount');
-      expect(response.data).toHaveProperty('total');
+      expect(response.data).toHaveProperty('subtotalCents');
+      expect(response.data).toHaveProperty('taxAmountCents');
+      expect(response.data).toHaveProperty('totalCents');
 
       // Additional checks if we have line items in the response
       if (response.data.lineItemTaxes && response.data.lineItemTaxes.length > 0) {
         const firstLineItem = response.data.lineItemTaxes[0];
         expect(firstLineItem).toHaveProperty('lineItemId');
         expect(firstLineItem).toHaveProperty('productId');
-        expect(firstLineItem).toHaveProperty('taxAmount');
+        expect(firstLineItem).toHaveProperty('taxAmountCents');
       }
     });
 

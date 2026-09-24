@@ -1,7 +1,4 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock } from '../../tests/testUtils';
 import { ProcessWebhookUseCase } from './ProcessWebhook';
 import { InvalidWebhookSignatureError } from '../../domain/errors/PaymentErrors';
 
@@ -21,8 +18,9 @@ describe('ProcessWebhookUseCase', () => {
   let useCase: ProcessWebhookUseCase;
 
   beforeEach(() => {
+    emitMock.mockClear();
     jest.clearAllMocks();
-    useCase = new ProcessWebhookUseCase(mockPaymentRepo as never, {});
+    useCase = new ProcessWebhookUseCase(mockPaymentRepo as unknown as ConstructorParameters<typeof ProcessWebhookUseCase>[0], {});
   });
 
   it('should process payment completed webhook', async () => {

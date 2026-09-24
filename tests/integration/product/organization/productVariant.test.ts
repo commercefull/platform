@@ -58,7 +58,7 @@ describe('Product Variants & Barcode', () => {
         productId: testProductId,
         name: 'New Test Variant',
         sku: `VAR-NEW-${Math.floor(Math.random() * 100000)}`,
-        price: 69.99,
+        priceCents: 6999,
         isDefault: false,
         options: [
           { name: 'Color', value: 'Red' },
@@ -76,7 +76,7 @@ describe('Product Variants & Barcode', () => {
       expect(variantId).toBeTruthy();
       expect(res.data.data).toHaveProperty('name', newVariantData.name);
       expect(res.data.data).toHaveProperty('sku', newVariantData.sku);
-      expect(res.data.data).toHaveProperty('price', newVariantData.price);
+      expect(res.data.data).toHaveProperty('priceCents', newVariantData.priceCents);
 
       // Cleanup
       await client
@@ -92,7 +92,7 @@ describe('Product Variants & Barcode', () => {
         `/business/products/variants/${testVariantId}`,
         {
           name: 'Updated Variant Name',
-          price: 79.99,
+          priceCents: 7999,
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
@@ -100,7 +100,7 @@ describe('Product Variants & Barcode', () => {
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       expect(res.data.data).toHaveProperty('name', 'Updated Variant Name');
-      expect(res.data.data).toHaveProperty('price', 79.99);
+      expect(res.data.data).toHaveProperty('priceCents', 7999);
     });
 
     it('should patch variant inventory', async () => {
@@ -131,7 +131,7 @@ describe('Product Variants & Barcode', () => {
           productId: testProductId,
           name: 'Dup SKU Variant',
           sku,
-          price: 49.99,
+          priceCents: 4999,
           isDefault: false,
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
@@ -146,7 +146,7 @@ describe('Product Variants & Barcode', () => {
           productId: testProductId,
           name: 'Dup SKU Variant 2',
           sku,
-          price: 59.99,
+          priceCents: 5999,
           isDefault: false,
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },

@@ -11,11 +11,11 @@ exports.up = async function (knex) {
     table.uuid('sellerId').notNullable();
     table.uuid('orderId').nullable();
     table.uuid('settlementId').nullable();
-    table.decimal('grossAmount', 15, 2).notNullable();
-    table.decimal('commissionAmount', 15, 2).notNullable();
-    table.decimal('feeAmount', 15, 2).defaultTo(0);
-    table.decimal('netAmount', 15, 2).notNullable();
-    table.string('currency', 3).notNullable();
+    table.bigInteger('grossAmountCents').notNullable();
+    table.bigInteger('commissionAmountCents').notNullable();
+    table.bigInteger('feeAmountCents').defaultTo(0);
+    table.bigInteger('netAmountCents').notNullable();
+    table.string('currencyCode', 3).notNullable().references('code').inTable('currency');
     table.string('status', 20).defaultTo('pending'); // 'pending', 'scheduled', 'processing', 'completed', 'failed'
     table.date('scheduledDate').nullable();
     table.timestamp('processedAt').nullable();

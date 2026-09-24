@@ -1,20 +1,25 @@
+import '../../tests/testUtils';
 import { GetMembershipBenefitsUseCase } from './GetMembershipBenefits';
+import { createBenefitsRepository } from '../../tests/testUtils';
 
 describe('GetMembershipBenefitsUseCase', () => {
-  let useCase: GetMembershipBenefitsUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const membershipRepository = createBenefitsRepository();
+  const useCase = new GetMembershipBenefitsUseCase(membershipRepository);
 
   beforeEach(() => {
-    mockRepo = {
-      findActiveByCustomerId: jest.fn().mockResolvedValue({ tierId: 't1', endDate: new Date(Date.now() + 30 * 86400000) }),
-      findTierById: jest
-        .fn()
-        .mockResolvedValue({ name: 'Gold', level: 2, benefits: [{ type: 'discount', value: 10, description: '10% off' }] }),
-    };
-    useCase = new GetMembershipBenefitsUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    membershipRepository.findActiveByCustomerId.mockResolvedValue({
+      tierId: 't1',
+      endDate: new Date(Date.now() + 30 * 86400000),
+    });
+    membershipRepository.findTierById.mockResolvedValue({
+      name: 'Gold',
+      level: 2,
+      benefits: [{ type: 'discount', value: 10, description: '10% off' }],
+    });
   });
 
-  it('should get membership benefits (happy path)', async () => {
+  it('should return the tier benefits and days remaining for a member', async () => {
     const result = await useCase.execute({ customerId: 'c1' });
 
     expect(result.hasMembership).toBe(true);
@@ -23,12 +28,13 @@ describe('GetMembershipBenefitsUseCase', () => {
     expect(result.daysRemaining).toBeGreaterThan(0);
   });
 
-  it('should return no membership for non-members', async () => {
-    mockRepo.findActiveByCustomerId.mockResolvedValue(null);
+  it('should return no membership when the customer is not a member', async () => {
+    membershipRepository.findActiveByCustomerId.mockResolvedValue(null);
 
     const result = await useCase.execute({ customerId: 'non-member' });
 
     expect(result.hasMembership).toBe(false);
     expect(result.benefits).toHaveLength(0);
+    expect(membershipRepository.findTierById).not.toHaveBeenCalled();
   });
 });

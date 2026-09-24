@@ -1,14 +1,16 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { GenerateReportUseCase } from '../../application/useCases/GenerateReport';
 import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
-import { CreateReportScheduleUseCase } from '../../application/useCases/CreateReportSchedule';
-import { ListReportSchedulesUseCase } from '../../application/useCases/ListReportSchedules';
-import { GetReportScheduleUseCase } from '../../application/useCases/GetReportSchedule';
-import { UpdateReportScheduleUseCase } from '../../application/useCases/UpdateReportSchedule';
-import { DeleteReportScheduleUseCase } from '../../application/useCases/DeleteReportSchedule';
-import { ListReportExecutionsUseCase } from '../../application/useCases/ListReportExecutions';
+import {
+  generateReportUseCase,
+  createReportScheduleUseCase,
+  listReportSchedulesUseCase,
+  getReportScheduleUseCase,
+  updateReportScheduleUseCase,
+  deleteReportScheduleUseCase,
+  listReportExecutionsUseCase,
+} from '../../application/wired';
 import type { ReportType } from '../../domain/entities/ReportEntities';
 
 export const reportingDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -23,7 +25,7 @@ export const reportingDashboard = async (req: HttpRequest, res: HttpResponse): P
 
 export const generateReport = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
-  const useCase = new GenerateReportUseCase();
+  const useCase = generateReportUseCase;
   const result = await useCase.execute({
     reportType: body.reportType as ReportType,
     parameters: {
@@ -45,7 +47,7 @@ export const generateReport = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const listSchedules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new ListReportSchedulesUseCase();
+  const useCase = listReportSchedulesUseCase;
   const schedules = await useCase.execute();
 
   adminRespond(req, res, 'reporting/scheduled', {
@@ -55,14 +57,14 @@ export const listSchedules = async (req: HttpRequest, res: HttpResponse): Promis
 };
 
 export const viewSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const scheduleUseCase = new GetReportScheduleUseCase();
+  const scheduleUseCase = getReportScheduleUseCase;
   const schedule = await scheduleUseCase.execute(req.params.scheduleId);
   if (!schedule) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Report schedule not found' });
     return;
   }
 
-  const executionsUseCase = new ListReportExecutionsUseCase();
+  const executionsUseCase = listReportExecutionsUseCase;
   const executions = await executionsUseCase.execute(req.params.scheduleId);
 
   adminRespond(req, res, 'reporting/schedule-detail', {
@@ -86,7 +88,7 @@ export const createScheduleForm = async (req: HttpRequest, res: HttpResponse): P
 export const createSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const useCase = new CreateReportScheduleUseCase();
+    const useCase = createReportScheduleUseCase;
     const result = await useCase.execute({
       name: body.name as string,
       reportType: body.reportType as ReportType,
@@ -115,7 +117,7 @@ export const createSchedule = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const editScheduleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const scheduleUseCase = new GetReportScheduleUseCase();
+  const scheduleUseCase = getReportScheduleUseCase;
   const schedule = await scheduleUseCase.execute(req.params.scheduleId);
   if (!schedule) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Report schedule not found' });
@@ -132,7 +134,7 @@ export const editScheduleForm = async (req: HttpRequest, res: HttpResponse): Pro
 export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const useCase = new UpdateReportScheduleUseCase();
+    const useCase = updateReportScheduleUseCase;
     await useCase.execute({
       reportScheduleId: req.params.scheduleId,
       name: (body.name as string) || undefined,
@@ -150,7 +152,7 @@ export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promi
     res.redirect(`/admin/reporting/schedules/${req.params.scheduleId}?success=Scheduled report updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    const scheduleUseCase = new GetReportScheduleUseCase();
+    const scheduleUseCase = getReportScheduleUseCase;
     const schedule = await scheduleUseCase.execute(req.params.scheduleId).catch(() => null);
     adminRespond(req, res, 'reporting/edit-schedule', {
       pageName: 'Edit Scheduled Report',
@@ -163,7 +165,7 @@ export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promi
 
 export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const useCase = new DeleteReportScheduleUseCase();
+    const useCase = deleteReportScheduleUseCase;
     await useCase.execute(req.params.scheduleId);
     res.redirect('/admin/reporting/schedules?success=Scheduled report deleted successfully');
   } catch (error: unknown) {

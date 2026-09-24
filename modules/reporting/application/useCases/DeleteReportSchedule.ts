@@ -1,7 +1,9 @@
-import { reportingRepository as reportingRepo } from '../wired';
+import type { ReportingRepository } from '../../domain/repositories/ReportingRepository';
 
 export class DeleteReportScheduleUseCase {
+  constructor(private readonly reportingRepo: ReportingRepository) {}
+
   async execute(reportScheduleId: string): Promise<boolean> {
-    return reportingRepo.deleteSchedule(reportScheduleId);
+    return this.reportingRepo.deleteSchedule(reportScheduleId);
   }
 }

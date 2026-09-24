@@ -75,10 +75,10 @@ export interface CheckoutBehaviorConfig {
   autoSelectShipping: boolean;
   /** Enable express checkout (Apple Pay, Google Pay) */
   enableExpressCheckout: boolean;
-  /** Minimum order amount for checkout */
-  minimumOrderAmount?: number;
-  /** Maximum order amount for checkout */
-  maximumOrderAmount?: number;
+  /** Minimum order amount for checkout (integer cents) */
+  minimumOrderAmountCents?: number;
+  /** Maximum order amount for checkout (integer cents) */
+  maximumOrderAmountCents?: number;
   /** Session timeout in minutes */
   sessionTimeoutMinutes: number;
   /** Custom success message */
@@ -421,12 +421,12 @@ export class CheckoutConfig {
     return this.getStep(stepId)?.fields.find(f => f.fieldId === fieldId);
   }
 
-  validateOrderAmount(amount: number): { valid: boolean; message?: string } {
-    if (this.props.behavior.minimumOrderAmount !== undefined && amount < this.props.behavior.minimumOrderAmount) {
-      return { valid: false, message: `Minimum order amount is ${this.props.behavior.minimumOrderAmount}` };
+  validateOrderAmount(amountCents: number): { valid: boolean; message?: string } {
+    if (this.props.behavior.minimumOrderAmountCents !== undefined && amountCents < this.props.behavior.minimumOrderAmountCents) {
+      return { valid: false, message: `Minimum order amount is ${this.props.behavior.minimumOrderAmountCents}` };
     }
-    if (this.props.behavior.maximumOrderAmount !== undefined && amount > this.props.behavior.maximumOrderAmount) {
-      return { valid: false, message: `Maximum order amount is ${this.props.behavior.maximumOrderAmount}` };
+    if (this.props.behavior.maximumOrderAmountCents !== undefined && amountCents > this.props.behavior.maximumOrderAmountCents) {
+      return { valid: false, message: `Maximum order amount is ${this.props.behavior.maximumOrderAmountCents}` };
     }
     return { valid: true };
   }

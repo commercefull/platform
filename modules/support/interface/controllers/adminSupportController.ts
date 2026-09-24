@@ -6,10 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { ManageSupportTicketsUseCase, ManageFaqUseCase } from '../../application/useCases/ManageSupport';
-
-const manageSupportTicketsUseCase = new ManageSupportTicketsUseCase();
-const manageFaqUseCase = new ManageFaqUseCase();
+import { manageSupportTicketsUseCase, manageFaqUseCase } from '../../application/wired';
 
 // ============================================================================
 // Support Dashboard

@@ -1,47 +1,48 @@
-jest.mock('../../infrastructure/repositories/CustomerDataRepository', () => ({
-  __esModule: true,
-  default: {
-    wishlist: {
-      findByCustomer: jest.fn().mockResolvedValue([{ productId: 'p1', productName: 'Widget' }]),
-      findExisting: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({ wishlistId: 'w1' }),
-      remove: jest.fn().mockResolvedValue(undefined),
-    },
-    addresses: {},
-    customers: {},
-  },
-}));
-
+import '../../tests/testUtils';
 import { ManageStorefrontWishlistUseCase } from './ManageStorefrontWishlist';
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
-
-const mockRepo = customerDataRepository as unknown as { wishlist: Record<string, jest.Mock> };
+import { createStorefrontWishlistRepository, createWishlistItem } from '../../tests/testUtils';
 
 describe('ManageStorefrontWishlistUseCase', () => {
-  let useCase: ManageStorefrontWishlistUseCase;
+  const wishlistRepository = createStorefrontWishlistRepository();
+  const useCase = new ManageStorefrontWishlistUseCase(wishlistRepository);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageStorefrontWishlistUseCase();
   });
 
-  it('should find by customer', async () => {
-    const result = await useCase.findByCustomer('c1');
+  it('should return the wishlist items for the customer', async () => {
+    wishlistRepository.findByCustomer.mockResolvedValue([createWishlistItem()]);
+
+    const result = await useCase.findByCustomer('cust-1');
+
     expect(result).toHaveLength(1);
+    expect(wishlistRepository.findByCustomer).toHaveBeenCalledWith('cust-1');
   });
 
-  it('should find existing', async () => {
-    await useCase.findExisting('c1', 'p1');
-    expect(mockRepo.wishlist.findExisting).toHaveBeenCalledWith('c1', 'p1');
+  it('should return the existing wishlist item', async () => {
+    wishlistRepository.findExisting.mockResolvedValue(createWishlistItem());
+
+    const result = await useCase.findExisting('cust-1', 'prod-1');
+
+    expect(result?.wishlistItemId).toBe('wish-1');
+    expect(wishlistRepository.findExisting).toHaveBeenCalledWith('cust-1', 'prod-1');
   });
 
-  it('should create wishlist item', async () => {
-    await useCase.create('c1', 'p1');
-    expect(mockRepo.wishlist.create).toHaveBeenCalledWith('c1', 'p1');
+  it('should delegate wishlist item creation', async () => {
+    wishlistRepository.create.mockResolvedValue(createWishlistItem());
+
+    const result = await useCase.create('cust-1', 'prod-1');
+
+    expect(result?.wishlistItemId).toBe('wish-1');
+    expect(wishlistRepository.create).toHaveBeenCalledWith('cust-1', 'prod-1');
   });
 
-  it('should remove wishlist item', async () => {
-    await useCase.remove('c1', 'p1');
-    expect(mockRepo.wishlist.remove).toHaveBeenCalledWith('c1', 'p1');
+  it('should delegate wishlist item removal', async () => {
+    wishlistRepository.remove.mockResolvedValue(createWishlistItem());
+
+    const result = await useCase.remove('cust-1', 'prod-1');
+
+    expect(result?.wishlistItemId).toBe('wish-1');
+    expect(wishlistRepository.remove).toHaveBeenCalledWith('cust-1', 'prod-1');
   });
 });

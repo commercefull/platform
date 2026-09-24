@@ -1,49 +1,33 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+import { OrderOrderPlacementAdapter } from './OrderOrderPlacementAdapter';
+import type { OrderRepository } from '../../../order/domain/repositories/OrderRepository';
+import type { Order } from '../../../order/domain/entities/Order';
+import type { CreateOrderUseCase } from '../../../order/application/useCases/CreateOrder';
+import type { CancelOrderUseCase } from '../../../order/application/useCases/CancelOrder';
+import { OrderStatus } from '../../../order/domain/valueObjects/OrderStatus';
+import { PaymentStatus } from '../../../order/domain/valueObjects/PaymentStatus';
 
 describe('OrderOrderPlacementAdapter', () => {
-  let adapter: import('./OrderOrderPlacementAdapter').OrderOrderPlacementAdapter;
-  let mockOrderRepo: { findById: jest.Mock; save: jest.Mock };
+  let adapter: OrderOrderPlacementAdapter;
+  let mockOrderRepo: jest.Mocked<Pick<OrderRepository, 'findById' | 'save'>>;
+  let createOrderUseCase: jest.Mocked<Pick<CreateOrderUseCase, 'execute'>>;
+  let cancelOrderUseCase: jest.Mocked<Pick<CancelOrderUseCase, 'execute'>>;
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.doMock('../../../order/application/useCases/CreateOrder', () => ({
-      CreateOrderUseCase: jest.fn().mockImplementation((_repo: any) => ({
-        execute: jest.fn().mockResolvedValue({ orderId: 'order-1', orderNumber: 'ORD-001' }),
-      })),
-      CreateOrderCommand: jest.fn().mockImplementation((...args: any[]) => ({ args })),
-    }));
-    jest.doMock('../../../order/application/useCases/CancelOrder', () => ({
-      CancelOrderUseCase: jest.fn().mockImplementation((_repo: any) => ({
-        execute: jest.fn().mockResolvedValue(undefined),
-      })),
-      CancelOrderCommand: jest.fn().mockImplementation((...args: any[]) => ({ args })),
-    }));
-    jest.doMock('../../../order/domain/valueObjects/OrderStatus', () => ({
-      OrderStatus: {
-        PENDING: 'pending',
-        PAYMENT_PENDING: 'payment_pending',
-        PROCESSING: 'processing',
-        CANCELLED: 'cancelled',
-        COMPLETED: 'completed',
-      },
-    }));
-    jest.doMock('../../../order/domain/valueObjects/PaymentStatus', () => ({
-      PaymentStatus: { PENDING: 'pending', PAID: 'paid' },
-    }));
-
     mockOrderRepo = {
       findById: jest.fn(),
       save: jest.fn(),
     };
-    const { OrderOrderPlacementAdapter } = require('./OrderOrderPlacementAdapter');
-    adapter = new OrderOrderPlacementAdapter(mockOrderRepo as never);
-  });
-
-  afterEach(() => {
-    jest.dontMock('../../../order/application/useCases/CreateOrder');
-    jest.dontMock('../../../order/application/useCases/CancelOrder');
-    jest.dontMock('../../../order/domain/valueObjects/OrderStatus');
-    jest.dontMock('../../../order/domain/valueObjects/PaymentStatus');
+    createOrderUseCase = {
+      execute: jest.fn().mockResolvedValue({ orderId: 'order-1', orderNumber: 'ORD-001' }),
+    };
+    cancelOrderUseCase = {
+      execute: jest.fn().mockResolvedValue(undefined),
+    };
+    adapter = new OrderOrderPlacementAdapter(
+      mockOrderRepo as unknown as OrderRepository,
+      createOrderUseCase as unknown as CreateOrderUseCase,
+      cancelOrderUseCase as unknown as CancelOrderUseCase,
+    );
   });
 
   it('implements OrderPlacementPort', () => {
@@ -57,14 +41,14 @@ describe('OrderOrderPlacementAdapter', () => {
     mockOrderRepo.findById.mockResolvedValue({
       orderId: 'order-1',
       orderNumber: 'ORD-001',
-      status: 'pending',
-      paymentStatus: 'pending',
-    });
+      status: OrderStatus.PENDING,
+      paymentStatus: PaymentStatus.PENDING,
+    } as unknown as Order);
 
     const result = await adapter.createOrder({
       customerId: 'cust-1',
       customerEmail: 'test@test.com',
-      items: [{ productId: 'p1', sku: 'SKU', name: 'Widget', quantity: 1, unitPrice: 100 }],
+      items: [{ productId: 'p1', sku: 'SKU', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
       shippingAddress: {
         firstName: 'Jane',
         lastName: 'Doe',
@@ -88,29 +72,36 @@ describe('OrderOrderPlacementAdapter', () => {
       basketId: 'basket-1',
       source: 'checkout',
       currency: 'USD',
-      shippingAmount: 10,
+      shippingAmountCents: 10,
     });
 
+    expect(createOrderUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customerId: 'cust-1',
+        customerEmail: 'test@test.com',
+        basketId: 'basket-1',
+      }),
+    );
     expect(result.orderId).toBe('order-1');
     expect(result.orderNumber).toBe('ORD-001');
-    expect(result.status).toBe('pending');
-    expect(result.paymentStatus).toBe('pending');
+    expect(result.status).toBe(OrderStatus.PENDING);
+    expect(result.paymentStatus).toBe(PaymentStatus.PENDING);
   });
 
   it('should find order and return snapshot', async () => {
     mockOrderRepo.findById.mockResolvedValue({
       orderId: 'order-1',
       orderNumber: 'ORD-001',
-      status: 'processing',
-      paymentStatus: 'paid',
-    });
+      status: OrderStatus.PROCESSING,
+      paymentStatus: PaymentStatus.PAID,
+    } as unknown as Order);
 
     const result = await adapter.findOrder('order-1');
 
     expect(result).not.toBeNull();
     expect(result!.orderId).toBe('order-1');
-    expect(result!.status).toBe('processing');
-    expect(result!.paymentStatus).toBe('paid');
+    expect(result!.status).toBe(OrderStatus.PROCESSING);
+    expect(result!.paymentStatus).toBe(PaymentStatus.PAID);
   });
 
   it('should return null when order not found', async () => {
@@ -124,11 +115,11 @@ describe('OrderOrderPlacementAdapter', () => {
       orderId: 'order-1',
       updateStatus: jest.fn(),
     };
-    mockOrderRepo.findById.mockResolvedValue(mockOrder);
+    mockOrderRepo.findById.mockResolvedValue(mockOrder as unknown as Order);
 
     await adapter.updateOrderStatus('order-1', 'pending_payment');
 
-    expect(mockOrder.updateStatus).toHaveBeenCalledWith('payment_pending');
+    expect(mockOrder.updateStatus).toHaveBeenCalledWith(OrderStatus.PAYMENT_PENDING);
     expect(mockOrderRepo.save).toHaveBeenCalledWith(mockOrder);
   });
 
@@ -142,6 +133,9 @@ describe('OrderOrderPlacementAdapter', () => {
 
   it('should cancel order via cancel use case', async () => {
     await adapter.cancelOrder('order-1', 'Customer abandoned');
-    expect(true).toBe(true);
+
+    expect(cancelOrderUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ orderId: 'order-1', reason: 'Customer abandoned' }),
+    );
   });
 });

@@ -13,7 +13,7 @@ import { FraudScreeningService } from '../../../payment/application/services/Fra
 import type { FraudScreeningPort, FraudScreeningRequest, FraudScreeningResult } from '../../application/ports/FraudScreeningPort';
 
 export class PaymentFraudScreeningAdapter implements FraudScreeningPort {
-  constructor(private readonly fraudScreeningService: FraudScreeningService = new FraudScreeningService()) {}
+  constructor(private readonly fraudScreeningService: Pick<FraudScreeningService, 'screen'>) {}
 
   async screenOrder(request: FraudScreeningRequest): Promise<FraudScreeningResult> {
     const result = await this.fraudScreeningService.screen({
@@ -23,7 +23,7 @@ export class PaymentFraudScreeningAdapter implements FraudScreeningPort {
       ipAddress: request.ipAddress,
       billingCountry: request.billingCountry,
       shippingCountry: request.shippingCountry,
-      orderAmount: request.orderAmount,
+      orderAmountCents: request.orderAmountCents,
       currency: request.currency,
       paymentMethod: request.paymentMethodId,
       isFirstOrder: request.isFirstOrder,

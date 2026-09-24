@@ -31,15 +31,15 @@
           <div class="card">
             <div class="card-header"><h3 class="card-title">Balance</h3></div>
             <div class="card-body">
-              <% if (balance) { %>
+              <% if (balanceCents) { %>
                 <div class="mb-3">
-                  <h1 class="mb-0">$<%= Number(balance.balance || 0).toFixed(2) %></h1>
+                  <h1 class="mb-0">$<%= ((balanceCents.balanceCents || 0)/100).toFixed(2) %></h1>
                   <small class="text-muted">Available Balance</small>
                 </div>
                 <dl class="row">
-                  <dt class="col-sm-6">Total Credits</dt><dd class="col-sm-6">$<%= Number(balance.totalCredits || 0).toFixed(2) %></dd>
-                  <dt class="col-sm-6">Total Debits</dt><dd class="col-sm-6">$<%= Number(balance.totalDebits || 0).toFixed(2) %></dd>
-                  <dt class="col-sm-6">Pending Expiry</dt><dd class="col-sm-6">$<%= Number(balance.pendingExpiry || 0).toFixed(2) %></dd>
+                  <dt class="col-sm-6">Total Credits</dt><dd class="col-sm-6">$<%= ((balanceCents.totalCreditsCents || 0)/100).toFixed(2) %></dd>
+                  <dt class="col-sm-6">Total Debits</dt><dd class="col-sm-6">$<%= ((balanceCents.totalDebitsCents || 0)/100).toFixed(2) %></dd>
+                  <dt class="col-sm-6">Pending Expiry</dt><dd class="col-sm-6">$<%= ((balanceCents.pendingExpiryCents || 0)/100).toFixed(2) %></dd>
                 </dl>
               <% } else { %>
                 <p class="text-muted">No store credit data found for this customer.</p>
@@ -72,10 +72,10 @@
                           <span class="badge bg-<%= typeColors[entry.entryType] || 'secondary' %>"><%= entry.entryType %></span>
                         </td>
                         <td class="text-<%= entry.entryType === 'credit' || entry.entryType === 'adjustment' ? 'success' : 'danger' %>">
-                          <%= entry.entryType === 'credit' ? '+' : '-' %>$<%= Number(entry.amount || 0).toFixed(2) %>
+                          <%= entry.entryType === 'credit' ? '+' : '-' %>$<%= ((entry.amountCents || 0)/100).toFixed(2) %>
                         </td>
-                        <td>$<%= Number(entry.balanceAfter || 0).toFixed(2) %></td>
-                        <td><%= entry.reference || '-' %></td>
+                        <td>$<%= ((entry.balanceAfterCents || 0)/100).toFixed(2) %></td>
+                        <td><%= [entry.referenceType, entry.referenceId].filter(Boolean).join("/") || "-" %></td>
                         <td><%= entry.expiresAt ? new Date(entry.expiresAt).toLocaleDateString() : '-' %></td>
                       </tr>
                     <% }) %>

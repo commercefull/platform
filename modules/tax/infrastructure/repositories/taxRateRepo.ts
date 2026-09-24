@@ -30,10 +30,10 @@ export interface TaxRate {
   isCompound: boolean;
   includeInPrice: boolean;
   isShippingTaxable: boolean;
-  fixedAmount?: number;
-  minimumAmount?: number;
-  maximumAmount?: number;
-  threshold?: number;
+  fixedAmountCents?: number;
+  minimumAmountCents?: number;
+  maximumAmountCents?: number;
+  thresholdCents?: number;
   startDate: string;
   endDate?: string;
   isActive: boolean;
@@ -76,8 +76,8 @@ export class TaxRateRepo {
     const result = await queryOne<TaxRate>(
       `INSERT INTO "taxRate" (
         "taxCategoryId", "taxZoneId", "name", "rate", "type", "priority", "isCompound",
-        "includeInPrice", "isShippingTaxable", "fixedAmount", "minimumAmount", "maximumAmount",
-        "threshold", "startDate", "endDate", "isActive", "createdAt", "updatedAt"
+        "includeInPrice", "isShippingTaxable", "fixedAmountCents", "minimumAmountCents", "maximumAmountCents",
+        "thresholdCents", "startDate", "endDate", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
       [
         params.taxCategoryId,
@@ -89,10 +89,10 @@ export class TaxRateRepo {
         params.isCompound || false,
         params.includeInPrice || false,
         params.isShippingTaxable || false,
-        params.fixedAmount || null,
-        params.minimumAmount || null,
-        params.maximumAmount || null,
-        params.threshold || null,
+        params.fixedAmountCents || null,
+        params.minimumAmountCents || null,
+        params.maximumAmountCents || null,
+        params.thresholdCents || null,
         params.startDate || now,
         params.endDate || null,
         params.isActive ?? true,

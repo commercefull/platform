@@ -6,11 +6,8 @@
  * Validates: Requirements 7.7, 7.8
  */
 
-import { notificationConfigRepository } from '../wired';
 import type { NotificationTemplateTranslationRepository } from '../../domain/repositories/NotificationTemplateTranslationRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
-
-const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
 
 // ============================================================================
 // Command
@@ -44,7 +41,7 @@ export interface UpsertTemplateTranslationResponse {
 
 export class UpsertTemplateTranslationUseCase {
   constructor(
-    private readonly translationRepo: NotificationTemplateTranslationRepository = notificationTemplateTranslationRepo,
+    private readonly translationRepo: NotificationTemplateTranslationRepository,
   ) {}
 
   async execute(command: UpsertTemplateTranslationCommand): Promise<UpsertTemplateTranslationResponse> {

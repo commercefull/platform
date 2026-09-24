@@ -1,22 +1,19 @@
-jest.mock('../../../../libs/db', () => ({
-  query: jest.fn().mockResolvedValue([]),
-}));
-
+import { createProduct, createProductVariant, lazyMock, queryMock } from '../../tests/testUtils';
 import { GetProductStoreAvailabilityUseCase } from './GetProductStoreAvailability';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 
-const mockProductRepository = {
-  findById: jest.fn().mockResolvedValue({ productId: 'p1', sku: 'SKU1' }),
-  findVariantById: jest.fn().mockResolvedValue({ productVariantId: 'v1', sku: 'VAR-SKU1' }),
-  getDefaultVariant: jest.fn().mockResolvedValue({ productVariantId: 'v0', sku: 'SKU1' }),
-};
+let mockProductRepository: jest.Mocked<ConstructorParameters<typeof GetProductStoreAvailabilityUseCase>[0]>;
 
 describe('GetProductStoreAvailabilityUseCase', () => {
   let useCase: GetProductStoreAvailabilityUseCase;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new GetProductStoreAvailabilityUseCase(mockProductRepository as never);
+    queryMock.mockResolvedValue([]);
+    mockProductRepository = lazyMock<ConstructorParameters<typeof GetProductStoreAvailabilityUseCase>[0]>();
+    mockProductRepository.findById.mockResolvedValue(createProduct());
+    mockProductRepository.findVariantById.mockResolvedValue(createProductVariant({ variantId: 'v1', sku: 'VAR-SKU1' }));
+    mockProductRepository.getDefaultVariant.mockResolvedValue(createProductVariant({ variantId: 'v0', sku: 'SKU1' }));
+    useCase = new GetProductStoreAvailabilityUseCase(mockProductRepository);
   });
 
   it('should return availability (happy path)', async () => {

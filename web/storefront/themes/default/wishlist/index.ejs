@@ -32,7 +32,7 @@
             <div class="p-4">
               <h3 class="font-semibold text-gray-900 truncate"><%= item.productName || item.name %></h3>
               <div class="flex items-center justify-between mt-2">
-                <span class="text-lg font-bold text-gray-900">$<%= ((item.price || 0) / 100).toFixed(2) %></span>
+                <span class="text-lg font-bold text-gray-900">$<%= ((item.salePriceCents || item.priceCents || 0) / 100).toFixed(2) %></span>
                 <% if (item.inStock !== false) { %>
                   <span class="text-xs text-green-600"><%= t('shared:common.inStock') %></span>
                 <% } else { %>

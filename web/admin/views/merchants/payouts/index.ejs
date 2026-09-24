@@ -33,7 +33,7 @@
             <% (payouts || []).forEach(function(p) { %>
             <tr>
               <td><code><%= p.merchantPayoutId.substring(0, 8) %>...</code></td>
-              <td><strong><%= (p.amount || 0).toFixed(2) %></strong></td>
+              <td><strong><%= ((p.amountCents || 0) / 100).toFixed(2) %></strong></td>
               <td><%= p.currency %></td>
               <td>
                 <span class="badge bg-<%= p.status === 'completed' ? 'success' : p.status === 'failed' ? 'danger' : p.status === 'processing' ? 'info' : 'warning' %>">

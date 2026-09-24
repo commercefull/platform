@@ -49,7 +49,7 @@ describe('SegmentRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.findById('s1');
     expect(result).not.toBeNull();
     expect(result!.name).toBe('VIP');
@@ -63,7 +63,7 @@ describe('SegmentRepositoryImpl', () => {
   });
 
   it('findAll returns empty array when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findAll();
     expect(result).toEqual([]);
   });
@@ -72,14 +72,14 @@ describe('SegmentRepositoryImpl', () => {
     const segment = SegmentDefinition.create({
       name: 'High Value',
       code: 'high_value',
-      conditions: [{ field: 'lifetimeValue', operator: 'gt', value: 1000 }],
+      conditions: [{ field: 'lifetimeValueCents', operator: 'gt', value: 1000 }],
     });
     const mockRow = {
       segmentId: 's1',
       name: 'High Value',
       code: 'high_value',
       description: null,
-      conditions: [{ field: 'lifetimeValue', operator: 'gt', value: 1000 }],
+      conditions: [{ field: 'lifetimeValueCents', operator: 'gt', value: 1000 }],
       matchMode: 'all',
       isActive: true,
       isSystem: false,
@@ -92,13 +92,13 @@ describe('SegmentRepositoryImpl', () => {
       updatedAt: new Date(),
       deletedAt: null,
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.create(segment);
     expect(result.name).toBe('High Value');
   });
 
   it('delete returns true when deleted', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ segmentId: 's1' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ segmentId: 's1' });
     const result = await repo.delete('s1');
     expect(result).toBe(true);
   });
@@ -110,13 +110,13 @@ describe('SegmentRepositoryImpl', () => {
   });
 
   it('count returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.count();
     expect(result).toBe(0);
   });
 
   it('count returns correct number', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '5' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '5' });
     const result = await repo.count(true);
     expect(result).toBe(5);
   });
@@ -145,9 +145,9 @@ describe('CustomerProfileRepositoryImpl', () => {
       lastName: 'User',
       status: 'active',
       tier: 'regular',
-      lifetimeValue: '1000',
-      totalSpent: '1000',
-      averageOrderValue: '100',
+      lifetimeValueCents: '1000',
+      totalSpentCents: '1000',
+      averageOrderValueCents: '100',
       totalOrders: 10,
       firstOrderDate: null,
       lastOrderDate: null,
@@ -180,21 +180,21 @@ describe('CustomerProfileRepositoryImpl', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    mockedQueryOne.mockResolvedValueOnce(mockRow as never);
+    mockedQueryOne.mockResolvedValueOnce(mockRow);
     const result = await repo.findByCustomerId('c1');
     expect(result).not.toBeNull();
     expect(result!.customerId).toBe('c1');
-    expect(result!.lifetimeValue).toBe(1000);
+    expect(result!.lifetimeValueCents).toBe(1000);
   });
 
   it('count returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.count();
     expect(result).toBe(0);
   });
 
   it('delete returns true when deleted', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ customerId: 'c1' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ customerId: 'c1' });
     const result = await repo.delete('c1');
     expect(result).toBe(true);
   });
@@ -209,13 +209,13 @@ describe('SegmentMembershipRepositoryImpl', () => {
   });
 
   it('findBySegment returns empty when no data', async () => {
-    mockedQuery.mockResolvedValueOnce([] as never);
+    mockedQuery.mockResolvedValueOnce([]);
     const result = await repo.findBySegment('s1');
     expect(result).toEqual([]);
   });
 
   it('countBySegment returns 0 when no data', async () => {
-    mockedQueryOne.mockResolvedValueOnce({ count: '0' } as never);
+    mockedQueryOne.mockResolvedValueOnce({ count: '0' });
     const result = await repo.countBySegment('s1');
     expect(result).toBe(0);
   });

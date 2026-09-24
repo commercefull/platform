@@ -9,7 +9,7 @@ export interface QuoteLineItem {
   sku: string;
   name: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   discountPercent?: number;
   taxRate?: number;
   notes?: string;
@@ -23,10 +23,10 @@ export interface QuoteProps {
   status: QuoteStatus;
   requestedBy: string;
   lineItems: QuoteLineItem[];
-  subtotal: number;
-  discountTotal: number;
-  taxTotal: number;
-  total: number;
+  subtotalCents: number;
+  discountTotalCents: number;
+  taxTotalCents: number;
+  totalCents: number;
   currency: string;
   notes?: string;
   internalNotes?: string;
@@ -67,10 +67,10 @@ export class Quote {
       status: 'draft',
       requestedBy: input.requestedBy,
       lineItems: [],
-      subtotal: 0,
-      discountTotal: 0,
-      taxTotal: 0,
-      total: 0,
+      subtotalCents: 0,
+      discountTotalCents: 0,
+      taxTotalCents: 0,
+      totalCents: 0,
       currency: input.currency ?? 'USD',
       notes: input.notes,
       validUntil,
@@ -104,17 +104,17 @@ export class Quote {
   get lineItems(): QuoteLineItem[] {
     return [...this.props.lineItems];
   }
-  get subtotal(): number {
-    return this.props.subtotal;
+  get subtotalCents(): number {
+    return this.props.subtotalCents;
   }
-  get discountTotal(): number {
-    return this.props.discountTotal;
+  get discountTotalCents(): number {
+    return this.props.discountTotalCents;
   }
-  get taxTotal(): number {
-    return this.props.taxTotal;
+  get taxTotalCents(): number {
+    return this.props.taxTotalCents;
   }
-  get total(): number {
-    return this.props.total;
+  get totalCents(): number {
+    return this.props.totalCents;
   }
   get currency(): string {
     return this.props.currency;
@@ -257,25 +257,25 @@ export class Quote {
   }
 
   private recalculate(): void {
-    let subtotal = 0;
-    let discountTotal = 0;
-    let taxTotal = 0;
+    let subtotalCents = 0;
+    let discountTotalCents = 0;
+    let taxTotalCents = 0;
 
     for (const item of this.props.lineItems) {
-      const lineSubtotal = item.unitPrice * item.quantity;
+      const lineSubtotal = item.unitPriceCents * item.quantity;
       const discount = item.discountPercent ? lineSubtotal * (item.discountPercent / 100) : 0;
       const taxable = lineSubtotal - discount;
       const tax = item.taxRate ? taxable * (item.taxRate / 100) : 0;
 
-      subtotal += lineSubtotal;
-      discountTotal += discount;
-      taxTotal += tax;
+      subtotalCents += lineSubtotal;
+      discountTotalCents += discount;
+      taxTotalCents += tax;
     }
 
-    this.props.subtotal = subtotal;
-    this.props.discountTotal = discountTotal;
-    this.props.taxTotal = taxTotal;
-    this.props.total = subtotal - discountTotal + taxTotal;
+    this.props.subtotalCents = subtotalCents;
+    this.props.discountTotalCents = discountTotalCents;
+    this.props.taxTotalCents = taxTotalCents;
+    this.props.totalCents = subtotalCents - discountTotalCents + taxTotalCents;
   }
 
   toJSON(): Record<string, unknown> {

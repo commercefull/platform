@@ -53,8 +53,8 @@ export class TaxCommandRepo {
       `INSERT INTO "${TABLES.TAX_RATE}" (
         "taxRateId", "taxCategoryId", "taxZoneId", "name",
         "rate", "type", "priority", "isCompound", "includeInPrice",
-        "isShippingTaxable", "fixedAmount", "minimumAmount", "maximumAmount",
-        "threshold", "startDate", "endDate", "isActive",
+        "isShippingTaxable", "fixedAmountCents", "minimumAmountCents", "maximumAmountCents",
+        "thresholdCents", "startDate", "endDate", "isActive",
         "createdAt", "updatedAt"
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
@@ -71,10 +71,10 @@ export class TaxCommandRepo {
         taxRate.isCompound,
         taxRate.includeInPrice,
         taxRate.isShippingTaxable,
-        taxRate.fixedAmount || null,
-        taxRate.minimumAmount || null,
-        taxRate.maximumAmount || null,
-        taxRate.threshold || null,
+        taxRate.fixedAmountCents || null,
+        taxRate.minimumAmountCents || null,
+        taxRate.maximumAmountCents || null,
+        taxRate.thresholdCents || null,
         taxRate.startDate ? new Date(taxRate.startDate * 1000).toISOString() : now,
         taxRate.endDate || null,
         taxRate.isActive,
@@ -146,24 +146,24 @@ export class TaxCommandRepo {
       params.push(taxRate.isShippingTaxable);
     }
 
-    if (taxRate.fixedAmount !== undefined) {
-      sets.push(`"fixedAmount" = $${paramIndex++}`);
-      params.push(taxRate.fixedAmount);
+    if (taxRate.fixedAmountCents !== undefined) {
+      sets.push(`"fixedAmountCents" = $${paramIndex++}`);
+      params.push(taxRate.fixedAmountCents);
     }
 
-    if (taxRate.minimumAmount !== undefined) {
-      sets.push(`"minimumAmount" = $${paramIndex++}`);
-      params.push(taxRate.minimumAmount);
+    if (taxRate.minimumAmountCents !== undefined) {
+      sets.push(`"minimumAmountCents" = $${paramIndex++}`);
+      params.push(taxRate.minimumAmountCents);
     }
 
-    if (taxRate.maximumAmount !== undefined) {
-      sets.push(`"maximumAmount" = $${paramIndex++}`);
-      params.push(taxRate.maximumAmount);
+    if (taxRate.maximumAmountCents !== undefined) {
+      sets.push(`"maximumAmountCents" = $${paramIndex++}`);
+      params.push(taxRate.maximumAmountCents);
     }
 
-    if (taxRate.threshold !== undefined) {
-      sets.push(`"threshold" = $${paramIndex++}`);
-      params.push(taxRate.threshold);
+    if (taxRate.thresholdCents !== undefined) {
+      sets.push(`"thresholdCents" = $${paramIndex++}`);
+      params.push(taxRate.thresholdCents);
     }
 
     if (taxRate.startDate !== undefined) {
@@ -455,8 +455,8 @@ export class TaxCommandRepo {
         exemption.verifiedAt || null,
         exemption.notes || null,
         exemption.applicableTaxCategoryIds ? JSON.stringify(exemption.applicableTaxCategoryIds) : null,
-        exemption.minOrderAmount ?? null,
-        exemption.maxOrderAmount ?? null,
+        exemption.minOrderAmountCents ?? null,
+        exemption.maxOrderAmountCents ?? null,
         exemption.exemptionPercent ?? 100,
         now,
         now,
@@ -558,14 +558,14 @@ export class TaxCommandRepo {
       params.push(exemption.applicableTaxCategoryIds ? JSON.stringify(exemption.applicableTaxCategoryIds) : null);
     }
 
-    if (exemption.minOrderAmount !== undefined) {
-      sets.push(`"minOrderAmount" = $${paramIndex++}`);
-      params.push(exemption.minOrderAmount ?? null);
+    if (exemption.minOrderAmountCents !== undefined) {
+      sets.push(`"minOrderAmountCents" = $${paramIndex++}`);
+      params.push(exemption.minOrderAmountCents ?? null);
     }
 
-    if (exemption.maxOrderAmount !== undefined) {
-      sets.push(`"maxOrderAmount" = $${paramIndex++}`);
-      params.push(exemption.maxOrderAmount ?? null);
+    if (exemption.maxOrderAmountCents !== undefined) {
+      sets.push(`"maxOrderAmountCents" = $${paramIndex++}`);
+      params.push(exemption.maxOrderAmountCents ?? null);
     }
 
     if (exemption.exemptionPercent !== undefined) {

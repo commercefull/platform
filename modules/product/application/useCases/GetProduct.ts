@@ -7,6 +7,8 @@ import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { Product } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
+import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
+import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
 
 // ============================================================================
 // Command
@@ -35,12 +37,13 @@ export interface ProductVariantResponse {
   sku: string;
   name: string;
   barcode?: string;
-  basePrice: number;
-  salePrice: number | null;
-  cost: number | null;
-  effectivePrice: number;
+  basePriceCents: number;
+  salePriceCents: number | null;
+  costPriceCents: number | null;
+  effectivePriceCents: number;
   isOnSale: boolean;
   discountPercentage: number;
+  currency: string;
   attributes: Array<{
     attributeId: string;
     attributeName: string;
@@ -86,14 +89,12 @@ export interface ProductDetailResponse {
   organizationId?: string;
   status: string;
   visibility: string;
-  basePrice: number;
-  salePrice: number | null;
-  cost: number | null;
-  effectivePrice: number;
+  basePriceCents: number;
+  salePriceCents: number | null;
+  costPriceCents: number | null;
+  effectivePriceCents: number;
   isOnSale: boolean;
   discountPercentage: number;
-  profitMargin: number | null;
-  profitMarginPercentage: number | null;
   currency: string;
   isFeatured: boolean;
   isVirtual: boolean;
@@ -134,7 +135,10 @@ export interface ProductDetailResponse {
 // ============================================================================
 
 export class GetProductUseCase {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly pricingPort: ProductPricingPort,
+  ) {}
 
   async execute(command: GetProductCommand): Promise<ProductDetailResponse | null> {
     let product: Product | null = null;
@@ -154,6 +158,8 @@ export class GetProductUseCase {
     let variants: ProductVariant[] = [];
     let images: ProductImageResponse[] = [];
 
+    const pricesPromise = this.pricingPort.listProductPrices(product.productId);
+
     if (command.includeVariants) {
       variants = await this.productRepository.findVariantsByProductId(product.productId);
     }
@@ -169,10 +175,22 @@ export class GetProductUseCase {
       }));
     }
 
-    return this.mapToResponse(product, variants, images);
+    const priceRows = await pricesPromise;
+    const productPrice = priceRows.find(p => p.productVariantId === null) ?? priceRows[0] ?? null;
+    const variantPriceByVariantId = new Map(
+      priceRows.filter(p => p.productVariantId !== null).map(p => [p.productVariantId as string, p]),
+    );
+
+    return this.mapToResponse(product, variants, images, productPrice, variantPriceByVariantId);
   }
 
-  private mapToResponse(product: Product, variants: ProductVariant[], images: ProductImageResponse[]): ProductDetailResponse {
+  private mapToResponse(
+    product: Product,
+    variants: ProductVariant[],
+    images: ProductImageResponse[],
+    productPrice: ProductPriceInfo | null,
+    variantPrices: Map<string, ProductPriceInfo>,
+  ): ProductDetailResponse {
     const primaryImage = images.find(img => img.isPrimary) || images[0];
 
     return {
@@ -187,15 +205,7 @@ export class GetProductUseCase {
       organizationId: product.organizationId,
       status: product.status,
       visibility: product.visibility,
-      basePrice: product.price.basePrice,
-      salePrice: product.price.salePrice,
-      cost: product.price.cost,
-      effectivePrice: product.price.effectivePrice,
-      isOnSale: product.price.isOnSale,
-      discountPercentage: product.price.discountPercentage,
-      profitMargin: product.price.profitMargin,
-      profitMarginPercentage: product.price.profitMarginPercentage,
-      currency: product.price.currency,
+      ...toProductPriceDtoOrEmpty(productPrice),
       isFeatured: product.isFeatured,
       isVirtual: product.isVirtual,
       isDownloadable: product.isDownloadable,
@@ -226,12 +236,7 @@ export class GetProductUseCase {
         sku: v.sku,
         name: v.name,
         barcode: v.barcode,
-        basePrice: v.price.basePrice,
-        salePrice: v.price.salePrice,
-        cost: v.price.cost,
-        effectivePrice: v.price.effectivePrice,
-        isOnSale: v.price.isOnSale,
-        discountPercentage: v.price.discountPercentage,
+        ...toProductPriceDtoOrEmpty(variantPrices.get(v.variantId) ?? productPrice),
         attributes: v.attributes,
         attributeString: v.attributeString,
         stockQuantity: v.stockQuantity,

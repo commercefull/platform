@@ -90,7 +90,7 @@
                   <%= company.contactName || '-' %>
                   <br><small class="text-muted"><%= company.email %></small>
                 </td>
-                <td>$<%= (company.creditLimit || 0).toLocaleString() %></td>
+                <td>$<%= ((company.creditLimitCents || 0)/100).toLocaleString() %></td>
                 <td><%= company.orderCount || 0 %></td>
                 <td>
                   <span class="badge bg-<%= company.status === 'approved' ? 'success' : company.status === 'pending' ? 'warning' : 'danger' %>">
@@ -147,7 +147,7 @@
                 <td><a href="/admin/programs/b2b/quotes/<%= quote.quoteId %>">#<%= quote.quoteNumber %></a></td>
                 <td><%= quote.companyName %></td>
                 <td><%= quote.itemCount || 0 %></td>
-                <td>$<%= (quote.totalAmount || 0).toFixed(2) %></td>
+                <td>$<%= ((quote.totalCents || 0) / 100).toFixed(2) %></td>
                 <td>
                   <span class="badge bg-<%= quote.status === 'accepted' ? 'success' : quote.status === 'pending' ? 'warning' : quote.status === 'rejected' ? 'danger' : 'secondary' %>">
                     <%= quote.status %>

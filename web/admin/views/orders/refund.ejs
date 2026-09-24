@@ -63,14 +63,14 @@
                         <% if (item.sku) { %><br><small class="text-muted">SKU: <%= item.sku %></small><% } %>
                       </td>
                       <td><%= item.quantity %></td>
-                      <td>$<%= (item.unitPrice || item.price || 0).toFixed(2) %></td>
-                      <td>$<%= ((item.unitPrice || item.price || 0) * item.quantity).toFixed(2) %></td>
+                      <td>$<%= ((item.unitPriceCents || 0) / 100).toFixed(2) %></td>
+                      <td>$<%= (((item.unitPriceCents || 0) / 100) * item.quantity).toFixed(2) %></td>
                       <td style="width: 100px;">
                         <input type="hidden" name="refundItems[<%= index %>][orderItemId]" value="<%= item.orderItemId %>">
                         <input type="number" class="form-control form-control-sm refund-qty" 
                                name="refundItems[<%= index %>][quantity]" 
                                min="0" max="<%= item.quantity %>" value="<%= item.quantity %>"
-                               data-price="<%= item.unitPrice || item.price || 0 %>"
+                               data-price="<%= (item.unitPriceCents || 0) / 100 %>"
                                onchange="calculateTotal()">
                       </td>
                     </tr>
@@ -86,10 +86,10 @@
                       <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" class="form-control" name="amount" id="refundAmount" 
-                               step="0.01" min="0" max="<%= order.totalAmount %>" 
-                               value="<%= (typeof formData !== 'undefined' && formData.amount) || order.totalAmount %>" required>
+                               step="0.01" min="0" max="<%= (order.totalAmountCents || 0) / 100 %>" 
+                               value="<%= (typeof formData !== 'undefined' && formData.amount) || ((order.totalAmountCents || 0) / 100) %>" required>
                       </div>
-                      <small class="text-muted"><%= t('order:maxRefundable') %>: $<%= order.totalAmount.toFixed(2) %></small>
+                      <small class="text-muted"><%= t('order:maxRefundable') %>: $<%= ((order.totalAmountCents || 0) / 100).toFixed(2) %></small>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -184,38 +184,38 @@
                 </tr>
                 <tr class="table-light">
                   <td><strong><%= t('order:subtotal') %></strong></td>
-                  <td class="text-end">$<%= (order.subtotal || 0).toFixed(2) %></td>
+                  <td class="text-end">$<%= ((order.subtotalCents || 0) / 100).toFixed(2) %></td>
                 </tr>
-                <% if (order.discountAmount > 0) { %>
+                <% if (order.discountTotalCents > 0) { %>
                 <tr>
                   <td><%= t('shared:common.discount') %>:</td>
-                  <td class="text-end text-danger">-$<%= order.discountAmount.toFixed(2) %></td>
+                  <td class="text-end text-danger">-$<%= ((order.discountTotalCents || 0) / 100).toFixed(2) %></td>
                 </tr>
                 <% } %>
-                <% if (order.taxAmount > 0) { %>
+                <% if (order.taxTotalCents > 0) { %>
                 <tr>
                   <td><%= t('shared:common.tax') %>:</td>
-                  <td class="text-end">$<%= order.taxAmount.toFixed(2) %></td>
+                  <td class="text-end">$<%= ((order.taxTotalCents || 0) / 100).toFixed(2) %></td>
                 </tr>
                 <% } %>
-                <% if (order.shippingAmount > 0) { %>
+                <% if (order.shippingTotalCents > 0) { %>
                 <tr>
                   <td><%= t('order:shipping') %></td>
-                  <td class="text-end">$<%= order.shippingAmount.toFixed(2) %></td>
+                  <td class="text-end">$<%= ((order.shippingTotalCents || 0) / 100).toFixed(2) %></td>
                 </tr>
                 <% } %>
                 <tr class="table-primary">
                   <td><strong><%= t('common.total') %>:</strong></td>
-                  <td class="text-end"><strong>$<%= order.totalAmount.toFixed(2) %></strong></td>
+                  <td class="text-end"><strong>$<%= ((order.totalAmountCents || 0) / 100).toFixed(2) %></strong></td>
                 </tr>
-                <% if (order.refundedAmount > 0) { %>
+                <% if ((order.refundedAmountCents || 0) > 0) { %>
                 <tr class="table-warning">
                   <td><%= t('order:alreadyRefunded') %>:</td>
-                  <td class="text-end text-danger">-$<%= order.refundedAmount.toFixed(2) %></td>
+                  <td class="text-end text-danger">-$<%= ((order.refundedAmountCents || 0) / 100).toFixed(2) %></td>
                 </tr>
                 <tr class="table-info">
                   <td><strong><%= t('order:refundable') %>:</strong></td>
-                  <td class="text-end"><strong>$<%= (order.totalAmount - (order.refundedAmount || 0)).toFixed(2) %></strong></td>
+                  <td class="text-end"><strong>$<%= (((order.totalAmountCents || 0) - (order.refundedAmountCents || 0)) / 100).toFixed(2) %></strong></td>
                 </tr>
                 <% } %>
               </table>
@@ -228,11 +228,11 @@
               <h3 class="card-title"><i class="fas fa-user me-2"></i><%= t('shared:common.customer') %></h3>
             </div>
             <div class="card-body">
-              <% if (order.customer) { %>
-              <p class="mb-1"><strong><%= order.customer.firstName %> <%= order.customer.lastName %></strong></p>
-              <p class="mb-1 text-muted"><%= order.customer.email %></p>
-              <% if (order.customer.phone) { %>
-              <p class="mb-0 text-muted"><%= order.customer.phone %></p>
+              <% if (order.customerName || order.customerEmail) { %>
+              <p class="mb-1"><strong><%= order.customerName || '' %></strong></p>
+              <p class="mb-1 text-muted"><%= order.customerEmail %></p>
+              <% if (order.customerPhone) { %>
+              <p class="mb-0 text-muted"><%= order.customerPhone %></p>
               <% } %>
               <% } else { %>
               <p class="text-muted mb-0"><%= t('order:guestCheckout') %></p>

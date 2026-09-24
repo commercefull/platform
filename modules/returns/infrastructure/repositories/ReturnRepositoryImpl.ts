@@ -29,7 +29,7 @@ interface ReturnDbRow {
   rmaNumber: string | null;
   paymentRefundId: string | null;
   returnShippingPaid: boolean;
-  returnShippingAmount: string | null;
+  returnShippingAmountCents: number | null;
   returnShippingLabel: string | null;
   returnCarrier: string;
   returnTrackingNumber: string | null;
@@ -54,7 +54,7 @@ interface ReturnItemDbRow {
   returnReasonDetail: string | null;
   condition: string;
   restockItem: boolean;
-  refundAmount: string | null;
+  refundAmountCents: number | null;
   exchangeProductId: string | null;
   exchangeVariantId: string | null;
   notes: string | null;
@@ -75,7 +75,7 @@ function itemRowToEntity(row: ReturnItemDbRow): ReturnItem {
     returnReasonDetail: row.returnReasonDetail ?? undefined,
     condition: row.condition as ReturnItemCondition,
     restockItem: row.restockItem,
-    refundAmount: row.refundAmount ? parseFloat(row.refundAmount) : undefined,
+    refundAmountCents: row.refundAmountCents ?? undefined,
     exchangeProductId: row.exchangeProductId ?? undefined,
     exchangeVariantId: row.exchangeVariantId ?? undefined,
     notes: row.notes ?? undefined,
@@ -102,7 +102,7 @@ function rowToEntity(row: ReturnDbRow, items: ReturnItem[] = []): ReturnRequest 
     rmaNumber: row.rmaNumber ?? undefined,
     paymentRefundId: row.paymentRefundId ?? undefined,
     returnShippingPaid: row.returnShippingPaid,
-    returnShippingAmount: row.returnShippingAmount ? parseFloat(row.returnShippingAmount) : undefined,
+    returnShippingAmountCents: row.returnShippingAmountCents ?? undefined,
     returnShippingLabel: row.returnShippingLabel ?? undefined,
     returnCarrier: row.returnCarrier as ReturnCarrier,
     returnTrackingNumber: row.returnTrackingNumber ?? undefined,
@@ -214,7 +214,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
           `INSERT INTO "orderReturnItem" (
             "orderReturnId", "orderItemId", "quantity",
             "returnReason", "returnReasonDetail", "condition",
-            "restockItem", "refundAmount", "exchangeProductId", "exchangeVariantId",
+            "restockItem", "refundAmountCents", "exchangeProductId", "exchangeVariantId",
             "notes", "warrantyStatus", "createdAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
           [
@@ -225,7 +225,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
             item.returnReasonDetail ?? null,
             item.condition,
             item.restockItem,
-            item.refundAmount ?? null,
+            item.refundAmountCents ?? null,
             item.exchangeProductId ?? null,
             item.exchangeVariantId ?? null,
             item.notes ?? null,
@@ -246,7 +246,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
       `UPDATE "orderReturn" SET
         "status" = $1, "approvedAt" = $2, "receivedAt" = $3, "completedAt" = $4,
         "rmaNumber" = $5, "paymentRefundId" = $6,
-        "returnShippingPaid" = $7, "returnShippingAmount" = $8, "returnShippingLabel" = $9,
+        "returnShippingPaid" = $7, "returnShippingAmountCents" = $8, "returnShippingLabel" = $9,
         "returnTrackingNumber" = $10, "returnTrackingUrl" = $11,
         "returnCarrier" = $12, "adminNotes" = $13,
         "inspectionPassedItems" = $14, "inspectionFailedItems" = $15,
@@ -260,7 +260,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
         props.rmaNumber ?? null,
         props.paymentRefundId ?? null,
         props.returnShippingPaid,
-        props.returnShippingAmount ?? null,
+        props.returnShippingAmountCents ?? null,
         props.returnShippingLabel ?? null,
         props.returnTrackingNumber ?? null,
         props.returnTrackingUrl ?? null,
@@ -353,7 +353,7 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
         `INSERT INTO "orderReturnItem" (
           "orderReturnId", "orderItemId", "quantity",
           "returnReason", "returnReasonDetail", "condition",
-          "restockItem", "refundAmount", "exchangeProductId", "exchangeVariantId",
+          "restockItem", "refundAmountCents", "exchangeProductId", "exchangeVariantId",
           "notes", "warrantyStatus", "createdAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
         [
@@ -364,7 +364,7 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
           item.returnReasonDetail ?? null,
           item.condition,
           item.restockItem,
-          item.refundAmount ?? null,
+          item.refundAmountCents ?? null,
           item.exchangeProductId ?? null,
           item.exchangeVariantId ?? null,
           item.notes ?? null,
@@ -391,30 +391,30 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
 export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   async getBalance(customerId: string): Promise<CustomerStoreCreditBalance> {
     const row = await queryOne<{
-      balance: string;
-      totalCredits: string;
-      totalDebits: string;
-      pendingExpiry: string;
+      balanceCents: string;
+      totalCreditsCents: string;
+      totalDebitsCents: string;
+      pendingExpiryCents: string;
       lastEntryAt: Date | null;
     }>(
       `SELECT
-        COALESCE(SUM(CASE WHEN "entryType" = 'credit' THEN "amount" ELSE 0 END) -
-                 SUM(CASE WHEN "entryType" IN ('debit', 'expiry') THEN "amount" ELSE 0 END), 0) as balance,
-        COALESCE(SUM(CASE WHEN "entryType" = 'credit' THEN "amount" ELSE 0 END), 0) as totalCredits,
-        COALESCE(SUM(CASE WHEN "entryType" IN ('debit', 'expiry') THEN "amount" ELSE 0 END), 0) as totalDebits,
-        COALESCE(SUM(CASE WHEN "entryType" = 'credit' AND "expiresAt" IS NOT NULL AND "expiresAt" > NOW() THEN "amount" ELSE 0 END), 0) as pendingExpiry,
-        MAX("createdAt") as lastEntryAt
+        COALESCE(SUM(CASE WHEN "entryType" = 'credit' THEN "amountCents" ELSE 0 END) -
+                 SUM(CASE WHEN "entryType" IN ('debit', 'expiry') THEN "amountCents" ELSE 0 END), 0) as "balanceCents",
+        COALESCE(SUM(CASE WHEN "entryType" = 'credit' THEN "amountCents" ELSE 0 END), 0) as "totalCreditsCents",
+        COALESCE(SUM(CASE WHEN "entryType" IN ('debit', 'expiry') THEN "amountCents" ELSE 0 END), 0) as "totalDebitsCents",
+        COALESCE(SUM(CASE WHEN "entryType" = 'credit' AND "expiresAt" IS NOT NULL AND "expiresAt" > NOW() THEN "amountCents" ELSE 0 END), 0) as "pendingExpiryCents",
+        MAX("createdAt") as "lastEntryAt"
        FROM "storeCreditLedger" WHERE "customerId" = $1`,
       [customerId],
     );
 
     return {
       customerId,
-      balance: row ? parseFloat(row.balance) : 0,
+      balanceCents: row ? parseFloat(row.balanceCents) : 0,
       currency: 'USD',
-      totalCredits: row ? parseFloat(row.totalCredits) : 0,
-      totalDebits: row ? parseFloat(row.totalDebits) : 0,
-      pendingExpiry: row ? parseFloat(row.pendingExpiry) : 0,
+      totalCreditsCents: row ? parseFloat(row.totalCreditsCents) : 0,
+      totalDebitsCents: row ? parseFloat(row.totalDebitsCents) : 0,
+      pendingExpiryCents: row ? parseFloat(row.pendingExpiryCents) : 0,
       lastEntryAt: row?.lastEntryAt ?? null,
     };
   }
@@ -427,9 +427,9 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       entryType: string;
       referenceType: string | null;
       referenceId: string | null;
-      amount: string;
-      balanceAfter: string;
-      currency: string;
+      amountCents: string;
+      balanceAfterCents: string;
+      currencyCode: string;
       reason: string | null;
       notes: string | null;
       createdBy: string | null;
@@ -439,7 +439,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
     }>(
       `INSERT INTO "storeCreditLedger" (
         "customerId", "entryType", "referenceType", "referenceId",
-        "amount", "balanceAfter", "currency", "reason", "notes",
+        "amountCents", "balanceAfterCents", "currencyCode", "reason", "notes",
         "createdBy", "expiresAt", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING *`,
@@ -448,8 +448,8 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
         props.entryType,
         props.referenceType ?? null,
         props.referenceId ?? null,
-        props.amount,
-        props.balanceAfter,
+        props.amountCents,
+        props.balanceAfterCents,
         props.currency,
         props.reason ?? null,
         props.notes ?? null,
@@ -464,8 +464,9 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
     return StoreCreditLedgerEntry.reconstitute({
       ...row,
       entryType: row.entryType as StoreCreditEntryType,
-      amount: parseFloat(row.amount),
-      balanceAfter: parseFloat(row.balanceAfter),
+      currency: row.currencyCode,
+      amountCents: Number(row.amountCents),
+      balanceAfterCents: Number(row.balanceAfterCents),
       referenceType: row.referenceType ?? undefined,
       referenceId: row.referenceId ?? undefined,
       reason: row.reason ?? undefined,
@@ -487,9 +488,9 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
         entryType: row.entryType as StoreCreditEntryType,
         referenceType: row.referenceType as string | undefined,
         referenceId: row.referenceId as string | undefined,
-        amount: parseFloat(row.amount as string),
-        balanceAfter: parseFloat(row.balanceAfter as string),
-        currency: row.currency as string,
+        amountCents: Number(row.amountCents),
+        balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+        currency: row.currencyCode as string,
         reason: row.reason as string | undefined,
         notes: row.notes as string | undefined,
         createdBy: row.createdBy as string | undefined,
@@ -512,9 +513,9 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
       entryType: row.entryType as StoreCreditEntryType,
       referenceType: row.referenceType as string | undefined,
       referenceId: row.referenceId as string | undefined,
-      amount: parseFloat(row.amount as string),
-      balanceAfter: parseFloat(row.balanceAfter as string),
-      currency: row.currency as string,
+      amountCents: Number(row.amountCents),
+      balanceAfterCents: parseFloat(row.balanceAfterCents as string),
+      currency: row.currencyCode as string,
       reason: row.reason as string | undefined,
       notes: row.notes as string | undefined,
       createdBy: row.createdBy as string | undefined,
@@ -527,7 +528,7 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
   async processExpiry(): Promise<number> {
     const result = await queryOne<{ count: string }>(
       `WITH expired AS (
-        SELECT "storeCreditLedgerId", "customerId", "amount"
+        SELECT "storeCreditLedgerId", "customerId", "amountCents"
         FROM "storeCreditLedger"
         WHERE "entryType" = 'credit'
           AND "expiresAt" IS NOT NULL
@@ -536,8 +537,8 @@ export class StoreCreditRepositoryImpl implements StoreCreditRepository {
             SELECT "referenceId" FROM "storeCreditLedger" WHERE "entryType" = 'expiry' AND "referenceType" = 'storeCredit'
           )
       )
-      INSERT INTO "storeCreditLedger" ("customerId", "entryType", "referenceType", "referenceId", "amount", "balanceAfter", "currency", "reason", "createdAt", "updatedAt")
-      SELECT e."customerId", 'expiry', 'storeCredit', e."storeCreditLedgerId", e."amount", 0, 'USD', 'Credit expired', NOW(), NOW()
+      INSERT INTO "storeCreditLedger" ("customerId", "entryType", "referenceType", "referenceId", "amountCents", "balanceAfterCents", "currencyCode", "reason", "createdAt", "updatedAt")
+      SELECT e."customerId", 'expiry', 'storeCredit', e."storeCreditLedgerId", e."amountCents", 0, 'USD', 'Credit expired', NOW(), NOW()
       FROM expired e
       RETURNING 1`,
     );

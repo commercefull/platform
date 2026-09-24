@@ -1,8 +1,4 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { VerifyCustomerEmailUseCase } from './VerifyCustomerEmail';
 import {
   VerificationTokenRequiredError,
@@ -12,29 +8,31 @@ import {
   EmailRequiredOnlyError,
   EmailAlreadyVerifiedError,
 } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('VerifyCustomerEmailUseCase', () => {
   let useCase: VerifyCustomerEmailUseCase;
-  let mockCustomerRepo: Record<string, jest.Mock>;
-  let mockVerifyRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
-  let mockEmail: Record<string, jest.Mock>;
+  let mockCustomerRepo: jest.Mocked<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[0]>;
+  let mockVerifyRepo: jest.Mocked<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[1]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[2]>;
+  let mockEmail: jest.Mocked<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[3]>;
 
   beforeEach(() => {
-    mockCustomerRepo = { findByEmail: jest.fn().mockResolvedValue(null), update: jest.fn().mockResolvedValue(undefined) };
-    mockVerifyRepo = {
-      findByToken: jest.fn().mockResolvedValue(null),
-      markAsUsed: jest.fn().mockResolvedValue(undefined),
-      create: jest.fn().mockResolvedValue(undefined),
-    };
-    mockAuth = { generateVerificationToken: jest.fn().mockResolvedValue('new-token') };
-    mockEmail = { sendVerificationEmail: jest.fn().mockResolvedValue(undefined) };
-    useCase = new VerifyCustomerEmailUseCase(mockCustomerRepo as never, mockVerifyRepo as never, mockAuth as never, mockEmail as never);
+    mockCustomerRepo = lazyMock<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[0]>();
+    mockCustomerRepo.findByEmail.mockResolvedValue(null);
+    mockCustomerRepo.update.mockResolvedValue(undefined);
+    mockVerifyRepo = lazyMock<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[1]>();
+    mockVerifyRepo.findByToken.mockResolvedValue(null);
+    mockVerifyRepo.markAsUsed.mockResolvedValue(undefined);
+    mockVerifyRepo.create.mockResolvedValue(undefined);
+    mockAuth = lazyMock<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[2]>();
+    mockAuth.generateVerificationToken.mockResolvedValue('new-token');
+    mockEmail = lazyMock<ConstructorParameters<typeof VerifyCustomerEmailUseCase>[3]>();
+    mockEmail.sendVerificationEmail.mockResolvedValue(undefined);
+    useCase = new VerifyCustomerEmailUseCase(mockCustomerRepo, mockVerifyRepo, mockAuth, mockEmail);
   });
 
   it('should verify email successfully (happy path)', async () => {
@@ -50,7 +48,7 @@ describe('VerifyCustomerEmailUseCase', () => {
     expect(result.success).toBe(true);
     expect(result.customerId).toBe('c1');
     expect(mockCustomerRepo.update).toHaveBeenCalledWith('c1', { emailVerified: true, status: 'active' });
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.email_verified', expect.objectContaining({ customerId: 'c1' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.email_verified', expect.objectContaining({ customerId: 'c1' }));
   });
 
   it('should throw VerificationTokenRequiredError when token missing', async () => {

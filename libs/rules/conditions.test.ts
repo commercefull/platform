@@ -5,6 +5,7 @@ import {
   normalizeCondition,
   normalizeConditions,
   AttributeCondition,
+  ConditionOperator,
   ConditionContext,
 } from './conditions';
 
@@ -160,7 +161,7 @@ describe('libs/rules/conditions', () => {
   describe('matchCondition — unknown operator', () => {
     it('returns false for unknown operator', () => {
       const ctx: ConditionContext = { x: 1 };
-      expect(matchCondition({ attribute: 'x', operator: 'unknown' as never, value: 1 }, ctx)).toBe(false);
+      expect(matchCondition({ attribute: 'x', operator: 'unknown' as ConditionOperator, value: 1 }, ctx)).toBe(false);
     });
   });
 

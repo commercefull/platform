@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { ShippingShippingQuoteAdapter } from './ShippingShippingQuoteAdapter';
+import type { CalculateShippingRatesUseCase } from '../../../shipping/application/useCases/CalculateShippingRates';
 
 describe('ShippingShippingQuoteAdapter', () => {
-  let adapter: import('./ShippingShippingQuoteAdapter').ShippingShippingQuoteAdapter;
-  let mockShippingUseCase: { execute: jest.Mock };
+  let adapter: ShippingShippingQuoteAdapter;
+  let mockShippingUseCase: jest.Mocked<Pick<CalculateShippingRatesUseCase, 'execute'>>;
 
   beforeEach(() => {
     mockShippingUseCase = {
       execute: jest.fn(),
     };
-    const { ShippingShippingQuoteAdapter } = require('./ShippingShippingQuoteAdapter');
-    adapter = new ShippingShippingQuoteAdapter(mockShippingUseCase as never);
+    adapter = new ShippingShippingQuoteAdapter(mockShippingUseCase as unknown as CalculateShippingRatesUseCase);
   });
 
   it('implements ShippingQuotePort', () => {
@@ -17,7 +17,6 @@ describe('ShippingShippingQuoteAdapter', () => {
   });
 
   it('should return empty array when use case is not provided', async () => {
-    const { ShippingShippingQuoteAdapter } = require('./ShippingShippingQuoteAdapter');
     const noUseCaseAdapter = new ShippingShippingQuoteAdapter(undefined);
     const result = await noUseCaseAdapter.getShippingOptions({
       basketId: 'basket-1',
@@ -38,7 +37,7 @@ describe('ShippingShippingQuoteAdapter', () => {
           rateId: 'rate-1',
           rateName: 'Ground',
           rateType: 'flat',
-          amount: 9.99,
+          amountCents: 9.99,
           currency: 'USD',
           estimatedDeliveryDays: 5,
           isFreeShipping: false,
@@ -50,13 +49,13 @@ describe('ShippingShippingQuoteAdapter', () => {
     const result = await adapter.getShippingOptions({
       basketId: 'basket-1',
       shippingAddress: { country: 'US', region: 'OR', city: 'Portland', postalCode: '97201' },
-      totalValue: 100,
+      totalValueCents: 100,
     });
 
     expect(result).toHaveLength(1);
     expect(result[0].methodId).toBe('method-1');
     expect(result[0].methodName).toBe('Standard');
-    expect(result[0].amount).toBe(9.99);
+    expect(result[0].amountCents).toBe(9.99);
     expect(result[0].currency).toBe('USD');
     expect(result[0].estimatedDays).toBe(5);
     expect(result[0].carrier).toBe('UPS');
@@ -65,7 +64,7 @@ describe('ShippingShippingQuoteAdapter', () => {
   it('should return empty array when shipping calculation fails', async () => {
     mockShippingUseCase.execute.mockResolvedValue({
       success: false,
-      rates: null,
+      rates: [],
     });
 
     const result = await adapter.getShippingOptions({
@@ -98,7 +97,7 @@ describe('ShippingShippingQuoteAdapter', () => {
           rateId: 'r1',
           rateName: null,
           rateType: 'flat',
-          amount: 19.99,
+          amountCents: 19.99,
           currency: 'USD',
           estimatedDeliveryDays: null,
           isFreeShipping: false,

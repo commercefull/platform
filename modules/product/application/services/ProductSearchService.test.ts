@@ -1,11 +1,9 @@
-jest.mock('../../../../libs/db', () => ({
-  query: jest.fn().mockResolvedValue([]),
-}));
-
+import { queryMock } from '../../tests/testUtils';
 import productSearchService from './ProductSearchService';
 
 describe('ProductSearchService', () => {
   beforeEach(() => {
+    queryMock.mockResolvedValue([]);
     jest.clearAllMocks();
   });
 
@@ -19,8 +17,8 @@ describe('ProductSearchService', () => {
   it('should accept filters and return results', async () => {
     const result = await productSearchService.search({
       categoryId: 'cat1',
-      minPrice: 10,
-      maxPrice: 100,
+      minPriceCents: 1000,
+      maxPriceCents: 10000,
       sortBy: 'price',
       sortOrder: 'asc',
       page: 1,

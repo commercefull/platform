@@ -113,8 +113,8 @@ describe('Configurable Product', () => {
 
       if (res.status === 200) {
         expect(res.data.success).toBe(true);
-        expect(res.data.data).toHaveProperty('price');
-        expect(res.data.data.price).toBeGreaterThanOrEqual(0);
+        expect(res.data.data).toHaveProperty('priceCents');
+        expect(res.data.data.priceCents).toBeGreaterThanOrEqual(0);
       } else {
         expectStatus(res, 400);
       }
@@ -130,7 +130,7 @@ describe('Configurable Product', () => {
 
       if (res.status === 200) {
         expect(res.data.success).toBe(true);
-        expect(typeof res.data.data.price).toBe('number');
+        expect(typeof res.data.data.priceCents).toBe('number');
       } else {
         expectStatus(res, 400);
       }

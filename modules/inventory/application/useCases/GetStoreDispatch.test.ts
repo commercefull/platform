@@ -1,14 +1,14 @@
+import { createStoreDispatch, lazyMock } from '../../tests/testUtils';
 import { GetStoreDispatchUseCase } from './GetStoreDispatch';
 
 describe('GetStoreDispatchUseCase', () => {
   let useCase: GetStoreDispatchUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetStoreDispatchUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({ toJSON: () => ({ dispatchId: 'd1', status: 'pending' }) }),
-    };
-    useCase = new GetStoreDispatchUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof GetStoreDispatchUseCase>[0]>();
+    mockRepo.findById.mockResolvedValue(createStoreDispatch({ dispatchId: 'd1' }));
+    useCase = new GetStoreDispatchUseCase(mockRepo);
   });
 
   it('should get dispatch by ID (happy path)', async () => {

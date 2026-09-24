@@ -36,7 +36,7 @@
               <td><code><%= f.transactionId.substring(0, 8) %>...</code></td>
               <td><%= f.merchantId %></td>
               <td><span class="badge bg-secondary"><%= f.type %></span></td>
-              <td><strong><%= f.currency %> <%= (f.amount || 0).toFixed(2) %></strong></td>
+              <td><strong><%= f.currency %> <%= ((f.amountCents || 0) / 100).toFixed(2) %></strong></td>
               <td><%= f.description || '-' %></td>
               <td><%= new Date(f.createdAt).toLocaleDateString() %></td>
             </tr>

@@ -9,9 +9,6 @@ export type ProductVariant = {
   sku: string;
   name: string;
   barcode?: string;
-  price: number;
-  compareAtPrice?: number | null;
-  costPrice?: number | null;
   inventory: number;
   inventoryPolicy: InventoryPolicy;
   weight?: number | null;
@@ -49,10 +46,6 @@ const dbColumns = [
   'sku',
   'name',
   'status',
-  'price',
-  'salePrice',
-  'costPrice',
-  'compareAtPrice',
   'isDefault',
   'weight',
   'length',
@@ -85,10 +78,6 @@ function parseVariantRow(row: Record<string, unknown> | null): Record<string, un
   if (!row) return row;
   return {
     ...row,
-    price: row.price != null ? parseFloat(row.price as string) : row.price,
-    salePrice: row.salePrice != null ? parseFloat(row.salePrice as string) : row.salePrice,
-    costPrice: row.costPrice != null ? parseFloat(row.costPrice as string) : row.costPrice,
-    compareAtPrice: row.compareAtPrice != null ? parseFloat(row.compareAtPrice as string) : row.compareAtPrice,
     weight: row.weight != null ? parseFloat(row.weight as string) : row.weight,
     position: row.position != null ? parseInt(row.position as string) : row.position,
   };
@@ -305,9 +294,6 @@ export class ProductVariantRepo {
     id: string;
     name: string;
     sku?: string;
-    basePrice?: number;
-    salePrice?: number;
-    cost?: number;
     weight?: number;
     weightUnit?: string;
     length?: number;
@@ -328,9 +314,6 @@ export class ProductVariantRepo {
         productId: product.id,
         name: product.name,
         sku: product.sku || `${product.id}-master`,
-        price: product.basePrice || 0,
-        compareAtPrice: product.salePrice,
-        costPrice: product.cost,
         inventory: 0,
         inventoryPolicy: InventoryPolicy.CONTINUE,
         weight: product.weight,

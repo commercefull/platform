@@ -5,16 +5,12 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
-  ManageShippingRatesUseCase,
-  ManageShippingZonesUseCase,
-  ManageShippingMethodsAdminUseCase,
-} from '../../application/useCases/ManageShippingRates';
+  manageShippingRatesUseCase,
+  manageShippingZonesLookupUseCase as manageShippingZonesUseCase,
+  manageShippingMethodsAdminUseCase as manageShippingMethodsUseCase,
+} from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageShippingRatesUseCase = new ManageShippingRatesUseCase();
-const manageShippingZonesUseCase = new ManageShippingZonesUseCase();
-const manageShippingMethodsUseCase = new ManageShippingMethodsAdminUseCase();
 
 // ============================================================================
 // Shipping Rates Management
@@ -97,12 +93,12 @@ export const createShippingRate = async (req: HttpRequest, res: HttpResponse): P
     name: name || null,
     description: description || null,
     rateType,
-    baseRate,
-    perItemRate: perItemRate || null,
-    freeThreshold: freeThreshold || null,
-    minRate: minRate || null,
-    maxRate: maxRate || null,
-    currency: currency || 'USD',
+    baseRateCents: Math.round(parseFloat(baseRate) * 100),
+    perItemRateCents: perItemRate ? Math.round(parseFloat(perItemRate) * 100) : null,
+    freeThresholdCents: freeThreshold ? Math.round(parseFloat(freeThreshold) * 100) : null,
+    minRateCents: minRate ? Math.round(parseFloat(minRate) * 100) : null,
+    maxRateCents: maxRate ? Math.round(parseFloat(maxRate) * 100) : null,
+    currencyCode: currency || 'USD',
     taxable: taxable === 'true',
     priority: priority ? parseInt(priority) : 0,
     validFrom: validFrom ? new Date(validFrom) : null,
@@ -265,6 +261,6 @@ export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse)
     calculatedRate,
     rateId: rate.shippingRateId,
     rateType: rate.rateType,
-    currency: rate.currency,
+    currency: rate.currencyCode,
   });
 };

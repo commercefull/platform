@@ -41,8 +41,6 @@ exports.seed = async function (knex) {
       theme: 'modern',
       primaryColor: '#FF6B6B',
       secondaryColor: '#4ECDC4',
-      defaultCurrency: 'USD',
-      supportedCurrencies: ['USD', 'EUR', 'GBP'],
       settings: JSON.stringify({
         allowGuestCheckout: true,
         requireAccountForPurchase: false,
@@ -89,7 +87,6 @@ exports.seed = async function (knex) {
       organizationId: TEST_ORG_ID,
       storeType: 'organization_store',
       storeEmail: 'store@inactiveteststore.com',
-      defaultCurrency: 'USD',
       settings: JSON.stringify({
         allowGuestCheckout: false,
         requireAccountForPurchase: true,
@@ -121,8 +118,6 @@ exports.seed = async function (knex) {
       theme: 'minimal',
       primaryColor: '#2D5AA0',
       secondaryColor: '#F5A623',
-      defaultCurrency: 'EUR',
-      supportedCurrencies: ['EUR', 'USD'],
       settings: JSON.stringify({
         allowGuestCheckout: true,
         requireAccountForPurchase: false,
@@ -155,7 +150,6 @@ exports.seed = async function (knex) {
       storeUrl: 'https://merchantteststore.com',
       storeType: 'merchant_store',
       storeEmail: 'merchant@merchantteststore.com',
-      defaultCurrency: 'GBP',
       settings: JSON.stringify({
         allowGuestCheckout: true,
         requireAccountForPurchase: false,
@@ -176,4 +170,27 @@ exports.seed = async function (knex) {
       updatedAt: knex.fn.now(),
     },
   ]);
+  // Store currency memberships — each store sells in the currencies it supports
+  const storeCurrencies = [
+    { storeId: TEST_STORE_IDS.ACTIVE, codes: ['USD', 'EUR', 'GBP'], default: 'USD' },
+    { storeId: TEST_STORE_IDS.INACTIVE, codes: ['USD'], default: 'USD' },
+    { storeId: TEST_STORE_IDS.FEATURED, codes: ['EUR', 'USD'], default: 'EUR' },
+    { storeId: TEST_STORE_IDS.MERCHANT, codes: ['GBP'], default: 'GBP' },
+  ];
+
+  await knex('storeCurrency').whereIn('storeId', Object.values(TEST_STORE_IDS)).del();
+
+  for (const sc of storeCurrencies) {
+    for (const code of sc.codes) {
+      const currency = await knex('currency').where({ code }).first('currencyId');
+      if (!currency) continue;
+      await knex('storeCurrency').insert({
+        storeId: sc.storeId,
+        currencyId: currency.currencyId,
+        isDefault: code === sc.default,
+        isActive: true,
+      });
+    }
+  }
+
 };

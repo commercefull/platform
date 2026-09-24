@@ -1,16 +1,15 @@
 import type { IAdminOperationsRepository } from '../../domain/repositories/AdminOperationsRepository';
-import { fulfillmentDataRepository } from '../wired';
-
-const adminOperationsRepo: IAdminOperationsRepository = fulfillmentDataRepository.admin;
 
 export class ManageOperationsUseCase {
+  constructor(private readonly adminOperationsRepo: IAdminOperationsRepository) {}
+
   async getOperationsStats() {
-    return adminOperationsRepo.getOperationsStats();
+    return this.adminOperationsRepo.getOperationsStats();
   }
   async findRecentFulfillments(limit?: number) {
-    return adminOperationsRepo.findRecentFulfillments(limit);
+    return this.adminOperationsRepo.findRecentFulfillments(limit);
   }
   async findWarehousesWithCounts() {
-    return adminOperationsRepo.findWarehousesWithCounts();
+    return this.adminOperationsRepo.findWarehousesWithCounts();
   }
 }

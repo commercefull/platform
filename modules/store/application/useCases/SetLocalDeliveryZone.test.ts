@@ -1,53 +1,60 @@
+import { createStoreRepository, createStore } from '../../tests/testUtils';
 import { SetLocalDeliveryZoneUseCase } from './SetLocalDeliveryZone';
 import { StoreNotFoundError, StoreValidationError } from '../../domain/errors/StoreErrors';
 
-const mockStoreRepository = {
-  findById: jest.fn().mockResolvedValue({ storeId: 's1' }),
-  updateLocalDeliverySettings: jest.fn().mockResolvedValue({
-    storeId: 's1',
-    updatedAt: new Date('2026-01-01'),
-  }),
-};
-
 describe('SetLocalDeliveryZoneUseCase', () => {
   let useCase: SetLocalDeliveryZoneUseCase;
+  let storeRepository: ReturnType<typeof createStoreRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new SetLocalDeliveryZoneUseCase(mockStoreRepository as never);
+    storeRepository = createStoreRepository();
+    storeRepository.findById.mockResolvedValue(createStore());
+    storeRepository.updateLocalDeliverySettings.mockImplementation(async () => createStore());
+    useCase = new SetLocalDeliveryZoneUseCase(storeRepository);
   });
 
-  it('should set delivery zone with radius (happy path)', async () => {
-    const result = await useCase.execute({
-      storeId: 's1',
-      enabled: true,
-      radiusKm: 10,
-      deliveryFee: 5,
-    });
+  it('should persist the delivery zone when a radius is provided', async () => {
+    const result = await useCase.execute({ storeId: 'store-1', enabled: true, radiusKm: 10, deliveryFee: 4.5 });
 
-    expect(result.storeId).toBe('s1');
     expect(result.localDeliveryEnabled).toBe(true);
     expect(result.radiusKm).toBe(10);
-    expect(result.deliveryFee).toBe(5);
+    expect(result.deliveryFee).toBe(4.5);
+    expect(storeRepository.updateLocalDeliverySettings).toHaveBeenCalledWith(
+      'store-1',
+      expect.objectContaining({ enabled: true, radiusKm: 10, deliveryFee: 4.5 }),
+    );
   });
 
-  it('should set delivery zone with postal codes', async () => {
-    const result = await useCase.execute({
-      storeId: 's1',
-      enabled: true,
-      postalCodes: ['10001', '10002'],
-    });
+  it('should persist the delivery zone when postal codes are provided', async () => {
+    const result = await useCase.execute({ storeId: 'store-1', enabled: true, postalCodes: ['10001', '10002'] });
 
+    expect(result.localDeliveryEnabled).toBe(true);
     expect(result.postalCodeCount).toBe(2);
+    expect(storeRepository.updateLocalDeliverySettings).toHaveBeenCalledWith(
+      'store-1',
+      expect.objectContaining({ postalCodes: ['10001', '10002'] }),
+    );
   });
 
-  it('should throw StoreNotFoundError when store not found', async () => {
-    mockStoreRepository.findById.mockResolvedValueOnce(null);
+  it('should throw StoreNotFoundError when the store does not exist', async () => {
+    storeRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true, radiusKm: 5 })).rejects.toThrow(StoreNotFoundError);
+    await expect(useCase.execute({ storeId: 'missing', enabled: true, radiusKm: 5 })).rejects.toThrow(StoreNotFoundError);
+    expect(storeRepository.updateLocalDeliverySettings).not.toHaveBeenCalled();
   });
 
-  it('should throw StoreValidationError when no radius or postal codes', async () => {
-    await expect(useCase.execute({ storeId: 's1', enabled: true })).rejects.toThrow(StoreValidationError);
+  it('should throw StoreValidationError when enabling without radius or postal codes', async () => {
+    await expect(useCase.execute({ storeId: 'store-1', enabled: true })).rejects.toThrow(StoreValidationError);
+    expect(storeRepository.updateLocalDeliverySettings).not.toHaveBeenCalled();
+  });
+
+  it('should allow disabling without a zone definition', async () => {
+    const result = await useCase.execute({ storeId: 'store-1', enabled: false });
+
+    expect(result.localDeliveryEnabled).toBe(false);
+    expect(storeRepository.updateLocalDeliverySettings).toHaveBeenCalledWith(
+      'store-1',
+      expect.objectContaining({ enabled: false }),
+    );
   });
 });

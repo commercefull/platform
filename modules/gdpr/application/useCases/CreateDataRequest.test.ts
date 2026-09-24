@@ -1,49 +1,73 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('gdpr-uuid'),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createDataRequest, createGdprDataRequestRepository, emitMock } from '../../tests/testUtils';
 import { CreateDataRequestUseCase, CreateDataRequestCommand } from './CreateDataRequest';
 import { CustomerIdRequiredError, GdprValidationError } from '../../domain/errors/GdprErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
 
 describe('CreateDataRequestUseCase', () => {
-  let useCase: CreateDataRequestUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should create the data request when the command is valid', async () => {
+    const repository = createGdprDataRequestRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      findByCustomerId: jest.fn().mockResolvedValue([]),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new CreateDataRequestUseCase(mockRepo as never);
-  });
+    const result = await new CreateDataRequestUseCase(repository).execute(
+      new CreateDataRequestCommand('customer-1', 'access', 'Want my data'),
+    );
 
-  it('should create data request (happy path)', async () => {
-    const result = await useCase.execute(new CreateDataRequestCommand('c1', 'access' as never, 'Want my data'));
-
-    expect(result.gdprDataRequestId).toBe('gdpr-uuid');
+    expect(result.gdprDataRequestId).toBe('test-uuid');
     expect(result.requestType).toBe('access');
-    expect(mockRepo.save).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('gdpr.request.created', expect.objectContaining({ gdprDataRequestId: 'gdpr-uuid' }));
+    expect(result.status).toBe('pending');
+    expect(new Date(result.deadlineAt).getTime()).toBeGreaterThan(Date.now());
+    expect(repository.save).toHaveBeenCalled();
   });
 
-  it('should throw CustomerIdRequiredError when customerId is empty', async () => {
-    await expect(useCase.execute(new CreateDataRequestCommand('', 'access' as never))).rejects.toThrow(CustomerIdRequiredError);
+  it('should emit gdpr.request.created when the request is created', async () => {
+    await new CreateDataRequestUseCase(createGdprDataRequestRepository()).execute(
+      new CreateDataRequestCommand('customer-1', 'deletion'),
+    );
+
+    expect(emitMock).toHaveBeenCalledWith(
+      'gdpr.request.created',
+      expect.objectContaining({ gdprDataRequestId: 'test-uuid', customerId: 'customer-1', requestType: 'deletion' }),
+    );
   });
 
-  it('should throw GdprValidationError when pending request exists', async () => {
-    mockRepo.findByCustomerId.mockResolvedValue([{ requestType: 'access', status: 'pending' }]);
+  it('should throw CustomerIdRequiredError when the customer id is blank', async () => {
+    const repository = createGdprDataRequestRepository();
 
-    await expect(useCase.execute(new CreateDataRequestCommand('c1', 'access' as never))).rejects.toThrow(GdprValidationError);
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('   ', 'access')),
+    ).rejects.toThrow(CustomerIdRequiredError);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw GdprValidationError when a pending request of the same type exists', async () => {
+    const repository = createGdprDataRequestRepository();
+    repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'pending' })]);
+
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access')),
+    ).rejects.toThrow(GdprValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it('should allow the request when only a different type is pending', async () => {
+    const repository = createGdprDataRequestRepository();
+    repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'deletion', status: 'pending' })]);
+
+    const result = await new CreateDataRequestUseCase(repository).execute(
+      new CreateDataRequestCommand('customer-1', 'access'),
+    );
+
+    expect(result.status).toBe('pending');
+    expect(repository.save).toHaveBeenCalled();
+  });
+
+  it('should allow the request when a same-type request is already completed', async () => {
+    const repository = createGdprDataRequestRepository();
+    repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'completed' })]);
+
+    const result = await new CreateDataRequestUseCase(repository).execute(
+      new CreateDataRequestCommand('customer-1', 'access'),
+    );
+
+    expect(result.status).toBe('pending');
   });
 });

@@ -16,7 +16,7 @@ export interface CreateRewardInput {
   valueType?: 'percentage' | 'fixed';
   productId?: string;
   categoryId?: string;
-  minOrderValue?: number;
+  minOrderValueCents?: number;
   maxUsagePerCustomer?: number;
   totalQuantity?: number;
   validFrom?: Date;
@@ -61,7 +61,7 @@ export class CreateRewardUseCase {
       valueType,
       productId,
       categoryId,
-      minOrderValue,
+      minOrderValueCents,
       maxUsagePerCustomer,
       totalQuantity,
       validFrom,
@@ -94,7 +94,7 @@ export class CreateRewardUseCase {
       valueType,
       productId,
       categoryId,
-      minOrderValue,
+      minOrderValueCents,
       maxUsagePerCustomer,
       totalQuantity,
       remainingQuantity: totalQuantity,

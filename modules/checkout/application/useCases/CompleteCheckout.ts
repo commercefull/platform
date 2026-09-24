@@ -78,7 +78,7 @@ export class CompleteCheckoutUseCase {
       basketId: session.basketId,
       orderId: session.orderId,
       customerId: session.customerId,
-      total: session.total.amount,
+      totalCents: session.total.cents,
     });
 
     return {

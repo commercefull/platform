@@ -7,8 +7,8 @@ exports.up = function (knex) {
     t.uuid('promotionId').notNullable().references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.uuid('promotionCouponId').references('promotionCouponId').inTable('promotionCoupon').onDelete('SET NULL');
     t.string('couponCode', 100);
-    t.decimal('discountAmount', 15, 2).notNullable();
-    t.string('currencyCode', 3).notNullable().defaultTo('USD');
+    t.bigInteger('discountAmountCents').notNullable();
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('isAutoApplied').notNullable().defaultTo(false);
     t.boolean('isCustomerInitiated').notNullable().defaultTo(true);
     t.uuid('appliedBy');

@@ -41,7 +41,7 @@ describe('Organization: Product Lifecycle', () => {
           name: `Lifecycle Test ${Date.now()}`,
           description: 'lifecycle test',
           productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID,
-          basePrice: 50,
+          basePriceCents: 5000,
           sku: `LC-${Date.now()}`,
         },
         { headers: { Authorization: `Bearer ${adminToken}` } },
@@ -72,7 +72,7 @@ describe('Organization: Product Lifecycle', () => {
     it('should reject negative basePrice', async () => {
       const res = await client.put(
         `/business/products/${SEEDED_PRODUCT_1_ID}`,
-        { basePrice: -1 },
+        { basePriceCents: -100 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(res.status).toBeGreaterThanOrEqual(400);
@@ -81,7 +81,7 @@ describe('Organization: Product Lifecycle', () => {
     it('should reject salePrice greater than basePrice', async () => {
       const res = await client.put(
         `/business/products/${SEEDED_PRODUCT_1_ID}`,
-        { basePrice: 10, salePrice: 20 },
+        { basePriceCents: 1000, salePriceCents: 2000 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(res.status).toBeGreaterThanOrEqual(400);
@@ -95,7 +95,7 @@ describe('Organization: Product Lifecycle', () => {
       });
       expect(res.status).toBe(200);
       expect(res.data.data).toHaveProperty('productId', SEEDED_PRODUCT_1_ID);
-      expect(res.data.data).toHaveProperty('basePrice');
+      expect(res.data.data).toHaveProperty('basePriceCents');
       expect(res.data.data).toHaveProperty('createdAt');
     });
 
@@ -111,12 +111,12 @@ describe('Organization: Product Lifecycle', () => {
     it('should update a product', async () => {
       const res = await client.put(
         `/business/products/${SEEDED_PRODUCT_1_ID}`,
-        { name: 'Updated Test Product', description: 'Updated', basePrice: 129.99 },
+        { name: 'Updated Test Product', description: 'Updated', basePriceCents: 12999 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       expect(res.status).toBe(200);
       expect(res.data.data).toHaveProperty('name', 'Updated Test Product');
-      expect(res.data.data).toHaveProperty('basePrice', 129.99);
+      expect(res.data.data).toHaveProperty('basePriceCents', 12999);
     });
 
     it('should search products', async () => {
@@ -195,7 +195,7 @@ describe('Organization: Product Lifecycle', () => {
     it('should reject publish when not ACTIVE', async () => {
       const createRes = await client.post(
         '/business/products',
-        { name: `Pub Guard ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePrice: 10 },
+        { name: `Pub Guard ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePriceCents: 1000 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       const draftId = createRes.data.data?.productId;
@@ -256,7 +256,7 @@ describe('Organization: Product Lifecycle', () => {
     it('should soft-delete a product', async () => {
       const createRes = await client.post(
         '/business/products',
-        { name: `SoftDel ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePrice: 10 },
+        { name: `SoftDel ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePriceCents: 1000 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       const id = createRes.data.data?.productId;
@@ -271,7 +271,7 @@ describe('Organization: Product Lifecycle', () => {
     it('should hard-delete with ?permanent=true', async () => {
       const createRes = await client.post(
         '/business/products',
-        { name: `HardDel ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePrice: 10 },
+        { name: `HardDel ${Date.now()}`, productTypeId: SEEDED_PRODUCT_TYPE_SIMPLE_ID, basePriceCents: 1000 },
         { headers: { Authorization: `Bearer ${adminToken}` } },
       );
       const id = createRes.data.data?.productId;

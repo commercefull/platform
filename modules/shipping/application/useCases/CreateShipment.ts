@@ -4,12 +4,9 @@
  * Creates a shipment with carrier integration, generating tracking numbers and labels.
  */
 
-import { shippingConfigRepository } from '../wired';
 import type { ShippingMethod } from '../../../../libs/db/types';
+import type { ShippingCarrierPort, ShippingMethodPort } from '../../domain/repositories/ShippingConfigPorts';
 import { ShippingCarrierNotFoundError, ShippingMethodNotFoundError } from '../../domain/errors/ShippingErrors';
-
-const shippingCarrierRepo = shippingConfigRepository.carriers;
-const shippingMethodRepo = shippingConfigRepository.methods;
 import { generateUUID } from '../../../../libs/uuid';
 import { logger } from '../../../../libs/logger';
 
@@ -71,13 +68,18 @@ interface ShippingMethodExtended extends ShippingMethod {
 }
 
 export class CreateShipmentUseCase {
+  constructor(
+    private readonly shippingCarrierRepo: ShippingCarrierPort,
+    private readonly shippingMethodRepo: Pick<ShippingMethodPort, 'findByCode'>,
+  ) {}
+
   async execute(input: CreateShipmentInput): Promise<Shipment> {
-    const carrier = await shippingCarrierRepo.findByCode(input.carrierCode);
+    const carrier = await this.shippingCarrierRepo.findByCode(input.carrierCode);
     if (!carrier) {
       throw new ShippingCarrierNotFoundError(input.carrierCode);
     }
 
-    const method = await shippingMethodRepo.findByCode(input.serviceCode);
+    const method = await this.shippingMethodRepo.findByCode(input.serviceCode);
     if (!method) {
       throw new ShippingMethodNotFoundError(input.serviceCode);
     }

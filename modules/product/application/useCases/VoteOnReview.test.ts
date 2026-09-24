@@ -1,23 +1,20 @@
-jest.mock('../../infrastructure/repositories/productReviewVoteRepo', () => ({
-  __esModule: true,
-  default: {
-    create: jest.fn().mockResolvedValue({ productReviewVoteId: 'v1', productReviewId: 'r1', customerId: 'c1', isHelpful: true }),
-    countByReview: jest.fn().mockResolvedValue({ helpful: 5, unhelpful: 2 }),
-  },
-}));
 
 import { VoteOnReviewUseCase, VoteOnReviewCommand } from './VoteOnReview';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
-import productReviewVoteRepo from '../../infrastructure/repositories/productReviewVoteRepo';
+import { createReviewVote, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productReviewVoteRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('VoteOnReviewUseCase', () => {
   let useCase: VoteOnReviewUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof VoteOnReviewUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new VoteOnReviewUseCase(productReviewVoteRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof VoteOnReviewUseCase>[0]>();
+    mockRepo.create.mockResolvedValue(createReviewVote());
+    mockRepo.countByReview.mockResolvedValue({ helpful: 5, unhelpful: 2 });
+    useCase = new VoteOnReviewUseCase(mockRepo);
   });
 
   it('should vote on review (happy path)', async () => {

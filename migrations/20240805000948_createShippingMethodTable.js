@@ -22,8 +22,8 @@ exports.up = async function (knex) {
     t.boolean('allowFreeShipping').notNullable().defaultTo(true);
     t.decimal('minWeight', 10, 2);
     t.decimal('maxWeight', 10, 2);
-    t.decimal('minOrderValue', 10, 2);
-    t.decimal('maxOrderValue', 10, 2);
+    t.bigInteger('minOrderValueCents');
+    t.bigInteger('maxOrderValueCents');
     t.jsonb('dimensionRestrictions');
     t.string('shippingClass', 50);
     t.jsonb('customFields');

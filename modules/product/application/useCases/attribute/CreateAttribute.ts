@@ -1,4 +1,4 @@
-import { dynamicAttributeRepo as dynamicAttributeRepository } from '../wired';
+import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
 import type {
   ProductAttributeCreateInput,
   ProductAttribute,
@@ -51,6 +51,7 @@ export interface CreateAttributeResponse {
 }
 
 export class CreateAttributeUseCase {
+  constructor(private readonly attributeRepository: DynamicAttributePort) {}
   async execute(command: CreateAttributeCommand): Promise<CreateAttributeResponse> {
     try {
       // Validate required fields
@@ -62,7 +63,7 @@ export class CreateAttributeUseCase {
       }
 
       // Check if attribute code already exists
-      const existing = await dynamicAttributeRepository.findAttributeByCode(command.code);
+      const existing = await this.attributeRepository.findAttributeByCode(command.code);
       if (existing) {
         return {
           success: false,
@@ -94,12 +95,12 @@ export class CreateAttributeUseCase {
         isGlobal: command.isGlobal,
       };
 
-      const attribute = await dynamicAttributeRepository.createAttribute(input);
+      const attribute = await this.attributeRepository.createAttribute(input);
 
       // Create predefined options if provided
       if (command.options && command.options.length > 0) {
         for (const option of command.options) {
-          await dynamicAttributeRepository.createAttributeValue({
+          await this.attributeRepository.createAttributeValue({
             attributeId: attribute.productAttributeId,
             value: option.value,
             displayValue: option.displayValue,
@@ -122,4 +123,3 @@ export class CreateAttributeUseCase {
   }
 }
 
-export default new CreateAttributeUseCase();

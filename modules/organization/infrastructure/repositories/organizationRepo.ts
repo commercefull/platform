@@ -292,7 +292,7 @@ export class OrganizationRepo {
       `INSERT INTO "organizationPaymentInfo" (
         "organizationId", "paymentType", "isDefault", "accountHolderName", "bankName",
         "accountNumber", "routingNumber", "accountType", "paypalEmail",
-        currency, "isVerified", "createdAt", "updatedAt"
+        "currencyCode", "isVerified", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *`,
       [

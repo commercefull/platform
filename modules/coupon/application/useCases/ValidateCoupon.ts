@@ -7,13 +7,13 @@ import { CouponRepository } from '../../domain/repositories/CouponRepository';
 export class ValidateCouponCommand {
   constructor(
     public readonly code: string,
-    public readonly orderValue: number,
+    public readonly orderValueCents: number,
     public readonly customerId?: string,
     public readonly items?: Array<{
       productId: string;
       categoryId?: string;
       quantity: number;
-      price: number;
+      priceCents: number;
     }>,
   ) {}
 }
@@ -26,12 +26,12 @@ export interface CouponValidationResult {
     name: string;
     type: string;
     value: number;
-    discountAmount: number;
+    discountAmountCents: number;
   };
   error?: string;
   applicableItems?: Array<{
     productId: string;
-    discountAmount: number;
+    discountAmountCents: number;
   }>;
 }
 
@@ -39,7 +39,7 @@ export class ValidateCouponUseCase {
   constructor(private readonly couponRepository: CouponRepository) {}
 
   async execute(command: ValidateCouponCommand): Promise<CouponValidationResult> {
-    const validation = await this.couponRepository.validateCouponCode(command.code, command.orderValue, command.customerId);
+    const validation = await this.couponRepository.validateCouponCode(command.code, command.orderValueCents, command.customerId);
 
     if (!validation.valid || !validation.coupon) {
       return {
@@ -49,10 +49,10 @@ export class ValidateCouponUseCase {
     }
 
     const coupon = validation.coupon;
-    const discountAmount = validation.discountAmount || 0;
+    const discountAmountCents = validation.discountAmountCents || 0;
 
     // Calculate item-level discounts if applicable
-    let applicableItems: Array<{ productId: string; discountAmount: number }> | undefined;
+    let applicableItems: Array<{ productId: string; discountAmountCents: number }> | undefined;
 
     if (command.items && coupon.applicableProducts) {
       applicableItems = [];
@@ -60,10 +60,10 @@ export class ValidateCouponUseCase {
 
       for (const item of command.items) {
         if (applicableProductIds.has(item.productId)) {
-          const itemDiscount = coupon.calculateDiscount(item.price * item.quantity, item.price * item.quantity);
+          const itemDiscount = coupon.calculateDiscount(item.priceCents * item.quantity, item.priceCents * item.quantity);
           applicableItems.push({
             productId: item.productId,
-            discountAmount: itemDiscount,
+            discountAmountCents: itemDiscount,
           });
         }
       }
@@ -77,7 +77,7 @@ export class ValidateCouponUseCase {
         name: coupon.name,
         type: coupon.type,
         value: coupon.value,
-        discountAmount,
+        discountAmountCents,
       },
       applicableItems,
     };

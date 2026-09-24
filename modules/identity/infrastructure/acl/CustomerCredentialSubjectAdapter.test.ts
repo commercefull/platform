@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+import { CustomerCredentialSubjectAdapter } from './CustomerCredentialSubjectAdapter';
+import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
+
+type CustomerRepo = InstanceType<typeof CustomerRepoType>;
+type RepoCustomer = NonNullable<Awaited<ReturnType<CustomerRepo['findCustomerById']>>>;
 
 describe('CustomerCredentialSubjectAdapter', () => {
-  let adapter: import('./CustomerCredentialSubjectAdapter').CustomerCredentialSubjectAdapter;
-  let mockCustomerRepo: any;
+  let adapter: CustomerCredentialSubjectAdapter;
+  let mockCustomerRepo: jest.Mocked<Pick<CustomerRepo, 'authenticateCustomer' | 'findCustomerById' | 'findCustomerByEmail' | 'createCustomerWithPassword' | 'updateCustomerLoginTimestamp' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
 
   beforeEach(() => {
     mockCustomerRepo = {
@@ -15,8 +19,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       createPasswordResetToken: jest.fn(),
       verifyPasswordResetToken: jest.fn(),
     };
-    const { CustomerCredentialSubjectAdapter } = require('./CustomerCredentialSubjectAdapter');
-    adapter = new CustomerCredentialSubjectAdapter(mockCustomerRepo);
+    adapter = new CustomerCredentialSubjectAdapter(mockCustomerRepo as unknown as CustomerRepo);
   });
 
   it('implements CredentialSubjectPort', () => {
@@ -36,7 +39,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       email: 'test@test.com',
       firstName: 'John',
       lastName: 'Doe',
-    });
+  } as unknown as RepoCustomer);
 
     const result = await adapter.authenticate('test@test.com', 'password');
 
@@ -64,7 +67,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       isActive: true,
       isVerified: true,
       lastLoginAt: new Date('2024-01-01'),
-    });
+  } as unknown as RepoCustomer);
 
     const result = await adapter.findById('cust-1');
 
@@ -87,7 +90,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       customerId: 'cust-1',
       email: 'test@test.com',
       isActive: true,
-    });
+  } as unknown as RepoCustomer);
 
     const result = await adapter.findByEmail('test@test.com');
 
@@ -104,7 +107,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       lastName: 'Smith',
       isActive: true,
       isVerified: false,
-    });
+  } as unknown as RepoCustomer);
 
     const result = await adapter.createWithPassword({
       email: 'new@test.com',
@@ -118,7 +121,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
   });
 
   it('should delegate updateLoginTimestamp', async () => {
-    mockCustomerRepo.updateCustomerLoginTimestamp.mockResolvedValue({});
+    mockCustomerRepo.updateCustomerLoginTimestamp.mockResolvedValue({} as unknown as RepoCustomer);
 
     await adapter.updateLoginTimestamp('cust-1');
 

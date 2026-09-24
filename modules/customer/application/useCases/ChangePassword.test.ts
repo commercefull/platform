@@ -1,69 +1,77 @@
-jest.mock('bcryptjs', () => ({
-  __esModule: true,
-  default: { compare: jest.fn(), hash: jest.fn() },
-  compare: jest.fn(),
-  hash: jest.fn(),
-}));
-
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { ChangePasswordUseCase, ChangePasswordCommand } from './ChangePassword';
 import { CustomerNotFoundError, CustomerValidationError, InvalidCredentialsError } from '../../domain/errors/CustomerErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import {
+  createCustomerRepository,
+  createCustomerRow,
+  compareStringMock,
+  hashStringMock,
+  emitMock,
+} from '../../tests/testUtils';
 
 describe('ChangePasswordUseCase', () => {
-  let useCase: ChangePasswordUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new ChangePasswordUseCase(customerRepository);
 
   beforeEach(() => {
-    const bcryptModule = jest.requireMock('bcryptjs');
-    bcryptModule.compare.mockResolvedValue(true);
-    bcryptModule.hash.mockResolvedValue('new-hash');
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue({ customerId: 'c1', email: 'test@test.com' }),
-      getPasswordHash: jest.fn().mockResolvedValue('old-hash'),
-      updatePassword: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new ChangePasswordUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    customerRepository.findById.mockResolvedValue(createCustomerRow());
+    customerRepository.getPasswordHash.mockResolvedValue('current-hash');
+    customerRepository.updatePassword.mockResolvedValue(undefined);
   });
 
-  it('should change password (happy path)', async () => {
-    const result = await useCase.execute(new ChangePasswordCommand('c1', 'oldPass', 'newPassword123'));
+  it('should change the password and emit customer.password_changed when credentials are valid', async () => {
+    const result = await useCase.execute(new ChangePasswordCommand('cust-1', 'old-password', 'new-password-123'));
 
     expect(result.success).toBe(true);
-    expect(mockRepo.updatePassword).toHaveBeenCalledWith('c1', 'new-hash');
-    expect(eventBus.emit).toHaveBeenCalledWith('customer.password_changed', expect.objectContaining({ customerId: 'c1' }));
+    expect(hashStringMock).toHaveBeenCalledWith('new-password-123', 12);
+    expect(customerRepository.updatePassword).toHaveBeenCalledWith('cust-1', 'hashed-password');
+    expect(emitMock).toHaveBeenCalledWith('customer.password_changed', { customerId: 'cust-1' });
   });
 
   it('should throw CustomerValidationError when customerId is empty', async () => {
-    await expect(useCase.execute(new ChangePasswordCommand('', 'old', 'newpass123'))).rejects.toThrow(CustomerValidationError);
+    await expect(useCase.execute(new ChangePasswordCommand('', 'old', 'new-password-123'))).rejects.toThrow(
+      CustomerValidationError,
+    );
+    expect(customerRepository.findById).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerValidationError when currentPassword is empty', async () => {
-    await expect(useCase.execute(new ChangePasswordCommand('c1', '', 'newpass123'))).rejects.toThrow(CustomerValidationError);
+  it('should throw CustomerValidationError when the current password is empty', async () => {
+    await expect(useCase.execute(new ChangePasswordCommand('cust-1', '', 'new-password-123'))).rejects.toThrow(
+      CustomerValidationError,
+    );
   });
 
-  it('should throw CustomerValidationError when newPassword is too short', async () => {
-    await expect(useCase.execute(new ChangePasswordCommand('c1', 'old', 'short'))).rejects.toThrow(CustomerValidationError);
+  it('should throw CustomerValidationError when the new password is too short', async () => {
+    await expect(useCase.execute(new ChangePasswordCommand('cust-1', 'old', 'short'))).rejects.toThrow(
+      CustomerValidationError,
+    );
   });
 
-  it('should throw CustomerNotFoundError when customer does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw CustomerNotFoundError when the customer does not exist', async () => {
+    customerRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new ChangePasswordCommand('missing', 'old', 'newpass123'))).rejects.toThrow(CustomerNotFoundError);
+    await expect(useCase.execute(new ChangePasswordCommand('missing', 'old', 'new-password-123'))).rejects.toThrow(
+      CustomerNotFoundError,
+    );
+    expect(customerRepository.updatePassword).not.toHaveBeenCalled();
   });
 
-  it('should throw InvalidCredentialsError when current password is wrong', async () => {
-    const bcryptModule = jest.requireMock('bcryptjs');
-    bcryptModule.compare.mockResolvedValue(false);
+  it('should throw CustomerValidationError when no password is set', async () => {
+    customerRepository.getPasswordHash.mockResolvedValue(null);
 
-    await expect(useCase.execute(new ChangePasswordCommand('c1', 'wrong', 'newpass123'))).rejects.toThrow(InvalidCredentialsError);
+    await expect(useCase.execute(new ChangePasswordCommand('cust-1', 'old', 'new-password-123'))).rejects.toThrow(
+      CustomerValidationError,
+    );
+  });
+
+  it('should throw InvalidCredentialsError when the current password is wrong', async () => {
+    compareStringMock.mockResolvedValue(false);
+
+    await expect(useCase.execute(new ChangePasswordCommand('cust-1', 'wrong', 'new-password-123'))).rejects.toThrow(
+      InvalidCredentialsError,
+    );
+    expect(customerRepository.updatePassword).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

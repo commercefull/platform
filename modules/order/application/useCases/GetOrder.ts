@@ -35,11 +35,11 @@ export interface OrderItemResponse {
   name: string;
   description?: string;
   quantity: number;
-  unitPrice: number;
+  unitPriceCents: number;
   discountedUnitPrice?: number;
-  lineTotal: number;
-  discountTotal: number;
-  taxTotal: number;
+  lineTotalCents: number;
+  discountTotalCents: number;
+  taxTotalCents: number;
   fulfillmentStatus: string;
   giftWrapped: boolean;
   giftMessage?: string;
@@ -78,12 +78,12 @@ export interface OrderDetailResponse {
   paymentStatus: string;
   fulfillmentStatus: string;
   currencyCode: string;
-  subtotal: number;
-  discountTotal: number;
-  taxTotal: number;
-  shippingTotal: number;
-  handlingFee: number;
-  totalAmount: number;
+  subtotalCents: number;
+  discountTotalCents: number;
+  taxTotalCents: number;
+  shippingTotalCents: number;
+  handlingFeeCents: number;
+  totalAmountCents: number;
   totalItems: number;
   totalQuantity: number;
   taxExempt: boolean;
@@ -151,12 +151,12 @@ export class GetOrderUseCase {
       paymentStatus: order.paymentStatus,
       fulfillmentStatus: order.fulfillmentStatus,
       currencyCode: order.currencyCode,
-      subtotal: order.subtotal.amount,
-      discountTotal: order.discountTotal.amount,
-      taxTotal: order.taxTotal.amount,
-      shippingTotal: order.shippingTotal.amount,
-      handlingFee: order.handlingFee.amount,
-      totalAmount: order.totalAmount.amount,
+      subtotalCents: order.subtotal.cents,
+      discountTotalCents: order.discountTotal.cents,
+      taxTotalCents: order.taxTotal.cents,
+      shippingTotalCents: order.shippingTotal.cents,
+      handlingFeeCents: order.handlingFee.cents,
+      totalAmountCents: order.totalAmount.cents,
       totalItems: order.totalItems,
       totalQuantity: order.totalQuantity,
       taxExempt: order.taxExempt,
@@ -181,11 +181,11 @@ export class GetOrderUseCase {
         name: item.name,
         description: item.description,
         quantity: item.quantity,
-        unitPrice: item.unitPrice.amount,
-        discountedUnitPrice: item.discountedUnitPrice?.amount,
-        lineTotal: item.lineTotal.amount,
-        discountTotal: item.discountTotal.amount,
-        taxTotal: item.taxTotal.amount,
+        unitPriceCents: item.unitPrice.cents,
+        discountedUnitPriceCents: item.discountedUnitPrice?.cents,
+        lineTotalCents: item.lineTotal.cents,
+        discountTotalCents: item.discountTotal.cents,
+        taxTotalCents: item.taxTotal.cents,
         fulfillmentStatus: item.fulfillmentStatus,
         giftWrapped: item.giftWrapped,
         giftMessage: item.giftMessage,

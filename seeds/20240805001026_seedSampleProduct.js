@@ -21,7 +21,6 @@ exports.up = async function (knex) {
       type: 'simple',
       status: 'active',
       visibility: 'visible',
-      price: 19.99,
       weight: 500,
       weightUnit: 'g',
       isInventoryManaged: true,
@@ -35,6 +34,17 @@ exports.up = async function (knex) {
 
   // Link product to category
   const productId = sampleProduct.productId ?? sampleProduct;
+
+  // Catalog base price lives in the pricing-owned store (integer cents)
+  await knex('productBasePrice')
+    .insert({
+      productId,
+      currencyCode: 'USD',
+      priceCents: 1999,
+    })
+    .onConflict(['productId', 'productVariantId', 'currencyCode'])
+    .merge();
+
   return knex('productCategoryMap').insert({
     productId,
     productCategoryId: electronicsCategory.productCategoryId,
@@ -49,6 +59,7 @@ exports.up = async function (knex) {
 exports.down = async function (knex) {
   const sampleProduct = await knex('product').where({ sku: 'SAMPLE-001' }).first('productId');
   if (sampleProduct) {
+    await knex('productBasePrice').where({ productId: sampleProduct.productId }).delete();
     await knex('productCategoryMap').where({ productId: sampleProduct.productId }).delete();
     await knex('product').where({ productId: sampleProduct.productId }).delete();
   }

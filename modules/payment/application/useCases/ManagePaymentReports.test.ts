@@ -1,41 +1,29 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      findAllReports: jest.fn().mockResolvedValue([{ paymentReportId: 'r1' }]),
-      findReportById: jest.fn().mockResolvedValue({ paymentReportId: 'r1' }),
-      createReport: jest.fn().mockResolvedValue({
-        paymentReportId: 'r1',
-        organizationId: 'org1',
-        type: 'monthly',
-        currency: 'USD',
-        totalAmount: 5000,
-        transactionCount: 100,
-        periodStart: new Date('2026-01-01'),
-        periodEnd: new Date('2026-01-31'),
-        createdAt: new Date('2026-02-01'),
-      }),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentReport } from '../../tests/testUtils';
 import { ManagePaymentReportsUseCase } from './ManagePaymentReports';
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('ManagePaymentReportsUseCase', () => {
   let useCase: ManagePaymentReportsUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManagePaymentReportsUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    useCase = new ManagePaymentReportsUseCase(repo);
   });
 
   it('should find all reports', async () => {
+    repo.findAllReports.mockResolvedValue([createPaymentReport()]);
+
     const result = await useCase.findAll();
+
     expect(result).toHaveLength(1);
   });
 
-  it('should find report by ID', async () => {
+  it('should find a report by ID', async () => {
+    repo.findReportById.mockResolvedValue(createPaymentReport({ paymentReportId: 'r1' }));
+
     const result = await useCase.findById('r1');
-    expect(result).toEqual({ paymentReportId: 'r1' });
+
+    expect(result?.paymentReportId).toBe('r1');
   });
 });

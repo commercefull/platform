@@ -27,19 +27,19 @@ describe('OrderItem', () => {
       expect(item.isDigital).toBe(false);
     });
 
-    it('should calculate lineTotal from effective price × quantity', () => {
+    it('should calculate lineTotalCents from effective price × quantity', () => {
       const item = OrderItem.create(baseProps);
-      expect(item.lineTotal.amount).toBe(100);
+      expect(item.lineTotal.cents).toBe(10000);
     });
 
-    it('should use discountedUnitPrice for lineTotal when provided', () => {
+    it('should use discountedUnitPrice for lineTotalCents when provided', () => {
       const item = OrderItem.create({
         ...baseProps,
         discountedUnitPrice: Money.create(40, 'USD'),
       });
 
-      expect(item.lineTotal.amount).toBe(80);
-      expect(item.discountTotal.amount).toBe(20);
+      expect(item.lineTotal.cents).toBe(8000);
+      expect(item.discountTotal.cents).toBe(2000);
     });
 
     it('should calculate tax from taxRate', () => {
@@ -48,12 +48,12 @@ describe('OrderItem', () => {
         taxRate: 10,
       });
 
-      expect(item.taxTotal.amount).toBe(10);
+      expect(item.taxTotal.cents).toBe(1000);
     });
 
-    it('should default taxTotal to zero when no taxRate', () => {
+    it('should default taxTotalCents to zero when no taxRate', () => {
       const item = OrderItem.create(baseProps);
-      expect(item.taxTotal.amount).toBe(0);
+      expect(item.taxTotal.cents).toBe(0);
     });
   });
 
@@ -63,7 +63,7 @@ describe('OrderItem', () => {
       item.updateQuantity(5);
 
       expect(item.quantity).toBe(5);
-      expect(item.lineTotal.amount).toBe(250);
+      expect(item.lineTotal.cents).toBe(25000);
     });
 
     it('should throw QuantityMustBeAtLeastOneError when quantity < 1', () => {
@@ -83,9 +83,9 @@ describe('OrderItem', () => {
   });
 
   describe('total (computed)', () => {
-    it('should return lineTotal + taxTotal', () => {
+    it('should return lineTotalCents + taxTotalCents', () => {
       const item = OrderItem.create({ ...baseProps, taxRate: 10 });
-      expect(item.total.amount).toBe(110);
+      expect(item.total.cents).toBe(11000);
     });
   });
 
@@ -95,8 +95,8 @@ describe('OrderItem', () => {
       const json = item.toJSON();
 
       expect(json.orderItemId).toBe('item-1');
-      expect(json.unitPrice).toBe(50);
-      expect(json.lineTotal).toBe(100);
+      expect(json.unitPriceCents).toBe(5000);
+      expect(json.lineTotalCents).toBe(10000);
       expect(json.fulfillmentStatus).toBe(FulfillmentStatus.UNFULFILLED);
     });
   });

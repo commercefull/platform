@@ -6,16 +6,12 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
-  ManageMembershipPlansUseCase,
-  ManageMembershipBenefitsUseCase,
-  ManageMembershipSubscriptionsUseCase,
-} from '../../application/useCases/ManageMembership';
+  manageMembershipPlansUseCase as managePlansUseCase,
+  manageMembershipBenefitsUseCase as manageBenefitsUseCase,
+  manageMembershipSubscriptionsUseCase as manageSubscriptionsUseCase,
+} from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const managePlansUseCase = new ManageMembershipPlansUseCase();
-const manageBenefitsUseCase = new ManageMembershipBenefitsUseCase();
-const manageSubscriptionsUseCase = new ManageMembershipSubscriptionsUseCase();
 
 // ============================================================================
 // Membership Plans Management
@@ -57,7 +53,7 @@ const planCreateFields: FieldConfig[] = [
   { name: 'priority', transform: 'int', default: 0, falsyValue: 0 },
   { name: 'level', transform: 'int', default: 1, falsyValue: 1 },
   { name: 'trialDays', transform: 'int', default: 0, falsyValue: 0 },
-  { name: 'price', transform: 'float' },
+  { name: 'priceCents', transform: 'float' },
   { name: 'salePrice', transform: 'float', default: null, falsyValue: null },
   { name: 'setupFee', transform: 'float', default: 0, falsyValue: 0 },
   { name: 'currency', transform: 'stringOrUndefined', default: 'USD' },
@@ -168,7 +164,7 @@ const planUpdateFields: FieldConfig[] = [
   { name: 'priority', transform: 'int', falsyValue: 0 },
   { name: 'level', transform: 'int', falsyValue: 1 },
   { name: 'trialDays', transform: 'int', falsyValue: 0 },
-  { name: 'price', transform: 'float' },
+  { name: 'priceCents', transform: 'float' },
   { name: 'salePrice', transform: 'float', falsyValue: undefined },
   { name: 'setupFee', transform: 'float', falsyValue: 0 },
   { name: 'currency' },

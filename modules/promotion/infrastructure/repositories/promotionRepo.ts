@@ -24,7 +24,7 @@ export type PromotionUsage = {
   promotionId: string;
   orderId: string | null;
   customerId: string | null;
-  discountAmount: string;
+  discountAmountCents: string;
   currencyCode: string;
   usedAt: Date;
   createdAt: Date;
@@ -67,8 +67,8 @@ export interface CreatePromotionInput {
   stackability?: 'none' | 'stackable' | 'exclusive';
   maxUsage?: number;
   maxUsagePerCustomer?: number;
-  minOrderAmount?: number;
-  maxDiscountAmount?: number;
+  minOrderAmountCents?: number;
+  maxDiscountAmountCents?: number;
   organizationId?: string;
   isGlobal?: boolean;
   eligibleCustomerGroups?: string[];
@@ -235,7 +235,7 @@ export class PromotionRepo {
         `INSERT INTO "${PROMOTION_TABLE}" (
           "name", "description", "status", "scope", "priority",
           "startDate", "endDate", "isActive", "isExclusive", "stackability", "maxUsage",
-          "usageCount", "maxUsagePerCustomer", "minOrderAmount", "maxDiscountAmount",
+          "usageCount", "maxUsagePerCustomer", "minOrderAmountCents", "maxDiscountAmountCents",
           "organizationId", "isGlobal", "eligibleCustomerGroups", "excludedCustomerGroups",
           "createdAt", "updatedAt"
         ) VALUES (
@@ -255,8 +255,8 @@ export class PromotionRepo {
           input.maxUsage || null,
           0, // Initial usage count
           input.maxUsagePerCustomer || null,
-          input.minOrderAmount || null,
-          input.maxDiscountAmount || null,
+          input.minOrderAmountCents || null,
+          input.maxDiscountAmountCents || null,
           input.organizationId || null,
           input.isGlobal || false,
           input.eligibleCustomerGroups ? JSON.stringify(input.eligibleCustomerGroups) : null,
@@ -296,15 +296,14 @@ export class PromotionRepo {
         for (const action of input.actions) {
           await tx.queryOne<PromotionAction>(
             `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
-              "promotionId", "type", "value", "targetType", "targetId", "metadata", "createdAt", "updatedAt"
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+              "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
             [
               promotion.promotionId,
               action.type,
-              action.value,
+              JSON.stringify(action.value),
               action.targetType || null,
-              action.targetId || null,
-              action.metadata ? JSON.stringify(action.metadata) : null,
+              action.targetId ? JSON.stringify([action.targetId]) : null,
               now,
               now,
             ],
@@ -337,8 +336,8 @@ export class PromotionRepo {
       'stackability',
       'maxUsage',
       'maxUsagePerCustomer',
-      'minOrderAmount',
-      'maxDiscountAmount',
+      'minOrderAmountCents',
+      'maxDiscountAmountCents',
       'organizationId',
       'isGlobal',
       'eligibleCustomerGroups',
@@ -449,15 +448,14 @@ export class PromotionRepo {
 
     const action = await queryOne<PromotionAction>(
       `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
-        "promotionId", "type", "value", "targetType", "targetId", "metadata", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         promotionId,
         input.type,
-        input.value,
+        JSON.stringify(input.value),
         input.targetType || null,
-        input.targetId || null,
-        input.metadata ? JSON.stringify(input.metadata) : null,
+        input.targetId ? JSON.stringify([input.targetId]) : null,
         now,
         now,
       ],
@@ -497,7 +495,7 @@ export class PromotionRepo {
     promotionId: string,
     orderId: string,
     customerId?: string,
-    discountAmount: number = 0,
+    discountAmountCents: number = 0,
     currencyCode: string = 'USD',
   ): Promise<PromotionUsage> {
     const now = new Date();
@@ -505,9 +503,9 @@ export class PromotionRepo {
     return withTransaction(async tx => {
       const usage = await tx.queryOne<PromotionUsage>(
         `INSERT INTO "${PROMOTION_USAGE_TABLE}" (
-          "promotionId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt", "createdAt", "updatedAt"
+          "promotionId", "orderId", "customerId", "discountAmountCents", "currencyCode", "usedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-        [promotionId, orderId, customerId || null, discountAmount, currencyCode, now, now, now],
+        [promotionId, orderId, customerId || null, discountAmountCents, currencyCode, now, now, now],
       );
 
       if (!usage) {
@@ -568,7 +566,7 @@ export class PromotionRepo {
   /**
    * Validate if a promotion can be applied
    */
-  async isValidForOrder(promotionId: string, orderTotal: number, customerId?: string): Promise<boolean> {
+  async isValidForOrder(promotionId: string, orderTotalCents: number, customerId?: string): Promise<boolean> {
     const details = await this.getWithDetails(promotionId);
 
     if (!details) return false;
@@ -586,7 +584,7 @@ export class PromotionRepo {
     if (promotion.maxUsage && promotion.usageCount >= promotion.maxUsage) return false;
 
     // Check minimum order amount
-    if (promotion.minOrderAmount && orderTotal < Number(promotion.minOrderAmount)) return false;
+    if (promotion.minOrderAmountCents && orderTotalCents < Number(promotion.minOrderAmountCents)) return false;
 
     // Check per-customer limit if applicable
     if (customerId && promotion.maxUsagePerCustomer) {

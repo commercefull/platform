@@ -1,28 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
-
-jest.mock('../../../tax/application/useCases/CalculateOrderTax', () => ({
-  __esModule: true,
-  calculateOrderTaxUseCase: { execute: jest.fn() },
-}));
-
-jest.mock('../../../tax/infrastructure/repositories/taxSettingsRepo', () => ({
-  __esModule: true,
-  default: { findByMerchant: jest.fn() },
-}));
-
 import { TaxTaxQuoteAdapter } from './TaxTaxQuoteAdapter';
+import type { CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
+import type taxSettingsRepoModule from '../../../tax/infrastructure/repositories/taxSettingsRepo';
 
 describe('TaxTaxQuoteAdapter', () => {
   let adapter: TaxTaxQuoteAdapter;
-
-  let calculateOrderTaxUseCase: any;
-
-  let taxSettingsRepo: any;
+  let calculateOrderTaxUseCase: jest.Mocked<Pick<CalculateOrderTaxUseCase, 'execute'>>;
+  let taxSettingsRepo: jest.Mocked<Pick<typeof taxSettingsRepoModule, 'findByMerchant'>>;
 
   beforeEach(() => {
-    calculateOrderTaxUseCase = require('../../../tax/application/useCases/CalculateOrderTax').calculateOrderTaxUseCase;
-    taxSettingsRepo = require('../../../tax/infrastructure/repositories/taxSettingsRepo').default;
-    adapter = new TaxTaxQuoteAdapter();
+    calculateOrderTaxUseCase = { execute: jest.fn() };
+    taxSettingsRepo = { findByMerchant: jest.fn() };
+    adapter = new TaxTaxQuoteAdapter(calculateOrderTaxUseCase, taxSettingsRepo);
   });
 
   it('implements TaxQuotePort', () => {
@@ -33,33 +21,43 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should map tax calculation result to checkout vocabulary', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: true,
-      taxAmount: 8.5,
+      subtotalCents: 100,
+      shippingAmountCents: 10,
+      taxAmountCents: 8.5,
+      totalCents: 118.5,
+      taxRate: 0.085,
+      lineItems: [],
     });
 
     const result = await adapter.calculateTax({
-      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPrice: 100 }],
+      items: [{ productId: 'p1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
       shippingAddress: { country: 'US', region: 'OR' },
-      shippingAmount: 10,
+      shippingAmountCents: 10,
     });
 
     expect(result.success).toBe(true);
-    expect(result.taxAmount).toBe(8.5);
+    expect(result.taxAmountCents).toBe(8.5);
   });
 
-  it('should return taxAmount 0 when calculation fails', async () => {
+  it('should return taxAmountCents 0 when calculation fails', async () => {
     calculateOrderTaxUseCase.execute.mockResolvedValue({
       success: false,
-      taxAmount: 0,
+      subtotalCents: 0,
+      shippingAmountCents: 0,
+      taxAmountCents: 0,
+      totalCents: 0,
+      taxRate: 0,
+      lineItems: [],
     });
 
     const result = await adapter.calculateTax({
       items: [],
       shippingAddress: { country: 'US' },
-      shippingAmount: 0,
+      shippingAmountCents: 0,
     });
 
     expect(result.success).toBe(false);
-    expect(result.taxAmount).toBe(0);
+    expect(result.taxAmountCents).toBe(0);
   });
 
   it('should return failure result when use case throws', async () => {
@@ -68,17 +66,28 @@ describe('TaxTaxQuoteAdapter', () => {
     const result = await adapter.calculateTax({
       items: [],
       shippingAddress: { country: 'US' },
-      shippingAmount: 0,
+      shippingAmountCents: 0,
     });
 
     expect(result.success).toBe(false);
-    expect(result.taxAmount).toBe(0);
+    expect(result.taxAmountCents).toBe(0);
   });
 
   it('should map tax settings to checkout vocabulary', async () => {
     taxSettingsRepo.findByMerchant.mockResolvedValue({
-      applyDiscountBeforeTax: true,
+      taxSettingsId: 'ts-1',
+      createdAt: '2024-01-01',
+      updatedAt: '2024-01-01',
+      organizationId: 'merchant-1',
+      calculationMethod: 'itemBased',
+      pricesIncludeTax: false,
+      displayPricesWithTax: false,
+      taxBasedOn: 'shippingAddress',
+      displayTaxTotals: 'itemized',
       applyTaxToShipping: false,
+      applyDiscountBeforeTax: true,
+      roundTaxAtSubtotal: false,
+      taxDecimalPlaces: 2,
     });
 
     const result = await adapter.getTaxSettings('merchant-1');

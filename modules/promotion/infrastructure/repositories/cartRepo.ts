@@ -5,16 +5,16 @@ import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../doma
 // Use PromotionCart type directly from libs/db/types.ts
 export type { PromotionCart };
 
-type CreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmount' | 'status'> &
+type CreateProps = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmountCents' | 'status'> &
   Partial<Pick<PromotionCart, 'promotionCouponId' | 'couponCode' | 'currencyCode' | 'appliedBy'>>;
-type UpdateProps = Partial<Pick<PromotionCart, 'discountAmount' | 'status'>>;
+type UpdateProps = Partial<Pick<PromotionCart, 'discountAmountCents' | 'status'>>;
 
 export class PromotionCartRepo {
   async create(props: CreateProps): Promise<PromotionCart> {
     const now = new Date();
     const row = await queryOne<PromotionCart>(
       `INSERT INTO "${Table.PromotionCart}" 
-       ("basketId", "promotionId", "promotionCouponId", "couponCode", "discountAmount", "currencyCode", "status", "appliedBy", "appliedAt", "createdAt", "updatedAt") 
+       ("basketId", "promotionId", "promotionCouponId", "couponCode", "discountAmountCents", "currencyCode", "status", "appliedBy", "appliedAt", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
        RETURNING *`,
       [
@@ -22,7 +22,7 @@ export class PromotionCartRepo {
         props.promotionId,
         props.promotionCouponId || null,
         props.couponCode || null,
-        props.discountAmount,
+        props.discountAmountCents,
         props.currencyCode || 'USD',
         props.status,
         props.appliedBy || null,

@@ -11,24 +11,22 @@
 
 import { eventBus, EventPayload } from '../../../libs/events/eventBus';
 import { logger } from '../../../libs/logger';
-import { orderDataRepository } from './wired';
 import { UpdateOrderStatusUseCase, UpdateOrderStatusCommand } from '../application/useCases/UpdateOrderStatus';
 import { OrderStatus } from '../domain/valueObjects/OrderStatus';
-
-const OrderRepo = orderDataRepository.commands;
+import type { OrderRepository } from '../domain/repositories/OrderRepository';
 
 /**
  * Register order event handlers for payment lifecycle events.
  * Called from registerEventHandlers.ts on app boot.
  */
-export function registerOrderPaymentEventHandlers(): void {
+export function registerOrderPaymentEventHandlers(orders: OrderRepository): void {
   // order.payment_failed → update order status to PAYMENT_FAILED
   eventBus.registerHandler('order.payment_failed', async (payload: EventPayload) => {
     const { orderId } = payload.data as { orderId?: string };
     if (!orderId) return;
 
     try {
-      const updateOrderStatus = new UpdateOrderStatusUseCase(OrderRepo);
+      const updateOrderStatus = new UpdateOrderStatusUseCase(orders);
       await updateOrderStatus.execute(new UpdateOrderStatusCommand(orderId, OrderStatus.PAYMENT_FAILED));
       logger.debug('Order marked as payment failed via event', { orderId });
     } catch (err: unknown) {

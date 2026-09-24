@@ -6,12 +6,9 @@
 
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { FraudScreeningService } from '../../application/services/FraudScreeningService';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { FraudRepo as fraudRepo } from '../../application/wired';
+import { FraudRepo as fraudRepo, fraudScreeningService } from '../../application/wired';
 import type { RuleAction, RuleType } from '../../application/wired';
-
-const fraudScreeningService = new FraudScreeningService();
 
 // ============================================================================
 // List Fraud Rules
@@ -134,13 +131,13 @@ export const deleteFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
 export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const { email, ipAddress, billingCountry, shippingCountry, orderAmount, currency, paymentMethod, isFirstOrder, isGuestCheckout } =
+    const { email, ipAddress, billingCountry, shippingCountry, orderAmountCents, currency, paymentMethod, isFirstOrder, isGuestCheckout } =
       body as {
         email?: string;
         ipAddress?: string;
         billingCountry?: string;
         shippingCountry?: string;
-        orderAmount: string;
+        orderAmountCents: string;
         currency?: string;
         paymentMethod?: string;
         isFirstOrder?: string;
@@ -152,7 +149,7 @@ export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse
       ipAddress: ipAddress || undefined,
       billingCountry: billingCountry || undefined,
       shippingCountry: shippingCountry || undefined,
-      orderAmount: parseFloat(orderAmount) || 0,
+      orderAmountCents: parseInt(orderAmountCents ?? '0') || 0,
       currency: currency || 'USD',
       paymentMethod: paymentMethod || undefined,
       isFirstOrder: isFirstOrder === 'true',

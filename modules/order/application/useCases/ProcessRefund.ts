@@ -22,7 +22,8 @@ import {
 export class ProcessRefundCommand {
   constructor(
     public readonly orderId: string,
-    public readonly amount: number,
+    /** Refund amount in integer cents. */
+    public readonly amountCents: number,
     public readonly reason: string,
     public readonly transactionId?: string,
   ) {}
@@ -35,7 +36,7 @@ export class ProcessRefundCommand {
 export interface ProcessRefundResponse {
   orderId: string;
   orderNumber: string;
-  refundAmount: number;
+  refundAmountCents: number;
   isFullRefund: boolean;
   previousPaymentStatus: string;
   newPaymentStatus: string;
@@ -63,16 +64,16 @@ export class ProcessRefundUseCase {
     }
 
     // Validate refund amount
-    if (command.amount <= 0) {
+    if (command.amountCents <= 0) {
       throw new RefundAmountMustBePositiveError();
     }
 
-    if (command.amount > order.totalAmount.amount) {
+    if (command.amountCents > order.totalAmount.cents) {
       throw new RefundExceedsOrderTotalError();
     }
 
     const previousPaymentStatus = order.paymentStatus;
-    const isFullRefund = command.amount >= order.totalAmount.amount;
+    const isFullRefund = command.amountCents >= order.totalAmount.cents;
 
     // Update payment status
     if (isFullRefund) {
@@ -83,7 +84,7 @@ export class ProcessRefundUseCase {
     }
 
     // Add admin note
-    order.addAdminNote(`Refund processed: $${command.amount.toFixed(2)} - Reason: ${command.reason}`);
+    order.addAdminNote(`Refund processed: $${(command.amountCents / 100).toFixed(2)} - Reason: ${command.reason}`);
 
     // Save updated order and record payment status change in a single transaction
     await withTransaction(async () => {
@@ -96,7 +97,7 @@ export class ProcessRefundUseCase {
       orderId: order.orderId,
       orderNumber: order.orderNumber,
       customerId: order.customerId,
-      refundAmount: command.amount,
+      refundAmountCents: command.amountCents,
       reason: command.reason,
       isFullRefund,
     });
@@ -104,7 +105,7 @@ export class ProcessRefundUseCase {
     return {
       orderId: order.orderId,
       orderNumber: order.orderNumber,
-      refundAmount: command.amount,
+      refundAmountCents: command.amountCents,
       isFullRefund,
       previousPaymentStatus,
       newPaymentStatus: order.paymentStatus,

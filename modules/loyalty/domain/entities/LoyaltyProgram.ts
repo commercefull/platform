@@ -82,12 +82,12 @@ export class LoyaltyProgram {
     return this.props.isActive;
   }
 
-  calculatePointsForPurchase(amount: number): number {
+  calculatePointsForPurchase(amountCents: number): number {
     const rule = this.props.earnRules.find(r => r.type === 'purchase' && r.isActive);
     if (!rule) return 0;
-    if (rule.minPurchase && amount < rule.minPurchase) return 0;
+    if (rule.minPurchase && amountCents < rule.minPurchase) return 0;
 
-    let points = Math.floor(amount / (rule.unit === 'dollar' ? 1 : 100)) * rule.pointsPerUnit;
+    let points = Math.floor(amountCents / (rule.unit === 'dollar' ? 1 : 100)) * rule.pointsPerUnit;
     if (rule.multiplier) points *= rule.multiplier;
     if (rule.maxPoints) points = Math.min(points, rule.maxPoints);
 

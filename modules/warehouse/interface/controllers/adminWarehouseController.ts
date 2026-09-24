@@ -5,11 +5,9 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import { ManageWarehouseAdminUseCaseV2 } from '../../application/useCases/ManageWarehouseAdminV2';
+import { manageWarehouseAdminUseCaseV2 as manageWarehouseUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
-
-const manageWarehouseUseCase = new ManageWarehouseAdminUseCaseV2();
 
 // ============================================================================
 // Warehouse Management

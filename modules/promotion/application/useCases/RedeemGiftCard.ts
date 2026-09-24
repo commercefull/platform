@@ -1,10 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
 /**
  * Redeem Gift Card Use Case
  * Handles gift card redemption for orders
  */
 
-import { giftCardRepo } from '../wired';
+import type {
+  GiftCardRepository,
+  PromotionGiftCardTransaction,
+} from '../../domain/repositories/GiftCardRepository';
 
 // ============================================================================
 // Command
@@ -13,7 +16,7 @@ import { giftCardRepo } from '../wired';
 export class RedeemGiftCardCommand {
   constructor(
     public readonly code: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly orderId?: string,
     public readonly customerId?: string,
   ) {}
@@ -25,8 +28,8 @@ export class RedeemGiftCardCommand {
 
 export interface RedeemGiftCardResponse {
   success: boolean;
-  transaction?: giftCardRepo.PromotionGiftCardTransaction;
-  remainingBalance?: number;
+  transaction?: PromotionGiftCardTransaction;
+  remainingBalanceCents?: number;
   message?: string;
   errors?: string[];
 }
@@ -36,18 +39,22 @@ export interface RedeemGiftCardResponse {
 // ============================================================================
 
 export class RedeemGiftCardUseCase {
+  constructor(
+    private readonly giftCardRepo: Pick<GiftCardRepository, 'getGiftCardByCode' | 'redeemGiftCard' | 'getGiftCard'>,
+  ) {}
+
   async execute(command: RedeemGiftCardCommand): Promise<RedeemGiftCardResponse> {
     // Validate input
     if (!command.code?.trim()) {
       return { success: false, message: 'Gift card code is required', errors: ['code_required'] };
     }
 
-    if (command.amount <= 0) {
+    if (command.amountCents <= 0) {
       return { success: false, message: 'Amount must be positive', errors: ['invalid_amount'] };
     }
 
     // Find gift card by code
-    const giftCard = await giftCardRepo.getGiftCardByCode(command.code);
+    const giftCard = await this.giftCardRepo.getGiftCardByCode(command.code);
 
     if (!giftCard) {
       return { success: false, message: 'Gift card not found', errors: ['gift_card_not_found'] };
@@ -68,30 +75,30 @@ export class RedeemGiftCardUseCase {
     }
 
     // Check balance
-    if (giftCard.currentBalance < command.amount) {
+    if (giftCard.currentBalanceCents < command.amountCents) {
       return {
         success: false,
-        message: `Insufficient balance. Available: ${giftCard.currentBalance}`,
+        message: `Insufficient balance. Available: ${giftCard.currentBalanceCents}`,
         errors: ['insufficient_balance'],
       };
     }
 
     try {
       // Redeem the gift card
-      const transaction = await giftCardRepo.redeemGiftCard(
+      const transaction = await this.giftCardRepo.redeemGiftCard(
         giftCard.promotionGiftCardId,
-        command.amount,
+        command.amountCents,
         command.orderId,
         command.customerId,
       );
 
       // Get updated gift card for remaining balance
-      const updatedGiftCard = await giftCardRepo.getGiftCard(giftCard.promotionGiftCardId);
+      const updatedGiftCard = await this.giftCardRepo.getGiftCard(giftCard.promotionGiftCardId);
 
       return {
         success: true,
         transaction,
-        remainingBalance: updatedGiftCard?.currentBalance ?? 0,
+        remainingBalanceCents: updatedGiftCard?.currentBalanceCents ?? 0,
         message: 'Gift card redeemed successfully',
       };
     } catch (error: unknown) {
@@ -103,5 +110,3 @@ export class RedeemGiftCardUseCase {
     }
   }
 }
-
-const redeemGiftCardUseCase = new RedeemGiftCardUseCase();

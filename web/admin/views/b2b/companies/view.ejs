@@ -22,8 +22,8 @@
         <% } else { %><span class="badge bg-danger"><%= company.status %></span><% } %>
       </td></tr>
       <tr><th>Payment Terms</th><td><%= company.paymentTerms %></td></tr>
-      <tr><th>Credit Limit</th><td><%= company.creditLimit != null ? '$' + company.creditLimit.toFixed(2) : '-' %></td></tr>
-      <tr><th>Outstanding Balance</th><td>$<%= company.outstandingBalance.toFixed(2) %></td></tr>
+      <tr><th>Credit Limit</th><td><%= company.creditLimitCents != null ? '$' + (company.creditLimitCents/100).toFixed(2) : '-' %></td></tr>
+      <tr><th>Outstanding Balance</th><td>$<%= (company.outstandingBalanceCents/100).toFixed(2) %></td></tr>
       <tr><th>Contact Email</th><td><%= company.contactEmail || '-' %></td></tr>
       <tr><th>Contact Phone</th><td><%= company.contactPhone || '-' %></td></tr>
       <tr><th>Website</th><td><%= company.website || '-' %></td></tr>

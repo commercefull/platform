@@ -16,9 +16,9 @@ export type ConditionOperator =
   | 'endsWith';
 
 export type ConditionField =
-  | 'lifetimeValue'
+  | 'lifetimeValueCents'
   | 'totalOrders'
-  | 'averageOrderValue'
+  | 'averageOrderValueCents'
   | 'daysSinceLastOrder'
   | 'ordersLast30Days'
   | 'ordersLast90Days'

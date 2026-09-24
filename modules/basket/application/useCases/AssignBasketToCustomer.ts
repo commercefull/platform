@@ -45,7 +45,10 @@ export class AssignBasketToCustomerUseCase {
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
-    return this.mapToResponse(updatedBasket!);
+    if (!updatedBasket) {
+      throw new BasketNotFoundError(command.basketId);
+    }
+    return this.mapToResponse(updatedBasket);
   }
 
   private mapToResponse(basket: Basket): BasketResponse {
@@ -62,13 +65,13 @@ export class AssignBasketToCustomerUseCase {
         sku: item.sku,
         name: item.name,
         quantity: item.quantity,
-        unitPrice: item.unitPrice.amount,
-        lineTotal: item.lineTotal.amount,
+        unitPriceCents: item.unitPrice.cents,
+        lineTotalCents: item.lineTotal.cents,
         imageUrl: item.imageUrl,
         isGift: item.isGift,
       })),
       itemCount: basket.itemCount,
-      subtotal: basket.subtotal.amount,
+      subtotalCents: basket.subtotal.cents,
       createdAt: basket.createdAt.toISOString(),
       updatedAt: basket.updatedAt.toISOString(),
     };

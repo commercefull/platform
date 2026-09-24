@@ -26,7 +26,7 @@ exports.up = async function (knex) {
     table.string('shipToCountry');
     table.decimal('weight', 10, 2);
     table.jsonb('dimensions');
-    table.decimal('shippingCost', 10, 2);
+    table.bigInteger('shippingCostCents');
     table.string('voidReason');
     table.timestamp('voidedAt');
     table.timestamp('createdAt').defaultTo(knex.fn.now());

@@ -9,7 +9,7 @@ export interface EarnPointsInput {
   customerId: string;
   orderId?: string;
   actionType: 'purchase' | 'referral' | 'review' | 'signup' | 'bonus';
-  amount?: number; // Order amount for purchase
+  amountCents?: number; // Order amountCents for purchase
   points?: number; // Fixed points for non-purchase actions
   description?: string;
 }
@@ -83,10 +83,10 @@ export class EarnPointsUseCase {
     // Calculate points
     let pointsToEarn = input.points || 0;
 
-    if (input.actionType === 'purchase' && input.amount) {
+    if (input.actionType === 'purchase' && input.amountCents) {
       // Points per dollar/currency unit
       const earnRate = program.earnRates?.[member.tierId] || program.baseEarnRate || 1;
-      pointsToEarn = Math.floor(input.amount * earnRate);
+      pointsToEarn = Math.floor(input.amountCents * earnRate);
     }
 
     // Apply tier multiplier

@@ -28,11 +28,11 @@ describe('auditMiddleware', () => {
     mockReq = {
       method: 'POST',
       path: '/business/products',
-      route: { path: '/business/products' } as never,
+      route: { path: '/business/products' } as unknown as HttpRequest['route'],
       params: {},
       body: { name: 'Widget', price: 10 },
       ip: '192.168.1.1',
-      socket: { remoteAddress: '192.168.1.1' } as never,
+      socket: { remoteAddress: '192.168.1.1' } as unknown as HttpRequest['socket'],
       headers: { 'user-agent': 'Mozilla/5.0' },
       user: {
         userId: 'user-1',
@@ -44,7 +44,7 @@ describe('auditMiddleware', () => {
         storeId: 'store-1',
         permissions: ['*'],
         role: 'ADMIN',
-      } as never,
+      } as unknown as HttpRequest['user'],
     };
 
     const sendFn = jest.fn(function (this: HttpResponse, _body: unknown) {

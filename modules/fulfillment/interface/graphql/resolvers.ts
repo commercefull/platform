@@ -43,7 +43,7 @@ export const fulfillmentResolvers = {
         trackingUrl?: string;
         carrierId?: string;
         carrierName?: string;
-        shippingCost?: number;
+        shippingCostCents?: number;
       },
       context: GraphQLAuthContext,
     ) => {
@@ -55,7 +55,7 @@ export const fulfillmentResolvers = {
         trackingUrl: args.trackingUrl,
         carrierId: args.carrierId,
         carrierName: args.carrierName,
-        shippingCost: args.shippingCost,
+        shippingCostCents: args.shippingCostCents,
       };
       return useCase.execute(input);
     },

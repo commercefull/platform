@@ -1,4 +1,4 @@
-import { reportingRepository as reportingRepo } from '../wired';
+import type { ReportingRepository } from '../../domain/repositories/ReportingRepository';
 import type { ReportScheduleProps, ReportFrequency, ReportFormat } from '../../domain/entities/ReportEntities';
 
 export interface UpdateReportScheduleInput {
@@ -12,7 +12,9 @@ export interface UpdateReportScheduleInput {
 }
 
 export class UpdateReportScheduleUseCase {
+  constructor(private readonly reportingRepo: ReportingRepository) {}
+
   async execute(input: UpdateReportScheduleInput): Promise<ReportScheduleProps | null> {
-    return reportingRepo.updateSchedule(input.reportScheduleId, input);
+    return this.reportingRepo.updateSchedule(input.reportScheduleId, input);
   }
 }

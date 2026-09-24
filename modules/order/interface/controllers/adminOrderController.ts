@@ -18,19 +18,16 @@ import {
   cancelOrderUseCase,
   processRefundUseCase,
   addOrderNoteUseCase,
+  manageOrderNotesUseCase,
+  getOrderRefundsUseCase,
+  getFulfillmentPackagesUseCase,
+  trackFulfillmentPackageUseCase,
 } from '../../application/useCases/wired';
-import { TrackFulfillmentPackageCommand, TrackFulfillmentPackageUseCase } from '../../application/useCases/TrackFulfillmentPackage';
-import { ManageOrderNotesUseCase } from '../../application/useCases/ManageOrderNotes';
-import { GetOrderRefundsUseCase } from '../../application/useCases/GetOrderRefunds';
-import { GetFulfillmentPackagesUseCase } from '../../application/useCases/GetFulfillmentPackages';
+import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const manageOrderNotesUseCase = new ManageOrderNotesUseCase();
-const getOrderRefundsUseCase = new GetOrderRefundsUseCase();
-const getFulfillmentPackagesUseCase = new GetFulfillmentPackagesUseCase();
 
 // ============================================================================
 // List Orders
@@ -204,7 +201,7 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   const { amount, reason, _refundItems } = body as { amount: string; reason?: string; _refundItems?: unknown };
   const _processedBy = req.user?.id || 'admin';
 
-  const command = new ProcessRefundCommand(orderId, parseFloat(amount), reason || 'Refund processed by admin');
+  const command = new ProcessRefundCommand(orderId, Math.round(parseFloat(amount) * 100), reason || 'Refund processed by admin');
 
   await processRefundUseCase.execute(command);
 
@@ -299,8 +296,7 @@ export const updatePackageTracking = async (req: HttpRequest, res: HttpResponse)
       undefined,
       packageId,
     );
-    const useCase = new TrackFulfillmentPackageUseCase();
-    await useCase.execute(command);
+    await trackFulfillmentPackageUseCase.execute(command);
 
     req.flash?.('success', 'Tracking updated');
     res.redirect(`/admin/orders/${orderId}`);

@@ -1,7 +1,7 @@
 import { query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { Product as DbProduct } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
-import type { Product } from '../../domain/entities/Product';
 
 /**
  * Search filters for product queries
@@ -15,9 +15,10 @@ export interface ProductSearchFilters {
   categoryIds?: string[];
   productTypeId?: string;
 
-  // Price filters
-  minPrice?: number;
-  maxPrice?: number;
+  // Price filters — integer cents, matched against the pricing-owned
+  // productBasePrice table (effective price = sale price when present).
+  minPriceCents?: number;
+  maxPriceCents?: number;
 
   // Status filters
   status?: string;
@@ -53,8 +54,51 @@ export interface AttributeFilter {
   operator?: 'eq' | 'neq' | 'in' | 'nin' | 'gt' | 'gte' | 'lt' | 'lte' | 'between' | 'like';
 }
 
+/**
+ * A raw `product` row enriched with the product-level catalog price from the
+ * pricing-owned `productBasePrice` table. All amounts are integer cents
+ * (pg returns bigint as strings; they are normalized to numbers on read).
+ */
+export type ProductSearchRow = DbProduct & {
+  priceCents: number | null;
+  salePriceCents: number | null;
+  effectivePriceCents: number | null;
+  currencyCode: string | null;
+};
+
+const PRICE_COLUMNS_SQL = `
+  bp."priceCents" AS "priceCents",
+  bp."salePriceCents" AS "salePriceCents",
+  COALESCE(bp."salePriceCents", bp."priceCents") AS "effectivePriceCents",
+  bp."currencyCode" AS "currencyCode"
+`;
+
+const PRICE_JOIN_SQL = `
+  LEFT JOIN LATERAL (
+    SELECT "priceCents", "salePriceCents", "currencyCode"
+    FROM "productBasePrice" bp_inner
+    WHERE bp_inner."productId" = p."productId"
+      AND bp_inner."productVariantId" IS NULL
+    ORDER BY bp_inner."currencyCode" ASC
+    LIMIT 1
+  ) bp ON true
+`;
+
+function mapSearchRow(row: Record<string, unknown>): ProductSearchRow {
+  const cents = (v: unknown): number | null => (v == null ? null : Number(v));
+  const priceCents = cents(row.priceCents);
+  const salePriceCents = cents(row.salePriceCents);
+  return {
+    ...(row as DbProduct),
+    priceCents,
+    salePriceCents,
+    effectivePriceCents: salePriceCents ?? priceCents,
+    currencyCode: (row.currencyCode as string | null) ?? null,
+  };
+}
+
 export interface ProductSearchResult {
-  products: Product[];
+  products: ProductSearchRow[];
   total: number;
   page: number;
   limit: number;
@@ -64,6 +108,7 @@ export interface ProductSearchResult {
 
 export interface SearchFacets {
   categories: FacetValue[];
+  brands: FacetValue[];
   priceRanges: PriceRangeFacet[];
   attributes: AttributeFacet[];
 }
@@ -112,10 +157,12 @@ class ProductSearchService {
       const { sql, countSql, params } = this.buildSearchQuery(filters, limit, offset);
 
       // Execute queries in parallel
-      const [products, countResult] = await Promise.all([
-        query<Product[]>(sql, params),
+      const [rows, countResult] = await Promise.all([
+        query<DbProduct[]>(sql, params),
         query<Array<{ count: string }>>(countSql, params.slice(0, -2)), // Remove limit/offset params
       ]);
+
+      const products: ProductSearchRow[] = (rows || []).map(mapSearchRow);
 
       const total = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
       const totalPages = Math.ceil(total / limit);
@@ -128,7 +175,7 @@ class ProductSearchService {
       }
 
       return {
-        products: products || [],
+        products,
         total,
         page,
         limit,
@@ -223,15 +270,16 @@ class ProductSearchService {
       paramIndex++;
     }
 
-    // Price filters
-    if (filters.minPrice !== undefined) {
-      conditions.push(`p."price" >= $${paramIndex}`);
-      params.push(filters.minPrice);
+    // Price filters — effective catalog price (integer cents) from the
+    // pricing-owned productBasePrice table.
+    if (filters.minPriceCents !== undefined) {
+      conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") >= $${paramIndex}`);
+      params.push(filters.minPriceCents);
       paramIndex++;
     }
-    if (filters.maxPrice !== undefined) {
-      conditions.push(`p."price" <= $${paramIndex}`);
-      params.push(filters.maxPrice);
+    if (filters.maxPriceCents !== undefined) {
+      conditions.push(`COALESCE(bp."salePriceCents", bp."priceCents") <= $${paramIndex}`);
+      params.push(filters.maxPriceCents);
       paramIndex++;
     }
 
@@ -399,7 +447,9 @@ class ProductSearchService {
         orderBy = `${alias}."name" ${sortOrder.toUpperCase()}`;
         break;
       case 'price':
-        orderBy = `${alias}."price" ${sortOrder.toUpperCase()}`;
+        // Output column from the productBasePrice LATERAL join — unqualified so
+        // it resolves in both the single-arm query and the UNION wrapper.
+        orderBy = `"effectivePriceCents" ${sortOrder.toUpperCase()} NULLS LAST`;
         break;
       case 'createdAt':
         orderBy = `${alias}."createdAt" ${sortOrder.toUpperCase()}`;
@@ -425,16 +475,17 @@ class ProductSearchService {
         break;
     }
 
-    const armSql = (a: typeof arm, cols: string) => `
+    const armSql = (a: typeof arm, cols: string, withPrice: boolean) => `
       SELECT DISTINCT ${cols}
       FROM "${this.productTable}" p
+      ${withPrice ? PRICE_JOIN_SQL : ''}
       ${a.joins.join(' ')}
       WHERE ${a.conditions.join(' AND ')}
     `;
 
     if (!secondArm) {
       const sql = `
-        ${armSql(arm, 'p.*')}
+        ${armSql(arm, `p.*, ${PRICE_COLUMNS_SQL}`, true)}
         ORDER BY ${orderBy}
         LIMIT $${arm.nextParamIndex} OFFSET $${arm.nextParamIndex + 1}
       `;
@@ -442,6 +493,7 @@ class ProductSearchService {
       const countSql = `
         SELECT COUNT(DISTINCT p."productId") as count
         FROM "${this.productTable}" p
+        ${PRICE_JOIN_SQL}
         ${arm.joins.join(' ')}
         WHERE ${arm.conditions.join(' AND ')}
       `;
@@ -451,9 +503,9 @@ class ProductSearchService {
 
     const sql = `
       SELECT * FROM (
-        ${armSql(arm, 'p.*')}
+        ${armSql(arm, `p.*, ${PRICE_COLUMNS_SQL}`, true)}
         UNION
-        ${armSql(secondArm, 'p.*')}
+        ${armSql(secondArm, `p.*, ${PRICE_COLUMNS_SQL}`, true)}
       ) t
       ORDER BY ${orderBy}
       LIMIT $${secondArm.nextParamIndex} OFFSET $${secondArm.nextParamIndex + 1}
@@ -461,9 +513,9 @@ class ProductSearchService {
 
     const countSql = `
       SELECT COUNT(*) as count FROM (
-        ${armSql(arm, 'p."productId"')}
+        ${armSql(arm, 'p."productId"', true)}
         UNION
-        ${armSql(secondArm, 'p."productId"')}
+        ${armSql(secondArm, 'p."productId"', true)}
       ) t
     `;
 
@@ -489,17 +541,16 @@ class ProductSearchService {
    * Compute facets for the current search
    */
   private async computeFacets(filters: ProductSearchFilters): Promise<SearchFacets> {
-    // Get category facets
-    const categoryFacets = await this.getCategoryFacets(filters);
-
-    // Get price range facets
-    const priceRangeFacets = await this.getPriceRangeFacets(filters);
-
-    // Get attribute facets
-    const attributeFacets = await this.getAttributeFacets(filters);
+    const [categoryFacets, brandFacets, priceRangeFacets, attributeFacets] = await Promise.all([
+      this.getCategoryFacets(filters),
+      this.getBrandFacets(filters),
+      this.getPriceRangeFacets(filters),
+      this.getAttributeFacets(filters),
+    ]);
 
     return {
       categories: categoryFacets,
+      brands: brandFacets,
       priceRanges: priceRangeFacets,
       attributes: attributeFacets,
     };
@@ -528,36 +579,67 @@ class ProductSearchService {
     }));
   }
 
-  private async getPriceRangeFacets(_filters: ProductSearchFilters): Promise<PriceRangeFacet[]> {
+  private async getBrandFacets(_filters: ProductSearchFilters): Promise<FacetValue[]> {
     const sql = `
       SELECT 
-        MIN(p."price") as min_price,
-        MAX(p."price") as max_price
+        b."brandId" as id,
+        b."name",
+        COUNT(DISTINCT p."productId") as count
       FROM "${this.productTable}" p
+      JOIN "${Table.Brand}" b ON b."brandId" = p."brandId"
+      WHERE p."deletedAt" IS NULL AND p."status" = 'active'
+        AND b."deletedAt" IS NULL
+      GROUP BY b."brandId", b."name"
+      ORDER BY count DESC
+      LIMIT 20
+    `;
+
+    const results = await query<Array<{ id: string; name: string; count: string }>>(sql);
+    return (results || []).map(r => ({
+      id: r.id,
+      name: r.name,
+      count: parseInt(r.count, 10),
+    }));
+  }
+
+  /**
+   * Price-range facets over the pricing-owned productBasePrice table.
+   * Buckets are integer cents on the effective price (sale price when present).
+   */
+  private async getPriceRangeFacets(_filters: ProductSearchFilters): Promise<PriceRangeFacet[]> {
+    const sql = `
+      SELECT
+        MIN(COALESCE(bp."salePriceCents", bp."priceCents")) as min_price,
+        MAX(COALESCE(bp."salePriceCents", bp."priceCents")) as max_price
+      FROM "${this.productTable}" p
+      JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."productVariantId" IS NULL
       WHERE p."deletedAt" IS NULL AND p."status" = 'active'
     `;
 
-    const result = await query<Array<{ min_price: number; max_price: number }>>(sql);
+    const result = await query<Array<{ min_price: string | null; max_price: string | null }>>(sql);
 
-    if (!result || result.length === 0) {
+    if (!result || result.length === 0 || result[0].min_price == null || result[0].max_price == null) {
       return [];
     }
 
-    const { min_price, max_price } = result[0];
-    const range = max_price - min_price;
+    const minPriceCents = Number(result[0].min_price);
+    const maxPriceCents = Number(result[0].max_price);
+    const range = maxPriceCents - minPriceCents;
     const step = Math.ceil(range / 5);
 
     // Generate price range buckets
     const ranges: PriceRangeFacet[] = [];
     for (let i = 0; i < 5; i++) {
-      const min = min_price + step * i;
-      const max = i === 4 ? max_price : min_price + step * (i + 1);
+      const min = minPriceCents + step * i;
+      const max = i === 4 ? maxPriceCents : minPriceCents + step * (i + 1);
 
       const countSql = `
         SELECT COUNT(*) as count
         FROM "${this.productTable}" p
+        JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."productVariantId" IS NULL
         WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-          AND p."price" >= $1 AND p."price" <= $2
+          AND COALESCE(bp."salePriceCents", bp."priceCents") >= $1
+          AND COALESCE(bp."salePriceCents", bp."priceCents") <= $2
       `;
 
       const countResult = await query<Array<{ count: string }>>(countSql, [min, max]);
@@ -654,10 +736,11 @@ class ProductSearchService {
   /**
    * Get products by attribute value
    */
-  async findByAttribute(attributeCode: string, value: string): Promise<Product[]> {
+  async findByAttribute(attributeCode: string, value: string): Promise<ProductSearchRow[]> {
     const sql = `
-      SELECT DISTINCT p.*
+      SELECT DISTINCT p.*, ${PRICE_COLUMNS_SQL}
       FROM "${this.productTable}" p
+      ${PRICE_JOIN_SQL}
       JOIN "${this.attributeValueMapTable}" pavm ON pavm."productId" = p."productId"
       JOIN "${this.attributeTable}" pa ON pa."productAttributeId" = pavm."attributeId"
       WHERE pa."code" = $1
@@ -667,13 +750,13 @@ class ProductSearchService {
       ORDER BY p."name"
     `;
 
-    return (await query<Product[]>(sql, [attributeCode, value])) || [];
+    return ((await query<Record<string, unknown>[]>(sql, [attributeCode, value])) || []).map(mapSearchRow);
   }
 
   /**
    * Get similar products based on attributes
    */
-  async findSimilar(productId: string, limit: number = 10): Promise<Product[]> {
+  async findSimilar(productId: string, limit: number = 10): Promise<ProductSearchRow[]> {
     // Get the product's attributes
     const attrSql = `
       SELECT "attributeId", "value"
@@ -689,14 +772,15 @@ class ProductSearchService {
 
     // Find products with similar attributes
     const sql = `
-      SELECT p.*, COUNT(pavm."attributeId") as match_count
+      SELECT p.*, ${PRICE_COLUMNS_SQL}, COUNT(pavm."attributeId") as match_count
       FROM "${this.productTable}" p
+      ${PRICE_JOIN_SQL}
       JOIN "${this.attributeValueMapTable}" pavm ON pavm."productId" = p."productId"
       WHERE p."productId" != $1
         AND p."deletedAt" IS NULL
         AND p."status" = 'active'
         AND (pavm."attributeId", pavm."value") IN (${productAttrs.map((_, i) => `($${i * 2 + 2}, $${i * 2 + 3})`).join(', ')})
-      GROUP BY p."productId"
+      GROUP BY p."productId", bp."priceCents", bp."salePriceCents", bp."currencyCode"
       ORDER BY match_count DESC, p."averageRating" DESC NULLS LAST
       LIMIT $${productAttrs.length * 2 + 2}
     `;
@@ -707,7 +791,7 @@ class ProductSearchService {
     }
     params.push(String(limit));
 
-    return (await query<Product[]>(sql, params)) || [];
+    return ((await query<Record<string, unknown>[]>(sql, params)) || []).map(mapSearchRow);
   }
 }
 

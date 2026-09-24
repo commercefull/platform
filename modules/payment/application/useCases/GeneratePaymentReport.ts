@@ -7,9 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentReport } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { PeriodEndMustBeAfterStartError, FailedToGenerateReportError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -23,7 +21,7 @@ export class GeneratePaymentReportCommand {
     public readonly currency: string,
     public readonly periodStart: Date,
     public readonly periodEnd: Date,
-    public readonly totalAmount: number,
+    public readonly totalAmountCents: number,
     public readonly transactionCount: number,
     public readonly data?: Record<string, unknown>,
   ) {}
@@ -38,7 +36,7 @@ export interface GeneratePaymentReportResponse {
   organizationId: string;
   type: string;
   currency: string;
-  totalAmount: number;
+  totalAmountCents: number;
   transactionCount: number;
   periodStart: string;
   periodEnd: string;
@@ -50,7 +48,7 @@ export interface GeneratePaymentReportResponse {
 // ============================================================================
 
 export class GeneratePaymentReportUseCase {
-  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository) {}
 
   async execute(command: GeneratePaymentReportCommand): Promise<GeneratePaymentReportResponse> {
     if (command.periodEnd <= command.periodStart) {
@@ -61,7 +59,7 @@ export class GeneratePaymentReportUseCase {
       organizationId: command.organizationId,
       type: command.type,
       currency: command.currency,
-      totalAmount: command.totalAmount,
+      totalAmountCents: command.totalAmountCents,
       transactionCount: command.transactionCount,
       data: command.data,
       periodStart: command.periodStart,
@@ -81,7 +79,7 @@ export class GeneratePaymentReportUseCase {
       organizationId: r.organizationId,
       type: r.type,
       currency: r.currency,
-      totalAmount: r.totalAmount,
+      totalAmountCents: r.totalAmountCents,
       transactionCount: r.transactionCount,
       periodStart: r.periodStart.toISOString(),
       periodEnd: r.periodEnd.toISOString(),

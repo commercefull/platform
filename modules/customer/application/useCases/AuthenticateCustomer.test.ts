@@ -1,72 +1,65 @@
-jest.mock('bcryptjs', () => ({
-  __esModule: true,
-  default: { compare: jest.fn(), hash: jest.fn() },
-  compare: jest.fn(),
-  hash: jest.fn(),
-}));
-
+import '../../tests/testUtils';
 import { AuthenticateCustomerUseCase, AuthenticateCustomerCommand } from './AuthenticateCustomer';
 import { EmailRequiredError, PasswordRequiredError } from '../../domain/errors/CustomerErrors';
+import { createCustomerRepository, createCustomerRow, compareStringMock } from '../../tests/testUtils';
 
 describe('AuthenticateCustomerUseCase', () => {
-  let useCase: AuthenticateCustomerUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  const customerRepository = createCustomerRepository();
+  const useCase = new AuthenticateCustomerUseCase(customerRepository);
 
   beforeEach(() => {
-    const bcryptModule = jest.requireMock('bcryptjs');
-    bcryptModule.compare.mockResolvedValue(true);
-    mockRepo = {
-      findByEmail: jest.fn().mockResolvedValue({
-        customerId: 'c1',
-        email: 'test@test.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        isVerified: true,
-      }),
-      getPasswordHash: jest.fn().mockResolvedValue('hashed-pw'),
-      recordLogin: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new AuthenticateCustomerUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    customerRepository.findByEmail.mockResolvedValue(createCustomerRow());
+    customerRepository.getPasswordHash.mockResolvedValue('stored-hash');
+    customerRepository.recordLogin.mockResolvedValue(undefined);
   });
 
-  it('should authenticate customer (happy path)', async () => {
-    const result = await useCase.execute(new AuthenticateCustomerCommand('test@test.com', 'password'));
+  it('should authenticate and record the login when credentials are valid', async () => {
+    const result = await useCase.execute(new AuthenticateCustomerCommand('jane@example.com', 'password123'));
 
     expect(result).not.toBeNull();
-    expect(result!.customerId).toBe('c1');
-    expect(mockRepo.recordLogin).toHaveBeenCalledWith('c1');
+    expect(result!.customerId).toBe('cust-1');
+    expect(result!.email).toBe('jane@example.com');
+    expect(compareStringMock).toHaveBeenCalledWith('password123', 'stored-hash');
+    expect(customerRepository.recordLogin).toHaveBeenCalledWith('cust-1');
   });
 
   it('should throw EmailRequiredError when email is empty', async () => {
-    await expect(useCase.execute(new AuthenticateCustomerCommand('', 'password'))).rejects.toThrow(EmailRequiredError);
+    await expect(useCase.execute(new AuthenticateCustomerCommand('', 'password123'))).rejects.toThrow(EmailRequiredError);
+    expect(customerRepository.findByEmail).not.toHaveBeenCalled();
   });
 
   it('should throw PasswordRequiredError when password is empty', async () => {
-    await expect(useCase.execute(new AuthenticateCustomerCommand('test@test.com', ''))).rejects.toThrow(PasswordRequiredError);
+    await expect(useCase.execute(new AuthenticateCustomerCommand('jane@example.com', ''))).rejects.toThrow(
+      PasswordRequiredError,
+    );
+    expect(customerRepository.findByEmail).not.toHaveBeenCalled();
   });
 
-  it('should return null when customer not found', async () => {
-    mockRepo.findByEmail.mockResolvedValue(null);
+  it('should return null when the customer is not found', async () => {
+    customerRepository.findByEmail.mockResolvedValue(null);
 
-    const result = await useCase.execute(new AuthenticateCustomerCommand('missing@test.com', 'password'));
+    const result = await useCase.execute(new AuthenticateCustomerCommand('unknown@example.com', 'password123'));
 
     expect(result).toBeNull();
+    expect(customerRepository.recordLogin).not.toHaveBeenCalled();
   });
 
-  it('should return null when password hash not found', async () => {
-    mockRepo.getPasswordHash.mockResolvedValue(null);
+  it('should return null when the customer has no password hash', async () => {
+    customerRepository.getPasswordHash.mockResolvedValue(null);
 
-    const result = await useCase.execute(new AuthenticateCustomerCommand('test@test.com', 'password'));
+    const result = await useCase.execute(new AuthenticateCustomerCommand('jane@example.com', 'password123'));
 
     expect(result).toBeNull();
+    expect(compareStringMock).not.toHaveBeenCalled();
   });
 
-  it('should return null when password does not match', async () => {
-    const bcryptModule = jest.requireMock('bcryptjs');
-    bcryptModule.compare.mockResolvedValue(false);
+  it('should return null when the password does not match', async () => {
+    compareStringMock.mockResolvedValue(false);
 
-    const result = await useCase.execute(new AuthenticateCustomerCommand('test@test.com', 'wrong'));
+    const result = await useCase.execute(new AuthenticateCustomerCommand('jane@example.com', 'wrong-password'));
 
     expect(result).toBeNull();
+    expect(customerRepository.recordLogin).not.toHaveBeenCalled();
   });
 });

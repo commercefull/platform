@@ -1,17 +1,17 @@
 export const pricingTypeDefs = `#graphql
   type PriceBreakdown {
-    basePrice: Float!
-    salePrice: Float
-    volumeDiscount: Float
-    customerDiscount: Float
-    finalPrice: Float!
+    basePriceCents: Int!
+    salePriceCents: Int
+    volumeDiscountCents: Int
+    customerDiscountCents: Int
+    finalPriceCents: Int!
     currency: String!
     appliedRules: [String!]!
   }
 
   type CalculatePriceResult {
-    unitPrice: Float!
-    totalPrice: Float!
+    unitPriceCents: Int!
+    totalPriceCents: Int!
     currency: String!
     breakdown: PriceBreakdown!
   }
@@ -28,8 +28,8 @@ export const pricingTypeDefs = `#graphql
   type SetProductPriceResult {
     productId: String!
     variantId: String
-    price: Float!
-    salePrice: Float
+    priceCents: Int!
+    salePriceCents: Int
     updatedAt: String!
   }
 
@@ -58,10 +58,8 @@ export const pricingTypeDefs = `#graphql
     productId: String!
     variantId: String
     priceListId: String
-    price: Float!
-    salePrice: Float
-    saleStartDate: String
-    saleEndDate: String
+    priceCents: Int!
+    salePriceCents: Int
     currencyCode: String
   }
 

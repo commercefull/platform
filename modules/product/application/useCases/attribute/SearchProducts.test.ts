@@ -1,27 +1,24 @@
-jest.mock('../../services/ProductSearchService', () => ({
-  __esModule: true,
-  default: {
-    search: jest.fn().mockResolvedValue({
-      products: [{ productId: 'p1', name: 'Widget' }],
-      total: 1,
-      page: 1,
-      limit: 20,
-      facets: {},
-    }),
-  },
-}));
 
 import { SearchProductsUseCase } from './SearchProducts';
-import productSearchService from '../../services/ProductSearchService';
-
-const mockService = productSearchService as unknown as { search: jest.Mock };
+import type { ProductSearchServicePort } from './SearchProducts';
+import { createProductSearchRow, lazyMock } from '../../../tests/testUtils';
 
 describe('SearchProductsUseCase', () => {
   let useCase: SearchProductsUseCase;
+  let mockService: jest.Mocked<ProductSearchServicePort>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new SearchProductsUseCase();
+    mockService = lazyMock<ProductSearchServicePort>();
+    mockService.search.mockResolvedValue({
+      products: [createProductSearchRow({ productId: 'p1', name: 'Widget', priceCents: 4500, effectivePriceCents: 4500 })],
+      total: 1,
+      page: 1,
+      limit: 20,
+      totalPages: 1,
+      facets: { categories: [], brands: [], priceRanges: [], attributes: [] },
+    });
+    useCase = new SearchProductsUseCase(mockService);
   });
 
   it('should search products (happy path)', async () => {

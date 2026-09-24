@@ -4,9 +4,7 @@
  * Retrieves capability information for a specific shipping carrier.
  */
 
-import { shippingConfigRepository } from '../wired';
-
-const shippingCarrierRepo = shippingConfigRepository.carriers;
+import type { ShippingCarrierPort } from '../../domain/repositories/ShippingConfigPorts';
 
 export interface CarrierCapabilities {
   supportedServices?: unknown;
@@ -16,9 +14,11 @@ export interface CarrierCapabilities {
 }
 
 export class GetCarrierCapabilitiesUseCase {
+  constructor(private readonly shippingCarrierRepo: ShippingCarrierPort) {}
+
   async execute(carrierCode: string): Promise<CarrierCapabilities> {
     try {
-      const carrier = await shippingCarrierRepo.findByCode(carrierCode);
+      const carrier = await this.shippingCarrierRepo.findByCode(carrierCode);
       return carrier
         ? {
             supportedServices: carrier.supportedServices,

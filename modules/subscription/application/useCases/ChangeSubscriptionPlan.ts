@@ -21,7 +21,7 @@ export interface ChangeSubscriptionPlanOutput {
   previousPlanId: string;
   newPlanId: string;
   effectiveDate: Date;
-  proratedAmount?: number;
+  proratedAmountCents?: number;
 }
 
 interface SubscriptionRecord {
@@ -31,11 +31,11 @@ interface SubscriptionRecord {
   nextBillingDate: string;
   currentPeriodStart?: string;
   startDate?: string;
-  price?: number;
+  priceCents?: number;
 }
 
 interface PlanRecord {
-  price?: number;
+  priceCents?: number;
 }
 
 interface SubscriptionRepoPort {
@@ -75,16 +75,16 @@ export class ChangeSubscriptionPlanUseCase {
     const previousPlanId = subscription.planId;
     const effectiveDate = input.applyImmediately ? new Date() : new Date(subscription.nextBillingDate);
 
-    let proratedAmount: number | undefined;
+    let proratedAmountCents: number | undefined;
     if (input.prorateCharges && input.applyImmediately) {
-      proratedAmount = this.calculateProration(subscription, newPlan);
+      proratedAmountCents = this.calculateProration(subscription, newPlan);
     }
 
     await this.subscriptionRepo.update(input.subscriptionId, {
       planId: input.newPlanId,
       planChangedAt: new Date(),
       previousPlanId,
-      proratedAmount,
+      proratedAmountCents,
     });
 
     eventBus.emit('subscription.activated', {
@@ -100,7 +100,7 @@ export class ChangeSubscriptionPlanUseCase {
       previousPlanId,
       newPlanId: input.newPlanId,
       effectiveDate,
-      proratedAmount,
+      proratedAmountCents,
     };
   }
 
@@ -114,12 +114,12 @@ export class ChangeSubscriptionPlanUseCase {
 
     if (remainingDays <= 0 || totalDays <= 0) return 0;
 
-    const oldDailyRate = (subscription.price || 0) / totalDays;
-    const newDailyRate = (newPlan.price || 0) / totalDays;
+    const oldDailyRate = (subscription.priceCents || 0) / totalDays;
+    const newDailyRate = (newPlan.priceCents || 0) / totalDays;
 
     const unusedCredit = oldDailyRate * remainingDays;
     const newCharge = newDailyRate * remainingDays;
 
-    return Math.round((newCharge - unusedCredit) * 100) / 100;
+    return Math.max(0, Math.round(newCharge - unusedCredit));
   }
 }

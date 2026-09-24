@@ -1,35 +1,27 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { emitMock, lazyMock } from '../../../tests/testUtils';
 import { LoginOrganizationUseCase } from './LoginOrganization';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('LoginOrganizationUseCase', () => {
   let useCase: LoginOrganizationUseCase;
-  let mockOrgRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
-  let mockToken: Record<string, jest.Mock>;
+  let mockOrgRepo: jest.Mocked<ConstructorParameters<typeof LoginOrganizationUseCase>[0]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof LoginOrganizationUseCase>[1]>;
+  let mockToken: jest.Mocked<ConstructorParameters<typeof LoginOrganizationUseCase>[2]>;
 
   beforeEach(() => {
-    mockOrgRepo = {
-      findByEmail: jest
-        .fn()
-        .mockResolvedValue({ organizationId: 'o1', email: 'o@test.com', passwordHash: 'hash', status: 'active', permissions: ['read'] }),
-      updateLastLogin: jest.fn().mockResolvedValue(undefined),
-    };
-    mockAuth = { verifyPassword: jest.fn().mockResolvedValue(true) };
-    mockToken = {
-      generateAccessToken: jest.fn().mockResolvedValue('access'),
-      generateRefreshToken: jest.fn().mockResolvedValue('refresh'),
-    };
-    useCase = new LoginOrganizationUseCase(mockOrgRepo as never, mockAuth as never, mockToken as never);
+    mockOrgRepo = lazyMock<ConstructorParameters<typeof LoginOrganizationUseCase>[0]>();
+    mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'o1', email: 'o@test.com', passwordHash: 'hash', status: 'active', permissions: ['read'] });
+    mockOrgRepo.updateLastLogin.mockResolvedValue(undefined);
+    mockAuth = lazyMock<ConstructorParameters<typeof LoginOrganizationUseCase>[1]>();
+    mockAuth.verifyPassword.mockResolvedValue(true);
+    mockToken = lazyMock<ConstructorParameters<typeof LoginOrganizationUseCase>[2]>();
+    mockToken.generateAccessToken.mockResolvedValue('access');
+    mockToken.generateRefreshToken.mockResolvedValue('refresh');
+    useCase = new LoginOrganizationUseCase(mockOrgRepo, mockAuth, mockToken);
   });
 
   it('should login organization successfully (happy path)', async () => {
@@ -37,7 +29,7 @@ describe('LoginOrganizationUseCase', () => {
 
     expect(result.organizationId).toBe('o1');
     expect(result.expiresIn).toBe(28800);
-    expect(eventBus.emit).toHaveBeenCalledWith('organization.logged_in', expect.objectContaining({ organizationId: 'o1' }));
+    expect(emitMock).toHaveBeenCalledWith('organization.logged_in', expect.objectContaining({ organizationId: 'o1' }));
   });
 
   it('should set 7-day expiry with rememberMe', async () => {

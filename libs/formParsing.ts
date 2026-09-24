@@ -1,7 +1,19 @@
-type TransformType = 'int' | 'float' | 'floatStr' | 'boolTrue' | 'boolNotFalse' | 'json' | 'date' | 'stringOrUndefined' | 'passthrough';
+type TransformType =
+  | 'int'
+  | 'float'
+  | 'floatStr'
+  | 'cents'
+  | 'boolTrue'
+  | 'boolNotFalse'
+  | 'json'
+  | 'date'
+  | 'stringOrUndefined'
+  | 'passthrough';
 
 export type FieldConfig = {
   name: string;
+  /** Optional output key when it differs from the form field name (e.g. price → priceCents). */
+  as?: string;
   transform?: TransformType;
   default?: unknown;
   falsyValue?: unknown;
@@ -13,6 +25,7 @@ const transforms: Record<Exclude<TransformType, 'passthrough'>, TransformFn> = {
   int: (v, f) => (v ? parseInt(v as string) : (f ?? undefined)),
   float: (v, f) => (v ? parseFloat(v as string) : (f ?? undefined)),
   floatStr: (v, f) => (v ? parseFloat(v as string).toString() : (f ?? null)),
+  cents: (v, f) => (v ? Math.round(parseFloat(v as string) * 100) : (f ?? null)),
   boolTrue: v => v === 'true' || v === true,
   boolNotFalse: v => v !== 'false' && v !== false,
   json: (v, f) => (v ? JSON.parse(v as string) : (f ?? undefined)),
@@ -29,11 +42,12 @@ export function buildFormObject(body: Record<string, unknown>, fields: FieldConf
   const result: Record<string, unknown> = {};
   for (const field of fields) {
     const raw = body[field.name];
+    const key = field.as ?? field.name;
     if (raw === undefined) {
-      if (field.default !== undefined) result[field.name] = field.default;
+      if (field.default !== undefined) result[key] = field.default;
       continue;
     }
-    result[field.name] = applyTransform(raw, field);
+    result[key] = applyTransform(raw, field);
   }
   return result;
 }

@@ -32,9 +32,9 @@ export interface VatRegistration {
   deregistrationDate?: Date;
   effectiveFrom?: Date;
   effectiveUntil?: Date;
-  annualThreshold?: number;
+  annualThresholdCents?: number;
   thresholdCurrency?: string;
-  currentYearSales?: number;
+  currentYearSalesCents?: number;
   thresholdExceeded?: boolean;
   isActive: boolean;
   notes?: string;
@@ -121,7 +121,7 @@ export async function saveVatRegistration(
         "vatNumber" = $1, "tradingName" = $2, "legalName" = $3, "registrationType" = $4,
         "isVerified" = $5, "verifiedAt" = $6, "verificationSource" = $7,
         "registrationDate" = $8, "deregistrationDate" = $9, "effectiveFrom" = $10, "effectiveUntil" = $11,
-        "annualThreshold" = $12, "thresholdCurrency" = $13, "currentYearSales" = $14, "thresholdExceeded" = $15,
+        "annualThresholdCents" = $12, "thresholdCurrency" = $13, "currentYearSalesCents" = $14, "thresholdExceeded" = $15,
         "isActive" = $16, "notes" = $17, "certificateUrl" = $18, "updatedAt" = $19
       WHERE "vatRegistrationId" = $20`,
       [
@@ -136,9 +136,9 @@ export async function saveVatRegistration(
         data.deregistrationDate?.toISOString(),
         data.effectiveFrom?.toISOString(),
         data.effectiveUntil?.toISOString(),
-        data.annualThreshold,
+        data.annualThresholdCents,
         data.thresholdCurrency || 'EUR',
-        data.currentYearSales,
+        data.currentYearSalesCents,
         data.thresholdExceeded || false,
         data.isActive !== false,
         data.notes,
@@ -154,7 +154,7 @@ export async function saveVatRegistration(
       `INSERT INTO "taxVatRegistration" (
         "organizationId", "countryCode", "vatNumber", "tradingName", "legalName", "registrationType",
         "isVerified", "registrationDate", "effectiveFrom",
-        "annualThreshold", "thresholdCurrency", "currentYearSales", "thresholdExceeded",
+        "annualThresholdCents", "thresholdCurrency", "currentYearSalesCents", "thresholdExceeded",
         "isActive", "notes", "certificateUrl", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
@@ -168,9 +168,9 @@ export async function saveVatRegistration(
         false,
         data.registrationDate?.toISOString(),
         data.effectiveFrom?.toISOString(),
-        data.annualThreshold,
+        data.annualThresholdCents,
         data.thresholdCurrency || 'EUR',
-        data.currentYearSales || 0,
+        data.currentYearSalesCents || 0,
         false,
         true,
         data.notes,
@@ -359,9 +359,9 @@ function mapToVatRegistration(row: Record<string, unknown>): VatRegistration {
     deregistrationDate: row.deregistrationDate ? new Date(row.deregistrationDate as string) : undefined,
     effectiveFrom: row.effectiveFrom ? new Date(row.effectiveFrom as string) : undefined,
     effectiveUntil: row.effectiveUntil ? new Date(row.effectiveUntil as string) : undefined,
-    annualThreshold: row.annualThreshold ? parseFloat(row.annualThreshold as string) : undefined,
+    annualThresholdCents: row.annualThresholdCents ? parseFloat(row.annualThresholdCents as string) : undefined,
     thresholdCurrency: row.thresholdCurrency as string | undefined,
-    currentYearSales: row.currentYearSales ? parseFloat(row.currentYearSales as string) : undefined,
+    currentYearSalesCents: row.currentYearSalesCents ? parseFloat(row.currentYearSalesCents as string) : undefined,
     thresholdExceeded: Boolean(row.thresholdExceeded),
     isActive: Boolean(row.isActive),
     notes: row.notes as string | undefined,

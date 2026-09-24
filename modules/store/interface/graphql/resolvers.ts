@@ -3,7 +3,7 @@ import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/g
 import { GetStoreUseCase, GetStoreQuery } from '../../application/useCases/GetStore';
 import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
 import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
-import { storeDataRepository, OrganizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
+import { storeDataRepository, organizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
 
 export const storeResolvers = {
   Query: {
@@ -17,7 +17,7 @@ export const storeResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetStoreUseCase(StoreRepo);
+      const useCase = new GetStoreUseCase(StoreRepo, storeDataRepository.currencies);
       const query = new GetStoreQuery(args.storeId, args.slug, args.storeUrl);
       return useCase.execute(query);
     },
@@ -43,7 +43,8 @@ export const storeResolvers = {
       const useCase = new CreateStoreUseCase(
         StoreRepo,
         new SystemConfigAdapter(new SystemConfigurationRepo()),
-        new OrganizationLookupAdapter(),
+        organizationLookupAdapter,
+        storeDataRepository.currencies,
       );
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
       const result = await useCase.execute(command);

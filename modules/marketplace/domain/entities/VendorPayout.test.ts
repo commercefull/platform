@@ -13,8 +13,8 @@ describe('VendorPayout Entity', () => {
       expect(p.payoutId).toBeDefined();
       expect(p.payoutNumber).toMatch(/^PO-\d{6}-/);
       expect(p.status).toBe('pending');
-      expect(p.grossAmount).toBe(0);
-      expect(p.netAmount).toBe(0);
+      expect(p.grossAmountCents).toBe(0);
+      expect(p.netAmountCents).toBe(0);
     });
 
     it('should calculate totals from line items', () => {
@@ -30,24 +30,24 @@ describe('VendorPayout Entity', () => {
             orderNumber: 'ORD-1',
             productId: 'p-1',
             productName: 'Widget',
-            grossRevenue: 100,
-            commissionAmount: 10,
-            netAmount: 90,
+            grossRevenueCents: 100,
+            commissionAmountCents: 10,
+            netAmountCents: 90,
           },
           {
             orderId: 'o-2',
             orderNumber: 'ORD-2',
             productId: 'p-2',
             productName: 'Gadget',
-            grossRevenue: 200,
-            commissionAmount: 20,
-            netAmount: 180,
+            grossRevenueCents: 200,
+            commissionAmountCents: 20,
+            netAmountCents: 180,
           },
         ],
       });
-      expect(p.grossAmount).toBe(300);
-      expect(p.commissionAmount).toBe(30);
-      expect(p.netAmount).toBe(270);
+      expect(p.grossAmountCents).toBe(300);
+      expect(p.commissionAmountCents).toBe(30);
+      expect(p.netAmountCents).toBe(270);
     });
   });
 
@@ -65,12 +65,12 @@ describe('VendorPayout Entity', () => {
         orderNumber: 'ORD-1',
         productId: 'p-1',
         productName: 'W',
-        grossRevenue: 100,
-        commissionAmount: 10,
-        netAmount: 90,
+        grossRevenueCents: 100,
+        commissionAmountCents: 10,
+        netAmountCents: 90,
       });
       expect(p.lineItemCount).toBe(1);
-      expect(p.grossAmount).toBe(100);
+      expect(p.grossAmountCents).toBe(100);
     });
 
     it('should not add items to non-pending payout', () => {
@@ -88,9 +88,9 @@ describe('VendorPayout Entity', () => {
           orderNumber: 'O',
           productId: 'p',
           productName: 'N',
-          grossRevenue: 1,
-          commissionAmount: 0,
-          netAmount: 1,
+          grossRevenueCents: 1,
+          commissionAmountCents: 0,
+          netAmountCents: 1,
         }),
       ).toThrow('in status: processing');
     });
@@ -105,7 +105,7 @@ describe('VendorPayout Entity', () => {
         periodStart: new Date('2024-01-01'),
         periodEnd: new Date('2024-01-31'),
         lineItems: [
-          { orderId: 'o-1', orderNumber: 'O', productId: 'p', productName: 'N', grossRevenue: 100, commissionAmount: 10, netAmount: 90 },
+          { orderId: 'o-1', orderNumber: 'O', productId: 'p', productName: 'N', grossRevenueCents: 100, commissionAmountCents: 10, netAmountCents: 90 },
         ],
       });
       p.startProcessing();

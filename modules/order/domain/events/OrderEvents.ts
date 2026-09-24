@@ -23,14 +23,14 @@ export class OrderCreatedEvent implements DomainEvent {
     orderNumber: string;
     customerId?: string;
     basketId?: string;
-    totalAmount: number;
+    totalAmountCents: number;
     currency: string;
   };
 
-  constructor(orderId: string, orderNumber: string, totalAmount: number, currency: string, customerId?: string, basketId?: string) {
+  constructor(orderId: string, orderNumber: string, totalAmountCents: number, currency: string, customerId?: string, basketId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
-    this.payload = { orderId, orderNumber, customerId, basketId, totalAmount, currency };
+    this.payload = { orderId, orderNumber, customerId, basketId, totalAmountCents, currency };
   }
 }
 
@@ -99,13 +99,13 @@ export class OrderCancelledEvent implements DomainEvent {
     orderNumber: string;
     customerId?: string;
     reason?: string;
-    refundAmount?: number;
+    refundAmountCents?: number;
   };
 
-  constructor(orderId: string, orderNumber: string, customerId?: string, reason?: string, refundAmount?: number) {
+  constructor(orderId: string, orderNumber: string, customerId?: string, reason?: string, refundAmountCents?: number) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
-    this.payload = { orderId, orderNumber, customerId, reason, refundAmount };
+    this.payload = { orderId, orderNumber, customerId, reason, refundAmountCents };
   }
 }
 
@@ -117,15 +117,15 @@ export class OrderRefundedEvent implements DomainEvent {
     orderId: string;
     orderNumber: string;
     customerId?: string;
-    refundAmount: number;
+    refundAmountCents: number;
     reason: string;
     isFullRefund: boolean;
   };
 
-  constructor(orderId: string, orderNumber: string, refundAmount: number, reason: string, isFullRefund: boolean, customerId?: string) {
+  constructor(orderId: string, orderNumber: string, refundAmountCents: number, reason: string, isFullRefund: boolean, customerId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
-    this.payload = { orderId, orderNumber, customerId, refundAmount, reason, isFullRefund };
+    this.payload = { orderId, orderNumber, customerId, refundAmountCents, reason, isFullRefund };
   }
 }
 
@@ -194,18 +194,18 @@ export class OrderCompletedEvent implements DomainEvent {
     orderId: string;
     orderNumber: string;
     customerId?: string;
-    totalAmount: number;
+    totalAmountCents: number;
     completedAt: string;
   };
 
-  constructor(orderId: string, orderNumber: string, totalAmount: number, customerId?: string) {
+  constructor(orderId: string, orderNumber: string, totalAmountCents: number, customerId?: string) {
     this.occurredAt = new Date();
     this.aggregateId = orderId;
     this.payload = {
       orderId,
       orderNumber,
       customerId,
-      totalAmount,
+      totalAmountCents,
       completedAt: new Date().toISOString(),
     };
   }

@@ -44,8 +44,10 @@ export const createB2BCompanyForm = async (req: HttpRequest, res: HttpResponse):
 export const createB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const organizationId = (req as unknown as { user?: { organizationId?: string } }).user?.organizationId ?? '';
   const body = req.body as HttpRequestBody;
+  const { creditLimit, ...rest } = body as Record<string, unknown>;
   const company = await manageCompanyUseCase.create({
-    ...(body as Record<string, unknown>),
+    ...rest,
+    creditLimitCents: creditLimit !== undefined && creditLimit !== '' ? Math.round(Number(creditLimit) * 100) : undefined,
     organizationId,
   } as Parameters<typeof manageCompanyUseCase.create>[0]);
 

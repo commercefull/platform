@@ -22,7 +22,7 @@
         <div class="row">
           <div class="col-auto">
             <span class="text-muted"><%= t('b2b:currentBalanceUsedLabel') %></span>
-            <strong class="ms-2"><%= (balance || 0).toFixed(2) %></strong>
+            <strong class="ms-2"><%= ((balanceCents || 0) / 100).toFixed(2) %></strong>
           </div>
         </div>
       </div>
@@ -52,8 +52,8 @@
               <td><code><%= t.b2bCompanyCreditTransactionId.substring(0, 8) %>...</code></td>
               <td><span class="badge bg-info"><%= t.type %></span></td>
               <td>
-                <span class="<%= t.amount > 0 ? 'text-danger' : 'text-success' %>">
-                  <%= t.amount > 0 ? '+' : '' %><%= (t.amount || 0).toFixed(2) %>
+                <span class="<%= t.amountCents > 0 ? 'text-danger' : 'text-success' %>">
+                  <%= t.amountCents > 0 ? '+' : '' %><%= ((t.amountCents || 0) / 100).toFixed(2) %>
                 </span>
               </td>
               <td><%= t.referenceId || '-' %></td>

@@ -45,7 +45,7 @@ function createGdprService(): GdprService {
       );
 
       const orders = await query<Record<string, unknown>[]>(
-        'SELECT "orderId", "orderNumber", status, "totalAmount", "currency", "createdAt" FROM "order" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
+        'SELECT "orderId", "orderNumber", status, "totalAmountCents", "currencyCode", "createdAt" FROM "order" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
         [customerId],
       );
 

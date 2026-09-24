@@ -9,9 +9,9 @@ interface OrderItem {
   variantId: string;
   name: string;
   sku: string;
-  unitPrice: number | string;
+  unitPriceCents: number | string;
   quantity: number;
-  subtotal: number | string;
+  subtotalCents: number | string;
   options: Record<string, unknown>;
   costPrice?: number | string;
   profit?: number | string;
@@ -47,7 +47,7 @@ describe('Order Item Tests', () => {
 
       // Verify camelCase property names in response (TypeScript interface)
       const items = response.data.data as OrderItem[];
-      expect(items[0]).toHaveProperty('unitPrice');
+      expect(items[0]).toHaveProperty('unitPriceCents');
 
       // Verify no snake_case properties are exposed in the API
       expect(items[0]).not.toHaveProperty('unit_price');
@@ -74,9 +74,9 @@ describe('Order Item Tests', () => {
         sku: `TEST-SKU-${Date.now()}`,
         name: 'New Test Product',
         quantity: 1,
-        unitPrice: 29.99,
-        discountedUnitPrice: 29.99,
-        lineTotal: 29.99,
+        unitPriceCents: 2999,
+        discountedUnitPriceCents: 2999,
+        lineTotalCents: 2999,
       };
 
       const response = await client.post('/business/order-items', newItemData, {
@@ -97,7 +97,7 @@ describe('Order Item Tests', () => {
     it('should update an order item (admin)', async () => {
       const updateData = {
         quantity: 3,
-        unitPrice: 39.99,
+        unitPriceCents: 3999,
       };
 
       const response = await client.put(`/business/order-items/${testOrderItemId}`, updateData, {
@@ -137,8 +137,8 @@ describe('Order Item Tests', () => {
       const afterTotals = afterResponse.data.data;
 
       // Verify totals exist
-      expect(afterTotals).toHaveProperty('subtotal');
-      expect(afterTotals).toHaveProperty('totalAmount');
+      expect(afterTotals).toHaveProperty('subtotalCents');
+      expect(afterTotals).toHaveProperty('totalAmountCents');
     });
   });
 

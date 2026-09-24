@@ -1,45 +1,49 @@
+import { createStoreRepository, createStore } from '../../tests/testUtils';
 import { ConfigureStorePickupUseCase } from './ConfigureStorePickup';
 import { StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
-const mockStoreRepository = {
-  findById: jest.fn().mockResolvedValue({ storeId: 's1', name: 'Main Store' }),
-  updatePickupSettings: jest.fn().mockResolvedValue({
-    storeId: 's1',
-    updatedAt: new Date('2026-01-01'),
-  }),
-};
-
 describe('ConfigureStorePickupUseCase', () => {
   let useCase: ConfigureStorePickupUseCase;
+  let storeRepository: ReturnType<typeof createStoreRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ConfigureStorePickupUseCase(mockStoreRepository as never);
+    storeRepository = createStoreRepository();
+    storeRepository.findById.mockResolvedValue(createStore());
+    storeRepository.updatePickupSettings.mockImplementation(async () => createStore());
+    useCase = new ConfigureStorePickupUseCase(storeRepository);
   });
 
-  it('should configure pickup (happy path)', async () => {
+  it('should persist the pickup settings when the store exists', async () => {
     const result = await useCase.execute({
-      storeId: 's1',
+      storeId: 'store-1',
       enabled: true,
-      settings: { prepareTimeMinutes: 30, maxHoldDays: 14 },
+      settings: { prepareTimeMinutes: 30, maxHoldDays: 3 },
     });
 
-    expect(result.storeId).toBe('s1');
     expect(result.pickupEnabled).toBe(true);
     expect(result.prepareTimeMinutes).toBe(30);
-    expect(result.maxHoldDays).toBe(14);
+    expect(result.maxHoldDays).toBe(3);
+    expect(storeRepository.updatePickupSettings).toHaveBeenCalledWith(
+      'store-1',
+      expect.objectContaining({ enabled: true, prepareTimeMinutes: 30, maxHoldDays: 3 }),
+    );
   });
 
-  it('should use defaults when settings not provided', async () => {
-    const result = await useCase.execute({ storeId: 's1', enabled: true });
+  it('should apply defaults when optional settings are not provided', async () => {
+    const result = await useCase.execute({ storeId: 'store-1', enabled: true });
 
     expect(result.prepareTimeMinutes).toBe(60);
     expect(result.maxHoldDays).toBe(7);
+    expect(storeRepository.updatePickupSettings).toHaveBeenCalledWith(
+      'store-1',
+      expect.objectContaining({ notifyOnReady: true, notifyMethods: ['email'], allowCurbside: false }),
+    );
   });
 
-  it('should throw StoreNotFoundError when store not found', async () => {
-    mockStoreRepository.findById.mockResolvedValueOnce(null);
+  it('should throw StoreNotFoundError when the store does not exist', async () => {
+    storeRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ storeId: 'nonexistent', enabled: true })).rejects.toThrow(StoreNotFoundError);
+    await expect(useCase.execute({ storeId: 'missing', enabled: true })).rejects.toThrow(StoreNotFoundError);
+    expect(storeRepository.updatePickupSettings).not.toHaveBeenCalled();
   });
 });

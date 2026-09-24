@@ -59,7 +59,7 @@
               <td><code><%= d.paymentDisputeId.substring(0, 8) %>...</code></td>
               <td><code><%= d.paymentId.substring(0, 8) %>...</code></td>
               <td><%= d.merchantId %></td>
-              <td><strong><%= d.currency %> <%= (d.amount || 0).toFixed(2) %></strong></td>
+              <td><strong><%= d.currency %> <%= ((d.amountCents || 0) / 100).toFixed(2) %></strong></td>
               <td><%= d.reason || '-' %></td>
               <td>
                 <span class="badge bg-<%= d.status === 'resolved' || d.status === 'won' ? 'success' : d.status === 'lost' ? 'danger' : d.status === 'open' ? 'warning' : 'info' %>">

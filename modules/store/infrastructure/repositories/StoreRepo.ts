@@ -40,23 +40,24 @@ export class StoreRepo implements IStoreRepository {
     if (existing) {
       await query(
         `UPDATE store SET
-          name = $1, slug = $2, description = $3, "storeType" = $4,
-          "organizationId" = $5, "storeUrl" = $6, "storeEmail" = $7,
-          "storePhone" = $8, logo = $9, banner = $10, "favicon" = $11,
-          "primaryColor" = $12, "secondaryColor" = $13, theme = $14, "colorScheme" = $15,
-          address = $16, "isActive" = $17, "isVerified" = $18, "isFeatured" = $19,
-          "storeRating" = $20, "reviewCount" = $21, "followerCount" = $22,
-          "productCount" = $23, "orderCount" = $24, "storePolicies" = $25,
-          "shippingMethods" = $26, "paymentMethods" = $27, "supportedCurrencies" = $28,
-          "defaultCurrency" = $29, settings = $30, "metaTitle" = $31, "metaDescription" = $32,
-          "metaKeywords" = $33, "socialLinks" = $34, "openingHours" = $35,
-          "customPages" = $36, "customFields" = $37, metadata = $38, "updatedAt" = $39
-        WHERE "storeId" = $40`,
+          name = $1, slug = $2, description = $3, "storeType" = $4, channel = $5,
+          "organizationId" = $6, "storeUrl" = $7, "storeEmail" = $8,
+          "storePhone" = $9, logo = $10, banner = $11, "favicon" = $12,
+          "primaryColor" = $13, "secondaryColor" = $14, theme = $15, "colorScheme" = $16,
+          address = $17, "isActive" = $18, "isVerified" = $19, "isFeatured" = $20,
+          "storeRating" = $21, "reviewCount" = $22, "followerCount" = $23,
+          "productCount" = $24, "orderCount" = $25, "storePolicies" = $26,
+          "shippingMethods" = $27, "paymentMethods" = $28,
+          settings = $29, "metaTitle" = $30, "metaDescription" = $31,
+          "metaKeywords" = $32, "socialLinks" = $33, "openingHours" = $34,
+          "customPages" = $35, "customFields" = $36, metadata = $37, "updatedAt" = $38
+        WHERE "storeId" = $39`,
         [
           store.name,
           store.slug,
           store.description,
           store.storeType,
+          store.channel,
           store.organizationId,
           store.storeUrl,
           store.storeEmail,
@@ -80,8 +81,6 @@ export class StoreRepo implements IStoreRepository {
           JSON.stringify(store.storePolicies || {}),
           store.shippingMethods || [],
           store.paymentMethods || [],
-          store.supportedCurrencies || [],
-          store.defaultCurrency,
           JSON.stringify(store.settings || {}),
           store.metaTitle,
           store.metaDescription,
@@ -98,18 +97,18 @@ export class StoreRepo implements IStoreRepository {
     } else {
       await query(
         `INSERT INTO store (
-          "storeId", name, slug, description, "storeType",
+          "storeId", name, slug, description, "storeType", channel,
           "organizationId", "storeUrl", "storeEmail", "storePhone",
           logo, banner, "favicon", "primaryColor", "secondaryColor", theme, "colorScheme",
           address, "isActive", "isVerified", "isFeatured", "storeRating", "reviewCount",
           "followerCount", "productCount", "orderCount", "storePolicies", "shippingMethods",
-          "paymentMethods", "supportedCurrencies", "defaultCurrency", settings,
+          "paymentMethods", settings,
           "metaTitle", "metaDescription", "metaKeywords", "socialLinks", "openingHours",
           "customPages", "customFields", metadata, "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
           $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33,
-          $34, $35, $36, $37, $38, $39, $40, $41
+          $34, $35, $36, $37, $38, $39, $40
         )`,
         [
           store.storeId,
@@ -117,6 +116,7 @@ export class StoreRepo implements IStoreRepository {
           store.slug,
           store.description,
           store.storeType,
+          store.channel,
           store.organizationId,
           store.storeUrl,
           store.storeEmail,
@@ -140,8 +140,6 @@ export class StoreRepo implements IStoreRepository {
           JSON.stringify(store.storePolicies || {}),
           store.shippingMethods || [],
           store.paymentMethods || [],
-          store.supportedCurrencies || [],
-          store.defaultCurrency,
           JSON.stringify(store.settings || {}),
           store.metaTitle,
           store.metaDescription,
@@ -352,6 +350,7 @@ export class StoreRepo implements IStoreRepository {
       slug: str(row.slug) as string,
       description: str(row.description),
       storeType: str(row.storeType) as 'merchant_store' | 'organization_store',
+      channel: (str(row.channel) as StoreProps['channel']) || 'digital',
       organizationId: str(row.organizationId),
       isHeadquarters: Boolean(row.isHeadquarters),
       parentStoreId: str(row.parentStoreId) || undefined,
@@ -381,11 +380,6 @@ export class StoreRepo implements IStoreRepository {
         typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : (row.shippingMethods as string[] | undefined),
       paymentMethods:
         typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : (row.paymentMethods as string[] | undefined),
-      supportedCurrencies:
-        typeof row.supportedCurrencies === 'string'
-          ? JSON.parse(row.supportedCurrencies)
-          : (row.supportedCurrencies as string[] | undefined),
-      defaultCurrency: str(row.defaultCurrency),
       settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : (row.settings as StoreProps['settings']),
       metaTitle: str(row.metaTitle),
       metaDescription: str(row.metaDescription),

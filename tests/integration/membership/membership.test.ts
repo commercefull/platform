@@ -38,10 +38,12 @@ describe('Membership Tests', () => {
       if (response.data.data.length > 0) {
         const tier = response.data.data.find((t: Record<string, unknown>) => (t.membershipTierId || t.id) === testTierId);
         expect(tier).toBeDefined();
-        expect(tier).toHaveProperty('monthlyPrice');
-        expect(tier).toHaveProperty('annualPrice');
+        expect(tier).toHaveProperty('monthlyPriceCents');
+        expect(tier).toHaveProperty('annualPriceCents');
         expect(tier).toHaveProperty('isActive');
+        expect(tier).not.toHaveProperty('monthlyPrice');
         expect(tier).not.toHaveProperty('monthly_price');
+        expect(tier).not.toHaveProperty('annualPrice');
         expect(tier).not.toHaveProperty('annual_price');
         expect(tier).not.toHaveProperty('is_active');
       }
@@ -57,15 +59,15 @@ describe('Membership Tests', () => {
       const tierId = response.data.data.membershipTierId || response.data.data.id;
       expect(tierId).toBe(testTierId);
       expect(response.data.data).toHaveProperty('name', testTier.name);
-      expect(parseFloat(response.data.data.monthlyPrice)).toBeGreaterThan(0);
-      expect(parseFloat(response.data.data.annualPrice)).toBeGreaterThan(0);
+      expect(response.data.data.monthlyPriceCents).toBeGreaterThan(0);
+      expect(response.data.data.annualPriceCents).toBeGreaterThan(0);
     });
 
     it('should update a tier', async () => {
       const updateData = {
         name: 'Updated Test Tier',
         description: 'Updated description for testing',
-        monthlyPrice: 24.99,
+        monthlyPriceCents: 2499,
       };
 
       const response = await client.put(`/business/membership/tiers/${testTierId}`, updateData, {
@@ -76,8 +78,8 @@ describe('Membership Tests', () => {
       expect(response.data.success).toBe(true);
       expect(response.data.data).toHaveProperty('name', updateData.name);
       expect(response.data.data).toHaveProperty('description', updateData.description);
-      expect(parseFloat(response.data.data.monthlyPrice)).toBeGreaterThan(0);
-      expect(parseFloat(response.data.data.annualPrice)).toBeGreaterThan(0);
+      expect(response.data.data.monthlyPriceCents).toBeGreaterThan(0);
+      expect(response.data.data.annualPriceCents).toBeGreaterThan(0);
     });
   });
 
@@ -274,14 +276,16 @@ describe('Membership Tests', () => {
 
       const tier = response.data.data;
 
-      expect(tier).toHaveProperty('monthlyPrice');
-      expect(tier).toHaveProperty('annualPrice');
+      expect(tier).toHaveProperty('monthlyPriceCents');
+      expect(tier).toHaveProperty('annualPriceCents');
       expect(tier).toHaveProperty('isActive');
       expect(tier).toHaveProperty('createdAt');
       expect(tier).toHaveProperty('updatedAt');
 
-      expect(tier).not.toHaveProperty('monthly_price');
-      expect(tier).not.toHaveProperty('annual_price');
+      expect(tier).not.toHaveProperty('monthlyPrice');
+        expect(tier).not.toHaveProperty('monthly_price');
+      expect(tier).not.toHaveProperty('annualPrice');
+        expect(tier).not.toHaveProperty('annual_price');
       expect(tier).not.toHaveProperty('is_active');
       expect(tier).not.toHaveProperty('created_at');
       expect(tier).not.toHaveProperty('updated_at');

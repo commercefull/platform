@@ -1,10 +1,8 @@
 import { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
-import { paymentDataRepository } from '../wired';
 
-const PaymentRepo = paymentDataRepository.payments;
 
 export class ManagePaymentSettingsUseCase {
-  constructor(private readonly paymentRepo: PaymentRepository = PaymentRepo) {}
+  constructor(private readonly paymentRepo: PaymentRepository) {}
 
   async findAll() {
     return this.paymentRepo.findAllSettings();

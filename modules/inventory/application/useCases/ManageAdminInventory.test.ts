@@ -24,7 +24,7 @@ describe('ManageAdminInventoryUseCase', () => {
   });
 
   it('should find inventory levels', async () => {
-    const result = await useCase.findInventoryLevels({ storeId: 's1' } as never);
+    const result = await useCase.findInventoryLevels({ locationId: 'loc1', limit: 10, offset: 0 });
     expect(result).toHaveLength(1);
   });
 

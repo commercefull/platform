@@ -17,9 +17,9 @@
   const images = product.images || [];
   const variants = product.variants || [];
   const hasVariants = variants.length > 0;
-  const isOnSale = product.salePrice !== null && product.salePrice !== undefined && product.basePrice > product.salePrice;
-  const displayPrice = product.salePrice || product.basePrice || product.price || 0;
-  const compareAt = isOnSale ? product.basePrice : null;
+  const isOnSale = product.salePriceCents !== null && product.salePriceCents !== undefined && product.basePriceCents > product.salePriceCents;
+  const displayPrice = (product.effectivePriceCents ?? product.salePriceCents ?? product.basePriceCents ?? 0) / 100;
+  const compareAt = isOnSale ? product.basePriceCents / 100 : null;
 
   // Extract unique sizes and colours from variants
   const sizes = [...new Set(variants.map(v => v.attributes?.find(a => a.name === 'size')?.value).filter(Boolean))];

@@ -14,10 +14,10 @@
       <tr><th>Company</th><td><%= quote.companyId %></td></tr>
       <tr><th>Status</th><td><span class="badge bg-info"><%= quote.status %></span></td></tr>
       <tr><th>Requested By</th><td><%= quote.requestedBy %></td></tr>
-      <tr><th>Subtotal</th><td>$<%= quote.subtotal.toFixed(2) %></td></tr>
-      <tr><th>Discount</th><td>$<%= quote.discountTotal.toFixed(2) %></td></tr>
-      <tr><th>Tax</th><td>$<%= quote.taxTotal.toFixed(2) %></td></tr>
-      <tr><th>Total</th><td><strong>$<%= quote.total.toFixed(2) %> <%= quote.currency %></strong></td></tr>
+      <tr><th>Subtotal</th><td>$<%= ((quote.subtotalCents || 0) / 100).toFixed(2) %></td></tr>
+      <tr><th>Discount</th><td>$<%= ((quote.discountTotalCents || 0) / 100).toFixed(2) %></td></tr>
+      <tr><th>Tax</th><td>$<%= ((quote.taxTotalCents || 0) / 100).toFixed(2) %></td></tr>
+      <tr><th>Total</th><td><strong>$<%= ((quote.totalCents || 0) / 100).toFixed(2) %> <%= quote.currency %></strong></td></tr>
       <tr><th>Valid Until</th><td><%= new Date(quote.validUntil).toLocaleDateString() %></td></tr>
       <tr><th>Notes</th><td><%= quote.notes || '-' %></td></tr>
       <tr><th>Created</th><td><%= new Date(quote.createdAt).toLocaleString() %></td></tr>
@@ -37,9 +37,9 @@
           <td><%= item.sku %></td>
           <td><%= item.name %></td>
           <td><%= item.quantity %></td>
-          <td>$<%= item.unitPrice.toFixed(2) %></td>
+          <td>$<%= ((item.unitPriceCents || 0) / 100).toFixed(2) %></td>
           <td><%= item.discountPercent ? item.discountPercent + '%' : '-' %></td>
-          <td>$<%= (item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100)).toFixed(2) %></td>
+          <td>$<%= ((item.quantity * (item.unitPriceCents || 0) * (1 - (item.discountPercent || 0) / 100)) / 100).toFixed(2) %></td>
         </tr>
         <% }); %>
       </tbody>

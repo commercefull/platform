@@ -5,7 +5,7 @@ export const couponTypeDefs = `#graphql
     name: String!
     type: String!
     value: Float!
-    discountAmount: Float!
+    discountAmountCents: Int!
   }
 
   type CouponValidationResult {
@@ -17,15 +17,15 @@ export const couponTypeDefs = `#graphql
 
   type CouponApplicableItem {
     productId: String!
-    discountAmount: Float!
+    discountAmountCents: Int!
   }
 
   type ApplyCouponResult {
     applied: Boolean!
-    discountAmount: Float!
+    discountAmountCents: Int!
     discountType: String!
     message: String
-    newTotal: Float!
+    newTotalCents: Int!
   }
 
   type RedeemCouponResult {
@@ -51,8 +51,8 @@ export const couponTypeDefs = `#graphql
     createdBy: String!
     description: String
     currency: String
-    minOrderValue: Float
-    maxDiscountAmount: Float
+    minOrderValueCents: Int
+    maxDiscountAmountCents: Int
     usageType: String
     usageLimit: Int
     customerUsageLimit: Int
@@ -66,18 +66,18 @@ export const couponTypeDefs = `#graphql
     couponCode: String!
     basketId: String!
     customerId: String
-    orderTotal: Float!
+    orderTotalCents: Int!
   }
 
   input RedeemCouponInput {
     couponCode: String!
     orderId: String!
     customerId: String
-    discountAmount: Float!
+    discountAmountCents: Int!
   }
 
   type Query {
-    validateCoupon(code: String!, orderValue: Float!, customerId: String): CouponValidationResult!
+    validateCoupon(code: String!, orderValueCents: Int!, customerId: String): CouponValidationResult!
   }
 
   type Mutation {

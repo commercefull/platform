@@ -43,8 +43,6 @@ exports.seed = async function (knex) {
         postalCode: 'W1D 1AN',
         country: 'GB',
       }),
-      defaultCurrency: 'GBP',
-      supportedCurrencies: ['GBP', 'EUR', 'USD'],
       isActive: true,
       isVerified: true,
       isFeatured: true,
@@ -83,8 +81,6 @@ exports.seed = async function (knex) {
         postalCode: '10118',
         country: 'US',
       }),
-      defaultCurrency: 'USD',
-      supportedCurrencies: ['USD', 'GBP', 'EUR'],
       isActive: true,
       isVerified: true,
       isFeatured: true,
@@ -106,6 +102,27 @@ exports.seed = async function (knex) {
       }),
     },
   ]);
+  // Store currency memberships — UK sells in GBP/EUR/USD (GBP default), US in USD/GBP/EUR (USD default)
+  const storeCurrencies = [
+    { storeId: STORE_IDS.UK, codes: ['GBP', 'EUR', 'USD'], default: 'GBP' },
+    { storeId: STORE_IDS.US, codes: ['USD', 'GBP', 'EUR'], default: 'USD' },
+  ];
+
+  await knex('storeCurrency').whereIn('storeId', Object.values(STORE_IDS)).del();
+
+  for (const sc of storeCurrencies) {
+    for (const code of sc.codes) {
+      const currency = await knex('currency').where({ code }).first('currencyId');
+      if (!currency) continue;
+      await knex('storeCurrency').insert({
+        storeId: sc.storeId,
+        currencyId: currency.currencyId,
+        isDefault: code === sc.default,
+        isActive: true,
+      });
+    }
+  }
+
 
   // Also create store-specific warehouses
   const warehouseTable = 'distributionWarehouse';

@@ -85,7 +85,7 @@ Routes are configured in `boot/routes.ts`:
 | Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                                                                       |
 | Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                                                                                |
 | Commerce    | `marketplace`, `supplier`, `organization`                                                                                                                                                 |
-| Platform    | `identity`, `configuration`, `localization`, `store`, `analytics`, `gdpr`, `support`, `tax`, `tracking`, `audit`, `integration`, `webhook`, `reporting`, `migration`, `compliance`, `b2b` |
+| Platform    | `identity`, `configuration`, `localization`, `store`, `analytics`, `gdpr`, `support`, `tax`, `tracking`, `audit`, `integration`, `webhook`, `reporting`, `migration`, `b2b` |
 
 ## Route Naming Convention
 
@@ -116,7 +116,6 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 | segment       | `/business/segment`                                                                                                                 |
 | marketplace   | `/business/vendors`, `/business/commission-rules`, `/business/payouts`                                                              |
 | b2b           | `/business/b2b`                                                                                                                     |
-| compliance    | `/business/compliance`                                                                                                              |
 
 ## Technology Stack
 

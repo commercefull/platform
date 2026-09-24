@@ -1,58 +1,38 @@
-jest.mock('../../infrastructure/repositories/PaymentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    payments: {
-      findWebhookByExternalId: jest.fn().mockResolvedValue(null),
-      createWebhook: jest.fn().mockResolvedValue({
-        paymentWebhookId: 'w1',
-        externalId: 'ext1',
-        provider: 'stripe',
-        eventType: 'payment.succeeded',
-        processedAt: new Date('2026-01-01'),
-        createdAt: new Date('2026-01-01'),
-      }),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentWebhook } from '../../tests/testUtils';
 import { ProcessPaymentWebhookUseCase, ProcessPaymentWebhookCommand } from './ProcessPaymentWebhook';
 import { FailedToCreatePaymentWebhookError } from '../../domain/errors/PaymentErrors';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
-
-const mockRepo = paymentDataRepository as unknown as { payments: Record<string, jest.Mock> };
+import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
 
 describe('ProcessPaymentWebhookUseCase', () => {
   let useCase: ProcessPaymentWebhookUseCase;
+  let repo: jest.Mocked<PaymentRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ProcessPaymentWebhookUseCase();
+    repo = lazyMock<PaymentRepository>();
+    repo.findWebhookByExternalId.mockResolvedValue(null);
+    repo.createWebhook.mockResolvedValue(createPaymentWebhook({ paymentWebhookId: 'w1' }));
+    useCase = new ProcessPaymentWebhookUseCase(repo);
   });
 
-  it('should process new webhook (happy path)', async () => {
+  it('should process a new webhook', async () => {
     const result = await useCase.execute(new ProcessPaymentWebhookCommand('ext1', 'stripe', 'payment.succeeded', { id: 'evt_1' }));
 
     expect(result.paymentWebhookId).toBe('w1');
     expect(result.alreadyExisted).toBe(false);
   });
 
-  it('should return existing webhook (idempotency)', async () => {
-    mockRepo.payments.findWebhookByExternalId.mockResolvedValueOnce({
-      paymentWebhookId: 'w0',
-      externalId: 'ext1',
-      provider: 'stripe',
-      eventType: 'payment.succeeded',
-      createdAt: new Date('2026-01-01'),
-    });
+  it('should return the existing webhook for idempotency', async () => {
+    repo.findWebhookByExternalId.mockResolvedValueOnce(createPaymentWebhook({ paymentWebhookId: 'w0' }));
 
     const result = await useCase.execute(new ProcessPaymentWebhookCommand('ext1', 'stripe', 'payment.succeeded', { id: 'evt_1' }));
 
     expect(result.paymentWebhookId).toBe('w0');
     expect(result.alreadyExisted).toBe(true);
+    expect(repo.createWebhook).not.toHaveBeenCalled();
   });
 
   it('should throw FailedToCreatePaymentWebhookError when creation fails', async () => {
-    mockRepo.payments.createWebhook.mockResolvedValueOnce(null);
+    repo.createWebhook.mockResolvedValueOnce(null);
 
     await expect(useCase.execute(new ProcessPaymentWebhookCommand('ext2', 'stripe', 'payment.failed', { id: 'evt_2' }))).rejects.toThrow(
       FailedToCreatePaymentWebhookError,

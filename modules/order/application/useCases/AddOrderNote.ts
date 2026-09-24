@@ -7,10 +7,7 @@
 
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import { OrderQueryRepository, OrderNote } from '../../domain/repositories/OrderQueryRepository';
-import { orderDataRepository } from '../wired';
 
-const orderRepo = orderDataRepository.commands;
-const orderQueryRepo = orderDataRepository.queries;
 import { OrderNotFoundError, NoteContentEmptyError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
@@ -45,8 +42,8 @@ export interface AddOrderNoteResponse {
 
 export class AddOrderNoteUseCase {
   constructor(
-    private readonly orders: OrderRepository = orderRepo,
-    private readonly queryRepo: OrderQueryRepository = orderQueryRepo,
+    private readonly orders: OrderRepository,
+    private readonly queryRepo: OrderQueryRepository,
   ) {}
 
   async execute(command: AddOrderNoteCommand): Promise<AddOrderNoteResponse> {

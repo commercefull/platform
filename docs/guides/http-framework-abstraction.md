@@ -70,7 +70,6 @@ libs/http/
 | `HttpResponse`       | Alias of Express `Response`             |
 | `HttpNext`           | Alias of Express `NextFunction`         |
 | `HttpHandler`        | Express-compatible request handler type |
-| `HttpErrorHandler`   | Express-compatible error handler type   |
 | `HttpRouter`         | Alias of Express `Router`               |
 | `HttpApplication`    | Alias of Express `Express`              |
 | `HttpRequestBody`    | `Record<string, unknown>`               |

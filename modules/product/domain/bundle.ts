@@ -19,7 +19,7 @@ export interface BundleItemProps {
   maxQuantity?: number;
   isRequired: boolean;
   isDefault: boolean;
-  priceAdjustment: number;
+  priceAdjustmentCents: number;
   discountPercent: number;
   sortOrder: number;
   metadata?: Record<string, unknown>;
@@ -35,11 +35,11 @@ export interface BundleProps {
   description?: string;
   bundleType: BundleType;
   pricingType: PricingType;
-  fixedPrice?: number;
+  fixedPriceCents?: number;
   discountPercent?: number;
-  discountAmount?: number;
-  minPrice?: number;
-  maxPrice?: number;
+  discountAmountCents?: number;
+  minPriceCents?: number;
+  maxPriceCents?: number;
   currency: string;
   minItems?: number;
   maxItems?: number;
@@ -48,7 +48,7 @@ export interface BundleProps {
   requireAllItems: boolean;
   allowDuplicates: boolean;
   showSavings: boolean;
-  savingsAmount?: number;
+  savingsAmountCents?: number;
   savingsPercent?: number;
   imageUrl?: string;
   sortOrder: number;
@@ -103,8 +103,8 @@ export class Bundle {
   get pricingType(): PricingType {
     return this.props.pricingType;
   }
-  get fixedPrice(): number | undefined {
-    return this.props.fixedPrice;
+  get fixedPriceCents(): number | undefined {
+    return this.props.fixedPriceCents;
   }
   get currency(): string {
     return this.props.currency;
@@ -158,11 +158,11 @@ export class Bundle {
     this.touch();
   }
 
-  updatePricing(pricing: { pricingType?: PricingType; fixedPrice?: number; discountPercent?: number; discountAmount?: number }): void {
+  updatePricing(pricing: { pricingType?: PricingType; fixedPriceCents?: number; discountPercent?: number; discountAmountCents?: number }): void {
     if (pricing.pricingType) this.props.pricingType = pricing.pricingType;
-    if (pricing.fixedPrice !== undefined) this.props.fixedPrice = pricing.fixedPrice;
+    if (pricing.fixedPriceCents !== undefined) this.props.fixedPriceCents = pricing.fixedPriceCents;
     if (pricing.discountPercent !== undefined) this.props.discountPercent = pricing.discountPercent;
-    if (pricing.discountAmount !== undefined) this.props.discountAmount = pricing.discountAmount;
+    if (pricing.discountAmountCents !== undefined) this.props.discountAmountCents = pricing.discountAmountCents;
     this.touch();
   }
 
@@ -191,27 +191,27 @@ export class Bundle {
     this.touch();
   }
 
-  calculatePrice(itemPrices: Map<string, number>): number {
-    if (this.props.pricingType === 'fixed' && this.props.fixedPrice !== undefined) {
-      return this.props.fixedPrice;
+  calculatePrice(itemPriceCents: Map<string, number>): number {
+    if (this.props.pricingType === 'fixed' && this.props.fixedPriceCents !== undefined) {
+      return this.props.fixedPriceCents;
     }
 
     let total = 0;
     for (const item of this.props.items) {
-      const basePrice = itemPrices.get(item.productId) || 0;
-      const adjustedPrice = basePrice + item.priceAdjustment;
-      const discounted = adjustedPrice * (1 - item.discountPercent / 100);
-      total += discounted * item.quantity;
+      const basePriceCents = itemPriceCents.get(item.productId) || 0;
+      const adjustedPriceCents = basePriceCents + item.priceAdjustmentCents;
+      const discountedCents = adjustedPriceCents * (1 - item.discountPercent / 100);
+      total += discountedCents * item.quantity;
     }
 
     if (this.props.pricingType === 'percentage_discount' && this.props.discountPercent) {
       total = total * (1 - this.props.discountPercent / 100);
     }
 
-    if (this.props.minPrice && total < this.props.minPrice) total = this.props.minPrice;
-    if (this.props.maxPrice && total > this.props.maxPrice) total = this.props.maxPrice;
+    if (this.props.minPriceCents && total < this.props.minPriceCents) total = this.props.minPriceCents;
+    if (this.props.maxPriceCents && total > this.props.maxPriceCents) total = this.props.maxPriceCents;
 
-    return Math.round(total * 100) / 100;
+    return Math.round(total);
   }
 
   private touch(): void {

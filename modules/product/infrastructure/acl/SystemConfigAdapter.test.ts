@@ -10,7 +10,7 @@ describe('SystemConfigAdapter (product)', () => {
     mockConfigRepo = {
       findActive: jest.fn(),
     };
-    adapter = new SystemConfigAdapter(mockConfigRepo as never as SystemConfigurationRepository);
+    adapter = new SystemConfigAdapter(mockConfigRepo as unknown as SystemConfigurationRepository);
   });
 
   it('should return SystemConfigSummary when config exists', async () => {

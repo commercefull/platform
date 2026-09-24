@@ -11,6 +11,7 @@ exports.up = function (knex) {
     t.string('slug', 150).notNullable().unique();
     t.text('description');
     t.enum('storeType', ['merchant_store', 'organization_store']).notNullable();
+    t.enum('channel', ['physical', 'digital', 'hybrid']).notNullable().defaultTo('digital');
     t.uuid('organizationId').references('organizationId').inTable('organization');
     t.boolean('isHeadquarters').notNullable().defaultTo(false);
     t.uuid('parentStoreId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
@@ -36,8 +37,6 @@ exports.up = function (knex) {
     t.jsonb('storePolicies');
     t.specificType('shippingMethods', 'text[]');
     t.specificType('paymentMethods', 'text[]');
-    t.specificType('supportedCurrencies', 'text[]');
-    t.string('defaultCurrency', 3).notNullable().defaultTo('USD');
     t.jsonb('settings');
     t.string('metaTitle', 255);
     t.text('metaDescription');

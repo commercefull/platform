@@ -1,29 +1,26 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('inv-uuid'),
-}));
-
+import { lazyMock, uuidMock } from '../../tests/testUtils';
 import { CreateInventoryItemUseCase } from './CreateInventoryItem';
 import { InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('CreateInventoryItemUseCase', () => {
   let useCase: CreateInventoryItemUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateInventoryItemUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findBySkuAndWarehouse: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({
-        inventoryId: 'inv-uuid',
-        productId: 'p1',
-        locationId: 'w1',
-        sku: 'SKU1',
-        quantity: 100,
-        reservedQuantity: 0,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateInventoryItemUseCase(mockRepo as never);
+    uuidMock.mockReturnValue('inv-uuid');
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateInventoryItemUseCase>[0]>();
+    mockRepo.findBySkuAndWarehouse.mockResolvedValue(null);
+    mockRepo.create.mockImplementation(async (params) => ({
+      inventoryId: 'inv-uuid',
+      productId: params.productId,
+      variantId: params.variantId,
+      locationId: params.warehouseId,
+      sku: params.sku,
+      quantity: params.quantity,
+      reservedQuantity: 0,
+      createdAt: new Date(),
+    }));
+    useCase = new CreateInventoryItemUseCase(mockRepo);
   });
 
   it('should create inventory item (happy path)', async () => {
@@ -46,7 +43,15 @@ describe('CreateInventoryItemUseCase', () => {
   });
 
   it('should throw InventoryValidationError when SKU already exists', async () => {
-    mockRepo.findBySkuAndWarehouse.mockResolvedValue({ inventoryId: 'existing' });
+    mockRepo.findBySkuAndWarehouse.mockResolvedValue({
+      inventoryId: 'existing',
+      productId: 'p1',
+      locationId: 'w1',
+      sku: 'SKU1',
+      quantity: 0,
+      reservedQuantity: 0,
+      createdAt: new Date(),
+    });
 
     await expect(useCase.execute({ productId: 'p1', warehouseId: 'w1', sku: 'SKU1', quantity: 10 })).rejects.toThrow(
       InventoryValidationError,

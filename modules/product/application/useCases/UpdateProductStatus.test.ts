@@ -8,6 +8,7 @@ import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 
 import type { ProductRepository } from '../../domain/repositories/ProductRepository';
+import { lazyMock } from '../../tests/testUtils';
 
 function createProduct(): Product {
   return Product.create({
@@ -19,37 +20,10 @@ function createProduct(): Product {
 }
 
 function createMockProductRepo(product: Product | null = null): jest.Mocked<ProductRepository> {
-  return {
-    findById: jest.fn().mockResolvedValue(product),
-    findBySlug: jest.fn().mockResolvedValue(null),
-    findBySku: jest.fn().mockResolvedValue(null),
-    findByBarcode: jest.fn().mockResolvedValue(null),
-    findAll: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    save: jest.fn().mockResolvedValue(product),
-    delete: jest.fn().mockResolvedValue(undefined),
-    hardDelete: jest.fn().mockResolvedValue(undefined),
-    count: jest.fn().mockResolvedValue(0),
-    findByCategory: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findByMerchant: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findByBusiness: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findByStore: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findByBusinessAndStore: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findFeatured: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findRelated: jest.fn().mockResolvedValue([]),
-    search: jest.fn().mockResolvedValue({ data: [], total: 0, limit: 20, offset: 0, hasMore: false, length: 0 }),
-    findVariantsByProductId: jest.fn().mockResolvedValue([]),
-    findVariantById: jest.fn().mockResolvedValue(null),
-    saveVariant: jest.fn(),
-    deleteVariant: jest.fn(),
-    getProductImages: jest.fn().mockResolvedValue([]),
-    addProductImage: jest.fn(),
-    updateProductImage: jest.fn(),
-    deleteProductImage: jest.fn(),
-    getCategories: jest.fn().mockResolvedValue([]),
-    setProductCategories: jest.fn(),
-    getTags: jest.fn().mockResolvedValue([]),
-    setProductTags: jest.fn(),
-  } as never as jest.Mocked<ProductRepository>;
+  const repo = lazyMock<ProductRepository>();
+  repo.findById.mockResolvedValue(product);
+  repo.save.mockImplementation(async (item) => item);
+  return repo;
 }
 
 describe('UpdateProductStatusUseCase', () => {

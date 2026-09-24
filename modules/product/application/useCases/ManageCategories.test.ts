@@ -1,39 +1,35 @@
-jest.mock('../../infrastructure/repositories/categoryRepo', () => ({
-  __esModule: true,
-  default: {
-    findOne: jest.fn().mockResolvedValue({ categoryId: 'c1', name: 'Electronics' }),
-    findBySlug: jest.fn().mockResolvedValue({ categoryId: 'c1', slug: 'electronics' }),
-    findAll: jest.fn().mockResolvedValue([{ categoryId: 'c1' }]),
-    findActive: jest.fn().mockResolvedValue([{ categoryId: 'c1', isActive: true }]),
-    findChildren: jest.fn().mockResolvedValue([{ categoryId: 'c2' }]),
-    findForMenu: jest.fn().mockResolvedValue([{ categoryId: 'c1', showInMenu: true }]),
-    create: jest.fn().mockResolvedValue({ categoryId: 'c2', name: 'Books' }),
-    update: jest.fn().mockResolvedValue({ categoryId: 'c1', name: 'Updated' }),
-    delete: jest.fn().mockResolvedValue(undefined),
-  },
-}));
 
 import { ManageCategoriesUseCase } from './ManageCategories';
-import categoryRepo from '../../infrastructure/repositories/categoryRepo';
+import { createCategoryRow, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = categoryRepo as unknown as Record<string, jest.Mock>;
 
 describe('ManageCategoriesUseCase', () => {
   let useCase: ManageCategoriesUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageCategoriesUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageCategoriesUseCase(categoryRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof ManageCategoriesUseCase>[0]>();
+    mockRepo.findOne.mockResolvedValue(createCategoryRow({ productCategoryId: 'c1' }));
+    mockRepo.findBySlug.mockResolvedValue(createCategoryRow({ productCategoryId: 'c1' }));
+    mockRepo.findAll.mockResolvedValue([createCategoryRow()]);
+    mockRepo.findActive.mockResolvedValue([createCategoryRow()]);
+    mockRepo.findChildren.mockResolvedValue([createCategoryRow({ productCategoryId: 'c2' })]);
+    mockRepo.findForMenu.mockResolvedValue([createCategoryRow()]);
+    mockRepo.create.mockResolvedValue(createCategoryRow({ productCategoryId: 'c2', name: 'Books' }));
+    mockRepo.update.mockResolvedValue(createCategoryRow({ productCategoryId: 'c1', name: 'Updated' }));
+    mockRepo.delete.mockResolvedValue(true);
+    useCase = new ManageCategoriesUseCase(mockRepo);
   });
 
   it('should find one', async () => {
     const result = await useCase.findOne('c1');
-    expect(result).toEqual({ categoryId: 'c1', name: 'Electronics' });
+    expect(result).toEqual(createCategoryRow({ productCategoryId: 'c1' }));
   });
 
   it('should find by slug', async () => {
     const result = await useCase.findBySlug('electronics');
-    expect(result).toEqual({ categoryId: 'c1', slug: 'electronics' });
+    expect(result).toEqual(createCategoryRow({ productCategoryId: 'c1' }));
   });
 
   it('should find all', async () => {
@@ -52,13 +48,13 @@ describe('ManageCategoriesUseCase', () => {
   });
 
   it('should create category', async () => {
-    const result = await useCase.create({ name: 'Books' } as never);
-    expect(result).toEqual({ categoryId: 'c2', name: 'Books' });
+    const result = await useCase.create({ name: 'Books' });
+    expect(result).toEqual(createCategoryRow({ productCategoryId: 'c2', name: 'Books' }));
   });
 
   it('should update category', async () => {
-    const result = await useCase.update('c1', { name: 'Updated' } as never);
-    expect(result).toEqual({ categoryId: 'c1', name: 'Updated' });
+    const result = await useCase.update('c1', { name: 'Updated' });
+    expect(result).toEqual(createCategoryRow({ productCategoryId: 'c1', name: 'Updated' }));
   });
 
   it('should delete category', async () => {

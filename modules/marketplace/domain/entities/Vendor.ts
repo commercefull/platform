@@ -24,9 +24,9 @@ export interface VendorBankInfo {
 
 export interface VendorStats {
   totalOrders: number;
-  totalRevenue: number;
-  totalPayouts: number;
-  outstandingBalance: number;
+  totalRevenueCents: number;
+  totalPayoutsCents: number;
+  outstandingBalanceCents: number;
   averageRating: number;
   productCount: number;
 }
@@ -136,9 +136,9 @@ export class Vendor {
       bankInfo: input.bankInfo,
       stats: {
         totalOrders: 0,
-        totalRevenue: 0,
-        totalPayouts: 0,
-        outstandingBalance: 0,
+        totalRevenueCents: 0,
+        totalPayoutsCents: 0,
+        outstandingBalanceCents: 0,
         averageRating: 0,
         productCount: 0,
       },
@@ -299,14 +299,14 @@ export class Vendor {
 
   recordOrder(revenue: number): void {
     this._stats.totalOrders += 1;
-    this._stats.totalRevenue += revenue;
-    this._stats.outstandingBalance += revenue;
+    this._stats.totalRevenueCents += revenue;
+    this._stats.outstandingBalanceCents += revenue;
     this._updatedAt = new Date();
   }
 
-  recordPayout(amount: number): void {
-    this._stats.totalPayouts += amount;
-    this._stats.outstandingBalance = Math.max(0, this._stats.outstandingBalance - amount);
+  recordPayout(amountCents: number): void {
+    this._stats.totalPayoutsCents += amountCents;
+    this._stats.outstandingBalanceCents = Math.max(0, this._stats.outstandingBalanceCents - amountCents);
     this._updatedAt = new Date();
   }
 
@@ -323,12 +323,12 @@ export class Vendor {
     this._updatedAt = new Date();
   }
 
-  calculateCommission(amount: number): number {
-    return (amount * this._commissionRate) / 100;
+  calculateCommission(amountCents: number): number {
+    return (amountCents * this._commissionRate) / 100;
   }
 
   get netEarnings(): number {
-    return this._stats.totalRevenue - this._stats.totalPayouts;
+    return this._stats.totalRevenueCents - this._stats.totalPayoutsCents;
   }
 
   toJSON(): VendorProps {

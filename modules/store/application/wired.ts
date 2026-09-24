@@ -1,6 +1,6 @@
 import storeDataRepository from '../infrastructure/repositories/StoreDataRepository';
 import { SystemConfigurationRepo } from '../../configuration/infrastructure/repositories/SystemConfigurationRepo';
-import { OrganizationLookupAdapter } from '../infrastructure/acl/OrganizationLookupAdapter';
 import { SystemConfigAdapter } from '../infrastructure/acl/SystemConfigAdapter';
+import { organizationLookupAdapter } from './useCases/wired';
 
-export { storeDataRepository, SystemConfigurationRepo, OrganizationLookupAdapter, SystemConfigAdapter };
+export { storeDataRepository, SystemConfigurationRepo, organizationLookupAdapter, SystemConfigAdapter };

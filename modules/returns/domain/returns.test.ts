@@ -10,7 +10,7 @@ describe('ReturnRequest', () => {
       returnReason: 'damaged' as ReturnItemReason,
       condition: 'new' as ReturnItemCondition,
       restockItem: true,
-      refundAmount: 50,
+      refundAmountCents: 50,
     },
   ];
 
@@ -171,7 +171,7 @@ describe('ReturnRequest', () => {
 
     expect(ret.returnShippingPaid).toBe(true);
     expect(ret.returnShippingLabel).toBe('label-url');
-    expect(ret.returnShippingAmount).toBe(15.99);
+    expect(ret.returnShippingAmountCents).toBe(15.99);
   });
 
   it('totalRefundAmount sums item refund amounts', () => {
@@ -179,8 +179,8 @@ describe('ReturnRequest', () => {
       orderId: 'o1',
       returnType: 'refund',
       items: [
-        { orderItemId: 'i1', quantity: 1, returnReason: 'damaged', condition: 'new', restockItem: false, refundAmount: 50 },
-        { orderItemId: 'i2', quantity: 2, returnReason: 'wrongProduct', condition: 'likeNew', restockItem: true, refundAmount: 100 },
+        { orderItemId: 'i1', quantity: 1, returnReason: 'damaged', condition: 'new', restockItem: false, refundAmountCents: 50 },
+        { orderItemId: 'i2', quantity: 2, returnReason: 'wrongProduct', condition: 'likeNew', restockItem: true, refundAmountCents: 100 },
       ],
     });
 
@@ -272,18 +272,18 @@ describe('ReturnRequest', () => {
             returnReason: 'other' as ReturnItemReason,
             condition: 'new' as ReturnItemCondition,
             restockItem: true,
-            refundAmount: 100,
+            refundAmountCents: 100,
           },
         ],
       });
 
       const totalFee = ret.applyRestockingFee({
         restockingFeePercent: 10,
-        restockingFeeFlat: 0,
+        restockingFeeFlatCents: 0,
       });
 
       expect(totalFee).toBe(10); // 10% of 100
-      expect(ret.items[0].refundAmount).toBe(90); // 100 - 10
+      expect(ret.items[0].refundAmountCents).toBe(90); // 100 - 10
     });
 
     it('applies flat + percentage restocking fee', () => {
@@ -297,21 +297,21 @@ describe('ReturnRequest', () => {
             returnReason: 'other' as ReturnItemReason,
             condition: 'new' as ReturnItemCondition,
             restockItem: true,
-            refundAmount: 100,
+            refundAmountCents: 100,
           },
         ],
       });
 
       const totalFee = ret.applyRestockingFee({
         restockingFeePercent: 5,
-        restockingFeeFlat: 2,
+        restockingFeeFlatCents: 2,
       });
 
       expect(totalFee).toBe(7); // 5% of 100 + 2 flat
-      expect(ret.items[0].refundAmount).toBe(93);
+      expect(ret.items[0].refundAmountCents).toBe(93);
     });
 
-    it('caps restocking fee at refund amount', () => {
+    it('caps restocking fee at refund amountCents', () => {
       const ret = ReturnRequest.create({
         orderId: 'o1',
         returnType: 'refund',
@@ -322,21 +322,21 @@ describe('ReturnRequest', () => {
             returnReason: 'other' as ReturnItemReason,
             condition: 'new' as ReturnItemCondition,
             restockItem: true,
-            refundAmount: 50,
+            refundAmountCents: 50,
           },
         ],
       });
 
       const totalFee = ret.applyRestockingFee({
         restockingFeePercent: 50,
-        restockingFeeFlat: 100,
+        restockingFeeFlatCents: 100,
       });
 
-      expect(totalFee).toBe(50); // capped at refund amount
-      expect(ret.items[0].refundAmount).toBe(0);
+      expect(totalFee).toBe(50); // capped at refund amountCents
+      expect(ret.items[0].refundAmountCents).toBe(0);
     });
 
-    it('skips items without refundAmount', () => {
+    it('skips items without refundAmountCents', () => {
       const ret = ReturnRequest.create({
         orderId: 'o1',
         returnType: 'exchange',
@@ -353,7 +353,7 @@ describe('ReturnRequest', () => {
 
       const totalFee = ret.applyRestockingFee({
         restockingFeePercent: 10,
-        restockingFeeFlat: 0,
+        restockingFeeFlatCents: 0,
       });
 
       expect(totalFee).toBe(0);
@@ -370,7 +370,7 @@ describe('ReturnRequest', () => {
             returnReason: 'other' as ReturnItemReason,
             condition: 'new' as ReturnItemCondition,
             restockItem: true,
-            refundAmount: 100,
+            refundAmountCents: 100,
           },
           {
             orderItemId: 'item-2',
@@ -378,19 +378,19 @@ describe('ReturnRequest', () => {
             returnReason: 'other' as ReturnItemReason,
             condition: 'used' as ReturnItemCondition,
             restockItem: false,
-            refundAmount: 50,
+            refundAmountCents: 50,
           },
         ],
       });
 
       const totalFee = ret.applyRestockingFee({
         restockingFeePercent: 10,
-        restockingFeeFlat: 0,
+        restockingFeeFlatCents: 0,
       });
 
       expect(totalFee).toBe(15); // 10% of 100 + 10% of 50
-      expect(ret.items[0].refundAmount).toBe(90);
-      expect(ret.items[1].refundAmount).toBe(45);
+      expect(ret.items[0].refundAmountCents).toBe(90);
+      expect(ret.items[1].refundAmountCents).toBe(45);
     });
   });
 });
@@ -402,15 +402,15 @@ describe('StoreCreditLedgerEntry', () => {
       entryType: 'credit',
       referenceType: 'return',
       referenceId: 'r1',
-      amount: 100,
-      balanceAfter: 100,
+      amountCents: 100,
+      balanceAfterCents: 100,
       reason: 'Store credit from return',
     });
 
     expect(entry.customerId).toBe('c1');
     expect(entry.entryType).toBe('credit');
-    expect(entry.amount).toBe(100);
-    expect(entry.balanceAfter).toBe(100);
+    expect(entry.amountCents).toBe(100);
+    expect(entry.balanceAfterCents).toBe(100);
     expect(entry.currency).toBe('USD');
     expect(entry.isCredit).toBe(true);
     expect(entry.isDebit).toBe(false);
@@ -420,8 +420,8 @@ describe('StoreCreditLedgerEntry', () => {
     const entry = StoreCreditLedgerEntry.create({
       customerId: 'c1',
       entryType: 'debit',
-      amount: 50,
-      balanceAfter: 50,
+      amountCents: 50,
+      balanceAfterCents: 50,
     });
 
     expect(entry.entryType).toBe('debit');
@@ -433,8 +433,8 @@ describe('StoreCreditLedgerEntry', () => {
     const expired = StoreCreditLedgerEntry.create({
       customerId: 'c1',
       entryType: 'credit',
-      amount: 100,
-      balanceAfter: 100,
+      amountCents: 100,
+      balanceAfterCents: 100,
       expiresAt: new Date(Date.now() - 86400000),
     });
     expect(expired.isExpired).toBe(true);
@@ -442,8 +442,8 @@ describe('StoreCreditLedgerEntry', () => {
     const notExpired = StoreCreditLedgerEntry.create({
       customerId: 'c1',
       entryType: 'credit',
-      amount: 100,
-      balanceAfter: 100,
+      amountCents: 100,
+      balanceAfterCents: 100,
       expiresAt: new Date(Date.now() + 86400000),
     });
     expect(notExpired.isExpired).toBe(false);
@@ -456,8 +456,8 @@ describe('StoreCreditLedgerEntry', () => {
       entryType: 'credit' as const,
       referenceType: 'return',
       referenceId: 'r1',
-      amount: 200,
-      balanceAfter: 200,
+      amountCents: 200,
+      balanceAfterCents: 200,
       currency: 'EUR',
       reason: 'Test',
       notes: undefined,
@@ -470,6 +470,6 @@ describe('StoreCreditLedgerEntry', () => {
     const entry = StoreCreditLedgerEntry.reconstitute(props);
     expect(entry.storeCreditLedgerId).toBe('scl1');
     expect(entry.currency).toBe('EUR');
-    expect(entry.amount).toBe(200);
+    expect(entry.amountCents).toBe(200);
   });
 });

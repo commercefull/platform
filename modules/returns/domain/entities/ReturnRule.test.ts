@@ -76,15 +76,15 @@ describe('ReturnRule domain entity', () => {
         ...baseProps,
         returnWindowDays: 30,
         restockingFeePercent: 10,
-        restockingFeeFlat: 5,
-        returnShippingCost: 9.99,
+        restockingFeeFlatCents: 5,
+        returnShippingCostCents: 9.99,
       });
       expect(rule.id).toBe('r1');
       expect(rule.scope).toBe('global');
       expect(rule.returnWindowDays).toBe(30);
       expect(rule.restockingFeePercent).toBe(10);
-      expect(rule.restockingFeeFlat).toBe(5);
-      expect(rule.returnShippingCost).toBe(9.99);
+      expect(rule.restockingFeeFlatCents).toBe(5);
+      expect(rule.returnShippingCostCents).toBe(9.99);
       expect(rule.customerPaysReturnShipping).toBe(false);
       expect(rule.autoApprove).toBe(false);
       expect(rule.requiresManualReview).toBe(false);

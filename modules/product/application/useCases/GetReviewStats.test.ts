@@ -1,21 +1,18 @@
-jest.mock('../../infrastructure/repositories/productReviewRepo', () => ({
-  __esModule: true,
-  default: {
-    getProductStatistics: jest.fn().mockResolvedValue({ totalReviews: 10, averageRating: 4.5 }),
-  },
-}));
 
 import { GetReviewStatsUseCase } from './GetReviewStats';
-import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
+import { lazyMock } from '../../tests/testUtils';
 
-const mockRepo = productReviewRepo as unknown as Record<string, jest.Mock>;
+;
 
 describe('GetReviewStatsUseCase', () => {
   let useCase: GetReviewStatsUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetReviewStatsUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetReviewStatsUseCase(productReviewRepo);
+        mockRepo = lazyMock<ConstructorParameters<typeof GetReviewStatsUseCase>[0]>();
+    mockRepo.getProductStatistics.mockResolvedValue({ totalReviews: 10, averageRating: 4.5, distribution: { 1: 0, 2: 0, 3: 0, 4: 2, 5: 8 }, verifiedPurchaseCount: 3 });
+    useCase = new GetReviewStatsUseCase(mockRepo);
   });
 
   it('should get review stats (happy path)', async () => {

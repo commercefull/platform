@@ -58,7 +58,7 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
     it('should accept paymentMethodToken, not raw card fields', () => {
       const request: PaymentRequest = {
         orderId: 'order-1',
-        amount: 100,
+        amountCents: 100,
         currency: 'USD',
         paymentMethodToken: 'pm_abc123',
       };
@@ -72,7 +72,7 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
     it('should not have any forbidden card fields in its type shape', () => {
       const sampleRequest: PaymentRequest = {
         orderId: 'order-1',
-        amount: 100,
+        amountCents: 100,
         currency: 'USD',
         paymentMethodToken: 'tok_123',
         customerId: 'cust-1',
@@ -98,10 +98,10 @@ describe('PCI-DSS Tokenisation-Only Assertions', () => {
         orderId: 'order-1',
         paymentMethodConfigId: 'pmc-1',
         gatewayId: 'stripe',
-        amount: 100,
+        amountCents: 100,
         currency: 'USD',
         status: 'authorized' as TransactionStatus,
-        refundedAmount: 0,
+        refundedAmountCents: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
         paymentMethodDetails: {

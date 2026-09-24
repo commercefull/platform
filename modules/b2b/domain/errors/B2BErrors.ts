@@ -51,11 +51,11 @@ export class B2BUserStatusError extends AppError {
 }
 
 export class SpendingLimitExceededError extends AppError {
-  constructor(userId: string, amount: number, limit: number) {
-    super(`Spending limit exceeded for user ${userId}: ${amount} exceeds limit ${limit}`, 403, {
+  constructor(userId: string, amountCents: number, limit: number) {
+    super(`Spending limit exceeded for user ${userId}: ${amountCents} exceeds limit ${limit}`, 403, {
       code: 'b2b.spending_limit_exceeded',
       severity: 'warn',
-      details: { userId, amount, limit },
+      details: { userId, amountCents, limit },
     });
   }
 }
@@ -109,11 +109,11 @@ export class UnauthorizedApproverError extends AppError {
 }
 
 export class CreditLimitExceededError extends AppError {
-  constructor(companyId: string, amount: number, available: number) {
-    super(`Credit limit exceeded for company ${companyId}: requested ${amount}, available ${available}`, 403, {
+  constructor(companyId: string, amountCents: number, available: number) {
+    super(`Credit limit exceeded for company ${companyId}: requested ${amountCents}, available ${available}`, 403, {
       code: 'b2b.credit_limit_exceeded',
       severity: 'warn',
-      details: { companyId, amount, available },
+      details: { companyId, amountCents, available },
     });
   }
 }

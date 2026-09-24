@@ -24,8 +24,8 @@ export interface SearchQuery {
   /** Product type filter */
   productTypeId?: string;
   /** Price range */
-  minPrice?: number;
-  maxPrice?: number;
+  minPriceCents?: number;
+  maxPriceCents?: number;
   /** Status filters */
   status?: string;
   visibility?: string;
@@ -105,7 +105,7 @@ export interface SearchProductItem {
   name: string;
   slug: string;
   sku?: string;
-  price: number;
+  priceCents: number;
   status: string;
   visibility: string;
   isFeatured: boolean;

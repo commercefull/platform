@@ -1,21 +1,16 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock } from '../../tests/testUtils';
 import { SetLowStockThresholdUseCase } from './SetLowStockThreshold';
 import { InventoryValidationError, InventoryItemNotFoundError } from '../../domain/errors/InventoryErrors';
 
 describe('SetLowStockThresholdUseCase', () => {
   let useCase: SetLowStockThresholdUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof SetLowStockThresholdUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findByProduct: jest.fn().mockResolvedValue({ inventoryId: 'i1', quantity: 5, reservedQuantity: 0, lowStockThreshold: 10 }),
-      updateReorderPoint: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new SetLowStockThresholdUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof SetLowStockThresholdUseCase>[0]>();
+    mockRepo.findByProduct.mockResolvedValue({ inventoryId: 'i1', quantity: 5, reservedQuantity: 0, lowStockThreshold: 10 });
+    mockRepo.updateReorderPoint.mockResolvedValue(undefined);
+    useCase = new SetLowStockThresholdUseCase(mockRepo);
   });
 
   it('should set low stock threshold (happy path)', async () => {

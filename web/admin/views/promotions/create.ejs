@@ -252,9 +252,8 @@
             productId: 'preview-product',
             name: 'Preview Item',
             quantity: itemQty,
-            unitPrice: cartTotal / itemQty,
+            unitPriceCents: Math.round((cartTotal / itemQty) * 100),
           }],
-          subtotal: cartTotal,
           shippingAmount: 0,
           customerGroup: customerGroup || undefined,
           currency: 'USD',
@@ -263,17 +262,17 @@
       const result = await resp.json();
 
       if (result.success) {
-        const discount = result.totalDiscountAmount || 0;
+        const discount = (result.totalDiscountAmountCents || 0) / 100;
         const freeShipping = result.freeShipping;
         const applied = result.appliedPromotions || [];
         let html = '<div class="alert ' + (discount > 0 || freeShipping ? 'alert-success' : 'alert-secondary') + ' mb-0">';
         html += '<strong>Discount: $' + discount.toFixed(2) + '</strong>';
         if (freeShipping) html += ' <span class="badge bg-info">Free Shipping</span>';
-        html += '<br>Original Total: $' + cartTotal.toFixed(2) + ' → Final Total: $' + (result.finalTotal || cartTotal - discount).toFixed(2);
+        html += '<br>Original Total: $' + cartTotal.toFixed(2) + ' → Final Total: $' + ((result.finalTotalCents !== undefined ? result.finalTotalCents / 100 : cartTotal - discount)).toFixed(2);
         if (applied.length > 0) {
           html += '<br><small class="text-muted">Applied promotions:</small><ul class="small mb-0">';
           applied.forEach(function(p) {
-            html += '<li>' + p.name + ' (' + p.type + ') — $' + (p.discountAmount || 0).toFixed(2) + '</li>';
+            html += '<li>' + p.name + ' (' + p.type + ') — $' + ((p.discountAmountCents || 0) / 100).toFixed(2) + '</li>';
           });
           html += '</ul>';
         } else {

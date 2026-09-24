@@ -14,6 +14,7 @@ jest.mock('../../../../libs/events/eventBus', () => ({
 }));
 
 import { WebhookDispatchService } from './WebhookDispatchService';
+import type { WebhookRepositoryInterface } from '../../domain/repositories/WebhookRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 const endpointProps = {
@@ -48,7 +49,7 @@ const deliveryProps = {
   updatedAt: new Date(),
 };
 
-const mockRepo = {
+const mockRepo: jest.Mocked<WebhookRepositoryInterface> = {
   findEndpointsByEvent: jest.fn().mockResolvedValue([]),
   createDelivery: jest.fn().mockResolvedValue(undefined),
   updateDelivery: jest.fn().mockResolvedValue(undefined),
@@ -56,6 +57,12 @@ const mockRepo = {
   claimPendingRetries: jest.fn().mockResolvedValue([]),
   releaseDeliveryLock: jest.fn().mockResolvedValue(undefined),
   findEndpointById: jest.fn().mockResolvedValue(null),
+  createEndpoint: jest.fn(),
+  findEndpoints: jest.fn(),
+  updateEndpoint: jest.fn(),
+  deleteEndpoint: jest.fn(),
+  findDeliveryById: jest.fn(),
+  findDeliveries: jest.fn(),
 };
 
 describe('WebhookDispatchService', () => {
@@ -68,9 +75,9 @@ describe('WebhookDispatchService', () => {
     mockRepo.claimPendingRetries.mockResolvedValue([]);
     mockRepo.releaseDeliveryLock.mockResolvedValue(undefined);
     mockRepo.findEndpointById.mockResolvedValue(null);
-    mockRepo.createDelivery.mockResolvedValue(undefined);
-    mockRepo.updateDelivery.mockResolvedValue(undefined);
-    service = new WebhookDispatchService(mockRepo as never);
+    mockRepo.createDelivery.mockResolvedValue(deliveryProps);
+    mockRepo.updateDelivery.mockResolvedValue(deliveryProps);
+    service = new WebhookDispatchService(mockRepo);
   });
 
   afterEach(() => {
@@ -108,7 +115,7 @@ describe('WebhookDispatchService', () => {
       ok: true,
       status: 200,
       text: jest.fn().mockResolvedValue('OK'),
-    }) as never;
+    }) as unknown as typeof fetch;
 
     const handleEvent = (service as unknown as { handleEvent: (p: unknown) => Promise<void> }).handleEvent.bind(service);
     await handleEvent({ type: 'test.event', data: { id: 1 }, timestamp: new Date(), correlationId: 'c1' });
@@ -127,7 +134,7 @@ describe('WebhookDispatchService', () => {
       ok: false,
       status: 500,
       text: jest.fn().mockResolvedValue('Server Error'),
-    }) as never;
+    }) as unknown as typeof fetch;
 
     const handleEvent = (service as unknown as { handleEvent: (p: unknown) => Promise<void> }).handleEvent.bind(service);
     await handleEvent({ type: 'test.event', data: {}, timestamp: new Date(), correlationId: 'c1' });
@@ -140,7 +147,7 @@ describe('WebhookDispatchService', () => {
 
   it('should record failure on network error', async () => {
     mockRepo.findEndpointsByEvent.mockResolvedValueOnce([endpointProps]);
-    global.fetch = jest.fn().mockRejectedValue(new Error('Network timeout')) as never;
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network timeout')) as unknown as typeof fetch;
 
     const handleEvent = (service as unknown as { handleEvent: (p: unknown) => Promise<void> }).handleEvent.bind(service);
     await handleEvent({ type: 'test.event', data: {}, timestamp: new Date(), correlationId: 'c1' });
@@ -158,7 +165,7 @@ describe('WebhookDispatchService', () => {
       ok: true,
       status: 200,
       text: jest.fn().mockResolvedValue('OK'),
-    }) as never;
+    }) as unknown as typeof fetch;
 
     const handleEvent = (service as unknown as { handleEvent: (p: unknown) => Promise<void> }).handleEvent.bind(service);
     await handleEvent({ type: 'test.event', data: {}, timestamp: new Date(), correlationId: 'c1' });
@@ -207,7 +214,7 @@ describe('WebhookDispatchService', () => {
       ok: true,
       status: 200,
       text: jest.fn().mockResolvedValue('OK'),
-    }) as never;
+    }) as unknown as typeof fetch;
 
     const processRetries = (service as unknown as { processRetries: () => Promise<void> }).processRetries.bind(service);
     await processRetries();

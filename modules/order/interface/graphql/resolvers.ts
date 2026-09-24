@@ -1,9 +1,8 @@
-const OrderRepo = orderDataRepository.commands;
-import { GetOrderUseCase, GetOrderCommand } from '../../application/useCases/GetOrder';
-import { GetCustomerOrdersUseCase, GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
-import { ListOrdersUseCase, ListOrdersCommand } from '../../application/useCases/ListOrders';
+import { GetOrderCommand } from '../../application/useCases/GetOrder';
+import { GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
+import { ListOrdersCommand } from '../../application/useCases/ListOrders';
 import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { orderDataRepository } from '../../application/wired';
+import { getOrderUseCase, getCustomerOrdersUseCase, listOrdersUseCase } from '../../application/useCases/wired';
 
 export const orderResolvers = {
   Query: {
@@ -16,7 +15,7 @@ export const orderResolvers = {
       context: GraphQLAuthContext,
     ) => {
       const { customerId } = requireCustomerAuth(context);
-      const useCase = new GetOrderUseCase(OrderRepo);
+      const useCase = getOrderUseCase;
       const command = new GetOrderCommand(args.orderId, args.orderNumber, customerId);
       return useCase.execute(command);
     },
@@ -33,7 +32,7 @@ export const orderResolvers = {
       context: GraphQLAuthContext,
     ) => {
       const { customerId } = requireCustomerAuth(context);
-      const useCase = new GetCustomerOrdersUseCase(OrderRepo);
+      const useCase = getCustomerOrdersUseCase;
       const command = new GetCustomerOrdersCommand(
         customerId,
         args.limit ?? 20,
@@ -56,7 +55,7 @@ export const orderResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ListOrdersUseCase(OrderRepo);
+      const useCase = listOrdersUseCase;
       const command = new ListOrdersCommand(
         args.filters as Record<string, unknown> | undefined,
         args.limit ?? 50,

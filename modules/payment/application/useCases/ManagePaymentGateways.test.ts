@@ -1,57 +1,63 @@
-jest.mock('../../infrastructure/repositories/PaymentDataRepository', () => ({
-  __esModule: true,
-  default: {
-    gateways: {
-      findAllGateways: jest.fn().mockResolvedValue([{ gatewayId: 'g1' }]),
-      findGatewayById: jest.fn().mockResolvedValue({ gatewayId: 'g1' }),
-      createGateway: jest.fn().mockResolvedValue({ gatewayId: 'g2' }),
-      updateGateway: jest.fn().mockResolvedValue(undefined),
-      deleteGateway: jest.fn().mockResolvedValue(undefined),
-      findAllMethodConfigs: jest.fn().mockResolvedValue([{ configId: 'c1' }]),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentGateway, createPaymentMethodConfig } from '../../tests/testUtils';
 import { ManagePaymentGatewaysUseCase } from './ManagePaymentGateways';
-import paymentDataRepository from '../../infrastructure/repositories/PaymentDataRepository';
-
-const mockRepo = paymentDataRepository as unknown as { gateways: Record<string, jest.Mock> };
+import type { PaymentGatewayRepository, PaymentGatewayCreateParams } from '../../domain/repositories/PaymentGatewayRepository';
 
 describe('ManagePaymentGatewaysUseCase', () => {
   let useCase: ManagePaymentGatewaysUseCase;
+  let repo: jest.Mocked<PaymentGatewayRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManagePaymentGatewaysUseCase();
+    repo = lazyMock<PaymentGatewayRepository>();
+    useCase = new ManagePaymentGatewaysUseCase(repo);
   });
 
   it('should find all gateways', async () => {
+    repo.findAllGateways.mockResolvedValue([createPaymentGateway()]);
+
     const result = await useCase.findAll('org1');
+
     expect(result).toHaveLength(1);
+    expect(repo.findAllGateways).toHaveBeenCalledWith('org1');
   });
 
-  it('should find by ID', async () => {
+  it('should find a gateway by ID', async () => {
+    repo.findGatewayById.mockResolvedValue(createPaymentGateway({ paymentGatewayId: 'g1' }));
+
     const result = await useCase.findById('g1');
-    expect(result).toEqual({ gatewayId: 'g1' });
+
+    expect(result?.paymentGatewayId).toBe('g1');
   });
 
-  it('should create gateway', async () => {
-    const result = await useCase.create({ organizationId: 'org1', provider: 'stripe' } as never);
-    expect(result).toEqual({ gatewayId: 'g2' });
+  it('should create a gateway', async () => {
+    repo.createGateway.mockResolvedValue(createPaymentGateway({ paymentGatewayId: 'g2' }));
+
+    const result = await useCase.create({ organizationId: 'org1', provider: 'stripe' } as unknown as PaymentGatewayCreateParams);
+
+    expect(result.paymentGatewayId).toBe('g2');
   });
 
-  it('should update gateway', async () => {
+  it('should update a gateway', async () => {
+    repo.updateGateway.mockResolvedValue(createPaymentGateway({ isActive: false }));
+
     await useCase.update('g1', { isActive: false });
-    expect(mockRepo.gateways.updateGateway).toHaveBeenCalledWith('g1', { isActive: false });
+
+    expect(repo.updateGateway).toHaveBeenCalledWith('g1', { isActive: false });
   });
 
-  it('should delete gateway', async () => {
+  it('should delete a gateway', async () => {
+    repo.deleteGateway.mockResolvedValue(true);
+
     await useCase.delete('g1');
-    expect(mockRepo.gateways.deleteGateway).toHaveBeenCalledWith('g1');
+
+    expect(repo.deleteGateway).toHaveBeenCalledWith('g1');
   });
 
   it('should find all method configs', async () => {
+    repo.findAllMethodConfigs.mockResolvedValue([createPaymentMethodConfig()]);
+
     const result = await useCase.findAllMethodConfigs('org1');
+
     expect(result).toHaveLength(1);
+    expect(repo.findAllMethodConfigs).toHaveBeenCalledWith('org1');
   });
 });

@@ -72,10 +72,10 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
     filters.brandId = brand as string;
   }
   if (priceMin) {
-    filters.priceMin = parseFloat(priceMin as string);
+    filters.priceMinCents = Math.round(parseFloat(priceMin as string) * 100);
   }
   if (priceMax) {
-    filters.priceMax = parseFloat(priceMax as string);
+    filters.priceMaxCents = Math.round(parseFloat(priceMax as string) * 100);
   }
   if (onSale === 'true') {
     filters.onSale = true;
@@ -207,10 +207,10 @@ export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): 
     filters.brandId = brand as string;
   }
   if (priceMin) {
-    filters.priceMin = parseFloat(priceMin as string);
+    filters.priceMinCents = Math.round(parseFloat(priceMin as string) * 100);
   }
   if (priceMax) {
-    filters.priceMax = parseFloat(priceMax as string);
+    filters.priceMaxCents = Math.round(parseFloat(priceMax as string) * 100);
   }
   if (onSale === 'true') {
     filters.onSale = true;
@@ -291,10 +291,10 @@ export const searchProducts = async (req: HttpRequest, res: HttpResponse): Promi
     filters.brandId = brand as string;
   }
   if (priceMin) {
-    filters.priceMin = parseFloat(priceMin as string);
+    filters.priceMinCents = Math.round(parseFloat(priceMin as string) * 100);
   }
   if (priceMax) {
-    filters.priceMax = parseFloat(priceMax as string);
+    filters.priceMaxCents = Math.round(parseFloat(priceMax as string) * 100);
   }
   if (onSale === 'true') {
     filters.onSale = true;

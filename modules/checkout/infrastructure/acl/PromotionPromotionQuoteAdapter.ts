@@ -10,30 +10,32 @@
  */
 
 import { PromotionQuotePort, PromotionQuoteRequest, PromotionQuoteResult } from '../../application/ports/PromotionQuotePort';
-import { promotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
+import type { PromotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
 
 export class PromotionPromotionQuoteAdapter implements PromotionQuotePort {
+  constructor(private readonly promotionEvaluationService: PromotionEvaluationService) {}
+
   async evaluatePromotions(request: PromotionQuoteRequest): Promise<PromotionQuoteResult> {
     try {
-      const result = await promotionEvaluationService.evaluate({
+      const result = await this.promotionEvaluationService.evaluate({
         items: request.items,
-        subtotal: request.subtotal,
-        shippingAmount: request.shippingAmount,
+        subtotalCents: request.subtotalCents,
+        shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
         currency: request.currency,
         couponCode: request.couponCode,
       });
 
       return {
-        totalDiscountAmount: result.totalDiscountAmount,
+        totalDiscountAmountCents: result.totalDiscountAmountCents,
         appliedPromotions: (result.appliedPromotions || []).map(p => ({
           id: p.promotionId,
           name: p.name,
-          amount: p.discountAmount,
+          amountCents: p.discountAmountCents,
         })),
       };
     } catch {
-      return { totalDiscountAmount: 0, appliedPromotions: [] };
+      return { totalDiscountAmountCents: 0, appliedPromotions: [] };
     }
   }
 }

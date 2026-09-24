@@ -200,13 +200,13 @@ export const getShippingMethods = async (req: HttpRequest, res: HttpResponse): P
   }
 
   // Fetch basket for order details
-  let subtotal = 0;
+  let subtotalCents = 0;
 
   try {
     const ports = getCheckoutPorts();
     const basket = await ports.basketSnapshot.getSnapshot(session.basketId);
     if (basket) {
-      subtotal = basket.subtotal?.amount ?? 0;
+      subtotalCents = basket.subtotal?.cents ?? 0;
     }
   } catch {
     // Basket lookup is best-effort; fall back to defaults
@@ -221,7 +221,7 @@ export const getShippingMethods = async (req: HttpRequest, res: HttpResponse): P
       city: session.shippingAddress.city,
       postalCode: session.shippingAddress.postalCode,
     },
-    totalValue: subtotal,
+    totalValueCents: subtotalCents,
   });
 
   if (shippingOptions.length === 0) {
@@ -234,7 +234,7 @@ export const getShippingMethods = async (req: HttpRequest, res: HttpResponse): P
     id: rate.methodId,
     name: rate.methodName,
     description: rate.estimatedDays ? `${rate.estimatedDays} day(s) delivery` : '',
-    price: rate.amount,
+    priceCents: rate.amountCents,
     currency: rate.currency,
     estimatedDeliveryDays: rate.estimatedDays,
   }));
@@ -622,12 +622,12 @@ export const getFulfillmentOptions = async (req: HttpRequest, res: HttpResponse)
           city: session.shippingAddress.city,
           postalCode: session.shippingAddress.postalCode,
         },
-        totalValue: session.subtotal.amount,
+        totalValueCents: session.subtotal.cents,
       });
       options.shippingMethods = shippingOptions.map(rate => ({
         id: rate.methodId,
         name: rate.methodName,
-        price: rate.amount,
+        priceCents: rate.amountCents,
         currency: rate.currency,
         estimatedDeliveryDays: rate.estimatedDays,
       }));

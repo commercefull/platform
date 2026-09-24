@@ -6,7 +6,7 @@ exports.up = function (knex) {
     t.text('description');
     t.enum('discountType', ['percentage', 'fixed_amount']).notNullable();
     t.decimal('discountValue', 15, 2).notNullable();
-    t.string('currencyCode', 3).defaultTo('USD');
+    t.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     t.timestamp('startDate').notNullable().defaultTo(knex.fn.now());
     t.timestamp('endDate');
     t.boolean('isActive').notNullable().defaultTo(true);
@@ -14,8 +14,8 @@ exports.up = function (knex) {
     t.enum('appliesTo', ['specific_products', 'all_products']).notNullable().defaultTo('specific_products');
     t.integer('minimumQuantity').defaultTo(1);
     t.integer('maximumQuantity');
-    t.decimal('minimumAmount', 15, 2);
-    t.decimal('maximumDiscountAmount', 15, 2);
+    t.bigInteger('minimumAmountCents');
+    t.bigInteger('maximumDiscountAmountCents');
     t.boolean('stackable').notNullable().defaultTo(false);
     t.boolean('displayOnProductPage').notNullable().defaultTo(true);
     t.boolean('displayInListing').notNullable().defaultTo(true);

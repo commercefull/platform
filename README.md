@@ -10,7 +10,7 @@
 [![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
 [![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 
-Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
+Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 42 business modules covering the full commerce lifecycle.
 
 ---
 
@@ -67,7 +67,7 @@ Commercefull is an open-source e-commerce platform built with Node.js, TypeScrip
 
 ### Platform
 
-- **Admin Panel** — Full platform management across all 43 modules
+- **Admin Panel** — Full platform management across all 42 modules
 - **Content Management** — Pages, blocks, templates, and media library
 - **Notifications** — Email/push templates with event-driven delivery
 - **Analytics** — Sales, product, customer, and predictive analytics
@@ -97,7 +97,6 @@ Commercefull is an open-source e-commerce platform built with Node.js, TypeScrip
 ### Compliance & Governance
 
 - **GDPR** — Data subject requests, cookie consent, and audit trails
-- **CCPA & SOC 2** — Data subject requests, key rotation policy, and audit logging via the `compliance` module
 - **PCI DSS** — SAQ boundary documentation in [`docs/compliance/`](./docs/compliance/pci-dss-saq-boundary.md)
 - **Consent-Gated Tracking** — Server-side GTM container and Meta CAPI adapters with SHA-256 PII hashing and per-store consent categories
 
@@ -204,7 +203,7 @@ platform/
 │   ├── session/               #   Session management
 │   ├── types/                 #   Shared TypeScript types
 │   └── validation/            #   Input validation helpers
-├── modules/                   # 43 business modules (DDD)
+├── modules/                   # 42 business modules (DDD)
 │   ├── product/               #   Example: Product module
 │   │   ├── application/       #     Use cases
 │   │   ├── domain/            #     Entities, value objects, events
@@ -390,7 +389,7 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Modules
 
-Commercefull includes 43 business modules:
+Commercefull includes 42 business modules:
 
 | Module          | Description                                                          |
 | --------------- | -------------------------------------------------------------------- |
@@ -400,7 +399,6 @@ Commercefull includes 43 business modules:
 | `b2b`           | B2B companies, quotes, price books, credit terms, approval workflows |
 | `basket`        | Shopping cart management                                             |
 | `checkout`      | Checkout sessions, configurable steps, payment capture flow          |
-| `compliance`    | SOC 2 audit logging, key rotation, CCPA data subject requests        |
 | `configuration` | System-wide configuration and feature flags                          |
 | `content`       | CMS pages, blocks, and templates                                     |
 | `coupon`        | Coupon codes and validation                                          |
@@ -444,7 +442,7 @@ Commercefull includes 43 business modules:
 
 ### Admin Panel (`/admin`)
 
-Full platform management covering all 43 modules. Built with Tabler (Bootstrap-based) UI framework.
+Full platform management covering all 42 modules. Built with Tabler (Bootstrap-based) UI framework.
 
 **Key sections:** Dashboard, Products, Orders, Customers, Inventory, Promotions, Payments, Shipping, Content, Analytics, Programs (Membership, Subscription, Loyalty), Operations (Warehouses, Fulfillment, Suppliers), Settings, Users & Roles, GDPR, Support.
 

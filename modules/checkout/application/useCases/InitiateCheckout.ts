@@ -53,11 +53,11 @@ export interface CheckoutResponse {
   shippingMethodId?: string;
   shippingMethodName?: string;
   paymentMethodId?: string;
-  subtotal: number;
-  taxAmount: number;
-  shippingAmount: number;
-  discountAmount: number;
-  total: number;
+  subtotalCents: number;
+  taxAmountCents: number;
+  shippingAmountCents: number;
+  discountAmountCents: number;
+  totalCents: number;
   currency: string;
   couponCode?: string;
   fulfillmentType: string;
@@ -99,11 +99,11 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     shippingMethodId: session.shippingMethodId,
     shippingMethodName: session.shippingMethodName,
     paymentMethodId: session.paymentMethodId,
-    subtotal: session.subtotal.amount,
-    taxAmount: session.taxAmount.amount,
-    shippingAmount: session.shippingAmount.amount,
-    discountAmount: session.discountAmount.amount,
-    total: session.total.amount,
+    subtotalCents: session.subtotal.cents,
+    taxAmountCents: session.taxAmount.cents,
+    shippingAmountCents: session.shippingAmount.cents,
+    discountAmountCents: session.discountAmount.cents,
+    totalCents: session.total.cents,
     currency: session.subtotal.currency,
     couponCode: session.couponCode,
     fulfillmentType: session.fulfillmentType,
@@ -159,6 +159,7 @@ export class InitiateCheckoutUseCase {
       checkoutId: session.id,
       basketId: command.basketId,
       customerId: command.customerId,
+      totalCents: session.total.cents,
     });
 
     return mapCheckoutToResponse(session);

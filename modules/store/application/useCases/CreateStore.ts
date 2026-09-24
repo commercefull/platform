@@ -4,6 +4,7 @@
  */
 
 import { StoreRepository } from '../../domain/repositories/StoreRepository';
+import { StoreCurrencyRepository } from '../../domain/repositories/StoreCurrencyRepository';
 import { OrganizationLookupPort } from '../../application/ports/OrganizationLookupPort';
 import { SystemConfigPort } from '../../application/ports/SystemConfigPort';
 import { Store, type StoreProps } from '../../domain/entities/Store';
@@ -20,6 +21,7 @@ export class CreateStoreCommand {
       slug?: string;
       description?: string;
       storeType: 'merchant_store' | 'organization_store';
+      channel?: 'physical' | 'digital' | 'hybrid';
       organizationId?: string;
       isHeadquarters?: boolean;
       parentStoreId?: string;
@@ -79,6 +81,7 @@ export class CreateStoreUseCase {
     private readonly storeRepository: StoreRepository,
     private readonly systemConfigPort: SystemConfigPort,
     private readonly organizationLookupPort?: OrganizationLookupPort,
+    private readonly storeCurrencyRepository?: StoreCurrencyRepository,
   ) {}
 
   async execute(command: CreateStoreCommand): Promise<CreateStoreResponse> {
@@ -121,6 +124,7 @@ export class CreateStoreUseCase {
       name: command.storeData.name,
       slug,
       storeType: command.storeData.storeType,
+      channel: command.storeData.channel,
       organizationId: command.storeData.organizationId,
       isHeadquarters: command.storeData.isHeadquarters,
       parentStoreId: command.storeData.parentStoreId,
@@ -135,8 +139,6 @@ export class CreateStoreUseCase {
       primaryColor: command.storeData.primaryColor,
       secondaryColor: command.storeData.secondaryColor,
       theme: command.storeData.theme,
-      defaultCurrency: command.storeData.defaultCurrency,
-      supportedCurrencies: command.storeData.supportedCurrencies,
       settings: command.storeData.settings as StoreProps['settings'] | undefined,
       storePolicies: command.storeData.storePolicies as StoreProps['storePolicies'] | undefined,
       metaTitle: command.storeData.metaTitle,
@@ -154,6 +156,16 @@ export class CreateStoreUseCase {
 
     // Save store
     const savedStore = await this.storeRepository.save(store);
+
+    // Establish the store's supported currencies — every store sells in at
+    // least one currency (the default). Currency codes are validated against
+    // the canonical `currency` table by the repository.
+    if (this.storeCurrencyRepository) {
+      const supportedCurrencies = command.storeData.supportedCurrencies?.length
+        ? command.storeData.supportedCurrencies
+        : [command.storeData.defaultCurrency || 'USD'];
+      await this.storeCurrencyRepository.replaceAll(savedStore.storeId, supportedCurrencies, command.storeData.defaultCurrency);
+    }
 
     return {
       storeId: savedStore.storeId,

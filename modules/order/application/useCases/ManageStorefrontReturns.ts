@@ -1,10 +1,8 @@
 import { OrderReturnRepository } from '../../domain/repositories/OrderReturnRepository';
-import { orderFulfillmentDataRepository } from '../wired';
 
-const orderReturnRepo = orderFulfillmentDataRepository.returns;
 
 export class ManageStorefrontReturnsUseCase {
-  constructor(private readonly returns: OrderReturnRepository = orderReturnRepo) {}
+  constructor(private readonly returns: OrderReturnRepository) {}
 
   async findByCustomerIdWithOrderNumber(customerId: string) {
     return this.returns.findByCustomerIdWithOrderNumber(customerId);

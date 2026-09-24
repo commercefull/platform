@@ -21,8 +21,9 @@ export interface ProductFilters {
   isFeatured?: boolean;
   isVirtual?: boolean;
   hasVariants?: boolean;
-  priceMin?: number;
-  priceMax?: number;
+  /** Price bounds are integer cents, matched against the pricing-owned productBasePrice table. */
+  priceMinCents?: number;
+  priceMaxCents?: number;
   tags?: string[];
   search?: string;
 }

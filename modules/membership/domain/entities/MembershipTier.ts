@@ -17,10 +17,10 @@ export interface MembershipTierProps {
   description?: string;
   level: number;
   pointsRequired: number;
-  annualFee?: number;
+  annualFeeCents?: number;
   benefits: TierBenefit[];
   discountPercentage?: number;
-  freeShippingThreshold?: number;
+  freeShippingThresholdCents?: number;
   pointsMultiplier: number;
   isActive: boolean;
   color?: string;

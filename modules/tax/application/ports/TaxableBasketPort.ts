@@ -8,13 +8,13 @@
 export interface TaxableBasketItem {
   productId: string;
   quantity: number;
-  price: number;
+  priceCents: number;
 }
 
 export interface TaxableBasket {
   basketId: string;
   items: TaxableBasketItem[];
-  subtotal: number;
+  subtotalCents: number;
 }
 
 export interface TaxableBasketPort {

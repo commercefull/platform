@@ -6,7 +6,7 @@ export async function up(knex) {
     table.string('type').notNullable();
     table.string('scope').notNullable();
     table.decimal('rate', 5, 2).notNullable().defaultTo(0);
-    table.decimal('fixedAmount', 14, 2);
+    table.bigInteger('fixedAmountCents');
     table.jsonb('tiers');
     table.uuid('categoryId');
     table.uuid('vendorId').references('vendorId').inTable('marketplaceVendor').onDelete('CASCADE');

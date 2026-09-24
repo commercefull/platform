@@ -1,13 +1,8 @@
 const identityRepo = identityDataRepository.users;
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import {
-  LoginUseCase,
-  LoginCommand,
-  RefreshTokenUseCase,
-  RefreshTokenCommand,
-  LogoutUseCase,
-  LogoutCommand,
-} from '../../application/useCases/Authenticate';
+import { LoginUseCase, LoginCommand } from '../../application/useCases/Login';
+import { RefreshTokenUseCase, RefreshTokenCommand } from '../../application/useCases/RefreshToken';
+import { LogoutUseCase, LogoutCommand } from '../../application/useCases/Logout';
 import { identityDataRepository } from '../../application/wired';
 
 export const identityResolvers = {

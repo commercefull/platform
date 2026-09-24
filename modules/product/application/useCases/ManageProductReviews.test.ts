@@ -1,39 +1,41 @@
-jest.mock('../../infrastructure/repositories/productReviewRepo', () => ({
-  __esModule: true,
-  ProductReviewRepo: jest.fn().mockImplementation(() => ({
-    findById: jest.fn().mockResolvedValue({ reviewId: 'r1' }),
-    findByProductId: jest.fn().mockResolvedValue([{ reviewId: 'r1' }]),
-    findByCustomerId: jest.fn().mockResolvedValue([{ reviewId: 'r1' }]),
-    findWithFilters: jest.fn().mockResolvedValue([{ reviewId: 'r1' }]),
-    findPending: jest.fn().mockResolvedValue([{ reviewId: 'r1', status: 'pending' }]),
-    create: jest.fn().mockResolvedValue({ reviewId: 'r2' }),
-    update: jest.fn().mockResolvedValue(undefined),
-    updateStatus: jest.fn().mockResolvedValue(undefined),
-    approve: jest.fn().mockResolvedValue(undefined),
-    reject: jest.fn().mockResolvedValue(undefined),
-    highlight: jest.fn().mockResolvedValue(undefined),
-    addAdminResponse: jest.fn().mockResolvedValue(undefined),
-    incrementHelpful: jest.fn().mockResolvedValue(undefined),
-    getProductStatistics: jest.fn().mockResolvedValue({ totalReviews: 10 }),
-    findByCustomerAndProduct: jest.fn().mockResolvedValue(null),
-    checkCustomerPurchase: jest.fn().mockResolvedValue(true),
-  })),
-}));
 
 import { ManageProductReviewsUseCase } from './ManageProductReviews';
-import { ProductReviewRepo } from '../../infrastructure/repositories/productReviewRepo';
+import { createProductReview, lazyMock } from '../../tests/testUtils';
 
 describe('ManageProductReviewsUseCase', () => {
   let useCase: ManageProductReviewsUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductReviewsUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageProductReviewsUseCase(new ProductReviewRepo() as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ManageProductReviewsUseCase>[0]>();
+    mockRepo.findById.mockResolvedValue(createProductReview());
+    mockRepo.findByProductId.mockResolvedValue([createProductReview()]);
+    mockRepo.findByCustomerId.mockResolvedValue([createProductReview()]);
+    mockRepo.findWithFilters.mockResolvedValue([createProductReview()]);
+    mockRepo.findPending.mockResolvedValue([createProductReview({ status: 'pending' })]);
+    mockRepo.create.mockResolvedValue(createProductReview({ productReviewId: 'r2' }));
+    mockRepo.update.mockResolvedValue(createProductReview());
+    mockRepo.updateStatus.mockResolvedValue(createProductReview());
+    mockRepo.approve.mockResolvedValue(createProductReview());
+    mockRepo.reject.mockResolvedValue(createProductReview());
+    mockRepo.highlight.mockResolvedValue(createProductReview());
+    mockRepo.addAdminResponse.mockResolvedValue(createProductReview());
+    mockRepo.incrementHelpful.mockResolvedValue(createProductReview());
+    mockRepo.getProductStatistics.mockResolvedValue({
+      totalReviews: 10,
+      averageRating: 4.5,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 10 },
+      verifiedPurchaseCount: 0,
+    });
+    mockRepo.findByCustomerAndProduct.mockResolvedValue(null);
+    mockRepo.checkCustomerPurchase.mockResolvedValue(true);
+    useCase = new ManageProductReviewsUseCase(mockRepo);
   });
 
   it('should find by ID', async () => {
     const result = await useCase.findById('r1');
-    expect(result).toEqual({ reviewId: 'r1' });
+    expect(result).toEqual(createProductReview());
   });
 
   it('should find by product ID', async () => {
@@ -47,8 +49,8 @@ describe('ManageProductReviewsUseCase', () => {
   });
 
   it('should create review', async () => {
-    const result = await useCase.create({ productId: 'p1', customerId: 'c1', rating: 5 } as never);
-    expect(result).toEqual({ reviewId: 'r2' });
+    const result = await useCase.create({ productId: 'p1', customerId: 'c1', rating: 5, status: 'pending', isVerifiedPurchase: false });
+    expect(result).toEqual(createProductReview({ productReviewId: 'r2' }));
   });
 
   it('should approve review', async () => {

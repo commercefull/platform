@@ -49,13 +49,13 @@ export class CommissionRuleRepositoryImpl implements CommissionRuleRepository {
     await query(
       `INSERT INTO "marketplaceCommissionRule" (
         "ruleId", "organizationId", "name", "type", "scope",
-        "rate", "fixedAmount", "tiers", "categoryId", "vendorId", "productId",
+        "rate", "fixedAmountCents", "tiers", "categoryId", "vendorId", "productId",
         "priority", "active", "startsAt", "endsAt", "createdAt", "updatedAt"
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
       ON CONFLICT ("ruleId") DO UPDATE SET
         "name" = EXCLUDED."name",
         "rate" = EXCLUDED."rate",
-        "fixedAmount" = EXCLUDED."fixedAmount",
+        "fixedAmountCents" = EXCLUDED."fixedAmountCents",
         "tiers" = EXCLUDED."tiers",
         "priority" = EXCLUDED."priority",
         "active" = EXCLUDED."active",
@@ -70,7 +70,7 @@ export class CommissionRuleRepositoryImpl implements CommissionRuleRepository {
         json.type,
         json.scope,
         json.rate,
-        json.fixedAmount ?? null,
+        json.fixedAmountCents ?? null,
         JSON.stringify(json.tiers ?? null),
         json.categoryId ?? null,
         json.vendorId ?? null,

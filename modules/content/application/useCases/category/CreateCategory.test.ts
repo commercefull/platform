@@ -1,42 +1,27 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentCategory, emitMock } from '../../../tests/testUtils';
 import { CreateCategoryUseCase, CreateCategoryCommand } from './CreateCategory';
 import { CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('CreateCategoryUseCase', () => {
   let useCase: CreateCategoryUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateCategoryUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findCategoryById: jest.fn().mockResolvedValue(null),
-      createCategory: jest.fn().mockResolvedValue({
-        contentCategoryId: 'c1',
-        name: 'News',
-        slug: 'news',
-        parentId: null,
-        path: 'news',
-        depth: 0,
-        isActive: true,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateCategoryUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateCategoryUseCase>[0]>();
+    mockRepo.findCategoryById.mockResolvedValue(null);
+    mockRepo.createCategory.mockImplementation(async (params) => createContentCategory({ ...params, contentCategoryId: 'c1' }));
+    useCase = new CreateCategoryUseCase(mockRepo);
   });
 
   it('should create a category successfully', async () => {
     const result = await useCase.execute(new CreateCategoryCommand('News', 'news'));
 
     expect(result.id).toBe('c1');
-    expect(eventBus.emit).toHaveBeenCalledWith('content.category.created', expect.objectContaining({ categoryId: 'c1' }));
+    expect(emitMock).toHaveBeenCalledWith('content.category.created', expect.objectContaining({ categoryId: 'c1' }));
   });
 
   it('should throw ContentValidationError when name or slug missing', async () => {

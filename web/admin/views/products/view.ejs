@@ -88,16 +88,17 @@
                   <!-- Pricing -->
                   <div class="row">
                     <div class="col-6">
-                      <h4 class="text-primary mb-0"><%= product.currency %> <%= product.effectivePrice.toFixed(2) %></h4>
-                      <% if (product.isOnSale && product.salePrice) { %>
-                        <small><s class="text-muted"><%= product.currency %> <%= product.basePrice.toFixed(2) %></s>
+                      <h4 class="text-primary mb-0"><%= product.currency %> <%= (product.effectivePriceCents / 100).toFixed(2) %></h4>
+                      <% if (product.isOnSale && product.salePriceCents != null) { %>
+                        <small><s class="text-muted"><%= product.currency %> <%= (product.basePriceCents / 100).toFixed(2) %></s>
                         <span class="text-danger">-<%= product.discountPercentage %>%</span></small>
                       <% } %>
-                      <% if (product.cost !== null && product.cost !== undefined) { %>
-                        <br><small class="text-muted"><%= t('shared:common.cost') %>: <%= product.currency %> <%= product.cost.toFixed(2) %></small>
-                        <% if (product.profitMargin !== null) { %>
-                          <small class="text-<%= product.profitMargin > 0 ? 'success' : 'danger' %> ml-1">
-                            (<%= t('product:margin') %>: <%= product.profitMarginPercentage %>%)
+                      <% if (product.costPriceCents !== null && product.costPriceCents !== undefined) { %>
+                        <br><small class="text-muted"><%= t('shared:common.cost') %>: <%= product.currency %> <%= (product.costPriceCents / 100).toFixed(2) %></small>
+                        <% if (product.effectivePriceCents > 0) { %>
+                          <% const marginPct = Math.round(((product.effectivePriceCents - product.costPriceCents) / product.effectivePriceCents) * 100); %>
+                          <small class="text-<%= marginPct > 0 ? 'success' : 'danger' %> ml-1">
+                            (<%= t('product:margin') %>: <%= marginPct %>%)
                           </small>
                         <% } %>
                       <% } %>
@@ -216,9 +217,9 @@
                       <% } %>
                     </td>
                     <td class="text-right">
-                      <%= product.currency %> <%= variant.effectivePrice.toFixed(2) %>
-                      <% if (variant.isOnSale && variant.salePrice) { %>
-                        <br><small><s class="text-muted"><%= product.currency %> <%= variant.basePrice.toFixed(2) %></s> <span class="text-danger">-<%= variant.discountPercentage %>%</span></small>
+                      <%= product.currency %> <%= (variant.effectivePriceCents / 100).toFixed(2) %>
+                      <% if (variant.isOnSale && variant.salePriceCents != null) { %>
+                        <br><small><s class="text-muted"><%= product.currency %> <%= (variant.basePriceCents / 100).toFixed(2) %></s> <span class="text-danger">-<%= variant.discountPercentage %>%</span></small>
                       <% } %>
                     </td>
                     <td class="text-center">

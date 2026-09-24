@@ -2,6 +2,8 @@
  * CalculatePrice Use Case
  *
  * Calculates the final price for a product considering all pricing rules.
+ * All monetary amounts are integer cents — base prices come from the
+ * pricing-owned productBasePrice store, never from the product module.
  */
 
 import { PricingValidationError } from '../../domain/errors/PricingErrors';
@@ -17,96 +19,90 @@ export interface CalculatePriceInput {
 }
 
 export interface PriceBreakdown {
-  basePrice: number;
-  salePrice?: number;
-  volumeDiscount?: number;
-  customerDiscount?: number;
-  finalPrice: number;
+  basePriceCents: number;
+  salePriceCents?: number;
+  volumeDiscountCents?: number;
+  customerDiscountCents?: number;
+  finalPriceCents: number;
   currency: string;
   appliedRules: string[];
 }
 
 export interface CalculatePriceOutput {
-  unitPrice: number;
-  totalPrice: number;
+  unitPriceCents: number;
+  totalPriceCents: number;
   currency: string;
   breakdown: PriceBreakdown;
 }
 
-interface PricingRepositoryPort {
-  getPriceListItem(priceListId: string, productId: string, variantId?: string): Promise<{ price: number } | null>;
-  getVolumeDiscount(productId: string, quantity: number): Promise<{ discountPercent: number } | null>;
-  getActiveSalePrice(productId: string, variantId?: string): Promise<number | null>;
+export interface BasePriceEntry {
+  priceCents: number;
+  salePriceCents?: number | null;
+  currencyCode: string;
 }
 
-interface ProductRepositoryPort {
-  findById(id: string): Promise<{ price: number; currencyCode?: string } | null>;
-  findVariantById(id: string): Promise<{ price?: number } | null>;
+interface PricingRepositoryPort {
+  /** Base price from the pricing-owned catalog store (variant row wins). */
+  getBasePrice(productId: string, variantId?: string): Promise<BasePriceEntry | null>;
+  getPriceListItem(priceListId: string, productId: string, variantId?: string): Promise<{ priceCents: number } | null>;
+  /** Tier-price override for the requested quantity (integer cents). */
+  getTierPrice(productId: string, quantity: number, variantId?: string): Promise<{ priceCents: number } | null>;
 }
 
 export class CalculatePriceUseCase {
-  constructor(
-    private readonly pricingRepository: PricingRepositoryPort,
-    private readonly productRepository: ProductRepositoryPort,
-  ) {}
+  constructor(private readonly pricingRepository: PricingRepositoryPort) {}
 
   async execute(input: CalculatePriceInput): Promise<CalculatePriceOutput> {
-    // Get product base price
-    const product = await this.productRepository.findById(input.productId);
-    if (!product) {
-      throw new PricingValidationError(`Product not found: ${input.productId}`);
+    // Get the pricing-owned base price (integer cents)
+    const basePrice = await this.pricingRepository.getBasePrice(input.productId, input.variantId);
+    if (!basePrice) {
+      throw new PricingValidationError(`No base price for product: ${input.productId}`);
     }
 
-    let basePrice = product.price;
+    const currency = basePrice.currencyCode || 'USD';
+    let finalPriceCents = basePrice.priceCents;
     const appliedRules: string[] = [];
-    let finalPrice = basePrice;
-
-    // Get variant price if applicable
-    if (input.variantId) {
-      const variant = await this.productRepository.findVariantById(input.variantId);
-      if (variant?.price) {
-        basePrice = variant.price;
-        finalPrice = basePrice;
-      }
-    }
 
     // Check for price list override
     if (input.priceListId) {
       const priceListItem = await this.pricingRepository.getPriceListItem(input.priceListId, input.productId, input.variantId);
       if (priceListItem) {
-        finalPrice = priceListItem.price;
+        finalPriceCents = priceListItem.priceCents;
         appliedRules.push(`price_list:${input.priceListId}`);
       }
     }
 
-    // Check for volume discounts
+    // Check for tier pricing (quantity-based price override)
+    let volumeDiscountCents: number | undefined;
     if (input.quantity > 1) {
-      const volumeDiscount = await this.pricingRepository.getVolumeDiscount(input.productId, input.quantity);
-      if (volumeDiscount) {
-        const discountAmount = finalPrice * (volumeDiscount.discountPercent / 100);
-        finalPrice = finalPrice - discountAmount;
-        appliedRules.push(`volume_discount:${volumeDiscount.discountPercent}%`);
+      const tierPrice = await this.pricingRepository.getTierPrice(input.productId, input.quantity, input.variantId);
+      if (tierPrice && tierPrice.priceCents < finalPriceCents) {
+        volumeDiscountCents = finalPriceCents - tierPrice.priceCents;
+        finalPriceCents = tierPrice.priceCents;
+        appliedRules.push('tier_price');
       }
     }
 
-    // Calculate sale price if active
-    const salePrice = await this.pricingRepository.getActiveSalePrice(input.productId, input.variantId);
-    if (salePrice && salePrice < finalPrice) {
-      finalPrice = salePrice;
+    // Apply the sale price if it beats the current price
+    const salePriceCents = basePrice.salePriceCents ?? undefined;
+    if (salePriceCents !== undefined && salePriceCents < finalPriceCents) {
+      finalPriceCents = salePriceCents;
       appliedRules.push('sale_price');
     }
 
-    const totalPrice = finalPrice * input.quantity;
+    finalPriceCents = Math.max(0, Math.round(finalPriceCents));
+    const totalPriceCents = finalPriceCents * input.quantity;
 
     return {
-      unitPrice: finalPrice,
-      totalPrice,
-      currency: product.currencyCode || 'USD',
+      unitPriceCents: finalPriceCents,
+      totalPriceCents,
+      currency,
       breakdown: {
-        basePrice,
-        salePrice: salePrice ?? undefined,
-        finalPrice,
-        currency: product.currencyCode || 'USD',
+        basePriceCents: basePrice.priceCents,
+        salePriceCents,
+        volumeDiscountCents,
+        finalPriceCents,
+        currency,
         appliedRules,
       },
     };

@@ -3,9 +3,7 @@
  * Validates a coupon code for a given order
  */
 
-import { couponDiscountRepository, type PromotionCoupon } from '../wired';
-
-const couponRepo = couponDiscountRepository.coupons;
+import type { PromotionCoupon, CouponRepository } from '../../domain/repositories/CouponRepository';
 
 // ============================================================================
 // Command
@@ -14,7 +12,7 @@ const couponRepo = couponDiscountRepository.coupons;
 export class ValidateCouponCommand {
   constructor(
     public readonly code: string,
-    public readonly orderTotal: number,
+    public readonly orderTotalCents: number,
     public readonly customerId?: string,
     public readonly organizationId?: string,
   ) {}
@@ -27,7 +25,7 @@ export class ValidateCouponCommand {
 export interface ValidateCouponResponse {
   valid: boolean;
   coupon?: PromotionCoupon;
-  discountAmount?: number;
+  discountAmountCents?: number;
   message?: string;
   errors?: string[];
 }
@@ -37,6 +35,8 @@ export interface ValidateCouponResponse {
 // ============================================================================
 
 export class ValidateCouponUseCase {
+  constructor(private readonly couponRepo: Pick<CouponRepository, 'findByCode' | 'getCustomerUsageCount' | 'calculateDiscount'>) {}
+
   async execute(command: ValidateCouponCommand): Promise<ValidateCouponResponse> {
     const _errors: string[] = [];
 
@@ -45,12 +45,12 @@ export class ValidateCouponUseCase {
       return { valid: false, message: 'Coupon code is required', errors: ['code_required'] };
     }
 
-    if (command.orderTotal < 0) {
+    if (command.orderTotalCents < 0) {
       return { valid: false, message: 'Order total must be positive', errors: ['invalid_order_total'] };
     }
 
     // Find coupon by code
-    const coupon = await couponRepo.findByCode(command.code.toUpperCase(), command.organizationId);
+    const coupon = await this.couponRepo.findByCode(command.code.toUpperCase(), command.organizationId);
 
     if (!coupon) {
       return { valid: false, message: 'Coupon not found', errors: ['coupon_not_found'] };
@@ -77,17 +77,17 @@ export class ValidateCouponUseCase {
     }
 
     // Check minimum order amount
-    if (coupon.minOrderAmount && command.orderTotal < Number(coupon.minOrderAmount)) {
+    if (coupon.minOrderAmountCents && command.orderTotalCents < Number(coupon.minOrderAmountCents)) {
       return {
         valid: false,
-        message: `Minimum order amount of ${coupon.minOrderAmount} required`,
+        message: `Minimum order amount of ${coupon.minOrderAmountCents} cents required`,
         errors: ['min_order_not_met'],
       };
     }
 
     // Check per-customer usage if customerId provided
     if (command.customerId && coupon.maxUsagePerCustomer) {
-      const customerUsage = await couponRepo.getCustomerUsageCount(coupon.promotionCouponId, command.customerId);
+      const customerUsage = await this.couponRepo.getCustomerUsageCount(coupon.promotionCouponId, command.customerId);
 
       if (customerUsage >= coupon.maxUsagePerCustomer) {
         return {
@@ -99,12 +99,12 @@ export class ValidateCouponUseCase {
     }
 
     // Calculate discount
-    const discountAmount = couponRepo.calculateDiscount(coupon, command.orderTotal);
+    const discountAmountCents = this.couponRepo.calculateDiscount(coupon, command.orderTotalCents);
 
     return {
       valid: true,
       coupon,
-      discountAmount,
+      discountAmountCents,
       message: 'Coupon is valid',
     };
   }

@@ -7,7 +7,8 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
 const PaymentRepo = paymentDataRepository.payments;
-import { SaveStoredPaymentMethodCommand, SaveStoredPaymentMethodUseCase } from '../../application/useCases/SaveStoredPaymentMethod';
+import { SaveStoredPaymentMethodCommand } from '../../application/useCases/SaveStoredPaymentMethod';
+import { saveStoredPaymentMethodUseCase } from '../../application/useCases/wired';
 import { paymentDataRepository } from '../../application/wired';
 
 // ============================================================================
@@ -45,7 +46,7 @@ export const saveStoredMethod = async (req: HttpRequest, res: HttpResponse): Pro
     errorResponse(res, 'type, provider, and providerToken are required', 400);
     return;
   }
-  const useCase = new SaveStoredPaymentMethodUseCase();
+  const useCase = saveStoredPaymentMethodUseCase;
   const result = await useCase.execute(
     new SaveStoredPaymentMethodCommand(
       customerId,

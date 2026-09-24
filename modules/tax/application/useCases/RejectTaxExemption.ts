@@ -5,16 +5,22 @@
  * Rejected exemptions are not evaluated by `CalculateOrderTax`.
  */
 
-import { taxCommandRepo } from '../wired';
 import type { CustomerTaxExemption } from '../../taxTypes';
 
+export interface TaxExemptionUpdatePort {
+  updateTaxExemption(
+    id: string,
+    exemption: Partial<Omit<CustomerTaxExemption, 'id' | 'customerId' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<CustomerTaxExemption>;
+}
+
 export class RejectTaxExemptionUseCase {
+  constructor(private readonly commandRepo: TaxExemptionUpdatePort) {}
+
   async execute(exemptionId: string, reason?: string): Promise<CustomerTaxExemption> {
-    return taxCommandRepo.updateTaxExemption(exemptionId, {
+    return this.commandRepo.updateTaxExemption(exemptionId, {
       status: 'rejected',
       notes: reason,
     });
   }
 }
-
-export const rejectTaxExemptionUseCase = new RejectTaxExemptionUseCase();

@@ -6,14 +6,16 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import type { ReportType } from '../../domain/entities/ReportEntities';
 import type { CreateReportScheduleInput } from '../../application/useCases/CreateReportSchedule';
-import { GenerateReportUseCase } from '../../application/useCases/GenerateReport';
 import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
-import { CreateReportScheduleUseCase } from '../../application/useCases/CreateReportSchedule';
-import { ListReportSchedulesUseCase } from '../../application/useCases/ListReportSchedules';
-import { GetReportScheduleUseCase } from '../../application/useCases/GetReportSchedule';
-import { UpdateReportScheduleUseCase } from '../../application/useCases/UpdateReportSchedule';
-import { DeleteReportScheduleUseCase } from '../../application/useCases/DeleteReportSchedule';
-import { ListReportExecutionsUseCase } from '../../application/useCases/ListReportExecutions';
+import {
+  generateReportUseCase,
+  createReportScheduleUseCase,
+  listReportSchedulesUseCase,
+  getReportScheduleUseCase,
+  updateReportScheduleUseCase,
+  deleteReportScheduleUseCase,
+  listReportExecutionsUseCase,
+} from '../../application/wired';
 import { UpdateReportScheduleParams } from '../../application/wired';
 
 interface GenerateReportBody {
@@ -29,7 +31,7 @@ export const generateReport = async (
     res.status(400).json({ success: false, error: 'reportType is required' });
     return;
   }
-  const useCase = new GenerateReportUseCase();
+  const useCase = generateReportUseCase;
   const result = await useCase.execute({
     reportType: req.body.reportType as ReportType,
     parameters: req.body.parameters || {},
@@ -52,20 +54,20 @@ export const createSchedule = async (
     res.status(400).json({ success: false, error: 'name and reportType are required' });
     return;
   }
-  const useCase = new CreateReportScheduleUseCase();
+  const useCase = createReportScheduleUseCase;
   const result = await useCase.execute(req.body);
   res.status(201).json({ success: true, data: result });
 };
 
 export const listSchedules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new ListReportSchedulesUseCase();
+  const useCase = listReportSchedulesUseCase;
   const organizationId = req.query.organizationId as string | undefined;
   const result = await useCase.execute(organizationId);
   res.json({ success: true, data: result });
 };
 
 export const getSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new GetReportScheduleUseCase();
+  const useCase = getReportScheduleUseCase;
   const result = await useCase.execute(req.params.scheduleId);
   if (!result) {
     res.status(404).json({ success: false, error: 'Report schedule not found' });
@@ -78,7 +80,7 @@ export const updateSchedule = async (
   req: HttpRequest<Record<string, string>, unknown, UpdateReportScheduleParams>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new UpdateReportScheduleUseCase();
+  const useCase = updateReportScheduleUseCase;
   const result = await useCase.execute({
     reportScheduleId: req.params.scheduleId,
     ...req.body,
@@ -91,7 +93,7 @@ export const updateSchedule = async (
 };
 
 export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new DeleteReportScheduleUseCase();
+  const useCase = deleteReportScheduleUseCase;
   const deleted = await useCase.execute(req.params.scheduleId);
   if (!deleted) {
     res.status(404).json({ success: false, error: 'Report schedule not found' });
@@ -101,7 +103,7 @@ export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const listExecutions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new ListReportExecutionsUseCase();
+  const useCase = listReportExecutionsUseCase;
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
   const result = await useCase.execute(req.params.scheduleId, limit);
   res.json({ success: true, data: result });

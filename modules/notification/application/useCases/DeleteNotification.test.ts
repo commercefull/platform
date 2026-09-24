@@ -1,45 +1,48 @@
-jest.mock('../../infrastructure/repositories/NotificationDataRepository', () => ({
-  __esModule: true,
-  default: {
-    notifications: {
-      delete: jest.fn().mockResolvedValue(true),
-      deleteAllForUser: jest.fn().mockResolvedValue(5),
-    },
-  },
-}));
-
+import { createNotificationCommandRepository } from '../../tests/testUtils';
 import { DeleteNotificationUseCase } from './DeleteNotification';
-import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
-
-const mockRepo = notificationDataRepository as unknown as { notifications: Record<string, jest.Mock> };
 
 describe('DeleteNotificationUseCase', () => {
   let useCase: DeleteNotificationUseCase;
+  let notificationRepo: ReturnType<typeof createNotificationCommandRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new DeleteNotificationUseCase();
+    notificationRepo = createNotificationCommandRepository();
+    useCase = new DeleteNotificationUseCase(notificationRepo);
   });
 
-  it('should delete single notification (happy path)', async () => {
-    const result = await useCase.execute({ notificationId: 'n1' });
+  it('should delete a single notification when notificationId is provided', async () => {
+    notificationRepo.delete.mockResolvedValue(true);
 
-    expect(result.deleted).toBe(true);
-    expect(result.deletedCount).toBe(1);
-    expect(mockRepo.notifications.delete).toHaveBeenCalledWith('n1');
+    const result = await useCase.execute({ notificationId: 'n-1' });
+
+    expect(result).toEqual({ deleted: true, deletedCount: 1 });
+    expect(notificationRepo.delete).toHaveBeenCalledWith('n-1');
+    expect(notificationRepo.deleteAllForUser).not.toHaveBeenCalled();
   });
 
-  it('should delete all notifications for user', async () => {
-    const result = await useCase.execute({ userId: 'u1', deleteAll: true });
+  it('should delete all notifications when deleteAll is set with a userId', async () => {
+    notificationRepo.deleteAllForUser.mockResolvedValue(5);
 
-    expect(result.deleted).toBe(true);
-    expect(result.deletedCount).toBe(5);
+    const result = await useCase.execute({ userId: 'u-1', deleteAll: true });
+
+    expect(result).toEqual({ deleted: true, deletedCount: 5 });
+    expect(notificationRepo.deleteAllForUser).toHaveBeenCalledWith('u-1');
+    expect(notificationRepo.delete).not.toHaveBeenCalled();
   });
 
-  it('should return not deleted when no ID provided', async () => {
+  it('should report not deleted when the repository delete fails', async () => {
+    notificationRepo.delete.mockResolvedValue(false);
+
+    const result = await useCase.execute({ notificationId: 'n-1' });
+
+    expect(result).toEqual({ deleted: false, deletedCount: 0 });
+  });
+
+  it('should report not deleted when neither notificationId nor deleteAll is provided', async () => {
     const result = await useCase.execute({});
 
-    expect(result.deleted).toBe(false);
-    expect(result.deletedCount).toBe(0);
+    expect(result).toEqual({ deleted: false, deletedCount: 0 });
+    expect(notificationRepo.delete).not.toHaveBeenCalled();
+    expect(notificationRepo.deleteAllForUser).not.toHaveBeenCalled();
   });
 });

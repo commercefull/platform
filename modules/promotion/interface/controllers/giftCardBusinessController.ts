@@ -20,7 +20,7 @@ import {
 
 interface CreateGiftCardBody {
   type?: GiftCardType;
-  initialBalance: number;
+  initialBalanceCents: number;
   currency?: string;
   purchasedBy?: string;
   purchaseOrderId?: string;
@@ -35,7 +35,7 @@ interface CreateGiftCardBody {
 }
 
 interface RefundBody {
-  amount: number;
+  amountCents: number;
   orderId?: string;
   notes?: string;
 }
@@ -63,8 +63,8 @@ export const getGiftCard: AsyncHandler = async (req, res, _next) => {
 
 export const createGiftCard: AsyncHandler = async (req, res, _next) => {
   const body = req.body as CreateGiftCardBody;
-  if (body.initialBalance === undefined || body.initialBalance === null) {
-    res.status(400).json({ success: false, message: 'initialBalance is required' });
+  if (body.initialBalanceCents === undefined || body.initialBalanceCents === null) {
+    res.status(400).json({ success: false, message: 'initialBalanceCents is required' });
     return;
   }
   const giftCard = await createGiftCardRepo(body);
@@ -89,7 +89,7 @@ export const assignGiftCard: AsyncHandler = async (req, res, _next) => {
 export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {
   const adminId = req.user?.userId || req.user?.organizationId;
   const body = req.body as RefundBody;
-  const transaction = await refundToGiftCardRepo(req.params.id, body.amount, body.orderId, adminId, body.notes);
+  const transaction = await refundToGiftCardRepo(req.params.id, body.amountCents, body.orderId, adminId, body.notes);
   res.json({ success: true, data: transaction });
 };
 

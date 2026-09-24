@@ -13,9 +13,9 @@ exports.up = async function (knex) {
       t.string('entryType').notNullable().checkIn(['credit', 'debit', 'adjustment', 'expiry']);
       t.string('referenceType').nullable();
       t.uuid('referenceId').nullable();
-      t.decimal('amount', 15, 2).notNullable();
-      t.decimal('balanceAfter', 15, 2).notNullable();
-      t.string('currency').notNullable().defaultTo('USD');
+      t.bigInteger('amountCents').notNullable();
+      t.bigInteger('balanceAfterCents').notNullable();
+      t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
       t.text('reason').nullable();
       t.text('notes').nullable();
       t.string('createdBy').nullable();

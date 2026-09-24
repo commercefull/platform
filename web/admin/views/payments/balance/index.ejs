@@ -34,8 +34,8 @@
               <td><code><%= b.merchantId %></code></td>
               <td><span class="badge bg-secondary"><%= b.currency %></span></td>
               <td>
-                <strong class="<%= b.amount < 0 ? 'text-danger' : 'text-success' %>">
-                  <%= b.currency %> <%= (b.amount || 0).toFixed(2) %>
+                <strong class="<%= b.amountCents < 0 ? 'text-danger' : 'text-success' %>">
+                  <%= b.currency %> <%= ((b.amountCents || 0) / 100).toFixed(2) %>
                 </strong>
               </td>
               <td><%= new Date(b.updatedAt).toLocaleString() %></td>

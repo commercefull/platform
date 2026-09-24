@@ -12,7 +12,6 @@ import { Product, ProductImage } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import { Price } from '../../domain/valueObjects/Price';
 import { Dimensions } from '../../domain/valueObjects/Dimensions';
 
 export class ProductRepo implements IProductRepository {
@@ -64,9 +63,30 @@ export class ProductRepo implements IProductRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
+    // Price sorting resolves against the pricing-owned productBasePrice table
+    // (product-level rows only); all other columns sort on the product table.
+    // orderBy comes from the query string — restrict to known product columns.
+    const sortableColumns = new Set([
+      'createdAt',
+      'updatedAt',
+      'name',
+      'sku',
+      'status',
+      'visibility',
+      'type',
+      'publishedAt',
+      'isFeatured',
+    ]);
+    const orderExpr =
+      orderBy === 'priceCents' || orderBy === 'basePrice'
+        ? `(SELECT bp."priceCents" FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL LIMIT 1)`
+        : sortableColumns.has(orderBy)
+          ? `"${orderBy}"`
+          : '"createdAt"';
+
     const rows = await query<DbProduct[]>(
       `SELECT * FROM product ${whereClause}
-       ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
+       ORDER BY ${orderExpr} ${orderDir.toUpperCase()} NULLS LAST
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
     );
@@ -104,14 +124,14 @@ export class ProductRepo implements IProductRepository {
       await query(
         `UPDATE product SET
           name = $1, description = $2, "shortDescription" = $3, sku = $4, slug = $5,
-          type = $6, status = $7, visibility = $8, price = $9,
-          "basePrice" = $10, "salePrice" = $11, "costPrice" = $12, "taxClass" = $13,
-          "isTaxable" = $14, currency = $15, "isInventoryManaged" = $16,
-          weight = $17, "weightUnit" = $18, length = $19, width = $20, height = $21,
-          "dimensionUnit" = $22, "metaTitle" = $23, "metaDescription" = $24, "metaKeywords" = $25,
-          "isFeatured" = $26, "isNew" = $27, "isBestseller" = $28, "hasVariants" = $29,
-          "organizationId" = $30, "storeId" = $31, "publishedAt" = $32, "updatedAt" = $33
-        WHERE "productId" = $34`,
+          type = $6, status = $7, visibility = $8,
+          "taxClass" = $9,
+          "isTaxable" = $10, "isInventoryManaged" = $11,
+          weight = $12, "weightUnit" = $13, length = $14, width = $15, height = $16,
+          "dimensionUnit" = $17, "metaTitle" = $18, "metaDescription" = $19, "metaKeywords" = $20,
+          "isFeatured" = $21, "isNew" = $22, "isBestseller" = $23, "hasVariants" = $24,
+          "organizationId" = $25, "storeId" = $26, "publishedAt" = $27, "updatedAt" = $28
+        WHERE "productId" = $29`,
         [
           product.name,
           product.description,
@@ -121,13 +141,8 @@ export class ProductRepo implements IProductRepository {
           'simple',
           product.status,
           product.visibility,
-          product.price.basePrice,
-          product.price.basePrice,
-          product.price.salePrice,
-          product.price.cost,
           product.taxClass || 'standard',
           product.isTaxable,
-          product.price.currency,
           true,
           product.dimensions.weight,
           product.dimensions.weightUnit,
@@ -153,15 +168,15 @@ export class ProductRepo implements IProductRepository {
       await query(
         `INSERT INTO product (
           "productId", name, description, "shortDescription", sku, slug,
-          type, status, visibility, price, "basePrice", "salePrice", "costPrice",
-          "taxClass", "isTaxable", currency, "isInventoryManaged",
+          type, status, visibility,
+          "taxClass", "isTaxable", "isInventoryManaged",
           weight, "weightUnit", length, width, height, "dimensionUnit",
           "metaTitle", "metaDescription", "metaKeywords",
           "isFeatured", "isNew", "isBestseller", "hasVariants",
           "organizationId", "storeId", "publishedAt", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30
         )`,
         [
           product.productId,
@@ -173,13 +188,8 @@ export class ProductRepo implements IProductRepository {
           'simple',
           product.status,
           product.visibility,
-          product.price.basePrice,
-          product.price.basePrice,
-          product.price.salePrice,
-          product.price.cost,
           product.taxClass || 'standard',
           product.isTaxable,
-          product.price.currency,
           true,
           product.dimensions.weight,
           product.dimensions.weightUnit,
@@ -308,19 +318,16 @@ export class ProductRepo implements IProductRepository {
     if (existing) {
       await query(
         `UPDATE "productVariant" SET
-          sku = $1, name = $2, price = $3, "compareAtPrice" = $4,
-          weight = $5, "weightUnit" = $6, "isDefault" = $7, "isActive" = $8,
-          "position" = $9, barcode = $10, "updatedAt" = $11
-        WHERE "productVariantId" = $12`,
+          sku = $1, name = $2,
+          weight = $3, "isDefault" = $4, status = $5,
+          "position" = $6, barcode = $7, "updatedAt" = $8
+        WHERE "productVariantId" = $9`,
         [
           variant.sku,
           variant.name,
-          variant.price.basePrice,
-          variant.price.salePrice,
           variant.dimensions.weight,
-          variant.dimensions.weightUnit,
           variant.isDefault,
-          variant.isActive,
+          variant.isActive ? 'active' : 'inactive',
           variant.position,
           variant.barcode,
           now,
@@ -330,21 +337,18 @@ export class ProductRepo implements IProductRepository {
     } else {
       await query(
         `INSERT INTO "productVariant" (
-          "productVariantId", "productId", sku, name, price, "compareAtPrice",
-          weight, "weightUnit", "isDefault", "isActive", position, barcode,
+          "productVariantId", "productId", sku, name,
+          weight, "isDefault", status, position, barcode,
           "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           variant.variantId,
           variant.productId,
           variant.sku,
           variant.name,
-          variant.price.basePrice,
-          variant.price.salePrice,
           variant.dimensions.weight,
-          variant.dimensions.weightUnit,
           variant.isDefault,
-          variant.isActive,
+          variant.isActive ? 'active' : 'inactive',
           variant.position,
           variant.barcode,
           now,
@@ -473,13 +477,18 @@ export class ProductRepo implements IProductRepository {
       conditions.push(`"isFeatured" = $${paramIndex++}`);
       params.push(filters.isFeatured);
     }
-    if (filters?.priceMin !== undefined) {
-      conditions.push(`price >= $${paramIndex++}`);
-      params.push(filters.priceMin);
+    // Price bounds live in the pricing-owned productBasePrice table (integer cents)
+    if (filters?.priceMinCents !== undefined) {
+      conditions.push(
+        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`,
+      );
+      params.push(filters.priceMinCents);
     }
-    if (filters?.priceMax !== undefined) {
-      conditions.push(`price <= $${paramIndex++}`);
-      params.push(filters.priceMax);
+    if (filters?.priceMaxCents !== undefined) {
+      conditions.push(
+        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`,
+      );
+      params.push(filters.priceMaxCents);
     }
     if (filters?.search) {
       // UNION inside the IN keeps each arm on its own trigram index — a plain
@@ -498,8 +507,6 @@ export class ProductRepo implements IProductRepository {
   }
 
   private mapToProduct(row: DbProduct, images: ProductImage[]): Product {
-    const currency = row.currency || 'USD';
-
     return Product.reconstitute({
       productId: row.productId,
       name: row.name,
@@ -513,12 +520,6 @@ export class ProductRepo implements IProductRepository {
       storeId: row.storeId ?? undefined,
       status: row.status as ProductStatus,
       visibility: row.visibility as ProductVisibility,
-      price: Price.create(
-        parseFloat(String(row.price || row.basePrice || 0)),
-        currency,
-        row.salePrice ? parseFloat(row.salePrice) : undefined,
-        row.costPrice ? parseFloat(row.costPrice) : undefined,
-      ),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         weightUnit: (row.weightUnit || 'g') as 'kg' | 'lb' | 'oz' | 'g',
@@ -559,14 +560,11 @@ export class ProductRepo implements IProductRepository {
   }
 
   private mapToVariant(row: DbProductVariant): ProductVariant {
-    const currency = 'USD';
-
     return ProductVariant.reconstitute({
       variantId: row.productVariantId,
       productId: row.productId,
       sku: row.sku,
       name: row.name || '',
-      price: Price.create(parseFloat(String(row.price || 0)), currency, undefined, undefined),
       dimensions: Dimensions.create({
         weight: row.weight ? parseFloat(row.weight) : undefined,
         weightUnit: 'g',

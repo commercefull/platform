@@ -16,8 +16,8 @@ function createMockPayment(overrides: Partial<OrderPayment> = {}): OrderPayment 
     orderPaymentId: 'pay-1',
     orderId: 'o-1',
     paymentMethod: 'card',
-    amount: 100,
-    refundedAmount: 0,
+    amountCents: 100,
+    refundedAmountCents: 0,
     status: 'paid',
     ...overrides,
   } as OrderPayment;
@@ -45,7 +45,7 @@ function createMockQueryRepo(payment: OrderPayment | null = createMockPayment())
     createRefund: jest.fn().mockResolvedValue({
       orderPaymentRefundId: 'ref-1',
       orderPaymentId: 'pay-1',
-      amount: 50,
+      amountCents: 50,
       reason: 'partial',
       notes: undefined,
       transactionId: undefined,
@@ -53,7 +53,7 @@ function createMockQueryRepo(payment: OrderPayment | null = createMockPayment())
       refundedBy: 'admin-1',
       createdAt: new Date().toISOString(),
     } as OrderPaymentRefund),
-  } as never as jest.Mocked<OrderQueryRepository>;
+  } as unknown as jest.Mocked<OrderQueryRepository>;
 }
 
 describe('CreateOrderRefundUseCase', () => {
@@ -64,7 +64,7 @@ describe('CreateOrderRefundUseCase', () => {
     const result = await useCase.execute(new CreateOrderRefundCommand('pay-1', 50, 'partial refund'));
 
     expect(result.orderPaymentRefundId).toBe('ref-1');
-    expect(result.amount).toBe(50);
+    expect(result.amountCents).toBe(50);
     expect(queryRepo.createRefund).toHaveBeenCalled();
   });
 
@@ -75,15 +75,15 @@ describe('CreateOrderRefundUseCase', () => {
     await expect(useCase.execute(new CreateOrderRefundCommand('nonexistent', 50))).rejects.toThrow(OrderPaymentNotFoundError);
   });
 
-  it('should throw RefundAmountMustBePositiveError for zero amount', async () => {
+  it('should throw RefundAmountMustBePositiveError for zero amountCents', async () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
     await expect(useCase.execute(new CreateOrderRefundCommand('pay-1', 0))).rejects.toThrow(RefundAmountMustBePositiveError);
   });
 
-  it('should throw RefundExceedsRefundableBalanceError when amount exceeds refundable', async () => {
-    const payment = createMockPayment({ amount: 100, refundedAmount: 80 });
+  it('should throw RefundExceedsRefundableBalanceError when amountCents exceeds refundable', async () => {
+    const payment = createMockPayment({ amountCents: 100, refundedAmountCents: 80 });
     const queryRepo = createMockQueryRepo(payment);
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 

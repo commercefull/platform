@@ -37,8 +37,10 @@ export interface OrderDiscount {
   name: string;
   description?: string;
   type: DiscountType;
+  /** Polymorphic operand: percentage or fixed amount. */
   value: number;
-  discountAmount: number;
+  /** Discount amount in integer cents. */
+  discountAmountCents: number;
 }
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
 
@@ -50,8 +52,8 @@ export interface OrderShipping {
   shippingMethod: string;
   carrier?: string;
   service?: string;
-  amount: number;
-  taxAmount?: number;
+  amountCents: number;
+  taxAmountCents?: number;
   trackingNumber?: string;
   trackingUrl?: string;
   estimatedDeliveryDate?: string;
@@ -60,7 +62,7 @@ export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 
 export type OrderShippingUpdateParams = Partial<
   Pick<
     OrderShipping,
-    'shippingMethod' | 'carrier' | 'service' | 'amount' | 'taxAmount' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
+    'shippingMethod' | 'carrier' | 'service' | 'amountCents' | 'taxAmountCents' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
   >
 >;
 
@@ -73,7 +75,7 @@ export interface OrderShippingRate {
   carrier: ShippingCarrier;
   serviceLevel: string;
   serviceName: string;
-  rate: number;
+  rateCents: number;
   estimatedDays?: number;
   estimatedDeliveryDate?: string;
   currencyCode: string;
@@ -92,8 +94,10 @@ export interface OrderTax {
   orderItemId?: string;
   taxType: string;
   name: string;
+  /** Tax rate percentage. */
   rate: number;
-  amount: number;
+  /** Tax amount in integer cents. */
+  amountCents: number;
   jurisdiction?: string;
   taxProvider?: string;
   providerTaxId?: string;
@@ -112,7 +116,7 @@ export interface OrderPayment {
   paymentMethodId?: string;
   type: OrderPaymentType;
   provider: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: OrderPaymentStatus;
   transactionId?: string;
@@ -122,7 +126,7 @@ export interface OrderPayment {
   maskedNumber?: string;
   cardType?: string;
   gatewayResponse?: Record<string, unknown>;
-  refundedAmount: number;
+  refundedAmountCents: number;
   capturedAt?: string;
 }
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
@@ -133,7 +137,7 @@ export interface OrderPaymentRefund {
   createdAt: string;
   updatedAt: string;
   orderPaymentId: string;
-  amount: number;
+  amountCents: number;
   reason?: string;
   notes?: string;
   transactionId?: string;
@@ -192,7 +196,7 @@ class OrderQueryRepo {
     const result = await queryOne<OrderDiscount>(
       `INSERT INTO "orderDiscount" (
         "orderId", "orderItemId", "code", "name", "description",
-        "type", "value", "discountAmount",
+        "type", "value", "discountAmountCents",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
@@ -204,7 +208,7 @@ class OrderQueryRepo {
         params.description || null,
         params.type,
         params.value,
-        params.discountAmount,
+        params.discountAmountCents,
         now,
         now,
       ],
@@ -224,8 +228,8 @@ class OrderQueryRepo {
     const now = unixTimestamp();
     const result = await queryOne<OrderShipping>(
       `INSERT INTO "orderShipping" (
-        "orderId", "shippingMethod", "carrier", "service", "amount",
-        "taxAmount", "trackingNumber", "trackingUrl", "estimatedDeliveryDate",
+        "orderId", "shippingMethod", "carrier", "service", "amountCents",
+        "taxAmountCents", "trackingNumber", "trackingUrl", "estimatedDeliveryDate",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
       RETURNING *`,
@@ -234,8 +238,8 @@ class OrderQueryRepo {
         params.shippingMethod,
         params.carrier || null,
         params.service || null,
-        params.amount,
-        params.taxAmount || null,
+        params.amountCents,
+        params.taxAmountCents || null,
         params.trackingNumber || null,
         params.trackingUrl || null,
         params.estimatedDeliveryDate || null,
@@ -273,7 +277,7 @@ class OrderQueryRepo {
   // --- Order Shipping Rates ---
 
   async findShippingRatesByOrder(orderId: string): Promise<OrderShippingRate[]> {
-    const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rate" ASC`, [
+    const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rateCents" ASC`, [
       orderId,
     ]);
     return results || [];
@@ -283,7 +287,7 @@ class OrderQueryRepo {
     const now = unixTimestamp();
     const result = await queryOne<OrderShippingRate>(
       `INSERT INTO "orderShippingRate" (
-        "orderId", "carrier", "serviceLevel", "serviceName", "rate",
+        "orderId", "carrier", "serviceLevel", "serviceName", "rateCents",
         "estimatedDays", "estimatedDeliveryDate", "currencyCode", "isSelected",
         "carrierAccountId", "shipmentId", "rateData",
         "createdAt", "updatedAt"
@@ -294,7 +298,7 @@ class OrderQueryRepo {
         params.carrier,
         params.serviceLevel,
         params.serviceName,
-        params.rate,
+        params.rateCents,
         params.estimatedDays || null,
         params.estimatedDeliveryDate || null,
         params.currencyCode || 'USD',
@@ -321,7 +325,7 @@ class OrderQueryRepo {
     const now = unixTimestamp();
     const result = await queryOne<OrderTax>(
       `INSERT INTO "orderTax" (
-        "orderId", "orderItemId", "taxType", "name", "rate", "amount",
+        "orderId", "orderItemId", "taxType", "name", "rate", "amountCents",
         "jurisdiction", "taxProvider", "providerTaxId", "isIncludedInPrice",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -332,7 +336,7 @@ class OrderQueryRepo {
         params.taxType,
         params.name,
         params.rate,
-        params.amount,
+        params.amountCents,
         params.jurisdiction || null,
         params.taxProvider || null,
         params.providerTaxId || null,
@@ -347,22 +351,28 @@ class OrderQueryRepo {
 
   // --- Order Payments ---
 
+  private toOrderPayment(row: Omit<OrderPayment, 'currency'> & { currencyCode?: string }): OrderPayment {
+    const { currencyCode, ...rest } = row;
+    return { ...rest, currency: currencyCode ?? 'USD' } as OrderPayment;
+  }
+
   async findPaymentsByOrder(orderId: string): Promise<OrderPayment[]> {
     const results = await query<OrderPayment[]>(`SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
-    return results || [];
+    return (results || []).map(row => this.toOrderPayment(row));
   }
 
   async findPaymentById(orderPaymentId: string): Promise<OrderPayment | null> {
-    return queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
+    const row = await queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
+    return row ? this.toOrderPayment(row) : null;
   }
 
   async createPayment(params: OrderPaymentCreateParams): Promise<OrderPayment> {
     const now = unixTimestamp();
     const result = await queryOne<OrderPayment>(
       `INSERT INTO "orderPayment" (
-        "orderId", "paymentMethodId", "type", "provider", "amount", "currency", "status",
+        "orderId", "paymentMethodId", "type", "provider", "amountCents", "currencyCode", "status",
         "transactionId", "authorizationCode", "errorCode", "errorMessage",
-        "maskedNumber", "cardType", "gatewayResponse", "refundedAmount", "capturedAt",
+        "maskedNumber", "cardType", "gatewayResponse", "refundedAmountCents", "capturedAt",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
@@ -371,7 +381,7 @@ class OrderQueryRepo {
         params.paymentMethodId || null,
         params.type,
         params.provider,
-        params.amount,
+        params.amountCents,
         params.currency,
         params.status || 'pending',
         params.transactionId || null,
@@ -381,14 +391,14 @@ class OrderQueryRepo {
         params.maskedNumber || null,
         params.cardType || null,
         params.gatewayResponse ? JSON.stringify(params.gatewayResponse) : null,
-        params.refundedAmount ?? 0,
+        params.refundedAmountCents ?? 0,
         params.capturedAt || null,
         now,
         now,
       ],
     );
     if (!result) throw new FailedToCreateOrderPaymentError();
-    return result;
+    return this.toOrderPayment(result);
   }
 
   // --- Order Payment Refunds ---
@@ -412,14 +422,14 @@ class OrderQueryRepo {
     const now = unixTimestamp();
     const result = await queryOne<OrderPaymentRefund>(
       `INSERT INTO "orderPaymentRefund" (
-        "orderPaymentId", "amount", "reason", "notes", "transactionId",
+        "orderPaymentId", "amountCents", "reason", "notes", "transactionId",
         "status", "gatewayResponse", "refundedBy",
         "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
       [
         params.orderPaymentId,
-        params.amount,
+        params.amountCents,
         params.reason || null,
         params.notes || null,
         params.transactionId || null,

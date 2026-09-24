@@ -29485,6 +29485,10 @@
           "currency": {
             "type": "string",
             "description": "string | undefined"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "string | undefined"
           }
         }
       },
@@ -29499,15 +29503,14 @@
             "description": "string | undefined"
           },
           "sku": {
-            "type": "string"
+            "type": "string",
+            "description": "string | undefined"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "string | undefined"
           },
           "quantity": {
-            "type": "number"
-          },
-          "unitPrice": {
             "type": "number"
           },
           "imageUrl": {
@@ -29525,10 +29528,7 @@
         },
         "required": [
           "productId",
-          "sku",
-          "name",
-          "quantity",
-          "unitPrice"
+          "quantity"
         ]
       },
       "UpdateItemQuantityBody": {
@@ -29604,17 +29604,17 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "orderTotal": {
+          "orderTotalCents": {
             "type": "number"
           },
           "items": {
             "type": "string",
-            "description": "{ productId: string; categoryId?: string; quantity: number; price: number; }[] | undefined"
+            "description": "{ productId: string; categoryId?: string; quantity: number; priceCents: number; }[] | undefined"
           }
         },
         "required": [
           "basketId",
-          "orderTotal"
+          "orderTotalCents"
         ]
       },
       "InitiateCheckoutBody": {
@@ -30835,11 +30835,11 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "minOrderValue": {
+          "minOrderValueCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "maxDiscountAmount": {
+          "maxDiscountAmountCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -30902,7 +30902,7 @@
           "code": {
             "type": "string"
           },
-          "orderTotal": {
+          "orderTotalCents": {
             "type": "string"
           },
           "customerId": {
@@ -30916,7 +30916,7 @@
         },
         "required": [
           "code",
-          "orderTotal"
+          "orderTotalCents"
         ]
       },
       "RedeemCouponBody": {
@@ -30932,14 +30932,14 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "discountAmount": {
+          "discountAmountCents": {
             "type": "number"
           }
         },
         "required": [
           "code",
           "orderId",
-          "discountAmount"
+          "discountAmountCents"
         ]
       },
       "CreateFulfillmentBody": {
@@ -31061,7 +31061,7 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "shippingCost": {
+          "shippingCostCents": {
             "type": "string",
             "description": "number | undefined"
           }
@@ -32074,10 +32074,10 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "monthlyPrice": {
+          "monthlyPriceCents": {
             "type": "number"
           },
-          "annualPrice": {
+          "annualPriceCents": {
             "type": "number"
           },
           "level": {
@@ -32090,8 +32090,8 @@
         },
         "required": [
           "name",
-          "monthlyPrice",
-          "annualPrice",
+          "monthlyPriceCents",
+          "annualPriceCents",
           "level"
         ]
       },
@@ -32106,11 +32106,11 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "monthlyPrice": {
+          "monthlyPriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "annualPrice": {
+          "annualPriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -32137,7 +32137,7 @@
           "pointsCost": {
             "type": "number"
           },
-          "discountAmount": {
+          "discountAmountCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -32186,7 +32186,7 @@
             "type": "string",
             "description": "number | undefined"
           },
-          "discountAmount": {
+          "discountAmountCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -32311,7 +32311,7 @@
             "type": "string",
             "description": "number | undefined"
           },
-          "discountAmount": {
+          "discountAmountCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -32349,7 +32349,7 @@
             "type": "string",
             "description": "number | undefined"
           },
-          "discountAmount": {
+          "discountAmountCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -32898,7 +32898,7 @@
             "type": "string",
             "description": "number | undefined"
           },
-          "price": {
+          "priceCents": {
             "type": "string",
             "description": "number | undefined"
           }
@@ -32969,15 +32969,19 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "basePrice": {
+          "basePriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "salePrice": {
+          "salePriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "cost": {
+          "costPriceCents": {
+            "type": "string",
+            "description": "number | undefined"
+          },
+          "compareAtPriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
@@ -33082,17 +33086,21 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "basePrice": {
+          "basePriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "salePrice": {
+          "salePriceCents": {
             "type": "string",
             "description": "number | null | undefined"
           },
-          "cost": {
+          "costPriceCents": {
             "type": "string",
-            "description": "number | undefined"
+            "description": "number | null | undefined"
+          },
+          "compareAtPriceCents": {
+            "type": "string",
+            "description": "number | null | undefined"
           },
           "currencyCode": {
             "type": "string",
@@ -33213,19 +33221,19 @@
             "type": "string",
             "description": "string | undefined"
           },
-          "price": {
+          "priceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "salePrice": {
+          "salePriceCents": {
             "type": "string",
             "description": "number | undefined"
           },
-          "compareAtPrice": {
+          "compareAtPriceCents": {
             "type": "string",
             "description": "number | null | undefined"
           },
-          "costPrice": {
+          "costPriceCents": {
             "type": "string",
             "description": "number | null | undefined"
           },
@@ -33505,7 +33513,7 @@
           "code": {
             "type": "string"
           },
-          "orderTotal": {
+          "orderTotalCents": {
             "type": "string"
           },
           "items": {
@@ -33519,7 +33527,7 @@
         },
         "required": [
           "code",
-          "orderTotal"
+          "orderTotalCents"
         ]
       },
       "CreateGiftCardBody": {
@@ -33529,7 +33537,7 @@
             "type": "string",
             "description": "GiftCardType | undefined"
           },
-          "initialBalance": {
+          "initialBalanceCents": {
             "type": "number"
           },
           "currency": {
@@ -33578,13 +33586,13 @@
           }
         },
         "required": [
-          "initialBalance"
+          "initialBalanceCents"
         ]
       },
       "RefundBody": {
         "type": "object",
         "properties": {
-          "amount": {
+          "amountCents": {
             "type": "number"
           },
           "orderId": {
@@ -33597,7 +33605,7 @@
           }
         },
         "required": [
-          "amount"
+          "amountCents"
         ]
       },
       "RedeemOrReloadBody": {
@@ -33606,7 +33614,7 @@
           "code": {
             "type": "string"
           },
-          "amount": {
+          "amountCents": {
             "type": "number"
           },
           "orderId": {
@@ -33616,7 +33624,7 @@
         },
         "required": [
           "code",
-          "amount"
+          "amountCents"
         ]
       },
       "ApplyPromotionBody": {

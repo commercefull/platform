@@ -1,20 +1,21 @@
+import { lazyMock } from '../../tests/testUtils';
 import { AllocateFromPoolUseCase } from './AllocateFromPool';
 import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
 
 describe('AllocateFromPoolUseCase', () => {
   let useCase: AllocateFromPoolUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof AllocateFromPoolUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findPoolById: jest.fn().mockResolvedValue({ poolId: 'p1', isActive: true, allocationStrategy: 'fifo' }),
-      findAvailableInPool: jest
-        .fn()
-        .mockResolvedValue([{ inventoryId: 'inv1', locationId: 'loc1', availableQuantity: 50, priority: 1, createdAt: new Date() }]),
-      reserveStock: jest.fn().mockResolvedValue(undefined),
-      createAllocation: jest.fn().mockResolvedValue(undefined),
-    };
-    useCase = new AllocateFromPoolUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof AllocateFromPoolUseCase>[0]>();
+    mockRepo.findPoolById.mockResolvedValue({ poolId: 'p1', isActive: true, allocationStrategy: 'fifo' });
+    mockRepo.findAvailableInPool.mockResolvedValue([
+      { inventoryId: 'inv1', locationId: 'loc1', availableQuantity: 50, priority: 1, createdAt: new Date() },
+    ]);
+    mockRepo.findPoolById.mockResolvedValue({ poolId: 'p1', isActive: true, allocationStrategy: 'fifo' });
+    mockRepo.reserveStock.mockResolvedValue(undefined);
+    mockRepo.createAllocation.mockResolvedValue(undefined);
+    useCase = new AllocateFromPoolUseCase(mockRepo);
   });
 
   it('should allocate from pool (happy path)', async () => {

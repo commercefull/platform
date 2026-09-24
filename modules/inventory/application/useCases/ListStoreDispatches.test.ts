@@ -1,20 +1,21 @@
+import { lazyMock, createStoreDispatch } from '../../tests/testUtils';
 import { ListStoreDispatchesUseCase } from './ListStoreDispatches';
 
 describe('ListStoreDispatchesUseCase', () => {
   let useCase: ListStoreDispatchesUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ListStoreDispatchesUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findAll: jest.fn().mockResolvedValue({
-        data: [{ toJSON: () => ({ dispatchId: 'd1', status: 'pending' }) }, { toJSON: () => ({ dispatchId: 'd2', status: 'approved' }) }],
-        total: 2,
-        limit: 10,
-        offset: 0,
-        hasMore: false,
-      }),
-    };
-    useCase = new ListStoreDispatchesUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof ListStoreDispatchesUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue({
+      data: [createStoreDispatch({ dispatchId: 'd1' }), createStoreDispatch({ dispatchId: 'd2', status: 'approved' })],
+      total: 2,
+      limit: 10,
+      offset: 0,
+      hasMore: false,
+      length: 2,
+    });
+    useCase = new ListStoreDispatchesUseCase(mockRepo);
   });
 
   it('should list store dispatches (happy path)', async () => {

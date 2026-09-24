@@ -129,24 +129,6 @@ export class ProductDeletedEvent implements DomainEvent {
   }
 }
 
-export class ProductPriceChangedEvent implements DomainEvent {
-  readonly eventType = 'product.price_changed';
-  readonly occurredAt: Date;
-  readonly aggregateId: string;
-  readonly payload: {
-    productId: string;
-    previousPrice: number;
-    newPrice: number;
-    currency: string;
-  };
-
-  constructor(productId: string, previousPrice: number, newPrice: number, currency: string) {
-    this.occurredAt = new Date();
-    this.aggregateId = productId;
-    this.payload = { productId, previousPrice, newPrice, currency };
-  }
-}
-
 export class ProductVariantCreatedEvent implements DomainEvent {
   readonly eventType = 'product.variant_created';
   readonly occurredAt: Date;

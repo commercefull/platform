@@ -132,22 +132,22 @@ function calculateOrderTotals(order: Record<string, unknown>) {
   // Orders should have tax already calculated and stored
   // Use the order's stored values directly
   const orderItems = order.items as Record<string, unknown>[] | undefined;
-  const subtotal =
-    (order.subtotal as number) ||
+  const subtotalCents =
+    (order.subtotalCents as number) ??
     orderItems?.reduce((sum: number, item: Record<string, unknown>) => {
-      return sum + ((item.unitPrice as number) || (item.price as number)) * (item.quantity as number);
-    }, 0) ||
+      return sum + ((item.lineTotalCents as number) ?? ((item.unitPriceCents as number) || 0) * (item.quantity as number));
+    }, 0) ??
     0;
 
-  const tax = (order.taxTotal as number) || (order.tax as number) || 0;
-  const shipping = (order.shippingTotal as number) || (order.shipping as number) || 0;
-  const total = (order.totalAmount as number) || (order.total as number) || subtotal + tax + shipping;
+  const taxCents = (order.taxTotalCents as number) || 0;
+  const shippingCents = (order.shippingTotalCents as number) || 0;
+  const totalCents = (order.totalAmountCents as number) ?? subtotalCents + taxCents + shippingCents;
 
   return {
-    subtotal: typeof subtotal === 'number' ? subtotal.toFixed(2) : subtotal,
-    tax: typeof tax === 'number' ? tax.toFixed(2) : tax,
-    shipping: typeof shipping === 'number' ? shipping.toFixed(2) : shipping,
-    total: typeof total === 'number' ? total.toFixed(2) : total,
+    subtotal: (subtotalCents / 100).toFixed(2),
+    tax: (taxCents / 100).toFixed(2),
+    shipping: (shippingCents / 100).toFixed(2),
+    total: (totalCents / 100).toFixed(2),
   };
 }
 

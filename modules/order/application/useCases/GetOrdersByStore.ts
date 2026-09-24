@@ -1,10 +1,8 @@
 import { OrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
-import { orderDataRepository } from '../wired';
 
-const orderRepo = orderDataRepository.commands;
 
 export class GetOrdersByStoreUseCase {
-  constructor(private readonly orders: OrderRepository = orderRepo) {}
+  constructor(private readonly orders: OrderRepository) {}
 
   async execute(storeId: string, limit = 10, offset = 0) {
     const result = await this.orders.findAll({ storeId } as OrderFilters, { limit, offset, orderBy: 'createdAt', orderDirection: 'desc' });

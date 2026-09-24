@@ -85,7 +85,7 @@ describe('Returns Operations Tests', () => {
       if (!customerId) return;
       const resp = await client.post(
         '/business/store-credit/debit',
-        { customerId, amount: 5, referenceType: 'order', reason: 'Partial purchase' },
+        { customerId, amountCents: 500, referenceType: 'order', reason: 'Partial purchase' },
         { headers: headers() },
       );
       expectStatus(resp, 200);
@@ -95,7 +95,7 @@ describe('Returns Operations Tests', () => {
       if (!customerId) return;
       const resp = await client.post(
         '/business/store-credit/debit',
-        { customerId, amount: 999999 },
+        { customerId, amountCents: 99999900 },
         { headers: headers() },
       );
       expectStatus(resp, 400);

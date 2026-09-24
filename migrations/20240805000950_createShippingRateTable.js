@@ -13,13 +13,13 @@ exports.up = function (knex) {
     t.text('description');
     t.boolean('isActive').notNullable().defaultTo(true);
     t.enum('rateType', ['flat', 'weightBased', 'priceBased', 'itemBased', 'dimensional', 'calculated', 'free']).notNullable();
-    t.decimal('baseRate', 10, 2).notNullable();
-    t.decimal('perItemRate', 10, 2).defaultTo(0);
-    t.decimal('freeThreshold', 10, 2);
+    t.bigInteger('baseRateCents').notNullable();
+    t.bigInteger('perItemRateCents').defaultTo(0);
+    t.bigInteger('freeThresholdCents');
     t.jsonb('rateMatrix');
-    t.decimal('minRate', 10, 2);
-    t.decimal('maxRate', 10, 2);
-    t.string('currency', 3).notNullable().defaultTo('USD');
+    t.bigInteger('minRateCents');
+    t.bigInteger('maxRateCents');
+    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     t.boolean('taxable').notNullable().defaultTo(true);
     t.integer('priority').defaultTo(0);
     t.timestamp('validFrom');
@@ -32,7 +32,7 @@ exports.up = function (knex) {
     t.index('isActive');
     t.index('rateType');
     t.index('priority');
-    t.index('currency');
+    t.index('currencyCode');
     t.index('validFrom');
     t.index('validTo');
     t.unique(['shippingZoneId', 'shippingMethodId']);

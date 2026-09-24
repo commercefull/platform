@@ -1,45 +1,37 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import '../../tests/testUtils';
 import { UpdateTrackingUseCase, UpdateTrackingCommand } from './UpdateTracking';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
-
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+import { createFulfillmentRepository, createFulfillment, emitMock } from '../../tests/testUtils';
 
 describe('UpdateTrackingUseCase', () => {
-  let useCase: UpdateTrackingUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockFulfillment: Record<string, unknown>;
+  const fulfillmentRepository = createFulfillmentRepository();
+  const useCase = new UpdateTrackingUseCase(fulfillmentRepository);
 
   beforeEach(() => {
-    mockFulfillment = {
-      fulfillmentId: 'f1',
-      orderId: 'o1',
-      updateTracking: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockFulfillment),
-      save: jest.fn().mockImplementation(async (f: unknown) => f),
-    };
-    useCase = new UpdateTrackingUseCase(mockRepo as never);
+    jest.clearAllMocks();
+    fulfillmentRepository.save.mockImplementation(async (f) => f);
   });
 
-  it('should update tracking (happy path)', async () => {
-    const result = await useCase.execute(new UpdateTrackingCommand('f1', 'TRK123', 'https://track.url'));
+  it('should update tracking details and emit fulfillment.tracking_updated', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(createFulfillment('shipped'));
 
-    expect(result.fulfillment.fulfillmentId).toBe('f1');
-    expect(mockFulfillment.updateTracking).toHaveBeenCalledWith('TRK123', 'https://track.url');
-    expect(eventBus.emit).toHaveBeenCalledWith('fulfillment.tracking_updated', expect.objectContaining({ trackingNumber: 'TRK123' }));
+    const result = await useCase.execute(new UpdateTrackingCommand('ful-1', 'TRK123', 'https://track.url'));
+
+    expect(result.fulfillment.fulfillmentId).toBe('ful-1');
+    expect(result.fulfillment.trackingNumber).toBe('TRK123');
+    expect(result.fulfillment.trackingUrl).toBe('https://track.url');
+    expect(emitMock).toHaveBeenCalledWith(
+      'fulfillment.tracking_updated',
+      expect.objectContaining({ trackingNumber: 'TRK123' }),
+    );
   });
 
-  it('should throw FulfillmentNotFoundError when fulfillment does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
+    fulfillmentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdateTrackingCommand('missing', 'TRK123'))).rejects.toThrow(FulfillmentNotFoundError);
+    await expect(useCase.execute(new UpdateTrackingCommand('missing', 'TRK123'))).rejects.toThrow(
+      FulfillmentNotFoundError,
+    );
+    expect(emitMock).not.toHaveBeenCalled();
   });
 });

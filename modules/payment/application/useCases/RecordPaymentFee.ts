@@ -7,9 +7,7 @@
  */
 
 import { PaymentBillingRepository, PaymentFee } from '../../domain/repositories/PaymentBillingRepository';
-import { paymentBillingDataRepository } from '../wired';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
 import { FailedToCreatePaymentFeeError } from '../../domain/errors/PaymentErrors';
 
 // ============================================================================
@@ -21,7 +19,7 @@ export class RecordPaymentFeeCommand {
     public readonly transactionId: string,
     public readonly organizationId: string,
     public readonly type: string,
-    public readonly amount: number,
+    public readonly amountCents: number,
     public readonly currency: string,
     public readonly description?: string,
   ) {}
@@ -36,7 +34,7 @@ export interface RecordPaymentFeeResponse {
   transactionId: string;
   organizationId: string;
   type: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   description?: string;
   createdAt: string;
@@ -47,14 +45,14 @@ export interface RecordPaymentFeeResponse {
 // ============================================================================
 
 export class RecordPaymentFeeUseCase {
-  constructor(private readonly repo: PaymentBillingRepository = paymentBillingRepo) {}
+  constructor(private readonly repo: PaymentBillingRepository) {}
 
   async execute(command: RecordPaymentFeeCommand): Promise<RecordPaymentFeeResponse> {
     const fee = await this.repo.createFee({
       transactionId: command.transactionId,
       organizationId: command.organizationId,
       type: command.type,
-      amount: command.amount,
+      amountCents: command.amountCents,
       currency: command.currency,
       description: command.description,
     });
@@ -72,7 +70,7 @@ export class RecordPaymentFeeUseCase {
       transactionId: f.transactionId,
       organizationId: f.organizationId,
       type: f.type,
-      amount: f.amount,
+      amountCents: f.amountCents,
       currency: f.currency,
       description: f.description,
       createdAt: f.createdAt.toISOString(),

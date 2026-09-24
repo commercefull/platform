@@ -1,7 +1,9 @@
 import { ImportJobRepositoryImpl } from '../../infrastructure/repositories/ImportJobRepositoryImpl';
 import { ImportMappingRepositoryImpl } from '../../infrastructure/repositories/ImportMappingRepositoryImpl';
 import { ImportErrorRepositoryImpl } from '../../infrastructure/repositories/ImportErrorRepositoryImpl';
-import { ManageImportJobsUseCase, ManageImportMappingsUseCase, ManageImportErrorsUseCase } from './Migration';
+import { ManageImportJobsUseCase } from './ManageImportJobs';
+import { ManageImportMappingsUseCase } from './ManageImportMappings';
+import { ManageImportErrorsUseCase } from './ManageImportErrors';
 
 const importJobRepo = new ImportJobRepositoryImpl();
 const importMappingRepo = new ImportMappingRepositoryImpl();

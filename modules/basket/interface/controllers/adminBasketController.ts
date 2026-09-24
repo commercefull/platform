@@ -21,11 +21,11 @@ export const listAbandonedCarts = async (req: HttpRequest, res: HttpResponse): P
   const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
 
   // Calculate recovery potential
-  const recoveryPotential = abandonedBaskets.reduce((total, basket) => {
+  const recoveryPotentialCents = abandonedBaskets.reduce((total, basket) => {
     return (
       total +
       basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.amount * item.quantity;
+        return itemTotal + item.unitPrice.cents * item.quantity;
       }, 0)
     );
   }, 0);
@@ -33,8 +33,8 @@ export const listAbandonedCarts = async (req: HttpRequest, res: HttpResponse): P
   const stats = {
     totalAbandoned: abandonedBaskets.length,
     totalExpired: expiredBaskets.length,
-    recoveryPotential: recoveryPotential,
-    avgCartValue: abandonedBaskets.length > 0 ? recoveryPotential / abandonedBaskets.length : 0,
+    recoveryPotentialCents,
+    avgCartValueCents: abandonedBaskets.length > 0 ? Math.round(recoveryPotentialCents / abandonedBaskets.length) : 0,
   };
 
   adminRespond(req, res, 'operations/baskets/abandoned', {
@@ -63,8 +63,8 @@ export const viewAbandonedCart = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   // Calculate cart value
-  const cartValue = basket.items.reduce((total, item) => {
-    return total + item.unitPrice.amount * item.quantity;
+  const cartValueCents = basket.items.reduce((total, item) => {
+    return total + item.unitPrice.cents * item.quantity;
   }, 0);
 
   // Calculate days since last activity
@@ -73,7 +73,7 @@ export const viewAbandonedCart = async (req: HttpRequest, res: HttpResponse): Pr
   adminRespond(req, res, 'operations/baskets/view', {
     pageName: `Abandoned Cart: ${basket.basketId}`,
     basket,
-    cartValue,
+    cartValueCents,
     daysSinceActivity,
 
     success: req.query.success || null,
@@ -95,7 +95,7 @@ export const recoverAbandonedCart = async (req: HttpRequest, res: HttpResponse):
   logger.info('Recovering abandoned cart', {
     basketId,
     recoveryMethod,
-    cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
+    cartValueCents: basket.items.reduce((total, item) => total + item.unitPrice.cents * item.quantity, 0),
     customerId: basket.customerId,
     sessionId: basket.sessionId,
   });
@@ -137,7 +137,7 @@ export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Pr
     subject,
     discountCode,
     cartItems: basket.items.length,
-    cartValue: basket.items.reduce((total, item) => total + item.unitPrice.amount * item.quantity, 0),
+    cartValueCents: basket.items.reduce((total, item) => total + item.unitPrice.cents * item.quantity, 0),
   });
 
   res.json({
@@ -170,16 +170,16 @@ export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Prom
   const totalExpired = expiredBaskets.length;
 
   // Calculate cart values
-  const abandonedValue = abandonedBaskets.reduce((total, basket) => {
+  const abandonedValueCents = abandonedBaskets.reduce((total, basket) => {
     return (
       total +
       basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.amount * item.quantity;
+        return itemTotal + item.unitPrice.cents * item.quantity;
       }, 0)
     );
   }, 0);
 
-  const avgCartValue = totalAbandoned > 0 ? abandonedValue / totalAbandoned : 0;
+  const avgCartValueCents = totalAbandoned > 0 ? Math.round(abandonedValueCents / totalAbandoned) : 0;
 
   // Calculate recovery potential by age
   const recentAbandoned = abandonedBaskets.filter(basket => {
@@ -192,20 +192,20 @@ export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Prom
     return daysSinceActivity > 7;
   });
 
-  const recentValue = recentAbandoned.reduce((total, basket) => {
+  const recentValueCents = recentAbandoned.reduce((total, basket) => {
     return (
       total +
       basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.amount * item.quantity;
+        return itemTotal + item.unitPrice.cents * item.quantity;
       }, 0)
     );
   }, 0);
 
-  const olderValue = olderAbandoned.reduce((total, basket) => {
+  const olderValueCents = olderAbandoned.reduce((total, basket) => {
     return (
       total +
       basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.amount * item.quantity;
+        return itemTotal + item.unitPrice.cents * item.quantity;
       }, 0)
     );
   }, 0);
@@ -213,13 +213,13 @@ export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Prom
   const stats = {
     totalAbandoned,
     totalExpired,
-    totalValue: abandonedValue,
-    avgCartValue,
+    totalValueCents: abandonedValueCents,
+    avgCartValueCents,
     recoveryRate: 0, // Would need conversion tracking
     recentAbandoned: recentAbandoned.length,
     olderAbandoned: olderAbandoned.length,
-    recentValue,
-    olderValue,
+    recentValueCents,
+    olderValueCents,
     topAbandonedProducts: [], // Would need product analytics
   };
 

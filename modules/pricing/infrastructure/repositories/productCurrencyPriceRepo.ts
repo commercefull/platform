@@ -3,120 +3,159 @@ import { Table, ProductCurrencyPrice } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
-export type ProductCurrencyPriceCreateParams = Omit<ProductCurrencyPrice, 'productCurrencyPriceId' | 'createdAt' | 'updatedAt'>;
-export type ProductCurrencyPriceUpdateParams = Partial<Pick<ProductCurrencyPrice, 'price' | 'compareAtPrice' | 'isManual' | 'updatedBy'>>;
+/**
+ * Currency-specific price override for a product/variant.
+ * Monetary amounts are integer cents — pg returns bigint as string,
+ * so rows are mapped to numbers here.
+ */
+export interface CurrencyPriceEntry {
+  productCurrencyPriceId: string;
+  productId: string;
+  productVariantId: string | null;
+  currencyId: string;
+  priceCents: number;
+  compareAtPriceCents: number | null;
+  isManual: boolean;
+  updatedBy: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+function mapRow(row: ProductCurrencyPrice): CurrencyPriceEntry {
+  return {
+    productCurrencyPriceId: row.productCurrencyPriceId,
+    productId: row.productId,
+    productVariantId: row.productVariantId,
+    currencyId: row.currencyId,
+    priceCents: Number(row.priceCents),
+    compareAtPriceCents: row.compareAtPriceCents == null ? null : Number(row.compareAtPriceCents),
+    isManual: row.isManual,
+    updatedBy: row.updatedBy,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+export type ProductCurrencyPriceCreateParams = {
+  productId: string;
+  productVariantId?: string | null;
+  currencyId: string;
+  priceCents: number;
+  compareAtPriceCents?: number | null;
+  isManual?: boolean;
+  updatedBy?: string | null;
+};
+export type ProductCurrencyPriceUpdateParams = Partial<Pick<CurrencyPriceEntry, 'priceCents' | 'compareAtPriceCents' | 'isManual' | 'updatedBy'>>;
 
 export class ProductCurrencyPriceRepo {
   /**
    * Find price by ID
    */
-  async findById(productCurrencyPriceId: string): Promise<ProductCurrencyPrice | null> {
-    return await queryOne<ProductCurrencyPrice>(`SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`, [
-      productCurrencyPriceId,
-    ]);
+  async findById(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
+    const row = await queryOne<ProductCurrencyPrice>(
+      `SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`,
+      [productCurrencyPriceId],
+    );
+    return row ? mapRow(row) : null;
   }
 
   /**
    * Find price for product in specific currency
    */
-  async findByProductAndCurrency(productId: string, currencyId: string, productVariantId?: string): Promise<ProductCurrencyPrice | null> {
-    if (productVariantId) {
-      return await queryOne<ProductCurrencyPrice>(
-        `SELECT * FROM "${Table.ProductCurrencyPrice}" 
-         WHERE "productId" = $1 AND "productVariantId" = $2 AND "currencyId" = $3`,
-        [productId, productVariantId, currencyId],
-      );
-    } else {
-      return await queryOne<ProductCurrencyPrice>(
-        `SELECT * FROM "${Table.ProductCurrencyPrice}" 
-         WHERE "productId" = $1 AND "productVariantId" IS NULL AND "currencyId" = $2`,
-        [productId, currencyId],
-      );
-    }
+  async findByProductAndCurrency(productId: string, currencyId: string, productVariantId?: string): Promise<CurrencyPriceEntry | null> {
+    const row = productVariantId
+      ? await queryOne<ProductCurrencyPrice>(
+          `SELECT * FROM "${Table.ProductCurrencyPrice}"
+           WHERE "productId" = $1 AND "productVariantId" = $2 AND "currencyId" = $3`,
+          [productId, productVariantId, currencyId],
+        )
+      : await queryOne<ProductCurrencyPrice>(
+          `SELECT * FROM "${Table.ProductCurrencyPrice}"
+           WHERE "productId" = $1 AND "productVariantId" IS NULL AND "currencyId" = $2`,
+          [productId, currencyId],
+        );
+    return row ? mapRow(row) : null;
   }
 
   /**
    * Find all prices for product
    */
-  async findByProduct(productId: string, productVariantId?: string): Promise<ProductCurrencyPrice[]> {
-    if (productVariantId) {
-      const results = await query<ProductCurrencyPrice[]>(
-        `SELECT * FROM "${Table.ProductCurrencyPrice}" 
-         WHERE "productId" = $1 AND "productVariantId" = $2
-         ORDER BY "currencyId" ASC`,
-        [productId, productVariantId],
-      );
-      return results || [];
-    } else {
-      const results = await query<ProductCurrencyPrice[]>(
-        `SELECT * FROM "${Table.ProductCurrencyPrice}" 
-         WHERE "productId" = $1 AND "productVariantId" IS NULL
-         ORDER BY "currencyId" ASC`,
-        [productId],
-      );
-      return results || [];
-    }
+  async findByProduct(productId: string, productVariantId?: string): Promise<CurrencyPriceEntry[]> {
+    const results = productVariantId
+      ? await query<ProductCurrencyPrice[]>(
+          `SELECT * FROM "${Table.ProductCurrencyPrice}"
+           WHERE "productId" = $1 AND "productVariantId" = $2
+           ORDER BY "currencyId" ASC`,
+          [productId, productVariantId],
+        )
+      : await query<ProductCurrencyPrice[]>(
+          `SELECT * FROM "${Table.ProductCurrencyPrice}"
+           WHERE "productId" = $1 AND "productVariantId" IS NULL
+           ORDER BY "currencyId" ASC`,
+          [productId],
+        );
+    return (results || []).map(mapRow);
   }
 
   /**
    * Find all prices for variant
    */
-  async findByVariant(productVariantId: string): Promise<ProductCurrencyPrice[]> {
+  async findByVariant(productVariantId: string): Promise<CurrencyPriceEntry[]> {
     const results = await query<ProductCurrencyPrice[]>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "productVariantId" = $1
        ORDER BY "currencyId" ASC`,
       [productVariantId],
     );
-    return results || [];
+    return (results || []).map(mapRow);
   }
 
   /**
    * Find all prices in specific currency
    */
-  async findByCurrency(currencyId: string, limit: number = 100, offset: number = 0): Promise<ProductCurrencyPrice[]> {
+  async findByCurrency(currencyId: string, limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
     const results = await query<ProductCurrencyPrice[]>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "currencyId" = $1
        ORDER BY "productId" ASC
        LIMIT $2 OFFSET $3`,
       [currencyId, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapRow);
   }
 
   /**
    * Find manual prices
    */
-  async findManualPrices(limit: number = 100, offset: number = 0): Promise<ProductCurrencyPrice[]> {
+  async findManualPrices(limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
     const results = await query<ProductCurrencyPrice[]>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "isManual" = true
        ORDER BY "updatedAt" DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapRow);
   }
 
   /**
    * Find auto-calculated prices
    */
-  async findAutoPrices(limit: number = 100, offset: number = 0): Promise<ProductCurrencyPrice[]> {
+  async findAutoPrices(limit: number = 100, offset: number = 0): Promise<CurrencyPriceEntry[]> {
     const results = await query<ProductCurrencyPrice[]>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT * FROM "${Table.ProductCurrencyPrice}"
        WHERE "isManual" = false
        ORDER BY "updatedAt" DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapRow);
   }
 
   /**
    * Create currency price
    */
-  async create(params: ProductCurrencyPriceCreateParams): Promise<ProductCurrencyPrice> {
+  async create(params: ProductCurrencyPriceCreateParams): Promise<CurrencyPriceEntry> {
     const now = unixTimestamp();
 
     // Check if price already exists for this combination
@@ -128,7 +167,7 @@ export class ProductCurrencyPriceRepo {
 
     const result = await queryOne<ProductCurrencyPrice>(
       `INSERT INTO "${Table.ProductCurrencyPrice}" (
-        "productId", "productVariantId", "currencyId", "price", "compareAtPrice",
+        "productId", "productVariantId", "currencyId", "priceCents", "compareAtPriceCents",
         "isManual", "updatedBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *`,
@@ -136,8 +175,8 @@ export class ProductCurrencyPriceRepo {
         params.productId,
         params.productVariantId || null,
         params.currencyId,
-        params.price,
-        params.compareAtPrice || null,
+        params.priceCents,
+        params.compareAtPriceCents ?? null,
         params.isManual !== undefined ? params.isManual : true,
         params.updatedBy || null,
         now,
@@ -149,19 +188,19 @@ export class ProductCurrencyPriceRepo {
       throw new FailedToCreatePricingError('Failed to create product currency price');
     }
 
-    return result;
+    return mapRow(result);
   }
 
   /**
    * Upsert currency price (create or update)
    */
-  async upsert(params: ProductCurrencyPriceCreateParams): Promise<ProductCurrencyPrice> {
+  async upsert(params: ProductCurrencyPriceCreateParams): Promise<CurrencyPriceEntry> {
     const existing = await this.findByProductAndCurrency(params.productId, params.currencyId, params.productVariantId ?? undefined);
 
     if (existing) {
       const updated = await this.update(existing.productCurrencyPriceId, {
-        price: params.price,
-        compareAtPrice: params.compareAtPrice,
+        priceCents: params.priceCents,
+        compareAtPriceCents: params.compareAtPriceCents,
         isManual: params.isManual,
         updatedBy: params.updatedBy,
       });
@@ -179,7 +218,7 @@ export class ProductCurrencyPriceRepo {
   /**
    * Update currency price
    */
-  async update(productCurrencyPriceId: string, params: ProductCurrencyPriceUpdateParams): Promise<ProductCurrencyPrice | null> {
+  async update(productCurrencyPriceId: string, params: ProductCurrencyPriceUpdateParams): Promise<CurrencyPriceEntry | null> {
     const updateFields: string[] = [];
     const values: unknown[] = [];
     let paramIndex = 1;
@@ -200,61 +239,62 @@ export class ProductCurrencyPriceRepo {
     values.push(productCurrencyPriceId);
 
     const result = await queryOne<ProductCurrencyPrice>(
-      `UPDATE "${Table.ProductCurrencyPrice}" 
+      `UPDATE "${Table.ProductCurrencyPrice}"
        SET ${updateFields.join(', ')}
        WHERE "productCurrencyPriceId" = $${paramIndex}
        RETURNING *`,
       values,
     );
 
-    return result;
+    return result ? mapRow(result) : null;
   }
 
   /**
-   * Update price value
+   * Update price value (integer cents)
    */
-  async updatePrice(productCurrencyPriceId: string, price: number, updatedBy?: string): Promise<ProductCurrencyPrice | null> {
+  async updatePrice(productCurrencyPriceId: string, priceCents: number, updatedBy?: string): Promise<CurrencyPriceEntry | null> {
     return this.update(productCurrencyPriceId, {
-      price: price.toString(),
+      priceCents,
       isManual: true,
       updatedBy: updatedBy ?? null,
     });
   }
 
   /**
-   * Update compare at price
+   * Update compare at price (integer cents)
    */
-  async updateCompareAtPrice(productCurrencyPriceId: string, compareAtPrice: number): Promise<ProductCurrencyPrice | null> {
-    return this.update(productCurrencyPriceId, { compareAtPrice: compareAtPrice.toString() });
+  async updateCompareAtPrice(productCurrencyPriceId: string, compareAtPriceCents: number): Promise<CurrencyPriceEntry | null> {
+    return this.update(productCurrencyPriceId, { compareAtPriceCents });
   }
 
   /**
    * Mark as manual
    */
-  async markAsManual(productCurrencyPriceId: string): Promise<ProductCurrencyPrice | null> {
+  async markAsManual(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
     return this.update(productCurrencyPriceId, { isManual: true });
   }
 
   /**
    * Mark as auto-calculated
    */
-  async markAsAuto(productCurrencyPriceId: string): Promise<ProductCurrencyPrice | null> {
+  async markAsAuto(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
     return this.update(productCurrencyPriceId, { isManual: false });
   }
 
   /**
-   * Bulk update prices for currency (e.g., when exchange rate changes)
+   * Bulk update prices for currency (e.g., when exchange rate changes).
+   * Amounts are integer cents.
    */
-  async bulkUpdateForCurrency(currencyId: string, priceUpdates: Array<{ productCurrencyPriceId: string; price: number }>): Promise<number> {
+  async bulkUpdateForCurrency(currencyId: string, priceUpdates: Array<{ productCurrencyPriceId: string; priceCents: number }>): Promise<number> {
     const now = unixTimestamp();
     let updated = 0;
 
     for (const update of priceUpdates) {
       await query(
-        `UPDATE "${Table.ProductCurrencyPrice}" 
-         SET "price" = $1, "updatedAt" = $2, "isManual" = false
+        `UPDATE "${Table.ProductCurrencyPrice}"
+         SET "priceCents" = $1, "updatedAt" = $2, "isManual" = false
          WHERE "productCurrencyPriceId" = $3`,
-        [update.price, now, update.productCurrencyPriceId],
+        [update.priceCents, now, update.productCurrencyPriceId],
       );
       updated++;
     }
@@ -347,8 +387,8 @@ export class ProductCurrencyPriceRepo {
     const auto = total - manual;
 
     const currencyResults = await query<{ currencyId: string; count: string }[]>(
-      `SELECT "currencyId", COUNT(*) as count 
-       FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT "currencyId", COUNT(*) as count
+       FROM "${Table.ProductCurrencyPrice}"
        GROUP BY "currencyId"`,
       [],
     );
@@ -361,7 +401,7 @@ export class ProductCurrencyPriceRepo {
     }
 
     const compareResult = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}" WHERE "compareAtPrice" IS NOT NULL`,
+      `SELECT COUNT(*) as count FROM "${Table.ProductCurrencyPrice}" WHERE "compareAtPriceCents" IS NOT NULL`,
       [],
     );
     const withCompareAtPrice = compareResult ? parseInt(compareResult.count, 10) : 0;
@@ -376,23 +416,23 @@ export class ProductCurrencyPriceRepo {
   }
 
   /**
-   * Get price range for currency
+   * Get price range for currency (integer cents)
    */
-  async getPriceRange(currencyId: string): Promise<{ min: number; max: number; avg: number }> {
+  async getPriceRange(currencyId: string): Promise<{ minCents: number; maxCents: number; avgCents: number }> {
     const result = await queryOne<{ min: string; max: string; avg: string }>(
-      `SELECT 
-        MIN("price") as min,
-        MAX("price") as max,
-        AVG("price") as avg
-       FROM "${Table.ProductCurrencyPrice}" 
+      `SELECT
+        MIN("priceCents") as min,
+        MAX("priceCents") as max,
+        AVG("priceCents") as avg
+       FROM "${Table.ProductCurrencyPrice}"
        WHERE "currencyId" = $1`,
       [currencyId],
     );
 
     return {
-      min: result && result.min ? parseFloat(result.min) : 0,
-      max: result && result.max ? parseFloat(result.max) : 0,
-      avg: result && result.avg ? parseFloat(result.avg) : 0,
+      minCents: result && result.min ? Number(result.min) : 0,
+      maxCents: result && result.max ? Number(result.max) : 0,
+      avgCents: result && result.avg ? Math.round(parseFloat(result.avg)) : 0,
     };
   }
 }

@@ -1,41 +1,27 @@
-jest.mock('../../infrastructure/repositories/ProductVariantRepository', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue({
-      data: [
-        {
-          variantId: 'v1',
-          productId: 'p1',
-          sku: 'SKU-1',
-          name: 'Red',
-          attributes: [],
-          price: { effectivePrice: 10, currency: 'USD', salePrice: null, cost: null, isOnSale: false, discountPercentage: 0 },
-          stockQuantity: 50,
-          lowStockThreshold: 5,
-          isDefault: true,
-          isActive: true,
-          position: 0,
-          isInStock: true,
-          isLowStock: false,
-          isOutOfStock: false,
-        },
-      ],
-      total: 1,
-    }),
-  },
-}));
 
 import { GetProductVariantsUseCase, GetProductVariantsCommand } from './GetProductVariants';
-import ProductVariantRepository from '../../infrastructure/repositories/ProductVariantRepository';
+import { createProductVariantRow, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = ProductVariantRepository as unknown as Record<string, jest.Mock>;
+;
 
 describe('GetProductVariantsUseCase', () => {
   let useCase: GetProductVariantsUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetProductVariantsUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetProductVariantsUseCase(mockRepo as never);
+        mockRepo = lazyMock<ConstructorParameters<typeof GetProductVariantsUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue({
+      data: [createProductVariantRow({ name: 'Red', stockQuantity: 50, lowStockThreshold: 5 })],
+      total: 1,
+      limit: 20,
+      offset: 0,
+      hasMore: false,
+      length: 1,
+    });
+    const pricingPort = lazyMock<ConstructorParameters<typeof GetProductVariantsUseCase>[1]>();
+    pricingPort.listProductPrices.mockResolvedValue([]);
+    useCase = new GetProductVariantsUseCase(mockRepo, pricingPort);
   });
 
   it('should get product variants (happy path)', async () => {

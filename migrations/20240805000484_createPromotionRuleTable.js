@@ -6,9 +6,21 @@ exports.up = function (knex) {
     t.uuid('promotionId').notNullable().references('promotionId').inTable('promotion').onDelete('CASCADE');
     t.string('name', 255);
     t.text('description');
-    t.enum('condition', ['all', 'any']).notNullable();
-    t.enum('operator', ['and', 'or']).notNullable();
+    t.enum('condition', [
+      'cartTotal',
+      'itemQuantity',
+      'productCategory',
+      'customerGroup',
+      'firstOrder',
+      'dateRange',
+      'timeOfDay',
+      'dayOfWeek',
+      'shippingMethod',
+      'paymentMethod',
+    ]).notNullable();
+    t.string('operator', 10).notNullable();
     t.jsonb('value').notNullable();
+    t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isRequired').notNullable().defaultTo(true);
     t.string('ruleGroup', 100).defaultTo('default');
     t.integer('sortOrder').notNullable().defaultTo(0);

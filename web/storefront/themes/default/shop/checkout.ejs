@@ -14,10 +14,10 @@
   };
 
   // Cart totals
-  const subtotal = basket?.totals?.subtotal || 0;
-  const shippingCost = basket?.totals?.shipping || 0;
-  const taxAmount = basket?.totals?.tax || 0;
-  const total = basket?.totals?.total || subtotal + shippingCost + taxAmount;
+  const subtotal = parseFloat(totals?.subtotal) || (basket?.subtotalCents || 0) / 100;
+  const shippingCost = parseFloat(totals?.shipping) || 0;
+  const taxAmount = parseFloat(totals?.tax) || 0;
+  const total = parseFloat(totals?.total) || (basket?.totalCents || 0) / 100 || subtotal + shippingCost + taxAmount;
   const itemCount = basket?.items?.length || 0;
 %>
 
@@ -204,11 +204,13 @@
                   <div class="flex items-center justify-between">
                     <div>
                       <span class="text-sm font-medium text-ink-900"><%= method.name %></span>
-                      <% if (method.estimatedDays) { %>
-                      <span class="text-xs text-gray-500 ml-2">(<%= method.estimatedDays %> days)</span>
+                      <% if (method.estimatedDeliveryDays) { %>
+                      <span class="text-xs text-gray-500 ml-2">(<%= method.estimatedDeliveryDays %> days)</span>
                       <% } %>
                     </div>
-                    <span class="text-sm font-semibold text-ink-900"><%= formatPrice(parseFloat(method.cost) || 0) %></span>
+                    <% if (method.minOrderValueCents || method.maxOrderValueCents) { %>
+                    <span class="text-xs text-gray-500"><%= method.minOrderValueCents ? 'min ' + formatPrice(method.minOrderValueCents / 100) : '' %><%= method.maxOrderValueCents ? ' max ' + formatPrice(method.maxOrderValueCents / 100) : '' %></span>
+                    <% } %>
                   </div>
                 </div>
               </label>
@@ -315,7 +317,7 @@
                     <p class="text-sm font-medium text-ink-900"><%= item.name %></p>
                     <p class="text-xs text-gray-500">Qty: <%= item.quantity %></p>
                   </div>
-                  <p class="text-sm font-semibold text-ink-900"><%= formatPrice((parseFloat(item.price) || 0) * item.quantity) %></p>
+                  <p class="text-sm font-semibold text-ink-900"><%= formatPrice((item.lineTotalCents || (item.unitPriceCents || 0) * item.quantity) / 100) %></p>
                 </div>
                 <% }) %>
               </div>
@@ -359,7 +361,7 @@
                   <p class="font-medium text-ink-900 truncate"><%= item.name %></p>
                   <p class="text-xs text-gray-500">Qty <%= item.quantity %></p>
                 </div>
-                <p class="font-medium text-ink-900"><%= formatPrice((parseFloat(item.price) || 0) * item.quantity) %></p>
+                <p class="font-medium text-ink-900"><%= formatPrice((item.lineTotalCents || (item.unitPriceCents || 0) * item.quantity) / 100) %></p>
               </div>
               <% }) %>
             </div>

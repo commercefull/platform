@@ -9,11 +9,15 @@
  */
 
 import { StockAvailabilityPort, StockCheckRequest, StockCheckResult } from '../../application/ports/StockAvailabilityPort';
-import InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
+import type InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 
 export class InventoryStockAvailabilityAdapter implements StockAvailabilityPort {
+  constructor(
+    private readonly inventoryRepo: Pick<typeof InventoryRepo, 'checkProductAvailability' | 'getTotalStockForProduct'>,
+  ) {}
+
   async checkAvailability(request: StockCheckRequest): Promise<StockCheckResult> {
-    const result = await InventoryRepo.checkProductAvailability(request.productId, request.productVariantId, request.quantity);
+    const result = await this.inventoryRepo.checkProductAvailability(request.productId, request.productVariantId, request.quantity);
     return {
       available: result.available,
       totalAvailable: result.totalAvailable,
@@ -22,6 +26,6 @@ export class InventoryStockAvailabilityAdapter implements StockAvailabilityPort 
   }
 
   async getTotalStock(productId: string): Promise<number> {
-    return InventoryRepo.getTotalStockForProduct(productId);
+    return this.inventoryRepo.getTotalStockForProduct(productId);
   }
 }

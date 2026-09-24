@@ -7,14 +7,18 @@
  */
 
 import { StoreFulfillmentPort, StoreFulfillmentOption, PickupLocation } from '../../application/ports/StoreFulfillmentPort';
-import StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
-import {
-  getLocations as getAllPickupLocations,
-  getLocation as getPickupLocation,
-  findNearestLocations as findNearestPickupLocations,
-} from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
+import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
+  constructor(
+    private readonly storeRepo: Pick<typeof StoreRepo, 'findActive'>,
+    private readonly pickupLocations: Pick<
+      typeof pickupLocationRepo,
+      'getLocations' | 'getLocation' | 'findNearestLocations'
+    >,
+  ) {}
+
   async checkLocalDeliveryEligibility(address: {
     latitude?: number;
     longitude?: number;
@@ -22,7 +26,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
     city?: string;
     country?: string;
   }): Promise<{ eligible: boolean; options: StoreFulfillmentOption[] }> {
-    const stores = await StoreRepo.findActive();
+    const stores = await this.storeRepo.findActive();
     const options: StoreFulfillmentOption[] = [];
 
     for (const store of stores) {
@@ -67,7 +71,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }
 
   async getAllPickupLocations(): Promise<PickupLocation[]> {
-    const locations = await getAllPickupLocations();
+    const locations = await this.pickupLocations.getLocations();
     return locations.map(loc => ({
       locationId: loc.pickupLocationId,
       storeId: loc.storeId,
@@ -84,7 +88,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }
 
   async getPickupLocation(locationId: string): Promise<PickupLocation | null> {
-    const loc = await getPickupLocation(locationId);
+    const loc = await this.pickupLocations.getLocation(locationId);
     if (!loc) return null;
     return {
       locationId: loc.pickupLocationId,
@@ -102,7 +106,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }
 
   async findNearestPickupLocations(lat: number, lng: number, radiusKm?: number): Promise<PickupLocation[]> {
-    const locations = await findNearestPickupLocations(lat, lng, radiusKm ?? 50);
+    const locations = await this.pickupLocations.findNearestLocations(lat, lng, radiusKm ?? 50);
     return locations.map(loc => ({
       locationId: loc.pickupLocationId,
       storeId: loc.storeId,

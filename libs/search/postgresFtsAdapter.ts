@@ -172,7 +172,14 @@ export class PostgresFtsAdapter implements SearchAdapter {
     const params: unknown[] = [];
     let paramIndex = 1;
 
-    const joins: string[] = [];
+    const joins: string[] = [
+      // Product-level base price (integer cents) from the pricing-owned store
+      `LEFT JOIN LATERAL (
+        SELECT "priceCents" FROM "productBasePrice"
+        WHERE "productId" = p."productId" AND "productVariantId" IS NULL
+        ORDER BY "priceCents" ASC LIMIT 1
+      ) bp ON true`,
+    ];
 
     // Full-text search using tsvector
     if (searchQuery.query) {
@@ -210,14 +217,14 @@ export class PostgresFtsAdapter implements SearchAdapter {
     }
 
     // Price range
-    if (searchQuery.minPrice !== undefined) {
-      conditions.push(`p."price" >= $${paramIndex}`);
-      params.push(searchQuery.minPrice);
+    if (searchQuery.minPriceCents !== undefined) {
+      conditions.push(`bp."priceCents" >= $${paramIndex}`);
+      params.push(searchQuery.minPriceCents);
       paramIndex++;
     }
-    if (searchQuery.maxPrice !== undefined) {
-      conditions.push(`p."price" <= $${paramIndex}`);
-      params.push(searchQuery.maxPrice);
+    if (searchQuery.maxPriceCents !== undefined) {
+      conditions.push(`bp."priceCents" <= $${paramIndex}`);
+      params.push(searchQuery.maxPriceCents);
       paramIndex++;
     }
 
@@ -366,7 +373,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
         orderBy = `p."name" ${sortOrder.toUpperCase()}`;
         break;
       case 'price':
-        orderBy = `p."price" ${sortOrder.toUpperCase()}`;
+        orderBy = `bp."priceCents" ${sortOrder.toUpperCase()}`;
         break;
       case 'createdAt':
         orderBy = `p."createdAt" ${sortOrder.toUpperCase()}`;
@@ -410,7 +417,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
         p."name",
         p."slug",
         p."sku",
-        p."price",
+        bp."priceCents",
         p."status",
         p."visibility",
         p."isFeatured",
@@ -480,9 +487,14 @@ export class PostgresFtsAdapter implements SearchAdapter {
   private async getPriceRangeFacets(_searchQuery: SearchQuery): Promise<SearchPriceRangeFacet[]> {
     const result = await query<Array<{ min_price: number; max_price: number }>>(`
       SELECT
-        MIN(p."price") as min_price,
-        MAX(p."price") as max_price
+        MIN(bp."priceCents") as min_price,
+        MAX(bp."priceCents") as max_price
       FROM "${PRODUCT_TABLE}" p
+      LEFT JOIN LATERAL (
+        SELECT "priceCents" FROM "productBasePrice"
+        WHERE "productId" = p."productId" AND "productVariantId" IS NULL
+        ORDER BY "priceCents" ASC LIMIT 1
+      ) bp ON true
       WHERE p."deletedAt" IS NULL AND p."status" = 'active'
     `);
 
@@ -500,8 +512,13 @@ export class PostgresFtsAdapter implements SearchAdapter {
 
       const countResult = await query<Array<{ count: string }>>(
         `SELECT COUNT(*) as count FROM "${PRODUCT_TABLE}" p
+         LEFT JOIN LATERAL (
+           SELECT "priceCents" FROM "productBasePrice"
+           WHERE "productId" = p."productId" AND "productVariantId" IS NULL
+           ORDER BY "priceCents" ASC LIMIT 1
+         ) bp ON true
          WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-           AND p."price" >= $1 AND p."price" <= $2`,
+           AND bp."priceCents" >= $1 AND bp."priceCents" <= $2`,
         [min, max],
       );
       const count = parseInt(countResult?.[0]?.count || '0', 10);

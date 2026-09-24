@@ -64,7 +64,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Conditions (JSON array)</label>
-            <textarea name="conditions" class="form-control" rows="4" placeholder='[{"field":"order.totalAmount","operator":"gt","value":100}]'><%= formData?.conditions || '' %></textarea>
+            <textarea name="conditions" class="form-control" rows="4" placeholder='[{"field":"order.totalAmountCents","operator":"gt","value":100}]'><%= formData?.conditions || '' %></textarea>
             <small class="form-hint">Array of condition objects with field, operator, and value.</small>
           </div>
           <div class="mb-3">

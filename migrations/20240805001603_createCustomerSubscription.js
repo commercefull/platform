@@ -12,11 +12,11 @@ exports.up = function (knex) {
     table.uuid('productVariantId').references('productVariantId').inTable('productVariant');
     table.string('status').defaultTo('pending'); // pending, trialing, active, paused, past_due, cancelled, expired
     table.integer('quantity').defaultTo(1);
-    table.decimal('unitPrice', 15, 2).notNullable();
-    table.decimal('discountAmount', 15, 2).defaultTo(0);
-    table.decimal('taxAmount', 15, 2).defaultTo(0);
-    table.decimal('totalPrice', 15, 2).notNullable();
-    table.string('currency', 3).defaultTo('USD');
+    table.bigInteger('unitPriceCents').notNullable();
+    table.bigInteger('discountAmountCents').defaultTo(0);
+    table.bigInteger('taxAmountCents').defaultTo(0);
+    table.bigInteger('totalPriceCents').notNullable();
+    table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
     table.string('billingInterval').notNullable();
     table.integer('billingIntervalCount').defaultTo(1);
     table.timestamp('trialStartAt');
@@ -39,7 +39,7 @@ exports.up = function (knex) {
     table.uuid('billingAddressId');
     table.string('paymentMethodId');
     table.string('externalSubscriptionId'); // Stripe/payment provider ID
-    table.decimal('lifetimeValue', 15, 2).defaultTo(0);
+    table.bigInteger('lifetimeValueCents').defaultTo(0);
     table.integer('failedPaymentCount').defaultTo(0);
     table.timestamp('lastPaymentAt');
     table.timestamp('lastPaymentFailedAt');

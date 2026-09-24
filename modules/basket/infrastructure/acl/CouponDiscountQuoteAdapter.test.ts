@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { CouponDiscountQuoteAdapter } from './CouponDiscountQuoteAdapter';
+import type { CouponRepository } from '../../../coupon/infrastructure/repositories/CouponRepository';
+import type { Coupon } from '../../../coupon/domain/entities/Coupon';
 
 describe('CouponDiscountQuoteAdapter', () => {
-  let adapter: import('./CouponDiscountQuoteAdapter').CouponDiscountQuoteAdapter;
-  let mockCouponRepo: { validateCouponCode: jest.Mock };
+  let adapter: CouponDiscountQuoteAdapter;
+  let mockCouponRepo: jest.Mocked<Pick<CouponRepository, 'validateCouponCode'>>;
 
   beforeEach(() => {
     mockCouponRepo = {
       validateCouponCode: jest.fn(),
     };
-    const { CouponDiscountQuoteAdapter } = require('./CouponDiscountQuoteAdapter');
-    adapter = new CouponDiscountQuoteAdapter(mockCouponRepo as never);
+    adapter = new CouponDiscountQuoteAdapter(mockCouponRepo as unknown as CouponRepository);
   });
 
   it('implements DiscountQuotePort', () => {
@@ -19,8 +20,8 @@ describe('CouponDiscountQuoteAdapter', () => {
   it('should return valid quote when coupon is valid', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 },
-      discountAmount: 10,
+      coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 } as unknown as Coupon,
+      discountAmountCents: 10,
     });
 
     const result = await adapter.validateDiscount('SAVE10', 100, 'cust-1');
@@ -30,7 +31,7 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.discount!.code).toBe('SAVE10');
     expect(result.discount!.type).toBe('fixed_amount');
     expect(result.discount!.value).toBe(10);
-    expect(result.discount!.discountAmount).toBe(10);
+    expect(result.discount!.discountAmountCents).toBe(10);
   });
 
   it('should return invalid result when coupon is invalid', async () => {
@@ -46,24 +47,24 @@ describe('CouponDiscountQuoteAdapter', () => {
     expect(result.error).toBe('Coupon expired');
   });
 
-  it('should default discountAmount to 0 when not provided', async () => {
+  it('should default discountAmountCents to 0 when not provided', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'FREE', type: 'percentage', value: 50 },
-      discountAmount: undefined,
+      coupon: { code: 'FREE', type: 'percentage', value: 50 } as unknown as Coupon,
+      discountAmountCents: undefined,
     });
 
     const result = await adapter.validateDiscount('FREE', 100);
 
     expect(result.valid).toBe(true);
-    expect(result.discount!.discountAmount).toBe(0);
+    expect(result.discount!.discountAmountCents).toBe(0);
   });
 
   it('should pass customerId to coupon repository', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 },
-      discountAmount: 10,
+      coupon: { code: 'SAVE10', type: 'fixed_amount', value: 10 } as unknown as Coupon,
+      discountAmountCents: 10,
     });
 
     await adapter.validateDiscount('SAVE10', 100, 'cust-1');
@@ -74,8 +75,8 @@ describe('CouponDiscountQuoteAdapter', () => {
   it('should work without customerId', async () => {
     mockCouponRepo.validateCouponCode.mockResolvedValue({
       valid: true,
-      coupon: { code: 'SAVE10', type: 'percentage', value: 20 },
-      discountAmount: 20,
+      coupon: { code: 'SAVE10', type: 'percentage', value: 20 } as unknown as Coupon,
+      discountAmountCents: 20,
     });
 
     const result = await adapter.validateDiscount('SAVE10', 100);

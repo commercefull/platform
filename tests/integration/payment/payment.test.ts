@@ -77,7 +77,7 @@ describe('Payment Integration Tests', () => {
       expect(event).toBeDefined();
     });
 
-    it('REQ 2.1.2 — amount <= 0 throws correct error', async () => {
+    it('REQ 2.1.2 — amountCents <= 0 throws correct error', async () => {
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
       await expect(useCase.execute(new InitiatePaymentCommand('order-id', 0, 'USD', 'default'))).rejects.toThrow(
         'Amount must be greater than zero',
@@ -123,7 +123,7 @@ describe('Payment Integration Tests', () => {
         orderId: generateUUID(),
         paymentMethodConfigId: 'default',
         gatewayId: 'default',
-        amount: 10,
+        amountCents: 10,
         currency: 'USD',
       });
       tx.markAsPaid(extId, {});
@@ -157,7 +157,7 @@ describe('Payment Integration Tests', () => {
         orderId: generateUUID(),
         paymentMethodConfigId: 'default',
         gatewayId: 'default',
-        amount: 10,
+        amountCents: 10,
         currency: 'USD',
       });
       tx.fail('card_declined', 'Card declined', {});

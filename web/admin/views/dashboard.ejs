@@ -36,7 +36,7 @@
             <div class="text-muted small"><%= t('dashboard.thisMonth') %></div>
           </div>
         </div>
-        <div class="h1 mb-3">$<%= (stats.totalRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+        <div class="h1 mb-3">$<%= ((stats.totalRevenueCents || 0) / 100).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
         <div class="d-flex">
           <a href="/admin/analytics" class="btn btn-success btn-sm"><%= t('dashboard.viewAnalytics') %></a>
         </div>
@@ -159,7 +159,7 @@
                 </span>
               </div>
               <div class="col">
-                <div class="font-weight-medium">$<%= (stats.todayRevenue || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                <div class="font-weight-medium">$<%= ((stats.todayRevenueCents || 0) / 100).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
                 <div class="text-muted"><%= t('dashboard.todaysRevenue') %></div>
               </div>
             </div>
@@ -207,7 +207,7 @@
                 <div class="font-weight-medium">
                   <a href="/admin/products/<%= product.productId %>"><%= product.name %></a>
                 </div>
-                <div class="text-muted"><%= product.totalSold %> <%= t('common.sold') %> • $<%= (product.revenue || 0).toFixed(2) %></div>
+                <div class="text-muted"><%= product.totalSold %> <%= t('common.sold') %> • $<%= ((product.revenueCents || 0) / 100).toFixed(2) %></div>
               </div>
             </div>
             <% }); %>
@@ -249,7 +249,7 @@
                         <%= order.status %>
                       </span>
                     </td>
-                    <td>$<%= (order.totalAmount || 0).toFixed(2) %></td>
+                    <td>$<%= ((order.totalAmountCents || 0) / 100).toFixed(2) %></td>
                     <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
                   </tr>
                   <% }); %>

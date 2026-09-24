@@ -1,97 +1,65 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createAddress, createCheckoutRepository, createCheckoutSession, createShippingQuotePort, emitMock } from '../../tests/testUtils';
 import { SetShippingMethodUseCase, SetShippingMethodCommand } from './SetShippingMethod';
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
-import { eventBus } from '../../../../libs/events/eventBus';
 
-beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
-});
+const SHIPPING_OPTIONS = [
+  { methodId: 'sm-1', methodName: 'Standard', amountCents: 999, currency: 'USD' },
+  { methodId: 'sm-2', methodName: 'Express', amountCents: 1999, currency: 'USD' },
+];
 
 describe('SetShippingMethodUseCase', () => {
   let useCase: SetShippingMethodUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockShippingPort: Record<string, jest.Mock>;
-  let mockSession: Record<string, unknown>;
+  let checkoutRepository: ReturnType<typeof createCheckoutRepository>;
+  let shippingQuotePort: ReturnType<typeof createShippingQuotePort>;
 
   beforeEach(() => {
-    mockSession = {
-      id: 'ck-1',
-      basketId: 'b1',
-      customerId: 'c1',
-      guestEmail: undefined,
-      status: 'pending',
-      paymentStatus: 'pending',
-      shippingAddress: {
-        country: 'US',
-        region: 'OR',
-        city: 'Portland',
-        postalCode: '97201',
-        firstName: 'J',
-        lastName: 'D',
-        addressLine1: '123 St',
-      },
-      billingAddress: null,
-      shippingMethodId: undefined,
-      shippingMethodName: undefined,
-      paymentMethodId: undefined,
-      subtotal: { amount: 100, currency: 'USD' },
-      taxAmount: { amount: 0, currency: 'USD' },
-      shippingAmount: { amount: 0, currency: 'USD' },
-      discountAmount: { amount: 0, currency: 'USD' },
-      total: { amount: 100, currency: 'USD' },
-      couponCode: undefined,
-      fulfillmentType: 'shipping',
-      notes: undefined,
-      sameAsShipping: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      expiresAt: new Date(),
-      setShippingMethod: jest.fn(),
-    };
-    mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockSession),
-      save: jest.fn().mockResolvedValue(undefined),
-    };
-    mockShippingPort = {
-      getShippingOptions: jest.fn().mockResolvedValue([
-        { methodId: 'sm-1', methodName: 'Standard', amount: 9.99, currency: 'USD' },
-        { methodId: 'sm-2', methodName: 'Express', amount: 19.99, currency: 'USD' },
-      ]),
-    };
-    useCase = new SetShippingMethodUseCase(mockRepo as never, mockShippingPort as never);
+    jest.clearAllMocks();
+    checkoutRepository = createCheckoutRepository();
+    shippingQuotePort = createShippingQuotePort();
+    shippingQuotePort.getShippingOptions.mockResolvedValue(SHIPPING_OPTIONS);
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession({ shippingAddress: createAddress() }));
+    useCase = new SetShippingMethodUseCase(checkoutRepository, shippingQuotePort);
   });
 
-  it('should set shipping method (happy path)', async () => {
+  it('should set the shipping method, persist the session, and emit checkout.updated when the method is valid', async () => {
     const result = await useCase.execute(new SetShippingMethodCommand('ck-1', 'sm-1'));
 
     expect(result.checkoutId).toBe('ck-1');
-    expect(mockSession.setShippingMethod).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ field: 'shippingMethod' }));
+    expect(result.shippingMethodId).toBe('sm-1');
+    expect(result.shippingMethodName).toBe('Standard');
+    expect(result.shippingAmountCents).toBe(999);
+    expect(checkoutRepository.save).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'shippingMethod', methodId: 'sm-1' }));
   });
 
-  it('should throw NotFoundError when session does not exist', async () => {
-    mockRepo.findById.mockResolvedValue(null);
+  it('should throw NotFoundError when the session does not exist', async () => {
+    checkoutRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(new SetShippingMethodCommand('missing', 'sm-1'))).rejects.toThrow(NotFoundError);
+    expect(shippingQuotePort.getShippingOptions).not.toHaveBeenCalled();
   });
 
-  it('should throw BadRequestError when shipping address not set', async () => {
-    mockSession.shippingAddress = null;
+  it('should throw BadRequestError when the shipping address is not set', async () => {
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession({ shippingAddress: undefined }));
+
+    await expect(useCase.execute(new SetShippingMethodCommand('ck-1', 'sm-1'))).rejects.toThrow(BadRequestError);
+    expect(shippingQuotePort.getShippingOptions).not.toHaveBeenCalled();
+  });
+
+  it('should throw BadRequestError when no shipping service is configured', async () => {
+    useCase = new SetShippingMethodUseCase(checkoutRepository);
 
     await expect(useCase.execute(new SetShippingMethodCommand('ck-1', 'sm-1'))).rejects.toThrow(BadRequestError);
   });
 
-  it('should throw BadRequestError when shipping service unavailable', async () => {
-    useCase = new SetShippingMethodUseCase(mockRepo as never);
+  it('should throw BadRequestError when no shipping methods are available for the address', async () => {
+    shippingQuotePort.getShippingOptions.mockResolvedValue([]);
 
     await expect(useCase.execute(new SetShippingMethodCommand('ck-1', 'sm-1'))).rejects.toThrow(BadRequestError);
   });
 
-  it('should throw BadRequestError for invalid shipping method', async () => {
+  it('should throw BadRequestError when the requested method is not offered', async () => {
     await expect(useCase.execute(new SetShippingMethodCommand('ck-1', 'invalid'))).rejects.toThrow(BadRequestError);
+    expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 });

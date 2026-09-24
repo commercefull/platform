@@ -15,8 +15,8 @@ exports.up = function (knex) {
     t.string('jurisdictionName', 100).notNullable();
     t.decimal('rate', 10, 6).notNullable();
     t.boolean('isCompound').notNullable().defaultTo(false);
-    t.decimal('taxableAmount', 15, 2).notNullable();
-    t.decimal('taxAmount', 15, 2).notNullable();
+    t.bigInteger('taxableAmountCents').notNullable();
+    t.bigInteger('taxAmountCents').notNullable();
 
     t.index('calculationId');
     t.index('calculationLineId');

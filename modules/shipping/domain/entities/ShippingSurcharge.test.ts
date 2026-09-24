@@ -14,9 +14,9 @@ describe('ShippingSurcharge domain entity', () => {
   };
 
   const baseContext: SurchargeContext = {
-    baseRate: 10,
+    baseRateCents: 10,
     weight: 5,
-    orderValue: 100,
+    orderValueCents: 100,
   };
 
   describe('isApplicable', () => {
@@ -58,13 +58,13 @@ describe('ShippingSurcharge domain entity', () => {
   describe('calculate — percentage', () => {
     it('adds a percentage surcharge on the base rate', () => {
       const sc = new ShippingSurcharge({ ...baseProps, calculationType: 'percentage', value: 10 });
-      // 10% of baseRate 10 = 1
+      // 10% of baseRateCents 10 = 1
       expect(sc.calculate(10, baseContext)).toBe(1);
     });
 
     it('adds 25% fuel surcharge', () => {
       const sc = new ShippingSurcharge({ ...baseProps, type: 'fuel', calculationType: 'percentage', value: 25 });
-      // 25% of baseRate 20 = 5
+      // 25% of baseRateCents 20 = 5
       expect(sc.calculate(20, baseContext)).toBe(5);
     });
   });
@@ -114,7 +114,7 @@ describe('ShippingSurcharge domain entity', () => {
     });
 
     it('applies insurance surcharge as percentage of declared value', () => {
-      const conditions: AttributeCondition[] = [{ attribute: 'declaredValue', operator: 'gte', value: 1000 }];
+      const conditions: AttributeCondition[] = [{ attribute: 'declaredValueCents', operator: 'gte', value: 1000 }];
       const sc = new ShippingSurcharge({
         ...baseProps,
         type: 'insurance',
@@ -123,10 +123,10 @@ describe('ShippingSurcharge domain entity', () => {
         conditions,
       });
 
-      // baseRate 10, declaredValue 1500 → 1% of 10 = 0.1
-      expect(sc.calculate(10, { ...baseContext, declaredValue: 1500 })).toBeCloseTo(0.1);
-      // declaredValue below threshold → no surcharge
-      expect(sc.calculate(10, { ...baseContext, declaredValue: 500 })).toBe(0);
+      // baseRateCents 10, declaredValueCents 1500 → 1% of 10 rounds to 0 cents
+      expect(sc.calculate(10, { ...baseContext, declaredValueCents: 1500 })).toBe(0);
+      // declaredValueCents below threshold → no surcharge
+      expect(sc.calculate(10, { ...baseContext, declaredValueCents: 500 })).toBe(0);
     });
 
     it('applies signature surcharge as flat fee', () => {

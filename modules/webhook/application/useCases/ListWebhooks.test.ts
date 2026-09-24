@@ -1,29 +1,26 @@
+import { createWebhookRepository, createWebhookEndpointProps } from '../../tests/testUtils';
 import { ListWebhooksUseCase } from './ListWebhooks';
 
 describe('ListWebhooksUseCase', () => {
-  let useCase: ListWebhooksUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should list endpoints with default pagination when no filters are given', async () => {
+    const repository = createWebhookRepository();
+    repository.findEndpoints.mockResolvedValue({
+      data: [createWebhookEndpointProps(), createWebhookEndpointProps({ webhookEndpointId: 'wh-2', isActive: false })],
+      total: 2,
+    });
 
-  beforeEach(() => {
-    mockRepo = {
-      findEndpoints: jest.fn().mockResolvedValue([
-        { webhookEndpointId: 'wh-1', name: 'Hook1', url: 'https://a.com', events: ['*'], isActive: true },
-        { webhookEndpointId: 'wh-2', name: 'Hook2', url: 'https://b.com', events: ['product.*'], isActive: false },
-      ]),
-    };
-    useCase = new ListWebhooksUseCase(mockRepo as never);
+    const result = await new ListWebhooksUseCase(repository).execute();
+
+    expect(result.data).toHaveLength(2);
+    expect(result.total).toBe(2);
+    expect(repository.findEndpoints).toHaveBeenCalledWith(undefined, { limit: 50, offset: 0 });
   });
 
-  it('should list webhooks with default pagination', async () => {
-    const result = await useCase.execute();
+  it('should pass filters and pagination through when provided', async () => {
+    const repository = createWebhookRepository();
 
-    expect(result).toHaveLength(2);
-    expect(mockRepo.findEndpoints).toHaveBeenCalledWith(undefined, { limit: 50, offset: 0 });
-  });
+    await new ListWebhooksUseCase(repository).execute({ organizationId: 'org-1' }, 10, 5);
 
-  it('should pass filters and pagination to repository', async () => {
-    await useCase.execute({ organizationId: 'org-1' }, 10, 5);
-
-    expect(mockRepo.findEndpoints).toHaveBeenCalledWith({ organizationId: 'org-1' }, { limit: 10, offset: 5 });
+    expect(repository.findEndpoints).toHaveBeenCalledWith({ organizationId: 'org-1' }, { limit: 10, offset: 5 });
   });
 });

@@ -49,7 +49,7 @@ export interface SubscriptionRepository {
   saveSubscriptionPlan(
     plan:
       | (Partial<SubscriptionPlan> & { subscriptionPlanId: string })
-      | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; price: number }),
+      | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; priceCents: number }),
   ): Promise<SubscriptionPlan>;
   deleteSubscriptionPlan(subscriptionPlanId: string): Promise<void>;
 
@@ -92,10 +92,10 @@ export interface SubscriptionRepository {
     billingCycleNumber: number;
     periodStart: Date;
     periodEnd: Date;
-    subtotal: number;
-    discountAmount?: number;
-    taxAmount?: number;
-    shippingAmount?: number;
+    subtotalCents: number;
+    discountAmountCents?: number;
+    taxAmountCents?: number;
+    shippingAmountCents?: number;
     scheduledAt?: Date;
   }): Promise<SubscriptionOrder>;
   updateSubscriptionOrderStatus(
@@ -109,7 +109,7 @@ export interface SubscriptionRepository {
     customerSubscriptionId: string;
     subscriptionOrderId?: string;
     attemptNumber: number;
-    amount: number;
+    amountCents: number;
     currency?: string;
     scheduledAt: Date;
   }): Promise<DunningAttempt>;

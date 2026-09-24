@@ -8,14 +8,14 @@ interface OrderCreatedPayload {
   orderId: string;
   customerId: string;
   orderNumber: string;
-  total: number;
+  totalAmountCents: number;
 }
 
 interface OrderPaidPayload {
   orderId: string;
   customerId: string;
   orderNumber: string;
-  amount: number;
+  amountCents: number;
   transactionId: string;
 }
 
@@ -44,7 +44,7 @@ interface OrderRefundedPayload {
   orderId: string;
   customerId: string;
   orderNumber: string;
-  amount: number;
+  refundAmountCents: number;
   reason: string;
 }
 
@@ -59,14 +59,14 @@ interface OrderReadyForPickupPayload {
 
 interface PaymentReceivedPayload {
   orderId: string;
-  amount: number;
+  amountCents: number;
   transactionId: string;
 }
 
 interface PaymentFailedPayload {
   orderId: string;
   customerId: string;
-  amount: number;
+  amountCents: number;
   reason: string;
 }
 
@@ -142,7 +142,7 @@ interface ReceivingCompletedPayload {
 export const registerOrderEventHandlers = () => {
   // Order created event
   eventBus.registerHandler('order.created', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, total } = payload.data as OrderCreatedPayload;
+    const { orderId, customerId, orderNumber, totalAmountCents } = payload.data as OrderCreatedPayload;
 
     // Send order confirmation notification
     await JobScheduler.scheduleNotification({
@@ -150,7 +150,7 @@ export const registerOrderEventHandlers = () => {
       type: 'order_confirmation',
       title: 'Order Confirmed',
       message: `Your order ${orderNumber} has been confirmed.`,
-      data: { orderId, orderNumber, total },
+      data: { orderId, orderNumber, totalAmountCents },
     });
 
     // Send order confirmation email
@@ -161,22 +161,22 @@ export const registerOrderEventHandlers = () => {
         to: customerEmail,
         subject: `Order Confirmation - ${orderNumber}`,
         template: 'order-confirmation',
-        data: { orderId, orderNumber, total },
+        data: { orderId, orderNumber, totalAmountCents },
       });
     }
   });
 
   // Order paid event
   eventBus.registerHandler('order.paid', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, amount, transactionId } = payload.data as OrderPaidPayload;
+    const { orderId, customerId, orderNumber, amountCents, transactionId } = payload.data as OrderPaidPayload;
 
     // Send payment confirmation notification
     await JobScheduler.scheduleNotification({
       userId: customerId,
       type: 'payment_confirmation',
       title: 'Payment Confirmed',
-      message: `Payment of $${amount} for order ${orderNumber} has been processed.`,
-      data: { orderId, orderNumber, amount, transactionId },
+      message: `Payment of $${((amountCents ?? 0) / 100).toFixed(2)} for order ${orderNumber} has been processed.`,
+      data: { orderId, orderNumber, amountCents, transactionId },
     });
   });
 
@@ -225,15 +225,15 @@ export const registerOrderEventHandlers = () => {
 
   // Order refunded event
   eventBus.registerHandler('order.refunded', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, amount, reason } = payload.data as OrderRefundedPayload;
+    const { orderId, customerId, orderNumber, refundAmountCents, reason } = payload.data as OrderRefundedPayload;
 
     // Send refund notification
     await JobScheduler.scheduleNotification({
       userId: customerId,
       type: 'refund_processed',
       title: 'Refund Processed',
-      message: `A refund of $${amount} has been processed for order ${orderNumber}.`,
-      data: { orderId, orderNumber, amount, reason },
+      message: `A refund of $${((refundAmountCents ?? 0) / 100).toFixed(2)} has been processed for order ${orderNumber}.`,
+      data: { orderId, orderNumber, refundAmountCents, reason },
     });
   });
 
@@ -265,26 +265,26 @@ export const registerOrderEventHandlers = () => {
 // Event handlers for payment events
 export const registerPaymentEventHandlers = () => {
   eventBus.registerHandler('payment.received', async (payload: EventPayload) => {
-    const { orderId, amount, transactionId } = payload.data as PaymentReceivedPayload;
+    const { orderId, amountCents, transactionId } = payload.data as PaymentReceivedPayload;
 
     // Emit order paid event
     await eventBus.emit('order.paid', {
       orderId,
-      amount,
+      amountCents,
       transactionId,
     });
   });
 
   eventBus.registerHandler('payment.failed', async (payload: EventPayload) => {
-    const { orderId, customerId, amount, reason } = payload.data as PaymentFailedPayload;
+    const { orderId, customerId, amountCents, reason } = payload.data as PaymentFailedPayload;
 
     // Send payment failure notification
     await JobScheduler.scheduleNotification({
       userId: customerId,
       type: 'payment_failed',
       title: 'Payment Failed',
-      message: `Payment of $${amount} could not be processed. Please try again.`,
-      data: { orderId, amount, reason },
+      message: `Payment of $${((amountCents ?? 0) / 100).toFixed(2)} could not be processed. Please try again.`,
+      data: { orderId, amountCents, reason },
     });
   });
 };

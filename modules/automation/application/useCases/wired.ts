@@ -1,12 +1,10 @@
 import { AutomationRuleRepositoryImpl, ExecutionLogRepositoryImpl } from '../../infrastructure';
 import { AutomationExecutionEngine } from '../services/AutomationExecutionEngine';
-import {
-  CreateAutomationRuleUseCase,
-  UpdateAutomationRuleUseCase,
-  DeleteAutomationRuleUseCase,
-  GetAutomationRuleUseCase,
-  ListAutomationRulesUseCase,
-} from './AutomationRuleCrud';
+import { CreateAutomationRuleUseCase } from './CreateAutomationRule';
+import { UpdateAutomationRuleUseCase } from './UpdateAutomationRule';
+import { DeleteAutomationRuleUseCase } from './DeleteAutomationRule';
+import { GetAutomationRuleUseCase } from './GetAutomationRule';
+import { ListAutomationRulesUseCase } from './ListAutomationRules';
 
 const ruleRepo = new AutomationRuleRepositoryImpl();
 const logRepo = new ExecutionLogRepositoryImpl();

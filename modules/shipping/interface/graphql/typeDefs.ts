@@ -7,7 +7,7 @@ export const shippingTypeDefs = `#graphql
     rateId: String!
     rateName: String
     rateType: String!
-    amount: Float!
+    amountCents: Int!
     currency: String!
     estimatedDeliveryDays: Int
     isFreeShipping: Boolean!
@@ -30,8 +30,8 @@ export const shippingTypeDefs = `#graphql
     displayOnFrontend: Boolean!
     estimatedDeliveryDays: Int
     handlingDays: Int
-    minOrderValue: Float
-    maxOrderValue: Float
+    minOrderValueCents: Int
+    maxOrderValueCents: Int
     minWeight: Float
     maxWeight: Float
   }
@@ -51,7 +51,7 @@ export const shippingTypeDefs = `#graphql
   }
 
   input OrderDetailsInput {
-    subtotal: Float!
+    subtotalCents: Int!
     itemCount: Int!
     totalWeight: Float
     currency: String

@@ -1,62 +1,56 @@
-jest.mock('../../infrastructure/repositories/CustomerDataRepository', () => ({
-  __esModule: true,
-  default: {
-    addresses: {
-      findActiveByCustomerId: jest.fn().mockResolvedValue([{ addressId: 'a1', customerId: 'c1' }]),
-      findActiveById: jest.fn().mockResolvedValue({ addressId: 'a1', customerId: 'c1' }),
-      create: jest.fn().mockResolvedValue({ addressId: 'a2' }),
-      update: jest.fn().mockResolvedValue(undefined),
-      softDelete: jest.fn().mockResolvedValue(undefined),
-      unsetDefaultsExcept: jest.fn().mockResolvedValue(undefined),
-    },
-    wishlist: {},
-    customers: {},
-  },
-}));
-
+import '../../tests/testUtils';
 import { ManageStorefrontAddressesUseCase } from './ManageStorefrontAddresses';
-import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
-
-const mockRepo = customerDataRepository as unknown as { addresses: Record<string, jest.Mock> };
+import { createCustomerAddressRepository, createCustomerAddressRow } from '../../tests/testUtils';
 
 describe('ManageStorefrontAddressesUseCase', () => {
-  let useCase: ManageStorefrontAddressesUseCase;
+  const addressRepository = createCustomerAddressRepository();
+  const useCase = new ManageStorefrontAddressesUseCase(addressRepository);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ManageStorefrontAddressesUseCase();
   });
 
-  it('should find active by customer ID', async () => {
-    const result = await useCase.findActiveByCustomerId('c1');
+  it('should return the active addresses for the customer', async () => {
+    addressRepository.findActiveByCustomerId.mockResolvedValue([createCustomerAddressRow()]);
+
+    const result = await useCase.findActiveByCustomerId('cust-1');
+
     expect(result).toHaveLength(1);
+    expect(addressRepository.findActiveByCustomerId).toHaveBeenCalledWith('cust-1');
   });
 
-  it('should find active by ID', async () => {
-    const result = await useCase.findActiveById('a1', 'c1');
-    expect(result).toEqual({ addressId: 'a1', customerId: 'c1' });
+  it('should return the active address for the given id', async () => {
+    addressRepository.findActiveById.mockResolvedValue(createCustomerAddressRow());
+
+    const result = await useCase.findActiveById('addr-1', 'cust-1');
+
+    expect(result?.customerAddressId).toBe('addr-1');
+    expect(addressRepository.findActiveById).toHaveBeenCalledWith('addr-1', 'cust-1');
   });
 
-  it('should create address', async () => {
-    const result = await useCase.create({
-      customerId: 'c1',
-      firstName: 'John',
-      lastName: 'Doe',
-      addressLine1: '123 Main',
-      city: 'NYC',
-      postalCode: '10001',
-      country: 'US',
-    });
-    expect(result).toEqual({ addressId: 'a2' });
+  it('should delegate address creation', async () => {
+    addressRepository.create.mockResolvedValue(createCustomerAddressRow());
+
+    const result = await useCase.create({ customerId: 'cust-1', addressLine1: '123 St' });
+
+    expect(result.customerAddressId).toBe('addr-1');
+    expect(addressRepository.create).toHaveBeenCalledWith({ customerId: 'cust-1', addressLine1: '123 St' });
   });
 
-  it('should soft delete address', async () => {
-    await useCase.softDelete('a1', 'c1');
-    expect(mockRepo.addresses.softDelete).toHaveBeenCalledWith('a1', 'c1');
+  it('should delegate soft deletion', async () => {
+    addressRepository.softDelete.mockResolvedValue(true);
+
+    const result = await useCase.softDelete('addr-1', 'cust-1');
+
+    expect(result).toBe(true);
+    expect(addressRepository.softDelete).toHaveBeenCalledWith('addr-1', 'cust-1');
   });
 
-  it('should unset defaults except', async () => {
-    await useCase.unsetDefaultsExcept('c1', 'a1');
-    expect(mockRepo.addresses.unsetDefaultsExcept).toHaveBeenCalledWith('c1', 'a1');
+  it('should delegate unsetting other defaults', async () => {
+    addressRepository.unsetDefaultsExcept.mockResolvedValue(undefined);
+
+    await useCase.unsetDefaultsExcept('cust-1', 'addr-1');
+
+    expect(addressRepository.unsetDefaultsExcept).toHaveBeenCalledWith('cust-1', 'addr-1');
   });
 });

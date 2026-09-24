@@ -6,10 +6,9 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { hashString } from '../../../../libs/hash';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { ManageAdminUsersUseCase, ManageRolesUseCase } from '../../application/useCases/ManageAdminUsers';
+import { manageAdminUsersUseCase, manageRolesUseCase } from '../../application/wired';
 
-const manageAdminUsersUseCase = new ManageAdminUsersUseCase();
-const manageRolesUseCase = new ManageRolesUseCase();
+
 
 // ============================================================================
 // Admin Users Management

@@ -16,7 +16,7 @@ describe('Subscription', () => {
       billingIntervalCount: 1,
       currentPeriodStart: '2024-01-01',
       currentPeriodEnd: '2024-02-01',
-      amount: 29.99,
+      amountCents: 29.99,
       currencyCode: 'USD',
       createdAt: '2024-01-01',
       updatedAt: '2024-01-01',
@@ -126,7 +126,7 @@ describe('Subscription', () => {
       expect(json.subscriptionId).toBe('sub-1');
       expect(json.customerId).toBe('cust-1');
       expect(json.planId).toBe('plan-1');
-      expect(json.amount).toBe(29.99);
+      expect(json.amountCents).toBe(29.99);
     });
   });
 });

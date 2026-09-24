@@ -27,7 +27,6 @@ describe('Store', () => {
       expect(store.isVerified).toBe(false);
       expect(store.isFeatured).toBe(false);
       expect(store.isHeadquarters).toBe(false);
-      expect(store.defaultCurrency).toBe('USD');
     });
 
     it('should generate slug from name', () => {
@@ -79,6 +78,7 @@ describe('Store', () => {
         name: 'Test',
         slug: 'test',
         storeType: 'merchant_store',
+        channel: 'physical',
         organizationId: 'org-1',
         isHeadquarters: true,
         isActive: true,

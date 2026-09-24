@@ -1,58 +1,99 @@
-jest.mock('../../../../libs/uuid', () => ({
-  __esModule: true,
-  generateUUID: jest.fn().mockReturnValue('consent-uuid'),
-}));
-
+import { createConsent, createConsentRepository } from '../../tests/testUtils';
 import { ManageCookieConsentUseCase, RecordCookieConsentCommand, UpdateCookieConsentCommand } from './ManageCookieConsent';
 import { GdprValidationError } from '../../domain/errors/GdprErrors';
 
 describe('ManageCookieConsentUseCase', () => {
-  let useCase: ManageCookieConsentUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should record anonymous consent when no consent exists for the session', async () => {
+    const repository = createConsentRepository(null);
 
-  beforeEach(() => {
-    mockRepo = {
-      findBySessionId: jest.fn().mockResolvedValue(null),
-      save: jest.fn().mockImplementation(async (c: unknown) => c),
-      findById: jest.fn().mockResolvedValue({
-        gdprCookieConsentId: 'c1',
-        updatePreferences: jest.fn(),
-        getPreferences: () => ({ necessary: true, functional: false, analytics: true, marketing: false }),
-        consentedAt: new Date(),
-        expiresAt: undefined,
-      }),
-    };
-    useCase = new ManageCookieConsentUseCase(mockRepo as never);
+    const result = await new ManageCookieConsentUseCase(repository).recordConsent(
+      new RecordCookieConsentCommand('sess-1', { necessary: true, functional: true }),
+    );
+
+    expect(result.gdprCookieConsentId).toBe('test-uuid');
+    expect(result.preferences.functional).toBe(true);
+    expect(repository.save).toHaveBeenCalled();
   });
 
-  it('should record consent for guest (happy path)', async () => {
-    const result = await useCase.recordConsent(new RecordCookieConsentCommand('sess1', { necessary: true, functional: true }));
+  it('should record customer consent when a customer id is provided', async () => {
+    const repository = createConsentRepository(null);
 
-    expect(result.gdprCookieConsentId).toBeDefined();
-    expect(mockRepo.save).toHaveBeenCalled();
+    const result = await new ManageCookieConsentUseCase(repository).recordConsent(
+      new RecordCookieConsentCommand('sess-1', { analytics: true }, 'customer-1'),
+    );
+
+    expect(result.gdprCookieConsentId).toBe('test-uuid');
+    expect(result.preferences.analytics).toBe(true);
   });
 
-  it('should throw GdprValidationError when sessionId is empty', async () => {
-    await expect(useCase.recordConsent(new RecordCookieConsentCommand('', {}))).rejects.toThrow(GdprValidationError);
+  it('should update the existing consent when the session already has one', async () => {
+    const existing = createConsent({ gdprCookieConsentId: 'existing-1', functional: false });
+    const repository = createConsentRepository(existing);
+
+    const result = await new ManageCookieConsentUseCase(repository).recordConsent(
+      new RecordCookieConsentCommand('sess-1', { functional: true }),
+    );
+
+    expect(result.gdprCookieConsentId).toBe('existing-1');
+    expect(result.preferences.functional).toBe(true);
   });
 
-  it('should update existing consent', async () => {
-    mockRepo.findBySessionId.mockResolvedValue({
-      gdprCookieConsentId: 'existing',
-      updatePreferences: jest.fn(),
-      getPreferences: () => ({ necessary: true, functional: true, analytics: false, marketing: false }),
-      consentedAt: new Date(),
-      expiresAt: undefined,
-    });
+  it('should throw GdprValidationError when the session id is blank', async () => {
+    const repository = createConsentRepository(null);
 
-    const result = await useCase.recordConsent(new RecordCookieConsentCommand('sess1', { functional: true }));
-
-    expect(result.gdprCookieConsentId).toBe('existing');
+    await expect(
+      new ManageCookieConsentUseCase(repository).recordConsent(new RecordCookieConsentCommand('  ', {})),
+    ).rejects.toThrow(GdprValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
   });
 
-  it('should update consent by ID', async () => {
-    const result = await useCase.updateConsent(new UpdateCookieConsentCommand('c1', { analytics: true }));
+  it('should update consent by id when it exists', async () => {
+    const repository = createConsentRepository(createConsent({ gdprCookieConsentId: 'c1', analytics: false }));
+
+    const result = await new ManageCookieConsentUseCase(repository).updateConsent(
+      new UpdateCookieConsentCommand('c1', { analytics: true }),
+    );
 
     expect(result.gdprCookieConsentId).toBe('c1');
+    expect(result.preferences.analytics).toBe(true);
+    expect(repository.save).toHaveBeenCalled();
+  });
+
+  it('should throw GdprValidationError when updating a consent that does not exist', async () => {
+    const repository = createConsentRepository(null);
+
+    await expect(
+      new ManageCookieConsentUseCase(repository).updateConsent(new UpdateCookieConsentCommand('missing', { analytics: true })),
+    ).rejects.toThrow(GdprValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should accept all optional cookies when acceptAll is called without existing consent', async () => {
+    const repository = createConsentRepository(null);
+
+    const result = await new ManageCookieConsentUseCase(repository).acceptAll('sess-new');
+
+    expect(result.gdprCookieConsentId).toBe('test-uuid');
+    expect(result.preferences).toEqual({
+      necessary: true,
+      functional: true,
+      analytics: true,
+      marketing: true,
+      thirdParty: true,
+    });
+  });
+
+  it('should reject optional cookies when rejectAll is called on an existing consent', async () => {
+    const repository = createConsentRepository(createConsent({ functional: true, analytics: true, marketing: true }));
+
+    const result = await new ManageCookieConsentUseCase(repository).rejectAll('sess-1');
+
+    expect(result.preferences).toEqual({
+      necessary: true,
+      functional: false,
+      analytics: false,
+      marketing: false,
+      thirdParty: false,
+    });
   });
 });

@@ -23,7 +23,7 @@ export interface ShippingItem {
 export interface CalculateRatesInput {
   destinationAddress: ShippingAddress;
   items: ShippingItem[];
-  orderValue: number;
+  orderValueCents: number;
   storeId?: string;
   organizationId?: string;
   channelId?: string;
@@ -33,7 +33,7 @@ export interface ShippingRate {
   shippingMethodId: string;
   name: string;
   code: string;
-  rate: number;
+  rateCents: number;
   currency: string;
   estimatedDaysMin?: number;
   estimatedDaysMax?: number;
@@ -59,8 +59,8 @@ interface ShippingMethodEntity {
   estimatedDaysMin?: number;
   estimatedDaysMax?: number;
   carrierType?: string;
-  isAvailableFor(weight: number, orderValue: number): boolean;
-  calculateRate(weight: number, orderValue: number): number;
+  isAvailableFor(weight: number, orderValueCents: number): boolean;
+  calculateRate(weight: number, orderValueCents: number): number;
 }
 
 interface ShippingRepository {
@@ -107,17 +107,17 @@ export class CalculateRatesUseCase {
     let defaultRateId: string | undefined;
 
     for (const method of methods) {
-      if (!method.isAvailableFor(totalWeight, input.orderValue)) {
+      if (!method.isAvailableFor(totalWeight, input.orderValueCents)) {
         continue;
       }
 
-      const rate = method.calculateRate(totalWeight, input.orderValue);
+      const rateCents = method.calculateRate(totalWeight, input.orderValueCents);
 
       rates.push({
         shippingMethodId: method.shippingMethodId,
         name: method.name,
         code: method.code,
-        rate,
+        rateCents,
         currency: this.currencyCode,
         estimatedDaysMin: method.estimatedDaysMin,
         estimatedDaysMax: method.estimatedDaysMax,
@@ -130,7 +130,7 @@ export class CalculateRatesUseCase {
     }
 
     // Sort by rate
-    rates.sort((a, b) => a.rate - b.rate);
+    rates.sort((a, b) => a.rateCents - b.rateCents);
 
     // If no default, use cheapest
     if (!defaultRateId && rates.length > 0) {
@@ -141,7 +141,7 @@ export class CalculateRatesUseCase {
     eventBus.emit('shipping.rate_calculated', {
       destinationCountry: input.destinationAddress.countryCode,
       rateCount: rates.length,
-      orderValue: input.orderValue,
+      orderValueCents: input.orderValueCents,
     });
 
     return {

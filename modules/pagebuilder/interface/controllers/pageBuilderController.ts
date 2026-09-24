@@ -4,17 +4,11 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import {
-  ManageDraftsUseCase,
-  ManageBlocksUseCase,
-  PublishDraftUseCase,
-  PreviewDraftUseCase,
-  GetBlockTypesUseCase,
-  CreateDraftCommand,
-  AddBlockCommand,
-  UpdateBlockCommand,
-  MoveBlockCommand,
-} from '../../application/useCases/PageBuilder';
+import { ManageDraftsUseCase, CreateDraftCommand } from '../../application/useCases/ManageDrafts';
+import { ManageBlocksUseCase, AddBlockCommand, UpdateBlockCommand, MoveBlockCommand } from '../../application/useCases/ManageBlocks';
+import { PublishDraftUseCase } from '../../application/useCases/PublishDraft';
+import { PreviewDraftUseCase } from '../../application/useCases/PreviewDraft';
+import { GetBlockTypesUseCase } from '../../application/useCases/GetBlockTypes';
 import { PageDraftRepositoryImpl, ThemeRepositoryImpl } from '../../application/wired';
 
 const draftRepo = new PageDraftRepositoryImpl();

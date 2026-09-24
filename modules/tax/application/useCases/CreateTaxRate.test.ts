@@ -1,42 +1,63 @@
+import { createTaxRateRepository } from '../../tests/testUtils';
 import { CreateTaxRateUseCase } from './CreateTaxRate';
 import { InvalidTaxRateError, TaxValidationError } from '../../domain/errors/TaxErrors';
 
 describe('CreateTaxRateUseCase', () => {
   let useCase: CreateTaxRateUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let taxRepository: ReturnType<typeof createTaxRateRepository>;
 
   beforeEach(() => {
-    mockRepo = {
-      createTaxRate: jest.fn().mockResolvedValue({
-        taxRateId: 'txr-1',
-        name: 'US Federal',
-        rate: 0.07,
-        country: 'US',
-        isActive: true,
-        createdAt: new Date(),
-      }),
-    };
-    useCase = new CreateTaxRateUseCase(mockRepo as never);
+    taxRepository = createTaxRateRepository();
+    taxRepository.createTaxRate.mockResolvedValue({
+      taxRateId: 'txr-1',
+      name: 'US Federal',
+      rate: 0.07,
+      country: 'US',
+      isActive: true,
+      createdAt: new Date(),
+    });
+    useCase = new CreateTaxRateUseCase(taxRepository);
   });
 
-  it('should create a tax rate (happy path)', async () => {
+  it('should persist and return the tax rate when the input is valid', async () => {
     const result = await useCase.execute({ name: 'US Federal', rate: 0.07, type: 'percentage', country: 'US' });
 
-    expect(result.taxRateId).toBe('txr-1');
-    expect(result.rate).toBe(0.07);
-    expect(mockRepo.createTaxRate).toHaveBeenCalled();
+    expect(result).toEqual({
+      taxRateId: 'txr-1',
+      name: 'US Federal',
+      rate: 0.07,
+      country: 'US',
+      isActive: true,
+      createdAt: expect.any(String),
+    });
+    expect(taxRepository.createTaxRate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'US Federal',
+        rate: 0.07,
+        type: 'percentage',
+        country: 'US',
+        isCompound: false,
+        includesShipping: false,
+        priority: 0,
+        isActive: true,
+      }),
+    );
   });
 
-  it('should throw TaxValidationError when required fields missing', async () => {
-    await expect(useCase.execute({ name: '', rate: 0.1, type: 'percentage', country: 'US' })).rejects.toThrow(TaxValidationError);
-    await expect(useCase.execute({ name: 'Test', rate: undefined as never, type: 'percentage', country: 'US' })).rejects.toThrow(
+  it('should throw TaxValidationError when required fields are missing', async () => {
+    await expect(useCase.execute({ name: '', rate: 0.1, type: 'percentage', country: 'US' })).rejects.toThrow(
       TaxValidationError,
     );
-    await expect(useCase.execute({ name: 'Test', rate: 0.1, type: 'percentage', country: '' })).rejects.toThrow(TaxValidationError);
+    await expect(useCase.execute({ name: 'Test', rate: 0.1, type: 'percentage', country: '' })).rejects.toThrow(
+      TaxValidationError,
+    );
+    expect(taxRepository.createTaxRate).not.toHaveBeenCalled();
   });
 
-  it('should throw InvalidTaxRateError when rate is out of range', async () => {
-    await expect(useCase.execute({ name: 'Test', rate: -0.1, type: 'percentage', country: 'US' })).rejects.toThrow(InvalidTaxRateError);
-    await expect(useCase.execute({ name: 'Test', rate: 1.5, type: 'percentage', country: 'US' })).rejects.toThrow(InvalidTaxRateError);
+  it.each([-0.1, 1.5])('should throw InvalidTaxRateError when the rate is %s', async rate => {
+    await expect(useCase.execute({ name: 'Test', rate, type: 'percentage', country: 'US' })).rejects.toThrow(
+      InvalidTaxRateError,
+    );
+    expect(taxRepository.createTaxRate).not.toHaveBeenCalled();
   });
 });

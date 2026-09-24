@@ -9,7 +9,9 @@ const payoutRepo = new VendorPayoutRepositoryImpl();
 
 export const marketplaceController = new MarketplaceController(vendorRepo, commissionRepo, payoutRepo);
 
-import { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase } from '../../application/useCases/Marketplace';
+import { ManageVendorUseCase } from '../../application/useCases/ManageVendor';
+import { ManageCommissionRuleUseCase } from '../../application/useCases/ManageCommissionRule';
+import { ManagePayoutUseCase } from '../../application/useCases/ManagePayout';
 
 export const manageVendorUseCase = new ManageVendorUseCase(vendorRepo);
 export const manageCommissionRuleUseCase = new ManageCommissionRuleUseCase(commissionRepo, vendorRepo);

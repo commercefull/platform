@@ -6,11 +6,11 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { ManageLanguagesUseCase, ManageCurrenciesUseCase, ManageCountriesUseCase } from '../../application/useCases/ManageLocalization';
-
-const manageLanguagesUseCase = new ManageLanguagesUseCase();
-const manageCurrenciesUseCase = new ManageCurrenciesUseCase();
-const manageCountriesUseCase = new ManageCountriesUseCase();
+import {
+  manageLanguagesUseCase,
+  manageCurrenciesUseCase,
+  manageCountriesUseCase,
+} from '../../application/wired';
 
 // ============================================================================
 // Types

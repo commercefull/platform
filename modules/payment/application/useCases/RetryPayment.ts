@@ -25,7 +25,7 @@ interface TransactionRecord {
   transactionId: string;
   orderId: string;
   customerId: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   paymentMethodId: string;
   provider: string;
@@ -68,7 +68,7 @@ export class RetryPaymentUseCase {
       transactionId: newTransactionId,
       orderId: originalTransaction.orderId,
       customerId: input.customerId || originalTransaction.customerId,
-      amount: originalTransaction.amount,
+      amountCents: originalTransaction.amountCents,
       currency: originalTransaction.currency,
       paymentMethodId: input.paymentMethodId || originalTransaction.paymentMethodId,
       provider: originalTransaction.provider,

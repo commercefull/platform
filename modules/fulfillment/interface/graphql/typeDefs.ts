@@ -116,7 +116,7 @@ export const fulfillmentTypeDefs = `#graphql
       trackingUrl: String
       carrierId: String
       carrierName: String
-      shippingCost: Float
+      shippingCostCents: Int
     ): ShipOrderResult!
     markDelivered(fulfillmentId: String!): MarkDeliveredResult!
     cancelFulfillment(fulfillmentId: String!, reason: String): CancelFulfillmentResult!

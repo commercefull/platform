@@ -98,7 +98,7 @@ export const loyaltyTypeDefs = `#graphql
     customerId: String!
     orderId: String
     actionType: String!
-    amount: Float
+    amountCents: Float
     points: Int
     description: String
   }
@@ -121,7 +121,7 @@ export const loyaltyTypeDefs = `#graphql
     valueType: String
     productId: String
     categoryId: String
-    minOrderValue: Float
+    minOrderValueCents: Float
     maxUsagePerCustomer: Int
     totalQuantity: Int
     validFrom: String

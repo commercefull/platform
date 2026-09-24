@@ -2,29 +2,18 @@
  * Unit Tests for PaymentFraudScreeningAdapter (Epic G)
  */
 
-jest.mock('../../../payment/application/services/FraudScreeningService', () => ({
-  FraudScreeningService: jest.fn().mockImplementation(() => ({
-    screen: jest.fn(),
-  })),
-}));
-
 import { PaymentFraudScreeningAdapter } from './PaymentFraudScreeningAdapter';
-import { FraudScreeningService } from '../../../payment/application/services/FraudScreeningService';
+import type { FraudScreeningService } from '../../../payment/application/services/FraudScreeningService';
 
 describe('PaymentFraudScreeningAdapter', () => {
   let adapter: PaymentFraudScreeningAdapter;
+  let screeningService: jest.Mocked<Pick<FraudScreeningService, 'screen'>>;
   let mockScreen: jest.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     mockScreen = jest.fn();
-    jest.mocked(FraudScreeningService).mockImplementation(
-      () =>
-        ({
-          screen: mockScreen,
-        }) as never,
-    );
-    adapter = new PaymentFraudScreeningAdapter();
+    screeningService = { screen: mockScreen };
+    adapter = new PaymentFraudScreeningAdapter(screeningService);
   });
 
   it('maps approved screening result to checkout vocabulary', async () => {
@@ -39,7 +28,7 @@ describe('PaymentFraudScreeningAdapter', () => {
 
     const result = await adapter.screenOrder({
       checkoutId: 'ck-1',
-      orderAmount: 100,
+      orderAmountCents: 100,
       currency: 'USD',
     });
 
@@ -62,7 +51,7 @@ describe('PaymentFraudScreeningAdapter', () => {
     const result = await adapter.screenOrder({
       checkoutId: 'ck-1',
       ipAddress: '1.2.3.4',
-      orderAmount: 100,
+      orderAmountCents: 100,
       currency: 'USD',
     });
 
@@ -83,7 +72,7 @@ describe('PaymentFraudScreeningAdapter', () => {
 
     const result = await adapter.screenOrder({
       checkoutId: 'ck-1',
-      orderAmount: 600,
+      orderAmountCents: 600,
       currency: 'USD',
     });
 
@@ -108,7 +97,7 @@ describe('PaymentFraudScreeningAdapter', () => {
       ipAddress: '1.2.3.4',
       billingCountry: 'US',
       shippingCountry: 'CA',
-      orderAmount: 200,
+      orderAmountCents: 200,
       currency: 'USD',
       paymentMethodId: 'pm1',
       isFirstOrder: true,
@@ -122,7 +111,7 @@ describe('PaymentFraudScreeningAdapter', () => {
         ipAddress: '1.2.3.4',
         billingCountry: 'US',
         shippingCountry: 'CA',
-        orderAmount: 200,
+        orderAmountCents: 200,
         currency: 'USD',
         paymentMethod: 'pm1',
         isFirstOrder: true,

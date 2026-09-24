@@ -17,7 +17,7 @@ export interface CommissionRuleProps {
   type: CommissionType;
   scope: CommissionScope;
   rate: number;
-  fixedAmount?: number;
+  fixedAmountCents?: number;
   tiers?: CommissionTier[];
   categoryId?: string;
   vendorId?: string;
@@ -37,7 +37,7 @@ export class CommissionRule {
   private _type: CommissionType;
   private _scope: CommissionScope;
   private _rate: number;
-  private _fixedAmount?: number;
+  private _fixedAmountCents?: number;
   private _tiers?: CommissionTier[];
   private _categoryId?: string;
   private _vendorId?: string;
@@ -56,7 +56,7 @@ export class CommissionRule {
     this._type = props.type;
     this._scope = props.scope;
     this._rate = props.rate;
-    this._fixedAmount = props.fixedAmount;
+    this._fixedAmountCents = props.fixedAmountCents;
     this._tiers = props.tiers;
     this._categoryId = props.categoryId;
     this._vendorId = props.vendorId;
@@ -75,7 +75,7 @@ export class CommissionRule {
     type: CommissionType;
     scope: CommissionScope;
     rate?: number;
-    fixedAmount?: number;
+    fixedAmountCents?: number;
     tiers?: CommissionTier[];
     categoryId?: string;
     vendorId?: string;
@@ -87,8 +87,8 @@ export class CommissionRule {
     if (input.type === 'percentage' && (input.rate === undefined || input.rate < 0 || input.rate > 100)) {
       throw new CommissionValidationError('Percentage commission requires rate between 0 and 100');
     }
-    if (input.type === 'fixed' && input.fixedAmount === undefined) {
-      throw new CommissionValidationError('Fixed commission requires fixedAmount');
+    if (input.type === 'fixed' && input.fixedAmountCents === undefined) {
+      throw new CommissionValidationError('Fixed commission requires fixedAmountCents');
     }
     if (input.type === 'tiered' && (!input.tiers || input.tiers.length === 0)) {
       throw new CommissionValidationError('Tiered commission requires at least one tier');
@@ -101,7 +101,7 @@ export class CommissionRule {
       type: input.type,
       scope: input.scope,
       rate: input.rate ?? 0,
-      fixedAmount: input.fixedAmount,
+      fixedAmountCents: input.fixedAmountCents,
       tiers: input.tiers,
       categoryId: input.categoryId,
       vendorId: input.vendorId,
@@ -137,8 +137,8 @@ export class CommissionRule {
   get rate(): number {
     return this._rate;
   }
-  get fixedAmount(): number | undefined {
-    return this._fixedAmount;
+  get fixedAmountCents(): number | undefined {
+    return this._fixedAmountCents;
   }
   get tiers(): CommissionTier[] | undefined {
     return this._tiers;
@@ -179,30 +179,30 @@ export class CommissionRule {
     return true;
   }
 
-  calculate(amount: number): number {
+  calculate(amountCents: number): number {
     if (!this.isActive) return 0;
     switch (this._type) {
       case 'percentage':
-        return (amount * this._rate) / 100;
+        return (amountCents * this._rate) / 100;
       case 'fixed':
-        return this._fixedAmount ?? 0;
+        return this._fixedAmountCents ?? 0;
       case 'tiered':
-        return this.calculateTiered(amount);
+        return this.calculateTiered(amountCents);
       default:
         return 0;
     }
   }
 
-  private calculateTiered(amount: number): number {
+  private calculateTiered(amountCents: number): number {
     if (!this._tiers || this._tiers.length === 0) return 0;
     const sorted = [...this._tiers].sort((a, b) => a.minAmount - b.minAmount);
     for (const tier of sorted) {
-      if (amount >= tier.minAmount && (!tier.maxAmount || amount <= tier.maxAmount)) {
-        return (amount * tier.rate) / 100;
+      if (amountCents >= tier.minAmount && (!tier.maxAmount || amountCents <= tier.maxAmount)) {
+        return (amountCents * tier.rate) / 100;
       }
     }
     const last = sorted[sorted.length - 1];
-    return (amount * last.rate) / 100;
+    return (amountCents * last.rate) / 100;
   }
 
   activate(): void {
@@ -242,7 +242,7 @@ export class CommissionRule {
       type: this._type,
       scope: this._scope,
       rate: this._rate,
-      fixedAmount: this._fixedAmount,
+      fixedAmountCents: this._fixedAmountCents,
       tiers: this._tiers,
       categoryId: this._categoryId,
       vendorId: this._vendorId,

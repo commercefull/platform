@@ -11,12 +11,12 @@ export const couponResolvers = {
       _parent: unknown,
       args: {
         code: string;
-        orderValue: number;
+        orderValueCents: number;
         customerId?: string;
       },
     ) => {
       const useCase = new ValidateCouponUseCase(CouponRepo);
-      const command = new ValidateCouponCommand(args.code, args.orderValue, args.customerId);
+      const command = new ValidateCouponCommand(args.code, args.orderValueCents, args.customerId);
       return useCase.execute(command);
     },
   },
@@ -33,8 +33,8 @@ export const couponResolvers = {
           createdBy: string;
           description?: string;
           currency?: string;
-          minOrderValue?: number;
-          maxDiscountAmount?: number;
+          minOrderValueCents?: number;
+          maxDiscountAmountCents?: number;
           usageType?: string;
           usageLimit?: number;
           customerUsageLimit?: number;
@@ -57,8 +57,8 @@ export const couponResolvers = {
         i.createdBy,
         i.description,
         i.currency,
-        i.minOrderValue,
-        i.maxDiscountAmount,
+        i.minOrderValueCents,
+        i.maxDiscountAmountCents,
         i.usageType as 'single_use' | 'multi_use' | 'unlimited',
         i.usageLimit,
         i.customerUsageLimit,

@@ -13,3 +13,7 @@ export {
   UpdateFulfillmentLocationParams,
   FulfillmentPartner,
 };
+
+import { ManageOperationsUseCase } from './useCases/ManageOperations';
+
+export const manageOperationsUseCase = new ManageOperationsUseCase(fulfillmentDataRepository.admin);

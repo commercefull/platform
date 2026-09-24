@@ -1,13 +1,4 @@
-jest.mock('../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
-jest.mock('../../../../libs/db', () => ({
-  __esModule: true,
-  withTransaction: jest.fn((cb: () => Promise<unknown>) => cb()),
-}));
-
+import { createOrder, createOrderItem, emitMock } from '../../tests/testUtils';
 import { ProcessRefundUseCase, ProcessRefundCommand } from './ProcessRefund';
 import {
   OrderNotFoundError,
@@ -15,45 +6,48 @@ import {
   RefundAmountMustBePositiveError,
   RefundExceedsOrderTotalError,
 } from '../../domain/errors/OrderErrors';
-import { eventBus } from '../../../../libs/events/eventBus';
+import type { OrderRepository } from '../../domain/repositories/OrderRepository';
+import type { Order } from '../../domain/entities/Order';
+import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
+import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
+import { Money } from '../../domain/valueObjects/Money';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('ProcessRefundUseCase', () => {
   let useCase: ProcessRefundUseCase;
-  let mockRepo: Record<string, jest.Mock>;
-  let mockOrder: Record<string, unknown>;
+  let mockRepo: jest.Mocked<Pick<OrderRepository, 'findById' | 'save' | 'recordPaymentStatusChange'>>;
+  let order: Order;
+  let updatePaymentStatusSpy: jest.SpyInstance;
+
+  const paidOrder = (): Order => {
+    const o = createOrder({ orderId: 'o1', orderNumber: 'ORD-001', customerId: 'c1' });
+    o.addItem(createOrderItem({ unitPrice: Money.create(100, 'USD') }));
+    o.updateStatus(OrderStatus.PROCESSING);
+    o.updatePaymentStatus(PaymentStatus.PAID);
+    return o;
+  };
 
   beforeEach(() => {
-    mockOrder = {
-      orderId: 'o1',
-      orderNumber: 'ORD-001',
-      customerId: 'c1',
-      status: 'processing',
-      paymentStatus: 'paid',
-      canBeRefunded: true,
-      totalAmount: { amount: 100 },
-      updatePaymentStatus: jest.fn(),
-      updateStatus: jest.fn(),
-      addAdminNote: jest.fn(),
-    };
+    order = paidOrder();
+    updatePaymentStatusSpy = jest.spyOn(order, 'updatePaymentStatus');
     mockRepo = {
-      findById: jest.fn().mockResolvedValue(mockOrder),
-      save: jest.fn().mockResolvedValue(undefined),
+      findById: jest.fn().mockResolvedValue(order),
+      save: jest.fn().mockResolvedValue(undefined as unknown as Order),
       recordPaymentStatusChange: jest.fn().mockResolvedValue(undefined),
     };
-    useCase = new ProcessRefundUseCase(mockRepo as never);
+    useCase = new ProcessRefundUseCase(mockRepo as unknown as OrderRepository);
   });
 
   it('should process full refund (happy path)', async () => {
-    const result = await useCase.execute(new ProcessRefundCommand('o1', 100, 'Customer request'));
+    const result = await useCase.execute(new ProcessRefundCommand('o1', 10000, 'Customer request'));
 
     expect(result.orderId).toBe('o1');
     expect(result.isFullRefund).toBe(true);
-    expect(mockOrder.updatePaymentStatus).toHaveBeenCalled();
-    expect(eventBus.emit).toHaveBeenCalledWith('order.refunded', expect.objectContaining({ orderId: 'o1', isFullRefund: true }));
+    expect(updatePaymentStatusSpy).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith('order.refunded', expect.objectContaining({ orderId: 'o1', isFullRefund: true }));
   });
 
   it('should process partial refund', async () => {
@@ -69,16 +63,16 @@ describe('ProcessRefundUseCase', () => {
   });
 
   it('should throw OrderCannotBeRefundedError when order cannot be refunded', async () => {
-    mockOrder.canBeRefunded = false;
+    mockRepo.findById.mockResolvedValue(createOrder({ orderId: 'o1' }));
 
-    await expect(useCase.execute(new ProcessRefundCommand('o1', 50, 'Test'))).rejects.toThrow(OrderCannotBeRefundedError);
+    await expect(useCase.execute(new ProcessRefundCommand('o1', 5000, 'Test'))).rejects.toThrow(OrderCannotBeRefundedError);
   });
 
-  it('should throw RefundAmountMustBePositiveError for zero amount', async () => {
+  it('should throw RefundAmountMustBePositiveError for zero amountCents', async () => {
     await expect(useCase.execute(new ProcessRefundCommand('o1', 0, 'Test'))).rejects.toThrow(RefundAmountMustBePositiveError);
   });
 
-  it('should throw RefundExceedsOrderTotalError when amount exceeds total', async () => {
-    await expect(useCase.execute(new ProcessRefundCommand('o1', 200, 'Test'))).rejects.toThrow(RefundExceedsOrderTotalError);
+  it('should throw RefundExceedsOrderTotalError when amountCents exceeds total', async () => {
+    await expect(useCase.execute(new ProcessRefundCommand('o1', 20000, 'Test'))).rejects.toThrow(RefundExceedsOrderTotalError);
   });
 });

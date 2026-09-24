@@ -1,38 +1,26 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { createAdminUser, emitMock, lazyMock } from '../../../tests/testUtils';
 import { LoginAdminUseCase } from './LoginAdmin';
 import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('LoginAdminUseCase', () => {
   let useCase: LoginAdminUseCase;
-  let mockAdminRepo: Record<string, jest.Mock>;
-  let mockAuth: Record<string, jest.Mock>;
-  let mockSession: Record<string, jest.Mock>;
+  let mockAdminRepo: jest.Mocked<ConstructorParameters<typeof LoginAdminUseCase>[0]>;
+  let mockAuth: jest.Mocked<ConstructorParameters<typeof LoginAdminUseCase>[1]>;
+  let mockSession: jest.Mocked<ConstructorParameters<typeof LoginAdminUseCase>[2]>;
 
   beforeEach(() => {
-    mockAdminRepo = {
-      findByEmail: jest.fn().mockResolvedValue({
-        adminId: 'a1',
-        email: 'admin@test.com',
-        name: 'Admin',
-        passwordHash: 'hash',
-        role: 'admin',
-        permissions: ['read'],
-        status: 'active',
-      }),
-      updateLastLogin: jest.fn().mockResolvedValue(undefined),
-    };
-    mockAuth = { verifyPassword: jest.fn().mockResolvedValue(true) };
-    mockSession = { createSession: jest.fn().mockResolvedValue('session-1') };
-    useCase = new LoginAdminUseCase(mockAdminRepo as never, mockAuth as never, mockSession as never);
+    mockAdminRepo = lazyMock<ConstructorParameters<typeof LoginAdminUseCase>[0]>();
+    mockAdminRepo.findByEmail.mockResolvedValue(createAdminUser({ adminId: 'a1' }));
+    mockAdminRepo.updateLastLogin.mockResolvedValue(undefined);
+    mockAuth = lazyMock<ConstructorParameters<typeof LoginAdminUseCase>[1]>();
+    mockAuth.verifyPassword.mockResolvedValue(true);
+    mockSession = lazyMock<ConstructorParameters<typeof LoginAdminUseCase>[2]>();
+    mockSession.createSession.mockResolvedValue('session-1');
+    useCase = new LoginAdminUseCase(mockAdminRepo, mockAuth, mockSession);
   });
 
   it('should login admin successfully (happy path)', async () => {
@@ -41,7 +29,7 @@ describe('LoginAdminUseCase', () => {
     expect(result.adminId).toBe('a1');
     expect(result.sessionId).toBe('session-1');
     expect(mockAdminRepo.updateLastLogin).toHaveBeenCalledWith('a1');
-    expect(eventBus.emit).toHaveBeenCalledWith('admin.logged_in', expect.objectContaining({ adminId: 'a1' }));
+    expect(emitMock).toHaveBeenCalledWith('admin.logged_in', expect.objectContaining({ adminId: 'a1' }));
   });
 
   it('should throw EmailAndPasswordRequiredError when fields missing', async () => {
@@ -53,26 +41,18 @@ describe('LoginAdminUseCase', () => {
     mockAdminRepo.findByEmail.mockResolvedValue(null);
 
     await expect(useCase.execute({ email: 'unknown@test.com', password: 'pass' })).rejects.toThrow(InvalidCredentialsError);
-    expect(eventBus.emit).toHaveBeenCalledWith('admin.login_failed', expect.objectContaining({ reason: 'user_not_found' }));
+    expect(emitMock).toHaveBeenCalledWith('admin.login_failed', expect.objectContaining({ reason: 'user_not_found' }));
   });
 
   it('should throw InvalidCredentialsError when password is wrong', async () => {
     mockAuth.verifyPassword.mockResolvedValue(false);
 
     await expect(useCase.execute({ email: 'admin@test.com', password: 'wrong' })).rejects.toThrow(InvalidCredentialsError);
-    expect(eventBus.emit).toHaveBeenCalledWith('admin.login_failed', expect.objectContaining({ reason: 'invalid_password' }));
+    expect(emitMock).toHaveBeenCalledWith('admin.login_failed', expect.objectContaining({ reason: 'invalid_password' }));
   });
 
   it('should throw AccountNotActiveError when admin is suspended', async () => {
-    mockAdminRepo.findByEmail.mockResolvedValue({
-      adminId: 'a1',
-      email: 'a@b.com',
-      name: 'A',
-      passwordHash: 'h',
-      role: 'admin',
-      permissions: [],
-      status: 'suspended',
-    });
+    mockAdminRepo.findByEmail.mockResolvedValue(createAdminUser({ adminId: 'a1', status: 'suspended' }));
 
     await expect(useCase.execute({ email: 'a@b.com', password: 'pass' })).rejects.toThrow(AccountNotActiveError);
   });

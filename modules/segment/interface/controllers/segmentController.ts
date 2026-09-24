@@ -150,7 +150,7 @@ class SegmentController {
         data: {
           customerId: req.params.customerId,
           totalOrders: 0,
-          totalSpent: 0,
+          totalSpentCents: 0,
           avgOrderValue: 0,
           lastOrderDate: null,
           firstOrderDate: null,
@@ -191,7 +191,7 @@ class SegmentController {
         data: {
           customerId: req.params.customerId,
           totalOrders: 0,
-          totalSpent: 0,
+          totalSpentCents: 0,
           avgOrderValue: 0,
           lastOrderDate: null,
           firstOrderDate: null,

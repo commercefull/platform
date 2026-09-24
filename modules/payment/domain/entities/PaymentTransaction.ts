@@ -12,14 +12,14 @@ export interface PaymentTransactionProps {
   paymentMethodConfigId: string;
   gatewayId: string;
   externalTransactionId?: string;
-  amount: number;
+  amountCents: number;
   currency: string;
   status: TransactionStatus;
   paymentMethodDetails?: Record<string, unknown>;
   gatewayResponse?: Record<string, unknown>;
   errorCode?: string;
   errorMessage?: string;
-  refundedAmount: number;
+  refundedAmountCents: number;
   customerIp?: string;
   authorizedAt?: Date;
   capturedAt?: Date;
@@ -41,7 +41,7 @@ export class PaymentTransaction {
     customerId?: string;
     paymentMethodConfigId: string;
     gatewayId: string;
-    amount: number;
+    amountCents: number;
     currency: string;
     customerIp?: string;
     metadata?: Record<string, unknown>;
@@ -53,10 +53,10 @@ export class PaymentTransaction {
       customerId: props.customerId,
       paymentMethodConfigId: props.paymentMethodConfigId,
       gatewayId: props.gatewayId,
-      amount: props.amount,
+      amountCents: props.amountCents,
       currency: props.currency.toUpperCase(),
       status: TransactionStatus.PENDING,
-      refundedAmount: 0,
+      refundedAmountCents: 0,
       customerIp: props.customerIp,
       metadata: props.metadata,
       createdAt: now,
@@ -87,8 +87,8 @@ export class PaymentTransaction {
   get externalTransactionId(): string | undefined {
     return this.props.externalTransactionId;
   }
-  get amount(): number {
-    return this.props.amount;
+  get amountCents(): number {
+    return this.props.amountCents;
   }
   get currency(): string {
     return this.props.currency;
@@ -108,8 +108,8 @@ export class PaymentTransaction {
   get errorMessage(): string | undefined {
     return this.props.errorMessage;
   }
-  get refundedAmount(): number {
-    return this.props.refundedAmount;
+  get refundedAmountCents(): number {
+    return this.props.refundedAmountCents;
   }
   get customerIp(): string | undefined {
     return this.props.customerIp;
@@ -150,7 +150,7 @@ export class PaymentTransaction {
     return [TransactionStatus.PAID, TransactionStatus.PARTIALLY_REFUNDED].includes(this.props.status);
   }
   get refundableAmount(): number {
-    return this.props.amount - this.props.refundedAmount;
+    return this.props.amountCents - this.props.refundedAmountCents;
   }
 
   // Domain methods
@@ -201,13 +201,13 @@ export class PaymentTransaction {
     this.touch();
   }
 
-  recordRefund(amount: number): void {
-    if (amount > this.refundableAmount) {
-      throw new RefundAmountExceedsRefundableError(amount, this.refundableAmount);
+  recordRefund(amountCents: number): void {
+    if (amountCents > this.refundableAmount) {
+      throw new RefundAmountExceedsRefundableError(amountCents, this.refundableAmount);
     }
-    this.props.refundedAmount += amount;
+    this.props.refundedAmountCents += amountCents;
 
-    if (this.props.refundedAmount >= this.props.amount) {
+    if (this.props.refundedAmountCents >= this.props.amountCents) {
       this.props.status = TransactionStatus.REFUNDED;
     } else {
       this.props.status = TransactionStatus.PARTIALLY_REFUNDED;
@@ -244,10 +244,10 @@ export class PaymentTransaction {
       paymentMethodConfigId: this.props.paymentMethodConfigId,
       gatewayId: this.props.gatewayId,
       externalTransactionId: this.props.externalTransactionId,
-      amount: this.props.amount,
+      amountCents: this.props.amountCents,
       currency: this.props.currency,
       status: this.props.status,
-      refundedAmount: this.props.refundedAmount,
+      refundedAmountCents: this.props.refundedAmountCents,
       refundableAmount: this.refundableAmount,
       isPaid: this.isPaid,
       canBeRefunded: this.canBeRefunded,

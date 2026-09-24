@@ -7,25 +7,23 @@
     <table class="table table-striped mb-0">
       <thead>
         <tr>
+          <th><%= t('product:variant') %></th>
           <th><%= t('shared:common.currency') %></th>
           <th><%= t('common.amount') %></th>
+          <th><%= t('product:salePrice') %></th>
           <th><%= t('product:compareAt') %></th>
-          <th><%= t('product:minQty') %></th>
-          <th><%= t('product:maxQty') %></th>
-          <th><%= t('product:startsAt') %></th>
-          <th><%= t('product:endsAt') %></th>
+          <th><%= t('product:cost') %></th>
         </tr>
       </thead>
       <tbody>
         <% prices.forEach(function(price) { %>
         <tr>
+          <td><%= price.productVariantId || t('product:baseProduct') %></td>
           <td><strong><%= price.currencyCode %></strong></td>
-          <td><%= price.amount %></td>
-          <td><%= price.compareAtAmount || '—' %></td>
-          <td><%= price.minQuantity || '—' %></td>
-          <td><%= price.maxQuantity || '—' %></td>
-          <td><%= price.startsAt ? new Date(price.startsAt).toLocaleDateString() : '—' %></td>
-          <td><%= price.endsAt ? new Date(price.endsAt).toLocaleDateString() : '—' %></td>
+          <td><%= (price.priceCents / 100).toFixed(2) %></td>
+          <td><%= price.salePriceCents != null ? (price.salePriceCents / 100).toFixed(2) : '—' %></td>
+          <td><%= price.compareAtPriceCents != null ? (price.compareAtPriceCents / 100).toFixed(2) : '—' %></td>
+          <td><%= price.costPriceCents != null ? (price.costPriceCents / 100).toFixed(2) : '—' %></td>
         </tr>
         <% }); %>
       </tbody>
@@ -50,24 +48,20 @@
             <input type="number" class="form-control form-control-sm" name="amount" step="0.01" min="0" required>
           </div>
           <div class="col-md-2">
+            <label class="form-label"><%= t('product:salePrice') %></label>
+            <input type="number" class="form-control form-control-sm" name="saleAmount" step="0.01" min="0">
+          </div>
+          <div class="col-md-2">
             <label class="form-label"><%= t('product:compareAt') %></label>
             <input type="number" class="form-control form-control-sm" name="compareAtAmount" step="0.01" min="0">
           </div>
-          <div class="col-md-1">
-            <label class="form-label"><%= t('product:minQty') %></label>
-            <input type="number" class="form-control form-control-sm" name="minQuantity" min="1">
-          </div>
-          <div class="col-md-1">
-            <label class="form-label"><%= t('product:maxQty') %></label>
-            <input type="number" class="form-control form-control-sm" name="maxQuantity" min="1">
+          <div class="col-md-2">
+            <label class="form-label"><%= t('product:cost') %></label>
+            <input type="number" class="form-control form-control-sm" name="costAmount" step="0.01" min="0">
           </div>
           <div class="col-md-2">
-            <label class="form-label"><%= t('product:startsAt') %></label>
-            <input type="date" class="form-control form-control-sm" name="startsAt">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label"><%= t('product:endsAt') %></label>
-            <input type="date" class="form-control form-control-sm" name="endsAt">
+            <label class="form-label"><%= t('product:variantId') %></label>
+            <input type="text" class="form-control form-control-sm" name="productVariantId" placeholder="">
           </div>
           <div class="col-12 mt-2">
             <button type="submit" class="btn btn-primary btn-sm"><%= t('product:savePrice') %></button>

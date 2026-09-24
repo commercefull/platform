@@ -15,7 +15,8 @@ export interface BasketItemProps {
   name: string;
   quantity: number;
   unitPrice: Money;
-  discountAmount?: number;
+  /** Item-level discount in integer cents. */
+  discountAmountCents?: number;
   imageUrl?: string;
   attributes?: Record<string, unknown>;
   itemType: 'physical' | 'digital' | 'subscription' | 'service';
@@ -93,8 +94,8 @@ export class BasketItem {
     return this.props.isGift;
   }
 
-  get discountAmount(): number {
-    return this.props.discountAmount || 0;
+  get discountAmountCents(): number {
+    return this.props.discountAmountCents || 0;
   }
 
   get isDigital(): boolean {
@@ -116,9 +117,9 @@ export class BasketItem {
   // Calculated properties
   get lineTotal(): Money {
     const gross = this.props.unitPrice.multiply(this.props.quantity);
-    if (this.props.discountAmount && this.props.discountAmount > 0) {
-      const net = Math.max(0, gross.amount - this.props.discountAmount);
-      return Money.create(net, gross.currency);
+    if (this.props.discountAmountCents && this.props.discountAmountCents > 0) {
+      const netCents = Math.max(0, gross.cents - this.props.discountAmountCents);
+      return Money.fromCents(netCents, gross.currency);
     }
     return gross;
   }
@@ -155,9 +156,9 @@ export class BasketItem {
     this.props.updatedAt = new Date();
   }
 
-  setDiscountAmount(amount: number): void {
-    if (amount < 0) throw new BasketItemDiscountError('Discount amount cannot be negative');
-    this.props.discountAmount = amount;
+  setDiscountAmountCents(amountCents: number): void {
+    if (amountCents < 0) throw new BasketItemDiscountError('Discount amount cannot be negative');
+    this.props.discountAmountCents = amountCents;
     this.props.updatedAt = new Date();
   }
 
@@ -184,10 +185,10 @@ export class BasketItem {
       sku: this.props.sku,
       name: this.props.name,
       quantity: this.props.quantity,
-      unitPrice: this.props.unitPrice.amount,
+      unitPriceCents: this.props.unitPrice.cents,
       currency: this.props.unitPrice.currency,
-      lineTotal: this.lineTotal.amount,
-      discountAmount: this.discountAmount,
+      lineTotalCents: this.lineTotal.cents,
+      discountAmountCents: this.discountAmountCents,
       imageUrl: this.props.imageUrl,
       attributes: this.props.attributes,
       itemType: this.props.itemType,

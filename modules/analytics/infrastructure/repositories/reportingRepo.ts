@@ -43,7 +43,7 @@ export interface AnalyticsReportEvent {
   visitorId?: string;
   channel?: string;
   eventData?: Record<string, unknown>;
-  eventValue?: number;
+  eventValueCents?: number;
   eventQuantity?: number;
   currency?: string;
   ipAddress?: string;
@@ -74,9 +74,9 @@ export interface AnalyticsReportSnapshot {
   deliveredOrders: number;
   cancelledOrders: number;
   refundedOrders: number;
-  totalRevenue: number;
-  pendingRevenue: number;
-  refundedAmount: number;
+  totalRevenueCents: number;
+  pendingRevenueCents: number;
+  refundedAmountCents: number;
   totalCustomers: number;
   activeCustomers: number;
   newCustomersToday: number;
@@ -84,12 +84,12 @@ export interface AnalyticsReportSnapshot {
   activeProducts: number;
   outOfStockProducts: number;
   lowStockProducts: number;
-  totalInventoryValue: number;
+  totalInventoryValueCents: number;
   totalInventoryUnits: number;
   openTickets: number;
   pendingTickets: number;
   activeSubscriptions: number;
-  monthlyRecurringRevenue: number;
+  monthlyRecurringRevenueCents: number;
   createdAt: Date;
 }
 
@@ -127,7 +127,7 @@ export async function trackEvent(event: {
   visitorId?: string;
   channel?: string;
   eventData?: Record<string, unknown>;
-  eventValue?: number;
+  eventValueCents?: number;
   eventQuantity?: number;
   currency?: string;
   ipAddress?: string;
@@ -145,7 +145,7 @@ export async function trackEvent(event: {
       "eventType", "eventCategory", "eventAction",
       "organizationId", "customerId", "orderId", "productId", "basketId",
       "sessionId", "visitorId", "channel",
-      "eventData", "eventValue", "eventQuantity", "currency",
+      "eventData", "eventValueCents", "eventQuantity", "currencyCode",
       "ipAddress", "userAgent", "referrer",
       "utmSource", "utmMedium", "utmCampaign",
       "deviceType", "country", "region",
@@ -165,7 +165,7 @@ export async function trackEvent(event: {
       event.visitorId,
       event.channel,
       event.eventData ? JSON.stringify(event.eventData) : null,
-      event.eventValue,
+      event.eventValueCents,
       event.eventQuantity,
       event.currency,
       event.ipAddress,
@@ -314,12 +314,12 @@ export async function createSnapshot(
       "organizationId", "snapshotType", "snapshotTime", "snapshotDate", "snapshotHour",
       "totalOrders", "pendingOrders", "processingOrders", "shippedOrders",
       "deliveredOrders", "cancelledOrders", "refundedOrders",
-      "totalRevenue", "pendingRevenue", "refundedAmount",
+      "totalRevenueCents", "pendingRevenueCents", "refundedAmountCents",
       "totalCustomers", "activeCustomers", "newCustomersToday",
       "totalProducts", "activeProducts", "outOfStockProducts", "lowStockProducts",
-      "totalInventoryValue", "totalInventoryUnits",
+      "totalInventoryValueCents", "totalInventoryUnits",
       "openTickets", "pendingTickets",
-      "activeSubscriptions", "monthlyRecurringRevenue",
+      "activeSubscriptions", "monthlyRecurringRevenueCents",
       "createdAt"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, NOW())
     ON CONFLICT ("organizationId", "snapshotType", "snapshotTime") DO UPDATE SET
@@ -330,9 +330,9 @@ export async function createSnapshot(
       "deliveredOrders" = EXCLUDED."deliveredOrders",
       "cancelledOrders" = EXCLUDED."cancelledOrders",
       "refundedOrders" = EXCLUDED."refundedOrders",
-      "totalRevenue" = EXCLUDED."totalRevenue",
-      "pendingRevenue" = EXCLUDED."pendingRevenue",
-      "refundedAmount" = EXCLUDED."refundedAmount",
+      "totalRevenueCents" = EXCLUDED."totalRevenueCents",
+      "pendingRevenueCents" = EXCLUDED."pendingRevenueCents",
+      "refundedAmountCents" = EXCLUDED."refundedAmountCents",
       "totalCustomers" = EXCLUDED."totalCustomers",
       "activeCustomers" = EXCLUDED."activeCustomers",
       "newCustomersToday" = EXCLUDED."newCustomersToday",
@@ -340,12 +340,12 @@ export async function createSnapshot(
       "activeProducts" = EXCLUDED."activeProducts",
       "outOfStockProducts" = EXCLUDED."outOfStockProducts",
       "lowStockProducts" = EXCLUDED."lowStockProducts",
-      "totalInventoryValue" = EXCLUDED."totalInventoryValue",
+      "totalInventoryValueCents" = EXCLUDED."totalInventoryValueCents",
       "totalInventoryUnits" = EXCLUDED."totalInventoryUnits",
       "openTickets" = EXCLUDED."openTickets",
       "pendingTickets" = EXCLUDED."pendingTickets",
       "activeSubscriptions" = EXCLUDED."activeSubscriptions",
-      "monthlyRecurringRevenue" = EXCLUDED."monthlyRecurringRevenue"
+      "monthlyRecurringRevenueCents" = EXCLUDED."monthlyRecurringRevenueCents"
     RETURNING *`,
     [
       snapshot.organizationId,
@@ -360,9 +360,9 @@ export async function createSnapshot(
       snapshot.deliveredOrders || 0,
       snapshot.cancelledOrders || 0,
       snapshot.refundedOrders || 0,
-      snapshot.totalRevenue || 0,
-      snapshot.pendingRevenue || 0,
-      snapshot.refundedAmount || 0,
+      snapshot.totalRevenueCents || 0,
+      snapshot.pendingRevenueCents || 0,
+      snapshot.refundedAmountCents || 0,
       snapshot.totalCustomers || 0,
       snapshot.activeCustomers || 0,
       snapshot.newCustomersToday || 0,
@@ -370,12 +370,12 @@ export async function createSnapshot(
       snapshot.activeProducts || 0,
       snapshot.outOfStockProducts || 0,
       snapshot.lowStockProducts || 0,
-      snapshot.totalInventoryValue || 0,
+      snapshot.totalInventoryValueCents || 0,
       snapshot.totalInventoryUnits || 0,
       snapshot.openTickets || 0,
       snapshot.pendingTickets || 0,
       snapshot.activeSubscriptions || 0,
-      snapshot.monthlyRecurringRevenue || 0,
+      snapshot.monthlyRecurringRevenueCents || 0,
     ],
   );
 
@@ -545,8 +545,8 @@ export async function getRealTimeMetrics(
     params,
   );
 
-  const orders = await queryOne<{ count: string; revenue: string }>(
-    `SELECT COUNT(*) as count, COALESCE(SUM("eventValue"), 0) as revenue 
+  const orders = await queryOne<{ count: string; revenueCents: string }>(
+    `SELECT COUNT(*) as count, COALESCE(SUM("eventValueCents"), 0) as "revenueCents" 
      FROM "analyticsReportEvent" 
      WHERE "createdAt" >= $1 AND "eventType" = 'order.created'${merchantFilter}`,
     params,
@@ -567,7 +567,7 @@ export async function getRealTimeMetrics(
   return {
     activeVisitors: parseInt(visitors?.count || '0'),
     ordersLastHour: parseInt(orders?.count || '0'),
-    revenueLastHour: parseFloat(orders?.revenue || '0'),
+    revenueLastHour: parseFloat(orders?.revenueCents || '0'),
     cartsCreated: parseInt(carts?.count || '0'),
     checkoutsStarted: parseInt(checkouts?.count || '0'),
   };
@@ -592,9 +592,9 @@ function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsRepor
     visitorId: row.visitorId ?? undefined,
     channel: row.channel ?? undefined,
     eventData: (row.eventData as Record<string, unknown>) ?? undefined,
-    eventValue: row.eventValue ? parseFloat(row.eventValue) : undefined,
+    eventValueCents: row.eventValueCents ? Number(row.eventValueCents) : undefined,
     eventQuantity: row.eventQuantity ?? undefined,
-    currency: row.currency ?? undefined,
+    currency: row.currencyCode ?? undefined,
     ipAddress: row.ipAddress ?? undefined,
     userAgent: row.userAgent ?? undefined,
     referrer: row.referrer ?? undefined,
@@ -625,9 +625,9 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
     deliveredOrders: row.deliveredOrders ?? 0,
     cancelledOrders: row.cancelledOrders ?? 0,
     refundedOrders: row.refundedOrders ?? 0,
-    totalRevenue: parseFloat(row.totalRevenue ?? '0'),
-    pendingRevenue: parseFloat(row.pendingRevenue ?? '0'),
-    refundedAmount: parseFloat(row.refundedAmount ?? '0'),
+    totalRevenueCents: Number(row.totalRevenueCents ?? 0),
+    pendingRevenueCents: Number(row.pendingRevenueCents ?? 0),
+    refundedAmountCents: Number(row.refundedAmountCents ?? 0),
     totalCustomers: row.totalCustomers ?? 0,
     activeCustomers: row.activeCustomers ?? 0,
     newCustomersToday: row.newCustomersToday ?? 0,
@@ -635,12 +635,12 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
     activeProducts: row.activeProducts ?? 0,
     outOfStockProducts: row.outOfStockProducts ?? 0,
     lowStockProducts: row.lowStockProducts ?? 0,
-    totalInventoryValue: parseFloat(row.totalInventoryValue ?? '0'),
+    totalInventoryValueCents: Number(row.totalInventoryValueCents ?? 0),
     totalInventoryUnits: row.totalInventoryUnits ?? 0,
     openTickets: row.openTickets ?? 0,
     pendingTickets: row.pendingTickets ?? 0,
     activeSubscriptions: row.activeSubscriptions ?? 0,
-    monthlyRecurringRevenue: parseFloat(row.monthlyRecurringRevenue ?? '0'),
+    monthlyRecurringRevenueCents: Number(row.monthlyRecurringRevenueCents ?? 0),
     createdAt: new Date(row.createdAt ?? new Date()),
   };
 }

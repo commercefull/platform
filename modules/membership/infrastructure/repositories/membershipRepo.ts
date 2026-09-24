@@ -35,8 +35,8 @@ export interface MembershipTier {
   id: string;
   name: string;
   description: string;
-  monthlyPrice: number;
-  annualPrice: number;
+  monthlyPriceCents: number;
+  annualPriceCents: number;
   level: number;
   isActive: boolean;
   createdAt: string;
@@ -50,7 +50,7 @@ export interface LegacyMembershipBenefit {
   description: string;
   benefitType: string;
   discountPercentage?: number;
-  discountAmount?: number;
+  discountAmountCents?: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -103,14 +103,14 @@ export class MembershipRepo {
       name: params.name,
       code: params.name.toUpperCase().replace(/\s+/g, '_'),
       description: params.description,
-      price: params.monthlyPrice,
+      priceCents: params.monthlyPriceCents,
       level: params.level,
       isActive: params.isActive,
       isPublic: true,
       isDefault: false,
       priority: 0,
       trialDays: 0,
-      setupFee: 0,
+      setupFeeCents: 0,
       currency: 'USD',
       billingCycle: 'monthly',
       billingPeriod: 1,
@@ -118,7 +118,7 @@ export class MembershipRepo {
       gracePeriodsAllowed: 0,
       gracePeriodDays: 0,
       shortDescription: null,
-      salePrice: null,
+      salePriceCents: null,
       maxMembers: null,
       duration: null,
       membershipImage: null,
@@ -136,7 +136,7 @@ export class MembershipRepo {
     const updateData: Record<string, unknown> = {};
     if (params.name !== undefined) updateData.name = params.name;
     if (params.description !== undefined) updateData.description = params.description;
-    if (params.monthlyPrice !== undefined) updateData.price = params.monthlyPrice;
+    if (params.monthlyPriceCents !== undefined) updateData.priceCents = params.monthlyPriceCents;
     if (params.level !== undefined) updateData.level = params.level;
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
 
@@ -184,7 +184,7 @@ export class MembershipRepo {
     tierIds: string[];
     benefitType: string;
     discountPercentage?: number;
-    discountAmount?: number;
+    discountAmountCents?: number;
     isActive?: boolean;
   }): Promise<LegacyMembershipBenefit> {
     const benefit = await membershipBenefitRepo.create({
@@ -198,8 +198,8 @@ export class MembershipRepo {
       valueType: params.discountPercentage ? 'percentage' : 'fixed',
       value: params.discountPercentage
         ? { percentage: params.discountPercentage }
-        : params.discountAmount
-          ? { amount: params.discountAmount }
+        : params.discountAmountCents
+          ? { amount: params.discountAmountCents }
           : null,
       icon: null,
       rules: null,
@@ -227,7 +227,7 @@ export class MembershipRepo {
       tierIds: string[];
       benefitType: string;
       discountPercentage: number;
-      discountAmount: number;
+      discountAmountCents: number;
       isActive: boolean;
     }>,
   ): Promise<LegacyMembershipBenefit> {
@@ -240,8 +240,8 @@ export class MembershipRepo {
       updateData.value = { percentage: params.discountPercentage };
       updateData.valueType = 'percentage';
     }
-    if (params.discountAmount !== undefined) {
-      updateData.value = { amount: params.discountAmount };
+    if (params.discountAmountCents !== undefined) {
+      updateData.value = { amount: params.discountAmountCents };
       updateData.valueType = 'fixed';
     }
 
@@ -320,7 +320,7 @@ export class MembershipRepo {
       cancelledAt: null,
       cancelReason: null,
       isAutoRenew: params.autoRenew,
-      priceOverride: null,
+      priceOverrideCents: null,
       billingCycleOverride: null,
       paymentMethodId: params.paymentMethod || null,
       notes: null,
@@ -368,8 +368,8 @@ export class MembershipRepo {
       id: plan.membershipPlanId,
       name: plan.name,
       description: plan.description || '',
-      monthlyPrice: plan.price,
-      annualPrice: plan.price * 12 * 0.8, // 20% annual discount
+      monthlyPriceCents: plan.priceCents,
+      annualPriceCents: Math.round(plan.priceCents * 12 * 0.8), // 20% annual discount
       level: plan.level,
       isActive: plan.isActive,
       createdAt: plan.createdAt.toString(),
@@ -386,7 +386,7 @@ export class MembershipRepo {
       description: benefit.description || '',
       benefitType: benefit.benefitType,
       discountPercentage: value.percentage,
-      discountAmount: value.amount,
+      discountAmountCents: value.amount,
       isActive: benefit.isActive,
       createdAt: benefit.createdAt.toString(),
       updatedAt: benefit.updatedAt.toString(),

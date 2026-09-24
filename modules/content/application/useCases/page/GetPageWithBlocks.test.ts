@@ -1,40 +1,27 @@
 import { GetPageWithBlocksUseCase, GetPageWithBlocksQuery } from './GetPageWithBlocks';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
+import { lazyMock, createContentPage, createContentBlock, createContentBlockType, createContentType } from '../../../tests/testUtils';
 
 describe('GetPageWithBlocksUseCase', () => {
   let useCase: GetPageWithBlocksUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof GetPageWithBlocksUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findPageById: jest.fn().mockResolvedValue(null),
-      findPageBySlug: jest.fn().mockResolvedValue(null),
-      findBlocksByPageId: jest.fn().mockResolvedValue([]),
-      findBlockTypeById: jest.fn().mockResolvedValue({ contentBlockTypeId: 'bt-1', name: 'Text', slug: 'text' }),
-      findContentTypeById: jest.fn().mockResolvedValue({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }),
-    };
-    useCase = new GetPageWithBlocksUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof GetPageWithBlocksUseCase>[0]>();
+    mockRepo.findPageById.mockResolvedValue(null);
+    mockRepo.findPageBySlug.mockResolvedValue(null);
+    mockRepo.findBlocksByPageId.mockResolvedValue([]);
+    mockRepo.findBlockTypeById.mockResolvedValue(createContentBlockType({ contentBlockTypeId: 'bt-1', name: 'Text', slug: 'text' }));
+    mockRepo.findContentTypeById.mockResolvedValue(createContentType({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }));
+    useCase = new GetPageWithBlocksUseCase(mockRepo);
   });
 
   it('should get page with blocks by ID', async () => {
-    mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'p1',
-      title: 'About',
-      slug: 'about',
-      status: 'published',
-      visibility: 'public',
-      summary: 'About us',
-      featuredImage: null,
-      metaTitle: null,
-      metaDescription: null,
-      publishedAt: null,
-      contentTypeId: 'ct-1',
-      templateId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    mockRepo.findPageById.mockResolvedValue(
+      createContentPage({ contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public', summary: 'About us', contentTypeId: 'ct-1' }),
+    );
     mockRepo.findBlocksByPageId.mockResolvedValue([
-      { contentBlockId: 'b1', blockTypeId: 'bt-1', title: 'Hero', sortOrder: 0, content: {}, isVisible: true },
+      createContentBlock({ contentBlockId: 'b1', title: 'Hero', sortOrder: 0, isVisible: true }),
     ]);
 
     const result = await useCase.execute(new GetPageWithBlocksQuery('p1'));
@@ -56,25 +43,12 @@ describe('GetPageWithBlocksUseCase', () => {
   });
 
   it('should filter inactive blocks by default', async () => {
-    mockRepo.findPageById.mockResolvedValue({
-      contentPageId: 'p1',
-      title: 'About',
-      slug: 'about',
-      status: 'published',
-      visibility: 'public',
-      summary: null,
-      featuredImage: null,
-      metaTitle: null,
-      metaDescription: null,
-      publishedAt: null,
-      contentTypeId: 'ct-1',
-      templateId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    mockRepo.findPageById.mockResolvedValue(
+      createContentPage({ contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public', summary: null, contentTypeId: 'ct-1' }),
+    );
     mockRepo.findBlocksByPageId.mockResolvedValue([
-      { contentBlockId: 'b1', blockTypeId: 'bt-1', title: 'Visible', sortOrder: 0, content: {}, isVisible: true },
-      { contentBlockId: 'b2', blockTypeId: 'bt-1', title: 'Hidden', sortOrder: 1, content: {}, isVisible: false },
+      createContentBlock({ contentBlockId: 'b1', title: 'Visible', sortOrder: 0, isVisible: true }),
+      createContentBlock({ contentBlockId: 'b2', title: 'Hidden', sortOrder: 1, isVisible: false }),
     ]);
 
     const result = await useCase.execute(new GetPageWithBlocksQuery('p1'));

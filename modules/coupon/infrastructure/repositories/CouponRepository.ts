@@ -80,7 +80,7 @@ export class CouponRepository {
       await query(
         `UPDATE "promotionCoupon" SET
           code = $1, name = $2, description = $3, type = $4, "discountAmount" = $5,
-          "currencyCode" = $6, "minOrderAmount" = $7, "maxDiscountAmount" = $8,
+          "currencyCode" = $6, "minOrderAmountCents" = $7, "maxDiscountAmountCents" = $8,
           "isOneTimeUse" = $9, "maxUsage" = $10, "usageCount" = $11,
           "maxUsagePerCustomer" = $12, "isActive" = $13,
           "startDate" = $14, "endDate" = $15,
@@ -93,8 +93,8 @@ export class CouponRepository {
           mappedType,
           String(coupon.value),
           coupon.currency ?? 'USD',
-          coupon.minOrderValue ? String(coupon.minOrderValue) : null,
-          coupon.maxDiscountAmount ? String(coupon.maxDiscountAmount) : null,
+          coupon.minOrderValueCents ?? null,
+          coupon.maxDiscountAmountCents ?? null,
           coupon.usageType === 'single_use',
           coupon.usageLimit ?? null,
           coupon.usageCount,
@@ -110,7 +110,7 @@ export class CouponRepository {
       await query(
         `INSERT INTO "promotionCoupon" (
           "promotionCouponId", code, name, description, type, "discountAmount",
-          "currencyCode", "minOrderAmount", "maxDiscountAmount",
+          "currencyCode", "minOrderAmountCents", "maxDiscountAmountCents",
           "isOneTimeUse", "maxUsage", "usageCount", "maxUsagePerCustomer",
           "isActive", "startDate", "endDate", "generationMethod", "isReferral", "isPublic",
           "createdAt", "updatedAt"
@@ -123,8 +123,8 @@ export class CouponRepository {
           mappedType,
           String(coupon.value),
           coupon.currency ?? 'USD',
-          coupon.minOrderValue ? String(coupon.minOrderValue) : null,
-          coupon.maxDiscountAmount ? String(coupon.maxDiscountAmount) : null,
+          coupon.minOrderValueCents ?? null,
+          coupon.maxDiscountAmountCents ?? null,
           coupon.usageType === 'single_use',
           coupon.usageLimit ?? null,
           coupon.usageCount,
@@ -150,7 +150,7 @@ export class CouponRepository {
 
   // Coupon Usage tracking
   async recordUsage(
-    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmount: number },
+    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmountCents: number },
   ): Promise<CouponUsage> {
     const now = new Date().toISOString();
     const fullUsage: CouponUsage = {
@@ -158,20 +158,20 @@ export class CouponRepository {
       couponId: usage.couponId,
       orderId: 'orderId' in usage ? (usage as CouponUsage).orderId : '',
       customerId: usage.customerId || '',
-      discountAmount: usage.discountAmount,
+      discountAmountCents: usage.discountAmountCents,
       usedAt: 'usedAt' in usage ? (usage as CouponUsage).usedAt : new Date(),
     };
 
     await query(
       `INSERT INTO "promotionCouponUsage" (
-        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
+        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmountCents", "currencyCode", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [
         fullUsage.usageId,
         fullUsage.couponId,
         fullUsage.orderId || null,
         fullUsage.customerId || null,
-        String(fullUsage.discountAmount),
+        fullUsage.discountAmountCents,
         'USD',
         now,
       ],
@@ -191,19 +191,19 @@ export class CouponRepository {
     couponId: string;
     orderId: string;
     customerId?: string;
-    discountAmount: number;
+    discountAmountCents: number;
     redeemedAt: Date;
   }): Promise<void> {
     await query(
       `INSERT INTO "promotionCouponUsage" (
-        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmount", "currencyCode", "usedAt"
+        "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmountCents", "currencyCode", "usedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [
         redemption.redemptionId,
         redemption.couponId,
         redemption.orderId,
         redemption.customerId || null,
-        String(redemption.discountAmount),
+        redemption.discountAmountCents,
         'USD',
         redemption.redeemedAt.toISOString(),
       ],
@@ -229,7 +229,7 @@ export class CouponRepository {
       couponId: row.promotionCouponId,
       orderId: row.orderId ?? '',
       customerId: row.customerId ?? '',
-      discountAmount: parseFloat(row.discountAmount),
+      discountAmountCents: Number(row.discountAmountCents),
       usedAt: new Date(row.usedAt),
     }));
   }
@@ -259,12 +259,12 @@ export class CouponRepository {
 
   async validateCouponCode(
     code: string,
-    orderValue: number,
+    orderValueCents: number,
     customerId?: string,
   ): Promise<{
     valid: boolean;
     coupon?: Coupon;
-    discountAmount?: number;
+    discountAmountCents?: number;
     error?: string;
   }> {
     const coupon = await this.findByCode(code);
@@ -279,7 +279,7 @@ export class CouponRepository {
       return { valid: false, error: `Coupon is ${coupon.status}` };
     }
 
-    if (!coupon.canBeApplied(orderValue, customerId)) {
+    if (!coupon.canBeApplied(orderValueCents, customerId)) {
       return { valid: false, error: 'Coupon cannot be applied to this order' };
     }
 
@@ -291,12 +291,12 @@ export class CouponRepository {
       }
     }
 
-    const discountAmount = coupon.calculateDiscount(orderValue);
+    const discountAmountCents = coupon.calculateDiscount(orderValueCents);
 
     return {
       valid: true,
       coupon,
-      discountAmount,
+      discountAmountCents,
     };
   }
 
@@ -352,8 +352,8 @@ export class CouponRepository {
       type: mappedType,
       value: parseFloat(String(row.discountAmount ?? 0)),
       currency: row.currencyCode ?? undefined,
-      minOrderValue: row.minOrderAmount ? parseFloat(String(row.minOrderAmount)) : undefined,
-      maxDiscountAmount: row.maxDiscountAmount ? parseFloat(String(row.maxDiscountAmount)) : undefined,
+      minOrderValueCents: row.minOrderAmountCents != null ? Number(row.minOrderAmountCents) : undefined,
+      maxDiscountAmountCents: row.maxDiscountAmountCents != null ? Number(row.maxDiscountAmountCents) : undefined,
       usageType: row.isOneTimeUse ? 'single_use' : 'multi_use',
       usageLimit: row.maxUsage ?? undefined,
       usageCount: row.usageCount,

@@ -78,7 +78,7 @@ export interface ConversionTrackedEvent {
     customerId?: string;
     orderId: string;
     orderNumber: string;
-    revenue: number;
+    revenueCents: number;
     currency: string;
     itemCount: number;
     timestamp: string;

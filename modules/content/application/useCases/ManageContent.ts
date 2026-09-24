@@ -1,51 +1,80 @@
-import { contentDataRepository } from '../wired';
-
-const contentRepo = contentDataRepository.pages;
+import type {
+  IContentRepository,
+  ContentPageCreateParams,
+  ContentPageUpdateParams,
+  ContentTypeCreateParams,
+  ContentTypeUpdateParams,
+  ContentBlockCreateParams,
+  ContentBlockUpdateParams,
+} from '../../domain/repositories/ContentRepository';
 
 export class ManageContentUseCase {
+  constructor(private readonly contentRepo: IContentRepository) {}
+
   async findPageById(id: string) {
-    return contentRepo.findPageById(id);
+    return this.contentRepo.findPageById(id);
   }
   async findPageBySlug(slug: string) {
-    return contentRepo.findPageBySlug(slug);
+    return this.contentRepo.findPageBySlug(slug);
   }
   async findHomePage() {
-    return contentRepo.findHomePage();
+    return this.contentRepo.findHomePage();
   }
-  async findAllPages(...args: Parameters<typeof contentRepo.findAllPages>) {
-    return contentRepo.findAllPages(...args);
+  async findAllPages(...args: Parameters<IContentRepository['findAllPages']>) {
+    return this.contentRepo.findAllPages(...args);
   }
-  async createPage(params: Parameters<typeof contentRepo.createPage>[0]) {
-    return contentRepo.createPage(params);
+  async createPage(params: ContentPageCreateParams) {
+    return this.contentRepo.createPage(params);
   }
-  async updatePage(id: string, params: Parameters<typeof contentRepo.updatePage>[1]) {
-    return contentRepo.updatePage(id, params);
+  async updatePage(id: string, params: ContentPageUpdateParams) {
+    return this.contentRepo.updatePage(id, params);
   }
   async deletePage(id: string) {
-    return contentRepo.deletePage(id);
+    return this.contentRepo.deletePage(id);
   }
   async publishPage(id: string) {
-    return contentRepo.publishPage(id);
+    return this.contentRepo.publishPage(id);
   }
   async findBlockById(id: string) {
-    return contentRepo.findBlockById(id);
+    return this.contentRepo.findBlockById(id);
   }
-  async findAllBlockTypes(...args: Parameters<typeof contentRepo.findAllBlockTypes>) {
-    return contentRepo.findAllBlockTypes(...args);
+  async findBlocksByPageId(pageId: string) {
+    return this.contentRepo.findBlocksByPageId(pageId);
+  }
+  async createBlock(params: ContentBlockCreateParams) {
+    return this.contentRepo.createBlock(params);
+  }
+  async updateBlock(id: string, params: ContentBlockUpdateParams) {
+    return this.contentRepo.updateBlock(id, params);
+  }
+  async deleteBlock(id: string) {
+    return this.contentRepo.deleteBlock(id);
+  }
+  async reorderBlocks(pageId: string, blockOrders: Array<{ id: string; order: number }>) {
+    return this.contentRepo.reorderBlocks(pageId, blockOrders);
+  }
+  async findBlockTypeById(id: string) {
+    return this.contentRepo.findBlockTypeById(id);
+  }
+  async findAllBlockTypes(...args: Parameters<IContentRepository['findAllBlockTypes']>) {
+    return this.contentRepo.findAllBlockTypes(...args);
+  }
+  async findAllTemplates(...args: Parameters<IContentRepository['findAllTemplates']>) {
+    return this.contentRepo.findAllTemplates(...args);
   }
   async findContentTypeById(id: string) {
-    return contentRepo.findContentTypeById(id);
+    return this.contentRepo.findContentTypeById(id);
   }
-  async findAllContentTypes(...args: Parameters<typeof contentRepo.findAllContentTypes>) {
-    return contentRepo.findAllContentTypes(...args);
+  async findAllContentTypes(...args: Parameters<IContentRepository['findAllContentTypes']>) {
+    return this.contentRepo.findAllContentTypes(...args);
   }
-  async createContentType(params: Parameters<typeof contentRepo.createContentType>[0]) {
-    return contentRepo.createContentType(params);
+  async createContentType(params: ContentTypeCreateParams) {
+    return this.contentRepo.createContentType(params);
   }
-  async updateContentType(id: string, params: Parameters<typeof contentRepo.updateContentType>[1]) {
-    return contentRepo.updateContentType(id, params);
+  async updateContentType(id: string, params: ContentTypeUpdateParams) {
+    return this.contentRepo.updateContentType(id, params);
   }
   async deleteContentType(id: string) {
-    return contentRepo.deleteContentType(id);
+    return this.contentRepo.deleteContentType(id);
   }
 }

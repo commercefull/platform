@@ -29,9 +29,9 @@ exports.up = function (knex) {
 
       // Event data
       table.jsonb('eventData'); // Flexible data storage for event-specific info
-      table.decimal('eventValue', 15, 2); // Monetary value if applicable
+      table.bigInteger('eventValueCents'); // Monetary value if applicable
       table.integer('eventQuantity'); // Quantity if applicable
-      table.string('currency', 3);
+      table.string('currencyCode', 3).references('code').inTable('currency');
 
       // Context
       table.string('ipAddress');

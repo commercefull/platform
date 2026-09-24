@@ -1,19 +1,18 @@
 import type { StorefrontWishlistRepository } from '../../domain/repositories/StorefrontWishlistRepository';
-import { customerDataRepository } from '../wired';
-
-const storefrontWishlistRepo: StorefrontWishlistRepository = customerDataRepository.wishlist;
 
 export class ManageStorefrontWishlistUseCase {
+  constructor(private readonly storefrontWishlistRepo: StorefrontWishlistRepository) {}
+
   async findByCustomer(customerId: string) {
-    return storefrontWishlistRepo.findByCustomer(customerId);
+    return this.storefrontWishlistRepo.findByCustomer(customerId);
   }
   async findExisting(customerId: string, productId: string) {
-    return storefrontWishlistRepo.findExisting(customerId, productId);
+    return this.storefrontWishlistRepo.findExisting(customerId, productId);
   }
   async create(customerId: string, productId: string) {
-    return storefrontWishlistRepo.create(customerId, productId);
+    return this.storefrontWishlistRepo.create(customerId, productId);
   }
   async remove(customerId: string, productId: string) {
-    return storefrontWishlistRepo.remove(customerId, productId);
+    return this.storefrontWishlistRepo.remove(customerId, productId);
   }
 }

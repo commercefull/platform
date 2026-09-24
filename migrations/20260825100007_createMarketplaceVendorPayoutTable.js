@@ -9,10 +9,10 @@ export async function up(knex) {
     table.timestamp('periodStart').notNullable();
     table.timestamp('periodEnd').notNullable();
     table.jsonb('lineItems').notNullable().defaultTo('[]');
-    table.decimal('grossAmount', 14, 2).notNullable().defaultTo(0);
-    table.decimal('commissionAmount', 14, 2).notNullable().defaultTo(0);
-    table.decimal('netAmount', 14, 2).notNullable().defaultTo(0);
-    table.string('currency').notNullable().defaultTo('USD');
+    table.bigInteger('grossAmountCents').notNullable().defaultTo(0);
+    table.bigInteger('commissionAmountCents').notNullable().defaultTo(0);
+    table.bigInteger('netAmountCents').notNullable().defaultTo(0);
+    table.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
     table.string('transactionRef');
     table.text('failureReason');
     table.timestamp('processedAt');

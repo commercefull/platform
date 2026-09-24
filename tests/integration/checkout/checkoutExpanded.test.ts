@@ -42,7 +42,7 @@ describe('Checkout Expanded Tests', () => {
 
     await client.post(
       `/customer/basket/${basketId}/items`,
-      { productId: TEST_PRODUCT_1_ID, sku: 'TEST-SKU-001', name: 'Test Product', quantity: 1, unitPrice: 29.99 },
+      { productId: TEST_PRODUCT_1_ID, sku: 'TEST-SKU-001', name: 'Test Product', quantity: 1 },
       { headers: authHeaders() },
     );
 
@@ -227,7 +227,7 @@ describe('Checkout Expanded Tests', () => {
 
       expectStatus(resp, 200);
       expect(resp.data.success).toBe(true);
-      expect(resp.data.data).toHaveProperty('subtotal');
+      expect(resp.data.data).toHaveProperty('subtotalCents');
 
       await cleanup(basketId);
     });

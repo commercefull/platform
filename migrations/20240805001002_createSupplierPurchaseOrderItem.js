@@ -21,10 +21,10 @@ exports.up = function (knex) {
     t.text('description');
     t.integer('quantity').notNullable();
     t.integer('receivedQuantity').notNullable().defaultTo(0);
-    t.decimal('unitCost', 10, 2).notNullable();
-    t.decimal('tax', 10, 2).notNullable().defaultTo(0);
-    t.decimal('discount', 10, 2).notNullable().defaultTo(0);
-    t.decimal('total', 15, 2).notNullable();
+    t.bigInteger('unitCostCents').notNullable();
+    t.bigInteger('taxCents').notNullable().defaultTo(0);
+    t.bigInteger('discountCents').notNullable().defaultTo(0);
+    t.bigInteger('totalCents').notNullable();
     t.enum('status', ['pending', 'partial', 'received', 'cancelled', 'backOrdered']).notNullable().defaultTo('pending');
     t.timestamp('expectedDeliveryDate');
     t.timestamp('receivedAt');

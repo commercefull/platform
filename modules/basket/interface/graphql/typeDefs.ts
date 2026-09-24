@@ -6,8 +6,8 @@ export const basketTypeDefs = `#graphql
     sku: String!
     name: String!
     quantity: Int!
-    unitPrice: Float!
-    lineTotal: Float!
+    unitPriceCents: Int!
+    lineTotalCents: Int!
     imageUrl: String
     isGift: Boolean!
   }
@@ -20,7 +20,7 @@ export const basketTypeDefs = `#graphql
     currency: String!
     items: [BasketItem!]!
     itemCount: Int!
-    subtotal: Float!
+    subtotalCents: Int!
     createdAt: String!
     updatedAt: String!
   }
@@ -36,7 +36,6 @@ export const basketTypeDefs = `#graphql
       sku: String!
       name: String!
       quantity: Int!
-      unitPrice: Float!
       productVariantId: String
       imageUrl: String
       itemType: String

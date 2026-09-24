@@ -20,19 +20,10 @@ export class StoreCurrencySettingsRepo {
   }
 
   /**
-   * Find settings by store currency
+   * Find settings for a store (one settings row per store)
    */
-  async findByStoreCurrency(storeCurrencyId: string): Promise<StoreCurrencySettings | null> {
-    return await queryOne<StoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeCurrencyId" = $1`, [
-      storeCurrencyId,
-    ]);
-  }
-
-  /**
-   * Find default settings (typically only one row exists per store)
-   */
-  async findDefault(): Promise<StoreCurrencySettings | null> {
-    return await queryOne<StoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" ORDER BY "createdAt" ASC LIMIT 1`);
+  async findByStore(storeId: string): Promise<StoreCurrencySettings | null> {
+    return await queryOne<StoreCurrencySettings>(`SELECT * FROM "${Table.StoreCurrencySettings}" WHERE "storeId" = $1`, [storeId]);
   }
 
   /**
@@ -70,23 +61,22 @@ export class StoreCurrencySettingsRepo {
   async create(params: StoreCurrencySettingsCreateParams): Promise<StoreCurrencySettings> {
     const now = unixTimestamp();
 
-    // Check if settings already exist for this store currency
-    const existing = await this.findByStoreCurrency(params.storeCurrencyId);
+    const existing = await this.findByStore(params.storeId);
     if (existing) {
-      throw new PricingValidationError(`Settings already exist for store currency ID '${params.storeCurrencyId}'`);
+      throw new PricingValidationError(`Settings already exist for store ID '${params.storeId}'`);
     }
 
     const result = await queryOne<StoreCurrencySettings>(
       `INSERT INTO "${Table.StoreCurrencySettings}" (
-        "storeCurrencyId", "baseCurrencyId", "displayCurrencyId",
+        "storeId", "baseCurrencyId", "displayCurrencyId",
         "allowCustomerCurrencySelection", "showCurrencySelector", "autoUpdateRates",
         "rateUpdateFrequency", "activeProviderCode", "markupPercentage",
-        "roundPrecision", "roundingMethod", "enabledCurrencies", "priceDisplayFormat",
+        "roundPrecision", "roundingMethod", "priceDisplayFormat",
         "updatedBy", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *`,
       [
-        params.storeCurrencyId,
+        params.storeId,
         params.baseCurrencyId,
         params.displayCurrencyId,
         params.allowCustomerCurrencySelection !== undefined ? params.allowCustomerCurrencySelection : true,
@@ -97,7 +87,6 @@ export class StoreCurrencySettingsRepo {
         params.markupPercentage || 0,
         params.roundPrecision !== undefined ? params.roundPrecision : 2,
         params.roundingMethod || 'half_up',
-        params.enabledCurrencies || null,
         params.priceDisplayFormat || 'symbol',
         params.updatedBy || null,
         now,
@@ -180,43 +169,6 @@ export class StoreCurrencySettingsRepo {
    */
   async updateDisplayCurrency(storeCurrencySettingsId: string, displayCurrencyId: string): Promise<StoreCurrencySettings | null> {
     return this.update(storeCurrencySettingsId, { displayCurrencyId });
-  }
-
-  /**
-   * Add enabled currency
-   */
-  async addEnabledCurrency(storeCurrencySettingsId: string, currencyCode: string): Promise<StoreCurrencySettings | null> {
-    const result = await queryOne<StoreCurrencySettings>(
-      `UPDATE "${Table.StoreCurrencySettings}" 
-       SET "enabledCurrencies" = array_append("enabledCurrencies", $1), "updatedAt" = $2
-       WHERE "storeCurrencySettingsId" = $3
-       RETURNING *`,
-      [currencyCode, unixTimestamp(), storeCurrencySettingsId],
-    );
-
-    return result;
-  }
-
-  /**
-   * Remove enabled currency
-   */
-  async removeEnabledCurrency(storeCurrencySettingsId: string, currencyCode: string): Promise<StoreCurrencySettings | null> {
-    const result = await queryOne<StoreCurrencySettings>(
-      `UPDATE "${Table.StoreCurrencySettings}" 
-       SET "enabledCurrencies" = array_remove("enabledCurrencies", $1), "updatedAt" = $2
-       WHERE "storeCurrencySettingsId" = $3
-       RETURNING *`,
-      [currencyCode, unixTimestamp(), storeCurrencySettingsId],
-    );
-
-    return result;
-  }
-
-  /**
-   * Set enabled currencies (replace all)
-   */
-  async setEnabledCurrencies(storeCurrencySettingsId: string, currencyCodes: string[]): Promise<StoreCurrencySettings | null> {
-    return this.update(storeCurrencySettingsId, { enabledCurrencies: currencyCodes });
   }
 
   /**

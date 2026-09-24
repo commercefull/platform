@@ -55,7 +55,7 @@
                     <td><%= item.returnReason %></td>
                     <td><%= item.condition %></td>
                     <td><%= item.restockItem ? 'Yes' : 'No' %></td>
-                    <td><%= item.refundAmount ? '$' + Number(item.refundAmount).toFixed(2) : '-' %></td>
+                    <td><%= item.refundAmountCents ? '$' + (item.refundAmountCents / 100).toFixed(2) : '-' %></td>
                     <td><%= item.warrantyStatus || 'none' %></td>
                   </tr>
                 <% }) %>

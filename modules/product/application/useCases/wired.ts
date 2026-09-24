@@ -3,7 +3,6 @@ import productTypeRepo from '../../infrastructure/repositories/ProductTypeReposi
 import productVariantRepo from '../../infrastructure/repositories/ProductVariantRepository';
 import productQaRepo from '../../infrastructure/repositories/productQaRepo';
 import productQaAnswerRepo from '../../infrastructure/repositories/productQaAnswerRepo';
-import productPriceRepo from '../../infrastructure/repositories/productPriceRepo';
 import productCategoryRepo from '../../infrastructure/repositories/productCategoryRepo';
 import productToCategoryRepo from '../../infrastructure/repositories/productToCategoryRepo';
 import productTagRepo from '../../infrastructure/repositories/productTagRepo';
@@ -17,6 +16,7 @@ import { DynamicAttributeRepository } from '../../infrastructure/repositories/Dy
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
 import brandRepo from '../../infrastructure/repositories/brandRepo';
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
+import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -28,7 +28,6 @@ import { ListProductTypesUseCase } from './ListProductTypes';
 import { GetProductVariantsUseCase } from './GetProductVariants';
 import { CreateProductVariantUseCase } from './CreateProductVariant';
 import { ManageProductQaUseCase } from './ManageProductQa';
-import { ManageProductPricesUseCase } from './ManageProductPrices';
 import { ManageProductCategoriesUseCase } from './ManageProductCategories';
 import { ManageProductTagsUseCase } from './ManageProductTags';
 import { ManageCategoriesUseCase } from './ManageCategories';
@@ -42,21 +41,38 @@ import { SubmitProductQaUseCase } from './SubmitProductQa';
 import { GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
 import { GetProductAttributesUseCase } from './GetProductAttributes';
 import { SearchProductsUseCase } from './SearchProducts';
+import productSearchService from '../services/ProductSearchService';
+import { CreateAttributeUseCase } from './attribute/CreateAttribute';
+import { UpdateAttributeUseCase } from './attribute/UpdateAttribute';
+import { AddAttributeValueUseCase } from './attribute/AddAttributeValue';
+import { RemoveAttributeValueUseCase } from './attribute/RemoveAttributeValue';
+import { GetAttributeValuesUseCase } from './attribute/GetAttributeValues';
+import { SetProductAttributeUseCase } from './attribute/SetProductAttribute';
+import { SetProductAttributesUseCase } from './attribute/SetProductAttributes';
+import { GetProductAttributesUseCase as GetAssignedProductAttributesUseCase } from './attribute/GetProductAttributes';
+import { RemoveProductAttributeUseCase } from './attribute/RemoveProductAttribute';
+import { SearchProductsUseCase as AttributeSearchProductsUseCase } from './attribute/SearchProducts';
+import { GetSearchSuggestionsUseCase } from './attribute/GetSearchSuggestions';
+import { FindSimilarProductsUseCase } from './attribute/FindSimilarProducts';
+import { FindByAttributeUseCase } from './attribute/FindByAttribute';
 
 export const dynamicAttributeRepo: DynamicAttributePort = new DynamicAttributeRepository();
 const attributeSetRepo = new ProductAttributeSetRepository();
 
-export const listProductsUseCase = new ListProductsUseCase(productRepo);
-export const createProductUseCase = new CreateProductUseCase(productRepo, attributeSetRepo, dynamicAttributeRepo);
-export const getProductUseCase = new GetProductUseCase(productRepo);
-export const updateProductUseCase = new UpdateProductUseCase(productRepo);
+// Pricing is owned by the pricing module — product consumes it through this
+// consumer-owned port + ACL adapter (integer cents across the boundary).
+export const productPricingPort = new ProductPricingAdapter();
+
+export const listProductsUseCase = new ListProductsUseCase(productRepo, productPricingPort);
+export const createProductUseCase = new CreateProductUseCase(productRepo, attributeSetRepo, dynamicAttributeRepo, productPricingPort);
+export const getProductUseCase = new GetProductUseCase(productRepo, productPricingPort);
+export const updateProductUseCase = new UpdateProductUseCase(productRepo, productPricingPort);
 export const deleteProductUseCase = new DeleteProductUseCase(productRepo);
 export const updateProductStatusUseCase = new UpdateProductStatusUseCase(productRepo);
 export const listProductTypesUseCase = new ListProductTypesUseCase(productTypeRepo);
-export const getProductVariantsUseCase = new GetProductVariantsUseCase(productVariantRepo);
-export const createProductVariantUseCase = new CreateProductVariantUseCase(productVariantRepo);
+export const getProductVariantsUseCase = new GetProductVariantsUseCase(productVariantRepo, productPricingPort);
+export const createProductVariantUseCase = new CreateProductVariantUseCase(productVariantRepo, productPricingPort);
 export const manageProductQaUseCase = new ManageProductQaUseCase(productQaRepo);
-export const manageProductPricesUseCase = new ManageProductPricesUseCase(productPriceRepo);
 export const manageProductCategoriesUseCase = new ManageProductCategoriesUseCase(productCategoryRepo);
 export const manageProductTagsUseCase = new ManageProductTagsUseCase(productTagRepo);
 export const manageCategoriesUseCase = new ManageCategoriesUseCase(categoryRepo);
@@ -76,5 +92,19 @@ export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmen
   productQaAnswerRepo,
 );
 export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynamicAttributeRepo);
-export const searchProductsUseCase = new SearchProductsUseCase(productRepo);
+export const searchProductsUseCase = new SearchProductsUseCase(productRepo, productPricingPort);
 export { brandRepo };
+
+export const createAttributeUseCase = new CreateAttributeUseCase(dynamicAttributeRepo);
+export const updateAttributeUseCase = new UpdateAttributeUseCase(dynamicAttributeRepo);
+export const addAttributeValueUseCase = new AddAttributeValueUseCase(dynamicAttributeRepo);
+export const removeAttributeValueUseCase = new RemoveAttributeValueUseCase(dynamicAttributeRepo);
+export const getAttributeValuesUseCase = new GetAttributeValuesUseCase(dynamicAttributeRepo);
+export const setProductAttributeUseCase = new SetProductAttributeUseCase(dynamicAttributeRepo);
+export const setProductAttributesUseCase = new SetProductAttributesUseCase(dynamicAttributeRepo);
+export const getAssignedProductAttributesUseCase = new GetAssignedProductAttributesUseCase(dynamicAttributeRepo);
+export const removeProductAttributeUseCase = new RemoveProductAttributeUseCase(dynamicAttributeRepo);
+export const attributeSearchProductsUseCase = new AttributeSearchProductsUseCase(productSearchService);
+export const getSearchSuggestionsUseCase = new GetSearchSuggestionsUseCase(productSearchService);
+export const findSimilarProductsUseCase = new FindSimilarProductsUseCase(productSearchService);
+export const findByAttributeUseCase = new FindByAttributeUseCase(productSearchService);

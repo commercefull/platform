@@ -21,7 +21,7 @@ export interface ReturnItem {
   returnReasonDetail?: string;
   condition: ReturnItemCondition;
   restockItem: boolean;
-  refundAmount?: number;
+  refundAmountCents?: number;
   exchangeProductId?: string;
   exchangeVariantId?: string;
   notes?: string;
@@ -46,7 +46,7 @@ export interface ReturnRequestProps {
   rmaNumber?: string;
   paymentRefundId?: string;
   returnShippingPaid: boolean;
-  returnShippingAmount?: number;
+  returnShippingAmountCents?: number;
   returnShippingLabel?: string;
   returnCarrier: ReturnCarrier;
   returnTrackingNumber?: string;
@@ -199,17 +199,17 @@ export class ReturnRequest {
 
   /**
    * Apply restocking fees to return items based on a return rule evaluation result.
-   * Each item's refundAmount is reduced by the restocking fee.
+   * Each item's refundAmountCents is reduced by the restocking fee.
    * Returns the total restocking fee applied.
    * (Epic I — see docs/e2e-rule-engine-implementation-plan.md)
    */
-  applyRestockingFee(result: { restockingFeePercent: number; restockingFeeFlat: number }): number {
+  applyRestockingFee(result: { restockingFeePercent: number; restockingFeeFlatCents: number }): number {
     let totalFee = 0;
     for (const item of this.props.items) {
-      if (item.refundAmount === undefined) continue;
-      const percentFee = (item.refundAmount * result.restockingFeePercent) / 100;
-      const fee = Math.min(percentFee + result.restockingFeeFlat, item.refundAmount);
-      item.refundAmount = item.refundAmount - fee;
+      if (item.refundAmountCents === undefined) continue;
+      const percentFee = (item.refundAmountCents * result.restockingFeePercent) / 100;
+      const fee = Math.min(percentFee + result.restockingFeeFlatCents, item.refundAmountCents);
+      item.refundAmountCents = item.refundAmountCents - fee;
       totalFee += fee;
     }
     this.props.updatedAt = new Date();
@@ -236,9 +236,9 @@ export class ReturnRequest {
     this.props.updatedAt = new Date();
   }
 
-  setShippingLabel(label: string, amount?: number): void {
+  setShippingLabel(label: string, amountCents?: number): void {
     this.props.returnShippingLabel = label;
-    if (amount !== undefined) this.props.returnShippingAmount = amount;
+    if (amountCents !== undefined) this.props.returnShippingAmountCents = amountCents;
     this.props.returnShippingPaid = true;
     this.props.updatedAt = new Date();
   }
@@ -282,8 +282,8 @@ export class ReturnRequest {
   get returnShippingPaid(): boolean {
     return this.props.returnShippingPaid;
   }
-  get returnShippingAmount(): number | undefined {
-    return this.props.returnShippingAmount;
+  get returnShippingAmountCents(): number | undefined {
+    return this.props.returnShippingAmountCents;
   }
   get returnShippingLabel(): string | undefined {
     return this.props.returnShippingLabel;
@@ -341,7 +341,7 @@ export class ReturnRequest {
   }
 
   get totalRefundAmount(): number {
-    return this.props.items.reduce((sum, item) => sum + (item.refundAmount ?? 0), 0);
+    return this.props.items.reduce((sum, item) => sum + (item.refundAmountCents ?? 0), 0);
   }
 
   toJSON(): ReturnRequestProps {

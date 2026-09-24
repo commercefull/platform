@@ -1,38 +1,22 @@
-jest.mock('../../../../../libs/events/eventBus', () => ({
-  __esModule: true,
-  eventBus: { emit: jest.fn() },
-}));
-
+import { lazyMock, createContentTemplate, emitMock } from '../../../tests/testUtils';
 import { DuplicateTemplateUseCase, DuplicateTemplateCommand } from './DuplicateTemplate';
 import { ContentTemplateNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
-import { eventBus } from '../../../../../libs/events/eventBus';
 
 beforeEach(() => {
-  jest.mocked(eventBus.emit).mockClear();
+  emitMock.mockClear();
 });
 
 describe('DuplicateTemplateUseCase', () => {
   let useCase: DuplicateTemplateUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof DuplicateTemplateUseCase>[0]>;
 
   beforeEach(() => {
-    mockRepo = {
-      findTemplateById: jest.fn().mockResolvedValue({
-        contentTemplateId: 't1',
-        name: 'Original',
-        slug: 'original',
-        description: 'Original template',
-        thumbnail: null,
-        htmlStructure: '<div></div>',
-        cssStyles: null,
-        jsScripts: null,
-        areas: null,
-        defaultBlocks: null,
-        compatibleContentTypes: null,
-      }),
-      createTemplate: jest.fn().mockResolvedValue({ contentTemplateId: 't2', name: 'Copy', slug: 'copy', createdAt: new Date() }),
-    };
-    useCase = new DuplicateTemplateUseCase(mockRepo as never);
+    mockRepo = lazyMock<ConstructorParameters<typeof DuplicateTemplateUseCase>[0]>();
+    mockRepo.findTemplateById.mockResolvedValue(
+      createContentTemplate({ contentTemplateId: 't1', name: 'Original', slug: 'original', description: 'Original template', htmlStructure: '<div></div>' }),
+    );
+    mockRepo.createTemplate.mockResolvedValue(createContentTemplate({ contentTemplateId: 't2', name: 'Copy', slug: 'copy' }));
+    useCase = new DuplicateTemplateUseCase(mockRepo);
   });
 
   it('should duplicate a template successfully', async () => {
@@ -40,7 +24,7 @@ describe('DuplicateTemplateUseCase', () => {
 
     expect(result.contentTemplateId).toBe('t2');
     expect(result.originalTemplateId).toBe('t1');
-    expect(eventBus.emit).toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalled();
   });
 
   it('should throw ContentValidationError when required fields missing', async () => {

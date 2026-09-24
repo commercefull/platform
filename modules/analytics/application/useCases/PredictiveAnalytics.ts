@@ -15,16 +15,16 @@ import {
 } from '../../domain/entities/AnalyticsReport';
 import { AnalyticsValidationError } from '../../domain/errors/AnalyticsErrors';
 
-function calculateTrendSlope(data: Array<{ date: Date; revenue: number }>): number {
+function calculateTrendSlope(data: Array<{ date: Date; revenueCents: number }>): number {
   if (data.length < 2) return 0;
   const n = data.length;
   const sumX = data.reduce((sum, _d, i) => sum + i, 0);
-  const sumY = data.reduce((sum, d) => sum + d.revenue, 0);
-  const sumXY = data.reduce((sum, d, i) => sum + i * d.revenue, 0);
+  const sumY = data.reduce((sum, d) => sum + d.revenueCents, 0);
+  const sumXY = data.reduce((sum, d, i) => sum + i * d.revenueCents, 0);
   const sumXX = data.reduce((sum, _d, i) => sum + i * i, 0);
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const avgRevenue = sumY / n;
-  return slope / avgRevenue;
+  const avgRevenueCents = sumY / n;
+  return slope / avgRevenueCents;
 }
 
 function getSeasonalFactor(date: Date): number {
@@ -35,7 +35,7 @@ function getSeasonalFactor(date: Date): number {
 
 export class PredictiveAnalyticsUseCase {
   async forecastSalesRevenue(
-    historicalData: Array<{ date: Date; revenue: number; orders: number }>,
+    historicalData: Array<{ date: Date; revenueCents: number; orders: number }>,
     forecastDays: number = 30,
   ): Promise<SalesForecast> {
     if (historicalData.length < 7) {
@@ -43,7 +43,7 @@ export class PredictiveAnalyticsUseCase {
     }
 
     const recentData = historicalData.slice(-30);
-    const avgRevenue = recentData.reduce((sum, d) => sum + d.revenue, 0) / recentData.length;
+    const avgRevenueCents = recentData.reduce((sum, d) => sum + d.revenueCents, 0) / recentData.length;
     const slope = calculateTrendSlope(recentData);
 
     const predictions = [];
@@ -53,7 +53,7 @@ export class PredictiveAnalyticsUseCase {
       const forecastDate = new Date(lastDate);
       forecastDate.setDate(forecastDate.getDate() + i);
 
-      const basePrediction = avgRevenue * (1 + slope * i);
+      const basePrediction = avgRevenueCents * (1 + slope * i);
       const seasonalFactor = getSeasonalFactor(forecastDate);
       const predicted = basePrediction * seasonalFactor;
       const confidence = Math.max(0.5, 0.9 - (i / forecastDays) * 0.4);
@@ -73,18 +73,18 @@ export class PredictiveAnalyticsUseCase {
 
   async predictCustomerChurn(
     customerId: string,
-    historicalData: Array<{ date: Date; orders: number; revenue: number }>,
+    historicalData: Array<{ date: Date; orders: number; revenueCents: number }>,
   ): Promise<ChurnPrediction> {
     const totalOrders = historicalData.reduce((sum, d) => sum + d.orders, 0);
-    const totalRevenue = historicalData.reduce((sum, d) => sum + d.revenue, 0);
-    const avgOrderValue = totalRevenue / totalOrders;
+    const totalRevenueCents = historicalData.reduce((sum, d) => sum + d.revenueCents, 0);
+    const avgOrderValueCents = totalRevenueCents / totalOrders;
 
     const lastOrderDate = new Date(Math.max(...historicalData.map(d => d.date.getTime())));
     const daysSinceLastOrder = Math.floor((Date.now() - lastOrderDate.getTime()) / (1000 * 60 * 60 * 24));
 
     const recencyScore = Math.min(1, daysSinceLastOrder / 90);
     const frequencyScore = Math.min(1, 1 / Math.max(1, totalOrders / 12));
-    const monetaryScore = Math.min(1, 500 / Math.max(1, avgOrderValue));
+    const monetaryScore = Math.min(1, 500 / Math.max(1, avgOrderValueCents));
 
     const churnProbability = recencyScore * 0.4 + frequencyScore * 0.3 + monetaryScore * 0.3;
 

@@ -37,7 +37,7 @@
               <td><code><%= r.merchantId %></code></td>
               <td><span class="badge bg-info"><%= r.type %></span></td>
               <td><%= r.currency %></td>
-              <td><strong><%= r.currency %> <%= (r.totalAmount || 0).toFixed(2) %></strong></td>
+              <td><strong><%= r.currency %> <%= ((r.totalAmountCents || 0) / 100).toFixed(2) %></strong></td>
               <td><%= r.transactionCount || 0 %></td>
               <td>
                 <%= new Date(r.periodStart).toLocaleDateString() %> &ndash;

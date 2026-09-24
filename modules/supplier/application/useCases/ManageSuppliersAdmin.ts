@@ -1,40 +1,40 @@
-import type { SupplierRepository } from '../../domain/repositories/SupplierRepository';
-import { supplierDataRepository } from '../wired';
-
-const supplierRepo = supplierDataRepository.suppliers as unknown as SupplierRepository;
+import type { SupplierStatus } from '../../domain/entities/Supplier';
+import type { SupplierRepository, SupplierCreateParams, SupplierUpdateParams } from '../../domain/repositories/SupplierRepository';
 
 export class ManageSuppliersAdminUseCase {
+  constructor(private readonly supplierRepo: SupplierRepository) {}
+
   async findAll(activeOnly?: boolean, approvedOnly?: boolean) {
-    return supplierRepo.findAll(activeOnly, approvedOnly);
+    return this.supplierRepo.findAll(activeOnly, approvedOnly);
   }
-  async findByStatus(status: string) {
-    return supplierRepo.findByStatus(status as Parameters<typeof supplierRepo.findByStatus>[0]);
+  async findByStatus(status: SupplierStatus) {
+    return this.supplierRepo.findByStatus(status);
   }
   async getStatistics() {
-    return supplierRepo.getStatistics();
+    return this.supplierRepo.getStatistics();
   }
   async findById(id: string) {
-    return supplierRepo.findById(id);
+    return this.supplierRepo.findById(id);
   }
-  async create(params: Parameters<typeof supplierRepo.create>[0]) {
-    return supplierRepo.create(params);
+  async create(params: SupplierCreateParams) {
+    return this.supplierRepo.create(params);
   }
-  async update(id: string, params: Parameters<typeof supplierRepo.update>[1]) {
-    return supplierRepo.update(id, params);
+  async update(id: string, params: SupplierUpdateParams) {
+    return this.supplierRepo.update(id, params);
   }
   async approve(id: string) {
-    return supplierRepo.approve(id);
+    return this.supplierRepo.approve(id);
   }
   async suspend(id: string) {
-    return supplierRepo.suspend(id);
+    return this.supplierRepo.suspend(id);
   }
   async activate(id: string) {
-    return supplierRepo.activate(id);
+    return this.supplierRepo.activate(id);
   }
   async deactivate(id: string) {
-    return supplierRepo.deactivate(id);
+    return this.supplierRepo.deactivate(id);
   }
   async delete(id: string) {
-    return supplierRepo.delete(id);
+    return this.supplierRepo.delete(id);
   }
 }

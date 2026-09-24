@@ -1,21 +1,18 @@
-jest.mock('../../infrastructure/repositories/ProductTypeRepository', () => ({
-  __esModule: true,
-  default: {
-    findAll: jest.fn().mockResolvedValue([{ typeId: 't1', name: 'Simple' }]),
-  },
-}));
 
 import { ListProductTypesUseCase } from './ListProductTypes';
-import ProductTypeRepository from '../../infrastructure/repositories/ProductTypeRepository';
+import { createProductTypeRow, lazyMock } from '../../tests/testUtils';
 
-const mockRepo = ProductTypeRepository as unknown as Record<string, jest.Mock>;
+;
 
 describe('ListProductTypesUseCase', () => {
   let useCase: ListProductTypesUseCase;
+  let mockRepo: jest.Mocked<ConstructorParameters<typeof ListProductTypesUseCase>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ListProductTypesUseCase(mockRepo as never);
+        mockRepo = lazyMock<ConstructorParameters<typeof ListProductTypesUseCase>[0]>();
+    mockRepo.findAll.mockResolvedValue([createProductTypeRow({ productTypeId: 't1', name: 'Simple' })]);
+    useCase = new ListProductTypesUseCase(mockRepo);
   });
 
   it('should list all product types', async () => {

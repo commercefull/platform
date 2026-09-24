@@ -26,7 +26,7 @@ export type MembershipSubscriptionUpdateParams = Partial<
     | 'cancelledAt'
     | 'cancelReason'
     | 'isAutoRenew'
-    | 'priceOverride'
+    | 'priceOverrideCents'
     | 'paymentMethodId'
     | 'notes'
   >
@@ -113,7 +113,7 @@ export class MembershipSubscriptionRepo {
     const result = await queryOne<MembershipSubscription>(
       `INSERT INTO "membershipSubscription" (
         "customerId", "membershipPlanId", "status", "membershipNumber", "startDate", "endDate",
-        "trialEndDate", "nextBillingDate", "lastBillingDate", "isAutoRenew", "priceOverride",
+        "trialEndDate", "nextBillingDate", "lastBillingDate", "isAutoRenew", "priceOverrideCents",
         "billingCycleOverride", "paymentMethodId", "notes", "createdBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
       [
@@ -127,7 +127,7 @@ export class MembershipSubscriptionRepo {
         params.nextBillingDate || null,
         params.lastBillingDate || null,
         params.isAutoRenew ?? true,
-        params.priceOverride || null,
+        params.priceOverrideCents || null,
         params.billingCycleOverride || null,
         params.paymentMethodId || null,
         params.notes || null,

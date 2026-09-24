@@ -72,7 +72,7 @@ export class CancelOrderUseCase {
       orderNumber: order.orderNumber,
       customerId: order.customerId,
       reason: command.reason,
-      totalAmount: order.totalAmount.amount,
+      totalAmountCents: order.totalAmount.cents,
     });
 
     return {

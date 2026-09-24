@@ -1,32 +1,32 @@
+import { createWebhookRepository } from '../../tests/testUtils';
 import { UnregisterWebhookUseCase } from './UnregisterWebhook';
 import { WebhookValidationError, WebhookEndpointNotFoundError } from '../../domain/errors/WebhookErrors';
 
 describe('UnregisterWebhookUseCase', () => {
-  let useCase: UnregisterWebhookUseCase;
-  let mockRepo: Record<string, jest.Mock>;
+  it('should delete the endpoint when it exists', async () => {
+    const repository = createWebhookRepository();
 
-  beforeEach(() => {
-    mockRepo = {
-      findEndpointById: jest.fn().mockResolvedValue({ webhookEndpointId: 'wh-1' }),
-      deleteEndpoint: jest.fn().mockResolvedValue(true),
-    };
-    useCase = new UnregisterWebhookUseCase(mockRepo as never);
-  });
-
-  it('should unregister a webhook successfully', async () => {
-    const result = await useCase.execute('wh-1');
+    const result = await new UnregisterWebhookUseCase(repository).execute('wh-1');
 
     expect(result).toBe(true);
-    expect(mockRepo.deleteEndpoint).toHaveBeenCalledWith('wh-1');
+    expect(repository.deleteEndpoint).toHaveBeenCalledWith('wh-1');
   });
 
-  it('should throw WebhookValidationError when id is empty', async () => {
-    await expect(useCase.execute('')).rejects.toThrow(WebhookValidationError);
+  it('should throw WebhookValidationError when the id is empty', async () => {
+    const repository = createWebhookRepository();
+
+    await expect(new UnregisterWebhookUseCase(repository).execute('')).rejects.toThrow(WebhookValidationError);
+    expect(repository.findEndpointById).not.toHaveBeenCalled();
+    expect(repository.deleteEndpoint).not.toHaveBeenCalled();
   });
 
-  it('should throw WebhookEndpointNotFoundError when endpoint not found', async () => {
-    mockRepo.findEndpointById.mockResolvedValue(null);
+  it('should throw WebhookEndpointNotFoundError when the endpoint does not exist', async () => {
+    const repository = createWebhookRepository();
+    repository.findEndpointById.mockResolvedValue(null);
 
-    await expect(useCase.execute('missing')).rejects.toThrow(WebhookEndpointNotFoundError);
+    await expect(new UnregisterWebhookUseCase(repository).execute('missing')).rejects.toThrow(
+      WebhookEndpointNotFoundError,
+    );
+    expect(repository.deleteEndpoint).not.toHaveBeenCalled();
   });
 });

@@ -34,7 +34,7 @@ describe('RBAC middleware', () => {
         organizationId: 'org-1',
         storeId: 'store-1',
         permissions: [],
-      } as never,
+      } as unknown as HttpRequest['user'],
       params: {},
       body: {},
       query: {},

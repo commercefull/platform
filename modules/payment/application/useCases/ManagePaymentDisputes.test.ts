@@ -1,40 +1,39 @@
-jest.mock('../../infrastructure/repositories/PaymentBillingDataRepository', () => ({
-  __esModule: true,
-  default: {
-    billing: {
-      findAllDisputes: jest.fn().mockResolvedValue([{ disputeId: 'd1' }]),
-      findDisputeById: jest.fn().mockResolvedValue({ disputeId: 'd1' }),
-      updateDisputeStatus: jest.fn().mockResolvedValue(undefined),
-    },
-  },
-}));
-
+import { lazyMock, createPaymentDispute } from '../../tests/testUtils';
 import { ManagePaymentDisputesUseCase } from './ManagePaymentDisputes';
-import paymentBillingDataRepository from '../../infrastructure/repositories/PaymentBillingDataRepository';
-
-const mockRepo = paymentBillingDataRepository as unknown as { billing: Record<string, jest.Mock> };
+import type { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
 describe('ManagePaymentDisputesUseCase', () => {
   let useCase: ManagePaymentDisputesUseCase;
+  let repo: jest.Mocked<PaymentBillingRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    useCase = new ManagePaymentDisputesUseCase();
+    repo = lazyMock<PaymentBillingRepository>();
+    useCase = new ManagePaymentDisputesUseCase(repo);
   });
 
   it('should find all disputes', async () => {
+    repo.findAllDisputes.mockResolvedValue([createPaymentDispute()]);
+
     const result = await useCase.findAll('open', 10);
+
     expect(result).toHaveLength(1);
-    expect(mockRepo.billing.findAllDisputes).toHaveBeenCalledWith('open', 10);
+    expect(repo.findAllDisputes).toHaveBeenCalledWith('open', 10);
   });
 
-  it('should find dispute by ID', async () => {
+  it('should find a dispute by ID', async () => {
+    repo.findDisputeById.mockResolvedValue(createPaymentDispute({ paymentDisputeId: 'd1' }));
+
     const result = await useCase.findById('d1');
-    expect(result).toEqual({ disputeId: 'd1' });
+
+    expect(result?.paymentDisputeId).toBe('d1');
   });
 
   it('should update dispute status', async () => {
-    await useCase.updateStatus('d1', 'resolved', new Date());
-    expect(mockRepo.billing.updateDisputeStatus).toHaveBeenCalledWith('d1', 'resolved', expect.any(Date));
+    const resolvedAt = new Date();
+    repo.updateDisputeStatus.mockResolvedValue(createPaymentDispute({ status: 'resolved', resolvedAt }));
+
+    await useCase.updateStatus('d1', 'resolved', resolvedAt);
+
+    expect(repo.updateDisputeStatus).toHaveBeenCalledWith('d1', 'resolved', resolvedAt);
   });
 });

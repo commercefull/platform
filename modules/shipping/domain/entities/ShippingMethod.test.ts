@@ -5,7 +5,7 @@ describe('ShippingMethod', () => {
     name: 'Standard',
     code: 'STD',
     type: 'flat_rate' as const,
-    basePrice: 10,
+    basePriceCents: 10,
     zoneIds: ['z1'],
     isActive: true,
     isDefault: false,
@@ -32,22 +32,22 @@ describe('ShippingMethod', () => {
   });
 
   it('should calculate weight-based rate', () => {
-    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKg: 2 });
+    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKgCents: 2 });
     expect(sm.calculateRate(5, 100)).toBe(20);
   });
 
   it('should enforce min price', () => {
-    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKg: 0.5, minPrice: 15 });
+    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKgCents: 0.5, minPriceCents: 15 });
     expect(sm.calculateRate(5, 100)).toBe(15);
   });
 
   it('should enforce max price', () => {
-    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKg: 10, maxPrice: 50 });
+    const sm = ShippingMethod.create({ ...baseProps, type: 'weight_based', pricePerKgCents: 10, maxPriceCents: 50 });
     expect(sm.calculateRate(10, 100)).toBe(50);
   });
 
   it('should check availability', () => {
-    const sm = ShippingMethod.create({ ...baseProps, minOrderValue: 50, maxWeight: 100 });
+    const sm = ShippingMethod.create({ ...baseProps, minOrderValueCents: 50, maxWeight: 100 });
     expect(sm.isAvailableFor(5, 100)).toBe(true);
     expect(sm.isAvailableFor(5, 30)).toBe(false);
     expect(sm.isAvailableFor(200, 100)).toBe(false);
@@ -77,9 +77,9 @@ describe('ShippingMethod', () => {
 
   it('should update fields', () => {
     const sm = ShippingMethod.create(baseProps);
-    sm.update({ name: 'Express', basePrice: 25 });
+    sm.update({ name: 'Express', basePriceCents: 25 });
     expect(sm.name).toBe('Express');
-    expect(sm.basePrice).toBe(25);
+    expect(sm.basePriceCents).toBe(25);
   });
 
   it('should serialize to persistence', () => {
