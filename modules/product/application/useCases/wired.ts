@@ -41,7 +41,7 @@ import { SubmitProductQaUseCase } from './SubmitProductQa';
 import { GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
 import { GetProductAttributesUseCase } from './GetProductAttributes';
 import { SearchProductsUseCase } from './SearchProducts';
-import productSearchService from '../services/ProductSearchService';
+import productSearchService from '../../infrastructure/services/ProductSearchService';
 import { CreateAttributeUseCase } from './attribute/CreateAttribute';
 import { UpdateAttributeUseCase } from './attribute/UpdateAttribute';
 import { AddAttributeValueUseCase } from './attribute/AddAttributeValue';

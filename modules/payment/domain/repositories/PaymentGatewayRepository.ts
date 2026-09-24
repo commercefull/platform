@@ -1,4 +1,4 @@
-import { PaymentGateway, PaymentMethodConfig, PaymentTransaction, PaymentRefund } from '../../../../libs/db/types';
+import { PaymentGateway, PaymentMethodConfig, PaymentTransactionRecord as PaymentTransaction, PaymentRefundRecord as PaymentRefund } from '../entities/PaymentModel';
 
 type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 

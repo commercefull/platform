@@ -309,7 +309,7 @@ export function createProductLookup(
 }
 
 import { Product } from '../domain/entities/Product';
-import type { ProductSearchRow } from '../application/services/ProductSearchService';
+import type { ProductSearchRow } from '../infrastructure/services/ProductSearchService';
 
 /**
  * Raw `product` table row enriched with pricing-owned base price columns,

@@ -4,7 +4,7 @@
  * Defines the contract for Content Redirect persistence operations.
  */
 
-import type { ContentRedirect } from '../../../../libs/db/types';
+import type { ContentRedirect } from '../entities/ContentModel';
 
 export type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
 export type ContentRedirectUpdateParams = Partial<

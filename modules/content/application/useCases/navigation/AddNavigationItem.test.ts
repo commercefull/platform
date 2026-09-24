@@ -1,6 +1,6 @@
 import { lazyMock, createContentNavigation, createContentNavigationItem, emitMock } from '../../../tests/testUtils';
 import { AddNavigationItemUseCase, AddNavigationItemCommand } from './AddNavigationItem';
-import { NavigationMenuNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+import { NavigationMenuNotFoundError, ContentValidationError, ContentPageNotFoundError } from '../../../domain/errors/ContentErrors';
 
 beforeEach(() => {
   emitMock.mockClear();
@@ -55,5 +55,14 @@ describe('AddNavigationItemUseCase', () => {
     const result = await useCase.execute(new AddNavigationItemCommand('n1', 'Sub', 'url', 'parent', '/sub'));
 
     expect(result.depth).toBe(2);
+  });
+
+  it('should throw ContentPageNotFoundError when a page-type item references a missing page', async () => {
+    mockContentRepo.findPageById.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute(new AddNavigationItemCommand('n1', 'About', 'page', undefined, undefined, 'missing-page')),
+    ).rejects.toThrow(ContentPageNotFoundError);
+    expect(mockNavRepo.createNavigationItem).not.toHaveBeenCalled();
   });
 });

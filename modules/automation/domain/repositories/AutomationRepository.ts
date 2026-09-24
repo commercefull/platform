@@ -5,7 +5,6 @@ export interface AutomationRuleRepository {
   findById(id: string): Promise<AutomationRule | null>;
   findAll(activeOnly?: boolean): Promise<AutomationRule[]>;
   findByTriggerType(triggerType: TriggerType, activeOnly?: boolean): Promise<AutomationRule[]>;
-  findByEventName(eventName: string, activeOnly?: boolean): Promise<AutomationRule[]>;
   findByOrganization(organizationId: string, activeOnly?: boolean): Promise<AutomationRule[]>;
 
   create(rule: AutomationRule): Promise<AutomationRule>;

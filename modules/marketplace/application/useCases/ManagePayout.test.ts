@@ -1,6 +1,6 @@
 import '../../tests/testUtils';
 import { ManagePayoutUseCase } from './ManagePayout';
-import { VendorStatusError, PayoutNotFoundError } from '../../domain/errors/MarketplaceErrors';
+import { VendorNotFoundError, VendorStatusError, PayoutNotFoundError } from '../../domain/errors/MarketplaceErrors';
 import type {
   VendorRepository, VendorPayoutRepository,
 } from '../../domain/repositories/MarketplaceRepository';
@@ -40,6 +40,15 @@ describe('ManagePayoutUseCase', () => {
       vendorId: 'v-1', organizationId: 'org-1', method: 'bank_transfer',
       periodStart: new Date(), periodEnd: new Date(),
     })).rejects.toThrow(VendorStatusError);
+  });
+
+  it('should throw VendorNotFoundError when creating a payout for a missing vendor', async () => {
+    vendorRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.create({
+      vendorId: 'missing', organizationId: 'org-1', method: 'bank_transfer',
+      periodStart: new Date(), periodEnd: new Date(),
+    })).rejects.toThrow(VendorNotFoundError);
   });
 
   it('should throw PayoutNotFoundError when the payout does not exist', async () => {

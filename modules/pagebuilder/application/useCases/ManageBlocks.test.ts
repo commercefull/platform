@@ -2,9 +2,11 @@ import '../../tests/testUtils';
 import { ManageBlocksUseCase } from './ManageBlocks';
 import {
   PageDraftNotFoundError, BlockTypeNotRegisteredError, BlockNotFoundError,
+  BlockPlacementError, PageDraftValidationError,
 } from '../../domain/errors/PageBuilderErrors';
 import type { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { createPageDraft, emitMock, lazyMock, registerBuiltInBlocks } from '../../tests/testUtils';
+import { blockSchemaRegistry } from '../../domain/services/BlockSchemaRegistry';
 
 describe('ManageBlocksUseCase', () => {
   let repo: jest.Mocked<PageDraftRepository>;
@@ -40,6 +42,36 @@ describe('ManageBlocksUseCase', () => {
 
   it('should throw BlockNotFoundError when removing a missing block', async () => {
     await expect(useCase.removeBlock('d-1', 'nope')).rejects.toThrow(BlockNotFoundError);
+  });
+
+  it('should throw PageDraftValidationError when required block fields are missing', async () => {
+    // 'heading' requires the 'text' field; passing explicit empty content skips defaults
+    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'heading', region: 'main', content: {} }))
+      .rejects.toThrow(PageDraftValidationError);
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw BlockPlacementError when a block exceeds its max-per-page limit', async () => {
+    if (!blockSchemaRegistry.has('test-single')) {
+      blockSchemaRegistry.register({
+        typeId: 'test-single',
+        name: 'Single',
+        description: 'One per page',
+        icon: 'square',
+        category: 'content',
+        fields: [],
+        defaultContent: {},
+        maxPerPage: 1,
+      });
+    }
+    const draft = createPageDraft({
+      blocks: [{ blockId: 'b-1', typeId: 'test-single', region: 'main', order: 0, content: {}, settings: {} }],
+    });
+    repo.findById.mockResolvedValue(draft);
+
+    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'test-single', region: 'main' }))
+      .rejects.toThrow(BlockPlacementError);
+    expect(repo.save).not.toHaveBeenCalled();
   });
 });
 

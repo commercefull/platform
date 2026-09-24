@@ -38,7 +38,7 @@ class UpdateCheckoutConfigCommand {
   ) {}
 }
 
-class ManageCheckoutConfigUseCase {
+export class ManageCheckoutConfigUseCase {
   constructor(private readonly configRepository: CheckoutConfigRepository) {}
 
   async create(command: CreateCheckoutConfigCommand): Promise<CheckoutConfig> {

@@ -6,7 +6,7 @@
  * and are injected via application/wired.ts.
  */
 
-import type { IdentityAdminUser, Role } from '../../../../libs/db/types';
+import type { IdentityAdminUser, Role } from '../entities/IdentityModel';
 import type { UserStoreAssignment } from '../entities/UserStoreAssignment';
 
 export interface AdminUser {

@@ -4,7 +4,7 @@
  * Defines the contract for Content Navigation and Navigation Item persistence operations.
  */
 
-import type { ContentNavigation, ContentNavigationItem } from '../../../../libs/db/types';
+import type { ContentNavigation, ContentNavigationItem } from '../entities/ContentModel';
 
 export type ContentNavigationCreateParams = Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>;
 export type ContentNavigationUpdateParams = Partial<Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>>;

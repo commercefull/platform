@@ -3,7 +3,7 @@
  * Defines the contract for customer address persistence operations
  */
 
-import { CustomerAddress } from '../../../../libs/db/types';
+import { CustomerAddressRecord as CustomerAddress } from '../entities/CustomerModel';
 
 export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'>;
 export type CustomerAddressUpdateParams = Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>;

@@ -178,7 +178,7 @@ export const checkoutResolvers = {
     ) => {
       requireAuth(context);
       const ports = getCheckoutPorts();
-      const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization);
+      const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization, ports.fraudScreening);
       const command = new CreatePaymentIntentCommand(args.checkoutId, args.customerId);
       return useCase.execute(command);
     },

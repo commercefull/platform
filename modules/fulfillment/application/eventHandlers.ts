@@ -14,36 +14,13 @@ import { query } from '../../../libs/db';
 import { logger } from '../../../libs/logger';
 import { JobScheduler } from '../../../libs/jobs/cronScheduler';
 import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
-import { OrderRouter } from '../../order/domain/services/OrderRouter';
-import type { StoreRepository } from '../../store/domain/repositories/StoreRepository';
 import type { IFulfillmentRepository } from '../domain/repositories/FulfillmentRepository';
 import { CreateFulfillmentUseCase } from './useCases/CreateFulfillment';
+import { planFulfillmentUseCase } from './wired';
 
 /** Narrow ports for cross-module dependencies, injected at boot. */
 export interface FulfillmentEventHandlerDeps {
   orders: Pick<OrderRepository, 'findById'>;
-  stores: Pick<StoreRepository, 'findActive'>;
-  warehouses: {
-    findDefault(): Promise<{
-      distributionWarehouseId: string;
-      name?: string;
-      addressLine1?: string;
-      addressLine2?: string;
-      city?: string;
-      state?: string;
-      postalCode?: string;
-      country?: string;
-      phone?: string;
-      email?: string;
-    } | null>;
-  };
-  stock: {
-    checkProductAvailability(
-      productId: string,
-      variantId: string | undefined,
-      requiredQuantity: number,
-    ): Promise<{ totalAvailable: number }>;
-  };
   reservations: {
     consumeByOrder(orderId: string): Promise<unknown>;
   };
@@ -51,7 +28,7 @@ export interface FulfillmentEventHandlerDeps {
 }
 
 export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDeps): void {
-  const { orders, stores: storeRepo, warehouses, stock, reservations, fulfillments } = deps;
+  const { orders, reservations, fulfillments } = deps;
 
   // Order paid -> auto-create fulfillment from default warehouse
   eventBus.registerHandler('order.paid', async payload => {
@@ -154,127 +131,65 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
         email: sa.email,
       };
 
-      // Attempt to find a store with inventory via OrderRouter
-      let fulfillmentSourceType: 'warehouse' | 'store' = 'warehouse';
-      let fulfillmentSourceId = '';
-      let shipFromAddress: Record<string, unknown>;
+      // Plan fulfillment across sources — splits items when a single store
+      // can't fulfill everything; falls back to the default warehouse.
+      const planResult = await planFulfillmentUseCase.execute(
+        physicalItems.map(item => ({
+          orderItemId: item.orderItemId,
+          productId: item.productId,
+          variantId: item.productVariantId,
+          sku: item.sku,
+          name: item.name,
+          quantity: item.quantity,
+        })),
+      );
 
-      try {
-        const stores = await storeRepo.findActive();
-        const orderRouter = new OrderRouter(
-          {
-            findById: async (id: string) => {
-              const s = stores.find(s => s.storeId === id);
-              return s
-                ? {
-                    storeId: s.storeId,
-                    name: s.name,
-                    canFulfillOnline: s.settings?.allowGuestCheckout ?? true,
-                    canPickupInStore: s.settings?.pickup?.enabled ?? false,
-                    localDeliveryEnabled: s.settings?.localDelivery?.enabled ?? false,
-                  }
-                : null;
-            },
-          },
-          {
-            getAvailableQuantity: async (_storeId: string, productId: string, variantId?: string) => {
-              const avail = await stock.checkProductAvailability(productId, variantId, 1);
-              return avail.totalAvailable;
-            },
-          },
-        );
-
-        const routingResult = await orderRouter.determineFulfillmentStore(
-          {
-            orderId: order.orderId,
-            fulfillmentType: 'shipping',
-            items: physicalItems.map(item => ({
-              productId: item.productId,
-              variantId: item.productVariantId,
-              quantity: item.quantity,
-            })),
-          },
-          stores.map(s => ({
-            storeId: s.storeId,
-            name: s.name,
-            latitude: s.address?.latitude,
-            longitude: s.address?.longitude,
-            canFulfillOnline: s.settings?.allowGuestCheckout ?? true,
-            canPickupInStore: s.settings?.pickup?.enabled ?? false,
-            localDeliveryEnabled: s.settings?.localDelivery?.enabled ?? false,
-            priority: 0,
-          })),
-        );
-
-        const selectedStore = stores.find(s => s.storeId === routingResult.storeId);
-        if (selectedStore && selectedStore.address) {
-          fulfillmentSourceType = 'store';
-          fulfillmentSourceId = selectedStore.storeId;
-          shipFromAddress = {
-            firstName: selectedStore.name,
-            lastName: '',
-            addressLine1: selectedStore.address.line1,
-            addressLine2: selectedStore.address.line2,
-            city: selectedStore.address.city,
-            state: selectedStore.address.state,
-            postalCode: selectedStore.address.postalCode,
-            countryCode: selectedStore.address.country,
-          };
-          logger.info(`order.paid: OrderRouter selected store ${selectedStore.name} for order ${orderId}: ${routingResult.reason}`);
-        } else {
-          throw new Error('No store found by router');
-        }
-      } catch (routeErr: unknown) {
-        // Fall back to default warehouse
-        logger.info(`order.paid: OrderRouter fallback to warehouse for order ${orderId}: ${(routeErr as Error).message}`);
-        const warehouse = await warehouses.findDefault();
-        if (!warehouse) {
-          logger.warn(`order.paid: no default warehouse found for order ${orderId}, fulfillment must be created manually`);
-          return;
-        }
-        fulfillmentSourceId = warehouse.distributionWarehouseId;
-        shipFromAddress = {
-          firstName: warehouse.name || 'Warehouse',
-          lastName: '',
-          addressLine1: warehouse.addressLine1 || '',
-          addressLine2: warehouse.addressLine2 || undefined,
-          city: warehouse.city || '',
-          state: warehouse.state || '',
-          postalCode: warehouse.postalCode || '',
-          countryCode: warehouse.country || '',
-          phone: warehouse.phone || undefined,
-          email: warehouse.email || undefined,
-        };
+      if (planResult.groups.length === 0) {
+        logger.warn(`order.paid: no fulfillment source found for order ${orderId}, fulfillment must be created manually`);
+        return;
       }
 
-      // Create fulfillment
+      if (planResult.isSplit) {
+        logger.info(`order.paid: order ${orderId} split across ${planResult.groups.length} fulfillment sources`);
+      }
+
       const createFulfillmentUseCase = new CreateFulfillmentUseCase(fulfillments);
-      const result = await createFulfillmentUseCase.execute({
-        orderId: order.orderId,
-        orderNumber: order.orderNumber,
-        sourceType: fulfillmentSourceType,
-        sourceId: fulfillmentSourceId,
-        shipFromAddress: shipFromAddress as {
-          addressLine1: string;
-          city: string;
-          postalCode: string;
-          countryCode: string;
-          firstName?: string;
-          lastName?: string;
-          company?: string;
-          addressLine2?: string;
-          state?: string;
-          phone?: string;
-          email?: string;
-        },
-        shipToAddress,
-        items: fulfillmentItems,
-      });
+      for (const group of planResult.groups) {
+        const result = await createFulfillmentUseCase.execute({
+          orderId: order.orderId,
+          orderNumber: order.orderNumber,
+          sourceType: group.sourceType,
+          sourceId: group.sourceId,
+          shipFromAddress: group.shipFromAddress as {
+            addressLine1: string;
+            city: string;
+            postalCode: string;
+            countryCode: string;
+            firstName?: string;
+            lastName?: string;
+            company?: string;
+            addressLine2?: string;
+            state?: string;
+            phone?: string;
+            email?: string;
+          },
+          shipToAddress,
+          items: group.items.map(i => ({
+            orderItemId: i.orderItemId,
+            productId: i.productId,
+            variantId: i.variantId,
+            sku: i.sku,
+            name: i.name,
+            quantityOrdered: i.quantity,
+          })),
+        });
+        logger.info(
+          `order.paid: fulfillment ${result.fulfillment.fulfillmentId} created for order ${orderId} (${group.sourceType}:${group.sourceId}, ${group.items.length} item(s))`,
+        );
+      }
 
       // Consume inventory reservations (mark as consumed so they aren't released)
       await reservations.consumeByOrder(orderId);
-
-      logger.info(`order.paid: fulfillment ${result.fulfillment.fulfillmentId} created for order ${orderId}`);
     } catch (err: unknown) {
       logger.error(`order.paid fulfillment handler error: ${(err as Error).message}`);
     }

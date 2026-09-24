@@ -4,7 +4,7 @@
  * Defines the contract for Content Category persistence operations.
  */
 
-import type { ContentCategory } from '../../../../libs/db/types';
+import type { ContentCategory } from '../entities/ContentModel';
 
 export type ContentCategoryCreateParams = Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>;
 export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>>;

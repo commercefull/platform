@@ -49,4 +49,35 @@ describe('UpdateAttributeUseCase', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('already exists');
   });
+
+  it('should skip the code uniqueness check when the code is unchanged', async () => {
+    const result = await useCase.execute({ attributeId: 'a1', code: 'color', name: 'Renamed' });
+
+    expect(result.success).toBe(true);
+    expect(mockRepo.findAttributeByCode).not.toHaveBeenCalled();
+  });
+
+  it('should only send provided fields to the repository', async () => {
+    await useCase.execute({ attributeId: 'a1', isFilterable: false });
+
+    expect(mockRepo.updateAttribute).toHaveBeenCalledWith('a1', { isFilterable: false });
+  });
+
+  it('should return error when the repository returns no updated attribute', async () => {
+    mockRepo.updateAttribute.mockResolvedValueOnce(null as never);
+
+    const result = await useCase.execute({ attributeId: 'a1', name: 'X' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Failed to update attribute');
+  });
+
+  it('should return failure when the repository throws', async () => {
+    mockRepo.findAttributeById.mockRejectedValueOnce(new Error('db down'));
+
+    const result = await useCase.execute({ attributeId: 'a1', name: 'X' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Failed to update attribute');
+  });
 });

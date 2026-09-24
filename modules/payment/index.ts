@@ -11,6 +11,8 @@ export * from './domain/repositories/FraudRepository';
 export * from './domain/repositories/PaymentGatewayRepository';
 export * from './domain/repositories/PSPRoutingRepository';
 export * from './domain/entities/PSPRoute';
+export * from './domain/entities/FraudRule';
+export * from './domain/services/FraudRuleEvaluator';
 export * from './domain/events/PaymentEvents';
 export * from './domain/errors/PaymentErrors';
 

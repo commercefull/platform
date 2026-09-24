@@ -1,4 +1,4 @@
-import type { ShippingRate } from '../../../../libs/db/types';
+import type { ShippingRateRecord as ShippingRate } from '../entities/ShippingModel';
 
 export function calculateRate(rate: ShippingRate, orderTotalCents: number, itemCount: number, weight?: number): number {
   if (rate.rateType === 'free') return 0;

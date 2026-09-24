@@ -79,5 +79,47 @@ describe('SsoLoginUseCase', () => {
     expect(result.userId).toBe('user-new');
     expect(emitMock).toHaveBeenCalledWith('identity.sso.login', expect.objectContaining({ isNewUser: true }));
   });
+
+  it('should throw SsoProviderNotFoundError when handling a SAML callback for a missing provider', async () => {
+    samlRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.handleSamlCallback('missing', 'saml-response')).rejects.toThrow(SsoProviderNotFoundError);
+  });
+
+  it('should throw SsoValidationError when handling a SAML callback for an inactive provider', async () => {
+    const provider = createSamlProvider();
+    provider.deactivate();
+    samlRepo.findById.mockResolvedValue(provider);
+
+    await expect(useCase.handleSamlCallback('saml-1', 'saml-response')).rejects.toThrow(SsoValidationError);
+  });
+
+  it('should throw SsoProviderNotFoundError when initiating OIDC for a missing provider', async () => {
+    oidcRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.initiateOidc('missing')).rejects.toThrow(SsoProviderNotFoundError);
+  });
+
+  it('should throw SsoValidationError when initiating OIDC for an inactive provider', async () => {
+    const provider = createOidcProvider();
+    provider.deactivate();
+    oidcRepo.findById.mockResolvedValue(provider);
+
+    await expect(useCase.initiateOidc('oidc-1')).rejects.toThrow(SsoValidationError);
+  });
+
+  it('should throw SsoProviderNotFoundError when handling an OIDC callback for a missing provider', async () => {
+    oidcRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.handleOidcCallback('missing', 'code')).rejects.toThrow(SsoProviderNotFoundError);
+  });
+
+  it('should throw SsoValidationError when handling an OIDC callback for an inactive provider', async () => {
+    const provider = createOidcProvider();
+    provider.deactivate();
+    oidcRepo.findById.mockResolvedValue(provider);
+
+    await expect(useCase.handleOidcCallback('oidc-1', 'code')).rejects.toThrow(SsoValidationError);
+  });
 });
 

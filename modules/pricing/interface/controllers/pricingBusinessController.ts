@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
 import { Currency, CurrencyRegion } from '../../domain/currency';
-import { currencyRepository, pricingRuleRepository, pricingService } from '../../application/wired';
+import { currencyRepository, pricingRuleRepository, getCurrencyUseCase } from '../../application/wired';
 
 interface ExchangeRateBody {
   source: string;
@@ -59,7 +59,7 @@ export const getDefaultCurrency = async (req: HttpRequest, res: HttpResponse): P
 export const getCurrencyByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
-  const currency = await pricingService.getCurrency(code);
+  const currency = await getCurrencyUseCase.execute(code);
 
   if (!currency) {
     res.status(404).json({

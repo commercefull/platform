@@ -1,6 +1,6 @@
 import { PSPRoutingRepository } from '../../domain/repositories/PSPRoutingRepository';
-import { getPSPAdapter } from '../services/GatewayAdapterRegistry';
-import type { PSPConfig } from '../services/GatewayAdapter';
+import { getPSPAdapter } from '../../infrastructu../../infrastructure/services/GatewayAdapterRegistry';
+import type { PSPConfig } from '../../infrastructure/services/GatewayAdapter';
 
 export class GetProviderHealthUseCase {
   constructor(private readonly routingRepository: PSPRoutingRepository) {}

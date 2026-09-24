@@ -33,6 +33,54 @@ describe('SearchProductsUseCase', () => {
     const result = await useCase.execute({});
 
     expect(result.success).toBe(true);
+    expect(mockService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'active',
+        visibility: 'visible',
+        page: 1,
+        limit: 20,
+      }),
+    );
+  });
+
+  it('should forward explicit filters, attributes, sorting and pagination to the search service', async () => {
+    const attributes = [{ code: 'color', value: 'red' }];
+
+    await useCase.execute({
+      query: 'shoe',
+      categoryIds: ['c1', 'c2'],
+      productTypeId: 'pt1',
+      minPriceCents: 1000,
+      maxPriceCents: 5000,
+      status: 'draft',
+      visibility: 'hidden',
+      isFeatured: true,
+      inStock: true,
+      attributes,
+      sortBy: 'price',
+      sortOrder: 'desc',
+      page: 3,
+      limit: 50,
+    });
+
+    expect(mockService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'shoe',
+        categoryIds: ['c1', 'c2'],
+        productTypeId: 'pt1',
+        minPriceCents: 1000,
+        maxPriceCents: 5000,
+        status: 'draft',
+        visibility: 'hidden',
+        isFeatured: true,
+        inStock: true,
+        attributes,
+        sortBy: 'price',
+        sortOrder: 'desc',
+        page: 3,
+        limit: 50,
+      }),
+    );
   });
 
   it('should return error on failure', async () => {

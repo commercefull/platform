@@ -54,4 +54,27 @@ describe('AddAttributeValueUseCase', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('already exists');
   });
+
+  it('should default the position to the existing value count when not provided', async () => {
+    mockRepo.findAttributeValues.mockResolvedValueOnce([
+      createAttributeValue({ productAttributeValueId: 'v1', value: 'Red' }),
+      createAttributeValue({ productAttributeValueId: 'v2', value: 'Blue' }),
+    ]);
+
+    const result = await useCase.execute({ attributeId: 'a1', value: 'Green' });
+
+    expect(result.success).toBe(true);
+    expect(mockRepo.createAttributeValue).toHaveBeenCalledWith(
+      expect.objectContaining({ attributeId: 'a1', value: 'Green', position: 2 }),
+    );
+  });
+
+  it('should return failure when the repository throws', async () => {
+    mockRepo.createAttributeValue.mockRejectedValueOnce(new Error('unique violation'));
+
+    const result = await useCase.execute({ attributeId: 'a1', value: 'Green' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('unique violation');
+  });
 });

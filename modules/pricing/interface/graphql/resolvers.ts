@@ -1,34 +1,34 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CalculatePriceUseCase, CalculatePriceInput } from '../../application/useCases/CalculatePrice';
+import { CalculatePriceInput } from '../../application/useCases/CalculatePrice';
 import { CreatePriceListUseCase, CreatePriceListInput } from '../../application/useCases/CreatePriceList';
 import { SetProductPriceUseCase, SetProductPriceInput } from '../../application/useCases/SetProductPrice';
-import { pricingDataRepository } from '../../application/wired';
-import { PricingAdjustmentType } from '../../domain/pricingRule';
+import { calculatePriceUseCase, pricingDataRepository } from '../../application/wired';
 
 export const pricingResolvers = {
   Query: {
     calculatePrice: async (_parent: unknown, args: { input: CalculatePriceInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const pricingRepository = {
-        getBasePrice: async (productId: string, variantId?: string) => {
-          const row = await pricingDataRepository.basePrices.findEffective(productId, variantId);
-          return row ? { priceCents: row.priceCents, salePriceCents: row.salePriceCents, currencyCode: row.currencyCode } : null;
-        },
-        getPriceListItem: async (priceListId: string, productId: string, variantId?: string) => {
-          const prices = await pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, [priceListId]);
-          const entry = prices.find(
-            p => p.adjustmentType === PricingAdjustmentType.OVERRIDE || p.adjustmentType === PricingAdjustmentType.FIXED,
-          );
-          // Price-list amounts are stored in major units — convert to cents
-          return entry ? { priceCents: Math.round(entry.adjustmentValue * 100) } : null;
-        },
-        getTierPrice: async (productId: string, quantity: number, variantId?: string) => {
-          const tier = await pricingDataRepository.tierPrices.findApplicableTier(productId, quantity, variantId);
-          return tier ? { priceCents: tier.priceCents } : null;
+      const result = await calculatePriceUseCase.execute(args.input);
+
+      // Map the PricingResult onto the GraphQL CalculatePriceResult shape
+      const discountOf = (prefix: string) => {
+        const impact = result.appliedRules.find(r => r.ruleName.startsWith(prefix))?.impact;
+        return impact && impact > 0 ? impact : undefined;
+      };
+
+      return {
+        unitPriceCents: result.finalPriceCents,
+        totalPriceCents: result.finalPriceCents * (args.input.quantity ?? 1),
+        currency: result.currency,
+        breakdown: {
+          basePriceCents: result.originalPriceCents,
+          volumeDiscountCents: discountOf('Tier Pricing'),
+          customerDiscountCents: discountOf('Customer Price'),
+          finalPriceCents: result.finalPriceCents,
+          currency: result.currency,
+          appliedRules: result.appliedRules.map(r => r.ruleName),
         },
       };
-      const useCase = new CalculatePriceUseCase(pricingRepository);
-      return useCase.execute(args.input);
     },
   },
 

@@ -2,22 +2,22 @@
  * PromotionPromotionQuoteAdapter
  *
  * ACL adapter implementing checkout's PromotionQuotePort.
- * Translates promotion's PromotionEvaluationService into
+ * Translates promotion's EvaluatePromotionsUseCase into
  * checkout's PromotionQuoteResult vocabulary.
  *
- * Breaks the singleton dependency — the adapter receives the service
+ * Breaks the singleton dependency — the adapter receives the use case
  * via constructor injection, not as a global import.
  */
 
 import { PromotionQuotePort, PromotionQuoteRequest, PromotionQuoteResult } from '../../application/ports/PromotionQuotePort';
-import type { PromotionEvaluationService } from '../../../promotion/application/services/PromotionEvaluationService';
+import type { EvaluatePromotionsUseCase } from '../../../promotion/application/useCases/EvaluatePromotions';
 
 export class PromotionPromotionQuoteAdapter implements PromotionQuotePort {
-  constructor(private readonly promotionEvaluationService: PromotionEvaluationService) {}
+  constructor(private readonly useCase: Pick<EvaluatePromotionsUseCase, 'execute'>) {}
 
   async evaluatePromotions(request: PromotionQuoteRequest): Promise<PromotionQuoteResult> {
     try {
-      const result = await this.promotionEvaluationService.evaluate({
+      const result = await this.useCase.execute({
         items: request.items,
         subtotalCents: request.subtotalCents,
         shippingAmountCents: request.shippingAmountCents,

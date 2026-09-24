@@ -70,4 +70,25 @@ describe('CreateDataRequestUseCase', () => {
 
     expect(result.status).toBe('pending');
   });
+
+  it('should throw GdprValidationError when the request type is missing', async () => {
+    const repository = createGdprDataRequestRepository();
+
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(
+        new CreateDataRequestCommand('customer-1', undefined as unknown as 'access'),
+      ),
+    ).rejects.toThrow(GdprValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should block a same-type request that is still processing', async () => {
+    const repository = createGdprDataRequestRepository();
+    repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'processing' })]);
+
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access')),
+    ).rejects.toThrow(GdprValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
 });

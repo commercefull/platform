@@ -1,6 +1,7 @@
 import { lazyMock, createOrderFulfillmentPackage } from '../../tests/testUtils';
 import { TrackFulfillmentPackageUseCase, TrackFulfillmentPackageCommand } from './TrackFulfillmentPackage';
 import type { OrderFulfillmentPackageRepository } from '../../domain/repositories/OrderFulfillmentPackageRepository';
+import { FulfillmentPackageNotFoundError } from '../../domain/errors/OrderErrors';
 
 describe('TrackFulfillmentPackageUseCase', () => {
   let useCase: TrackFulfillmentPackageUseCase;
@@ -31,5 +32,15 @@ describe('TrackFulfillmentPackageUseCase', () => {
     expect(result.orderFulfillmentPackageId).toBe('pk1');
     expect(result.trackingNumber).toBe('TRK456');
     expect(repo.updateTracking).toHaveBeenCalledWith('pk1', expect.objectContaining({ trackingNumber: 'TRK456' }));
+  });
+
+  it('should throw FulfillmentPackageNotFoundError when the package to update does not exist', async () => {
+    repo.updateTracking.mockResolvedValue(null as never);
+
+    await expect(
+      useCase.execute(
+        new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK456', undefined, undefined, undefined, undefined, undefined, undefined, 'missing'),
+      ),
+    ).rejects.toThrow(FulfillmentPackageNotFoundError);
   });
 });

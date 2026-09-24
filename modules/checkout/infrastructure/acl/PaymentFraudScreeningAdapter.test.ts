@@ -3,17 +3,17 @@
  */
 
 import { PaymentFraudScreeningAdapter } from './PaymentFraudScreeningAdapter';
-import type { FraudScreeningService } from '../../../payment/application/services/FraudScreeningService';
+import type { ScreenForFraudUseCase } from '../../../payment/application/useCases/ScreenForFraud';
 
 describe('PaymentFraudScreeningAdapter', () => {
   let adapter: PaymentFraudScreeningAdapter;
-  let screeningService: jest.Mocked<Pick<FraudScreeningService, 'screen'>>;
+  let screeningUseCase: jest.Mocked<Pick<ScreenForFraudUseCase, 'execute'>>;
   let mockScreen: jest.Mock;
 
   beforeEach(() => {
     mockScreen = jest.fn();
-    screeningService = { screen: mockScreen };
-    adapter = new PaymentFraudScreeningAdapter(screeningService);
+    screeningUseCase = { execute: mockScreen };
+    adapter = new PaymentFraudScreeningAdapter(screeningUseCase);
   });
 
   it('maps approved screening result to checkout vocabulary', async () => {

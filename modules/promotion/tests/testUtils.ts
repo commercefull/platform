@@ -3,13 +3,11 @@
  * Typed `jest.Mocked` port factories + domain record factories.
  */
 
-import type { Promotion, PromotionRule, PromotionAction } from '../../../libs/db/types';
-import type { PromotionRepository } from '../domain/repositories/PromotionRepository';
+import type { PromotionRepository, Promotion, PromotionRule, PromotionAction } from '../domain/repositories/PromotionRepository';
 import type { CouponRepository, PromotionCoupon, PromotionCouponUsage } from '../domain/repositories/CouponRepository';
 import { CouponType, CouponGenerationMethod } from '../domain/repositories/CouponRepository';
 import type { GiftCardRepository, PromotionGiftCard, PromotionGiftCardTransaction } from '../domain/repositories/GiftCardRepository';
-import type { ProductDiscountRepository } from '../domain/repositories/ProductDiscountRepository';
-import type { PromotionProductDiscount } from '../../../libs/db/types';
+import type { ProductDiscountRepository, PromotionProductDiscount } from '../domain/repositories/ProductDiscountRepository';
 import type { CheckGiftCardBalanceUseCase } from '../application/useCases/CheckGiftCardBalance';
 import type { RedeemGiftCardUseCase } from '../application/useCases/RedeemGiftCard';
 import type { ValidateCouponUseCase } from '../application/useCases/ValidateCoupon';

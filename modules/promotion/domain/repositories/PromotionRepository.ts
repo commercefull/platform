@@ -2,7 +2,9 @@
  * Promotion Repository Interface
  */
 
-import { Promotion, PromotionRule, PromotionAction } from '../../../../libs/db/types';
+import { Promotion, PromotionRule, PromotionAction } from '../entities/PromotionModel';
+
+export type { Promotion, PromotionRule, PromotionAction };
 
 // Types matching infrastructure repository signatures
 export type PromotionStatus = 'active' | 'scheduled' | 'expired' | 'disabled' | 'pendingApproval';

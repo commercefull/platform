@@ -14,11 +14,11 @@ import { logger } from '../../../../libs/logger';
 
 const PaymentRepo = paymentDataRepository.payments;
 import { eventBus } from '../../../../libs/events/eventBus';
-import { getAdapter } from '../../application/services/GatewayAdapterRegistry';
 import { ProcessPaymentWebhookCommand } from '../../application/useCases/ProcessPaymentWebhook';
 import { processPaymentWebhookUseCase } from '../../application/useCases/wired';
 import type { OrderStatusSyncPort } from '../../application/ports/OrderStatusSyncPort';
-import { paymentDataRepository, orderStatusSyncAdapter } from '../../application/wired';
+import type { GatewayWebhookPort } from '../../application/ports/GatewayWebhookPort';
+import { paymentDataRepository, orderStatusSyncAdapter, gatewayWebhookPort } from '../../application/wired';
 
 // Ports
 const orderStatusSyncPort: OrderStatusSyncPort = orderStatusSyncAdapter;
@@ -46,9 +46,9 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
   try {
     const rawBody: Buffer = req.body as Buffer;
 
-    // 1. Detect provider and resolve adapter
+    // 1. Detect provider
     const provider = detectProvider(req);
-    const adapter = getAdapter(provider);
+    const gatewayWebhooks: GatewayWebhookPort = gatewayWebhookPort;
 
     // 2. Look up the webhook secret for this gateway from the DB (or env fallback)
     const gatewayRow = await PaymentRepo.getDefaultGateway('default').catch(() => null);
@@ -56,7 +56,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
 
     // 3. Verify signature
     if (secret) {
-      const valid = adapter.verifySignature(rawBody, req.headers as Record<string, string | undefined>, secret);
+      const valid = gatewayWebhooks.verifySignature(provider, rawBody, req.headers as Record<string, string | undefined>, secret);
       if (!valid) {
         res.status(400).json({ error: 'Invalid signature' });
         return;
@@ -105,7 +105,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
     }
 
     // 6. Normalize to canonical event
-    const event = adapter.normalize(rawPayload);
+    const event = gatewayWebhooks.normalize(provider, rawPayload);
     if (!event) {
       // Unrecognised event type — silently acknowledge
       res.status(200).json({ received: true });

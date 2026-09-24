@@ -1,7 +1,7 @@
 import '../../tests/testUtils';
 import { PublishDraftUseCase } from './PublishDraft';
 import {
-  DraftAlreadyPublishedError, DraftNotReadyToPublishError,
+  DraftAlreadyPublishedError, DraftNotReadyToPublishError, PageDraftNotFoundError,
 } from '../../domain/errors/PageBuilderErrors';
 import type { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { createPageDraft, emitMock, lazyMock } from '../../tests/testUtils';
@@ -39,6 +39,20 @@ describe('PublishDraftUseCase', () => {
     repo.findById.mockResolvedValue(draft);
 
     await expect(useCase.publish('d-1')).rejects.toThrow(DraftAlreadyPublishedError);
+  });
+
+  it('should throw PageDraftNotFoundError when publishing a missing draft', async () => {
+    repo.findById.mockResolvedValue(null);
+
+    await expect(useCase.publish('missing')).rejects.toThrow(PageDraftNotFoundError);
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('should throw PageDraftNotFoundError when unpublishing a missing draft', async () => {
+    repo.findById.mockResolvedValue(null);
+
+    await expect(useCase.unpublish('missing')).rejects.toThrow(PageDraftNotFoundError);
+    expect(repo.save).not.toHaveBeenCalled();
   });
 });
 

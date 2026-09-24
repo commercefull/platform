@@ -24,6 +24,7 @@ import { ShippingQuotePort } from '../application/ports/ShippingQuotePort';
 import { PromotionQuotePort } from '../application/ports/PromotionQuotePort';
 import { OrderPlacementPort } from '../application/ports/OrderPlacementPort';
 import { PaymentAuthorizationPort } from '../application/ports/PaymentAuthorizationPort';
+import { FraudScreeningPort } from '../application/ports/FraudScreeningPort';
 import { StoreFulfillmentPort } from '../application/ports/StoreFulfillmentPort';
 import { StockAvailabilityPort } from '../application/ports/StockAvailabilityPort';
 
@@ -34,14 +35,16 @@ import { ShippingShippingQuoteAdapter } from './acl/ShippingShippingQuoteAdapter
 import { PromotionPromotionQuoteAdapter } from './acl/PromotionPromotionQuoteAdapter';
 import { OrderOrderPlacementAdapter } from './acl/OrderOrderPlacementAdapter';
 import { PaymentPaymentAuthorizationAdapter } from './acl/PaymentPaymentAuthorizationAdapter';
+import { PaymentFraudScreeningAdapter } from './acl/PaymentFraudScreeningAdapter';
 import { StoreStoreFulfillmentAdapter } from './acl/StoreStoreFulfillmentAdapter';
 import { InventoryStockAvailabilityAdapter } from './acl/InventoryStockAvailabilityAdapter';
 
 import { CouponRepository } from '../../coupon/infrastructure';
 import { createOrderUseCase, cancelOrderUseCase } from '../../order/application/useCases/wired';
 import { InitiatePaymentUseCase } from '../../payment/application/useCases/InitiatePayment';
+import { screenForFraudUseCase } from '../../payment/application/wired';
 import { calculateShippingRatesUseCase } from '../../shipping/application/wired';
-import { promotionEvaluationService } from '../../promotion/application/wired';
+import { evaluatePromotionsUseCase } from '../../promotion/application/wired';
 import { calculateOrderTaxUseCase } from '../../tax/application/wired';
 import taxSettingsRepo from '../../tax/infrastructure/repositories/taxSettingsRepo';
 import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
@@ -56,6 +59,7 @@ export interface CheckoutPorts {
   promotionQuote: PromotionQuotePort;
   orderPlacement: OrderPlacementPort;
   paymentAuthorization: PaymentAuthorizationPort;
+  fraudScreening: FraudScreeningPort;
   storeFulfillment: StoreFulfillmentPort;
   stockAvailability: StockAvailabilityPort;
 }
@@ -70,9 +74,10 @@ export function getCheckoutPorts(): CheckoutPorts {
     discountQuote: new CouponDiscountQuoteAdapter(CouponRepository),
     taxQuote: new TaxTaxQuoteAdapter(calculateOrderTaxUseCase, taxSettingsRepo),
     shippingQuote: new ShippingShippingQuoteAdapter(calculateShippingRatesUseCase),
-    promotionQuote: new PromotionPromotionQuoteAdapter(promotionEvaluationService),
+    promotionQuote: new PromotionPromotionQuoteAdapter(evaluatePromotionsUseCase),
     orderPlacement: new OrderOrderPlacementAdapter(OrderRepo, createOrderUseCase, cancelOrderUseCase),
     paymentAuthorization: new PaymentPaymentAuthorizationAdapter(new InitiatePaymentUseCase(PaymentRepo)),
+    fraudScreening: new PaymentFraudScreeningAdapter(screenForFraudUseCase),
     storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, pickupLocationRepo),
     stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),
   };

@@ -10,7 +10,8 @@ import type {
   RiskLevel,
 } from '../infrastructure/repositories/PaymentBillingDataRepository';
 import { FraudRepo, FraudRepo as fraudRepo } from '../infrastructure';
-import { FraudScreeningService } from './services/FraudScreeningService';
+import { GatewayWebhookAdapter } from '../infrastructure/services/GatewayWebhookAdapter';
+import { ScreenForFraudUseCase } from './useCases/ScreenForFraud';
 import CheckoutRepo from '../../checkout/infrastructure/repositories/CheckoutRepository';
 import orderDataRepository from '../../order/infrastructure/repositories/OrderDataRepository';
 
@@ -28,9 +29,11 @@ export {
   FraudRepo,
 };
 
-export const fraudScreeningService = new FraudScreeningService(FraudRepo);
+export const screenForFraudUseCase = new ScreenForFraudUseCase(FraudRepo);
 
 export const orderStatusSyncAdapter = new CheckoutOrderStatusSyncAdapter(
   CheckoutRepo,
   orderDataRepository.commands,
 );
+
+export const gatewayWebhookPort = new GatewayWebhookAdapter();

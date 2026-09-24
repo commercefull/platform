@@ -8,14 +8,15 @@ The Automation module provides a rule-based automation engine — condition/acti
 
 ## Public API (`index.ts`)
 
-| Export                      | Type    | Description                                         |
-| --------------------------- | ------- | --------------------------------------------------- |
-| `AutomationRule`            | Entity  | Rule definition with trigger, conditions, actions   |
-| `AutomationRepository`      | Port    | Repository interface for rules and execution logs   |
-| `AutomationErrors`          | Errors  | Domain error classes                                |
-| `ConditionEvaluator`        | Service | Evaluates rule conditions against event context     |
-| `ActionExecutor`            | Service | Executes rule actions (webhook, email, flag toggle) |
-| `AutomationExecutionEngine` | Service | Orchestrates rule evaluation and execution          |
+| Export                            | Type     | Description                                                          |
+| --------------------------------- | -------- | -------------------------------------------------------------------- |
+| `AutomationRule`                  | Entity   | Rule definition with trigger, conditions, actions                    |
+| `AutomationRepository`            | Port     | Repository interface for rules and execution logs                    |
+| `AutomationErrors`                | Errors   | Domain error classes                                                 |
+| `ConditionEvaluator`              | Service  | Evaluates rule conditions against event context                      |
+| `executeActions`/`createActionHandlers` | Service | Pure action dispatch; side effects via `AutomationActionEffects` port |
+| `ExecuteAutomationRuleUseCase`    | Use Case | Evaluates conditions, executes actions, logs the result              |
+| `TriggerAutomationRuleUseCase`    | Use Case | Manual trigger entry point                                           |
 
 ---
 

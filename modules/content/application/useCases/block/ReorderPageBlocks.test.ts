@@ -1,5 +1,5 @@
 import { ReorderPageBlocksUseCase, ReorderPageBlocksCommand } from './ReorderPageBlocks';
-import { ContentBlockNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+import { ContentBlockNotFoundError, ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 import { lazyMock, createContentPage, createContentBlock } from '../../../tests/testUtils';
 
 describe('ReorderPageBlocksUseCase', () => {
@@ -36,5 +36,14 @@ describe('ReorderPageBlocksUseCase', () => {
 
   it('should throw ContentBlockNotFoundError when block does not belong to page', async () => {
     await expect(useCase.execute(new ReorderPageBlocksCommand('p1', [{ id: 'bX', order: 0 }]))).rejects.toThrow(ContentBlockNotFoundError);
+  });
+
+  it('should throw ContentPageNotFoundError when the page does not exist', async () => {
+    mockRepo.findPageById.mockResolvedValue(null);
+
+    await expect(useCase.execute(new ReorderPageBlocksCommand('missing', [{ id: 'b1', order: 0 }]))).rejects.toThrow(
+      ContentPageNotFoundError,
+    );
+    expect(mockRepo.reorderBlocks).not.toHaveBeenCalled();
   });
 });

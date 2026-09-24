@@ -1,7 +1,7 @@
 import { PSPRoutingRepository } from '../../domain/repositories/PSPRoutingRepository';
-import { FailoverRoutingEngine, GatewayRoute } from '../services/FailoverRoutingEngine';
-import { getPSPAdapter } from '../services/GatewayAdapterRegistry';
-import type { PSPConfig, PaymentRequest } from '../services/GatewayAdapter';
+import { FailoverRoutingEngine, GatewayRoute } from '../../infrastructure/services/FailoverRoutingEngine';
+import { getPSPAdapter } from '../../infrastructure/services/GatewayAdapterRegistry';
+import type { PSPConfig, PaymentRequest } from '../../infrastructure/services/GatewayAdapter';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { NoProvidersAvailableError, AllProvidersExhaustedError } from '../../domain/errors/PaymentErrors';
 import { logger } from '../../../../libs/logger';
@@ -40,7 +40,10 @@ export interface RoutePaymentResponse {
 
 
 export class RoutePaymentUseCase {
-  constructor(private readonly routingRepository: PSPRoutingRepository) {}
+  constructor(
+    private readonly routingRepository: PSPRoutingRepository,
+    private readonly routingEngine: Pick<FailoverRoutingEngine, 'routePayment'>,
+  ) {}
 
   async execute(command: RoutePaymentCommand): Promise<RoutePaymentResponse> {
     const routes = await this.routingRepository.findActiveRoutes(command.organizationId);
@@ -91,16 +94,6 @@ export class RoutePaymentUseCase {
       throw new NoProvidersAvailableError();
     }
 
-    const engine = new FailoverRoutingEngine({
-      maxRetriesPerProvider: 2,
-      retryBaseDelayMs: 500,
-      retryMaxDelayMs: 5000,
-      circuitBreakerThreshold: 3,
-      circuitBreakerResetMs: 60_000,
-      healthCheckIntervalMs: 0,
-    });
-    engine.registerRoutes(gatewayRoutes);
-
     const paymentRequest: PaymentRequest = {
       orderId: command.orderId,
       amountCents: command.amountCents,
@@ -115,7 +108,7 @@ export class RoutePaymentUseCase {
       metadata: command.metadata,
     };
 
-    const result = await engine.routePayment(paymentRequest);
+    const result = await this.routingEngine.routePayment(paymentRequest, gatewayRoutes);
 
     eventBus.emit('payment.routed', {
       orderId: command.orderId,

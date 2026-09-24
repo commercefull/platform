@@ -6,7 +6,7 @@
  * infrastructure/repositories and are injected via application/wired.ts.
  */
 
-import type { ShippingCarrier, ShippingMethod, ShippingZone, ShippingRate } from '../../../../libs/db/types';
+import type { ShippingCarrier, ShippingMethodRecord as ShippingMethod, ShippingZoneRecord as ShippingZone, ShippingRateRecord as ShippingRate } from '../entities/ShippingModel';
 
 export type CreateShippingCarrierInput = Omit<ShippingCarrier, 'shippingCarrierId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingCarrierInput = Partial<Omit<ShippingCarrier, 'shippingCarrierId' | 'code' | 'createdAt' | 'updatedAt'>>;

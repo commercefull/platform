@@ -8,7 +8,7 @@ import { Product } from '../../domain/entities/Product';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
-import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
+import { toProductPriceDtoOrEmpty } from '../dto/productPriceDto';
 
 // ============================================================================
 // Command

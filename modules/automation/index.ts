@@ -5,7 +5,6 @@ export * from './domain/errors/AutomationErrors';
 export * from './domain/repositories/AutomationRepository';
 export * from './infrastructure';
 export * from './application/useCases';
-export * from './application/services/AutomationExecutionEngine';
 
 // Interface exports (routers, GraphQL)
 export { automationBusinessRouter } from './interface/routers/automationRouter';

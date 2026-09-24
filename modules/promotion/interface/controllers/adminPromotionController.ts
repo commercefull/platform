@@ -15,8 +15,8 @@ import {
   updatePromotionUseCase,
   deletePromotionUseCase,
 } from '../../application/useCases/wired';
-import { managePromotionsUseCase, promotionEvaluationService } from '../../application/wired';
-import type { PromotionEvaluationContext } from '../../application/services/PromotionEvaluationService';
+import { managePromotionsUseCase, evaluatePromotionsUseCase } from '../../application/wired';
+import type { PromotionEvaluationContext } from '../../application/useCases/EvaluatePromotions';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================
@@ -250,7 +250,7 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
 };
 
 // ============================================================================
-// Promotion Preview (server-side evaluation via PromotionEvaluationService)
+// Promotion Preview (server-side evaluation via EvaluatePromotionsUseCase)
 // ============================================================================
 
 export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -318,7 +318,7 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
       currency: currency || 'USD',
     };
 
-    const result = await promotionEvaluationService.evaluate(context);
+    const result = await evaluatePromotionsUseCase.execute(context);
 
     res.json({
       success: true,

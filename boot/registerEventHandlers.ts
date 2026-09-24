@@ -14,9 +14,7 @@ import { moduleRegistry } from './moduleManifests';
 
 import { OrderDataRepository as OrderDataRepo } from '../modules/order/infrastructure';
 import { InventoryDataRepository as InventoryDataRepo } from '../modules/inventory/infrastructure';
-import { WarehouseDataRepository as WarehouseDataRepo } from '../modules/warehouse/infrastructure';
 import { FulfillmentDataRepository as FulfillmentDataRepo } from '../modules/fulfillment/infrastructure';
-import { StoreDataRepository as StoreDataRepo } from '../modules/store/infrastructure';
 import { LoyaltyDataRepository as LoyaltyDataRepo } from '../modules/loyalty/infrastructure';
 import { CheckoutRepository as CheckoutRepo } from '../modules/checkout/infrastructure';
 import { GdprDataRepository } from '../modules/gdpr/infrastructure';
@@ -76,9 +74,6 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
     register: () =>
       registerFulfillmentEventHandlers({
         orders: OrderDataRepo.commands,
-        stores: StoreDataRepo.stores,
-        warehouses: WarehouseDataRepo.warehouses,
-        stock: InventoryDataRepo.stock,
         reservations: InventoryDataRepo.reservations,
         fulfillments: FulfillmentDataRepo.fulfillments,
       }),

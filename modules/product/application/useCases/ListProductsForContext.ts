@@ -14,7 +14,7 @@ import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
-import { toProductPriceDtoOrEmpty } from '../services/productPriceDto';
+import { toProductPriceDtoOrEmpty } from '../dto/productPriceDto';
 
 // ============================================================================
 // Command

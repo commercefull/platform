@@ -1,16 +1,11 @@
 import type {
   ProductSearchFilters,
   ProductSearchResult,
-  ProductSearchRow,
   AttributeFilter,
-} from '../../services/ProductSearchService';
+} from '../../ports/ProductSearchPort';
 
-export interface ProductSearchServicePort {
-  search(filters: ProductSearchFilters): Promise<ProductSearchResult>;
-  getSuggestions(partialQuery: string, limit?: number): Promise<string[]>;
-  findByAttribute(attributeCode: string, value: string): Promise<ProductSearchRow[]>;
-  findSimilar(productId: string, limit?: number): Promise<ProductSearchRow[]>;
-}
+export type { ProductSearchServicePort } from '../../ports/ProductSearchPort';
+import type { ProductSearchServicePort } from '../../ports/ProductSearchPort';
 
 export interface SearchProductsQuery {
   // Text search

@@ -66,14 +66,6 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
     return (rows || []).map(rowToEntity);
   }
 
-  async findByEventName(eventName: string, activeOnly = false): Promise<AutomationRule[]> {
-    let sql = `SELECT * FROM "automationRule" WHERE "triggerType" = 'event' AND "deletedAt" IS NULL AND "triggerConfig"->>'eventName' = $1`;
-    if (activeOnly) sql += ` AND "isActive" = true`;
-    sql += ` ORDER BY "priority" DESC`;
-    const rows = await query<RuleDbRow[]>(sql, [eventName]);
-    return (rows || []).map(rowToEntity);
-  }
-
   async findByOrganization(organizationId: string, activeOnly = false): Promise<AutomationRule[]> {
     let sql = `SELECT * FROM "automationRule" WHERE "organizationId" = $1 AND "deletedAt" IS NULL`;
     if (activeOnly) sql += ` AND "isActive" = true`;

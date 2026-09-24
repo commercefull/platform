@@ -1,7 +1,7 @@
 import '../../tests/testUtils';
 import { ManageB2BUserUseCase } from './ManageB2BUser';
 import {
-B2BUserAlreadyExistsError, B2BUserNotFoundError, SpendingLimitExceededError,
+B2BUserAlreadyExistsError, B2BUserNotFoundError, B2BUserStatusError, CompanyNotFoundError, SpendingLimitExceededError,
 } from '../../domain/errors/B2BErrors';
 import type { CompanyRepository, B2BUserRepository } from '../../domain/repositories/B2BRepository';
 import { createB2BUser, createCompany, emitMock, lazyMock } from '../../tests/testUtils';
@@ -34,6 +34,12 @@ describe('ManageB2BUserUseCase', () => {
     await expect(useCase.invite({ companyId: 'co-1', organizationId: 'org-1', email: 'a@b.test' })).rejects.toThrow(B2BUserAlreadyExistsError);
   });
 
+  it('should throw CompanyNotFoundError when inviting into a missing company', async () => {
+    companyRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.invite({ companyId: 'missing', organizationId: 'org-1', email: 'a@b.test' })).rejects.toThrow(CompanyNotFoundError);
+  });
+
   it('should throw B2BUserNotFoundError when the user does not exist', async () => {
     userRepo.findById.mockResolvedValue(null);
 
@@ -46,5 +52,11 @@ describe('ManageB2BUserUseCase', () => {
     userRepo.findById.mockResolvedValue(user);
 
     await expect(useCase.checkSpendingLimit('u-1', 60, 50, 'monthlyLimit')).rejects.toThrow(SpendingLimitExceededError);
+  });
+
+  it('should throw B2BUserStatusError when checking the spending limit of an inactive user', async () => {
+    userRepo.findById.mockResolvedValue(createB2BUser());
+
+    await expect(useCase.checkSpendingLimit('u-1', 60, 50, 'monthlyLimit')).rejects.toThrow(B2BUserStatusError);
   });
 });
