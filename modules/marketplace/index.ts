@@ -21,3 +21,5 @@ export {
   listPayouts,
   viewPayout,
 } from './interface/controllers/adminMarketplaceController';
+
+export { manifest } from './manifest';

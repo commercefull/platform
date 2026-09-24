@@ -14,3 +14,5 @@ export { loyaltyMerchantRouter } from './interface/routers/loyaltyBusinessRouter
 export { loyaltyTypeDefs } from './interface/graphql/typeDefs';
 export { loyaltyResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

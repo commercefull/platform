@@ -49,15 +49,18 @@ await writeToOutbox(
 
 ### Register handlers
 
-Handlers are registered in `libs/events/registerEventHandlers.ts` and gated by the module registry:
+Handlers are owned by each module in `modules/<name>/application/eventHandlers.ts` and wired in `boot/registerEventHandlers.ts`, gated by the module registry:
 
 ```typescript
-import { registerHandler } from '../eventBus';
+import { eventBus } from '../../../libs/events/eventBus';
 
-// Only registered if the 'notification' module is enabled
-registerHandler('order.created', async data => {
-  await sendOrderConfirmationEmail(data);
-});
+// Only registered if the module is enabled (shouldRegisterEvents)
+export function registerNotificationEventHandlers(): void {
+  eventBus.registerHandler('order.created', async payload => {
+    await sendOrderConfirmationEmail(payload.data);
+  });
+}
+```
 ```
 
 ## Naming Convention

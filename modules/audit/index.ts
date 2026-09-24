@@ -13,3 +13,5 @@ export * from './domain/enums/AuditAction';
 export { auditAdminRouter } from './interface/controllers/auditAdminRouter';
 export { auditMiddleware } from './interface/middleware/auditMiddleware';
 export { listAuditLogs, viewAuditLog, auditStats, verifyChain } from './interface/controllers/adminAuditController';
+
+export { manifest } from './manifest';

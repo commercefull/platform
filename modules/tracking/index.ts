@@ -21,3 +21,5 @@ export {
   disableTrackingConfig,
   deleteTrackingConfig,
 } from './interface/controllers/adminTrackingController';
+
+export { manifest } from './manifest';

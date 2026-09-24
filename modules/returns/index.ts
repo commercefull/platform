@@ -8,3 +8,5 @@ export * from './application/useCases';
 // Interface exports (routers, GraphQL)
 export { returnBusinessRouter } from './interface/routers/returnRouter';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

@@ -21,3 +21,5 @@ export {
   viewImportErrors,
   resolveImportError,
 } from './interface/controllers/adminMigrationController';
+
+export { manifest } from './manifest';

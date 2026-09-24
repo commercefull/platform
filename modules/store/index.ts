@@ -17,3 +17,5 @@ export { storeRouter } from './interface/http/StoreRouter';
 export { storeTypeDefs } from './interface/graphql/typeDefs';
 export { storeResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

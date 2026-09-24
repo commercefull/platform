@@ -29,7 +29,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use ES module `import` syntax for all imports in TypeScript files.
 - Place all imports at the top of the file.
 - Fold schema changes into the original `create` migration when it hasn't been released yet; otherwise add a new `alter` migration.
-- Register new modules in `boot/moduleManifests.ts` with a manifest.
+- Declare a module's manifest in `modules/<name>/manifest.ts` and add it to `boot/moduleManifests.ts`.
 - Gate route mounting with `moduleRegistry.shouldMountRoutes()` in `boot/routes.ts`.
 - Gate event handler registration with `moduleRegistry.shouldRegisterEvents()`.
 - Use `writeToOutbox()` for events that must survive process crashes (within a DB transaction).
@@ -65,7 +65,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use `throw new Error('...')` in `domain/` or `application/` — use typed domain errors.
 - Redefine types in infrastructure that already exist in `domain/entities/` — import from the domain entity instead.
 - Leave empty or stub domain files — every domain file must be wired through the module or deleted.
-- Add a module without registering it in `boot/moduleManifests.ts`.
+- Add a module without declaring `manifest.ts` and registering it in `boot/moduleManifests.ts`.
 - Mount routes without checking `moduleRegistry.shouldMountRoutes()`.
 - Use `emitEvent()` for events that must survive crashes — use `writeToOutbox()` within a transaction instead.
 - Add a new module without writing module documentation and integration tests.

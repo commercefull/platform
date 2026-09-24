@@ -260,20 +260,23 @@ See [Migration Standards](#/guidelines/migrations) for the full convention.
 
 ## 9. Register the Module Manifest
 
-Add the manifest in `boot/moduleManifests.ts`:
+Declare the manifest in `modules/myModule/manifest.ts`, re-export it from the module's `index.ts` barrel (`export { manifest } from './manifest';`), and add it to the `manifests` array in `boot/moduleManifests.ts`:
 
 ```typescript
-{
+// modules/myModule/manifest.ts
+import type { ModuleManifest } from '../../libs/moduleRegistry';
+
+export const manifest: ModuleManifest = {
   name: 'myModule',
   description: 'Does something useful',
   requirement: 'optional',
   dependsOn: [],
-  routes: { enabled: true, prefix: '/business/my-module' },
+  routes: [{ path: '/business/my-module', auth: 'organization' }],
   graphql: { enabled: false },
-  events: { types: ['mymodule.created', 'mymodule.updated', 'mymodule.deleted'] },
-  tables: ['myEntity'],
+  events: { subscribes: [], publishes: ['mymodule.created', 'mymodule.updated', 'mymodule.deleted'] },
+  tables: { names: ['myEntity'] },
   featureFlagKey: 'module.mymodule.enabled',
-}
+};
 ```
 
 See [Module Registry & Feature Flags](#/guides/module-registry) for details.
@@ -294,15 +297,25 @@ if (moduleRegistry.shouldMountRoutes('myModule')) {
 
 ## 11. Register Event Handlers
 
-If your module emits or consumes events, register handlers in `libs/events/registerEventHandlers.ts`:
+If your module consumes events, own the handlers in `modules/myModule/application/eventHandlers.ts` — export a `registerMyModuleEventHandlers(deps)` function that subscribes on the event bus. Declare cross-module dependencies as narrow injected ports (boot injects the concrete repositories), then add an entry to `eventHandlerModules` in `boot/registerEventHandlers.ts`:
 
 ```typescript
-if (moduleRegistry.shouldRegisterEvents('myModule')) {
-  registerHandler('mymodule.created', async data => {
+// modules/myModule/application/eventHandlers.ts
+import { eventBus } from '../../../libs/events/eventBus';
+
+export function registerMyModuleEventHandlers(): void {
+  eventBus.registerHandler('mymodule.created', async payload => {
     // React to event
   });
 }
 ```
+
+```typescript
+// boot/registerEventHandlers.ts
+{ module: 'myModule', register: registerMyModuleEventHandlers },
+```
+
+Modules with recurring work also own their cron jobs in `modules/myModule/scheduledJobs.ts` (export `scheduledJobs: ScheduledJobDefinition[]`) and are listed in `jobModules` in `boot/scheduledJobs.ts`.
 
 ## 12. Add Admin UI (Optional)
 
@@ -383,9 +396,10 @@ yarn db:types          # Regenerate Knex types
 - [ ] Router uses `isOrganizationLoggedIn` middleware
 - [ ] Route prefix follows `/business/{topic}/...` convention
 - [ ] Migration uses camelCase columns, UUIDv7 primary keys, `knex.fn.now()` timestamps
-- [ ] Module manifest registered in `boot/moduleManifests.ts`
+- [ ] Module manifest declared in `modules/<name>/manifest.ts`, barrel-exported, and added to `boot/moduleManifests.ts`
 - [ ] Routes gated by `moduleRegistry.shouldMountRoutes()` in `boot/routes.ts`
-- [ ] Event handlers gated by `moduleRegistry.shouldRegisterEvents()`
+- [ ] Event handlers in `application/eventHandlers.ts`, gated by `moduleRegistry.shouldRegisterEvents()` via `boot/registerEventHandlers.ts`
+- [ ] Cron jobs in `scheduledJobs.ts`, added to `jobModules` in `boot/scheduledJobs.ts`
 - [ ] `index.ts` barrel export created
 - [ ] Module documentation at `docs/modules/<moduleName>.md`
 - [ ] Unit tests for domain entities and use cases
