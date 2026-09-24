@@ -25,16 +25,18 @@ modules/automation/
 ├── domain/
 │   ├── entities/AutomationRule.ts       # Rule entity (create, update, activate, recordExecution)
 │   ├── services/ConditionEvaluator.ts   # 15-operator condition DSL evaluator
-│   ├── services/ActionExecutor.ts       # Action registry + sequential/parallel execution
+│   ├── services/ActionExecutor.ts       # Pure dispatch: sequential/parallel via handler map + AutomationActionEffects port
 │   ├── errors/AutomationErrors.ts       # Domain errors
 │   └── repositories/AutomationRepository.ts  # Port interfaces
 ├── infrastructure/
 │   ├── repositories/AutomationRepositoryImpl.ts  # PostgreSQL rule + log repos
+│   ├── services/AutomationActionEffects.ts       # Effects impl: eventBus, JobScheduler, tag SQL
 │   └── index.ts
 ├── application/
-│   ├── services/AutomationExecutionEngine.ts  # Core engine: trigger → evaluate → execute → log
-│   ├── useCases/AutomationRuleCrud.ts          # Create/Update/Delete/Get/List use cases
-│   ├── useCases/wired.ts                       # Singleton wiring
+│   ├── useCases/ExecuteAutomationRule.ts         # Evaluate → execute → log a single rule
+│   ├── useCases/TriggerAutomationRule.ts         # Manual trigger entry point
+│   ├── useCases/AutomationRuleCrud.ts            # Create/Update/Delete/Get/List use cases
+│   ├── useCases/wired.ts                         # Singleton wiring
 │   └── useCases/index.ts
 ├── interface/
 │   ├── controllers/automationController.ts     # HTTP controller
@@ -162,18 +164,27 @@ Actions are the side effects executed when conditions are met. Each action has a
 
 ### 4. Extending Actions
 
-New action types are registered via the action registry:
+Action handlers live in a `Map<ActionType, ActionHandler>` injected into
+`ExecuteAutomationRuleUseCase` at the composition root. To add a custom action type,
+extend the map in `useCases/wired.ts`:
 
 ```typescript
-import { registerActionHandler } from '../modules/automation/domain/services/ActionExecutor';
+import { createActionHandlers } from '../../domain/services/ActionExecutor';
+import { AutomationActionEffectsImpl } from '../../infrastructure';
 
-registerActionHandler('apply_discount', async (action, context) => {
+const actionHandlers = createActionHandlers(new AutomationActionEffectsImpl());
+actionHandlers.set('apply_discount', async (action, context) => {
   const customerId = action.config.customerId as string;
   const percent = action.config.percent as number;
   // ... apply discount logic ...
   return { actionType: 'apply_discount', success: true, output: { customerId, percent } };
 });
 ```
+
+Handlers that produce side effects should call them through the
+`AutomationActionEffects` port rather than importing `eventBus`, `JobScheduler`, or
+`libs/db` — the domain executor stays pure and the infrastructure adapter
+(`infrastructure/services/AutomationActionEffects.ts`) owns the I/O.
 
 The handler receives the `RuleAction` and an `ActionContext` containing the event, customer, order, product, organizationId, ruleId, and executionLogId.
 
@@ -182,8 +193,8 @@ The handler receives the `RuleAction` and an `ActionContext` containing the even
 ### Event-Triggered Execution
 
 1. An event is emitted on the event bus (e.g., `order.completed`)
-2. The execution engine's `triggerEvent()` method is called with the event name and data
-3. The engine loads all active rules matching `triggerType: "event"` and `triggerConfig.eventName` matching the event
+2. A module event handler loads all active rules via `ruleRepo.findByTriggerType('event', true)`, filtered by `triggerConfig.eventName`
+3. `executeAutomationRuleUseCase.execute(rule, context, triggerEventId, correlationId)` is called per rule
 4. For each rule (ordered by priority descending):
    - An execution log entry is created with status `running`
    - Conditions are evaluated against the context (`{ event: { type, data, correlationId } }`)
@@ -196,7 +207,7 @@ The handler receives the `RuleAction` and an `ActionContext` containing the even
 
 ### Manual Trigger
 
-Call `executionEngine.triggerManual(ruleId, context?)` via the API or programmatically. Same flow as above but with `triggerType: "manual"`.
+Call `triggerAutomationRuleUseCase.execute(ruleId, context?)` via the API or programmatically. Same flow as above but with `triggerType: "manual"`.
 
 ## API Endpoints
 
@@ -311,24 +322,29 @@ curl -X POST http://localhost:3000/business/automation/rule-id/trigger \
 
 ## Programmatic Usage
 
-### Using the execution engine directly
+### Executing rules programmatically
 
 ```typescript
-import { executionEngine } from '../modules/automation/application/useCases/wired';
+import {
+  executeAutomationRuleUseCase,
+  triggerAutomationRuleUseCase,
+} from '../modules/automation/application/useCases/wired';
+import { AutomationRuleRepositoryImpl } from '../modules/automation/infrastructure';
 
-// Trigger all rules matching an event
-const results = await executionEngine.triggerEvent(
-  'order.completed',
-  {
-    orderId: 'o1',
-    customerId: 'c1',
-    totalAmount: 500,
-  },
-  correlationId,
-);
+// Execute all rules matching an event
+const rules = (await new AutomationRuleRepositoryImpl().findByTriggerType('event', true))
+  .filter(r => r.triggerConfig.eventName === 'order.completed');
+for (const rule of rules) {
+  await executeAutomationRuleUseCase.execute(
+    rule,
+    { event: { type: 'order.completed', data: { orderId: 'o1', customerId: 'c1', totalAmount: 500 } } },
+    undefined,
+    correlationId,
+  );
+}
 
 // Manually trigger a specific rule
-const result = await executionEngine.triggerManual('rule-uuid', {
+const result = await triggerAutomationRuleUseCase.execute('rule-uuid', {
   customer: { customerId: 'c1', tier: 'vip', lifetimeValue: 10000 },
 });
 ```
@@ -354,9 +370,12 @@ const rules = await listAutomationRulesUseCase.execute(true);
 ### Registering a custom action handler
 
 ```typescript
-import { registerActionHandler } from '../modules/automation/domain/services/ActionExecutor';
+// modules/automation/application/useCases/wired.ts
+import { createActionHandlers } from '../../domain/services/ActionExecutor';
+import { AutomationActionEffectsImpl } from '../../infrastructure';
 
-registerActionHandler('apply_discount', async (action, context) => {
+const actionHandlers = createActionHandlers(new AutomationActionEffectsImpl());
+actionHandlers.set('apply_discount', async (action, context) => {
   const { customerId, percent } = action.config as { customerId: string; percent: number };
   // Apply discount logic...
   return { actionType: 'apply_discount', success: true, output: { customerId, percent } };
@@ -365,20 +384,32 @@ registerActionHandler('apply_discount', async (action, context) => {
 
 ## Integration with Event Bus
 
-The automation engine is designed to integrate with the platform's event bus (`libs/events/eventBus.ts`). To wire event-triggered rules:
+The automation module is designed to integrate with the platform's event bus (`libs/events/eventBus.ts`). To wire event-triggered rules:
 
-1. Register a handler on the event bus that calls `executionEngine.triggerEvent()`
+1. Register a handler on the event bus that loads matching rules and calls `executeAutomationRuleUseCase.execute(...)`
 2. Add an entry in `boot/registerEventHandlers.ts` that calls the module's `application/eventHandlers.ts` register function
 
 Example module-owned wiring in `modules/automation/application/eventHandlers.ts`:
 
 ```typescript
 import { eventBus } from '../../../libs/events/eventBus';
-import { executionEngine } from './useCases/wired';
+import { executeAutomationRuleUseCase } from './useCases/wired';
+import { AutomationRuleRepositoryImpl } from '../infrastructure';
+
+const ruleRepo = new AutomationRuleRepositoryImpl();
 
 export function registerAutomationEventHandlers(): void {
   eventBus.registerHandler('order.completed', async payload => {
-    await executionEngine.triggerEvent('order.completed', payload.data, payload.correlationId);
+    const rules = (await ruleRepo.findByTriggerType('event', true))
+      .filter(r => r.triggerConfig.eventName === 'order.completed');
+    for (const rule of rules) {
+      await executeAutomationRuleUseCase.execute(
+        rule,
+        { event: { type: 'order.completed', data: payload.data } },
+        payload.eventId,
+        payload.correlationId,
+      );
+    }
   });
 }
 ```

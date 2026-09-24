@@ -44,7 +44,7 @@ modules/<consumer>/
 
 ### Reference implementations
 
-- `modules/payment/application/services/GatewayAdapter.ts` — correct ACL against an external system (Stripe).
+- `modules/payment/infrastructure/services/GatewayAdapter.ts` — correct ACL against an external system (Stripe).
 - `modules/media/infrastructure/services/StorageServiceFactory.ts` — correct adapter/factory pair for S3.
 
 ## 3. Shared Kernel Promotion Criteria

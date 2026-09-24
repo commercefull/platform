@@ -17,7 +17,7 @@ pricing-owned `productBasePrice` table (`productId`, nullable `productVariantId`
   (e.g. product's `ProductPricingPort`, basket's `ProductPricePort`) backed by
   adapters in the consumer's `infrastructure/acl/` — never by importing pricing
   internals directly.
-- `PricingService.calculatePrice(productId, context)` resolves the effective
+- `CalculatePriceUseCase.execute({ productId, ...context })` resolves the effective
   price: base/sale price → currency conversion → tier pricing → customer price
   lists → dynamic rules → membership/loyalty discounts. Purchase flows (basket,
   checkout) must resolve prices through this path — clients never supply prices.
