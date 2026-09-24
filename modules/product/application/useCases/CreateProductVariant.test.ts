@@ -1,5 +1,6 @@
 import { lazyMock, uuidMock } from '../../tests/testUtils';
 import { CreateProductVariantUseCase, CreateProductVariantCommand } from './CreateProductVariant';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 ;
 
@@ -37,5 +38,14 @@ describe('CreateProductVariantUseCase', () => {
     expect(result.variantId).toBe('variant-uuid');
     expect(result.productId).toBe('p1');
     expect(mockRepo.save).toHaveBeenCalled();
+  });
+
+  it('should throw ProductValidationError when basePriceCents is negative or fractional', async () => {
+    await expect(
+      useCase.execute(new CreateProductVariantCommand('p1', 'SKU-2', [], -1)),
+    ).rejects.toThrow(ProductValidationError);
+    await expect(
+      useCase.execute(new CreateProductVariantCommand('p1', 'SKU-3', [], 10.5)),
+    ).rejects.toThrow(ProductValidationError);
   });
 });

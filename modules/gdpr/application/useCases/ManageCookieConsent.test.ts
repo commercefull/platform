@@ -1,5 +1,10 @@
 import { createConsent, createConsentRepository } from '../../tests/testUtils';
-import { ManageCookieConsentUseCase, RecordCookieConsentCommand, UpdateCookieConsentCommand } from './ManageCookieConsent';
+import {
+  ManageCookieConsentUseCase,
+  RecordCookieConsentCommand,
+  UpdateCookieConsentCommand,
+  LinkConsentToCustomerCommand,
+} from './ManageCookieConsent';
 import { GdprValidationError } from '../../domain/errors/GdprErrors';
 
 describe('ManageCookieConsentUseCase', () => {
@@ -95,5 +100,91 @@ describe('ManageCookieConsentUseCase', () => {
       marketing: false,
       thirdParty: false,
     });
+  });
+
+  it('should flip all optional preferences on when acceptAll is called on an existing consent', async () => {
+    const repository = createConsentRepository(createConsent({ gdprCookieConsentId: 'c1' }));
+
+    const result = await new ManageCookieConsentUseCase(repository).acceptAll('sess-1');
+
+    expect(result.gdprCookieConsentId).toBe('c1');
+    expect(result.preferences).toEqual({
+      necessary: true,
+      functional: true,
+      analytics: true,
+      marketing: true,
+      thirdParty: true,
+    });
+    expect(repository.save).toHaveBeenCalled();
+  });
+
+  it('should create an anonymous consent with only necessary cookies when rejectAll has no existing consent', async () => {
+    const repository = createConsentRepository(null);
+
+    const result = await new ManageCookieConsentUseCase(repository).rejectAll('sess-new');
+
+    expect(result.preferences).toEqual({
+      necessary: true,
+      functional: false,
+      analytics: false,
+      marketing: false,
+      thirdParty: false,
+    });
+    expect(repository.save).toHaveBeenCalled();
+  });
+
+  it('should return the consent when getConsent finds one for the session', async () => {
+    const repository = createConsentRepository(createConsent({ gdprCookieConsentId: 'c1', analytics: true }));
+
+    const result = await new ManageCookieConsentUseCase(repository).getConsent('sess-1');
+
+    expect(result).not.toBeNull();
+    expect(result!.gdprCookieConsentId).toBe('c1');
+    expect(result!.preferences.analytics).toBe(true);
+  });
+
+  it('should return null when getConsent finds no consent for the session', async () => {
+    const repository = createConsentRepository(null);
+
+    const result = await new ManageCookieConsentUseCase(repository).getConsent('sess-none');
+
+    expect(result).toBeNull();
+  });
+
+  it('should return null when linkToCustomer finds no consent for the session', async () => {
+    const repository = createConsentRepository(null);
+
+    const result = await new ManageCookieConsentUseCase(repository).linkToCustomer(
+      new LinkConsentToCustomerCommand('sess-none', 'customer-1'),
+    );
+
+    expect(result).toBeNull();
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should keep the existing customer consent when the customer already has one', async () => {
+    const sessionConsent = createConsent({ gdprCookieConsentId: 'anon-1', analytics: true });
+    const customerConsent = createConsent({ gdprCookieConsentId: 'cust-1', customerId: 'customer-1', analytics: false });
+    const repository = createConsentRepository(sessionConsent);
+    repository.findByCustomerId.mockResolvedValue(customerConsent);
+
+    const result = await new ManageCookieConsentUseCase(repository).linkToCustomer(
+      new LinkConsentToCustomerCommand('sess-1', 'customer-1'),
+    );
+
+    expect(result!.gdprCookieConsentId).toBe('cust-1');
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should link the anonymous consent to the customer when they have none', async () => {
+    const repository = createConsentRepository(createConsent({ gdprCookieConsentId: 'anon-1' }));
+
+    const result = await new ManageCookieConsentUseCase(repository).linkToCustomer(
+      new LinkConsentToCustomerCommand('sess-1', 'customer-9'),
+    );
+
+    expect(result!.gdprCookieConsentId).toBe('anon-1');
+    expect(repository.save).toHaveBeenCalledTimes(1);
+    expect((repository.save.mock.calls[0][0] as { customerId?: string }).customerId).toBe('customer-9');
   });
 });

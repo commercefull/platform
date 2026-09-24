@@ -6,7 +6,7 @@ import {
   ProcessDeletionRequestCommand,
   RejectRequestCommand,
 } from './ProcessDataRequest';
-import { DataRequestNotFoundError, GdprValidationError } from '../../domain/errors/GdprErrors';
+import { DataRequestNotFoundError, DataRequestProcessingError, GdprValidationError } from '../../domain/errors/GdprErrors';
 
 describe('ProcessDataRequestUseCase', () => {
   it('should verify identity when the request exists', async () => {
@@ -93,6 +93,72 @@ describe('ProcessDataRequestUseCase', () => {
     expect(repository.save).not.toHaveBeenCalled();
   });
 
+  it('should process an access request through the export path', async () => {
+    const repository = createGdprDataRequestRepository(
+      createDataRequest({ requestType: 'access', identityVerified: true }),
+    );
+    const gdprService = createGdprService();
+
+    const result = await new ProcessDataRequestUseCase(repository, gdprService).processExport(
+      new ProcessExportRequestCommand('req-1', 'admin-1', 'csv'),
+    );
+
+    expect(result.status).toBe('completed');
+    expect(gdprService.exportCustomerData).toHaveBeenCalledWith('customer-1');
+  });
+
+  it('should throw DataRequestProcessingError when the export service fails', async () => {
+    const repository = createGdprDataRequestRepository(
+      createDataRequest({ requestType: 'export', identityVerified: true }),
+    );
+    const gdprService = createGdprService();
+    gdprService.exportCustomerData.mockRejectedValue(new Error('storage unavailable'));
+
+    await expect(
+      new ProcessDataRequestUseCase(repository, gdprService).processExport(new ProcessExportRequestCommand('req-1', 'admin-1')),
+    ).rejects.toThrow(DataRequestProcessingError);
+  });
+
+  it('should throw GdprValidationError when processing a non-deletion request as deletion', async () => {
+    const repository = createGdprDataRequestRepository(
+      createDataRequest({ requestType: 'access', identityVerified: true }),
+    );
+
+    await expect(
+      new ProcessDataRequestUseCase(repository, createGdprService()).processDeletion(
+        new ProcessDeletionRequestCommand('req-1', 'admin-1'),
+      ),
+    ).rejects.toThrow(GdprValidationError);
+  });
+
+  it('should throw GdprValidationError when deleting an unverified request', async () => {
+    const repository = createGdprDataRequestRepository(
+      createDataRequest({ requestType: 'deletion', identityVerified: false }),
+    );
+    const gdprService = createGdprService();
+
+    await expect(
+      new ProcessDataRequestUseCase(repository, gdprService).processDeletion(
+        new ProcessDeletionRequestCommand('req-1', 'admin-1'),
+      ),
+    ).rejects.toThrow(GdprValidationError);
+    expect(gdprService.anonymizeCustomerData).not.toHaveBeenCalled();
+  });
+
+  it('should throw DataRequestProcessingError when the deletion service fails', async () => {
+    const repository = createGdprDataRequestRepository(
+      createDataRequest({ requestType: 'deletion', identityVerified: true }),
+    );
+    const gdprService = createGdprService();
+    gdprService.anonymizeCustomerData.mockRejectedValue(new Error('db down'));
+
+    await expect(
+      new ProcessDataRequestUseCase(repository, gdprService).processDeletion(
+        new ProcessDeletionRequestCommand('req-1', 'admin-1'),
+      ),
+    ).rejects.toThrow(DataRequestProcessingError);
+  });
+
   it('should throw DataRequestNotFoundError when the request does not exist', async () => {
     const useCase = new ProcessDataRequestUseCase(createGdprDataRequestRepository(null), createGdprService());
 
@@ -103,6 +169,9 @@ describe('ProcessDataRequestUseCase', () => {
       DataRequestNotFoundError,
     );
     await expect(useCase.processExport(new ProcessExportRequestCommand('missing', 'admin-1'))).rejects.toThrow(
+      DataRequestNotFoundError,
+    );
+    await expect(useCase.processDeletion(new ProcessDeletionRequestCommand('missing', 'admin-1'))).rejects.toThrow(
       DataRequestNotFoundError,
     );
   });

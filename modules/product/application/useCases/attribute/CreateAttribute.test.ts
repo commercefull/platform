@@ -48,4 +48,59 @@ describe('CreateAttributeUseCase', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('already exists');
   });
+
+  it('should create predefined options when options are provided', async () => {
+    const result = await useCase.execute({
+      name: 'Color',
+      code: 'color',
+      type: 'select',
+      options: [
+        { value: 'red', displayValue: 'Red', position: 0, isDefault: true },
+        { value: 'blue', displayValue: 'Blue' },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockRepo.createAttributeValue).toHaveBeenCalledTimes(2);
+    expect(mockRepo.createAttributeValue).toHaveBeenNthCalledWith(1, {
+      attributeId: 'a1',
+      value: 'red',
+      displayValue: 'Red',
+      position: 0,
+      isDefault: true,
+    });
+    expect(mockRepo.createAttributeValue).toHaveBeenNthCalledWith(2, {
+      attributeId: 'a1',
+      value: 'blue',
+      displayValue: 'Blue',
+      position: undefined,
+      isDefault: undefined,
+    });
+  });
+
+  it('should default type and inputType to text when not provided', async () => {
+    await useCase.execute({ name: 'SKU Note', code: 'sku_note' });
+
+    expect(mockRepo.createAttribute).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'text', inputType: 'text' }),
+    );
+  });
+
+  it('should default inputType to the attribute type when inputType is not provided', async () => {
+    await useCase.execute({ name: 'Size', code: 'size', type: 'select' });
+
+    expect(mockRepo.createAttribute).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'select', inputType: 'select' }),
+    );
+  });
+
+  it('should return failure when the repository throws', async () => {
+    mockRepo.createAttribute.mockRejectedValueOnce(new Error('db down'));
+
+    const result = await useCase.execute({ name: 'Color', code: 'color' });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Failed to create attribute');
+    expect(result.error).toContain('db down');
+  });
 });

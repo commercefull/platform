@@ -52,5 +52,22 @@ describe('ManageAdminGdprUseCase', () => {
 
     expect(repository.completeRequest).toHaveBeenCalledWith('r1', 'Done');
   });
+
+  it('should look up a request by id when asked', async () => {
+    const repository = createAdminGdprRepository();
+
+    const result = await new ManageAdminGdprUseCase(repository).findRequestById('r1');
+
+    expect(result).toEqual({ requestId: 'r1' });
+    expect(repository.findRequestById).toHaveBeenCalledWith('r1');
+  });
+
+  it('should update the request status through the repository', async () => {
+    const repository = createAdminGdprRepository();
+
+    await new ManageAdminGdprUseCase(repository).updateStatus('r1', 'processing');
+
+    expect(repository.updateStatus).toHaveBeenCalledWith('r1', 'processing');
+  });
 });
 

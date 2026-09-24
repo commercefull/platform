@@ -2,9 +2,10 @@
  * ValidateCheckoutStep Use Case Tests
  */
 
-import { ValidateCheckoutStepUseCase, ValidateCheckoutStepCommand } from './CheckoutConfig';
+import { ManageCheckoutConfigUseCase, ValidateCheckoutStepUseCase, ValidateCheckoutStepCommand } from './CheckoutConfig';
 import { CheckoutConfigRepository } from '../../domain/repositories/CheckoutConfigRepository';
 import { CheckoutConfig } from '../../domain/entities/CheckoutConfig';
+import { CheckoutValidationError } from '../../domain/errors/CheckoutErrors';
 import { validationHookRegistry } from '../../domain/services/ValidationHookRegistry';
 
 class MockCheckoutConfigRepository implements CheckoutConfigRepository {
@@ -197,5 +198,44 @@ describe('ValidateCheckoutStepUseCase', () => {
   it('should throw when step not found', async () => {
     const cmd = new ValidateCheckoutStepCommand('store_1', 'nonexistent_step', {});
     await expect(useCase.execute(cmd)).rejects.toThrow("Step 'nonexistent_step' not found");
+  });
+});
+
+describe('ManageCheckoutConfigUseCase', () => {
+  let repo: MockCheckoutConfigRepository;
+  let useCase: ManageCheckoutConfigUseCase;
+
+  beforeEach(() => {
+    repo = new MockCheckoutConfigRepository();
+    useCase = new ManageCheckoutConfigUseCase(repo);
+  });
+
+  it('should throw CheckoutValidationError when deleting the default configuration', async () => {
+    const config = CheckoutConfig.create({
+      configId: 'cfg_1',
+      storeId: 'store_1',
+      organizationId: 'org_1',
+      name: 'Default',
+    });
+    config.setAsDefault();
+    await repo.create(config);
+
+    await expect(useCase.delete('cfg_1')).rejects.toThrow(CheckoutValidationError);
+    await expect(repo.findById('cfg_1')).resolves.not.toBeNull();
+  });
+
+  it('should delete a non-default configuration', async () => {
+    const config = CheckoutConfig.create({
+      configId: 'cfg_2',
+      storeId: 'store_1',
+      organizationId: 'org_1',
+      name: 'Secondary',
+    });
+    await repo.create(config);
+
+    const deleted = await useCase.delete('cfg_2');
+
+    expect(deleted).toBe(true);
+    await expect(repo.findById('cfg_2')).resolves.toBeNull();
   });
 });

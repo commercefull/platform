@@ -1,6 +1,6 @@
 import { lazyMock, createStoredPaymentMethod } from '../../tests/testUtils';
 import { SaveStoredPaymentMethodUseCase, SaveStoredPaymentMethodCommand } from './SaveStoredPaymentMethod';
-import { FailedToCreateStoredPaymentMethodError } from '../../domain/errors/PaymentErrors';
+import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
 import type { PaymentRepository } from '../../domain/repositories/PaymentRepository';
 
 describe('SaveStoredPaymentMethodUseCase', () => {
@@ -38,5 +38,13 @@ describe('SaveStoredPaymentMethodUseCase', () => {
     await useCase.execute(new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_2', false));
 
     expect(repo.setDefaultStoredMethod).not.toHaveBeenCalled();
+  });
+
+  it('should throw FailedToRetrieveSavedPaymentMethodError when the saved method cannot be re-read', async () => {
+    repo.findStoredMethodById.mockResolvedValueOnce(null);
+
+    await expect(useCase.execute(new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_1'))).rejects.toThrow(
+      FailedToRetrieveSavedPaymentMethodError,
+    );
   });
 });

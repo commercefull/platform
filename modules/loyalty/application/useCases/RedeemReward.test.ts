@@ -2,6 +2,7 @@ import '../../tests/testUtils';
 import { RedeemRewardUseCase } from './RedeemReward';
 import {
   LoyaltyRewardNotFoundError,
+  LoyaltyValidationError,
   RewardNotAvailableError,
   InsufficientPointsError,
   LoyaltyMemberNotFoundError,
@@ -80,5 +81,34 @@ describe('RedeemRewardUseCase', () => {
 
     await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(InsufficientPointsError);
     expect(loyaltyRepository.updatePointsBalance).not.toHaveBeenCalled();
+  });
+
+  it('should throw LoyaltyValidationError when the reward has expired', async () => {
+    loyaltyRepository.getRewardById.mockResolvedValue({
+      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
+      isActive: true, totalQuantity: 100, remainingQuantity: 100, maxUsagePerCustomer: null,
+      validTo: new Date('2020-01-01'),
+    });
+
+    await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(LoyaltyValidationError);
+  });
+
+  it('should throw LoyaltyValidationError when the reward is not yet available', async () => {
+    loyaltyRepository.getRewardById.mockResolvedValue({
+      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
+      isActive: true, totalQuantity: 100, remainingQuantity: 100, maxUsagePerCustomer: null,
+      validFrom: new Date('2999-01-01'),
+    });
+
+    await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(LoyaltyValidationError);
+  });
+
+  it('should throw LoyaltyValidationError when the reward is out of stock', async () => {
+    loyaltyRepository.getRewardById.mockResolvedValue({
+      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
+      isActive: true, totalQuantity: 5, remainingQuantity: 0, maxUsagePerCustomer: null,
+    });
+
+    await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(LoyaltyValidationError);
   });
 });

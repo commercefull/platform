@@ -1,7 +1,7 @@
 import '../../tests/testUtils';
 import { ManageApprovalWorkflowUseCase } from './ManageApprovalWorkflow';
 import {
-  B2BValidationError, ApprovalWorkflowNotFoundError, UnauthorizedApproverError,
+  B2BValidationError, ApprovalWorkflowNotFoundError, CompanyNotFoundError, UnauthorizedApproverError,
 } from '../../domain/errors/B2BErrors';
 import type { CompanyRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import { createApprovalWorkflow, createCompany, emitMock, lazyMock } from '../../tests/testUtils';
@@ -39,6 +39,16 @@ describe('ManageApprovalWorkflowUseCase', () => {
     })).rejects.toThrow(B2BValidationError);
   });
 
+  it('should throw CompanyNotFoundError when creating a workflow for a missing company', async () => {
+    companyRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.create({
+      companyId: 'missing', organizationId: 'org-1', type: 'purchase_order', referenceId: 'ref-1',
+      referenceNumber: 'ORD-1', requestedBy: 'user-1', requestedByEmail: 'u@x.test', amountCents: 100,
+      approvers: [{ approverId: 'mgr-1', approverEmail: 'm@x.test' }],
+    })).rejects.toThrow(CompanyNotFoundError);
+  });
+
   it('should throw ApprovalWorkflowNotFoundError when the workflow does not exist', async () => {
     workflowRepo.findById.mockResolvedValue(null);
 
@@ -49,6 +59,12 @@ describe('ManageApprovalWorkflowUseCase', () => {
     workflowRepo.findById.mockResolvedValue(createApprovalWorkflow());
 
     await expect(useCase.approve('w-1', 'intruder')).rejects.toThrow(UnauthorizedApproverError);
+  });
+
+  it('should throw UnauthorizedApproverError when a non-current approver tries to reject', async () => {
+    workflowRepo.findById.mockResolvedValue(createApprovalWorkflow());
+
+    await expect(useCase.reject('w-1', 'intruder')).rejects.toThrow(UnauthorizedApproverError);
   });
 
   it('should approve and emit approval.approved when the current approver acts', async () => {

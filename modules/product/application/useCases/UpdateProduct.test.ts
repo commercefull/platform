@@ -1,6 +1,6 @@
 import { createProduct, lazyMock, emitMock } from '../../tests/testUtils';
 import { UpdateProductUseCase, UpdateProductCommand } from './UpdateProduct';
-import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
+import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import { Product } from '../../domain/entities/Product';
 
 beforeEach(() => {
@@ -53,5 +53,39 @@ describe('UpdateProductUseCase', () => {
 
     expect(addTag).toHaveBeenCalledWith('new');
     expect(addTag).toHaveBeenCalledWith('hot');
+  });
+
+  it('should throw ProductValidationError when basePriceCents is not a non-negative integer', async () => {
+    await expect(useCase.execute(new UpdateProductCommand('p1', { basePriceCents: -5 }))).rejects.toThrow(
+      ProductValidationError,
+    );
+    await expect(useCase.execute(new UpdateProductCommand('p1', { basePriceCents: 10.5 }))).rejects.toThrow(
+      ProductValidationError,
+    );
+    expect(mockPricingPort.setBasePrice).not.toHaveBeenCalled();
+  });
+
+  it('should throw ProductValidationError when a supplementary price is negative', async () => {
+    await expect(
+      useCase.execute(new UpdateProductCommand('p1', { basePriceCents: 1000, costPriceCents: -1 })),
+    ).rejects.toThrow(ProductValidationError);
+    expect(mockPricingPort.setBasePrice).not.toHaveBeenCalled();
+  });
+
+  it('should throw ProductValidationError when salePriceCents exceeds basePriceCents', async () => {
+    mockPricingPort.getBasePrice.mockResolvedValue(null);
+
+    await expect(
+      useCase.execute(new UpdateProductCommand('p1', { basePriceCents: 1000, salePriceCents: 1500 })),
+    ).rejects.toThrow(ProductValidationError);
+    expect(mockPricingPort.setBasePrice).not.toHaveBeenCalled();
+  });
+
+  it('should throw ProductValidationError when a price update has no resolvable base price', async () => {
+    mockPricingPort.getBasePrice.mockResolvedValue(null);
+
+    await expect(useCase.execute(new UpdateProductCommand('p1', { salePriceCents: 500 }))).rejects.toThrow(
+      ProductValidationError,
+    );
   });
 });
