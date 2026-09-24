@@ -6,20 +6,22 @@ The platform includes a module registry system that controls which modules are a
 
 ### Manifest Declaration
 
-Module manifests are declared in `boot/moduleManifests.ts`:
+Each module declares its own manifest in `modules/<name>/manifest.ts` (re-exported through the module barrel). `boot/moduleManifests.ts` collects them and calls `moduleRegistry.registerAll(...)`:
 
 ```typescript
-{
+// modules/audit/manifest.ts
+import type { ModuleManifest } from '../../libs/moduleRegistry';
+
+export const manifest: ModuleManifest = {
   name: 'audit',
   description: 'Immutable, hash-chained audit log',
   requirement: 'optional',
-  dependsOn: [],
-  routes: { enabled: true, prefix: '/business/audit' },
+  routes: [{ path: '/business/audit', auth: 'organization' }],
   graphql: { enabled: false },
-  events: { types: ['log.recorded', 'chain.verified', 'chain.tampered'] },
-  tables: ['auditLog'],
+  events: { subscribes: [], publishes: ['log.recorded', 'chain.verified', 'chain.tampered'] },
+  tables: { names: ['auditLog'] },
   featureFlagKey: 'module.audit.enabled',
-}
+};
 ```
 
 ### Registry API
@@ -40,11 +42,12 @@ The registry singleton (`libs/moduleRegistry/registry.ts`) exposes:
 
 ```
 app.ts
-  1. registerModuleManifestsSync()   — register all manifests, initialize with env vars
-  2. registerAllEventHandlers()      — each handler checks shouldRegisterEvents()
+  1. registerModuleManifestsSync()   — collect each module's manifest.ts, initialize with env vars
+  2. registerAllEventHandlers()      — each module's eventHandlers.ts register fn is gated by shouldRegisterEvents()
   3. startOutboxDispatcher()         — durable event bus
   4. boot/routes.ts                  — each router checks shouldMountRoutes()
   5. boot/graphql.ts                 — each schema checks shouldIncludeGraphQL()
+  6. initializeScheduledJobs()       — each module's scheduledJobs.ts registered when the module is enabled
 ```
 
 ## Required vs Optional Modules
@@ -101,39 +104,32 @@ Optional modules with unmet `dependsOn` are auto-disabled. For example, `pagebui
 
 ## Adding a New Module to the Registry
 
-1. Declare the manifest in `boot/moduleManifests.ts`:
+1. Declare the manifest in `modules/myModule/manifest.ts`, export it from the module barrel, and add it to the `manifests` array in `boot/moduleManifests.ts`:
 
 ```typescript
-{
+// modules/myModule/manifest.ts
+import type { ModuleManifest } from '../../libs/moduleRegistry';
+
+export const manifest: ModuleManifest = {
   name: 'myModule',
   description: 'Does something useful',
   requirement: 'optional',
   dependsOn: [],
-  routes: { enabled: true, prefix: '/business/my-module' },
+  routes: [{ path: '/business/my-module', auth: 'organization' }],
   graphql: { enabled: false },
-  events: { types: ['mymodule.thing_happened'] },
-  tables: ['myModuleTable'],
+  events: { subscribes: ['mymodule.thing_happened'], publishes: ['mymodule.thing_happened'] },
+  tables: { names: ['myModuleTable'] },
   featureFlagKey: 'module.mymodule.enabled',
-}
+};
 ```
 
-2. Gate your router in `boot/routes.ts`:
+2. Mount your router in `boot/routes.ts` — add it to the customer/business router list with its module name so `shouldMountRoutes` gates it.
 
-```typescript
-if (moduleRegistry.shouldMountRoutes('myModule')) {
-  app.use('/business/my-module', myModuleRouter);
-}
-```
+3. Own your event handlers in `modules/myModule/application/eventHandlers.ts` and add an entry to `eventHandlerModules` in `boot/registerEventHandlers.ts` — the entry is gated by `shouldRegisterEvents('myModule')`. Declare cross-module dependencies as narrow injected ports; boot (the composition root) passes the concrete repositories.
 
-3. Gate your event handlers in `libs/events/registerEventHandlers.ts`:
+4. Own your cron jobs in `modules/myModule/scheduledJobs.ts` (export `scheduledJobs: ScheduledJobDefinition[]`) and add the module to `jobModules` in `boot/scheduledJobs.ts` — jobs register only while the module is enabled.
 
-```typescript
-if (moduleRegistry.shouldRegisterEvents('myModule')) {
-  registerHandler('mymodule.thing_happened', handleThing);
-}
-```
-
-4. Toggle with `MODULE_MYMODULE_ENABLED=false` or via DB flag.
+5. Toggle with `MODULE_MYMODULE_ENABLED=false` or via DB flag.
 
 ## Testing
 

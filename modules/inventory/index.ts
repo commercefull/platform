@@ -15,3 +15,5 @@ export { inventoryBusinessRouter } from './interface/routers/businessRouter';
 export { inventoryTypeDefs } from './interface/graphql/typeDefs';
 export { inventoryResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

@@ -10,3 +10,5 @@ export * from './application/services/AutomationExecutionEngine';
 // Interface exports (routers, GraphQL)
 export { automationBusinessRouter } from './interface/routers/automationRouter';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

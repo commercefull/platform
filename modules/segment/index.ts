@@ -19,3 +19,5 @@ export {
   evaluateSegment,
   viewSegmentMembers,
 } from './interface/controllers/adminSegmentController';
+
+export { manifest } from './manifest';

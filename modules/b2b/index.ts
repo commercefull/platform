@@ -21,3 +21,5 @@ export {
   listB2BQuotes,
   viewB2BQuote,
 } from './interface/controllers/adminB2BController';
+
+export { manifest } from './manifest';

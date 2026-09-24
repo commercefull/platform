@@ -13,3 +13,5 @@ export { warehouseMerchantRouter } from './interface/routers/warehouseBusinessRo
 export { warehouseTypeDefs } from './interface/graphql/typeDefs';
 export { warehouseResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
+
+export { manifest } from './manifest';

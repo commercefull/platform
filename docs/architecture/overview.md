@@ -131,7 +131,7 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 
 ## Module Registry & Feature Flags
 
-Each of the 42 modules declares a manifest in `boot/moduleManifests.ts` with `{ name, description, requirement, dependsOn, routes, graphql, events, tables, featureFlagKey }`.
+Each of the 42 modules declares a manifest in its own `modules/<name>/manifest.ts` (re-exported via the barrel) with `{ name, description, requirement, dependsOn, routes, graphql, events, tables, featureFlagKey }`; `boot/moduleManifests.ts` collects and registers them.
 
 - **6 required modules**: `identity`, `order`, `product`, `payment`, `configuration`, `organization` — always loaded, cannot be toggled off.
 - **36 optional modules**: Toggled via `MODULE_<NAME>_ENABLED=false` env var or a DB-backed feature flag provider.
