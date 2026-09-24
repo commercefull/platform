@@ -118,7 +118,7 @@ The integration module is **separate from the webhook module** — webhooks forw
 
 ## Application Services
 
-- **`IntegrationEventDispatcher`** — Listens to eventBus `*` events, finds matching active subscriptions, decrypts credentials, transforms payloads using dot-notation mapping, resolves provider endpoints, sends HTTP POST with auth headers, logs results. Registered at boot via `registerEventHandlers.ts`.
+- **`IntegrationEventDispatcher`** — Listens to eventBus `*` events, finds matching active subscriptions, decrypts credentials, transforms payloads using dot-notation mapping, resolves provider endpoints, sends HTTP POST with auth headers, logs results. Registered at boot via `registerIntegrationEventHandlers()` in `modules/integration/application/eventHandlers.ts`, wired from `boot/registerEventHandlers.ts`.
 
 ## Repository Ports
 
