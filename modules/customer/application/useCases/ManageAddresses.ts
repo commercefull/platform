@@ -4,7 +4,7 @@
 
 import { generateUUID } from '../../../../libs/uuid';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
-import { CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
+import { CustomerAddressNotFoundError, CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { CustomerAddress } from '../../../../libs/db/types';
 
 // ============================================================================
@@ -127,6 +127,8 @@ export class ManageAddressesUseCase {
       throw new CustomerNotFoundError(command.customerId);
     }
 
+    await this.assertOwnedAddress(command.customerId, command.addressId);
+
     const updated = await this.customerRepository.updateAddress(command.addressId, command.updates as Partial<CustomerAddress>);
     return this.mapToResponse(updated);
   }
@@ -137,6 +139,8 @@ export class ManageAddressesUseCase {
       throw new CustomerNotFoundError(command.customerId);
     }
 
+    await this.assertOwnedAddress(command.customerId, command.addressId);
+
     await this.customerRepository.deleteAddress(command.addressId);
   }
 
@@ -145,6 +149,8 @@ export class ManageAddressesUseCase {
     if (!customer) {
       throw new CustomerNotFoundError(command.customerId);
     }
+
+    await this.assertOwnedAddress(command.customerId, command.addressId);
 
     await this.customerRepository.setDefaultAddress(command.customerId, command.addressId, command.addressType);
   }
@@ -157,6 +163,18 @@ export class ManageAddressesUseCase {
 
     const addresses = await this.customerRepository.getAddresses(customerId);
     return addresses.map(a => this.mapToResponse(a));
+  }
+
+  /**
+   * Verifies the address exists and belongs to the customer. Returns the same
+   * not-found error for foreign or missing addresses so ownership is never
+   * leaked through the API.
+   */
+  private async assertOwnedAddress(customerId: string, addressId: string): Promise<void> {
+    const owned = await this.customerRepository.getAddresses(customerId);
+    if (!owned.some(a => a.customerAddressId === addressId)) {
+      throw new CustomerAddressNotFoundError(addressId);
+    }
   }
 
   private mapToResponse(address: CustomerAddress): AddressResponse {

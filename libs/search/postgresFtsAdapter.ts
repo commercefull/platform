@@ -91,15 +91,18 @@ export class PostgresFtsAdapter implements SearchAdapter {
 
     const suggestions = await query<AutocompleteSuggestion[]>(
       `
-      SELECT DISTINCT
-        p."name" as text,
-        'product' as type,
-        p."productId"
-      FROM "${PRODUCT_TABLE}" p
-      WHERE p."deletedAt" IS NULL
-        AND p."status" = 'active'
-        AND p."name" ILIKE $1
-      ORDER BY similarity(p."name", $2) DESC
+      SELECT text, type, "productId" FROM (
+        SELECT DISTINCT
+          p."name" as text,
+          'product' as type,
+          p."productId",
+          similarity(p."name", $2) AS score
+        FROM "${PRODUCT_TABLE}" p
+        WHERE p."deletedAt" IS NULL
+          AND p."status" = 'active'
+          AND p."name" ILIKE $1
+      ) s
+      ORDER BY score DESC
       LIMIT $3
       `,
       [`%${partialQuery}%`, partialQuery, limit],
@@ -425,7 +428,8 @@ export class PostgresFtsAdapter implements SearchAdapter {
         p."isBestseller",
         p."averageRating",
         p."reviewCount",
-        p."shortDescription"
+        p."shortDescription",
+        p."createdAt"
         ${scoreExpr}
       FROM "${PRODUCT_TABLE}" p
       ${joinClause}
@@ -545,8 +549,8 @@ export class PostgresFtsAdapter implements SearchAdapter {
         pa."code" as "attributeCode",
         pa."name" as "attributeName",
         pa."type",
-        pav."value",
-        COALESCE(pavl."displayValue", pav."value") as "displayValue",
+        pavm."value",
+        COALESCE(pavl."displayValue", pavm."value") as "displayValue",
         COUNT(DISTINCT pavm."productId") as count
       FROM "${ATTRIBUTE_TABLE}" pa
       JOIN "${ATTRIBUTE_VALUE_MAP_TABLE}" pavm ON pavm."attributeId" = pa."productAttributeId"
@@ -555,7 +559,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
       WHERE pa."isFilterable" = true
         AND p."deletedAt" IS NULL
         AND p."status" = 'active'
-      GROUP BY pa."productAttributeId", pa."code", pa."name", pa."type", pav."value", pavl."displayValue"
+      GROUP BY pa."productAttributeId", pa."code", pa."name", pa."type", pavm."value", pavl."displayValue"
       ORDER BY pa."position" ASC, count DESC
     `);
 

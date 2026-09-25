@@ -233,7 +233,7 @@ export const createMembershipBenefit = async (
 ): Promise<void> => {
   const { name, description, tierIds, benefitType, discountPercentage, discountAmountCents, isActive = true } = req.body;
 
-  const tierId = tierIds[0];
+  const tierId = tierIds?.[0];
 
   // Basic validation
   if (!name || !tierId || !benefitType) {

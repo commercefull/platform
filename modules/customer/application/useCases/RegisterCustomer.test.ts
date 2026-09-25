@@ -55,16 +55,32 @@ describe('RegisterCustomerUseCase', () => {
     expect(customerRepository.save).not.toHaveBeenCalled();
   });
 
-  it('should throw CustomerValidationError when firstName is empty', async () => {
-    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', '', 'Doe', 'password123'))).rejects.toThrow(
-      CustomerValidationError,
-    );
+  it('should create a passwordless account when no password is provided', async () => {
+    const result = await useCase.execute(new RegisterCustomerCommand('sso@x.com', 'Sam', 'Provi'));
+
+    expect(result.customerId).toBe('new-cust-id');
+    expect(hashStringMock).not.toHaveBeenCalled();
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ password: '' }));
+    expect(customerRepository.updatePassword).not.toHaveBeenCalled();
+    expect(emitMock).toHaveBeenCalledWith('customer.registered', expect.objectContaining({ email: 'sso@x.com' }));
   });
 
-  it('should throw CustomerValidationError when lastName is empty', async () => {
-    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', 'Jane', '', 'password123'))).rejects.toThrow(
-      CustomerValidationError,
+  it('should allow empty names for provisioned accounts', async () => {
+    const result = await useCase.execute(new RegisterCustomerCommand('scim@x.com', '', '', ''));
+
+    expect(result.customerId).toBe('new-cust-id');
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ firstName: '', lastName: '' }));
+  });
+
+  it('should honor isActive and isVerified flags', async () => {
+    await useCase.execute(
+      new RegisterCustomerCommand('prov@x.com', 'P', 'Q', undefined, undefined, undefined, undefined, undefined, undefined, {
+        isActive: false,
+        isVerified: true,
+      }),
     );
+
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ isActive: false, isVerified: true }));
   });
 
   it('should throw CustomerValidationError when the password is too short', async () => {

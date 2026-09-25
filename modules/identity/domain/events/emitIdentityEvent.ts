@@ -8,7 +8,6 @@ import { eventBus } from '../../../../libs/events/eventBus';
 import {
   CustomerLoginEvent,
   CustomerLogoutEvent,
-  CustomerRegisteredEvent,
   OrganizationLoginEvent,
   OrganizationLogoutEvent,
   OrganizationRegisteredEvent,
@@ -34,13 +33,6 @@ export function emitCustomerLogin(payload: Omit<CustomerLoginEvent, 'timestamp'>
 
 export function emitCustomerLogout(payload: Omit<CustomerLogoutEvent, 'timestamp'>): void {
   eventBus.emit('identity.customer.logout', {
-    ...payload,
-    timestamp: new Date(),
-  });
-}
-
-export function emitCustomerRegistered(payload: Omit<CustomerRegisteredEvent, 'timestamp'>): void {
-  eventBus.emit('identity.customer.registered', {
     ...payload,
     timestamp: new Date(),
   });

@@ -41,35 +41,6 @@ function respondError(req: HttpRequest, res: HttpResponse, message: string, stat
 // Customer Routes
 // ============================================================================
 
-export const registerCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { email, firstName, lastName, password, phone, dateOfBirth, preferredCurrency, preferredLanguage } = req.body as {
-    email: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-    phone?: string;
-    dateOfBirth?: string;
-    preferredCurrency?: string;
-    preferredLanguage?: string;
-  };
-
-  const command = new RegisterCustomerCommand(
-    email,
-    firstName,
-    lastName,
-    password,
-    phone,
-    dateOfBirth ? new Date(dateOfBirth) : undefined,
-    preferredCurrency,
-    preferredLanguage,
-  );
-
-  const useCase = new RegisterCustomerUseCase(CustomerRepo);
-  const result = await useCase.execute(command);
-
-  respond(req, res, result, 201);
-};
-
 export const getCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
   const command = new GetCustomerCommand(customerId);

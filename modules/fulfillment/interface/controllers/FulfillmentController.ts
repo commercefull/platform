@@ -179,7 +179,7 @@ export const markDelivered = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const listFulfillmentsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fulfillments = await fulfillmentRepository.findByOrderId(req.params.orderId);
-  res.json({ success: true, data: fulfillments });
+  res.json({ success: true, data: fulfillments.map(f => f.toPersistence()) });
 };
 
 export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

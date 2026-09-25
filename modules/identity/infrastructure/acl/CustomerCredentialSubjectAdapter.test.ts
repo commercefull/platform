@@ -1,25 +1,48 @@
 import { CustomerCredentialSubjectAdapter } from './CustomerCredentialSubjectAdapter';
 import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
+import type { CustomerRepository } from '../../../customer/domain/repositories/CustomerRepository';
+
+jest.mock('../../../../libs/events/eventBus', () => ({
+  eventBus: { emit: jest.fn(), registerHandler: jest.fn() },
+}));
+jest.mock('../../../../libs/uuid', () => ({
+  generateUUID: jest.fn(() => 'new-cust-id'),
+}));
+jest.mock('../../../../libs/hash', () => ({
+  hashString: jest.fn(async () => 'hashed-password'),
+  compareString: jest.fn(async () => true),
+}));
+jest.mock('../../../../libs/db', () => ({
+  withTransaction: jest.fn(async (fn: () => Promise<unknown>) => fn()),
+}));
 
 type CustomerRepo = InstanceType<typeof CustomerRepoType>;
 type RepoCustomer = NonNullable<Awaited<ReturnType<CustomerRepo['findCustomerById']>>>;
 
 describe('CustomerCredentialSubjectAdapter', () => {
   let adapter: CustomerCredentialSubjectAdapter;
-  let mockCustomerRepo: jest.Mocked<Pick<CustomerRepo, 'authenticateCustomer' | 'findCustomerById' | 'findCustomerByEmail' | 'createCustomerWithPassword' | 'updateCustomerLoginTimestamp' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
+  let mockCustomerRepo: jest.Mocked<Pick<CustomerRepo, 'authenticateCustomer' | 'findCustomerById' | 'findCustomerByEmail' | 'updateCustomerLoginTimestamp' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
+  let mockCustomers: jest.Mocked<Pick<CustomerRepository, 'findByEmail' | 'save' | 'updatePassword'>>;
 
   beforeEach(() => {
     mockCustomerRepo = {
       authenticateCustomer: jest.fn(),
       findCustomerById: jest.fn(),
       findCustomerByEmail: jest.fn(),
-      createCustomerWithPassword: jest.fn(),
       updateCustomerLoginTimestamp: jest.fn(),
       changePassword: jest.fn(),
       createPasswordResetToken: jest.fn(),
       verifyPasswordResetToken: jest.fn(),
     };
-    adapter = new CustomerCredentialSubjectAdapter(mockCustomerRepo as unknown as CustomerRepo);
+    mockCustomers = {
+      findByEmail: jest.fn().mockResolvedValue(null),
+      save: jest.fn().mockImplementation(async c => c),
+      updatePassword: jest.fn().mockResolvedValue(undefined),
+    };
+    adapter = new CustomerCredentialSubjectAdapter(
+      mockCustomerRepo as unknown as CustomerRepo,
+      mockCustomers as unknown as CustomerRepository,
+    );
   });
 
   it('implements CredentialSubjectPort', () => {
@@ -99,16 +122,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
     expect(result!.email).toBe('test@test.com');
   });
 
-  it('should create with password and map to CredentialSubject', async () => {
-    mockCustomerRepo.createCustomerWithPassword.mockResolvedValue({
-      customerId: 'cust-new',
-      email: 'new@test.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      isActive: true,
-      isVerified: false,
-  } as unknown as RepoCustomer);
-
+  it('should create via RegisterCustomerUseCase and map to CredentialSubject', async () => {
     const result = await adapter.createWithPassword({
       email: 'new@test.com',
       password: 'password123',
@@ -116,8 +130,29 @@ describe('CustomerCredentialSubjectAdapter', () => {
       lastName: 'Smith',
     });
 
-    expect(result.id).toBe('cust-new');
+    expect(mockCustomers.findByEmail).toHaveBeenCalledWith('new@test.com');
+    expect(mockCustomers.save).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'new@test.com', firstName: 'Jane', lastName: 'Smith' }),
+    );
+    expect(mockCustomers.updatePassword).toHaveBeenCalledWith('new-cust-id', 'hashed-password');
+    expect(result.id).toBe('new-cust-id');
     expect(result.email).toBe('new@test.com');
+    expect(result.firstName).toBe('Jane');
+  });
+
+  it('should create a passwordless account when password is empty', async () => {
+    const result = await adapter.createWithPassword({
+      email: 'sso@test.com',
+      password: '',
+      firstName: '',
+      lastName: '',
+      isVerified: true,
+    });
+
+    expect(result.id).toBe('new-cust-id');
+    expect(result.isVerified).toBe(true);
+    expect(mockCustomers.save).toHaveBeenCalledWith(expect.objectContaining({ password: '' }));
+    expect(mockCustomers.updatePassword).not.toHaveBeenCalled();
   });
 
   it('should delegate updateLoginTimestamp', async () => {

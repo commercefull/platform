@@ -492,8 +492,8 @@ export class PaymentRepo implements IPaymentRepository {
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
     const now = new Date();
     return queryOne<StoredPaymentMethod>(
-      `INSERT INTO "storedPaymentMethod" ("customerId", "paymentMethod", provider, token, "lastFour", "cardType", "expiryMonth", "expiryYear", "isDefault", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING ${STORED_METHOD_COLUMNS}`,
+      `INSERT INTO "storedPaymentMethod" ("customerId", "paymentMethod", provider, token, "lastFour", "cardType", "expiryMonth", "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10, $11) RETURNING ${STORED_METHOD_COLUMNS}`,
       [
         params.customerId,
         params.type,

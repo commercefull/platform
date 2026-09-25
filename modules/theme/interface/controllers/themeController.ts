@@ -73,7 +73,7 @@ class ThemeController {
       let settingsSchema = body.settingsSchema as CreateThemeCommand['themeData']['settingsSchema'];
       if (Array.isArray(body.settingsSchema)) {
         settingsSchema = { groups: [{ groupId: 'general', label: 'General', settings: body.settingsSchema as never[] }] };
-      } else if (body.settingsSchema && !Array.isArray((body.settingsSchema as Record<string, unknown>).groups)) {
+      } else if (!body.settingsSchema || !Array.isArray((body.settingsSchema as Record<string, unknown>).groups)) {
         settingsSchema = { groups: [] };
       }
       const command = new CreateThemeCommand({

@@ -6,7 +6,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org)
-[![Tests](https://img.shields.io/badge/Tests-5%2C000%2B%20passing-brightgreen.svg)](#quality-metrics)
+[![Tests](https://img.shields.io/badge/Tests-6%2C000%2B%20passing-brightgreen.svg)](#quality-metrics)
 [![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
 [![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 

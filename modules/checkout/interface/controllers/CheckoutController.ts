@@ -692,9 +692,9 @@ export const getPickupSlots = async (req: HttpRequest, res: HttpResponse): Promi
   const useCase = new GetPickupSlotsUseCase();
   const slots = useCase.execute(
     {
-      maxOrdersPerSlot: 10,
-      prepareTimeMinutes: 60,
-      operatingHours: {} as Record<string, { open: string; close: string }>,
+      maxOrdersPerSlot: location.maxOrdersPerSlot ?? 10,
+      prepareTimeMinutes: location.prepareTimeMinutes ?? 60,
+      operatingHours: location.operatingHours ?? {},
     },
     daysAhead,
   );

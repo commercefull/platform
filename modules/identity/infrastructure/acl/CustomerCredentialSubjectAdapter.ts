@@ -9,9 +9,17 @@
 
 import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData } from '../../application/ports/CredentialSubjectPort';
 import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
+import type { CustomerRepository } from '../../../customer/domain/repositories/CustomerRepository';
+import {
+  RegisterCustomerCommand,
+  RegisterCustomerUseCase,
+} from '../../../customer/application/useCases/RegisterCustomer';
 
 export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
-  constructor(private readonly customerRepo: CustomerRepoType) {}
+  constructor(
+    private readonly customerRepo: CustomerRepoType,
+    private readonly customers: CustomerRepository,
+  ) {}
 
   async authenticate(email: string, password: string): Promise<CredentialSubject | null> {
     const result = await this.customerRepo.authenticateCustomer({ email, password });
@@ -58,23 +66,31 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   }
 
   async createWithPassword(data: CreateCredentialSubjectData): Promise<CredentialSubject> {
-    const customer = await this.customerRepo.createCustomerWithPassword({
-      email: data.email,
-      firstName: data.firstName ?? '',
-      lastName: data.lastName ?? '',
-      password: data.password,
-      phone: data.phone,
-      isActive: data.isActive ?? true,
-      isVerified: data.isVerified ?? false,
-    });
+    // Single creation path: customer's RegisterCustomerUseCase owns validation,
+    // duplicate checks, transaction, and the customer.registered event.
+    // Empty/absent password creates a passwordless (provider-only) account.
+    const result = await new RegisterCustomerUseCase(this.customers).execute(
+      new RegisterCustomerCommand(
+        data.email,
+        data.firstName || data.name || '',
+        data.lastName ?? '',
+        data.password || undefined,
+        data.phone,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        { isActive: data.isActive, isVerified: data.isVerified },
+      ),
+    );
     return {
-      id: customer.customerId,
-      email: customer.email,
-      firstName: customer.firstName ?? undefined,
-      lastName: customer.lastName ?? undefined,
-      status: customer.isActive ? 'active' : 'inactive',
-      isActive: customer.isActive,
-      isVerified: customer.isVerified ?? false,
+      id: result.customerId,
+      email: result.email,
+      firstName: result.firstName,
+      lastName: result.lastName,
+      status: (data.isActive ?? true) ? 'active' : 'inactive',
+      isActive: data.isActive ?? true,
+      isVerified: result.isVerified,
     };
   }
 

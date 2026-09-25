@@ -6,7 +6,7 @@ import {
   DeleteAddressCommand,
   SetDefaultAddressCommand,
 } from './ManageAddresses';
-import { CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
+import { CustomerAddressNotFoundError, CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { createCustomerRepository, createCustomerRow, createCustomerAddressRow, uuidMock } from '../../tests/testUtils';
 
 describe('ManageAddressesUseCase', () => {
@@ -17,6 +17,7 @@ describe('ManageAddressesUseCase', () => {
     jest.clearAllMocks();
     uuidMock.mockReturnValue('new-addr-id');
     customerRepository.findById.mockResolvedValue(createCustomerRow());
+    customerRepository.getAddresses.mockResolvedValue([createCustomerAddressRow({ customerAddressId: 'addr-1' })]);
   });
 
   describe('addAddress', () => {
@@ -63,6 +64,13 @@ describe('ManageAddressesUseCase', () => {
         CustomerNotFoundError,
       );
     });
+
+    it('should throw CustomerAddressNotFoundError when the address is not owned by the customer', async () => {
+      await expect(useCase.updateAddress(new UpdateAddressCommand('cust-1', 'foreign-addr', { city: 'X' }))).rejects.toThrow(
+        CustomerAddressNotFoundError,
+      );
+      expect(customerRepository.updateAddress).not.toHaveBeenCalled();
+    });
   });
 
   describe('deleteAddress', () => {
@@ -80,6 +88,13 @@ describe('ManageAddressesUseCase', () => {
       await expect(useCase.deleteAddress(new DeleteAddressCommand('missing', 'addr-1'))).rejects.toThrow(
         CustomerNotFoundError,
       );
+    });
+
+    it('should throw CustomerAddressNotFoundError when the address is not owned by the customer', async () => {
+      await expect(useCase.deleteAddress(new DeleteAddressCommand('cust-1', 'foreign-addr'))).rejects.toThrow(
+        CustomerAddressNotFoundError,
+      );
+      expect(customerRepository.deleteAddress).not.toHaveBeenCalled();
     });
   });
 

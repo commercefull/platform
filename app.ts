@@ -322,6 +322,17 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
+// Test database isolation middleware — routes DB queries to a per-test database.
+// Must run BEFORE session() so session-store reads and writes share the same
+// database context as the request's business queries.
+app.use((req, res, next) => {
+  const testDb = req.headers['x-test-database'] as string | undefined;
+  if (testDb) {
+    return runWithTestDb(testDb, () => next());
+  }
+  next();
+});
+
 // Session configuration — secret validated via libs/secrets (fail-fast in production)
 const sessionSecret = getSecret('SESSION_SECRET');
 
@@ -367,15 +378,6 @@ app.use((req, res, next) => {
   const { successMsg, errorMsg } = popFlashMessages(req);
   res.locals.successMsg = successMsg;
   res.locals.errorMsg = errorMsg;
-  next();
-});
-
-// Test database isolation middleware — routes DB queries to a per-test database
-app.use((req, res, next) => {
-  const testDb = req.headers['x-test-database'] as string | undefined;
-  if (testDb) {
-    return runWithTestDb(testDb, () => next());
-  }
   next();
 });
 

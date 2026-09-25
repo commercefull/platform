@@ -26,6 +26,9 @@ export interface PickupLocation {
     latitude?: number;
     longitude?: number;
   };
+  operatingHours?: Record<string, { open: string; close: string }>;
+  maxOrdersPerSlot?: number;
+  prepareTimeMinutes?: number;
 }
 
 export interface StoreFulfillmentPort {

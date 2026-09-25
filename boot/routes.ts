@@ -105,7 +105,12 @@ export function configureRoutes(app: HttpApplication): void {
     { module: 'product', router: searchCustomerRouter },
   ];
   const enabledCustomerRouters = customerRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
-  app.use('/customer', enabledCustomerRouters);
+  app.use('/customer', enabledCustomerRouters.filter(r => r !== Fulfillment.fulfillmentCustomerRouter));
+  // Fulfillment customer router uses bare params (/:fulfillmentId) that would shadow
+  // single-segment customer routes like /customer/search — mount under its own prefix.
+  if (moduleRegistry.shouldMountRoutes('fulfillment')) {
+    app.use('/customer/fulfillments', Fulfillment.fulfillmentCustomerRouter);
+  }
 
   // Business/Merchant API routes — conditionally mounted based on module enabled state
   const businessRouters: { module: string; router: HttpRouter }[] = [

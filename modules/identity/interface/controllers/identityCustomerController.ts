@@ -2,7 +2,7 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 
 const tokenRepo = identityDataRepository.tokens;
 import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
-import { emitCustomerLogin, emitCustomerRegistered, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { emitCustomerLogin, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
@@ -147,13 +147,8 @@ export const registerCustomer = async (
     isVerified: false,
   });
 
-  // Emit registration event
-  emitCustomerRegistered({
-    customerId: newSubject.id,
-    email: newSubject.email,
-    firstName: newSubject.firstName || '',
-    lastName: newSubject.lastName || '',
-  });
+  // The adapter delegates creation to customer's RegisterCustomerUseCase,
+  // which emits customer.registered (welcome email, segment, tracking).
 
   // Generate access token for immediate login
   const accessToken = generateAccessToken(newSubject.id, newSubject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);

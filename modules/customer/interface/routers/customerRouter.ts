@@ -11,16 +11,6 @@ import { isCustomerLoggedIn } from '../../../../libs/auth';
 const router = createHttpRouter();
 
 // ============================================================================
-// Public Routes
-// ============================================================================
-
-/**
- * Register a new customer
- * POST /customers/register
- */
-router.post('/register', asyncHandler(customerController.registerCustomer));
-
-// ============================================================================
 // Protected Routes
 // ============================================================================
 

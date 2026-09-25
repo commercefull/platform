@@ -6,7 +6,6 @@
 
 // Customer authentication
 export { LoginCustomerUseCase, LoginCustomerInput, LoginCustomerOutput } from './customer/LoginCustomer';
-export { RegisterCustomerUseCase, RegisterCustomerInput, RegisterCustomerOutput } from './customer/RegisterCustomer';
 export { LogoutCustomerUseCase, LogoutCustomerInput, LogoutCustomerOutput } from './customer/LogoutCustomer';
 export {
   ResetCustomerPasswordUseCase,

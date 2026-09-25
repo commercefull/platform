@@ -131,11 +131,12 @@ export const isCustomerLoggedIn = (req: HttpRequest, res: HttpResponse, next: Ht
     return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
   }
 
-  if (req.isAuthenticated()) {
+  // Accept either a hydrated storefront session user or passport auth
+  if (req.user || req.isAuthenticated?.()) {
     return next();
   }
 
-  res.redirect('/login');
+  res.redirect('/signin');
 };
 
 export const optionalCustomerAuth = (req: HttpRequest, res: HttpResponse, next: HttpNext) => {

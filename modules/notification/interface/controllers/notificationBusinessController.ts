@@ -156,7 +156,7 @@ export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse
 };
 
 export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -166,7 +166,7 @@ export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse
 };
 
 export const getRecentNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -178,7 +178,7 @@ export const getRecentNotifications = async (req: UserRequest, res: HttpResponse
 
 export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -196,7 +196,7 @@ export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse
 };
 
 export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -207,7 +207,7 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResp
 
 export const deleteNotification = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -230,7 +230,7 @@ export const deleteNotification = async (req: UserRequest, res: HttpResponse): P
 };
 
 export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promise<void> => {
-  const userId = req.user?._id || req.user?.id;
+  const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
@@ -249,7 +249,8 @@ export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promi
 export const listBatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  successResponse(res, { batches: [], limit, offset });
+  const batches = await notificationBatchRepo.findAll(limit, offset);
+  successResponse(res, { batches, limit, offset });
 };
 
 /**
@@ -296,7 +297,7 @@ export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown
  * GET /business/notifications/webhooks
  */
 export const listWebhooks = async (req: UserRequest, res: HttpResponse): Promise<void> => {
-  const organizationId = req.user?.organizationId || (req.query.organizationId as string);
+  const organizationId = req.user?.organizationId || req.user?.id || (req.query.organizationId as string);
   const useCase = manageNotificationWebhookUseCase;
   const result = await useCase.execute(new ManageNotificationWebhookCommand('list', organizationId));
   if (!result.success) {

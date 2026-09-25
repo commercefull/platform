@@ -14,6 +14,7 @@
  */
 
 import type { HttpRequest, HttpResponse } from '../http';
+import { logger } from '../logger';
 import { getSearchAdapter, isSearchAdapterConfigured } from './types';
 import {
   getMerchandisingRules,
@@ -114,7 +115,8 @@ class SearchController {
     try {
       const result = await adapter.search(searchQuery);
       res.json({ success: true, data: result });
-    } catch (_error) {
+    } catch (error) {
+      logger.error('Search request failed', { error: (error as Error).message });
       res.status(500).json({ success: false, error: 'Search failed' });
     }
   }

@@ -1,4 +1,5 @@
 import { createHttpRouter } from 'libs/http';
+import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { resolveTheme } from './themeMiddleware';
 import { resolveStore } from './storeResolutionMiddleware';
@@ -118,6 +119,47 @@ router.use(resolveTheme);
 
 // Load categories for navigation on all routes
 router.use(loadCategoriesForNavigation);
+
+// ============================================================================
+// Customer Session Hydration
+// ============================================================================
+
+/**
+ * Restores req.user from the session-written customer. signIn/signUp persist
+ * session.user; without hydration the user only existed for that one request
+ * and every authed storefront page fell back to anonymous.
+ */
+const hydrateCustomerSession = (req: HttpRequest, _res: HttpResponse, next: HttpNext): void => {
+  if (!req.user && req.session) {
+    const user = (req.session as unknown as Record<string, unknown>).user as HttpRequest['user'];
+    if (user) {
+      req.user = user;
+    }
+  }
+  next();
+};
+
+router.use(hydrateCustomerSession);
+
+// ============================================================================
+// Guest Session Persistence
+// ============================================================================
+
+/**
+ * Persists the guest session on basket/checkout/auth paths only.
+ * With saveUninitialized:false a guest gets no session cookie until the
+ * session is modified — without this, every guest request generates a new
+ * sessionId and the session-scoped basket is orphaned on the next request.
+ * Scoped to shopping paths to avoid a session row per anonymous page view.
+ */
+const persistGuestSession = (req: HttpRequest, _res: HttpResponse, next: HttpNext): void => {
+  if (!req.user && req.session) {
+    (req.session as unknown as Record<string, unknown>).guestSessionActive = true;
+  }
+  next();
+};
+
+router.use(['/basket', '/checkout', '/order-confirmation', '/signin', '/signup'], persistGuestSession);
 
 // ============================================================================
 // Page Routes

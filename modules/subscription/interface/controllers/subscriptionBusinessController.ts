@@ -70,6 +70,11 @@ export const updateSubscriptionProduct: AsyncHandler = async (req, res, _next) =
 };
 
 export const deleteSubscriptionProduct: AsyncHandler = async (req, res, _next) => {
+  const product = await getSubscriptionProductRepo(req.params.id);
+  if (!product) {
+    res.status(404).json({ success: false, message: 'Subscription product not found' });
+    return;
+  }
   await deleteSubscriptionProductRepo(req.params.id);
   res.json({ success: true, message: 'Subscription product deactivated' });
 };
@@ -146,6 +151,12 @@ export const getCustomerSubscription: AsyncHandler = async (req, res, _next) => 
 export const cancelSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
   const adminId = req.user?.userId || req.user?.organizationId;
+
+  const existing = await getCustomerSubscriptionRepo(req.params.id);
+  if (!existing) {
+    res.status(404).json({ success: false, message: 'Subscription not found' });
+    return;
+  }
 
   await cancelSubscription(req.params.id, reason, `admin:${adminId}`, cancelAtPeriodEnd !== false);
 

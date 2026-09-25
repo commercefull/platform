@@ -18,6 +18,7 @@ const TEST_GUEST_BASKET_ID = '00000000-0000-0000-0000-000000002001';
 const TEST_CUSTOMER_BASKET_ID = '00000000-0000-0000-0000-000000002002';
 const TEST_CHECKOUT_BASKET_ID = '00000000-0000-0000-0000-000000002003';
 const TEST_CHECKOUT_ID = '00000000-0000-0000-0000-000000003001';
+const TEST_PICKUP_LOCATION_ID = '00000000-0000-0000-0000-000000003010';
 
 // Content test IDs
 const TEST_CONTENT_TYPE_ID = '00000000-0000-0000-0000-000000005001';
@@ -821,6 +822,48 @@ exports.seed = async function (knex) {
   } catch (e) {}
 
   // =========================================================================
+  // Test Pickup Location (BOPIS) — attached to "Active Test Store"
+  // =========================================================================
+  try {
+    const hasPickupTable = await knex.schema.hasTable('storePickupLocation');
+    if (hasPickupTable) {
+      await knex('storePickupLocation')
+        .insert({
+          pickupLocationId: TEST_PICKUP_LOCATION_ID,
+          storeId: '20000000-0000-0000-0000-000000000001', // Active Test Store
+          name: 'Downtown Pickup Counter',
+          addressLine1: '500 Commerce St',
+          addressLine2: 'Suite 10',
+          city: 'Portland',
+          state: 'OR',
+          postalCode: '97201',
+          country: 'US',
+          latitude: 45.5152,
+          longitude: -122.6784,
+          operatingHours: JSON.stringify({
+            monday: { open: '09:00', close: '18:00' },
+            tuesday: { open: '09:00', close: '18:00' },
+            wednesday: { open: '09:00', close: '18:00' },
+            thursday: { open: '09:00', close: '18:00' },
+            friday: { open: '09:00', close: '18:00' },
+            saturday: { open: '10:00', close: '16:00' },
+            sunday: { open: '10:00', close: '16:00' },
+          }),
+          contactPhone: '555-900-0001',
+          contactEmail: 'pickup@example.com',
+          instructions: 'Bring order confirmation and ID',
+          maxOrdersPerSlot: 10,
+          prepareTimeMinutes: 60,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .onConflict('pickupLocationId')
+        .ignore();
+    }
+  } catch (e) {}
+
+  // =========================================================================
   // Integration + Credential for integration ops tests (credential update)
   // =========================================================================
   try {
@@ -880,6 +923,7 @@ exports.seed = async function (knex) {
     TEST_CUSTOMER_BASKET_ID,
     TEST_CHECKOUT_BASKET_ID,
     TEST_CHECKOUT_ID,
+    TEST_PICKUP_LOCATION_ID,
     TEST_CONTENT_TYPE_ID,
     TEST_CONTENT_PAGE_ID,
     TEST_CONTENT_BLOCK_ID,

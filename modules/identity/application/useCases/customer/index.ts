@@ -3,7 +3,6 @@
  */
 export { LoginCustomerUseCase, LoginCustomerInput, LoginCustomerOutput } from './LoginCustomer';
 export { LogoutCustomerUseCase, LogoutCustomerInput, LogoutCustomerOutput } from './LogoutCustomer';
-export { RegisterCustomerUseCase, RegisterCustomerInput, RegisterCustomerOutput } from './RegisterCustomer';
 export {
   ResetCustomerPasswordUseCase,
   RequestPasswordResetInput,

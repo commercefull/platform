@@ -72,24 +72,20 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
 
   async getAllPickupLocations(): Promise<PickupLocation[]> {
     const locations = await this.pickupLocations.getLocations();
-    return locations.map(loc => ({
-      locationId: loc.pickupLocationId,
-      storeId: loc.storeId,
-      storeName: loc.name,
-      address: {
-        line1: loc.address.line1,
-        city: loc.address.city,
-        postalCode: loc.address.postalCode,
-        country: loc.address.country,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-      },
-    }));
+    return locations.map(loc => this.mapLocation(loc));
   }
 
   async getPickupLocation(locationId: string): Promise<PickupLocation | null> {
     const loc = await this.pickupLocations.getLocation(locationId);
-    if (!loc) return null;
+    return loc ? this.mapLocation(loc) : null;
+  }
+
+  async findNearestPickupLocations(lat: number, lng: number, radiusKm?: number): Promise<PickupLocation[]> {
+    const locations = await this.pickupLocations.findNearestLocations(lat, lng, radiusKm ?? 50);
+    return locations.map(loc => this.mapLocation(loc));
+  }
+
+  private mapLocation(loc: pickupLocationRepo.PickupLocation): PickupLocation {
     return {
       locationId: loc.pickupLocationId,
       storeId: loc.storeId,
@@ -102,24 +98,10 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
         latitude: loc.latitude,
         longitude: loc.longitude,
       },
+      operatingHours: loc.operatingHours,
+      maxOrdersPerSlot: loc.maxOrdersPerSlot,
+      prepareTimeMinutes: loc.prepareTimeMinutes,
     };
-  }
-
-  async findNearestPickupLocations(lat: number, lng: number, radiusKm?: number): Promise<PickupLocation[]> {
-    const locations = await this.pickupLocations.findNearestLocations(lat, lng, radiusKm ?? 50);
-    return locations.map(loc => ({
-      locationId: loc.pickupLocationId,
-      storeId: loc.storeId,
-      storeName: loc.name,
-      address: {
-        line1: loc.address.line1,
-        city: loc.address.city,
-        postalCode: loc.address.postalCode,
-        country: loc.address.country,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-      },
-    }));
   }
 
   private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {

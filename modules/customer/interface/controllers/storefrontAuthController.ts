@@ -85,13 +85,15 @@ export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void>
       return res.redirect('/signin?redirect=' + encodeURIComponent(redirectTo as string));
     }
 
-    // Set customer session
-    (req as unknown as Record<string, unknown>).user = {
+    // Set customer session — persisted so later requests can hydrate req.user
+    const sessionUser = {
       customerId: customer.customerId,
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
     };
+    (req as unknown as Record<string, unknown>).user = sessionUser;
+    (req.session as unknown as Record<string, unknown>).user = sessionUser;
 
     await mergeGuestBasket(req, customer.customerId);
 
@@ -134,13 +136,15 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
 
     const customer = await registerCustomerUseCase.execute(command);
 
-    // Auto-login after registration
-    (req as unknown as Record<string, unknown>).user = {
+    // Auto-login after registration — persisted so later requests can hydrate req.user
+    const sessionUser = {
       customerId: customer.customerId,
       email: customer.email,
       firstName: customer.firstName,
       lastName: customer.lastName,
     };
+    (req as unknown as Record<string, unknown>).user = sessionUser;
+    (req.session as unknown as Record<string, unknown>).user = sessionUser;
 
     await mergeGuestBasket(req, customer.customerId);
 

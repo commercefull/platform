@@ -41,19 +41,6 @@ export interface CustomerAuthResult {
   lastName?: string | null;
 }
 
-export interface CustomerCreateParams {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  phone?: string;
-  dateOfBirth?: Date;
-  isActive?: boolean;
-  isVerified?: boolean;
-  lastLoginAt?: Date;
-  note?: string;
-}
-
 export class CustomerRepo {
   // Customer methods
   async findAllCustomers(limit: number = 100, offset: number = 0): Promise<Customer[]> {
@@ -109,36 +96,6 @@ export class CustomerRepo {
       [`%${searchTerm}%`, limit],
     );
     return customers || [];
-  }
-
-  async createCustomerWithPassword(params: CustomerCreateParams): Promise<Customer> {
-    const now = new Date();
-    const hashedPassword = await this.hashPassword(params.password);
-
-    const result = await queryOne<Customer>(
-      `INSERT INTO "customer"
-       ("email", "firstName", "lastName", "password", "phone", "dateOfBirth", "isActive", "isVerified", "createdAt", "updatedAt", "lastLoginAt", "note")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, $10, $11)
-       RETURNING *`,
-      [
-        params.email,
-        params.firstName,
-        params.lastName,
-        hashedPassword,
-        params.phone ?? null,
-        params.dateOfBirth ?? null,
-        params.isActive ?? true,
-        params.isVerified ?? false,
-        now,
-        params.lastLoginAt ?? null,
-        params.note ?? null,
-      ],
-    );
-
-    if (!result) {
-      throw new FailedToCreateCustomerError();
-    }
-    return result;
   }
 
   async updateCustomer(customerId: string, updates: Partial<Customer>): Promise<Customer> {

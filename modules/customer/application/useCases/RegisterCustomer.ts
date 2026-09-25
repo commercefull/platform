@@ -19,12 +19,13 @@ export class RegisterCustomerCommand {
     public readonly email: string,
     public readonly firstName: string,
     public readonly lastName: string,
-    public readonly password: string,
+    public readonly password?: string,
     public readonly phone?: string,
     public readonly dateOfBirth?: Date,
     public readonly preferredCurrency?: string,
     public readonly preferredLanguage?: string,
     public readonly metadata?: Record<string, unknown>,
+    public readonly flags?: { isActive?: boolean; isVerified?: boolean },
   ) {}
 }
 
@@ -53,13 +54,9 @@ export class RegisterCustomerUseCase {
     if (!command.email?.trim()) {
       throw new EmailRequiredError();
     }
-    if (!command.firstName?.trim()) {
-      throw new CustomerValidationError('First name is required');
-    }
-    if (!command.lastName?.trim()) {
-      throw new CustomerValidationError('Last name is required');
-    }
-    if (!command.password || command.password.length < 8) {
+    // Password is optional to support provisioning flows (social, SSO, SCIM)
+    // that create passwordless accounts; interfaces enforce it for registration.
+    if (command.password && command.password.length < 8) {
       throw new CustomerValidationError('Password must be at least 8 characters');
     }
 
@@ -75,15 +72,15 @@ export class RegisterCustomerUseCase {
     const customer: Customer = {
       customerId,
       email: command.email.toLowerCase().trim(),
-      firstName: command.firstName.trim(),
-      lastName: command.lastName.trim(),
+      firstName: command.firstName?.trim() || '',
+      lastName: command.lastName?.trim() || '',
       password: '',
       phone: command.phone?.trim() || null,
       dateOfBirth: command.dateOfBirth || null,
       gender: null,
       avatarUrl: null,
-      isActive: true,
-      isVerified: false,
+      isActive: command.flags?.isActive ?? true,
+      isVerified: command.flags?.isVerified ?? false,
       emailVerified: false,
       phoneVerified: false,
       lastLoginAt: null,
@@ -112,13 +109,17 @@ export class RegisterCustomerUseCase {
       deletedAt: null,
     };
 
-    // Hash password before saving so both writes happen in a single transaction
-    const passwordHash = await hashString(command.password, 12);
+    // Hash password before saving so both writes happen in a single transaction.
+    // Passwordless (provisioned) accounts keep an empty password column so
+    // credential comparison can never match — they must sign in via their provider.
+    const passwordHash = command.password ? await hashString(command.password, 12) : null;
 
     // Save customer + password atomically
     await withTransaction(async () => {
       await this.customerRepository.save(customer);
-      await this.customerRepository.updatePassword(customerId, passwordHash);
+      if (passwordHash) {
+        await this.customerRepository.updatePassword(customerId, passwordHash);
+      }
     });
 
     // Emit event

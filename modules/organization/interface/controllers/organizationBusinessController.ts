@@ -43,11 +43,14 @@ interface UpdateOrganizationAddressBody {
   isDefault?: boolean;
 }
 
+type PaymentType = 'bankAccount' | 'paypal' | 'stripe' | 'venmo' | 'other';
+
 interface AddOrganizationPaymentInfoBody {
   accountHolderName: string;
   bankName?: string;
   accountNumber?: string;
   routingNumber?: string;
+  paymentType?: PaymentType;
   paymentProcessor?: string;
   processorAccountId?: string;
   isVerified?: boolean;
@@ -58,6 +61,7 @@ interface UpdateOrganizationPaymentInfoBody {
   bankName?: string;
   accountNumber?: string;
   routingNumber?: string;
+  paymentType?: PaymentType;
   paymentProcessor?: string;
   isVerified?: boolean;
 }
@@ -285,7 +289,7 @@ export const addOrganizationPaymentInfo = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { organizationId } = req.params;
-  const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified = false } = req.body;
+  const { accountHolderName, bankName, accountNumber, routingNumber, paymentType, isVerified = false } = req.body;
 
   const org = await repo.findById(organizationId);
   if (!org) {
@@ -310,7 +314,9 @@ export const addOrganizationPaymentInfo = async (
     bankName,
     accountNumber,
     routingNumber,
-    paymentType: paymentProcessor || 'bank',
+    // paymentType must satisfy organizationPaymentInfo_paymentType_check
+    // ('bankAccount' | 'paypal' | 'stripe' | 'venmo' | 'other'); 'bank' is invalid.
+    paymentType: paymentType || 'bankAccount',
     currency: 'USD',
     isVerified,
   });
@@ -323,7 +329,7 @@ export const updateOrganizationPaymentInfo = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { organizationId, paymentInfoId } = req.params;
-  const { accountHolderName, bankName, accountNumber, routingNumber, paymentProcessor, isVerified } = req.body;
+  const { accountHolderName, bankName, accountNumber, routingNumber, paymentType, isVerified } = req.body;
 
   const org = await repo.findById(organizationId);
   if (!org) {
@@ -345,7 +351,7 @@ export const updateOrganizationPaymentInfo = async (
       bankName: bankName !== undefined ? bankName : existingPaymentInfo.bankName,
       accountNumber: accountNumber !== undefined ? accountNumber : existingPaymentInfo.accountNumber,
       routingNumber: routingNumber !== undefined ? routingNumber : existingPaymentInfo.routingNumber,
-      paymentType: paymentProcessor || existingPaymentInfo.paymentType,
+      paymentType: paymentType || existingPaymentInfo.paymentType,
       isVerified: isVerified !== undefined ? isVerified : existingPaymentInfo.isVerified,
     },
     message: 'Organization payment information updated successfully',

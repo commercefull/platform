@@ -38,22 +38,13 @@ const router = createHttpRouter();
 router.use(isOrganizationLoggedIn);
 
 // ============================================================================
-// Admin CRUD routes for notifications
+// Literal notification routes — must be registered before /notifications/:id
 // ============================================================================
 router.get('/notifications', asyncHandler(getAllNotifications));
 router.post('/notifications', asyncHandler(createNotification));
-router.get('/notifications/:id', asyncHandler(getNotificationById));
-router.put('/notifications/:id', asyncHandler(updateNotification));
-router.delete('/notifications/:id', asyncHandler(deleteNotification));
-router.post('/notifications/:id/send', asyncHandler(markNotificationAsSent));
-
-// ============================================================================
-// User-specific routes (for logged-in merchant viewing their own notifications)
-// ============================================================================
 router.get('/notifications/unread', asyncHandler(getUnreadNotifications));
 router.get('/notifications/recent', asyncHandler(getRecentNotifications));
 router.get('/notifications/count', asyncHandler(getUnreadCount));
-router.put('/notifications/:id/read', asyncHandler(markNotificationAsRead));
 router.put('/notifications/read-all', asyncHandler(markAllNotificationsAsRead));
 
 // ============================================================================
@@ -69,6 +60,15 @@ router.get('/notifications/batches/:batchId', asyncHandler(getBatch));
 router.get('/notifications/webhooks', asyncHandler(listWebhooks));
 router.post('/notifications/webhooks', asyncHandler(createWebhook));
 router.delete('/notifications/webhooks/:webhookId', asyncHandler(deactivateWebhook));
+
+// ============================================================================
+// Admin CRUD routes for notifications (parameterized — after all literals)
+// ============================================================================
+router.get('/notifications/:id', asyncHandler(getNotificationById));
+router.put('/notifications/:id', asyncHandler(updateNotification));
+router.delete('/notifications/:id', asyncHandler(deleteNotification));
+router.post('/notifications/:id/send', asyncHandler(markNotificationAsSent));
+router.put('/notifications/:id/read', asyncHandler(markNotificationAsRead));
 
 // ============================================================================
 // Template routes
