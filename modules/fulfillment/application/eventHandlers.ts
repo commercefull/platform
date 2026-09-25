@@ -16,6 +16,7 @@ import { JobScheduler } from '../../../libs/jobs/cronScheduler';
 import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
 import type { IFulfillmentRepository } from '../domain/repositories/FulfillmentRepository';
 import { CreateFulfillmentUseCase } from './useCases/CreateFulfillment';
+import { CancelFulfillmentUseCase, CancelFulfillmentCommand } from './useCases/CancelFulfillment';
 import { planFulfillmentUseCase } from './wired';
 
 /** Narrow ports for cross-module dependencies, injected at boot. */
@@ -40,6 +41,14 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
       const order = await orders.findById(orderId);
       if (!order) {
         logger.warn(`order.paid: order ${orderId} not found`);
+        return;
+      }
+
+      // Idempotency — order.paid can be emitted by both the PSP webhook path and
+      // the payment.received/payment.completed relays; never plan twice.
+      const existing = await fulfillments.findByOrderId(orderId);
+      if (existing.length > 0) {
+        logger.info(`order.paid: order ${orderId} already has ${existing.length} fulfillment(s), skipping`);
         return;
       }
 
@@ -284,6 +293,31 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
       logger.info(`fulfillment.delivered: order ${orderId} marked delivered, emitted order.completed`);
     } catch (err: unknown) {
       logger.error(`fulfillment.delivered handler error: ${(err as Error).message}`);
+    }
+  });
+
+  // Order cancelled -> cancel any fulfillments that haven't left the building.
+  // Shipped/in-transit/delivered fulfillments are skipped — the goods are already gone.
+  eventBus.registerHandler('order.cancelled', async payload => {
+    const data = payload.data as Record<string, unknown>;
+    const orderId = data.orderId as string;
+    if (!orderId) return;
+
+    const open = (await fulfillments.findByOrderId(orderId)).filter(
+      f => !['shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'returned', 'failed'].includes(f.status),
+    );
+
+    const cancelFulfillment = new CancelFulfillmentUseCase(fulfillments);
+    for (const fulfillment of open) {
+      try {
+        await cancelFulfillment.execute(new CancelFulfillmentCommand(fulfillment.fulfillmentId, 'Order cancelled'));
+      } catch (err: unknown) {
+        logger.warn(`order.cancelled: could not cancel fulfillment ${fulfillment.fulfillmentId}: ${(err as Error).message}`);
+      }
+    }
+
+    if (open.length > 0) {
+      logger.info(`order.cancelled: cancelled ${open.length} fulfillment(s) for order ${orderId}`);
     }
   });
 }

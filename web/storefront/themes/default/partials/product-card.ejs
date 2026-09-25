@@ -10,12 +10,8 @@
    */
 %>
 <%
-  const formatPrice = (amt, cur, loc) => {
-    try { return new Intl.NumberFormat(loc || 'en-US', { style: 'currency', currency: (cur || 'USD').toUpperCase() }).format(amt); }
-    catch { return (cur || 'USD') + ' ' + amt.toFixed(2); }
-  };
+  // formatPrice / formatCents are provided by storefrontRespond (libs/money).
   // Prices arrive as integer cents — format at the view boundary.
-  const formatCents = (cents, cur, loc) => formatPrice((cents || 0) / 100, cur, loc);
   const cur = (typeof currency !== 'undefined' ? currency : 'USD') || 'USD';
   const loc = (typeof locale !== 'undefined' ? locale : 'en-US') || 'en-US';
   const isOnSale = product.isOnSale || (product.salePriceCents !== null && product.salePriceCents !== undefined && product.basePriceCents > product.salePriceCents);

@@ -10,6 +10,7 @@ export * from './RemoveItem';
 export * from './ClearBasket';
 export * from './MergeBaskets';
 export * from './AssignBasketToCustomer';
+export * from './MergeGuestBasketOnLogin';
 export * from './SetItemAsGift';
 export * from './ExtendExpiration';
 export * from './ApplyCoupon';

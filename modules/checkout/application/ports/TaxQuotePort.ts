@@ -25,15 +25,21 @@ export interface TaxQuoteRequest {
   };
   shippingAmountCents: number;
   customerId?: string;
+  /** When true, item/shipping prices already include tax — the quote extracts the embedded tax instead of adding it */
+  pricesIncludeTax?: boolean;
 }
 
 export interface TaxQuoteResult {
   success: boolean;
   taxAmountCents: number;
+  /** True when taxAmountCents is embedded in the subtotal and must not be added again to the grand total */
+  taxIncludedInSubtotal?: boolean;
   breakdown?: Array<{ label: string; amountCents: number }>;
 }
 
 export interface TaxQuotePort {
   calculateTax(request: TaxQuoteRequest): Promise<TaxQuoteResult>;
-  getTaxSettings(merchantId: string): Promise<{ applyDiscountBeforeTax: boolean; applyTaxToShipping: boolean } | null>;
+  getTaxSettings(
+    merchantId: string,
+  ): Promise<{ applyDiscountBeforeTax: boolean; applyTaxToShipping: boolean; pricesIncludeTax: boolean } | null>;
 }

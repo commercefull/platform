@@ -44,6 +44,23 @@ describe('CheckoutSession', () => {
     expect(session.total.cents).toBe(12500);
   });
 
+  it('should not add tax to the total when prices include tax', () => {
+    const session = CheckoutSession.create({ id: 'cs1', basketId: 'b1' });
+    session.updateAmounts(Money.create(110, 'USD'), Money.create(10, 'USD'), true);
+    session.setShippingMethod('sm1', 'Express', Money.create(11, 'USD'));
+    // 110 gross (includes 10 tax) + 11 shipping (includes its tax) = 121, tax is not added again
+    expect(session.taxAmount.cents).toBe(1000);
+    expect(session.taxIncludedInSubtotal).toBe(true);
+    expect(session.total.cents).toBe(12100);
+  });
+
+  it('should add tax to the total when prices are tax-exclusive', () => {
+    const session = CheckoutSession.create({ id: 'cs1', basketId: 'b1' });
+    session.updateAmounts(Money.create(100, 'USD'), Money.create(10, 'USD'), false);
+    session.setShippingMethod('sm1', 'Express', Money.create(15, 'USD'));
+    expect(session.total.cents).toBe(12500);
+  });
+
   it('should apply coupon and recalculate', () => {
     const session = CheckoutSession.create({ id: 'cs1', basketId: 'b1' });
     session.updateAmounts(Money.create(100, 'USD'), Money.create(10, 'USD'));

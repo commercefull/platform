@@ -4,8 +4,10 @@
  */
 
 import { logger } from '../../../../libs/logger';
+import { eventBus } from '../../../../libs/events/eventBus';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { organizationRepoInstance } from '../../application/wired';
 
 export const listOrganizations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/index', {
@@ -71,12 +73,28 @@ export const deleteOrganization = async (req: HttpRequest, res: HttpResponse): P
 
 export const approveOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
-  res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
+  try {
+    const organization = await organizationRepoInstance.update(organizationId, { status: 'approved' });
+    await eventBus.emit('organization.approved', {
+      organizationId: organization.organizationId,
+      businessName: organization.name,
+    });
+    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
+  } catch (error: unknown) {
+    logger.warn('Error approving organization:', error);
+    res.redirect(`/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve organization')}`);
+  }
 };
 
 export const suspendOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
-  res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
+  try {
+    await organizationRepoInstance.update(organizationId, { status: 'suspended' });
+    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
+  } catch (error: unknown) {
+    logger.warn('Error suspending organization:', error);
+    res.redirect(`/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to suspend organization')}`);
+  }
 };
 
 // ============================================================================

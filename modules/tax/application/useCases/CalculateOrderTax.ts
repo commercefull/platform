@@ -45,6 +45,7 @@ export class CalculateOrderTaxCommand {
     public readonly shippingAddress: TaxAddress,
     public readonly shippingAmountCents: number = 0,
     public readonly customerId?: string,
+    public readonly pricesIncludeTax: boolean = false,
   ) {}
 }
 
@@ -69,6 +70,8 @@ export interface CalculateOrderTaxResponse {
   totalCents: number;
   taxRate: number;
   lineItems: TaxLineItem[];
+  /** True when item/shipping prices already include tax — taxAmountCents is the embedded portion, not an additional charge */
+  taxIncludedInSubtotal: boolean;
   message?: string;
 }
 
@@ -91,6 +94,7 @@ export class CalculateOrderTaxUseCase {
           totalCents: command.shippingAmountCents,
           taxRate: 0,
           lineItems: [],
+          taxIncludedInSubtotal: command.pricesIncludeTax,
           message: 'No items to calculate tax for',
         };
       }
@@ -104,6 +108,7 @@ export class CalculateOrderTaxUseCase {
           totalCents: command.shippingAmountCents,
           taxRate: 0,
           lineItems: [],
+          taxIncludedInSubtotal: command.pricesIncludeTax,
           message: 'Shipping address country is required for tax calculation',
         };
       }
@@ -172,7 +177,10 @@ export class CalculateOrderTaxUseCase {
           }
         }
 
-        const itemTaxAmount = (itemSubtotal * itemTaxRate * exemptionMultiplier) / 100;
+        const effectiveRate = itemTaxRate * exemptionMultiplier;
+        const itemTaxAmount = command.pricesIncludeTax
+          ? itemSubtotal - itemSubtotal / (1 + effectiveRate / 100)
+          : (itemSubtotal * effectiveRate) / 100;
 
         lineItems.push({
           productId: item.productId,
@@ -186,13 +194,20 @@ export class CalculateOrderTaxUseCase {
 
       // Calculate tax on shipping (if applicable and not fully exempt)
       const shippingExemptionMultiplier = this.shippingExemptionMultiplier(exemptions, subtotal);
-      const shippingTaxAmountCents = Math.round((command.shippingAmountCents * defaultTaxRate * shippingExemptionMultiplier) / 100);
+      const effectiveShippingRate = defaultTaxRate * shippingExemptionMultiplier;
+      const shippingTaxAmountCents = Math.round(
+        command.pricesIncludeTax
+          ? command.shippingAmountCents - command.shippingAmountCents / (1 + effectiveShippingRate / 100)
+          : (command.shippingAmountCents * effectiveShippingRate) / 100,
+      );
 
       // Calculate total tax
       const totalTaxAmountCents = lineItems.reduce((sum, item) => sum + item.taxAmountCents, 0) + shippingTaxAmountCents;
 
-      // Calculate grand total
-      const totalCents = subtotal + command.shippingAmountCents + totalTaxAmountCents;
+      // Grand total: with tax-inclusive pricing the tax is already inside subtotal/shipping
+      const totalCents = command.pricesIncludeTax
+        ? subtotal + command.shippingAmountCents
+        : subtotal + command.shippingAmountCents + totalTaxAmountCents;
 
       return {
         success: true,
@@ -202,6 +217,7 @@ export class CalculateOrderTaxUseCase {
         totalCents,
         taxRate: defaultTaxRate,
         lineItems,
+        taxIncludedInSubtotal: command.pricesIncludeTax,
         message: hasAnyExemption ? 'Tax exemption applied' : undefined,
       };
     } catch (error: unknown) {
@@ -222,6 +238,7 @@ export class CalculateOrderTaxUseCase {
           taxAmountCents: 0,
           taxRate: 0,
         })),
+        taxIncludedInSubtotal: command.pricesIncludeTax,
         message: (error as Error).message || 'Failed to calculate tax',
       };
     }

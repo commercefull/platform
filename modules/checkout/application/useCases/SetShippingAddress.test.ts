@@ -55,7 +55,7 @@ describe('SetShippingAddressUseCase', () => {
     const basketSnapshotPort = createBasketSnapshotPort();
     basketSnapshotPort.getSnapshot.mockResolvedValue(createBasketSnapshot());
     const taxQuotePort = createTaxQuotePort();
-    taxQuotePort.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: true });
+    taxQuotePort.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: true, pricesIncludeTax: false });
     taxQuotePort.calculateTax.mockResolvedValue({ success: true, taxAmountCents: 850, breakdown: [] });
     useCase = new SetShippingAddressUseCase(checkoutRepository, basketSnapshotPort, taxQuotePort);
 

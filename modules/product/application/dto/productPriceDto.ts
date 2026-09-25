@@ -33,7 +33,7 @@ export function toProductPriceDto(info: ProductPriceInfo | null | undefined): Pr
 }
 
 /** Empty price block for products without a catalog price yet. */
-export const EMPTY_PRICE_DTO: ProductPriceDto = {
+const EMPTY_PRICE_DTO: ProductPriceDto = {
   basePriceCents: 0,
   salePriceCents: null,
   costPriceCents: null,

@@ -1,6 +1,6 @@
 import { createPSPRoute, createPSPRoutingRepository, emitMock } from '../../tests/testUtils';
 import { RoutePaymentUseCase, RoutePaymentCommand } from './RoutePayment';
-import { PSPRoute, PSPRouteConfig } from '../../domain/entities/PSPRoute';
+import { PSPRoute } from '../../domain/entities/PSPRoute';
 import { NoProvidersAvailableError, AllProvidersExhaustedError } from '../../domain/errors/PaymentErrors';
 import type { PSPAdapter } from '../../infrastructure/services/GatewayAdapter';
 import { getPSPAdapter } from '../../infrastructure/services/GatewayAdapterRegistry';

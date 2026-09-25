@@ -189,7 +189,7 @@ function makeTaxPort(): jest.Mocked<TaxQuotePort> {
         { label: 'Digital Goods (exempt)', amountCents: 0 },
       ],
     });
-  port.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: false });
+  port.getTaxSettings.mockResolvedValue({ applyDiscountBeforeTax: false, applyTaxToShipping: false, pricesIncludeTax: false });
   return port;
 }
 

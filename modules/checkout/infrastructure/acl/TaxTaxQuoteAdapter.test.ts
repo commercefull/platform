@@ -27,6 +27,7 @@ describe('TaxTaxQuoteAdapter', () => {
       totalCents: 118.5,
       taxRate: 0.085,
       lineItems: [],
+      taxIncludedInSubtotal: false,
     });
 
     const result = await adapter.calculateTax({
@@ -48,6 +49,7 @@ describe('TaxTaxQuoteAdapter', () => {
       totalCents: 0,
       taxRate: 0,
       lineItems: [],
+      taxIncludedInSubtotal: false,
     });
 
     const result = await adapter.calculateTax({

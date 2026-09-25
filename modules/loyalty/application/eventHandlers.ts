@@ -15,7 +15,7 @@ import type { LoyaltyRepository } from '../domain/repositories/LoyaltyRepository
 
 export interface LoyaltyEventHandlerDeps {
   orders: Pick<OrderRepository, 'findById'>;
-  points: Pick<LoyaltyRepository, 'processOrderPoints'>;
+  points: Pick<LoyaltyRepository, 'processOrderPoints' | 'findCustomerPointsWithTier'>;
 }
 
 export function registerLoyaltyEventHandlers(deps: LoyaltyEventHandlerDeps): void {
@@ -34,8 +34,20 @@ export function registerLoyaltyEventHandlers(deps: LoyaltyEventHandlerDeps): voi
 
       const orderTotal = order.totalAmount?.amount ?? 0;
       if (orderTotal > 0) {
+        const before = await points.findCustomerPointsWithTier(customerId);
         await points.processOrderPoints(customerId, orderId, orderTotal);
         logger.info(`order.completed: awarded loyalty points for order ${orderId} to customer ${customerId}`);
+
+        // processOrderPoints re-evaluates the tier internally; emit when it changed
+        const after = await points.findCustomerPointsWithTier(customerId);
+        if (after && after.tier.tierId !== before?.tier.tierId) {
+          await eventBus.emit('loyalty.tier_upgraded', {
+            customerId,
+            previousTier: before?.tier.name,
+            newTier: after.tier.name,
+            tierId: after.tier.tierId,
+          });
+        }
       }
     } catch (err: unknown) {
       logger.error(`order.completed loyalty handler error: ${(err as Error).message}`);

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@6.32.0/schema.json",
+  "$schema": "./node_modules/knip/schema.json",
   "exclude": ["nsExports", "nsTypes"],
   "entry": [
     "boot/**/*.ts",
@@ -15,7 +15,6 @@
     "modules/*/index.ts",
     "modules/*/application/useCases/index.ts",
     "modules/*/application/useCases/*/index.ts",
-    "modules/*/application/services/index.ts",
     "modules/*/infrastructure/index.ts",
     "modules/*/infrastructure/repositories/index.ts",
     "modules/*/infrastructure/services/**",
@@ -24,9 +23,7 @@
     "modules/*/domain/entities/**",
     "modules/*/domain/valueObjects/**",
     "modules/*/domain/*.ts",
-    "modules/*/hooks/**",
     "modules/*/utils/**",
-    "modules/*/eventHandlers.ts",
     "modules/analytics/**",
     "modules/audit/**",
     "modules/automation/**",

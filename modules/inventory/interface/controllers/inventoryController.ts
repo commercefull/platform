@@ -22,7 +22,8 @@ import {
 } from '../../application/useCases';
 import type { PickupLocationPort } from '../../application/ports/PickupLocationPort';
 import { eventBus } from '../../../../libs/events/eventBus';
-import { inventoryDataRepository, pickupLocationAdapter } from '../../application/wired';
+import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
+import { inventoryDataRepository, pickupLocationAdapter, adjustStockUseCase } from '../../application/wired';
 
 // Ports
 const pickupLocationPort: PickupLocationPort = pickupLocationAdapter;
@@ -299,47 +300,26 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
     return;
   }
 
-  // Get current location
-  const currentLocation = await inventoryRepo.findLocationById(inventoryLocationId);
-  if (!currentLocation) {
-    respondError(res, 'Inventory location not found', 404);
-    return;
-  }
-
-  // Get transaction type
-  const transactionType = await inventoryRepo.findTransactionTypeByCode(
-    transactionTypeCode || (quantityChange > 0 ? 'ADJUST_UP' : 'ADJUST_DOWN'),
-  );
-
-  // Adjust quantity
-  const updatedLocation = await inventoryRepo.adjustQuantity(inventoryLocationId, quantityChange, reason);
-
-  // Record transaction
-  if (transactionType) {
-    await inventoryRepo.createTransaction({
-      typeId: transactionType.inventoryTransactionTypeId,
-      distributionWarehouseId: currentLocation.distributionWarehouseId,
-      distributionWarehouseBinId: currentLocation.distributionWarehouseBinId ?? undefined,
-      productId: currentLocation.productId,
-      productVariantId: currentLocation.productVariantId ?? undefined,
-      sku: currentLocation.sku,
-      quantity: quantityChange,
-      previousQuantity: currentLocation.quantity,
-      newQuantity: updatedLocation.quantity,
-      notes: reason,
-    });
-  }
-
-  // Emit event
-  if (quantityChange > 0) {
-    eventBus.emit('inventory.low', {
+  try {
+    const result = await adjustStockUseCase.execute({
       inventoryLocationId,
-      sku: currentLocation.sku,
-      quantity: updatedLocation.quantity,
+      adjustmentType: quantityChange >= 0 ? 'increment' : 'decrement',
+      quantity: Math.abs(quantityChange),
+      reason: reason || 'manual',
+      transactionTypeCode,
     });
+    respond(res, result.location);
+  } catch (error: unknown) {
+    if (error instanceof InventoryLocationNotFoundError) {
+      respondError(res, 'Inventory location not found', 404);
+      return;
+    }
+    if (error instanceof InventoryValidationError) {
+      respondError(res, error.message, 400);
+      return;
+    }
+    throw error;
   }
-
-  respond(res, updatedLocation);
 };
 
 /**

@@ -159,24 +159,6 @@ export function createProductTag(overrides: Partial<ProductTag> = {}): ProductTa
   return { productTagId: 't1', createdAt: ISO, updatedAt: ISO, name: 'Sale', slug: 'sale', ...overrides };
 }
 
-import type { ProductPriceInfo } from '../application/ports/ProductPricingPort';
-
-/** Pricing-owned catalog base price row (integer cents). */
-export function createProductPriceInfo(overrides: Partial<ProductPriceInfo> = {}): ProductPriceInfo {
-  return {
-    productBasePriceId: 'bp1',
-    productId: 'p1',
-    productVariantId: null,
-    currencyCode: 'USD',
-    priceCents: 10000,
-    salePriceCents: null,
-    compareAtPriceCents: null,
-    costPriceCents: null,
-    updatedAt: new Date(ISO),
-    ...overrides,
-  };
-}
-
 export function createProductQa(overrides: Partial<ProductQa> = {}): ProductQa {
   return {
     productQaId: 'q1',

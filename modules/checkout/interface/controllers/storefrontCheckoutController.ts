@@ -21,12 +21,13 @@ import { calculateOrderTaxUseCase } from '../../../tax/application/wired';
 // ============================================================================
 
 export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  if (!req.user) {
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
+
+  // Guests check out by session; without a session there is no basket to check out
+  if (!customerId && !sessionId) {
     return res.redirect('/signin?redirect=/checkout');
   }
-
-  const customerId = req.user.customerId;
-  const sessionId = req.session?.id;
 
   // Get or create basket
   const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
@@ -37,19 +38,19 @@ export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<voi
     return res.redirect('/basket?error=' + encodeURIComponent('Your cart is empty'));
   }
 
-  // Get customer details
-  const customerCommand = new GetCustomerCommand(customerId);
-  const customerUseCase = getCustomerUseCase;
-  const customer = await customerUseCase.execute(customerCommand);
+  // Get customer details (authenticated shoppers only)
+  let customer: Record<string, unknown> | undefined;
+  if (customerId) {
+    const customerCommand = new GetCustomerCommand(customerId);
+    const customerUseCase = getCustomerUseCase;
+    customer = (await customerUseCase.execute(customerCommand)) as unknown as Record<string, unknown> | undefined;
+  }
 
   // Get shipping methods (active + visible on storefront)
   const shippingResult = await getShippingMethodsUseCase.execute(new GetShippingMethodsQuery(true, true));
 
   // Calculate totals with tax
-  const totals = await calculateCheckoutTotals(
-    basket as unknown as Record<string, unknown>,
-    customer as unknown as Record<string, unknown> | undefined,
-  );
+  const totals = await calculateCheckoutTotals(basket as unknown as Record<string, unknown>, customer);
 
   storefrontRespond(req, res, 'shop/checkout', {
     pageName: 'Checkout',
@@ -81,13 +82,14 @@ function mapAddressFields(addr: Record<string, unknown>) {
 }
 
 export const processCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  if (!req.user) {
+  const customerId = req.user?.customerId;
+  const sessionId = req.session?.id;
+
+  if (!customerId && !sessionId) {
     res.status(401).json({ success: false, message: 'Not authenticated' });
     return;
   }
 
-  const customerId = req.user.customerId;
-  const customerEmail = req.user.email;
   const body = req.body as HttpRequestBody;
   const {
     shippingMethodId,
@@ -98,7 +100,6 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   } = body;
 
   // Get or create basket
-  const sessionId = req.session?.id;
   const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
   const basketUseCase = getOrCreateBasketUseCase;
   const basket = await basketUseCase.execute(basketCommand);
@@ -111,6 +112,19 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   // Parse addresses
   const shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
   const billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
+
+  // Guest checkout requires a contact email (billingEmail / guestEmail / address email)
+  const customerEmail =
+    (req.user?.email as string | undefined) ||
+    (body.guestEmail as string | undefined) ||
+    (body.billingEmail as string | undefined) ||
+    (billingAddress.email as string | undefined) ||
+    (shippingAddress.email as string | undefined);
+
+  if (!customerEmail) {
+    res.status(400).json({ success: false, message: 'An email address is required for checkout' });
+    return;
+  }
 
   // Get shipping method details
   const shippingMethod = await getShippingMethodDetailsUseCase.getShippingMethod(shippingMethodId as string);
@@ -130,8 +144,8 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
 
   // Create order with proper constructor arguments
   const orderCommand = new CreateOrderCommand(
-    customerId as string,
-    customerEmail as string,
+    customerId,
+    customerEmail,
     orderItems,
     mapAddressFields(shippingAddress),
     mapAddressFields(billingAddress),
@@ -150,6 +164,12 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   const orderUseCase = createOrderUseCase;
   const order = await orderUseCase.execute(orderCommand);
 
+  // Remember guest orders on the session so the confirmation page can verify ownership
+  if (!customerId && req.session) {
+    const session = req.session as unknown as Record<string, unknown>;
+    session.guestOrderIds = [...((session.guestOrderIds as string[] | undefined) ?? []), order.orderId];
+  }
+
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     res.json({
       success: true,
@@ -166,19 +186,24 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
 // ============================================================================
 
 export const orderConfirmation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  if (!req.user) {
-    return res.redirect('/signin');
-  }
-
   const { orderId } = req.params;
-  const customerId = req.user.customerId;
+  const customerId = req.user?.customerId;
+
+  if (!customerId) {
+    // Guests may only view orders this session placed (marker set by processCheckout)
+    const session = req.session as unknown as Record<string, unknown> | undefined;
+    const guestOrderIds = (session?.guestOrderIds as string[] | undefined) ?? [];
+    if (!guestOrderIds.includes(orderId)) {
+      return res.redirect('/signin');
+    }
+  }
 
   // Get order details using GetOrderUseCase
   const orderCommand = new GetOrderCommand(orderId, undefined, customerId);
   const orderUseCase = getOrderUseCase;
   const order = await orderUseCase.execute(orderCommand);
 
-  if (!order) {
+  if (!order || (!customerId && order.customerId)) {
     storefrontRespond(req, res, '404', {
       pageName: 'Order Not Found',
       user: req.user,

@@ -1,5 +1,5 @@
 import type { HttpRequest, HttpResponse } from './http';
-import { formatPrice, formatPriceWithTax } from './money';
+import { formatCents, formatCentsWithTax, formatPrice, formatPriceWithTax } from './money';
 import { popFlashMessages } from './flash';
 
 type ResponseData = Record<string, unknown>;
@@ -47,6 +47,8 @@ export async function storefrontRespond(req: HttpRequest, res: HttpResponse, vie
     // Price formatting helpers (from libs/money)
     formatPrice,
     formatPriceWithTax,
+    formatCents,
+    formatCentsWithTax,
     successMsg,
     errorMsg,
     ...data,

@@ -18,6 +18,17 @@ import {
 import { GetCustomerCommand } from '../../application/useCases/GetCustomer';
 import { UpdateCustomerCommand } from '../../application/useCases/UpdateCustomer';
 import { ChangePasswordCommand } from '../../application/useCases/ChangePassword';
+import { MergeGuestBasketOnLoginCommand } from '../../../basket/application/useCases/MergeGuestBasketOnLogin';
+import { mergeGuestBasketOnLoginUseCase } from '../../../basket/application/useCases/wired';
+
+/** Merge the anonymous session basket into the customer's basket after authentication. Best-effort: login must not fail on merge errors. */
+async function mergeGuestBasket(req: HttpRequest, customerId: string): Promise<void> {
+  try {
+    await mergeGuestBasketOnLoginUseCase.execute(new MergeGuestBasketOnLoginCommand(customerId, req.session?.id));
+  } catch (error: unknown) {
+    logger.warn(`Failed to merge guest basket for customer ${customerId}:`, error);
+  }
+}
 
 // ============================================================================
 // Sign In Form
@@ -82,6 +93,8 @@ export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void>
       lastName: customer.lastName,
     };
 
+    await mergeGuestBasket(req, customer.customerId);
+
     req.flash('success', `Welcome back, ${customer.firstName}!`);
     res.redirect(redirectTo as string);
   } catch (error: unknown) {
@@ -128,6 +141,8 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
       firstName: customer.firstName,
       lastName: customer.lastName,
     };
+
+    await mergeGuestBasket(req, customer.customerId);
 
     req.flash('success', `Welcome to our store, ${customer.firstName}!`);
     res.redirect('/profile');

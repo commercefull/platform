@@ -1,7 +1,7 @@
-import { eventBus, EventPayload } from '../../libs/events/eventBus';
-import { JobScheduler } from '../../libs/jobs/cronScheduler';
-import { query } from '../../libs/db';
-import { logger } from '../../libs/logger';
+import { eventBus, EventPayload } from '../../../libs/events/eventBus';
+import { JobScheduler } from '../../../libs/jobs/cronScheduler';
+import { query } from '../../../libs/db';
+import { logger } from '../../../libs/logger';
 
 // Event payload interfaces
 interface OrderCreatedPayload {
@@ -19,12 +19,12 @@ interface OrderPaidPayload {
   transactionId: string;
 }
 
-interface OrderShippedPayload {
+interface FulfillmentShippedPayload {
+  fulfillmentId: string;
   orderId: string;
-  customerId: string;
-  orderNumber: string;
   trackingNumber: string;
-  carrier: string;
+  trackingUrl?: string;
+  carrierName?: string;
 }
 
 interface OrderCompletedPayload {
@@ -57,17 +57,10 @@ interface OrderReadyForPickupPayload {
   customerEmail: string;
 }
 
-interface PaymentReceivedPayload {
+interface InventoryReservationFailedPayload {
   orderId: string;
-  amountCents: number;
-  transactionId: string;
-}
-
-interface PaymentFailedPayload {
-  orderId: string;
-  customerId: string;
-  amountCents: number;
-  reason: string;
+  productId?: string;
+  reason?: string;
 }
 
 interface InventoryLowPayload {
@@ -139,7 +132,7 @@ interface ReceivingCompletedPayload {
 }
 
 // Event handlers for order events
-export const registerOrderEventHandlers = () => {
+const registerOrderEventHandlers = () => {
   // Order created event
   eventBus.registerHandler('order.created', async (payload: EventPayload) => {
     const { orderId, customerId, orderNumber, totalAmountCents } = payload.data as OrderCreatedPayload;
@@ -180,9 +173,18 @@ export const registerOrderEventHandlers = () => {
     });
   });
 
-  // Order shipped event
-  eventBus.registerHandler('order.shipped', async (payload: EventPayload) => {
-    const { orderId, customerId, orderNumber, trackingNumber, carrier } = payload.data as OrderShippedPayload;
+  // Fulfillment shipped event — orders ship via fulfillments, so this is the
+  // event that actually fires when an order leaves a store/warehouse.
+  eventBus.registerHandler('fulfillment.shipped', async (payload: EventPayload) => {
+    const { orderId, trackingNumber, carrierName } = payload.data as FulfillmentShippedPayload;
+    if (!orderId) return;
+
+    const orderRow = await query<Array<{ customerId: string | null; orderNumber: string }>>(
+      `SELECT "customerId", "orderNumber" FROM "order" WHERE "orderId" = $1`,
+      [orderId],
+    );
+    const { customerId, orderNumber } = orderRow?.[0] ?? {};
+    if (!customerId) return;
 
     // Send shipping notification
     await JobScheduler.scheduleNotification({
@@ -190,7 +192,7 @@ export const registerOrderEventHandlers = () => {
       type: 'order_shipped',
       title: 'Order Shipped',
       message: `Your order ${orderNumber} has been shipped.`,
-      data: { orderId, orderNumber, trackingNumber, carrier },
+      data: { orderId, orderNumber, trackingNumber, carrier: carrierName },
       channels: ['email', 'push', 'in_app'],
     });
   });
@@ -262,35 +264,8 @@ export const registerOrderEventHandlers = () => {
   });
 };
 
-// Event handlers for payment events
-export const registerPaymentEventHandlers = () => {
-  eventBus.registerHandler('payment.received', async (payload: EventPayload) => {
-    const { orderId, amountCents, transactionId } = payload.data as PaymentReceivedPayload;
-
-    // Emit order paid event
-    await eventBus.emit('order.paid', {
-      orderId,
-      amountCents,
-      transactionId,
-    });
-  });
-
-  eventBus.registerHandler('payment.failed', async (payload: EventPayload) => {
-    const { orderId, customerId, amountCents, reason } = payload.data as PaymentFailedPayload;
-
-    // Send payment failure notification
-    await JobScheduler.scheduleNotification({
-      userId: customerId,
-      type: 'payment_failed',
-      title: 'Payment Failed',
-      message: `Payment of $${((amountCents ?? 0) / 100).toFixed(2)} could not be processed. Please try again.`,
-      data: { orderId, amountCents, reason },
-    });
-  });
-};
-
 // Event handlers for inventory events
-export const registerInventoryEventHandlers = () => {
+const registerInventoryEventHandlers = () => {
   eventBus.registerHandler('inventory.low', async (payload: EventPayload) => {
     const { productId, sku, currentStock, reorderPoint } = payload.data as InventoryLowPayload;
 
@@ -342,23 +317,38 @@ export const registerInventoryEventHandlers = () => {
 
     logger.debug('Inventory released', { productId, quantity, reason });
   });
+
+  // Stock reservation failure — an order was created but inventory could not be
+  // reserved, so fulfilment will stall. Alert the merchant's organization.
+  eventBus.registerHandler('inventory.reservation_failed', async (payload: EventPayload) => {
+    const { orderId, productId, reason } = payload.data as InventoryReservationFailedPayload;
+
+    logger.warn('Inventory reservation failed', { orderId, productId, reason });
+
+    const merchants = await query<Array<{ organizationId: string }>>(
+      `SELECT DISTINCT m."organizationId" FROM "organization" m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = 'active'`,
+      [productId],
+    );
+
+    for (const merchant of merchants || []) {
+      await JobScheduler.scheduleNotification({
+        userId: merchant.organizationId,
+        type: 'reservation_failed_alert',
+        title: 'Stock Reservation Failed',
+        message: `Order ${orderId} could not reserve stock${reason ? `: ${reason}` : ''}. Manual review required.`,
+        data: { orderId, productId, reason },
+      });
+    }
+  });
 };
 
 // Event handlers for customer events
-export const registerCustomerEventHandlers = () => {
+const registerCustomerEventHandlers = () => {
   eventBus.registerHandler('customer.registered', async (payload: EventPayload) => {
-    const { customerId, email, firstName, lastName } = payload.data as CustomerRegisteredPayload;
+    const { email, firstName, lastName } = payload.data as CustomerRegisteredPayload;
+    if (!email) return;
 
-    // Send welcome notification
-    await JobScheduler.scheduleNotification({
-      userId: customerId,
-      type: 'welcome',
-      title: 'Welcome to Commercefull!',
-      message: `Welcome ${firstName}! Thank you for joining us.`,
-      data: { customerId, email },
-    });
-
-    // Send welcome email
+    // Send welcome email (the in-app welcome notification is sent by the customer module)
     await JobScheduler.scheduleEmail({
       to: email,
       subject: 'Welcome to Commercefull!',
@@ -376,7 +366,7 @@ export const registerCustomerEventHandlers = () => {
 };
 
 // Event handlers for supplier events
-export const registerSupplierEventHandlers = () => {
+const registerSupplierEventHandlers = () => {
   eventBus.registerHandler('supplier.created', async (payload: EventPayload) => {
     const { supplierId, name, email } = payload.data as SupplierCreatedPayload;
 
@@ -437,14 +427,10 @@ export const registerSupplierEventHandlers = () => {
   });
 };
 
-// Register all event handlers
-export const registerAllEventHandlers = () => {
+// Register all notification event handlers — called once from boot/registerEventHandlers.
+export const registerNotificationEventHandlers = () => {
   registerOrderEventHandlers();
-  registerPaymentEventHandlers();
   registerInventoryEventHandlers();
   registerCustomerEventHandlers();
   registerSupplierEventHandlers();
 };
-
-// Initialize event handlers when the module is imported
-registerAllEventHandlers();

@@ -225,4 +225,70 @@ describe('CalculateOrderTaxUseCase', () => {
       expect(result.lineItems[0].exemptionVerdict).toBe('exempt');
     });
   });
+
+  describe('pricesIncludeTax', () => {
+    it('should extract embedded tax instead of adding it when prices include tax', async () => {
+      const result = await useCase.execute(
+        new CalculateOrderTaxCommand(
+          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          { country: 'US', state: 'OR' },
+          0,
+          undefined,
+          true,
+        ),
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.taxIncludedInSubtotal).toBe(true);
+      // 110 gross at 10% -> net 100, embedded tax 10
+      expect(result.lineItems[0].taxAmountCents).toBe(10);
+      expect(result.taxAmountCents).toBe(10);
+      // Total must not add tax again — it is already inside the price
+      expect(result.totalCents).toBe(110);
+    });
+
+    it('should extract shipping tax too when prices include tax', async () => {
+      const result = await useCase.execute(
+        new CalculateOrderTaxCommand(
+          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          { country: 'US', state: 'OR' },
+          11,
+          undefined,
+          true,
+        ),
+      );
+
+      // items: 10 embedded, shipping: 11 - 10 = 1 embedded
+      expect(result.taxAmountCents).toBe(11);
+      expect(result.totalCents).toBe(121);
+    });
+
+    it('should not double-charge tax on exempt inclusive items', async () => {
+      taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption()]);
+
+      const result = await useCase.execute(
+        new CalculateOrderTaxCommand(
+          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          { country: 'US' },
+          0,
+          'cust-1',
+          true,
+        ),
+      );
+
+      expect(result.taxAmountCents).toBe(0);
+      expect(result.totalCents).toBe(110);
+    });
+
+    it('should report taxIncludedInSubtotal false for exclusive pricing', async () => {
+      const result = await useCase.execute(
+        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }], { country: 'US' }, 0),
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.taxIncludedInSubtotal).toBe(false);
+      expect(result.taxAmountCents).toBe(10);
+      expect(result.totalCents).toBe(110);
+    });
+  });
 });

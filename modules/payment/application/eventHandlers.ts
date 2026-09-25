@@ -20,6 +20,26 @@ export interface PaymentEventHandlerDeps {
 export function registerPaymentEventHandlers(deps: PaymentEventHandlerDeps): void {
   const { orders } = deps;
 
+  // payment.received -> order.paid relay (InitiatePayment/CapturePayment paths
+  // never pass through the PSP webhook controller that emits order.paid).
+  eventBus.registerHandler('payment.received', async payload => {
+    const { orderId, amountCents, transactionId } = payload.data as {
+      orderId?: string;
+      amountCents?: number;
+      transactionId?: string;
+    };
+    if (!orderId) return;
+
+    const order = await orders.findById(orderId);
+    eventBus.emit('order.paid', {
+      orderId,
+      orderNumber: order?.orderNumber,
+      customerId: order?.customerId,
+      amountCents,
+      transactionId,
+    });
+  });
+
   // Payment completed -> update order status, notify customer
   eventBus.registerHandler('payment.completed', async payload => {
     const data = payload.data as Record<string, unknown>;
@@ -43,6 +63,16 @@ export function registerPaymentEventHandlers(deps: PaymentEventHandlerDeps): voi
           data: { orderId, orderNumber: order.orderNumber, transactionId, amount },
         });
       }
+
+      // Emit order.paid so downstream fulfillment/inventory flows trigger even
+      // when the payment did not come through the PSP webhook controller.
+      eventBus.emit('order.paid', {
+        orderId,
+        orderNumber: order?.orderNumber,
+        customerId: order?.customerId,
+        amountCents: amount,
+        transactionId,
+      });
 
       logger.info(`payment.completed: order ${orderId} payment status updated to paid`);
     } catch (err: unknown) {

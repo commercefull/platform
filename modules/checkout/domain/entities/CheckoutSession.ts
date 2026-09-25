@@ -29,6 +29,8 @@ export interface CheckoutSessionProps {
   orderId?: string;
   subtotal: Money;
   taxAmount: Money;
+  /** True when taxAmount is embedded in subtotal/shipping (tax-inclusive pricing) and must not be added to the total */
+  taxIncludedInSubtotal?: boolean;
   shippingAmount: Money;
   discountAmount: Money;
   total: Money;
@@ -140,6 +142,10 @@ export class CheckoutSession {
 
   get taxAmount(): Money {
     return this.props.taxAmount;
+  }
+
+  get taxIncludedInSubtotal(): boolean {
+    return this.props.taxIncludedInSubtotal ?? false;
   }
 
   get shippingAmount(): Money {
@@ -290,10 +296,11 @@ export class CheckoutSession {
     this.touch();
   }
 
-  updateAmounts(subtotal: Money, taxAmount: Money): void {
+  updateAmounts(subtotal: Money, taxAmount: Money, taxIncludedInSubtotal = false): void {
     this.ensureActive();
     this.props.subtotal = subtotal;
     this.props.taxAmount = taxAmount;
+    this.props.taxIncludedInSubtotal = taxIncludedInSubtotal;
     this.recalculateTotal();
     this.touch();
   }
@@ -355,7 +362,10 @@ export class CheckoutSession {
 
   private recalculateTotal(): void {
     const currency = this.props.subtotal.currency;
-    let total = this.props.subtotal.add(this.props.taxAmount).add(this.props.shippingAmount);
+    let total = this.props.subtotal.add(this.props.shippingAmount);
+    if (!this.props.taxIncludedInSubtotal) {
+      total = total.add(this.props.taxAmount);
+    }
 
     if (!this.props.discountAmount.isZero()) {
       total = Money.create(Math.max(0, total.amount - this.props.discountAmount.amount), currency);
@@ -386,6 +396,7 @@ export class CheckoutSession {
       orderId: this.props.orderId,
       subtotal: this.props.subtotal.amount,
       taxAmount: this.props.taxAmount.amount,
+      taxIncludedInSubtotal: this.props.taxIncludedInSubtotal ?? false,
       shippingAmount: this.props.shippingAmount.amount,
       discountAmount: this.props.discountAmount.amount,
       total: this.props.total.amount,

@@ -3,8 +3,8 @@ const PurchaseOrderRepo = supplierPurchaseOrderDataRepository.purchaseOrders;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateSupplierUseCase, CreateSupplierInput } from '../../application/useCases/CreateSupplier';
 import { CreatePurchaseOrderUseCase, CreatePurchaseOrderInput } from '../../application/useCases/CreatePurchaseOrder';
-import { ReceiveGoodsUseCase, ReceiveGoodsInput } from '../../application/useCases/ReceiveGoods';
-import { supplierDataRepository, supplierPurchaseOrderDataRepository } from '../../application/wired';
+import { ReceiveGoodsInput } from '../../application/useCases/ReceiveGoods';
+import { supplierDataRepository, supplierPurchaseOrderDataRepository, receiveGoodsUseCase } from '../../application/wired';
 
 // Adapters for use case port interfaces
 const supplierRepoAdapter = {
@@ -59,24 +59,7 @@ const purchaseOrderRepoAdapter = {
   },
 };
 
-const receivingRepoAdapter = {
-  async create(_data: Record<string, unknown>) {
-    // Simplified adapter
-  },
-};
 
-const inventoryRepoAdapter = {
-  async adjustStock(_params: {
-    productId: string;
-    variantId?: string;
-    locationId: string;
-    adjustment: number;
-    reason: string;
-    reference: string;
-  }) {
-    // Inventory adjustments would be handled by the actual inventory module
-  },
-};
 
 export const supplierResolvers = {
   Mutation: {
@@ -98,8 +81,7 @@ export const supplierResolvers = {
 
     receiveGoods: async (_parent: unknown, args: { input: ReceiveGoodsInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new ReceiveGoodsUseCase(purchaseOrderRepoAdapter, receivingRepoAdapter, inventoryRepoAdapter);
-      return useCase.execute(args.input);
+      return receiveGoodsUseCase.execute(args.input);
     },
   },
 };

@@ -80,14 +80,17 @@ export class SetShippingAddressUseCase {
     session.setShippingAddress(address);
 
     let taxAmountCents: number;
+    let taxIncludedInSubtotal = false;
     try {
       let taxableShippingCents = session.shippingAmount.cents;
       let applyDiscountBeforeTax = false;
+      let pricesIncludeTax = false;
       try {
         if (this.taxQuotePort) {
           const settings = await this.taxQuotePort.getTaxSettings('default');
           if (settings) {
             applyDiscountBeforeTax = settings.applyDiscountBeforeTax;
+            pricesIncludeTax = settings.pricesIncludeTax;
             if (!settings.applyTaxToShipping) {
               taxableShippingCents = 0;
             }
@@ -115,15 +118,21 @@ export class SetShippingAddressUseCase {
           },
           shippingAmountCents: taxableShippingCents,
           customerId: session.customerId,
+          pricesIncludeTax,
         });
         taxAmountCents = taxResult.success ? taxResult.taxAmountCents : 0;
+        taxIncludedInSubtotal = taxResult.success && taxResult.taxIncludedInSubtotal === true;
       } else {
         taxAmountCents = 0;
       }
     } catch {
       taxAmountCents = 0;
     }
-    session.updateAmounts(session.subtotal, Money.fromCents(taxAmountCents, session.subtotal.currency));
+    session.updateAmounts(
+      session.subtotal,
+      Money.fromCents(taxAmountCents, session.subtotal.currency),
+      taxIncludedInSubtotal,
+    );
 
     // Evaluate auto-applied promotions
     await this.evaluatePromotions(session);

@@ -23,23 +23,28 @@ export class TaxTaxQuoteAdapter implements TaxQuotePort {
         shippingAddress: request.shippingAddress,
         shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
+        pricesIncludeTax: request.pricesIncludeTax ?? false,
       });
       return {
         success: taxResult.success,
         taxAmountCents: taxResult.success ? taxResult.taxAmountCents : 0,
+        taxIncludedInSubtotal: taxResult.taxIncludedInSubtotal,
       };
     } catch {
       return { success: false, taxAmountCents: 0 };
     }
   }
 
-  async getTaxSettings(merchantId: string): Promise<{ applyDiscountBeforeTax: boolean; applyTaxToShipping: boolean } | null> {
+  async getTaxSettings(
+    merchantId: string,
+  ): Promise<{ applyDiscountBeforeTax: boolean; applyTaxToShipping: boolean; pricesIncludeTax: boolean } | null> {
     try {
       const settings = await this.taxSettings.findByMerchant(merchantId);
       if (!settings) return null;
       return {
         applyDiscountBeforeTax: settings.applyDiscountBeforeTax,
         applyTaxToShipping: settings.applyTaxToShipping,
+        pricesIncludeTax: settings.pricesIncludeTax,
       };
     } catch {
       return null;

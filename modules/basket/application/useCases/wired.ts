@@ -11,6 +11,7 @@ import { ClearBasketUseCase } from './ClearBasket';
 import { ManageAdminBasketUseCase } from './ManageAdminBasket';
 import { MergeBasketsUseCase } from './MergeBaskets';
 import { AssignBasketToCustomerUseCase } from './AssignBasketToCustomer';
+import { MergeGuestBasketOnLoginUseCase } from './MergeGuestBasketOnLogin';
 import { SetItemAsGiftUseCase } from './SetItemAsGift';
 import { ExtendExpirationUseCase } from './ExtendExpiration';
 import { ApplyCouponUseCase } from './ApplyCoupon';
@@ -29,6 +30,11 @@ export const clearBasketUseCase = new ClearBasketUseCase(basketRepo);
 export const manageAdminBasketUseCase = new ManageAdminBasketUseCase(basketRepo);
 export const mergeBasketsUseCase = new MergeBasketsUseCase(basketRepo);
 export const assignBasketToCustomerUseCase = new AssignBasketToCustomerUseCase(basketRepo);
+export const mergeGuestBasketOnLoginUseCase = new MergeGuestBasketOnLoginUseCase(
+  basketRepo,
+  mergeBasketsUseCase,
+  assignBasketToCustomerUseCase,
+);
 export const setItemAsGiftUseCase = new SetItemAsGiftUseCase(basketRepo);
 export const extendExpirationUseCase = new ExtendExpirationUseCase(basketRepo);
 export const applyCouponUseCase = new ApplyCouponUseCase(basketRepo, discountQuotePort);

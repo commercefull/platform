@@ -15,18 +15,20 @@ import { moduleRegistry } from './moduleManifests';
 import { OrderDataRepository as OrderDataRepo } from '../modules/order/infrastructure';
 import { InventoryDataRepository as InventoryDataRepo } from '../modules/inventory/infrastructure';
 import { FulfillmentDataRepository as FulfillmentDataRepo } from '../modules/fulfillment/infrastructure';
+import { ReturnRequestRepositoryImpl } from '../modules/returns/infrastructure';
 import { LoyaltyDataRepository as LoyaltyDataRepo } from '../modules/loyalty/infrastructure';
 import { CheckoutRepository as CheckoutRepo } from '../modules/checkout/infrastructure';
 import { GdprDataRepository } from '../modules/gdpr/infrastructure';
 import { WebhookRepository as WebhookRepo } from '../modules/webhook/infrastructure';
 import { TrackingConfigRepositoryImpl } from '../modules/tracking/infrastructure';
 
-import { registerOrderEventHandlers, registerOrderPaymentEventHandlers } from '../modules/order/application/eventHandlers';
+import { registerOrderPaymentEventHandlers } from '../modules/order/application/eventHandlers';
 import { registerInventoryEventHandlers } from '../modules/inventory/application/eventHandlers';
 import { registerFulfillmentEventHandlers } from '../modules/fulfillment/application/eventHandlers';
 import { registerLoyaltyEventHandlers } from '../modules/loyalty/application/eventHandlers';
 import { registerStoreEventHandlers } from '../modules/store/application/eventHandlers';
 import { registerOrganizationEventHandlers } from '../modules/organization/application/eventHandlers';
+import { VendorRepositoryImpl } from '../modules/marketplace/infrastructure';
 import { registerBasketEventHandlers } from '../modules/basket/application/eventHandlers';
 import { registerCheckoutEventHandlers } from '../modules/checkout/application/eventHandlers';
 import { registerPaymentEventHandlers } from '../modules/payment/application/eventHandlers';
@@ -35,6 +37,8 @@ import { registerProductEventHandlers } from '../modules/product/application/eve
 import { registerSubscriptionEventHandlers } from '../modules/subscription/application/eventHandlers';
 import { registerWebhookEventHandlers } from '../modules/webhook/application/eventHandlers';
 import { registerIntegrationEventHandlers } from '../modules/integration/application/eventHandlers';
+import { registerNotificationEventHandlers } from '../modules/notification/application/eventHandlers';
+import { initializeAnalyticsHandlers } from '../modules/analytics/application/analyticsEventHandler';
 import {
   registerTrackingEventHandlers,
   setConsentRepository,
@@ -51,11 +55,10 @@ let webhookDispatchService: WebhookDispatchService | null = null;
  */
 const eventHandlerModules: { module: string; register: () => void }[] = [
   {
-    // Order handlers (payment lifecycle + completion notification)
+    // Order handlers (payment lifecycle; lifecycle notifications live in the notification module)
     module: 'order',
     register: () => {
       registerOrderPaymentEventHandlers(OrderDataRepo.commands);
-      registerOrderEventHandlers(OrderDataRepo.commands);
     },
   },
   {
@@ -64,6 +67,7 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
     register: () =>
       registerInventoryEventHandlers({
         orders: OrderDataRepo.commands,
+        returns: new ReturnRequestRepositoryImpl(),
         stock: InventoryDataRepo.stock,
         reservations: InventoryDataRepo.reservations,
       }),
@@ -90,7 +94,10 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
   // Store handlers (inventory sync, pickup notifications)
   { module: 'store', register: registerStoreEventHandlers },
   // Organization handlers (settlement updates)
-  { module: 'organization', register: registerOrganizationEventHandlers },
+  {
+    module: 'organization',
+    register: () => registerOrganizationEventHandlers({ vendors: new VendorRepositoryImpl() }),
+  },
   // Basket handlers (cart recovery)
   { module: 'basket', register: registerBasketEventHandlers },
   // Checkout handlers (Published Language: reacts to payment events)
@@ -123,6 +130,10 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
   },
   // Integration dispatcher (forwards events to third-party integrations)
   { module: 'integration', register: registerIntegrationEventHandlers },
+  // Notification handlers (transactional emails/notifications for order, payment, inventory, customer, supplier events)
+  { module: 'notification', register: registerNotificationEventHandlers },
+  // Analytics handlers (order/basket/checkout funnel event tracking)
+  { module: 'analytics', register: initializeAnalyticsHandlers },
 ];
 
 /**

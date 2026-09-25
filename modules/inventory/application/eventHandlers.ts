@@ -8,20 +8,43 @@
  */
 
 import { eventBus } from '../../../libs/events/eventBus';
-import { query } from '../../../libs/db';
 import { logger } from '../../../libs/logger';
-import { JobScheduler } from '../../../libs/jobs/cronScheduler';
 import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
+import type { ReturnRequestRepository } from '../../returns/domain/repositories/ReturnRepository';
+import type { InventoryLocation } from '../../../libs/db/types';
+
+interface CreateStockTransactionParams {
+  typeId: string;
+  distributionWarehouseId: string;
+  distributionWarehouseBinId?: string;
+  productId: string;
+  productVariantId?: string;
+  sku: string;
+  quantity: number;
+  previousQuantity?: number;
+  newQuantity?: number;
+  referenceType?: string;
+  referenceId?: string;
+  lotNumber?: string;
+  serialNumber?: string;
+  notes?: string;
+  reason?: string;
+}
 
 /** Narrow ports for cross-module dependencies, injected at boot. */
 export interface InventoryEventHandlerDeps {
   orders: Pick<OrderRepository, 'findById'>;
+  returns: Pick<ReturnRequestRepository, 'findById'>;
   stock: {
     checkProductAvailability(
       productId: string,
       variantId: string | undefined,
       requiredQuantity: number,
     ): Promise<{ available: boolean; locations: unknown[] }>;
+    findLocationsByProductId(productId: string): Promise<InventoryLocation[]>;
+    adjustQuantity(inventoryLocationId: string, quantityChange: number, reason?: string): Promise<InventoryLocation>;
+    createTransaction(input: CreateStockTransactionParams): Promise<unknown>;
+    findTransactionTypeByCode(code: string): Promise<{ inventoryTransactionTypeId: string } | null>;
   };
   reservations: {
     createAtomic(params: {
@@ -39,7 +62,7 @@ export interface InventoryEventHandlerDeps {
 }
 
 export function registerInventoryEventHandlers(deps: InventoryEventHandlerDeps): void {
-  const { orders, stock, reservations } = deps;
+  const { orders, returns, stock, reservations } = deps;
 
   // Order created -> reserve inventory atomically
   eventBus.registerHandler('order.created', async payload => {
@@ -128,65 +151,21 @@ export function registerInventoryEventHandlers(deps: InventoryEventHandlerDeps):
     }
   });
 
-  // Low stock alert -> notify merchant
+  // Low stock -> audit log only; merchant alerts are sent by the notification module
   eventBus.registerHandler('inventory.low', async payload => {
     const data = payload.data as Record<string, unknown>;
-    const productId = data.productId as string;
-    const sku = data.sku as string;
-    const currentStock = data.currentStock as number;
-    const reorderPoint = data.reorderPoint as number;
-    if (!productId) return;
-
-    try {
-      // Find merchants who carry this product
-      const merchants = await query<Array<{ organizationId: string }>>(
-        'SELECT DISTINCT m."organizationId", m."organizationId" FROM merchant m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = \'active\'',
-        [productId],
-      );
-
-      for (const merchant of merchants || []) {
-        await JobScheduler.scheduleNotification({
-          userId: merchant.organizationId,
-          type: 'low_stock_alert',
-          title: 'Low Stock Alert',
-          message: `Product ${sku || productId} is running low (${currentStock} remaining, reorder at ${reorderPoint}).`,
-          data: { productId, sku, currentStock, reorderPoint },
-        });
-      }
-
-      logger.info(`inventory.low: alerted ${merchants?.length || 0} merchants for product ${sku || productId}`);
-    } catch (err: unknown) {
-      logger.error(`inventory.low handler error: ${(err as Error).message}`);
-    }
+    logger.warn('inventory.low: low stock', {
+      productId: data.productId,
+      sku: data.sku,
+      currentStock: data.currentStock,
+      reorderPoint: data.reorderPoint,
+    });
   });
 
-  // Out of stock -> notify merchant, update product visibility
+  // Out of stock -> audit log only; merchant alerts are sent by the notification module
   eventBus.registerHandler('inventory.out_of_stock', async payload => {
     const data = payload.data as Record<string, unknown>;
-    const productId = data.productId as string;
-    const sku = data.sku as string;
-    if (!productId) return;
-
-    try {
-      const merchants = await query<Array<{ organizationId: string }>>(
-        'SELECT DISTINCT m."organizationId" FROM merchant m JOIN product p ON p."organizationId" = m."organizationId" WHERE p."productId" = $1 AND m.status = \'active\'',
-        [productId],
-      );
-
-      for (const merchant of merchants || []) {
-        await JobScheduler.scheduleNotification({
-          userId: merchant.organizationId,
-          type: 'out_of_stock_alert',
-          title: 'Out of Stock Alert',
-          message: `Product ${sku || productId} is now out of stock.`,
-          data: { productId, sku },
-        });
-      }
-
-      logger.info(`inventory.out_of_stock: alerted ${merchants?.length || 0} merchants for product ${sku || productId}`);
-    } catch (err: unknown) {
-      logger.error(`inventory.out_of_stock handler error: ${(err as Error).message}`);
-    }
+    logger.warn('inventory.out_of_stock', { productId: data.productId, sku: data.sku });
   });
 
   // Stock reserved -> log for audit trail
@@ -199,5 +178,75 @@ export function registerInventoryEventHandlers(deps: InventoryEventHandlerDeps):
   eventBus.registerHandler('inventory.released', async payload => {
     const data = payload.data as Record<string, unknown>;
     logger.info(`inventory.released: product=${data.productId}, qty=${data.quantity}, reason=${data.reason}`);
+  });
+
+  // Return completed -> restock items flagged restockItem that did not fail inspection.
+  // Restock goes to the product's existing stock location (variant-matched where possible).
+  eventBus.registerHandler('return.completed', async payload => {
+    const data = payload.data as Record<string, unknown>;
+    const orderReturnId = data.orderReturnId as string;
+    if (!orderReturnId) return;
+
+    try {
+      const returnRequest = await returns.findById(orderReturnId);
+      if (!returnRequest) {
+        logger.warn(`return.completed: return ${orderReturnId} not found`);
+        return;
+      }
+
+      const failed = returnRequest.inspectionFailedItems;
+      const isFailed = (itemId: string): boolean => {
+        if (!failed) return false;
+        if (Array.isArray(failed)) return failed.includes(itemId);
+        return itemId in failed;
+      };
+
+      const restockItems = returnRequest.items.filter(item => item.restockItem && !isFailed(item.orderReturnItemId));
+      if (restockItems.length === 0) return;
+
+      const order = await orders.findById(returnRequest.orderId);
+
+      for (const item of restockItems) {
+        const orderItem = order?.findItem(item.orderItemId);
+        if (!orderItem) {
+          logger.warn(`return.completed: order item ${item.orderItemId} not found on order ${returnRequest.orderId}`);
+          continue;
+        }
+
+        const locations = await stock.findLocationsByProductId(orderItem.productId);
+        const location =
+          locations.find(l => (l.productVariantId ?? undefined) === orderItem.productVariantId) ?? locations[0];
+        if (!location) {
+          logger.warn(`return.completed: no stock location for product ${orderItem.productId}, cannot restock return ${orderReturnId}`);
+          continue;
+        }
+
+        const updated = await stock.adjustQuantity(location.inventoryLocationId, item.quantity, 'customer_return');
+
+        const transactionType =
+          (await stock.findTransactionTypeByCode('RETURN')) ?? (await stock.findTransactionTypeByCode('ADJUST_UP'));
+        if (transactionType) {
+          await stock.createTransaction({
+            typeId: transactionType.inventoryTransactionTypeId,
+            distributionWarehouseId: location.distributionWarehouseId,
+            distributionWarehouseBinId: location.distributionWarehouseBinId ?? undefined,
+            productId: orderItem.productId,
+            productVariantId: orderItem.productVariantId,
+            sku: location.sku ?? orderItem.sku,
+            quantity: item.quantity,
+            previousQuantity: location.quantity,
+            newQuantity: updated.quantity,
+            referenceType: 'return',
+            referenceId: orderReturnId,
+            reason: 'customer_return',
+            notes: `Restocked from return ${returnRequest.returnNumber}`,
+          });
+        }
+
+        logger.info(`return.completed: restocked ${item.quantity} of product ${orderItem.productId} from return ${returnRequest.returnNumber}`);
+      }
+    } catch (err: unknown) {
+      logger.error(`return.completed handler error: ${(err as Error).message}`);
+    }
   });
 }
