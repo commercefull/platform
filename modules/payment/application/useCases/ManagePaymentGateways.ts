@@ -22,4 +22,16 @@ export class ManagePaymentGatewaysUseCase {
   async findAllMethodConfigs(organizationId: string) {
     return this.gatewayRepo.findAllMethodConfigs(organizationId);
   }
+  async findMethodConfigById(id: string) {
+    return this.gatewayRepo.findMethodConfigById(id);
+  }
+  async createMethodConfig(params: Parameters<PaymentGatewayRepository['createMethodConfig']>[0]) {
+    return this.gatewayRepo.createMethodConfig(params);
+  }
+  async updateMethodConfig(id: string, params: Parameters<PaymentGatewayRepository['updateMethodConfig']>[1]) {
+    return this.gatewayRepo.updateMethodConfig(id, params);
+  }
+  async deleteMethodConfig(id: string) {
+    return this.gatewayRepo.deleteMethodConfig(id);
+  }
 }

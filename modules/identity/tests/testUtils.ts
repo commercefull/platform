@@ -94,6 +94,33 @@ export function createRoleRecord(overrides: Partial<RoleRecord> = {}): RoleRecor
   };
 }
 
+export function createCredentialSubject(
+  overrides: Partial<{ id: string; email: string; name: string; status: string; isActive: boolean; isVerified: boolean }> = {},
+) {
+  return {
+    id: 'subject-1',
+    email: 'subject@test.com',
+    name: 'Test Subject',
+    status: 'active',
+    isActive: true,
+    isVerified: true,
+    ...overrides,
+  };
+}
+
+export function createRefreshTokenInfo(
+  overrides: Partial<{ token: string; userType: string; userId: string; isRevoked: boolean; expiresAt: Date }> = {},
+) {
+  return {
+    token: 'refresh-token-1',
+    userType: 'customer',
+    userId: 'subject-1',
+    isRevoked: false,
+    expiresAt: new Date('2099-01-01'),
+    ...overrides,
+  };
+}
+
 export function createUserStoreAssignment(
   overrides: Partial<{ userStoreId: string; userId: string; storeId: string; isPrimary: boolean; role: 'cashier' | 'manager' | 'admin' }> = {},
 ) {

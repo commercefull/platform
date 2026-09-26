@@ -1,15 +1,14 @@
-const ContentRepo = contentDataRepository.pages;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CreatePageUseCase, CreatePageCommand } from '../../application/useCases/CreatePage';
-import { UpdatePageUseCase, UpdatePageCommand } from '../../application/useCases/UpdatePage';
-import { PublishPageUseCase, PublishPageCommand } from '../../application/useCases/PublishPage';
-import { contentDataRepository } from '../../application/wired';
+import { CreatePageCommand } from '../../application/useCases/CreatePage';
+import { UpdatePageCommand } from '../../application/useCases/UpdatePage';
+import { PublishPageCommand } from '../../application/useCases/PublishPage';
+import { createPageUseCase, updatePageUseCase, publishPageUseCase } from '../../application/useCases/wired';
 
 export const contentResolvers = {
   Mutation: {
     createPage: async (_parent: unknown, args: { input: Record<string, unknown> }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreatePageUseCase(ContentRepo);
+      const useCase = createPageUseCase;
       const i = args.input;
       const command = new CreatePageCommand(
         i.title as string,
@@ -40,7 +39,7 @@ export const contentResolvers = {
 
     updatePage: async (_parent: unknown, args: { input: Record<string, unknown> }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new UpdatePageUseCase(ContentRepo);
+      const useCase = updatePageUseCase;
       const i = args.input;
       const command = new UpdatePageCommand(
         i.pageId as string,
@@ -69,7 +68,7 @@ export const contentResolvers = {
 
     publishPage: async (_parent: unknown, args: { pageId: string; publishedBy?: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new PublishPageUseCase(ContentRepo);
+      const useCase = publishPageUseCase;
       const command = new PublishPageCommand(args.pageId, args.publishedBy);
       const result = await useCase.execute(command);
       return {

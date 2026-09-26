@@ -7,8 +7,8 @@ import { randomUUID } from 'crypto';
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
-import { UpdateSystemConfigurationUseCase, UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
-import { SystemConfigurationRepo } from '../../application/wired';
+import { UpdateSystemConfigurationCommand } from '../../application/useCases/UpdateSystemConfiguration';
+import { manageSystemConfigurationUseCase, updateSystemConfigurationUseCase } from '../../application/wired';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { isUuid } from '../../../../libs/uuid';
 
@@ -41,12 +41,7 @@ interface UpdateConfigBody {
 }
 
 export class SystemConfigurationController {
-  private updateSystemConfigurationUseCase: UpdateSystemConfigurationUseCase;
-
-  constructor() {
-    const systemConfigRepository = new SystemConfigurationRepo();
-    this.updateSystemConfigurationUseCase = new UpdateSystemConfigurationUseCase(systemConfigRepository);
-  }
+  private updateSystemConfigurationUseCase = updateSystemConfigurationUseCase;
 
   /**
    * Create system configuration
@@ -75,8 +70,7 @@ export class SystemConfigurationController {
         systemMode: body.systemMode,
       });
 
-      const systemConfigRepository = new SystemConfigurationRepo();
-      await systemConfigRepository.save(config);
+      await manageSystemConfigurationUseCase.save(config);
 
       res.status(201).json({
         success: true,
@@ -148,8 +142,7 @@ export class SystemConfigurationController {
           message: 'Invalid configuration ID format',
         });
       }
-      const systemConfigRepository = new SystemConfigurationRepo();
-      const config = await systemConfigRepository.findById(req.params.configId);
+      const config = await manageSystemConfigurationUseCase.findById(req.params.configId);
 
       if (!config) {
         return res.status(404).json({
@@ -180,8 +173,7 @@ export class SystemConfigurationController {
    */
   async getActiveSystemConfiguration(req: HttpRequest, res: HttpResponse) {
     try {
-      const systemConfigRepository = new SystemConfigurationRepo();
-      const config = await systemConfigRepository.findActive();
+      const config = await manageSystemConfigurationUseCase.findActive();
 
       if (!config) {
         return res.status(404).json({
@@ -212,8 +204,7 @@ export class SystemConfigurationController {
    */
   async listSystemConfigurations(req: HttpRequest, res: HttpResponse) {
     try {
-      const systemConfigRepository = new SystemConfigurationRepo();
-      const configs = await systemConfigRepository.findAll();
+      const configs = await manageSystemConfigurationUseCase.findAll();
 
       res.json({
         success: true,

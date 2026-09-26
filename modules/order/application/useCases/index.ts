@@ -5,6 +5,8 @@ export * from './CreateOrder';
 export * from './GetOrder';
 export * from './ListOrders';
 export * from './UpdateOrderStatus';
+export * from './UpdatePaymentStatus';
+export * from './UpdateFulfillmentStatus';
 export * from './CancelOrder';
 export * from './ProcessRefund';
 export * from './GetCustomerOrders';

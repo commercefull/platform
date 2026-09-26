@@ -7,6 +7,7 @@ import { GetAutomationRuleUseCase } from './GetAutomationRule';
 import { ListAutomationRulesUseCase } from './ListAutomationRules';
 import { ExecuteAutomationRuleUseCase } from './ExecuteAutomationRule';
 import { TriggerAutomationRuleUseCase } from './TriggerAutomationRule';
+import { ListExecutionLogsUseCase } from './ListExecutionLogs';
 
 const ruleRepo = new AutomationRuleRepositoryImpl();
 const logRepo = new ExecutionLogRepositoryImpl();
@@ -16,6 +17,7 @@ export const updateAutomationRuleUseCase = new UpdateAutomationRuleUseCase(ruleR
 export const deleteAutomationRuleUseCase = new DeleteAutomationRuleUseCase(ruleRepo);
 export const getAutomationRuleUseCase = new GetAutomationRuleUseCase(ruleRepo);
 export const listAutomationRulesUseCase = new ListAutomationRulesUseCase(ruleRepo);
+export const listExecutionLogsUseCase = new ListExecutionLogsUseCase(logRepo);
 
 const actionHandlers = createActionHandlers(new AutomationActionEffectsImpl());
 

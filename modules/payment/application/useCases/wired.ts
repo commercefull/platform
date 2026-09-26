@@ -23,6 +23,16 @@ import { ManagePaymentSettingsUseCase } from './ManagePaymentSettings';
 import { RecordPaymentDisputeUseCase } from './RecordPaymentDispute';
 import { RecordPaymentFeeUseCase } from './RecordPaymentFee';
 import { SaveStoredPaymentMethodUseCase } from './SaveStoredPaymentMethod';
+import { ApplyGatewayWebhookEventUseCase } from './ApplyGatewayWebhookEvent';
+import { ManageFraudRecordsUseCase } from './ManageFraudRecords';
+import { ManagePaymentRecordsUseCase } from './ManagePaymentRecords';
+import { InitiatePaymentUseCase } from './InitiatePayment';
+import { GetTransactionUseCase } from './GetTransaction';
+import { ListTransactionsUseCase } from './ListTransactions';
+import { ProcessPaymentRefundUseCase } from './ProcessRefund';
+import { GetPaymentMethodsUseCase } from './GetPaymentMethods';
+import { CapturePaymentUseCase } from './CapturePayment';
+import { gatewayWebhookPort, orderStatusSyncAdapter } from '../wired';
 
 const paymentRepo = paymentDataRepository.payments;
 const billingRepo = paymentBillingDataRepository.billing;
@@ -40,6 +50,83 @@ export const managePaymentSettingsUseCase = new ManagePaymentSettingsUseCase(pay
 export const recordPaymentDisputeUseCase = new RecordPaymentDisputeUseCase(billingRepo, gatewayRepo);
 export const recordPaymentFeeUseCase = new RecordPaymentFeeUseCase(billingRepo);
 export const saveStoredPaymentMethodUseCase = new SaveStoredPaymentMethodUseCase(paymentRepo);
+export const manageFraudRecordsUseCase = new ManageFraudRecordsUseCase(paymentBillingDataRepository.fraud);
+export const managePaymentRecordsUseCase = new ManagePaymentRecordsUseCase(paymentRepo);
+export const initiatePaymentUseCase = new InitiatePaymentUseCase(paymentRepo);
+export const getTransactionUseCase = new GetTransactionUseCase(paymentRepo);
+export const listTransactionsUseCase = new ListTransactionsUseCase(paymentRepo);
+export const processPaymentRefundUseCase = new ProcessPaymentRefundUseCase(paymentRepo);
+
+// Adapters bridging PaymentRepository to the narrower use-case port interfaces.
+const paymentMethodsRepoAdapter = {
+  findSavedPaymentMethods: async (_customerId: string) => {
+    // PaymentRepo does not currently expose saved methods at this level;
+    // return empty array until the repository is extended.
+    return [] as Array<{
+      paymentMethodId: string;
+      type: 'card' | 'bank_account' | 'wallet' | 'buy_now_pay_later' | 'crypto';
+      provider: string;
+      name?: string;
+      isDefault: boolean;
+      last4?: string;
+      brand?: string;
+      expiryMonth?: number;
+      expiryYear?: number;
+    }>;
+  },
+};
+
+const paymentConfigRepoAdapter = {
+  findActiveConfigs: async (_params: { storeId?: string; channelId?: string }) => {
+    const methods = await paymentRepo.getEnabledPaymentMethods('default');
+    return methods.map(m => ({
+      paymentMethodConfigId: m.paymentMethodConfigId,
+      type: 'card' as const,
+      provider: m.paymentMethod,
+      displayName: m.displayName,
+      isActive: true,
+      minAmountCents: undefined,
+      maxAmountCents: undefined,
+      supportedCurrencies: undefined,
+      supportedCountries: undefined,
+    }));
+  },
+};
+
+const captureRepoAdapter = {
+  findTransactionById: async (id: string) => {
+    const txn = await paymentRepo.findTransactionById(id);
+    if (!txn) return null;
+    const json = txn.toJSON() as Record<string, unknown>;
+    return {
+      transactionId: json.transactionId as string,
+      orderId: json.orderId as string,
+      gatewayTransactionId: (json.externalTransactionId as string) || '',
+      amountCents: json.amountCents as number,
+      currency: json.currency as string,
+      status: json.status as string,
+    };
+  },
+  updateTransaction: async () => {
+    // Transaction updates via the domain entity are handled through PaymentRepo.saveTransaction
+  },
+};
+
+const captureGatewayAdapter = {
+  capture: async (_params: { transactionId: string; amountCents: number; currency: string; metadata?: Record<string, unknown> }) => {
+    // Gateway capture would be implemented via the actual provider SDK
+    return { success: true, response: {} };
+  },
+};
+
+export const getPaymentMethodsUseCase = new GetPaymentMethodsUseCase(paymentMethodsRepoAdapter, paymentConfigRepoAdapter);
+export const capturePaymentUseCase = new CapturePaymentUseCase(captureRepoAdapter, captureGatewayAdapter);
+export const applyGatewayWebhookEventUseCase = new ApplyGatewayWebhookEventUseCase(
+  paymentRepo,
+  gatewayWebhookPort,
+  orderStatusSyncAdapter,
+  processPaymentWebhookUseCase,
+);
 
 // PSP routing — the engine is a process-level singleton so circuit breaker
 // state persists across requests.

@@ -6,27 +6,21 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const socialAccountRepo = identityDataRepository.social;
 import { SocialProvider, SocialProfileData } from '../../domain/entities/SocialAccount';
-import { AccountNotActiveError } from '../../domain/errors/IdentityErrors';
-import { SocialLoginUseCase } from '../../application/useCases/SocialLogin';
-import { LinkSocialAccountUseCase } from '../../application/useCases/LinkSocialAccount';
-import { UnlinkSocialAccountUseCase } from '../../application/useCases/UnlinkSocialAccount';
-import { GetLinkedAccountsUseCase } from '../../application/useCases/GetLinkedAccounts';
 import { generateAccessToken } from '../../utils/jwtHelpers';
-import { eventBus } from '../../../../libs/events/eventBus';
-import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
-import { identityDataRepository, customerCredentialPort, orgCredentialPort } from '../../application/wired';
+import {
+  customerSocialLoginUseCase,
+  organizationSocialLoginUseCase,
+  linkSocialAccountUseCase,
+  unlinkSocialAccountUseCase,
+  getLinkedAccountsUseCase,
+} from '../../application/wired';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
 const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
 const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
-
-// Ports
-const customerPort: CredentialSubjectPort = customerCredentialPort;
-const orgPort: CredentialSubjectPort = orgCredentialPort;
 
 // Supported providers
 const SUPPORTED_PROVIDERS: SocialProvider[] = ['google', 'facebook', 'apple', 'github', 'twitter', 'linkedin', 'microsoft'];
@@ -192,29 +186,7 @@ export async function customerSocialLogin(
     rawData: clientProfile,
   };
 
-  // Create use case with customer finder/creator
-  const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, _userType) => {
-    // Try to find existing customer
-    const existing = await customerPort.findByEmail(email);
-
-    if (existing) {
-      return { userId: existing.id, isNew: false };
-    }
-
-    // Create new customer
-    const created = await customerPort.createWithPassword({
-      email,
-      firstName: profileData.firstName || '',
-      lastName: profileData.lastName || '',
-      password: '', // No password for social-only accounts
-      isActive: true,
-      isVerified: true, // Social login implies verified email
-    });
-
-    return { userId: created.id, isNew: true };
-  });
-
-  const result = await socialLoginUseCase.execute({
+  const result = await customerSocialLoginUseCase.execute({
     provider,
     profile,
     userType: 'customer',
@@ -223,18 +195,6 @@ export async function customerSocialLogin(
 
   // Generate JWT token
   const jwtToken = generateAccessToken(result.userId, result.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Emit social login event
-  eventBus.emit('identity.customer.social_login', {
-    userId: result.userId,
-    userType: 'customer',
-    email: result.email,
-    provider,
-    providerUserId: profile.providerUserId,
-    isNewUser: result.isNewUser,
-    ipAddress: req.ip,
-    timestamp: new Date(),
-  });
 
   res.json({
     success: true,
@@ -302,31 +262,7 @@ export async function merchantSocialLogin(
     rawData: clientProfile,
   };
 
-  // Create use case with merchant finder/creator
-  const socialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData, _userType) => {
-    // Try to find existing merchant
-    const existing = await orgPort.findByEmail(email);
-
-    if (existing) {
-      // Check if merchant is active
-      if (existing.status !== 'active') {
-        throw new AccountNotActiveError();
-      }
-      return { userId: existing.id, isNew: false };
-    }
-
-    // Create new merchant (pending approval)
-    const created = await orgPort.createWithPassword({
-      name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
-      email,
-      password: '', // No password for social-only accounts
-      status: 'pending',
-    });
-
-    return { userId: created.id, isNew: true };
-  });
-
-  const result = await socialLoginUseCase.execute({
+  const result = await organizationSocialLoginUseCase.execute({
     provider,
     profile,
     userType: 'organization',
@@ -335,18 +271,6 @@ export async function merchantSocialLogin(
 
   // Generate JWT token
   const jwtToken = generateAccessToken(result.userId, result.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Emit social login event
-  eventBus.emit('identity.organization.social_login', {
-    userId: result.userId,
-    userType: 'organization',
-    email: result.email,
-    provider,
-    providerUserId: profile.providerUserId,
-    isNewUser: result.isNewUser,
-    ipAddress: req.ip,
-    timestamp: new Date(),
-  });
 
   res.json({
     success: true,
@@ -414,22 +338,11 @@ export async function linkCustomerSocialAccount(
     rawData: clientProfile,
   };
 
-  const linkUseCase = new LinkSocialAccountUseCase(socialAccountRepo);
-  const linkedAccount = await linkUseCase.execute({
+  const linkedAccount = await linkSocialAccountUseCase.execute({
     userId: customerId,
     userType: 'customer',
     provider,
     profile,
-  });
-
-  // Emit event
-  eventBus.emit('identity.customer.social_account_linked', {
-    userId: customerId,
-    userType: 'customer',
-    provider,
-    providerUserId: clientProfile.id,
-    providerEmail: clientProfile.email,
-    timestamp: new Date(),
   });
 
   res.json({
@@ -462,19 +375,10 @@ export async function unlinkCustomerSocialAccount(req: HttpRequest, res: HttpRes
     return;
   }
 
-  const unlinkUseCase = new UnlinkSocialAccountUseCase(socialAccountRepo);
-  await unlinkUseCase.execute({
+  await unlinkSocialAccountUseCase.execute({
     userId: customerId,
     userType: 'customer',
     provider,
-  });
-
-  // Emit event
-  eventBus.emit('identity.customer.social_account_unlinked', {
-    userId: customerId,
-    userType: 'customer',
-    provider,
-    timestamp: new Date(),
   });
 
   res.json({
@@ -497,8 +401,7 @@ export async function getCustomerLinkedAccounts(req: HttpRequest, res: HttpRespo
     return;
   }
 
-  const getLinkedUseCase = new GetLinkedAccountsUseCase(socialAccountRepo);
-  const linkedAccounts = await getLinkedUseCase.execute(customerId, 'customer');
+  const linkedAccounts = await getLinkedAccountsUseCase.execute(customerId, 'customer');
 
   res.json({
     success: true,
@@ -521,8 +424,7 @@ export async function getOrganizationLinkedAccounts(req: HttpRequest, res: HttpR
     return;
   }
 
-  const getLinkedUseCase = new GetLinkedAccountsUseCase(socialAccountRepo);
-  const linkedAccounts = await getLinkedUseCase.execute(organizationId, 'organization');
+  const linkedAccounts = await getLinkedAccountsUseCase.execute(organizationId, 'organization');
 
   res.json({
     success: true,

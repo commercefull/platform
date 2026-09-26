@@ -5,7 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { listProductsUseCase, getProductUseCase, brandRepo } from '../../application/useCases/wired';
+import { listProductsUseCase, getProductUseCase, manageBrandsUseCase } from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 
@@ -89,7 +89,7 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
   try {
-    const brandsResult = await brandRepo.findAll({ organizationId: undefined, status: 'active' });
+    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
     availableBrands = brandsResult.data.map(b => ({ brandId: b.brandId, name: b.name, slug: b.slug }));
   } catch {
     // Brands are optional — continue without them
@@ -224,7 +224,7 @@ export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): 
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
   try {
-    const brandsResult = await brandRepo.findAll({ organizationId: undefined, status: 'active' });
+    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
     availableBrands = brandsResult.data.map(b => ({ brandId: b.brandId, name: b.name, slug: b.slug }));
   } catch {
     // Brands are optional — continue without them
@@ -308,7 +308,7 @@ export const searchProducts = async (req: HttpRequest, res: HttpResponse): Promi
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
   try {
-    const brandsResult = await brandRepo.findAll({ organizationId: undefined, status: 'active' });
+    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
     availableBrands = brandsResult.data.map(b => ({ brandId: b.brandId, name: b.name, slug: b.slug }));
   } catch {
     // Brands are optional — continue without them
@@ -365,7 +365,7 @@ export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): P
   // Brand suggestions
   let brands: { name: string; slug: string }[] = [];
   try {
-    const brandsResult = await brandRepo.findAll({ search: search as string });
+    const brandsResult = await manageBrandsUseCase.findAll({ search: search as string });
     brands = brandsResult.data.slice(0, 3).map(b => ({ name: b.name, slug: b.slug }));
   } catch {
     // Brands are optional
@@ -419,7 +419,7 @@ export const generateSitemap = async (req: HttpRequest, res: HttpResponse): Prom
 
   // Brands
   try {
-    const brandsResult = await brandRepo.findAll({ organizationId: undefined, status: 'active' });
+    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
     brandsResult.data.forEach(b => {
       urls.push({
         loc: `${baseUrl}/brands/${b.slug}`,

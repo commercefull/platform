@@ -1,15 +1,15 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const InventoryRepository = inventoryDataRepository.items;
-import { CreateStoreDispatchUseCase } from '../../application/useCases/CreateStoreDispatch';
-import { ListStoreDispatchesUseCase } from '../../application/useCases/ListStoreDispatches';
-import { GetStoreDispatchUseCase } from '../../application/useCases/GetStoreDispatch';
-import { ApproveStoreDispatchUseCase } from '../../application/useCases/ApproveStoreDispatch';
-import { DispatchFromStoreUseCase } from '../../application/useCases/DispatchFromStore';
-import { ReceiveStoreDispatchUseCase } from '../../application/useCases/ReceiveStoreDispatch';
-import { CancelStoreDispatchUseCase } from '../../application/useCases/CancelStoreDispatch';
 import { DispatchStatus } from '../../domain/entities/StoreDispatch';
-import { inventoryDataRepository, storeDispatchRepository } from '../../application/wired';
+import {
+  createStoreDispatchUseCase,
+  listStoreDispatchesUseCase,
+  getStoreDispatchUseCase,
+  approveStoreDispatchUseCase,
+  dispatchFromStoreUseCase,
+  receiveStoreDispatchUseCase,
+  cancelStoreDispatchUseCase,
+} from '../../application/useCases/wired';
 
 interface CreateDispatchBody {
   fromStoreId: string;
@@ -58,7 +58,7 @@ export const createStoreDispatch = async (
     respondError(res, 'toStoreId is required', 400);
     return;
   }
-  const useCase = new CreateStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
+  const useCase = createStoreDispatchUseCase;
   const result = await useCase.execute({
     fromStoreId: req.body.fromStoreId,
     toStoreId: req.body.toStoreId,
@@ -71,7 +71,7 @@ export const createStoreDispatch = async (
 };
 
 export const listStoreDispatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new ListStoreDispatchesUseCase(storeDispatchRepository);
+  const useCase = listStoreDispatchesUseCase;
   const result = await useCase.execute({
     fromStoreId: req.query.fromStoreId as string | undefined,
     toStoreId: req.query.toStoreId as string | undefined,
@@ -86,7 +86,7 @@ export const listStoreDispatches = async (req: HttpRequest, res: HttpResponse): 
 };
 
 export const getStoreDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new GetStoreDispatchUseCase(storeDispatchRepository);
+  const useCase = getStoreDispatchUseCase;
   const result = await useCase.execute(req.params.dispatchId);
 
   if (!result) {
@@ -101,7 +101,7 @@ export const approveStoreDispatch = async (
   req: HttpRequest<Record<string, string>, unknown, ApproveDispatchBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new ApproveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
+  const useCase = approveStoreDispatchUseCase;
   const actor = req.body.approvedBy || 'test-admin';
   const result = await useCase.execute(req.params.dispatchId, actor);
   respond(res, result);
@@ -111,7 +111,7 @@ export const dispatchFromStore = async (
   req: HttpRequest<Record<string, string>, unknown, DispatchItemsBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new DispatchFromStoreUseCase(storeDispatchRepository, InventoryRepository);
+  const useCase = dispatchFromStoreUseCase;
   const actor = req.body.dispatchedBy || 'test-admin';
   const result = await useCase.execute(req.params.dispatchId, actor, req.body.items);
   respond(res, result);
@@ -121,7 +121,7 @@ export const receiveStoreDispatch = async (
   req: HttpRequest<Record<string, string>, unknown, ReceiveDispatchBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new ReceiveStoreDispatchUseCase(storeDispatchRepository, InventoryRepository);
+  const useCase = receiveStoreDispatchUseCase;
   const result = await useCase.execute({
     dispatchId: req.params.dispatchId,
     receivedBy: req.body.receivedBy || 'test-admin',
@@ -135,7 +135,7 @@ export const cancelStoreDispatch = async (
   req: HttpRequest<Record<string, string>, unknown, CancelDispatchBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new CancelStoreDispatchUseCase(storeDispatchRepository);
+  const useCase = cancelStoreDispatchUseCase;
   const result = await useCase.execute(req.params.dispatchId, req.body.reason);
   respond(res, result);
 };

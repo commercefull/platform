@@ -1,5 +1,5 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { OrganizationRepo, Organization } from '../../application/wired';
+import { manageOrganizationsUseCase, Organization } from '../../application/wired';
 
 interface CreateOrganizationBody {
   name: string;
@@ -66,7 +66,7 @@ interface UpdateOrganizationPaymentInfoBody {
   isVerified?: boolean;
 }
 
-const repo = new OrganizationRepo();
+const repo = manageOrganizationsUseCase;
 
 export const getOrganizations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;

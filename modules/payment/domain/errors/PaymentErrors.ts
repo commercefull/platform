@@ -372,3 +372,9 @@ export class PaymentValidationError extends AppError {
     super(message, 400, { code: 'payment.validation_error' });
   }
 }
+
+export class FraudRuleNotFoundError extends AppError {
+  constructor() {
+    super('Rule not found', 404, { code: 'payment.fraud_rule_not_found' });
+  }
+}

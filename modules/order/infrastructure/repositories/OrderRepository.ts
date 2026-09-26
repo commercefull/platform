@@ -266,6 +266,13 @@ export class OrderRepo implements IOrderRepository {
     return (rows || []).map(row => this.mapToOrderItem(row, currency));
   }
 
+  async findOrderItemById(orderItemId: string): Promise<OrderItem | null> {
+    const row = await queryOne<DbOrderItem>('SELECT * FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
+    if (!row) return null;
+    const order = await queryOne<{ currencyCode: string }>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [row.orderId]);
+    return this.mapToOrderItem(row, order?.currencyCode || 'USD');
+  }
+
   async addOrderItem(orderId: string, item: OrderItem): Promise<OrderItem> {
     const now = new Date().toISOString();
     await query(

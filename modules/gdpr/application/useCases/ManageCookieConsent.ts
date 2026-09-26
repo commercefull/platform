@@ -213,6 +213,13 @@ export class ManageCookieConsentUseCase {
   /**
    * Link anonymous consent to customer after login
    */
+  async getConsentStatistics() {
+    return this.consentRepository.getConsentStatistics();
+  }
+  async getConsentByCountry() {
+    return this.consentRepository.getConsentByCountry();
+  }
+
   async linkToCustomer(command: LinkConsentToCustomerCommand): Promise<CookieConsentResponse | null> {
     const consent = await this.consentRepository.findBySessionId(command.sessionId);
     if (!consent) return null;

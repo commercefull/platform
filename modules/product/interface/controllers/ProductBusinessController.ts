@@ -11,36 +11,37 @@ import { UpdateProductCommand } from '../../application/useCases/UpdateProduct';
 import { ManageProductCollectionCommand } from '../../application/useCases/ManageProductCollection';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import { GetProductStoreAvailabilityUseCase } from '../../application/useCases/GetProductStoreAvailability';
 import {
   listProductsUseCase,
   getProductUseCase,
   createProductUseCase,
   updateProductUseCase,
   manageProductCollectionUseCase,
-  productPricingPort,
+  updateProductStatusUseCase,
+  deleteProductUseCase,
+  createCatalogVariantUseCase,
+  updateCatalogVariantUseCase,
+  getVariantMatrixUseCase,
+  configureVariantUseCase,
+  listGroupedChildrenUseCase,
+  applyAttributeSetUseCase,
+  getProductStoreAvailabilityUseCase,
+  manageProductVariantsUseCase,
+  manageProductImagesUseCase,
+  manageProductReviewsUseCase,
+  manageProductQaUseCase,
+  manageReviewMediaUseCase,
+  manageProductCollectionsUseCase,
+  manageProductDownloadsUseCase,
+  manageProductRelationshipsUseCase,
 } from '../../application/useCases/wired';
+import { CreateCatalogVariantCommand } from '../../application/useCases/CreateCatalogVariant';
+import { UpdateCatalogVariantCommand } from '../../application/useCases/UpdateCatalogVariant';
+import type { CatalogVariantCreateParams, CatalogVariantUpdateParams, CatalogVariantOption } from '../../application/ports/CatalogVariantPort';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { productCatalogRepository, productAttributeRepository, productEngagementRepository } from '../../application/wired';
-import {
-  ProductVariantCreateProps,
-  ProductVariantUpdateProps,
-  ProductQaStatus,
-  RelationType,
-  ReviewFilters,
-} from '../../application/wired';
-
-const ProductRepo = productCatalogRepository.productRepository;
-const productVariantRepo = productCatalogRepository.variants;
-const productImageRepo = productEngagementRepository.images;
-const productReviewRepo = productEngagementRepository.reviews;
-const productQaRepo = productEngagementRepository.qa;
-const productReviewMediaRepo = productEngagementRepository.reviewMedia;
-const productCollectionRepo = productEngagementRepository.collections;
-const productDownloadRepo = productCatalogRepository.downloads;
-const productRelationshipRepo = productEngagementRepository.relationships;
-const ProductAttributeSetRepository = productAttributeRepository.sets;
-const DynamicAttributeRepository = productAttributeRepository.dynamic;
+import { ProductVariantUpdateProps, ProductQaStatus, ReviewFilters } from '../../application/wired';
+import type { ProductRelationType } from '../../application/useCases/ManageProductAssets';
 
 // ============================================================================
 // Request Body Interfaces
@@ -277,8 +278,7 @@ export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<v
 };
 
 export const getProductStoreAvailability = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new GetProductStoreAvailabilityUseCase(ProductRepo);
-  const result = await useCase.execute({
+  const result = await getProductStoreAvailabilityUseCase.execute({
     productId: req.params.productId,
     variantId: req.query.variantId as string | undefined,
     storeId: req.query.storeId as string | undefined,
@@ -412,16 +412,12 @@ export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): 
     return;
   }
 
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    respondError(req, res, 'Product not found', 404);
-    return;
+  try {
+    const product = await updateProductStatusUseCase.updateStatus(productId, status as ProductStatus);
+    respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  product.updateStatus(status as ProductStatus);
-  await ProductRepo.save(product);
-
-  respond(req, res, { productId, status: product.status, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 /**
@@ -438,16 +434,12 @@ export const updateProductVisibility = async (req: HttpRequest, res: HttpRespons
     return;
   }
 
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    respondError(req, res, 'Product not found', 404);
-    return;
+  try {
+    const product = await updateProductStatusUseCase.updateVisibility(productId, visibility as ProductVisibility);
+    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  product.updateVisibility(visibility as ProductVisibility);
-  await ProductRepo.save(product);
-
-  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 /**
@@ -458,19 +450,12 @@ export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promis
   const { productId } = req.params;
   const { permanent } = req.query;
 
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    respondError(req, res, 'Product not found', 404);
-    return;
+  try {
+    await deleteProductUseCase.execute(productId, permanent === 'true');
+    respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  if (permanent === 'true') {
-    await ProductRepo.hardDelete(productId);
-  } else {
-    await ProductRepo.delete(productId);
-  }
-
-  respond(req, res, { productId, deleted: true, permanent: permanent === 'true' }, 200);
 };
 
 /**
@@ -480,21 +465,17 @@ export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promis
 export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    respondError(req, res, 'Product not found', 404);
-    return;
+  try {
+    const product = await updateProductStatusUseCase.publish(productId);
+    respond(
+      req,
+      res,
+      { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
+      200,
+    );
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  product.publish();
-  await ProductRepo.save(product);
-
-  respond(
-    req,
-    res,
-    { productId, status: product.status, visibility: product.visibility, publishedAt: product.publishedAt?.toISOString() },
-    200,
-  );
 };
 
 /**
@@ -504,16 +485,12 @@ export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promi
 export const unpublishProduct = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
 
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    respondError(req, res, 'Product not found', 404);
-    return;
+  try {
+    const product = await updateProductStatusUseCase.unpublish(productId);
+    respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  product.unpublish();
-  await ProductRepo.save(product);
-
-  respond(req, res, { productId, visibility: product.visibility, updatedAt: product.updatedAt.toISOString() }, 200);
 };
 
 // ============================================================================
@@ -532,7 +509,7 @@ export const findByBarcode = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
-  const result = await ProductRepo.findByBarcode(barcode);
+  const result = await getProductUseCase.findByBarcode(barcode);
   if (!result) {
     respondError(req, res, 'No product found for this barcode', 404);
     return;
@@ -546,12 +523,12 @@ export const findByBarcode = async (req: HttpRequest, res: HttpResponse): Promis
 // ============================================================================
 
 export const getProductVariants = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const variants = await productVariantRepo.findByProductId(req.params.productId);
+  const variants = await manageProductVariantsUseCase.listForProduct(req.params.productId);
   respond(req, res, variants);
 };
 
 export const getProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const variant = await productVariantRepo.findById(req.params.variantId);
+  const variant = await manageProductVariantsUseCase.findById(req.params.variantId);
   if (!variant) {
     respondError(req, res, 'Variant not found', 404);
     return;
@@ -563,55 +540,47 @@ export const createProductVariant = async (req: HttpRequest, res: HttpResponse):
   const { productId } = req.params;
   const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
     req.body as VariantBody & { currencyCode?: string };
-  const variant = await productVariantRepo.create({
-    productId,
-    ...variantFields,
-  } as ProductVariantCreateProps);
-  const variantId = (variant as unknown as { productVariantId?: string }).productVariantId ?? variant.id;
 
-  // Variant-level catalog price lives in the pricing-owned store
-  if (priceCents !== undefined || salePriceCents !== undefined || compareAtPriceCents !== undefined) {
-    const existing = await productPricingPort.getBasePrice(productId, variantId);
-    const price = await productPricingPort.setBasePrice({
-      productId,
-      productVariantId: variantId,
-      currencyCode: currencyCode ?? existing?.currencyCode ?? 'USD',
-      priceCents: priceCents ?? existing?.priceCents ?? 0,
-      salePriceCents: salePriceCents ?? existing?.salePriceCents ?? null,
-      compareAtPriceCents: compareAtPriceCents ?? existing?.compareAtPriceCents ?? null,
-      costPriceCents: costPriceCents ?? existing?.costPriceCents ?? null,
-    });
-    respond(req, res, { ...variant, priceCents: price.priceCents }, 201);
-    return;
+  try {
+    const result = await createCatalogVariantUseCase.execute(
+      new CreateCatalogVariantCommand(
+        productId,
+        { productId, ...variantFields } as CatalogVariantCreateParams,
+        priceCents ?? undefined,
+        salePriceCents ?? undefined,
+        compareAtPriceCents ?? undefined,
+        costPriceCents ?? undefined,
+        currencyCode ?? undefined,
+      ),
+    );
+    respond(req, res, result, 201);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  respond(req, res, variant, 201);
 };
 
 export const updateProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { variantId } = req.params;
   const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
     req.body as ProductVariantUpdateProps & VariantBody & { currencyCode?: string };
-  const variant = await productVariantRepo.update(variantId, variantFields);
-  const productId = req.params.productId ?? variant.productId;
 
-  // Variant-level catalog price lives in the pricing-owned store
-  if (priceCents !== undefined || salePriceCents !== undefined || compareAtPriceCents !== undefined || costPriceCents !== undefined) {
-    const existing = await productPricingPort.getBasePrice(productId, variantId);
-    const price = await productPricingPort.setBasePrice({
-      productId,
-      productVariantId: variantId,
-      currencyCode: currencyCode ?? existing?.currencyCode ?? 'USD',
-      priceCents: priceCents ?? existing?.priceCents ?? 0,
-      salePriceCents: salePriceCents !== undefined ? salePriceCents : (existing?.salePriceCents ?? null),
-      compareAtPriceCents: compareAtPriceCents !== undefined ? compareAtPriceCents : (existing?.compareAtPriceCents ?? null),
-      costPriceCents: costPriceCents !== undefined ? costPriceCents : (existing?.costPriceCents ?? null),
-    });
-    respond(req, res, { ...variant, priceCents: price.priceCents });
-    return;
+  try {
+    const result = await updateCatalogVariantUseCase.execute(
+      new UpdateCatalogVariantCommand(
+        req.params.productId ?? '',
+        variantId,
+        variantFields as CatalogVariantUpdateParams,
+        priceCents ?? undefined,
+        salePriceCents ?? undefined,
+        compareAtPriceCents ?? undefined,
+        costPriceCents ?? undefined,
+        currencyCode ?? undefined,
+      ),
+    );
+    respond(req, res, result);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  respond(req, res, variant);
 };
 
 export const updateVariantInventory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -621,7 +590,7 @@ export const updateVariantInventory = async (req: HttpRequest, res: HttpResponse
     respondError(req, res, 'inventory is required', 400);
     return;
   }
-  const variant = await productVariantRepo.findById(variantId);
+  const variant = (await manageProductVariantsUseCase.findById(variantId)) as Record<string, unknown> | null;
   if (!variant) {
     respondError(req, res, 'Variant not found', 404);
     return;
@@ -632,7 +601,7 @@ export const updateVariantInventory = async (req: HttpRequest, res: HttpResponse
 };
 
 export const deleteProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  await productVariantRepo.delete(req.params.variantId);
+  await manageProductVariantsUseCase.delete(req.params.variantId);
   respond(req, res, { deleted: true });
 };
 
@@ -641,7 +610,7 @@ export const deleteProductVariant = async (req: HttpRequest, res: HttpResponse):
 // ============================================================================
 
 export const getProductImages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const images = await productImageRepo.findByProductId(req.params.productId);
+  const images = await manageProductImagesUseCase.listForProduct(req.params.productId);
   respond(req, res, images);
 };
 
@@ -659,20 +628,7 @@ export const addProductImage = async (req: HttpRequest, res: HttpResponse): Prom
     type?: string;
     isVisible?: boolean;
   };
-  const image = await productImageRepo.create({
-    productId: req.params.productId,
-    url: body.url,
-    position: body.position ?? 0,
-    isPrimary: body.isPrimary ?? false,
-    productVariantId: body.productVariantId,
-    alt: body.alt,
-    title: body.title,
-    width: body.width,
-    height: body.height,
-    size: body.size,
-    type: body.type,
-    isVisible: body.isVisible,
-  });
+  const image = await manageProductImagesUseCase.create(req.params.productId, body);
   respond(req, res, image, 201);
 };
 
@@ -690,23 +646,27 @@ export const updateProductImage = async (req: HttpRequest, res: HttpResponse): P
     type?: string;
     isVisible?: boolean;
   };
-  const image = await productImageRepo.update(req.params.imageId, body);
-  respond(req, res, image);
+  try {
+    const image = await manageProductImagesUseCase.update(req.params.imageId, body);
+    respond(req, res, image);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
+  }
 };
 
 export const deleteProductImage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  await productImageRepo.delete(req.params.imageId);
+  await manageProductImagesUseCase.delete(req.params.imageId);
   respond(req, res, { deleted: true });
 };
 
 export const reorderProductImages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { imageIds } = req.body as ImageReorderBody;
-  if (!Array.isArray(imageIds)) {
-    respondError(req, res, 'imageIds must be an array', 400);
-    return;
+  try {
+    await manageProductImagesUseCase.reorder(req.params.productId, imageIds);
+    respond(req, res, { reordered: true });
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  await productImageRepo.reorder(req.params.productId, imageIds);
-  respond(req, res, { reordered: true });
 };
 
 // ============================================================================
@@ -718,12 +678,16 @@ export const listReviews = async (req: HttpRequest, res: HttpResponse): Promise<
   const filters: ReviewFilters = {};
   if (productId) filters.productId = productId as string;
   if (status) filters.status = status as ReviewFilters['status'];
-  const reviews = await productReviewRepo.findWithFilters(filters, parseInt(limit as string) || 50, parseInt(offset as string) || 0);
+  const reviews = await manageProductReviewsUseCase.findWithFilters(
+    filters,
+    parseInt(limit as string) || 50,
+    parseInt(offset as string) || 0,
+  );
   respond(req, res, reviews);
 };
 
 export const getReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const review = await productReviewRepo.findById(req.params.reviewId);
+  const review = await manageProductReviewsUseCase.findById(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -732,7 +696,7 @@ export const getReview = async (req: HttpRequest, res: HttpResponse): Promise<vo
 };
 
 export const approveReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const review = await productReviewRepo.approve(req.params.reviewId);
+  const review = await manageProductReviewsUseCase.approve(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -741,7 +705,7 @@ export const approveReview = async (req: HttpRequest, res: HttpResponse): Promis
 };
 
 export const rejectReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const review = await productReviewRepo.reject(req.params.reviewId);
+  const review = await manageProductReviewsUseCase.reject(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -755,7 +719,7 @@ export const respondToReview = async (req: HttpRequest, res: HttpResponse): Prom
     respondError(req, res, 'Response text is required', 400);
     return;
   }
-  const review = await productReviewRepo.addAdminResponse(req.params.reviewId, response);
+  const review = await manageProductReviewsUseCase.addAdminResponse(req.params.reviewId, response);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -764,7 +728,7 @@ export const respondToReview = async (req: HttpRequest, res: HttpResponse): Prom
 };
 
 export const deleteReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  await productReviewRepo.delete(req.params.reviewId);
+  await manageProductReviewsUseCase.delete(req.params.reviewId);
   respond(req, res, { deleted: true });
 };
 
@@ -779,7 +743,7 @@ export const deleteReview = async (req: HttpRequest, res: HttpResponse): Promise
 export const listProductQa = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { status } = req.query;
-  const qa = await productQaRepo.findByProduct(productId, status as ProductQaStatus | undefined);
+  const qa = await manageProductQaUseCase.findByProduct(productId, status as ProductQaStatus | undefined);
   successResponse(res, qa);
 };
 
@@ -794,7 +758,7 @@ export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promi
     errorResponse(res, 'status is required', 400);
     return;
   }
-  const qa = await productQaRepo.updateStatus(qaId, status as ProductQaStatus);
+  const qa = await manageProductQaUseCase.updateStatus(qaId, status as ProductQaStatus);
   if (!qa) {
     errorResponse(res, 'Q&A not found', 404);
     return;
@@ -816,7 +780,7 @@ export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Prom
     errorResponse(res, 'reviewId query param is required', 400);
     return;
   }
-  const media = await productReviewMediaRepo.findByReview(reviewId as string);
+  const media = await manageReviewMediaUseCase.findMediaByReview(reviewId as string);
   successResponse(res, media);
 };
 
@@ -826,7 +790,7 @@ export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Prom
  */
 export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { mediaId } = req.params;
-  const deleted = await productReviewMediaRepo.delete(mediaId);
+  const deleted = await manageReviewMediaUseCase.deleteMedia(mediaId);
   if (!deleted) {
     errorResponse(res, 'Review media not found', 404);
     return;
@@ -843,7 +807,7 @@ export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Pr
  * GET /collections
  */
 export const listCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const collections = await productCollectionRepo.findAll();
+  const collections = await manageProductCollectionsUseCase.findAll();
   successResponse(res, collections);
 };
 
@@ -917,7 +881,7 @@ export const updateCollection = async (req: HttpRequest, res: HttpResponse): Pro
  */
 export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { collectionId } = req.params;
-  const deleted = await productCollectionRepo.softDelete(collectionId);
+  const deleted = await manageProductCollectionsUseCase.softDelete(collectionId);
   if (!deleted) {
     errorResponse(res, 'Collection not found', 404);
     return;
@@ -932,58 +896,38 @@ export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Pro
 export const listDownloads = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { activeOnly } = req.query;
-  const downloads = await productDownloadRepo.findByProductId(productId, undefined, activeOnly === 'true');
+  const downloads = await manageProductDownloadsUseCase.listForProduct(productId, activeOnly === 'true');
   successResponse(res, downloads);
 };
 
 export const createDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const { name, fileUrl, filePath, fileSize, mimeType, maxDownloads, daysValid, isActive, sampleUrl, sortOrder, productVariantId } =
-    req.body as DownloadBody;
-  if (!name?.trim()) {
-    errorResponse(res, 'name is required', 400);
-    return;
+  try {
+    const download = await manageProductDownloadsUseCase.create(productId, req.body as DownloadBody);
+    successResponse(res, download, 201);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  if (!fileUrl?.trim()) {
-    errorResponse(res, 'fileUrl is required', 400);
-    return;
-  }
-  const download = await productDownloadRepo.create({
-    productId,
-    productVariantId,
-    name,
-    fileUrl,
-    filePath,
-    fileSize,
-    mimeType,
-    maxDownloads,
-    daysValid,
-    isActive: isActive !== false,
-    sampleUrl,
-    sortOrder: sortOrder || 0,
-  });
-  successResponse(res, download, 201);
 };
 
 export const updateDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
-  const body = req.body as DownloadBody;
-  const updated = await productDownloadRepo.update(downloadId, body);
-  if (!updated) {
-    errorResponse(res, 'Download not found', 404);
-    return;
+  try {
+    const updated = await manageProductDownloadsUseCase.update(downloadId, req.body as DownloadBody);
+    successResponse(res, updated);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, updated);
 };
 
 export const deleteDownload = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { downloadId } = req.params;
-  const deleted = await productDownloadRepo.delete(downloadId);
-  if (!deleted) {
-    errorResponse(res, 'Download not found', 404);
-    return;
+  try {
+    await manageProductDownloadsUseCase.delete(downloadId);
+    successResponse(res, { deleted: true });
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -993,39 +937,28 @@ export const deleteDownload = async (req: HttpRequest, res: HttpResponse): Promi
 export const listRelationships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { type } = req.query;
-  const relationships = await productRelationshipRepo.findByProductId(productId, type as RelationType | undefined);
+  const relationships = await manageProductRelationshipsUseCase.listForProduct(productId, type as ProductRelationType | undefined);
   successResponse(res, relationships);
 };
 
 export const createRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const { relatedProductId, type, position, isAutomated } = req.body as RelationshipBody;
-  if (!relatedProductId) {
-    errorResponse(res, 'relatedProductId is required', 400);
-    return;
+  try {
+    const relationship = await manageProductRelationshipsUseCase.create(productId, req.body as RelationshipBody);
+    successResponse(res, relationship, 201);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  if (!type) {
-    errorResponse(res, 'type is required (related, accessory, cross_sell, up_sell, grouped)', 400);
-    return;
-  }
-  const relationship = await productRelationshipRepo.create({
-    productId,
-    relatedProductId,
-    type: type as RelationType,
-    position: position || 0,
-    isAutomated: isAutomated || false,
-  });
-  successResponse(res, relationship, 201);
 };
 
 export const deleteRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { relationshipId } = req.params;
-  const deleted = await productRelationshipRepo.delete(relationshipId);
-  if (!deleted) {
-    errorResponse(res, 'Relationship not found', 404);
-    return;
+  try {
+    await manageProductRelationshipsUseCase.delete(relationshipId);
+    successResponse(res, { deleted: true });
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, { deleted: true });
 };
 
 // ============================================================================
@@ -1034,56 +967,23 @@ export const deleteRelationship = async (req: HttpRequest, res: HttpResponse): P
 
 export const getVariantMatrix = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const variants = await productVariantRepo.findByProductId(productId);
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    errorResponse(res, 'Product not found', 404);
-    return;
+  try {
+    const result = await getVariantMatrixUseCase.execute(productId);
+    successResponse(res, result);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  // Variant prices come from the pricing-owned store (integer cents)
-  const priceRows = await productPricingPort.listProductPrices(productId);
-  const productLevelPrice = priceRows.find(p => p.productVariantId == null) ?? null;
-  const priceByVariantId = new Map(priceRows.filter(p => p.productVariantId != null).map(p => [p.productVariantId, p]));
-  const matrix = variants.map(v => {
-    const variantId = (v as unknown as { productVariantId?: string }).productVariantId ?? v.id;
-    const price = priceByVariantId.get(variantId) ?? productLevelPrice;
-    return {
-      variantId,
-      sku: v.sku,
-      name: v.name,
-      priceCents: price?.priceCents ?? null,
-      salePriceCents: price?.salePriceCents ?? null,
-      compareAtPriceCents: price?.compareAtPriceCents ?? null,
-      currencyCode: price?.currencyCode ?? null,
-      inventory: v.inventory,
-      isDefault: v.isDefault,
-      position: v.position,
-      options: v.options,
-      isActive: v.isActive,
-    };
-  });
-  const optionAxes = matrix.length > 0 ? [...new Set(matrix.flatMap(v => (v.options ?? []).map(o => o.name)))] : [];
-  successResponse(res, { productId, productName: product.name, hasVariants: product.hasVariants, optionAxes, variants: matrix });
 };
 
 export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as OptionsBody;
-  if (!options || !Array.isArray(options) || options.length === 0) {
-    errorResponse(res, 'options array is required', 400);
-    return;
+  try {
+    const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
+    successResponse(res, match);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  const variants = await productVariantRepo.findByProductId(productId);
-  const match = variants.find(v =>
-    options.every((reqOpt: { name: string; value: string }) =>
-      v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
-    ),
-  );
-  if (!match) {
-    errorResponse(res, 'No matching variant found for the given options', 404);
-    return;
-  }
-  successResponse(res, match);
 };
 
 // ============================================================================
@@ -1092,13 +992,7 @@ export const configureVariant = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const listGroupedChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const relationships = await productRelationshipRepo.findByProductId(productId, 'grouped' as RelationType);
-  const childIds = relationships.map(r => r.relatedProductId);
-  const children: unknown[] = [];
-  for (const id of childIds) {
-    const p = await ProductRepo.findById(id);
-    if (p) children.push(p.toJSON());
-  }
+  const children = await listGroupedChildrenUseCase.execute(productId);
   successResponse(res, children);
 };
 
@@ -1109,31 +1003,11 @@ export const listGroupedChildren = async (req: HttpRequest, res: HttpResponse): 
 export const applyAttributeSet = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { attributeSetId } = req.body as AttributeSetBody;
-  if (!attributeSetId) {
-    errorResponse(res, 'attributeSetId is required', 400);
-    return;
+
+  try {
+    const result = await applyAttributeSetUseCase.execute(productId, attributeSetId ?? '');
+    successResponse(res, result);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  const product = await ProductRepo.findById(productId);
-  if (!product) {
-    errorResponse(res, 'Product not found', 404);
-    return;
-  }
-
-  const setWithAttrs = await ProductAttributeSetRepository.findByIdWithAttributes(attributeSetId);
-  if (!setWithAttrs) {
-    errorResponse(res, 'Attribute set not found', 404);
-    return;
-  }
-
-  const attrsToSet = setWithAttrs.attributes.map(attr => ({
-    attributeId: attr.productAttributeId,
-    value: attr.defaultValue || '',
-  }));
-
-  if (attrsToSet.length > 0) {
-    await DynamicAttributeRepository.setProductAttributes(productId, attrsToSet);
-  }
-
-  successResponse(res, { applied: true, attributeSetId, attributesAssigned: attrsToSet.length });
 };

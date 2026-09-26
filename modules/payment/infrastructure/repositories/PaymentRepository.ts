@@ -527,6 +527,13 @@ export class PaymentRepo implements IPaymentRepository {
     return queryOne<StoredPaymentMethod>(sql, customerId ? [storedPaymentMethodId, customerId] : [storedPaymentMethodId]);
   }
 
+  async deleteTransaction(transactionId: string): Promise<void> {
+    await query(`UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2`, [
+      new Date().toISOString(),
+      transactionId,
+    ]);
+  }
+
   private mapToRefund(row: Record<string, unknown>): PaymentRefund {
     return PaymentRefund.reconstitute({
       refundId: row.paymentRefundId as string,

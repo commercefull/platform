@@ -54,6 +54,18 @@ export class CategoryNotFoundError extends AppError {
   }
 }
 
+export class PageTranslationNotFoundError extends AppError {
+  constructor(translationId: string) {
+    super(`Translation with ID ${translationId} not found`, 404, { code: 'content.translation_not_found' });
+  }
+}
+
+export class CategorizationNotFoundError extends AppError {
+  constructor(message = 'Categorization not found') {
+    super(message, 404, { code: 'content.categorization_not_found' });
+  }
+}
+
 export class SlugAlreadyExistsError extends AppError {
   constructor(slug: string) {
     super(`Slug already exists: ${slug}`, 409, { code: 'content.slug_already_exists' });

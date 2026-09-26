@@ -1,29 +1,30 @@
 import { requireBusinessAuth, requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetConfigurationUseCase, GetConfigurationInput } from '../../application/useCases/GetConfiguration';
-import { GetFeatureFlagsUseCase, GetFeatureFlagsInput } from '../../application/useCases/GetFeatureFlags';
-import { ToggleFeatureFlagUseCase, ToggleFeatureFlagInput } from '../../application/useCases/ToggleFeatureFlag';
-import { SystemConfigRepo } from '../../application/wired';
+import { GetConfigurationInput } from '../../application/useCases/GetConfiguration';
+import { GetFeatureFlagsInput } from '../../application/useCases/GetFeatureFlags';
+import { ToggleFeatureFlagInput } from '../../application/useCases/ToggleFeatureFlag';
+import {
+  getConfigurationUseCase,
+  getFeatureFlagsUseCase,
+  toggleFeatureFlagUseCase,
+} from '../../application/wired';
 
 export const configurationResolvers = {
   Query: {
     configuration: async (_parent: unknown, args: { input: GetConfigurationInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetConfigurationUseCase(SystemConfigRepo as never);
-      return useCase.execute(args.input);
+      return getConfigurationUseCase.execute(args.input);
     },
 
     featureFlags: async (_parent: unknown, args: { input: GetFeatureFlagsInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetFeatureFlagsUseCase(SystemConfigRepo as never);
-      return useCase.execute(args.input);
+      return getFeatureFlagsUseCase.execute(args.input);
     },
   },
 
   Mutation: {
     toggleFeatureFlag: async (_parent: unknown, args: { input: ToggleFeatureFlagInput }, context: GraphQLAuthContext) => {
       requireAdminAuth(context);
-      const useCase = new ToggleFeatureFlagUseCase(SystemConfigRepo as never);
-      return useCase.execute(args.input);
+      return toggleFeatureFlagUseCase.execute(args.input);
     },
   },
 };

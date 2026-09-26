@@ -5,10 +5,9 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { ManageStoresAdminUseCase } from '../../application/useCases/ManageStoresAdmin';
-import { storeDataRepository } from '../../application/wired';
+import { manageStoresAdminUseCase } from '../../application/useCases/wired';
 
-const manageStoresUseCase = new ManageStoresAdminUseCase(storeDataRepository.stores);
+const manageStoresUseCase = manageStoresAdminUseCase;
 
 export const getStoreLocator = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const stores = await manageStoresUseCase.findActive();

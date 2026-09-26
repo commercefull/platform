@@ -12,3 +12,7 @@ export * from './DeleteWarehouse';
 export * from './ActivateWarehouse';
 export * from './DeactivateWarehouse';
 export * from './AssignToStore';
+export * from './ManageZones';
+export * from './ManageBins';
+export * from './ManageReceiving';
+export * from './ManagePickPack';

@@ -110,6 +110,18 @@ export class SocialLoginUseCase {
       });
     }
 
+    // Emit social login event
+    eventBus.emit(`identity.${userType}.social_login`, {
+      userId,
+      userType,
+      email: profile.email || socialAccount.providerEmail || '',
+      provider,
+      providerUserId: profile.providerUserId,
+      isNewUser,
+      ipAddress: ip,
+      timestamp: new Date(),
+    });
+
     return {
       isNewUser,
       userId,

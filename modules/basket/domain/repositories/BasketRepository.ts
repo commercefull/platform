@@ -6,6 +6,19 @@
 import { Basket } from '../entities/Basket';
 import { BasketItem } from '../entities/BasketItem';
 
+/**
+ * Lightweight basket row projection used by admin listings.
+ */
+export interface BasketSummaryRecord {
+  basketId: string;
+  status: string;
+  currencyCode: string;
+  customerId: string | null;
+  sessionId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface BasketRepository {
   /**
    * Find basket by ID
@@ -26,6 +39,11 @@ export interface BasketRepository {
    * Find active basket for customer or session
    */
   findActiveBasket(customerId?: string, sessionId?: string): Promise<Basket | null>;
+
+  /**
+   * List basket summaries (admin)
+   */
+  findSummaries(limit?: number, offset?: number): Promise<BasketSummaryRecord[]>;
 
   /**
    * Save basket (create or update)

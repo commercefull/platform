@@ -41,3 +41,9 @@ export class CheckoutBasketNotFoundError extends AppError {
     super(`Basket not found: ${basketId}`, 404, { code: 'checkout.basket_not_found' });
   }
 }
+
+export class PickupLocationNotFoundError extends AppError {
+  constructor(locationId: string) {
+    super(`Pickup location not found or inactive: ${locationId}`, 404, { code: 'checkout.pickup_location_not_found' });
+  }
+}

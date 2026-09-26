@@ -1,22 +1,26 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const tokenRepo = identityDataRepository.tokens;
-import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
-import { emitCustomerLogin, emitCustomerTokenRefreshed } from '../../domain/events/emitIdentityEvent';
+import { generateAccessToken, verifyAccessToken } from '../../utils/jwtHelpers';
+import { emitCustomerLogin } from '../../domain/events/emitIdentityEvent';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
-import { eventBus } from '../../../../libs/events/eventBus';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
-import { identityDataRepository, customerCredentialPort } from '../../application/wired';
+import {
+  customerCredentialPort,
+  issueCustomerTokenPairUseCase,
+  renewCustomerAccessTokenUseCase,
+  logoutSessionUseCase,
+} from '../../application/wired';
+import { IssueTokenPairCommand } from '../../application/useCases/token/IssueTokenPair';
+import { RenewAccessTokenCommand } from '../../application/useCases/token/RenewAccessToken';
+import { LogoutSessionCommand } from '../../application/useCases/token/LogoutSession';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
 const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
-const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 const credentialPort: CredentialSubjectPort = customerCredentialPort;
-const refreshTokenRepo = tokenRepo;
-const tokenBlacklistRepo = tokenRepo;
 
 interface LoginBody {
   email: string;
@@ -170,56 +174,26 @@ export const registerCustomer = async (
  * More secure than simple login as refresh tokens can be revoked
  */
 export const issueTokenPair = async (req: HttpRequest<Record<string, string>, unknown, LoginBody>, res: HttpResponse): Promise<void> => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    const result = await issueCustomerTokenPairUseCase.execute(
+      new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
+    );
 
-  // Validate credentials
-  if (!email || !password) {
-    res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
+    res.json({
+      success: true,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
+      customer: {
+        id: result.subject.id,
+        email: result.subject.email,
+      },
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const subject = await credentialPort.authenticate(email, password);
-  if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
-    return;
-  }
-
-  // Track login activity
-  await credentialPort.updateLoginTimestamp(subject.id);
-
-  // Generate access token (short-lived)
-  const accessToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Generate refresh token (long-lived)
-  const refreshToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, REFRESH_TOKEN_DURATION);
-
-  // Store refresh token in database for tracking/revocation
-  await refreshTokenRepo.createRefreshToken({
-    token: refreshToken,
-    userType: 'customer',
-    userId: subject.id,
-    expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
-    userAgent: req.headers['user-agent'] || null,
-    ipAddress: req.ip || null,
-  });
-
-  res.json({
-    success: true,
-    accessToken,
-    refreshToken,
-    tokenType: 'Bearer',
-    expiresIn: ACCESS_TOKEN_DURATION,
-    customer: {
-      id: subject.id,
-      email: subject.email,
-    },
-  });
 };
 
 /**
@@ -229,64 +203,19 @@ export const renewAccessToken = async (
   req: HttpRequest<Record<string, string>, unknown, RefreshTokenBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { refreshToken } = req.body;
+  try {
+    const { refreshToken } = req.body;
+    const result = await renewCustomerAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
-  if (!refreshToken) {
-    res.status(400).json({
-      success: false,
-      message: 'Refresh token is required',
+    res.json({
+      success: true,
+      accessToken: result.accessToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Verify refresh token signature
-  const tokenPayload = verifyAccessToken(refreshToken, CUSTOMER_JWT_SECRET);
-  if (!tokenPayload || !tokenPayload.id) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid or expired refresh token',
-    });
-    return;
-  }
-
-  // Verify refresh token exists in database and hasn't been revoked
-  const storedToken = await refreshTokenRepo.findRefreshToken(refreshToken);
-  if (!storedToken || storedToken.userId !== tokenPayload.id || storedToken.userType !== 'customer') {
-    res.status(401).json({
-      success: false,
-      message: 'Refresh token has been revoked or is invalid',
-    });
-    return;
-  }
-
-  // Verify customer still exists and is active
-  const subject = await credentialPort.findById(tokenPayload.id);
-  if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'Customer account not found',
-    });
-    return;
-  }
-
-  // Generate new access token
-  const newAccessToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Mark refresh token as used (optional - for tracking)
-  await refreshTokenRepo.markRefreshTokenUsed(refreshToken);
-
-  // Emit token refreshed event
-  emitCustomerTokenRefreshed({
-    userId: subject.id,
-    ipAddress: req.ip,
-  });
-
-  res.json({
-    success: true,
-    accessToken: newAccessToken,
-    tokenType: 'Bearer',
-    expiresIn: ACCESS_TOKEN_DURATION,
-  });
 };
 
 /**
@@ -478,21 +407,7 @@ export const logoutCustomer = async (req: HttpRequest<Record<string, string>, un
     return;
   }
 
-  // Blacklist the access token
-  await tokenBlacklistRepo.blacklistToken({
-    token: accessToken,
-    userId: customerId,
-    userType: 'customer',
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  });
-
-  // Revoke refresh token if provided
-  if (refreshToken) {
-    await refreshTokenRepo.revokeRefreshToken(refreshToken);
-  }
-
-  // Emit logout event
-  eventBus.emit('customer.logged_out', { customerId });
+  await logoutSessionUseCase.execute(new LogoutSessionCommand(customerId, 'customer', accessToken, refreshToken));
 
   res.json({
     success: true,

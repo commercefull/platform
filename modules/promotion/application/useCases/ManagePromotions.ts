@@ -24,5 +24,8 @@ export class ManagePromotionsUseCase {
   async delete(id: string) {
     return this.promotionRepo.delete(id);
   }
+  async isValidForOrder(promotionId: string, orderTotalCents: number, customerId?: string) {
+    return this.promotionRepo.isValidForOrder(promotionId, orderTotalCents, customerId);
+  }
 }
 

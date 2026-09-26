@@ -103,6 +103,11 @@ export interface OrderRepository {
   getOrderItems(orderId: string): Promise<OrderItem[]>;
 
   /**
+   * Find a single order item by ID (resolves parent order internally)
+   */
+  findOrderItemById(orderItemId: string): Promise<OrderItem | null>;
+
+  /**
    * Add item to order
    */
   addOrderItem(orderId: string, item: OrderItem): Promise<OrderItem>;

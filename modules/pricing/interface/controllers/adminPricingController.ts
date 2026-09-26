@@ -16,7 +16,7 @@ import {
   type PricingRuleUpdateProps,
 } from '../../domain/pricingRule';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { pricingRuleRepo } from '../../application/wired';
+import { managePricingAdminUseCase } from '../../application/wired';
 
 // ============================================================================
 // Price Lists
@@ -92,7 +92,7 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
 export const listPriceRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let priceRules: never[] = [];
   try {
-    const rules = await pricingRuleRepo.findAllRules();
+    const rules = await managePricingAdminUseCase.findAllRules();
     priceRules = (rules || []).map(r => ({
       priceRuleId: r.pricingRuleId || r.id,
       name: r.name,
@@ -158,7 +158,7 @@ export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       adjustments,
     };
 
-    await pricingRuleRepo.create(createProps);
+    await managePricingAdminUseCase.createRule(createProps);
 
     res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: unknown) {
@@ -175,7 +175,7 @@ export const viewPriceRule = async (req: HttpRequest, res: HttpResponse): Promis
   const { ruleId } = req.params;
   let priceRule = null;
   try {
-    priceRule = await pricingRuleRepo.findById(ruleId);
+    priceRule = await managePricingAdminUseCase.findRuleById(ruleId);
   } catch (error) {
     logger.warn('Error fetching price rule:', error);
   }
@@ -191,7 +191,7 @@ export const editPriceRuleForm = async (req: HttpRequest, res: HttpResponse): Pr
   const { ruleId } = req.params;
   let priceRule = null;
   try {
-    priceRule = await pricingRuleRepo.findById(ruleId);
+    priceRule = await managePricingAdminUseCase.findRuleById(ruleId);
   } catch (error) {
     logger.warn('Error fetching price rule for edit:', error);
   }
@@ -239,7 +239,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       ];
     }
 
-    await pricingRuleRepo.update(ruleId, updateProps);
+    await managePricingAdminUseCase.updateRule(ruleId, updateProps);
 
     res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
   } catch (error: unknown) {
@@ -256,7 +256,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
 export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
-    await pricingRuleRepo.delete(ruleId);
+    await managePricingAdminUseCase.deleteRule(ruleId);
     res.json({ success: true, message: 'Price rule deleted successfully' });
   } catch (error: unknown) {
     logger.warn('Error deleting price rule:', error);

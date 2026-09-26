@@ -10,3 +10,4 @@ export * from './CalculateTierStatus';
 export * from './CreateReward';
 export * from './RedeemReward';
 export * from './ProcessPointsExpiration';
+export * from './AdjustCustomerPoints';

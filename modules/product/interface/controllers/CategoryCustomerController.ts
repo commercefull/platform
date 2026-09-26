@@ -4,9 +4,9 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { productCatalogRepository } from '../../application/wired';
+import { manageCategoriesUseCase } from '../../application/useCases/wired';
 
-const categoryRepo = productCatalogRepository.categories;
+
 
 /**
  * List all active categories
@@ -17,13 +17,13 @@ export const listCategories = async (req: HttpRequest, res: HttpResponse): Promi
 
   let categories;
   if (featured === 'true') {
-    categories = await categoryRepo.findFeatured();
+    categories = await manageCategoriesUseCase.findFeatured();
   } else if (menu === 'true') {
-    categories = await categoryRepo.findForMenu();
+    categories = await manageCategoriesUseCase.findForMenu();
   } else if (root === 'true') {
-    categories = await categoryRepo.findRootCategories();
+    categories = await manageCategoriesUseCase.findRootCategories();
   } else {
-    categories = await categoryRepo.findActive();
+    categories = await manageCategoriesUseCase.findActive();
   }
 
   res.json({ success: true, data: categories });
@@ -37,7 +37,7 @@ export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<
   const { identifier } = req.params;
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
-  const category = isUuid ? await categoryRepo.findOne(identifier) : await categoryRepo.findBySlug(identifier);
+  const category = isUuid ? await manageCategoriesUseCase.findOne(identifier) : await manageCategoriesUseCase.findBySlug(identifier);
 
   if (!category || !category.isActive) {
     res.status(404).json({ success: false, error: 'Category not found' });
@@ -54,7 +54,7 @@ export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<
 export const getCategoryChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
 
-  const children = await categoryRepo.findChildren(categoryId);
+  const children = await manageCategoriesUseCase.findChildren(categoryId);
   const activeChildren = children.filter(c => c.isActive);
 
   res.json({ success: true, data: activeChildren });

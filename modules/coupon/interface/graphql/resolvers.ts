@@ -1,9 +1,14 @@
 import { requireBusinessAuth, requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { ValidateCouponUseCase, ValidateCouponCommand } from '../../application/useCases/ValidateCoupon';
-import { ApplyCouponUseCase, ApplyCouponInput } from '../../application/useCases/ApplyCoupon';
-import { RedeemCouponUseCase, RedeemCouponInput } from '../../application/useCases/RedeemCoupon';
-import { CreateCouponUseCase, CreateCouponCommand } from '../../application/useCases/CreateCoupon';
-import { CouponRepo } from '../../application/wired';
+import { ValidateCouponCommand } from '../../application/useCases/ValidateCoupon';
+import { ApplyCouponInput } from '../../application/useCases/ApplyCoupon';
+import { RedeemCouponInput } from '../../application/useCases/RedeemCoupon';
+import { CreateCouponCommand } from '../../application/useCases/CreateCoupon';
+import {
+  validateCouponUseCase,
+  createCouponUseCase,
+  applyCouponUseCase,
+  redeemCouponUseCase,
+} from '../../application/wired';
 
 export const couponResolvers = {
   Query: {
@@ -15,9 +20,8 @@ export const couponResolvers = {
         customerId?: string;
       },
     ) => {
-      const useCase = new ValidateCouponUseCase(CouponRepo);
       const command = new ValidateCouponCommand(args.code, args.orderValueCents, args.customerId);
-      return useCase.execute(command);
+      return validateCouponUseCase.execute(command);
     },
   },
 
@@ -47,7 +51,7 @@ export const couponResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new CreateCouponUseCase(CouponRepo);
+      const useCase = createCouponUseCase;
       const i = args.input;
       const command = new CreateCouponCommand(
         i.code,
@@ -79,14 +83,12 @@ export const couponResolvers = {
 
     applyCouponCode: async (_parent: unknown, args: { input: ApplyCouponInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new ApplyCouponUseCase(CouponRepo);
-      return useCase.execute(args.input);
+      return applyCouponUseCase.execute(args.input);
     },
 
     redeemCoupon: async (_parent: unknown, args: { input: RedeemCouponInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new RedeemCouponUseCase(CouponRepo);
-      return useCase.execute(args.input);
+      return redeemCouponUseCase.execute(args.input);
     },
   },
 };

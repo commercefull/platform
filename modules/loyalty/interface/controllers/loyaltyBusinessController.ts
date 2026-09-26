@@ -5,9 +5,8 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { loyaltyDataRepository, LoyaltyPointsAction } from '../../application/wired';
-
-const loyaltyRepo = loyaltyDataRepository.points;
+import { manageLoyaltyAdminUseCase, adjustCustomerPointsUseCase } from '../../application/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 // ============================================================================
 // Body Interfaces
@@ -94,54 +93,54 @@ function respondError(res: HttpResponse, message: string, statusCode: number = 5
   res.status(statusCode).json({ success: false, message });
 }
 
+function respondUseCaseError(res: HttpResponse, error: unknown, fallback: string): void {
+  respondError(res, getErrorMessage(error) || fallback, getErrorStatusCode(error));
+}
+
 // ============================================================================
 // Tier Management
 // ============================================================================
 
 export const getTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const includeInactive = req.query.includeInactive === 'true';
-  const tiers = await loyaltyRepo.findAllTiers(includeInactive);
+  const tiers = await manageLoyaltyAdminUseCase.findAllTiers(includeInactive);
   respond(res, tiers);
 };
 
 export const getTierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const tier = await loyaltyRepo.findTierById(id);
 
-  if (!tier) {
-    respondError(res, `Loyalty tier with ID ${id} not found`, 404);
-    return;
+  try {
+    respond(res, await manageLoyaltyAdminUseCase.getTierById(id));
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to load loyalty tier');
   }
-
-  respond(res, tier);
 };
 
 export const createTier = async (req: HttpRequest<Record<string, string>, unknown, CreateTierBody>, res: HttpResponse): Promise<void> => {
   const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
-  if (!name || pointsThreshold === undefined || multiplier === undefined) {
-    respondError(res, 'Name, pointsThreshold, and multiplier are required', 400);
-    return;
+  try {
+    const tier = await manageLoyaltyAdminUseCase.createTier({
+      name,
+      description,
+      type,
+      pointsThreshold,
+      multiplier,
+      benefits,
+      isActive,
+    });
+    respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to create loyalty tier');
   }
-
-  const tier = await loyaltyRepo.createTier({
-    name,
-    description,
-    type: type || 'points',
-    pointsThreshold,
-    multiplier,
-    benefits,
-    isActive,
-  });
-
-  respondWithMessage(res, tier, 'Loyalty tier created successfully', 201);
 };
 
 export const updateTier = async (req: HttpRequest<Record<string, string>, unknown, UpdateTierBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const { name, description, type, pointsThreshold, multiplier, benefits, isActive } = req.body;
 
-  const tier = await loyaltyRepo.updateTier(id, {
+  const tier = await manageLoyaltyAdminUseCase.updateTier(id, {
     name,
     description,
     type,
@@ -160,20 +159,18 @@ export const updateTier = async (req: HttpRequest<Record<string, string>, unknow
 
 export const getRewards = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const includeInactive = req.query.includeInactive === 'true';
-  const rewards = await loyaltyRepo.findAllRewards(includeInactive);
+  const rewards = await manageLoyaltyAdminUseCase.findAllRewards(includeInactive);
   respond(res, rewards);
 };
 
 export const getRewardById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const reward = await loyaltyRepo.findRewardById(id);
 
-  if (!reward) {
-    respondError(res, `Loyalty reward with ID ${id} not found`, 404);
-    return;
+  try {
+    respond(res, await manageLoyaltyAdminUseCase.getRewardById(id));
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to load loyalty reward');
   }
-
-  respond(res, reward);
 };
 
 export const createReward = async (
@@ -183,25 +180,23 @@ export const createReward = async (
   const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
     req.body;
 
-  if (!name || pointsCost === undefined) {
-    respondError(res, 'Name and pointsCost are required', 400);
-    return;
+  try {
+    const reward = await manageLoyaltyAdminUseCase.createReward({
+      name,
+      description,
+      pointsCost,
+      discountAmountCents,
+      discountPercent,
+      discountCode,
+      freeShipping,
+      productIds,
+      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
+      isActive,
+    });
+    respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to create loyalty reward');
   }
-
-  const reward = await loyaltyRepo.createReward({
-    name,
-    description,
-    pointsCost,
-    discountAmountCents,
-    discountPercent,
-    discountCode,
-    freeShipping,
-    productIds,
-    expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-    isActive,
-  });
-
-  respondWithMessage(res, reward, 'Loyalty reward created successfully', 201);
 };
 
 export const updateReward = async (
@@ -212,7 +207,7 @@ export const updateReward = async (
   const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
     req.body;
 
-  const reward = await loyaltyRepo.updateReward(id, {
+  const reward = await manageLoyaltyAdminUseCase.updateReward(id, {
     name,
     description,
     pointsCost,
@@ -234,7 +229,7 @@ export const updateReward = async (
 
 export const getCustomerPoints = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
+  const pointsData = await manageLoyaltyAdminUseCase.findCustomerPointsWithTier(customerId);
 
   if (!pointsData) {
     respondError(res, `No loyalty points found for customer ${customerId}`, 404);
@@ -251,7 +246,7 @@ export const getCustomerPointsTransactions = async (req: HttpRequest, res: HttpR
   const { customerId } = req.params;
   const limit = parseInt(req.query.limit as string) || 50;
 
-  const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
+  const transactions = await manageLoyaltyAdminUseCase.findCustomerTransactions(customerId, limit);
 
   res.json({
     success: true,
@@ -267,27 +262,12 @@ export const adjustCustomerPoints = async (
   const { customerId } = req.params;
   const { points, reason, tierId } = req.body;
 
-  if (points === undefined) {
-    respondError(res, 'Points adjustment amountCents is required', 400);
-    return;
+  try {
+    const updatedPoints = await adjustCustomerPointsUseCase.execute({ customerId, points, reason, tierId });
+    respondWithMessage(res, updatedPoints, `Customer points ${parseInt(points) >= 0 ? 'increased' : 'decreased'} successfully`);
+  } catch (error) {
+    respondError(res, error instanceof Error ? error.message : 'Failed to adjust points', getErrorStatusCode(error));
   }
-
-  // If tierId provided and customer has no points, initialize first
-  if (tierId) {
-    const existing = await loyaltyRepo.findCustomerPoints(customerId);
-    if (!existing) {
-      await loyaltyRepo.initializeCustomerPoints(customerId, tierId);
-    }
-  }
-
-  const updatedPoints = await loyaltyRepo.adjustCustomerPoints(
-    customerId,
-    parseInt(points),
-    LoyaltyPointsAction.MANUAL_ADJUSTMENT,
-    reason || 'Manual adjustment by admin',
-  );
-
-  respondWithMessage(res, updatedPoints, `Customer points ${parseInt(points) >= 0 ? 'increased' : 'decreased'} successfully`);
 };
 
 // ============================================================================
@@ -298,7 +278,7 @@ export const getCustomerRedemptions = async (req: HttpRequest, res: HttpResponse
   const { customerId } = req.params;
   const limit = parseInt(req.query.limit as string) || 50;
 
-  const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
+  const redemptions = await manageLoyaltyAdminUseCase.findCustomerRedemptions(customerId, limit);
   respond(res, redemptions);
 };
 
@@ -309,14 +289,12 @@ export const updateRedemptionStatus = async (
   const { id } = req.params;
   const { status } = req.body;
 
-  if (!status || !['pending', 'used', 'expired', 'cancelled'].includes(status)) {
-    respondError(res, 'Valid status (pending, used, expired, or cancelled) is required', 400);
-    return;
+  try {
+    const redemption = await manageLoyaltyAdminUseCase.updateRedemptionStatus(id, status);
+    respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to update redemption status');
   }
-
-  const redemption = await loyaltyRepo.updateRedemptionStatus(id, status as 'pending' | 'used' | 'expired' | 'cancelled');
-
-  respondWithMessage(res, redemption, `Redemption status updated to ${status}`);
 };
 
 // ============================================================================
@@ -330,12 +308,10 @@ export const processOrderPoints = async (
   const { orderId } = req.params;
   const { orderAmount, customerId } = req.body;
 
-  if (!orderAmount || !customerId) {
-    respondError(res, 'Order amountCents and customer ID are required', 400);
-    return;
+  try {
+    const updatedPoints = await manageLoyaltyAdminUseCase.processOrderPoints(orderId, orderAmount, customerId);
+    respondWithMessage(res, updatedPoints, 'Order points processed successfully');
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to process order points');
   }
-
-  const updatedPoints = await loyaltyRepo.processOrderPoints(customerId, orderId, parseFloat(orderAmount));
-
-  respondWithMessage(res, updatedPoints, 'Order points processed successfully');
 };

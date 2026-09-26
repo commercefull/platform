@@ -73,3 +73,63 @@ export class FailedToEnsureMasterVariantsError extends AppError {
     super(`Failed to ensure master variants: ${reason}`, 500, { code: 'product.master_variant_ensure_failed' });
   }
 }
+
+export class AttributeSetNotFoundError extends AppError {
+  constructor(attributeSetId: string) {
+    super(`Attribute set not found: ${attributeSetId}`, 404, { code: 'product.attribute_set_not_found' });
+  }
+}
+
+export class ProductTypeNotFoundError extends AppError {
+  constructor(productTypeId: string) {
+    super(`Product type not found: ${productTypeId}`, 404, { code: 'product.type_not_found' });
+  }
+}
+
+export class ProductTypeSlugAlreadyExistsError extends AppError {
+  constructor(slug: string) {
+    super(`Product type with slug "${slug}" already exists`, 400, { code: 'product.type_slug_exists' });
+  }
+}
+
+export class BundleNotFoundError extends AppError {
+  constructor() {
+    super('Bundle not found', 404, { code: 'product.bundle_not_found' });
+  }
+}
+
+export class BundleItemNotFoundError extends AppError {
+  constructor() {
+    super('Bundle item not found', 404, { code: 'product.bundle_item_not_found' });
+  }
+}
+
+export class ProductDownloadNotFoundError extends AppError {
+  constructor(downloadId: string) {
+    super(`Download not found: ${downloadId}`, 404, { code: 'product.download_not_found' });
+  }
+}
+
+export class ProductRelationshipNotFoundError extends AppError {
+  constructor(relationshipId: string) {
+    super(`Relationship not found: ${relationshipId}`, 404, { code: 'product.relationship_not_found' });
+  }
+}
+
+export class ProductReviewNotFoundError extends AppError {
+  constructor(reviewId: string) {
+    super(`Review not found: ${reviewId}`, 404, { code: 'product.review_not_found' });
+  }
+}
+
+export class ProductQaNotFoundError extends AppError {
+  constructor(qaId: string) {
+    super(`Q&A not found: ${qaId}`, 404, { code: 'product.qa_not_found' });
+  }
+}
+
+export class ProductReviewMediaNotFoundError extends AppError {
+  constructor(mediaId: string) {
+    super(`Review media not found: ${mediaId}`, 404, { code: 'product.review_media_not_found' });
+  }
+}

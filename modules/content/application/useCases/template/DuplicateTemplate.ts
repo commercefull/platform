@@ -20,6 +20,8 @@ export interface DuplicateTemplateResponse {
   contentTemplateId: string;
   name: string;
   slug: string;
+  isSystem: boolean;
+  isActive: boolean;
   originalTemplateId: string;
   createdAt: Date;
 }
@@ -64,6 +66,8 @@ export class DuplicateTemplateUseCase {
       contentTemplateId: duplicate.contentTemplateId,
       name: duplicate.name,
       slug: duplicate.slug,
+      isSystem: duplicate.isSystem,
+      isActive: duplicate.isActive,
       originalTemplateId: command.templateId,
       createdAt: duplicate.createdAt,
     };

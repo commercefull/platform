@@ -12,7 +12,11 @@ export interface GetLabelInput {
 }
 
 export class GetShippingLabelUseCase {
-  constructor(private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'findById' | 'findByTrackingNumber'>) {}
+  constructor(private readonly shippingLabelRepo: Pick<ShippingLabelPort, 'findById' | 'findByTrackingNumber' | 'findByOrderId'>) {}
+
+  async findByOrderId(orderId: string): Promise<ShippingLabel[]> {
+    return this.shippingLabelRepo.findByOrderId(orderId);
+  }
 
   async execute(input: GetLabelInput): Promise<{ found: boolean; label: ShippingLabel | null }> {
     if (input.shippingLabelId) {

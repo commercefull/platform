@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { productAttributeRepository } from '../../application/wired';
+import { manageAttributeGroupsUseCase } from '../../application/useCases/wired';
 
-const attributeGroupRepo = productAttributeRepository.groups;
+
 
 class AttributeGroupController {
   /**
@@ -9,7 +9,7 @@ class AttributeGroupController {
    * List all attribute groups
    */
   async listAttributeGroups(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const groups = await attributeGroupRepo.findAll();
+    const groups = await manageAttributeGroupsUseCase.findAll();
 
     res.json({
       success: true,
@@ -23,7 +23,7 @@ class AttributeGroupController {
    */
   async getAttributeGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
-    const group = await attributeGroupRepo.findOne(id);
+    const group = await manageAttributeGroupsUseCase.findOne(id);
 
     if (!group) {
       res.status(404).json({
@@ -45,7 +45,7 @@ class AttributeGroupController {
    */
   async getAttributeGroupByCode(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { code } = req.params;
-    const group = await attributeGroupRepo.findByCode(code);
+    const group = await manageAttributeGroupsUseCase.findByCode(code);
 
     if (!group) {
       res.status(404).json({
@@ -78,7 +78,7 @@ class AttributeGroupController {
     }
 
     // Check for duplicate code
-    const existing = await attributeGroupRepo.findByCode(code);
+    const existing = await manageAttributeGroupsUseCase.findByCode(code);
     if (existing) {
       res.status(400).json({
         success: false,
@@ -87,7 +87,7 @@ class AttributeGroupController {
       return;
     }
 
-    const group = await attributeGroupRepo.create({
+    const group = await manageAttributeGroupsUseCase.create({
       name,
       code,
       description: description || '',
@@ -109,7 +109,7 @@ class AttributeGroupController {
     const { name, description, sortOrder } = req.body as { name?: string; description?: string; sortOrder?: number };
 
     // Check if group exists
-    const existing = await attributeGroupRepo.findOne(id);
+    const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
       res.status(404).json({
         success: false,
@@ -118,7 +118,7 @@ class AttributeGroupController {
       return;
     }
 
-    const group = await attributeGroupRepo.update(id, {
+    const group = await manageAttributeGroupsUseCase.update(id, {
       name,
       description,
       position: sortOrder,
@@ -138,7 +138,7 @@ class AttributeGroupController {
     const { id } = req.params;
 
     // Check if group exists
-    const existing = await attributeGroupRepo.findOne(id);
+    const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
       res.status(404).json({
         success: false,
@@ -147,7 +147,7 @@ class AttributeGroupController {
       return;
     }
 
-    await attributeGroupRepo.delete(id);
+    await manageAttributeGroupsUseCase.delete(id);
 
     res.json({
       success: true,

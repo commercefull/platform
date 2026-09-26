@@ -35,6 +35,9 @@ export interface TokenRepository {
   findRefreshToken(token: string): Promise<RefreshTokenInfo | null>;
   revokeRefreshToken(token: string): Promise<void>;
   revokeAllForUser(userId: string): Promise<number>;
+  revokeAllForUserWithType(userId: string, userType?: string): Promise<number>;
+  markRefreshTokenUsed(token: string, usedAt?: Date): Promise<boolean>;
+  cleanupExpiredRefreshTokens(now?: Date): Promise<number>;
 
   // Token blacklist
   blacklistToken(params: {

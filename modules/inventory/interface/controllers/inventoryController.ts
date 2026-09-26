@@ -6,24 +6,24 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const inventoryRepo = inventoryDataRepository.stock;
-const inventoryRepository = inventoryDataRepository.items;
-const inventoryPoolRepo = inventoryDataRepository.pools;
-import {
-  TransferStockUseCase,
-  CreateInventoryItemUseCase,
-  CreateInventoryPoolUseCase,
-  AllocateFromPoolUseCase,
-  GetInventoryItemUseCase,
-  ListInventoryItemsUseCase,
-  TransferBetweenStoresUseCase,
-  ConfirmReservationUseCase,
-  SetLowStockThresholdUseCase,
-} from '../../application/useCases';
 import type { PickupLocationPort } from '../../application/ports/PickupLocationPort';
-import { eventBus } from '../../../../libs/events/eventBus';
 import { InventoryLocationNotFoundError, InventoryValidationError } from '../../domain/errors/InventoryErrors';
-import { inventoryDataRepository, pickupLocationAdapter, adjustStockUseCase } from '../../application/wired';
+import {
+  pickupLocationAdapter,
+  adjustStockUseCase,
+  reserveLocationStockUseCase,
+  releaseLocationReservationUseCase,
+  manageInventoryLocationsUseCase,
+  transferStockUseCase,
+  createInventoryItemUseCase,
+  createInventoryPoolUseCase,
+  allocateFromPoolUseCase,
+  getInventoryItemUseCase,
+  listInventoryItemsUseCase,
+  transferBetweenStoresUseCase,
+  confirmReservationUseCase,
+  setLowStockThresholdUseCase,
+} from '../../application/wired';
 
 // Ports
 const pickupLocationPort: PickupLocationPort = pickupLocationAdapter;
@@ -126,7 +126,7 @@ export const getInventoryLocation = async (req: HttpRequest, res: HttpResponse):
     return;
   }
 
-  const location = await inventoryRepo.findLocationById(inventoryLocationId);
+  const location = await manageInventoryLocationsUseCase.findLocationById(inventoryLocationId);
 
   if (!location) {
     respondError(res, 'Inventory location not found', 404);
@@ -151,7 +151,7 @@ export const listInventoryLocations = async (req: HttpRequest, res: HttpResponse
     .map(loc => ({ ...loc, id: loc.id, isActive: loc.isActive ?? true }));
 
   // Get inventory locations from the inventoryLocation table
-  const inventoryLocations = await inventoryRepo.findLocations(undefined, limit, offset);
+  const inventoryLocations = await manageInventoryLocationsUseCase.findLocations(undefined, limit, offset);
   const inventoryData = inventoryLocations
     .filter(loc => includeInactive || loc.status !== 'inactive')
     .map(loc => ({ ...loc, isActive: loc.status === 'available' || loc.status === 'active' }));
@@ -206,7 +206,7 @@ export const createInventoryLocation = async (req: HttpRequest, res: HttpRespons
     return;
   }
 
-  const location = await inventoryRepo.createLocation({
+  const location = await manageInventoryLocationsUseCase.createLocation({
     distributionWarehouseId,
     distributionWarehouseBinId,
     productId,
@@ -252,7 +252,7 @@ export const updateInventoryLocation = async (req: HttpRequest, res: HttpRespons
 
   const { quantity, reservedQuantity, minimumStockLevel, maximumStockLevel, status } = body;
 
-  const location = await inventoryRepo.updateLocation(inventoryLocationId, {
+  const location = await manageInventoryLocationsUseCase.updateLocation(inventoryLocationId, {
     quantity,
     reservedQuantity,
     minimumStockLevel,
@@ -275,12 +275,12 @@ export const deleteInventoryLocation = async (req: HttpRequest, res: HttpRespons
     respond(res, { message: 'Inventory location deleted successfully' });
     return;
   }
-  const existing = await inventoryRepo.findLocationById(inventoryLocationId);
+  const existing = await manageInventoryLocationsUseCase.findLocationById(inventoryLocationId);
   if (!existing) {
     respondError(res, 'Inventory location not found', 404);
     return;
   }
-  await inventoryRepo.deleteLocation(inventoryLocationId);
+  await manageInventoryLocationsUseCase.deleteLocation(inventoryLocationId);
   respond(res, { message: 'Inventory location deleted successfully' });
 };
 
@@ -329,28 +329,25 @@ export const reserveStock = async (req: HttpRequest, res: HttpResponse): Promise
   const inventoryLocationId = (req.params.inventoryLocationId || req.params.inventoryId) as string;
   const { quantity, orderId, basketId } = req.body as ReserveStockBody;
 
-  if (!quantity || quantity <= 0) {
-    respondError(res, 'quantity must be a positive number', 400);
-    return;
+  try {
+    const updatedLocation = await reserveLocationStockUseCase.execute({
+      inventoryLocationId,
+      quantity,
+      orderId,
+      basketId,
+    });
+    respond(res, updatedLocation);
+  } catch (error: unknown) {
+    if (error instanceof InventoryLocationNotFoundError) {
+      respondError(res, 'Inventory location not found', 404);
+      return;
+    }
+    if (error instanceof InventoryValidationError) {
+      respondError(res, error.message, 400);
+      return;
+    }
+    throw error;
   }
-
-  const currentLocation = await inventoryRepo.findLocationById(inventoryLocationId);
-  if (!currentLocation) {
-    respondError(res, 'Inventory location not found', 404);
-    return;
-  }
-
-  const updatedLocation = await inventoryRepo.reserveQuantity(inventoryLocationId, quantity);
-
-  // Emit event
-  eventBus.emit('inventory.reserved', {
-    inventoryLocationId,
-    quantity,
-    orderId,
-    basketId,
-  });
-
-  respond(res, updatedLocation);
 };
 
 /**
@@ -360,26 +357,20 @@ export const releaseReservation = async (req: HttpRequest, res: HttpResponse): P
   const { inventoryLocationId } = req.params;
   const { quantity } = req.body as ReleaseReservationBody;
 
-  if (!quantity || quantity <= 0) {
-    respondError(res, 'quantity must be a positive number', 400);
-    return;
+  try {
+    const updatedLocation = await releaseLocationReservationUseCase.execute(inventoryLocationId, quantity);
+    respond(res, updatedLocation);
+  } catch (error: unknown) {
+    if (error instanceof InventoryLocationNotFoundError) {
+      respondError(res, 'Inventory location not found', 404);
+      return;
+    }
+    if (error instanceof InventoryValidationError) {
+      respondError(res, error.message, 400);
+      return;
+    }
+    throw error;
   }
-
-  const currentLocation = await inventoryRepo.findLocationById(inventoryLocationId);
-  if (!currentLocation) {
-    respondError(res, 'Inventory location not found', 404);
-    return;
-  }
-
-  const updatedLocation = await inventoryRepo.releaseReservation(inventoryLocationId, quantity);
-
-  // Emit event
-  eventBus.emit('inventory.released', {
-    inventoryLocationId,
-    quantity,
-  });
-
-  respond(res, updatedLocation);
 };
 
 // ============================================================================
@@ -393,7 +384,7 @@ export const checkAvailability = async (req: HttpRequest, res: HttpResponse): Pr
   const { sku } = req.params;
   const quantity = parseInt(req.query.quantity as string) || 1;
 
-  const location = await inventoryRepo.findLocationBySku(sku);
+  const location = await manageInventoryLocationsUseCase.findLocationBySku(sku);
 
   if (!location) {
     respond(res, {
@@ -417,7 +408,7 @@ export const checkAvailability = async (req: HttpRequest, res: HttpResponse): Pr
  * Get low stock items
  */
 export const getLowStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const locations = await inventoryRepo.findLowStockLocations();
+  const locations = await manageInventoryLocationsUseCase.findLowStockLocations();
   respond(res, locations);
 };
 
@@ -425,7 +416,7 @@ export const getLowStock = async (req: HttpRequest, res: HttpResponse): Promise<
  * Get out of stock items
  */
 export const getOutOfStock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const locations = await inventoryRepo.findOutOfStockLocations();
+  const locations = await manageInventoryLocationsUseCase.findOutOfStockLocations();
   respond(res, locations);
 };
 
@@ -440,7 +431,7 @@ export const getTransactionHistory = async (req: HttpRequest, res: HttpResponse)
   const { productId } = req.params;
   const limit = parseInt(req.query.limit as string) || 50;
 
-  const transactions = await inventoryRepo.findTransactionsByProductId(productId, limit);
+  const transactions = await manageInventoryLocationsUseCase.findTransactionsByProductId(productId, limit);
   respond(res, transactions);
 };
 
@@ -448,7 +439,7 @@ export const getTransactionHistory = async (req: HttpRequest, res: HttpResponse)
  * Get transaction types
  */
 export const getTransactionTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const types = await inventoryRepo.findAllTransactionTypes();
+  const types = await manageInventoryLocationsUseCase.findAllTransactionTypes();
   respond(res, types);
 };
 
@@ -461,7 +452,7 @@ export const checkProductAvailability = async (req: HttpRequest, res: HttpRespon
   const variantId = req.query.variantId as string | undefined;
   const quantity = parseInt(req.query.quantity as string) || 1;
 
-  const result = await inventoryRepo.checkProductAvailability(productId, variantId, quantity);
+  const result = await manageInventoryLocationsUseCase.checkProductAvailability(productId, variantId, quantity);
   respond(res, result);
 };
 
@@ -494,7 +485,7 @@ export const transferStock = async (
     respondError(res, 'items must be a non-empty array', 400);
     return;
   }
-  const useCase = new TransferStockUseCase(inventoryRepository);
+  const useCase = transferStockUseCase;
   const result = await useCase.execute({
     sourceLocationId: req.body.sourceLocationId,
     destinationLocationId: req.body.destinationLocationId,
@@ -528,7 +519,7 @@ export const createInventoryItem = async (
   req: HttpRequest<Record<string, string>, unknown, CreateInventoryItemBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new CreateInventoryItemUseCase(inventoryRepository);
+  const useCase = createInventoryItemUseCase;
   const result = await useCase.execute({
     productId: req.body.productId,
     variantId: req.body.variantId,
@@ -563,7 +554,7 @@ export const createInventoryPool = async (
   req: HttpRequest<Record<string, string>, unknown, CreatePoolBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new CreateInventoryPoolUseCase(inventoryPoolRepo);
+  const useCase = createInventoryPoolUseCase;
   const result = await useCase.execute({
     ownerType: req.body.ownerType,
     ownerId: req.body.ownerId,
@@ -596,7 +587,7 @@ export const allocateFromPool = async (
     respondError(res, 'items must be a non-empty array', 400);
     return;
   }
-  const useCase = new AllocateFromPoolUseCase(inventoryPoolRepo);
+  const useCase = allocateFromPoolUseCase;
   const result = await useCase.execute({
     poolId: req.body.poolId,
     orderId: req.body.orderId,
@@ -612,7 +603,7 @@ export const allocateFromPool = async (
 // ============================================================================
 
 export const getInventoryItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new GetInventoryItemUseCase(inventoryRepository);
+  const useCase = getInventoryItemUseCase;
   const result = await useCase.execute({
     inventoryItemId: req.query.inventoryItemId as string | undefined,
     sku: req.query.sku as string | undefined,
@@ -625,7 +616,7 @@ export const getInventoryItem = async (req: HttpRequest, res: HttpResponse): Pro
     const sku = req.query.sku as string | undefined;
     if (sku) {
       // Use repository directly to search any location
-      const any = await inventoryRepository.findBySku(sku);
+      const any = await getInventoryItemUseCase.findBySku(sku);
       if (any && any.length > 0) {
         res.status(200).json({ success: true, data: any[0] });
         return;
@@ -642,7 +633,7 @@ export const getInventoryItem = async (req: HttpRequest, res: HttpResponse): Pro
 // ============================================================================
 
 export const listInventoryItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new ListInventoryItemsUseCase(inventoryRepository);
+  const useCase = listInventoryItemsUseCase;
   const result = await useCase.execute({
     warehouseId: req.query.warehouseId as string | undefined,
     productId: req.query.productId as string | undefined,
@@ -674,7 +665,7 @@ export const transferBetweenStores = async (
   req: HttpRequest<Record<string, string>, unknown, TransferBetweenStoresBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new TransferBetweenStoresUseCase(inventoryRepository);
+  const useCase = transferBetweenStoresUseCase;
   const result = await useCase.execute({
     sourceStoreId: req.body.sourceStoreId,
     targetStoreId: req.body.targetStoreId,
@@ -699,7 +690,7 @@ export const confirmReservation = async (
   req: HttpRequest<Record<string, string>, unknown, ConfirmReservationBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new ConfirmReservationUseCase(inventoryRepo);
+  const useCase = confirmReservationUseCase;
   const result = await useCase.execute({
     reservationId: req.body.reservationId,
     orderId: req.body.orderId,
@@ -727,7 +718,7 @@ export const setLowStockThreshold = async (
   req: HttpRequest<Record<string, string>, unknown, SetLowStockThresholdBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new SetLowStockThresholdUseCase(inventoryRepository);
+  const useCase = setLowStockThresholdUseCase;
   const result = await useCase.execute({
     productId: req.body.productId,
     variantId: req.body.variantId,

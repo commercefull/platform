@@ -4,13 +4,8 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-
-const OrderRepo = orderDataRepository.commands;
-const orderQueryRepo = orderDataRepository.queries;
-const orderFulfillmentRepo = orderFulfillmentDataRepository.fulfillments;
 import { GetOrderCommand } from '../../application/useCases/GetOrder';
 import { ListOrdersCommand } from '../../application/useCases/ListOrders';
-import { GetStoreSalesSummaryUseCase } from '../../application/useCases/GetStoreSalesSummary';
 import { UpdateOrderStatusCommand } from '../../application/useCases/UpdateOrderStatus';
 import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
 import { ProcessRefundCommand } from '../../application/useCases/ProcessRefund';
@@ -21,21 +16,28 @@ import { OrderFilters } from '../../domain/repositories/OrderRepository';
 import { AddOrderNoteCommand } from '../../application/useCases/AddOrderNote';
 import { CreateOrderRefundCommand } from '../../application/useCases/CreateOrderRefund';
 import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
+import { UpdatePaymentStatusCommand } from '../../application/useCases/UpdatePaymentStatus';
+import { UpdateFulfillmentStatusCommand } from '../../application/useCases/UpdateFulfillmentStatus';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   listOrdersUseCase,
   getOrderUseCase,
   updateOrderStatusUseCase,
+  updatePaymentStatusUseCase,
+  updateFulfillmentStatusUseCase,
   cancelOrderUseCase,
   processRefundUseCase,
   addOrderNoteUseCase,
   createOrderRefundUseCase,
   trackFulfillmentPackageUseCase,
+  manageOrderNotesUseCase,
+  getOrderRefundsUseCase,
+  getFulfillmentPackagesUseCase,
+  manageOrderItemsUseCase,
+  getOrderHistoryUseCase,
+  getStoreSalesSummaryUseCase,
 } from '../../application/useCases/wired';
-import { OrderItem } from '../../domain/entities/OrderItem';
-import { Money } from '../../domain/valueObjects/Money';
-import { generateUUID, isUuid } from '../../../../libs/uuid';
-import { query, queryOne } from '../../../../libs/db';
-import { orderDataRepository, orderFulfillmentDataRepository } from '../../application/wired';
+import { isUuid } from '../../../../libs/uuid';
 import { OrderNotFoundError, RefundAmountMustBePositiveError } from '../../domain/errors/OrderErrors';
 
 // ============================================================================
@@ -215,7 +217,7 @@ export const getOrderStats = async (req: HttpRequest, res: HttpResponse): Promis
   if (createdByUserId) filters.createdByUserId = createdByUserId as string;
   if (orderSource) filters.orderSource = orderSource as string;
 
-  const stats = await OrderRepo.getOrderStats(Object.keys(filters).length > 0 ? filters : undefined);
+  const stats = await getOrderHistoryUseCase.getStats(Object.keys(filters).length > 0 ? filters : undefined);
 
   respond(req, res, stats, 200);
 };
@@ -224,8 +226,7 @@ export const getStoreSalesSummary = async (req: HttpRequest, res: HttpResponse):
   const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
   const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
 
-  const useCase = new GetStoreSalesSummaryUseCase();
-  const summary = await useCase.execute({
+  const summary = await getStoreSalesSummaryUseCase.execute({
     storeId: req.query.storeId as string | undefined,
     dateFrom,
     dateTo,
@@ -241,7 +242,7 @@ export const getStoreSalesSummary = async (req: HttpRequest, res: HttpResponse):
 export const getOrderHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
 
-  const history = await OrderRepo.getStatusHistory(orderId);
+  const history = await getOrderHistoryUseCase.getStatusHistory(orderId);
 
   respond(req, res, { orderId, history }, 200);
 };
@@ -256,7 +257,7 @@ export const getOrderHistory = async (req: HttpRequest, res: HttpResponse): Prom
  */
 export const listOrderNotes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const notes = await orderQueryRepo.findNotesByOrder(orderId);
+  const notes = await manageOrderNotesUseCase.findByOrder(orderId);
   respond(req, res, { orderId, notes });
 };
 
@@ -282,7 +283,7 @@ export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise
  */
 export const deleteOrderNote = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { noteId } = req.params;
-  const deleted = await orderQueryRepo.softDeleteNote(noteId);
+  const deleted = await manageOrderNotesUseCase.softDelete(noteId);
   if (!deleted) {
     respondError(req, res, 'Order note not found', 404);
     return;
@@ -300,7 +301,7 @@ export const deleteOrderNote = async (req: HttpRequest, res: HttpResponse): Prom
  */
 export const listOrderRefunds = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const refunds = await orderQueryRepo.findRefundsByOrder(orderId);
+  const refunds = await getOrderRefundsUseCase.findByOrder(orderId);
   respond(req, res, { orderId, refunds });
 };
 
@@ -340,7 +341,7 @@ export const listFulfillmentPackages = async (req: HttpRequest, res: HttpRespons
     respondError(req, res, 'fulfillmentId query parameter is required', 400);
     return;
   }
-  const packages = await orderFulfillmentRepo.findByFulfillment(fulfillmentId as string);
+  const packages = await getFulfillmentPackagesUseCase.findByFulfillment(fulfillmentId as string);
   respond(req, res, { fulfillmentId, packages });
 };
 
@@ -443,7 +444,7 @@ export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const getOrderItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const items = await OrderRepo.getOrderItems(orderId);
+  const items = await manageOrderItemsUseCase.listItems(orderId);
   respond(
     req,
     res,
@@ -453,14 +454,7 @@ export const getOrderItems = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const getOrderItemById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
-  if (!row) {
-    respondError(req, res, 'Order item not found', 404);
-    return;
-  }
-  const orderId = row.orderId as string;
-  const items = await OrderRepo.getOrderItems(orderId);
-  const item = items.find(i => i.orderItemId === orderItemId);
+  const item = await manageOrderItemsUseCase.getItem(orderItemId);
   if (!item) {
     respondError(req, res, 'Order item not found', 404);
     return;
@@ -495,32 +489,7 @@ export const createOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  const orderItemId = generateUUID();
-  const currency = 'USD';
-  const item = OrderItem.reconstitute({
-    orderItemId,
-    orderId,
-    productId: body.productId,
-    productVariantId: body.variantId,
-    name: body.name,
-    sku: body.sku || '',
-    quantity: body.quantity,
-    unitPrice: Money.fromCents(body.unitPriceCents, currency),
-    discountedUnitPrice: Money.fromCents(body.discountedUnitPriceCents ?? body.unitPriceCents, currency),
-    lineTotal: Money.fromCents(body.lineTotalCents ?? body.unitPriceCents * body.quantity, currency),
-    discountTotal: Money.fromCents(body.discountTotalCents ?? 0, currency),
-    taxTotal: Money.fromCents(body.taxTotalCents ?? 0, currency),
-    taxRate: body.taxRate ?? 0,
-    taxExempt: body.taxExempt ?? false,
-    fulfillmentStatus: (body.fulfillmentStatus as FulfillmentStatus) ?? FulfillmentStatus.UNFULFILLED,
-    giftWrapped: body.giftWrapped ?? false,
-    isDigital: body.isDigital ?? false,
-    description: body.description,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
-
-  await OrderRepo.addOrderItem(orderId, item);
+  const item = await manageOrderItemsUseCase.addItem(body);
   respond(req, res, item.toJSON(), 201);
 };
 
@@ -528,33 +497,18 @@ export const updateOrderItem = async (req: HttpRequest, res: HttpResponse): Prom
   const { orderItemId } = req.params;
   const body = req.body as { quantity?: number; unitPriceCents?: number };
 
-  // Find the item across all orders (we need orderId to look it up)
-  // Since we don't have orderId in the route, we search by orderItemId
-  const row = await query<Array<{ orderId: string }>>('SELECT "orderId" FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
-  if (!row || row.length === 0) {
-    respondError(req, res, 'Order item not found', 404);
-    return;
-  }
-
-  const orderId = row[0].orderId;
-  const items = await OrderRepo.getOrderItems(orderId);
-  const item = items.find(i => i.orderItemId === orderItemId);
+  const item = await manageOrderItemsUseCase.updateItem(orderItemId, body);
   if (!item) {
     respondError(req, res, 'Order item not found', 404);
     return;
   }
 
-  if (body.quantity !== undefined) {
-    item.updateQuantity(body.quantity);
-  }
-
-  await OrderRepo.updateOrderItem(item);
   respond(req, res, item.toJSON());
 };
 
 export const deleteOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderItemId } = req.params;
-  await OrderRepo.removeOrderItem(orderItemId);
+  await manageOrderItemsUseCase.removeItem(orderItemId);
   respond(req, res, { deleted: true });
 };
 
@@ -567,29 +521,14 @@ export const updatePaymentStatus = async (req: HttpRequest, res: HttpResponse): 
   const body = req.body as { paymentStatus: string };
   const { paymentStatus } = body;
 
-  const validStatuses = Object.values(PaymentStatus) as string[];
-  if (!validStatuses.includes(paymentStatus)) {
-    respondError(req, res, `Invalid payment status. Must be one of: ${validStatuses.join(', ')}`, 400);
-    return;
+  try {
+    const result = await updatePaymentStatusUseCase.execute(
+      new UpdatePaymentStatusCommand(orderId, paymentStatus as PaymentStatus),
+    );
+    respond(req, res, result, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  const order = await OrderRepo.findById(orderId);
-  if (!order) {
-    respondError(req, res, 'Order not found', 404);
-    return;
-  }
-
-  const previousStatus = order.paymentStatus;
-  order.updatePaymentStatus(paymentStatus as PaymentStatus);
-  await OrderRepo.save(order);
-  await OrderRepo.recordPaymentStatusChange(orderId, paymentStatus as PaymentStatus);
-
-  respond(req, res, {
-    orderId: order.orderId,
-    previousStatus,
-    paymentStatus: order.paymentStatus,
-    updatedAt: order.updatedAt.toISOString(),
-  });
 };
 
 export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -597,29 +536,14 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
   const body = req.body as { fulfillmentStatus: string };
   const { fulfillmentStatus } = body;
 
-  const validStatuses = Object.values(FulfillmentStatus) as string[];
-  if (!validStatuses.includes(fulfillmentStatus)) {
-    respondError(req, res, `Invalid fulfillment status. Must be one of: ${validStatuses.join(', ')}`, 400);
-    return;
+  try {
+    const result = await updateFulfillmentStatusUseCase.execute(
+      new UpdateFulfillmentStatusCommand(orderId, fulfillmentStatus as FulfillmentStatus),
+    );
+    respond(req, res, result, 200);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  const order = await OrderRepo.findById(orderId);
-  if (!order) {
-    respondError(req, res, 'Order not found', 404);
-    return;
-  }
-
-  const previousStatus = order.fulfillmentStatus;
-  order.updateFulfillmentStatus(fulfillmentStatus as FulfillmentStatus);
-  await OrderRepo.save(order);
-  await OrderRepo.recordFulfillmentStatusChange(orderId, fulfillmentStatus as FulfillmentStatus);
-
-  respond(req, res, {
-    orderId: order.orderId,
-    previousStatus,
-    fulfillmentStatus: order.fulfillmentStatus,
-    updatedAt: order.updatedAt.toISOString(),
-  });
 };
 
 // ============================================================================
@@ -628,7 +552,7 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
 
 export const getStatusHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const history = await OrderRepo.getStatusHistory(orderId);
+  const history = await getOrderHistoryUseCase.getStatusHistory(orderId);
   const result = history.map(h => ({
     orderId,
     status: h.status,
@@ -640,7 +564,7 @@ export const getStatusHistory = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const getPaymentHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const history = await OrderRepo.getPaymentStatusHistory(orderId);
+  const history = await getOrderHistoryUseCase.getPaymentStatusHistory(orderId);
   const result = history.map(h => ({
     orderId: h.orderId,
     paymentStatus: h.paymentStatus,
@@ -652,7 +576,7 @@ export const getPaymentHistory = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const getFulfillmentHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const history = await OrderRepo.getFulfillmentStatusHistory(orderId);
+  const history = await getOrderHistoryUseCase.getFulfillmentStatusHistory(orderId);
   const result = history.map(h => ({
     orderId: h.orderId,
     fulfillmentStatus: h.fulfillmentStatus,

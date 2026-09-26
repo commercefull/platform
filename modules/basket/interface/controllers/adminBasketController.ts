@@ -17,25 +17,7 @@ export const listAbandonedCarts = async (req: HttpRequest, res: HttpResponse): P
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
-  const abandonedBaskets = await manageBasketUseCase.findAbandonedBaskets(olderThanDays);
-  const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
-
-  // Calculate recovery potential
-  const recoveryPotentialCents = abandonedBaskets.reduce((total, basket) => {
-    return (
-      total +
-      basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.cents * item.quantity;
-      }, 0)
-    );
-  }, 0);
-
-  const stats = {
-    totalAbandoned: abandonedBaskets.length,
-    totalExpired: expiredBaskets.length,
-    recoveryPotentialCents,
-    avgCartValueCents: abandonedBaskets.length > 0 ? Math.round(recoveryPotentialCents / abandonedBaskets.length) : 0,
-  };
+  const { abandonedBaskets, expiredBaskets, stats } = await manageBasketUseCase.getAbandonedCartStats(olderThanDays);
 
   adminRespond(req, res, 'operations/baskets/abandoned', {
     pageName: 'Abandoned Carts',
@@ -52,9 +34,9 @@ export const listAbandonedCarts = async (req: HttpRequest, res: HttpResponse): P
 export const viewAbandonedCart = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
-  const basket = await manageBasketUseCase.findById(basketId);
+  const details = await manageBasketUseCase.getBasketViewDetails(basketId);
 
-  if (!basket) {
+  if (!details) {
     adminRespond(req, res, 'error', {
       pageName: 'Not Found',
       error: 'Abandoned cart not found',
@@ -62,19 +44,11 @@ export const viewAbandonedCart = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  // Calculate cart value
-  const cartValueCents = basket.items.reduce((total, item) => {
-    return total + item.unitPrice.cents * item.quantity;
-  }, 0);
-
-  // Calculate days since last activity
-  const daysSinceActivity = Math.floor((Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24));
-
   adminRespond(req, res, 'operations/baskets/view', {
-    pageName: `Abandoned Cart: ${basket.basketId}`,
-    basket,
-    cartValueCents,
-    daysSinceActivity,
+    pageName: `Abandoned Cart: ${details.basket.basketId}`,
+    basket: details.basket,
+    cartValueCents: details.cartValueCents,
+    daysSinceActivity: details.daysSinceActivity,
 
     success: req.query.success || null,
   });
@@ -95,7 +69,7 @@ export const recoverAbandonedCart = async (req: HttpRequest, res: HttpResponse):
   logger.info('Recovering abandoned cart', {
     basketId,
     recoveryMethod,
-    cartValueCents: basket.items.reduce((total, item) => total + item.unitPrice.cents * item.quantity, 0),
+    cartValueCents: manageBasketUseCase.getCartValueCents(basket),
     customerId: basket.customerId,
     sessionId: basket.sessionId,
   });
@@ -137,7 +111,7 @@ export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Pr
     subject,
     discountCode,
     cartItems: basket.items.length,
-    cartValueCents: basket.items.reduce((total, item) => total + item.unitPrice.cents * item.quantity, 0),
+    cartValueCents: manageBasketUseCase.getCartValueCents(basket),
   });
 
   res.json({
@@ -161,67 +135,7 @@ export const markCartRecovered = async (req: HttpRequest, res: HttpResponse): Pr
 // ============================================================================
 
 export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  // Get basic cart statistics
-  const abandonedBaskets = await manageBasketUseCase.findAbandonedBaskets(30); // Last 30 days
-  const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
-
-  // Calculate analytics
-  const totalAbandoned = abandonedBaskets.length;
-  const totalExpired = expiredBaskets.length;
-
-  // Calculate cart values
-  const abandonedValueCents = abandonedBaskets.reduce((total, basket) => {
-    return (
-      total +
-      basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.cents * item.quantity;
-      }, 0)
-    );
-  }, 0);
-
-  const avgCartValueCents = totalAbandoned > 0 ? Math.round(abandonedValueCents / totalAbandoned) : 0;
-
-  // Calculate recovery potential by age
-  const recentAbandoned = abandonedBaskets.filter(basket => {
-    const daysSinceActivity = Math.floor((Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24));
-    return daysSinceActivity <= 7;
-  });
-
-  const olderAbandoned = abandonedBaskets.filter(basket => {
-    const daysSinceActivity = Math.floor((Date.now() - basket.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24));
-    return daysSinceActivity > 7;
-  });
-
-  const recentValueCents = recentAbandoned.reduce((total, basket) => {
-    return (
-      total +
-      basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.cents * item.quantity;
-      }, 0)
-    );
-  }, 0);
-
-  const olderValueCents = olderAbandoned.reduce((total, basket) => {
-    return (
-      total +
-      basket.items.reduce((itemTotal, item) => {
-        return itemTotal + item.unitPrice.cents * item.quantity;
-      }, 0)
-    );
-  }, 0);
-
-  const stats = {
-    totalAbandoned,
-    totalExpired,
-    totalValueCents: abandonedValueCents,
-    avgCartValueCents,
-    recoveryRate: 0, // Would need conversion tracking
-    recentAbandoned: recentAbandoned.length,
-    olderAbandoned: olderAbandoned.length,
-    recentValueCents,
-    olderValueCents,
-    topAbandonedProducts: [], // Would need product analytics
-  };
+  const stats = await manageBasketUseCase.getBasketAnalytics();
 
   adminRespond(req, res, 'operations/baskets/analytics', {
     pageName: 'Cart Analytics',
@@ -230,13 +144,7 @@ export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Prom
 };
 
 export const cleanupExpiredBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const expiredBaskets = await manageBasketUseCase.findExpiredBaskets();
-
-  let deletedCount = 0;
-  for (const basket of expiredBaskets) {
-    await manageBasketUseCase.delete(basket.basketId);
-    deletedCount++;
-  }
+  const deletedCount = await manageBasketUseCase.cleanupExpiredBaskets();
 
   res.json({
     success: true,

@@ -3,6 +3,18 @@ import type { SubscriptionRepository } from '../../domain/repositories/Subscript
 export class ManageAdminSubscriptionsUseCase {
   constructor(private readonly subscriptionRepo: SubscriptionRepository) {}
 
+  async getSubscriptionProduct(id: string) {
+    return this.subscriptionRepo.getSubscriptionProduct(id);
+  }
+  async getSubscriptionProducts(activeOnly?: boolean) {
+    return this.subscriptionRepo.getSubscriptionProducts(activeOnly);
+  }
+  async saveSubscriptionProduct(...args: Parameters<SubscriptionRepository['saveSubscriptionProduct']>) {
+    return this.subscriptionRepo.saveSubscriptionProduct(...args);
+  }
+  async deleteSubscriptionProduct(id: string) {
+    return this.subscriptionRepo.deleteSubscriptionProduct(id);
+  }
   async getSubscriptionPlan(id: string) {
     return this.subscriptionRepo.getSubscriptionPlan(id);
   }
@@ -32,6 +44,15 @@ export class ManageAdminSubscriptionsUseCase {
   }
   async pauseSubscription(...args: Parameters<SubscriptionRepository['pauseSubscription']>) {
     return this.subscriptionRepo.pauseSubscription(...args);
+  }
+  async resumeSubscription(...args: Parameters<SubscriptionRepository['resumeSubscription']>) {
+    return this.subscriptionRepo.resumeSubscription(...args);
+  }
+  async getDunningAttempts(customerSubscriptionId: string) {
+    return this.subscriptionRepo.getDunningAttempts(customerSubscriptionId);
+  }
+  async getPendingDunningAttempts(beforeDate: Date) {
+    return this.subscriptionRepo.getPendingDunningAttempts(beforeDate);
   }
   async getSubscriptionsDueBilling(beforeDate: Date) {
     return this.subscriptionRepo.getSubscriptionsDueBilling(beforeDate);

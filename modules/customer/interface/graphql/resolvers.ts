@@ -1,8 +1,7 @@
-const CustomerRepo = customerDataRepository.customers;
-import { GetCustomerUseCase, GetCustomerCommand } from '../../application/useCases/GetCustomer';
-import { RegisterCustomerUseCase, RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
+import { GetCustomerCommand } from '../../application/useCases/GetCustomer';
+import { RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
 import { requireCustomerAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { customerDataRepository } from '../../application/wired';
+import { getCustomerUseCase, registerCustomerUseCase } from '../../application/useCases/wired';
 
 export const customerResolvers = {
   Query: {
@@ -15,16 +14,14 @@ export const customerResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetCustomerUseCase(CustomerRepo);
       const command = new GetCustomerCommand(args.customerId, args.email);
-      return useCase.execute(command);
+      return getCustomerUseCase.execute(command);
     },
 
     myProfile: async (_parent: unknown, _args: unknown, context: GraphQLAuthContext) => {
       const { customerId } = requireCustomerAuth(context);
-      const useCase = new GetCustomerUseCase(CustomerRepo);
       const command = new GetCustomerCommand(customerId);
-      return useCase.execute(command);
+      return getCustomerUseCase.execute(command);
     },
   },
 
@@ -42,7 +39,6 @@ export const customerResolvers = {
         preferredLanguage?: string;
       },
     ) => {
-      const useCase = new RegisterCustomerUseCase(CustomerRepo);
       const command = new RegisterCustomerCommand(
         args.email,
         args.firstName,
@@ -53,7 +49,7 @@ export const customerResolvers = {
         args.preferredCurrency,
         args.preferredLanguage,
       );
-      return useCase.execute(command);
+      return registerCustomerUseCase.execute(command);
     },
   },
 };

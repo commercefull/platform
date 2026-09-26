@@ -5,7 +5,7 @@
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { manageIntegrations, manageSubscriptions, manageIntegrationLogs } from '../../application/useCases/wired';
+import { manageIntegrations, manageSubscriptions, getIntegrationDetail } from '../../application/useCases/wired';
 import type { CredentialType } from '../../domain/entities/IntegrationCredential';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
@@ -67,18 +67,15 @@ export const listIntegrations = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const viewIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const integration = await manageIntegrations.getIntegration(req.params.integrationId);
-    const credentials = await manageIntegrations.getCredentials(req.params.integrationId);
-    const subscriptions = await manageSubscriptions.listSubscriptions(req.params.integrationId);
-    const logsResult = await manageIntegrationLogs.listLogs(req.params.integrationId, { limit: 20 });
+    const detail = await getIntegrationDetail.execute(req.params.integrationId);
 
     adminRespond(req, res, 'settings/integrations/detail', {
       pageName: 'Integration Details',
-      integration: integration.toJSON(),
-      credentials: credentials.map(c => c.toJSON()),
-      subscriptions: subscriptions.map(s => s.toJSON()),
-      logs: logsResult.data.map(l => l.toJSON()),
-      logTotal: logsResult.total,
+      integration: detail.integration.toJSON(),
+      credentials: detail.credentials.map(c => c.toJSON()),
+      subscriptions: detail.subscriptions.map(s => s.toJSON()),
+      logs: detail.logs.map(l => l.toJSON()),
+      logTotal: detail.logTotal,
       providers: PROVIDERS,
       platformEvents: PLATFORM_EVENTS,
     });

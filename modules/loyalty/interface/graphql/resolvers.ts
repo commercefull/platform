@@ -1,21 +1,27 @@
-const LoyaltyRepo = loyaltyDataRepository.points;
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CheckPointsBalanceUseCase, CheckPointsBalanceInput } from '../../application/useCases/CheckPointsBalance';
-import { EarnPointsUseCase, EarnPointsInput } from '../../application/useCases/EarnPoints';
-import { RedeemPointsUseCase, RedeemPointsInput } from '../../application/useCases/RedeemPoints';
-import { GetPointsHistoryUseCase, GetPointsHistoryInput } from '../../application/useCases/GetPointsHistory';
-import { CalculateTierStatusUseCase, CalculateTierStatusInput } from '../../application/useCases/CalculateTierStatus';
-import { CreateRewardUseCase, CreateRewardInput } from '../../application/useCases/CreateReward';
-import { RedeemRewardUseCase, RedeemRewardInput } from '../../application/useCases/RedeemReward';
-import { loyaltyDataRepository } from '../../application/wired';
+import { CheckPointsBalanceInput } from '../../application/useCases/CheckPointsBalance';
+import { EarnPointsInput } from '../../application/useCases/EarnPoints';
+import { RedeemPointsInput } from '../../application/useCases/RedeemPoints';
+import { GetPointsHistoryInput } from '../../application/useCases/GetPointsHistory';
+import { CalculateTierStatusInput } from '../../application/useCases/CalculateTierStatus';
+import { CreateRewardInput } from '../../application/useCases/CreateReward';
+import { RedeemRewardInput } from '../../application/useCases/RedeemReward';
+import {
+  calculateTierStatusUseCase,
+  checkPointsBalanceUseCase,
+  createRewardUseCase,
+  earnPointsUseCase,
+  getPointsHistoryUseCase,
+  redeemPointsUseCase,
+  redeemRewardUseCase,
+} from '../../application/wired';
 
 export const loyaltyResolvers = {
   Query: {
     pointsBalance: async (_parent: unknown, args: { customerId: string }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new CheckPointsBalanceUseCase(LoyaltyRepo as never);
       const input: CheckPointsBalanceInput = { customerId: args.customerId };
-      return useCase.execute(input);
+      return checkPointsBalanceUseCase.execute(input);
     },
 
     pointsHistory: async (
@@ -31,7 +37,6 @@ export const loyaltyResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new GetPointsHistoryUseCase(LoyaltyRepo as never);
       const input: GetPointsHistoryInput = {
         customerId: args.customerId,
         page: args.page,
@@ -40,7 +45,7 @@ export const loyaltyResolvers = {
         startDate: args.startDate ? new Date(args.startDate) : undefined,
         endDate: args.endDate ? new Date(args.endDate) : undefined,
       };
-      return useCase.execute(input);
+      return getPointsHistoryUseCase.execute(input);
     },
 
     tierStatus: async (
@@ -52,32 +57,28 @@ export const loyaltyResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new CalculateTierStatusUseCase(LoyaltyRepo as never);
       const input: CalculateTierStatusInput = {
         customerId: args.customerId,
         programId: args.programId,
       };
-      return useCase.execute(input);
+      return calculateTierStatusUseCase.execute(input);
     },
   },
 
   Mutation: {
     earnPoints: async (_parent: unknown, args: { input: EarnPointsInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new EarnPointsUseCase(LoyaltyRepo as never, LoyaltyRepo as never);
-      return useCase.execute(args.input);
+      return earnPointsUseCase.execute(args.input);
     },
 
     redeemPoints: async (_parent: unknown, args: { input: RedeemPointsInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new RedeemPointsUseCase(LoyaltyRepo as never, LoyaltyRepo as never);
-      return useCase.execute(args.input);
+      return redeemPointsUseCase.execute(args.input);
     },
 
     createReward: async (_parent: unknown, args: { input: CreateRewardInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new CreateRewardUseCase(LoyaltyRepo as never);
-      return useCase.execute(args.input);
+      return createRewardUseCase.execute(args.input);
     },
 
     redeemReward: async (
@@ -90,13 +91,12 @@ export const loyaltyResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new RedeemRewardUseCase(LoyaltyRepo as never);
       const input: RedeemRewardInput = {
         customerId: args.customerId,
         rewardId: args.rewardId,
         orderId: args.orderId,
       };
-      return useCase.execute(input);
+      return redeemRewardUseCase.execute(input);
     },
   },
 };

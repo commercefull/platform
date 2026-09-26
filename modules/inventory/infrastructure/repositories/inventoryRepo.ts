@@ -461,6 +461,18 @@ export class InventoryRepo {
     };
   }
 
+  async findAvailableQuantityAtWarehouse(
+    distributionWarehouseId: string,
+    productId: string,
+    variantId?: string,
+  ): Promise<number> {
+    const row = await queryOne<{ availableQuantity: number }>(
+      `SELECT "availableQuantity" FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 AND "productId" = $2${variantId ? ' AND "productVariantId" = $3' : ''} LIMIT 1`,
+      variantId ? [distributionWarehouseId, productId, variantId] : [distributionWarehouseId, productId],
+    );
+    return row?.availableQuantity ?? 0;
+  }
+
   async getTotalStockForProduct(productId: string): Promise<number> {
     const sql = `
       SELECT COALESCE(SUM("availableQuantity"), 0) as total 
@@ -491,6 +503,40 @@ export class InventoryRepo {
   // ==========================================================================
   // Reservation Methods
   // ==========================================================================
+
+  async createReservation(input: {
+    reservationId: string;
+    orderId: string;
+    inventoryItemId: string;
+    productId: string;
+    variantId?: string;
+    sku?: string;
+    quantity: number;
+    locationId?: string;
+    expiresAt: Date;
+    status: string;
+  }): Promise<void> {
+    await query(
+      `INSERT INTO "inventoryReservation" (
+        "inventoryReservationId", "inventoryItemId", "productId", "variantId", "sku",
+        "orderId", "locationId", "quantity", "status", "expiresAt", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      [
+        input.reservationId,
+        input.inventoryItemId,
+        input.productId,
+        input.variantId ?? null,
+        input.sku ?? null,
+        input.orderId,
+        input.locationId ?? null,
+        input.quantity,
+        input.status,
+        input.expiresAt,
+        new Date(),
+        new Date(),
+      ],
+    );
+  }
 
   async findReservationById(
     reservationId: string,

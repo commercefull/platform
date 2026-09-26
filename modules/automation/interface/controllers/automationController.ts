@@ -7,9 +7,9 @@ import {
   getAutomationRuleUseCase,
   listAutomationRulesUseCase,
   triggerAutomationRuleUseCase,
+  listExecutionLogsUseCase,
 } from '../../application/useCases/wired';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
-import { ExecutionLogRepositoryImpl } from '../../application/wired';
 
 class AutomationController {
   async listRules(req: HttpRequest, res: HttpResponse): Promise<void> {
@@ -154,8 +154,7 @@ class AutomationController {
 
   async getExecutionLogs(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
-    const logRepo = new ExecutionLogRepositoryImpl();
-    const logs = await logRepo.findByRule(req.params.ruleId, limit);
+    const logs = await listExecutionLogsUseCase.findByRule(req.params.ruleId, limit);
     res.json({ success: true, data: logs });
   }
 }

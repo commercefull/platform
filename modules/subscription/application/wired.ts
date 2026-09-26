@@ -4,6 +4,11 @@ import { CreateSubscriptionUseCase } from './useCases/CreateSubscription';
 import { CancelSubscriptionUseCase } from './useCases/CancelSubscription';
 import { ManageAdminSubscriptionsUseCase } from './useCases/ManageAdminSubscriptions';
 import { ManageStorefrontSubscriptionsUseCase } from './useCases/ManageStorefrontSubscriptions';
+import { ManageCustomerSubscriptionsUseCase } from './useCases/ManageCustomerSubscriptions';
+import { ProcessBillingCycleUseCase } from './useCases/ProcessBillingCycle';
+import { ChangeSubscriptionPlanUseCase } from './useCases/ChangeSubscriptionPlan';
+import { PauseSubscriptionUseCase } from './useCases/PauseSubscription';
+import { ResumeSubscriptionUseCase } from './useCases/ResumeSubscription';
 import {
   SubscriptionPlan,
   SubscriptionProduct,
@@ -39,6 +44,42 @@ export const manageAdminSubscriptionsUseCase = new ManageAdminSubscriptionsUseCa
 export const manageStorefrontSubscriptionsUseCase = new ManageStorefrontSubscriptionsUseCase(
   subscriptionRepo as unknown as SubscriptionRepository,
 );
+export const manageCustomerSubscriptionsUseCase = new ManageCustomerSubscriptionsUseCase(subscriptionRepo);
+export const processBillingCycleUseCase = new ProcessBillingCycleUseCase(subscriptionRepo);
+
+// Adapters bridging the record-model subscriptionRepo to the entity-model ports
+// expected by the lifecycle use cases.
+const subscriptionRecordAdapter = {
+  async findById(id: string) {
+    const sub = await subscriptionRepo.getCustomerSubscription(id);
+    if (!sub) return null;
+    return {
+      status: sub.status,
+      planId: sub.subscriptionPlanId,
+      customerId: sub.customerId,
+      nextBillingDate: sub.nextBillingAt?.toISOString() ?? new Date().toISOString(),
+      currentPeriodStart: sub.currentPeriodStart?.toISOString(),
+      startDate: sub.createdAt.toISOString(),
+      priceCents: sub.totalPriceCents,
+      billingInterval: sub.billingInterval,
+    };
+  },
+  async update(id: string, data: Record<string, unknown>) {
+    await subscriptionRepo.updateSubscriptionStatus(id, (data.status as SubscriptionStatus) ?? 'active');
+  },
+};
+
+const planRecordAdapter = {
+  async findById(id: string) {
+    const plan = await subscriptionRepo.getSubscriptionPlan(id);
+    if (!plan) return null;
+    return { priceCents: plan.priceCents };
+  },
+};
+
+export const changeSubscriptionPlanUseCase = new ChangeSubscriptionPlanUseCase(subscriptionRecordAdapter, planRecordAdapter);
+export const pauseSubscriptionEntityUseCase = new PauseSubscriptionUseCase(subscriptionRecordAdapter);
+export const resumeSubscriptionEntityUseCase = new ResumeSubscriptionUseCase(subscriptionRecordAdapter);
 
 export {
   subscriptionRepo,

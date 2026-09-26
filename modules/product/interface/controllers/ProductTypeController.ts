@@ -1,8 +1,10 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { productCatalogRepository, productAttributeRepository } from '../../application/wired';
+import { manageProductTypesUseCase } from '../../application/useCases/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
-const productTypeRepository = productCatalogRepository.types;
-const productAttributeSetRepository = productAttributeRepository.sets;
+function respondError(res: HttpResponse, error: unknown, fallback: string): void {
+  res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) || fallback });
+}
 
 class ProductTypeController {
   /**
@@ -10,14 +12,7 @@ class ProductTypeController {
    * List all product types
    */
   async listProductTypes(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const { active } = req.query;
-
-    let productTypes;
-    if (active === 'true') {
-      productTypes = await productTypeRepository.findActive();
-    } else {
-      productTypes = await productTypeRepository.findAll();
-    }
+    const productTypes = await manageProductTypesUseCase.list(req.query.active === 'true');
 
     res.json({
       success: true,
@@ -30,27 +25,15 @@ class ProductTypeController {
    * Get a single product type by ID
    */
   async getProductType(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const { id } = req.params;
-    const productType = await productTypeRepository.findById(id);
-
-    if (!productType) {
-      res.status(404).json({
-        success: false,
-        error: 'Product type not found',
+    try {
+      const productType = await manageProductTypesUseCase.getByIdWithAttributeSets(req.params.id);
+      res.json({
+        success: true,
+        data: productType,
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Product type not found');
     }
-
-    // Get attribute sets for this product type
-    const attributeSets = await productAttributeSetRepository.findByProductType(id);
-
-    res.json({
-      success: true,
-      data: {
-        ...productType,
-        attributeSets,
-      },
-    });
   }
 
   /**
@@ -58,21 +41,15 @@ class ProductTypeController {
    * Get a single product type by slug
    */
   async getProductTypeBySlug(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const { slug } = req.params;
-    const productType = await productTypeRepository.findBySlug(slug);
-
-    if (!productType) {
-      res.status(404).json({
-        success: false,
-        error: 'Product type not found',
+    try {
+      const productType = await manageProductTypesUseCase.getBySlug(req.params.slug);
+      res.json({
+        success: true,
+        data: productType,
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Product type not found');
     }
-
-    res.json({
-      success: true,
-      data: productType,
-    });
   }
 
   /**
@@ -82,34 +59,15 @@ class ProductTypeController {
   async createProductType(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { name, slug } = req.body as { name?: string; slug?: string };
 
-    if (!name) {
-      res.status(400).json({
-        success: false,
-        error: 'Name is required',
+    try {
+      const productType = await manageProductTypesUseCase.create({ name, slug });
+      res.status(201).json({
+        success: true,
+        data: productType,
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Failed to create product type');
     }
-
-    // Check if slug already exists
-    const checkSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const existing = await productTypeRepository.findBySlug(checkSlug);
-    if (existing) {
-      res.status(400).json({
-        success: false,
-        error: `Product type with slug "${checkSlug}" already exists`,
-      });
-      return;
-    }
-
-    const productType = await productTypeRepository.create({
-      name,
-      slug,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: productType,
-    });
   }
 
   /**
@@ -120,36 +78,15 @@ class ProductTypeController {
     const { id } = req.params;
     const { name, slug } = req.body as { name?: string; slug?: string };
 
-    const existing = await productTypeRepository.findById(id);
-    if (!existing) {
-      res.status(404).json({
-        success: false,
-        error: 'Product type not found',
+    try {
+      const updated = await manageProductTypesUseCase.update(id, { name, slug });
+      res.json({
+        success: true,
+        data: updated,
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Product type not found');
     }
-
-    // Check if new slug conflicts
-    if (slug && slug !== existing.slug) {
-      const slugExists = await productTypeRepository.findBySlug(slug);
-      if (slugExists) {
-        res.status(400).json({
-          success: false,
-          error: `Product type with slug "${slug}" already exists`,
-        });
-        return;
-      }
-    }
-
-    const updated = await productTypeRepository.update(id, {
-      name,
-      slug,
-    });
-
-    res.json({
-      success: true,
-      data: updated,
-    });
   }
 
   /**
@@ -157,23 +94,15 @@ class ProductTypeController {
    * Delete a product type
    */
   async deleteProductType(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const { id } = req.params;
-
-    const existing = await productTypeRepository.findById(id);
-    if (!existing) {
-      res.status(404).json({
-        success: false,
-        error: 'Product type not found',
+    try {
+      await manageProductTypesUseCase.delete(req.params.id);
+      res.json({
+        success: true,
+        message: 'Product type deleted successfully',
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Product type not found');
     }
-
-    await productTypeRepository.delete(id);
-
-    res.json({
-      success: true,
-      message: 'Product type deleted successfully',
-    });
   }
 
   /**
@@ -181,23 +110,15 @@ class ProductTypeController {
    * Get all attributes for a product type (via attribute sets)
    */
   async getProductTypeAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const { id } = req.params;
-
-    const productType = await productTypeRepository.findById(id);
-    if (!productType) {
-      res.status(404).json({
-        success: false,
-        error: 'Product type not found',
+    try {
+      const attributes = await manageProductTypesUseCase.getAttributes(req.params.id);
+      res.json({
+        success: true,
+        data: attributes,
       });
-      return;
+    } catch (error) {
+      respondError(res, error, 'Product type not found');
     }
-
-    const attributes = await productAttributeSetRepository.getAttributesForProductType(id);
-
-    res.json({
-      success: true,
-      data: attributes,
-    });
   }
 }
 

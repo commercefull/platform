@@ -5,15 +5,12 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { logger } from '../../../../libs/logger';
 import { getAnalyticsDataUseCase } from '../../application/wired';
 import { generateReportUseCase, manageReportSchedulesUseCase } from '../../application/useCases';
 import { predictiveAnalyticsUseCase } from '../../application/useCases/PredictiveAnalytics';
-import { GetStoreSalesSummaryUseCase } from '../../../order/application/useCases/GetStoreSalesSummary';
-import { FindActiveStoresUseCase } from '../../../store/application/useCases/wired';
+import { getStoreSalesSummaryUseCase } from '../../../order/application/useCases/wired';
+import { findActiveStoresUseCase } from '../../../store/application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const findActiveStoresUseCase = new FindActiveStoresUseCase();
 
 // ============================================================================
 // Advanced Analytics Dashboard
@@ -96,7 +93,7 @@ export const analyticsDashboard = async (req: HttpRequest, res: HttpResponse): P
 export const storeSalesDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
   const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
-  const summary = await new GetStoreSalesSummaryUseCase().execute({
+  const summary = await getStoreSalesSummaryUseCase.execute({
     storeId: req.query.storeId as string | undefined,
     dateFrom,
     dateTo,
@@ -137,38 +134,7 @@ export const predictiveAnalytics = async (req: HttpRequest, res: HttpResponse): 
   const inventoryPredictions = await predictiveAnalyticsUseCase.optimizeInventoryLevels();
 
   // Get customer churn analysis for top customers
-  const customerChurnData = await getAnalyticsDataUseCase.findRecentCustomerIds(10);
-
-  const customerChurnPromises = customerChurnData.map(async customerId => {
-    try {
-      const history = await getAnalyticsDataUseCase.findCustomerPurchaseHistory(customerId, 30);
-
-      const analysis = await predictiveAnalyticsUseCase.predictCustomerChurn(
-        customerId,
-        history.map(h => ({
-          date: new Date((h as { date: string | Date }).date),
-          orders: Number((h as { orders: number }).orders),
-          revenueCents: Number((h as { revenueCents: number }).revenueCents),
-        })),
-      );
-
-      return {
-        customerId,
-        ...analysis,
-      };
-    } catch (error) {
-      logger.warn('Error:', error);
-      return {
-        customerId,
-        churnProbability: 0,
-        riskLevel: 'low' as const,
-        factors: [],
-        recommendations: [],
-      };
-    }
-  });
-
-  const customerChurnRisk = await Promise.all(customerChurnPromises);
+  const customerChurnRisk = await getAnalyticsDataUseCase.analyzeCustomerChurnRisk(10);
 
   adminRespond(req, res, 'analytics/predictive', {
     pageName: 'Predictive Analytics',
@@ -287,59 +253,7 @@ export const aiRecommendations = async (req: HttpRequest, res: HttpResponse): Pr
 // ============================================================================
 
 export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  // Get current period KPIs
-  const [startDate, endDate] = parsePeriod('30d');
-  const currentKPIs = await calculateExecutiveKPIs(startDate, endDate);
-
-  // Get previous period for comparison
-  const [prevStartDate, _prevEndDate] = parsePeriod('60d');
-  const previousKPIs = await calculateExecutiveKPIs(prevStartDate, startDate);
-
-  // Calculate KPI changes
-  const kpis = {
-    revenue: {
-      current: currentKPIs.revenueCents,
-      target: currentKPIs.revenueCents * 1.15, // 15% growth target
-      growth: ((currentKPIs.revenueCents - previousKPIs.revenueCents) / previousKPIs.revenueCents) * 100,
-      change: currentKPIs.revenueCents - previousKPIs.revenueCents,
-    },
-    profit: {
-      current: currentKPIs.profitCents,
-      margin: (currentKPIs.profitCents / currentKPIs.revenueCents) * 100,
-      growth: previousKPIs.profitCents > 0 ? ((currentKPIs.profitCents - previousKPIs.profitCents) / previousKPIs.profitCents) * 100 : 0,
-      change: currentKPIs.profitCents - previousKPIs.profitCents,
-    },
-    customers: {
-      total: currentKPIs.customers.total,
-      active: currentKPIs.customers.active,
-      growth: ((currentKPIs.customers.total - previousKPIs.customers.total) / previousKPIs.customers.total) * 100,
-      change: currentKPIs.customers.total - previousKPIs.customers.total,
-    },
-    orders: {
-      total: currentKPIs.orders.total,
-      average: currentKPIs.orders.averageCents,
-      conversion: currentKPIs.orders.conversion,
-      growth: ((currentKPIs.orders.total - previousKPIs.orders.total) / previousKPIs.orders.total) * 100,
-    },
-    inventory: {
-      turnover: currentKPIs.inventory.turnover,
-      stockouts: currentKPIs.inventory.stockouts,
-      optimization: 0, // Would calculate optimization score
-      value: currentKPIs.inventory.valueCents,
-    },
-    marketing: {
-      roi: currentKPIs.marketing.roi,
-      cac: currentKPIs.marketing.cac,
-      ltv: currentKPIs.customers.ltvCents,
-      spend: currentKPIs.marketing.spend,
-    },
-  };
-
-  // Get business alerts
-  const alerts = await getBusinessAlerts(kpis);
-
-  // Get business trends
-  const trends = await analyzeBusinessTrends(kpis, previousKPIs);
+  const { kpis, alerts, trends } = await getAnalyticsDataUseCase.getExecutiveDashboard(30);
 
   adminRespond(req, res, 'analytics/executive', {
     pageName: 'Executive Dashboard',
@@ -355,7 +269,7 @@ export const executiveDashboard = async (req: HttpRequest, res: HttpResponse): P
 
 export const realTimeMetrics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // Get current real-time metrics
-  const metrics = await getCurrentRealTimeMetrics();
+  const metrics = await getAnalyticsDataUseCase.getRealTimeMetricsEnriched();
 
   res.json({
     success: true,
@@ -541,182 +455,4 @@ function calculateNextRunTime(type: string): Date {
   }
 }
 
-// ============================================================================
-// KPI Calculation Functions
-// ============================================================================
 
-async function calculateExecutiveKPIs(startDate: Date, endDate: Date) {
-  // Get revenue data
-  const revenueData = await getAnalyticsDataUseCase.getRevenueData(startDate, endDate);
-
-  // Get customer data
-  const customerData = await getAnalyticsDataUseCase.getCustomerData(startDate, endDate);
-
-  // Get inventory data
-  const inventoryData = await getAnalyticsDataUseCase.getInventoryData(startDate, endDate);
-
-  return {
-    revenueCents: revenueData.revenueCents,
-    profitCents: Math.round(revenueData.revenueCents * 0.25),
-    customers: {
-      total: customerData.total,
-      active: customerData.active,
-      ltvCents: customerData.ltvCents,
-    },
-    orders: {
-      total: revenueData.orders,
-      averageCents: revenueData.averageOrderCents,
-      conversion: 0.03,
-    },
-    inventory: {
-      turnover: inventoryData.turnover,
-      stockouts: inventoryData.stockouts,
-      valueCents: inventoryData.valueCents,
-    },
-    marketing: {
-      roi: 2.5,
-      cac: 25,
-      spend: 1000,
-    },
-  };
-}
-
-// ============================================================================
-// Business Alerts
-// ============================================================================
-
-interface BusinessKPIs {
-  revenue: { growth: number };
-  customers: { growth: number };
-  orders: { average: number; growth: number };
-  inventory: { stockouts: number };
-  profit: { margin: number };
-  marketing: { roi: number };
-}
-
-async function getBusinessAlerts(kpis: BusinessKPIs) {
-  const alerts = [];
-
-  // Revenue alerts
-  if (kpis.revenue.growth < -10) {
-    alerts.push({
-      type: 'critical',
-      message: `Revenue decreased by ${Math.abs(kpis.revenue.growth).toFixed(1)}% compared to last period`,
-      action: 'Review sales strategy and marketing campaigns',
-    });
-  } else if (kpis.revenue.growth < -5) {
-    alerts.push({
-      type: 'warning',
-      message: `Revenue slightly down by ${Math.abs(kpis.revenue.growth).toFixed(1)}%`,
-      action: 'Monitor sales trends closely',
-    });
-  }
-
-  // Customer alerts
-  if (kpis.customers.growth < -15) {
-    alerts.push({
-      type: 'critical',
-      message: `Customer base decreased by ${Math.abs(kpis.customers.growth).toFixed(1)}%`,
-      action: 'Implement customer retention campaigns',
-    });
-  }
-
-  // Inventory alerts
-  if (kpis.inventory.stockouts > 5) {
-    alerts.push({
-      type: 'warning',
-      message: `${kpis.inventory.stockouts} products are out of stock`,
-      action: 'Review inventory management and reorder points',
-    });
-  }
-
-  // Profit margin alerts
-  if (kpis.profit.margin < 15) {
-    alerts.push({
-      type: 'warning',
-      message: `Profit margin (${kpis.profit.margin.toFixed(1)}%) is below target`,
-      action: 'Review pricing strategy and cost optimization',
-    });
-  }
-
-  // Marketing ROI alerts
-  if (kpis.marketing.roi < 2.0) {
-    alerts.push({
-      type: 'info',
-      message: `Marketing ROI (${kpis.marketing.roi.toFixed(1)}) could be improved`,
-      action: 'Optimize marketing spend and campaign targeting',
-    });
-  }
-
-  return {
-    critical: alerts.filter(a => a.type === 'critical'),
-    warnings: alerts.filter(a => a.type === 'warning'),
-    opportunities: alerts.filter(a => a.type === 'info'),
-    trends: [],
-  };
-}
-
-// ============================================================================
-// Business Trends Analysis
-// ============================================================================
-
-async function analyzeBusinessTrends(currentKPIs: BusinessKPIs, previousKPIs: { orders: { averageCents: number } }) {
-  const trends = [];
-
-  // Revenue trend
-  if (currentKPIs.revenue.growth > 15) {
-    trends.push({
-      metric: 'Revenue',
-      trend: 'up',
-      description: `Strong revenue growth of ${currentKPIs.revenue.growth.toFixed(1)}%`,
-      impact: 'positive',
-    });
-  } else if (currentKPIs.revenue.growth < -5) {
-    trends.push({
-      metric: 'Revenue',
-      trend: 'down',
-      description: `Revenue decline of ${Math.abs(currentKPIs.revenue.growth).toFixed(1)}%`,
-      impact: 'negative',
-    });
-  }
-
-  // Customer acquisition trend
-  if (currentKPIs.customers.growth > 20) {
-    trends.push({
-      metric: 'Customer Acquisition',
-      trend: 'up',
-      description: `Strong customer growth of ${currentKPIs.customers.growth.toFixed(1)}%`,
-      impact: 'positive',
-    });
-  }
-
-  // Order value trend
-  const orderValueChange = ((currentKPIs.orders.average - previousKPIs.orders.averageCents) / previousKPIs.orders.averageCents) * 100;
-  if (Math.abs(orderValueChange) > 10) {
-    trends.push({
-      metric: 'Average Order Value',
-      trend: orderValueChange > 0 ? 'up' : 'down',
-      description: `AOV ${orderValueChange > 0 ? 'increased' : 'decreased'} by ${Math.abs(orderValueChange).toFixed(1)}%`,
-      impact: orderValueChange > 0 ? 'positive' : 'neutral',
-    });
-  }
-
-  return trends;
-}
-
-// ============================================================================
-// Real-time Metrics
-// ============================================================================
-
-async function getCurrentRealTimeMetrics() {
-  const metrics = await getAnalyticsDataUseCase.getRealTimeMetrics();
-
-  // Server performance (mock for now)
-  const serverPerformance = 95 + Math.random() * 5; // 95-100%
-
-  return {
-    ...metrics,
-    serverPerformance: parseFloat(serverPerformance.toFixed(1)),
-    timestamp: new Date().toISOString(),
-  };
-}

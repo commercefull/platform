@@ -1,35 +1,11 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { AssignUserToStoreUseCase } from '../../application/useCases/store/AssignUserToStore';
-import { GetUserStoresUseCase } from '../../application/useCases/store/GetUserStores';
-import { ListStoreUsersUseCase } from '../../application/useCases/store/ListStoreUsers';
-import { RemoveUserFromStoreUseCase } from '../../application/useCases/store/RemoveUserFromStore';
-import { UserRepository } from '../../domain/repositories/UserRepository';
-import { StoreLookupPort } from '../../application/ports/StoreLookupPort';
-
-const identityRepo = identityDataRepository.users;
 import { StoreRole } from '../../domain/entities/UserStoreAssignment';
-import { identityDataRepository } from '../../application/wired';
-
-const fallbackUserRepository: Pick<UserRepository, 'findById'> = {
-  async findById(userId: string) {
-    return { userId } as Awaited<ReturnType<UserRepository['findById']>>;
-  },
-};
-
-const fallbackStoreLookupPort: StoreLookupPort = {
-  async findById(storeId: string) {
-    return { storeId } as Awaited<ReturnType<StoreLookupPort['findById']>>;
-  },
-};
-
-const assignUserToStoreUseCase = new AssignUserToStoreUseCase(
-  identityRepo,
-  fallbackUserRepository as UserRepository,
-  fallbackStoreLookupPort,
-);
-const getUserStoresUseCase = new GetUserStoresUseCase(identityRepo);
-const listStoreUsersUseCase = new ListStoreUsersUseCase(identityRepo);
-const removeUserFromStoreUseCase = new RemoveUserFromStoreUseCase(identityRepo);
+import {
+  assignUserToStoreUseCase,
+  getUserStoresUseCase,
+  listStoreUsersUseCase,
+  removeUserFromStoreUseCase,
+} from '../../application/wired';
 
 interface AssignUserBody {
   storeId: string;

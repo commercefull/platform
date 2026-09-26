@@ -16,6 +16,11 @@ export * from './EvaluatePromotions';
 // Coupon
 export * from './ValidateCoupon';
 export * from './RedeemCoupon';
+export * from './CreateCoupon';
+export * from './ValidateCouponCode';
+export * from './CalculateCouponDiscount';
+export * from './CreatePromotionRecord';
+export * from './ChangePromotionStatus';
 
 // Gift Card
 export * from './CheckGiftCardBalance';

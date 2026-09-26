@@ -122,31 +122,18 @@ export const saveOverride = async (req: HttpRequest, res: HttpResponse): Promise
   };
 
   try {
-    let override;
-    const existing = await manageOverridesUseCase.getByStore(storeId);
-
-    if (existing) {
-      override = await manageOverridesUseCase.update(existing.overrideId, {
+    const override = await manageOverridesUseCase.create(
+      new CreateThemeOverrideCommand({
+        storeId,
+        themeId,
+        organizationId,
         settings: typeof settings === 'string' ? JSON.parse(settings) : settings,
         customCss,
         customLogoUrl,
         customFaviconUrl,
         customBannerUrl,
-      });
-    } else {
-      override = await manageOverridesUseCase.create(
-        new CreateThemeOverrideCommand({
-          storeId,
-          themeId,
-          organizationId,
-          settings: typeof settings === 'string' ? JSON.parse(settings) : settings,
-          customCss,
-          customLogoUrl,
-          customFaviconUrl,
-          customBannerUrl,
-        }),
-      );
-    }
+      }),
+    );
 
     res.json({ success: true, data: override });
   } catch (err) {

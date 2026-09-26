@@ -5,18 +5,16 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const localeRepo = localizationDataRepository.locales;
-const countryRepo = localizationDataRepository.countries;
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { Locale, Country } from '../../../../libs/db/types';
-import { localizationDataRepository } from '../../application/wired';
+import { manageLocalesUseCase } from '../../application/wired';
 
 /**
  * Get all active locales
  * GET /locales
  */
 export const getActiveLocales = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const locales = await localeRepo.findAll(true); // Only active locales
+  const locales = await manageLocalesUseCase.findLocales(true); // Only active locales
 
   // Map to public-facing data (exclude internal fields)
   const publicLocales = locales.map((locale: Locale) => ({
@@ -39,7 +37,7 @@ export const getActiveLocales = async (_req: HttpRequest, res: HttpResponse): Pr
  * GET /countries
  */
 export const getActiveCountries = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const countries = await countryRepo.findAll(true); // Only active countries
+  const countries = await manageLocalesUseCase.findCountries(true); // Only active countries
 
   // Map to public-facing data
   const publicCountries = countries.map((country: Country) => ({
@@ -69,7 +67,7 @@ export const detectLocale = async (req: HttpRequest, res: HttpResponse): Promise
 
   for (const lang of preferredLanguages) {
     // Try exact match first (e.g., "en-US")
-    const exactMatch = await localeRepo.findByCode(lang.code);
+    const exactMatch = await manageLocalesUseCase.findLocaleByCode(lang.code);
     if (exactMatch && exactMatch.isActive) {
       matchedLocale = exactMatch;
       break;
@@ -87,7 +85,7 @@ export const detectLocale = async (req: HttpRequest, res: HttpResponse): Promise
 
   // Fallback to default locale
   if (!matchedLocale) {
-    matchedLocale = await localeRepo.findDefault();
+    matchedLocale = await manageLocalesUseCase.findDefaultLocale();
   }
 
   if (!matchedLocale) {
@@ -133,7 +131,7 @@ export const getLocaleByCode = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  const locale = await localeRepo.findByCode(code);
+  const locale = await manageLocalesUseCase.findLocaleByCode(code);
 
   if (!locale || !locale.isActive) {
     errorResponse(res, 'Locale not found', 404);
@@ -165,7 +163,7 @@ export const getCountryByCode = async (req: HttpRequest, res: HttpResponse): Pro
     return;
   }
 
-  const country = await countryRepo.findByCode(code);
+  const country = await manageLocalesUseCase.findCountryByCode(code);
 
   if (!country || !country.isActive) {
     errorResponse(res, 'Country not found', 404);
@@ -234,6 +232,6 @@ function parseAcceptLanguage(header: string): ParsedLanguage[] {
  * Find first active locale matching a language code
  */
 async function findLocaleByLanguage(language: string): Promise<Locale | null> {
-  const locales = await localeRepo.findAll(true);
+  const locales = await manageLocalesUseCase.findLocales(true);
   return locales.find((l: Locale) => l.language.toLowerCase() === language.toLowerCase()) || null;
 }

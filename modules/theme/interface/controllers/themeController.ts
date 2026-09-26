@@ -7,18 +7,13 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { CreateThemeCommand, CreateThemeOverrideCommand, AssignThemeToStoreCommand } from '../../application/useCases';
-import { ManageThemesUseCase } from '../../application/useCases/ManageThemes';
-import { ManageThemeOverridesUseCase } from '../../application/useCases/ManageThemeOverrides';
-import { AssignThemeToStoreUseCase } from '../../application/useCases/AssignThemeToStore';
-import { ResolveStoreThemeUseCase } from '../../application/useCases/ResolveStoreTheme';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
-import { ThemeRepositoryImpl } from '../../application/wired';
-
-const themeRepository = new ThemeRepositoryImpl();
-const manageThemesUseCase = new ManageThemesUseCase(themeRepository);
-const manageOverridesUseCase = new ManageThemeOverridesUseCase(themeRepository);
-const assignThemeUseCase = new AssignThemeToStoreUseCase(themeRepository);
-const resolveThemeUseCase = new ResolveStoreThemeUseCase(themeRepository);
+import {
+  manageThemesUseCase,
+  manageOverridesUseCase,
+  assignThemeUseCase,
+  resolveThemeUseCase,
+} from '../../application/wired';
 
 class ThemeController {
   // ── Theme CRUD ──────────────────────────────────────────────

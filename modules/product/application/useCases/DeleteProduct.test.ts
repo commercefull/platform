@@ -1,5 +1,16 @@
 import { DeleteProductUseCase } from './DeleteProduct';
+import { Product } from '../../domain/entities/Product';
+import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
 import { lazyMock } from '../../tests/testUtils';
+
+function createProduct(): Product {
+  return Product.create({
+    productId: 'p1',
+    name: 'Test Product',
+    description: 'desc',
+    productTypeId: 'pt-1',
+  });
+}
 
 describe('DeleteProductUseCase', () => {
   let useCase: DeleteProductUseCase;
@@ -7,6 +18,7 @@ describe('DeleteProductUseCase', () => {
 
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof DeleteProductUseCase>[0]>();
+    mockRepo.findById.mockResolvedValue(createProduct());
     useCase = new DeleteProductUseCase(mockRepo);
   });
 
@@ -22,5 +34,13 @@ describe('DeleteProductUseCase', () => {
 
     expect(mockRepo.hardDelete).toHaveBeenCalledWith('p1');
     expect(mockRepo.delete).not.toHaveBeenCalled();
+  });
+
+  it('should throw ProductNotFoundError when the product does not exist', async () => {
+    mockRepo.findById.mockResolvedValue(null);
+
+    await expect(useCase.execute('missing')).rejects.toThrow(ProductNotFoundError);
+    expect(mockRepo.delete).not.toHaveBeenCalled();
+    expect(mockRepo.hardDelete).not.toHaveBeenCalled();
   });
 });

@@ -6,7 +6,7 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import type { ReportType } from '../../domain/entities/ReportEntities';
 import type { CreateReportScheduleInput } from '../../application/useCases/CreateReportSchedule';
-import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
+
 import {
   generateReportUseCase,
   createReportScheduleUseCase,
@@ -15,6 +15,7 @@ import {
   updateReportScheduleUseCase,
   deleteReportScheduleUseCase,
   listReportExecutionsUseCase,
+  getReportTemplatesUseCase,
 } from '../../application/wired';
 import { UpdateReportScheduleParams } from '../../application/wired';
 
@@ -40,8 +41,7 @@ export const generateReport = async (
 };
 
 export const getReportTemplates = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const useCase = new GetReportTemplatesUseCase();
-  const templates = await useCase.execute();
+  const templates = await getReportTemplatesUseCase.execute();
   const templateList = Object.values(templates);
   res.json({ success: true, data: templateList });
 };

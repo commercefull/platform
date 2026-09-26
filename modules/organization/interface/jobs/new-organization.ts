@@ -1,4 +1,4 @@
-import { OrganizationRepo } from '../../application/wired';
+import { manageOrganizationsUseCase } from '../../application/wired';
 /**
  * Job: Create New Organization
  * Creates a new organization account with the specified email, name, and password
@@ -31,16 +31,14 @@ async function run() {
   }
 
   try {
-    const repo = new OrganizationRepo();
-
-    const existing = await repo.findByEmail(email);
+    const existing = await manageOrganizationsUseCase.findByEmail(email);
     if (existing) {
       console.error(`❌ Organization with email "${email}" already exists`);
       process.exit(1);
     }
 
     console.log(`👤 Creating organization "${name}"...`);
-    const org = await repo.createWithPassword({
+    const org = await manageOrganizationsUseCase.createWithPassword({
       name,
       email,
       password,

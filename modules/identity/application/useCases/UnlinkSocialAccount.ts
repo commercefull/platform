@@ -1,3 +1,4 @@
+import { eventBus } from '../../../../libs/events/eventBus';
 import type { SocialAccountRepository } from '../../domain/repositories/SocialAccountRepository';
 import { SocialProvider, UserType } from '../../domain/entities/SocialAccount';
 import {
@@ -43,6 +44,13 @@ export class UnlinkSocialAccountUseCase {
 
     // Deactivate the social account
     await this.socialAccountRepo.deactivate(socialAccount.socialAccountId);
+
+    eventBus.emit(`identity.${userType}.social_account_unlinked`, {
+      userId,
+      userType,
+      provider,
+      timestamp: new Date(),
+    });
   }
 }
 

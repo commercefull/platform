@@ -1,13 +1,20 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   CustomerPriceList,
-  CustomerPrice,
   PricingRuleCreateProps,
   PricingRuleStatus,
   PricingRuleUpdateProps,
   TierPrice,
 } from '../../domain/pricingRule';
-import { pricingRuleRepository, pricingDataRepository } from '../../application/wired';
+import {
+  managePricingAdminUseCase,
+  createPricingRuleUseCase,
+  createTierPriceUseCase,
+  addPriceToListUseCase,
+} from '../../application/wired';
+import type { CustomerPriceCreateProps } from '../../application/useCases/AddPriceToList';
+import type { TierPriceCreateProps } from '../../application/useCases/CreateTierPrice';
 
 interface PricingRuleBody {
   name?: string;
@@ -59,13 +66,13 @@ export const getPricingRules = async (req: HttpRequest, res: HttpResponse): Prom
   };
 
   // Get the rules with proper pagination (offset based on page number)
-  const rules = await pricingRuleRepository.rules.findAllRules(filters, {
+  const rules = await managePricingAdminUseCase.findAllRules(filters, {
     limit: limitNum,
     offset: (pageNum - 1) * limitNum, // Convert page to offset
   });
 
   // Get the total count for pagination
-  const total = await pricingRuleRepository.rules.countRules(filters);
+  const total = await managePricingAdminUseCase.countRules(filters);
 
   res.json({
     success: true,
@@ -84,7 +91,7 @@ export const getPricingRules = async (req: HttpRequest, res: HttpResponse): Prom
  */
 export const getPricingRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const rule = await pricingRuleRepository.rules.findById(id);
+  const rule = await managePricingAdminUseCase.findRuleById(id);
 
   if (!rule) {
     res.status(404).json({
@@ -107,32 +114,16 @@ export const createPricingRule = async (
   req: HttpRequest<Record<string, string>, unknown, PricingRuleBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const ruleData = req.body;
+  try {
+    const newRule = await createPricingRuleUseCase.execute(req.body as PricingRuleCreateProps);
 
-  // Validate required fields
-  if (!ruleData.name || !ruleData.type || !ruleData.scope) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: name, type, and scope are required',
+    res.status(201).json({
+      success: true,
+      data: newRule,
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Validate adjustments
-  if (!ruleData.adjustments || ruleData.adjustments.length === 0) {
-    res.status(400).json({
-      success: false,
-      message: 'At least one adjustment is required',
-    });
-    return;
-  }
-
-  const newRule = await pricingRuleRepository.rules.create(ruleData as PricingRuleCreateProps);
-
-  res.status(201).json({
-    success: true,
-    data: newRule,
-  });
 };
 
 /**
@@ -145,7 +136,7 @@ export const updatePricingRule = async (
   const { id } = req.params;
   const ruleData = req.body;
 
-  const existingRule = await pricingRuleRepository.rules.findById(id);
+  const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
     res.status(404).json({
       success: false,
@@ -154,7 +145,7 @@ export const updatePricingRule = async (
     return;
   }
 
-  const updatedRule = await pricingRuleRepository.rules.update(id, ruleData as PricingRuleUpdateProps);
+  const updatedRule = await managePricingAdminUseCase.updateRule(id, ruleData as PricingRuleUpdateProps);
 
   res.json({
     success: true,
@@ -168,7 +159,7 @@ export const updatePricingRule = async (
 export const deletePricingRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const existingRule = await pricingRuleRepository.rules.findById(id);
+  const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
     res.status(404).json({
       success: false,
@@ -177,7 +168,7 @@ export const deletePricingRule = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  await pricingRuleRepository.rules.delete(id);
+  await managePricingAdminUseCase.deleteRule(id);
 
   res.json({
     success: true,
@@ -194,7 +185,7 @@ export const getTierPrices = async (req: HttpRequest, res: HttpResponse): Promis
   const pageNum = parseInt(page as string, 10);
   const limitNum = parseInt(limit as string, 10);
 
-  const { tierPrices, total } = await pricingDataRepository.tierPrices.findAll({
+  const { tierPrices, total } = await managePricingAdminUseCase.findTierPrices({
     page: pageNum,
     limit: limitNum,
     productId: productId as string,
@@ -219,7 +210,7 @@ export const getTierPrices = async (req: HttpRequest, res: HttpResponse): Promis
  */
 export const getTierPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const tierPrice = await pricingDataRepository.tierPrices.findById(id);
+  const tierPrice = await managePricingAdminUseCase.findTierPriceById(id);
 
   if (!tierPrice) {
     res.status(404).json({
@@ -242,23 +233,16 @@ export const createTierPrice = async (
   req: HttpRequest<Record<string, string>, unknown, TierPriceBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const tierPriceData = req.body;
+  try {
+    const newTierPrice = await createTierPriceUseCase.execute(req.body as TierPriceCreateProps);
 
-  // Validate required fields
-  if (!tierPriceData.productId || !tierPriceData.quantityMin || tierPriceData.priceCents === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: productId, quantityMin, and priceCents are required',
+    res.status(201).json({
+      success: true,
+      data: newTierPrice,
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const newTierPrice = await pricingDataRepository.tierPrices.create(tierPriceData as Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>);
-
-  res.status(201).json({
-    success: true,
-    data: newTierPrice,
-  });
 };
 
 /**
@@ -271,7 +255,7 @@ export const updateTierPrice = async (
   const { id } = req.params;
   const tierPriceData = req.body;
 
-  const existingTierPrice = await pricingDataRepository.tierPrices.findById(id);
+  const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
     res.status(404).json({
       success: false,
@@ -280,7 +264,7 @@ export const updateTierPrice = async (
     return;
   }
 
-  const updatedTierPrice = await pricingDataRepository.tierPrices.update(
+  const updatedTierPrice = await managePricingAdminUseCase.updateTierPrice(
     id,
     tierPriceData as Partial<Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>>,
   );
@@ -297,7 +281,7 @@ export const updateTierPrice = async (
 export const deleteTierPrice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const existingTierPrice = await pricingDataRepository.tierPrices.findById(id);
+  const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
     res.status(404).json({
       success: false,
@@ -306,7 +290,7 @@ export const deleteTierPrice = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  await pricingDataRepository.tierPrices.delete(id);
+  await managePricingAdminUseCase.deleteTierPrice(id);
 
   res.json({
     success: true,
@@ -328,7 +312,7 @@ export const getPriceLists = async (req: HttpRequest, res: HttpResponse): Promis
 
   if (customerId) {
     const customerGroupIds = customerGroupId ? [customerGroupId as string] : [];
-    priceLists = await pricingDataRepository.customerPrices.findPriceListsForCustomer(customerId as string, customerGroupIds);
+    priceLists = await managePricingAdminUseCase.findPriceListsForCustomer(customerId as string, customerGroupIds);
   } else {
     // This would need to be implemented in the repo
     // For now, return an empty array
@@ -352,7 +336,7 @@ export const getPriceLists = async (req: HttpRequest, res: HttpResponse): Promis
  */
 export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const priceList = await pricingDataRepository.customerPrices.findPriceListById(id);
+  const priceList = await managePricingAdminUseCase.findPriceListById(id);
 
   if (!priceList) {
     res.status(404).json({
@@ -363,7 +347,7 @@ export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise
   }
 
   // Get associated prices
-  const prices = await pricingDataRepository.customerPrices.findPricesByPriceListId(id);
+  const prices = await managePricingAdminUseCase.findPricesByPriceListId(id);
 
   res.json({
     success: true,
@@ -392,7 +376,7 @@ export const createPriceList = async (
     return;
   }
 
-  const newPriceList = await pricingDataRepository.customerPrices.createPriceList(
+  const newPriceList = await managePricingAdminUseCase.createCustomerPriceList(
     priceListData as Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>,
   );
 
@@ -412,7 +396,7 @@ export const updatePriceList = async (
   const { id } = req.params;
   const priceListData = req.body;
 
-  const existingPriceList = await pricingDataRepository.customerPrices.findPriceListById(id);
+  const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
     res.status(404).json({
       success: false,
@@ -421,7 +405,7 @@ export const updatePriceList = async (
     return;
   }
 
-  const updatedPriceList = await pricingDataRepository.customerPrices.updatePriceList(
+  const updatedPriceList = await managePricingAdminUseCase.updateCustomerPriceList(
     id,
     priceListData as Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>,
   );
@@ -438,7 +422,7 @@ export const updatePriceList = async (
 export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const existingPriceList = await pricingDataRepository.customerPrices.findPriceListById(id);
+  const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
     res.status(404).json({
       success: false,
@@ -447,7 +431,7 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  await pricingDataRepository.customerPrices.deletePriceList(id);
+  await managePricingAdminUseCase.deleteCustomerPriceList(id);
 
   res.json({
     success: true,
@@ -460,34 +444,18 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
  */
 export const addPriceToList = async (req: HttpRequest<Record<string, string>, unknown, PriceBody>, res: HttpResponse): Promise<void> => {
   const { priceListId } = req.params;
-  const priceData = req.body;
 
-  // Validate price list exists
-  const existingPriceList = await pricingDataRepository.customerPrices.findPriceListById(priceListId);
-  if (!existingPriceList) {
-    res.status(404).json({
-      success: false,
-      message: 'Price list not found',
+  try {
+    const newPrice = await addPriceToListUseCase.execute(
+      priceListId,
+      req.body as Omit<CustomerPriceCreateProps, 'priceListId'>,
+    );
+
+    res.status(201).json({
+      success: true,
+      data: newPrice,
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Validate required fields
-  if (!priceData.productId || !priceData.adjustmentType || priceData.adjustmentValue === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: productId, adjustmentType, and adjustmentValue are required',
-    });
-    return;
-  }
-
-  const newPrice = await pricingDataRepository.customerPrices.createPrice({
-    ...priceData,
-    priceListId,
-  } as Omit<CustomerPrice, 'id' | 'createdAt' | 'updatedAt'>);
-
-  res.status(201).json({
-    success: true,
-    data: newPrice,
-  });
 };

@@ -176,10 +176,67 @@ export interface CategoryPort {
   findAll(): Promise<CategoryRow[]>;
   findActive(): Promise<CategoryRow[]>;
   findChildren(parentId: string): Promise<CategoryRow[]>;
+  findRootCategories(): Promise<CategoryRow[]>;
+  findFeatured(): Promise<CategoryRow[]>;
   findForMenu(): Promise<CategoryRow[]>;
   create(props: CategoryCreateProps): Promise<CategoryRow>;
   update(id: string, props: CategoryUpdateProps): Promise<CategoryRow | null>;
   delete(id: string): Promise<boolean>;
+}
+
+// ============================================================================
+// Attribute Groups & Options (productAttributeGroup / productAttributeOption rows)
+// ============================================================================
+
+export interface AttributeGroupRow {
+  productAttributeGroupId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  description: string | null;
+  position: number;
+  isVisible: boolean;
+  isComparable: boolean;
+  organizationId: string | null;
+  isGlobal: boolean;
+}
+
+export type AttributeGroupCreateParams = Pick<AttributeGroupRow, 'name' | 'code' | 'description' | 'position'>;
+export type AttributeGroupUpdateParams = Partial<AttributeGroupCreateParams>;
+
+export interface AttributeGroupPort {
+  findOne(id: string): Promise<AttributeGroupRow | null>;
+  findByCode(code: string): Promise<AttributeGroupRow | null>;
+  findAll(): Promise<AttributeGroupRow[]>;
+  create(props: AttributeGroupCreateParams): Promise<AttributeGroupRow>;
+  update(id: string, props: AttributeGroupUpdateParams): Promise<AttributeGroupRow | null>;
+  delete(id: string): Promise<AttributeGroupRow | null>;
+}
+
+export interface AttributeOptionRow {
+  productAttributeOptionId: string;
+  attributeId: string;
+  value: string;
+  label: string;
+  position: number;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type AttributeOptionCreateParams = Pick<AttributeOptionRow, 'attributeId' | 'value' | 'label' | 'position'>;
+export type AttributeOptionUpdateParams = Partial<AttributeOptionCreateParams>;
+
+export interface AttributeOptionPort {
+  findOne(id: string): Promise<AttributeOptionRow | null>;
+  findByValue(attributeId: string, value: string): Promise<AttributeOptionRow | null>;
+  findByAttribute(attributeId: string): Promise<AttributeOptionRow[]>;
+  create(props: AttributeOptionCreateParams): Promise<AttributeOptionRow>;
+  bulkCreate(options: AttributeOptionCreateParams[]): Promise<AttributeOptionRow[]>;
+  update(id: string, props: AttributeOptionUpdateParams): Promise<AttributeOptionRow | null>;
+  delete(id: string): Promise<AttributeOptionRow | null>;
+  deleteByAttribute(attributeId: string): Promise<number>;
 }
 
 // ============================================================================
@@ -245,6 +302,7 @@ export interface ProductReviewPort {
   highlight(id: string, highlighted?: boolean): Promise<ProductReview | null>;
   addAdminResponse(id: string, response: string): Promise<ProductReview | null>;
   incrementHelpful(id: string): Promise<ProductReview | null>;
+  incrementReport(id: string): Promise<ProductReview | null>;
   getProductStatistics(productId: string): Promise<{
     totalReviews: number;
     averageRating: number;
@@ -253,6 +311,7 @@ export interface ProductReviewPort {
   }>;
   findByCustomerAndProduct(customerId: string, productId: string): Promise<ProductReview | null>;
   checkCustomerPurchase(customerId: string, productId: string): Promise<boolean>;
+  delete(id: string): Promise<unknown>;
 }
 
 // ============================================================================
@@ -542,6 +601,11 @@ export interface DynamicAttributePort {
   findAttributeById(id: string): Promise<ProductAttribute | null>;
   findAttributeByCode(code: string): Promise<ProductAttribute | null>;
   findAllAttributes(): Promise<ProductAttribute[]>;
+  findAttributesByGroup(groupId: string): Promise<ProductAttribute[]>;
+  findSearchableAttributes(): Promise<ProductAttribute[]>;
+  findFilterableAttributes(): Promise<ProductAttribute[]>;
+  findVariantAttributes(): Promise<ProductAttribute[]>;
+  deleteAttribute(id: string): Promise<boolean>;
   createAttribute(input: ProductAttributeCreateInput): Promise<ProductAttribute>;
   updateAttribute(id: string, input: ProductAttributeUpdateInput): Promise<ProductAttribute | null>;
   findAttributeValues(attributeId: string): Promise<ProductAttributeValue[]>;

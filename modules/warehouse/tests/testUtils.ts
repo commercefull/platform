@@ -13,7 +13,7 @@ import type { DeleteWarehouseUseCase } from '../application/useCases/DeleteWareh
 import type { GetWarehouseUseCase } from '../application/useCases/GetWarehouse';
 import type { ListWarehousesUseCase } from '../application/useCases/ListWarehouses';
 import type { UpdateWarehouseUseCase } from '../application/useCases/UpdateWarehouse';
-import type { ManageWarehouseAdminUseCaseV2 } from '../application/useCases/ManageWarehouseAdminV2';
+import type { ManageWarehouseAdminUseCase } from '../application/useCases/ManageWarehouseAdmin';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -40,7 +40,7 @@ function lazyMock<T>(): jest.Mocked<T> {
   }) as jest.Mocked<T>;
 }
 
-export function createWarehouseRepository(): jest.Mocked<ConstructorParameters<typeof ManageWarehouseAdminUseCaseV2>[0]> {
+export function createWarehouseRepository(): jest.Mocked<ConstructorParameters<typeof ManageWarehouseAdminUseCase>[0]> {
   return lazyMock();
 }
 

@@ -8,7 +8,7 @@ import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 import type { AllocationRuleScope, AllocationStrategy, ReservationPolicy } from '../../domain/entities/InventoryAllocationRule';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { inventoryAllocationRuleRepo } from '../../application/wired';
+import { manageAllocationRulesUseCase } from '../../application/wired';
 
 // ============================================================================
 // List Inventory Allocation Rules
@@ -17,7 +17,7 @@ import { inventoryAllocationRuleRepo } from '../../application/wired';
 export const listAllocationRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   let rules: never[] = [];
   try {
-    const activeRules = await inventoryAllocationRuleRepo.findActiveRules();
+    const activeRules = await manageAllocationRulesUseCase.findActiveRules();
     rules = (activeRules || []).map(r => (r.toJSON ? r.toJSON() : r)) as never[];
   } catch {
     // DB may not be migrated yet — show empty list
@@ -75,7 +75,7 @@ export const createAllocationRule = async (req: HttpRequest, res: HttpResponse):
     // Parse conditions from condition-builder form data
     const conditions = parseConditionsFromForm(body.conditions);
 
-    await inventoryAllocationRuleRepo.create({
+    await manageAllocationRulesUseCase.create({
       name,
       description: description || undefined,
       scope: scope || 'global',

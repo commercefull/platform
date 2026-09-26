@@ -1,5 +1,5 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { promotionRuleRepository } from '../../application/wired';
+import { managePromotionTargetsUseCase } from '../../application/wired';
 
 interface CategoryCreateBody {
   productCategoryId: string;
@@ -17,24 +17,22 @@ interface CategoryCreateBody {
 
 type CategoryUpdateBody = Partial<Omit<CategoryCreateBody, 'productCategoryId' | 'promotionId'>>;
 
-const categoryPromotionRepo = promotionRuleRepository.categories;
-
 export const getActiveCategoryPromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const promotions = await categoryPromotionRepo.getActivePromotions();
+  const promotions = await managePromotionTargetsUseCase.getActiveCategoryPromotions();
   res.status(200).json({ success: true, data: promotions || [] });
 };
 
 // Get promotions by category ID
 export const getPromotionsByCategoryId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
-  const promotions = await categoryPromotionRepo.getByCategoryId(categoryId);
+  const promotions = await managePromotionTargetsUseCase.getCategoryPromotionsByCategoryId(categoryId);
   res.status(200).json({ success: true, data: promotions || [] });
 };
 
 // Get promotion by ID
 export const getCategoryPromotionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const promotion = await categoryPromotionRepo.getById(id);
+  const promotion = await managePromotionTargetsUseCase.getCategoryPromotionById(id);
 
   if (!promotion) {
     res.status(404).json({ success: false, message: 'Category promotion not found' });
@@ -51,7 +49,7 @@ export const createCategoryPromotion = async (
 ): Promise<void> => {
   const promotionData = req.body;
 
-  const promotion = await categoryPromotionRepo.create(promotionData);
+  const promotion = await managePromotionTargetsUseCase.createCategoryPromotion(promotionData);
   res.status(201).json({ success: true, data: promotion });
 };
 
@@ -63,13 +61,13 @@ export const updateCategoryPromotion = async (
   const { id } = req.params;
   const promotionData = req.body;
 
-  const promotion = await categoryPromotionRepo.update(id, promotionData);
+  const promotion = await managePromotionTargetsUseCase.updateCategoryPromotion(id, promotionData);
   res.status(200).json({ success: true, data: promotion });
 };
 
 // Delete a category promotion
 export const deleteCategoryPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  await categoryPromotionRepo.delete(id);
+  await managePromotionTargetsUseCase.deleteCategoryPromotion(id);
   res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });
 };

@@ -19,6 +19,18 @@ export class ManageGdprRequestsUseCase {
   ) {
     return this.gdprDataRequestRepo.findAll(filters, pagination);
   }
+  async findOverdueRequests() {
+    return this.gdprDataRequestRepo.findOverdueRequests();
+  }
+  async countByStatus() {
+    return this.gdprDataRequestRepo.countByStatus();
+  }
+  async countByType() {
+    return this.gdprDataRequestRepo.countByType();
+  }
+  async getAverageProcessingTime() {
+    return this.gdprDataRequestRepo.getAverageProcessingTime();
+  }
   async save(request: GdprDataRequest) {
     return this.gdprDataRequestRepo.save(request);
   }

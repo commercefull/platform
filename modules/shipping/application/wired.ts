@@ -22,6 +22,8 @@ import { ManageShippingZonesLookupUseCase } from './useCases/ManageShippingZones
 import { ManageShippingMethodsAdminUseCase } from './useCases/ManageShippingMethodsAdmin';
 import { TrackShipmentUseCase } from './useCases/TrackShipment';
 import { VoidShippingLabelUseCase } from './useCases/VoidShippingLabel';
+import { EstimateDeliveryWindowUseCase } from './useCases/EstimateDeliveryWindow';
+import { ManageShippingConfigurationUseCase } from './useCases/ManageShippingConfig';
 import type {
   CreateShippingCarrierInput,
   UpdateShippingCarrierInput,
@@ -57,6 +59,15 @@ export const manageShippingZonesLookupUseCase = new ManageShippingZonesLookupUse
 export const manageShippingMethodsAdminUseCase = new ManageShippingMethodsAdminUseCase(shippingConfigRepository.methods);
 export const trackShipmentUseCase = new TrackShipmentUseCase(shippingLabelRepo);
 export const voidShippingLabelUseCase = new VoidShippingLabelUseCase(shippingLabelRepo);
+export const estimateDeliveryWindowUseCase = new EstimateDeliveryWindowUseCase(shippingConfigRepository.methods);
+export const manageShippingConfigurationUseCase = new ManageShippingConfigurationUseCase(
+  shippingConfigRepository.carriers,
+  shippingConfigRepository.packaging,
+  {
+    ...shippingConfigRepository.surcharges,
+    findActiveByRateId: (shippingRateId: string) => shippingConfigRepository.surcharges.findByRateId(shippingRateId, true),
+  },
+);
 
 export {
   shippingConfigRepository,

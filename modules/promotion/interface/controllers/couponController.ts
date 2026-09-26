@@ -1,7 +1,13 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { couponDiscountRepository, type CreateCouponInput, type UpdateCouponInput } from '../../application/wired';
-
-const couponRepo = couponDiscountRepository.coupons;
+import {
+  type CreateCouponInput,
+  type UpdateCouponInput,
+  createCouponUseCase,
+  validateCouponCodeUseCase,
+  calculateCouponDiscountUseCase,
+  manageCouponsUseCase,
+} from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 interface ValidateCouponBody {
   code: string;
@@ -23,7 +29,7 @@ interface CalculateDiscountBody {
 export const getActiveCoupons = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId, limit, offset, orderBy, direction } = req.query;
 
-  const coupons = await couponRepo.findActiveCoupons(organizationId as string | undefined, {
+  const coupons = await manageCouponsUseCase.findActiveCoupons(organizationId as string | undefined, {
     limit: limit ? parseInt(limit as string) : undefined,
     offset: offset ? parseInt(offset as string) : undefined,
     orderBy: orderBy as string | undefined,
@@ -45,7 +51,7 @@ export const getActiveCoupons = async (req: HttpRequest, res: HttpResponse): Pro
  */
 export const getCouponById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const coupon = await couponRepo.findById(id);
+  const coupon = await manageCouponsUseCase.findById(id);
 
   if (!coupon) {
     res.status(404).json({ success: false, message: 'Coupon not found' });
@@ -62,7 +68,7 @@ export const getCouponByCode = async (req: HttpRequest, res: HttpResponse): Prom
   const { code } = req.params;
   const { organizationId } = req.query;
 
-  const coupon = await couponRepo.findByCode(code, organizationId as string | undefined);
+  const coupon = await manageCouponsUseCase.findByCode(code, organizationId as string | undefined);
 
   if (!coupon) {
     res.status(404).json({ success: false, message: 'Coupon not found' });
@@ -94,34 +100,17 @@ export const createCoupon = async (
     couponData.type = typeMapping[couponData.type] as unknown as CreateCouponInput['type'];
   }
 
-  // Validate required fields
-  if (!couponData.code || !couponData.name || !couponData.type) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: code, name, and type are required',
+  try {
+    const coupon = await createCouponUseCase.execute(couponData);
+
+    res.status(201).json({
+      success: true,
+      data: coupon,
+      message: 'Coupon created successfully',
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Check if code already exists
-  const existingCoupon = await couponRepo.findByCode(couponData.code, couponData.organizationId);
-  if (existingCoupon) {
-    res.status(400).json({
-      success: false,
-      message: 'Coupon code already exists',
-    });
-    return;
-  }
-
-  // Default values are handled by the repository
-
-  const coupon = await couponRepo.create(couponData);
-
-  res.status(201).json({
-    success: true,
-    data: coupon,
-    message: 'Coupon created successfully',
-  });
 };
 
 /**
@@ -135,7 +124,7 @@ export const updateCoupon = async (
   const couponData = req.body;
 
   // Check if coupon exists
-  const existingCoupon = await couponRepo.findById(id);
+  const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     res.status(404).json({
       success: false,
@@ -146,7 +135,7 @@ export const updateCoupon = async (
 
   // Code cannot be changed via update (it's excluded from UpdateCouponInput)
 
-  const updatedCoupon = await couponRepo.update(id, couponData);
+  const updatedCoupon = await manageCouponsUseCase.update(id, couponData);
 
   res.status(200).json({
     success: true,
@@ -162,7 +151,7 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   const { id } = req.params;
 
   // Check if coupon exists
-  const existingCoupon = await couponRepo.findById(id);
+  const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     res.status(404).json({
       success: false,
@@ -171,7 +160,7 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     return;
   }
 
-  await couponRepo.delete(id);
+  await manageCouponsUseCase.delete(id);
 
   res.status(200).json({
     success: true,
@@ -188,30 +177,29 @@ export const validateCoupon = async (
 ): Promise<void> => {
   const { code, orderTotalCents, customerId, organizationId } = req.body;
 
-  // Validation
-  if (!code || orderTotalCents === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Coupon code and order total are required',
+  try {
+    const result = await validateCouponCodeUseCase.execute({
+      code,
+      orderTotalCents,
+      customerId,
+      organizationId,
     });
-    return;
-  }
 
-  // Validate the coupon
-  const result = await couponRepo.validate(code, parseFloat(orderTotalCents), customerId, organizationId);
+    if (!result.valid) {
+      res.status(400).json({
+        success: false,
+        data: result,
+      });
+      return;
+    }
 
-  if (!result.valid) {
-    res.status(400).json({
-      success: false,
+    res.status(200).json({
+      success: true,
       data: result,
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
 };
 
 /**
@@ -221,7 +209,7 @@ export const getCouponUsage = async (req: HttpRequest, res: HttpResponse): Promi
   const { id } = req.params;
 
   // Check if coupon exists
-  const existingCoupon = await couponRepo.findById(id);
+  const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     res.status(404).json({
       success: false,
@@ -230,7 +218,7 @@ export const getCouponUsage = async (req: HttpRequest, res: HttpResponse): Promi
     return;
   }
 
-  const usage = await couponRepo.getUsage(id);
+  const usage = await manageCouponsUseCase.getUsage(id);
 
   res.status(200).json({
     success: true,
@@ -252,35 +240,14 @@ export const calculateCouponDiscount = async (
 ): Promise<void> => {
   const { code, orderTotalCents, items: _items, organizationId } = req.body;
 
-  // Validation
-  if (!code || orderTotalCents === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Coupon code and order total are required',
+  try {
+    const result = await calculateCouponDiscountUseCase.execute({ code, orderTotalCents, organizationId });
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Get coupon
-  const coupon = await couponRepo.findByCode(code, organizationId);
-  if (!coupon) {
-    res.status(404).json({
-      success: false,
-      message: 'Coupon not found',
-    });
-    return;
-  }
-
-  // Calculate discount
-  const discountAmountCents = couponRepo.calculateDiscount(coupon, parseFloat(orderTotalCents));
-
-  res.status(200).json({
-    success: true,
-    data: {
-      coupon,
-      orderTotalCents: parseFloat(orderTotalCents),
-      discountAmountCents,
-      finalTotalCents: parseFloat(orderTotalCents) - discountAmountCents,
-    },
-  });
 };

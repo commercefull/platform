@@ -48,8 +48,23 @@ export function createSupportAdminPort(): jest.Mocked<SupportAdminPort> {
 export function createFaqPort(): jest.Mocked<FaqPort> {
   return {
     getArticles: jest.fn(),
+    getArticle: jest.fn(),
     saveArticle: jest.fn(),
+    publishArticle: jest.fn(),
+    unpublishArticle: jest.fn(),
     deleteArticle: jest.fn(),
+    getFeaturedCategories: jest.fn(),
+    getCategoryBySlug: jest.fn(),
+    getArticleBySlug: jest.fn(),
+    searchArticles: jest.fn(),
+    getPopularArticles: jest.fn(),
+    getRelatedArticles: jest.fn(),
+    incrementViews: jest.fn(),
+    submitHelpfulVote: jest.fn(),
+    getCategories: jest.fn(),
+    getCategory: jest.fn(),
+    saveCategory: jest.fn(),
+    deleteCategory: jest.fn(),
   };
 }
 

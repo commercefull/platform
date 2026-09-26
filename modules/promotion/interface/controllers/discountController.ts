@@ -1,12 +1,10 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { couponDiscountRepository, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
-
-const discountRepo = couponDiscountRepository.discounts;
+import { managePromotionTargetsUseCase, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
 
 // Get all active discounts
 export const getActiveDiscounts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.query;
-  const discounts = await discountRepo.findActive(organizationId as string | undefined);
+  const discounts = await managePromotionTargetsUseCase.findActiveProductDiscounts(organizationId as string | undefined);
   res.status(200).json({ success: true, data: discounts || [] });
 };
 
@@ -14,7 +12,7 @@ export const getActiveDiscounts = async (req: HttpRequest, res: HttpResponse): P
 export const getDiscountsByProductId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { organizationId } = req.query;
-  const discounts = await discountRepo.findDiscountsForProduct(productId, organizationId as string | undefined);
+  const discounts = await managePromotionTargetsUseCase.findDiscountsForProduct(productId, organizationId as string | undefined);
   res.status(200).json({ success: true, data: discounts || [] });
 };
 
@@ -22,14 +20,14 @@ export const getDiscountsByProductId = async (req: HttpRequest, res: HttpRespons
 export const getDiscountsByCategoryId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const { organizationId } = req.query;
-  const discounts = await discountRepo.findDiscountsForCategory(categoryId, organizationId as string | undefined);
+  const discounts = await managePromotionTargetsUseCase.findDiscountsForCategory(categoryId, organizationId as string | undefined);
   res.status(200).json({ success: true, data: discounts || [] });
 };
 
 // Get discount by ID
 export const getDiscountById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const discount = await discountRepo.findById(id);
+  const discount = await managePromotionTargetsUseCase.findProductDiscountById(id);
 
   if (!discount) {
     res.status(404).json({ success: false, message: 'Discount not found' });
@@ -52,7 +50,7 @@ export const createDiscount = async (
     return;
   }
 
-  const discount = await discountRepo.create(discountData);
+  const discount = await managePromotionTargetsUseCase.createProductDiscount(discountData);
   res.status(201).json({ success: true, data: discount });
 };
 
@@ -64,7 +62,7 @@ export const updateDiscount = async (
   const { id } = req.params;
   const discountData = req.body;
 
-  const discount = await discountRepo.update(id, discountData);
+  const discount = await managePromotionTargetsUseCase.updateProductDiscount(id, discountData);
   res.status(200).json({ success: true, data: discount });
 };
 
@@ -72,7 +70,7 @@ export const updateDiscount = async (
 export const deleteDiscount = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const deleted = await discountRepo.delete(id);
+  const deleted = await managePromotionTargetsUseCase.deleteProductDiscount(id);
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Discount not found' });
     return;

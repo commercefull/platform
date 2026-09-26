@@ -5,12 +5,14 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { RegisterWebhookUseCase } from '../../application/useCases/RegisterWebhook';
-import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
-import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
-import { WebhookRepo } from '../../application/wired';
+import {
+  listWebhooksUseCase,
+  registerWebhookUseCase,
+  unregisterWebhookUseCase,
+  manageWebhooksUseCase,
+} from '../../application/wired';
 
 interface RegisterWebhookBody {
   name: string;
@@ -42,7 +44,7 @@ export const registerWebhook = async (
   req: HttpRequest<Record<string, string>, unknown, RegisterWebhookBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const useCase = new RegisterWebhookUseCase(WebhookRepo);
+  const useCase = registerWebhookUseCase;
   const result = await useCase.execute({
     name: req.body.name,
     url: req.body.url,
@@ -61,7 +63,7 @@ export const registerWebhook = async (
  */
 export const unregisterWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const useCase = new UnregisterWebhookUseCase(WebhookRepo);
+  const useCase = unregisterWebhookUseCase;
   await useCase.execute(webhookEndpointId);
 
   res.json({ success: true, message: 'Webhook endpoint removed' });
@@ -73,7 +75,7 @@ export const unregisterWebhook = async (req: HttpRequest, res: HttpResponse): Pr
  */
 export const listWebhooks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId, isActive, limit, offset } = req.query;
-  const useCase = new ListWebhooksUseCase(WebhookRepo);
+  const useCase = listWebhooksUseCase;
   const result = await useCase.execute(
     {
       organizationId: organizationId as string,
@@ -92,7 +94,7 @@ export const listWebhooks = async (req: HttpRequest, res: HttpResponse): Promise
  */
 export const getWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
+  const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
     res.status(404).json({ success: false, error: 'Webhook endpoint not found' });
@@ -122,7 +124,7 @@ export const updateWebhook = async (
   if (req.body.headers !== undefined) updates.headers = req.body.headers;
   if (req.body.retryPolicy !== undefined) updates.retryPolicy = req.body.retryPolicy;
 
-  const result = await WebhookRepo.updateEndpoint(webhookEndpointId, updates);
+  const result = await manageWebhooksUseCase.updateEndpoint(webhookEndpointId, updates);
 
   if (!result) {
     res.status(404).json({ success: false, error: 'Webhook endpoint not found' });
@@ -140,7 +142,7 @@ export const getDeliveries = async (req: HttpRequest, res: HttpResponse): Promis
   const { webhookEndpointId } = req.params;
   const { status, eventType, limit, offset } = req.query;
 
-  const result = await WebhookRepo.findDeliveries(
+  const result = await manageWebhooksUseCase.findDeliveries(
     {
       webhookEndpointId,
       status: status as DeliveryStatus | undefined,
@@ -175,7 +177,7 @@ export const getAvailableEvents = async (_req: HttpRequest, res: HttpResponse): 
  */
 export const testWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
+  const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
     res.status(404).json({ success: false, error: 'Webhook endpoint not found' });

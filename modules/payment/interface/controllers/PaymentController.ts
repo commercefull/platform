@@ -4,19 +4,29 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const PaymentRepo = paymentDataRepository.payments;
-import { InitiatePaymentCommand, InitiatePaymentUseCase } from '../../application/useCases/InitiatePayment';
-import { ProcessPaymentRefundCommand, ProcessPaymentRefundUseCase } from '../../application/useCases/ProcessRefund';
+import { InitiatePaymentCommand } from '../../application/useCases/InitiatePayment';
+import { ProcessPaymentRefundCommand } from '../../application/useCases/ProcessRefund';
 import {
   GetTransactionCommand,
-  GetTransactionUseCase,
   ListTransactionsCommand,
-  ListTransactionsUseCase,
 } from '../../application/useCases';
+import {
+  getTransactionUseCase,
+  initiatePaymentUseCase,
+  listTransactionsUseCase,
+  managePaymentGatewaysUseCase,
+  managePaymentRecordsUseCase,
+  processPaymentRefundUseCase,
+} from '../../application/useCases/wired';
+import type {
+  PaymentGatewayCreateParams,
+  PaymentGatewayUpdateParams,
+  PaymentMethodConfigCreateParams,
+  PaymentMethodConfigUpdateParams,
+} from '../../domain/repositories/PaymentGatewayRepository';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
-import { query, queryOne } from '../../../../libs/db';
 import { isUuid } from '../../../../libs/uuid';
-import { paymentDataRepository } from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
   res.status(statusCode).json({ success: true, data });
@@ -38,7 +48,7 @@ export const getMyTransactions = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   const { limit, offset } = req.query;
-  const result = await PaymentRepo.findTransactionsByCustomerId(customerId, {
+  const result = await managePaymentRecordsUseCase.findTransactionsByCustomerId(customerId, {
     limit: parseInt(limit as string) || 20,
     offset: parseInt(offset as string) || 0,
   });
@@ -48,13 +58,13 @@ export const getMyTransactions = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const getTransactionByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const transactions = await PaymentRepo.findTransactionsByOrderId(orderId);
+  const transactions = await managePaymentRecordsUseCase.findTransactionsByOrderId(orderId);
   respond(req, res, { transactions: transactions.map(t => t.toJSON()) });
 };
 
 export const getPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { currency } = req.query;
-  const methods = await PaymentRepo.getEnabledPaymentMethods('default', currency as string);
+  const methods = await managePaymentRecordsUseCase.getEnabledPaymentMethods('default', currency as string);
   respond(req, res, { paymentMethods: methods });
 };
 
@@ -88,8 +98,7 @@ export const listTransactions = async (req: HttpRequest, res: HttpResponse): Pro
     (orderDirection as 'asc' | 'desc') || 'desc',
   );
 
-  const useCase = new ListTransactionsUseCase(PaymentRepo);
-  const result = await useCase.execute(command);
+  const result = await listTransactionsUseCase.execute(command);
 
   respond(req, res, result);
 };
@@ -101,8 +110,7 @@ export const getTransaction = async (req: HttpRequest, res: HttpResponse): Promi
     return;
   }
   const command = new GetTransactionCommand(transactionId);
-  const useCase = new GetTransactionUseCase(PaymentRepo);
-  const transaction = await useCase.execute(command);
+  const transaction = await getTransactionUseCase.execute(command);
 
   if (!transaction) {
     respondError(req, res, 'Transaction not found', 404);
@@ -123,8 +131,7 @@ export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Prom
 
   const command = new InitiatePaymentCommand(orderId, amountCents, currency, paymentMethodConfigId, customerId, req.ip);
 
-  const useCase = new InitiatePaymentUseCase(PaymentRepo);
-  const result = await useCase.execute(command);
+  const result = await initiatePaymentUseCase.execute(command);
 
   respond(req, res, result, 201);
 };
@@ -140,8 +147,7 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   const command = new ProcessPaymentRefundCommand(transactionId, amountCents, reason);
-  const useCase = new ProcessPaymentRefundUseCase(PaymentRepo);
-  const result = await useCase.execute(command);
+  const result = await processPaymentRefundUseCase.execute(command);
 
   respond(req, res, result, 201);
 };
@@ -149,13 +155,13 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
 export const getRefunds = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
 
-  const transaction = await PaymentRepo.findTransactionById(transactionId);
+  const transaction = await managePaymentRecordsUseCase.findTransactionById(transactionId);
   if (!transaction) {
     respondError(req, res, 'Transaction not found', 404);
     return;
   }
 
-  const refunds = await PaymentRepo.findRefundsByTransactionId(transactionId);
+  const refunds = await managePaymentRecordsUseCase.findRefundsByTransactionId(transactionId);
   respond(req, res, { refunds: refunds.map(r => r.toJSON()) });
 };
 
@@ -170,10 +176,7 @@ export const listGateways = async (req: HttpRequest, res: HttpResponse): Promise
     return;
   }
 
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "paymentGateway" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "name" ASC',
-    [organizationId],
-  );
+  const rows = await managePaymentGatewaysUseCase.findAll(organizationId);
   respond(req, res, rows || []);
 };
 
@@ -183,10 +186,7 @@ export const getGateway = async (req: HttpRequest, res: HttpResponse): Promise<v
     respondError(req, res, 'Gateway not found', 404);
     return;
   }
-  const gateway = await queryOne<Record<string, unknown>>(
-    'SELECT * FROM "paymentGateway" WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL',
-    [gatewayId],
-  );
+  const gateway = await managePaymentGatewaysUseCase.findById(gatewayId);
 
   if (!gateway) {
     respondError(req, res, 'Gateway not found', 404);
@@ -235,41 +235,35 @@ export const createGateway = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
-  const now = new Date().toISOString();
-
-  const result = await queryOne<Record<string, unknown>>(
-    `INSERT INTO "paymentGateway" (
-      "organizationId", name, provider, "isActive", "isDefault", "isTestMode",
-      "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint", "supportedPaymentMethods",
-      "createdAt", "updatedAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-    RETURNING *`,
-    [
+  try {
+    const result = await managePaymentGatewaysUseCase.create({
       organizationId,
       name,
       provider,
-      isActive ?? true,
-      isDefault ?? false,
-      isTestMode ?? false,
+      isActive: isActive ?? true,
+      isDefault: isDefault ?? false,
+      isTestMode: isTestMode ?? false,
       apiKey,
       apiSecret,
       publicKey,
       webhookSecret,
       apiEndpoint,
-      supportedPaymentMethods || 'creditCard',
-      now,
-      now,
-    ],
-  );
+      supportedPaymentMethods: supportedPaymentMethods || 'creditCard',
+      supportedCurrencies: null,
+      processingFees: null,
+      checkoutSettings: null,
+      metadata: null,
+    } as PaymentGatewayCreateParams);
 
-  respond(req, res, result, 201);
+    respond(req, res, result, 201);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
+  }
 };
 
 export const updateGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
   const updates = req.body as Record<string, unknown>;
-
-  const now = new Date().toISOString();
 
   // Build dynamic update
   const allowedFields = [
@@ -285,36 +279,24 @@ export const updateGateway = async (req: HttpRequest, res: HttpResponse): Promis
     'apiEndpoint',
     'supportedPaymentMethods',
   ];
-  const setStatements: string[] = ['"updatedAt" = $1'];
-  const values: unknown[] = [now];
-  let paramIndex = 2;
-
+  const params: Record<string, unknown> = {};
   for (const field of allowedFields) {
     if (updates[field] !== undefined) {
-      setStatements.push(`"${field}" = $${paramIndex++}`);
-      values.push(updates[field]);
+      params[field] = updates[field];
     }
   }
 
-  values.push(gatewayId);
-
-  const result = await queryOne<Record<string, unknown>>(
-    `UPDATE "paymentGateway" SET ${setStatements.join(', ')} WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-    values,
-  );
-
-  if (!result) {
-    respondError(req, res, 'Gateway not found', 404);
-    return;
+  try {
+    const result = await managePaymentGatewaysUseCase.update(gatewayId, params as PaymentGatewayUpdateParams);
+    respond(req, res, result);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  respond(req, res, result);
 };
 
 export const deleteGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
-  const now = new Date().toISOString();
-
-  await query('UPDATE "paymentGateway" SET "deletedAt" = $1 WHERE "paymentGatewayId" = $2', [now, gatewayId]);
+  await managePaymentGatewaysUseCase.delete(gatewayId);
 
   respond(req, res, { success: true });
 };
@@ -330,10 +312,7 @@ export const listMethodConfigs = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "paymentMethodConfig" WHERE "organizationId" = $1 AND "deletedAt" IS NULL ORDER BY "displayOrder" ASC',
-    [organizationId],
-  );
+  const rows = await managePaymentGatewaysUseCase.findAllMethodConfigs(organizationId);
   respond(req, res, rows || []);
 };
 
@@ -343,10 +322,7 @@ export const getMethodConfig = async (req: HttpRequest, res: HttpResponse): Prom
     respondError(req, res, 'Method config not found', 404);
     return;
   }
-  const config = await queryOne<Record<string, unknown>>(
-    'SELECT * FROM "paymentMethodConfig" WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL',
-    [methodConfigId],
-  );
+  const config = await managePaymentGatewaysUseCase.findMethodConfigById(methodConfigId);
 
   if (!config) {
     respondError(req, res, 'Method config not found', 404);
@@ -399,43 +375,34 @@ export const createMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     return;
   }
 
-  const now = new Date().toISOString();
-
-  const result = await queryOne<Record<string, unknown>>(
-    `INSERT INTO "paymentMethodConfig" (
-      "organizationId", "paymentMethod", "isEnabled", "displayName", description, "processingFeeCents",
-      "minimumAmountCents", "maximumAmountCents", "displayOrder", icon, "supportedCurrencies", countries,
-      "gatewayId", configuration, "createdAt", "updatedAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-    RETURNING *`,
-    [
+  try {
+    const result = await managePaymentGatewaysUseCase.createMethodConfig({
       organizationId,
       paymentMethod,
-      isEnabled ?? true,
+      isEnabled: isEnabled ?? true,
       displayName,
       description,
-      processingFeeCents,
-      minimumAmountCents,
-      maximumAmountCents,
-      displayOrder ?? 0,
+      processingFeeCents: processingFeeCents !== undefined ? Number(processingFeeCents) : undefined,
+      minimumAmountCents: minimumAmountCents !== undefined ? Number(minimumAmountCents) : undefined,
+      maximumAmountCents: maximumAmountCents !== undefined ? Number(maximumAmountCents) : undefined,
+      displayOrder: displayOrder ?? 0,
       icon,
-      supportedCurrencies || ['USD'],
+      supportedCurrencies: supportedCurrencies || ['USD'],
       countries,
       gatewayId,
-      configuration ? JSON.stringify(configuration) : null,
-      now,
-      now,
-    ],
-  );
+      configuration,
+      metadata: null,
+    } as PaymentMethodConfigCreateParams);
 
-  respond(req, res, result, 201);
+    respond(req, res, result, 201);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
+  }
 };
 
 export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodConfigId } = req.params;
   const updates = req.body as Record<string, unknown>;
-
-  const now = new Date().toISOString();
 
   // Build dynamic update
   const allowedFields = [
@@ -453,45 +420,31 @@ export const updateMethodConfig = async (req: HttpRequest, res: HttpResponse): P
     'gatewayId',
     'configuration',
   ];
-  const setStatements: string[] = ['"updatedAt" = $1'];
-  const values: unknown[] = [now];
-  let paramIndex = 2;
-
+  const params: Record<string, unknown> = {};
   for (const field of allowedFields) {
     if (updates[field] !== undefined) {
-      setStatements.push(`"${field}" = $${paramIndex++}`);
-      values.push(field === 'configuration' ? JSON.stringify(updates[field]) : updates[field]);
+      params[field] = updates[field];
     }
   }
 
-  values.push(methodConfigId);
-
-  const result = await queryOne<Record<string, unknown>>(
-    `UPDATE "paymentMethodConfig" SET ${setStatements.join(', ')} WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
-    values,
-  );
-
-  if (!result) {
-    respondError(req, res, 'Method config not found', 404);
-    return;
+  try {
+    const result = await managePaymentGatewaysUseCase.updateMethodConfig(methodConfigId, params as PaymentMethodConfigUpdateParams);
+    respond(req, res, result);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  respond(req, res, result);
 };
 
 export const deleteMethodConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { methodConfigId } = req.params;
-  const now = new Date().toISOString();
-
-  await query('UPDATE "paymentMethodConfig" SET "deletedAt" = $1 WHERE "paymentMethodConfigId" = $2', [now, methodConfigId]);
+  await managePaymentGatewaysUseCase.deleteMethodConfig(methodConfigId);
 
   respond(req, res, { success: true });
 };
 
 export const deleteTransaction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { transactionId } = req.params;
-  const now = new Date().toISOString();
-
-  await query('UPDATE "paymentTransaction" SET "deletedAt" = $1 WHERE "paymentTransactionId" = $2', [now, transactionId]);
+  await managePaymentRecordsUseCase.deleteTransaction(transactionId);
 
   respond(req, res, { success: true });
 };

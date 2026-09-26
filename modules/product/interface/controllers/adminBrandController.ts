@@ -5,8 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { brandRepo } from '../../application/useCases/wired';
-import { Brand } from '../../domain/entities/Brand';
+import { manageBrandsUseCase } from '../../application/useCases/wired';
 
 // Default organization ID — in production this would come from the authenticated admin's session
 const DEFAULT_ORG_ID = process.env.DEFAULT_ORGANIZATION_ID || '01911000-0000-7000-8000-000000000001';
@@ -18,7 +17,7 @@ const DEFAULT_ORG_ID = process.env.DEFAULT_ORGANIZATION_ID || '01911000-0000-700
 export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { search, status } = req.query;
 
-  const result = await brandRepo.findAll({
+  const result = await manageBrandsUseCase.findAll({
     organizationId: DEFAULT_ORG_ID,
     search: search as string | undefined,
     status: status as 'active' | 'inactive' | 'archived' | undefined,
@@ -43,7 +42,7 @@ export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<v
 
 export const viewBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
-  const brand = await brandRepo.findById(brandId);
+  const brand = await manageBrandsUseCase.findById(brandId);
 
   if (!brand) {
     req.flash('error', 'Brand not found');
@@ -88,7 +87,7 @@ export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<
   }
 
   try {
-    const brand = Brand.create({
+    await manageBrandsUseCase.create({
       organizationId: DEFAULT_ORG_ID,
       name,
       slug: slug || undefined,
@@ -97,7 +96,6 @@ export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<
       website: website || undefined,
       countryOfOrigin: countryOfOrigin || undefined,
     });
-    await brandRepo.create(brand);
     req.flash('success', `Brand "${name}" created successfully`);
     res.redirect('/hub/catalog/brands');
   } catch (err) {
@@ -112,7 +110,7 @@ export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<
 
 export const editBrandForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { brandId } = req.params;
-  const brand = await brandRepo.findById(brandId);
+  const brand = await manageBrandsUseCase.findById(brandId);
 
   if (!brand) {
     req.flash('error', 'Brand not found');
@@ -141,30 +139,24 @@ export const updateBrand = async (req: HttpRequest, res: HttpResponse): Promise<
   };
   const { name, description, logoUrl, website, countryOfOrigin, status } = body;
 
-  const brand = await brandRepo.findById(brandId);
+  const brand = await manageBrandsUseCase.findById(brandId);
   if (!brand) {
     req.flash('error', 'Brand not found');
     return res.redirect('/hub/catalog/brands');
   }
 
   try {
-    brand.updateProfile({
-      name: name || undefined,
-      description: description || undefined,
-      logoUrl: logoUrl || undefined,
-      website: website || undefined,
-      countryOfOrigin: countryOfOrigin || undefined,
-    });
-
-    if (status === 'active') {
-      brand.activate();
-    } else if (status === 'inactive') {
-      brand.deactivate();
-    } else if (status === 'archived') {
-      brand.archive();
-    }
-
-    await brandRepo.update(brand);
+    await manageBrandsUseCase.updateDetails(
+      brandId,
+      {
+        name: name || undefined,
+        description: description || undefined,
+        logoUrl: logoUrl || undefined,
+        website: website || undefined,
+        countryOfOrigin: countryOfOrigin || undefined,
+      },
+      status === 'active' || status === 'inactive' || status === 'archived' ? status : undefined,
+    );
     req.flash('success', 'Brand updated successfully');
     res.redirect('/hub/catalog/brands');
   } catch (err) {
@@ -181,7 +173,7 @@ export const deleteBrand = async (req: HttpRequest, res: HttpResponse): Promise<
   const { brandId } = req.params;
 
   try {
-    await brandRepo.delete(brandId);
+    await manageBrandsUseCase.delete(brandId);
     req.flash('success', 'Brand archived successfully');
   } catch (err) {
     req.flash('error', `Failed to delete brand: ${(err as Error).message}`);

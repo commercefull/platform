@@ -3,7 +3,6 @@ import { logger } from '../../../../libs/logger';
 import { ManageVendorUseCase } from '../../application/useCases/ManageVendor';
 import { ManageCommissionRuleUseCase } from '../../application/useCases/ManageCommissionRule';
 import { ManagePayoutUseCase } from '../../application/useCases/ManagePayout';
-import { VendorRepository, CommissionRuleRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import { VendorTier } from '../../domain/entities/Vendor';
 import { PayoutMethod } from '../../domain/entities/VendorPayout';
 import {
@@ -22,10 +21,10 @@ export class MarketplaceController {
   private commissionUseCase: ManageCommissionRuleUseCase;
   private payoutUseCase: ManagePayoutUseCase;
 
-  constructor(vendorRepo: VendorRepository, commissionRepo: CommissionRuleRepository, payoutRepo: VendorPayoutRepository) {
-    this.vendorUseCase = new ManageVendorUseCase(vendorRepo);
-    this.commissionUseCase = new ManageCommissionRuleUseCase(commissionRepo, vendorRepo);
-    this.payoutUseCase = new ManagePayoutUseCase(payoutRepo, vendorRepo);
+  constructor(vendorUseCase: ManageVendorUseCase, commissionUseCase: ManageCommissionRuleUseCase, payoutUseCase: ManagePayoutUseCase) {
+    this.vendorUseCase = vendorUseCase;
+    this.commissionUseCase = commissionUseCase;
+    this.payoutUseCase = payoutUseCase;
   }
 
   private handleError(res: HttpResponse, error: unknown): void {

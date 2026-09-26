@@ -1,22 +1,22 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { productCatalogRepository } from '../../application/wired';
-import { CategoryUpdateProps } from '../../application/wired';
+import { manageCategoriesUseCase } from '../../application/useCases/wired';
+import type { CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
 
-const categoryRepo = productCatalogRepository.categories;
+
 
 export const listCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const categories = await categoryRepo.findAll();
+  const categories = await manageCategoriesUseCase.findAll();
   res.json({ success: true, data: categories });
 };
 
 export const getRootCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const categories = await categoryRepo.findRootCategories();
+  const categories = await manageCategoriesUseCase.findRootCategories();
   res.json({ success: true, data: categories });
 };
 
 export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const category = await categoryRepo.findOne(id);
+  const category = await manageCategoriesUseCase.findOne(id);
   if (!category) {
     res.status(404).json({ success: false, error: 'Category not found' });
     return;
@@ -26,7 +26,7 @@ export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<
 
 export const getCategoryBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
-  const category = await categoryRepo.findBySlug(slug);
+  const category = await manageCategoriesUseCase.findBySlug(slug);
   if (!category) {
     res.status(404).json({ success: false, error: 'Category not found' });
     return;
@@ -36,7 +36,7 @@ export const getCategoryBySlug = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const getCategoryChildren = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const children = await categoryRepo.findChildren(id);
+  const children = await manageCategoriesUseCase.findChildren(id);
   res.json({ success: true, data: children });
 };
 
@@ -84,7 +84,7 @@ export const createCategory = async (req: HttpRequest, res: HttpResponse): Promi
     return;
   }
 
-  const category = await categoryRepo.create({
+  const category = await manageCategoriesUseCase.create({
     name,
     description,
     parentId,
@@ -109,22 +109,22 @@ export const createCategory = async (req: HttpRequest, res: HttpResponse): Promi
 
 export const updateCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const existing = await categoryRepo.findOne(id);
+  const existing = await manageCategoriesUseCase.findOne(id);
   if (!existing) {
     res.status(404).json({ success: false, error: 'Category not found' });
     return;
   }
-  const updated = await categoryRepo.update(id, req.body as CategoryUpdateProps);
+  const updated = await manageCategoriesUseCase.update(id, req.body as CategoryUpdateProps);
   res.json({ success: true, data: updated });
 };
 
 export const deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const existing = await categoryRepo.findOne(id);
+  const existing = await manageCategoriesUseCase.findOne(id);
   if (!existing) {
     res.status(404).json({ success: false, error: 'Category not found' });
     return;
   }
-  await categoryRepo.delete(id);
+  await manageCategoriesUseCase.delete(id);
   res.json({ success: true, message: 'Category deleted' });
 };

@@ -12,6 +12,14 @@ export class ManageGiftCardsUseCase {
   async getGiftCards(...args: Parameters<GiftCardRepository['getGiftCards']>) {
     return this.giftCardRepo.getGiftCards(...args);
   }
+  async getGiftCardStats() {
+    const result = await this.giftCardRepo.getGiftCards();
+    return {
+      totalCards: result.total,
+      activeCards: result.data.filter(card => card.status === 'active').length,
+      totalValue: result.data.reduce((sum, card) => sum + card.currentBalanceCents, 0),
+    };
+  }
   async createGiftCard(giftCard: Parameters<GiftCardRepository['createGiftCard']>[0]) {
     return this.giftCardRepo.createGiftCard(giftCard);
   }
@@ -20,6 +28,9 @@ export class ManageGiftCardsUseCase {
   }
   async assignGiftCard(...args: Parameters<GiftCardRepository['assignGiftCard']>) {
     return this.giftCardRepo.assignGiftCard(...args);
+  }
+  async redeemGiftCard(...args: Parameters<GiftCardRepository['redeemGiftCard']>) {
+    return this.giftCardRepo.redeemGiftCard(...args);
   }
   async reloadGiftCard(...args: Parameters<GiftCardRepository['reloadGiftCard']>) {
     return this.giftCardRepo.reloadGiftCard(...args);

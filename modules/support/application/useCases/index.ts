@@ -7,3 +7,4 @@ export * from './UpdateTicket';
 export * from './AddTicketComment';
 export * from './GetCustomerTickets';
 export * from './SearchFAQ';
+export * from './ManageCustomerTickets';

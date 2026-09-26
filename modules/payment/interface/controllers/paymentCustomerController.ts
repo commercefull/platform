@@ -6,10 +6,8 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
-const PaymentRepo = paymentDataRepository.payments;
 import { SaveStoredPaymentMethodCommand } from '../../application/useCases/SaveStoredPaymentMethod';
-import { saveStoredPaymentMethodUseCase } from '../../application/useCases/wired';
-import { paymentDataRepository } from '../../application/wired';
+import { managePaymentRecordsUseCase, saveStoredPaymentMethodUseCase } from '../../application/useCases/wired';
 
 // ============================================================================
 // Stored Payment Methods
@@ -21,7 +19,7 @@ export const listStoredMethods = async (req: HttpRequest, res: HttpResponse): Pr
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const methods = await PaymentRepo.findStoredMethodsByCustomer(customerId);
+  const methods = await managePaymentRecordsUseCase.findStoredMethodsByCustomer(customerId);
   successResponse(res, { methods });
 };
 
@@ -71,7 +69,7 @@ export const setDefaultMethod = async (req: HttpRequest, res: HttpResponse): Pro
     return;
   }
   const { methodId } = req.params;
-  const method = await PaymentRepo.setDefaultStoredMethod(String(methodId), customerId);
+  const method = await managePaymentRecordsUseCase.setDefaultStoredMethod(String(methodId), customerId);
   if (!method) {
     errorResponse(res, 'Payment method not found', 404);
     return;
@@ -86,7 +84,7 @@ export const deleteStoredMethod = async (req: HttpRequest, res: HttpResponse): P
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const method = await PaymentRepo.softDeleteStoredMethod(String(methodId), String(customerId));
+  const method = await managePaymentRecordsUseCase.softDeleteStoredMethod(String(methodId), String(customerId));
   if (!method) {
     errorResponse(res, 'Payment method not found', 404);
     return;

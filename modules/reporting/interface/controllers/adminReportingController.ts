@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { GetReportTemplatesUseCase } from '../../application/useCases/GetReportTemplates';
+
 import {
   generateReportUseCase,
   createReportScheduleUseCase,
@@ -10,12 +10,12 @@ import {
   updateReportScheduleUseCase,
   deleteReportScheduleUseCase,
   listReportExecutionsUseCase,
+  getReportTemplatesUseCase,
 } from '../../application/wired';
 import type { ReportType } from '../../domain/entities/ReportEntities';
 
 export const reportingDashboard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const templatesUseCase = new GetReportTemplatesUseCase();
-  const templates = await templatesUseCase.execute();
+  const templates = await getReportTemplatesUseCase.execute();
 
   adminRespond(req, res, 'reporting/dashboard', {
     pageName: 'Reporting Dashboard',
@@ -75,8 +75,7 @@ export const viewSchedule = async (req: HttpRequest, res: HttpResponse): Promise
 };
 
 export const createScheduleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const templatesUseCase = new GetReportTemplatesUseCase();
-  const templates = await templatesUseCase.execute();
+  const templates = await getReportTemplatesUseCase.execute();
 
   adminRespond(req, res, 'reporting/create-schedule', {
     pageName: 'Create Scheduled Report',
@@ -105,8 +104,7 @@ export const createSchedule = async (req: HttpRequest, res: HttpResponse): Promi
     res.redirect(`/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    const templatesUseCase = new GetReportTemplatesUseCase();
-    const templates = await templatesUseCase.execute().catch(() => ({}));
+      const templates = await getReportTemplatesUseCase.execute().catch(() => ({}));
     adminRespond(req, res, 'reporting/create-schedule', {
       pageName: 'Create Scheduled Report',
       error: (error as Error).message || 'Failed to create schedule',

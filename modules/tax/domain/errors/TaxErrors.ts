@@ -65,3 +65,9 @@ export class TaxSettingsNotFoundError extends AppError {
     super(`Tax settings not found: ${settingsId}`, 404, { code: 'tax.settings_not_found' });
   }
 }
+
+export class TaxableBasketNotFoundError extends AppError {
+  constructor(basketId: string) {
+    super(`Basket not found: ${basketId}`, 404, { code: 'tax.basket_not_found' });
+  }
+}

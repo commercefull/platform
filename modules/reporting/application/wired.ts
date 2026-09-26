@@ -23,3 +23,7 @@ export const listReportSchedulesUseCase = new ListReportSchedulesUseCase(reporti
 export const updateReportScheduleUseCase = new UpdateReportScheduleUseCase(reportingRepository);
 
 export { reportingRepository, UpdateReportScheduleParams };
+
+import { GetReportTemplatesUseCase } from './useCases/GetReportTemplates';
+
+export const getReportTemplatesUseCase = new GetReportTemplatesUseCase();

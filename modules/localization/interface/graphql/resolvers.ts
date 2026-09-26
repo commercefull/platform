@@ -1,41 +1,40 @@
-const CurrencyRepo = localizationDataRepository.currencies;
-const LocaleRepo = localizationDataRepository.locales;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { ConvertCurrencyUseCase, ConvertCurrencyInput } from '../../application/useCases/ConvertCurrency';
-import { CreateCurrencyUseCase, CreateCurrencyInput } from '../../application/useCases/CreateCurrency';
-import { CreateLocaleUseCase, CreateLocaleInput } from '../../application/useCases/CreateLocale';
-import { SetExchangeRateUseCase, SetExchangeRateInput } from '../../application/useCases/SetExchangeRate';
-import { localizationDataRepository } from '../../application/wired';
+import { ConvertCurrencyInput } from '../../application/useCases/ConvertCurrency';
+import { CreateCurrencyInput } from '../../application/useCases/CreateCurrency';
+import { CreateLocaleInput } from '../../application/useCases/CreateLocale';
+import { SetExchangeRateInput } from '../../application/useCases/SetExchangeRate';
+import {
+  convertCurrencyUseCase,
+  createCurrencyUseCase,
+  createLocaleUseCase,
+  setExchangeRateUseCase,
+} from '../../application/wired';
 
 export const localizationResolvers = {
   Query: {
     convertCurrency: async (_parent: unknown, args: { input: ConvertCurrencyInput }) => {
-      const useCase = new ConvertCurrencyUseCase(CurrencyRepo as never);
-      return useCase.execute(args.input);
+      return convertCurrencyUseCase.execute(args.input);
     },
   },
 
   Mutation: {
     createCurrency: async (_parent: unknown, args: { input: CreateCurrencyInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateCurrencyUseCase(CurrencyRepo as never);
-      return useCase.execute(args.input);
+      return createCurrencyUseCase.execute(args.input);
     },
 
     createLocale: async (_parent: unknown, args: { input: CreateLocaleInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateLocaleUseCase(LocaleRepo as never);
-      return useCase.execute(args.input);
+      return createLocaleUseCase.execute(args.input);
     },
 
     setExchangeRate: async (_parent: unknown, args: { input: SetExchangeRateInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new SetExchangeRateUseCase(CurrencyRepo as never);
       const input: SetExchangeRateInput = {
         ...args.input,
         effectiveDate: args.input.effectiveDate ? new Date(args.input.effectiveDate) : undefined,
       };
-      return useCase.execute(input);
+      return setExchangeRateUseCase.execute(input);
     },
   },
 };

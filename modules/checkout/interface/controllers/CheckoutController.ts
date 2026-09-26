@@ -6,31 +6,35 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   InitiateCheckoutCommand,
-  InitiateCheckoutUseCase,
   mapCheckoutToResponse,
   SetShippingAddressCommand,
-  SetShippingAddressUseCase,
   SetBillingAddressCommand,
-  SetBillingAddressUseCase,
   SetShippingMethodCommand,
-  SetShippingMethodUseCase,
   SetPaymentMethodCommand,
-  SetPaymentMethodUseCase,
   SetFulfillmentMethodCommand,
-  SetFulfillmentMethodUseCase,
-  GetPickupSlotsUseCase,
   ApplyCouponCommand,
-  ApplyCouponUseCase,
   RemoveCouponCommand,
-  RemoveCouponUseCase,
   CompleteCheckoutCommand,
-  CompleteCheckoutUseCase,
   AbandonCheckoutCommand,
-  AbandonCheckoutUseCase,
   CreatePaymentIntentCommand,
-  CreatePaymentIntentUseCase,
 } from '../../application/useCases';
-import { CheckoutRepo, getCheckoutPorts } from '../../application/wired';
+import { getCheckoutPorts } from '../../application/wired';
+import {
+  abandonCheckoutUseCase,
+  applyCouponUseCase,
+  completeCheckoutUseCase,
+  createPaymentIntentUseCase,
+  getPickupSlotsUseCase,
+  initiateCheckoutUseCase,
+  manageCheckoutSessionUseCase,
+  removeCouponUseCase,
+  setBillingAddressUseCase,
+  setFulfillmentMethodUseCase,
+  setPaymentMethodUseCase,
+  setPickupLocationUseCase,
+  setShippingAddressUseCase,
+  setShippingMethodUseCase,
+} from '../../application/useCases/wired';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -107,8 +111,7 @@ export const initiateCheckout = async (
   }
 
   const command = new InitiateCheckoutCommand(basketId, customerId, guestEmail);
-  const ports = getCheckoutPorts();
-  const useCase = new InitiateCheckoutUseCase(CheckoutRepo, ports.basketSnapshot);
+  const useCase = initiateCheckoutUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 201);
@@ -121,7 +124,7 @@ export const initiateCheckout = async (
 export const getCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
 
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
@@ -138,7 +141,7 @@ export const getCheckout = async (req: HttpRequest, res: HttpResponse): Promise<
 export const getCheckoutSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
 
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
@@ -173,9 +176,7 @@ export const setShippingAddress = async (
     region,
     phone,
   );
-
-  const ports = getCheckoutPorts();
-  const useCase = new SetShippingAddressUseCase(CheckoutRepo, ports.basketSnapshot, ports.taxQuote, ports.promotionQuote);
+  const useCase = setShippingAddressUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -188,7 +189,7 @@ export const setShippingAddress = async (
 export const getShippingMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
     return;
@@ -280,62 +281,13 @@ export const setPickupLocation = async (
     return;
   }
 
-  const ports = getCheckoutPorts();
-  const location = await ports.storeFulfillment.getPickupLocation(pickupLocationId);
-  if (!location) {
-    respondError(req, res, 'Pickup location not found or inactive', 404);
-    return;
-  }
+  const { session, inventoryWarnings } = await setPickupLocationUseCase.execute(checkoutId, pickupLocationId);
 
-  const session = await CheckoutRepo.findById(checkoutId);
-  if (!session) {
-    respondError(req, res, 'Checkout session not found', 404);
-    return;
-  }
-
-  session.setFulfillmentType('pickup');
-  session.updateMetadata({
-    pickupLocationId: location.locationId,
-    pickupLocationName: location.storeName,
-    pickupStoreId: location.storeId,
-    pickupAddress: location.address,
-  });
-
-  // Validate inventory at pickup location for basket items
-  const inventoryWarnings: Array<{ productId: string; available: number; requested: number }> = [];
-  try {
-    const basket = await ports.basketSnapshot.getSnapshot(session.basketId);
-    if (basket) {
-      for (const item of basket.items) {
-        const availability = await ports.stockAvailability.checkAvailability({
-          productId: item.productId,
-          productVariantId: item.productVariantId,
-          quantity: item.quantity,
-        });
-        if (!availability.available) {
-          inventoryWarnings.push({
-            productId: item.productId,
-            available: availability.stockLevel || 0,
-            requested: item.quantity,
-          });
-        }
-      }
-    }
-  } catch {
-    // Inventory check is best-effort
-  }
-
+  const responseData = session as unknown as Record<string, unknown>;
   if (inventoryWarnings.length > 0) {
-    session.updateMetadata({ pickupInventoryWarnings: inventoryWarnings });
+    responseData.inventoryWarnings = inventoryWarnings;
   }
-
-  await CheckoutRepo.save(session);
-
-  const responseData = session as unknown as unknown;
-  if (inventoryWarnings.length > 0) {
-    (responseData as Record<string, unknown>).inventoryWarnings = inventoryWarnings;
-  }
-  respond(req, res, responseData, 200);
+  respond(req, res, responseData as unknown, 200);
 };
 
 /**
@@ -355,7 +307,7 @@ export const setFulfillmentMethod = async (
   }
 
   const command = new SetFulfillmentMethodCommand(checkoutId, fulfillmentType);
-  const useCase = new SetFulfillmentMethodUseCase(CheckoutRepo);
+  const useCase = setFulfillmentMethodUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -378,8 +330,7 @@ export const setShippingMethod = async (
   }
 
   const command = new SetShippingMethodCommand(checkoutId, shippingMethodId);
-  const ports = getCheckoutPorts();
-  const useCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
+  const useCase = setShippingMethodUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -390,7 +341,7 @@ export const setShippingMethod = async (
  * GET /checkout/payment-methods
  */
 export const getPaymentMethods = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const methods = await CheckoutRepo.getAvailablePaymentMethods();
+  const methods = await manageCheckoutSessionUseCase.getAvailablePaymentMethods();
   respond(req, res, methods as unknown as unknown, 200);
 };
 
@@ -411,7 +362,7 @@ export const setPaymentMethod = async (
   }
 
   const command = new SetPaymentMethodCommand(checkoutId, paymentMethodId);
-  const useCase = new SetPaymentMethodUseCase(CheckoutRepo);
+  const useCase = setPaymentMethodUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -431,8 +382,7 @@ export const applyCoupon = async (req: HttpRequest<Record<string, string>, unkno
   }
 
   const command = new ApplyCouponCommand(checkoutId, couponCode);
-  const ports = getCheckoutPorts();
-  const useCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote);
+  const useCase = applyCouponUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -446,7 +396,7 @@ export const removeCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   const { checkoutId } = req.params;
 
   const command = new RemoveCouponCommand(checkoutId);
-  const useCase = new RemoveCouponUseCase(CheckoutRepo);
+  const useCase = removeCouponUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -458,10 +408,8 @@ export const removeCoupon = async (req: HttpRequest, res: HttpResponse): Promise
  */
 export const completeCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
-
-  const ports = getCheckoutPorts();
   const command = new CompleteCheckoutCommand(checkoutId);
-  const useCase = new CompleteCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
+  const useCase = completeCheckoutUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 201);
@@ -473,10 +421,8 @@ export const completeCheckout = async (req: HttpRequest, res: HttpResponse): Pro
  */
 export const abandonCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
-
-  const ports = getCheckoutPorts();
   const command = new AbandonCheckoutCommand(checkoutId);
-  const useCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
+  const useCase = abandonCheckoutUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 200);
@@ -508,7 +454,7 @@ export const setBillingAddress = async (
     sameAsShipping,
   );
 
-  const useCase = new SetBillingAddressUseCase(CheckoutRepo);
+  const useCase = setBillingAddressUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);
@@ -521,10 +467,8 @@ export const setBillingAddress = async (
 export const createPaymentIntent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
   const customerId = req.user?.customerId || ((req.user as Record<string, unknown> | undefined)?.id as string | undefined);
-
-  const ports = getCheckoutPorts();
   const command = new CreatePaymentIntentCommand(checkoutId, customerId);
-  const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization, ports.fraudScreening);
+  const useCase = createPaymentIntentUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result as unknown as unknown, 201);
@@ -537,7 +481,7 @@ export const createPaymentIntent = async (req: HttpRequest, res: HttpResponse): 
 export const getLocalDeliveryOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
     return;
@@ -571,7 +515,7 @@ export const getLocalDeliveryOptions = async (req: HttpRequest, res: HttpRespons
 export const getFulfillmentOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { checkoutId } = req.params;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
     return;
@@ -669,7 +613,7 @@ export const getPickupSlots = async (req: HttpRequest, res: HttpResponse): Promi
   const { checkoutId } = req.params;
   const daysAhead = req.query.days ? parseInt(String(req.query.days), 10) : 7;
 
-  const session = await CheckoutRepo.findById(checkoutId);
+  const session = await manageCheckoutSessionUseCase.findById(checkoutId);
   if (!session) {
     respondError(req, res, 'Checkout session not found', 404);
     return;
@@ -689,7 +633,7 @@ export const getPickupSlots = async (req: HttpRequest, res: HttpResponse): Promi
     return;
   }
 
-  const useCase = new GetPickupSlotsUseCase();
+  const useCase = getPickupSlotsUseCase;
   const slots = useCase.execute(
     {
       maxOrdersPerSlot: location.maxOrdersPerSlot ?? 10,

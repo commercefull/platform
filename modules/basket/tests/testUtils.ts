@@ -78,6 +78,7 @@ export function createBasketRepository(basket: Basket | null = null): jest.Mocke
     findByCustomerId: jest.fn(),
     findBySessionId: jest.fn(),
     findActiveBasket: jest.fn(),
+    findSummaries: jest.fn(),
     save: jest.fn(),
     delete: jest.fn(),
     addItem: jest.fn(),

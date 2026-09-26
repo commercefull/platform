@@ -5,10 +5,10 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const warehouseRepo = warehouseDataRepository.warehouses;
+
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { query } from '../../../../libs/db';
-import { warehouseDataRepository } from '../../application/wired';
+import { manageWarehouseAdminUseCase } from '../../application/wired';
+import { manageInventoryLocationsUseCase } from '../../../inventory/application/wired';
 
 /**
  * Find nearest stores based on customer location
@@ -38,7 +38,7 @@ export const findNearestStores = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  const stores = await warehouseRepo.findNearLocation(lat, lng, parseFloat(radiusKm as string), parseInt(limit as string));
+  const stores = await manageWarehouseAdminUseCase.findNearLocation(lat, lng, parseFloat(radiusKm as string), parseInt(limit as string));
 
   // Filter to only return active stores (fulfillment centers that can serve customers)
   const activeStores = stores.filter(store => store.isActive);
@@ -80,7 +80,7 @@ export const getStoreById = async (req: HttpRequest, res: HttpResponse): Promise
     return;
   }
 
-  const store = await warehouseRepo.findById(id);
+  const store = await manageWarehouseAdminUseCase.findById(id);
 
   if (!store) {
     errorResponse(res, 'Store not found', 404);
@@ -134,7 +134,7 @@ export const getStoresByCity = async (req: HttpRequest, res: HttpResponse): Prom
   }
 
   // Find all active warehouses and filter by city
-  const allStores = await warehouseRepo.findAll(true);
+  const allStores = await manageWarehouseAdminUseCase.findAll(true);
   const stores = allStores.filter(store => store.city.toLowerCase() === city.toLowerCase());
 
   // Already filtered to active stores
@@ -175,7 +175,7 @@ export const getStoresByCountry = async (req: HttpRequest, res: HttpResponse): P
     return;
   }
 
-  const stores = await warehouseRepo.findByCountry(country);
+  const stores = await manageWarehouseAdminUseCase.findByCountry(country);
 
   // Repo already filters to active stores
   const activeStores = stores;
@@ -209,7 +209,7 @@ export const checkStoreAvailability = async (req: HttpRequest, res: HttpResponse
     return;
   }
 
-  const store = await warehouseRepo.findById(id);
+  const store = await manageWarehouseAdminUseCase.findById(id);
 
   if (!store || !store.isActive) {
     errorResponse(res, 'Store not found', 404);
@@ -217,11 +217,11 @@ export const checkStoreAvailability = async (req: HttpRequest, res: HttpResponse
   }
 
   // Check inventory availability at this location
-  const inventoryRows = await query<Array<{ availableQuantity: number }>>(
-    `SELECT "availableQuantity" FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 AND "productId" = $2${variantId ? ' AND "productVariantId" = $3' : ''} LIMIT 1`,
-    variantId ? [id, productId, variantId as string] : [id, productId],
+  const availableQuantity = await manageInventoryLocationsUseCase.findAvailableQuantityAtWarehouse(
+    id,
+    productId,
+    variantId as string | undefined,
   );
-  const availableQuantity = inventoryRows?.[0]?.availableQuantity ?? 0;
 
   const availability = {
     storeId: id,

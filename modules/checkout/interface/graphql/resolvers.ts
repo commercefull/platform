@@ -1,21 +1,33 @@
 import { requireAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { InitiateCheckoutUseCase, InitiateCheckoutCommand, mapCheckoutToResponse } from '../../application/useCases/InitiateCheckout';
-import { SetShippingAddressUseCase, SetShippingAddressCommand } from '../../application/useCases/SetShippingAddress';
-import { SetBillingAddressUseCase, SetBillingAddressCommand } from '../../application/useCases/SetBillingAddress';
-import { SetShippingMethodUseCase, SetShippingMethodCommand } from '../../application/useCases/SetShippingMethod';
-import { SetPaymentMethodUseCase, SetPaymentMethodCommand } from '../../application/useCases/SetPaymentMethod';
-import { ApplyCouponUseCase, ApplyCouponCommand } from '../../application/useCases/ApplyCoupon';
-import { RemoveCouponUseCase, RemoveCouponCommand } from '../../application/useCases/RemoveCoupon';
-import { CreatePaymentIntentUseCase, CreatePaymentIntentCommand } from '../../application/useCases/CreatePaymentIntent';
-import { CompleteCheckoutUseCase, CompleteCheckoutCommand } from '../../application/useCases/CompleteCheckout';
-import { AbandonCheckoutUseCase, AbandonCheckoutCommand } from '../../application/useCases/AbandonCheckout';
-import { CheckoutRepo, getCheckoutPorts } from '../../application/wired';
+import { InitiateCheckoutCommand, mapCheckoutToResponse } from '../../application/useCases/InitiateCheckout';
+import { SetShippingAddressCommand } from '../../application/useCases/SetShippingAddress';
+import { SetBillingAddressCommand } from '../../application/useCases/SetBillingAddress';
+import { SetShippingMethodCommand } from '../../application/useCases/SetShippingMethod';
+import { SetPaymentMethodCommand } from '../../application/useCases/SetPaymentMethod';
+import { ApplyCouponCommand } from '../../application/useCases/ApplyCoupon';
+import { RemoveCouponCommand } from '../../application/useCases/RemoveCoupon';
+import { CreatePaymentIntentCommand } from '../../application/useCases/CreatePaymentIntent';
+import { CompleteCheckoutCommand } from '../../application/useCases/CompleteCheckout';
+import { AbandonCheckoutCommand } from '../../application/useCases/AbandonCheckout';
+import {
+  abandonCheckoutUseCase,
+  applyCouponUseCase,
+  completeCheckoutUseCase,
+  createPaymentIntentUseCase,
+  initiateCheckoutUseCase,
+  manageCheckoutSessionUseCase,
+  removeCouponUseCase,
+  setBillingAddressUseCase,
+  setPaymentMethodUseCase,
+  setShippingAddressUseCase,
+  setShippingMethodUseCase,
+} from '../../application/useCases/wired';
 
 export const checkoutResolvers = {
   Query: {
     checkout: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const session = await CheckoutRepo.findById(args.checkoutId);
+      const session = await manageCheckoutSessionUseCase.findById(args.checkoutId);
       if (!session) return null;
       return mapCheckoutToResponse(session);
     },
@@ -32,8 +44,7 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new InitiateCheckoutUseCase(CheckoutRepo, ports.basketSnapshot);
+      const useCase = initiateCheckoutUseCase;
       const command = new InitiateCheckoutCommand(args.basketId, args.customerId, args.guestEmail);
       return useCase.execute(command);
     },
@@ -58,8 +69,7 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new SetShippingAddressUseCase(CheckoutRepo, ports.basketSnapshot, ports.taxQuote, ports.promotionQuote);
+      const useCase = setShippingAddressUseCase;
       const a = args.address;
       const command = new SetShippingAddressCommand(
         args.checkoutId,
@@ -98,7 +108,7 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new SetBillingAddressUseCase(CheckoutRepo);
+      const useCase = setBillingAddressUseCase;
       const a = args.address;
       const command = new SetBillingAddressCommand(
         args.checkoutId,
@@ -126,8 +136,7 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
+      const useCase = setShippingMethodUseCase;
       const command = new SetShippingMethodCommand(args.checkoutId, args.shippingMethodId);
       return useCase.execute(command);
     },
@@ -141,7 +150,7 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new SetPaymentMethodUseCase(CheckoutRepo);
+      const useCase = setPaymentMethodUseCase;
       const command = new SetPaymentMethodCommand(args.checkoutId, args.paymentMethodId);
       return useCase.execute(command);
     },
@@ -155,15 +164,14 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote);
+      const useCase = applyCouponUseCase;
       const command = new ApplyCouponCommand(args.checkoutId, args.couponCode);
       return useCase.execute(command);
     },
 
     removeCoupon: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new RemoveCouponUseCase(CheckoutRepo);
+      const useCase = removeCouponUseCase;
       const command = new RemoveCouponCommand(args.checkoutId);
       return useCase.execute(command);
     },
@@ -177,24 +185,21 @@ export const checkoutResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new CreatePaymentIntentUseCase(CheckoutRepo, ports.basketSnapshot, ports.orderPlacement, ports.paymentAuthorization, ports.fraudScreening);
+      const useCase = createPaymentIntentUseCase;
       const command = new CreatePaymentIntentCommand(args.checkoutId, args.customerId);
       return useCase.execute(command);
     },
 
     completeCheckout: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new CompleteCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
+      const useCase = completeCheckoutUseCase;
       const command = new CompleteCheckoutCommand(args.checkoutId);
       return useCase.execute(command);
     },
 
     abandonCheckout: async (_parent: unknown, args: { checkoutId: string }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const ports = getCheckoutPorts();
-      const useCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
+      const useCase = abandonCheckoutUseCase;
       const command = new AbandonCheckoutCommand(args.checkoutId);
       return useCase.execute(command);
     },

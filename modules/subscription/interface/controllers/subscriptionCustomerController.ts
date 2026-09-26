@@ -4,7 +4,9 @@
  */
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { subscriptionRepo } from '../../application/wired';
+import { manageCustomerSubscriptionsUseCase } from '../../application/wired';
+import type { SubscriptionStatus } from '../../domain/repositories/SubscriptionRepository';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -13,16 +15,16 @@ type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Pr
 // ============================================================================
 
 export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, _next) => {
-  const products = await subscriptionRepo.getSubscriptionProducts(true);
+  const products = await manageCustomerSubscriptionsUseCase.getSubscriptionProducts(true);
   res.json({ success: true, data: products });
 };
 
 export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _next) => {
   // Try to get by product ID first (for product page integration)
-  let product = await subscriptionRepo.getSubscriptionProductByProductId(req.params.productId);
+  let product = await manageCustomerSubscriptionsUseCase.getSubscriptionProductByProductId(req.params.productId);
 
   if (!product) {
-    product = await subscriptionRepo.getSubscriptionProduct(req.params.productId);
+    product = await manageCustomerSubscriptionsUseCase.getSubscriptionProduct(req.params.productId);
   }
 
   if (!product || !product.isActive) {
@@ -30,12 +32,12 @@ export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _nex
     return;
   }
 
-  const plans = await subscriptionRepo.getSubscriptionPlans(product.subscriptionProductId, true);
+  const plans = await manageCustomerSubscriptionsUseCase.getSubscriptionPlans(product.subscriptionProductId, true);
   res.json({ success: true, data: { ...product, plans } });
 };
 
 export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) => {
-  const plan = await subscriptionRepo.getSubscriptionPlan(req.params.planId);
+  const plan = await manageCustomerSubscriptionsUseCase.getSubscriptionPlan(req.params.planId);
   if (!plan || !plan.isActive) {
     res.status(404).json({ success: false, message: 'Subscription plan not found' });
     return;
@@ -51,8 +53,8 @@ export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { status, limit, offset } = req.query;
 
-  const result = await subscriptionRepo.getCustomerSubscriptions(
-    { customerId, status: status as subscriptionRepo.SubscriptionStatus | undefined },
+  const result = await manageCustomerSubscriptionsUseCase.getCustomerSubscriptions(
+    { customerId, status: status as SubscriptionStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
   res.json({ success: true, ...result });
@@ -60,15 +62,15 @@ export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
 
 export const getMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
+  const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
     res.status(404).json({ success: false, message: 'Subscription not found' });
     return;
   }
 
-  const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
-  const plan = await subscriptionRepo.getSubscriptionPlan(subscription.subscriptionPlanId);
+  const orders = await manageCustomerSubscriptionsUseCase.getSubscriptionOrders(req.params.id);
+  const plan = await manageCustomerSubscriptionsUseCase.getSubscriptionPlan(subscription.subscriptionPlanId);
 
   res.json({ success: true, data: { ...subscription, plan, orders } });
 };
@@ -90,26 +92,22 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
       customizations?: Record<string, unknown>;
     };
 
-  // Validate plan exists and is active
-  const plan = await subscriptionRepo.getSubscriptionPlan(subscriptionPlanId);
-  if (!plan || !plan.isActive) {
-    res.status(400).json({ success: false, message: 'Invalid subscription plan' });
-    return;
+  try {
+    const subscription = await manageCustomerSubscriptionsUseCase.subscribe({
+      customerId: customerId || '',
+      subscriptionPlanId,
+      productVariantId,
+      quantity,
+      shippingAddressId,
+      billingAddressId,
+      paymentMethodId,
+      customizations,
+    });
+
+    res.status(201).json({ success: true, data: subscription });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const subscription = await subscriptionRepo.createCustomerSubscription({
-    customerId: customerId || '',
-    subscriptionPlanId,
-    subscriptionProductId: plan.subscriptionProductId,
-    productVariantId,
-    quantity,
-    shippingAddressId,
-    billingAddressId,
-    paymentMethodId,
-    customizations,
-  });
-
-  res.status(201).json({ success: true, data: subscription });
 };
 
 // ============================================================================
@@ -118,7 +116,7 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
 
 export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
+  const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
     res.status(404).json({ success: false, message: 'Subscription not found' });
@@ -141,167 +139,72 @@ export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const changePlan: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
-
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
-  }
-
-  if (subscription.status !== 'active' && subscription.status !== 'trialing') {
-    res.status(400).json({ success: false, message: 'Cannot change plan for inactive subscription' });
-    return;
-  }
-
   const { newPlanId } = req.body as { newPlanId: string };
-  const newPlan = await subscriptionRepo.getSubscriptionPlan(newPlanId);
 
-  if (!newPlan || !newPlan.isActive) {
-    res.status(400).json({ success: false, message: 'Invalid plan' });
-    return;
+  try {
+    await manageCustomerSubscriptionsUseCase.changePlan(customerId || '', req.params.id, newPlanId);
+    res.json({ success: true, message: 'Plan change scheduled' });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Plan change logic would go here - proration, etc.
-  res.json({ success: true, message: 'Plan change scheduled' });
 };
 
 export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
-
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
-  }
-
-  if (subscription.status !== 'active') {
-    res.status(400).json({ success: false, message: 'Only active subscriptions can be paused' });
-    return;
-  }
-
-  // Check if pausing is allowed
-  const product = subscription.subscriptionProductId
-    ? await subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
-    : null;
-
-  if (product && !product.allowPause) {
-    res.status(400).json({ success: false, message: 'Pausing is not allowed for this subscription' });
-    return;
-  }
-
-  if (product?.maxPausesPerYear && subscription.pauseCount >= product.maxPausesPerYear) {
-    res.status(400).json({ success: false, message: 'Maximum pauses reached for this year' });
-    return;
-  }
-
   const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
 
-  // Validate pause duration
-  if (product?.maxPauseDays && resumeAt) {
-    const pauseDays = Math.ceil((new Date(resumeAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    if (pauseDays > product.maxPauseDays) {
-      res.status(400).json({
-        success: false,
-        message: `Maximum pause duration is ${product.maxPauseDays} days`,
-      });
-      return;
-    }
+  try {
+    const pause = await manageCustomerSubscriptionsUseCase.pause(customerId || '', req.params.id, {
+      resumeAt: resumeAt ? new Date(resumeAt) : undefined,
+      reason,
+    });
+    res.json({ success: true, data: pause });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const pause = await subscriptionRepo.pauseSubscription(req.params.id, resumeAt ? new Date(resumeAt) : undefined, reason, 'customer');
-
-  res.json({ success: true, data: pause });
 };
 
 export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
+  try {
+    await manageCustomerSubscriptionsUseCase.resume(customerId || '', req.params.id);
+    res.json({ success: true, message: 'Subscription resumed' });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  if (subscription.status !== 'paused') {
-    res.status(400).json({ success: false, message: 'Subscription is not paused' });
-    return;
-  }
-
-  await subscriptionRepo.resumeSubscription(req.params.id, 'customer');
-  res.json({ success: true, message: 'Subscription resumed' });
 };
 
 export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
-
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
-  }
-
-  if (subscription.status === 'cancelled' || subscription.status === 'expired') {
-    res.status(400).json({ success: false, message: 'Subscription is already cancelled' });
-    return;
-  }
-
-  // Check contract requirements
-  if (subscription.contractCyclesRemaining && subscription.contractCyclesRemaining > 0) {
-    const product = subscription.subscriptionProductId
-      ? await subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
-      : null;
-
-    if (product && !product.allowEarlyCancel) {
-      res.status(400).json({
-        success: false,
-        message: `Contract requires ${subscription.contractCyclesRemaining} more billing cycles`,
-      });
-      return;
-    }
-
-    // Note: Early termination fee would be handled here
-  }
-
   const { reason, cancelAtPeriodEnd } = req.body as { reason?: string; cancelAtPeriodEnd?: boolean };
 
-  await subscriptionRepo.cancelSubscription(
-    req.params.id,
-    reason,
-    'customer',
-    cancelAtPeriodEnd !== false, // Default to cancel at period end
-  );
+  try {
+    const result = await manageCustomerSubscriptionsUseCase.cancel(customerId || '', req.params.id, {
+      reason,
+      cancelAtPeriodEnd,
+    });
 
-  res.json({
-    success: true,
-    message:
-      cancelAtPeriodEnd !== false
+    res.json({
+      success: true,
+      message: result.cancelAtPeriodEnd
         ? 'Subscription will be cancelled at the end of the current billing period'
         : 'Subscription cancelled immediately',
-  });
+    });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+  }
 };
 
 export const reactivateMySubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
+  try {
+    await manageCustomerSubscriptionsUseCase.reactivate(customerId || '', req.params.id);
+    res.json({ success: true, message: 'Subscription reactivated' });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Can only reactivate if cancelled at period end but period hasn't ended
-  if (!subscription.cancelAtPeriodEnd) {
-    res.status(400).json({ success: false, message: 'Subscription cannot be reactivated' });
-    return;
-  }
-
-  await subscriptionRepo.updateSubscriptionStatus(req.params.id, 'active', {
-    cancelledAt: undefined,
-    cancellationReason: undefined,
-    cancelledBy: undefined,
-  });
-
-  res.json({ success: true, message: 'Subscription reactivated' });
 };
 
 // ============================================================================
@@ -310,14 +213,14 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, _next) =>
 
 export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
+  const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
     res.status(404).json({ success: false, message: 'Subscription not found' });
     return;
   }
 
-  const orders = await subscriptionRepo.getSubscriptionOrders(req.params.id);
+  const orders = await manageCustomerSubscriptionsUseCase.getSubscriptionOrders(req.params.id);
   res.json({ success: true, data: orders });
 };
 
@@ -327,30 +230,11 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => 
 
 export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const subscription = await subscriptionRepo.getCustomerSubscription(req.params.id);
 
-  if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
-    return;
+  try {
+    await manageCustomerSubscriptionsUseCase.skipNextDelivery(customerId || '', req.params.id);
+    res.json({ success: true, message: 'Next delivery skipped' });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Check if skipping is allowed
-  const product = subscription.subscriptionProductId
-    ? await subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
-    : null;
-
-  if (product && !product.allowSkip) {
-    res.status(400).json({ success: false, message: 'Skipping is not allowed for this subscription' });
-    return;
-  }
-
-  if (product?.maxSkipsPerYear && subscription.skipCount >= product.maxSkipsPerYear) {
-    res.status(400).json({ success: false, message: 'Maximum skips reached for this year' });
-    return;
-  }
-
-  // Advance to next billing cycle without charging
-  await subscriptionRepo.advanceBillingCycle(subscription.customerSubscriptionId);
-
-  res.json({ success: true, message: 'Next delivery skipped' });
 };

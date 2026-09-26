@@ -6,7 +6,7 @@
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { ReturnRuleRepo as returnRuleRepo } from '../../application/wired';
+import { manageReturnRulesUseCase } from '../../application/wired';
 import type { RefundMethod, ReturnRuleScope } from '../../domain/entities/ReturnRule';
 
 // Use the repository via the infrastructure barrel
@@ -19,7 +19,7 @@ export const listReturnRules = async (req: HttpRequest, res: HttpResponse): Prom
   // In production this would query the DB; for now we show the management screen
   let rules: never[] = [];
   try {
-    rules = (await returnRuleRepo.findActiveRules()) as never[];
+    rules = (await manageReturnRulesUseCase.findActiveRules()) as never[];
   } catch {
     // DB may not be migrated yet — show empty list
   }
@@ -75,7 +75,7 @@ export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
       isActive?: string;
     };
 
-    await returnRuleRepo.create({
+    await manageReturnRulesUseCase.create({
       name,
       description: description || undefined,
       scope: scope || 'global',

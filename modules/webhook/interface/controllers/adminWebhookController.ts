@@ -4,17 +4,19 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { RegisterWebhookUseCase } from '../../application/useCases/RegisterWebhook';
-import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
-import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
-import { WebhookRepo } from '../../application/wired';
+import {
+  listWebhooksUseCase,
+  registerWebhookUseCase,
+  unregisterWebhookUseCase,
+  manageWebhooksUseCase,
+} from '../../application/wired';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 export const listWebhookEndpoints = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId, isActive } = req.query;
-  const useCase = new ListWebhooksUseCase(WebhookRepo);
+  const useCase = listWebhooksUseCase;
   const result = await useCase.execute(
     {
       organizationId: organizationId as string,
@@ -35,7 +37,7 @@ export const listWebhookEndpoints = async (req: HttpRequest, res: HttpResponse):
 
 export const viewWebhookEndpoint = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
+  const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Webhook endpoint not found' });
@@ -61,7 +63,7 @@ export const createWebhookForm = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
-  const useCase = new RegisterWebhookUseCase(WebhookRepo);
+  const useCase = registerWebhookUseCase;
   const result = await useCase.execute({
     name: body.name as string,
     url: body.url as string,
@@ -76,7 +78,7 @@ export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const editWebhookForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const endpoint = await WebhookRepo.findEndpointById(webhookEndpointId);
+  const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Webhook endpoint not found' });
@@ -103,13 +105,13 @@ export const updateWebhook = async (req: HttpRequest, res: HttpResponse): Promis
   if (body.isActive !== undefined) updates.isActive = body.isActive;
   if (body.headers !== undefined) updates.headers = body.headers;
 
-  await WebhookRepo.updateEndpoint(webhookEndpointId, updates);
+  await manageWebhooksUseCase.updateEndpoint(webhookEndpointId, updates);
   res.redirect(`/admin/webhooks/${webhookEndpointId}?success=Webhook updated successfully`);
 };
 
 export const deleteWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
-  const useCase = new UnregisterWebhookUseCase(WebhookRepo);
+  const useCase = unregisterWebhookUseCase;
   await useCase.execute(webhookEndpointId);
   res.redirect('/admin/webhooks?success=Webhook deleted');
 };
@@ -118,7 +120,7 @@ export const viewWebhookDeliveries = async (req: HttpRequest, res: HttpResponse)
   const { webhookEndpointId } = req.params;
   const { status, limit, offset } = req.query;
 
-  const result = await WebhookRepo.findDeliveries(
+  const result = await manageWebhooksUseCase.findDeliveries(
     {
       webhookEndpointId,
       status: status as DeliveryStatus | undefined,

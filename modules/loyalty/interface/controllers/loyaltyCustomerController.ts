@@ -5,9 +5,7 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { loyaltyDataRepository } from '../../application/wired';
-
-const loyaltyRepo = loyaltyDataRepository.points;
+import { manageLoyaltyAdminUseCase } from '../../application/wired';
 
 // ============================================================================
 // Types
@@ -48,7 +46,7 @@ function getCustomerId(req: UserRequest): string | null {
  * Get publicly available loyalty tiers
  */
 export const getPublicTiers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const tiers = await loyaltyRepo.findAllTiers(false);
+  const tiers = await manageLoyaltyAdminUseCase.findAllTiers(false);
 
   // Return limited tier information for public view
   const publicTiers = tiers.map(tier => ({
@@ -66,7 +64,7 @@ export const getPublicTiers = async (req: HttpRequest, res: HttpResponse): Promi
  * Get publicly available loyalty rewards
  */
 export const getPublicRewards = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const rewards = await loyaltyRepo.findAllRewards(false);
+  const rewards = await manageLoyaltyAdminUseCase.findAllRewards(false);
 
   // Return limited reward information for public view
   const publicRewards = rewards.map(reward => ({
@@ -99,7 +97,7 @@ export const getMyLoyaltyStatus = async (req: UserRequest, res: HttpResponse): P
     return;
   }
 
-  const pointsData = await loyaltyRepo.findCustomerPointsWithTier(customerId);
+  const pointsData = await manageLoyaltyAdminUseCase.findCustomerPointsWithTier(customerId);
 
   if (!pointsData) {
     // Return default values for new customers
@@ -143,7 +141,7 @@ export const getMyTransactions = async (req: UserRequest, res: HttpResponse): Pr
   }
 
   const limit = parseInt(req.query.limit as string) || 20;
-  const transactions = await loyaltyRepo.findCustomerTransactions(customerId, limit);
+  const transactions = await manageLoyaltyAdminUseCase.findCustomerTransactions(customerId, limit);
 
   // Format transactions for customer view
   const formattedTransactions = transactions.map(transaction => ({
@@ -179,7 +177,7 @@ export const redeemReward = async (req: UserRequest, res: HttpResponse): Promise
     return;
   }
 
-  const redemption = await loyaltyRepo.redeemReward(customerId, rewardId);
+  const redemption = await manageLoyaltyAdminUseCase.redeemReward(customerId, rewardId);
 
   respondWithMessage(
     res,
@@ -204,12 +202,12 @@ export const getMyRedemptions = async (req: UserRequest, res: HttpResponse): Pro
   }
 
   const limit = parseInt(req.query.limit as string) || 50;
-  const redemptions = await loyaltyRepo.findCustomerRedemptions(customerId, limit);
+  const redemptions = await manageLoyaltyAdminUseCase.findCustomerRedemptions(customerId, limit);
 
   // Add reward details to each redemption
   const detailedRedemptions = await Promise.all(
     redemptions.map(async redemption => {
-      const reward = await loyaltyRepo.findRewardById(redemption.rewardId);
+      const reward = await manageLoyaltyAdminUseCase.findRewardById(redemption.rewardId);
       return {
         id: redemption.redemptionId,
         redemptionCode: redemption.couponCode,

@@ -7,6 +7,9 @@ export class ManagePaymentDisputesUseCase {
   async findAll(status?: string, limit?: number) {
     return this.billingRepo.findAllDisputes(status, limit);
   }
+  async findByPayment(paymentId: string) {
+    return this.billingRepo.findDisputesByPayment(paymentId);
+  }
   async findById(disputeId: string) {
     return this.billingRepo.findDisputeById(disputeId);
   }

@@ -56,5 +56,6 @@ export interface ShippingLabelPort {
   create(input: CreateShippingLabelInput): Promise<ShippingLabel>;
   findById(shippingLabelId: string): Promise<ShippingLabel | null>;
   findByTrackingNumber(trackingNumber: string): Promise<ShippingLabel | null>;
+  findByOrderId(orderId: string): Promise<ShippingLabel[]>;
   voidLabel(shippingLabelId: string, reason?: string): Promise<ShippingLabel | null>;
 }

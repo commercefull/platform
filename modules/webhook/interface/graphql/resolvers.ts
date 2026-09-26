@@ -1,14 +1,16 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { RegisterWebhookUseCase, RegisterWebhookInput } from '../../application/useCases/RegisterWebhook';
-import { ListWebhooksUseCase } from '../../application/useCases/ListWebhooks';
-import { UnregisterWebhookUseCase } from '../../application/useCases/UnregisterWebhook';
-import { WebhookRepo } from '../../application/wired';
+import type { RegisterWebhookInput } from '../../application/useCases/RegisterWebhook';
+import {
+  listWebhooksUseCase,
+  registerWebhookUseCase,
+  unregisterWebhookUseCase,
+} from '../../application/wired';
 
 export const webhookResolvers = {
   Query: {
     webhooks: async (_parent: unknown, args: { organizationId?: string; limit?: number; offset?: number }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new ListWebhooksUseCase(WebhookRepo);
+      const useCase = listWebhooksUseCase;
       const result = await useCase.execute(
         args.organizationId ? { organizationId: args.organizationId } : undefined,
         args.limit ?? 50,
@@ -25,7 +27,7 @@ export const webhookResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new RegisterWebhookUseCase(WebhookRepo);
+      const useCase = registerWebhookUseCase;
       const input: RegisterWebhookInput = {
         name: args.input.name,
         url: args.input.url,
@@ -38,7 +40,7 @@ export const webhookResolvers = {
 
     unregisterWebhook: async (_parent: unknown, args: { webhookEndpointId: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new UnregisterWebhookUseCase(WebhookRepo);
+      const useCase = unregisterWebhookUseCase;
       const deleted = await useCase.execute(args.webhookEndpointId);
       return { deleted };
     },

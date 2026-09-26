@@ -1,45 +1,23 @@
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CreateSubscriptionCommand, CreateSubscriptionInput } from '../../application/useCases/CreateSubscription';
 import { CancelSubscriptionCommand, CancelSubscriptionInput } from '../../application/useCases/CancelSubscription';
-import { ChangeSubscriptionPlanUseCase, ChangeSubscriptionPlanInput } from '../../application/useCases/ChangeSubscriptionPlan';
-import { PauseSubscriptionUseCase, PauseSubscriptionInput } from '../../application/useCases/PauseSubscription';
-import { ResumeSubscriptionUseCase, ResumeSubscriptionInput } from '../../application/useCases/ResumeSubscription';
-import { subscriptionRepo, createSubscriptionUseCase, cancelSubscriptionUseCase } from '../../application/wired';
-
-// Adapter to adapt the repo module to the port interface expected by use cases
-const subscriptionRepoAdapter = {
-  async findById(id: string) {
-    const sub = await subscriptionRepo.getCustomerSubscription(id);
-    if (!sub) return null;
-    return {
-      status: sub.status,
-      planId: sub.subscriptionPlanId,
-      customerId: sub.customerId,
-      nextBillingDate: sub.nextBillingAt?.toISOString() ?? new Date().toISOString(),
-      currentPeriodStart: sub.currentPeriodStart?.toISOString(),
-      startDate: sub.createdAt.toISOString(),
-      priceCents: sub.totalPriceCents,
-      billingInterval: sub.billingInterval,
-    };
-  },
-  async update(id: string, data: Record<string, unknown>) {
-    await subscriptionRepo.updateSubscriptionStatus(id, (data.status as subscriptionRepo.SubscriptionStatus) ?? 'active');
-  },
-};
-
-const planRepoAdapter = {
-  async findById(id: string) {
-    const plan = await subscriptionRepo.getSubscriptionPlan(id);
-    if (!plan) return null;
-    return { priceCents: plan.priceCents };
-  },
-};
+import type { ChangeSubscriptionPlanInput } from '../../application/useCases/ChangeSubscriptionPlan';
+import type { PauseSubscriptionInput } from '../../application/useCases/PauseSubscription';
+import type { ResumeSubscriptionInput } from '../../application/useCases/ResumeSubscription';
+import {
+  createSubscriptionUseCase,
+  cancelSubscriptionUseCase,
+  changeSubscriptionPlanUseCase,
+  pauseSubscriptionEntityUseCase,
+  resumeSubscriptionEntityUseCase,
+  manageCustomerSubscriptionsUseCase,
+} from '../../application/wired';
 
 export const subscriptionResolvers = {
   Query: {
     subscription: async (_parent: unknown, args: { customerSubscriptionId: string }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      return subscriptionRepo.getCustomerSubscription(args.customerSubscriptionId);
+      return manageCustomerSubscriptionsUseCase.getCustomerSubscription(args.customerSubscriptionId);
     },
   },
 
@@ -69,7 +47,7 @@ export const subscriptionResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new ChangeSubscriptionPlanUseCase(subscriptionRepoAdapter, planRepoAdapter);
+      const useCase = changeSubscriptionPlanUseCase;
       const input: ChangeSubscriptionPlanInput = {
         subscriptionId: args.subscriptionId,
         newPlanId: args.newPlanId,
@@ -89,7 +67,7 @@ export const subscriptionResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new PauseSubscriptionUseCase(subscriptionRepoAdapter);
+      const useCase = pauseSubscriptionEntityUseCase;
       const input: PauseSubscriptionInput = {
         subscriptionId: args.subscriptionId,
         reason: args.reason,
@@ -100,7 +78,7 @@ export const subscriptionResolvers = {
 
     resumeSubscription: async (_parent: unknown, args: { subscriptionId: string }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new ResumeSubscriptionUseCase(subscriptionRepoAdapter);
+      const useCase = resumeSubscriptionEntityUseCase;
       const input: ResumeSubscriptionInput = { subscriptionId: args.subscriptionId };
       return useCase.execute(input);
     },

@@ -1,16 +1,16 @@
 import { requireCustomerAuth, requireAdminAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { CreateDataRequestUseCase, CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
+import { CreateDataRequestCommand } from '../../application/useCases/CreateDataRequest';
 import {
-  ProcessDataRequestUseCase,
   ProcessExportRequestCommand,
   ProcessDeletionRequestCommand,
   RejectRequestCommand,
 } from '../../application/useCases/ProcessDataRequest';
-import { ManageCookieConsentUseCase, RecordCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
-import { gdprDataRepository } from '../../application/wired';
-
-const dataRequestRepo = gdprDataRepository.dataRequests;
-const cookieConsentRepo = gdprDataRepository.cookieConsent;
+import { RecordCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
+import {
+  createDataRequestUseCase,
+  manageCookieConsentUseCase,
+  processDataRequestUseCase,
+} from '../../application/useCases/wired';
 
 export const gdprResolvers = {
   Mutation: {
@@ -29,7 +29,7 @@ export const gdprResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new CreateDataRequestUseCase(dataRequestRepo);
+      const useCase = createDataRequestUseCase;
       const command = new CreateDataRequestCommand(
         args.input.customerId,
         args.input.requestType,
@@ -56,7 +56,7 @@ export const gdprResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAdminAuth(context);
-      const useCase = new ProcessDataRequestUseCase(dataRequestRepo, dataRequestRepo as never);
+      const useCase = processDataRequestUseCase;
       if (args.input.action === 'export') {
         const cmd = new ProcessExportRequestCommand(args.input.gdprDataRequestId, args.input.adminId, args.input.format || 'json');
         return useCase.processExport(cmd);
@@ -84,7 +84,7 @@ export const gdprResolvers = {
         };
       },
     ) => {
-      const useCase = new ManageCookieConsentUseCase(cookieConsentRepo);
+      const useCase = manageCookieConsentUseCase;
       const command = new RecordCookieConsentCommand(
         args.input.sessionId,
         args.input.preferences,

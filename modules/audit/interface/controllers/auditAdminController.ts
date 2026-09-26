@@ -7,7 +7,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import { auditRepository } from '../../application/useCases/wired';
+import { manageAuditLogsUseCase } from '../../application/useCases/wired';
 
 export class AuditAdminController {
   listLogs = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
@@ -29,13 +29,13 @@ export class AuditAdminController {
 
     const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
 
-    const result = await auditRepository.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
+    const result = await manageAuditLogsUseCase.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
     res.json({ success: true, data: result });
   });
 
   getLog = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
-    const log = await auditRepository.findById(String(req.params.id));
+    const log = await manageAuditLogsUseCase.findById(String(req.params.id));
     if (!log) {
       res.status(404).json({ success: false, error: 'Audit log entry not found' });
       return;
@@ -46,17 +46,17 @@ export class AuditAdminController {
   verifyChain = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const fromId = req.query.fromId as string | undefined;
     const toId = req.query.toId as string | undefined;
-    const result = await auditRepository.verifyChain(fromId, toId);
+    const result = await manageAuditLogsUseCase.verifyChain(fromId, toId);
     res.json({ success: true, data: result });
   });
 
   getStats = asyncHandler(async (_req: HttpRequest, res: HttpResponse) => {
-    const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
+    const [byAction, byActor] = await Promise.all([manageAuditLogsUseCase.countByAction(), manageAuditLogsUseCase.countByActor()]);
     res.json({ success: true, data: { byAction, byActor } });
   });
 
   findByCorrelationId = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
-    const logs = await auditRepository.findByCorrelationId(String(req.params.correlationId));
+    const logs = await manageAuditLogsUseCase.findByCorrelationId(String(req.params.correlationId));
     if (logs.length === 0) {
       res.status(404).json({ success: false, error: 'No audit logs found for correlation ID' });
       return;

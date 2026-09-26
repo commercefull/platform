@@ -13,3 +13,4 @@ export * from './ValidateShippingAddress';
 export * from './CreateShipment';
 export * from './GetCarrierCapabilities';
 export * from './UpdateShipmentStatus';
+export * from './ManageShippingConfig';

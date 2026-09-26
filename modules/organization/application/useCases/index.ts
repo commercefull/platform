@@ -3,3 +3,4 @@
  */
 
 export * from './CreateOrganization';
+export * from './ApproveOrganization';

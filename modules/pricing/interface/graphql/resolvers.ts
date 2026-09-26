@@ -1,8 +1,8 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CalculatePriceInput } from '../../application/useCases/CalculatePrice';
-import { CreatePriceListUseCase, CreatePriceListInput } from '../../application/useCases/CreatePriceList';
-import { SetProductPriceUseCase, SetProductPriceInput } from '../../application/useCases/SetProductPrice';
-import { calculatePriceUseCase, pricingDataRepository } from '../../application/wired';
+import type { CreatePriceListInput } from '../../application/useCases/CreatePriceList';
+import type { SetProductPriceInput } from '../../application/useCases/SetProductPrice';
+import { calculatePriceUseCase, createPriceListUseCase, setProductPriceUseCase } from '../../application/wired';
 
 export const pricingResolvers = {
   Query: {
@@ -35,38 +35,7 @@ export const pricingResolvers = {
   Mutation: {
     createPriceList: async (_parent: unknown, args: { input: CreatePriceListInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const repository = {
-        createPriceList: async (data: {
-          priceListId: string;
-          name: string;
-          description?: string;
-          currencyCode: string;
-          type: string;
-          isDefault: boolean;
-          validFrom?: Date;
-          validTo?: Date;
-          storeIds: string[];
-          isActive: boolean;
-        }) => {
-          const result = await pricingDataRepository.priceLists.create({
-            name: data.name,
-            description: data.description,
-            priority: 0,
-            isActive: data.isActive,
-            startDate: data.validFrom?.toISOString(),
-            endDate: data.validTo?.toISOString(),
-          });
-          return {
-            priceListId: result.priceListId,
-            name: result.name,
-            type: data.type,
-            currencyCode: data.currencyCode,
-            isDefault: data.isDefault,
-            createdAt: new Date(result.createdAt),
-          };
-        },
-      };
-      const useCase = new CreatePriceListUseCase(repository);
+      const useCase = createPriceListUseCase;
       const input: CreatePriceListInput = {
         ...args.input,
         validFrom: args.input.validFrom ? new Date(args.input.validFrom) : undefined,
@@ -77,31 +46,7 @@ export const pricingResolvers = {
 
     setProductPrice: async (_parent: unknown, args: { input: SetProductPriceInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const repository = {
-        setPrice: async (data: {
-          productId: string;
-          variantId?: string;
-          priceCents: number;
-          salePriceCents?: number;
-          currencyCode: string;
-        }) => {
-          const saved = await pricingDataRepository.basePrices.upsert({
-            productId: data.productId,
-            productVariantId: data.variantId ?? null,
-            currencyCode: data.currencyCode,
-            priceCents: data.priceCents,
-            salePriceCents: data.salePriceCents ?? null,
-          });
-          return {
-            productId: saved.productId,
-            variantId: saved.productVariantId ?? undefined,
-            priceCents: saved.priceCents,
-            salePriceCents: saved.salePriceCents,
-            updatedAt: saved.updatedAt,
-          };
-        },
-      };
-      const useCase = new SetProductPriceUseCase(repository);
+      const useCase = setProductPriceUseCase;
       return useCase.execute(args.input);
     },
   },

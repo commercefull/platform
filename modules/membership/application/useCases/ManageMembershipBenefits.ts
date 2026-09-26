@@ -30,5 +30,25 @@ export class ManageMembershipBenefitsUseCase {
   async findPlanBenefits(planId: string, activeOnly?: boolean) {
     return this.planBenefitRepo.findByPlanId(planId, activeOnly);
   }
+
+  /** Plan benefits joined with benefit details and plan-level overrides. */
+  async getPlanBenefitsWithDetails(planId: string, activeOnly = true) {
+    const planBenefits = await this.planBenefitRepo.findByPlanId(planId, activeOnly);
+    const benefits = [];
+    for (const planBenefit of planBenefits) {
+      const benefit = await this.benefitRepo.findById(planBenefit.benefitId);
+      if (benefit) {
+        benefits.push({
+          ...benefit,
+          planBenefitId: planBenefit.membershipPlanBenefitId,
+          priority: planBenefit.priority,
+          valueOverride: planBenefit.valueOverride,
+          rulesOverride: planBenefit.rulesOverride,
+          notes: planBenefit.notes,
+        });
+      }
+    }
+    return benefits;
+  }
 }
 

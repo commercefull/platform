@@ -1,7 +1,17 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
 import { Currency, CurrencyRegion } from '../../domain/currency';
-import { currencyRepository, pricingRuleRepository, getCurrencyUseCase } from '../../application/wired';
+import {
+  managePricingAdminUseCase,
+  getCurrencyUseCase,
+  saveCurrencyUseCase,
+  deleteCurrencyUseCase,
+  createCurrencyRegionUseCase,
+  updateCurrencyRegionUseCase,
+  createCurrencyPriceRuleUseCase,
+  updateCurrencyPriceRuleUseCase,
+} from '../../application/wired';
 
 interface ExchangeRateBody {
   source: string;
@@ -25,7 +35,7 @@ export const getAllCurrencies = async (req: HttpRequest, res: HttpResponse): Pro
   // Only show active currencies by default
   const showInactive = includeInactive === 'true';
 
-  const currencies = await currencyRepository.currencies.getAllCurrencies(showInactive);
+  const currencies = await managePricingAdminUseCase.getAllCurrencies(showInactive);
 
   res.json({
     success: true,
@@ -37,7 +47,7 @@ export const getAllCurrencies = async (req: HttpRequest, res: HttpResponse): Pro
  * Get default currency
  */
 export const getDefaultCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const currency = await currencyRepository.currencies.getDefaultCurrency();
+  const currency = await managePricingAdminUseCase.getDefaultCurrency();
 
   if (!currency) {
     res.status(404).json({
@@ -79,25 +89,17 @@ export const getCurrencyByCode = async (req: HttpRequest, res: HttpResponse): Pr
  * Save currency
  */
 export const saveCurrency = async (req: HttpRequest<Record<string, string>, unknown, Currency>, res: HttpResponse): Promise<void> => {
-  const currencyData = req.body;
+  try {
+    const result = await saveCurrencyUseCase.execute(req.body);
 
-  // Check if this is an update or a create
-  const existingCurrency = await currencyRepository.currencies.getCurrencyByCode(currencyData.code);
-
-  let result;
-  if (existingCurrency) {
-    // Update
-    result = await currencyRepository.currencies.saveCurrency(currencyData);
-  } else {
-    // Create new
-    result = await currencyRepository.currencies.saveCurrency(currencyData);
+    res.status(result.created ? 201 : 200).json({
+      success: true,
+      data: result.currency,
+      message: result.created ? 'Currency created successfully' : 'Currency updated successfully',
+    });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  res.status(existingCurrency ? 200 : 201).json({
-    success: true,
-    data: result,
-    message: existingCurrency ? 'Currency updated successfully' : 'Currency created successfully',
-  });
 };
 
 /**
@@ -106,31 +108,16 @@ export const saveCurrency = async (req: HttpRequest<Record<string, string>, unkn
 export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
 
-  const currency = await currencyRepository.currencies.getCurrencyByCode(code);
+  try {
+    await deleteCurrencyUseCase.execute(code);
 
-  if (!currency) {
-    res.status(404).json({
-      success: false,
-      message: `Currency with code ${code} not found`,
+    res.json({
+      success: true,
+      message: 'Currency deleted successfully',
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Prevent deleting the default currency
-  if (currency.isDefault) {
-    res.status(400).json({
-      success: false,
-      message: 'Cannot delete the default currency',
-    });
-    return;
-  }
-
-  await currencyRepository.currencies.deleteCurrency(code);
-
-  res.json({
-    success: true,
-    message: 'Currency deleted successfully',
-  });
 };
 
 /**
@@ -143,7 +130,7 @@ export const updateExchangeRates = async (
   const { source } = req.body;
 
   // Update exchange rates from specified source (e.g., API, manual)
-  const result = await currencyRepository.currencies.updateExchangeRates(source);
+  const result = await managePricingAdminUseCase.updateExchangeRates(source);
 
   res.json({
     success: true,
@@ -161,7 +148,7 @@ export const getAllCurrencyRegions = async (req: HttpRequest, res: HttpResponse)
   // Only show active regions by default
   const showInactive = includeInactive === 'true';
 
-  const regions = await currencyRepository.currencies.getCurrencyRegions(showInactive);
+  const regions = await managePricingAdminUseCase.getCurrencyRegions(showInactive);
 
   res.json({
     success: true,
@@ -175,7 +162,7 @@ export const getAllCurrencyRegions = async (req: HttpRequest, res: HttpResponse)
 export const getCurrencyRegionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const region = await currencyRepository.currencies.getCurrencyRegionById(id);
+  const region = await managePricingAdminUseCase.getCurrencyRegionById(id);
 
   if (!region) {
     res.status(404).json({
@@ -198,35 +185,17 @@ export const createCurrencyRegion = async (
   req: HttpRequest<Record<string, string>, unknown, CurrencyRegion>,
   res: HttpResponse,
 ): Promise<void> => {
-  const regionData = req.body;
+  try {
+    const newRegion = await createCurrencyRegionUseCase.execute(req.body);
 
-  // Validate required fields
-  if (!regionData.code || !regionData.name || !regionData.currencyCode) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: code, name, and currencyCode are required',
+    res.status(201).json({
+      success: true,
+      data: newRegion,
+      message: 'Currency region created successfully',
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Check if currency exists
-  const currency = await currencyRepository.currencies.getCurrencyByCode(regionData.currencyCode);
-
-  if (!currency) {
-    res.status(400).json({
-      success: false,
-      message: `Currency with code ${regionData.currencyCode} not found`,
-    });
-    return;
-  }
-
-  const newRegion = await currencyRepository.currencies.createCurrencyRegion(regionData);
-
-  res.status(201).json({
-    success: true,
-    data: newRegion,
-    message: 'Currency region created successfully',
-  });
 };
 
 /**
@@ -237,39 +206,18 @@ export const updateCurrencyRegion = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const regionData = req.body;
 
-  // Check if region exists
-  const existingRegion = await currencyRepository.currencies.getCurrencyRegionById(id);
+  try {
+    const updatedRegion = await updateCurrencyRegionUseCase.execute(id, req.body);
 
-  if (!existingRegion) {
-    res.status(404).json({
-      success: false,
-      message: `Currency region with ID ${id} not found`,
+    res.json({
+      success: true,
+      data: updatedRegion,
+      message: 'Currency region updated successfully',
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // If currency code is changing, validate new code
-  if (regionData.currencyCode && regionData.currencyCode !== existingRegion.currencyCode) {
-    const currency = await currencyRepository.currencies.getCurrencyByCode(regionData.currencyCode);
-
-    if (!currency) {
-      res.status(400).json({
-        success: false,
-        message: `Currency with code ${regionData.currencyCode} not found`,
-      });
-      return;
-    }
-  }
-
-  const updatedRegion = await currencyRepository.currencies.updateCurrencyRegion(id, regionData);
-
-  res.json({
-    success: true,
-    data: updatedRegion,
-    message: 'Currency region updated successfully',
-  });
 };
 
 /**
@@ -279,7 +227,7 @@ export const deleteCurrencyRegion = async (req: HttpRequest, res: HttpResponse):
   const { id } = req.params;
 
   // Check if region exists
-  const existingRegion = await currencyRepository.currencies.getCurrencyRegionById(id);
+  const existingRegion = await managePricingAdminUseCase.getCurrencyRegionById(id);
 
   if (!existingRegion) {
     res.status(404).json({
@@ -289,7 +237,7 @@ export const deleteCurrencyRegion = async (req: HttpRequest, res: HttpResponse):
     return;
   }
 
-  await currencyRepository.currencies.deleteCurrencyRegion(id);
+  await managePricingAdminUseCase.deleteCurrencyRegion(id);
 
   res.json({
     success: true,
@@ -304,17 +252,10 @@ export const getAllPriceRules = async (req: HttpRequest, res: HttpResponse): Pro
   const { currencyCode, includeInactive } = req.query;
   const showInactive = includeInactive === 'true';
 
-  let rules: CurrencyPriceRule[];
-  if (currencyCode) {
-    rules = await pricingRuleRepository.currencyPriceRules.findByCurrencyCode(currencyCode as string, showInactive);
-  } else {
-    const currencies = await currencyRepository.currencies.getAllCurrencies(showInactive);
-    rules = [] as CurrencyPriceRule[];
-    for (const currency of currencies) {
-      const currencyRules = await pricingRuleRepository.currencyPriceRules.findByCurrencyCode(currency.code, showInactive);
-      rules.push(...currencyRules);
-    }
-  }
+  const rules: CurrencyPriceRule[] = await managePricingAdminUseCase.getAllPriceRules(
+    currencyCode as string | undefined,
+    showInactive,
+  );
 
   res.json({ success: true, data: rules });
 };
@@ -324,7 +265,7 @@ export const getAllPriceRules = async (req: HttpRequest, res: HttpResponse): Pro
  */
 export const getPriceRuleById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const rule = await pricingRuleRepository.currencyPriceRules.findById(id);
+  const rule = await managePricingAdminUseCase.findCurrencyPriceRuleById(id);
 
   if (!rule) {
     res.status(404).json({ success: false, message: `Price rule with ID ${id} not found` });
@@ -341,48 +282,17 @@ export const createPriceRule = async (
   req: HttpRequest<Record<string, string>, unknown, CurrencyPriceRuleBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const ruleData = req.body;
+  try {
+    const newRule = await createCurrencyPriceRuleUseCase.execute(req.body as CurrencyPriceRuleCreateProps);
 
-  // Validate required fields
-  if (!ruleData.currencyCode || ruleData.priority === undefined || !ruleData.adjustments || ruleData.adjustments.length === 0) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields: currencyCode, priority, and at least one adjustment are required',
+    res.status(201).json({
+      success: true,
+      data: newRule,
+      message: 'Price rule created successfully',
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Check if currency exists
-  const currency = await currencyRepository.currencies.getCurrencyByCode(ruleData.currencyCode);
-
-  if (!currency) {
-    res.status(400).json({
-      success: false,
-      message: 'Currency not found',
-    });
-    return;
-  }
-
-  // Check if region exists if specified
-  if (ruleData.regionCode) {
-    const region = await currencyRepository.currencies.getCurrencyRegionByCode(ruleData.regionCode);
-
-    if (!region) {
-      res.status(400).json({
-        success: false,
-        message: `Region with code ${ruleData.regionCode} not found`,
-      });
-      return;
-    }
-  }
-
-  const newRule = await pricingRuleRepository.currencyPriceRules.create(ruleData as CurrencyPriceRuleCreateProps);
-
-  res.status(201).json({
-    success: true,
-    data: newRule,
-    message: 'Price rule created successfully',
-  });
 };
 
 /**
@@ -393,52 +303,18 @@ export const updatePriceRule = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const ruleData = req.body;
 
-  // Check if rule exists
-  const existingRule = await pricingRuleRepository.currencyPriceRules.findById(id);
+  try {
+    const updatedRule = await updateCurrencyPriceRuleUseCase.execute(id, req.body as CurrencyPriceRuleUpdateProps);
 
-  if (!existingRule) {
-    res.status(404).json({
-      success: false,
-      message: `Price rule with ID ${id} not found`,
+    res.json({
+      success: true,
+      data: updatedRule,
+      message: 'Price rule updated successfully',
     });
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // If currency code is changing, validate new code
-  if (ruleData.currencyCode && ruleData.currencyCode !== existingRule.currencyCode) {
-    const currency = await currencyRepository.currencies.getCurrencyByCode(ruleData.currencyCode);
-
-    if (!currency) {
-      res.status(400).json({
-        success: false,
-        message: `Currency with code ${ruleData.currencyCode} not found`,
-      });
-      return;
-    }
-  }
-
-  // If region code is changing, validate new code
-  if (ruleData.regionCode && ruleData.regionCode !== existingRule.regionCode) {
-    const region = await currencyRepository.currencies.getCurrencyRegionByCode(ruleData.regionCode);
-
-    if (!region) {
-      res.status(400).json({
-        success: false,
-        message: `Region with code ${ruleData.regionCode} not found`,
-      });
-      return;
-    }
-  }
-
-  const updatedRule = await pricingRuleRepository.currencyPriceRules.update(id, ruleData as CurrencyPriceRuleUpdateProps);
-
-  res.json({
-    success: true,
-    data: updatedRule,
-    message: 'Price rule updated successfully',
-  });
 };
 
 /**
@@ -448,7 +324,7 @@ export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
   const { id } = req.params;
 
   // Check if rule exists
-  const existingRule = await pricingRuleRepository.currencyPriceRules.findById(id);
+  const existingRule = await managePricingAdminUseCase.findCurrencyPriceRuleById(id);
 
   if (!existingRule) {
     res.status(404).json({
@@ -458,7 +334,7 @@ export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  await pricingRuleRepository.currencyPriceRules.delete(id);
+  await managePricingAdminUseCase.deleteCurrencyPriceRule(id);
 
   res.json({
     success: true,

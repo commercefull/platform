@@ -1,77 +1,18 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import { CalculateOrderTaxCommand, OrderLineItem, TaxAddress } from '../../application/useCases/CalculateOrderTax';
-import { CreateTaxRateUseCase, CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
-import { GetTaxRateForAddressUseCase, GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
-import type { TaxRateType } from '../../taxTypes';
-import { taxQueryRepository, taxCommandRepository, calculateOrderTaxUseCase } from '../../application/wired';
-
-// Adapter that bridges taxQueryRepo to the TaxRepository port interface
-const taxRepoAdapter = {
-  async findRatesForAddress(params: { country: string; state?: string; city?: string; postalCode?: string; taxCategory?: string }) {
-    const zone = await taxQueryRepository.query.findTaxZoneForAddress(params.country, params.state, params.postalCode, params.city);
-    if (!zone) return [];
-
-    const defaultCategory = params.taxCategory
-      ? await taxQueryRepository.query.findTaxCategoryByCode(params.taxCategory)
-      : await taxQueryRepository.query.findDefaultTaxCategory();
-
-    if (!defaultCategory) return [];
-
-    const rates = await taxQueryRepository.query.findTaxRatesByCategoryAndZone(defaultCategory.id, zone.id, true);
-    return rates.map(r => ({
-      taxRateId: r.id,
-      name: r.name,
-      rate: r.rate,
-      isCompound: r.isCompound,
-      includesShipping: r.isShippingTaxable,
-      priority: r.priority,
-    }));
-  },
-};
-
-// Adapter for customer tax exemption lookups
-const customerRepoAdapter = {
-  async getTaxExemption(customerId: string) {
-    const exemptions = await taxQueryRepository.query.findCustomerTaxExemptions(customerId);
-    if (exemptions.length === 0) return null;
-    return { isActive: true, reason: exemptions[0].type };
-  },
-};
-
-// Adapter that bridges TaxCommandRepo to the CreateTaxRate port interface
-const taxCommandAdapter = {
-  async createTaxRate(data: Record<string, unknown>) {
-    const commandRepo = taxCommandRepository.commands;
-    const result = await commandRepo.createTaxRate({
-      taxCategoryId: (data.taxCategory as string) || '',
-      taxZoneId: '',
-      name: data.name as string,
-      rate: data.rate as number,
-      type: ((data.type as string) || 'percentage') as TaxRateType,
-      priority: (data.priority as number) || 0,
-      isCompound: (data.isCompound as boolean) || false,
-      includeInPrice: false,
-      isShippingTaxable: (data.includesShipping as boolean) || false,
-      startDate: Math.floor(Date.now() / 1000),
-      isActive: (data.isActive as boolean) ?? true,
-    });
-    return {
-      taxRateId: result.id,
-      name: result.name,
-      rate: result.rate,
-      country: '',
-      isActive: result.isActive,
-      createdAt: new Date(result.createdAt * 1000),
-    };
-  },
-};
+import type { CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
+import type { GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
+import {
+  calculateOrderTaxUseCase,
+  getTaxRateForAddressUseCase,
+  createTaxRateUseCase,
+} from '../../application/wired';
 
 export const taxResolvers = {
   Query: {
     taxRateForAddress: async (_parent: unknown, args: { input: GetTaxRateForAddressInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetTaxRateForAddressUseCase(taxRepoAdapter, customerRepoAdapter);
-      return useCase.execute(args.input);
+      return getTaxRateForAddressUseCase.execute(args.input);
     },
   },
 
@@ -89,20 +30,18 @@ export const taxResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = calculateOrderTaxUseCase;
       const command = new CalculateOrderTaxCommand(
         args.input.items,
         args.input.shippingAddress,
         args.input.shippingAmount ?? 0,
         args.input.customerId,
       );
-      return useCase.execute(command);
+      return calculateOrderTaxUseCase.execute(command);
     },
 
     createTaxRate: async (_parent: unknown, args: { input: CreateTaxRateInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateTaxRateUseCase(taxCommandAdapter);
-      return useCase.execute(args.input);
+      return createTaxRateUseCase.execute(args.input);
     },
   },
 };

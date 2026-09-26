@@ -1,6 +1,6 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const dynamicAttributeRepository = productAttributeRepository.dynamic;
+
 import type { CreateAttributeCommand } from '../../application/useCases/attribute/CreateAttribute';
 import type { AddAttributeValueCommand } from '../../application/useCases/attribute/AddAttributeValue';
 import {
@@ -15,7 +15,7 @@ import {
   removeProductAttributeUseCase,
 } from '../../application/useCases/wired';
 import type { SetProductAttributeCommand } from '../../application/useCases/attribute/SetProductAttribute';
-import { productAttributeRepository } from '../../application/wired';
+import { manageAttributesUseCase } from '../../application/useCases/wired';
 
 class AttributeController {
   // ==================== ATTRIBUTE CRUD ====================
@@ -29,17 +29,12 @@ class AttributeController {
 
     let attributes;
 
-    if (groupId) {
-      attributes = await dynamicAttributeRepository.findAttributesByGroup(groupId as string);
-    } else if (searchable === 'true') {
-      attributes = await dynamicAttributeRepository.findSearchableAttributes();
-    } else if (filterable === 'true') {
-      attributes = await dynamicAttributeRepository.findFilterableAttributes();
-    } else if (forVariants === 'true') {
-      attributes = await dynamicAttributeRepository.findVariantAttributes();
-    } else {
-      attributes = await dynamicAttributeRepository.findAllAttributes();
-    }
+    attributes = await manageAttributesUseCase.list({
+      groupId: groupId as string | undefined,
+      searchable: searchable === 'true',
+      filterable: filterable === 'true',
+      variant: forVariants === 'true',
+    });
 
     res.json({
       success: true,
@@ -53,7 +48,7 @@ class AttributeController {
    */
   async listAttributesByGroup(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { groupId } = req.params;
-    const attributes = await dynamicAttributeRepository.findAttributesByGroup(groupId);
+    const attributes = await manageAttributesUseCase.list({ groupId });
 
     res.json({
       success: true,
@@ -67,7 +62,7 @@ class AttributeController {
    */
   async getAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
-    const attribute = await dynamicAttributeRepository.findAttributeById(id);
+    const attribute = await manageAttributesUseCase.findById(id);
 
     if (!attribute) {
       res.status(404).json({
@@ -81,7 +76,7 @@ class AttributeController {
     const optionTypes = ['select', 'multiselect', 'radio', 'checkbox', 'color'];
     let values: unknown[] = [];
     if (optionTypes.includes(attribute.type)) {
-      values = await dynamicAttributeRepository.findAttributeValues(id);
+      values = await manageAttributesUseCase.findValues(id);
     }
 
     res.json({
@@ -99,7 +94,7 @@ class AttributeController {
    */
   async getAttributeByCode(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { code } = req.params;
-    const attribute = await dynamicAttributeRepository.findAttributeByCode(code);
+    const attribute = await manageAttributesUseCase.findByCode(code);
 
     if (!attribute) {
       res.status(404).json({
@@ -165,7 +160,7 @@ class AttributeController {
     const { id } = req.params;
 
     // Check if attribute exists
-    const attribute = await dynamicAttributeRepository.findAttributeById(id);
+    const attribute = await manageAttributesUseCase.findById(id);
     if (!attribute) {
       res.status(404).json({
         success: false,
@@ -183,7 +178,7 @@ class AttributeController {
       return;
     }
 
-    await dynamicAttributeRepository.deleteAttribute(id);
+    await manageAttributesUseCase.delete(id);
 
     res.json({
       success: true,

@@ -1,28 +1,29 @@
-const membershipRepo = membershipSubscriptionDataRepository.memberships;
 import { requireCustomerAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { AssignMembershipUseCase, AssignMembershipInput } from '../../application/useCases/AssignMembership';
-import { GetMembershipBenefitsUseCase, GetMembershipBenefitsInput } from '../../application/useCases/GetMembershipBenefits';
-import { CancelMembershipUseCase, CancelMembershipInput } from '../../application/useCases/CancelMembership';
-import { UpgradeMembershipUseCase, UpgradeMembershipInput } from '../../application/useCases/UpgradeMembership';
-import { RenewMembershipUseCase, RenewMembershipInput } from '../../application/useCases/RenewMembership';
-import { membershipSubscriptionDataRepository } from '../../application/wired';
+import { AssignMembershipInput } from '../../application/useCases/AssignMembership';
+import { GetMembershipBenefitsInput } from '../../application/useCases/GetMembershipBenefits';
+import { CancelMembershipInput } from '../../application/useCases/CancelMembership';
+import { UpgradeMembershipInput } from '../../application/useCases/UpgradeMembership';
+import { RenewMembershipInput } from '../../application/useCases/RenewMembership';
+import {
+  assignMembershipUseCase,
+  cancelMembershipUseCase,
+  getMembershipBenefitsUseCase,
+  renewMembershipUseCase,
+  upgradeMembershipUseCase,
+} from '../../application/wired';
 
 export const membershipResolvers = {
   Query: {
     membershipBenefits: async (_parent: unknown, args: { customerId: string }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new GetMembershipBenefitsUseCase(
-        membershipRepo as unknown as ConstructorParameters<typeof GetMembershipBenefitsUseCase>[0],
-      );
       const input: GetMembershipBenefitsInput = { customerId: args.customerId };
-      return useCase.execute(input);
+      return getMembershipBenefitsUseCase.execute(input);
     },
   },
 
   Mutation: {
     assignMembership: async (_parent: unknown, args: { input: AssignMembershipInput }, context: GraphQLAuthContext) => {
       requireCustomerAuth(context);
-      const useCase = new AssignMembershipUseCase(membershipRepo as unknown as ConstructorParameters<typeof AssignMembershipUseCase>[0]);
       const input: AssignMembershipInput = {
         customerId: args.input.customerId,
         tierId: args.input.tierId,
@@ -30,7 +31,7 @@ export const membershipResolvers = {
         startDate: args.input.startDate ? new Date(args.input.startDate) : undefined,
         source: args.input.source as AssignMembershipInput['source'],
       };
-      return useCase.execute(input);
+      return assignMembershipUseCase.execute(input);
     },
 
     cancelMembership: async (
@@ -45,7 +46,6 @@ export const membershipResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new CancelMembershipUseCase(membershipRepo as unknown as ConstructorParameters<typeof CancelMembershipUseCase>[0]);
       const input: CancelMembershipInput = {
         membershipId: args.membershipId,
         reason: args.reason,
@@ -53,7 +53,7 @@ export const membershipResolvers = {
         immediate: args.immediate ?? false,
         cancelledBy: args.cancelledBy,
       };
-      return useCase.execute(input);
+      return cancelMembershipUseCase.execute(input);
     },
 
     upgradeMembership: async (
@@ -67,14 +67,13 @@ export const membershipResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new UpgradeMembershipUseCase(membershipRepo as unknown as ConstructorParameters<typeof UpgradeMembershipUseCase>[0]);
       const input: UpgradeMembershipInput = {
         membershipId: args.membershipId,
         newTierId: args.newTierId,
         prorateBilling: args.prorateBilling,
         effectiveDate: args.effectiveDate ? new Date(args.effectiveDate) : undefined,
       };
-      return useCase.execute(input);
+      return upgradeMembershipUseCase.execute(input);
     },
 
     renewMembership: async (
@@ -87,13 +86,12 @@ export const membershipResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireCustomerAuth(context);
-      const useCase = new RenewMembershipUseCase(membershipRepo as unknown as ConstructorParameters<typeof RenewMembershipUseCase>[0]);
       const input: RenewMembershipInput = {
         membershipId: args.membershipId,
         paymentMethodId: args.paymentMethodId,
         autoRenew: args.autoRenew,
       };
-      return useCase.execute(input);
+      return renewMembershipUseCase.execute(input);
     },
   },
 };

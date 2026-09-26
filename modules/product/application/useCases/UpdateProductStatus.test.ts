@@ -34,7 +34,7 @@ describe('UpdateProductStatusUseCase', () => {
 
     const result = await useCase.updateStatus('p-1', ProductStatus.ACTIVE);
 
-    expect(result).toBe(ProductStatus.ACTIVE);
+    expect(result.status).toBe(ProductStatus.ACTIVE);
     expect(repo.save).toHaveBeenCalled();
   });
 

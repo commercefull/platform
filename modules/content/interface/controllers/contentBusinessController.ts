@@ -1,6 +1,62 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { eventBus } from '../../../../libs/events/eventBus';
-import { contentDataRepository, contentStructureRepository, contentMediaDataRepository } from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import {
+  publishPageUseCase,
+  unpublishPageUseCase,
+  schedulePageUseCase,
+  duplicatePageUseCase,
+  createPageVersionUseCase,
+  restorePageVersionUseCase,
+  reorderPageBlocksUseCase,
+  createCategoryUseCase,
+  updateCategoryUseCase,
+  deleteCategoryUseCase,
+  moveCategoryUseCase,
+  createNavigationUseCase,
+  updateNavigationUseCase,
+  addNavigationItemUseCase,
+  uploadMediaUseCase,
+  deleteMediaUseCase,
+  trackMediaUsageUseCase,
+  organizeMediaFolderUseCase,
+  createRedirectUseCase,
+  updateRedirectUseCase,
+  deleteRedirectUseCase,
+  createPageTranslationUseCase,
+  updatePageTranslationUseCase,
+  deletePageTranslationUseCase,
+  assignPageToCategoryUseCase,
+  removePageFromCategoryUseCase,
+  setPrimaryCategoryUseCase,
+  createTemplateUseCase,
+  duplicateTemplateUseCase,
+  manageContentUseCase,
+} from '../../application/useCases/wired';
+import { PublishPageCommand } from '../../application/useCases/PublishPage';
+import { UnpublishPageCommand } from '../../application/useCases/page/UnpublishPage';
+import { SchedulePageCommand } from '../../application/useCases/page/SchedulePage';
+import { DuplicatePageCommand } from '../../application/useCases/page/DuplicatePage';
+import { CreatePageVersionCommand } from '../../application/useCases/page/CreatePageVersion';
+import { RestorePageVersionCommand } from '../../application/useCases/page/RestorePageVersion';
+import { ReorderPageBlocksCommand } from '../../application/useCases/block/ReorderPageBlocks';
+import { CreateCategoryCommand } from '../../application/useCases/category/CreateCategory';
+import { UpdateCategoryCommand } from '../../application/useCases/category/UpdateCategory';
+import { MoveCategoryCommand } from '../../application/useCases/category/MoveCategory';
+import { CreateNavigationCommand } from '../../application/useCases/navigation/CreateNavigation';
+import { UpdateNavigationCommand } from '../../application/useCases/navigation/UpdateNavigation';
+import { AddNavigationItemCommand } from '../../application/useCases/navigation/AddNavigationItem';
+import { UploadMediaCommand } from '../../application/useCases/media/UploadMedia';
+import { TrackMediaUsageCommand } from '../../application/useCases/media/TrackMediaUsage';
+import { MoveMediaToFolderCommand, CreateFolderCommand } from '../../application/useCases/media/OrganizeMediaFolder';
+import { CreateRedirectCommand } from '../../application/useCases/redirect/CreateRedirect';
+import { UpdateRedirectCommand } from '../../application/useCases/redirect/UpdateRedirect';
+import { CreatePageTranslationCommand } from '../../application/useCases/translation/CreatePageTranslation';
+import { UpdatePageTranslationCommand } from '../../application/useCases/translation/UpdatePageTranslation';
+import { AssignPageToCategoryCommand } from '../../application/useCases/categorization/AssignPageToCategory';
+import { RemovePageFromCategoryCommand } from '../../application/useCases/categorization/RemovePageFromCategory';
+import { SetPrimaryCategoryCommand } from '../../application/useCases/categorization/SetPrimaryCategory';
+import { CreateTemplateCommand } from '../../application/useCases/template/CreateTemplate';
+import { DuplicateTemplateCommand } from '../../application/useCases/template/DuplicateTemplate';
 
 // ============================================================================
 // Request Body Interfaces
@@ -311,15 +367,7 @@ interface TrackMediaUsageBody {
 }
 
 export class ContentController {
-  private contentRepo = contentDataRepository.pages;
-  private categoryRepo = contentStructureRepository.categories;
-  private navigationRepo = contentStructureRepository.navigation;
-  private mediaRepo = contentMediaDataRepository.media;
-  private redirectRepo = contentStructureRepository.redirects;
-  private pageVersionRepo = contentDataRepository.versions;
-  private pageTranslationRepo = contentDataRepository.translations;
-  private categorizationRepo = contentStructureRepository.categorization;
-  private mediaUsageRepo = contentMediaDataRepository.usage;
+  private contentUC = manageContentUseCase;
 
   constructor() {}
 
@@ -333,7 +381,7 @@ export class ContentController {
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-    const contentTypes = await this.contentRepo.findAllContentTypes(isActive, limit, offset);
+    const contentTypes = await this.contentUC.findAllContentTypes(isActive, limit, offset);
 
     res.status(200).json({
       success: true,
@@ -351,7 +399,7 @@ export class ContentController {
    */
   getContentTypeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const contentType = await this.contentRepo.findContentTypeById(id);
+    const contentType = await this.contentUC.findContentTypeById(id);
 
     if (!contentType) {
       res.status(404).json({
@@ -372,7 +420,7 @@ export class ContentController {
    */
   getContentTypeBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { slug } = req.params;
-    const contentType = await this.contentRepo.findContentTypeBySlug(slug);
+    const contentType = await this.contentUC.findContentTypeBySlug(slug);
 
     if (!contentType) {
       res.status(404).json({
@@ -417,7 +465,7 @@ export class ContentController {
       return;
     }
 
-    const contentType = await this.contentRepo.createContentType({
+    const contentType = await this.contentUC.createContentType({
       name,
       slug,
       description: description ?? null,
@@ -448,7 +496,7 @@ export class ContentController {
     const { name, slug, description, icon, requiredFields, metaFields, isActive } = req.body;
 
     // Check if content type exists
-    const existingContentType = await this.contentRepo.findContentTypeById(id);
+    const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
       res.status(404).json({
         success: false,
@@ -457,7 +505,7 @@ export class ContentController {
       return;
     }
 
-    const updatedContentType = await this.contentRepo.updateContentType(id, {
+    const updatedContentType = await this.contentUC.updateContentType(id, {
       name,
       slug,
       description,
@@ -481,7 +529,7 @@ export class ContentController {
     const { id } = req.params;
 
     // Check if content type exists
-    const existingContentType = await this.contentRepo.findContentTypeById(id);
+    const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
       res.status(404).json({
         success: false,
@@ -490,7 +538,7 @@ export class ContentController {
       return;
     }
 
-    await this.contentRepo.deleteContentType(id);
+    await this.contentUC.deleteContentType(id);
 
     res.status(200).json({
       success: true,
@@ -510,7 +558,7 @@ export class ContentController {
     const contentTypeId = req.query.contentTypeId as string | undefined;
     const search = req.query.search as string | undefined;
 
-    const pages = await this.contentRepo.findAllPages(status, contentTypeId, limit, offset, search);
+    const pages = await this.contentUC.findAllPages(status, contentTypeId, limit, offset, search);
 
     res.status(200).json({
       success: true,
@@ -528,7 +576,7 @@ export class ContentController {
    */
   getPageById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const page = await this.contentRepo.findPageById(id);
+    const page = await this.contentUC.findPageById(id);
 
     if (!page) {
       res.status(404).json({
@@ -551,7 +599,7 @@ export class ContentController {
     const { id } = req.params;
 
     // Fetch the basic page data
-    const page = await this.contentRepo.findPageById(id);
+    const page = await this.contentUC.findPageById(id);
     if (!page) {
       res.status(404).json({
         success: false,
@@ -561,18 +609,18 @@ export class ContentController {
     }
 
     // Fetch all content blocks for this page
-    const blocks = await this.contentRepo.findBlocksByPageId(id);
+    const blocks = await this.contentUC.findBlocksByPageId(id);
 
     // If the page has a template, fetch it as well
     let template = null;
     if (page.templateId) {
-      template = await this.contentRepo.findTemplateById(page.templateId);
+      template = await this.contentUC.findTemplateById(page.templateId);
     }
 
     // Fetch content type if specified
     let contentType = null;
     if (page.contentTypeId) {
-      contentType = await this.contentRepo.findContentTypeById(page.contentTypeId);
+      contentType = await this.contentUC.findContentTypeById(page.contentTypeId);
     }
 
     // Construct the full page data
@@ -617,7 +665,7 @@ export class ContentController {
 
     // Validate layout if provided
     if (layout) {
-      const template = await this.contentRepo.findTemplateById(layout);
+      const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
         res.status(400).json({
           success: false,
@@ -627,7 +675,7 @@ export class ContentController {
       }
     }
 
-    const page = await this.contentRepo.createPage({
+    const page = await this.contentUC.createPage({
       title,
       slug,
       summary: description ?? null, // Using description value but assigning to the correct field name 'summary'
@@ -655,7 +703,7 @@ export class ContentController {
     const { title, slug, description, metaTitle, metaDescription, status, publishedAt, layout } = req.body;
 
     // Check if page exists
-    const existingPage = await this.contentRepo.findPageById(id);
+    const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
       res.status(404).json({
         success: false,
@@ -666,7 +714,7 @@ export class ContentController {
 
     // Validate layout if provided
     if (layout) {
-      const template = await this.contentRepo.findTemplateById(layout);
+      const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
         res.status(400).json({
           success: false,
@@ -676,7 +724,7 @@ export class ContentController {
       }
     }
 
-    const updatedPage = await this.contentRepo.updatePage(id, {
+    const updatedPage = await this.contentUC.updatePage(id, {
       title,
       slug,
       summary: description, // Using description value but mapping to 'summary' field
@@ -701,7 +749,7 @@ export class ContentController {
     const { id } = req.params;
 
     // Check if page exists
-    const existingPage = await this.contentRepo.findPageById(id);
+    const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
       res.status(404).json({
         success: false,
@@ -710,7 +758,7 @@ export class ContentController {
       return;
     }
 
-    await this.contentRepo.deletePage(id);
+    await this.contentUC.deletePage(id);
 
     res.status(200).json({
       success: true,
@@ -727,7 +775,7 @@ export class ContentController {
     const { pageId } = req.params;
 
     // Check if page exists
-    const page = await this.contentRepo.findPageById(pageId);
+    const page = await this.contentUC.findPageById(pageId);
     if (!page) {
       res.status(404).json({
         success: false,
@@ -736,7 +784,7 @@ export class ContentController {
       return;
     }
 
-    const blocks = await this.contentRepo.findBlocksByPageId(pageId);
+    const blocks = await this.contentUC.findBlocksByPageId(pageId);
 
     res.status(200).json({
       success: true,
@@ -749,7 +797,7 @@ export class ContentController {
    */
   getBlockById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const block = await this.contentRepo.findBlockById(id);
+    const block = await this.contentUC.findBlockById(id);
 
     if (!block) {
       res.status(404).json({
@@ -781,7 +829,7 @@ export class ContentController {
     }
 
     // Validate block type exists
-    const blockType = await this.contentRepo.findBlockTypeById(blockTypeId);
+    const blockType = await this.contentUC.findBlockTypeById(blockTypeId);
     if (!blockType) {
       res.status(404).json({
         success: false,
@@ -810,7 +858,7 @@ export class ContentController {
       }
     }
 
-    const block = await this.contentRepo.createBlock({
+    const block = await this.contentUC.createBlock({
       contentPageId,
       blockTypeId,
       title: title || null,
@@ -834,7 +882,7 @@ export class ContentController {
     const { blockTypeId, title, area, sortOrder, content, isVisible } = req.body;
 
     // Check if block exists
-    const existingBlock = await this.contentRepo.findBlockById(id);
+    const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
       res.status(404).json({
         success: false,
@@ -849,7 +897,7 @@ export class ContentController {
     const effectiveContent = content || existingBlock.content;
 
     if (blockTypeId || content) {
-      const blockType = await this.contentRepo.findBlockTypeById(effectiveBlockTypeId);
+      const blockType = await this.contentUC.findBlockTypeById(effectiveBlockTypeId);
       if (!blockType) {
         res.status(404).json({
           success: false,
@@ -879,7 +927,7 @@ export class ContentController {
       }
     }
 
-    const updatedBlock = await this.contentRepo.updateBlock(id, {
+    const updatedBlock = await this.contentUC.updateBlock(id, {
       blockTypeId,
       title,
       area,
@@ -902,7 +950,7 @@ export class ContentController {
     const { id } = req.params;
 
     // Check if block exists
-    const existingBlock = await this.contentRepo.findBlockById(id);
+    const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
       res.status(404).json({
         success: false,
@@ -911,7 +959,7 @@ export class ContentController {
       return;
     }
 
-    await this.contentRepo.deleteBlock(id);
+    await this.contentUC.deleteBlock(id);
 
     res.status(200).json({
       success: true,
@@ -945,22 +993,15 @@ export class ContentController {
       }
     }
 
-    // Check if page exists
-    const page = await this.contentRepo.findPageById(pageId);
-    if (!page) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${pageId} not found`,
+    try {
+      await reorderPageBlocksUseCase.execute(new ReorderPageBlocksCommand(pageId, blockOrders, req.user?.id));
+      res.status(200).json({
+        success: true,
+        message: 'Content blocks reordered successfully',
       });
-      return;
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    await this.contentRepo.reorderBlocks(pageId, blockOrders);
-
-    res.status(200).json({
-      success: true,
-      message: 'Content blocks reordered successfully',
-    });
   };
 
   /**
@@ -971,7 +1012,7 @@ export class ContentController {
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-    const templates = await this.contentRepo.findAllTemplates(isActive, limit, offset);
+    const templates = await this.contentUC.findAllTemplates(isActive, limit, offset);
 
     res.status(200).json({
       success: true,
@@ -989,7 +1030,7 @@ export class ContentController {
    */
   getTemplateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const template = await this.contentRepo.findTemplateById(id);
+    const template = await this.contentUC.findTemplateById(id);
 
     if (!template) {
       res.status(404).json({
@@ -1024,35 +1065,27 @@ export class ContentController {
       isActive = true,
     } = req.body;
 
-    // Basic validation
-    if (!name || !slug) {
-      res.status(400).json({
-        success: false,
-        message: 'Name and slug are required',
-      });
-      return;
+    try {
+      const result = await createTemplateUseCase.execute(
+        new CreateTemplateCommand(
+          name,
+          slug,
+          description,
+          thumbnail,
+          htmlStructure,
+          cssStyles,
+          jsScripts,
+          areas,
+          defaultBlocks,
+          compatibleContentTypes,
+          isSystem,
+          isActive,
+        ),
+      );
+      res.status(201).json({ success: true, data: result, message: 'Template created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const template = await this.contentRepo.createTemplate({
-      name,
-      slug,
-      description: description ?? null,
-      thumbnail: thumbnail ?? null,
-      htmlStructure: htmlStructure ?? null,
-      cssStyles: cssStyles ?? null,
-      jsScripts: jsScripts ?? null,
-      areas: areas ?? null,
-      defaultBlocks: defaultBlocks ?? null,
-      compatibleContentTypes: compatibleContentTypes ?? null,
-      isSystem,
-      isActive,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: template,
-      message: 'Template created successfully',
-    });
   };
 
   /**
@@ -1063,7 +1096,7 @@ export class ContentController {
     const { name, slug, description, htmlStructure, areas, isActive } = req.body;
 
     // Check if template exists
-    const existingTemplate = await this.contentRepo.findTemplateById(id);
+    const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
       res.status(404).json({
         success: false,
@@ -1072,7 +1105,7 @@ export class ContentController {
       return;
     }
 
-    const updatedTemplate = await this.contentRepo.updateTemplate(id, {
+    const updatedTemplate = await this.contentUC.updateTemplate(id, {
       name,
       slug,
       description,
@@ -1095,7 +1128,7 @@ export class ContentController {
     const { id } = req.params;
 
     // Check if template exists
-    const existingTemplate = await this.contentRepo.findTemplateById(id);
+    const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
       res.status(404).json({
         success: false,
@@ -1104,7 +1137,7 @@ export class ContentController {
       return;
     }
 
-    await this.contentRepo.deleteTemplate(id);
+    await this.contentUC.deleteTemplate(id);
 
     res.status(200).json({
       success: true,
@@ -1122,34 +1155,12 @@ export class ContentController {
     const { id } = req.params;
     const { name, slug } = req.body;
 
-    if (!name || !slug) {
-      res.status(400).json({ success: false, message: 'Name and slug are required' });
-      return;
+    try {
+      const result = await duplicateTemplateUseCase.execute(new DuplicateTemplateCommand(id, name, slug));
+      res.status(201).json({ success: true, data: result, message: 'Template duplicated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const original = await this.contentRepo.findTemplateById(id);
-    if (!original) {
-      res.status(404).json({ success: false, message: `Template with ID ${id} not found` });
-      return;
-    }
-
-    const duplicate = await this.contentRepo.createTemplate({
-      name,
-      slug,
-      description: original.description,
-      thumbnail: original.thumbnail,
-      htmlStructure: original.htmlStructure,
-      cssStyles: original.cssStyles,
-      jsScripts: original.jsScripts,
-      areas: original.areas,
-      defaultBlocks: original.defaultBlocks,
-      compatibleContentTypes: original.compatibleContentTypes,
-      isSystem: false,
-      isActive: true,
-    });
-
-    eventBus.emit('content.template.created', { templateId: duplicate.contentTemplateId, name: duplicate.name, slug: duplicate.slug });
-    res.status(201).json({ success: true, data: duplicate, message: 'Template duplicated successfully' });
   };
 
   // Page Action Handlers
@@ -1158,36 +1169,26 @@ export class ContentController {
    * Publish a page
    */
   publishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    const { id } = req.params;
-    const page = await this.contentRepo.findPageById(id);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-      return;
+    try {
+      const { id } = req.params;
+      const result = await publishPageUseCase.execute(new PublishPageCommand(id, req.user?.id));
+      res.status(200).json({ success: true, data: result, message: 'Page published successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updatedPage = await this.contentRepo.updatePage(id, {
-      status: 'published',
-      publishedAt: new Date(),
-    });
-
-    eventBus.emit('content.page.published', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
-    res.status(200).json({ success: true, data: updatedPage, message: 'Page published successfully' });
   };
 
   /**
    * Unpublish a page
    */
   unpublishPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    const { id } = req.params;
-    const page = await this.contentRepo.findPageById(id);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-      return;
+    try {
+      const { id } = req.params;
+      const result = await unpublishPageUseCase.execute(new UnpublishPageCommand(id));
+      res.status(200).json({ success: true, data: result, message: 'Page unpublished successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updatedPage = await this.contentRepo.updatePage(id, { status: 'draft' });
-    eventBus.emit('content.page.unpublished', { pageId: id, title: updatedPage.title, slug: updatedPage.slug });
-    res.status(200).json({ success: true, data: updatedPage, message: 'Page unpublished successfully' });
   };
 
   /**
@@ -1197,19 +1198,14 @@ export class ContentController {
     const { id } = req.params;
     const { scheduledAt } = req.body;
 
-    if (!scheduledAt) {
-      res.status(400).json({ success: false, message: 'Scheduled date is required' });
-      return;
+    try {
+      const result = await schedulePageUseCase.execute(
+        new SchedulePageCommand(id, scheduledAt ? new Date(scheduledAt) : (undefined as unknown as Date), req.user?.id),
+      );
+      res.status(200).json({ success: true, data: result, message: 'Page scheduled successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const page = await this.contentRepo.findPageById(id);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-      return;
-    }
-
-    const updatedPage = await this.contentRepo.updatePage(id, { status: 'scheduled', scheduledAt: new Date(scheduledAt) });
-    res.status(200).json({ success: true, data: updatedPage, message: 'Page scheduled successfully' });
   };
 
   /**
@@ -1219,48 +1215,12 @@ export class ContentController {
     const { id } = req.params;
     const { title, slug } = req.body;
 
-    if (!title || !slug) {
-      res.status(400).json({ success: false, message: 'Title and slug are required' });
-      return;
+    try {
+      const result = await duplicatePageUseCase.execute(new DuplicatePageCommand(id, title, slug, req.user?.id));
+      res.status(201).json({ success: true, data: result, message: 'Page duplicated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const original = await this.contentRepo.findPageById(id);
-    if (!original) {
-      res.status(404).json({ success: false, message: `Page with ID ${id} not found` });
-      return;
-    }
-
-    const duplicatePage = await this.contentRepo.createPage({
-      title,
-      slug,
-      contentTypeId: original.contentTypeId,
-      templateId: original.templateId,
-      status: 'draft',
-      visibility: original.visibility,
-      summary: original.summary,
-      featuredImage: original.featuredImage,
-      metaTitle: original.metaTitle,
-      metaDescription: original.metaDescription,
-      metaKeywords: original.metaKeywords,
-      customFields: original.customFields,
-      // isHomePage defaults to false in DB, don't pass explicitly
-    });
-
-    // Duplicate blocks
-    const blocks = await this.contentRepo.findBlocksByPageId(id);
-    for (const block of blocks) {
-      await this.contentRepo.createBlock({
-        contentPageId: duplicatePage.contentPageId,
-        blockTypeId: block.blockTypeId,
-        title: block.title,
-        sortOrder: block.sortOrder,
-        content: block.content,
-        isVisible: block.isVisible,
-      });
-    }
-
-    eventBus.emit('content.page.created', { pageId: duplicatePage.contentPageId, title: duplicatePage.title, slug: duplicatePage.slug });
-    res.status(201).json({ success: true, data: duplicatePage, message: 'Page duplicated successfully' });
   };
 
   // Category Handlers
@@ -1271,50 +1231,34 @@ export class ContentController {
     const parentId = req.query.parentId as string | undefined;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-    const categories = await this.categoryRepo.findAllCategories(parentId, isActive, limit, offset);
+    const categories = await this.contentUC.findAllCategories(parentId, isActive, limit, offset);
     res.status(200).json({ success: true, data: categories });
   };
 
   getCategoryTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
-    const categories = await this.categoryRepo.getCategoryTree(isActive);
+    const categories = await this.contentUC.getCategoryTree(isActive);
     res.status(200).json({ success: true, data: categories });
   };
 
   createCategory = async (req: HttpRequest<Record<string, string>, unknown, CreateCategoryBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-    if (!name || !slug) {
-      res.status(400).json({ success: false, message: 'Name and slug are required' });
-      return;
+    try {
+      const result = await createCategoryUseCase.execute(
+        new CreateCategoryCommand(name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive),
+      );
+      res
+        .status(201)
+        .json({ success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const category = await this.categoryRepo.createCategory({
-      name,
-      slug,
-      parentId: parentId ?? null,
-      description: description ?? null,
-      featuredImage: featuredImage ?? null,
-      metaTitle: metaTitle ?? null,
-      metaDescription: metaDescription ?? null,
-      sortOrder: sortOrder || 0,
-      isActive: isActive !== undefined ? isActive : true,
-      path: null,
-      depth: 0,
-    });
-
-    eventBus.emit('content.category.created', {
-      categoryId: category.contentCategoryId,
-      name: category.name,
-      slug: category.slug,
-      parentId: category.parentId,
-    });
-    res.status(201).json({ success: true, data: category, message: 'Category created successfully' });
   };
 
   getCategoryById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const category = await this.categoryRepo.findCategoryById(id);
+    const category = await this.contentUC.findCategoryById(id);
     if (!category) {
       res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
       return;
@@ -1326,84 +1270,62 @@ export class ContentController {
     const { id } = req.params;
     const { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive } = req.body;
 
-    const existing = await this.categoryRepo.findCategoryById(id);
-    if (!existing) {
-      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
-      return;
+    try {
+      const result = await updateCategoryUseCase.execute(
+        new UpdateCategoryCommand(id, { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive }),
+      );
+      res.status(200).json({ success: true, data: result, message: 'Category updated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updated = await this.categoryRepo.updateCategory(id, {
-      name,
-      slug,
-      description,
-      featuredImage,
-      metaTitle,
-      metaDescription,
-      sortOrder,
-      isActive,
-    });
-    eventBus.emit('content.category.updated', { categoryId: id, name: updated.name, slug: updated.slug });
-    res.status(200).json({ success: true, data: updated, message: 'Category updated successfully' });
   };
 
   deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const existing = await this.categoryRepo.findCategoryById(id);
-    if (!existing) {
-      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
-      return;
+    try {
+      await deleteCategoryUseCase.execute(id);
+      res.status(200).json({ success: true, message: 'Category deleted successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    await this.categoryRepo.deleteCategory(id);
-    eventBus.emit('content.category.deleted', { categoryId: id, name: existing.name });
-    res.status(200).json({ success: true, message: 'Category deleted successfully' });
   };
 
   moveCategory = async (req: HttpRequest<Record<string, string>, unknown, MoveCategoryBody>, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const { newParentId } = req.body;
 
-    const updated = await this.categoryRepo.moveCategory(id, newParentId);
-    res.status(200).json({ success: true, data: updated, message: 'Category moved successfully' });
+    try {
+      const result = await moveCategoryUseCase.execute(new MoveCategoryCommand(id, newParentId ?? null));
+      res.status(200).json({ success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category moved successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    }
   };
 
   // Navigation Handlers
 
   getNavigations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
-    const navigations = await this.navigationRepo.findAllNavigations(isActive);
+    const navigations = await this.contentUC.findAllNavigations(isActive);
     res.status(200).json({ success: true, data: navigations });
   };
 
   createNavigation = async (req: HttpRequest<Record<string, string>, unknown, CreateNavigationBody>, res: HttpResponse): Promise<void> => {
     const { name, slug, description, location, isActive } = req.body;
 
-    if (!name || !slug) {
-      res.status(400).json({ success: false, message: 'Name and slug are required' });
-      return;
+    try {
+      const result = await createNavigationUseCase.execute(new CreateNavigationCommand(name, slug, description, location, isActive));
+      res
+        .status(201)
+        .json({ success: true, data: { ...result, contentNavigationId: result.id }, message: 'Navigation created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const navigation = await this.navigationRepo.createNavigation({
-      name,
-      slug,
-      description: description ?? null,
-      location: location ?? null,
-      isActive: isActive !== undefined ? isActive : true,
-      createdBy: null,
-      updatedBy: null,
-    });
-    eventBus.emit('content.navigation.created', {
-      navigationId: navigation.contentNavigationId,
-      name: navigation.name,
-      slug: navigation.slug,
-      location: navigation.location,
-    });
-    res.status(201).json({ success: true, data: navigation, message: 'Navigation created successfully' });
   };
 
   getNavigationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const navigation = await this.navigationRepo.findNavigationById(id);
+    const navigation = await this.contentUC.findNavigationById(id);
     if (!navigation) {
       res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
       return;
@@ -1413,13 +1335,13 @@ export class ContentController {
 
   getNavigationWithItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const navigation = await this.navigationRepo.findNavigationById(id);
+    const navigation = await this.contentUC.findNavigationById(id);
     if (!navigation) {
       res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
       return;
     }
 
-    const items = await this.navigationRepo.findAllNavigationItems(id);
+    const items = await this.contentUC.findAllNavigationItems(id);
     res.status(200).json({ success: true, data: { navigation, items } });
   };
 
@@ -1427,20 +1349,19 @@ export class ContentController {
     const { id } = req.params;
     const { name, slug, description, location, isActive } = req.body;
 
-    const existing = await this.navigationRepo.findNavigationById(id);
-    if (!existing) {
-      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
-      return;
+    try {
+      const result = await updateNavigationUseCase.execute(
+        new UpdateNavigationCommand(id, { name, slug, description, location, isActive }),
+      );
+      res.status(200).json({ success: true, data: result, message: 'Navigation updated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updated = await this.navigationRepo.updateNavigation(id, { name, slug, description, location, isActive });
-    eventBus.emit('content.navigation.updated', { navigationId: id, name: updated.name });
-    res.status(200).json({ success: true, data: updated, message: 'Navigation updated successfully' });
   };
 
   deleteNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    await this.navigationRepo.deleteNavigation(id);
+    await this.contentUC.deleteNavigation(id);
     res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
   };
 
@@ -1465,36 +1386,31 @@ export class ContentController {
       conditions,
     } = req.body;
 
-    if (!title || !type) {
-      res.status(400).json({ success: false, message: 'Title and type are required' });
-      return;
+    try {
+      const result = await addNavigationItemUseCase.execute(
+        new AddNavigationItemCommand(
+          navigationId,
+          title,
+          type as 'url' | 'page' | 'category' | 'product' | 'blog',
+          parentId,
+          url,
+          contentPageId,
+          targetId,
+          targetSlug,
+          icon,
+          cssClasses,
+          openInNewTab,
+          isActive,
+          sortOrder,
+          conditions,
+        ),
+      );
+      res
+        .status(201)
+        .json({ success: true, data: { ...result, contentNavigationItemId: result.id }, message: 'Navigation item added successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const item = await this.navigationRepo.createNavigationItem({
-      navigationId,
-      parentId: parentId ?? null,
-      title,
-      type,
-      url: url ?? null,
-      contentPageId: contentPageId ?? null,
-      targetId: targetId ?? null,
-      targetSlug: targetSlug ?? null,
-      icon: icon ?? null,
-      cssClasses: cssClasses ?? null,
-      openInNewTab: openInNewTab || false,
-      isActive: isActive !== undefined ? isActive : true,
-      sortOrder: sortOrder || 0,
-      conditions: conditions ?? null,
-      depth: 0,
-    });
-
-    eventBus.emit('content.navigation.item_added', {
-      navigationId,
-      itemId: item.contentNavigationItemId,
-      title: item.title,
-      type: item.type,
-    });
-    res.status(201).json({ success: true, data: item, message: 'Navigation item added successfully' });
   };
 
   updateNavigationItem = async (
@@ -1504,7 +1420,7 @@ export class ContentController {
     const { id } = req.params;
     const { title, type, url, contentPageId, icon, openInNewTab, isActive, sortOrder } = req.body;
 
-    const updated = await this.navigationRepo.updateNavigationItem(id, {
+    const updated = await this.contentUC.updateNavigationItem(id, {
       title,
       type,
       url,
@@ -1519,7 +1435,7 @@ export class ContentController {
 
   deleteNavigationItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    await this.navigationRepo.deleteNavigationItem(id);
+    await this.contentUC.deleteNavigationItem(id);
     res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
   };
 
@@ -1535,7 +1451,7 @@ export class ContentController {
       return;
     }
 
-    await this.navigationRepo.reorderNavigationItems(navigationId, itemOrders);
+    await this.contentUC.reorderNavigationItems(navigationId, itemOrders);
     res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
   };
 
@@ -1547,7 +1463,7 @@ export class ContentController {
     const folderId = req.query.folderId as string | undefined;
     const fileType = req.query.fileType as string | undefined;
 
-    const media = await this.mediaRepo.findAllMedia(folderId, fileType, limit, offset);
+    const media = await this.contentUC.findAllMedia(folderId, fileType, limit, offset);
     res.status(200).json({ success: true, data: media });
   };
 
@@ -1573,48 +1489,43 @@ export class ContentController {
       externalId,
     } = req.body;
 
-    if (!title || !fileName || !url) {
-      res.status(400).json({ success: false, message: 'Title, fileName, and URL are required' });
-      return;
+    try {
+      const result = await uploadMediaUseCase.execute(
+        new UploadMediaCommand(
+          title,
+          fileName,
+          filePath || '',
+          fileType || 'application/octet-stream',
+          fileSize || 0,
+          url,
+          width,
+          height,
+          duration,
+          altText,
+          caption,
+          description,
+          folderId || undefined,
+          thumbnailUrl,
+          tags,
+          isExternal,
+          externalService,
+          externalId,
+          req.user?.id,
+        ),
+      );
+      res.status(201).json({
+        success: true,
+        data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
+        message: 'Media uploaded successfully',
+      });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const media = await this.mediaRepo.createMedia({
-      title,
-      fileName,
-      filePath: filePath || '',
-      fileType: fileType || 'application/octet-stream',
-      fileSize: fileSize || 0,
-      url,
-      width: width ?? null,
-      height: height ?? null,
-      duration: duration ?? null,
-      altText: altText ?? null,
-      caption: caption ?? null,
-      description: description ?? null,
-      contentMediaFolderId: folderId || null,
-      thumbnailUrl: thumbnailUrl ?? null,
-      sortOrder: 0,
-      tags: tags ?? null,
-      isExternal: isExternal || false,
-      externalService: externalService ?? null,
-      externalId: externalId ?? null,
-      createdBy: null,
-      updatedBy: null,
-    });
-
-    eventBus.emit('content.media.uploaded', {
-      mediaId: media.contentMediaId,
-      title: media.title,
-      fileName: media.fileName,
-      fileType: media.fileType,
-      fileSize: media.fileSize,
-    });
-    res.status(201).json({ success: true, data: media, message: 'Media uploaded successfully' });
   };
 
   getMediaById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const media = await this.mediaRepo.findMediaById(id);
+    const media = await this.contentUC.findMediaById(id);
     if (!media) {
       res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
       return;
@@ -1626,7 +1537,7 @@ export class ContentController {
     const { id } = req.params;
     const { title, altText, caption, description, folderId, tags, sortOrder } = req.body;
 
-    const updated = await this.mediaRepo.updateMedia(id, {
+    const updated = await this.contentUC.updateMedia(id, {
       title,
       altText,
       caption,
@@ -1640,15 +1551,12 @@ export class ContentController {
 
   deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const media = await this.mediaRepo.findMediaById(id);
-    if (!media) {
-      res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
-      return;
+    try {
+      await deleteMediaUseCase.execute(id);
+      res.status(200).json({ success: true, message: 'Media deleted successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    await this.mediaRepo.deleteMedia(id);
-    eventBus.emit('content.media.deleted', { mediaId: id, fileName: media.fileName });
-    res.status(200).json({ success: true, message: 'Media deleted successfully' });
   };
 
   moveMediaToFolder = async (
@@ -1662,29 +1570,26 @@ export class ContentController {
       return;
     }
 
-    let movedCount = 0;
-    for (const mediaId of mediaIds) {
-      try {
-        await this.mediaRepo.updateMedia(mediaId, { contentMediaFolderId: folderId || undefined });
-        movedCount++;
-      } catch {
-        /* skip */
-      }
+    try {
+      const result = await organizeMediaFolderUseCase.moveMediaToFolder(new MoveMediaToFolderCommand(mediaIds, folderId ?? null));
+      res
+        .status(200)
+        .json({ success: true, data: result, message: `${result.movedCount} media items moved successfully` });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    res.status(200).json({ success: true, data: { movedCount }, message: `${movedCount} media items moved successfully` });
   };
 
   // Media Folder Handlers
 
   getMediaFolders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const parentId = req.query.parentId as string | undefined;
-    const folders = await this.mediaRepo.findAllFolders(parentId);
+    const folders = await this.contentUC.findAllFolders(parentId);
     res.status(200).json({ success: true, data: folders });
   };
 
   getMediaFolderTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-    const folders = await this.mediaRepo.findAllFolders();
+    const folders = await this.contentUC.findAllFolders();
     res.status(200).json({ success: true, data: folders });
   };
 
@@ -1694,21 +1599,14 @@ export class ContentController {
   ): Promise<void> => {
     const { name, parentId } = req.body;
 
-    if (!name) {
-      res.status(400).json({ success: false, message: 'Folder name is required' });
-      return;
+    try {
+      const result = await organizeMediaFolderUseCase.createFolder(new CreateFolderCommand(name, parentId, req.user?.id));
+      res
+        .status(201)
+        .json({ success: true, data: { ...result, contentMediaFolderId: result.id }, message: 'Folder created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const folder = await this.mediaRepo.createFolder({
-      name,
-      parentId: parentId ?? null,
-      path: null,
-      depth: 0,
-      sortOrder: 0,
-      createdBy: null,
-      updatedBy: null,
-    });
-    res.status(201).json({ success: true, data: folder, message: 'Folder created successfully' });
   };
 
   updateMediaFolder = async (
@@ -1718,13 +1616,13 @@ export class ContentController {
     const { id } = req.params;
     const { name, parentId, sortOrder } = req.body;
 
-    const updated = await this.mediaRepo.updateFolder(id, { name, parentId, sortOrder });
+    const updated = await this.contentUC.updateFolder(id, { name, parentId, sortOrder });
     res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
   };
 
   deleteMediaFolder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    await this.mediaRepo.deleteFolder(id);
+    await this.contentUC.deleteFolder(id);
     res.status(200).json({ success: true, message: 'Folder deleted successfully' });
   };
 
@@ -1735,41 +1633,36 @@ export class ContentController {
     const offset = parseInt(req.query.offset as string) || 0;
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
-    const redirects = await this.redirectRepo.findAllRedirects(isActive, limit, offset);
+    const redirects = await this.contentUC.findAllRedirects(isActive, limit, offset);
     res.status(200).json({ success: true, data: redirects });
   };
 
   createRedirect = async (req: HttpRequest<Record<string, string>, unknown, CreateRedirectBody>, res: HttpResponse): Promise<void> => {
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-    if (!sourceUrl || !targetUrl) {
-      res.status(400).json({ success: false, message: 'Source URL and target URL are required' });
-      return;
+    try {
+      const result = await createRedirectUseCase.execute(
+        new CreateRedirectCommand(
+          sourceUrl,
+          targetUrl,
+          statusCode ? (Number(statusCode) as 301 | 302 | 303 | 307 | 308) : undefined,
+          isRegex,
+          isActive,
+          notes,
+          req.user?.id,
+        ),
+      );
+      res
+        .status(201)
+        .json({ success: true, data: { ...result, contentRedirectId: result.id }, message: 'Redirect created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const redirect = await this.redirectRepo.createRedirect({
-      sourceUrl,
-      targetUrl,
-      statusCode: String(statusCode || '301'),
-      isRegex: isRegex || false,
-      isActive: isActive !== undefined ? isActive : true,
-      notes: notes ?? null,
-      createdBy: null,
-      updatedBy: null,
-    });
-
-    eventBus.emit('content.redirect.created', {
-      redirectId: redirect.contentRedirectId,
-      sourceUrl: redirect.sourceUrl,
-      targetUrl: redirect.targetUrl,
-      statusCode: redirect.statusCode,
-    });
-    res.status(201).json({ success: true, data: redirect, message: 'Redirect created successfully' });
   };
 
   getRedirectById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const redirect = await this.redirectRepo.findRedirectById(id);
+    const redirect = await this.contentUC.findRedirectById(id);
     if (!redirect) {
       res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
       return;
@@ -1781,22 +1674,24 @@ export class ContentController {
     const { id } = req.params;
     const { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes } = req.body;
 
-    const updated = await this.redirectRepo.updateRedirect(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes });
-    eventBus.emit('content.redirect.updated', { redirectId: id, sourceUrl: updated.sourceUrl, targetUrl: updated.targetUrl });
-    res.status(200).json({ success: true, data: updated, message: 'Redirect updated successfully' });
+    try {
+      const result = await updateRedirectUseCase.execute(
+        new UpdateRedirectCommand(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes }),
+      );
+      res.status(200).json({ success: true, data: result, message: 'Redirect updated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    }
   };
 
   deleteRedirect = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
-    const redirect = await this.redirectRepo.findRedirectById(id);
-    if (!redirect) {
-      res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
-      return;
+    try {
+      await deleteRedirectUseCase.execute(id);
+      res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    await this.redirectRepo.deleteRedirect(id);
-    eventBus.emit('content.redirect.deleted', { redirectId: id, sourceUrl: redirect.sourceUrl });
-    res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
   };
 
   // Page Version Handlers
@@ -1806,13 +1701,13 @@ export class ContentController {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const page = await this.contentRepo.findPageById(pageId);
+    const page = await this.contentUC.findPageById(pageId);
     if (!page) {
       res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
-    const versions = await this.pageVersionRepo.findVersionsByPageId(pageId, limit, offset);
+    const versions = await this.contentUC.findVersionsByPageId(pageId, limit, offset);
     res.status(200).json({ success: true, data: versions });
   };
 
@@ -1823,63 +1718,35 @@ export class ContentController {
     const { pageId } = req.params;
     const { comment } = req.body;
 
-    const page = await this.contentRepo.findPageById(pageId);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-      return;
+    try {
+      const version = await createPageVersionUseCase.execute(new CreatePageVersionCommand(pageId, comment));
+      res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const version = await this.pageVersionRepo.createVersion({
-      contentPageId: pageId,
-      title: page.title,
-      status: page.status,
-      summary: page.summary || undefined,
-      content: (page.customFields as Record<string, unknown>) || undefined,
-      customFields: (page.customFields as Record<string, unknown>) || undefined,
-      comment: comment || `Version snapshot of "${page.title}"`,
-      createdBy: null,
-    });
-
-    eventBus.emit('content.page.version_created', { pageId, versionId: version.contentPageVersionId, version: version.version });
-    res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
   };
 
   restorePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, versionId } = req.params;
 
-    const page = await this.contentRepo.findPageById(pageId);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-      return;
+    try {
+      const { restoredPage, version } = await restorePageVersionUseCase.execute(new RestorePageVersionCommand(pageId, versionId));
+      res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version}` });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const version = await this.pageVersionRepo.findVersionById(versionId);
-    if (!version || version.contentPageId !== pageId) {
-      res.status(404).json({ success: false, message: `Version with ID ${versionId} not found for page ${pageId}` });
-      return;
-    }
-
-    const restoredPage = await this.contentRepo.updatePage(pageId, {
-      title: version.title,
-      status: version.status,
-      summary: version.summary ?? undefined,
-      customFields: (version.customFields as Record<string, unknown>) || undefined,
-    });
-
-    eventBus.emit('content.page.version_restored', { pageId, versionId, version: version.version });
-    res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version.version}` });
   };
 
   deletePageVersion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { versionId } = req.params;
 
-    const version = await this.pageVersionRepo.findVersionById(versionId);
+    const version = await this.contentUC.findVersionById(versionId);
     if (!version) {
       res.status(404).json({ success: false, message: `Version with ID ${versionId} not found` });
       return;
     }
 
-    await this.pageVersionRepo.deleteVersion(versionId);
+    await this.contentUC.deleteVersion(versionId);
     res.status(200).json({ success: true, message: 'Page version deleted successfully' });
   };
 
@@ -1888,20 +1755,20 @@ export class ContentController {
   getPageTranslations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
 
-    const page = await this.contentRepo.findPageById(pageId);
+    const page = await this.contentUC.findPageById(pageId);
     if (!page) {
       res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
-    const translations = await this.pageTranslationRepo.findTranslationsByPageId(pageId);
+    const translations = await this.contentUC.findTranslationsByPageId(pageId);
     res.status(200).json({ success: true, data: translations });
   };
 
   getPageTranslationByLocale = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, localeId } = req.params;
 
-    const translation = await this.pageTranslationRepo.findTranslationByPageAndLocale(pageId, localeId);
+    const translation = await this.contentUC.findTranslationByPageAndLocale(pageId, localeId);
     if (!translation) {
       res.status(404).json({ success: false, message: `Translation for locale ${localeId} not found` });
       return;
@@ -1933,38 +1800,28 @@ export class ContentController {
       isPublished,
     } = req.body;
 
-    if (!localeId || !title) {
-      res.status(400).json({ success: false, message: 'Locale ID and title are required' });
-      return;
+    try {
+      const result = await createPageTranslationUseCase.execute(
+        new CreatePageTranslationCommand(pageId, localeId, title, {
+          slug,
+          summary,
+          content,
+          metaTitle,
+          metaDescription,
+          metaKeywords,
+          openGraphTitle,
+          openGraphDescription,
+          featuredImage,
+          isAutoTranslated,
+          translationSource,
+          isApproved,
+          isPublished,
+        }),
+      );
+      res.status(201).json({ success: true, data: result, message: 'Page translation created successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const page = await this.contentRepo.findPageById(pageId);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-      return;
-    }
-
-    const translation = await this.pageTranslationRepo.createTranslation({
-      contentPageId: pageId,
-      localeId,
-      title,
-      slug,
-      summary,
-      content,
-      metaTitle,
-      metaDescription,
-      metaKeywords,
-      openGraphTitle,
-      openGraphDescription,
-      featuredImage,
-      isAutoTranslated,
-      translationSource,
-      isApproved,
-      isPublished,
-    });
-
-    eventBus.emit('content.page.translation_created', { pageId, translationId: translation.contentPageTranslationId, localeId });
-    res.status(201).json({ success: true, data: translation, message: 'Page translation created successfully' });
   };
 
   updatePageTranslation = async (
@@ -1990,46 +1847,40 @@ export class ContentController {
       publishedAt,
     } = req.body;
 
-    const existing = await this.pageTranslationRepo.findTranslationById(translationId);
-    if (!existing) {
-      res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
-      return;
+    try {
+      const result = await updatePageTranslationUseCase.execute(
+        new UpdatePageTranslationCommand(translationId, {
+          title,
+          slug,
+          summary,
+          content,
+          metaTitle,
+          metaDescription,
+          metaKeywords,
+          openGraphTitle,
+          openGraphDescription,
+          featuredImage,
+          isAutoTranslated,
+          translationSource,
+          isApproved,
+          isPublished,
+          publishedAt: publishedAt ? new Date(publishedAt) : undefined,
+        }),
+      );
+      res.status(200).json({ success: true, data: result, message: 'Page translation updated successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updated = await this.pageTranslationRepo.updateTranslation(translationId, {
-      title,
-      slug,
-      summary,
-      content,
-      metaTitle,
-      metaDescription,
-      metaKeywords,
-      openGraphTitle,
-      openGraphDescription,
-      featuredImage,
-      isAutoTranslated,
-      translationSource,
-      isApproved,
-      isPublished,
-      publishedAt: publishedAt ? new Date(publishedAt) : undefined,
-    });
-
-    eventBus.emit('content.page.translation_updated', { translationId, pageId: existing.contentPageId });
-    res.status(200).json({ success: true, data: updated, message: 'Page translation updated successfully' });
   };
 
   deletePageTranslation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { translationId } = req.params;
-
-    const existing = await this.pageTranslationRepo.findTranslationById(translationId);
-    if (!existing) {
-      res.status(404).json({ success: false, message: `Translation with ID ${translationId} not found` });
-      return;
+    try {
+      await deletePageTranslationUseCase.execute(translationId);
+      res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    await this.pageTranslationRepo.deleteTranslation(translationId);
-    eventBus.emit('content.page.translation_deleted', { translationId, pageId: existing.contentPageId });
-    res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
   };
 
   // Categorization Handlers
@@ -2037,13 +1888,13 @@ export class ContentController {
   getPageCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId } = req.params;
 
-    const page = await this.contentRepo.findPageById(pageId);
+    const page = await this.contentUC.findPageById(pageId);
     if (!page) {
       res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
-    const categorizations = await this.categorizationRepo.findCategorizationsByPageId(pageId);
+    const categorizations = await this.contentUC.findCategorizationsByPageId(pageId);
     res.status(200).json({ success: true, data: categorizations });
   };
 
@@ -2054,44 +1905,22 @@ export class ContentController {
     const { pageId } = req.params;
     const { categoryId, isPrimary } = req.body;
 
-    if (!categoryId) {
-      res.status(400).json({ success: false, message: 'Category ID is required' });
-      return;
+    try {
+      const result = await assignPageToCategoryUseCase.execute(new AssignPageToCategoryCommand(pageId, categoryId, isPrimary));
+      res.status(201).json({ success: true, data: result, message: 'Page assigned to category successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const page = await this.contentRepo.findPageById(pageId);
-    if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
-      return;
-    }
-
-    const category = await this.categoryRepo.findCategoryById(categoryId);
-    if (!category) {
-      res.status(404).json({ success: false, message: `Category with ID ${categoryId} not found` });
-      return;
-    }
-
-    const categorization = await this.categorizationRepo.createCategorization({
-      contentPageId: pageId,
-      categoryId,
-      isPrimary: isPrimary || false,
-    });
-
-    eventBus.emit('content.page.categorized', { pageId, categoryId, isPrimary: categorization.isPrimary });
-    res.status(201).json({ success: true, data: categorization, message: 'Page assigned to category successfully' });
   };
 
   removePageFromCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { pageId, categoryId } = req.params;
-
-    const deleted = await this.categorizationRepo.deleteCategorizationByPageAndCategory(pageId, categoryId);
-    if (!deleted) {
-      res.status(404).json({ success: false, message: 'Categorization not found' });
-      return;
+    try {
+      await removePageFromCategoryUseCase.execute(new RemovePageFromCategoryCommand(pageId, categoryId));
+      res.status(200).json({ success: true, message: 'Page removed from category successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    eventBus.emit('content.page.uncategorized', { pageId, categoryId });
-    res.status(200).json({ success: true, message: 'Page removed from category successfully' });
   };
 
   setPrimaryCategory = async (
@@ -2101,14 +1930,12 @@ export class ContentController {
     const { pageId } = req.params;
     const { categorizationId } = req.body;
 
-    if (!categorizationId) {
-      res.status(400).json({ success: false, message: 'Categorization ID is required' });
-      return;
+    try {
+      const result = await setPrimaryCategoryUseCase.execute(new SetPrimaryCategoryCommand(pageId, categorizationId));
+      res.status(200).json({ success: true, data: result, message: 'Primary category set successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const updated = await this.categorizationRepo.setPrimaryCategory(pageId, categorizationId);
-    eventBus.emit('content.page.primary_category_set', { pageId, categorizationId });
-    res.status(200).json({ success: true, data: updated, message: 'Primary category set successfully' });
   };
 
   getPagesByCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -2116,12 +1943,12 @@ export class ContentController {
     const limit = parseInt(req.query.limit as string) || 50;
     const offset = parseInt(req.query.offset as string) || 0;
 
-    const categorizations = await this.categorizationRepo.findCategorizationsByCategoryId(categoryId, limit, offset);
+    const categorizations = await this.contentUC.findCategorizationsByCategoryId(categoryId, limit, offset);
 
     // Fetch the actual pages
     const pages = await Promise.all(
       categorizations.map(async cat => {
-        const page = await this.contentRepo.findPageById(cat.contentPageId);
+        const page = await this.contentUC.findPageById(cat.contentPageId);
         return page ? { ...page, isPrimary: cat.isPrimary } : null;
       }),
     );
@@ -2135,47 +1962,40 @@ export class ContentController {
   getMediaUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { mediaId } = req.params;
 
-    const media = await this.mediaRepo.findMediaById(mediaId);
+    const media = await this.contentUC.findMediaById(mediaId);
     if (!media) {
       res.status(404).json({ success: false, message: `Media with ID ${mediaId} not found` });
       return;
     }
 
-    const usages = await this.mediaUsageRepo.findUsageByMediaId(mediaId);
+    const usages = await this.contentUC.findUsageByMediaId(mediaId);
     res.status(200).json({ success: true, data: usages });
   };
 
   getMediaUsageByEntity = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { entityType, entityId } = req.params;
 
-    const usages = await this.mediaUsageRepo.findUsageByEntity(entityType, entityId);
+    const usages = await this.contentUC.findUsageByEntity(entityType, entityId);
     res.status(200).json({ success: true, data: usages });
   };
 
   trackMediaUsage = async (req: HttpRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: HttpResponse): Promise<void> => {
     const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
-    if (!mediaId || !entityType || !entityId) {
-      res.status(400).json({ success: false, message: 'Media ID, entity type, and entity ID are required' });
-      return;
+    try {
+      const result = await trackMediaUsageUseCase.execute(
+        new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder),
+      );
+      res.status(201).json({ success: true, data: result, message: 'Media usage tracked successfully' });
+    } catch (error) {
+      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
     }
-
-    const usage = await this.mediaUsageRepo.createUsage({
-      mediaId,
-      entityType,
-      entityId,
-      field,
-      sortOrder,
-    });
-
-    eventBus.emit('content.media.usage_tracked', { mediaId, entityType, entityId });
-    res.status(201).json({ success: true, data: usage, message: 'Media usage tracked successfully' });
   };
 
   untrackMediaUsage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { usageId } = req.params;
 
-    const deleted = await this.mediaUsageRepo.deleteUsage(usageId);
+    const deleted = await this.contentUC.deleteMediaUsage(usageId);
     if (!deleted) {
       res.status(404).json({ success: false, message: `Media usage with ID ${usageId} not found` });
       return;
@@ -2187,7 +2007,7 @@ export class ContentController {
   getMediaUsageCount = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { mediaId } = req.params;
 
-    const count = await this.mediaUsageRepo.getUsageCount(mediaId);
+    const count = await this.contentUC.getMediaUsageCount(mediaId);
     res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
   };
 }
