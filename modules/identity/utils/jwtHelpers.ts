@@ -2,6 +2,10 @@
 import jwt, { SignOptions, JwtPayload } from 'jsonwebtoken';
 import { randomUUID } from 'crypto';
 
+type JwtTokenUse = 'access' | 'refresh';
+
+const JWT_ALGORITHM = 'HS256';
+
 /**
  * Time unit multipliers for converting human-readable durations to milliseconds
  */
@@ -37,6 +41,7 @@ export function parseExpirationDate(durationString: string): Date {
  * @param userRole - User's role (customer, merchant, admin)
  * @param jwtSecret - Secret key for signing the token
  * @param expiresIn - Token expiration duration (e.g., "7d", "24h")
+ * @param tokenUse - 'access' (default) or 'refresh'; refresh tokens are rejected by API auth middleware
  * @returns Signed JWT token string
  */
 export function generateAccessToken(
@@ -45,15 +50,17 @@ export function generateAccessToken(
   userRole: 'customer' | 'organization' | 'admin',
   jwtSecret: string,
   expiresIn: string,
+  tokenUse: JwtTokenUse = 'access',
 ): string {
   const payload: JwtPayload = {
     id: userId,
     email: userEmail,
     role: userRole,
+    tokenUse,
     jti: randomUUID(),
   };
 
-  return jwt.sign(payload, jwtSecret, { expiresIn } as SignOptions);
+  return jwt.sign(payload, jwtSecret, { expiresIn, algorithm: JWT_ALGORITHM } as SignOptions);
 }
 
 /**
@@ -64,7 +71,7 @@ export function generateAccessToken(
  */
 export function verifyAccessToken(token: string, jwtSecret: string): JwtPayload | null {
   try {
-    return jwt.verify(token, jwtSecret) as JwtPayload;
+    return jwt.verify(token, jwtSecret, { algorithms: [JWT_ALGORITHM] }) as JwtPayload;
   } catch {
     // Token is invalid, expired, or malformed
     return null;

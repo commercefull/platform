@@ -19,7 +19,7 @@ import type { JwtPayload } from 'jsonwebtoken';
 export type TokenSubjectType = 'customer' | 'organization';
 
 export interface JwtTokenPort {
-  sign(subjectId: string, email: string, userType: TokenSubjectType, secret: string, expiresIn: string): string;
+  sign(subjectId: string, email: string, userType: TokenSubjectType, secret: string, expiresIn: string, tokenUse?: 'access' | 'refresh'): string;
   verify(token: string, secret: string): JwtPayload | null;
 }
 
@@ -75,7 +75,14 @@ export class IssueTokenPairUseCase {
     }
 
     const accessToken = this.jwt.sign(subject.id, subject.email, this.config.userType, this.config.jwtSecret, this.config.accessTokenDuration);
-    const refreshToken = this.jwt.sign(subject.id, subject.email, this.config.userType, this.config.jwtSecret, this.config.refreshTokenDuration);
+    const refreshToken = this.jwt.sign(
+      subject.id,
+      subject.email,
+      this.config.userType,
+      this.config.jwtSecret,
+      this.config.refreshTokenDuration,
+      'refresh',
+    );
 
     await this.tokenRepo.createRefreshToken({
       token: refreshToken,

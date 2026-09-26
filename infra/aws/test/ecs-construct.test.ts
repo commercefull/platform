@@ -17,9 +17,7 @@ describe('EcsConstruct', () => {
     const sessionSecret = new secretsmanager.Secret(stack, 'SessionSecret', {
       generateSecretString: { generateStringKey: 'sessionSecret', secretStringTemplate: '{}' },
     });
-    const jwtSecret = new secretsmanager.Secret(stack, 'JwtSecret', {
-      generateSecretString: { generateStringKey: 'jwtSecret', secretStringTemplate: '{}' },
-    });
+    const customerJwtSecret = new secretsmanager.Secret(stack, 'CustomerJwtSecret');
 
     const db = new DatabaseConstruct(stack, 'Database', {
       environment,
@@ -38,7 +36,7 @@ describe('EcsConstruct', () => {
       dbName: db.databaseName,
       dbCredentials,
       sessionSecret,
-      jwtSecret,
+      appSecrets: { CUSTOMER_JWT_SECRET: customerJwtSecret },
       enableAlb,
     });
 
@@ -65,18 +63,78 @@ describe('EcsConstruct', () => {
     });
   });
 
-  test('sets NODE_ENV and PORT environment variables', () => {
+  test('sets NODE_ENV=production and PORT environment variables', () => {
     const { stack } = setup('prod');
     const template = Template.fromStack(stack);
     template.hasResourceProperties('AWS::ECS::TaskDefinition', {
       ContainerDefinitions: Match.arrayWith([
         Match.objectLike({
           Environment: Match.arrayWith([
-            { Name: 'NODE_ENV', Value: 'prod' },
+            { Name: 'NODE_ENV', Value: 'production' },
             { Name: 'PORT', Value: '3000' },
           ]),
         }),
       ]),
+    });
+  });
+
+  test('uses NODE_ENV=production even for non-prod environments so production safeguards apply', () => {
+    const { stack } = setup('dev');
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      ContainerDefinitions: Match.arrayWith([
+        Match.objectLike({
+          Environment: Match.arrayWith([
+            { Name: 'NODE_ENV', Value: 'production' },
+            { Name: 'ENVIRONMENT', Value: 'dev' },
+          ]),
+        }),
+      ]),
+    });
+  });
+
+  test('sets CORS allow-list, trust proxy and DB TLS environment variables', () => {
+    const { stack } = setup('prod');
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      ContainerDefinitions: Match.arrayWith([
+        Match.objectLike({
+          Environment: Match.arrayWith([
+            { Name: 'ALLOWED_ORIGINS', Value: 'https://example.com,https://www.example.com' },
+            { Name: 'TRUST_PROXY', Value: '2' },
+            { Name: 'POSTGRES_SSL', Value: 'true' },
+          ]),
+        }),
+      ]),
+    });
+  });
+
+  test('injects app secrets as container secrets', () => {
+    const { stack } = setup('prod');
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+      ContainerDefinitions: Match.arrayWith([
+        Match.objectLike({
+          Secrets: Match.arrayWith([Match.objectLike({ Name: 'SESSION_SECRET' }), Match.objectLike({ Name: 'CUSTOMER_JWT_SECRET' })]),
+        }),
+      ]),
+    });
+  });
+
+  test('does not attach the task execution managed policy to the task role', () => {
+    const { stack } = setup('prod');
+    const template = Template.fromStack(stack);
+    const roles = template.findResources('AWS::IAM::Role');
+    const taskRole = Object.entries(roles).find(([logicalId]) => logicalId.includes('TaskRole'));
+    expect(taskRole).toBeDefined();
+    expect(taskRole![1].Properties.ManagedPolicyArns).toBeUndefined();
+  });
+
+  test('drops invalid HTTP header fields on the ALB', () => {
+    const { stack } = setup('prod', true);
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::ElasticLoadBalancingV2::LoadBalancer', {
+      LoadBalancerAttributes: Match.arrayWith([{ Key: 'routing.http.drop_invalid_header_fields.enabled', Value: 'true' }]),
     });
   });
 

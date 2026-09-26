@@ -36,7 +36,7 @@
   ansible.builtin.file:
     path: '{{ local_backup_dir }}/{{ ansible_date_time.date }}'
     state: directory
-    mode: '0750'
+    mode: '0700'
   delegate_to: localhost
   become: no
   tags: [backup, backup-db, backup-files]
@@ -144,6 +144,17 @@
     flat: yes
   when: backup_files | bool and shared_dir_stat.stat.exists
   tags: [backup, backup-files]
+
+# SECURITY: backups contain the full database and the production .env —
+# keep local copies owner-only (encrypt them at rest, e.g. gpg/age, before offsite storage)
+- name: Restrict local backup file permissions
+  ansible.builtin.file:
+    path: '{{ local_backup_dir }}/{{ ansible_date_time.date }}'
+    mode: 'u=rwX,go='
+    recurse: yes
+  delegate_to: localhost
+  become: no
+  tags: [backup, backup-db, backup-files]
 
 # ===========================================
 # CLEANUP

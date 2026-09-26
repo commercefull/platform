@@ -21,6 +21,15 @@
       Then edit with production values.
   when: not shared_env.stat.exists
 
+# SECURITY: the shared .env holds every production secret — owner-only access
+- name: Restrict shared .env permissions
+  ansible.builtin.file:
+    path: '{{ shared_dir }}/.env'
+    owner: '{{ app_user }}'
+    group: '{{ app_group }}'
+    mode: '0600'
+  when: shared_env.stat.exists
+
 - name: Copy .env from shared
   ansible.builtin.copy:
     src: '{{ shared_dir }}/.env'

@@ -20,7 +20,16 @@ export interface EcsConstructProps {
   readonly dbName: string;
   readonly dbCredentials: secretsmanager.Secret;
   readonly sessionSecret: secretsmanager.Secret;
-  readonly jwtSecret: secretsmanager.Secret;
+  /**
+   * Plain-string secrets injected as env vars, keyed by variable name
+   * (CUSTOMER_JWT_SECRET, ORGANIZATION_JWT_SECRET, ADMIN_JWT_SECRET,
+   * B2B_JWT_SECRET, COOKIE_SECRET, ORIGIN_VERIFY_SECRET, ...).
+   * Each realm MUST have its own secret — a shared JWT secret lets a customer
+   * token authenticate against the admin/organization APIs.
+   */
+  readonly appSecrets?: Record<string, secretsmanager.ISecret>;
+  /** Number of reverse-proxy hops in front of the container (CloudFront + ALB/API Gateway = 2). */
+  readonly trustProxyHops?: number;
   readonly desiredCount?: number;
   readonly cpu?: number;
   readonly memoryLimitMiB?: number;
@@ -69,12 +78,12 @@ export class EcsConstruct extends Construct {
     });
 
     // ── IAM roles ────────────────────────────────────────────────────────
+    // Task role = what the application code can do. Least privilege: no ECR/logs
+    // permissions and no direct secret access (secrets are injected at start-up
+    // by the execution role), so an RCE cannot read every secret via the SDK.
     this.taskRole = new iam.Role(this, 'TaskRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
     });
-    this.taskRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
-    );
 
     const executionRole = new iam.Role(this, 'ExecutionRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
@@ -82,11 +91,6 @@ export class EcsConstruct extends Construct {
     executionRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
     );
-
-    // ── Secrets grants ────────────────────────────────────────────────────
-    props.dbCredentials.grantRead(this.taskRole);
-    props.sessionSecret.grantRead(this.taskRole);
-    props.jwtSecret.grantRead(this.taskRole);
 
     // ── Log group ────────────────────────────────────────────────────────
     this.logGroup = new logs.LogGroup(this, 'LogGroup', {
@@ -112,19 +116,30 @@ export class EcsConstruct extends Construct {
         logGroup: this.logGroup,
       }),
       environment: {
-        NODE_ENV: environment,
+        // Must be exactly 'production' — the app keys every production safeguard
+        // (secure cookies, CSP, error redaction, CORS allow-list, test-DB lockout) on it.
+        NODE_ENV: 'production',
         PORT: '3000',
         DOMAIN: `https://${props.domainName}`,
         ENVIRONMENT: environment,
+        ALLOWED_ORIGINS: `https://${props.domainName},https://www.${props.domainName}`,
+        COOKIE_DOMAIN: props.domainName,
+        TRUST_PROXY: String(props.trustProxyHops ?? 2),
         POSTGRES_HOST: props.dbEndpointAddress,
         POSTGRES_PORT: '5432',
         POSTGRES_DB: props.dbName,
         POSTGRES_USER: 'commercefull',
+        // RDS enforces TLS (rds.force_ssl=1). Mount the RDS CA bundle into
+        // POSTGRES_SSL_CA and drop REJECT_UNAUTHORIZED=false to also verify the server.
+        POSTGRES_SSL: 'true',
+        POSTGRES_SSL_REJECT_UNAUTHORIZED: 'false',
       },
       secrets: {
         POSTGRES_PASSWORD: ecs.Secret.fromSecretsManager(props.dbCredentials, 'password'),
         SESSION_SECRET: ecs.Secret.fromSecretsManager(props.sessionSecret, 'sessionSecret'),
-        JWT_SECRET: ecs.Secret.fromSecretsManager(props.jwtSecret, 'jwtSecret'),
+        ...Object.fromEntries(
+          Object.entries(props.appSecrets ?? {}).map(([name, secret]) => [name, ecs.Secret.fromSecretsManager(secret)]),
+        ),
       },
       healthCheck: {
         command: ['CMD-SHELL', 'curl -f http://localhost:3000/health || exit 1'],
@@ -177,6 +192,8 @@ export class EcsConstruct extends Construct {
         internetFacing: true,
         securityGroup: props.albSecurityGroup,
         deletionProtection: isProd,
+        // Reject requests with malformed headers (HTTP request smuggling / desync)
+        dropInvalidHeaderFields: true,
       });
 
       this.targetGroup = new elbv2.ApplicationTargetGroup(this, 'TargetGroup', {
@@ -247,6 +264,7 @@ export class EcsConstruct extends Construct {
     this.httpsListener = this.loadBalancer.addListener('HTTPSListener', {
       port: 443,
       certificates: [certificate],
+      sslPolicy: elbv2.SslPolicy.RECOMMENDED_TLS,
       open: true,
     });
     if (this.targetGroup) {

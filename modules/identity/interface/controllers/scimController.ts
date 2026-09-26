@@ -9,6 +9,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
+import { safeEqual } from '../../../../libs/httpSecurity';
 import { ScimValidationError, ScimResourceNotFoundError, ScimConflictError, ScimAuthenticationError } from '../../domain/errors/SsoErrors';
 import type { ManageScimProvisioningUseCase, ScimPatchOperation } from '../../application/useCases/ManageScimProvisioning';
 
@@ -31,7 +32,7 @@ function validateScimToken(req: HttpRequest): void {
     throw new ScimAuthenticationError();
   }
   const token = auth.slice(7);
-  if (token !== SCIM_BEARER_TOKEN) {
+  if (!safeEqual(token, SCIM_BEARER_TOKEN)) {
     throw new ScimAuthenticationError();
   }
 }

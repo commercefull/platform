@@ -31,6 +31,15 @@ describe('IssueTokenPairUseCase', () => {
     tokenRepo.createRefreshToken.mockResolvedValue(createRefreshTokenInfo());
   });
 
+  it('should sign the refresh token with tokenUse refresh when issuing a pair', async () => {
+    credentialPort.authenticate.mockResolvedValue(createCredentialSubject());
+    const useCase = new IssueTokenPairUseCase(credentialPort, tokenRepo, jwt, config);
+
+    await useCase.execute(new IssueTokenPairCommand('a@b.com', 'pw'));
+
+    expect(jwt.sign).toHaveBeenCalledWith('subject-1', expect.any(String), 'customer', 'test-secret', '30d', 'refresh');
+  });
+
   it('should issue an access/refresh pair and persist the refresh token', async () => {
     credentialPort.authenticate.mockResolvedValue(createCredentialSubject());
     const useCase = new IssueTokenPairUseCase(credentialPort, tokenRepo, jwt, config);
