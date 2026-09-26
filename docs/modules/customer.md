@@ -100,7 +100,5 @@ PUT /customers/me/addresses/:addressId |
 DELETE /customers/me/addresses/:addressId |
 | POST | `/me/addresses/:addressId/default` | `asyncHandler(customerController.setDefaultAddress)` | Set default address
 POST /customers/me/addresses/:addressId/default |
-| POST | `/register` | `asyncHandler(customerController.registerCustomer)` | Register a new customer
-POST /customers/register |
 
 <!-- GENERATED:ENDPOINTS:END -->

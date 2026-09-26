@@ -82,12 +82,12 @@ The Notification feature manages in-app notifications for merchants and administ
 | DELETE | `/notification-templates/:id` | `asyncHandler(deleteTemplate)` | — |
 | POST | `/notification-templates/:id/preview` | `asyncHandler(previewTemplate)` | — |
 | GET | `/notification-templates/type/:type` | `asyncHandler(getTemplatesByType)` | — |
-| GET | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
+| GET | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
 | POST | `/notifications` | `asyncHandler(createNotification)` | — |
 | GET | `/notifications` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| GET | `/notifications/:id` | `asyncHandler(getNotificationById)` | — |
+| GET | `/notifications/:id` | `asyncHandler(getNotificationById)` | ============================================================================ Admin CRUD routes for notifications (parameterized — after all literals) ============================================================================ |
 | PUT | `/notifications/:id` | `asyncHandler(updateNotification)` | — |
 | DELETE | `/notifications/:id` | `asyncHandler(deleteNotification)` | — |
 | GET | `/notifications/:id` | `async (req, res) => {
@@ -97,7 +97,7 @@ The Notification feature manages in-app notifications for merchants and administ
 | POST | `/notifications/:id/send` | `asyncHandler(markNotificationAsSent)` | — |
 | PUT | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
-    const useCase = new MarkAs` | — |
+    const customerId = req.use` | — |
 | PATCH | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
@@ -129,7 +129,7 @@ The Notification feature manages in-app notifications for merchants and administ
 | GET | `/notifications/recent` | `asyncHandler(getRecentNotifications)` | — |
 | GET | `/notifications/templates/:templateId/translations` | `asyncHandler(listTranslations)` | ============================================================================ Template translation routes ============================================================================ |
 | POST | `/notifications/templates/:templateId/translations` | `asyncHandler(upsertTranslation)` | — |
-| GET | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | ============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================ |
+| GET | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | — |
 | GET | `/notifications/unread-count` | `async (req, res) => {
   try {
     const customerId = req.use` | — |

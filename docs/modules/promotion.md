@@ -83,8 +83,6 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 
 | Method | Endpoint | Controller | Description |
 |---|---|---|---|
-| GET | `/active` | `(_req, res) => {
-  res.json({ success: true, message: 'Get a` | — |
 | POST | `/cart-promotions` | `asyncHandler(cartPromotionController.applyPromotion)` | — |
 | GET | `/cart-promotions/:id` | `asyncHandler(cartPromotionController.getCartPromotionById)` | Cart Promotion routes |
 | PUT | `/cart-promotions/:id` | `asyncHandler(cartPromotionController.updateCartPromotion)` | — |
@@ -131,7 +129,5 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 | POST | `/promotions/:id/activate` | `asyncHandler(promotionController.activatePromotion)` | — |
 | POST | `/promotions/:id/pause` | `asyncHandler(promotionController.pausePromotion)` | — |
 | GET | `/promotions/active` | `asyncHandler(promotionController.getActivePromotions)` | — |
-| POST | `/validate` | `(_req, res) => {
-  res.json({ success: true, message: 'Valid` | Placeholder routes - implement with DDD controllers |
 
 <!-- GENERATED:ENDPOINTS:END -->
