@@ -43,6 +43,12 @@ describe('RenewAccessTokenUseCase', () => {
     expect(tokenRepo.markRefreshTokenUsed).toHaveBeenCalledWith('refresh-token-1');
   });
 
+  it('should reject when an access token is presented as a refresh token', async () => {
+    jwt.verify.mockReturnValue({ id: 'subject-1', email: 'subject@test.com', tokenUse: 'access' });
+
+    await expect(useCase.execute(new RenewAccessTokenCommand('access-token'))).rejects.toThrow(InvalidRefreshTokenError);
+  });
+
   it('should emit a customer token_refreshed event', async () => {
     await useCase.execute(new RenewAccessTokenCommand('refresh-token-1'));
 

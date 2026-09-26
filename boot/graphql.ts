@@ -4,8 +4,8 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware, ExpressContextFunctionArgument } from '@as-integrations/express5';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import jwt from 'jsonwebtoken';
 import { SessionService } from '../libs/session';
+import { verifyAccessJwt } from '../libs/auth';
 import { logger } from '../libs/logger';
 import { AppError } from '../libs/errors';
 
@@ -68,8 +68,7 @@ async function buildContext({ req }: ExpressContextFunctionArgument): Promise<Gr
     // Try customer token first, then merchant token
     for (const secret of [CUSTOMER_JWT_SECRET, ORGANIZATION_JWT_SECRET]) {
       try {
-        const decoded = jwt.verify(token, String(secret)) as Record<string, unknown>;
-        context.user = decoded as GraphQLContext['user'];
+        context.user = verifyAccessJwt(token, secret) as GraphQLContext['user'];
         break;
       } catch {
         // Continue to next secret

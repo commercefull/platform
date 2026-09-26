@@ -80,6 +80,24 @@
 |---|---|---|
 | `DATABASE_URL` | `postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db` | Alternative: single connection URL |
 
+## Enable TLS to PostgreSQL (required for RDS / Cloud SQL / Azure Flexible Server)
+
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_SSL` | `false` | Enable TLS to PostgreSQL (required for RDS / Cloud SQL / Azure Flexible Server) |
+
+## Verify the server certificate (set false only when the CA is not available)
+
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_SSL_REJECT_UNAUTHORIZED` | `true` | Verify the server certificate (set false only when the CA is not available) |
+
+## Optional PEM CA bundle for certificate verification
+
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_SSL_CA` | `—` | Optional PEM CA bundle for certificate verification |
+
 ## CORS and Cookies
 
 | Variable | Default | Description |
@@ -87,6 +105,43 @@
 | `ALLOWED_ORIGINS` | `https://yourdomain.com` | ============================================================================ CORS and Cookies ============================================================================ |
 | `COOKIE_SECRET` | `—` | — |
 | `COOKIE_DOMAIN` | `—` | — |
+
+## Edge / Network Security
+
+| Variable | Default | Description |
+|---|---|---|
+| `TRUST_PROXY` | `—` | ============================================================================ Edge / Network Security ============================================================================ Number of reverse-proxy hops in front of the app (1 = nginx, 2 = CDN + LB). Never "true". |
+| `ORIGIN_VERIFY_SECRET` | `—` | When set, requests without this value in ORIGIN_VERIFY_HEADER are rejected (blocks CDN/WAF bypass) |
+
+## Header carrying the origin secret (x-azure-fdid for Azure Front Door)
+
+| Variable | Default | Description |
+|---|---|---|
+| `ORIGIN_VERIFY_HEADER` | `x-origin-verify` | Header carrying the origin secret (x-azure-fdid for Azure Front Door) |
+
+## Per-IP request budget per minute (all routes)
+
+| Variable | Default | Description |
+|---|---|---|
+| `RATE_LIMIT_GLOBAL_PER_MINUTE` | `600` | Per-IP request budget per minute (all routes) |
+
+## Per-IP login/register/token/password-reset attempts per 15 minutes
+
+| Variable | Default | Description |
+|---|---|---|
+| `RATE_LIMIT_AUTH_PER_15_MINUTES` | `20` | Per-IP login/register/token/password-reset attempts per 15 minutes |
+
+## Force rate limiting on in development/test (off by default there)
+
+| Variable | Default | Description |
+|---|---|---|
+| `RATE_LIMIT_ENABLED` | `0` | Force rate limiting on in development/test (off by default there) |
+
+## Serve /docs and /docs/api in production (internal docs are hidden by default)
+
+| Variable | Default | Description |
+|---|---|---|
+| `DOCS_PUBLIC` | `false` | Serve /docs and /docs/api in production (internal docs are hidden by default) |
 
 ## File Storage
 

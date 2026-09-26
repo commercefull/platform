@@ -41,6 +41,16 @@ check_requirements() {
         exit 1
     fi
 
+    if [ ! -f "infra/docker/.env.prod" ]; then
+        print_error "infra/docker/.env.prod not found. Copy infra/docker/.env.prod.example and set real secrets."
+        exit 1
+    fi
+
+    if [ -z "${POSTGRES_PASSWORD:-}" ] || [ -z "${REDIS_PASSWORD:-}" ] || [ -z "${BASE_URL:-}" ]; then
+        print_error "POSTGRES_PASSWORD, REDIS_PASSWORD and BASE_URL must be exported before deploying."
+        exit 1
+    fi
+
     if [ ! -f "infra/docker/docker-compose.yml" ]; then
         print_error "infra/docker/docker-compose.yml not found."
         exit 1

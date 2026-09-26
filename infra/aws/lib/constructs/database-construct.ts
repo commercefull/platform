@@ -73,6 +73,12 @@ export class DatabaseConstruct extends Construct {
       enablePerformanceInsights: true,
       databaseName: this.databaseName,
       publiclyAccessible: false,
+      // SECURITY: encryption at rest, TLS-only connections, audit-able logs
+      storageEncrypted: true,
+      parameters: { 'rds.force_ssl': '1', log_connections: '1', log_disconnections: '1' },
+      cloudwatchLogsExports: ['postgresql'],
+      autoMinorVersionUpgrade: true,
+      copyTagsToSnapshot: true,
     });
 
     this.endpointAddress = this.instance.dbInstanceEndpointAddress;

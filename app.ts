@@ -13,7 +13,7 @@ import session from 'express-session';
 import cors from 'cors';
 import hpp from 'hpp';
 import { pool } from './libs/db/pool';
-import { runWithTestDb } from './libs/db/testDbContext';
+import { resolveTestDatabase, runWithTestDb } from './libs/db/testDbContext';
 import { startQueryCounterContext } from './libs/db/queryCounter';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
@@ -31,6 +31,16 @@ import { registerModuleManifestsSync } from './boot/moduleManifests';
 import { themeRegistry } from './modules/theme/domain/services/ThemeRegistry';
 import { blockSchemaRegistry } from './modules/pagebuilder/domain/services/BlockSchemaRegistry';
 import { validateAllSecrets, validateCorsOrigins, getSecret } from './libs/secrets';
+import { AUTH_RATE_LIMITED_PATHS, createOriginVerifyMiddleware, createRateLimiters, resolveTrustProxy } from './libs/httpSecurity';
+
+const PRODUCTION_CDN_SCRIPTS = [
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/',
+  'https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/',
+  'https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/',
+];
+
+const SUPPORTED_LANGUAGES = ['en', 'de', 'es', 'fr', 'it', 'el', 'sq', 'pt', 'zh', 'hi', 'ru', 'id', 'ja', 'tr', 'ko', 'vi'];
 
 // Register module manifests and initialize registry (sync, env-var based)
 registerModuleManifestsSync();
@@ -73,45 +83,12 @@ let loadPath;
 // Security Middleware (applied in ALL environments)
 // ============================================================================
 
-// Trust proxy when behind load balancer/reverse proxy
-if (isProduction) {
-  app.set('trust proxy', 1);
-}
+// Trust exactly TRUST_PROXY hops (default 1 in production) so req.ip cannot be
+// spoofed through X-Forwarded-For
+app.set('trust proxy', resolveTrustProxy(process.env.TRUST_PROXY, isProduction));
 
-// Static file serving - must be before security middleware
-app.use(
-  '/javascripts',
-  express.static(path.join(__dirname, 'public/javascripts'), {
-    maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
-    etag: true,
-    lastModified: true,
-  }),
-);
-app.use(
-  '/stylesheets',
-  express.static(path.join(__dirname, 'public/stylesheets'), {
-    maxAge: isProduction ? '1y' : 0,
-    etag: true,
-    lastModified: true,
-  }),
-);
-app.use(
-  '/images',
-  express.static(path.join(__dirname, 'public/images'), {
-    maxAge: isProduction ? '1y' : 0,
-    etag: true,
-    lastModified: true,
-  }),
-);
-
-// ============================================================================
-// Security Middleware (applied in ALL environments)
-// ============================================================================
-
-// Trust proxy when behind load balancer/reverse proxy
-if (isProduction) {
-  app.set('trust proxy', 1);
-}
+// Reject requests that bypass the CDN/WAF (active when ORIGIN_VERIFY_SECRET is set)
+app.use(createOriginVerifyMiddleware());
 
 // Helmet security headers - always enabled
 app.use(
@@ -132,10 +109,11 @@ app.use(
           'https://www.google-analytics.com',
           'https://ssl.google-analytics.com',
           'https://www.googletagmanager.com',
-          'https://unpkg.com',
-          'https://cdnjs.cloudflare.com',
-          'https://cdn.jsdelivr.net',
-          ...(isProduction ? [] : ["'unsafe-inline'"]),
+          // Whole-host CDN allowances let an attacker load any npm package (CSP bypass) —
+          // production pins only the packages the templates actually use.
+          ...(isProduction
+            ? PRODUCTION_CDN_SCRIPTS
+            : ['https://unpkg.com', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', "'unsafe-inline'"]),
         ],
         'img-src': [
           "'self'",
@@ -184,6 +162,37 @@ const corsOptions: cors.CorsOptions = {
   maxAge: 86400, // 24 hours
 };
 app.use(cors(corsOptions));
+
+// Static file serving — after helmet so assets also carry security headers
+app.use(
+  '/javascripts',
+  express.static(path.join(__dirname, 'public/javascripts'), {
+    maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
+    etag: true,
+    lastModified: true,
+  }),
+);
+app.use(
+  '/stylesheets',
+  express.static(path.join(__dirname, 'public/stylesheets'), {
+    maxAge: isProduction ? '1y' : 0,
+    etag: true,
+    lastModified: true,
+  }),
+);
+app.use(
+  '/images',
+  express.static(path.join(__dirname, 'public/images'), {
+    maxAge: isProduction ? '1y' : 0,
+    etag: true,
+    lastModified: true,
+  }),
+);
+
+// Rate limiting — global per-IP budget + strict budget on credential endpoints
+const { globalLimiter, authLimiter } = createRateLimiters();
+app.use(globalLimiter);
+app.use(AUTH_RATE_LIMITED_PATHS, authLimiter);
 
 // HTTP Parameter Pollution protection
 // Prevents attackers from polluting query/body parameters
@@ -247,7 +256,10 @@ i18next
       loadPath,
     },
     fallbackLng: 'en',
-    preload: ['en', 'de', 'es', 'fr', 'it', 'el', 'sq', 'pt', 'zh', 'hi', 'ru', 'id', 'ja', 'tr', 'ko', 'vi'],
+    preload: SUPPORTED_LANGUAGES,
+    // Only allow known languages — the ?lang= value is otherwise used to build a filesystem load path
+    supportedLngs: SUPPORTED_LANGUAGES,
+    nonExplicitSupportedLngs: true,
     ns: [
       'shared',
       'auth',
@@ -289,7 +301,8 @@ i18next
       lookupQuerystring: 'lang',
       lookupCookie: 'lang',
       ignoreCase: true,
-      cookieSecure: false,
+      cookieSecure: isProduction,
+      cookieSameSite: 'lax',
     },
   });
 
@@ -325,8 +338,9 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 // Test database isolation middleware — routes DB queries to a per-test database.
 // Must run BEFORE session() so session-store reads and writes share the same
 // database context as the request's business queries.
+// Only honoured in development/test for test_* names (see resolveTestDatabase).
 app.use((req, res, next) => {
-  const testDb = req.headers['x-test-database'] as string | undefined;
+  const testDb = resolveTestDatabase(req.headers['x-test-database']);
   if (testDb) {
     return runWithTestDb(testDb, () => next());
   }

@@ -89,6 +89,17 @@ variable "create_dns_zone" {
   default     = false
 }
 
+variable "frontdoor_sku" {
+  description = "Front Door SKU. Premium_AzureFrontDoor enables OWASP managed WAF rules and bot protection."
+  type        = string
+  default     = "Standard_AzureFrontDoor"
+
+  validation {
+    condition     = contains(["Standard_AzureFrontDoor", "Premium_AzureFrontDoor"], var.frontdoor_sku)
+    error_message = "frontdoor_sku must be Standard_AzureFrontDoor or Premium_AzureFrontDoor"
+  }
+}
+
 variable "enable_frontdoor" {
   description = "Enable Azure Front Door CDN"
   type        = bool

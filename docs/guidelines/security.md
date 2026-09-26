@@ -1,5 +1,15 @@
 # Security Standards
 
+> Latest application + infrastructure review, findings and mitigations: [Security Review — September 2026](../compliance/security-review-2026-09.md).
+
+## Edge & Request Controls (`libs/httpSecurity.ts`)
+
+- **Rate limiting** — global per-IP budget plus a strict budget on credential endpoints (`AUTH_RATE_LIMITED_PATHS`). Add new login/token/password endpoints to that list.
+- **Origin verification** — when `ORIGIN_VERIFY_SECRET` is set, requests without the edge-injected header are rejected (prevents CDN/WAF bypass).
+- **Trust proxy** — `TRUST_PROXY` is a hop count, never `true`.
+- **Test database header** — `X-Test-Database` is only honoured in `development`/`test` for `test_*` names.
+- **JWT** — verify API tokens with `verifyAccessJwt` (HS256 pinned, refresh tokens rejected); never call `jwt.verify` directly.
+
 ## Helmet Security Headers
 
 - Content Security Policy (CSP) with whitelisted sources

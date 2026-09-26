@@ -49,7 +49,7 @@ export class RenewAccessTokenUseCase {
     }
 
     const tokenPayload = this.jwt.verify(command.refreshToken, this.config.jwtSecret);
-    if (!tokenPayload || !tokenPayload.id) {
+    if (!tokenPayload || !tokenPayload.id || tokenPayload.tokenUse === 'access') {
       throw new InvalidRefreshTokenError();
     }
 

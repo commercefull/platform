@@ -24,8 +24,12 @@ export function getCorrelationId(): string | undefined {
  * - Stores it in AsyncLocalStorage for the request lifecycle
  * - Attaches it to response headers and res.locals
  */
+const CORRELATION_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/;
+
 export function correlationIdMiddleware(req: HttpRequest, res: HttpResponse, next: HttpNext): void {
-  const correlationId = (req.headers['x-correlation-id'] as string) || randomUUID();
+  // Only accept well-formed inbound IDs — prevents log injection and oversized headers
+  const inbound = req.headers['x-correlation-id'];
+  const correlationId = typeof inbound === 'string' && CORRELATION_ID_PATTERN.test(inbound) ? inbound : randomUUID();
 
   res.setHeader('X-Correlation-Id', correlationId);
   res.locals.correlationId = correlationId;

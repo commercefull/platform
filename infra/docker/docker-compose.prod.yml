@@ -4,9 +4,12 @@
 
 services:
   app:
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
       - NODE_ENV=production
-      - BASE_URL=https://yourdomain.com
+      - BASE_URL=${BASE_URL:?BASE_URL must be set (e.g. https://shop.example.org)}
     env_file:
       - .env.prod
     deploy:
@@ -32,7 +35,7 @@ services:
     ports: !reset []
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-commercefull}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       - POSTGRES_DB=${POSTGRES_DB:-commercefull}
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
@@ -52,7 +55,9 @@ services:
 
   redis:
     ports: !reset []
-    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --requirepass \"$$REDIS_PASSWORD\""]
     volumes:
       - redis_prod_data:/data
     deploy:

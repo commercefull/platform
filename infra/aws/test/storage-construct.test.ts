@@ -20,13 +20,45 @@ describe('StorageConstruct', () => {
       CorsConfiguration: {
         CorsRules: [
           {
-            AllowedHeaders: ['*'],
+            AllowedHeaders: ['Content-Type', 'Content-MD5', 'x-amz-*'],
             AllowedMethods: ['GET', 'POST', 'PUT'],
-            AllowedOrigins: ['https://example.com'],
+            AllowedOrigins: ['https://example.com', 'https://www.example.com'],
             MaxAge: 3000,
           },
         ],
       },
+    });
+  });
+
+  test('blocks public access, encrypts and disables ACLs', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack', { env: { account: '123456789012', region: 'us-east-1' } });
+    new StorageConstruct(stack, 'Storage', { environment: 'prod', domainName: 'example.com' });
+
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::S3::Bucket', {
+      PublicAccessBlockConfiguration: {
+        BlockPublicAcls: true,
+        BlockPublicPolicy: true,
+        IgnorePublicAcls: true,
+        RestrictPublicBuckets: true,
+      },
+      BucketEncryption: Match.objectLike({}),
+      OwnershipControls: { Rules: [{ ObjectOwnership: 'BucketOwnerEnforced' }] },
+      VersioningConfiguration: { Status: 'Enabled' },
+    });
+  });
+
+  test('denies non-TLS requests via bucket policy', () => {
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, 'TestStack', { env: { account: '123456789012', region: 'us-east-1' } });
+    new StorageConstruct(stack, 'Storage', { environment: 'prod', domainName: 'example.com' });
+
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::S3::BucketPolicy', {
+      PolicyDocument: Match.objectLike({
+        Statement: Match.arrayWith([Match.objectLike({ Effect: 'Deny', Condition: { Bool: { 'aws:SecureTransport': 'false' } } })]),
+      }),
     });
   });
 

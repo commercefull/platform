@@ -23,6 +23,11 @@ export interface ApiGatewayConstructProps {
   readonly cloudMapService?: cloudmap.Service;
 
   readonly domainName?: string;
+
+  /** Steady-state requests per second allowed on the default stage. Defaults to 1000. */
+  readonly throttlingRateLimit?: number;
+  /** Burst capacity on the default stage. Defaults to 500. */
+  readonly throttlingBurstLimit?: number;
 }
 
 /**
@@ -86,6 +91,14 @@ export class ApiGatewayConstruct extends Construct {
       path: '/health',
       methods: [apigatewayv2.HttpMethod.GET],
       integration,
+    });
+
+    // SECURITY: stage-level throttling so a single client cannot exhaust the
+    // account-wide API Gateway quota (10k rps) or overwhelm the tasks.
+    const stage = this.api.defaultStage?.node.defaultChild as apigatewayv2.CfnStage | undefined;
+    stage?.addPropertyOverride('DefaultRouteSettings', {
+      ThrottlingBurstLimit: props.throttlingBurstLimit ?? 500,
+      ThrottlingRateLimit: props.throttlingRateLimit ?? 1000,
     });
 
     this.apiUrl = this.api.apiEndpoint;

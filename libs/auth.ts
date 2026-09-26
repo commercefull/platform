@@ -18,6 +18,19 @@ const _B2B_JWT_SECRET = getSecret('B2B_JWT_SECRET');
 const SESSION_COOKIE_NAME = 'cf_session';
 
 /**
+ * Verify an API access token: pins HS256 (no algorithm confusion) and rejects
+ * refresh tokens so a long-lived refresh token cannot be used as a bearer token.
+ * Throws on any invalid token.
+ */
+export const verifyAccessJwt = (token: string, secret: string): HttpUser => {
+  const decoded = jwt.verify(token, String(secret), { algorithms: ['HS256'] });
+  if (typeof decoded === 'string' || decoded.tokenUse === 'refresh') {
+    throw new Error('Invalid token type');
+  }
+  return decoded as HttpUser;
+};
+
+/**
  * Authenticate API requests via JWT
  */
 const authenticateToken = (req: HttpRequest, res: HttpResponse, next: HttpNext, secret: string): void => {
@@ -32,8 +45,7 @@ const authenticateToken = (req: HttpRequest, res: HttpResponse, next: HttpNext, 
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, String(secret));
-    req.user = decoded as HttpUser;
+    req.user = verifyAccessJwt(token, secret);
     return next();
   } catch {
     // Return 401 for invalid/expired tokens (not 403 which is for authorization failures)
@@ -145,8 +157,7 @@ export const optionalCustomerAuth = (req: HttpRequest, res: HttpResponse, next: 
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, String(CUSTOMER_JWT_SECRET));
-      req.user = decoded as HttpUser;
+      req.user = verifyAccessJwt(token, CUSTOMER_JWT_SECRET);
     } catch {
       // Invalid token — continue without user
     }

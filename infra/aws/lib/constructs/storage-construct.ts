@@ -30,11 +30,18 @@ export class StorageConstruct extends Construct {
       bucketName,
       removalPolicy: autoDelete ? cdk.RemovalPolicy.DESTROY : cdk.RemovalPolicy.RETAIN,
       autoDeleteObjects: autoDelete,
+      // SECURITY: private bucket (serve via presigned URLs / CloudFront OAC), encrypted,
+      // TLS-only, versioned (ransomware / accidental overwrite recovery), no ACLs.
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      versioned: isProd,
+      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
       cors: [
         {
-          allowedHeaders: ['*'],
+          allowedHeaders: ['Content-Type', 'Content-MD5', 'x-amz-*'],
           allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.POST, s3.HttpMethods.PUT],
-          allowedOrigins: [`https://${props.domainName}`],
+          allowedOrigins: [`https://${props.domainName}`, `https://www.${props.domainName}`],
           maxAge: 3000,
         },
       ],

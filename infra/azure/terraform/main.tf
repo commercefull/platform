@@ -71,10 +71,33 @@ resource "azurerm_postgresql_flexible_server_database" "db" {
   charset   = "utf8"
 }
 
-# Random password for database
+# Random password for database (URL-safe specials so DATABASE_URL parses correctly)
 resource "random_password" "db_password" {
-  length  = 16
-  special = true
+  length           = 32
+  special          = true
+  override_special = "-_"
+}
+
+# SECURITY: TLS-only connections to PostgreSQL
+resource "azurerm_postgresql_flexible_server_configuration" "require_tls" {
+  name      = "require_secure_transport"
+  server_id = azurerm_postgresql_flexible_server.db.id
+  value     = "on"
+}
+
+resource "azurerm_postgresql_flexible_server_configuration" "min_tls" {
+  name      = "ssl_min_protocol_version"
+  server_id = azurerm_postgresql_flexible_server.db.id
+  value     = "TLSv1.2"
+}
+
+# SECURITY: independent secret per auth realm — a shared JWT secret would let a
+# customer token authenticate against the organization/admin APIs.
+resource "random_password" "app_secrets" {
+  for_each = toset(["customer-jwt-secret", "organization-jwt-secret", "admin-jwt-secret", "b2b-jwt-secret", "cookie-secret"])
+
+  length  = 64
+  special = false
 }
 
 # Storage Account
@@ -86,6 +109,20 @@ resource "azurerm_storage_account" "storage" {
   account_replication_type = var.storage_replication_type
   account_kind             = "StorageV2"
 
+  # SECURITY: TLS 1.2+, HTTPS only, no anonymous blob access
+  min_tls_version                 = "TLS1_2"
+  https_traffic_only_enabled      = true
+  allow_nested_items_to_be_public = false
+
+  blob_properties {
+    delete_retention_policy {
+      days = 14
+    }
+    container_delete_retention_policy {
+      days = 14
+    }
+  }
+
   tags = {
     Environment = var.environment
     Purpose     = "media-storage"
@@ -94,9 +131,10 @@ resource "azurerm_storage_account" "storage" {
 
 # Storage Container
 resource "azurerm_storage_container" "media" {
-  name                  = "media"
-  storage_account_name  = azurerm_storage_account.storage.name
-  container_access_type = "blob"
+  name                 = "media"
+  storage_account_name = azurerm_storage_account.storage.name
+  # SECURITY: private — serve media via SAS URLs or Front Door, never anonymous listing/reads
+  container_access_type = "private"
 }
 
 # Log Analytics Workspace
@@ -133,8 +171,9 @@ resource "azurerm_key_vault" "kv" {
   resource_group_name         = azurerm_resource_group.rg.name
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = false
+  soft_delete_retention_days  = 90
+  # SECURITY: prevents a compromised identity from permanently destroying secrets
+  purge_protection_enabled = true
 
   sku_name = "standard"
 
@@ -184,8 +223,8 @@ resource "azurerm_key_vault_secret" "session_secret" {
 
 # Random session secret
 resource "random_password" "session_secret" {
-  length  = 32
-  special = true
+  length  = 64
+  special = false
 }
 
 # Random string for storage account
@@ -266,6 +305,64 @@ resource "azurerm_container_app" "app" {
         name        = "POSTGRES_PASSWORD"
         secret_name = "database-password"
       }
+
+      # Azure Database for PostgreSQL certificates chain to a public root → full verification
+      env {
+        name  = "POSTGRES_SSL"
+        value = "true"
+      }
+
+      env {
+        name  = "ALLOWED_ORIGINS"
+        value = "https://${var.domain},https://www.${var.domain}"
+      }
+
+      env {
+        name  = "COOKIE_DOMAIN"
+        value = var.domain
+      }
+
+      # Front Door → Container Apps ingress → app
+      env {
+        name  = "TRUST_PROXY"
+        value = "2"
+      }
+
+      # SECURITY: only accept traffic that came through *our* Front Door profile
+      env {
+        name  = "ORIGIN_VERIFY_HEADER"
+        value = "x-azure-fdid"
+      }
+
+      env {
+        name  = "ORIGIN_VERIFY_SECRET"
+        value = azurerm_cdn_frontdoor_profile.frontdoor.resource_guid
+      }
+
+      env {
+        name        = "CUSTOMER_JWT_SECRET"
+        secret_name = "customer-jwt-secret"
+      }
+
+      env {
+        name        = "ORGANIZATION_JWT_SECRET"
+        secret_name = "organization-jwt-secret"
+      }
+
+      env {
+        name        = "ADMIN_JWT_SECRET"
+        secret_name = "admin-jwt-secret"
+      }
+
+      env {
+        name        = "B2B_JWT_SECRET"
+        secret_name = "b2b-jwt-secret"
+      }
+
+      env {
+        name        = "COOKIE_SECRET"
+        secret_name = "cookie-secret"
+      }
     }
   }
 
@@ -293,6 +390,14 @@ resource "azurerm_container_app" "app" {
     value = random_password.db_password.result
   }
 
+  dynamic "secret" {
+    for_each = random_password.app_secrets
+    content {
+      name  = secret.key
+      value = secret.value.result
+    }
+  }
+
   tags = {
     Environment = var.environment
     Purpose     = "application"
@@ -303,7 +408,7 @@ resource "azurerm_container_app" "app" {
 resource "azurerm_cdn_frontdoor_profile" "frontdoor" {
   name                = "${var.app_name}-frontdoor-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
-  sku_name            = "Standard_AzureFrontDoor"
+  sku_name            = var.frontdoor_sku
 
   tags = {
     Environment = var.environment
@@ -348,11 +453,93 @@ resource "azurerm_cdn_frontdoor_route" "route" {
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.origin_group.id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.origin.id]
 
-  patterns_to_match   = ["/*"]
-  supported_protocols = ["Https"]
-  forwarding_protocol = "HttpsOnly"
+  patterns_to_match      = ["/*"]
+  supported_protocols    = ["Http", "Https"]
+  https_redirect_enabled = true
+  forwarding_protocol    = "HttpsOnly"
 
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.custom_domain.id]
+}
+
+# SECURITY: WAF on Front Door — per-IP rate limits (all SKUs) + OWASP managed rules (Premium)
+resource "azurerm_cdn_frontdoor_firewall_policy" "waf" {
+  name                = "${var.app_name}waf${var.environment}"
+  resource_group_name = azurerm_resource_group.rg.name
+  sku_name            = azurerm_cdn_frontdoor_profile.frontdoor.sku_name
+  enabled             = true
+  mode                = "Prevention"
+
+  custom_rule {
+    name                           = "RateLimitAuth"
+    enabled                        = true
+    priority                       = 1
+    type                           = "RateLimitRule"
+    rate_limit_duration_in_minutes = 5
+    rate_limit_threshold           = 100
+    action                         = "Block"
+
+    match_condition {
+      match_variable = "RequestUri"
+      operator       = "Contains"
+      match_values   = ["/login", "/signin", "/signup", "/auth/", "/identity/"]
+      transforms     = ["Lowercase"]
+    }
+  }
+
+  custom_rule {
+    name                           = "RateLimitGlobal"
+    enabled                        = true
+    priority                       = 2
+    type                           = "RateLimitRule"
+    rate_limit_duration_in_minutes = 5
+    rate_limit_threshold           = 3000
+    action                         = "Block"
+
+    match_condition {
+      match_variable = "RequestUri"
+      operator       = "Any"
+      match_values   = []
+    }
+  }
+
+  dynamic "managed_rule" {
+    for_each = azurerm_cdn_frontdoor_profile.frontdoor.sku_name == "Premium_AzureFrontDoor" ? [1] : []
+    content {
+      type    = "Microsoft_DefaultRuleSet"
+      version = "2.1"
+      action  = "Block"
+    }
+  }
+
+  dynamic "managed_rule" {
+    for_each = azurerm_cdn_frontdoor_profile.frontdoor.sku_name == "Premium_AzureFrontDoor" ? [1] : []
+    content {
+      type    = "Microsoft_BotManagerRuleSet"
+      version = "1.0"
+      action  = "Block"
+    }
+  }
+}
+
+resource "azurerm_cdn_frontdoor_security_policy" "waf" {
+  name                     = "${var.app_name}-waf-policy-${var.environment}"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.frontdoor.id
+
+  security_policies {
+    firewall {
+      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.waf.id
+
+      association {
+        patterns_to_match = ["/*"]
+        domain {
+          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_endpoint.endpoint.id
+        }
+        domain {
+          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.custom_domain.id
+        }
+      }
+    }
+  }
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "custom_domain" {

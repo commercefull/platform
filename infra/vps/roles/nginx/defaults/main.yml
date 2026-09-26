@@ -11,6 +11,12 @@ app_port: 3000
 # Rate limiting
 nginx_rate_limit: '10r/s'
 nginx_rate_limit_burst: 20
+# Credential endpoints (login/register/token/password reset)
+nginx_auth_rate_limit: '5r/m'
+nginx_auth_rate_limit_burst: 10
+# Everything else
+nginx_global_rate_limit: '20r/s'
+nginx_global_rate_limit_burst: 100
 
 # Client body size (for uploads)
 nginx_client_max_body_size: '50M'

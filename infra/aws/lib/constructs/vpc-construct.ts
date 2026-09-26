@@ -48,6 +48,13 @@ export class VpcConstruct extends Construct {
         maxAzs,
         natGateways,
         subnetConfiguration,
+        // SECURITY: network forensics / anomaly detection
+        flowLogs: {
+          RejectedTraffic: {
+            destination: ec2.FlowLogDestination.toCloudWatchLogs(),
+            trafficType: ec2.FlowLogTrafficType.REJECT,
+          },
+        },
       });
     } else if (props.existingVpcId) {
       this.vpc = ec2.Vpc.fromVpcAttributes(this, 'ImportedVPC', {
@@ -76,7 +83,8 @@ export class VpcConstruct extends Construct {
     this.dbSecurityGroup = new ec2.SecurityGroup(this, 'DBSG', {
       vpc: this.vpc,
       description: 'Security group for RDS database',
-      allowAllOutbound: true,
+      // The database never initiates outbound connections
+      allowAllOutbound: false,
     });
     this.dbSecurityGroup.addIngressRule(this.ecsSecurityGroup, ec2.Port.tcp(5432), 'Allow PostgreSQL from ECS');
   }

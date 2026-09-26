@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template } from 'aws-cdk-lib/assertions';
+import { Template, Match } from 'aws-cdk-lib/assertions';
 import { CommercefullStack } from '../lib/commercefull-stack';
 
 describe('CommercefullStack', () => {
@@ -67,9 +67,29 @@ describe('CommercefullStack', () => {
     template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
   });
 
-  test('creates Secrets Manager secrets for DB, session, and JWT', () => {
+  test('creates Secrets Manager secrets for DB, session, per-realm JWT, cookie and origin verification', () => {
     const { template } = createStack();
-    template.resourceCountIs('AWS::SecretsManager::Secret', 3);
+    // db + session + customer/organization/admin/b2b JWT + cookie + origin-verify
+    template.resourceCountIs('AWS::SecretsManager::Secret', 8);
+  });
+
+  test('attaches a WAF web ACL to CloudFront', () => {
+    const { template } = createStack();
+    template.resourceCountIs('AWS::WAFv2::WebACL', 1);
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({ WebACLId: Match.anyValue() }),
+    });
+  });
+
+  test('sends the origin-verify header from CloudFront', () => {
+    const { template } = createStack();
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        Origins: Match.arrayWith([
+          Match.objectLike({ OriginCustomHeaders: Match.arrayWith([Match.objectLike({ HeaderName: 'x-origin-verify' })]) }),
+        ]),
+      }),
+    });
   });
 
   test('outputs DeploymentMode as cost-optimized', () => {

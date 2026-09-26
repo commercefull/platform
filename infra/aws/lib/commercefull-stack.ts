@@ -115,15 +115,27 @@ export class CommercefullStack extends cdk.Stack {
       },
     });
 
-    const jwtSecret = new secretsmanager.Secret(this, 'JwtSecret', {
-      secretName: `commercefull/${environment}/jwt-secret`,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({}),
-        generateStringKey: 'jwtSecret',
-        excludeCharacters: '"@/\\',
-        passwordLength: 64,
-      },
-    });
+    // One independent secret per auth realm. A shared JWT secret would let a
+    // customer token validate against the organization/admin APIs.
+    const generatedSecret = (id: string, name: string) =>
+      new secretsmanager.Secret(this, id, {
+        secretName: `commercefull/${environment}/${name}`,
+        generateSecretString: { passwordLength: 64, excludePunctuation: true },
+      });
+
+    const appSecrets: Record<string, secretsmanager.ISecret> = {
+      CUSTOMER_JWT_SECRET: generatedSecret('CustomerJwtSecret', 'customer-jwt-secret'),
+      ORGANIZATION_JWT_SECRET: generatedSecret('OrganizationJwtSecret', 'organization-jwt-secret'),
+      ADMIN_JWT_SECRET: generatedSecret('AdminJwtSecret', 'admin-jwt-secret'),
+      B2B_JWT_SECRET: generatedSecret('B2bJwtSecret', 'b2b-jwt-secret'),
+      COOKIE_SECRET: generatedSecret('CookieSecret', 'cookie-secret'),
+    };
+
+    // Shared secret between CloudFront and the app — blocks direct-to-origin traffic
+    const originVerifySecret = enableCloudFront && (enableApiGateway || enableAlb) ? generatedSecret('OriginVerifySecret', 'origin-verify-secret') : undefined;
+    if (originVerifySecret) {
+      appSecrets.ORIGIN_VERIFY_SECRET = originVerifySecret;
+    }
 
     // ── ECS ──────────────────────────────────────────────────────────────
     const containerImage =
@@ -141,7 +153,9 @@ export class CommercefullStack extends cdk.Stack {
       dbName: database.databaseName,
       dbCredentials: database.credentials,
       sessionSecret,
-      jwtSecret,
+      appSecrets,
+      // CloudFront → (API Gateway | ALB) → task
+      trustProxyHops: enableCloudFront ? 2 : 1,
       enableAlb,
     });
 
@@ -191,6 +205,7 @@ export class CommercefullStack extends cdk.Stack {
           domainName,
           certificate,
           api: apiGateway.api,
+          originVerifySecret,
         });
       } else if (ecs.loadBalancer) {
         // CloudFront → ALB
@@ -198,6 +213,7 @@ export class CommercefullStack extends cdk.Stack {
           domainName,
           certificate,
           loadBalancer: ecs.loadBalancer,
+          originVerifySecret,
         });
       }
     }

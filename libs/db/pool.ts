@@ -12,6 +12,19 @@ const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_E
 // global to the `pg` driver, so this covers test pools as well.
 PG.types.setTypeParser(20, (val: string) => (val === null ? val : Number(val)));
 
+/**
+ * TLS for managed databases (RDS / Cloud SQL / Azure Flexible Server).
+ * POSTGRES_SSL=true enables TLS; certificates are verified unless
+ * POSTGRES_SSL_REJECT_UNAUTHORIZED=false. POSTGRES_SSL_CA may hold a PEM CA bundle.
+ */
+const resolveSsl = (): PG.PoolConfig['ssl'] => {
+  if (process.env.POSTGRES_SSL !== 'true') return undefined;
+  return {
+    rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== 'false',
+    ...(process.env.POSTGRES_SSL_CA ? { ca: process.env.POSTGRES_SSL_CA } : {}),
+  };
+};
+
 export const pool = isTestEnv
   ? (null as unknown as PG.Pool)
   : new PG.Pool({
@@ -20,6 +33,7 @@ export const pool = isTestEnv
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
+      ssl: resolveSsl(),
       max: 20, // maximum number of connections in the pool
       idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
       connectionTimeoutMillis: 2000, // how long to wait for a connection to be established

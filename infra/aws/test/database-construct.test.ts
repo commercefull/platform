@@ -31,6 +31,23 @@ describe('DatabaseConstruct', () => {
     });
   });
 
+  test('encrypts storage and exports PostgreSQL logs', () => {
+    const { stack } = setup('prod');
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::RDS::DBInstance', {
+      StorageEncrypted: true,
+      EnableCloudwatchLogsExports: ['postgresql'],
+    });
+  });
+
+  test('enforces TLS connections via parameter group', () => {
+    const { stack } = setup('prod');
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::RDS::DBParameterGroup', {
+      Parameters: Match.objectLike({ 'rds.force_ssl': '1' }),
+    });
+  });
+
   test('creates a Secrets Manager secret for credentials', () => {
     const { stack } = setup('prod');
     const template = Template.fromStack(stack);

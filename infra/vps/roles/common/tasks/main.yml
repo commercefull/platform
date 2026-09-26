@@ -68,3 +68,58 @@
     state: present
   notify: Restart SSH
   tags: [common, ssh, security]
+
+- name: Disable SSH X11 and agent forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?{{ item.key }}\b'
+    line: '{{ item.key }} {{ item.value }}'
+    state: present
+  loop:
+    - { key: 'X11Forwarding', value: 'no' }
+    - { key: 'AllowAgentForwarding', value: 'no' }
+    - { key: 'LoginGraceTime', value: '30' }
+  notify: Restart SSH
+  tags: [common, ssh, security]
+
+# SECURITY: automatic security patches + SSH brute-force banning
+- name: Install security packages
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      - fail2ban
+    state: present
+  tags: [common, security]
+
+- name: Enable unattended security upgrades
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    owner: root
+    group: root
+    mode: '0644'
+  tags: [common, security]
+
+- name: Configure fail2ban for SSH
+  ansible.builtin.copy:
+    dest: /etc/fail2ban/jail.d/sshd.local
+    content: |
+      [sshd]
+      enabled = true
+      maxretry = 5
+      findtime = 10m
+      bantime = 1h
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart fail2ban
+  tags: [common, security]
+
+- name: Ensure fail2ban is running
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  tags: [common, security]
