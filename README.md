@@ -2,6 +2,7 @@
 
 > **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
+[![Website](https://img.shields.io/badge/Website-commercefull.org-orange.svg)](https://commercefull.org)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
@@ -32,6 +33,7 @@ Commercefull is an open-source e-commerce platform built with Node.js, TypeScrip
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
+- [Links](#links)
 
 ---
 
@@ -533,6 +535,15 @@ We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for gu
 ## License
 
 This project is licensed under the [Apache License 2.0](./LICENSE).
+
+---
+
+## Links
+
+- **Website** — [https://commercefull.org](https://commercefull.org/)
+- **Repository** — [github.com/commercefull/platform](https://github.com/commercefull/platform)
+- **Documentation** — [`docs/`](./docs/)
+- **Contributing** — [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
