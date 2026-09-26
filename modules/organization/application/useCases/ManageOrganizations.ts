@@ -5,6 +5,7 @@ import type {
   OrganizationAddressCreateParams,
   OrganizationPaymentInfoCreateParams,
 } from '../../domain/repositories/OrganizationRepository';
+import { OrganizationEmailAlreadyExistsError } from '../../domain/errors/OrganizationErrors';
 
 export class ManageOrganizationsUseCase {
   constructor(private readonly organizationRepo: OrganizationRepository) {}
@@ -27,7 +28,7 @@ export class ManageOrganizationsUseCase {
   async createWithPassword(params: OrganizationCreateParams & { password: string }) {
     const existing = await this.organizationRepo.findByEmail(params.email);
     if (existing) {
-      throw new Error(`Organization with email "${params.email}" already exists`);
+      throw new OrganizationEmailAlreadyExistsError(params.email);
     }
     return this.organizationRepo.createWithPassword(params);
   }
