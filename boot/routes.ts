@@ -169,16 +169,20 @@ export function configureRoutes(app: HttpApplication): void {
     app.use('/business', Audit.auditMiddleware);
   }
 
+  // Internal docs (architecture, security guidelines, DB schema, full route map)
+  // are reconnaissance material — only served in production when DOCS_PUBLIC=true.
+  const serveDocs = process.env.NODE_ENV !== 'production' || process.env.DOCS_PUBLIC === 'true';
+
   // ─── Documentation site (Docsify) ────────────────────────────────────────
   const docsDir = path.resolve(__dirname, '../docs');
-  if (fs.existsSync(docsDir)) {
+  if (serveDocs && fs.existsSync(docsDir)) {
     app.use('/docs', express.static(docsDir));
     app.get('/docs', (_req, res) => res.redirect('/docs/'));
   }
 
   // ─── Swagger UI (OpenAPI) ────────────────────────────────────────────────
   const openApiPath = path.resolve(__dirname, '../docs/generated/openapi.json');
-  if (fs.existsSync(openApiPath)) {
+  if (serveDocs && fs.existsSync(openApiPath)) {
     const openApiSpec = JSON.parse(fs.readFileSync(openApiPath, 'utf-8'));
     app.use(
       '/docs/api',

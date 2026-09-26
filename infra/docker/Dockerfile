@@ -1,6 +1,8 @@
 # Multi-stage Dockerfile for Commercefull Platform
 # Stage 1: Build stage
-FROM node:20-alpine AS builder
+# Node 22 LTS matches package.json "engines" (>=22) and still receives security patches.
+# For reproducible builds, pin by digest: node:22-alpine@sha256:<digest>
+FROM node:22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -25,10 +27,12 @@ COPY . .
 RUN yarn prd:build
 
 # Stage 2: Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
-# Install runtime dependencies
-RUN apk add --no-cache \
+ENV NODE_ENV=production
+
+# Install runtime dependencies (apk upgrade picks up base-image CVE fixes)
+RUN apk upgrade --no-cache && apk add --no-cache \
     dumb-init \
     curl \
     && addgroup -g 1001 -S nodejs \
@@ -57,11 +61,10 @@ COPY --from=builder /app/boot ./boot
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/knexfile.js ./
 
-# Create necessary directories
-RUN mkdir -p /app/logs /app/uploads
-
-# Set permissions
-RUN chown -R commercefull:nodejs /app
+# Create necessary directories. Only the runtime-writable paths are owned by the
+# app user — code stays root-owned/read-only so an RCE cannot tamper with it.
+RUN mkdir -p /app/logs /app/uploads /app/public/uploads \
+    && chown -R commercefull:nodejs /app/logs /app/uploads /app/public/uploads
 USER commercefull
 
 # Expose port
@@ -74,5 +77,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start application (no --watch in containers)
-CMD ["yarn", "prd:run:docker"]
+# Start application directly (no --watch, no yarn wrapper → signals reach node)
+CMD ["node", "./app.mjs"]

@@ -59,12 +59,23 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables file — never bake secrets into image layers
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+**/.env
+**/.env.*
+
+# Secrets, keys and infrastructure state
+*.pem
+*.key
+*.p12
+id_rsa*
+infra/
+**/*.tfstate*
+**/.terraform/
+**/terraform.tfvars
+**/inventory.ini
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -79,7 +90,8 @@ dist
 
 # Gatsby files
 .cache/
-public
+# User uploads must not be baked into the image (public/ itself is needed for the build)
+public/uploads
 
 # Storybook build outputs
 .out

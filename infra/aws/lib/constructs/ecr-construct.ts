@@ -22,6 +22,9 @@ export class EcrConstruct extends Construct {
     this.repository = new ecr.Repository(this, 'Repository', {
       repositoryName: props.repositoryName ?? 'commercefull',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      // SECURITY: scan every pushed image for known CVEs
+      imageScanOnPush: true,
+      encryption: ecr.RepositoryEncryption.AES_256,
       lifecycleRules: [
         {
           maxImageCount: props.maxImageCount ?? 10,
