@@ -1,8 +1,8 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { productAttributeRepository } from '../../application/wired';
-import { ProductAttributeOption } from '../../application/wired';
+import { manageAttributeOptionsUseCase } from '../../application/useCases/wired';
+import type { ProductAttributeOption } from '../../../../libs/db/types';
 
-const attributeOptionRepo = productAttributeRepository.options;
+
 
 /** Expose `sortOrder` as an alias for `position` in API responses */
 function mapOption(option: ProductAttributeOption): Record<string, unknown> {
@@ -23,7 +23,7 @@ class AttributeOptionController {
       return;
     }
 
-    const option = await attributeOptionRepo.findOne(id);
+    const option = await manageAttributeOptionsUseCase.findOne(id);
 
     if (!option) {
       res.status(404).json({ success: false, error: 'Attribute option not found' });
@@ -39,7 +39,7 @@ class AttributeOptionController {
    */
   async getOptionsByAttribute(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { attributeId } = req.params;
-    const options = await attributeOptionRepo.findByAttribute(attributeId);
+    const options = await manageAttributeOptionsUseCase.findByAttribute(attributeId);
 
     res.json({ success: true, data: options.map(mapOption) });
   }
@@ -50,7 +50,7 @@ class AttributeOptionController {
    */
   async getOptionByValue(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { attributeId, value } = req.params;
-    const option = await attributeOptionRepo.findByValue(attributeId, value);
+    const option = await manageAttributeOptionsUseCase.findByValue(attributeId, value);
 
     if (!option) {
       res.status(404).json({ success: false, error: 'Attribute option not found' });
@@ -77,7 +77,7 @@ class AttributeOptionController {
       return;
     }
 
-    const option = await attributeOptionRepo.create({
+    const option = await manageAttributeOptionsUseCase.create({
       attributeId,
       value,
       label: label || value,
@@ -95,13 +95,13 @@ class AttributeOptionController {
     const { id } = req.params;
     const { value, label, sortOrder } = req.body as { value?: string; label?: string; sortOrder?: number };
 
-    const existing = await attributeOptionRepo.findOne(id);
+    const existing = await manageAttributeOptionsUseCase.findOne(id);
     if (!existing) {
       res.status(404).json({ success: false, error: 'Attribute option not found' });
       return;
     }
 
-    const updated = await attributeOptionRepo.update(id, {
+    const updated = await manageAttributeOptionsUseCase.update(id, {
       value,
       label,
       position: sortOrder,
@@ -117,13 +117,13 @@ class AttributeOptionController {
   async deleteAttributeOption(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id } = req.params;
 
-    const existing = await attributeOptionRepo.findOne(id);
+    const existing = await manageAttributeOptionsUseCase.findOne(id);
     if (!existing) {
       res.status(404).json({ success: false, error: 'Attribute option not found' });
       return;
     }
 
-    await attributeOptionRepo.delete(id);
+    await manageAttributeOptionsUseCase.delete(id);
 
     res.json({ success: true, message: 'Attribute option deleted successfully' });
   }

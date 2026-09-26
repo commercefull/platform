@@ -7,13 +7,11 @@ import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
 import {
-  TaxQueryRepository,
+  manageTaxRecordsUseCase,
   manageAdminTaxUseCase,
   approveTaxExemptionUseCase,
   rejectTaxExemptionUseCase,
 } from '../../application/wired';
-
-const taxQueryRepo = TaxQueryRepository.query;
 
 // ============================================================================
 // List Tax Settings
@@ -201,7 +199,7 @@ export const deleteTaxClass = async (req: HttpRequest, res: HttpResponse): Promi
 
 export const listTaxExemptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = (req.query.status as string) || undefined;
-  const exemptions = await taxQueryRepo.findAllTaxExemptions(status as never);
+  const exemptions = await manageTaxRecordsUseCase.findAllTaxExemptions(status as never);
 
   adminRespond(req, res, 'tax/exemptions', {
     pageName: 'Tax Exemptions',

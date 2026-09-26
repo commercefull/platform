@@ -2,13 +2,11 @@ import { CalculateShippingRatesCommand } from '../../application/useCases/Calcul
 import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import {
-  shippingConfigRepository,
   calculateShippingRatesUseCase,
   getShippingMethodsUseCase,
+  manageShippingConfigurationUseCase,
 } from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
-
-const surchargeRepo = shippingConfigRepository.surcharges;
 
 export const shippingResolvers = {
   Query: {
@@ -41,18 +39,18 @@ export const shippingResolvers = {
 
     shippingSurcharges: async (_parent: unknown, args: { rateId: string; activeOnly?: boolean }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      return surchargeRepo.findByRateId(args.rateId, args.activeOnly ?? true);
+      return manageShippingConfigurationUseCase.listSurchargesByRate(args.rateId, args.activeOnly ?? true);
     },
 
     shippingSurcharge: async (_parent: unknown, args: { id: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      return surchargeRepo.findById(args.id);
+      return manageShippingConfigurationUseCase.findSurchargeById(args.id);
     },
   },
   Mutation: {
     createShippingSurcharge: async (_parent: unknown, args: { input: CreateShippingSurchargeInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      return surchargeRepo.create(args.input);
+      return manageShippingConfigurationUseCase.createSurcharge(args.input);
     },
 
     updateShippingSurcharge: async (
@@ -61,12 +59,12 @@ export const shippingResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      return surchargeRepo.update(args.id, args.input);
+      return manageShippingConfigurationUseCase.updateSurcharge(args.id, args.input);
     },
 
     deleteShippingSurcharge: async (_parent: unknown, args: { id: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      return surchargeRepo.delete(args.id);
+      return manageShippingConfigurationUseCase.deleteSurcharge(args.id);
     },
   },
 };

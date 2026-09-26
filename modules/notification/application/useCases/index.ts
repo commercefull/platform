@@ -12,3 +12,5 @@ export * from './UnsubscribeNotification';
 export * from './LogNotificationEvent';
 export * from './ManageNotificationWebhook';
 export * from './UpsertTemplateTranslation';
+export * from './ManageNotificationPreferences';
+export * from './ManageNotificationRecords';

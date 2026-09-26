@@ -3,3 +3,5 @@
  */
 export * from './OrganizeMediaFolder';
 export * from './UploadMedia';
+export * from './DeleteMedia';
+export * from './TrackMediaUsage';

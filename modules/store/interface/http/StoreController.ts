@@ -6,16 +6,22 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { AppError, getErrorStatusCode } from '../../../../libs/errors';
-import { eventBus } from '../../../../libs/events/eventBus';
-import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
-import { UpdateStoreUseCase, UpdateStoreCommand } from '../../application/useCases/UpdateStore';
-import { ConfigureStorePickupUseCase, type ConfigureStorePickupInput } from '../../application/useCases/ConfigureStorePickup';
-import { SetLocalDeliveryZoneUseCase, type SetLocalDeliveryZoneInput } from '../../application/useCases/SetLocalDeliveryZone';
-import { CreateStoreHierarchyUseCase, type CreateStoreHierarchyInput } from '../../application/useCases/CreateStoreHierarchy';
-import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
-import { storeDataRepository, SystemConfigurationRepo, organizationLookupAdapter, SystemConfigAdapter } from '../../application/wired';
-
-const StoreRepo = storeDataRepository.stores;
+import { CreateStoreCommand } from '../../application/useCases/CreateStore';
+import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
+import { type ConfigureStorePickupInput } from '../../application/useCases/ConfigureStorePickup';
+import { type SetLocalDeliveryZoneInput } from '../../application/useCases/SetLocalDeliveryZone';
+import { type CreateStoreHierarchyInput } from '../../application/useCases/CreateStoreHierarchy';
+import { ListStoresQuery } from '../../application/useCases/ListStores';
+import {
+  configureStorePickupUseCase,
+  createStoreHierarchyUseCase,
+  createStoreUseCase,
+  deleteStoreUseCase,
+  listStoresUseCase,
+  manageStoresAdminUseCase,
+  setLocalDeliveryZoneUseCase,
+  updateStoreUseCase,
+} from '../../application/useCases/wired';
 
 function handleControllerError(res: HttpResponse, action: string, error: unknown): void {
   logger.error(`${action}:`, error);
@@ -30,23 +36,13 @@ function handleControllerError(res: HttpResponse, action: string, error: unknown
 }
 
 export class StoreController {
-  private createStoreUseCase: CreateStoreUseCase;
-  private updateStoreUseCase: UpdateStoreUseCase;
-  private configurePickupUseCase: ConfigureStorePickupUseCase;
-  private setLocalDeliveryUseCase: SetLocalDeliveryZoneUseCase;
-  private createStoreHierarchyUseCase: CreateStoreHierarchyUseCase;
-  private listStoresUseCase: ListStoresUseCase;
-
-  constructor() {
-    const storeRepository = StoreRepo;
-    const systemConfigPort = new SystemConfigAdapter(new SystemConfigurationRepo());
-    this.createStoreUseCase = new CreateStoreUseCase(storeRepository, systemConfigPort, organizationLookupAdapter, storeDataRepository.currencies);
-    this.updateStoreUseCase = new UpdateStoreUseCase(storeRepository, storeDataRepository.currencies);
-    this.configurePickupUseCase = new ConfigureStorePickupUseCase(storeRepository);
-    this.setLocalDeliveryUseCase = new SetLocalDeliveryZoneUseCase(storeRepository);
-    this.createStoreHierarchyUseCase = new CreateStoreHierarchyUseCase(storeRepository);
-    this.listStoresUseCase = new ListStoresUseCase(storeRepository);
-  }
+  private createStoreUseCase = createStoreUseCase;
+  private updateStoreUseCase = updateStoreUseCase;
+  private configurePickupUseCase = configureStorePickupUseCase;
+  private setLocalDeliveryUseCase = setLocalDeliveryZoneUseCase;
+  private createStoreHierarchyUseCase = createStoreHierarchyUseCase;
+  private listStoresUseCase = listStoresUseCase;
+  private deleteStoreUseCase = deleteStoreUseCase;
 
   /**
    * Create a new store
@@ -107,8 +103,7 @@ export class StoreController {
    */
   async getStore(req: HttpRequest, res: HttpResponse) {
     try {
-      const storeRepository = StoreRepo;
-      const store = await storeRepository.findById(req.params.storeId);
+      const store = await manageStoresAdminUseCase.findById(req.params.storeId);
 
       if (!store) {
         return res.status(404).json({
@@ -132,8 +127,7 @@ export class StoreController {
    */
   async getStoreBySlug(req: HttpRequest, res: HttpResponse) {
     try {
-      const storeRepository = StoreRepo;
-      const store = await storeRepository.findBySlug(req.params.slug);
+      const store = await manageStoresAdminUseCase.findBySlug(req.params.slug);
 
       if (!store) {
         return res.status(404).json({
@@ -157,8 +151,7 @@ export class StoreController {
    */
   async getStoresByBusiness(req: HttpRequest, res: HttpResponse) {
     try {
-      const storeRepository = StoreRepo;
-      const stores = await storeRepository.findByBusiness(req.params.organizationId);
+      const stores = await manageStoresAdminUseCase.findByBusiness(req.params.organizationId);
 
       res.json({
         success: true,
@@ -176,8 +169,7 @@ export class StoreController {
    */
   async getActiveStores(req: HttpRequest, res: HttpResponse) {
     try {
-      const storeRepository = StoreRepo;
-      const stores = await storeRepository.findActive();
+      const stores = await manageStoresAdminUseCase.findActive();
 
       res.json({
         success: true,
@@ -213,12 +205,7 @@ export class StoreController {
    */
   async deleteStore(req: HttpRequest, res: HttpResponse) {
     try {
-      const storeRepository = StoreRepo;
-      await storeRepository.delete(req.params.storeId);
-
-      eventBus.emit('store.deleted', {
-        storeId: req.params.storeId,
-      });
+      await this.deleteStoreUseCase.execute(req.params.storeId);
 
       res.json({
         success: true,

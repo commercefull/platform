@@ -1,22 +1,28 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-const tokenRepo = identityDataRepository.tokens;
-import { generateAccessToken, verifyAccessToken, parseExpirationDate } from '../../utils/jwtHelpers';
+import { generateAccessToken, verifyAccessToken } from '../../utils/jwtHelpers';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
-import { emitOrganizationLogin, emitOrganizationRegistered, emitOrganizationTokenRefreshed } from '../../domain/events/emitIdentityEvent';
-import { identityDataRepository, orgCredentialPort, customerCredentialPort } from '../../application/wired';
+import { emitOrganizationLogin, emitOrganizationRegistered } from '../../domain/events/emitIdentityEvent';
+import {
+  orgCredentialPort,
+  logoutSessionUseCase,
+  customerCredentialPort,
+  issueOrganizationTokenPairUseCase,
+  renewOrganizationAccessTokenUseCase,
+  cleanupExpiredTokensUseCase,
+} from '../../application/wired';
+import { IssueTokenPairCommand } from '../../application/useCases/token/IssueTokenPair';
+import { RenewAccessTokenCommand } from '../../application/useCases/token/RenewAccessToken';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { getSecret } from '../../../../libs/secrets';
 
 // Environment configuration
 const ORGANIZATION_JWT_SECRET = getSecret('ORGANIZATION_JWT_SECRET');
 const ACCESS_TOKEN_DURATION = process.env.JWT_EXPIRES_IN || '7d';
-const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 const orgPort: CredentialSubjectPort = orgCredentialPort;
 const customerPort: CredentialSubjectPort = customerCredentialPort;
-const refreshTokenRepo = tokenRepo;
-const tokenBlacklistRepo = tokenRepo;
 
 interface LoginBody {
   email: string;
@@ -172,63 +178,27 @@ export const registerOrganization = async (
  * More secure than simple login as refresh tokens can be revoked
  */
 export const issueTokenPair = async (req: HttpRequest<Record<string, string>, unknown, LoginBody>, res: HttpResponse): Promise<void> => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    const result = await issueOrganizationTokenPairUseCase.execute(
+      new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
+    );
 
-  // Validate credentials
-  if (!email || !password) {
-    res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
+    res.json({
+      success: true,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
+      organization: {
+        id: result.subject.id,
+        email: result.subject.email,
+        name: result.subject.name,
+      },
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const subject = await orgPort.authenticate(email, password);
-  if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
-    return;
-  }
-
-  // Check organization account status
-  if (subject.status !== 'active') {
-    res.status(403).json({
-      success: false,
-      message: `Your account is ${subject.status}. Please contact support for assistance.`,
-    });
-    return;
-  }
-
-  // Generate access token (short-lived)
-  const accessToken = generateAccessToken(subject.id, subject.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Generate refresh token (long-lived)
-  const refreshToken = generateAccessToken(subject.id, subject.email, 'organization', ORGANIZATION_JWT_SECRET, REFRESH_TOKEN_DURATION);
-
-  // Store refresh token in database for tracking/revocation
-  await refreshTokenRepo.createRefreshToken({
-    token: refreshToken,
-    userType: 'organization',
-    userId: subject.id,
-    expiresAt: parseExpirationDate(REFRESH_TOKEN_DURATION),
-    userAgent: req.headers['user-agent'] || null,
-    ipAddress: req.ip || null,
-  });
-
-  res.json({
-    success: true,
-    accessToken,
-    refreshToken,
-    tokenType: 'Bearer',
-    expiresIn: ACCESS_TOKEN_DURATION,
-    organization: {
-      id: subject.id,
-      email: subject.email,
-      name: subject.name,
-    },
-  });
 };
 
 /**
@@ -238,72 +208,19 @@ export const renewAccessToken = async (
   req: HttpRequest<Record<string, string>, unknown, RefreshTokenBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { refreshToken } = req.body;
+  try {
+    const { refreshToken } = req.body;
+    const result = await renewOrganizationAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
-  if (!refreshToken) {
-    res.status(400).json({
-      success: false,
-      message: 'Refresh token is required',
+    res.json({
+      success: true,
+      accessToken: result.accessToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Verify refresh token signature
-  const tokenPayload = verifyAccessToken(refreshToken, ORGANIZATION_JWT_SECRET);
-  if (!tokenPayload || !tokenPayload.id) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid or expired refresh token',
-    });
-    return;
-  }
-
-  // Verify refresh token exists in database and hasn't been revoked
-  const storedToken = await refreshTokenRepo.findRefreshToken(refreshToken);
-  if (!storedToken || storedToken.userId !== tokenPayload.id || storedToken.userType !== 'organization') {
-    res.status(401).json({
-      success: false,
-      message: 'Refresh token has been revoked or is invalid',
-    });
-    return;
-  }
-
-  // Verify organization still exists and is active
-  const subject = await orgPort.findById(tokenPayload.id);
-  if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'organization account not found',
-    });
-    return;
-  }
-
-  if (subject.status !== 'active') {
-    res.status(403).json({
-      success: false,
-      message: `Your account is ${subject.status}. Please contact support.`,
-    });
-    return;
-  }
-
-  // Generate new access token
-  const newAccessToken = generateAccessToken(subject.id, subject.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
-
-  // Mark refresh token as used (optional - for tracking)
-  await refreshTokenRepo.markRefreshTokenUsed(refreshToken);
-
-  // Emit token refreshed event
-  emitOrganizationTokenRefreshed({
-    userId: subject.id,
-    ipAddress: req.ip,
-  });
-
-  res.json({
-    success: true,
-    accessToken: newAccessToken,
-    tokenType: 'Bearer',
-    expiresIn: ACCESS_TOKEN_DURATION,
-  });
 };
 
 /**
@@ -498,7 +415,7 @@ export const revokeUserTokens = async (
     return;
   }
 
-  const revokedCount = await refreshTokenRepo.revokeAllForUserWithType(userId, userType);
+  const revokedCount = await logoutSessionUseCase.revokeAllForUser(userId, userType);
   res.json({ success: true, data: { revokedCount } });
 };
 
@@ -523,8 +440,7 @@ export const forceResetPassword = async (
 };
 
 export const cleanupExpiredTokens = async (_req: HttpRequest<Record<string, string>, unknown>, res: HttpResponse): Promise<void> => {
-  const refreshTokens = await refreshTokenRepo.cleanupExpiredRefreshTokens();
-  const blacklistTokens = await tokenBlacklistRepo.cleanExpiredBlacklist();
+  const { refreshTokens, blacklistTokens } = await cleanupExpiredTokensUseCase.execute();
 
   res.json({
     success: true,

@@ -5,11 +5,13 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { fulfillmentPartnerRepository } from '../../application/wired';
+import { manageFulfillmentLocationsUseCase } from '../../application/wired';
 import { CreateFulfillmentLocationParams, UpdateFulfillmentLocationParams, FulfillmentPartner } from '../../application/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
-const fulfillmentLocationRepo = fulfillmentPartnerRepository.locations;
-const fulfillmentPartnerRepo = fulfillmentPartnerRepository.partners;
+function respondError(res: HttpResponse, error: unknown, fallback: string): void {
+  res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) || fallback });
+}
 
 // ============================================================================
 // Fulfillment Locations
@@ -17,33 +19,24 @@ const fulfillmentPartnerRepo = fulfillmentPartnerRepository.partners;
 
 export const createLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateFulfillmentLocationParams;
-  if (!body.organizationId?.trim()) {
-    res.status(400).json({ success: false, error: 'organizationId is required' });
-    return;
+  try {
+    const result = await manageFulfillmentLocationsUseCase.createLocation(body);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Failed to create location');
   }
-  if (!body.type?.trim()) {
-    res.status(400).json({ success: false, error: 'type is required' });
-    return;
-  }
-  if (!body.name?.trim()) {
-    res.status(400).json({ success: false, error: 'name is required' });
-    return;
-  }
-  const result = await fulfillmentLocationRepo.create(body);
-  res.status(201).json({ success: true, data: result });
 };
 
 export const getLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentLocationRepo.findById(req.params.locationId);
-  if (!result) {
-    res.status(404).json({ success: false, error: 'Location not found' });
-    return;
+  try {
+    res.json({ success: true, data: await manageFulfillmentLocationsUseCase.getLocation(req.params.locationId) });
+  } catch (error) {
+    respondError(res, error, 'Location not found');
   }
-  res.json({ success: true, data: result });
 };
 
 export const listLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentLocationRepo.findByOrganization(req.query.organizationId as string, {
+  const result = await manageFulfillmentLocationsUseCase.listLocations(req.query.organizationId as string, {
     type: req.query.type as string,
     isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
   });
@@ -51,37 +44,37 @@ export const listLocations = async (req: HttpRequest, res: HttpResponse): Promis
 };
 
 export const updateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentLocationRepo.update(req.params.locationId, req.body as UpdateFulfillmentLocationParams);
-  if (!result) {
-    res.status(404).json({ success: false, error: 'Location not found' });
-    return;
+  try {
+    const result = await manageFulfillmentLocationsUseCase.updateLocation(req.params.locationId, req.body as UpdateFulfillmentLocationParams);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Location not found');
   }
-  res.json({ success: true, data: result });
 };
 
 export const activateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentLocationRepo.activate(req.params.locationId);
+  const result = await manageFulfillmentLocationsUseCase.activateLocation(req.params.locationId);
   res.json({ success: true, activated: result });
 };
 
 export const deactivateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentLocationRepo.deactivate(req.params.locationId);
+  const result = await manageFulfillmentLocationsUseCase.deactivateLocation(req.params.locationId);
   res.json({ success: true, deactivated: result });
 };
 
 export const findNearestLocations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const latitude = parseFloat(req.query.latitude as string);
   const longitude = parseFloat(req.query.longitude as string);
-  if (isNaN(latitude) || isNaN(longitude)) {
-    res.status(400).json({ success: false, error: 'latitude and longitude query params are required' });
-    return;
+  try {
+    const result = await manageFulfillmentLocationsUseCase.findNearestLocations(latitude, longitude, {
+      limit: parseInt(req.query.limit as string) || 10,
+      type: req.query.type as string,
+      organizationId: req.query.organizationId as string,
+    });
+    res.json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Failed to find nearest locations');
   }
-  const result = await fulfillmentLocationRepo.findNearestLocations(latitude, longitude, {
-    limit: parseInt(req.query.limit as string) || 10,
-    type: req.query.type as string,
-    organizationId: req.query.organizationId as string,
-  });
-  res.json({ success: true, data: result });
 };
 
 // ============================================================================
@@ -90,51 +83,49 @@ export const findNearestLocations = async (req: HttpRequest, res: HttpResponse):
 
 export const listPartners = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly !== 'false';
-  const result = await fulfillmentPartnerRepo.findAll(activeOnly);
+  const result = await manageFulfillmentLocationsUseCase.listPartners(activeOnly);
   res.json({ success: true, data: result });
 };
 
 export const getPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const result = await fulfillmentPartnerRepo.findById(req.params.partnerId);
-  if (!result) {
-    res.status(404).json({ success: false, error: 'Partner not found' });
-    return;
+  try {
+    res.json({ success: true, data: await manageFulfillmentLocationsUseCase.getPartner(req.params.partnerId) });
+  } catch (error) {
+    respondError(res, error, 'Partner not found');
   }
-  res.json({ success: true, data: result });
 };
 
 export const createPartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>;
-  if (!body.name?.trim()) {
-    res.status(400).json({ success: false, error: 'name is required' });
-    return;
+  try {
+    const result = await manageFulfillmentLocationsUseCase.createPartner(body);
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Failed to create partner');
   }
-  if (!body.code?.trim()) {
-    res.status(400).json({ success: false, error: 'code is required' });
-    return;
-  }
-  const result = await fulfillmentPartnerRepo.create(body);
-  res.status(201).json({ success: true, data: result });
 };
 
 export const updatePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { partnerId } = req.params;
-  const result = await fulfillmentPartnerRepo.update(partnerId, req.body as Record<string, unknown>);
-  if (!result) {
-    res.status(404).json({ success: false, error: 'Partner not found' });
-    return;
+  try {
+    const result = await manageFulfillmentLocationsUseCase.updatePartner(
+      partnerId,
+      req.body as Parameters<typeof manageFulfillmentLocationsUseCase.updatePartner>[1],
+    );
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Partner not found');
   }
-  res.status(200).json({ success: true, data: result });
 };
 
 export const deletePartner = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { partnerId } = req.params;
-  await fulfillmentPartnerRepo.remove(partnerId);
+  await manageFulfillmentLocationsUseCase.deletePartner(partnerId);
   res.status(200).json({ success: true, message: 'Partner deleted successfully' });
 };
 
 export const deleteLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { locationId } = req.params;
-  await fulfillmentLocationRepo.deleteLocation(locationId);
+  await manageFulfillmentLocationsUseCase.deleteLocation(locationId);
   res.status(200).json({ success: true, message: 'Location deleted successfully' });
 };

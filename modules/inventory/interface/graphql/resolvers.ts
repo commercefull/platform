@@ -1,19 +1,16 @@
-const InventoryRepo = inventoryDataRepository.items;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetInventoryItemUseCase, GetInventoryItemInput } from '../../application/useCases/GetInventoryItem';
-import { ListInventoryItemsUseCase, ListInventoryItemsInput } from '../../application/useCases/ListInventoryItems';
-import { GetLowStockItemsUseCase, GetLowStockItemsInput } from '../../application/useCases/GetLowStockItems';
-import { GetOutOfStockItemsUseCase, GetOutOfStockItemsInput } from '../../application/useCases/GetOutOfStockItems';
-import { ReserveStockUseCase, ReserveStockInput } from '../../application/useCases/ReserveStock';
-import { inventoryDataRepository } from '../../application/wired';
-
-// The InventoryRepository implements all these methods but the use case port interfaces
-// are structurally narrower. Use type assertions to satisfy the constraints.
-type GetItemRepo = ConstructorParameters<typeof GetInventoryItemUseCase>[0];
-type ListItemsRepo = ConstructorParameters<typeof ListInventoryItemsUseCase>[0];
-type LowStockRepo = ConstructorParameters<typeof GetLowStockItemsUseCase>[0];
-type OutOfStockRepo = ConstructorParameters<typeof GetOutOfStockItemsUseCase>[0];
-type ReserveRepo = ConstructorParameters<typeof ReserveStockUseCase>[0];
+import type { GetInventoryItemInput } from '../../application/useCases/GetInventoryItem';
+import type { ListInventoryItemsInput } from '../../application/useCases/ListInventoryItems';
+import type { GetLowStockItemsInput } from '../../application/useCases/GetLowStockItems';
+import type { GetOutOfStockItemsInput } from '../../application/useCases/GetOutOfStockItems';
+import type { ReserveStockInput } from '../../application/useCases/ReserveStock';
+import {
+  getInventoryItemUseCase,
+  listInventoryItemsUseCase,
+  getLowStockItemsUseCase,
+  getOutOfStockItemsUseCase,
+  reserveStockUseCase,
+} from '../../application/wired';
 
 export const inventoryResolvers = {
   Query: {
@@ -29,7 +26,6 @@ export const inventoryResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetInventoryItemUseCase(InventoryRepo as unknown as GetItemRepo);
       const input: GetInventoryItemInput = {
         inventoryItemId: args.inventoryItemId,
         sku: args.sku,
@@ -37,7 +33,7 @@ export const inventoryResolvers = {
         variantId: args.variantId,
         warehouseId: args.warehouseId,
       };
-      return useCase.execute(input);
+      return getInventoryItemUseCase.execute(input);
     },
 
     inventoryItems: async (
@@ -48,8 +44,7 @@ export const inventoryResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ListInventoryItemsUseCase(InventoryRepo as unknown as ListItemsRepo);
-      return useCase.execute(args.input || {});
+      return listInventoryItemsUseCase.execute(args.input || {});
     },
 
     lowStockItems: async (
@@ -63,14 +58,13 @@ export const inventoryResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetLowStockItemsUseCase(InventoryRepo as unknown as LowStockRepo);
       const input: GetLowStockItemsInput = {
         warehouseId: args.warehouseId,
         threshold: args.threshold,
         page: args.page,
         limit: args.limit,
       };
-      return useCase.execute(input);
+      return getLowStockItemsUseCase.execute(input);
     },
 
     outOfStockItems: async (
@@ -84,14 +78,13 @@ export const inventoryResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetOutOfStockItemsUseCase(InventoryRepo as unknown as OutOfStockRepo);
       const input: GetOutOfStockItemsInput = {
         warehouseId: args.warehouseId,
         includeReserved: args.includeReserved,
         page: args.page,
         limit: args.limit,
       };
-      return useCase.execute(input);
+      return getOutOfStockItemsUseCase.execute(input);
     },
   },
 
@@ -108,7 +101,6 @@ export const inventoryResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ReserveStockUseCase(InventoryRepo as unknown as ReserveRepo);
       const input: ReserveStockInput = {
         orderId: args.orderId,
         items: args.items,
@@ -116,7 +108,7 @@ export const inventoryResolvers = {
         channelId: args.channelId,
         storeId: args.storeId,
       };
-      return useCase.execute(input);
+      return reserveStockUseCase.execute(input);
     },
   },
 };

@@ -1,6 +1,17 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { TaxRate, TaxCategory, TaxZone, TaxRateType } from '../../taxTypes';
-import { taxQueryRepository, taxCommandRepository } from '../../application/wired';
+import { TaxRate, TaxCategory } from '../../taxTypes';
+import type { CreateTaxRateRecordCommand } from '../../application/useCases/CreateTaxRateRecord';
+import type { CreateTaxCategoryCommand } from '../../application/useCases/CreateTaxCategory';
+import type { CreateTaxZoneCommand } from '../../application/useCases/CreateTaxZone';
+import type { UpdateTaxZoneCommand } from '../../application/useCases/UpdateTaxZone';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import {
+  manageTaxRecordsUseCase,
+  createTaxRateRecordUseCase,
+  createTaxCategoryUseCase,
+  createTaxZoneUseCase,
+  updateTaxZoneUseCase,
+} from '../../application/wired';
 import { isUuid } from '../../../../libs/uuid';
 
 export const getTaxRate = async (req: HttpRequest, res: HttpResponse) => {
@@ -13,7 +24,7 @@ export const getTaxRate = async (req: HttpRequest, res: HttpResponse) => {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
   }
 
-  const taxRate = await taxQueryRepository.query.findTaxRateById(id);
+  const taxRate = await manageTaxRecordsUseCase.findTaxRateById(id);
 
   if (!taxRate) {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
@@ -35,67 +46,18 @@ export const getAllTaxRates = async (req: HttpRequest, res: HttpResponse) => {
     statusFilter = false;
   }
 
-  const taxRates = await taxQueryRepository.query.findAllTaxRates(statusFilter, country as string, region as string, limitNum, offsetNum);
+  const taxRates = await manageTaxRecordsUseCase.findAllTaxRates(statusFilter, country as string, region as string, limitNum, offsetNum);
 
   res.json({ success: true, data: taxRates });
 };
 
 export const createTaxRate = async (req: HttpRequest, res: HttpResponse) => {
-  const body = req.body as {
-    name?: string;
-    description?: string;
-    rate?: string | number;
-    taxCategoryId?: string;
-    taxZoneId?: string;
-    priority?: string | number;
-    isActive?: boolean;
-    type?: string;
-    isCompound?: boolean;
-    includeInPrice?: boolean;
-    isShippingTaxable?: boolean;
-    startDate?: number;
-  };
-
-  const {
-    name,
-    description,
-    rate,
-    taxCategoryId,
-    taxZoneId,
-    priority,
-    isActive,
-    type,
-    isCompound,
-    includeInPrice,
-    isShippingTaxable,
-    startDate,
-  } = body;
-
-  if (!name || rate === undefined || !taxCategoryId || !taxZoneId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Name, rate, tax category ID, and tax zone ID are required',
-    });
+  try {
+    const createdTaxRate = await createTaxRateRecordUseCase.execute(req.body as CreateTaxRateRecordCommand);
+    res.status(201).json({ success: true, data: createdTaxRate });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) });
   }
-
-  const newTaxRate: Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'> = {
-    name,
-    description,
-    rate: parseFloat(String(rate)),
-    taxCategoryId,
-    taxZoneId,
-    priority: priority ? parseInt(String(priority)) : 1,
-    isActive: isActive !== undefined ? isActive : true,
-    type: (type || 'percentage') as TaxRateType,
-    isCompound: isCompound !== undefined ? isCompound : false,
-    includeInPrice: includeInPrice !== undefined ? includeInPrice : false,
-    isShippingTaxable: isShippingTaxable !== undefined ? isShippingTaxable : false,
-    startDate: startDate || Math.floor(Date.now() / 1000), // Unix timestamp if not provided
-  };
-
-  const createdTaxRate = await taxCommandRepository.commands.createTaxRate(newTaxRate);
-
-  res.status(201).json({ success: true, data: createdTaxRate });
 };
 
 export const updateTaxRate = async (req: HttpRequest, res: HttpResponse) => {
@@ -114,7 +76,7 @@ export const updateTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   };
   const { name, description, rate, taxCategoryId, taxZoneId, priority, isActive } = body;
 
-  const existingTaxRate = await taxQueryRepository.query.findTaxRateById(id);
+  const existingTaxRate = await manageTaxRecordsUseCase.findTaxRateById(id);
 
   if (!existingTaxRate) {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
@@ -130,7 +92,7 @@ export const updateTaxRate = async (req: HttpRequest, res: HttpResponse) => {
   if (priority !== undefined) updatedTaxRate.priority = parseInt(String(priority));
   if (isActive !== undefined) updatedTaxRate.isActive = isActive;
 
-  const result = await taxCommandRepository.commands.updateTaxRate(id, updatedTaxRate);
+  const result = await manageTaxRecordsUseCase.updateTaxRate(id, updatedTaxRate);
 
   res.json({ success: true, data: result });
 };
@@ -141,13 +103,13 @@ export const deleteTaxRate = async (req: HttpRequest, res: HttpResponse) => {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
   }
 
-  const existingTaxRate = await taxQueryRepository.query.findTaxRateById(id);
+  const existingTaxRate = await manageTaxRecordsUseCase.findTaxRateById(id);
 
   if (!existingTaxRate) {
     return res.status(404).json({ success: false, error: 'Tax rate not found' });
   }
 
-  await taxCommandRepository.commands.deleteTaxRate(id);
+  await manageTaxRecordsUseCase.deleteTaxRate(id);
 
   res.json({ success: true, message: 'Tax rate deleted successfully' });
 };
@@ -164,7 +126,7 @@ export const getAllTaxCategories = async (req: HttpRequest, res: HttpResponse) =
     isActive = false;
   }
 
-  const taxCategories = await taxQueryRepository.query.findAllTaxCategories(isActive);
+  const taxCategories = await manageTaxRecordsUseCase.findAllTaxCategories(isActive);
 
   res.json({ success: true, data: taxCategories });
 };
@@ -174,7 +136,7 @@ export const getTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
   if (!isUuid(id)) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
   }
-  const taxCategory = await taxQueryRepository.query.findTaxCategoryById(id);
+  const taxCategory = await manageTaxRecordsUseCase.findTaxCategoryById(id);
 
   if (!taxCategory) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
@@ -184,32 +146,12 @@ export const getTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
 };
 
 export const createTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
-  const body = req.body as {
-    name?: string;
-    code?: string;
-    description?: string;
-    isDefault?: boolean;
-    sortOrder?: string;
-    isActive?: boolean;
-  };
-  const { name, code, description, isDefault, sortOrder, isActive } = body;
-
-  if (!name || !code) {
-    return res.status(400).json({ success: false, error: 'Name and code are required' });
+  try {
+    const createdCategory = await createTaxCategoryUseCase.execute(req.body as CreateTaxCategoryCommand);
+    res.status(201).json({ success: true, data: createdCategory });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) });
   }
-
-  const newTaxCategory = {
-    name,
-    code,
-    description,
-    isDefault: isDefault !== undefined ? isDefault : false,
-    sortOrder: sortOrder !== undefined ? parseInt(sortOrder) : 0,
-    isActive: isActive !== undefined ? isActive : true,
-  };
-
-  const createdCategory = await taxCommandRepository.commands.createTaxCategory(newTaxCategory);
-
-  res.status(201).json({ success: true, data: createdCategory });
 };
 
 export const updateTaxCategory = async (req: HttpRequest, res: HttpResponse) => {
@@ -227,7 +169,7 @@ export const updateTaxCategory = async (req: HttpRequest, res: HttpResponse) => 
   };
   const { name, code, description, isDefault, sortOrder, isActive } = body;
 
-  const existingCategory = await taxQueryRepository.query.findTaxCategoryById(id);
+  const existingCategory = await manageTaxRecordsUseCase.findTaxCategoryById(id);
 
   if (!existingCategory) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
@@ -242,7 +184,7 @@ export const updateTaxCategory = async (req: HttpRequest, res: HttpResponse) => 
   if (sortOrder !== undefined) updatedCategory.sortOrder = parseInt(sortOrder);
   if (isActive !== undefined) updatedCategory.isActive = isActive;
 
-  const result = await taxCommandRepository.commands.updateTaxCategory(id, updatedCategory);
+  const result = await manageTaxRecordsUseCase.updateTaxCategory(id, updatedCategory);
 
   res.json({ success: true, data: result });
 };
@@ -253,13 +195,13 @@ export const deleteTaxCategory = async (req: HttpRequest, res: HttpResponse) => 
     return res.status(404).json({ success: false, error: 'Tax category not found' });
   }
 
-  const existingCategory = await taxQueryRepository.query.findTaxCategoryById(id);
+  const existingCategory = await manageTaxRecordsUseCase.findTaxCategoryById(id);
 
   if (!existingCategory) {
     return res.status(404).json({ success: false, error: 'Tax category not found' });
   }
 
-  await taxCommandRepository.commands.deleteTaxCategory(id);
+  await manageTaxRecordsUseCase.deleteTaxCategory(id);
 
   res.json({ success: true, message: 'Tax category deleted successfully' });
 };
@@ -277,7 +219,7 @@ export const getAllTaxZones = async (req: HttpRequest, res: HttpResponse) => {
     statusFilter = false;
   }
 
-  const taxZones = await taxQueryRepository.query.findAllTaxZones(statusFilter, limitNum, offsetNum);
+  const taxZones = await manageTaxRecordsUseCase.findAllTaxZones(statusFilter, limitNum, offsetNum);
 
   res.json({ success: true, data: taxZones });
 };
@@ -289,7 +231,7 @@ export const getTaxZoneById = async (req: HttpRequest, res: HttpResponse) => {
     return res.status(400).json({ success: false, error: 'Tax zone ID is required' });
   }
 
-  const taxZone = await taxQueryRepository.query.findTaxZoneById(id);
+  const taxZone = await manageTaxRecordsUseCase.findTaxZoneById(id);
 
   if (!taxZone) {
     return res.status(404).json({ success: false, error: 'Tax zone not found' });
@@ -299,93 +241,35 @@ export const getTaxZoneById = async (req: HttpRequest, res: HttpResponse) => {
 };
 
 export const createTaxZone = async (req: HttpRequest, res: HttpResponse) => {
-  const body = req.body as {
-    name?: string;
-    code?: string;
-    description?: string;
-    isDefault?: boolean;
-    countries?: string[];
-    states?: string[];
-    postcodes?: string[];
-    cities?: string[];
-    isActive?: boolean;
-  };
-  const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = body;
-
-  if (!name || !code || !countries || !Array.isArray(countries) || countries.length === 0) {
-    return res.status(400).json({ success: false, error: 'Name, code, and at least one country are required' });
+  try {
+    const createdTaxZone = await createTaxZoneUseCase.execute(req.body as CreateTaxZoneCommand);
+    res.status(201).json({ success: true, data: createdTaxZone });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) });
   }
-
-  const newTaxZone = {
-    name,
-    code,
-    description,
-    isDefault: isDefault !== undefined ? isDefault : false,
-    countries,
-    states: states || [],
-    postcodes: postcodes || [],
-    cities: cities || [],
-    isActive: isActive !== undefined ? isActive : true,
-  };
-
-  const createdTaxZone = await taxCommandRepository.commands.createTaxZone(newTaxZone);
-
-  res.status(201).json({ success: true, data: createdTaxZone });
 };
 
 export const updateTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
-  const body = req.body as {
-    name?: string;
-    code?: string;
-    description?: string;
-    isDefault?: boolean;
-    countries?: string[];
-    states?: string[];
-    postcodes?: string[];
-    cities?: string[];
-    isActive?: boolean;
-  };
-  const { name, code, description, isDefault, countries, states, postcodes, cities, isActive } = body;
 
-  const existingTaxZone = await taxQueryRepository.query.findTaxZoneById(id);
-
-  if (!existingTaxZone) {
-    return res.status(404).json({ success: false, error: 'Tax zone not found' });
+  try {
+    const result = await updateTaxZoneUseCase.execute(id, req.body as UpdateTaxZoneCommand);
+    res.json({ success: true, data: result });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) });
   }
-
-  const updatedTaxZone: Partial<Omit<TaxZone, 'id' | 'createdAt' | 'updatedAt'>> = {};
-
-  if (name !== undefined) updatedTaxZone.name = name;
-  if (code !== undefined) updatedTaxZone.code = code;
-  if (description !== undefined) updatedTaxZone.description = description;
-  if (isDefault !== undefined) updatedTaxZone.isDefault = isDefault;
-  if (countries !== undefined) {
-    if (!Array.isArray(countries) || countries.length === 0) {
-      return res.status(400).json({ success: false, error: 'At least one country is required' });
-    }
-    updatedTaxZone.countries = countries;
-  }
-  if (states !== undefined) updatedTaxZone.states = states;
-  if (postcodes !== undefined) updatedTaxZone.postcodes = postcodes;
-  if (cities !== undefined) updatedTaxZone.cities = cities;
-  if (isActive !== undefined) updatedTaxZone.isActive = isActive;
-
-  const result = await taxCommandRepository.commands.updateTaxZone(id, updatedTaxZone);
-
-  res.json({ success: true, data: result });
 };
 
 export const deleteTaxZone = async (req: HttpRequest, res: HttpResponse) => {
   const { id } = req.params;
 
-  const existingTaxZone = await taxQueryRepository.query.findTaxZoneById(id);
+  const existingTaxZone = await manageTaxRecordsUseCase.findTaxZoneById(id);
 
   if (!existingTaxZone) {
     return res.status(404).json({ success: false, error: 'Tax zone not found' });
   }
 
-  await taxCommandRepository.commands.deleteTaxZone(id);
+  await manageTaxRecordsUseCase.deleteTaxZone(id);
 
   res.json({ success: true, message: 'Tax zone deleted successfully' });
 };

@@ -1,147 +1,16 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { AddressInput } from '../../taxTypes';
-import type { TaxableBasketPort } from '../../application/ports/TaxableBasketPort';
-import { taxQueryRepository, taxableBasketAdapter } from '../../application/wired';
-
-// Ports
-const taxableBasketPort: TaxableBasketPort = taxableBasketAdapter;
-
-// Define interfaces needed for the controller - keeping application layer in camelCase
-interface TaxableItem {
-  productId: string;
-  quantity: number;
-  priceCents: number;
-  taxCategoryId?: string;
-}
-
-interface _BasketItem {
-  productId: string;
-  quantity: number;
-  priceCents: number;
-  taxCategoryId?: string;
-  [key: string]: unknown;
-}
-
-interface ShippingAddressBody {
-  country: string;
-  region?: string;
-  postalCode?: string;
-  city?: string;
-}
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { manageTaxRecordsUseCase, calculateLineItemTaxUseCase, calculateBasketTaxUseCase } from '../../application/wired';
+import type { CalculateLineItemTaxCommand } from '../../application/useCases/CalculateLineItemTax';
+import type { CalculateBasketTaxCommand } from '../../application/useCases/CalculateBasketTax';
 
 export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpResponse) => {
-  const body = req.body as {
-    productId?: string;
-    quantity?: number;
-    priceCents?: number;
-    shippingAddress?: ShippingAddressBody;
-    customerId?: string;
-    organizationId?: string;
-  };
-
-  const { productId, quantity, priceCents, shippingAddress, customerId, organizationId } = body;
-
-  // Validate required fields
-  if (!productId || !quantity || priceCents === undefined || !shippingAddress || !shippingAddress.country) {
-    res.status(400).json({
-      error: 'Product ID, quantity, priceCents, and shipping country are required',
-    });
-    return;
+  try {
+    const taxResult = await calculateLineItemTaxUseCase.execute(req.body as CalculateLineItemTaxCommand);
+    res.json(taxResult);
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ error: getErrorMessage(error) });
   }
-
-  // Ensure quantity and price are valid numbers
-  const parsedQuantity = Number(quantity);
-  const parsedPriceCents = Number(priceCents);
-
-  if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
-    res.status(400).json({ error: 'Quantity must be a positive number' });
-    return;
-  }
-
-  if (isNaN(parsedPriceCents) || parsedPriceCents < 0) {
-    res.status(400).json({ error: 'Price must be a non-negative number' });
-    return;
-  }
-
-  // For backward compatibility, use simple tax calculation if available
-  if (typeof taxQueryRepository.query.calculateTaxForLineItem === 'function') {
-    const taxResult = await taxQueryRepository.query.calculateTaxForLineItem(
-      productId,
-      parsedQuantity,
-      parsedPriceCents,
-      {
-        country: shippingAddress.country,
-        region: shippingAddress.region,
-        postalCode: shippingAddress.postalCode,
-      },
-      customerId,
-    );
-
-    const subtotalCents = taxResult.taxableAmountCents;
-    res.json({
-      subtotalCents,
-      taxAmountCents: taxResult.taxAmountCents,
-      totalCents: taxResult.totalCents,
-      rate: taxResult.rate,
-      taxBreakdown:
-        taxResult.taxAmountCents > 0
-          ? [
-              {
-                rateId: 'default',
-                rateName: 'Tax',
-                rateValue: taxResult.rate,
-                taxableAmountCents: subtotalCents,
-                taxAmountCents: taxResult.taxAmountCents,
-              },
-            ]
-          : [],
-    });
-    return;
-  }
-
-  // Otherwise use the new complex tax calculation
-  const items: TaxableItem[] = [
-    {
-      productId,
-      quantity: parsedQuantity,
-      priceCents: parsedPriceCents,
-      taxCategoryId: undefined, // Will be determined by the tax repo
-    },
-  ];
-
-  // Transform the input address to the expected format (camelCase for application layer)
-  const address: AddressInput = {
-    country: shippingAddress.country,
-    region: shippingAddress.region,
-    postalCode: shippingAddress.postalCode,
-    city: shippingAddress.city,
-  };
-
-  // DB uses camelCase - pass items and address directly
-  const dbItems = items.map(item => ({
-    product_id: item.productId,
-    quantity: item.quantity,
-    priceCents: item.priceCents,
-    tax_category_id: item.taxCategoryId,
-  }));
-  const dbAddress = {
-    country: address.country,
-    region: address.region,
-    postal_code: address.postalCode,
-    city: address.city,
-  };
-
-  const taxResult = await taxQueryRepository.query.calculateComplexTax(
-    dbItems,
-    dbAddress,
-    dbAddress, // Same address for billing
-    parsedPriceCents * parsedQuantity, // Subtotal in cents
-    0, // No shipping amount for single line item
-    customerId,
-    organizationId,
-  );
-
-  res.json(taxResult);
 };
 
 /**
@@ -149,105 +18,16 @@ export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpRespons
  */
 export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse) => {
   const { basketId } = req.params;
-  const body = req.body as {
-    shippingAddress?: ShippingAddressBody;
-    billingAddress?: ShippingAddressBody;
-    customerId?: string;
-    organizationId?: string;
-  };
-  const { shippingAddress, billingAddress, customerId, organizationId } = body;
 
-  // Validate required fields
-  if (!basketId || !shippingAddress || !shippingAddress.country) {
-    res.status(400).json({
-      error: 'Basket ID and shipping country are required',
-    });
-    return;
-  }
-
-  // For backward compatibility
-  if (typeof taxQueryRepository.query.calculateTaxForBasket === 'function') {
-    const taxResult = await taxQueryRepository.query.calculateTaxForBasket(
+  try {
+    const taxResult = await calculateBasketTaxUseCase.execute({
+      ...(req.body as CalculateBasketTaxCommand),
       basketId,
-      {
-        country: shippingAddress.country,
-        region: shippingAddress.region,
-        postal_code: shippingAddress.postalCode,
-      },
-      customerId,
-    );
-
+    });
     res.json(taxResult);
-    return;
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ error: getErrorMessage(error) });
   }
-
-  // For the enhanced tax system, we need to get the basket items first
-  // Note: This assumes a basketRepo is available in the application
-  // If not, this would need to be implemented based on your application structure
-  // Get the basket with items
-  const basket = await taxableBasketPort.findById(basketId);
-
-  if (!basket) {
-    res.status(404).json({ error: 'Basket not found' });
-    return;
-  }
-
-  // Format the items for tax calculation from basket items
-  const items: TaxableItem[] = basket.items.map(item => ({
-    productId: item.productId,
-    quantity: item.quantity,
-    priceCents: item.priceCents,
-  }));
-
-  // Transform addresses to the expected format (camelCase for application layer)
-  const shippingAddrInput: AddressInput = {
-    country: shippingAddress.country,
-    region: shippingAddress.region,
-    postalCode: shippingAddress.postalCode,
-    city: shippingAddress.city,
-  };
-
-  const billingAddrInput: AddressInput = billingAddress
-    ? {
-        country: billingAddress.country,
-        region: billingAddress.region,
-        postalCode: billingAddress.postalCode,
-        city: billingAddress.city,
-      }
-    : shippingAddrInput;
-
-  // Convert to format expected by calculateComplexTax
-  const dbItems = items.map(item => ({
-    product_id: item.productId,
-    quantity: item.quantity,
-    priceCents: item.priceCents,
-    tax_category_id: item.taxCategoryId,
-  }));
-  const dbShippingAddr = {
-    country: shippingAddrInput.country,
-    region: shippingAddrInput.region,
-    postal_code: shippingAddrInput.postalCode,
-    city: shippingAddrInput.city,
-  };
-  const dbBillingAddr = {
-    country: billingAddrInput.country,
-    region: billingAddrInput.region,
-    postal_code: billingAddrInput.postalCode,
-    city: billingAddrInput.city,
-  };
-
-  // Calculate tax using the enhanced method
-  const taxResult = await taxQueryRepository.query.calculateComplexTax(
-    dbItems,
-    dbShippingAddr,
-    dbBillingAddr,
-    basket.subtotalCents,
-    0,
-    customerId,
-    organizationId,
-  );
-
-  res.json(taxResult);
 };
 
 /**
@@ -262,7 +42,7 @@ export const getTaxCategoryByCode = async (req: HttpRequest, res: HttpResponse) 
   }
 
   // Call repository - returns data with id field already added
-  const taxCategory = await taxQueryRepository.query.findTaxCategoryByCode(code);
+  const taxCategory = await manageTaxRecordsUseCase.findTaxCategoryByCode(code);
 
   if (!taxCategory) {
     res.status(404).json({ error: 'Tax category not found' });
@@ -279,7 +59,7 @@ export const getTaxRates = async (req: HttpRequest, res: HttpResponse) => {
   const { country, region } = req.query;
 
   // Call repository - returns data with id field already added
-  const taxRates = await taxQueryRepository.query.findAllTaxRates(true, country as string, region as string);
+  const taxRates = await manageTaxRecordsUseCase.findAllTaxRates(true, country as string, region as string);
 
   res.json(taxRates);
 };
@@ -296,7 +76,7 @@ export const checkCustomerTaxExemption = async (req: HttpRequest, res: HttpRespo
   }
 
   // Repository returns data with id field already added
-  const exemptions = await taxQueryRepository.query.findTaxExemptionsByCustomerId(customerId);
+  const exemptions = await manageTaxRecordsUseCase.findTaxExemptionsByCustomerId(customerId);
 
   // Format response in camelCase as per platform convention
   res.json({
@@ -318,7 +98,7 @@ export const findTaxZoneForAddress = async (req: HttpRequest, res: HttpResponse)
   }
 
   // Find the actual tax zone for this address
-  const taxZone = await taxQueryRepository.query.findTaxZoneForAddress(country, region, postalCode, city);
+  const taxZone = await manageTaxRecordsUseCase.findTaxZoneForAddress(country, region, postalCode, city);
 
   if (!taxZone) {
     res.status(404).json({ error: 'No matching tax zone found' });

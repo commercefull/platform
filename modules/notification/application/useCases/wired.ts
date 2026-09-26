@@ -17,6 +17,9 @@ import { ManageNotificationTemplatesUseCase } from './ManageNotificationTemplate
 import { ManageNotificationWebhookUseCase } from './ManageNotificationWebhook';
 import { ManageNotificationWebhooksAdminUseCase } from './ManageNotificationWebhooksAdmin';
 import { ManageNotificationDevicesUseCase } from './ManageNotificationDevices';
+import { ManageNotificationPreferencesUseCase } from './ManageNotificationPreferences';
+import { MarkAsReadUseCase } from './MarkAsRead';
+import { ManageNotificationRecordsUseCase } from './ManageNotificationRecords';
 import { ManageStorefrontNotificationsUseCase } from './ManageStorefrontNotifications';
 import { RegisterNotificationDeviceUseCase } from './RegisterNotificationDevice';
 import { SendNotificationBatchUseCase } from './SendNotificationBatch';
@@ -33,6 +36,9 @@ export const manageNotificationTemplatesUseCase = new ManageNotificationTemplate
 export const manageNotificationWebhookUseCase = new ManageNotificationWebhookUseCase(notificationConfigRepository.webhooks);
 export const manageNotificationWebhooksAdminUseCase = new ManageNotificationWebhooksAdminUseCase(notificationConfigRepository.webhooks);
 export const manageNotificationDevicesUseCase = new ManageNotificationDevicesUseCase(notificationConfigRepository.devices);
+export const manageNotificationPreferencesUseCase = new ManageNotificationPreferencesUseCase(notificationConfigRepository.preferences);
+export const manageNotificationRecordsUseCase = new ManageNotificationRecordsUseCase(notificationDataRepository.notifications);
+export const markAsReadUseCase = new MarkAsReadUseCase(notificationDataRepository.notifications);
 export const manageStorefrontNotificationsUseCase = new ManageStorefrontNotificationsUseCase(notificationDataRepository.storefront);
 export const registerNotificationDeviceUseCase = new RegisterNotificationDeviceUseCase(notificationConfigRepository.devices);
 export const sendNotificationBatchUseCase = new SendNotificationBatchUseCase(
@@ -46,3 +52,12 @@ export const unsubscribeNotificationUseCase = new UnsubscribeNotificationUseCase
   notificationConfigRepository.preferences,
 );
 export const upsertTemplateTranslationUseCase = new UpsertTemplateTranslationUseCase(notificationConfigRepository.templateTranslations);
+
+import { GetNotificationsUseCase } from './GetNotifications';
+import { SendNotificationUseCase } from './SendNotification';
+
+export const getNotificationsUseCase = new GetNotificationsUseCase(notificationDataRepository.notifications);
+export const sendNotificationUseCase = new SendNotificationUseCase(
+  notificationDataRepository.notifications,
+  notificationDataRepository.notifications,
+);

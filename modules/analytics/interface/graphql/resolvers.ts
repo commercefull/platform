@@ -1,65 +1,64 @@
-const DashboardQueryRepo = analyticsDataRepository.dashboard;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetDashboardMetricsUseCase, GetDashboardMetricsInput } from '../../application/useCases/GetDashboardMetrics';
-import { GetSalesAnalyticsUseCase, GetSalesAnalyticsInput } from '../../application/useCases/GetSalesAnalytics';
-import { GetProductPerformanceUseCase, GetProductPerformanceInput } from '../../application/useCases/GetProductPerformance';
-import { TrackPageViewUseCase, TrackPageViewCommand } from '../../application/useCases/TrackPageView';
+import { GetDashboardMetricsInput } from '../../application/useCases/GetDashboardMetrics';
+import { GetSalesAnalyticsInput } from '../../application/useCases/GetSalesAnalytics';
+import { GetProductPerformanceInput } from '../../application/useCases/GetProductPerformance';
+import { TrackPageViewCommand } from '../../application/useCases/TrackPageView';
 import { GenerateSalesReportCommand } from '../../application/useCases/GenerateSalesReport';
-import { generateSalesReportUseCase } from '../../application/wired';
-import { analyticsDataRepository } from '../../application/wired';
+import {
+  generateSalesReportUseCase,
+  getDashboardMetricsUseCase,
+  getProductPerformanceUseCase,
+  getSalesAnalyticsUseCase,
+  trackPageViewUseCase,
+} from '../../application/wired';
 
 export const analyticsResolvers = {
   Query: {
     dashboardMetrics: async (_parent: unknown, args: { input: GetDashboardMetricsInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetDashboardMetricsUseCase(DashboardQueryRepo as never);
       const input: GetDashboardMetricsInput = {
         ...args.input,
         startDate: new Date(args.input.startDate),
         endDate: new Date(args.input.endDate),
       };
-      return useCase.execute(input);
+      return getDashboardMetricsUseCase.execute(input);
     },
 
     salesAnalytics: async (_parent: unknown, args: { input: GetSalesAnalyticsInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetSalesAnalyticsUseCase(DashboardQueryRepo as never);
       const input: GetSalesAnalyticsInput = {
         ...args.input,
         startDate: new Date(args.input.startDate),
         endDate: new Date(args.input.endDate),
       };
-      return useCase.execute(input);
+      return getSalesAnalyticsUseCase.execute(input);
     },
 
     productPerformance: async (_parent: unknown, args: { input: GetProductPerformanceInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetProductPerformanceUseCase(DashboardQueryRepo as never);
       const input: GetProductPerformanceInput = {
         ...args.input,
         startDate: new Date(args.input.startDate),
         endDate: new Date(args.input.endDate),
       };
-      return useCase.execute(input);
+      return getProductPerformanceUseCase.execute(input);
     },
   },
 
   Mutation: {
     trackPageView: async (_parent: unknown, args: { input: TrackPageViewCommand }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new TrackPageViewUseCase();
-      return useCase.execute(args.input);
+      return trackPageViewUseCase.execute(args.input);
     },
 
     generateSalesReport: async (_parent: unknown, args: { input: GenerateSalesReportCommand }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = generateSalesReportUseCase;
       const command: GenerateSalesReportCommand = {
         ...args.input,
         startDate: new Date(args.input.startDate),
         endDate: new Date(args.input.endDate),
       };
-      return useCase.execute(command);
+      return generateSalesReportUseCase.execute(command);
     },
   },
 };

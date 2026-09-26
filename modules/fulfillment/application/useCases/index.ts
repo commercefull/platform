@@ -14,3 +14,4 @@ export * from './CancelFulfillment';
 export * from './UpdateTracking';
 export * from './InitiateReturn';
 export * from './PlanFulfillment';
+export * from './ManageFulfillmentLocations';

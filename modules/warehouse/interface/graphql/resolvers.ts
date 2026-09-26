@@ -1,30 +1,26 @@
-const WarehouseRepo = warehouseDataRepository.warehouses;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetWarehouseUseCase, GetWarehouseInput } from '../../application/useCases/GetWarehouse';
-import { ListWarehousesUseCase, ListWarehousesInput } from '../../application/useCases/ListWarehouses';
-import { CreateWarehouseUseCase, CreateWarehouseInput } from '../../application/useCases/CreateWarehouse';
-import { warehouseDataRepository } from '../../application/wired';
+import { GetWarehouseInput } from '../../application/useCases/GetWarehouse';
+import { ListWarehousesInput } from '../../application/useCases/ListWarehouses';
+import { CreateWarehouseInput } from '../../application/useCases/CreateWarehouse';
+import { createWarehouseUseCase, getWarehouseUseCase, listWarehousesUseCase } from '../../application/wired';
 
 export const warehouseResolvers = {
   Query: {
     warehouse: async (_parent: unknown, args: { input: GetWarehouseInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new GetWarehouseUseCase(WarehouseRepo);
-      return useCase.execute(args.input);
+      return getWarehouseUseCase.execute(args.input);
     },
 
     warehouses: async (_parent: unknown, args: { input?: ListWarehousesInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new ListWarehousesUseCase(WarehouseRepo);
-      return useCase.execute(args.input || {});
+      return listWarehousesUseCase.execute(args.input || {});
     },
   },
 
   Mutation: {
     createWarehouse: async (_parent: unknown, args: { input: CreateWarehouseInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateWarehouseUseCase(WarehouseRepo);
-      const result = await useCase.execute(args.input);
+      const result = await createWarehouseUseCase.execute(args.input);
       return {
         warehouseId: result.warehouseId,
         name: result.name,

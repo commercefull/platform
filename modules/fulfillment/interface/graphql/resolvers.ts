@@ -1,12 +1,18 @@
-const fulfillmentRepository = fulfillmentDataRepository.fulfillments;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetFulfillmentUseCase, GetFulfillmentInput } from '../../application/useCases/GetFulfillment';
-import { CreateFulfillmentUseCase, CreateFulfillmentInput } from '../../application/useCases/CreateFulfillment';
-import { ShipOrderUseCase, ShipOrderInput } from '../../application/useCases/ShipOrder';
-import { MarkDeliveredUseCase, MarkDeliveredInput } from '../../application/useCases/MarkDelivered';
-import { CancelFulfillmentUseCase, CancelFulfillmentCommand } from '../../application/useCases/CancelFulfillment';
-import { UpdateTrackingUseCase, UpdateTrackingCommand } from '../../application/useCases/UpdateTracking';
-import { fulfillmentDataRepository } from '../../application/wired';
+import { GetFulfillmentInput } from '../../application/useCases/GetFulfillment';
+import { CreateFulfillmentInput } from '../../application/useCases/CreateFulfillment';
+import { ShipOrderInput } from '../../application/useCases/ShipOrder';
+import { MarkDeliveredInput } from '../../application/useCases/MarkDelivered';
+import { CancelFulfillmentCommand } from '../../application/useCases/CancelFulfillment';
+import { UpdateTrackingCommand } from '../../application/useCases/UpdateTracking';
+import {
+  cancelFulfillmentUseCase,
+  createFulfillmentUseCase,
+  getFulfillmentUseCase,
+  markDeliveredUseCase,
+  shipOrderUseCase,
+  updateTrackingUseCase,
+} from '../../application/wired';
 
 export const fulfillmentResolvers = {
   Query: {
@@ -19,20 +25,18 @@ export const fulfillmentResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetFulfillmentUseCase(fulfillmentRepository);
       const input: GetFulfillmentInput = {
         fulfillmentId: args.fulfillmentId,
         trackingNumber: args.trackingNumber,
       };
-      return useCase.execute(input);
+      return getFulfillmentUseCase.execute(input);
     },
   },
 
   Mutation: {
     createFulfillment: async (_parent: unknown, args: { input: CreateFulfillmentInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateFulfillmentUseCase(fulfillmentRepository);
-      return useCase.execute(args.input);
+      return createFulfillmentUseCase.execute(args.input);
     },
 
     shipOrder: async (
@@ -48,7 +52,6 @@ export const fulfillmentResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ShipOrderUseCase(fulfillmentRepository);
       const input: ShipOrderInput = {
         fulfillmentId: args.fulfillmentId,
         trackingNumber: args.trackingNumber,
@@ -57,14 +60,13 @@ export const fulfillmentResolvers = {
         carrierName: args.carrierName,
         shippingCostCents: args.shippingCostCents,
       };
-      return useCase.execute(input);
+      return shipOrderUseCase.execute(input);
     },
 
     markDelivered: async (_parent: unknown, args: { fulfillmentId: string }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new MarkDeliveredUseCase(fulfillmentRepository);
       const input: MarkDeliveredInput = { fulfillmentId: args.fulfillmentId };
-      return useCase.execute(input);
+      return markDeliveredUseCase.execute(input);
     },
 
     cancelFulfillment: async (
@@ -76,9 +78,8 @@ export const fulfillmentResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new CancelFulfillmentUseCase(fulfillmentRepository);
       const command = new CancelFulfillmentCommand(args.fulfillmentId, args.reason);
-      return useCase.execute(command);
+      return cancelFulfillmentUseCase.execute(command);
     },
 
     updateTracking: async (
@@ -91,9 +92,8 @@ export const fulfillmentResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new UpdateTrackingUseCase(fulfillmentRepository);
       const command = new UpdateTrackingCommand(args.fulfillmentId, args.trackingNumber, args.trackingUrl);
-      return useCase.execute(command);
+      return updateTrackingUseCase.execute(command);
     },
   },
 };

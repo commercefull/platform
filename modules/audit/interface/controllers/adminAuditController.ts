@@ -4,7 +4,7 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { auditRepository } from '../../application/useCases/wired';
+import { manageAuditLogsUseCase } from '../../application/useCases/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 export const listAuditLogs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -21,7 +21,7 @@ export const listAuditLogs = async (req: HttpRequest, res: HttpResponse): Promis
   };
 
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
-  const result = await auditRepository.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
+  const result = await manageAuditLogsUseCase.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
   adminRespond(req, res, 'audit/index', {
     pageName: 'Audit Logs',
@@ -35,7 +35,7 @@ export const listAuditLogs = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const viewAuditLog = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { logId } = req.params;
-  const log = await auditRepository.findById(logId);
+  const log = await manageAuditLogsUseCase.findById(logId);
 
   if (!log) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Audit log entry not found' });
@@ -49,7 +49,7 @@ export const viewAuditLog = async (req: HttpRequest, res: HttpResponse): Promise
 };
 
 export const auditStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const [byAction, byActor] = await Promise.all([auditRepository.countByAction(), auditRepository.countByActor()]);
+  const [byAction, byActor] = await Promise.all([manageAuditLogsUseCase.countByAction(), manageAuditLogsUseCase.countByActor()]);
 
   adminRespond(req, res, 'audit/stats', {
     pageName: 'Audit Statistics',
@@ -61,7 +61,7 @@ export const auditStats = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const verifyChain = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fromId = req.query.fromId as string | undefined;
   const toId = req.query.toId as string | undefined;
-  const result = await auditRepository.verifyChain(fromId, toId);
+  const result = await manageAuditLogsUseCase.verifyChain(fromId, toId);
 
   adminRespond(req, res, 'audit/verify-chain', {
     pageName: 'Verify Chain Integrity',

@@ -5477,39 +5477,6 @@
         }
       }
     },
-    "/register": {
-      "post": {
-        "summary": "Register a new customer\nPOST /customers/register",
-        "operationId": "asyncHandler(customerController.registerCustomer)_customer",
-        "tags": [
-          "customer"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignToCustomerBody"
-              }
-            }
-          }
-        }
-      }
-    },
     "/me": {
       "get": {
         "summary": "Get my profile\nGET /customers/me",
@@ -12649,117 +12616,9 @@
         }
       }
     },
-    "/notifications/{id}": {
-      "get": {
-        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
-        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "put": {
-        "summary": "asyncHandler(updateNotification)",
-        "operationId": "asyncHandler(updateNotification)_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "asyncHandler(deleteNotification)",
-        "operationId": "asyncHandler(deleteNotification)_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/notifications/{id}/send": {
-      "post": {
-        "summary": "asyncHandler(markNotificationAsSent)",
-        "operationId": "asyncHandler(markNotificationAsSent)_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
-          }
-        }
-      }
-    },
     "/notifications/unread": {
       "get": {
-        "summary": "============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================",
+        "summary": "asyncHandler(getUnreadNotifications)",
         "operationId": "asyncHandler(getUnreadNotifications)_notification",
         "tags": [
           "notification"
@@ -12822,39 +12681,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/notifications/{id}/read": {
-      "put": {
-        "summary": "asyncHandler(markNotificationAsRead)",
-        "operationId": "asyncHandler(markNotificationAsRead)_notification",
-        "tags": [
-          "notification"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateNotificationBody"
-              }
-            }
           }
         }
       }
@@ -13042,6 +12868,147 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/notifications/{id}": {
+      "get": {
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "asyncHandler(updateNotification)",
+        "operationId": "asyncHandler(updateNotification)_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "asyncHandler(deleteNotification)",
+        "operationId": "asyncHandler(deleteNotification)_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/notifications/{id}/send": {
+      "post": {
+        "summary": "asyncHandler(markNotificationAsSent)",
+        "operationId": "asyncHandler(markNotificationAsSent)_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/{id}/read": {
+      "put": {
+        "summary": "asyncHandler(markNotificationAsRead)",
+        "operationId": "asyncHandler(markNotificationAsRead)_notification",
+        "tags": [
+          "notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationBody"
+              }
+            }
           }
         }
       }
@@ -13684,8 +13651,8 @@
     },
     "/notifications/{notificationId}/read": {
       "put": {
-        "summary": "async (req, res) => {\n  try {\n    const useCase = new MarkAs",
-        "operationId": "async (req, res) => {\n  try {\n    const useCase = new MarkAs_notification",
+        "summary": "async (req, res) => {\n  try {\n    const customerId = req.use",
+        "operationId": "async (req, res) => {\n  try {\n    const customerId = req.use_notification",
         "tags": [
           "notification"
         ],
@@ -21756,62 +21723,6 @@
         }
       }
     },
-    "/validate": {
-      "post": {
-        "summary": "Placeholder routes - implement with DDD controllers",
-        "operationId": "(_req, res) => {\n  res.json({ success: true, message: 'Valid_promotion",
-        "tags": [
-          "promotion"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CartPromotionBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/active": {
-      "get": {
-        "summary": "(_req, res) => {\n  res.json({ success: true, message: 'Get a",
-        "operationId": "(_req, res) => {\n  res.json({ success: true, message: 'Get a_promotion",
-        "tags": [
-          "promotion"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/gift-cards/balance/{code}": {
       "get": {
         "summary": "Gift Card routes",
@@ -29635,7 +29546,24 @@
       "ShippingAddressBody": {
         "type": "object",
         "properties": {
-          "country": {
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "company": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "city": {
             "type": "string"
           },
           "region": {
@@ -29643,15 +29571,22 @@
             "description": "string | undefined"
           },
           "postalCode": {
-            "type": "string",
-            "description": "string | undefined"
+            "type": "string"
           },
-          "city": {
+          "country": {
+            "type": "string"
+          },
+          "phone": {
             "type": "string",
             "description": "string | undefined"
           }
         },
         "required": [
+          "firstName",
+          "lastName",
+          "addressLine1",
+          "city",
+          "postalCode",
           "country"
         ]
       },
@@ -32786,6 +32721,10 @@
             "type": "string",
             "description": "string | undefined"
           },
+          "paymentType": {
+            "type": "string",
+            "description": "PaymentType | undefined"
+          },
           "paymentProcessor": {
             "type": "string",
             "description": "string | undefined"
@@ -32821,6 +32760,10 @@
           "routingNumber": {
             "type": "string",
             "description": "string | undefined"
+          },
+          "paymentType": {
+            "type": "string",
+            "description": "PaymentType | undefined"
           },
           "paymentProcessor": {
             "type": "string",

@@ -3,7 +3,6 @@
  * HTTP interface for basket operations with content negotiation (JSON/HTML)
  */
 
-import { query, queryOne } from '../../../../libs/db';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { Basket } from '../../domain/entities/Basket';
 import {
@@ -21,8 +20,9 @@ import {
   RemoveCouponCommand,
 } from '../../application/useCases';
 import {
-  basketRepo as BasketRepo,
-  discountQuotePort,
+  applyCouponAdminOverrideUseCase,
+  manageAdminBasketUseCase,
+  productDetailsPort,
   getOrCreateBasketUseCase,
   addItemUseCase,
   updateItemQuantityUseCase,
@@ -123,53 +123,14 @@ export const applyCouponAdmin = async (req: HttpRequest, res: HttpResponse): Pro
     return;
   }
 
-  const basket = await BasketRepo.findById(basketId);
-  if (!basket) {
-    respondError(req, res, 'Basket not found', 404);
-    return;
-  }
-
-  // Admin override: try validation first, but if it fails, still apply the coupon directly
-  let discountType: 'fixed' | 'percentage' = 'percentage';
-  let discountValue = 0;
-
-  try {
-    const validation = await discountQuotePort.validateDiscount(couponCode, basket.subtotal.cents, basket.customerId);
-    if (validation.valid && validation.discount) {
-      discountType = validation.discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
-      discountValue = validation.discount.value;
-    }
-  } catch {
-    // Validation failed — admin override: look up the coupon directly
-    const couponRow = await queryOne<{ type: string; discountAmount: string | null }>(
-      `SELECT type, "discountAmount" FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true AND ("endDate" IS NULL OR "endDate" > NOW()) LIMIT 1`,
-      [couponCode],
-    );
-    if (couponRow) {
-      discountType = couponRow.type === 'fixedAmount' || couponRow.type === 'fixed_amount' ? 'fixed' : 'percentage';
-      discountValue = Number(couponRow.discountAmount ?? 0);
-    }
-  }
-
-  if (discountValue === 0 && discountType === 'percentage') {
-    // If we couldn't find the coupon, still apply a default for admin override
-    discountValue = 10;
-  }
-
-  basket.applyCoupon(couponCode, discountType, discountValue);
-  await BasketRepo.save(basket);
-
+  const basket = await applyCouponAdminOverrideUseCase.execute(basketId, couponCode);
   respond(req, res, basket.toJSON(), 200);
 };
 
 export const listBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
   const offset = req.query.offset ? parseInt(String(req.query.offset), 10) : 0;
-  const rows = await query<Record<string, unknown>[]>(
-    `SELECT "basketId", status, "currencyCode", "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
-     ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
-    [limit, offset],
-  );
+  const rows = await manageAdminBasketUseCase.findSummaries(limit, offset);
   respond(req, res, { items: rows || [], count: (rows || []).length }, 200);
 };
 
@@ -230,7 +191,7 @@ export const getOrCreateBasket = async (req: HttpRequest, res: HttpResponse): Pr
 export const getBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
-  const basket = await BasketRepo.findById(basketId);
+  const basket = await manageAdminBasketUseCase.findById(basketId);
 
   if (!basket) {
     respondError(req, res, 'Basket not found', 404);
@@ -247,7 +208,7 @@ export const getBasket = async (req: HttpRequest, res: HttpResponse): Promise<vo
 export const getBasketSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
-  const basket = await BasketRepo.findById(basketId);
+  const basket = await manageAdminBasketUseCase.findById(basketId);
 
   if (!basket) {
     respondError(req, res, 'Basket not found', 404);
@@ -274,7 +235,7 @@ export const addItem = async (req: HttpRequest, res: HttpResponse): Promise<void
 
   // Look up product details if sku or name not provided
   if ((!sku || !name) && productId) {
-    const product = await queryOne<{ sku: string; name: string }>('SELECT sku, name FROM product WHERE "productId" = $1', [productId]);
+    const product = await productDetailsPort.findProductDetails(productId);
     if (product) {
       sku = sku || product.sku;
       name = name || product.name;
@@ -392,18 +353,7 @@ export const mergeBaskets = async (req: HttpRequest, res: HttpResponse): Promise
   }
 
   // Get or create the target basket if it doesn't exist
-  let targetBasket = await BasketRepo.findById(targetBasketId);
-  let isNew = false;
-  if (!targetBasket) {
-    targetBasket = Basket.create({
-      basketId: targetBasketId,
-      customerId: undefined,
-      sessionId: targetBasketId,
-      currency: 'USD',
-    });
-    await BasketRepo.save(targetBasket);
-    isNew = true;
-  }
+  const { isNew } = await manageAdminBasketUseCase.getOrCreateForMerge(targetBasketId);
 
   const command = new MergeBasketsCommand(sourceBasketId, targetBasketId);
   const basket = await mergeBasketsUseCase.execute(command);
@@ -468,13 +418,13 @@ export const extendExpiration = async (req: HttpRequest, res: HttpResponse): Pro
 export const deleteBasket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { basketId } = req.params;
 
-  const basket = await BasketRepo.findById(basketId);
+  const basket = await manageAdminBasketUseCase.findById(basketId);
   if (!basket) {
     respondError(req, res, 'Basket not found', 404);
     return;
   }
 
-  await BasketRepo.delete(basketId);
+  await manageAdminBasketUseCase.delete(basketId);
 
   respond(req, res, { message: 'Basket deleted successfully' }, 200);
 };

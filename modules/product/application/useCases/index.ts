@@ -29,5 +29,20 @@ export type { ManageProductCollectionResponse, CollectionMapItem } from './Manag
 export { GetProductCatalogEnrichmentCommand, GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
 export type { ProductCatalogEnrichmentResponse, QaWithAnswers } from './GetProductCatalogEnrichment';
 
+export { ManageAttributeSetsUseCase } from './ManageAttributeSets';
+export type { AttributeSetCreateInput, AttributeSetUpdateInput } from './ManageAttributeSets';
+
+export { ManageProductTypesUseCase } from './ManageProductTypes';
+export { ManageBundlesUseCase } from './ManageBundles';
+export type { ProductBundleRecord, BundleItemRecord, BundlePricing } from './ManageBundles';
+
+export {
+  ManageProductImagesUseCase,
+  ManageProductDownloadsUseCase,
+  ManageProductRelationshipsUseCase,
+  ManageProductVariantsUseCase,
+} from './ManageProductAssets';
+export type { ProductRelationType } from './ManageProductAssets';
+
 // Attribute sub-module
 export * from './attribute';

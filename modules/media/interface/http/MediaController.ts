@@ -6,9 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import multer from 'multer';
-import { ProcessImageUseCase } from '../../application/useCases/ProcessImage';
-import { DownloadImageUseCase } from '../../application/useCases/DownloadImage';
-import { PostgreSQLMediaRepository, SharpImageProcessingService, StorageServiceFactory } from '../../application/wired';
+import { processImageUseCase, downloadImageUseCase } from '../../application/wired';
 
 interface MediaUploadBody {
   altText?: string;
@@ -44,17 +42,8 @@ const upload = multer({
 });
 
 export class MediaController {
-  private processImageUseCase: ProcessImageUseCase;
-  private downloadImageUseCase: DownloadImageUseCase;
-
-  constructor() {
-    const mediaRepository = new PostgreSQLMediaRepository();
-    const imageProcessingService = new SharpImageProcessingService();
-    const storageService = StorageServiceFactory.create();
-
-    this.processImageUseCase = new ProcessImageUseCase(mediaRepository, imageProcessingService, storageService);
-    this.downloadImageUseCase = new DownloadImageUseCase(this.processImageUseCase);
-  }
+  private processImageUseCase = processImageUseCase;
+  private downloadImageUseCase = downloadImageUseCase;
 
   // Middleware for handling single file upload
   uploadSingle = upload.single('image');

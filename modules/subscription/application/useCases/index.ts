@@ -9,3 +9,5 @@ export * from './PauseSubscription';
 export * from './ResumeSubscription';
 export * from './ChangeSubscriptionPlan';
 export * from './ProcessRenewal';
+export * from './ManageCustomerSubscriptions';
+export * from './ProcessBillingCycle';

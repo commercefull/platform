@@ -7,11 +7,14 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 
-const paymentBillingRepo = paymentBillingDataRepository.billing;
-const PaymentRepo = paymentDataRepository.payments;
 import { GetPaymentBalanceCommand } from '../../application/useCases/GetPaymentBalance';
-import { getPaymentBalanceUseCase } from '../../application/useCases/wired';
-import { paymentBillingDataRepository, paymentDataRepository } from '../../application/wired';
+import {
+  getPaymentBalanceUseCase,
+  managePaymentDisputesUseCase,
+  managePaymentFeesUseCase,
+  managePaymentReportsUseCase,
+  managePaymentSettingsUseCase,
+} from '../../application/useCases/wired';
 
 // ============================================================================
 // Disputes
@@ -19,13 +22,13 @@ import { paymentBillingDataRepository, paymentDataRepository } from '../../appli
 
 export const listDisputes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { paymentId } = req.query;
-  const disputes = paymentId ? await paymentBillingRepo.findDisputesByPayment(paymentId as string) : [];
+  const disputes = paymentId ? await managePaymentDisputesUseCase.findByPayment(paymentId as string) : [];
   successResponse(res, { disputes });
 };
 
 export const getDispute = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { disputeId } = req.params;
-  const dispute = await paymentBillingRepo.findDisputeById(String(disputeId));
+  const dispute = await managePaymentDisputesUseCase.findById(String(disputeId));
   if (!dispute) {
     errorResponse(res, 'Dispute not found', 404);
     return;
@@ -40,7 +43,7 @@ export const updateDisputeStatus = async (req: HttpRequest, res: HttpResponse): 
     errorResponse(res, 'status is required', 400);
     return;
   }
-  const dispute = await paymentBillingRepo.updateDisputeStatus(String(disputeId), status, resolvedAt ? new Date(resolvedAt) : undefined);
+  const dispute = await managePaymentDisputesUseCase.updateStatus(String(disputeId), status, resolvedAt ? new Date(resolvedAt) : undefined);
   if (!dispute) {
     errorResponse(res, 'Dispute not found', 404);
     return;
@@ -58,7 +61,7 @@ export const listFees = async (req: HttpRequest, res: HttpResponse): Promise<voi
     errorResponse(res, 'transactionId query parameter is required', 400);
     return;
   }
-  const fees = await paymentBillingRepo.findFeesByTransaction(transactionId as string);
+  const fees = await managePaymentFeesUseCase.findByTransaction(transactionId as string);
   successResponse(res, { fees });
 };
 
@@ -72,7 +75,7 @@ export const getSettings = async (req: HttpRequest, res: HttpResponse): Promise<
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const settings = await PaymentRepo.findSettingsByMerchant(organizationId);
+  const settings = await managePaymentSettingsUseCase.findByMerchant(organizationId);
   successResponse(res, { settings });
 };
 
@@ -107,7 +110,7 @@ export const updateSettings = async (req: HttpRequest, res: HttpResponse): Promi
     errorResponse(res, 'at least one settings field is required', 400);
     return;
   }
-  const settings = await PaymentRepo.upsertSettings({
+  const settings = await managePaymentSettingsUseCase.upsert({
     organizationId,
     ...updates,
   });
@@ -140,7 +143,7 @@ export const listReports = async (req: HttpRequest, res: HttpResponse): Promise<
     errorResponse(res, 'Authentication required', 401);
     return;
   }
-  const reports = await paymentBillingRepo.findReportsByMerchant(organizationId);
+  const reports = await managePaymentReportsUseCase.findByMerchant(organizationId);
   successResponse(res, { reports });
 };
 
@@ -155,6 +158,6 @@ const getReport = async (req: HttpRequest, res: HttpResponse): Promise<void> => 
     errorResponse(res, 'from and to query parameters are required', 400);
     return;
   }
-  const reports = await paymentBillingRepo.findReportsByDateRange(organizationId, new Date(from as string), new Date(to as string));
+  const reports = await managePaymentReportsUseCase.findByDateRange(organizationId, new Date(from as string), new Date(to as string));
   successResponse(res, { reports });
 };

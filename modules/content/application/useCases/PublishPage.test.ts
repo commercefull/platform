@@ -52,9 +52,14 @@ describe('PublishPageUseCase', () => {
     await expect(useCase.execute(new PublishPageCommand('page-x'))).rejects.toThrow(ContentPageNotFoundError);
   });
 
-  it('should throw ContentValidationError when page is already published', async () => {
+  it('should republish an already published page (idempotent)', async () => {
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }));
+    mockRepo.updatePage.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }));
 
-    await expect(useCase.execute(new PublishPageCommand('page-1'))).rejects.toThrow(ContentValidationError);
+    const result = await useCase.execute(new PublishPageCommand('page-1'));
+
+    expect(result.status).toBe('published');
+    expect(mockRepo.updatePage).toHaveBeenCalledWith('page-1', expect.objectContaining({ status: 'published' }));
+    expect(emitMock).toHaveBeenCalledWith('content.page.published', expect.objectContaining({ pageId: 'page-1' }));
   });
 });

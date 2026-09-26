@@ -12,6 +12,8 @@ import type { SupplierRepository } from '../domain/repositories/SupplierReposito
 import type { CreateSupplierUseCase } from '../application/useCases/CreateSupplier';
 import type { CreatePurchaseOrderUseCase } from '../application/useCases/CreatePurchaseOrder';
 import type { ReceiveGoodsUseCase } from '../application/useCases/ReceiveGoods';
+import type { CreateSupplierPurchaseOrderUseCase } from '../application/useCases/CreateSupplierPurchaseOrder';
+import type { CreateReceivingRecordUseCase } from '../application/useCases/CreateReceivingRecord';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -102,6 +104,42 @@ export function createReceivingRepository(): jest.Mocked<ReceivingRepoPort> {
 
 export function createInventoryRepository(): jest.Mocked<InventoryRepoPort> {
   return { adjustStock: jest.fn().mockResolvedValue(undefined) };
+}
+
+type SupplierLookupPort = ConstructorParameters<typeof CreateSupplierPurchaseOrderUseCase>[0];
+type SupplierPoWritePort = ConstructorParameters<typeof CreateSupplierPurchaseOrderUseCase>[1];
+type ReceivingRecordWritePort = ConstructorParameters<typeof CreateReceivingRecordUseCase>[0];
+type ReceivingItemWritePort = ConstructorParameters<typeof CreateReceivingRecordUseCase>[1];
+
+export function createSupplierLookup(supplier: unknown = { supplierId: 'sup-1' }): jest.Mocked<SupplierLookupPort> {
+  return { findById: jest.fn().mockResolvedValue(supplier) };
+}
+
+export function createPoWritePort(): jest.Mocked<SupplierPoWritePort> {
+  return {
+    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
+      Promise.resolve({ supplierPurchaseOrderId: 'po-new', ...params }),
+    ),
+    createItem: jest.fn().mockImplementation((params: Record<string, unknown>) =>
+      Promise.resolve({ supplierPurchaseOrderItemId: 'item-new', ...params }),
+    ),
+  };
+}
+
+export function createReceivingRecordWritePort(): jest.Mocked<ReceivingRecordWritePort> {
+  return {
+    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
+      Promise.resolve({ supplierReceivingRecordId: 'rec-new', ...params }),
+    ),
+  };
+}
+
+export function createReceivingItemWritePort(): jest.Mocked<ReceivingItemWritePort> {
+  return {
+    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
+      Promise.resolve({ supplierReceivingItemId: 'ritem-new', ...params }),
+    ),
+  };
 }
 
 export function createSupplierRepository(supplier: Supplier | null = createSupplier()): jest.Mocked<SupplierRepository> {

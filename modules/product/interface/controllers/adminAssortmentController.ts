@@ -173,9 +173,7 @@ export const reorderCategories = async (req: HttpRequest, res: HttpResponse): Pr
   const body = req.body as HttpRequestBody;
   const { categories } = body as { categories: { categoryId: string; position: number }[] }; // Array of { categoryId, position }
 
-  for (const cat of categories) {
-    await manageCategoriesUseCase.update(cat.categoryId, { position: cat.position });
-  }
+  await manageCategoriesUseCase.reorder(categories);
 
   res.json({ success: true, message: 'Categories reordered successfully' });
 };

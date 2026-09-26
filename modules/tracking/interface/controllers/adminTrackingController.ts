@@ -4,14 +4,8 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { ManageTrackingConfigUseCase } from '../../application/useCases/ManageTrackingConfig';
-import { GetTrackingStatusUseCase } from '../../application/useCases/GetTrackingStatus';
-import { TrackingConfigRepositoryImpl } from '../../application/wired';
+import { manageTrackingConfigUseCase as manageConfigUseCase, getTrackingStatusUseCase as getStatusUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
-
-const repo = new TrackingConfigRepositoryImpl();
-const manageConfigUseCase = new ManageTrackingConfigUseCase(repo);
-const getStatusUseCase = new GetTrackingStatusUseCase(repo);
 
 export const listTrackingConfigs = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const storeId = req.query.storeId as string;

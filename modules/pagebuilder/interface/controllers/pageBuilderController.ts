@@ -4,20 +4,15 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { ManageDraftsUseCase, CreateDraftCommand } from '../../application/useCases/ManageDrafts';
-import { ManageBlocksUseCase, AddBlockCommand, UpdateBlockCommand, MoveBlockCommand } from '../../application/useCases/ManageBlocks';
-import { PublishDraftUseCase } from '../../application/useCases/PublishDraft';
-import { PreviewDraftUseCase } from '../../application/useCases/PreviewDraft';
-import { GetBlockTypesUseCase } from '../../application/useCases/GetBlockTypes';
-import { PageDraftRepositoryImpl, ThemeRepositoryImpl } from '../../application/wired';
-
-const draftRepo = new PageDraftRepositoryImpl();
-const themeRepo = new ThemeRepositoryImpl();
-const manageDraftsUseCase = new ManageDraftsUseCase(draftRepo);
-const manageBlocksUseCase = new ManageBlocksUseCase(draftRepo);
-const publishDraftUseCase = new PublishDraftUseCase(draftRepo);
-const previewDraftUseCase = new PreviewDraftUseCase(draftRepo, themeRepo);
-const getBlockTypesUseCase = new GetBlockTypesUseCase();
+import { CreateDraftCommand } from '../../application/useCases/ManageDrafts';
+import { AddBlockCommand, UpdateBlockCommand, MoveBlockCommand } from '../../application/useCases/ManageBlocks';
+import {
+  manageDraftsUseCase,
+  manageBlocksUseCase,
+  publishDraftUseCase,
+  previewDraftUseCase,
+  getBlockTypesUseCase,
+} from '../../application/wired';
 
 class PageBuilderController {
   // ── Block Types ──────────────────────────────────────────────

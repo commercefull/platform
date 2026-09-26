@@ -17,6 +17,10 @@ Quick reference. For the full rules, see the individual standards documents.
 - Follow the `/business/{topic}/...` route naming convention for all business routes.
 - Use the Winston logger (`logger.error()`, `logger.info()`) instead of `console.log`.
 - Write use cases as classes with an `execute()` method.
+- Route all repository access through use cases — including CRUD, which is shared across admin views, REST controllers, GraphQL resolvers, and jobs.
+- Consume wired use-case singletons from `application/wired.ts` / `application/useCases/wired.ts` in controllers, resolvers, and jobs.
+- Group related CRUD on sub-aggregates into a single `Manage*` facade use case.
+- Emit domain events (`eventBus.emit`, `writeToOutbox`) from use cases, not controllers.
 - Create domain entities with `create()` and `reconstitute()` factory methods.
 - Import types from `domain/entities/` in all layers — domain entities are the single source of truth.
 - Export domain entities from the module's `index.ts` so they are reachable from the entry point.
@@ -43,6 +47,10 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use snake_case for database columns.
 - Use an ORM — use raw SQL with `libs/db` helpers.
 - Put business logic in controllers (use domain entities and use cases).
+- Import from `infrastructure/` or construct `new XUseCase(...)` / `new XRepo()` in `interface/` files — inject wired singletons instead.
+- Call repositories directly from controllers, resolvers, or jobs — even for single-method CRUD reads.
+- Emit events (`eventBus.emit`) from the interface layer — emit them inside the use case.
+- Build `Manage*` use-case classes that merely re-export a repo method with no consumer — but if an interface file needs the call, it must go through a UC.
 - Hard-code API endpoints or secrets.
 - Hard-code user-facing text in EJS templates — always use `t('namespace:key')` and add keys to locale JSON files.
 - Use `console.log` in production code.

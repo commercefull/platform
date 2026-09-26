@@ -10,4 +10,10 @@ export class ManagePaymentReportsUseCase {
   async findById(reportId: string) {
     return this.billingRepo.findReportById(reportId);
   }
+  async findByMerchant(organizationId: string) {
+    return this.billingRepo.findReportsByMerchant(organizationId);
+  }
+  async findByDateRange(organizationId: string, from: Date, to: Date) {
+    return this.billingRepo.findReportsByDateRange(organizationId, from, to);
+  }
 }

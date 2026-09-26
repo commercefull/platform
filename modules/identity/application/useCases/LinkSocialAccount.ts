@@ -1,3 +1,4 @@
+import { eventBus } from '../../../../libs/events/eventBus';
 import type { SocialAccountRepository } from '../../domain/repositories/SocialAccountRepository';
 import { SocialProvider, UserType, SocialProfileData } from '../../domain/entities/SocialAccount';
 import type { LinkedAccount } from './GetLinkedAccounts';
@@ -39,6 +40,15 @@ export class LinkSocialAccountUseCase {
         profile.tokenExpiresAt,
       );
 
+      eventBus.emit(`identity.${userType}.social_account_linked`, {
+        userId,
+        userType,
+        provider,
+        providerUserId: profile.providerUserId,
+        providerEmail: profile.email,
+        timestamp: new Date(),
+      });
+
       return {
         socialAccountId: userExisting.socialAccountId,
         provider,
@@ -67,6 +77,15 @@ export class LinkSocialAccountUseCase {
       tokenExpiresAt: profile.tokenExpiresAt,
       scopes: profile.scopes,
       providerData: profile.rawData,
+    });
+
+    eventBus.emit(`identity.${userType}.social_account_linked`, {
+      userId,
+      userType,
+      provider,
+      providerUserId: profile.providerUserId,
+      providerEmail: profile.email,
+      timestamp: new Date(),
     });
 
     return {

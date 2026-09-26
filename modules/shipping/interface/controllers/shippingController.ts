@@ -4,17 +4,21 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { CalculateShippingRatesCommand, ShippingAddress, OrderDetails } from '../../application/useCases/CalculateShippingRates';
 import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import {
-  shippingConfigRepository,
-  shippingLabelRepo,
   calculateShippingRatesUseCase,
   getShippingMethodsUseCase,
   createShippingLabelUseCase,
   getShippingLabelUseCase,
   voidShippingLabelUseCase,
   trackShipmentUseCase,
+  estimateDeliveryWindowUseCase,
+  manageShippingMethodsUseCase,
+  manageShippingZonesUseCase,
+  manageShippingRatesUseCase,
+  manageShippingConfigurationUseCase,
 } from '../../application/wired';
 import {
   CreateShippingCarrierInput,
@@ -30,12 +34,7 @@ import {
 } from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
 
-const shippingCarrierRepo = shippingConfigRepository.carriers;
-const shippingMethodRepo = shippingConfigRepository.methods;
-const shippingZoneRepo = shippingConfigRepository.zones;
-const shippingRateRepo = shippingConfigRepository.rates;
-const packagingTypeRepo = shippingConfigRepository.packaging;
-const shippingSurchargeRepo = shippingConfigRepository.surcharges;
+
 
 // ============================================================================
 // Carriers
@@ -43,13 +42,13 @@ const shippingSurchargeRepo = shippingConfigRepository.surcharges;
 
 export const getCarriers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
-  const carriers = await shippingCarrierRepo.findAll(activeOnly === 'true');
+  const carriers = await manageShippingConfigurationUseCase.listCarriers(activeOnly === 'true');
   res.status(200).json({ success: true, data: carriers });
 };
 
 export const getCarrierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const carrier = await shippingCarrierRepo.findById(id);
+  const carrier = await manageShippingConfigurationUseCase.findCarrierById(id);
 
   if (!carrier) {
     res.status(404).json({ success: false, message: 'Carrier not found' });
@@ -63,7 +62,7 @@ export const createCarrier = async (
   req: HttpRequest<Record<string, string>, unknown, CreateShippingCarrierInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const carrier = await shippingCarrierRepo.create(req.body);
+  const carrier = await manageShippingConfigurationUseCase.createCarrier(req.body);
   res.status(201).json({ success: true, data: carrier });
 };
 
@@ -72,7 +71,7 @@ export const updateCarrier = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const carrier = await shippingCarrierRepo.update(id, req.body);
+  const carrier = await manageShippingConfigurationUseCase.updateCarrier(id, req.body);
 
   if (!carrier) {
     res.status(404).json({ success: false, message: 'Carrier not found' });
@@ -84,7 +83,7 @@ export const updateCarrier = async (
 
 export const deleteCarrier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await shippingCarrierRepo.delete(id);
+  const deleted = await manageShippingConfigurationUseCase.deleteCarrier(id);
 
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Carrier not found' });
@@ -109,7 +108,7 @@ export const getMethods = async (req: HttpRequest, res: HttpResponse): Promise<v
 
 export const getMethodById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const method = await shippingMethodRepo.findById(id);
+  const method = await manageShippingMethodsUseCase.findById(id);
 
   if (!method) {
     res.status(404).json({ success: false, message: 'Method not found' });
@@ -123,7 +122,7 @@ export const createMethod = async (
   req: HttpRequest<Record<string, string>, unknown, CreateShippingMethodInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const method = await shippingMethodRepo.create(req.body);
+  const method = await manageShippingMethodsUseCase.create(req.body);
   res.status(201).json({ success: true, data: method });
 };
 
@@ -132,7 +131,7 @@ export const updateMethod = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const method = await shippingMethodRepo.update(id, req.body);
+  const method = await manageShippingMethodsUseCase.update(id, req.body);
 
   if (!method) {
     res.status(404).json({ success: false, message: 'Method not found' });
@@ -144,7 +143,7 @@ export const updateMethod = async (
 
 export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await shippingMethodRepo.delete(id);
+  const deleted = await manageShippingMethodsUseCase.delete(id);
 
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Method not found' });
@@ -160,13 +159,13 @@ export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise
 
 export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
-  const zones = await shippingZoneRepo.findAll(activeOnly === 'true');
+  const zones = await manageShippingZonesUseCase.findAll(activeOnly === 'true');
   res.status(200).json({ success: true, data: zones });
 };
 
 export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const zone = await shippingZoneRepo.findById(id);
+  const zone = await manageShippingZonesUseCase.findById(id);
 
   if (!zone) {
     res.status(404).json({ success: false, message: 'Zone not found' });
@@ -180,7 +179,7 @@ export const createZone = async (
   req: HttpRequest<Record<string, string>, unknown, CreateShippingZoneInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const zone = await shippingZoneRepo.create(req.body);
+  const zone = await manageShippingZonesUseCase.create(req.body);
   res.status(201).json({ success: true, data: zone });
 };
 
@@ -189,7 +188,7 @@ export const updateZone = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const zone = await shippingZoneRepo.update(id, req.body);
+  const zone = await manageShippingZonesUseCase.update(id, req.body);
 
   if (!zone) {
     res.status(404).json({ success: false, message: 'Zone not found' });
@@ -201,7 +200,7 @@ export const updateZone = async (
 
 export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await shippingZoneRepo.delete(id);
+  const deleted = await manageShippingZonesUseCase.delete(id);
 
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Zone not found' });
@@ -217,13 +216,13 @@ export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<v
 
 export const getRates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId, methodId } = req.query;
-  const rates = await shippingRateRepo.findActive(zoneId as string | undefined, methodId as string | undefined);
+  const rates = await manageShippingRatesUseCase.findActive(zoneId as string | undefined, methodId as string | undefined);
   res.status(200).json({ success: true, data: rates });
 };
 
 export const getRateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const rate = await shippingRateRepo.findById(id);
+  const rate = await manageShippingRatesUseCase.findById(id);
 
   if (!rate) {
     res.status(404).json({ success: false, message: 'Rate not found' });
@@ -237,7 +236,7 @@ export const createRate = async (
   req: HttpRequest<Record<string, string>, unknown, CreateShippingRateInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const rate = await shippingRateRepo.create(req.body);
+  const rate = await manageShippingRatesUseCase.create(req.body);
   res.status(201).json({ success: true, data: rate });
 };
 
@@ -246,7 +245,7 @@ export const updateRate = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const rate = await shippingRateRepo.update(id, req.body);
+  const rate = await manageShippingRatesUseCase.update(id, req.body);
 
   if (!rate) {
     res.status(404).json({ success: false, message: 'Rate not found' });
@@ -258,7 +257,7 @@ export const updateRate = async (
 
 export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await shippingRateRepo.delete(id);
+  const deleted = await manageShippingRatesUseCase.delete(id);
 
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Rate not found' });
@@ -274,13 +273,13 @@ export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<v
 
 export const getPackagingTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
-  const types = await packagingTypeRepo.findAll(activeOnly === 'true');
+  const types = await manageShippingConfigurationUseCase.listPackagingTypes(activeOnly === 'true');
   res.status(200).json({ success: true, data: types });
 };
 
 export const getPackagingTypeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const type = await packagingTypeRepo.findById(id);
+  const type = await manageShippingConfigurationUseCase.findPackagingTypeById(id);
 
   if (!type) {
     res.status(404).json({ success: false, message: 'Packaging type not found' });
@@ -294,7 +293,7 @@ export const createPackagingType = async (
   req: HttpRequest<Record<string, string>, unknown, CreateShippingPackagingTypeInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const type = await packagingTypeRepo.create(req.body);
+  const type = await manageShippingConfigurationUseCase.createPackagingType(req.body);
   res.status(201).json({ success: true, data: type });
 };
 
@@ -303,7 +302,7 @@ export const updatePackagingType = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const type = await packagingTypeRepo.update(id, req.body);
+  const type = await manageShippingConfigurationUseCase.updatePackagingType(id, req.body);
 
   if (!type) {
     res.status(404).json({ success: false, message: 'Packaging type not found' });
@@ -315,7 +314,7 @@ export const updatePackagingType = async (
 
 export const deletePackagingType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await packagingTypeRepo.delete(id);
+  const deleted = await manageShippingConfigurationUseCase.deletePackagingType(id);
 
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Packaging type not found' });
@@ -338,53 +337,13 @@ export const estimateDelivery = async (
   req: HttpRequest<Record<string, string>, unknown, EstimateDeliveryBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { methodId, destinationAddress } = req.body;
-
-  if (!methodId) {
-    res.status(400).json({ success: false, message: 'methodId is required' });
-    return;
+  try {
+    const result = await estimateDeliveryWindowUseCase.execute(req.body);
+    res.status(200).json({ success: true, data: result });
+  } catch (error: unknown) {
+    const status = getErrorStatusCode(error);
+    res.status(status).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const method = await shippingMethodRepo.findById(methodId);
-  if (!method) {
-    res.status(404).json({ success: false, message: 'Shipping method not found' });
-    return;
-  }
-
-  // estimatedDeliveryDays may be stored as JSON { min, max } or a number
-  const deliveryDays = method.estimatedDeliveryDays as { min?: number; max?: number } | number | null;
-  const handlingDays = method.handlingDays || 0;
-
-  let daysMin = handlingDays;
-  let daysMax = handlingDays;
-
-  if (typeof deliveryDays === 'number') {
-    daysMin += deliveryDays;
-    daysMax += deliveryDays;
-  } else if (deliveryDays && typeof deliveryDays === 'object') {
-    daysMin += deliveryDays.min || 0;
-    daysMax += deliveryDays.max || deliveryDays.min || 0;
-  }
-
-  const now = new Date();
-  const minDate = new Date(now);
-  const maxDate = new Date(now);
-  minDate.setDate(minDate.getDate() + daysMin);
-  maxDate.setDate(maxDate.getDate() + daysMax);
-
-  res.status(200).json({
-    success: true,
-    data: {
-      methodId: method.shippingMethodId,
-      methodName: method.name,
-      estimatedDaysMin: daysMin,
-      estimatedDaysMax: daysMax,
-      estimatedDeliveryMin: minDate.toISOString(),
-      estimatedDeliveryMax: maxDate.toISOString(),
-      handlingDays,
-      destinationAddress,
-    },
-  });
 };
 
 interface CalculateRatesBody {
@@ -460,7 +419,7 @@ export const getLabel = async (req: HttpRequest, res: HttpResponse): Promise<voi
 
 export const getLabelsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
-  const labels = await shippingLabelRepo.findByOrderId(orderId);
+  const labels = await getShippingLabelUseCase.findByOrderId(orderId);
   res.status(200).json({ success: true, data: labels });
 };
 
@@ -498,13 +457,13 @@ export const trackShipment = async (req: HttpRequest, res: HttpResponse): Promis
 export const getSurchargesByRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { rateId } = req.params;
   const { activeOnly } = req.query;
-  const surcharges = await shippingSurchargeRepo.findByRateId(rateId, activeOnly !== 'false');
+  const surcharges = await manageShippingConfigurationUseCase.listSurchargesByRate(rateId, activeOnly !== 'false');
   res.status(200).json({ success: true, data: surcharges });
 };
 
 export const getSurchargeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const surcharge = await shippingSurchargeRepo.findById(id);
+  const surcharge = await manageShippingConfigurationUseCase.findSurchargeById(id);
   if (!surcharge) {
     res.status(404).json({ success: false, message: 'Surcharge not found' });
     return;
@@ -513,19 +472,18 @@ export const getSurchargeById = async (req: HttpRequest, res: HttpResponse): Pro
 };
 
 export const createSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const input = req.body as CreateShippingSurchargeInput;
-  if (!input.shippingRateId || !input.type || !input.calculationType || input.value === undefined) {
-    res.status(400).json({ success: false, message: 'Missing required fields: shippingRateId, type, calculationType, value' });
-    return;
+  try {
+    const surcharge = await manageShippingConfigurationUseCase.createSurcharge(req.body as CreateShippingSurchargeInput);
+    res.status(201).json({ success: true, data: surcharge });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-  const surcharge = await shippingSurchargeRepo.create(input);
-  res.status(201).json({ success: true, data: surcharge });
 };
 
 export const updateSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const input = req.body as UpdateShippingSurchargeInput;
-  const surcharge = await shippingSurchargeRepo.update(id, input);
+  const surcharge = await manageShippingConfigurationUseCase.updateSurcharge(id, input);
   if (!surcharge) {
     res.status(404).json({ success: false, message: 'Surcharge not found' });
     return;
@@ -535,7 +493,7 @@ export const updateSurcharge = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const deleteSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await shippingSurchargeRepo.delete(id);
+  const deleted = await manageShippingConfigurationUseCase.deleteSurcharge(id);
   if (!deleted) {
     res.status(404).json({ success: false, message: 'Surcharge not found' });
     return;

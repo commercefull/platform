@@ -3,7 +3,7 @@
 > Auto-generated from router source files. Do not edit manually.
 > Run `yarn docs:routes` to regenerate.
 
-**Total routes:** 1215
+**Total routes:** 1212
 
 ## (unmounted)
 
@@ -11,8 +11,6 @@
 |---|---|---|---|
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId` | `asyncHandler(getFulfillment)` | Get fulfillment by ID (customer view) |
 | <span class="badge badge-get">GET</span> | `/:fulfillmentId/track` | `asyncHandler(getTrackingInfo)` | Track fulfillment |
-| <span class="badge badge-get">GET</span> | `/active` | `(_req, res) => {
-  res.json({ success: true, message: 'Get a` | — |
 | <span class="badge badge-get">GET</span> | `/analytics/customers/cohorts` | `asyncHandler(analyticsController.getCustomerCohorts)` | GET /business/analytics/customers/cohorts - Get customer cohort analysis |
 | <span class="badge badge-get">GET</span> | `/analytics/dashboards` | `asyncHandler(analyticsController.getDashboards)` | GET /business/analytics/dashboards - List dashboards |
 | <span class="badge badge-post">POST</span> | `/analytics/dashboards` | `asyncHandler(analyticsController.createDashboard)` | POST /business/analytics/dashboards - Create dashboard |
@@ -660,12 +658,12 @@ POST /customers/me/addresses/:addressId/default |
 | <span class="badge badge-delete">DELETE</span> | `/notification-templates/:id` | `asyncHandler(deleteTemplate)` | — |
 | <span class="badge badge-post">POST</span> | `/notification-templates/:id/preview` | `asyncHandler(previewTemplate)` | — |
 | <span class="badge badge-get">GET</span> | `/notification-templates/type/:type` | `asyncHandler(getTemplatesByType)` | — |
-| <span class="badge badge-get">GET</span> | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Admin CRUD routes for notifications ============================================================================ |
+| <span class="badge badge-get">GET</span> | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/notifications` | `asyncHandler(createNotification)` | — |
 | <span class="badge badge-get">GET</span> | `/notifications` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
-| <span class="badge badge-get">GET</span> | `/notifications/:id` | `asyncHandler(getNotificationById)` | — |
+| <span class="badge badge-get">GET</span> | `/notifications/:id` | `asyncHandler(getNotificationById)` | ============================================================================ Admin CRUD routes for notifications (parameterized — after all literals) ============================================================================ |
 | <span class="badge badge-put">PUT</span> | `/notifications/:id` | `asyncHandler(updateNotification)` | — |
 | <span class="badge badge-delete">DELETE</span> | `/notifications/:id` | `asyncHandler(deleteNotification)` | — |
 | <span class="badge badge-get">GET</span> | `/notifications/:id` | `async (req, res) => {
@@ -675,7 +673,7 @@ POST /customers/me/addresses/:addressId/default |
 | <span class="badge badge-post">POST</span> | `/notifications/:id/send` | `asyncHandler(markNotificationAsSent)` | — |
 | <span class="badge badge-put">PUT</span> | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
-    const useCase = new MarkAs` | — |
+    const customerId = req.use` | — |
 | <span class="badge badge-patch">PATCH</span> | `/notifications/:notificationId/read` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
@@ -707,7 +705,7 @@ POST /customers/me/addresses/:addressId/default |
 | <span class="badge badge-get">GET</span> | `/notifications/recent` | `asyncHandler(getRecentNotifications)` | — |
 | <span class="badge badge-get">GET</span> | `/notifications/templates/:templateId/translations` | `asyncHandler(listTranslations)` | ============================================================================ Template translation routes ============================================================================ |
 | <span class="badge badge-post">POST</span> | `/notifications/templates/:templateId/translations` | `asyncHandler(upsertTranslation)` | — |
-| <span class="badge badge-get">GET</span> | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | ============================================================================ User-specific routes (for logged-in merchant viewing their own notifications) ============================================================================ |
+| <span class="badge badge-get">GET</span> | `/notifications/unread` | `asyncHandler(getUnreadNotifications)` | — |
 | <span class="badge badge-get">GET</span> | `/notifications/unread-count` | `async (req, res) => {
   try {
     const customerId = req.use` | — |
@@ -1018,8 +1016,6 @@ GET /customer/products/search/suggestions |
 | <span class="badge badge-post">POST</span> | `/receiving/:id/complete` | `asyncHandler(receivingController.completeReceiving)` | — |
 | <span class="badge badge-get">GET</span> | `/receiving/:id/items` | `asyncHandler(receivingController.getReceivingItems)` | Receiving items |
 | <span class="badge badge-post">POST</span> | `/receiving/:id/items` | `asyncHandler(receivingController.createReceivingItem)` | — |
-| <span class="badge badge-post">POST</span> | `/register` | `asyncHandler(customerController.registerCustomer)` | Register a new customer
-POST /customers/register |
 | <span class="badge badge-delete">DELETE</span> | `/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | — |
 | <span class="badge badge-post">POST</span> | `/reports/generate` | `asyncHandler(reportingController.generateReport)` | Report generation (on-demand) |
 | <span class="badge badge-get">GET</span> | `/reports/schedules` | `asyncHandler(reportingController.listSchedules)` | Report schedule CRUD |
@@ -1283,8 +1279,6 @@ POST /customers/register |
 | <span class="badge badge-put">PUT</span> | `/users/:userId/spending-limits` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/users/:userId/suspend` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-post">POST</span> | `/users/invite` | `isOrganizationLoggedIn` | — |
-| <span class="badge badge-post">POST</span> | `/validate` | `(_req, res) => {
-  res.json({ success: true, message: 'Valid` | Placeholder routes - implement with DDD controllers |
 | <span class="badge badge-get">GET</span> | `/vendors` | `isOrganizationLoggedIn` | Vendor CRUD + lifecycle |
 | <span class="badge badge-post">POST</span> | `/vendors` | `isOrganizationLoggedIn` | — |
 | <span class="badge badge-get">GET</span> | `/vendors/:vendorId` | `isOrganizationLoggedIn` | — |

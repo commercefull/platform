@@ -76,5 +76,7 @@ export interface PaymentRepository {
   findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null>;
   createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null>;
   setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null>;
-  softDeleteStoredMethod(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null>;
+  softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null>;
+
+  deleteTransaction(transactionId: string): Promise<void>;
 }

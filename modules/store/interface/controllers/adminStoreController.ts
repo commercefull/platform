@@ -9,7 +9,7 @@ import {
   createStoreUseCase,
   updateStoreUseCase,
   organizationLookupAdapter,
-  FindActiveStoresUseCase,
+  findActiveStoresUseCase,
 } from '../../application/useCases/wired';
 import {
   listStoreUsersUseCase,
@@ -23,7 +23,7 @@ import { GetStoreQuery } from '../../application/useCases/GetStore';
 import { CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
 
-const findActiveStoresUseCase = new FindActiveStoresUseCase();
+
 
 export const listStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const page = parseInt((req.query.page as string) || '1', 10);

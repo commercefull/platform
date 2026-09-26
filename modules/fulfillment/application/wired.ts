@@ -15,6 +15,7 @@ export {
 };
 
 import { ManageOperationsUseCase } from './useCases/ManageOperations';
+import { ManageFulfillmentLocationsUseCase } from './useCases/ManageFulfillmentLocations';
 import { PlanFulfillmentUseCase } from './useCases/PlanFulfillment';
 import { FulfillmentSourceAdapter } from '../infrastructure/acl/FulfillmentSourceAdapter';
 import { OrderRouter } from '../../order/domain/services/OrderRouter';
@@ -22,6 +23,10 @@ import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 
 export const manageOperationsUseCase = new ManageOperationsUseCase(fulfillmentDataRepository.admin);
+export const manageFulfillmentLocationsUseCase = new ManageFulfillmentLocationsUseCase(
+  fulfillmentPartnerRepository.locations,
+  fulfillmentPartnerRepository.partners,
+);
 
 const orderRouter = new OrderRouter(
   {
@@ -47,3 +52,25 @@ const orderRouter = new OrderRouter(
 );
 
 export const planFulfillmentUseCase = new PlanFulfillmentUseCase(orderRouter, new FulfillmentSourceAdapter());
+
+import { GetFulfillmentUseCase } from './useCases/GetFulfillment';
+import { CreateFulfillmentUseCase } from './useCases/CreateFulfillment';
+import { ShipOrderUseCase } from './useCases/ShipOrder';
+import { MarkDeliveredUseCase } from './useCases/MarkDelivered';
+import { CancelFulfillmentUseCase } from './useCases/CancelFulfillment';
+import { UpdateTrackingUseCase } from './useCases/UpdateTracking';
+import { ProcessPickingUseCase } from './useCases/ProcessPicking';
+import { ProcessPackingUseCase } from './useCases/ProcessPacking';
+import { InitiateReturnUseCase } from './useCases/InitiateReturn';
+import { ManageFulfillmentsUseCase } from './useCases/ManageFulfillments';
+
+export const getFulfillmentUseCase = new GetFulfillmentUseCase(fulfillmentDataRepository.fulfillments);
+export const createFulfillmentUseCase = new CreateFulfillmentUseCase(fulfillmentDataRepository.fulfillments);
+export const shipOrderUseCase = new ShipOrderUseCase(fulfillmentDataRepository.fulfillments);
+export const markDeliveredUseCase = new MarkDeliveredUseCase(fulfillmentDataRepository.fulfillments);
+export const cancelFulfillmentUseCase = new CancelFulfillmentUseCase(fulfillmentDataRepository.fulfillments);
+export const updateTrackingUseCase = new UpdateTrackingUseCase(fulfillmentDataRepository.fulfillments);
+export const processPickingUseCase = new ProcessPickingUseCase(fulfillmentDataRepository.fulfillments);
+export const processPackingUseCase = new ProcessPackingUseCase(fulfillmentDataRepository.fulfillments);
+export const initiateReturnUseCase = new InitiateReturnUseCase(fulfillmentDataRepository.fulfillments);
+export const manageFulfillmentsUseCase = new ManageFulfillmentsUseCase(fulfillmentDataRepository.fulfillments);

@@ -6,7 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { FindActiveStoresUseCase } from '../../../store/application/useCases/wired';
+import { findActiveStoresUseCase } from '../../../store/application/useCases/wired';
 import {
   listStoreDispatchesUseCase,
   getStoreDispatchUseCase,
@@ -18,7 +18,7 @@ import {
   manageAdminInventoryUseCase,
 } from '../../application/useCases/wired';
 
-const findActiveStoresUseCase = new FindActiveStoresUseCase();
+
 
 // ============================================================================
 // List Inventory

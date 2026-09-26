@@ -49,11 +49,6 @@ export class PublishPageUseCase {
       throw new ContentPageNotFoundError(command.pageId);
     }
 
-    // Check if already published
-    if (page.status === 'published') {
-      throw new ContentValidationError('Page is already published');
-    }
-
     // Update page status to published
     const now = new Date();
     const updatedPage = await this.contentRepo.updatePage(command.pageId, {

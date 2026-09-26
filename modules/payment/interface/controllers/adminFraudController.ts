@@ -7,7 +7,8 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { FraudRepo as fraudRepo, screenForFraudUseCase } from '../../application/wired';
+import { screenForFraudUseCase } from '../../application/wired';
+import { manageFraudRecordsUseCase } from '../../application/useCases/wired';
 import type { RuleAction, RuleType } from '../../application/wired';
 
 // ============================================================================
@@ -15,8 +16,8 @@ import type { RuleAction, RuleType } from '../../application/wired';
 // ============================================================================
 
 export const listFraudRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const rules = await fraudRepo.getRules(false);
-  const pendingReviews = await fraudRepo.getPendingReviews();
+  const rules = await manageFraudRecordsUseCase.listRules(false);
+  const pendingReviews = await manageFraudRecordsUseCase.getPendingReviews();
 
   adminRespond(req, res, 'payment/fraud/rules', {
     pageName: 'Fraud Rules',
@@ -47,7 +48,7 @@ export const createFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
     // Parse conditions from condition-builder form data
     const parsedConditions = parseConditionsFromForm(conditions);
 
-    await fraudRepo.saveRule({
+    await manageFraudRecordsUseCase.saveRule({
       fraudRuleId: '',
       name,
       description: description || undefined,
@@ -83,7 +84,7 @@ export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
       isActive?: string | boolean;
     };
 
-    const existing = await fraudRepo.getRule(fraudRuleId);
+    const existing = await manageFraudRecordsUseCase.getRule(fraudRuleId);
     if (!existing) {
       res.redirect('/hub/payment/fraud/rules?error=Fraud rule not found');
       return;
@@ -91,7 +92,7 @@ export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
 
     const parsedConditions = parseConditionsFromForm(conditions);
 
-    await fraudRepo.saveRule({
+    await manageFraudRecordsUseCase.saveRule({
       ...existing,
       name,
       description: description || undefined,
@@ -116,7 +117,7 @@ export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
 export const deleteFraudRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { fraudRuleId } = req.params;
-    await fraudRepo.deleteRule(fraudRuleId);
+    await manageFraudRecordsUseCase.deleteRule(fraudRuleId);
     res.json({ success: true });
   } catch (error: unknown) {
     logger.warn('Error deleting fraud rule:', error);

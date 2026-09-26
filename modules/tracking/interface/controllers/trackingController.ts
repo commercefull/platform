@@ -7,15 +7,11 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { GTMConfig, MetaCAPIConfig, EventMapping } from '../../domain/entities/TrackingConfig';
-import { ManageTrackingConfigUseCase } from '../../application/useCases/ManageTrackingConfig';
-import { ProcessTrackingEventUseCase } from '../../application/useCases/ProcessTrackingEvent';
-import { GetTrackingStatusUseCase } from '../../application/useCases/GetTrackingStatus';
-import { TrackingConfigRepositoryImpl } from '../../application/wired';
-
-const repo = new TrackingConfigRepositoryImpl();
-const manageConfigUseCase = new ManageTrackingConfigUseCase(repo);
-const processEventUseCase = new ProcessTrackingEventUseCase(repo);
-const getStatusUseCase = new GetTrackingStatusUseCase(repo);
+import {
+  manageTrackingConfigUseCase as manageConfigUseCase,
+  processTrackingEventUseCase as processEventUseCase,
+  getTrackingStatusUseCase as getStatusUseCase,
+} from '../../application/wired';
 
 class TrackingController {
   // ── Config CRUD ─────────────────────────────────────────────

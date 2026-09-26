@@ -2,10 +2,12 @@ import type {
   ProductReview,
   ProductReviewCreateParams,
   ProductReviewUpdateParams,
+  ReviewRating,
   ReviewStatus,
   ReviewFilters,
   ProductReviewPort,
 } from '../../domain/repositories/ProductCatalogPorts';
+import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
 export class ManageProductReviewsUseCase {
   constructor(private readonly productReviewRepo: ProductReviewPort) {}
@@ -28,6 +30,43 @@ export class ManageProductReviewsUseCase {
   async create(params: ProductReviewCreateParams): Promise<ProductReview> {
     return this.productReviewRepo.create(params);
   }
+  async submitReview(input: {
+    productId: string;
+    customerId?: string;
+    rating?: number;
+    title?: string;
+    content?: string;
+    reviewerName?: string;
+    reviewerEmail?: string;
+  }): Promise<ProductReview> {
+    if (!input.rating || input.rating < 1 || input.rating > 5) {
+      throw new ProductValidationError('Rating must be between 1 and 5');
+    }
+    if (!input.reviewerName?.trim()) {
+      throw new ProductValidationError('Reviewer name is required');
+    }
+    return this.productReviewRepo.create({
+      productId: input.productId,
+      customerId: input.customerId,
+      rating: input.rating as ReviewRating,
+      title: input.title,
+      content: input.content,
+      reviewerName: input.reviewerName,
+      reviewerEmail: input.reviewerEmail,
+      isVerifiedPurchase: !!input.customerId,
+      status: 'pending',
+    });
+  }
+  async getApprovedReviewsWithStats(productId: string, limit?: number, offset?: number) {
+    const reviews = await this.productReviewRepo.findByProductId(productId, 'approved', limit, offset);
+    const stats = await this.productReviewRepo.getProductStatistics(productId);
+    return {
+      reviews,
+      averageRating: stats.averageRating,
+      ratingDistribution: stats.distribution,
+      totalCount: stats.totalReviews,
+    };
+  }
   async update(id: string, params: ProductReviewUpdateParams): Promise<ProductReview | null> {
     return this.productReviewRepo.update(id, params);
   }
@@ -49,6 +88,9 @@ export class ManageProductReviewsUseCase {
   async incrementHelpful(id: string): Promise<ProductReview | null> {
     return this.productReviewRepo.incrementHelpful(id);
   }
+  async incrementReport(id: string): Promise<ProductReview | null> {
+    return this.productReviewRepo.incrementReport(id);
+  }
   async getProductStatistics(productId: string) {
     return this.productReviewRepo.getProductStatistics(productId);
   }
@@ -57,5 +99,8 @@ export class ManageProductReviewsUseCase {
   }
   async checkCustomerPurchase(customerId: string, productId: string): Promise<boolean> {
     return this.productReviewRepo.checkCustomerPurchase(customerId, productId);
+  }
+  async delete(id: string): Promise<unknown> {
+    return this.productReviewRepo.delete(id);
   }
 }

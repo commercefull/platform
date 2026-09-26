@@ -1,28 +1,25 @@
-const NotificationRepo = notificationDataRepository.notifications;
 import { requireAuth, requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetNotificationsUseCase, GetNotificationsInput } from '../../application/useCases/GetNotifications';
-import { SendNotificationUseCase, SendNotificationInput } from '../../application/useCases/SendNotification';
-import { MarkAsReadUseCase, MarkAsReadInput } from '../../application/useCases/MarkAsRead';
-import { notificationDataRepository } from '../../application/wired';
+import { GetNotificationsInput } from '../../application/useCases/GetNotifications';
+import { SendNotificationInput } from '../../application/useCases/SendNotification';
+import { MarkAsReadInput } from '../../application/useCases/MarkAsRead';
+import { getNotificationsUseCase, markAsReadUseCase, sendNotificationUseCase } from '../../application/useCases/wired';
 
 export const notificationResolvers = {
   Query: {
     notifications: async (_parent: unknown, args: { input: GetNotificationsInput }, context: GraphQLAuthContext) => {
       requireAuth(context);
-      const useCase = new GetNotificationsUseCase(NotificationRepo);
-      return useCase.execute(args.input);
+      return getNotificationsUseCase.execute(args.input);
     },
   },
 
   Mutation: {
     sendNotification: async (_parent: unknown, args: { input: SendNotificationInput }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new SendNotificationUseCase(NotificationRepo, NotificationRepo);
       const input: SendNotificationInput = {
         ...args.input,
         scheduledAt: args.input.scheduledAt ? new Date(args.input.scheduledAt) : undefined,
       };
-      return useCase.execute(input);
+      return sendNotificationUseCase.execute(input);
     },
 
     markNotificationsAsRead: async (
@@ -34,12 +31,11 @@ export const notificationResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const useCase = new MarkAsReadUseCase(NotificationRepo);
       const input: MarkAsReadInput = {
         notificationIds: args.notificationIds,
         recipientId: args.recipientId,
       };
-      return useCase.execute(input);
+      return markAsReadUseCase.execute(input);
     },
   },
 };

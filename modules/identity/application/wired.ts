@@ -44,4 +44,151 @@ export const manageRolesUseCase = new ManageRolesUseCase(identityDataRepository.
 export const adminAuthUseCase = new AdminAuthUseCase(identityDataRepository.users);
 export const getDashboardDataUseCase = new GetDashboardDataUseCase(dashboardQueryRepository);
 
+// --- Token lifecycle use cases (customer + organization flows) ---------------
+import { IssueTokenPairUseCase } from './useCases/token/IssueTokenPair';
+import { RenewAccessTokenUseCase } from './useCases/token/RenewAccessToken';
+import { LogoutSessionUseCase } from './useCases/token/LogoutSession';
+import { CleanupExpiredTokensUseCase } from './useCases/token/CleanupExpiredTokens';
+import { generateAccessToken, verifyAccessToken } from '../utils/jwtHelpers';
+
+const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
+const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+
+const jwtTokenPort = { sign: generateAccessToken, verify: verifyAccessToken };
+const tokenRepo = identityDataRepository.tokens;
+
+export const issueCustomerTokenPairUseCase = new IssueTokenPairUseCase(customerCredentialPort, tokenRepo, jwtTokenPort, {
+  userType: 'customer',
+  jwtSecret: CUSTOMER_JWT_SECRET,
+  accessTokenDuration: ACCESS_TOKEN_DURATION,
+  refreshTokenDuration: REFRESH_TOKEN_DURATION,
+  requireActiveStatus: false,
+  trackLoginTimestamp: true,
+});
+export const issueOrganizationTokenPairUseCase = new IssueTokenPairUseCase(orgCredentialPort, tokenRepo, jwtTokenPort, {
+  userType: 'organization',
+  jwtSecret: ORGANIZATION_JWT_SECRET,
+  accessTokenDuration: ACCESS_TOKEN_DURATION,
+  refreshTokenDuration: REFRESH_TOKEN_DURATION,
+  requireActiveStatus: true,
+  trackLoginTimestamp: false,
+});
+export const renewCustomerAccessTokenUseCase = new RenewAccessTokenUseCase(customerCredentialPort, tokenRepo, jwtTokenPort, {
+  userType: 'customer',
+  jwtSecret: CUSTOMER_JWT_SECRET,
+  accessTokenDuration: ACCESS_TOKEN_DURATION,
+  requireActiveStatus: false,
+});
+export const renewOrganizationAccessTokenUseCase = new RenewAccessTokenUseCase(orgCredentialPort, tokenRepo, jwtTokenPort, {
+  userType: 'organization',
+  jwtSecret: ORGANIZATION_JWT_SECRET,
+  accessTokenDuration: ACCESS_TOKEN_DURATION,
+  requireActiveStatus: true,
+});
+export const logoutSessionUseCase = new LogoutSessionUseCase(tokenRepo);
+export const cleanupExpiredTokensUseCase = new CleanupExpiredTokensUseCase(tokenRepo);
+
+// --- SCIM provisioning -------------------------------------------------------
+import { ManageScimProvisioningUseCase } from './useCases/ManageScimProvisioning';
+
+const scimProvisioningRepo = new ScimProvisioningRepositoryImpl();
+export const manageScimProvisioningUseCase = new ManageScimProvisioningUseCase(scimProvisioningRepo, orgCredentialPort);
+
+import { ProvisionAdminUserUseCase } from './useCases/ProvisionAdminUser';
+
+export const provisionAdminUserUseCase = new ProvisionAdminUserUseCase(identityDataRepository.users);
+
+// --- Store-user assignment (UserStoreController) ------------------------------
+import { AssignUserToStoreUseCase } from './useCases/store/AssignUserToStore';
+import { GetUserStoresUseCase } from './useCases/store/GetUserStores';
+import { ListStoreUsersUseCase } from './useCases/store/ListStoreUsers';
+import { RemoveUserFromStoreUseCase } from './useCases/store/RemoveUserFromStore';
+import type { UserRepository } from '../domain/repositories/UserRepository';
+import type { StoreLookupPort } from './ports/StoreLookupPort';
+
+const userStoreFallbackUserRepository: Pick<UserRepository, 'findById'> = {
+  async findById(userId: string) {
+    return { userId } as Awaited<ReturnType<UserRepository['findById']>>;
+  },
+};
+
+const userStoreFallbackStoreLookup: StoreLookupPort = {
+  async findById(storeId: string) {
+    return { storeId } as Awaited<ReturnType<StoreLookupPort['findById']>>;
+  },
+};
+
+export const assignUserToStoreUseCase = new AssignUserToStoreUseCase(
+  identityDataRepository.users,
+  userStoreFallbackUserRepository as UserRepository,
+  userStoreFallbackStoreLookup,
+);
+export const getUserStoresUseCase = new GetUserStoresUseCase(identityDataRepository.users);
+export const listStoreUsersUseCase = new ListStoreUsersUseCase(identityDataRepository.users);
+export const removeUserFromStoreUseCase = new RemoveUserFromStoreUseCase(identityDataRepository.users);
+
+// --- Social login ------------------------------------------------------------
+import { SocialLoginUseCase } from './useCases/SocialLogin';
+import { LinkSocialAccountUseCase } from './useCases/LinkSocialAccount';
+import { UnlinkSocialAccountUseCase } from './useCases/UnlinkSocialAccount';
+import { GetLinkedAccountsUseCase } from './useCases/GetLinkedAccounts';
+import { AccountNotActiveError } from '../domain/errors/IdentityErrors';
+
+const socialAccountRepo = identityDataRepository.social;
+
+// Find-or-create for customer social login: existing customers sign in,
+// unknown emails get a verified social-only account.
+export const customerSocialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData) => {
+  const existing = await customerCredentialPort.findByEmail(email);
+
+  if (existing) {
+    return { userId: existing.id, isNew: false };
+  }
+
+  const created = await customerCredentialPort.createWithPassword({
+    email,
+    firstName: profileData.firstName || '',
+    lastName: profileData.lastName || '',
+    password: '', // No password for social-only accounts
+    isActive: true,
+    isVerified: true, // Social login implies verified email
+  });
+
+  return { userId: created.id, isNew: true };
+});
+
+// Find-or-create for organization social login: existing orgs must be active,
+// unknown emails get a pending-approval org.
+export const organizationSocialLoginUseCase = new SocialLoginUseCase(socialAccountRepo, async (email, profileData) => {
+  const existing = await orgCredentialPort.findByEmail(email);
+
+  if (existing) {
+    if (existing.status !== 'active') {
+      throw new AccountNotActiveError();
+    }
+    return { userId: existing.id, isNew: false };
+  }
+
+  const created = await orgCredentialPort.createWithPassword({
+    name: profileData.displayName || `${profileData.firstName} ${profileData.lastName}`.trim() || email.split('@')[0],
+    email,
+    password: '', // No password for social-only accounts
+    status: 'pending',
+  });
+
+  return { userId: created.id, isNew: true };
+});
+
+export const linkSocialAccountUseCase = new LinkSocialAccountUseCase(socialAccountRepo);
+export const unlinkSocialAccountUseCase = new UnlinkSocialAccountUseCase(socialAccountRepo);
+export const getLinkedAccountsUseCase = new GetLinkedAccountsUseCase(socialAccountRepo);
+
 export { ScimProvisioningRepositoryImpl, OrganizationCredentialSubjectAdapter, identityDataRepository, CustomerCredentialSubjectAdapter };
+
+import { RefreshTokenUseCase } from './useCases/RefreshToken';
+import { LoginUseCase } from './useCases/Login';
+import { LogoutUseCase } from './useCases/Logout';
+
+export const refreshTokenUseCase = new RefreshTokenUseCase(identityDataRepository.users as never);
+export const loginUseCase = new LoginUseCase(identityDataRepository.users as never);
+export const logoutUseCase = new LogoutUseCase(identityDataRepository.users as never);

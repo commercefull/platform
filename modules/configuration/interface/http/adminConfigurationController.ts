@@ -5,13 +5,12 @@
 
 import { randomUUID } from 'crypto';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { SystemConfigurationRepo } from '../../application/wired';
+import { manageSystemConfigurationUseCase } from '../../application/wired';
 import { SystemConfiguration } from '../../domain/entities/SystemConfiguration';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 export const listSystemConfigurations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const repo = new SystemConfigurationRepo();
-  const configs = await repo.findAll();
+  const configs = await manageSystemConfigurationUseCase.findAll();
 
   adminRespond(req, res, 'configuration/index', {
     pageName: 'System Configurations',
@@ -22,8 +21,7 @@ export const listSystemConfigurations = async (req: HttpRequest, res: HttpRespon
 
 export const viewSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
-  const repo = new SystemConfigurationRepo();
-  const config = await repo.findById(configId);
+  const config = await manageSystemConfigurationUseCase.findById(configId);
 
   if (!config) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Configuration not found' });
@@ -53,16 +51,14 @@ export const createSystemConfiguration = async (req: HttpRequest, res: HttpRespo
     timezone: body.timezone as string | undefined,
   });
 
-  const repo = new SystemConfigurationRepo();
-  await repo.save(config);
+  await manageSystemConfigurationUseCase.save(config);
 
   res.redirect(`/admin/configuration/${config.configId}?success=Configuration created successfully`);
 };
 
 export const editSystemConfigurationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
-  const repo = new SystemConfigurationRepo();
-  const config = await repo.findById(configId);
+  const config = await manageSystemConfigurationUseCase.findById(configId);
 
   if (!config) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Configuration not found' });
@@ -78,8 +74,7 @@ export const editSystemConfigurationForm = async (req: HttpRequest, res: HttpRes
 export const updateSystemConfiguration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { configId } = req.params;
   const body = req.body as HttpRequestBody;
-  const repo = new SystemConfigurationRepo();
-  const config = await repo.findById(configId);
+  const config = await manageSystemConfigurationUseCase.findById(configId);
 
   if (!config) {
     adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Configuration not found' });
@@ -95,7 +90,7 @@ export const updateSystemConfiguration = async (req: HttpRequest, res: HttpRespo
     timezone: body.timezone as string | undefined,
   });
 
-  await repo.save(config);
+  await manageSystemConfigurationUseCase.save(config);
 
   res.redirect(`/admin/configuration/${configId}?success=Configuration updated successfully`);
 };

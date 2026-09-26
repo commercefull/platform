@@ -6,7 +6,7 @@
  * infrastructure/repositories and are injected via application/wired.ts.
  */
 
-import type { ShippingCarrier, ShippingMethodRecord as ShippingMethod, ShippingZoneRecord as ShippingZone, ShippingRateRecord as ShippingRate } from '../entities/ShippingModel';
+import type { ShippingCarrier, ShippingMethodRecord as ShippingMethod, ShippingZoneRecord as ShippingZone, ShippingRateRecord as ShippingRate, ShippingPackagingTypeRecord as ShippingPackagingType } from '../entities/ShippingModel';
 
 export type CreateShippingCarrierInput = Omit<ShippingCarrier, 'shippingCarrierId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingCarrierInput = Partial<Omit<ShippingCarrier, 'shippingCarrierId' | 'code' | 'createdAt' | 'updatedAt'>>;
@@ -16,10 +16,24 @@ export type CreateShippingZoneInput = Omit<ShippingZone, 'shippingZoneId' | 'cre
 export type UpdateShippingZoneInput = Partial<Omit<ShippingZone, 'shippingZoneId' | 'createdAt' | 'updatedAt'>>;
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingRateInput = Partial<Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>>;
+export type CreateShippingPackagingTypeInput = Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>;
+export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>>;
 
 export interface ShippingCarrierPort {
   findById(id: string): Promise<ShippingCarrier | null>;
   findByCode(code: string): Promise<ShippingCarrier | null>;
+  findAll(activeOnly?: boolean): Promise<ShippingCarrier[]>;
+  create(input: CreateShippingCarrierInput): Promise<ShippingCarrier>;
+  update(id: string, input: UpdateShippingCarrierInput): Promise<ShippingCarrier | null>;
+  delete(id: string): Promise<boolean>;
+}
+
+export interface ShippingPackagingPort {
+  findById(id: string): Promise<ShippingPackagingType | null>;
+  findAll(activeOnly?: boolean): Promise<ShippingPackagingType[]>;
+  create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType>;
+  update(id: string, input: UpdateShippingPackagingTypeInput): Promise<ShippingPackagingType | null>;
+  delete(id: string): Promise<boolean>;
 }
 
 export interface ShippingMethodPort {

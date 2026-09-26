@@ -15,12 +15,26 @@ import { MergeGuestBasketOnLoginUseCase } from './MergeGuestBasketOnLogin';
 import { SetItemAsGiftUseCase } from './SetItemAsGift';
 import { ExtendExpirationUseCase } from './ExtendExpiration';
 import { ApplyCouponUseCase } from './ApplyCoupon';
+import { ApplyCouponAdminOverrideUseCase, CouponOverrideLookupPort } from './ApplyCouponAdminOverride';
 import { RemoveCouponUseCase } from './RemoveCoupon';
+import { ProductDetailsAdapter } from '../../infrastructure/acl/ProductDetailsAdapter';
 
 // ACL adapters — wired once, reused by use cases and controllers
 const discountQuotePort = new CouponDiscountQuoteAdapter(CouponRepository);
 const productPricePort = new BasketPricingAdapter();
+const productDetailsPort = new ProductDetailsAdapter();
 const storeCurrencyPort = new StoreCurrencyAdapter();
+
+// Admin override coupon lookup — reads active promotion coupons directly
+const couponOverrideLookupPort: CouponOverrideLookupPort = {
+  findActiveCoupon: async code => {
+    const coupon = await CouponRepository.findByCode(code);
+    if (!coupon || !coupon.isActive || (coupon.expiresAt && coupon.expiresAt <= new Date())) {
+      return null;
+    }
+    return { type: coupon.type, discountValue: coupon.value };
+  },
+};
 
 export const getOrCreateBasketUseCase = new GetOrCreateBasketUseCase(basketRepo, storeCurrencyPort);
 export const addItemUseCase = new AddItemUseCase(basketRepo, productPricePort);
@@ -38,5 +52,10 @@ export const mergeGuestBasketOnLoginUseCase = new MergeGuestBasketOnLoginUseCase
 export const setItemAsGiftUseCase = new SetItemAsGiftUseCase(basketRepo);
 export const extendExpirationUseCase = new ExtendExpirationUseCase(basketRepo);
 export const applyCouponUseCase = new ApplyCouponUseCase(basketRepo, discountQuotePort);
+export const applyCouponAdminOverrideUseCase = new ApplyCouponAdminOverrideUseCase(
+  basketRepo,
+  discountQuotePort,
+  couponOverrideLookupPort,
+);
 export const removeCouponUseCase = new RemoveCouponUseCase(basketRepo);
-export { basketRepo, discountQuotePort, productPricePort };
+export { basketRepo, discountQuotePort, productPricePort, productDetailsPort };

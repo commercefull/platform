@@ -4,12 +4,10 @@
  */
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { supportDataRepository, supportInfoRepository } from '../../application/wired';
+import { manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase } from '../../application/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
 
-const supportRepo = supportDataRepository.tickets;
-const faqRepo = supportInfoRepository.faq;
-const alertRepo = supportInfoRepository.alerts;
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -30,7 +28,7 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
     category?: string;
   };
 
-  const ticket = await supportRepo.createTicket({
+  const ticket = await manageCustomerTicketsUseCase.createTicket({
     customerId,
     orderId: body.orderId,
     email: body.email || req.user?.email || '',
@@ -43,18 +41,6 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
     channel: 'web',
   });
 
-  // Add initial message if description provided
-  if (body.description) {
-    await supportRepo.addMessage({
-      supportTicketId: ticket.supportTicketId,
-      senderId: customerId,
-      senderType: 'customer',
-      senderName: body.name,
-      senderEmail: body.email,
-      message: body.description,
-    });
-  }
-
   res.status(201).json({ success: true, data: ticket });
 };
 
@@ -62,7 +48,7 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { status, limit, offset } = req.query;
 
-  const result = await supportRepo.getTickets(
+  const result = await manageCustomerTicketsUseCase.getTickets(
     { customerId, status: status as TicketStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
@@ -71,71 +57,37 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
 
 export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const ticket = await supportRepo.getTicket(req.params.id);
-
-  if (!ticket || ticket.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Ticket not found' });
-    return;
+  try {
+    const data = await manageCustomerTicketsUseCase.getTicketDetail(req.params.id, customerId || '');
+    res.json({ success: true, data });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const messages = await supportRepo.getMessages(req.params.id, false); // Exclude internal
-  const attachments = await supportRepo.getAttachments(req.params.id);
-
-  // Mark messages as read
-  await supportRepo.markMessagesRead(req.params.id, customerId || '');
-
-  res.json({ success: true, data: { ...ticket, messages, attachments } });
 };
 
 export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const ticket = await supportRepo.getTicket(req.params.id);
-
-  if (!ticket || ticket.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Ticket not found' });
-    return;
+  try {
+    const message = await manageCustomerTicketsUseCase.addCustomerMessage(
+      req.params.id,
+      customerId || '',
+      req.body as { name?: string; email?: string; message: string },
+    );
+    res.status(201).json({ success: true, data: message });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  if (ticket.status === 'closed') {
-    res.status(400).json({ success: false, message: 'Cannot reply to closed ticket' });
-    return;
-  }
-
-  const body = req.body as { name?: string; email?: string; message: string };
-  const message = await supportRepo.addMessage({
-    supportTicketId: req.params.id,
-    senderId: customerId,
-    senderType: 'customer',
-    senderName: body.name || ticket.name,
-    senderEmail: body.email || ticket.email,
-    message: body.message,
-  });
-
-  res.status(201).json({ success: true, data: message });
 };
 
 export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const ticket = await supportRepo.getTicket(req.params.id);
-
-  if (!ticket || ticket.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Ticket not found' });
-    return;
-  }
-
-  if (ticket.status !== 'resolved' && ticket.status !== 'closed') {
-    res.status(400).json({ success: false, message: 'Can only submit feedback for resolved tickets' });
-    return;
-  }
-
   const { satisfaction, feedback } = req.body as { satisfaction: number; feedback?: string };
-  if (satisfaction < 1 || satisfaction > 5) {
-    res.status(400).json({ success: false, message: 'Satisfaction must be between 1 and 5' });
-    return;
+  try {
+    await manageCustomerTicketsUseCase.submitFeedback(req.params.id, customerId || '', satisfaction, feedback);
+    res.json({ success: true, message: 'Feedback submitted' });
+  } catch (error: unknown) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  await supportRepo.submitFeedback(req.params.id, satisfaction, feedback);
-  res.json({ success: true, message: 'Feedback submitted' });
 };
 
 // ============================================================================
@@ -143,29 +95,29 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
 // ============================================================================
 
 export const getFaqCategories: AsyncHandler = async (req, res, _next) => {
-  const categories = await faqRepo.getCategories(true);
+  const categories = await manageFaqUseCase.getCategories(true);
   res.json({ success: true, data: categories });
 };
 
 export const getFeaturedFaqCategories: AsyncHandler = async (req, res, _next) => {
-  const categories = await faqRepo.getFeaturedCategories();
+  const categories = await manageFaqUseCase.getFeaturedCategories();
   res.json({ success: true, data: categories });
 };
 
 export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
-  const category = await faqRepo.getCategoryBySlug(req.params.slug);
+  const category = await manageFaqUseCase.getCategoryBySlug(req.params.slug);
   if (!category || !category.isActive) {
     res.status(404).json({ success: false, message: 'Category not found' });
     return;
   }
 
-  const articles = await faqRepo.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
+  const articles = await manageFaqUseCase.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
 
   res.json({ success: true, data: { ...category, articles: articles.data } });
 };
 
 export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
-  const article = await faqRepo.getArticleBySlug(req.params.slug);
+  const article = await manageFaqUseCase.getArticleBySlug(req.params.slug);
   if (!article || !article.isPublished) {
     res.status(404).json({ success: false, message: 'Article not found' });
     return;
@@ -175,13 +127,13 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
   const sessionKey = `faq_view_${article.faqArticleId}`;
   const session = req.session as unknown as Record<string, unknown> | undefined;
   const isUnique = !session?.[sessionKey];
-  await faqRepo.incrementViews(article.faqArticleId, isUnique);
+  await manageFaqUseCase.incrementViews(article.faqArticleId, isUnique);
   if (session) {
     session[sessionKey] = true;
   }
 
   // Get related articles
-  const relatedArticles = await faqRepo.getRelatedArticles(article.faqArticleId);
+  const relatedArticles = await manageFaqUseCase.getRelatedArticles(article.faqArticleId);
 
   res.json({ success: true, data: { ...article, relatedArticles } });
 };
@@ -193,19 +145,19 @@ export const searchFaq: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const articles = await faqRepo.searchArticles(q as string, parseInt(limit as string) || 10);
+  const articles = await manageFaqUseCase.searchArticles(q as string, parseInt(limit as string) || 10);
   res.json({ success: true, data: articles });
 };
 
 export const getPopularFaqArticles: AsyncHandler = async (req, res, _next) => {
   const { limit } = req.query;
-  const articles = await faqRepo.getPopularArticles(parseInt(limit as string) || 10);
+  const articles = await manageFaqUseCase.getPopularArticles(parseInt(limit as string) || 10);
   res.json({ success: true, data: articles });
 };
 
 export const submitFaqFeedback: AsyncHandler = async (req, res, _next) => {
   const { isHelpful } = req.body as { isHelpful: boolean };
-  await faqRepo.submitHelpfulVote(req.params.id, isHelpful);
+  await manageFaqUseCase.submitHelpfulVote(req.params.id, isHelpful);
   res.json({ success: true, message: 'Feedback submitted' });
 };
 
@@ -227,7 +179,7 @@ export const createStockAlert: AsyncHandler = async (req, res, _next) => {
     notificationChannel?: NotificationChannel;
   };
 
-  const alert = await alertRepo.createStockAlert({
+  const alert = await manageStockAlertsUseCase.createStockAlert({
     customerId,
     email: body.email,
     phone: body.phone,
@@ -247,7 +199,7 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { status, limit, offset } = req.query;
 
-  const result = await alertRepo.getStockAlerts(
+  const result = await manageStockAlertsUseCase.listStockAlerts(
     { customerId, status: status as AlertStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
@@ -256,14 +208,14 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
 
 export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const alert = await alertRepo.getStockAlert(req.params.id);
+  const alert = await manageStockAlertsUseCase.getStockAlert(req.params.id);
 
   if (!alert || alert.customerId !== customerId) {
     res.status(404).json({ success: false, message: 'Alert not found' });
     return;
   }
 
-  await alertRepo.cancelStockAlert(req.params.id);
+  await manageStockAlertsUseCase.cancelStockAlert(req.params.id);
   res.json({ success: true, message: 'Alert cancelled' });
 };
 
@@ -291,7 +243,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
   };
 
   const toCents = (v?: number) => (v != null ? Math.round(Number(v) * 100) : undefined);
-  const alert = await alertRepo.createPriceAlert({
+  const alert = await manageStockAlertsUseCase.createPriceAlert({
     customerId,
     email: body.email,
     phone: body.phone,
@@ -316,7 +268,7 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   const { status, limit, offset } = req.query;
 
-  const result = await alertRepo.getPriceAlerts(
+  const result = await manageStockAlertsUseCase.listPriceAlerts(
     { customerId, status: status as AlertStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
@@ -325,13 +277,13 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
 
 export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const alert = await alertRepo.getPriceAlert(req.params.id);
+  const alert = await manageStockAlertsUseCase.getPriceAlert(req.params.id);
 
   if (!alert || alert.customerId !== customerId) {
     res.status(404).json({ success: false, message: 'Alert not found' });
     return;
   }
 
-  await alertRepo.cancelPriceAlert(req.params.id);
+  await manageStockAlertsUseCase.cancelPriceAlert(req.params.id);
   res.json({ success: true, message: 'Alert cancelled' });
 };

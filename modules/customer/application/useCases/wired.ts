@@ -1,4 +1,5 @@
 import customerDataRepository from '../../infrastructure/repositories/CustomerDataRepository';
+import customerGroupDataRepository from '../../infrastructure/repositories/CustomerGroupDataRepository';
 
 const customerRepo = customerDataRepository.customers;
 import { GetCustomerUseCase } from './GetCustomer';
@@ -10,13 +11,20 @@ import { ManageAddressesUseCase } from './ManageAddresses';
 import { AuthenticateCustomerUseCase } from './AuthenticateCustomer';
 import { RegisterCustomerUseCase } from './RegisterCustomer';
 import { ChangePasswordUseCase } from './ChangePassword';
+import { DeleteCustomerUseCase } from './DeleteCustomer';
 import { ManageCustomersUseCase } from './ManageCustomers';
 import { ManageCustomerAddressesUseCase } from './ManageCustomerAddresses';
 import { ManageWishlistUseCase } from './ManageWishlist';
 import { ManageStorefrontAddressesUseCase } from './ManageStorefrontAddresses';
 import { ManageStorefrontWishlistUseCase } from './ManageStorefrontWishlist';
+import { ManageCustomerGroupsUseCase } from './ManageCustomerGroups';
 
 export const manageCustomersUseCase = new ManageCustomersUseCase(customerDataRepository.customers);
+export const manageCustomerGroupsUseCase = new ManageCustomerGroupsUseCase(
+  customerGroupDataRepository.groups,
+  customerGroupDataRepository.memberships,
+  customerDataRepository.customers,
+);
 export const manageCustomerAddressesUseCase = new ManageCustomerAddressesUseCase(customerDataRepository.addresses);
 export const manageWishlistUseCase = new ManageWishlistUseCase(customerDataRepository.wishlist);
 export const manageStorefrontAddressesUseCase = new ManageStorefrontAddressesUseCase(customerDataRepository.addresses);
@@ -25,6 +33,7 @@ export const manageStorefrontWishlistUseCase = new ManageStorefrontWishlistUseCa
 export const getCustomerUseCase = new GetCustomerUseCase(customerRepo);
 export const updateCustomerUseCase = new UpdateCustomerUseCase(customerRepo);
 export const deactivateCustomerUseCase = new DeactivateCustomerUseCase(customerRepo);
+export const deleteCustomerUseCase = new DeleteCustomerUseCase(customerRepo);
 export const reactivateCustomerUseCase = new ReactivateCustomerUseCase(customerRepo);
 export const verifyCustomerUseCase = new VerifyCustomerUseCase(customerRepo);
 export const manageAddressesUseCase = new ManageAddressesUseCase(customerRepo);

@@ -215,9 +215,53 @@ export const getProduct = new GetProductUseCase(ProductRepo);
 1. **UseCase files** (`application/useCases/*.ts`, excluding `wired.ts`) — may ONLY import repository types from `domain/repositories/`
 2. **`wired.ts` files** (`application/wired.ts`, `application/useCases/wired.ts`) — MAY import from `infrastructure/repositories/` (composition root)
 3. **Test files** — import from `domain/repositories/` and create mock implementations; never import from `infrastructure/repositories/`
-4. **Enforced by** the dependency-cruiser rule `application-no-infra-repos`
+4. **Interface files** (`interface/**`) — may ONLY consume wired use-case instances from `application/wired.ts` or `application/useCases/wired.ts`; NEVER import from `infrastructure/` and NEVER construct `new XUseCase(...)` or `new XRepo()` themselves
+5. **Enforced by** the dependency-cruiser rule `application-no-infra-repos`
 
 > See [Repository Dependency Injection Migration Plan](../guides/repository-dependency-injection.md) for the full migration guide.
+
+## Interface Layer Rules (Controllers, Resolvers, Jobs)
+
+The interface layer is transport only. Everything reusable lives in use cases.
+
+### Controllers/resolvers own
+
+- Parsing request params, query strings, and body fields (dates, booleans, cents coercion, JSON fields)
+- Auth/authorization middleware integration (`req.user`, `isOrganizationLoggedIn`)
+- Response shaping, redirects, HTTP status codes, view rendering (`adminRespond`)
+- Calling the wired use case with a plain command/input object
+
+### Use cases own
+
+- All repository access — including CRUD. CRUD goes through use cases because the same operations are reused by admin views, business/customer REST controllers, GraphQL resolvers, and jobs; putting it behind a UC defines validation, defaults, and error semantics once
+- Orchestration across multiple aggregates or repos (composed reads like `GetIntegrationDetail`, fan-out writes, state transitions)
+- Invariants, ownership checks, and business calculations (totals, stats, thresholds)
+- Event emission (`eventBus.emit`, `writeToOutbox`) — never emit from the interface layer
+
+### Composition roots
+
+Each module exposes pre-wired singletons:
+
+```typescript
+// application/useCases/wired.ts
+const repo = new ProductRepositoryImpl();
+export const getProductUseCase = new GetProductUseCase(repo);
+export const manageProductsAdminUseCase = new ManageProductsAdminUseCase(repo);
+```
+
+```typescript
+// interface/controllers/adminProductController.ts — consume, don't construct
+import { getProductUseCase } from '../../application/useCases/wired';
+```
+
+### Grouped facades
+
+Related CRUD on several sub-aggregates belongs in one grouped facade (e.g. `ManagePricingAdminUseCase`, `ManageAdminSubscriptionsUseCase`) rather than a UC per table.
+
+### Do NOT create use cases for
+
+- Placeholder/stub handlers with no real persistence
+- Pure repo re-exports with no consumer — but if an interface file needs the call, route it through a UC method rather than touching the repo directly
 
 ## Module Barrel Exports (`index.ts`)
 

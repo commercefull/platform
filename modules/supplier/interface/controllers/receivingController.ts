@@ -1,46 +1,42 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
-import { supplierPurchaseOrderDataRepository } from '../../application/wired';
+import { createReceivingRecordUseCase, manageReceivingUseCase } from '../../application/wired';
+import { CreateReceivingRecordInput } from '../../application/useCases/CreateReceivingRecord';
+import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
-  SupplierReceivingStatus,
   SupplierReceivingRecordCreateParams,
   SupplierReceivingRecordUpdateParams,
   SupplierReceivingItemCreateParams,
   SupplierReceivingItemUpdateParams,
 } from '../../application/wired';
 
-const ReceivingRecordRepo = supplierPurchaseOrderDataRepository.receivingRecords;
-const ReceivingItemRepo = supplierPurchaseOrderDataRepository.receivingItems;
-const PurchaseOrderRepo = supplierPurchaseOrderDataRepository.purchaseOrders;
-
-// Use the singleton instances directly
-const receivingRecordRepo = ReceivingRecordRepo;
-const receivingItemRepo = ReceivingItemRepo;
-const _purchaseOrderRepo = PurchaseOrderRepo;
+function respondValidationOrError(res: HttpResponse, error: unknown): void {
+  if (error instanceof SupplierValidationError) {
+    validationErrorResponse(res, getErrorMessage(error).split('; '));
+    return;
+  }
+  res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+}
 
 // ---------- Receiving Record Methods ----------
 
 export const getReceivingRecords = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, warehouseId, supplierId, limit = '50' } = req.query;
 
-  let receivingRecords;
-
-  if (status) {
-    receivingRecords = await receivingRecordRepo.findByStatus(status as SupplierReceivingStatus, parseInt(limit as string));
-  } else if (warehouseId) {
-    receivingRecords = await receivingRecordRepo.findByWarehouseId(warehouseId as string, parseInt(limit as string));
-  } else if (supplierId) {
-    receivingRecords = await receivingRecordRepo.findBySupplierId(supplierId as string, parseInt(limit as string));
-  } else {
-    receivingRecords = await receivingRecordRepo.findAll(parseInt(limit as string));
-  }
+  const receivingRecords = await manageReceivingUseCase.listReceivingRecords({
+    status: status as string | undefined,
+    warehouseId: warehouseId as string | undefined,
+    supplierId: supplierId as string | undefined,
+    limit: parseInt(limit as string),
+  });
 
   successResponse(res, receivingRecords);
 };
 
 export const getReceivingRecordById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const receivingRecord = await receivingRecordRepo.findById(id);
+  const receivingRecord = await manageReceivingUseCase.getReceivingRecord(id);
 
   if (!receivingRecord) {
     errorResponse(res, `Receiving record with ID ${id} not found`, 404);
@@ -52,7 +48,7 @@ export const getReceivingRecordById = async (req: HttpRequest, res: HttpResponse
 
 export const getReceivingByPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const receivingRecords = await receivingRecordRepo.findByPurchaseOrderId(id);
+  const receivingRecords = await manageReceivingUseCase.getByPurchaseOrder(id);
   successResponse(res, receivingRecords);
 };
 
@@ -72,60 +68,40 @@ export const createReceivingRecord = async (req: HttpRequest, res: HttpResponse)
     items, // Array of receiving items
   } = req.body as SupplierReceivingRecordCreateParams & { items: SupplierReceivingItemCreateParams[] };
 
-  // Validate required fields
-  const errors: string[] = [];
-  if (!distributionWarehouseId) errors.push('distributionWarehouseId is required');
-  if (!supplierId) errors.push('supplierId is required');
-  if (!items || !Array.isArray(items) || items.length === 0) errors.push('items array is required and must not be empty');
+  try {
+    const result = await createReceivingRecordUseCase.execute({
+      supplierPurchaseOrderId,
+      distributionWarehouseId,
+      supplierId,
+      status,
+      receivedDate,
+      carrierName,
+      trackingNumber,
+      packageCount,
+      notes,
+      discrepancies,
+      attachments,
+      items,
+    } as CreateReceivingRecordInput);
 
-  if (errors.length > 0) {
-    validationErrorResponse(res, errors);
-    return;
+    successResponse(
+      res,
+      {
+        receivingRecord: result.receivingRecord,
+        items: result.items,
+      },
+      201,
+    );
+  } catch (error) {
+    respondValidationOrError(res, error);
   }
-
-  // Create receiving record
-  const recordParams: SupplierReceivingRecordCreateParams = {
-    supplierPurchaseOrderId,
-    distributionWarehouseId,
-    supplierId,
-    status,
-    receivedDate,
-    carrierName,
-    trackingNumber,
-    packageCount,
-    notes,
-    discrepancies,
-    attachments,
-  };
-
-  const receivingRecord = await receivingRecordRepo.create(recordParams);
-
-  // Create receiving items
-  const createdItems = [];
-  for (const item of items) {
-    const itemParams: SupplierReceivingItemCreateParams = {
-      ...item,
-      supplierReceivingRecordId: receivingRecord.supplierReceivingRecordId,
-    };
-    const createdItem = await receivingItemRepo.create(itemParams);
-    createdItems.push(createdItem);
-  }
-
-  successResponse(
-    res,
-    {
-      receivingRecord,
-      items: createdItems,
-    },
-    201,
-  );
 };
 
 export const updateReceivingRecord = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierReceivingRecordUpdateParams;
 
-  const receivingRecord = await receivingRecordRepo.update(id, updateParams);
+  const receivingRecord = await manageReceivingUseCase.updateReceivingRecord(id, updateParams as Record<string, unknown>);
 
   if (!receivingRecord) {
     errorResponse(res, `Receiving record with ID ${id} not found`, 404);
@@ -137,7 +113,7 @@ export const updateReceivingRecord = async (req: HttpRequest, res: HttpResponse)
 
 export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const receivingRecord = await receivingRecordRepo.complete(id);
+  const receivingRecord = await manageReceivingUseCase.completeReceiving(id);
 
   if (!receivingRecord) {
     errorResponse(res, `Receiving record with ID ${id} not found`, 404);
@@ -151,39 +127,27 @@ export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const getReceivingItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const items = await receivingItemRepo.findByReceivingRecordId(id);
+  const items = await manageReceivingUseCase.getItems(id);
   successResponse(res, items);
 };
 
 export const createReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const body = req.body as Omit<SupplierReceivingItemCreateParams, 'supplierReceivingRecordId'>;
-  const itemParams: SupplierReceivingItemCreateParams = {
-    supplierReceivingRecordId: id,
-    ...body,
-  };
 
-  // Validate required fields
-  const errors: string[] = [];
-  if (!itemParams.productId) errors.push('productId is required');
-  if (!itemParams.sku) errors.push('sku is required');
-  if (!itemParams.name) errors.push('name is required');
-  if (!itemParams.receivedQuantity || itemParams.receivedQuantity < 0) errors.push('receivedQuantity must be non-negative');
-
-  if (errors.length > 0) {
-    validationErrorResponse(res, errors);
-    return;
+  try {
+    const item = await manageReceivingUseCase.createItem(id, body);
+    successResponse(res, item, 201);
+  } catch (error) {
+    respondValidationOrError(res, error);
   }
-
-  const item = await receivingItemRepo.create(itemParams);
-  successResponse(res, item, 201);
 };
 
 export const updateReceivingItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierReceivingItemUpdateParams;
 
-  const item = await receivingItemRepo.update(id, updateParams);
+  const item = await manageReceivingUseCase.updateItem(id, updateParams as Record<string, unknown>);
 
   if (!item) {
     errorResponse(res, `Receiving item with ID ${id} not found`, 404);
@@ -197,7 +161,7 @@ export const acceptReceivingItem = async (req: HttpRequest, res: HttpResponse): 
   const { id } = req.params;
   const { processedBy } = req.body as { processedBy?: string };
 
-  const item = await receivingItemRepo.accept(id, processedBy);
+  const item = await manageReceivingUseCase.acceptItem(id, processedBy);
 
   if (!item) {
     errorResponse(res, `Receiving item with ID ${id} not found`, 404);
@@ -211,17 +175,16 @@ export const rejectReceivingItem = async (req: HttpRequest, res: HttpResponse): 
   const { id } = req.params;
   const { reason, processedBy } = req.body as { reason?: string; processedBy?: string };
 
-  if (!reason) {
-    validationErrorResponse(res, ['reason is required']);
-    return;
+  try {
+    const item = await manageReceivingUseCase.rejectItem(id, reason, processedBy);
+
+    if (!item) {
+      errorResponse(res, `Receiving item with ID ${id} not found`, 404);
+      return;
+    }
+
+    successResponse(res, item);
+  } catch (error) {
+    respondValidationOrError(res, error);
   }
-
-  const item = await receivingItemRepo.reject(id, reason, processedBy);
-
-  if (!item) {
-    errorResponse(res, `Receiving item with ID ${id} not found`, 404);
-    return;
-  }
-
-  successResponse(res, item);
 };

@@ -8,7 +8,6 @@ import {
 } from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
-import { CompanyRepository, B2BUserRepository, QuoteRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import {
   CompanyNotFoundError,
   CompanyAlreadyExistsError,
@@ -43,15 +42,15 @@ export class B2BController {
   private approvalUseCase: ManageApprovalWorkflowUseCase;
 
   constructor(
-    companyRepo: CompanyRepository,
-    userRepo: B2BUserRepository,
-    quoteRepo: QuoteRepository,
-    approvalRepo: ApprovalWorkflowRepository,
+    companyUseCase: ManageCompanyUseCase,
+    userUseCase: ManageB2BUserUseCase,
+    quoteUseCase: ManageQuoteUseCase,
+    approvalUseCase: ManageApprovalWorkflowUseCase,
   ) {
-    this.companyUseCase = new ManageCompanyUseCase(companyRepo);
-    this.userUseCase = new ManageB2BUserUseCase(userRepo, companyRepo);
-    this.quoteUseCase = new ManageQuoteUseCase(quoteRepo);
-    this.approvalUseCase = new ManageApprovalWorkflowUseCase(approvalRepo, companyRepo);
+    this.companyUseCase = companyUseCase;
+    this.userUseCase = userUseCase;
+    this.quoteUseCase = quoteUseCase;
+    this.approvalUseCase = approvalUseCase;
   }
 
   private handleError(res: HttpResponse, error: unknown): void {

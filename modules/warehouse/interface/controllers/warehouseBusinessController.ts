@@ -1,14 +1,35 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
-import { eventBus } from '../../../../libs/events/eventBus';
-import { warehouseDataRepository } from '../../application/wired';
-import { WarehouseUpdateParams } from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
+import { WarehouseValidationError } from '../../domain/errors/WarehouseErrors';
+import type {
+  UpdateZoneInput,
+  UpdateBinInput,
+  CreateBinInput,
+  CreateReceivingInput,
+  CreatePickPackInput,
+} from '../../domain/repositories/WarehouseRepository';
+import type { WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
+import {
+  manageWarehouseAdminUseCase,
+  manageZonesUseCase,
+  manageBinsUseCase,
+  manageReceivingUseCase,
+  managePickPackUseCase,
+} from '../../application/wired';
 
-const warehouseRepo = warehouseDataRepository.warehouses;
-const warehouseZoneRepo = warehouseDataRepository.zones;
-const warehouseBinRepo = warehouseDataRepository.bins;
-const warehouseReceivingRepo = warehouseDataRepository.receiving;
-const warehousePickPackRepo = warehouseDataRepository.pickPack;
+/**
+ * Maps domain errors thrown by use cases to the legacy response shapes:
+ * validation failures keep the `error.errors[]` array; everything else uses
+ * the standard error envelope.
+ */
+function useCaseErrorResponse(res: HttpResponse, error: unknown): void {
+  if (error instanceof WarehouseValidationError) {
+    validationErrorResponse(res, [getErrorMessage(error)]);
+    return;
+  }
+  errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
+}
 
 interface CreateWarehouseBody {
   name: string;
@@ -60,22 +81,22 @@ export const getWarehouses = async (req: HttpRequest, res: HttpResponse): Promis
 
   if (search) {
     // Use search functionality
-    warehouses = await warehouseRepo.search(search as string);
+    warehouses = await manageWarehouseAdminUseCase.search(search as string);
   } else if (fulfillmentCenters === 'true') {
     // Get fulfillment centers
-    warehouses = await warehouseRepo.findFulfillmentCenters();
+    warehouses = await manageWarehouseAdminUseCase.findFulfillmentCenters();
   } else if (returnCenters === 'true') {
     // Get return centers
-    warehouses = await warehouseRepo.findReturnCenters();
+    warehouses = await manageWarehouseAdminUseCase.findReturnCenters();
   } else if (organizationId) {
     // Get warehouses by merchant
-    warehouses = await warehouseRepo.findByMerchantId(organizationId as string);
+    warehouses = await manageWarehouseAdminUseCase.findByMerchantId(organizationId as string);
   } else if (country) {
     // Get warehouses by country
-    warehouses = await warehouseRepo.findByCountry(country as string);
+    warehouses = await manageWarehouseAdminUseCase.findByCountry(country as string);
   } else {
     // Get all warehouses
-    warehouses = await warehouseRepo.findAll(activeOnly === 'true');
+    warehouses = await manageWarehouseAdminUseCase.findAll(activeOnly === 'true');
   }
 
   successResponse(res, warehouses);
@@ -83,7 +104,7 @@ export const getWarehouses = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const getWarehouseById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const warehouse = await warehouseRepo.findById(id);
+  const warehouse = await manageWarehouseAdminUseCase.findById(id);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -95,7 +116,7 @@ export const getWarehouseById = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const getWarehouseByCode = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { code } = req.params;
-  const warehouse = await warehouseRepo.findByCode(code);
+  const warehouse = await manageWarehouseAdminUseCase.findByCode(code);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with code ${code} not found`, 404);
@@ -106,10 +127,10 @@ export const getWarehouseByCode = async (req: HttpRequest, res: HttpResponse): P
 };
 
 export const getDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  let warehouse = await warehouseRepo.findDefault();
+  let warehouse = await manageWarehouseAdminUseCase.findDefault();
   if (!warehouse) {
     // Fallback to first active warehouse to satisfy deterministic 200 for this endpoint
-    const list = await warehouseRepo.findAll(true);
+    const list = await manageWarehouseAdminUseCase.findAll(true);
     warehouse = list[0] || null;
   }
 
@@ -122,17 +143,17 @@ export const getDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): 
 };
 
 export const getFulfillmentCenters = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const warehouses = await warehouseRepo.findFulfillmentCenters();
+  const warehouses = await manageWarehouseAdminUseCase.findFulfillmentCenters();
   successResponse(res, warehouses);
 };
 
 export const getReturnCenters = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const warehouses = await warehouseRepo.findReturnCenters();
+  const warehouses = await manageWarehouseAdminUseCase.findReturnCenters();
   successResponse(res, warehouses);
 };
 
 export const getWarehouseStatistics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const statistics = await warehouseRepo.getStatistics();
+  const statistics = await manageWarehouseAdminUseCase.getStatistics();
   successResponse(res, statistics);
 };
 
@@ -147,7 +168,7 @@ export const findNearestWarehouses = async (req: HttpRequest, res: HttpResponse)
     return;
   }
 
-  const warehouses = await warehouseRepo.findNearLocation(
+  const warehouses = await manageWarehouseAdminUseCase.findNearLocation(
     parseFloat(latitude as string),
     parseFloat(longitude as string),
     parseFloat(radiusKm as string),
@@ -159,13 +180,13 @@ export const findNearestWarehouses = async (req: HttpRequest, res: HttpResponse)
 
 export const getWarehousesByCountry = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { country } = req.params;
-  const warehouses = await warehouseRepo.findByCountry(country);
+  const warehouses = await manageWarehouseAdminUseCase.findByCountry(country);
   successResponse(res, warehouses);
 };
 
 export const getWarehousesByMerchant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
-  const warehouses = await warehouseRepo.findByMerchantId(organizationId);
+  const warehouses = await manageWarehouseAdminUseCase.findByMerchantId(organizationId);
   successResponse(res, warehouses);
 };
 
@@ -248,7 +269,7 @@ export const createWarehouse = async (
     createdBy,
   };
 
-  const warehouse = await warehouseRepo.create(warehouseParams);
+  const warehouse = await manageWarehouseAdminUseCase.create(warehouseParams);
   successResponse(res, warehouse, 201);
 };
 
@@ -259,7 +280,7 @@ export const updateWarehouse = async (
   const { id } = req.params;
   const updateParams = req.body;
 
-  const warehouse = await warehouseRepo.update(id, updateParams);
+  const warehouse = await manageWarehouseAdminUseCase.update(id, updateParams);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -271,7 +292,7 @@ export const updateWarehouse = async (
 
 export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await warehouseRepo.delete(id);
+  const deleted = await manageWarehouseAdminUseCase.delete(id);
 
   if (!deleted) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -283,7 +304,7 @@ export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const setDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const warehouse = await warehouseRepo.setAsDefault(id);
+  const warehouse = await manageWarehouseAdminUseCase.setAsDefault(id);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -295,7 +316,7 @@ export const setDefaultWarehouse = async (req: HttpRequest, res: HttpResponse): 
 
 export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const warehouse = await warehouseRepo.activate(id);
+  const warehouse = await manageWarehouseAdminUseCase.activate(id);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -307,7 +328,7 @@ export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const deactivateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const warehouse = await warehouseRepo.deactivate(id);
+  const warehouse = await manageWarehouseAdminUseCase.deactivate(id);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -331,7 +352,7 @@ export const addShippingMethod = async (
     return;
   }
 
-  const warehouse = await warehouseRepo.addShippingMethod(id, method);
+  const warehouse = await manageWarehouseAdminUseCase.addShippingMethod(id, method);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -344,7 +365,7 @@ export const addShippingMethod = async (
 export const removeShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id, method } = req.params;
 
-  const warehouse = await warehouseRepo.removeShippingMethod(id, method);
+  const warehouse = await manageWarehouseAdminUseCase.removeShippingMethod(id, method);
 
   if (!warehouse) {
     errorResponse(res, `Warehouse with ID ${id} not found`, 404);
@@ -370,43 +391,24 @@ interface CreateZoneBody {
 
 export const createZone = async (req: HttpRequest<Record<string, string>, unknown, CreateZoneBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const { name, code, description, zoneType, isActive, sortOrder, metadata } = req.body;
 
-  if (!name || !code) {
-    validationErrorResponse(res, ['name and code are required']);
-    return;
+  try {
+    const zone = await manageZonesUseCase.create(id, req.body);
+    successResponse(res, zone, 201);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-
-  const zone = await warehouseZoneRepo.createZone({
-    distributionWarehouseId: id,
-    name,
-    code,
-    description,
-    zoneType,
-    isActive,
-    sortOrder,
-    metadata,
-  });
-
-  eventBus.emit('warehouse.zone.created', {
-    zoneId: zone.distributionWarehouseZoneId,
-    warehouseId: id,
-    name,
-    code,
-  });
-
-  successResponse(res, zone, 201);
 };
 
 export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const zones = await warehouseZoneRepo.findZonesByWarehouse(id);
+  const zones = await manageZonesUseCase.findZonesByWarehouse(id);
   successResponse(res, zones);
 };
 
 export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
-  const zone = await warehouseZoneRepo.findZoneById(zoneId);
+  const zone = await manageZonesUseCase.findZoneById(zoneId);
   if (!zone) {
     errorResponse(res, 'Zone not found', 404);
     return;
@@ -416,20 +418,24 @@ export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<
 
 export const updateZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
-  const zone = await warehouseZoneRepo.updateZone(zoneId, req.body as Record<string, unknown>);
-  if (!zone) {
-    errorResponse(res, 'Zone not found', 404);
-    return;
+
+  try {
+    const zone = await manageZonesUseCase.update(zoneId, req.body as UpdateZoneInput);
+    successResponse(res, zone);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  eventBus.emit('warehouse.zone.updated', { zoneId, changes: req.body });
-  successResponse(res, zone);
 };
 
 export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId } = req.params;
-  await warehouseZoneRepo.deleteZone(zoneId);
-  eventBus.emit('warehouse.zone.deleted', { zoneId });
-  successResponse(res, { message: 'Zone deleted successfully' });
+
+  try {
+    await manageZonesUseCase.delete(zoneId);
+    successResponse(res, { message: 'Zone deleted successfully' });
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
+  }
 };
 
 // ============================================================================
@@ -453,38 +459,24 @@ interface CreateBinBody {
 
 export const createBin = async (req: HttpRequest<Record<string, string>, unknown, CreateBinBody>, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const { locationCode, binType, ...rest } = req.body;
 
-  if (!locationCode || !binType) {
-    validationErrorResponse(res, ['locationCode and binType are required']);
-    return;
+  try {
+    const bin = await manageBinsUseCase.create(id, req.body as Omit<CreateBinInput, 'distributionWarehouseId'>);
+    successResponse(res, bin, 201);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-
-  const bin = await warehouseBinRepo.createBin({
-    distributionWarehouseId: id,
-    locationCode,
-    binType,
-    ...rest,
-  });
-
-  eventBus.emit('warehouse.bin.created', {
-    binId: bin.distributionWarehouseBinId,
-    warehouseId: id,
-    locationCode,
-  });
-
-  successResponse(res, bin, 201);
 };
 
 export const getBins = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const bins = await warehouseBinRepo.findBinsByWarehouse(id);
+  const bins = await manageBinsUseCase.findBinsByWarehouse(id);
   successResponse(res, bins);
 };
 
 export const getBinById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
-  const bin = await warehouseBinRepo.findBinById(binId);
+  const bin = await manageBinsUseCase.findBinById(binId);
   if (!bin) {
     errorResponse(res, 'Bin not found', 404);
     return;
@@ -494,20 +486,24 @@ export const getBinById = async (req: HttpRequest, res: HttpResponse): Promise<v
 
 export const updateBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
-  const bin = await warehouseBinRepo.updateBin(binId, req.body as Record<string, unknown>);
-  if (!bin) {
-    errorResponse(res, 'Bin not found', 404);
-    return;
+
+  try {
+    const bin = await manageBinsUseCase.update(binId, req.body as UpdateBinInput);
+    successResponse(res, bin);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  eventBus.emit('warehouse.bin.updated', { binId, changes: req.body });
-  successResponse(res, bin);
 };
 
 export const deleteBin = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { binId } = req.params;
-  await warehouseBinRepo.deleteBin(binId);
-  eventBus.emit('warehouse.bin.deleted', { binId });
-  successResponse(res, { message: 'Bin deleted successfully' });
+
+  try {
+    await manageBinsUseCase.delete(binId);
+    successResponse(res, { message: 'Bin deleted successfully' });
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
+  }
 };
 
 // ============================================================================
@@ -532,39 +528,25 @@ export const createReceiving = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { receiptNumber, sourceType, ...rest } = req.body;
 
-  if (!receiptNumber || !sourceType) {
-    validationErrorResponse(res, ['receiptNumber and sourceType are required']);
-    return;
+  try {
+    const record = await manageReceivingUseCase.create(id, req.body as Omit<CreateReceivingInput, 'distributionWarehouseId'>);
+    successResponse(res, record, 201);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-
-  const record = await warehouseReceivingRepo.create({
-    distributionWarehouseId: id,
-    receiptNumber,
-    sourceType,
-    ...rest,
-  });
-
-  eventBus.emit('warehouse.receiving.created', {
-    receivingId: record.warehouseReceivingId,
-    warehouseId: id,
-    receiptNumber,
-  });
-
-  successResponse(res, record, 201);
 };
 
 export const getReceiving = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const status = req.query.status as string | undefined;
-  const records = await warehouseReceivingRepo.findByWarehouse(id, status);
+  const records = await manageReceivingUseCase.findByWarehouse(id, status);
   successResponse(res, records);
 };
 
 export const getReceivingById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { receivingId } = req.params;
-  const record = await warehouseReceivingRepo.findById(receivingId);
+  const record = await manageReceivingUseCase.findById(receivingId);
   if (!record) {
     errorResponse(res, 'Receiving record not found', 404);
     return;
@@ -580,22 +562,12 @@ export const completeReceiving = async (req: HttpRequest, res: HttpResponse): Pr
     hasDiscrepancies?: boolean;
   };
 
-  if (items) {
-    await warehouseReceivingRepo.updateItems(receivingId, items, hasDiscrepancies ?? false);
+  try {
+    const record = await manageReceivingUseCase.complete(receivingId, { receivedBy, items, hasDiscrepancies });
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-
-  const record = await warehouseReceivingRepo.updateStatus(receivingId, 'completed', receivedBy);
-  if (!record) {
-    errorResponse(res, 'Receiving record not found', 404);
-    return;
-  }
-
-  eventBus.emit('warehouse.receiving.completed', {
-    receivingId: record.warehouseReceivingId,
-    warehouseId: record.distributionWarehouseId,
-  });
-
-  successResponse(res, record);
 };
 
 // ============================================================================
@@ -616,38 +588,25 @@ export const createPickPack = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { pickPackNumber, ...rest } = req.body;
 
-  if (!pickPackNumber) {
-    validationErrorResponse(res, ['pickPackNumber is required']);
-    return;
+  try {
+    const record = await managePickPackUseCase.create(id, req.body as Omit<CreatePickPackInput, 'distributionWarehouseId'>);
+    successResponse(res, record, 201);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-
-  const record = await warehousePickPackRepo.create({
-    distributionWarehouseId: id,
-    pickPackNumber,
-    ...rest,
-  });
-
-  eventBus.emit('warehouse.pick.created', {
-    pickPackId: record.warehousePickPackId,
-    warehouseId: id,
-    pickPackNumber,
-  });
-
-  successResponse(res, record, 201);
 };
 
 export const getPickPacks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const status = req.query.status as string | undefined;
-  const records = await warehousePickPackRepo.findByWarehouse(id, status);
+  const records = await managePickPackUseCase.findByWarehouse(id, status);
   successResponse(res, records);
 };
 
 export const getPickPackById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
-  const record = await warehousePickPackRepo.findById(pickPackId);
+  const record = await managePickPackUseCase.findById(pickPackId);
   if (!record) {
     errorResponse(res, 'Pick/pack record not found', 404);
     return;
@@ -657,58 +616,56 @@ export const getPickPackById = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const startPicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
-  const record = await warehousePickPackRepo.startPicking(pickPackId);
-  if (!record) {
-    errorResponse(res, 'Pick/pack record not found or not in pending status', 404);
-    return;
+
+  try {
+    const record = await managePickPackUseCase.startPicking(pickPackId);
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  eventBus.emit('warehouse.pick.created', { pickPackId, warehouseId: record.distributionWarehouseId });
-  successResponse(res, record);
 };
 
 export const completePicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
-  const record = await warehousePickPackRepo.completePicking(pickPackId);
-  if (!record) {
-    errorResponse(res, 'Pick/pack record not found or not in picking status', 404);
-    return;
+
+  try {
+    const record = await managePickPackUseCase.completePicking(pickPackId);
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  eventBus.emit('warehouse.pick.completed', { pickPackId, warehouseId: record.distributionWarehouseId });
-  successResponse(res, record);
 };
 
 export const startPacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
-  const record = await warehousePickPackRepo.startPacking(pickPackId);
-  if (!record) {
-    errorResponse(res, 'Pick/pack record not found or not in picked status', 404);
-    return;
+
+  try {
+    const record = await managePickPackUseCase.startPacking(pickPackId);
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  successResponse(res, record);
 };
 
 export const completePacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
-  const record = await warehousePickPackRepo.completePacking(pickPackId);
-  if (!record) {
-    errorResponse(res, 'Pick/pack record not found or not in packing status', 404);
-    return;
+
+  try {
+    const record = await managePickPackUseCase.completePacking(pickPackId);
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  eventBus.emit('warehouse.pack.completed', { pickPackId, warehouseId: record.distributionWarehouseId });
-  successResponse(res, record);
 };
 
 export const assignPickPack = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pickPackId } = req.params;
   const { assignedTo } = req.body as { assignedTo: string };
-  if (!assignedTo) {
-    validationErrorResponse(res, ['assignedTo is required']);
-    return;
+
+  try {
+    const record = await managePickPackUseCase.assign(pickPackId, assignedTo);
+    successResponse(res, record);
+  } catch (error: unknown) {
+    useCaseErrorResponse(res, error);
   }
-  const record = await warehousePickPackRepo.assignTo(pickPackId, assignedTo);
-  if (!record) {
-    errorResponse(res, 'Pick/pack record not found', 404);
-    return;
-  }
-  successResponse(res, record);
 };

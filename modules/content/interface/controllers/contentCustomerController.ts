@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { contentDataRepository } from '../../application/wired';
+import { manageContentUseCase } from '../../application/useCases/wired';
 
-const contentRepo = contentDataRepository.pages;
+const contentUC = manageContentUseCase;
 
 /**
  * Get published pages with optional filtering
@@ -12,7 +12,7 @@ export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Pr
   const offset = parseInt(req.query.offset as string) || 0;
 
   // Only return published pages
-  const pages = await contentRepo.findAllPages('published', undefined, limit, offset);
+  const pages = await contentUC.findAllPages('published', undefined, limit, offset);
 
   // Remove sensitive information
   const sanitizedPages = pages.map(page => ({
@@ -43,7 +43,7 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
   const { slug } = req.params;
 
   // First get the page by slug
-  const page = await contentRepo.findPageBySlug(slug);
+  const page = await contentUC.findPageBySlug(slug);
 
   if (!page) {
     res.status(404).json({
@@ -54,17 +54,17 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
   }
 
   // Then get content blocks for the page
-  const blocks = await contentRepo.findBlocksByPageId(page.contentPageId);
+  const blocks = await contentUC.findBlocksByPageId(page.contentPageId);
 
   // Get the template if one is assigned to the page
-  const template = page.templateId ? await contentRepo.findTemplateById(page.templateId) : undefined;
+  const template = page.templateId ? await contentUC.findTemplateById(page.templateId) : undefined;
 
   // Combine into a pageData object for consistency with existing code
   const pageData = {
     page,
     blocks: await Promise.all(
       blocks.map(async block => {
-        const contentType = await contentRepo.findBlockTypeById(block.blockTypeId);
+        const contentType = await contentUC.findBlockTypeById(block.blockTypeId);
         return {
           ...block,
           contentType: contentType || {
@@ -135,7 +135,7 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
  * Get active content types (sanitized for public use)
  */
 export const getActiveContentTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const contentTypes = await contentRepo.findAllContentTypes(true);
+  const contentTypes = await contentUC.findAllContentTypes(true);
 
   // Sanitize content types to remove sensitive schema information
   const sanitizedContentTypes = contentTypes.map(type => ({

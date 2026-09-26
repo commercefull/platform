@@ -1,49 +1,34 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
-import { supplierPurchaseOrderDataRepository, supplierDataRepository } from '../../application/wired';
+import { createSupplierPurchaseOrderUseCase, managePurchaseOrdersUseCase } from '../../application/wired';
 import {
-  SupplierPurchaseOrderStatus,
   SupplierPurchaseOrderCreateParams,
   SupplierPurchaseOrderUpdateParams,
   SupplierPurchaseOrderItemCreateParams,
   SupplierPurchaseOrderItemUpdateParams,
 } from '../../application/wired';
-
-// Use the singleton instance directly
-const purchaseOrderRepo = supplierPurchaseOrderDataRepository.purchaseOrders;
-const supplierRepoInstance = supplierDataRepository.suppliers;
-const supplierRepo = supplierRepoInstance;
+import { CreateSupplierPurchaseOrderInput } from '../../application/useCases/CreateSupplierPurchaseOrder';
+import { SupplierNotFoundError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 // ---------- Purchase Order CRUD Methods ----------
 export const getPurchaseOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { status, supplierId, warehouseId, limit = '50', offset = '0' } = req.query;
 
-  let purchaseOrders;
-
-  if (status) {
-    purchaseOrders = await purchaseOrderRepo.findByStatus(
-      status as SupplierPurchaseOrderStatus,
-      parseInt(limit as string),
-      parseInt(offset as string),
-    );
-  } else if (supplierId) {
-    purchaseOrders = await purchaseOrderRepo.findBySupplierId(supplierId as string, parseInt(limit as string), parseInt(offset as string));
-  } else if (warehouseId) {
-    purchaseOrders = await purchaseOrderRepo.findByWarehouseId(
-      warehouseId as string,
-      parseInt(limit as string),
-      parseInt(offset as string),
-    );
-  } else {
-    purchaseOrders = await purchaseOrderRepo.findAll(parseInt(limit as string), parseInt(offset as string));
-  }
+  const purchaseOrders = await managePurchaseOrdersUseCase.listPurchaseOrders({
+    status: status as string | undefined,
+    supplierId: supplierId as string | undefined,
+    warehouseId: warehouseId as string | undefined,
+    limit: parseInt(limit as string),
+    offset: parseInt(offset as string),
+  });
 
   successResponse(res, purchaseOrders);
 };
 
 export const getPurchaseOrderById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const purchaseOrder = await purchaseOrderRepo.findById(id);
+  const purchaseOrder = await managePurchaseOrdersUseCase.getPurchaseOrder(id);
 
   if (!purchaseOrder) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -57,7 +42,11 @@ export const getPurchaseOrdersBySupplierId = async (req: HttpRequest, res: HttpR
   const { id } = req.params;
   const { limit = '50', offset = '0' } = req.query;
 
-  const purchaseOrders = await purchaseOrderRepo.findBySupplierId(id, parseInt(limit as string), parseInt(offset as string));
+  const purchaseOrders = await managePurchaseOrdersUseCase.listPurchaseOrders({
+    supplierId: id,
+    limit: parseInt(limit as string),
+    offset: parseInt(offset as string),
+  });
 
   successResponse(res, purchaseOrders);
 };
@@ -88,78 +77,58 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     items, // Array of purchase order items
   } = req.body as SupplierPurchaseOrderCreateParams & { items: SupplierPurchaseOrderItemCreateParams[]; currency?: string };
 
-  // Validate required fields
-  const errors: string[] = [];
-  if (!supplierId) errors.push('supplierId is required');
-  if (!distributionWarehouseId) errors.push('distributionWarehouseId is required');
-  if (!items || !Array.isArray(items) || items.length === 0) errors.push('items array is required and must not be empty');
+  try {
+    const result = await createSupplierPurchaseOrderUseCase.execute({
+      supplierId,
+      distributionWarehouseId,
+      status,
+      orderType,
+      priority,
+      orderDate,
+      expectedDeliveryDate,
+      deliveryDate,
+      shippingMethod,
+      trackingNumber,
+      carrierName,
+      paymentTerms,
+      currency,
+      subtotalCents,
+      taxCents,
+      shippingCents,
+      discountCents,
+      totalCents,
+      notes,
+      supplierNotes,
+      attachments,
+      items,
+    } as CreateSupplierPurchaseOrderInput);
 
-  if (errors.length > 0) {
-    validationErrorResponse(res, errors);
-    return;
+    successResponse(
+      res,
+      {
+        purchaseOrder: result.purchaseOrder,
+        items: result.items,
+      },
+      201,
+    );
+  } catch (error) {
+    if (error instanceof SupplierNotFoundError) {
+      validationErrorResponse(res, ['Supplier not found']);
+      return;
+    }
+    if (error instanceof SupplierValidationError) {
+      validationErrorResponse(res, getErrorMessage(error).split('; '));
+      return;
+    }
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Validate supplier exists
-  const supplier = await supplierRepo.findById(supplierId);
-  if (!supplier) {
-    validationErrorResponse(res, ['Supplier not found']);
-    return;
-  }
-
-  // Create purchase order
-  const poParams = {
-    supplierId,
-    distributionWarehouseId,
-    status,
-    orderType,
-    priority,
-    orderDate,
-    expectedDeliveryDate,
-    deliveryDate,
-    shippingMethod,
-    trackingNumber,
-    carrierName,
-    paymentTerms,
-    currencyCode: currency || 'USD',
-    subtotalCents,
-    taxCents,
-    shippingCents,
-    discountCents,
-    totalCents,
-    notes,
-    supplierNotes,
-    attachments,
-  };
-
-  const purchaseOrder = await purchaseOrderRepo.create(poParams);
-
-  // Create purchase order items
-  const createdItems = [];
-  for (const item of items) {
-    const itemParams: SupplierPurchaseOrderItemCreateParams = {
-      ...item,
-      totalCents: item.totalCents ?? item.quantity * item.unitCostCents,
-      supplierPurchaseOrderId: purchaseOrder.supplierPurchaseOrderId,
-    };
-    const createdItem = await purchaseOrderRepo.createItem(itemParams);
-    createdItems.push(createdItem);
-  }
-
-  successResponse(
-    res,
-    {
-      purchaseOrder,
-      items: createdItems,
-    },
-    201,
-  );
 };
 
 export const updatePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierPurchaseOrderUpdateParams;
 
-  const purchaseOrder = await purchaseOrderRepo.update(id, updateParams);
+  const purchaseOrder = await managePurchaseOrdersUseCase.updatePurchaseOrder(id, updateParams as Record<string, unknown>);
 
   if (!purchaseOrder) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -171,7 +140,7 @@ export const updatePurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
 
 export const deletePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await purchaseOrderRepo.delete(id);
+  const deleted = await managePurchaseOrdersUseCase.deletePurchaseOrder(id);
 
   if (!deleted) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -183,7 +152,7 @@ export const deletePurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
 
 export const approvePurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const purchaseOrder = await purchaseOrderRepo.approve(id);
+  const purchaseOrder = await managePurchaseOrdersUseCase.approvePurchaseOrder(id);
 
   if (!purchaseOrder) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -195,7 +164,7 @@ export const approvePurchaseOrder = async (req: HttpRequest, res: HttpResponse):
 
 export const cancelPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const purchaseOrder = await purchaseOrderRepo.cancel(id);
+  const purchaseOrder = await managePurchaseOrdersUseCase.cancelPurchaseOrder(id);
 
   if (!purchaseOrder) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -207,7 +176,7 @@ export const cancelPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
 
 export const sendPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const purchaseOrder = await purchaseOrderRepo.send(id);
+  const purchaseOrder = await managePurchaseOrdersUseCase.sendPurchaseOrder(id);
 
   if (!purchaseOrder) {
     errorResponse(res, `Purchase order with ID ${id} not found`, 404);
@@ -221,41 +190,31 @@ export const sendPurchaseOrder = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const getPurchaseOrderItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const items = await purchaseOrderRepo.findItemsByOrderId(id);
+  const items = await managePurchaseOrdersUseCase.getItems(id);
   successResponse(res, items);
 };
 
 export const addPurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const body = req.body as Omit<SupplierPurchaseOrderItemCreateParams, 'supplierPurchaseOrderId'>;
-  const itemParams: SupplierPurchaseOrderItemCreateParams = {
-    supplierPurchaseOrderId: id,
-    ...body,
-    totalCents: body.totalCents ?? body.quantity * body.unitCostCents,
-  };
 
-  // Validate required fields
-  const errors: string[] = [];
-  if (!itemParams.productId) errors.push('productId is required');
-  if (!itemParams.sku) errors.push('sku is required');
-  if (!itemParams.name) errors.push('name is required');
-  if (!itemParams.quantity || itemParams.quantity <= 0) errors.push('quantity must be greater than 0');
-  if (!itemParams.unitCostCents || itemParams.unitCostCents < 0) errors.push('unitCostCents must be non-negative');
-
-  if (errors.length > 0) {
-    validationErrorResponse(res, errors);
-    return;
+  try {
+    const item = await managePurchaseOrdersUseCase.addItem(id, body);
+    successResponse(res, item, 201);
+  } catch (error) {
+    if (error instanceof SupplierValidationError) {
+      validationErrorResponse(res, getErrorMessage(error).split('; '));
+      return;
+    }
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const item = await purchaseOrderRepo.createItem(itemParams);
-  successResponse(res, item, 201);
 };
 
 export const updatePurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const updateParams = req.body as SupplierPurchaseOrderItemUpdateParams;
 
-  const item = await purchaseOrderRepo.updateItem(id, updateParams);
+  const item = await managePurchaseOrdersUseCase.updateItem(id, updateParams as Record<string, unknown>);
 
   if (!item) {
     errorResponse(res, `Purchase order item with ID ${id} not found`, 404);
@@ -267,7 +226,7 @@ export const updatePurchaseOrderItem = async (req: HttpRequest, res: HttpRespons
 
 export const deletePurchaseOrderItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const deleted = await purchaseOrderRepo.deleteItem(id);
+  const deleted = await managePurchaseOrdersUseCase.deleteItem(id);
 
   if (!deleted) {
     errorResponse(res, `Purchase order item with ID ${id} not found`, 404);

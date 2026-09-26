@@ -4,10 +4,9 @@
  */
 
 import { logger } from '../../../../libs/logger';
-import { eventBus } from '../../../../libs/events/eventBus';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { organizationRepoInstance } from '../../application/wired';
+import { approveOrganizationUseCase, suspendOrganizationUseCase } from '../../application/wired';
 
 export const listOrganizations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'operations/organizations/index', {
@@ -74,11 +73,7 @@ export const deleteOrganization = async (req: HttpRequest, res: HttpResponse): P
 export const approveOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   try {
-    const organization = await organizationRepoInstance.update(organizationId, { status: 'approved' });
-    await eventBus.emit('organization.approved', {
-      organizationId: organization.organizationId,
-      businessName: organization.name,
-    });
+    await approveOrganizationUseCase.execute(organizationId);
     res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error approving organization:', error);
@@ -89,7 +84,7 @@ export const approveOrganization = async (req: HttpRequest, res: HttpResponse): 
 export const suspendOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   try {
-    await organizationRepoInstance.update(organizationId, { status: 'suspended' });
+    await suspendOrganizationUseCase.execute(organizationId);
     res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
   } catch (error: unknown) {
     logger.warn('Error suspending organization:', error);

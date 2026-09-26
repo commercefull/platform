@@ -7,23 +7,33 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { CustomerAddress } from '../../../../libs/db/types';
 
-const CustomerRepo = customerDataRepository.customers;
-import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../application/useCases/RegisterCustomer';
-import { GetCustomerCommand, GetCustomerUseCase } from '../../application/useCases/GetCustomer';
-import { UpdateCustomerCommand, UpdateCustomerUseCase } from '../../application/useCases/UpdateCustomer';
-import { DeleteCustomerCommand, DeleteCustomerUseCase } from '../../application/useCases/DeleteCustomer';
-import { VerifyCustomerCommand, VerifyCustomerUseCase } from '../../application/useCases/VerifyCustomer';
-import { DeactivateCustomerCommand, DeactivateCustomerUseCase } from '../../application/useCases/DeactivateCustomer';
-import { ReactivateCustomerCommand, ReactivateCustomerUseCase } from '../../application/useCases/ReactivateCustomer';
-import { ChangePasswordCommand, ChangePasswordUseCase } from '../../application/useCases/ChangePassword';
+import { RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
+import { GetCustomerCommand } from '../../application/useCases/GetCustomer';
+import { UpdateCustomerCommand } from '../../application/useCases/UpdateCustomer';
+import { DeleteCustomerCommand } from '../../application/useCases/DeleteCustomer';
+import { VerifyCustomerCommand } from '../../application/useCases/VerifyCustomer';
+import { DeactivateCustomerCommand } from '../../application/useCases/DeactivateCustomer';
+import { ReactivateCustomerCommand } from '../../application/useCases/ReactivateCustomer';
+import { ChangePasswordCommand } from '../../application/useCases/ChangePassword';
 import {
   AddAddressCommand,
   UpdateAddressCommand,
   DeleteAddressCommand,
   SetDefaultAddressCommand,
-  ManageAddressesUseCase,
 } from '../../application/useCases/ManageAddresses';
-import { customerDataRepository, customerGroupDataRepository } from '../../application/wired';
+import {
+  changePasswordUseCase,
+  deactivateCustomerUseCase,
+  deleteCustomerUseCase,
+  getCustomerUseCase,
+  manageAddressesUseCase,
+  manageCustomerGroupsUseCase,
+  manageCustomersUseCase,
+  reactivateCustomerUseCase,
+  registerCustomerUseCase,
+  updateCustomerUseCase,
+  verifyCustomerUseCase,
+} from '../../application/useCases/wired';
 
 // ============================================================================
 // Helpers
@@ -44,7 +54,7 @@ function respondError(req: HttpRequest, res: HttpResponse, message: string, stat
 export const getCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
   const command = new GetCustomerCommand(customerId);
-  const useCase = new GetCustomerUseCase(CustomerRepo);
+  const useCase = getCustomerUseCase;
   const customer = await useCase.execute(command);
 
   if (!customer) {
@@ -63,7 +73,7 @@ export const getMyProfile = async (req: HttpRequest, res: HttpResponse): Promise
   }
 
   const command = new GetCustomerCommand(customerId);
-  const useCase = new GetCustomerUseCase(CustomerRepo);
+  const useCase = getCustomerUseCase;
   const customer = await useCase.execute(command);
 
   if (!customer) {
@@ -94,7 +104,7 @@ export const updateMyProfile = async (req: HttpRequest, res: HttpResponse): Prom
       metadata?: Record<string, unknown>;
     },
   );
-  const useCase = new UpdateCustomerUseCase(CustomerRepo);
+  const useCase = updateCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -111,7 +121,7 @@ export const getAddresses = async (req: HttpRequest, res: HttpResponse): Promise
     return;
   }
 
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   const addresses = await useCase.getAddresses(customerId);
 
   respond(req, res, { addresses });
@@ -171,7 +181,7 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse): Promise<v
     isDefault,
   );
 
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   const address = await useCase.addAddress(command);
 
   respond(req, res, address, 201);
@@ -182,7 +192,7 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse): Promise<v
 // ============================================================================
 export const getCustomerGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerGroupId } = req.params;
-  const group = await customerGroupDataRepository.groups.findById(customerGroupId);
+  const group = await manageCustomerGroupsUseCase.findGroupById(customerGroupId);
   if (!group) {
     res.status(404).json({ success: false, error: 'Customer group not found' });
     return;
@@ -192,15 +202,8 @@ export const getCustomerGroup = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const getCustomersInGroup = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerGroupId } = req.params;
-  const memberships = await customerGroupDataRepository.memberships.findByGroupId(customerGroupId, true);
-  const customers = await Promise.all(
-    memberships.map(async m => {
-      const c = await CustomerRepo.findById(m.customerId);
-      return c;
-    }),
-  );
-  const validCustomers = customers.filter(Boolean);
-  respond(req, res, validCustomers);
+  const customers = await manageCustomerGroupsUseCase.findCustomersInGroup(customerGroupId);
+  respond(req, res, customers);
 };
 
 export const updateAddress = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -217,7 +220,7 @@ export const updateAddress = async (req: HttpRequest, res: HttpResponse): Promis
     addressId,
     req.body as Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>,
   );
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   const address = await useCase.updateAddress(command);
 
   respond(req, res, address);
@@ -233,7 +236,7 @@ export const deleteAddress = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   const command = new DeleteAddressCommand(customerId, addressId);
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   await useCase.deleteAddress(command);
 
   respond(req, res, { deleted: true });
@@ -255,7 +258,7 @@ export const setDefaultAddress = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   const command = new SetDefaultAddressCommand(customerId, addressId, addressType);
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   await useCase.setDefaultAddress(command);
 
   respond(req, res, { success: true });
@@ -273,7 +276,7 @@ export const listCustomers = async (req: HttpRequest, res: HttpResponse): Promis
   if (status) filters.status = status as 'active' | 'inactive' | 'suspended';
   if (isVerified !== undefined) filters.isVerified = isVerified === 'true';
 
-  const customers = await CustomerRepo.findAll(filters, {
+  const customers = await manageCustomersUseCase.findAll(filters, {
     limit: Number(limit),
     offset: Number(offset),
   });
@@ -304,7 +307,7 @@ export const createCustomer = async (req: HttpRequest, res: HttpResponse): Promi
     preferredLanguage,
   );
 
-  const useCase = new RegisterCustomerUseCase(CustomerRepo);
+  const useCase = registerCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result, 201);
@@ -325,7 +328,7 @@ export const updateCustomer = async (req: HttpRequest, res: HttpResponse): Promi
       metadata?: Record<string, unknown>;
     },
   );
-  const useCase = new UpdateCustomerUseCase(CustomerRepo);
+  const useCase = updateCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -336,7 +339,7 @@ export const deleteCustomer = async (req: HttpRequest, res: HttpResponse): Promi
   const { reason } = (req.body || {}) as { reason?: string };
 
   const command = new DeleteCustomerCommand(customerId, reason);
-  const useCase = new DeleteCustomerUseCase(CustomerRepo);
+  const useCase = deleteCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -347,7 +350,7 @@ export const verifyCustomer = async (req: HttpRequest, res: HttpResponse): Promi
   const { verificationType = 'email' } = req.body as { verificationType?: 'email' | 'phone' };
 
   const command = new VerifyCustomerCommand(customerId, verificationType);
-  const useCase = new VerifyCustomerUseCase(CustomerRepo);
+  const useCase = verifyCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -358,7 +361,7 @@ export const deactivateCustomer = async (req: HttpRequest, res: HttpResponse): P
   const { reason } = (req.body || {}) as { reason?: string };
 
   const command = new DeactivateCustomerCommand(customerId, reason);
-  const useCase = new DeactivateCustomerUseCase(CustomerRepo);
+  const useCase = deactivateCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -368,7 +371,7 @@ export const reactivateCustomer = async (req: HttpRequest, res: HttpResponse): P
   const { customerId } = req.params;
 
   const command = new ReactivateCustomerCommand(customerId);
-  const useCase = new ReactivateCustomerUseCase(CustomerRepo);
+  const useCase = reactivateCustomerUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -383,7 +386,7 @@ const changePassword = async (req: HttpRequest, res: HttpResponse): Promise<void
 
   const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
   const command = new ChangePasswordCommand(customerId, currentPassword, newPassword);
-  const useCase = new ChangePasswordUseCase(CustomerRepo);
+  const useCase = changePasswordUseCase;
   const result = await useCase.execute(command);
 
   respond(req, res, result);
@@ -395,7 +398,7 @@ const changePassword = async (req: HttpRequest, res: HttpResponse): Promise<void
 
 export const getCustomerAddresses = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { customerId } = req.params;
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   const addresses = await useCase.getAddresses(customerId);
 
   respond(req, res, { addresses });
@@ -450,7 +453,7 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
     isDefault,
   );
 
-  const useCase = new ManageAddressesUseCase(CustomerRepo);
+  const useCase = manageAddressesUseCase;
   const address = await useCase.addAddress(command);
 
   respond(req, res, address, 201);

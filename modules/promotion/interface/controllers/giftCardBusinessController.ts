@@ -5,14 +5,7 @@
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import {
-  activateGiftCardRepo,
-  assignGiftCardRepo,
-  cancelGiftCardRepo,
-  createGiftCardRepo,
-  getGiftCardRepo,
-  getGiftCardsRepo,
-  getTransactions,
-  refundToGiftCardRepo,
+  manageGiftCardsUseCase,
   type GiftCardStatus,
   type GiftCardType,
   type DeliveryMethod,
@@ -44,7 +37,7 @@ type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Pr
 
 export const getGiftCards: AsyncHandler = async (req, res, _next) => {
   const { status, purchasedBy, assignedTo, limit, offset } = req.query;
-  const result = await getGiftCardsRepo(
+  const result = await manageGiftCardsUseCase.getGiftCards(
     { status: status as GiftCardStatus | undefined, purchasedBy: purchasedBy as string, assignedTo: assignedTo as string },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
@@ -52,12 +45,12 @@ export const getGiftCards: AsyncHandler = async (req, res, _next) => {
 };
 
 export const getGiftCard: AsyncHandler = async (req, res, _next) => {
-  const giftCard = await getGiftCardRepo(req.params.id);
+  const giftCard = await manageGiftCardsUseCase.getGiftCard(req.params.id);
   if (!giftCard) {
     res.status(404).json({ success: false, message: 'Gift card not found' });
     return;
   }
-  const transactions = await getTransactions(req.params.id);
+  const transactions = await manageGiftCardsUseCase.getTransactions(req.params.id);
   res.json({ success: true, data: { ...giftCard, transactions } });
 };
 
@@ -67,12 +60,12 @@ export const createGiftCard: AsyncHandler = async (req, res, _next) => {
     res.status(400).json({ success: false, message: 'initialBalanceCents is required' });
     return;
   }
-  const giftCard = await createGiftCardRepo(body);
+  const giftCard = await manageGiftCardsUseCase.createGiftCard(body);
   res.status(201).json({ success: true, data: giftCard });
 };
 
 export const activateGiftCard: AsyncHandler = async (req, res, _next) => {
-  await activateGiftCardRepo(req.params.id);
+  await manageGiftCardsUseCase.activateGiftCard(req.params.id);
   res.json({ success: true, message: 'Gift card activated' });
 };
 
@@ -82,18 +75,18 @@ export const assignGiftCard: AsyncHandler = async (req, res, _next) => {
     res.status(400).json({ success: false, message: 'customerId is required' });
     return;
   }
-  await assignGiftCardRepo(req.params.id, customerId);
+  await manageGiftCardsUseCase.assignGiftCard(req.params.id, customerId);
   res.json({ success: true, message: 'Gift card assigned' });
 };
 
 export const refundToGiftCard: AsyncHandler = async (req, res, _next) => {
   const adminId = req.user?.userId || req.user?.organizationId;
   const body = req.body as RefundBody;
-  const transaction = await refundToGiftCardRepo(req.params.id, body.amountCents, body.orderId, adminId, body.notes);
+  const transaction = await manageGiftCardsUseCase.refundToGiftCard(req.params.id, body.amountCents, body.orderId, adminId, body.notes);
   res.json({ success: true, data: transaction });
 };
 
 export const cancelGiftCard: AsyncHandler = async (req, res, _next) => {
-  await cancelGiftCardRepo(req.params.id);
+  await manageGiftCardsUseCase.cancelGiftCard(req.params.id);
   res.json({ success: true, message: 'Gift card cancelled' });
 };

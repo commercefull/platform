@@ -21,6 +21,12 @@ export class ManageCategoriesUseCase {
   async findForMenu(): Promise<CategoryRow[]> {
     return this.categoryRepo.findForMenu();
   }
+  async findRootCategories(): Promise<CategoryRow[]> {
+    return this.categoryRepo.findRootCategories();
+  }
+  async findFeatured(): Promise<CategoryRow[]> {
+    return this.categoryRepo.findFeatured();
+  }
   async create(props: CategoryCreateProps): Promise<CategoryRow> {
     return this.categoryRepo.create(props);
   }

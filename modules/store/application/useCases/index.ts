@@ -6,6 +6,7 @@
 
 export * from './CreateStore';
 export * from './UpdateStore';
+export * from './DeleteStore';
 export * from './GetStore';
 export * from './ListStores';
 export * from './CreateStoreHierarchy';

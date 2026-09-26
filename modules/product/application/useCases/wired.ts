@@ -15,6 +15,7 @@ import productCollectionMapRepo from '../../infrastructure/repositories/productC
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
 import brandRepo from '../../infrastructure/repositories/brandRepo';
+import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
 
@@ -31,6 +32,10 @@ import { ManageProductQaUseCase } from './ManageProductQa';
 import { ManageProductCategoriesUseCase } from './ManageProductCategories';
 import { ManageProductTagsUseCase } from './ManageProductTags';
 import { ManageCategoriesUseCase } from './ManageCategories';
+import { ManageAttributesUseCase } from './ManageAttributes';
+import { ManageAttributeGroupsUseCase } from './ManageAttributeGroups';
+import { ManageAttributeOptionsUseCase } from './ManageAttributeOptions';
+import { ManageBrandsUseCase } from './ManageBrands';
 import { ManageProductReviewsUseCase } from './ManageProductReviews';
 import { ManageReviewMediaUseCase } from './ManageReviewMedia';
 import { GetReviewStatsUseCase } from './GetReviewStats';
@@ -55,6 +60,27 @@ import { SearchProductsUseCase as AttributeSearchProductsUseCase } from './attri
 import { GetSearchSuggestionsUseCase } from './attribute/GetSearchSuggestions';
 import { FindSimilarProductsUseCase } from './attribute/FindSimilarProducts';
 import { FindByAttributeUseCase } from './attribute/FindByAttribute';
+import { GetProductStoreAvailabilityUseCase } from './GetProductStoreAvailability';
+import { CreateCatalogVariantUseCase } from './CreateCatalogVariant';
+import { UpdateCatalogVariantUseCase } from './UpdateCatalogVariant';
+import { GetVariantMatrixUseCase } from './GetVariantMatrix';
+import { ConfigureVariantUseCase } from './ConfigureVariant';
+import { ListGroupedChildrenUseCase } from './ListGroupedChildren';
+import { ApplyAttributeSetUseCase } from './ApplyAttributeSet';
+import catalogVariantRepo from '../../infrastructure/repositories/productVariantRepo';
+import productRelationshipRepo from '../../infrastructure/repositories/productRelationshipRepo';
+import productImageRepo from '../../infrastructure/repositories/productImageRepo';
+import productDownloadRepo from '../../infrastructure/repositories/productDownloadRepo';
+import * as bundleRepo from '../../infrastructure/repositories/bundleRepo';
+import { ManageAttributeSetsUseCase } from './ManageAttributeSets';
+import { ManageBundlesUseCase } from './ManageBundles';
+import { ManageProductTypesUseCase } from './ManageProductTypes';
+import {
+  ManageProductDownloadsUseCase,
+  ManageProductImagesUseCase,
+  ManageProductRelationshipsUseCase,
+  ManageProductVariantsUseCase,
+} from './ManageProductAssets';
 
 export const dynamicAttributeRepo: DynamicAttributePort = new DynamicAttributeRepository();
 const attributeSetRepo = new ProductAttributeSetRepository();
@@ -76,6 +102,10 @@ export const manageProductQaUseCase = new ManageProductQaUseCase(productQaRepo);
 export const manageProductCategoriesUseCase = new ManageProductCategoriesUseCase(productCategoryRepo);
 export const manageProductTagsUseCase = new ManageProductTagsUseCase(productTagRepo);
 export const manageCategoriesUseCase = new ManageCategoriesUseCase(categoryRepo);
+export const manageAttributesUseCase = new ManageAttributesUseCase(dynamicAttributeRepo);
+export const manageAttributeGroupsUseCase = new ManageAttributeGroupsUseCase(productAttributeRepository.groups);
+export const manageAttributeOptionsUseCase = new ManageAttributeOptionsUseCase(productAttributeRepository.options);
+export const manageBrandsUseCase = new ManageBrandsUseCase(brandRepo);
 export const manageProductReviewsUseCase = new ManageProductReviewsUseCase(productReviewRepo);
 export const manageReviewMediaUseCase = new ManageReviewMediaUseCase(productReviewRepo, productReviewMediaRepo);
 export const getReviewStatsUseCase = new GetReviewStatsUseCase(productReviewRepo);
@@ -95,6 +125,13 @@ export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynam
 export const searchProductsUseCase = new SearchProductsUseCase(productRepo, productPricingPort);
 export { brandRepo };
 
+export const createCatalogVariantUseCase = new CreateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);
+export const updateCatalogVariantUseCase = new UpdateCatalogVariantUseCase(catalogVariantRepo, productPricingPort);
+export const getVariantMatrixUseCase = new GetVariantMatrixUseCase(productRepo, catalogVariantRepo, productPricingPort);
+export const configureVariantUseCase = new ConfigureVariantUseCase(catalogVariantRepo);
+export const listGroupedChildrenUseCase = new ListGroupedChildrenUseCase(productRelationshipRepo, productRepo);
+export const applyAttributeSetUseCase = new ApplyAttributeSetUseCase(productRepo, attributeSetRepo, dynamicAttributeRepo);
+
 export const createAttributeUseCase = new CreateAttributeUseCase(dynamicAttributeRepo);
 export const updateAttributeUseCase = new UpdateAttributeUseCase(dynamicAttributeRepo);
 export const addAttributeValueUseCase = new AddAttributeValueUseCase(dynamicAttributeRepo);
@@ -108,3 +145,12 @@ export const attributeSearchProductsUseCase = new AttributeSearchProductsUseCase
 export const getSearchSuggestionsUseCase = new GetSearchSuggestionsUseCase(productSearchService);
 export const findSimilarProductsUseCase = new FindSimilarProductsUseCase(productSearchService);
 export const findByAttributeUseCase = new FindByAttributeUseCase(productSearchService);
+
+export const manageAttributeSetsUseCase = new ManageAttributeSetsUseCase(attributeSetRepo);
+export const manageProductTypesUseCase = new ManageProductTypesUseCase(productTypeRepo, attributeSetRepo);
+export const manageBundlesUseCase = new ManageBundlesUseCase(bundleRepo);
+export const manageProductImagesUseCase = new ManageProductImagesUseCase(productImageRepo);
+export const manageProductDownloadsUseCase = new ManageProductDownloadsUseCase(productDownloadRepo);
+export const manageProductRelationshipsUseCase = new ManageProductRelationshipsUseCase(productRelationshipRepo);
+export const manageProductVariantsUseCase = new ManageProductVariantsUseCase(catalogVariantRepo);
+export const getProductStoreAvailabilityUseCase = new GetProductStoreAvailabilityUseCase(productRepo);

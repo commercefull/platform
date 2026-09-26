@@ -5,7 +5,7 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { brandRepo, listProductsUseCase } from '../../application/useCases/wired';
+import { manageBrandsUseCase, listProductsUseCase } from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 
 // ============================================================================
@@ -13,7 +13,7 @@ import { ListProductsCommand } from '../../application/useCases/ListProducts';
 // ============================================================================
 
 export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const brands = await brandRepo.findActive();
+  const brands = await manageBrandsUseCase.findActive();
 
   storefrontRespond(req, res, 'brand/index', {
     pageName: 'All Brands',
@@ -28,7 +28,7 @@ export const listBrands = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const getBrand = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
 
-  const brand = await brandRepo.findBySlug(slug);
+  const brand = await manageBrandsUseCase.findBySlug(slug);
 
   if (!brand) {
     storefrontRespond(req, res, '404', {
@@ -64,7 +64,7 @@ export const getBrandProducts = async (req: HttpRequest, res: HttpResponse): Pro
   const { slug } = req.params;
   const { page = '1', limit = '12' } = req.query;
 
-  const brand = await brandRepo.findBySlug(slug);
+  const brand = await manageBrandsUseCase.findBySlug(slug);
 
   if (!brand) {
     storefrontRespond(req, res, '404', {

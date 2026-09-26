@@ -101,3 +101,27 @@ export type ShippingSurchargeRecord = {
   isActive: boolean;
 }
 
+export type ShippingPackagingTypeRecord = {
+  shippingPackagingTypeId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  code: string;
+  description: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+  volume: string;
+  maxWeight: string | null;
+  maxItems: number | null;
+  costCents: number | null;
+  currencyCode: string;
+  recyclable: boolean;
+  imageUrl: string | null;
+  validCarriers: string[] | null;
+  createdBy: string | null;
+}
+

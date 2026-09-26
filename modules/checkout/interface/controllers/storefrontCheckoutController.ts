@@ -99,19 +99,16 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     specialInstructions,
   } = body;
 
-  // Get or create basket
-  const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
-  const basketUseCase = getOrCreateBasketUseCase;
-  const basket = await basketUseCase.execute(basketCommand);
-
-  if (!basket || !basket.items || basket.items.length === 0) {
-    res.status(400).json({ success: false, message: 'Cart is empty' });
+  // Parse addresses
+  let shippingAddress: Record<string, unknown>;
+  let billingAddress: Record<string, unknown>;
+  try {
+    shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
+    billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
+  } catch {
+    res.status(400).json({ success: false, message: 'Invalid shipping or billing address' });
     return;
   }
-
-  // Parse addresses
-  const shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
-  const billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
 
   // Guest checkout requires a contact email (billingEmail / guestEmail / address email)
   const customerEmail =
@@ -123,6 +120,16 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
 
   if (!customerEmail) {
     res.status(400).json({ success: false, message: 'An email address is required for checkout' });
+    return;
+  }
+
+  // Get or create basket
+  const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
+  const basketUseCase = getOrCreateBasketUseCase;
+  const basket = await basketUseCase.execute(basketCommand);
+
+  if (!basket || !basket.items || basket.items.length === 0) {
+    res.status(400).json({ success: false, message: 'Cart is empty' });
     return;
   }
 

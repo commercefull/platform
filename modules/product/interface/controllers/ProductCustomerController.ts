@@ -18,16 +18,15 @@ import {
   searchProductsUseCase,
   submitProductQaUseCase,
   voteOnReviewUseCase,
+  manageProductReviewsUseCase,
+  manageProductQaUseCase,
+  manageProductDownloadsUseCase,
+  configureVariantUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { productCatalogRepository, productEngagementRepository, stockAvailabilityPort } from '../../application/wired';
-import { ReviewRating } from '../../application/wired';
-
-const ProductRepo = productCatalogRepository.productRepository;
-const productReviewRepo = productEngagementRepository.reviews;
-const productQaRepo = productEngagementRepository.qa;
-const productVariantRepo = productCatalogRepository.variants;
-const productDownloadRepo = productCatalogRepository.downloads;
+import { stockAvailabilityPort } from '../../application/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
+import type { CatalogVariantOption } from '../../application/ports/CatalogVariantPort';
 
 // ============================================================================
 // Content Negotiation Helpers
@@ -160,7 +159,7 @@ export const findByBarcode = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
-  const result = await ProductRepo.findByBarcode(barcode);
+  const result = await getProductUseCase.findByBarcode(barcode);
   if (!result) {
     respondError(req, res, 'Product not found', 404);
     return;
@@ -234,7 +233,7 @@ export const getRelatedProducts = async (req: HttpRequest, res: HttpResponse): P
   const { productId } = req.params;
   const { limit } = req.query;
 
-  const products = await ProductRepo.findRelated(productId, parseInt(limit as string) || 8);
+  const products = await getProductUseCase.findRelated(productId, parseInt(limit as string) || 8);
 
   respond(req, res, { products }, 200);
 };
@@ -246,16 +245,12 @@ export const getRelatedProducts = async (req: HttpRequest, res: HttpResponse): P
 export const getProductReviews = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { limit, offset } = req.query;
-  const reviews = await productReviewRepo.findByProductId(
+  const result = await manageProductReviewsUseCase.getApprovedReviewsWithStats(
     productId,
-    'approved',
     parseInt(limit as string) || 20,
     parseInt(offset as string) || 0,
   );
-  const averageRating = await productReviewRepo.getAverageRating(productId);
-  const ratingDistribution = await productReviewRepo.getRatingDistribution(productId);
-  const totalCount = await productReviewRepo.countByProductId(productId, 'approved');
-  respond(req, res, { reviews, averageRating, ratingDistribution, totalCount });
+  respond(req, res, result);
 };
 
 export const createReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -269,31 +264,24 @@ export const createReview = async (req: HttpRequest, res: HttpResponse): Promise
     reviewerEmail?: string;
   };
 
-  if (!rating || rating < 1 || rating > 5) {
-    respondError(req, res, 'Rating must be between 1 and 5', 400);
-    return;
+  try {
+    const review = await manageProductReviewsUseCase.submitReview({
+      productId,
+      customerId,
+      rating,
+      title,
+      content,
+      reviewerName,
+      reviewerEmail,
+    });
+    respond(req, res, review, 201);
+  } catch (error) {
+    respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  if (!reviewerName?.trim()) {
-    respondError(req, res, 'Reviewer name is required', 400);
-    return;
-  }
-
-  const review = await productReviewRepo.create({
-    productId,
-    customerId,
-    rating: rating as ReviewRating,
-    title,
-    content,
-    reviewerName,
-    reviewerEmail,
-    isVerifiedPurchase: !!customerId,
-    status: 'pending',
-  });
-  respond(req, res, review, 201);
 };
 
 export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const review = await productReviewRepo.incrementHelpful(req.params.reviewId);
+  const review = await manageProductReviewsUseCase.incrementHelpful(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -302,7 +290,7 @@ export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse): Pr
 };
 
 export const reportReview = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const review = await productReviewRepo.incrementReport(req.params.reviewId);
+  const review = await manageProductReviewsUseCase.incrementReport(req.params.reviewId);
   if (!review) {
     respondError(req, res, 'Review not found', 404);
     return;
@@ -320,7 +308,7 @@ export const reportReview = async (req: HttpRequest, res: HttpResponse): Promise
  */
 export const listProductQaCustomer = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const qa = await productQaRepo.findByProduct(productId, 'answered');
+  const qa = await manageProductQaUseCase.findByProduct(productId, 'answered');
   successResponse(res, qa);
 };
 
@@ -375,21 +363,12 @@ export const voteOnReview = async (req: HttpRequest, res: HttpResponse): Promise
 export const configureVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const { options } = req.body as { options?: Array<{ name: string; value: string }> };
-  if (!options || !Array.isArray(options) || options.length === 0) {
-    errorResponse(res, 'options array is required', 400);
-    return;
+  try {
+    const match = await configureVariantUseCase.execute(productId, options as CatalogVariantOption[]);
+    successResponse(res, match);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  const variants = await productVariantRepo.findByProductId(productId);
-  const match = variants.find(v =>
-    options.every((reqOpt: { name: string; value: string }) =>
-      v.options.some((vOpt: { name: string; value: string }) => vOpt.name === reqOpt.name && vOpt.value === reqOpt.value),
-    ),
-  );
-  if (!match) {
-    errorResponse(res, 'No matching variant found for the given options', 404);
-    return;
-  }
-  successResponse(res, match);
 };
 
 // ============================================================================
@@ -398,7 +377,7 @@ export const configureVariant = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const getProductDownloads = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const downloads = await productDownloadRepo.findByProductId(productId, undefined, true);
+  const downloads = await manageProductDownloadsUseCase.listForProduct(productId, true);
   successResponse(res, downloads);
 };
 

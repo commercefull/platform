@@ -7,4 +7,8 @@ export class GetFulfillmentPackagesUseCase {
   async findByOrder(orderId: string) {
     return this.packageRepo.findByOrder(orderId);
   }
+
+  async findByFulfillment(orderFulfillmentId: string) {
+    return this.packageRepo.findByFulfillment(orderFulfillmentId);
+  }
 }

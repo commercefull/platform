@@ -140,6 +140,14 @@ export class GetProductUseCase {
     private readonly pricingPort: ProductPricingPort,
   ) {}
 
+  async findByBarcode(barcode: string): Promise<{ product: Product; variant: ProductVariant } | null> {
+    return this.productRepository.findByBarcode(barcode);
+  }
+
+  async findRelated(productId: string, limit?: number): Promise<Product[]> {
+    return this.productRepository.findRelated(productId, limit);
+  }
+
   async execute(command: GetProductCommand): Promise<ProductDetailResponse | null> {
     let product: Product | null = null;
 

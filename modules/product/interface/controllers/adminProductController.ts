@@ -394,8 +394,8 @@ export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): 
   }
 
   try {
-    const updatedStatus = await updateProductStatusUseCase.updateStatus(productId, status);
-    res.json({ success: true, message: 'Status updated', data: { status: updatedStatus } });
+    const product = await updateProductStatusUseCase.updateStatus(productId, status);
+    res.json({ success: true, message: 'Status updated', data: { status: product.status } });
   } catch {
     res.status(404).json({ success: false, message: 'Product not found' });
   }
@@ -717,13 +717,7 @@ export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promi
 
 export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const reviews = await manageReviewMediaUseCase.findReviewsByProduct(productId);
-  const mediaByReview = await Promise.all(
-    reviews.map(async (r: { productReviewId: string }) => ({
-      review: r,
-      media: await manageReviewMediaUseCase.findMediaByReview(r.productReviewId),
-    })),
-  );
+  const mediaByReview = await manageReviewMediaUseCase.findMediaByProduct(productId);
   res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
 };
 

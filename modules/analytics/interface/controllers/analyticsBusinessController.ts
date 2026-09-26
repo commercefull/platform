@@ -4,10 +4,8 @@
  */
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { analyticsDataRepository } from '../../application/wired';
+import { manageAnalyticsReportingUseCase } from '../../application/wired';
 
-const analyticsRepo = analyticsDataRepository.analytics;
-const reportingRepo = analyticsDataRepository.reporting;
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -22,9 +20,9 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
   const end = endDate ? new Date(endDate as string) : new Date();
 
   const [summary, dailyData, realTime] = await Promise.all([
-    analyticsRepo.getSalesSummary(start, end, organizationId as string),
-    analyticsRepo.getSalesDaily({ startDate: start, endDate: end, organizationId: organizationId as string }),
-    reportingRepo.getRealTimeMetrics(organizationId as string, 60),
+    manageAnalyticsReportingUseCase.getSalesSummary(start, end, organizationId as string),
+    manageAnalyticsReportingUseCase.getSalesDaily({ startDate: start, endDate: end, organizationId: organizationId as string }),
+    manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, 60),
   ]);
 
   res.json({
@@ -40,7 +38,7 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
   const { startDate, endDate, channel, organizationId, limit, offset } = req.query;
 
-  const result = await analyticsRepo.getSalesDaily(
+  const result = await manageAnalyticsReportingUseCase.getSalesDaily(
     {
       startDate: startDate ? new Date(startDate as string) : undefined,
       endDate: endDate ? new Date(endDate as string) : undefined,
@@ -60,7 +58,7 @@ export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
 export const getProductPerformance: AsyncHandler = async (req, res, _next) => {
   const { productId, startDate, endDate, limit, offset } = req.query;
 
-  const result = await analyticsRepo.getProductPerformance(
+  const result = await manageAnalyticsReportingUseCase.getProductPerformance(
     {
       productId: productId as string,
       startDate: startDate ? new Date(startDate as string) : undefined,
@@ -78,7 +76,7 @@ export const getTopProducts: AsyncHandler = async (req, res, _next) => {
   const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const end = endDate ? new Date(endDate as string) : new Date();
 
-  const products = await analyticsRepo.getTopProducts(
+  const products = await manageAnalyticsReportingUseCase.getTopProducts(
     start,
     end,
     (metric as 'revenue' | 'purchases' | 'views') || 'revenue',
@@ -95,7 +93,7 @@ export const getTopProducts: AsyncHandler = async (req, res, _next) => {
 export const getSearchAnalytics: AsyncHandler = async (req, res, _next) => {
   const { startDate, endDate, isZeroResult, query, limit, offset } = req.query;
 
-  const result = await analyticsRepo.getSearchQueries(
+  const result = await manageAnalyticsReportingUseCase.getSearchQueries(
     {
       startDate: startDate ? new Date(startDate as string) : undefined,
       endDate: endDate ? new Date(endDate as string) : undefined,
@@ -111,7 +109,7 @@ export const getSearchAnalytics: AsyncHandler = async (req, res, _next) => {
 export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
   const { startDate, endDate, limit } = req.query;
 
-  const result = await analyticsRepo.getSearchQueries(
+  const result = await manageAnalyticsReportingUseCase.getSearchQueries(
     {
       startDate: startDate ? new Date(startDate as string) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       endDate: endDate ? new Date(endDate as string) : new Date(),
@@ -130,7 +128,7 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
 export const getCustomerCohorts: AsyncHandler = async (req, res, _next) => {
   const { startMonth, endMonth } = req.query;
 
-  const cohorts = await analyticsRepo.getCustomerCohorts(
+  const cohorts = await manageAnalyticsReportingUseCase.getCustomerCohorts(
     startMonth ? new Date(startMonth as string) : undefined,
     endMonth ? new Date(endMonth as string) : undefined,
   );
@@ -145,7 +143,7 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, _next) => {
 export const getEvents: AsyncHandler = async (req, res, _next) => {
   const { eventType, eventCategory, customerId, orderId, productId, startDate, endDate, limit, offset } = req.query;
 
-  const result = await reportingRepo.getEvents(
+  const result = await manageAnalyticsReportingUseCase.getEvents(
     {
       eventType: eventType as string,
       eventCategory: eventCategory as string,
@@ -167,7 +165,7 @@ export const getEventCounts: AsyncHandler = async (req, res, _next) => {
   const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 24 * 60 * 60 * 1000);
   const end = endDate ? new Date(endDate as string) : new Date();
 
-  const counts = await reportingRepo.getEventCounts(start, end, (groupBy as 'hour' | 'day') || 'hour');
+  const counts = await manageAnalyticsReportingUseCase.getEventCounts(start, end, (groupBy as 'hour' | 'day') || 'hour');
 
   res.json({ success: true, data: counts });
 };
@@ -182,7 +180,7 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
   const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const end = endDate ? new Date(endDate as string) : new Date();
 
-  const snapshots = await reportingRepo.getSnapshots(
+  const snapshots = await manageAnalyticsReportingUseCase.getSnapshots(
     (snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly') || 'daily',
     start,
     end,
@@ -195,7 +193,7 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
 export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
   const { snapshotType, organizationId } = req.query;
 
-  const snapshot = await reportingRepo.getLatestSnapshot(
+  const snapshot = await manageAnalyticsReportingUseCase.getLatestSnapshot(
     (snapshotType as 'hourly' | 'daily' | 'weekly' | 'monthly') || 'daily',
     organizationId as string,
   );
@@ -210,7 +208,7 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
 export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
   const { organizationId, minutes } = req.query;
 
-  const metrics = await reportingRepo.getRealTimeMetrics(organizationId as string, parseInt(minutes as string) || 60);
+  const metrics = await manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, parseInt(minutes as string) || 60);
 
   res.json({ success: true, data: metrics });
 };
@@ -221,12 +219,12 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
 
 export const getDashboards: AsyncHandler = async (req, res, _next) => {
   const organizationId = req.user?.organizationId || req.user?.id;
-  const dashboards = await reportingRepo.getDashboards(organizationId);
+  const dashboards = await manageAnalyticsReportingUseCase.getDashboards(organizationId);
   res.json({ success: true, data: dashboards });
 };
 
 export const getDashboard: AsyncHandler = async (req, res, _next) => {
-  const dashboard = await reportingRepo.getDashboard(req.params.id);
+  const dashboard = await manageAnalyticsReportingUseCase.getDashboard(req.params.id);
   if (!dashboard) {
     res.status(404).json({ success: false, message: 'Dashboard not found' });
     return;
@@ -239,7 +237,7 @@ export const createDashboard: AsyncHandler = async (req, res, _next) => {
   const createdBy = req.user?.userId;
 
   const body = req.body as Record<string, unknown>;
-  const dashboard = await reportingRepo.saveDashboard({
+  const dashboard = await manageAnalyticsReportingUseCase.saveDashboard({
     ...body,
     name: (body.name as string) || 'Untitled',
     organizationId,
@@ -251,7 +249,7 @@ export const createDashboard: AsyncHandler = async (req, res, _next) => {
 
 export const updateDashboard: AsyncHandler = async (req, res, _next) => {
   const body = req.body as Record<string, unknown>;
-  const dashboard = await reportingRepo.saveDashboard({
+  const dashboard = await manageAnalyticsReportingUseCase.saveDashboard({
     analyticsReportDashboardId: req.params.id,
     ...body,
     name: (body.name as string) || 'Untitled',
@@ -261,6 +259,6 @@ export const updateDashboard: AsyncHandler = async (req, res, _next) => {
 };
 
 export const deleteDashboard: AsyncHandler = async (req, res, _next) => {
-  await reportingRepo.deleteDashboard(req.params.id);
+  await manageAnalyticsReportingUseCase.deleteDashboard(req.params.id);
   res.json({ success: true, message: 'Dashboard deleted' });
 };

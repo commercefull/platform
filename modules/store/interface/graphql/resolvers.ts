@@ -1,9 +1,8 @@
-const StoreRepo = storeDataRepository.stores;
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import { GetStoreUseCase, GetStoreQuery } from '../../application/useCases/GetStore';
-import { ListStoresUseCase, ListStoresQuery } from '../../application/useCases/ListStores';
-import { CreateStoreUseCase, CreateStoreCommand } from '../../application/useCases/CreateStore';
-import { storeDataRepository, organizationLookupAdapter, SystemConfigAdapter, SystemConfigurationRepo } from '../../application/wired';
+import { GetStoreQuery } from '../../application/useCases/GetStore';
+import { ListStoresQuery } from '../../application/useCases/ListStores';
+import { CreateStoreCommand } from '../../application/useCases/CreateStore';
+import { createStoreUseCase, getStoreUseCase, listStoresUseCase } from '../../application/useCases/wired';
 
 export const storeResolvers = {
   Query: {
@@ -17,9 +16,8 @@ export const storeResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new GetStoreUseCase(StoreRepo, storeDataRepository.currencies);
       const query = new GetStoreQuery(args.storeId, args.slug, args.storeUrl);
-      return useCase.execute(query);
+      return getStoreUseCase.execute(query);
     },
 
     stores: async (
@@ -31,23 +29,16 @@ export const storeResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const useCase = new ListStoresUseCase(StoreRepo);
       const query = new ListStoresQuery(args.filters as ListStoresQuery['filters'], args.pagination);
-      return useCase.execute(query);
+      return listStoresUseCase.execute(query);
     },
   },
 
   Mutation: {
     createStore: async (_parent: unknown, args: { input: Record<string, unknown> }, context: GraphQLAuthContext) => {
       requireBusinessAuth(context);
-      const useCase = new CreateStoreUseCase(
-        StoreRepo,
-        new SystemConfigAdapter(new SystemConfigurationRepo()),
-        organizationLookupAdapter,
-        storeDataRepository.currencies,
-      );
       const command = new CreateStoreCommand(args.input as CreateStoreCommand['storeData']);
-      const result = await useCase.execute(command);
+      const result = await createStoreUseCase.execute(command);
       return {
         storeId: result.storeId,
         name: result.name,

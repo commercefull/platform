@@ -56,6 +56,7 @@ interface GetInventoryItemRepositoryPort {
   findById(inventoryId: string): Promise<InventoryRecord | null>;
   findBySkuAndWarehouse(sku: string, warehouseId: string): Promise<InventoryRecord | null>;
   findByProductAndWarehouse(productId: string, warehouseId: string, variantId?: string): Promise<InventoryRecord | null>;
+  findBySku(sku: string, locationId?: string): Promise<InventoryRecord[]>;
 }
 
 export class GetInventoryItemUseCase {
@@ -100,5 +101,9 @@ export class GetInventoryItemUseCase {
         lastUpdated: item.updatedAt?.toISOString() || item.createdAt?.toISOString(),
       },
     };
+  }
+
+  async findBySku(sku: string): Promise<InventoryRecord[]> {
+    return this.inventoryRepository.findBySku(sku);
   }
 }

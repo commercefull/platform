@@ -8,12 +8,9 @@
  */
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { generateUUID } from '../../../../libs/uuid';
-import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
-import { ScimProvisioningRepository } from '../../domain/repositories/SsoProviderRepository';
 import { ScimValidationError, ScimResourceNotFoundError, ScimConflictError, ScimAuthenticationError } from '../../domain/errors/SsoErrors';
-import type { CredentialSubjectPort } from '../../application/ports/CredentialSubjectPort';
+import type { ManageScimProvisioningUseCase, ScimPatchOperation } from '../../application/useCases/ManageScimProvisioning';
 
 const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
@@ -59,10 +56,7 @@ interface ScimUser {
 }
 
 export class ScimController {
-  constructor(
-    private readonly provisioningRepo: ScimProvisioningRepository,
-    private readonly credentialPort: CredentialSubjectPort,
-  ) {}
+  constructor(private readonly scimUseCase: ManageScimProvisioningUseCase) {}
 
   /**
    * GET /scim/v2/Users — list provisioned users
@@ -75,15 +69,10 @@ export class ScimController {
         throw new ScimValidationError('organizationId query parameter is required');
       }
 
-      const records = await this.provisioningRepo.findByOrganizationId(organizationId);
-      const resources: ScimUser[] = [];
-
-      for (const record of records) {
-        const user = await this.credentialPort.findById(record.userId);
-        if (user) {
-          resources.push(this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
-        }
-      }
+      const entries = await this.scimUseCase.listUsers(organizationId);
+      const resources: ScimUser[] = entries.map(({ record, user }) =>
+        this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+      );
 
       res.json({
         schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
@@ -112,16 +101,7 @@ export class ScimController {
       validateScimToken(req);
       const { id } = req.params;
 
-      const record = await this.provisioningRepo.findByScimUserId(id);
-      if (!record) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
-      const user = await this.credentialPort.findById(record.userId);
-      if (!user) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
+      const { record, user } = await this.scimUseCase.getUser(id);
       res.json(this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
@@ -149,73 +129,16 @@ export class ScimController {
 
       const emails = body.emails as Array<{ value: string; type: string; primary: boolean }> | undefined;
       const email = emails?.find(e => e.primary)?.value || emails?.[0]?.value;
-      if (!email) {
-        throw new ScimValidationError('At least one email is required');
-      }
-
-      // Check if user already exists
-      const existing = await this.credentialPort.findByEmail(email);
-      if (existing) {
-        // Check if already provisioned
-        const existingRecord = await this.provisioningRepo.findByUserId(existing.id);
-        if (existingRecord) {
-          throw new ScimConflictError(`User with email ${email} already provisioned`);
-        }
-      }
-
       const name = body.name as { givenName?: string; familyName?: string } | undefined;
-      const displayName = body.displayName as string | undefined;
-      const active = (body.active as boolean | undefined) ?? true;
-      const externalId = body.externalId as string | undefined;
 
-      // Create or find user
-      let userId: string;
-      let isNewUser = false;
-
-      if (existing) {
-        userId = existing.id;
-      } else {
-        const created = await this.credentialPort.createWithPassword({
-          email,
-          password: '',
-          firstName: name?.givenName || '',
-          lastName: name?.familyName || '',
-          name: displayName,
-          isActive: active,
-          isVerified: true,
-        });
-        userId = created.id;
-        isNewUser = true;
-      }
-
-      // Create provisioning record
-      const scimUserId = generateUUID();
-      const now = new Date();
-      const record = await this.provisioningRepo.save({
-        recordId: generateUUID(),
+      const { record, user } = await this.scimUseCase.provisionUser({
         organizationId,
-        userId,
-        userType: 'organization',
-        scimUserId,
-        externalId,
-        source: 'scim',
-        isActive: active,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      const user = await this.credentialPort.findById(userId);
-      if (!user) {
-        throw new ScimResourceNotFoundError('User', userId);
-      }
-
-      eventBus.emit('identity.scim.user_provisioned', {
-        userId,
-        organizationId,
-        scimUserId,
         email,
-        isNewUser,
-        timestamp: now,
+        givenName: name?.givenName,
+        familyName: name?.familyName,
+        displayName: body.displayName as string | undefined,
+        active: body.active as boolean | undefined,
+        externalId: body.externalId as string | undefined,
       });
 
       res
@@ -244,37 +167,18 @@ export class ScimController {
       const { id } = req.params;
       const body = req.body as Record<string, unknown>;
 
-      const record = await this.provisioningRepo.findByScimUserId(id);
-      if (!record) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
-      const user = await this.credentialPort.findById(record.userId);
-      if (!user) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
-      const active = (body.active as boolean | undefined) ?? true;
-      if (!active && record.isActive) {
-        await this.provisioningRepo.deactivate(record.recordId);
-      }
-
-      eventBus.emit('identity.scim.user_updated', {
-        userId: record.userId,
-        scimUserId: id,
-        active,
-        timestamp: new Date(),
+      const { record: updatedRecord, user, active } = await this.scimUseCase.replaceUser(id, {
+        active: body.active as boolean | undefined,
       });
 
-      const updatedRecord = await this.provisioningRepo.findByScimUserId(id);
       res.json(
         this.toScimUser(
-          updatedRecord!.scimUserId,
+          updatedRecord.scimUserId,
           user,
           active,
-          updatedRecord!.createdAt,
-          updatedRecord!.updatedAt,
-          updatedRecord!.externalId,
+          updatedRecord.createdAt,
+          updatedRecord.updatedAt,
+          updatedRecord.externalId,
         ),
       );
     } catch (error) {
@@ -298,29 +202,8 @@ export class ScimController {
       const { id } = req.params;
       const body = req.body as Record<string, unknown>;
 
-      const record = await this.provisioningRepo.findByScimUserId(id);
-      if (!record) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
-      // SCIM PATCH operations
-      const operations = body.Operations as Array<{ op: string; path?: string; value: unknown }> | undefined;
-      if (operations) {
-        for (const op of operations) {
-          if (op.op.toLowerCase() === 'replace' && op.path === 'active') {
-            const active = op.value as boolean;
-            if (!active && record.isActive) {
-              await this.provisioningRepo.deactivate(record.recordId);
-            }
-          }
-        }
-      }
-
-      eventBus.emit('identity.scim.user_updated', {
-        userId: record.userId,
-        scimUserId: id,
-        timestamp: new Date(),
-      });
+      const operations = body.Operations as ScimPatchOperation[] | undefined;
+      await this.scimUseCase.patchUser(id, operations);
 
       res.status(204).send();
     } catch (error) {
@@ -343,19 +226,7 @@ export class ScimController {
       validateScimToken(req);
       const { id } = req.params;
 
-      const record = await this.provisioningRepo.findByScimUserId(id);
-      if (!record) {
-        throw new ScimResourceNotFoundError('User', id);
-      }
-
-      await this.provisioningRepo.deactivate(record.recordId);
-
-      eventBus.emit('identity.scim.user_deprovisioned', {
-        userId: record.userId,
-        scimUserId: id,
-        organizationId: record.organizationId,
-        timestamp: new Date(),
-      });
+      await this.scimUseCase.deprovisionUser(id);
 
       res.status(204).send();
     } catch (error) {

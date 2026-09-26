@@ -1,16 +1,19 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-
-const notificationPreferenceRepo = notificationConfigRepository.preferences;
-const notificationDeviceRepo = notificationConfigRepository.devices;
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { ManageNotificationPreferenceCommand } from '../../application/useCases/ManageNotificationPreference';
 import { RegisterNotificationDeviceCommand } from '../../application/useCases/RegisterNotificationDevice';
 import {
+  manageNotificationDevicesUseCase,
   manageNotificationPreferenceUseCase,
+  manageNotificationPreferencesUseCase,
   registerNotificationDeviceUseCase,
 } from '../../application/useCases/wired';
-import { notificationConfigRepository } from '../../application/wired';
 import { NotificationPreference } from '../../application/wired';
+
+function respondUseCaseError(res: HttpResponse, error: unknown, fallback: string): void {
+  errorResponse(res, getErrorMessage(error) || fallback, getErrorStatusCode(error));
+}
 
 function mapPreference(p: NotificationPreference) {
   return {
@@ -37,7 +40,7 @@ export const getPreferences = async (req: HttpRequest, res: HttpResponse): Promi
     return;
   }
 
-  const preferences = await notificationPreferenceRepo.findByUser(userId, 'customer');
+  const preferences = await manageNotificationPreferencesUseCase.findByUser(userId, 'customer');
   successResponse(res, preferences.map(mapPreference));
 };
 
@@ -52,16 +55,12 @@ export const getPreferenceById = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  const preference = await notificationPreferenceRepo.findById(String(req.params.id));
-  if (!preference) {
-    errorResponse(res, 'Preference not found', 404);
-    return;
+  try {
+    const preference = await manageNotificationPreferencesUseCase.getOwnedById(String(req.params.id), userId);
+    successResponse(res, mapPreference(preference));
+  } catch (error) {
+    respondUseCaseError(res, error, 'Preference not found');
   }
-  if (preference.userId !== userId) {
-    errorResponse(res, 'Unauthorized', 403);
-    return;
-  }
-  successResponse(res, mapPreference(preference));
 };
 
 /**
@@ -75,7 +74,7 @@ export const getPreferenceByType = async (req: HttpRequest, res: HttpResponse): 
     return;
   }
 
-  const preference = await notificationPreferenceRepo.findByUserAndType(userId, 'customer', String(req.params.type));
+  const preference = await manageNotificationPreferencesUseCase.findByUserAndType(userId, 'customer', String(req.params.type));
   if (!preference) {
     errorResponse(res, 'Preference not found', 404);
     return;
@@ -134,34 +133,24 @@ export const updatePreference = async (req: HttpRequest, res: HttpResponse): Pro
   }
 
   const id = String(req.params.id);
-  const existing = await notificationPreferenceRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Preference not found', 404);
-    return;
-  }
-  if (existing.userId !== userId) {
-    errorResponse(res, 'Unauthorized', 403);
-    return;
-  }
-
   const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body as {
     channelPreferences?: Record<string, boolean>;
     isEnabled?: boolean;
     schedulePreferences?: Record<string, unknown> | null;
     metadata?: Record<string, unknown> | null;
   };
-  const updated = await notificationPreferenceRepo.update(id, {
-    channelPreferences,
-    isEnabled,
-    schedulePreferences,
-    metadata,
-  });
 
-  if (!updated) {
-    errorResponse(res, 'Failed to update preference', 500);
-    return;
+  try {
+    const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, {
+      channelPreferences,
+      isEnabled,
+      schedulePreferences,
+      metadata,
+    });
+    successResponse(res, mapPreference(updated));
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to update preference');
   }
-  successResponse(res, mapPreference(updated));
 };
 
 /**
@@ -176,24 +165,14 @@ export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promi
   }
 
   const id = String(req.params.id);
-  const existing = await notificationPreferenceRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Preference not found', 404);
-    return;
-  }
-  if (existing.userId !== userId) {
-    errorResponse(res, 'Unauthorized', 403);
-    return;
-  }
-
   const { schedulePreferences } = req.body as { schedulePreferences?: Record<string, unknown> | null };
-  const updated = await notificationPreferenceRepo.update(id, { schedulePreferences });
 
-  if (!updated) {
-    errorResponse(res, 'Failed to update schedule preferences', 500);
-    return;
+  try {
+    const updated = await manageNotificationPreferencesUseCase.updateOwned(id, userId, { schedulePreferences });
+    successResponse(res, mapPreference(updated));
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to update schedule preferences');
   }
-  successResponse(res, mapPreference(updated));
 };
 
 /**
@@ -208,22 +187,13 @@ export const deletePreference = async (req: HttpRequest, res: HttpResponse): Pro
   }
 
   const id = String(req.params.id);
-  const existing = await notificationPreferenceRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Preference not found', 404);
-    return;
-  }
-  if (existing.userId !== userId) {
-    errorResponse(res, 'Unauthorized', 403);
-    return;
-  }
 
-  const deleted = await notificationPreferenceRepo.deleteById(id);
-  if (!deleted) {
-    errorResponse(res, 'Failed to delete preference', 500);
-    return;
+  try {
+    const result = await manageNotificationPreferencesUseCase.deleteOwned(id, userId);
+    successResponse(res, result);
+  } catch (error) {
+    respondUseCaseError(res, error, 'Failed to delete preference');
   }
-  successResponse(res, { id });
 };
 
 /**
@@ -251,7 +221,7 @@ export const bulkUpdatePreferences = async (req: HttpRequest, res: HttpResponse)
     return;
   }
 
-  const result = await notificationPreferenceRepo.bulkUpsert(userId, 'customer', updates);
+  const result = await manageNotificationPreferencesUseCase.bulkUpsert(userId, 'customer', updates);
   successResponse(res, result);
 };
 
@@ -266,7 +236,7 @@ export const listDevices = async (req: HttpRequest, res: HttpResponse): Promise<
     return;
   }
 
-  const devices = await notificationDeviceRepo.findByUser(userId);
+  const devices = await manageNotificationDevicesUseCase.findByUser(userId);
   successResponse(res, { devices });
 };
 
@@ -294,6 +264,6 @@ export const registerDevice = async (req: HttpRequest, res: HttpResponse): Promi
  */
 export const deleteDevice = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { deviceToken } = req.params;
-  await notificationDeviceRepo.deactivate(String(deviceToken));
+  await manageNotificationDevicesUseCase.deactivate(String(deviceToken));
   successResponse(res, { deviceToken });
 };

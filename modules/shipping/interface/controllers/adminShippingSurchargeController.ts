@@ -4,11 +4,9 @@
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import { shippingConfigRepository } from '../../application/wired';
+import { manageShippingConfigurationUseCase } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { logger } from '../../../../libs/logger';
-
-const surchargeRepo = shippingConfigRepository.surcharges;
 
 // ============================================================================
 // List Surcharges
@@ -20,9 +18,9 @@ export const listShippingSurcharges = async (req: HttpRequest, res: HttpResponse
 
   let surcharges;
   if (rateId) {
-    surcharges = await surchargeRepo.findByRateId(rateId, activeOnly);
+    surcharges = await manageShippingConfigurationUseCase.listSurchargesByRate(rateId, activeOnly);
   } else {
-    surcharges = await surchargeRepo.findByRateId('', false);
+    surcharges = await manageShippingConfigurationUseCase.listSurchargesByRate('', false);
   }
 
   adminRespond(req, res, 'shipping/surcharges/index', {
@@ -71,7 +69,7 @@ export const createShippingSurcharge = async (req: HttpRequest, res: HttpRespons
       return;
     }
 
-    const surcharge = await surchargeRepo.create({
+    const surcharge = await manageShippingConfigurationUseCase.createSurcharge({
       shippingRateId,
       type: type as 'fuel' | 'remoteArea' | 'residential' | 'oversize' | 'signature' | 'insurance',
       calculationType: calculationType as 'flat' | 'percentage',
@@ -98,7 +96,7 @@ export const createShippingSurcharge = async (req: HttpRequest, res: HttpRespons
 export const viewShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
-  const surcharge = await surchargeRepo.findById(surchargeId);
+  const surcharge = await manageShippingConfigurationUseCase.findSurchargeById(surchargeId);
 
   if (!surcharge) {
     adminRespond(req, res, 'error', {
@@ -122,7 +120,7 @@ export const viewShippingSurcharge = async (req: HttpRequest, res: HttpResponse)
 export const editShippingSurchargeForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
-  const surcharge = await surchargeRepo.findById(surchargeId);
+  const surcharge = await manageShippingConfigurationUseCase.findSurchargeById(surchargeId);
 
   if (!surcharge) {
     adminRespond(req, res, 'error', {
@@ -156,7 +154,7 @@ export const updateShippingSurcharge = async (req: HttpRequest, res: HttpRespons
     }
     if (body.isActive !== undefined) updates.isActive = body.isActive === 'true' || body.isActive === true;
 
-    const surcharge = await surchargeRepo.update(surchargeId, updates);
+    const surcharge = await manageShippingConfigurationUseCase.updateSurcharge(surchargeId, updates);
 
     if (!surcharge) {
       adminRespond(req, res, 'error', {
@@ -172,7 +170,7 @@ export const updateShippingSurcharge = async (req: HttpRequest, res: HttpRespons
     const { surchargeId } = req.params;
     adminRespond(req, res, 'shipping/surcharges/edit', {
       pageName: 'Edit Shipping Surcharge',
-      surcharge: await surchargeRepo.findById(surchargeId),
+      surcharge: await manageShippingConfigurationUseCase.findSurchargeById(surchargeId),
       error: (error as Error).message || 'Failed to update surcharge',
     });
   }
@@ -185,7 +183,7 @@ export const updateShippingSurcharge = async (req: HttpRequest, res: HttpRespons
 export const deleteShippingSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { surchargeId } = req.params;
 
-  const deleted = await surchargeRepo.delete(surchargeId);
+  const deleted = await manageShippingConfigurationUseCase.deleteSurcharge(surchargeId);
 
   if (!deleted) {
     res.json({ success: false, message: 'Surcharge not found' });

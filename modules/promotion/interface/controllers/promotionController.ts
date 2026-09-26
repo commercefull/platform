@@ -1,5 +1,14 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { promotionRepo, CreatePromotionInput, PromotionScope, PromotionStatus, UpdatePromotionInput } from '../../application/wired';
+import {
+  CreatePromotionInput,
+  PromotionScope,
+  PromotionStatus,
+  UpdatePromotionInput,
+  createPromotionRecordUseCase,
+  changePromotionStatusUseCase,
+  managePromotionsUseCase,
+} from '../../application/wired';
+import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 
 interface ApplyPromotionBody {
   cartId: string;
@@ -29,7 +38,7 @@ export const getActivePromotions = async (req: HttpRequest, res: HttpResponse): 
     }
   }
 
-  const promotions = await promotionRepo.findActive(scopeFilter, organizationId as string | undefined);
+  const promotions = await managePromotionsUseCase.findActive(scopeFilter, organizationId as string | undefined);
 
   res.status(200).json({
     success: true,
@@ -73,7 +82,7 @@ export const getPromotions = async (req: HttpRequest, res: HttpResponse): Promis
     }
   }
 
-  const promotions = await promotionRepo.findAll(
+  const promotions = await managePromotionsUseCase.findAll(
     {
       status: statusFilter,
       scope: scopeFilter,
@@ -106,7 +115,7 @@ export const getPromotions = async (req: HttpRequest, res: HttpResponse): Promis
 export const getPromotionById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const promotionData = await promotionRepo.getWithDetails(id);
+  const promotionData = await managePromotionsUseCase.getWithDetails(id);
 
   if (!promotionData) {
     res.status(404).json({
@@ -129,34 +138,17 @@ export const createPromotion = async (
   req: HttpRequest<Record<string, string>, unknown, CreatePromotionInput>,
   res: HttpResponse,
 ): Promise<void> => {
-  const promotionData = req.body;
+  try {
+    const promotion = await createPromotionRecordUseCase.execute(req.body);
 
-  // Validate required fields
-  if (!promotionData.name || !promotionData.status || !promotionData.scope || !promotionData.startDate) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required fields',
+    res.status(201).json({
+      success: true,
+      data: promotion,
+      message: 'Promotion created successfully',
     });
-    return;
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  // Set default values if not provided
-  if (promotionData.priority === undefined) {
-    promotionData.priority = 10; // Default priority
-  }
-
-  if (promotionData.isExclusive === undefined) {
-    promotionData.isExclusive = false; // Default non-exclusive
-  }
-
-  // Create the promotion
-  const promotion = await promotionRepo.create(promotionData);
-
-  res.status(201).json({
-    success: true,
-    data: promotion,
-    message: 'Promotion created successfully',
-  });
 };
 
 /**
@@ -170,7 +162,7 @@ export const updatePromotion = async (
   const promotionData = req.body;
 
   // Check if promotion exists
-  const existingPromotion = await promotionRepo.findById(id);
+  const existingPromotion = await managePromotionsUseCase.findById(id);
 
   if (!existingPromotion) {
     res.status(404).json({
@@ -181,7 +173,7 @@ export const updatePromotion = async (
   }
 
   // Update the promotion
-  const updatedPromotion = await promotionRepo.update(id, promotionData);
+  const updatedPromotion = await managePromotionsUseCase.update(id, promotionData);
 
   res.status(200).json({
     success: true,
@@ -197,7 +189,7 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   const { id } = req.params;
 
   // Check if promotion exists
-  const existingPromotion = await promotionRepo.findById(id);
+  const existingPromotion = await managePromotionsUseCase.findById(id);
 
   if (!existingPromotion) {
     res.status(404).json({
@@ -208,7 +200,7 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   }
 
   // Delete the promotion
-  const deleted = await promotionRepo.delete(id);
+  const deleted = await managePromotionsUseCase.delete(id);
 
   if (!deleted) {
     res.status(500).json({
@@ -243,7 +235,7 @@ const _applyPromotionToCart = async (
   }
 
   // Check if promotion exists and is active
-  const promotionData = await promotionRepo.getWithDetails(promotionId);
+  const promotionData = await managePromotionsUseCase.getWithDetails(promotionId);
 
   if (!promotionData || promotionData.promotion.status !== 'active') {
     res.status(404).json({
@@ -322,7 +314,7 @@ const _validatePromotionForCart = async (
   }
 
   // Validate the promotion
-  const isValid = await promotionRepo.isValidForOrder(promotionId, Math.round(parseFloat(cartTotal) * 100), customerId);
+  const isValid = await managePromotionsUseCase.isValidForOrder(promotionId, Math.round(parseFloat(cartTotal) * 100), customerId);
 
   if (isValid) {
     res.status(200).json({
@@ -351,19 +343,17 @@ const _validatePromotionForCart = async (
 export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const existingPromotion = await promotionRepo.findById(id);
-  if (!existingPromotion) {
-    res.status(404).json({ success: false, message: 'Promotion not found' });
-    return;
+  try {
+    const updatedPromotion = await changePromotionStatusUseCase.activate(id);
+
+    res.status(200).json({
+      success: true,
+      data: updatedPromotion,
+      message: 'Promotion activated successfully',
+    });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const updatedPromotion = await promotionRepo.update(id, { status: 'active' as PromotionStatus });
-
-  res.status(200).json({
-    success: true,
-    data: updatedPromotion,
-    message: 'Promotion activated successfully',
-  });
 };
 
 /**
@@ -372,17 +362,15 @@ export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Pr
 export const pausePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
 
-  const existingPromotion = await promotionRepo.findById(id);
-  if (!existingPromotion) {
-    res.status(404).json({ success: false, message: 'Promotion not found' });
-    return;
+  try {
+    const updatedPromotion = await changePromotionStatusUseCase.pause(id);
+
+    res.status(200).json({
+      success: true,
+      data: updatedPromotion,
+      message: 'Promotion paused successfully',
+    });
+  } catch (error) {
+    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
   }
-
-  const updatedPromotion = await promotionRepo.update(id, { status: 'paused' as PromotionStatus });
-
-  res.status(200).json({
-    success: true,
-    data: updatedPromotion,
-    message: 'Promotion paused successfully',
-  });
 };

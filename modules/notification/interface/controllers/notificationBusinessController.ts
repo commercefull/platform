@@ -6,16 +6,15 @@ import {
   sendNotificationBatchUseCase,
   manageNotificationWebhookUseCase,
   upsertTemplateTranslationUseCase,
+  getTemplateTranslationsUseCase,
+  manageNotificationBatchesUseCase,
+  manageNotificationTemplatesUseCase,
+  manageNotificationPreferencesUseCase,
+  manageNotificationRecordsUseCase,
 } from '../../application/useCases/wired';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
-import { notificationDataRepository, notificationConfigRepository } from '../../application/wired';
+import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { NotificationTemplate, NotificationPreference } from '../../application/wired';
-
-const NotificationRepo = notificationDataRepository.notifications;
-const notificationBatchRepo = notificationDataRepository.batches;
-const notificationTemplateTranslationRepo = notificationConfigRepository.templateTranslations;
-const notificationTemplateRepo = notificationConfigRepository.templates;
-const notificationPreferenceRepo = notificationConfigRepository.preferences;
 
 // Typed body interfaces
 interface CreateNotificationBody {
@@ -78,8 +77,9 @@ interface UserRequest extends HttpRequest {
   };
 }
 
-// Initialize the notification repository
-const notificationRepo = NotificationRepo;
+function respondError(res: HttpResponse, error: unknown, fallback: string): void {
+  res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) || fallback });
+}
 
 // ============================================================================
 // Existing notification CRUD handlers
@@ -88,7 +88,7 @@ const notificationRepo = NotificationRepo;
 export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const notifications = await notificationRepo.findAll(limit, offset);
+  const notifications = await manageNotificationRecordsUseCase.list(limit, offset);
   res.status(200).json({
     success: true,
     data: notifications,
@@ -98,12 +98,11 @@ export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): 
 
 export const getNotificationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const notification = await notificationRepo.findById(id);
-  if (!notification) {
-    res.status(404).json({ success: false, message: 'Notification not found' });
-    return;
+  try {
+    res.status(200).json({ success: true, data: await manageNotificationRecordsUseCase.getById(id) });
+  } catch (error) {
+    respondError(res, error, 'Notification not found');
   }
-  res.status(200).json({ success: true, data: notification });
 };
 
 export const createNotification = async (
@@ -111,23 +110,23 @@ export const createNotification = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { userId, userType, type, title, content, channel, priority, category, data, metadata } = req.body;
-  if (!userId || !type || !title || !content || !channel) {
-    res.status(400).json({ success: false, message: 'userId, type, title, content, and channel are required' });
-    return;
+  try {
+    const notification = await manageNotificationRecordsUseCase.create({
+      userId,
+      userType,
+      type,
+      title,
+      content,
+      channel,
+      priority,
+      category,
+      data,
+      metadata,
+    });
+    res.status(201).json({ success: true, data: notification });
+  } catch (error) {
+    respondError(res, error, 'Failed to create notification');
   }
-  const notification = await notificationRepo.create({
-    userId,
-    userType: userType || 'customer',
-    type,
-    title,
-    content,
-    channel,
-    priority: priority || 'normal',
-    category,
-    data,
-    metadata,
-  });
-  res.status(201).json({ success: true, data: notification });
 };
 
 export const updateNotification = async (
@@ -136,23 +135,21 @@ export const updateNotification = async (
 ): Promise<void> => {
   const { id } = req.params;
   const { title, content, priority, category, data, metadata } = req.body;
-  const existing = await notificationRepo.findById(id);
-  if (!existing) {
-    res.status(404).json({ success: false, message: 'Notification not found' });
-    return;
+  try {
+    const updated = await manageNotificationRecordsUseCase.update(id, { title, content, priority, category, data, metadata });
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    respondError(res, error, 'Failed to update notification');
   }
-  const updated = await notificationRepo.update(id, { title, content, priority, category, data, metadata });
-  res.status(200).json({ success: true, data: updated });
 };
 
 export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
-  const notification = await notificationRepo.markAsSent(id);
-  if (!notification) {
-    res.status(404).json({ success: false, message: 'Notification not found' });
-    return;
+  try {
+    res.status(200).json({ success: true, data: await manageNotificationRecordsUseCase.markAsSent(id) });
+  } catch (error) {
+    respondError(res, error, 'Notification not found');
   }
-  res.status(200).json({ success: true, data: notification });
 };
 
 export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
@@ -161,7 +158,7 @@ export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
   }
-  const notifications = await notificationRepo.findUnreadByUser(userId);
+  const notifications = await manageNotificationRecordsUseCase.findUnreadByUser(userId);
   res.json({ success: true, data: notifications });
 };
 
@@ -172,7 +169,7 @@ export const getRecentNotifications = async (req: UserRequest, res: HttpResponse
     return;
   }
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
-  const notifications = await notificationRepo.findByUser(userId, limit);
+  const notifications = await manageNotificationRecordsUseCase.findByUser(userId, limit);
   res.json({ success: true, data: notifications });
 };
 
@@ -183,16 +180,12 @@ export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
   }
-  const updatedNotification = await notificationRepo.markAsRead(id);
-  if (!updatedNotification) {
-    res.status(404).json({ success: false, message: 'Notification not found' });
-    return;
+  try {
+    const updatedNotification = await manageNotificationRecordsUseCase.markAsReadOwned(id, userId);
+    res.json({ success: true, data: updatedNotification });
+  } catch (error) {
+    respondError(res, error, 'Failed to mark notification as read');
   }
-  if (updatedNotification.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Unauthorized' });
-    return;
-  }
-  res.json({ success: true, data: updatedNotification });
 };
 
 export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
@@ -201,7 +194,7 @@ export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResp
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
   }
-  const updatedCount = await notificationRepo.markAllAsRead(userId);
+  const updatedCount = await manageNotificationRecordsUseCase.markAllAsRead(userId);
   res.json({ success: true, data: { count: updatedCount } });
 };
 
@@ -212,21 +205,12 @@ export const deleteNotification = async (req: UserRequest, res: HttpResponse): P
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
   }
-  const notification = await notificationRepo.findById(id);
-  if (!notification) {
-    res.status(404).json({ success: false, message: 'Notification not found' });
-    return;
+  try {
+    const result = await manageNotificationRecordsUseCase.deleteOwned(id, userId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    respondError(res, error, 'Failed to delete notification');
   }
-  if (notification.userId !== userId) {
-    res.status(403).json({ success: false, message: 'Unauthorized' });
-    return;
-  }
-  const deleted = await notificationRepo.delete(id);
-  if (!deleted) {
-    res.status(404).json({ success: false, message: 'Notification not found or already deleted' });
-    return;
-  }
-  res.json({ success: true, data: { id } });
 };
 
 export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promise<void> => {
@@ -235,7 +219,7 @@ export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promi
     res.status(401).json({ success: false, message: 'User not authenticated' });
     return;
   }
-  const count = await notificationRepo.countUnread(userId);
+  const count = await manageNotificationRecordsUseCase.countUnread(userId);
   res.json({ success: true, data: { count } });
 };
 
@@ -249,7 +233,7 @@ export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promi
 export const listBatches = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const batches = await notificationBatchRepo.findAll(limit, offset);
+  const batches = await manageNotificationBatchesUseCase.findAll(limit, offset);
   successResponse(res, { batches, limit, offset });
 };
 
@@ -258,7 +242,7 @@ export const listBatches = async (req: HttpRequest, res: HttpResponse): Promise<
  */
 export const getBatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { batchId } = req.params;
-  const batch = await notificationBatchRepo.findById(batchId);
+  const batch = await manageNotificationBatchesUseCase.findById(batchId);
   if (!batch) {
     errorResponse(res, 'Batch not found', 404);
     return;
@@ -345,7 +329,7 @@ export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Pr
  */
 export const listTranslations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { templateId } = req.params;
-  const translations = await notificationTemplateTranslationRepo.findByTemplate(templateId);
+  const translations = await getTemplateTranslationsUseCase.findByTemplate(templateId);
   successResponse(res, { translations });
 };
 
@@ -428,23 +412,21 @@ function mapTemplate(t: NotificationTemplate) {
 
 export const getAllTemplates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const activeOnly = req.query.activeOnly === 'true';
-  const templates = await notificationTemplateRepo.findAll(activeOnly);
+  const templates = await manageNotificationTemplatesUseCase.findAll(activeOnly);
   successResponse(res, templates.map(mapTemplate));
 };
 
 export const getTemplateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const template = await notificationTemplateRepo.findById(String(req.params.id));
-  if (!template) {
-    errorResponse(res, 'Template not found', 404);
-    return;
+  try {
+    successResponse(res, mapTemplate(await manageNotificationTemplatesUseCase.getById(String(req.params.id))));
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, mapTemplate(template));
 };
 
 export const getTemplatesByType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { type } = req.params;
-  const all = await notificationTemplateRepo.findAll(false);
-  const filtered = all.filter(t => t.type === type);
+  const filtered = await manageNotificationTemplatesUseCase.findByType(type);
   successResponse(res, filtered.map(mapTemplate));
 };
 
@@ -453,30 +435,29 @@ export const createTemplate = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { code, name, type, supportedChannels, defaultChannel } = req.body;
-  if (!code || !name || !type || !supportedChannels || !defaultChannel) {
-    errorResponse(res, 'code, name, type, supportedChannels, and defaultChannel are required', 400);
-    return;
+
+  try {
+    const created = await manageNotificationTemplatesUseCase.create({
+      code,
+      name,
+      description: req.body.description,
+      type: type as never,
+      supportedChannels: supportedChannels as never,
+      defaultChannel: defaultChannel as never,
+      subject: req.body.subject,
+      htmlTemplate: req.body.htmlTemplate,
+      textTemplate: req.body.textTemplate,
+      pushTemplate: req.body.pushTemplate,
+      smsTemplate: req.body.smsTemplate,
+      parameters: req.body.parameters,
+      isActive: req.body.isActive ?? true,
+      categoryCode: req.body.categoryCode,
+      previewData: req.body.previewData,
+    });
+    successResponse(res, mapTemplate(created), 201);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  const created = await notificationTemplateRepo.create({
-    code,
-    name,
-    description: req.body.description,
-    type: type as never,
-    supportedChannels: supportedChannels as never,
-    defaultChannel: defaultChannel as never,
-    subject: req.body.subject,
-    htmlTemplate: req.body.htmlTemplate,
-    textTemplate: req.body.textTemplate,
-    pushTemplate: req.body.pushTemplate,
-    smsTemplate: req.body.smsTemplate,
-    parameters: req.body.parameters,
-    isActive: req.body.isActive ?? true,
-    categoryCode: req.body.categoryCode,
-    previewData: req.body.previewData,
-  });
-
-  successResponse(res, mapTemplate(created), 201);
 };
 
 export const updateTemplate = async (
@@ -484,52 +465,49 @@ export const updateTemplate = async (
   res: HttpResponse,
 ): Promise<void> => {
   const id = String(req.params.id);
-  const existing = await notificationTemplateRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Template not found', 404);
-    return;
+
+  try {
+    const updated = await manageNotificationTemplatesUseCase.updateExisting(id, {
+      name: req.body.name,
+      description: req.body.description,
+      type: req.body.type as never,
+      supportedChannels: req.body.supportedChannels as never,
+      defaultChannel: req.body.defaultChannel as never,
+      subject: req.body.subject,
+      htmlTemplate: req.body.htmlTemplate,
+      textTemplate: req.body.textTemplate,
+      pushTemplate: req.body.pushTemplate,
+      smsTemplate: req.body.smsTemplate,
+      parameters: req.body.parameters,
+      isActive: req.body.isActive,
+      categoryCode: req.body.categoryCode,
+      previewData: req.body.previewData,
+    });
+    successResponse(res, mapTemplate(updated));
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-
-  const updated = await notificationTemplateRepo.update(id, {
-    name: req.body.name,
-    description: req.body.description,
-    type: req.body.type as never,
-    supportedChannels: req.body.supportedChannels as never,
-    defaultChannel: req.body.defaultChannel as never,
-    subject: req.body.subject,
-    htmlTemplate: req.body.htmlTemplate,
-    textTemplate: req.body.textTemplate,
-    pushTemplate: req.body.pushTemplate,
-    smsTemplate: req.body.smsTemplate,
-    parameters: req.body.parameters,
-    isActive: req.body.isActive,
-    categoryCode: req.body.categoryCode,
-    previewData: req.body.previewData,
-  });
-
-  successResponse(res, mapTemplate(updated || existing));
 };
 
 export const deleteTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const id = String(req.params.id);
-  const existing = await notificationTemplateRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Template not found', 404);
-    return;
-  }
 
-  const deleted = await notificationTemplateRepo.delete(id);
-  if (!deleted) {
-    errorResponse(res, 'Failed to delete template', 500);
-    return;
+  try {
+    const deleted = await manageNotificationTemplatesUseCase.deleteExisting(id);
+    if (!deleted) {
+      errorResponse(res, 'Failed to delete template', 500);
+      return;
+    }
+    successResponse(res, { id });
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, { id });
 };
 
 export const previewTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const id = String(req.params.id);
   const { data, channel } = req.body as { data?: Record<string, unknown>; channel?: string };
-  const result = await notificationTemplateRepo.getPreview(id, data);
+  const result = await manageNotificationTemplatesUseCase.getPreview(id, data);
 
   const template = result.template;
   const html = channel === 'email' || !channel ? result.compiledHtml : undefined;
@@ -557,13 +535,13 @@ function mapPreferenceAdmin(p: NotificationPreference) {
 }
 
 export const getAllPreferences = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const preferences = await notificationPreferenceRepo.findAll();
+  const preferences = await manageNotificationPreferencesUseCase.findAll();
   successResponse(res, preferences.map(mapPreferenceAdmin));
 };
 
 export const getPreferencesByUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const userId = String(req.params.userId);
-  const preferences = await notificationPreferenceRepo.findByUser(userId, 'customer');
+  const preferences = await manageNotificationPreferencesUseCase.findByUser(userId, 'customer');
   successResponse(res, preferences.map(mapPreferenceAdmin));
 };
 
@@ -579,23 +557,17 @@ export const updatePreferenceAdmin = async (
   res: HttpResponse,
 ): Promise<void> => {
   const id = String(req.params.id);
-  const existing = await notificationPreferenceRepo.findById(id);
-  if (!existing) {
-    errorResponse(res, 'Preference not found', 404);
-    return;
-  }
-
   const { channelPreferences, isEnabled, schedulePreferences, metadata } = req.body;
-  const updated = await notificationPreferenceRepo.update(id, {
-    channelPreferences,
-    isEnabled,
-    schedulePreferences,
-    metadata,
-  });
 
-  if (!updated) {
-    errorResponse(res, 'Failed to update preference', 500);
-    return;
+  try {
+    const updated = await manageNotificationPreferencesUseCase.update(id, {
+      channelPreferences,
+      isEnabled,
+      schedulePreferences,
+      metadata,
+    });
+    successResponse(res, mapPreferenceAdmin(updated));
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }
-  successResponse(res, mapPreferenceAdmin(updated));
 };

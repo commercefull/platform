@@ -113,6 +113,9 @@ describe('Storefront Checkout Flow', () => {
 
   it('requires an email for guest checkout', async () => {
     const add = await client.post(`/basket/add/${TEST_PRODUCT_1_ID}`, { quantity: 1 }, { maxRedirects: 0 });
+    // Pin the basket precondition — addToBasket swallows failures into a
+    // `/?error=` redirect, so assert the item actually landed in the basket.
+    expect(decodeURIComponent(add.headers.location as string)).toContain('/basket');
     const jar = jarFrom(add);
 
     const resp = await client.post('/checkout', { shippingAddress: SHIPPING_ADDRESS_JSON }, { headers: jar });

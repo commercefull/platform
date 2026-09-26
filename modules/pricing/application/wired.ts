@@ -17,6 +17,18 @@ import { CalculatePriceUseCase } from './useCases/CalculatePrice';
 import { CalculatePricesUseCase } from './useCases/CalculatePrices';
 import { CalculateRuleImpactUseCase } from './useCases/CalculateRuleImpact';
 import { FormatPriceUseCase } from './useCases/FormatPrice';
+import { SaveCurrencyUseCase } from './useCases/SaveCurrency';
+import { DeleteCurrencyUseCase } from './useCases/DeleteCurrency';
+import { CreateCurrencyRegionUseCase } from './useCases/CreateCurrencyRegion';
+import { UpdateCurrencyRegionUseCase } from './useCases/UpdateCurrencyRegion';
+import { CreateCurrencyPriceRuleUseCase } from './useCases/CreateCurrencyPriceRule';
+import { UpdateCurrencyPriceRuleUseCase } from './useCases/UpdateCurrencyPriceRule';
+import { CreatePricingRuleUseCase } from './useCases/CreatePricingRule';
+import { CreateTierPriceUseCase } from './useCases/CreateTierPrice';
+import { AddPriceToListUseCase } from './useCases/AddPriceToList';
+import { ManagePricingAdminUseCase } from './useCases/ManagePricingAdmin';
+import { CreatePriceListUseCase } from './useCases/CreatePriceList';
+import { SetProductPriceUseCase } from './useCases/SetProductPrice';
 
 export { pricingDataRepository, pricingRuleRepository, currencyRepository };
 
@@ -74,3 +86,97 @@ export const calculatePriceUseCase = new CalculatePriceUseCase(
 export const calculatePricesUseCase = new CalculatePricesUseCase(calculatePriceUseCase);
 export const calculateRuleImpactUseCase = new CalculateRuleImpactUseCase(pricingRuleQuery, calculatePriceUseCase);
 export const formatPriceUseCase = new FormatPriceUseCase(currencyCatalog);
+
+// ── Catalog administration use cases ────────────────────────────────
+
+export const saveCurrencyUseCase = new SaveCurrencyUseCase(currencyRepository.currencies);
+export const deleteCurrencyUseCase = new DeleteCurrencyUseCase(currencyRepository.currencies);
+export const createCurrencyRegionUseCase = new CreateCurrencyRegionUseCase(currencyRepository.currencies);
+export const updateCurrencyRegionUseCase = new UpdateCurrencyRegionUseCase(currencyRepository.currencies);
+
+export const createCurrencyPriceRuleUseCase = new CreateCurrencyPriceRuleUseCase({
+  getCurrencyByCode: code => currencyRepository.currencies.getCurrencyByCode(code),
+  getCurrencyRegionByCode: regionCode => currencyRepository.currencies.getCurrencyRegionByCode(regionCode),
+  create: data => pricingRuleRepository.currencyPriceRules.create(data),
+});
+export const updateCurrencyPriceRuleUseCase = new UpdateCurrencyPriceRuleUseCase({
+  findById: id => pricingRuleRepository.currencyPriceRules.findById(id),
+  getCurrencyByCode: code => currencyRepository.currencies.getCurrencyByCode(code),
+  getCurrencyRegionByCode: regionCode => currencyRepository.currencies.getCurrencyRegionByCode(regionCode),
+  update: (id, data) => pricingRuleRepository.currencyPriceRules.update(id, data),
+});
+
+export const createPricingRuleUseCase = new CreatePricingRuleUseCase(pricingRuleRepository.rules);
+export const createTierPriceUseCase = new CreateTierPriceUseCase(pricingDataRepository.tierPrices);
+export const addPriceToListUseCase = new AddPriceToListUseCase(pricingDataRepository.customerPrices);
+
+export const managePricingAdminUseCase = new ManagePricingAdminUseCase({
+  currencies: currencyRepository.currencies,
+  rules: pricingRuleRepository.rules,
+  currencyPriceRules: pricingRuleRepository.currencyPriceRules,
+  tierPrices: pricingDataRepository.tierPrices,
+  customerPrices: pricingDataRepository.customerPrices,
+  basePrices: pricingDataRepository.basePrices,
+  priceLists: pricingDataRepository.priceLists,
+});
+
+const createPriceListAdapter = {
+  createPriceList: async (data: {
+    priceListId: string;
+    name: string;
+    description?: string;
+    currencyCode: string;
+    type: string;
+    isDefault: boolean;
+    validFrom?: Date;
+    validTo?: Date;
+    storeIds: string[];
+    isActive: boolean;
+  }) => {
+    const result = await pricingDataRepository.priceLists.create({
+      name: data.name,
+      description: data.description,
+      priority: 0,
+      isActive: data.isActive,
+      startDate: data.validFrom?.toISOString(),
+      endDate: data.validTo?.toISOString(),
+    });
+    return {
+      priceListId: result.priceListId,
+      name: result.name,
+      type: data.type,
+      currencyCode: data.currencyCode,
+      isDefault: data.isDefault,
+      createdAt: new Date(result.createdAt),
+    };
+  },
+};
+
+const setProductPriceAdapter = {
+  setPrice: async (data: {
+    productId: string;
+    variantId?: string;
+    priceListId?: string;
+    priceCents: number;
+    salePriceCents?: number;
+    currencyCode: string;
+  }) => {
+    const saved = await pricingDataRepository.basePrices.upsert({
+      productId: data.productId,
+      productVariantId: data.variantId ?? null,
+      currencyCode: data.currencyCode,
+      priceCents: data.priceCents,
+      salePriceCents: data.salePriceCents ?? null,
+    });
+    return {
+      productId: saved.productId,
+      variantId: saved.productVariantId ?? undefined,
+      priceCents: saved.priceCents,
+      salePriceCents: saved.salePriceCents,
+      updatedAt: saved.updatedAt,
+    };
+  },
+};
+
+export const createPriceListUseCase = new CreatePriceListUseCase(createPriceListAdapter);
+export const setProductPriceUseCase = new SetProductPriceUseCase(setProductPriceAdapter);

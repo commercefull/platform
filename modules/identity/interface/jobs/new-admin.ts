@@ -7,9 +7,7 @@
  */
 
 import { hashAString } from '../../../../libs/hash';
-import { identityDataRepository } from '../../application/wired';
-
-const identityRepo = identityDataRepository.users;
+import { provisionAdminUserUseCase } from '../../application/wired';
 
 async function run() {
   const args = process.argv.slice(2);
@@ -40,60 +38,19 @@ async function run() {
     process.exit(1);
   }
 
-  // Validate role
-  const validRoles = ['super_admin', 'admin', 'support', 'operations'];
-  if (!validRoles.includes(role)) {
-    console.error(`❌ Invalid role "${role}". Valid roles: ${validRoles.join(', ')}`);
-    process.exit(1);
-  }
-
   try {
-    // Check if admin user already exists
-    const existingAdmin = await identityRepo.findAdminByEmail(email);
-    if (existingAdmin) {
-      console.error(`❌ Admin user with email "${email}" already exists`);
-      process.exit(1);
-    }
-
     // Hash the password
     console.log('🔐 Hashing password...');
     const passwordHash = hashAString(password);
 
-    // Set default permissions based on role
-    let permissions: string[] = [];
-    switch (role) {
-      case 'super_admin':
-        permissions = ['*']; // Full access
-        break;
-      case 'admin':
-        permissions = [
-          'users:read',
-          'users:write',
-          'users:delete',
-          'orders:read',
-          'orders:write',
-          'products:read',
-          'products:write',
-          'analytics:read',
-        ];
-        break;
-      case 'support':
-        permissions = ['users:read', 'orders:read', 'orders:write', 'support:read', 'support:write'];
-        break;
-      case 'operations':
-        permissions = ['orders:read', 'orders:write', 'inventory:read', 'inventory:write', 'fulfillment:read', 'fulfillment:write'];
-        break;
-    }
-
-    // Create the admin user
+    // Create the admin user (role validation, duplicate check, and default
+    // permissions are handled by the use case)
     console.log(`👤 Creating admin user "${name}" with role "${role}"...`);
-    const result = await identityRepo.createAdmin({
+    const result = await provisionAdminUserUseCase.execute({
       email,
       name,
       passwordHash,
       role,
-      permissions,
-      status: 'active',
     });
 
     console.log('✅ Admin user created successfully!');

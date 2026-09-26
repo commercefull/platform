@@ -6,7 +6,7 @@
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { PromotionGiftCard, manageGiftCardsUseCase } from '../../application/wired';
+import { manageGiftCardsUseCase } from '../../application/wired';
 
 // ============================================================================
 // Gift Card Management
@@ -22,21 +22,14 @@ export const listGiftCards = async (req: HttpRequest, res: HttpResponse): Promis
     { limit, offset },
   );
 
-  // Get total stats
-  const totalResult = await manageGiftCardsUseCase.getGiftCards();
-  const totalValue = totalResult.data.reduce((sum: number, card: PromotionGiftCard) => sum + card.currentBalanceCents, 0);
-  const activeCards = totalResult.data.filter((card: PromotionGiftCard) => card.status === 'active').length;
+  const stats = await manageGiftCardsUseCase.getGiftCardStats();
 
   adminRespond(req, res, 'promotions/gift-cards/index', {
     pageName: 'Gift Cards',
     giftCards: result.data,
     filters: { status },
     pagination: { limit, offset, total: result.total },
-    stats: {
-      totalCards: totalResult.total,
-      activeCards,
-      totalValue,
-    },
+    stats,
 
     success: req.query.success || null,
   });

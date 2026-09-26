@@ -32,3 +32,19 @@ export * from './admin';
 // Token management
 export { RefreshTokenUseCase, RefreshTokenInput, RefreshTokenOutput } from './token/RefreshToken';
 export { RevokeTokenUseCase, RevokeTokenInput, RevokeAllTokensInput, RevokeTokenOutput } from './token/RevokeToken';
+export {
+  IssueTokenPairUseCase,
+  IssueTokenPairCommand,
+  IssueTokenPairConfig,
+  IssueTokenPairResult,
+  JwtTokenPort,
+  TokenSubjectType,
+} from './token/IssueTokenPair';
+export {
+  RenewAccessTokenUseCase,
+  RenewAccessTokenCommand,
+  RenewAccessTokenConfig,
+  RenewAccessTokenResult,
+} from './token/RenewAccessToken';
+export { LogoutSessionUseCase, LogoutSessionCommand } from './token/LogoutSession';
+export { CleanupExpiredTokensUseCase, CleanupExpiredTokensResult } from './token/CleanupExpiredTokens';

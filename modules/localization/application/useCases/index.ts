@@ -6,3 +6,5 @@ export * from './CreateLocale';
 export * from './CreateCurrency';
 export * from './ConvertCurrency';
 export * from './SetExchangeRate';
+export * from './ManageLocales';
+export * from './ManageLocales';

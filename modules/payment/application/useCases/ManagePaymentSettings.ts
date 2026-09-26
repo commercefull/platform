@@ -7,6 +7,9 @@ export class ManagePaymentSettingsUseCase {
   async findAll() {
     return this.paymentRepo.findAllSettings();
   }
+  async findByMerchant(organizationId: string) {
+    return this.paymentRepo.findSettingsByMerchant(organizationId);
+  }
   async upsert(params: PaymentSettingsUpsertParams) {
     return this.paymentRepo.upsertSettings(params);
   }

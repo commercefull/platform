@@ -6,7 +6,7 @@
 import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
 import { generateUUID } from '../../../../libs/uuid';
-import { BasketRepository } from '../../domain/repositories/BasketRepository';
+import { BasketRepository, BasketSummaryRecord } from '../../domain/repositories/BasketRepository';
 import { Basket, BasketStatus } from '../../domain/entities/Basket';
 import { BasketItem } from '../../domain/entities/BasketItem';
 import { Money } from '../../domain/valueObjects/Money';
@@ -62,6 +62,15 @@ export class BasketRepo implements BasketRepository {
     }
 
     return null;
+  }
+
+  async findSummaries(limit: number = 20, offset: number = 0): Promise<BasketSummaryRecord[]> {
+    const rows = await query<BasketSummaryRecord[]>(
+      `SELECT "basketId", status, "currencyCode", "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
+       ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
+      [limit, offset],
+    );
+    return rows ?? [];
   }
 
   async save(basket: Basket): Promise<Basket> {
