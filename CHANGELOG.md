@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/commercefull/platform/compare/v1.2.2...v1.3.0) (2026-09-27)
+
+
+### Features
+
+* **recommendation:** deterministic product recommendations module ([35d075c](https://github.com/commercefull/platform/commit/35d075cb1da015cbe26c98e060b6d1d547485985))
+
 ## [1.2.2](https://github.com/commercefull/platform/compare/v1.2.1...v1.2.2) (2026-09-22)
 
 
