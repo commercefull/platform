@@ -1,0 +1,48 @@
+<% if (moduleEnabled && suggestions && suggestions.length > 0) { %>
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="fas fa-magic me-2"></i><%= t('recommendation:suggestions') %> (<%= suggestions.length %>)</h3>
+  </div>
+  <div class="card-body table-responsive p-0">
+    <table class="table table-sm table-hover mb-0">
+      <thead>
+        <tr>
+          <th><%= t('product:linkedProduct') %></th>
+          <th><%= t('recommendation:suggestionSource') %></th>
+          <th class="text-center"><%= t('recommendation:suggestionScore') %></th>
+          <th class="text-right"><%= t('common.actions') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% suggestions.forEach(function(s) { %>
+        <tr>
+          <td>
+            <strong><%= s.name || s.candidateProductId %></strong>
+            <code class="ml-1"><%= s.candidateProductId %></code>
+          </td>
+          <td>
+            <span class="badge badge-secondary"><%= s.source %></span>
+            <% if (s.reason && s.reason.support) { %><small class="text-muted ml-1"><%= t('recommendation:boughtTogether') %> <%= s.reason.support %></small><% } %>
+          </td>
+          <td class="text-center"><%= typeof s.score === 'number' ? s.score.toFixed(2) : s.score %></td>
+          <td class="text-right">
+            <form method="POST" action="/admin/products/<%= productId %>/recommendations/suggestions/<%= s.candidateProductId %>/accept" class="d-inline">
+              <select name="relationType" class="form-control form-control-sm d-inline" style="width: auto">
+                <option value="related">related</option>
+                <option value="accessory">accessory</option>
+                <option value="cross_sell">cross_sell</option>
+                <option value="up_sell">up_sell</option>
+              </select>
+              <button type="submit" class="btn btn-sm btn-outline-success"><i class="fas fa-check"></i> <%= t('recommendation:accept') %></button>
+            </form>
+            <form method="POST" action="/admin/products/<%= productId %>/recommendations/suggestions/<%= s.candidateProductId %>/hide" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye-slash"></i></button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% } %>

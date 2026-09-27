@@ -293,6 +293,7 @@ i18next
       'salesSegment',
       'auditLog',
       'organization',
+      'recommendation',
     ],
     defaultNS: 'shared',
     detection: {

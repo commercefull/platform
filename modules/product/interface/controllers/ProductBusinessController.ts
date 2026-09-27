@@ -37,7 +37,11 @@ import {
 } from '../../application/useCases/wired';
 import { CreateCatalogVariantCommand } from '../../application/useCases/CreateCatalogVariant';
 import { UpdateCatalogVariantCommand } from '../../application/useCases/UpdateCatalogVariant';
-import type { CatalogVariantCreateParams, CatalogVariantUpdateParams, CatalogVariantOption } from '../../application/ports/CatalogVariantPort';
+import type {
+  CatalogVariantCreateParams,
+  CatalogVariantUpdateParams,
+  CatalogVariantOption,
+} from '../../application/ports/CatalogVariantPort';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { ProductVariantUpdateProps, ProductQaStatus, ReviewFilters } from '../../application/wired';
@@ -191,6 +195,7 @@ interface RelationshipBody {
   type?: string;
   position?: number;
   isAutomated?: boolean;
+  bidirectional?: boolean;
 }
 
 interface OptionsBody {
@@ -538,8 +543,9 @@ export const getProductVariant = async (req: HttpRequest, res: HttpResponse): Pr
 
 export const createProductVariant = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
-  const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } =
-    req.body as VariantBody & { currencyCode?: string };
+  const { priceCents, salePriceCents, compareAtPriceCents, costPriceCents, currencyCode, ...variantFields } = req.body as VariantBody & {
+    currencyCode?: string;
+  };
 
   try {
     const result = await createCatalogVariantUseCase.execute(
@@ -946,6 +952,16 @@ export const createRelationship = async (req: HttpRequest, res: HttpResponse): P
   try {
     const relationship = await manageProductRelationshipsUseCase.create(productId, req.body as RelationshipBody);
     successResponse(res, relationship, 201);
+  } catch (error) {
+    errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
+  }
+};
+
+export const reorderRelationships = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  try {
+    const updates = (req.body as { updates?: Array<{ productRelatedId?: string; position?: number }> })?.updates ?? [];
+    await manageProductRelationshipsUseCase.reorder(updates);
+    successResponse(res, { reordered: true });
   } catch (error) {
     errorResponse(res, getErrorMessage(error), getErrorStatusCode(error));
   }

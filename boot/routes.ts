@@ -48,6 +48,7 @@ import * as Migration from '../modules/migration';
 import * as Integration from '../modules/integration';
 import * as Organization from '../modules/organization';
 import * as Supplier from '../modules/supplier';
+import * as Recommendation from '../modules/recommendation';
 import * as Pricing from '../modules/pricing';
 import * as Analytics from '../modules/analytics';
 
@@ -103,9 +104,13 @@ export function configureRoutes(app: HttpApplication): void {
     { module: 'fulfillment', router: Fulfillment.fulfillmentCustomerRouter },
     { module: 'content', router: Content.contentCustomerRouter },
     { module: 'product', router: searchCustomerRouter },
+    { module: 'recommendation', router: Recommendation.recommendationCustomerRouter },
   ];
   const enabledCustomerRouters = customerRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
-  app.use('/customer', enabledCustomerRouters.filter(r => r !== Fulfillment.fulfillmentCustomerRouter));
+  app.use(
+    '/customer',
+    enabledCustomerRouters.filter(r => r !== Fulfillment.fulfillmentCustomerRouter),
+  );
   // Fulfillment customer router uses bare params (/:fulfillmentId) that would shadow
   // single-segment customer routes like /customer/search — mount under its own prefix.
   if (moduleRegistry.shouldMountRoutes('fulfillment')) {
@@ -119,6 +124,7 @@ export function configureRoutes(app: HttpApplication): void {
     { module: 'organization', router: Organization.organizationBusinessRouter },
     { module: 'promotion', router: Promotion.promotionBusinessRouter },
     { module: 'product', router: Product.productBusinessRouter },
+    { module: 'recommendation', router: Recommendation.recommendationBusinessRouter },
     { module: 'order', router: Order.orderBusinessRouter },
     { module: 'tax', router: Tax.taxBusinessRouter },
     { module: 'customer', router: Customer.customerBusinessRouter },

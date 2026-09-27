@@ -1,0 +1,290 @@
+<%- include('../partials/header', { title: pageName }) %>
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0"><i class="fas fa-lightbulb me-2"></i><%= pageName %></h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item"><a href="/admin"><%= t('common.breadcrumbHome') %></a></li>
+            <li class="breadcrumb-item active"><%= t('recommendation:title') %></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <% if (!moduleEnabled) { %>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i><%= t('recommendation:moduleDisabled') %>
+      </div>
+      <% } %>
+
+      <!-- Organization scope -->
+      <div class="card">
+        <div class="card-body">
+          <form method="GET" action="/admin/recommendations" class="form-inline">
+            <label class="mr-2" for="organizationId"><%= t('recommendation:organization') %></label>
+            <input type="text" id="organizationId" name="organizationId" class="form-control mr-2" style="min-width: 320px"
+                   value="<%= organizationId %>" placeholder="<%= t('recommendation:organizationIdPlaceholder') %>" required />
+            <button type="submit" class="btn btn-primary"><%= t('common.search') %></button>
+          </form>
+        </div>
+      </div>
+
+      <% if (organizationId) { %>
+
+      <!-- Stats -->
+      <% if (stats) { %>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h3 class="mb-0"><%= stats.ordersCounted %></h3>
+              <p class="text-muted mb-0"><%= t('recommendation:ordersCounted') %></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h3 class="mb-0"><%= stats.productsWithFbt %></h3>
+              <p class="text-muted mb-0"><%= t('recommendation:productsWithFbt') %></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-body text-center">
+              <h3 class="mb-0"><%= stats.lastRebuiltAt ? new Date(stats.lastRebuiltAt).toLocaleDateString() : '—' %></h3>
+              <p class="text-muted mb-0"><%= t('recommendation:lastRebuilt') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="row">
+        <!-- Rules -->
+        <div class="col-md-7">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><%= t('recommendation:rules') %> (<%= rules.length %>)</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <% if (rules.length > 0) { %>
+              <table class="table table-sm table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th><%= t('common.name') %></th>
+                    <th><%= t('recommendation:ruleSource') %></th>
+                    <th><%= t('recommendation:ruleTarget') %></th>
+                    <th><%= t('product:linkType') %></th>
+                    <th class="text-center"><%= t('common.status') %></th>
+                    <th class="text-right"><%= t('common.actions') %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% rules.forEach(function(rule) { %>
+                  <tr>
+                    <td><strong><%= rule.name %></strong><br><small class="text-muted">P<%= rule.priority %> · <%= t('recommendation:maxItems') %> <%= rule.maxItems %></small></td>
+                    <td><span class="badge badge-secondary"><%= rule.sourceType %></span> <code><%= rule.sourceId %></code></td>
+                    <td><span class="badge badge-secondary"><%= rule.targetType %></span> <code><%= rule.targetId %></code><br><small class="text-muted"><%= rule.targetSort %> · <%= rule.priceBand %></small></td>
+                    <td><span class="badge badge-info"><%= rule.relationType %></span></td>
+                    <td class="text-center">
+                      <% if (rule.isActive) { %><span class="badge badge-success"><%= t('common.active') %></span><% } else { %><span class="badge badge-secondary"><%= t('common.inactive') %></span><% } %>
+                    </td>
+                    <td class="text-right">
+                      <form method="POST" action="/admin/recommendations/rules/<%= rule.recommendationRuleId %>/delete?organizationId=<%= organizationId %>" class="d-inline" onsubmit="return confirm('<%= t('recommendation:confirmDeleteRule') %>')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+              <% } else { %>
+              <div class="p-4 text-muted text-center"><%= t('recommendation:noRules') %></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- New rule form -->
+        <div class="col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><%= t('recommendation:addRule') %></h3>
+            </div>
+            <form method="POST" action="/admin/recommendations/rules?organizationId=<%= organizationId %>">
+              <div class="card-body">
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" name="name" placeholder="<%= t('common.name') %>" required />
+                </div>
+                <div class="row">
+                  <div class="col-5">
+                    <select name="sourceType" class="form-control form-control-sm">
+                      <option value="category">category</option>
+                      <option value="brand">brand</option>
+                      <option value="collection">collection</option>
+                      <option value="productType">productType</option>
+                      <option value="tag">tag</option>
+                    </select>
+                  </div>
+                  <div class="col-7">
+                    <input type="text" class="form-control form-control-sm" name="sourceId" placeholder="<%= t('recommendation:sourceIdPlaceholder') %>" required />
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-5">
+                    <select name="targetType" class="form-control form-control-sm">
+                      <option value="category">category</option>
+                      <option value="brand">brand</option>
+                      <option value="collection">collection</option>
+                      <option value="tag">tag</option>
+                    </select>
+                  </div>
+                  <div class="col-7">
+                    <input type="text" class="form-control form-control-sm" name="targetId" placeholder="<%= t('recommendation:targetIdPlaceholder') %>" required />
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-4">
+                    <select name="relationType" class="form-control form-control-sm">
+                      <option value="related">related</option>
+                      <option value="accessory">accessory</option>
+                      <option value="cross_sell">cross_sell</option>
+                      <option value="up_sell">up_sell</option>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <select name="targetSort" class="form-control form-control-sm">
+                      <option value="bestSelling">bestSelling</option>
+                      <option value="newest">newest</option>
+                      <option value="rating">rating</option>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <select name="priceBand" class="form-control form-control-sm">
+                      <option value="any">any</option>
+                      <option value="cheaper">cheaper</option>
+                      <option value="similar">similar</option>
+                      <option value="pricier">pricier</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-6">
+                    <input type="number" class="form-control form-control-sm" name="maxItems" value="4" min="1" max="50" placeholder="<%= t('recommendation:maxItems') %>" />
+                  </div>
+                  <div class="col-6">
+                    <input type="number" class="form-control form-control-sm" name="priority" value="0" placeholder="<%= t('recommendation:priority') %>" />
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i><%= t('recommendation:addRule') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Exclusions -->
+        <div class="col-md-7">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><%= t('recommendation:exclusions') %> (<%= exclusions.length %>)</h3>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <% if (exclusions.length > 0) { %>
+              <table class="table table-sm table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th><%= t('recommendation:exclusionScope') %></th>
+                    <th><%= t('recommendation:excludedProduct') %></th>
+                    <th><%= t('recommendation:onProduct') %></th>
+                    <th><%= t('recommendation:reason') %></th>
+                    <th class="text-right"><%= t('common.actions') %></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% exclusions.forEach(function(ex) { %>
+                  <tr>
+                    <td><span class="badge badge-<%= ex.scope === 'global' ? 'warning' : 'secondary' %>"><%= ex.scope %></span></td>
+                    <td><code><%= ex.excludedProductId %></code></td>
+                    <td><code><%= ex.scope === 'global' ? '—' : ex.productId %></code></td>
+                    <td><%= ex.reason || '—' %></td>
+                    <td class="text-right">
+                      <form method="POST" action="/admin/recommendations/exclusions/<%= ex.recommendationExclusionId %>/delete?organizationId=<%= organizationId %>" class="d-inline" onsubmit="return confirm('<%= t('recommendation:confirmDeleteExclusion') %>')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                      </form>
+                    </td>
+                  </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+              <% } else { %>
+              <div class="p-4 text-muted text-center"><%= t('recommendation:noExclusions') %></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- New exclusion form -->
+        <div class="col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><%= t('recommendation:addExclusion') %></h3>
+            </div>
+            <form method="POST" action="/admin/recommendations/exclusions?organizationId=<%= organizationId %>">
+              <div class="card-body">
+                <div class="mb-2">
+                  <select name="scope" class="form-control form-control-sm">
+                    <option value="pair"><%= t('recommendation:scopePair') %></option>
+                    <option value="global"><%= t('recommendation:scopeGlobal') %></option>
+                  </select>
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" name="productId" placeholder="<%= t('recommendation:sourceProductPlaceholder') %>" />
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" name="excludedProductId" placeholder="<%= t('recommendation:excludedProductPlaceholder') %>" required />
+                </div>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" name="reason" placeholder="<%= t('recommendation:reasonPlaceholder') %>" />
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i><%= t('recommendation:addExclusion') %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

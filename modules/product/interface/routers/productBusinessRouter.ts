@@ -275,7 +275,9 @@ router.delete('/downloads/:downloadId', asyncHandler(productController.deleteDow
 
 router.get('/products/:productId/relationships', asyncHandler(productController.listRelationships));
 router.post('/products/:productId/relationships', asyncHandler(productController.createRelationship));
-router.delete('/relationships/:relationshipId', asyncHandler(productController.deleteRelationship));
+router.put('/products/:productId/relationships/reorder', asyncHandler(productController.reorderRelationships));
+// G6: kept under the /products topic prefix (was /business/relationships/:id)
+router.delete('/products/relationships/:relationshipId', asyncHandler(productController.deleteRelationship));
 
 // ============================================================================
 // Configurable Product Routes (Business)

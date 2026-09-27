@@ -5,7 +5,6 @@ import {
   ProductValidationError,
 } from '../../domain/errors/ProductErrors';
 
-
 interface ProductImageRecord {
   productImageId?: string;
   productId?: string;
@@ -196,44 +195,44 @@ export class ManageProductDownloadsUseCase {
   }
 }
 
-interface ProductRelationshipRecord {
-  productRelatedId?: string;
-  productId?: string;
-  relatedProductId?: string;
-  type?: ProductRelationType;
-  position?: number;
-  isAutomated?: boolean;
-}
+import type { ProductRelationType } from '../../domain/entities/ProductRelationship';
+import type { ProductRelationshipRepository } from '../../domain/repositories/ProductRelationshipRepository';
+import { PRODUCT_RELATION_TYPES } from '../../domain/entities/ProductRelationship';
 
-export type ProductRelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
+export type { ProductRelationType };
 
-export interface ProductRelationshipCreateProps {
-  productId: string;
-  relatedProductId: string;
-  type: ProductRelationType;
-  position: number;
-  isAutomated: boolean;
-}
-
-interface ProductRelationshipPort {
-  findByProductId(productId: string, type?: ProductRelationType): Promise<ProductRelationshipRecord[]>;
-  create(params: ProductRelationshipCreateProps): Promise<ProductRelationshipRecord>;
-  delete(id: string): Promise<boolean>;
+interface ProductOwnershipLookup {
+  /**
+   * Owning organization of a product: `undefined` when the product does not
+   * exist, `null` when it exists but has no organization (legacy/platform rows).
+   */
+  getOrganizationId(productId: string): Promise<string | null | undefined>;
 }
 
 export class ManageProductRelationshipsUseCase {
-  constructor(private readonly relationshipRepo: ProductRelationshipPort) {}
+  constructor(
+    private readonly relationshipRepo: ProductRelationshipRepository,
+    private readonly productLookup?: ProductOwnershipLookup,
+  ) {}
 
   async listForProduct(productId: string, type?: ProductRelationType) {
     return this.relationshipRepo.findByProductId(productId, type);
   }
 
-  async create(productId: string, input: { relatedProductId?: string; type?: string; position?: number; isAutomated?: boolean }) {
+  async create(
+    productId: string,
+    input: { relatedProductId?: string; type?: string; position?: number; isAutomated?: boolean; bidirectional?: boolean },
+  ) {
     if (!input.relatedProductId) {
       throw new ProductValidationError('relatedProductId is required');
     }
-    if (!input.type) {
+    if (!input.type || !PRODUCT_RELATION_TYPES.includes(input.type as ProductRelationType)) {
       throw new ProductValidationError('type is required (related, accessory, cross_sell, up_sell, grouped)');
+    }
+    await this.assertSameOrganization(productId, input.relatedProductId);
+
+    if (input.bidirectional) {
+      return this.relationshipRepo.createBidirectional(productId, input.relatedProductId, input.type as ProductRelationType);
     }
     return this.relationshipRepo.create({
       productId,
@@ -242,6 +241,31 @@ export class ManageProductRelationshipsUseCase {
       position: input.position || 0,
       isAutomated: input.isAutomated || false,
     });
+  }
+
+  async reorder(updates: Array<{ productRelatedId?: string; position?: number }>) {
+    const sanitized = updates
+      .filter((u): u is { productRelatedId: string; position: number } => !!u.productRelatedId && typeof u.position === 'number')
+      .map(u => ({ productRelatedId: u.productRelatedId, position: u.position }));
+    if (sanitized.length === 0) {
+      throw new ProductValidationError('At least one { productRelatedId, position } pair is required');
+    }
+    return this.relationshipRepo.bulkReorder(sanitized);
+  }
+
+  /** Reject links across organizations — relationships must stay within a tenant. */
+  private async assertSameOrganization(productId: string, relatedProductId: string): Promise<void> {
+    if (!this.productLookup) return;
+    const [sourceOrg, targetOrg] = await Promise.all([
+      this.productLookup.getOrganizationId(productId),
+      this.productLookup.getOrganizationId(relatedProductId),
+    ]);
+    if (targetOrg === undefined) {
+      throw new ProductValidationError('relatedProductId does not reference an existing product');
+    }
+    if (sourceOrg && targetOrg && sourceOrg !== targetOrg) {
+      throw new ProductValidationError('Cannot link products from different organizations');
+    }
   }
 
   async delete(relationshipId: string) {

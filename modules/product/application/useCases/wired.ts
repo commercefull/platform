@@ -61,6 +61,9 @@ import { GetSearchSuggestionsUseCase } from './attribute/GetSearchSuggestions';
 import { FindSimilarProductsUseCase } from './attribute/FindSimilarProducts';
 import { FindByAttributeUseCase } from './attribute/FindByAttribute';
 import { GetProductStoreAvailabilityUseCase } from './GetProductStoreAvailability';
+import { GetProductCardsUseCase } from './GetProductCards';
+import { ListCatalogFeaturesUseCase } from './ListCatalogFeatures';
+import { RecordProductViewUseCase } from './RecordProductView';
 import { CreateCatalogVariantUseCase } from './CreateCatalogVariant';
 import { UpdateCatalogVariantUseCase } from './UpdateCatalogVariant';
 import { GetVariantMatrixUseCase } from './GetVariantMatrix';
@@ -151,6 +154,19 @@ export const manageProductTypesUseCase = new ManageProductTypesUseCase(productTy
 export const manageBundlesUseCase = new ManageBundlesUseCase(bundleRepo);
 export const manageProductImagesUseCase = new ManageProductImagesUseCase(productImageRepo);
 export const manageProductDownloadsUseCase = new ManageProductDownloadsUseCase(productDownloadRepo);
-export const manageProductRelationshipsUseCase = new ManageProductRelationshipsUseCase(productRelationshipRepo);
+export const manageProductRelationshipsUseCase = new ManageProductRelationshipsUseCase(
+  productRelationshipRepo,
+  // Same-organization guard for relationship linking (G7).
+  // undefined = product missing; null = exists but has no organization.
+  {
+    getOrganizationId: async (id: string) => {
+      const product = await productRepo.findById(id);
+      return product ? (product.organizationId ?? null) : undefined;
+    },
+  },
+);
 export const manageProductVariantsUseCase = new ManageProductVariantsUseCase(catalogVariantRepo);
 export const getProductStoreAvailabilityUseCase = new GetProductStoreAvailabilityUseCase(productRepo);
+export const getProductCardsUseCase = new GetProductCardsUseCase(productRepo, productPricingPort);
+export const listCatalogFeaturesUseCase = new ListCatalogFeaturesUseCase(productRepo);
+export const recordProductViewUseCase = new RecordProductViewUseCase();

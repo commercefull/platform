@@ -4,6 +4,7 @@
  */
 
 import { Product } from '../entities/Product';
+import { CatalogFeature } from '../entities/CatalogFeature';
 import { ProductVariant } from '../entities/ProductVariant';
 import { ProductCategory } from '../entities/ProductCategory';
 import { ProductStatus } from '../valueObjects/ProductStatus';
@@ -48,6 +49,10 @@ export interface ProductRepository {
   findByBusinessAndStore(organizationId: string, storeId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findFeatured(pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
   findRelated(productId: string, limit?: number): Promise<Product[]>;
+  /** Batch lookup used by cross-module consumers (recommendation serving). */
+  findByIds(productIds: string[]): Promise<Product[]>;
+  /** Cursor-paged catalog feature export (recommendation rebuilds, feeds). */
+  listCatalogFeatureRows(params: { organizationId?: string; afterProductId?: string; limit?: number }): Promise<CatalogFeature[]>;
   search(query: string, filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>>;
 
   // Product Variants

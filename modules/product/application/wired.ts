@@ -2,6 +2,7 @@ import productCatalogRepository from '../infrastructure/repositories/ProductCata
 import productAttributeRepository from '../infrastructure/repositories/ProductAttributeRepository';
 import productEngagementRepository from '../infrastructure/repositories/ProductEngagementRepository';
 import { InventoryStockAvailabilityAdapter } from '../infrastructure/acl/InventoryStockAvailabilityAdapter';
+import { StorefrontRecommendationAdapter } from '../infrastructure/acl/StorefrontRecommendationAdapter';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 import type { ProductVariantCreateProps, ProductVariantUpdateProps } from '../infrastructure/repositories/productVariantRepo';
 import type { BundleType, ProductBundle, BundleItem } from '../infrastructure/repositories/bundleRepo';
@@ -16,6 +17,7 @@ import type {
 import type { CategoryUpdateProps } from '../infrastructure/repositories/ProductCatalogRepository';
 
 export const stockAvailabilityPort = new InventoryStockAvailabilityAdapter(InventoryRepo);
+export const storefrontRecommendationPort = new StorefrontRecommendationAdapter();
 
 export {
   productCatalogRepository,

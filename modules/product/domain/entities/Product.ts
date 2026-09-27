@@ -46,6 +46,7 @@ export interface ProductProps {
   isSubscription: boolean;
   isTaxable: boolean;
   taxClass?: string;
+  isInventoryManaged?: boolean;
   hasVariants: boolean;
   variantAttributes?: Record<string, unknown>;
   images: ProductImage[];
@@ -228,6 +229,10 @@ export class Product {
   }
   get isTaxable(): boolean {
     return this.props.isTaxable;
+  }
+  /** Whether the product tracks stock (product.isInventoryManaged column). */
+  get isInventoryManaged(): boolean | undefined {
+    return this.props.isInventoryManaged;
   }
   get taxClass(): string | undefined {
     return this.props.taxClass;

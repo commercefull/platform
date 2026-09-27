@@ -38,11 +38,9 @@ import { registerSubscriptionEventHandlers } from '../modules/subscription/appli
 import { registerWebhookEventHandlers } from '../modules/webhook/application/eventHandlers';
 import { registerIntegrationEventHandlers } from '../modules/integration/application/eventHandlers';
 import { registerNotificationEventHandlers } from '../modules/notification/application/eventHandlers';
+import { registerRecommendationEventHandlers } from '../modules/recommendation/application/eventHandlers';
 import { initializeAnalyticsHandlers } from '../modules/analytics/application/analyticsEventHandler';
-import {
-  registerTrackingEventHandlers,
-  setConsentRepository,
-} from '../modules/tracking/application/eventHandlers/trackingEventHandlers';
+import { registerTrackingEventHandlers, setConsentRepository } from '../modules/tracking/application/eventHandlers/trackingEventHandlers';
 import type { WebhookDispatchService } from '../modules/webhook/application/services/WebhookDispatchService';
 
 // Track registration state
@@ -134,6 +132,8 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
   { module: 'notification', register: registerNotificationEventHandlers },
   // Analytics handlers (order/basket/checkout funnel event tracking)
   { module: 'analytics', register: initializeAnalyticsHandlers },
+  // Recommendation handlers (co-purchase counting on order.paid, reversal, product cleanup)
+  { module: 'recommendation', register: registerRecommendationEventHandlers },
 ];
 
 /**

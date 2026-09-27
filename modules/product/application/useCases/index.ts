@@ -44,5 +44,13 @@ export {
 } from './ManageProductAssets';
 export type { ProductRelationType } from './ManageProductAssets';
 
+export { GetProductCardsCommand, GetProductCardsUseCase } from './GetProductCards';
+export type { ProductCardResponse } from './GetProductCards';
+
+export { ListCatalogFeaturesCommand, ListCatalogFeaturesUseCase } from './ListCatalogFeatures';
+export type { ListCatalogFeaturesResponse } from './ListCatalogFeatures';
+
+export { RecordProductViewCommand, RecordProductViewUseCase } from './RecordProductView';
+
 // Attribute sub-module
 export * from './attribute';

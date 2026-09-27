@@ -75,6 +75,7 @@
   - [Pricing](modules/pricing.md)
   - [Product](modules/product.md)
   - [Promotion](modules/promotion.md)
+  - [Recommendation](modules/recommendation.md)
   - [Reporting](modules/reporting.md)
   - [Returns](modules/returns.md)
   - [Segment](modules/segment.md)

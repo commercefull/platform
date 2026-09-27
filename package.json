@@ -48,6 +48,7 @@
     "storefront:watch": "npx esbuild public/javascripts/storefront/main.js --bundle --format=esm --target=es2022 --outfile=public/javascripts/storefront/bundle.min.js --watch",
     "job:new:organization": "NODE_ENV=development node --env-file=.env --import tsx ./modules/organization/interface/jobs/new-organization.ts",
     "job:new:admin": "NODE_ENV=development node --env-file=.env --import tsx ./modules/identity/interface/jobs/new-admin.ts",
+    "job:recommendation:backfill": "NODE_ENV=development node --env-file=.env --import tsx ./modules/recommendation/interface/jobs/backfill-co-purchase.ts",
     "docs:env": "tsx scripts/docs/generate-env-docs.ts",
     "docs:routes": "tsx scripts/docs/generate-route-docs.ts",
     "docs:openapi": "tsx scripts/docs/generate-openapi.ts",

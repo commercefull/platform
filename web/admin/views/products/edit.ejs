@@ -20,6 +20,12 @@
 
   <section class="content">
     <div class="container-fluid">
+      <% if (typeof success !== 'undefined' && success) { %>
+      <div class="alert alert-success alert-dismissible">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+      </div>
+      <% } %>
       <% if (typeof error !== 'undefined' && error) { %>
       <div class="alert alert-danger alert-dismissible">
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -458,11 +464,97 @@
           </div>
         </div>
       </form>
+
+      <!-- Linked Products (manual recommendations) -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-link me-2"></i><%= t('product:linkedProducts') %></h3>
+              <% if (product.organizationId) { %>
+              <a href="/admin/recommendations?organizationId=<%= product.organizationId %>" class="btn btn-sm btn-outline-secondary float-right">
+                <i class="fas fa-lightbulb me-1"></i><%= t('recommendation:title') %>
+              </a>
+              <% } %>
+            </div>
+            <div class="card-body">
+              <p class="text-muted"><%= t('product:linkedProductsHelp') %></p>
+              <% if (productRelationships && productRelationships.length > 0) { %>
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead>
+                    <tr>
+                      <th><%= t('product:linkedProduct') %></th>
+                      <th><%= t('product:linkType') %></th>
+                      <th class="text-center"><%= t('product:linkPosition') %></th>
+                      <th class="text-right"><%= t('common.actions') %></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% productRelationships.forEach(function(rel) { %>
+                    <tr>
+                      <td>
+                        <% if (rel.relatedProduct) { %>
+                          <strong><%= rel.relatedProduct.name %></strong>
+                          <code class="ml-1"><%= rel.relatedProduct.sku || rel.relatedProductId %></code>
+                        <% } else { %>
+                          <code><%= rel.relatedProductId %></code>
+                        <% } %>
+                        <% if (rel.isAutomated) { %><span class="badge badge-info ml-1"><%= t('product:linkAutomated') %></span><% } %>
+                      </td>
+                      <td><span class="badge badge-secondary"><%= rel.type %></span></td>
+                      <td class="text-center"><%= rel.position %></td>
+                      <td class="text-right">
+                        <form method="POST" action="/admin/products/<%= product.productId %>/relationships/<%= rel.productRelatedId %>/delete" class="d-inline">
+                          <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <% } else { %>
+              <p class="text-muted mb-0"><%= t('product:noLinkedProducts') %></p>
+              <% } %>
+            </div>
+            <div class="card-footer">
+              <form method="POST" action="/admin/products/<%= product.productId %>/relationships" class="form-inline">
+                <input type="text" name="relatedProductId" class="form-control form-control-sm mr-2" style="min-width: 280px" placeholder="<%= t('product:relatedProductIdPlaceholder') %>" required />
+                <select name="type" class="form-control form-control-sm mr-2">
+                  <option value="related">related</option>
+                  <option value="accessory">accessory</option>
+                  <option value="cross_sell">cross_sell</option>
+                  <option value="up_sell">up_sell</option>
+                  <option value="grouped">grouped</option>
+                  <option value="bundle">bundle</option>
+                </select>
+                <input type="number" name="position" class="form-control form-control-sm mr-2" style="width: 90px" placeholder="0" value="0" />
+                <div class="form-check mr-2">
+                  <input type="checkbox" name="bidirectional" class="form-check-input" id="relBidirectional" />
+                  <label class="form-check-label" for="relBidirectional"><%= t('product:linkBidirectional') %></label>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i><%= t('product:addLink') %></button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggested products (recommendation module) -->
+      <div class="row">
+        <div class="col-12" id="recommendationSuggestions"></div>
+      </div>
     </div>
   </section>
 </div>
 
 <script>
+  fetch('/admin/products/<%= product.productId %>/recommendations/suggestions')
+    .then(r => r.ok ? r.text() : '')
+    .then(html => { document.getElementById('recommendationSuggestions').innerHTML = html; })
+    .catch(() => {});
+
   async function deleteProduct() {
     if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
 
