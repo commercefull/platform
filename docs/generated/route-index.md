@@ -3,7 +3,7 @@
 > Auto-generated from router source files. Do not edit manually.
 > Run `yarn docs:routes` to regenerate.
 
-**Total routes:** 1212
+**Total routes:** 1229
 
 ## (unmounted)
 
@@ -916,6 +916,7 @@ POST /business/products/:productId/publish |
 GET /products/:productId/related |
 | <span class="badge badge-get">GET</span> | `/products/:productId/relationships` | `asyncHandler(productController.listRelationships)` | — |
 | <span class="badge badge-post">POST</span> | `/products/:productId/relationships` | `asyncHandler(productController.createRelationship)` | — |
+| <span class="badge badge-put">PUT</span> | `/products/:productId/relationships/reorder` | `asyncHandler(productController.reorderRelationships)` | — |
 | <span class="badge badge-get">GET</span> | `/products/:productId/reviews` | `asyncHandler(productController.getProductReviews)` | — |
 | <span class="badge badge-post">POST</span> | `/products/:productId/reviews` | `optionalCustomerAuth` | — |
 | <span class="badge badge-post">POST</span> | `/products/:productId/reviews/:reviewId/vote` | `isCustomerLoggedIn` | — |
@@ -953,6 +954,7 @@ GET /customer/products/by-attribute/:code/:value |
 GET /products/category/:categoryId |
 | <span class="badge badge-get">GET</span> | `/products/featured` | `asyncHandler(productController.getFeaturedProducts)` | Get featured products
 GET /products/featured |
+| <span class="badge badge-delete">DELETE</span> | `/products/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | G6: kept under the /products topic prefix (was /business/relationships/:id) |
 | <span class="badge badge-get">GET</span> | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with filters and facets |
 | <span class="badge badge-post">POST</span> | `/products/search` | `asyncHandler(productSearchController.searchPost.bind(product` | — |
 | <span class="badge badge-get">GET</span> | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with advanced filters and facets
@@ -1016,7 +1018,22 @@ GET /customer/products/search/suggestions |
 | <span class="badge badge-post">POST</span> | `/receiving/:id/complete` | `asyncHandler(receivingController.completeReceiving)` | — |
 | <span class="badge badge-get">GET</span> | `/receiving/:id/items` | `asyncHandler(receivingController.getReceivingItems)` | Receiving items |
 | <span class="badge badge-post">POST</span> | `/receiving/:id/items` | `asyncHandler(receivingController.createReceivingItem)` | — |
-| <span class="badge badge-delete">DELETE</span> | `/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/exclusions` | `asyncHandler(controller.listExclusions)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/exclusions` | `asyncHandler(controller.createExclusion)` | — |
+| <span class="badge badge-delete">DELETE</span> | `/recommendation/exclusions/:exclusionId` | `asyncHandler(controller.deleteExclusion)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/popular` | `asyncHandler(controller.getPopular)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/products` | `asyncHandler(controller.postProductRecommendations)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/products/:productId` | `asyncHandler(controller.getProductRecommendations)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/products/:productId/preview` | `asyncHandler(controller.previewPlacement)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/products/:productId/suggestions` | `asyncHandler(controller.listSuggestions)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/products/:productId/suggestions/hide` | `asyncHandler(controller.hideSuggestion)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/rebuild` | `asyncHandler(controller.rebuild)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/rules` | `asyncHandler(controller.listRules)` | — |
+| <span class="badge badge-post">POST</span> | `/recommendation/rules` | `asyncHandler(controller.createRule)` | — |
+| <span class="badge badge-put">PUT</span> | `/recommendation/rules/:ruleId` | `asyncHandler(controller.updateRule)` | — |
+| <span class="badge badge-delete">DELETE</span> | `/recommendation/rules/:ruleId` | `asyncHandler(controller.deleteRule)` | — |
+| <span class="badge badge-get">GET</span> | `/recommendation/stats` | `asyncHandler(controller.getStats)` | — |
 | <span class="badge badge-post">POST</span> | `/reports/generate` | `asyncHandler(reportingController.generateReport)` | Report generation (on-demand) |
 | <span class="badge badge-get">GET</span> | `/reports/schedules` | `asyncHandler(reportingController.listSchedules)` | Report schedule CRUD |
 | <span class="badge badge-post">POST</span> | `/reports/schedules` | `asyncHandler(reportingController.createSchedule)` | — |

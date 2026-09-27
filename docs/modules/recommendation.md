@@ -830,3 +830,27 @@ These events are also useful for the built-in engine (for example, tuning `minSu
 2. `RecommendationProviderPort` + one adapter in **batch mode** for a single placement, at 10% of traffic.
 3. Compare against built-in for a few weeks. Expand only if the metrics improve.
 4. Online/personalised mode, with consent gating, for the placements that benefit.
+
+
+<!-- GENERATED:ENDPOINTS:START -->
+
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| GET | `/recommendation/exclusions` | `asyncHandler(controller.listExclusions)` | — |
+| POST | `/recommendation/exclusions` | `asyncHandler(controller.createExclusion)` | — |
+| DELETE | `/recommendation/exclusions/:exclusionId` | `asyncHandler(controller.deleteExclusion)` | — |
+| GET | `/recommendation/popular` | `asyncHandler(controller.getPopular)` | — |
+| POST | `/recommendation/products` | `asyncHandler(controller.postProductRecommendations)` | — |
+| GET | `/recommendation/products/:productId` | `asyncHandler(controller.getProductRecommendations)` | — |
+| GET | `/recommendation/products/:productId/preview` | `asyncHandler(controller.previewPlacement)` | — |
+| GET | `/recommendation/products/:productId/suggestions` | `asyncHandler(controller.listSuggestions)` | — |
+| POST | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)` | — |
+| POST | `/recommendation/products/:productId/suggestions/hide` | `asyncHandler(controller.hideSuggestion)` | — |
+| POST | `/recommendation/rebuild` | `asyncHandler(controller.rebuild)` | — |
+| GET | `/recommendation/rules` | `asyncHandler(controller.listRules)` | — |
+| POST | `/recommendation/rules` | `asyncHandler(controller.createRule)` | — |
+| PUT | `/recommendation/rules/:ruleId` | `asyncHandler(controller.updateRule)` | — |
+| DELETE | `/recommendation/rules/:ruleId` | `asyncHandler(controller.deleteRule)` | — |
+| GET | `/recommendation/stats` | `asyncHandler(controller.getStats)` | — |
+
+<!-- GENERATED:ENDPOINTS:END -->
