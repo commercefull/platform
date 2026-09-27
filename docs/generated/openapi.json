@@ -13848,6 +13848,37 @@
             "description": "Internal server error"
           }
         }
+      },
+      "post": {
+        "summary": "Create an order on behalf of the organization (POS / manual orders)\nPOST /business/orders",
+        "operationId": "asyncHandler(orderController.createOrder)_order",
+        "tags": [
+          "order"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderBlocksBody"
+              }
+            }
+          }
+        }
       }
     },
     "/orders/number/{orderNumber}": {
