@@ -36,6 +36,12 @@ router.get('/orders/store-summary', asyncHandler(orderController.getStoreSalesSu
 router.get('/orders', asyncHandler(orderController.listOrders));
 
 /**
+ * Create an order on behalf of the organization (POS / manual orders)
+ * POST /business/orders
+ */
+router.post('/orders', asyncHandler(orderController.createOrder));
+
+/**
  * Get order by order number
  * GET /business/orders/number/:orderNumber
  */

@@ -53,9 +53,9 @@ export interface AddressInput {
 export class CreateOrderCommand {
   constructor(
     public readonly customerId: string | undefined,
-    public readonly customerEmail: string,
+    public readonly customerEmail: string | undefined,
     public readonly items: OrderItemInput[],
-    public readonly shippingAddress: AddressInput,
+    public readonly shippingAddress?: AddressInput,
     public readonly billingAddress?: AddressInput,
     public readonly basketId?: string,
     public readonly storeId?: string,
@@ -75,6 +75,13 @@ export class CreateOrderCommand {
     public readonly userAgent?: string,
     public readonly referralSource?: string,
     public readonly metadata?: Record<string, unknown>,
+    /**
+     * Allows orders without customerEmail and shippingAddress.
+     * Used by back-office/POS order creation where walk-in sales
+     * have no customer contact details. Customer-facing callers
+     * must keep this false.
+     */
+    public readonly allowGuestOrder?: boolean,
   ) {}
 }
 
@@ -119,11 +126,11 @@ export class CreateOrderUseCase {
       throw new OrderMustContainItemsError();
     }
 
-    if (!command.customerEmail) {
+    if (!command.customerEmail && !command.allowGuestOrder) {
       throw new CustomerEmailRequiredError();
     }
 
-    if (!command.shippingAddress) {
+    if (!command.shippingAddress && !command.allowGuestOrder) {
       throw new ShippingAddressRequiredError();
     }
 
@@ -140,7 +147,7 @@ export class CreateOrderUseCase {
       createdByUserId: command.createdByUserId,
       orderSource: command.orderSource,
       currencyCode: currency,
-      customerEmail: command.customerEmail,
+      customerEmail: command.customerEmail || '',
       customerPhone: command.customerPhone,
       customerName: command.customerName,
       customerNotes: command.customerNotes,
@@ -165,7 +172,8 @@ export class CreateOrderUseCase {
         description: itemInput.description,
         quantity: itemInput.quantity,
         unitPrice: Money.fromCents(itemInput.unitPriceCents, currency),
-        discountedUnitPrice: itemInput.discountedUnitPriceCents != null ? Money.fromCents(itemInput.discountedUnitPriceCents, currency) : undefined,
+        discountedUnitPrice:
+          itemInput.discountedUnitPriceCents != null ? Money.fromCents(itemInput.discountedUnitPriceCents, currency) : undefined,
         taxRate: itemInput.taxRate,
         options: itemInput.options,
         attributes: itemInput.attributes,
@@ -180,23 +188,27 @@ export class CreateOrderUseCase {
     }
 
     // Create shipping address
-    const shippingAddress = OrderAddress.create({
-      orderAddressId: generateUUID(),
-      orderId,
-      addressType: 'shipping',
-      ...command.shippingAddress,
-    });
-    order.setShippingAddress(shippingAddress);
+    if (command.shippingAddress) {
+      const shippingAddress = OrderAddress.create({
+        orderAddressId: generateUUID(),
+        orderId,
+        addressType: 'shipping',
+        ...command.shippingAddress,
+      });
+      order.setShippingAddress(shippingAddress);
+    }
 
     // Create billing address (use shipping if not provided)
     const billingAddressInput = command.billingAddress || command.shippingAddress;
-    const billingAddress = OrderAddress.create({
-      orderAddressId: generateUUID(),
-      orderId,
-      addressType: 'billing',
-      ...billingAddressInput,
-    });
-    order.setBillingAddress(billingAddress);
+    if (billingAddressInput) {
+      const billingAddress = OrderAddress.create({
+        orderAddressId: generateUUID(),
+        orderId,
+        addressType: 'billing',
+        ...billingAddressInput,
+      });
+      order.setBillingAddress(billingAddress);
+    }
 
     // Save order and record initial status history in a single transaction
     const savedOrder = await withTransaction(async () => {
