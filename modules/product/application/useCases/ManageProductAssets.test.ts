@@ -119,6 +119,17 @@ describe('ManageProductRelationshipsUseCase', () => {
   let useCase: ManageProductRelationshipsUseCase;
   let mockRepo: jest.Mocked<ConstructorParameters<typeof ManageProductRelationshipsUseCase>[0]>;
 
+  const relRow = {
+    productRelatedId: 'r1',
+    productId: 'p1',
+    relatedProductId: 'p2',
+    type: 'related' as const,
+    position: 0,
+    isAutomated: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockRepo = lazyMock<ConstructorParameters<typeof ManageProductRelationshipsUseCase>[0]>();
@@ -126,14 +137,14 @@ describe('ManageProductRelationshipsUseCase', () => {
   });
 
   it('should list relationships for a product', async () => {
-    mockRepo.findByProductId.mockResolvedValue([{ productRelatedId: 'r1' }]);
+    mockRepo.findByProductId.mockResolvedValue([relRow]);
     const result = await useCase.listForProduct('p1', 'related');
     expect(result).toHaveLength(1);
     expect(mockRepo.findByProductId).toHaveBeenCalledWith('p1', 'related');
   });
 
   it('should create a relationship with defaults', async () => {
-    mockRepo.create.mockResolvedValue({ productRelatedId: 'r1' });
+    mockRepo.create.mockResolvedValue(relRow);
     await useCase.create('p1', { relatedProductId: 'p2', type: 'up_sell' });
     expect(mockRepo.create).toHaveBeenCalledWith({
       productId: 'p1',

@@ -18,6 +18,31 @@ product use cases through the consumer-owned `ProductPricingPort`
   `price_desc` ordering sorts on the product-level base price.
 - Views format cents to display strings at render time (`(cents / 100)`).
 
+## Product Relationships & Recommendations
+
+Product owns **merchant curation** of recommendations, entered during product
+setup, in the `productRelated` table (`ManageProductRelationshipsUseCase`):
+
+| Type                       | Storefront meaning                     | Used by recommendations |
+| -------------------------- | -------------------------------------- | ----------------------- |
+| `related`                  | Alternatives — "You may also like"     | Yes                     |
+| `accessory` / `cross_sell` | Complements — "Complete your purchase" | Yes                     |
+| `up_sell`                  | Premium option — "Upgrade"             | Yes                     |
+| `grouped`                  | Grouped-product children               | No                      |
+| `bundle`                   | Reserved for the bundles feature       | No                      |
+
+`position` is the merchant's ordering. `isAutomated = true` marks a link the
+merchant accepted from a computed suggestion. It is still a manual link.
+
+Computed recommendations (frequently bought together, category/tag rules,
+similarity, best sellers) and the storefront placement/blending logic live in
+the optional **recommendation** module. It reads these manual links through an
+ACL port and always ranks them first. The product module does not depend on it.
+
+See the full design, including known gaps in the current related/similar
+implementation (`categoryId` fallback, legacy `relatedProducts` uuid arrays, PDP
+wiring): [Recommendation Module](./recommendation.md).
+
 ---
 
 ## Use Cases

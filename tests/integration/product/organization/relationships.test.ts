@@ -59,7 +59,7 @@ describe('Product Relationships', () => {
       expect(res.data.success).toBe(true);
       expect(res.data.data.type).toBe('cross_sell');
 
-      await client.delete(`/business/relationships/${res.data.data.productRelatedId}`, {
+      await client.delete(`/business/products/relationships/${res.data.data.productRelatedId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
@@ -79,7 +79,7 @@ describe('Product Relationships', () => {
       expect(res.data.success).toBe(true);
       expect(res.data.data.type).toBe('up_sell');
 
-      await client.delete(`/business/relationships/${res.data.data.productRelatedId}`, {
+      await client.delete(`/business/products/relationships/${res.data.data.productRelatedId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
@@ -99,7 +99,7 @@ describe('Product Relationships', () => {
       expect(res.data.success).toBe(true);
       expect(res.data.data.type).toBe('grouped');
 
-      await client.delete(`/business/relationships/${res.data.data.productRelatedId}`, {
+      await client.delete(`/business/products/relationships/${res.data.data.productRelatedId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
     });
@@ -139,7 +139,7 @@ describe('Product Relationships', () => {
       if (createRes.status !== 201) return;
       const relId = createRes.data.data.productRelatedId;
 
-      const res = await client.delete(`/business/relationships/${relId}`, {
+      const res = await client.delete(`/business/products/relationships/${relId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
 
@@ -209,7 +209,7 @@ describe('Product Relationships', () => {
       expect(Array.isArray(res.data.data)).toBe(true);
       expect(res.data.data.length).toBeGreaterThanOrEqual(1);
 
-      await client.delete(`/business/relationships/${relId}`, {
+      await client.delete(`/business/products/relationships/${relId}`, {
         headers: { Authorization: `Bearer ${adminToken}` },
       });
     });

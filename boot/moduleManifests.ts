@@ -43,6 +43,7 @@ import { manifest as paymentManifest } from '../modules/payment/manifest';
 import { manifest as pricingManifest } from '../modules/pricing/manifest';
 import { manifest as productManifest } from '../modules/product/manifest';
 import { manifest as promotionManifest } from '../modules/promotion/manifest';
+import { manifest as recommendationManifest } from '../modules/recommendation/manifest';
 import { manifest as reportingManifest } from '../modules/reporting/manifest';
 import { manifest as returnsManifest } from '../modules/returns/manifest';
 import { manifest as segmentManifest } from '../modules/segment/manifest';
@@ -93,6 +94,7 @@ const manifests: ModuleManifest[] = [
   // ── Analytics & Reporting (optional) ─────────────────────────
   analyticsManifest,
   reportingManifest,
+  recommendationManifest,
 
   // ── Support (optional) ───────────────────────────────────────
   supportManifest,

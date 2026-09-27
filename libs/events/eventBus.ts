@@ -436,7 +436,12 @@ export type EventType =
   | 'integration.subscription.created'
   | 'integration.subscription.updated'
   | 'integration.dispatch.success'
-  | 'integration.dispatch.failed';
+  | 'integration.dispatch.failed'
+  // Recommendation events
+  | 'recommendation.rebuilt'
+  | 'recommendation.rule_created'
+  | 'recommendation.rule_updated'
+  | 'recommendation.rule_deleted';
 
 /**
  * Planned event types for modules not yet implemented.

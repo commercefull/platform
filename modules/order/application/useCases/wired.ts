@@ -22,6 +22,8 @@ import { GetOrderHistoryUseCase } from './GetOrderHistory';
 import { ManageOrderReturnsUseCase } from './ManageOrderReturns';
 import { ManageStorefrontReturnsUseCase } from './ManageStorefrontReturns';
 import { TrackFulfillmentPackageUseCase } from './TrackFulfillmentPackage';
+import { GetOrderLinesUseCase } from './GetOrderLines';
+import orderLineExportRepo from '../../infrastructure/repositories/orderLineExportRepo';
 
 const orderRepo = OrderDataRepository.commands;
 const orderQueryRepo = OrderDataRepository.queries;
@@ -51,6 +53,7 @@ export const getOrderHistoryUseCase = new GetOrderHistoryUseCase(orderRepo);
 export const manageOrderReturnsUseCase = new ManageOrderReturnsUseCase(orderReturnRepo);
 export const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase(orderReturnRepo);
 export const trackFulfillmentPackageUseCase = new TrackFulfillmentPackageUseCase(orderFulfillmentRepo);
+export const getOrderLinesUseCase = new GetOrderLinesUseCase(orderLineExportRepo);
 import { GetStoreSalesSummaryUseCase } from './GetStoreSalesSummary';
 
 export const getStoreSalesSummaryUseCase = new GetStoreSalesSummaryUseCase();

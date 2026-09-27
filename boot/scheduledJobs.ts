@@ -17,6 +17,7 @@ import { scheduledJobs as analyticsJobs } from '../modules/analytics/scheduledJo
 import { scheduledJobs as basketJobs } from '../modules/basket/scheduledJobs';
 import { scheduledJobs as notificationJobs, wireNotificationJobCreators } from '../modules/notification/scheduledJobs';
 import { scheduledJobs as reportingJobs, wireReportJobCreator } from '../modules/reporting/scheduledJobs';
+import { scheduledJobs as recommendationJobs } from '../modules/recommendation/scheduledJobs';
 
 const jobModules: { module: string; jobs: ScheduledJobDefinition[] }[] = [
   { module: 'inventory', jobs: inventoryJobs },
@@ -25,6 +26,7 @@ const jobModules: { module: string; jobs: ScheduledJobDefinition[] }[] = [
   { module: 'basket', jobs: basketJobs },
   { module: 'notification', jobs: notificationJobs },
   { module: 'reporting', jobs: reportingJobs },
+  { module: 'recommendation', jobs: recommendationJobs },
 ];
 
 /**

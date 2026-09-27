@@ -9,6 +9,7 @@ import { Product as DbProduct, ProductVariant as DbProductVariant, ProductImage 
 import { ProductRepository as IProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
 import { Product, ProductImage } from '../../domain/entities/Product';
+import { CatalogFeature } from '../../domain/entities/CatalogFeature';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
@@ -66,17 +67,7 @@ export class ProductRepo implements IProductRepository {
     // Price sorting resolves against the pricing-owned productBasePrice table
     // (product-level rows only); all other columns sort on the product table.
     // orderBy comes from the query string — restrict to known product columns.
-    const sortableColumns = new Set([
-      'createdAt',
-      'updatedAt',
-      'name',
-      'sku',
-      'status',
-      'visibility',
-      'type',
-      'publishedAt',
-      'isFeatured',
-    ]);
+    const sortableColumns = new Set(['createdAt', 'updatedAt', 'name', 'sku', 'status', 'visibility', 'type', 'publishedAt', 'isFeatured']);
     const orderExpr =
       orderBy === 'priceCents' || orderBy === 'basePrice'
         ? `(SELECT bp."priceCents" FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL LIMIT 1)`
@@ -264,17 +255,42 @@ export class ProductRepo implements IProductRepository {
   }
 
   async findRelated(productId: string, limit: number = 10): Promise<Product[]> {
-    const product = await this.findById(productId);
-    if (!product?.categoryId) return [];
-
-    const rows = await query<DbProduct[]>(
-      `SELECT * FROM product
-       WHERE "categoryId" = $1 AND "productId" != $2 AND "deletedAt" IS NULL
-       AND status = $3 AND visibility IN ($4, $5)
-       ORDER BY "isFeatured" DESC, RANDOM()
-       LIMIT $6`,
-      [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
+    // Manual 'related' links from productRelated take precedence — a merchant
+    // curated these and they must outrank any computed fallback.
+    const linked = await query<Array<{ relatedProductId: string }>>(
+      `SELECT "relatedProductId" FROM "productRelated"
+       WHERE "productId" = $1 AND type = 'related'
+       ORDER BY "position" ASC`,
+      [productId],
     );
+
+    let rows: DbProduct[] | null;
+    if (linked && linked.length > 0) {
+      const ids = linked.map(r => r.relatedProductId);
+      rows = await query<DbProduct[]>(
+        `SELECT * FROM product
+         WHERE "productId" = ANY($1) AND "deletedAt" IS NULL
+         AND status = $2 AND visibility IN ($3, $4)
+         LIMIT $5`,
+        [ids, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
+      );
+    } else {
+      // Category fallback via the productToCategory mapping table — the
+      // product row has no direct categoryId column.
+      rows = await query<DbProduct[]>(
+        `SELECT p.* FROM product p
+         JOIN "productToCategory" ptc ON ptc."productId" = p."productId"
+         WHERE ptc."productCategoryId" = (
+           SELECT "productCategoryId" FROM "productToCategory"
+           WHERE "productId" = $1 ORDER BY "isPrimary" DESC, "position" ASC LIMIT 1
+         )
+         AND p."productId" != $1 AND p."deletedAt" IS NULL
+         AND p.status = $2 AND p.visibility IN ($3, $4)
+         ORDER BY p."isFeatured" DESC, RANDOM()
+         LIMIT $5`,
+        [productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, ProductVisibility.FEATURED, limit],
+      );
+    }
 
     if (!rows || rows.length === 0) return [];
 
@@ -284,6 +300,96 @@ export class ProductRepo implements IProductRepository {
       products.push(this.mapToProduct(row, images));
     }
     return products;
+  }
+
+  async findByIds(productIds: string[]): Promise<Product[]> {
+    const ids = [...new Set(productIds.filter(Boolean))];
+    if (ids.length === 0) return [];
+
+    const rows = await query<DbProduct[]>(`SELECT * FROM product WHERE "productId" = ANY($1) AND "deletedAt" IS NULL`, [ids]);
+    if (!rows || rows.length === 0) return [];
+
+    const foundIds = rows.map(r => r.productId);
+    const allImages = await query<Array<{ productId: string } & Record<string, unknown>>>(
+      `SELECT * FROM "productImage" WHERE "productId" = ANY($1) ORDER BY "productId", "position" ASC`,
+      [foundIds],
+    );
+    const imagesByProduct = new Map<string, Array<Record<string, unknown>>>();
+    for (const img of allImages || []) {
+      const arr = imagesByProduct.get(img.productId) || [];
+      arr.push(img);
+      imagesByProduct.set(img.productId, arr);
+    }
+    return rows.map(row => this.mapToProduct(row, (imagesByProduct.get(row.productId) || []) as never));
+  }
+
+  async listCatalogFeatureRows(params: { organizationId?: string; afterProductId?: string; limit?: number }): Promise<CatalogFeature[]> {
+    const limit = params.limit ?? 500;
+    const rows = await query<
+      Array<{
+        productId: string;
+        organizationId: string | null;
+        storeId: string | null;
+        status: string;
+        visibility: string;
+        type: string;
+        brandId: string | null;
+        averageRating: string | null;
+        publishedAt: string | null;
+        isFeatured: boolean;
+        isBestseller: boolean;
+        primaryCategoryId: string | null;
+        categoryIds: unknown;
+        collectionIds: unknown;
+        attributeValues: unknown;
+        basePriceCents: number | null;
+      }>
+    >(
+      `SELECT
+         p."productId", p."organizationId", p."storeId", p."status", p."visibility", p."type",
+         p."brandId", p."averageRating", p."publishedAt", p."isFeatured", p."isBestseller",
+         (SELECT ptc."productCategoryId" FROM "productToCategory" ptc
+           WHERE ptc."productId" = p."productId"
+           ORDER BY ptc."isPrimary" DESC, ptc."position" ASC LIMIT 1) AS "primaryCategoryId",
+         COALESCE((SELECT json_agg(x."productCategoryId") FROM (
+           SELECT DISTINCT ptc2."productCategoryId" FROM "productToCategory" ptc2
+           WHERE ptc2."productId" = p."productId") x), '[]'::json) AS "categoryIds",
+         COALESCE((SELECT json_agg(pcm."productCollectionId") FROM "productCollectionMap" pcm
+           WHERE pcm."productId" = p."productId"), '[]'::json) AS "collectionIds",
+         COALESCE((SELECT json_agg(json_build_object('attributeId', avm."attributeId", 'value', avm."value"))
+           FROM "productAttributeValueMap" avm WHERE avm."productId" = p."productId"), '[]'::json) AS "attributeValues",
+         (SELECT bp."priceCents" FROM "productBasePrice" bp
+           WHERE bp."productId" = p."productId" AND bp."productVariantId" IS NULL LIMIT 1) AS "basePriceCents"
+       FROM product p
+       WHERE p."deletedAt" IS NULL
+         AND ($1::uuid IS NULL OR p."organizationId" = $1)
+         AND ($2::uuid IS NULL OR p."productId" > $2)
+       ORDER BY p."productId" ASC
+       LIMIT $3`,
+      [params.organizationId ?? null, params.afterProductId ?? null, limit],
+    );
+
+    return (rows || []).map(row => {
+      const categoryIds = (row.categoryIds as string[]) || [];
+      return {
+        productId: row.productId,
+        organizationId: row.organizationId,
+        storeId: row.storeId,
+        status: row.status,
+        visibility: row.visibility,
+        type: row.type,
+        brandId: row.brandId,
+        primaryCategoryId: row.primaryCategoryId,
+        secondaryCategoryIds: categoryIds.filter(c => c !== row.primaryCategoryId),
+        collectionIds: (row.collectionIds as string[]) || [],
+        attributeValues: (row.attributeValues as CatalogFeature['attributeValues']) || [],
+        basePriceCents: row.basePriceCents !== null ? Number(row.basePriceCents) : null,
+        averageRating: row.averageRating !== null ? Number(row.averageRating) : null,
+        publishedAt: row.publishedAt,
+        isFeatured: row.isFeatured,
+        isBestseller: row.isBestseller,
+      };
+    });
   }
 
   async search(queryStr: string, filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
@@ -454,7 +560,11 @@ export class ProductRepo implements IProductRepository {
       }
     }
     if (filters?.categoryId) {
-      // Category filtering not implemented in current schema
+      // Product↔category lives in the productToCategory mapping table
+      conditions.push(
+        `EXISTS (SELECT 1 FROM "productToCategory" ptc WHERE ptc."productId" = product."productId" AND ptc."productCategoryId" = $${paramIndex++})`,
+      );
+      params.push(filters.categoryId);
     }
     if (filters?.organizationId) {
       conditions.push(`"organizationId" = $${paramIndex++}`);
@@ -533,6 +643,8 @@ export class ProductRepo implements IProductRepository {
       isDownloadable: Boolean(row.isDownloadable),
       isSubscription: Boolean(row.isSubscription),
       isTaxable: Boolean(row.isTaxable),
+      isInventoryManaged:
+        row.isInventoryManaged === null || row.isInventoryManaged === undefined ? undefined : Boolean(row.isInventoryManaged),
       taxClass: row.taxClass ?? undefined,
       hasVariants: Boolean(row.hasVariants),
       variantAttributes: row.variantAttributes

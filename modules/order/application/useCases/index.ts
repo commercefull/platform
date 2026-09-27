@@ -3,6 +3,7 @@
  */
 export * from './CreateOrder';
 export * from './GetOrder';
+export * from './GetOrderLines';
 export * from './ListOrders';
 export * from './UpdateOrderStatus';
 export * from './UpdatePaymentStatus';

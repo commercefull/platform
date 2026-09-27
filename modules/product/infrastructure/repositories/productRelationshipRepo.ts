@@ -1,24 +1,17 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductRelationType, ProductRelationshipProps } from '../../domain/entities/ProductRelationship';
+import type { ProductRelationshipRepository } from '../../domain/repositories/ProductRelationshipRepository';
 
-export type RelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
-
-export interface ProductRelationship {
-  productRelatedId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  relatedProductId: string;
-  type: RelationType;
-  position: number;
-  isAutomated: boolean;
-}
-
+// Backward-compatible aliases — the canonical types live in
+// domain/entities/ProductRelationship.ts
+export type RelationType = ProductRelationType;
+export type ProductRelationship = ProductRelationshipProps;
 export type ProductRelationshipCreateParams = Omit<ProductRelationship, 'productRelatedId' | 'createdAt' | 'updatedAt'>;
 export type ProductRelationshipUpdateParams = Partial<Pick<ProductRelationship, 'type' | 'position' | 'isAutomated'>>;
 
-export class ProductRelationshipRepo {
+export class ProductRelationshipRepo implements ProductRelationshipRepository {
   /**
    * Find relationship by ID
    */
@@ -326,6 +319,9 @@ export class ProductRelationshipRepo {
       related: 0,
       accessory: 0,
       bundle: 0,
+      cross_sell: 0,
+      up_sell: 0,
+      grouped: 0,
     };
 
     if (results) {

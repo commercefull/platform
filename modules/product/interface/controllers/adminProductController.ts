@@ -29,7 +29,10 @@ import {
   manageCategoriesUseCase,
   getProductAttributesUseCase,
   getReviewStatsUseCase,
+  manageProductRelationshipsUseCase,
+  getProductCardsUseCase,
 } from '../../application/useCases/wired';
+import { GetProductCardsCommand } from '../../application/useCases/GetProductCards';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================
@@ -310,12 +313,26 @@ export const editProductForm = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  const [productTypes, categories, productAttributes, allAttributes] = await Promise.all([
+  const [productTypes, categories, productAttributes, allAttributes, relationships] = await Promise.all([
     listProductTypesUseCase.execute(),
     manageCategoriesUseCase.findActive(),
     getProductAttributesUseCase.getProductAttributes(productId).catch(() => []),
     getProductAttributesUseCase.findAllAttributes().catch(() => []),
+    manageProductRelationshipsUseCase.listForProduct(productId).catch(() => []),
   ]);
+
+  const relatedCards = await getProductCardsUseCase
+    .execute(new GetProductCardsCommand(relationships.map(r => r.relatedProductId)))
+    .catch(() => []);
+  const cardById = new Map(relatedCards.map(c => [c.productId, c]));
+  const productRelationships = relationships.map(r => ({
+    productRelatedId: r.productRelatedId,
+    relatedProductId: r.relatedProductId,
+    type: r.type,
+    position: r.position,
+    isAutomated: r.isAutomated,
+    relatedProduct: cardById.get(r.relatedProductId) || null,
+  }));
 
   adminRespond(req, res, 'products/edit', {
     pageName: `Edit: ${product?.name || 'Product'}`,
@@ -324,7 +341,44 @@ export const editProductForm = async (req: HttpRequest, res: HttpResponse): Prom
     categories,
     productAttributes,
     allAttributes,
+    productRelationships,
+    success: req.query.success || null,
+    error: req.query.error || null,
   });
+};
+
+// ============================================================================
+// Product Relationships (manual recommendation links)
+// ============================================================================
+
+export const addProductRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { productId } = req.params;
+  try {
+    const body = req.body as { relatedProductId?: string; type?: string; position?: string; bidirectional?: string };
+    await manageProductRelationshipsUseCase.create(productId, {
+      relatedProductId: body.relatedProductId?.trim(),
+      type: body.type,
+      position: body.position ? parseInt(body.position, 10) : 0,
+      bidirectional: body.bidirectional === 'on' || body.bidirectional === 'true',
+    });
+    res.redirect(`/admin/products/${productId}/edit?success=Product link added`);
+  } catch (error: unknown) {
+    logger.warn('Error:', error);
+    res.redirect(`/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to add product link'));
+  }
+};
+
+export const removeProductRelationship = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { productId, relationshipId } = req.params;
+  try {
+    await manageProductRelationshipsUseCase.delete(relationshipId);
+    res.redirect(`/admin/products/${productId}/edit?success=Product link removed`);
+  } catch (error: unknown) {
+    logger.warn('Error:', error);
+    res.redirect(
+      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to remove product link'),
+    );
+  }
 };
 
 // ============================================================================

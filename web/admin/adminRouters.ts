@@ -49,6 +49,8 @@ import {
   updateProductStatus,
   updateQaStatus,
   upsertProductPrice,
+  addProductRelationship,
+  removeProductRelationship,
   viewProduct,
   createCategory,
   createCategoryForm,
@@ -73,6 +75,16 @@ import {
   updateBrand,
   deleteBrand,
 } from '../../modules/product';
+import {
+  recommendationsDashboard,
+  createRecommendationRule,
+  deleteRecommendationRule,
+  createRecommendationExclusion,
+  deleteRecommendationExclusion,
+  productSuggestionsPartial,
+  acceptProductSuggestion,
+  hideProductSuggestion,
+} from '../../modules/recommendation';
 import {
   addOrderNote,
   cancelOrder,
@@ -771,6 +783,22 @@ router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(delete
 // Product Prices
 router.get('/products/:productId/prices', asyncHandler(listProductPrices));
 router.post('/products/:productId/prices', asyncHandler(upsertProductPrice));
+
+// Product Relationships (manual recommendation links)
+router.post('/products/:productId/relationships', asyncHandler(addProductRelationship));
+router.post('/products/:productId/relationships/:relationshipId/delete', asyncHandler(removeProductRelationship));
+
+// Product Recommendations — suggestions panel on the product editor
+router.get('/products/:productId/recommendations/suggestions', asyncHandler(productSuggestionsPartial));
+router.post('/products/:productId/recommendations/suggestions/:candidateProductId/accept', asyncHandler(acceptProductSuggestion));
+router.post('/products/:productId/recommendations/suggestions/:candidateProductId/hide', asyncHandler(hideProductSuggestion));
+
+// Recommendations — org-scoped rules, exclusions and stats
+router.get('/recommendations', asyncHandler(recommendationsDashboard));
+router.post('/recommendations/rules', asyncHandler(createRecommendationRule));
+router.post('/recommendations/rules/:ruleId/delete', asyncHandler(deleteRecommendationRule));
+router.post('/recommendations/exclusions', asyncHandler(createRecommendationExclusion));
+router.post('/recommendations/exclusions/:exclusionId/delete', asyncHandler(deleteRecommendationExclusion));
 
 // ============================================================================
 // Order Routes

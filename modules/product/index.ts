@@ -5,11 +5,14 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/ProductRepository';
+export * from './domain/repositories/ProductRelationshipRepository';
 export * from './domain/repositories/BrandRepository';
 export * from './domain/events/ProductEvents';
 export * from './domain/errors/ProductErrors';
 export * from './domain/entities/ProductType';
 export * from './domain/entities/ProductAttribute';
+export * from './domain/entities/ProductRelationship';
+export * from './domain/entities/CatalogFeature';
 export * from './domain/entities/Brand';
 
 // Infrastructure exports (repository singletons)

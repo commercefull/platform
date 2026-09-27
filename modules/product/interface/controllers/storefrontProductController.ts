@@ -5,9 +5,20 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
-import { listProductsUseCase, getProductUseCase, manageBrandsUseCase } from '../../application/useCases/wired';
+import {
+  listProductsUseCase,
+  getProductUseCase,
+  manageBrandsUseCase,
+  getProductCardsUseCase,
+  manageProductRelationshipsUseCase,
+  recordProductViewUseCase,
+} from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
+import { GetProductCardsCommand } from '../../application/useCases/GetProductCards';
+import { RecordProductViewCommand } from '../../application/useCases/RecordProductView';
+import { storefrontRecommendationPort } from '../../application/wired';
+import { logger } from '../../../../libs/logger';
 
 // ============================================================================
 // Store context helper — reads from res.locals (set by storeResolutionMiddleware)
@@ -155,29 +166,66 @@ export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<v
     return;
   }
 
-  // Get related products from same category
-  const relatedFilters: Record<string, unknown> = { categoryId: product.categoryId };
-  if (storeCtx.storeId) {
-    relatedFilters.storeId = storeCtx.storeId;
-  }
-  const relatedCommand = new ListProductsCommand(relatedFilters, 5, 0);
-  const relatedUseCase = listProductsUseCase;
-  const relatedResult = await relatedUseCase.execute(relatedCommand);
-  // Filter out the current product
-  const relatedProducts = (relatedResult.products || []).filter(p => p.productId !== product.productId).slice(0, 4);
+  // Emit product.viewed for analytics / tracking / recommendation consumers.
+  // Fire-and-forget: a tracking failure must never break the PDP render.
+  recordProductViewUseCase
+    .execute(
+      new RecordProductViewCommand(product.productId, {
+        customerId:
+          (req.user as { customerId?: string; id?: string } | undefined)?.customerId ?? (req.user as { id?: string } | undefined)?.id,
+        sessionId: (req as unknown as { sessionID?: string }).sessionID,
+        organizationId: product.organizationId,
+        storeId: storeCtx.storeId || undefined,
+      }),
+    )
+    .catch(err => logger.debug('product.viewed emission failed', { productId: product.productId, error: err }));
 
-  // Get complementary products (accessories category) for "Complete the look"
-  let complementaryProducts: typeof relatedProducts = [];
-  try {
-    const complementaryFilters: Record<string, unknown> = { search: 'accessories' };
-    if (storeCtx.storeId) {
-      complementaryFilters.storeId = storeCtx.storeId;
+  // Recommendation module slots (registry-gated inside the port — returns
+  // [] when disabled). Fall back to curated links + category heuristics.
+  const recommendationContext = {
+    organizationId: product.organizationId,
+    storeId: storeCtx.storeId || undefined,
+    currencyCode: storeCtx.currency,
+  };
+  let relatedProducts = await storefrontRecommendationPort.getForPlacement('pdpAlsoLike', [product.productId], recommendationContext, 4);
+  let complementaryProducts = await storefrontRecommendationPort.getForPlacement(
+    'pdpBoughtWith',
+    [product.productId],
+    recommendationContext,
+    4,
+  );
+
+  // Related products fallback: curated 'related' links first, primary-category
+  // fallback when none exist (findRelated handles both).
+  if (relatedProducts.length === 0) {
+    const relatedEntities = await getProductUseCase.findRelated(product.productId, 4).catch(() => []);
+    relatedProducts = await getProductCardsUseCase
+      .execute(
+        new GetProductCardsCommand(
+          relatedEntities.map(p => p.productId),
+          storeCtx.currency,
+        ),
+      )
+      .catch(() => []);
+  }
+
+  // Complementary fallback ("Complete the look"): curated accessory /
+  // cross_sell links from product setup.
+  if (complementaryProducts.length === 0) {
+    try {
+      const [accessories, crossSells] = await Promise.all([
+        manageProductRelationshipsUseCase.listForProduct(product.productId, 'accessory'),
+        manageProductRelationshipsUseCase.listForProduct(product.productId, 'cross_sell'),
+      ]);
+      const ids = [...accessories, ...crossSells].map(r => r.relatedProductId).filter((id): id is string => !!id);
+      if (ids.length > 0) {
+        complementaryProducts = (await getProductCardsUseCase.execute(new GetProductCardsCommand(ids, storeCtx.currency)))
+          .filter(c => c.status === 'active')
+          .slice(0, 4);
+      }
+    } catch {
+      // Complementary products are optional
     }
-    const complementaryCommand = new ListProductsCommand(complementaryFilters, 5, 0);
-    const complementaryResult = await listProductsUseCase.execute(complementaryCommand);
-    complementaryProducts = (complementaryResult.products || []).filter(p => p.productId !== product.productId).slice(0, 4);
-  } catch {
-    // Complementary products are optional
   }
 
   storefrontRespond(req, res, 'product/pdp', {

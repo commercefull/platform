@@ -5,6 +5,7 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/OrderRepository';
+export * from './domain/repositories/OrderLineExportRepository';
 export * from './domain/repositories/OrderQueryRepository';
 export * from './domain/repositories/OrderFulfillmentRepository';
 export * from './domain/repositories/OrderFulfillmentPackageRepository';
