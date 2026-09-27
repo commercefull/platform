@@ -2,7 +2,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 4.0"
+      version = "~> 5.6"
     }
     random = {
       source  = "hashicorp/random"
@@ -96,7 +96,7 @@ resource "google_sql_database_instance" "postgres" {
       ipv4_enabled    = false
       private_network = google_compute_network.vpc.id
       # SECURITY: reject unencrypted connections
-      require_ssl = true
+      ssl_mode = "ENCRYPTED_ONLY"
     }
 
     database_flags {
@@ -353,8 +353,8 @@ resource "google_cloud_run_service" "app" {
           value = google_sql_user.user.name
         }
 
-        # Cloud SQL enforces TLS (require_ssl). Supply the instance CA via
-        # POSTGRES_SSL_CA to also verify the server certificate.
+        # Cloud SQL enforces TLS (ssl_mode = ENCRYPTED_ONLY). Supply the
+        # instance CA via POSTGRES_SSL_CA to also verify the server certificate.
         env {
           name  = "POSTGRES_SSL"
           value = "true"
