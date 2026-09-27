@@ -276,6 +276,7 @@ POST /business/products/:productId/publish |
 GET /products/:productId/related |
 | GET | `/products/:productId/relationships` | `asyncHandler(productController.listRelationships)` | — |
 | POST | `/products/:productId/relationships` | `asyncHandler(productController.createRelationship)` | — |
+| PUT | `/products/:productId/relationships/reorder` | `asyncHandler(productController.reorderRelationships)` | — |
 | GET | `/products/:productId/reviews` | `asyncHandler(productController.getProductReviews)` | — |
 | POST | `/products/:productId/reviews` | `optionalCustomerAuth` | — |
 | POST | `/products/:productId/reviews/:reviewId/vote` | `isCustomerLoggedIn` | — |
@@ -313,6 +314,7 @@ GET /customer/products/by-attribute/:code/:value |
 GET /products/category/:categoryId |
 | GET | `/products/featured` | `asyncHandler(productController.getFeaturedProducts)` | Get featured products
 GET /products/featured |
+| DELETE | `/products/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | G6: kept under the /products topic prefix (was /business/relationships/:id) |
 | GET | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with filters and facets |
 | POST | `/products/search` | `asyncHandler(productSearchController.searchPost.bind(product` | — |
 | GET | `/products/search` | `asyncHandler(productSearchController.search.bind(productSear` | Search products with advanced filters and facets
@@ -326,7 +328,6 @@ GET /customer/products/search/suggestions |
 | PUT | `/products/variants/:variantId` | `asyncHandler(productController.updateProductVariant)` | — |
 | DELETE | `/products/variants/:variantId` | `asyncHandler(productController.deleteProductVariant)` | — |
 | PATCH | `/products/variants/:variantId/inventory` | `asyncHandler(productController.updateVariantInventory)` | — |
-| DELETE | `/relationships/:relationshipId` | `asyncHandler(productController.deleteRelationship)` | — |
 | GET | `/reviews` | `asyncHandler(productController.listReviews)` | — |
 | GET | `/reviews/:reviewId` | `asyncHandler(productController.getReview)` | — |
 | DELETE | `/reviews/:reviewId` | `asyncHandler(productController.deleteReview)` | — |

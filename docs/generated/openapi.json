@@ -125,6 +125,10 @@
       "description": "promotion module"
     },
     {
+      "name": "recommendation",
+      "description": "recommendation module"
+    },
+    {
       "name": "reporting",
       "description": "reporting module"
     },
@@ -20177,9 +20181,42 @@
         }
       }
     },
-    "/relationships/{relationshipId}": {
+    "/products/{productId}/relationships/reorder": {
+      "put": {
+        "summary": "asyncHandler(productController.reorderRelationships)",
+        "operationId": "asyncHandler(productController.reorderRelationships)_product",
+        "tags": [
+          "product"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/relationships/{relationshipId}": {
       "delete": {
-        "summary": "asyncHandler(productController.deleteRelationship)",
+        "summary": "G6: kept under the /products topic prefix (was /business/relationships/:id)",
         "operationId": "asyncHandler(productController.deleteRelationship)_product",
         "tags": [
           "product"
@@ -21831,6 +21868,368 @@
                 "$ref": "#/components/schemas/CartPromotionBody"
               }
             }
+          }
+        }
+      }
+    },
+    "/recommendation/products/{productId}/suggestions": {
+      "get": {
+        "summary": "asyncHandler(controller.listSuggestions)",
+        "operationId": "asyncHandler(controller.listSuggestions)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/products/{productId}/suggestions/accept": {
+      "post": {
+        "summary": "asyncHandler(controller.acceptSuggestion)",
+        "operationId": "asyncHandler(controller.acceptSuggestion)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/products/{productId}/suggestions/hide": {
+      "post": {
+        "summary": "asyncHandler(controller.hideSuggestion)",
+        "operationId": "asyncHandler(controller.hideSuggestion)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/products/{productId}/preview": {
+      "get": {
+        "summary": "asyncHandler(controller.previewPlacement)",
+        "operationId": "asyncHandler(controller.previewPlacement)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/rules": {
+      "get": {
+        "summary": "asyncHandler(controller.listRules)",
+        "operationId": "asyncHandler(controller.listRules)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(controller.createRule)",
+        "operationId": "asyncHandler(controller.createRule)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/rules/{ruleId}": {
+      "put": {
+        "summary": "asyncHandler(controller.updateRule)",
+        "operationId": "asyncHandler(controller.updateRule)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "asyncHandler(controller.deleteRule)",
+        "operationId": "asyncHandler(controller.deleteRule)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/exclusions": {
+      "get": {
+        "summary": "asyncHandler(controller.listExclusions)",
+        "operationId": "asyncHandler(controller.listExclusions)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(controller.createExclusion)",
+        "operationId": "asyncHandler(controller.createExclusion)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/exclusions/{exclusionId}": {
+      "delete": {
+        "summary": "asyncHandler(controller.deleteExclusion)",
+        "operationId": "asyncHandler(controller.deleteExclusion)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/rebuild": {
+      "post": {
+        "summary": "asyncHandler(controller.rebuild)",
+        "operationId": "asyncHandler(controller.rebuild)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/stats": {
+      "get": {
+        "summary": "asyncHandler(controller.getStats)",
+        "operationId": "asyncHandler(controller.getStats)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/products/{productId}": {
+      "get": {
+        "summary": "asyncHandler(controller.getProductRecommendations)",
+        "operationId": "asyncHandler(controller.getProductRecommendations)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/products": {
+      "post": {
+        "summary": "asyncHandler(controller.postProductRecommendations)",
+        "operationId": "asyncHandler(controller.postProductRecommendations)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/recommendation/popular": {
+      "get": {
+        "summary": "asyncHandler(controller.getPopular)",
+        "operationId": "asyncHandler(controller.getPopular)_recommendation",
+        "tags": [
+          "recommendation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -33363,6 +33762,10 @@
             "description": "number | undefined"
           },
           "isAutomated": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "bidirectional": {
             "type": "string",
             "description": "boolean | undefined"
           }
