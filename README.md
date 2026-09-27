@@ -11,7 +11,7 @@
 [![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
 [![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 
-Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 42 business modules covering the full commerce lifecycle.
+Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
 
 ---
 
@@ -205,7 +205,7 @@ platform/
 │   ├── session/               #   Session management
 │   ├── types/                 #   Shared TypeScript types
 │   └── validation/            #   Input validation helpers
-├── modules/                   # 42 business modules (DDD)
+├── modules/                   # 43 business modules (DDD)
 │   ├── product/               #   Example: Product module
 │   │   ├── application/       #     Use cases
 │   │   ├── domain/            #     Entities, value objects, events
@@ -391,7 +391,7 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Modules
 
-Commercefull includes 42 business modules:
+Commercefull includes 43 business modules:
 
 | Module          | Description                                                          |
 | --------------- | -------------------------------------------------------------------- |
