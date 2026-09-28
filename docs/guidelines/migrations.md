@@ -257,7 +257,7 @@ Run `yarn db:migrate:smoke` in CI to verify migrations against both a fresh DB a
 
 ```bash
 # Fresh DB: apply all migrations from scratch
-yarn db:migrate:smoke:fresh
+yarn db:migrate:smoke
 
 # Seeded DB: apply migrations on top of seeded data
 yarn db:migrate:smoke:seeded
