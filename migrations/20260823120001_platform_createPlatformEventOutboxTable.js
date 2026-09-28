@@ -1,5 +1,5 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('eventOutbox', t => {
+  return knex.schema.createTable('platformEventOutbox', t => {
     t.uuid('eventOutboxId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -28,5 +28,5 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  return knex.schema.dropTable('eventOutbox');
+  return knex.schema.dropTable('platformEventOutbox');
 };

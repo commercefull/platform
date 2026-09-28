@@ -23,9 +23,6 @@ export enum Table {
   BasketHistory = "basketHistory",
   BasketItem = "basketItem",
   BasketMerge = "basketMerge",
-  Brand = "brand",
-  CategoryManualOrder = "categoryManualOrder",
-  CcpaDsr = "ccpaDsr",
   CheckoutConfig = "checkoutConfig",
   CheckoutSession = "checkoutSession",
   ContentBlock = "contentBlock",
@@ -57,7 +54,6 @@ export enum Table {
   CustomerPasswordReset = "customerPasswordReset",
   CustomerPrice = "customerPrice",
   CustomerPriceList = "customerPriceList",
-  CustomerProfile = "customerProfile",
   CustomerSubscription = "customerSubscription",
   CustomerTaxExemption = "customerTaxExemption",
   CustomerWishlist = "customerWishlist",
@@ -65,7 +61,6 @@ export enum Table {
   DistributionWarehouse = "distributionWarehouse",
   DistributionWarehouseBin = "distributionWarehouseBin",
   DistributionWarehouseZone = "distributionWarehouseZone",
-  EventOutbox = "eventOutbox",
   FraudBlacklist = "fraudBlacklist",
   FraudCheck = "fraudCheck",
   FraudRule = "fraudRule",
@@ -76,13 +71,20 @@ export enum Table {
   FulfillmentPartner = "fulfillmentPartner",
   FulfillmentRule = "fulfillmentRule",
   FulfillmentStatusHistory = "fulfillmentStatusHistory",
+  GdprCcpaDsr = "gdprCcpaDsr",
   GdprCookieConsent = "gdprCookieConsent",
   GdprDataRequest = "gdprDataRequest",
   IdentityAdminUser = "identityAdminUser",
   IdentityCustomerSession = "identityCustomerSession",
+  IdentityKeyRotationPolicy = "identityKeyRotationPolicy",
+  IdentityOidcProvider = "identityOidcProvider",
   IdentityOrganizationSession = "identityOrganizationSession",
   IdentityRefreshTokens = "identityRefreshTokens",
+  IdentityRolePolicy = "identityRolePolicy",
+  IdentitySamlProvider = "identitySamlProvider",
+  IdentityScimProvisioningRecord = "identityScimProvisioningRecord",
   IdentitySocialAccount = "identitySocialAccount",
+  IdentityStoreUser = "identityStoreUser",
   IdentityTokenBlacklist = "identityTokenBlacklist",
   IdentityUserSession = "identityUserSession",
   ImportError = "importError",
@@ -103,7 +105,6 @@ export enum Table {
   InventoryStockReservation = "inventoryStockReservation",
   InventoryTransaction = "inventoryTransaction",
   InventoryTransactionType = "inventoryTransactionType",
-  KeyRotationPolicy = "keyRotationPolicy",
   KnexMigrations = "knexMigrations",
   KnexMigrationsLock = "knexMigrations_lock",
   Language = "language",
@@ -124,7 +125,6 @@ export enum Table {
   MembershipPlan = "membershipPlan",
   MembershipPlanBenefit = "membershipPlanBenefit",
   MembershipSubscription = "membershipSubscription",
-  MerchandisingRule = "merchandisingRule",
   Notification = "notification",
   NotificationBatch = "notificationBatch",
   NotificationCategory = "notificationCategory",
@@ -136,7 +136,6 @@ export enum Table {
   NotificationTemplateTranslation = "notificationTemplateTranslation",
   NotificationUnsubscribe = "notificationUnsubscribe",
   NotificationWebhook = "notificationWebhook",
-  OidcProvider = "oidcProvider",
   Order = "order",
   OrderAddress = "orderAddress",
   OrderAllocation = "orderAllocation",
@@ -161,7 +160,7 @@ export enum Table {
   OrganizationApiKey = "organizationApiKey",
   OrganizationPasswordReset = "organizationPasswordReset",
   OrganizationPaymentInfo = "organizationPaymentInfo",
-  PageDraft = "pageDraft",
+  PagebuilderPageDraft = "pagebuilderPageDraft",
   PaymentBalance = "paymentBalance",
   PaymentDispute = "paymentDispute",
   PaymentFee = "paymentFee",
@@ -172,6 +171,7 @@ export enum Table {
   PaymentPayoutItem = "paymentPayoutItem",
   PaymentPayoutSettings = "paymentPayoutSettings",
   PaymentPlan = "paymentPlan",
+  PaymentPspRoute = "paymentPspRoute",
   PaymentRefund = "paymentRefund",
   PaymentReport = "paymentReport",
   PaymentSettings = "paymentSettings",
@@ -179,6 +179,7 @@ export enum Table {
   PaymentTerms = "paymentTerms",
   PaymentTransaction = "paymentTransaction",
   PaymentWebhook = "paymentWebhook",
+  PlatformEventOutbox = "platformEventOutbox",
   PricingCommissionPlan = "pricingCommissionPlan",
   PricingPriceList = "pricingPriceList",
   PricingPriceListScope = "pricingPriceListScope",
@@ -198,9 +199,11 @@ export enum Table {
   ProductAttributeValue = "productAttributeValue",
   ProductAttributeValueMap = "productAttributeValueMap",
   ProductBasePrice = "productBasePrice",
+  ProductBrand = "productBrand",
   ProductBundle = "productBundle",
   ProductBundleItem = "productBundleItem",
   ProductCategory = "productCategory",
+  ProductCategoryManualOrder = "productCategoryManualOrder",
   ProductCategoryMap = "productCategoryMap",
   ProductCollection = "productCollection",
   ProductCollectionMap = "productCollectionMap",
@@ -210,6 +213,7 @@ export enum Table {
   ProductList = "productList",
   ProductListItem = "productListItem",
   ProductMedia = "productMedia",
+  ProductMerchandisingRule = "productMerchandisingRule",
   ProductPrice = "productPrice",
   ProductQa = "productQa",
   ProductQaAnswer = "productQaAnswer",
@@ -238,14 +242,20 @@ export enum Table {
   PromotionProductDiscountItem = "promotionProductDiscountItem",
   PromotionRule = "promotionRule",
   PromotionUsage = "promotionUsage",
-  PspRoute = "pspRoute",
+  RecommendationCandidate = "recommendationCandidate",
+  RecommendationCoPurchase = "recommendationCoPurchase",
+  RecommendationCoView = "recommendationCoView",
+  RecommendationExclusion = "recommendationExclusion",
+  RecommendationPopular = "recommendationPopular",
+  RecommendationProcessedOrder = "recommendationProcessedOrder",
+  RecommendationProductStat = "recommendationProductStat",
+  RecommendationRule = "recommendationRule",
+  RecommendationTenantStat = "recommendationTenantStat",
   ReportingReportExecution = "reportingReportExecution",
   ReportingReportSchedule = "reportingReportSchedule",
   ReturnRule = "returnRule",
   Role = "role",
-  RolePolicy = "rolePolicy",
-  SamlProvider = "samlProvider",
-  ScimProvisioningRecord = "scimProvisioningRecord",
+  SegmentCustomerProfile = "segmentCustomerProfile",
   SegmentDefinition = "segmentDefinition",
   SegmentMembership = "segmentMembership",
   Session = "session",
@@ -266,7 +276,6 @@ export enum Table {
   StoreLocation = "storeLocation",
   StorePickupLocation = "storePickupLocation",
   StoreSettings = "storeSettings",
-  StoreUser = "storeUser",
   StoredPaymentMethod = "storedPaymentMethod",
   SubscriptionDunningAttempt = "subscriptionDunningAttempt",
   SubscriptionInvoice = "subscriptionInvoice",
@@ -335,9 +344,6 @@ export type Tables = {
   "basketHistory": BasketHistory,
   "basketItem": BasketItem,
   "basketMerge": BasketMerge,
-  "brand": Brand,
-  "categoryManualOrder": CategoryManualOrder,
-  "ccpaDsr": CcpaDsr,
   "checkoutConfig": CheckoutConfig,
   "checkoutSession": CheckoutSession,
   "contentBlock": ContentBlock,
@@ -369,7 +375,6 @@ export type Tables = {
   "customerPasswordReset": CustomerPasswordReset,
   "customerPrice": CustomerPrice,
   "customerPriceList": CustomerPriceList,
-  "customerProfile": CustomerProfile,
   "customerSubscription": CustomerSubscription,
   "customerTaxExemption": CustomerTaxExemption,
   "customerWishlist": CustomerWishlist,
@@ -377,7 +382,6 @@ export type Tables = {
   "distributionWarehouse": DistributionWarehouse,
   "distributionWarehouseBin": DistributionWarehouseBin,
   "distributionWarehouseZone": DistributionWarehouseZone,
-  "eventOutbox": EventOutbox,
   "fraudBlacklist": FraudBlacklist,
   "fraudCheck": FraudCheck,
   "fraudRule": FraudRule,
@@ -388,13 +392,20 @@ export type Tables = {
   "fulfillmentPartner": FulfillmentPartner,
   "fulfillmentRule": FulfillmentRule,
   "fulfillmentStatusHistory": FulfillmentStatusHistory,
+  "gdprCcpaDsr": GdprCcpaDsr,
   "gdprCookieConsent": GdprCookieConsent,
   "gdprDataRequest": GdprDataRequest,
   "identityAdminUser": IdentityAdminUser,
   "identityCustomerSession": IdentityCustomerSession,
+  "identityKeyRotationPolicy": IdentityKeyRotationPolicy,
+  "identityOidcProvider": IdentityOidcProvider,
   "identityOrganizationSession": IdentityOrganizationSession,
   "identityRefreshTokens": IdentityRefreshTokens,
+  "identityRolePolicy": IdentityRolePolicy,
+  "identitySamlProvider": IdentitySamlProvider,
+  "identityScimProvisioningRecord": IdentityScimProvisioningRecord,
   "identitySocialAccount": IdentitySocialAccount,
+  "identityStoreUser": IdentityStoreUser,
   "identityTokenBlacklist": IdentityTokenBlacklist,
   "identityUserSession": IdentityUserSession,
   "importError": ImportError,
@@ -415,7 +426,6 @@ export type Tables = {
   "inventoryStockReservation": InventoryStockReservation,
   "inventoryTransaction": InventoryTransaction,
   "inventoryTransactionType": InventoryTransactionType,
-  "keyRotationPolicy": KeyRotationPolicy,
   "knexMigrations": KnexMigrations,
   "knexMigrations_lock": KnexMigrationsLock,
   "language": Language,
@@ -436,7 +446,6 @@ export type Tables = {
   "membershipPlan": MembershipPlan,
   "membershipPlanBenefit": MembershipPlanBenefit,
   "membershipSubscription": MembershipSubscription,
-  "merchandisingRule": MerchandisingRule,
   "notification": Notification,
   "notificationBatch": NotificationBatch,
   "notificationCategory": NotificationCategory,
@@ -448,7 +457,6 @@ export type Tables = {
   "notificationTemplateTranslation": NotificationTemplateTranslation,
   "notificationUnsubscribe": NotificationUnsubscribe,
   "notificationWebhook": NotificationWebhook,
-  "oidcProvider": OidcProvider,
   "order": Order,
   "orderAddress": OrderAddress,
   "orderAllocation": OrderAllocation,
@@ -473,7 +481,7 @@ export type Tables = {
   "organizationApiKey": OrganizationApiKey,
   "organizationPasswordReset": OrganizationPasswordReset,
   "organizationPaymentInfo": OrganizationPaymentInfo,
-  "pageDraft": PageDraft,
+  "pagebuilderPageDraft": PagebuilderPageDraft,
   "paymentBalance": PaymentBalance,
   "paymentDispute": PaymentDispute,
   "paymentFee": PaymentFee,
@@ -484,6 +492,7 @@ export type Tables = {
   "paymentPayoutItem": PaymentPayoutItem,
   "paymentPayoutSettings": PaymentPayoutSettings,
   "paymentPlan": PaymentPlan,
+  "paymentPspRoute": PaymentPspRoute,
   "paymentRefund": PaymentRefund,
   "paymentReport": PaymentReport,
   "paymentSettings": PaymentSettings,
@@ -491,6 +500,7 @@ export type Tables = {
   "paymentTerms": PaymentTerms,
   "paymentTransaction": PaymentTransaction,
   "paymentWebhook": PaymentWebhook,
+  "platformEventOutbox": PlatformEventOutbox,
   "pricingCommissionPlan": PricingCommissionPlan,
   "pricingPriceList": PricingPriceList,
   "pricingPriceListScope": PricingPriceListScope,
@@ -510,9 +520,11 @@ export type Tables = {
   "productAttributeValue": ProductAttributeValue,
   "productAttributeValueMap": ProductAttributeValueMap,
   "productBasePrice": ProductBasePrice,
+  "productBrand": ProductBrand,
   "productBundle": ProductBundle,
   "productBundleItem": ProductBundleItem,
   "productCategory": ProductCategory,
+  "productCategoryManualOrder": ProductCategoryManualOrder,
   "productCategoryMap": ProductCategoryMap,
   "productCollection": ProductCollection,
   "productCollectionMap": ProductCollectionMap,
@@ -522,6 +534,7 @@ export type Tables = {
   "productList": ProductList,
   "productListItem": ProductListItem,
   "productMedia": ProductMedia,
+  "productMerchandisingRule": ProductMerchandisingRule,
   "productPrice": ProductPrice,
   "productQa": ProductQa,
   "productQaAnswer": ProductQaAnswer,
@@ -550,14 +563,20 @@ export type Tables = {
   "promotionProductDiscountItem": PromotionProductDiscountItem,
   "promotionRule": PromotionRule,
   "promotionUsage": PromotionUsage,
-  "pspRoute": PspRoute,
+  "recommendationCandidate": RecommendationCandidate,
+  "recommendationCoPurchase": RecommendationCoPurchase,
+  "recommendationCoView": RecommendationCoView,
+  "recommendationExclusion": RecommendationExclusion,
+  "recommendationPopular": RecommendationPopular,
+  "recommendationProcessedOrder": RecommendationProcessedOrder,
+  "recommendationProductStat": RecommendationProductStat,
+  "recommendationRule": RecommendationRule,
+  "recommendationTenantStat": RecommendationTenantStat,
   "reportingReportExecution": ReportingReportExecution,
   "reportingReportSchedule": ReportingReportSchedule,
   "returnRule": ReturnRule,
   "role": Role,
-  "rolePolicy": RolePolicy,
-  "samlProvider": SamlProvider,
-  "scimProvisioningRecord": ScimProvisioningRecord,
+  "segmentCustomerProfile": SegmentCustomerProfile,
   "segmentDefinition": SegmentDefinition,
   "segmentMembership": SegmentMembership,
   "session": Session,
@@ -578,7 +597,6 @@ export type Tables = {
   "storeLocation": StoreLocation,
   "storePickupLocation": StorePickupLocation,
   "storeSettings": StoreSettings,
-  "storeUser": StoreUser,
   "storedPaymentMethod": StoredPaymentMethod,
   "subscriptionDunningAttempt": SubscriptionDunningAttempt,
   "subscriptionInvoice": SubscriptionInvoice,
@@ -1093,63 +1111,6 @@ export type BasketMerge = {
   itemsMerged: number;
   conflictStrategy: string;
   mergedBy: string | null;
-};
-
-export type Brand = {
-  brandId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-  organizationId: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  logoUrl: string | null;
-  website: string | null;
-  countryOfOrigin: string | null;
-  status: string;
-  metadata: unknown | null;
-  externalId: string | null;
-};
-
-export type CategoryManualOrder = {
-  orderId: string;
-  categoryId: string;
-  productId: string;
-  position: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-export type CcpaDsr = {
-  ccpaDsrId: string;
-  customerId: string;
-  organizationId: string;
-  requestType: string;
-  status: string;
-  source: string;
-  reason: string | null;
-  identityVerified: boolean;
-  verificationMethod: string | null;
-  verifiedAt: Date | null;
-  authorizedAgent: string | null;
-  requestedAt: Date;
-  deadlineAt: Date;
-  extensionRequested: boolean;
-  extensionReason: string | null;
-  extendedDeadlineAt: Date | null;
-  completedAt: Date | null;
-  processedBy: string | null;
-  adminNotes: string | null;
-  rejectionReason: string | null;
-  dataCategoriesRequested: unknown | null;
-  downloadUrl: string | null;
-  downloadExpiresAt: Date | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type CheckoutConfig = {
@@ -1687,50 +1648,6 @@ export type CustomerPriceList = {
   customerGroupId: string | null;
 };
 
-export type CustomerProfile = {
-  customerProfileId: string;
-  customerId: string;
-  email: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  status: string | null;
-  tier: string | null;
-  lifetimeValueCents: number;
-  totalSpentCents: number;
-  averageOrderValueCents: number;
-  totalOrders: number;
-  firstOrderDate: Date | null;
-  lastOrderDate: Date | null;
-  daysSinceLastOrder: number | null;
-  ordersLast30Days: number;
-  ordersLast90Days: number;
-  ordersLast12Months: number;
-  productViews: number;
-  cartCount: number;
-  abandonedCarts: number;
-  wishlistItemCount: number;
-  reviewCount: number;
-  averageReviewRating: string | null;
-  visitCount: number;
-  lastVisitDate: Date | null;
-  rfmSegment: string | null;
-  engagementScore: string | null;
-  churnRisk: string | null;
-  riskScore: string | null;
-  preferredCategories: unknown | null;
-  preferredProducts: unknown | null;
-  preferredPaymentMethods: unknown | null;
-  preferredShippingMethods: unknown | null;
-  deviceUsage: unknown | null;
-  tags: unknown | null;
-  customAttributes: unknown | null;
-  segmentIds: unknown | null;
-  organizationId: string | null;
-  lastComputedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type CustomerSubscription = {
   customerSubscriptionId: string;
   subscriptionNumber: string | null;
@@ -1891,24 +1808,6 @@ export type DistributionWarehouseZone = {
   metadata: unknown | null;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type EventOutbox = {
-  eventOutboxId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  eventType: string;
-  payload: unknown;
-  correlationId: string | null;
-  source: string | null;
-  status: string;
-  attempts: number;
-  maxAttempts: number;
-  nextRetryAt: Date;
-  processedAt: Date | null;
-  lastError: string | null;
-  lockedBy: string | null;
-  lockedAt: Date | null;
 };
 
 export type FraudBlacklist = {
@@ -2121,6 +2020,36 @@ export type FulfillmentStatusHistory = {
   location: string | null;
 };
 
+export type GdprCcpaDsr = {
+  ccpaDsrId: string;
+  customerId: string;
+  organizationId: string;
+  requestType: string;
+  status: string;
+  source: string;
+  reason: string | null;
+  identityVerified: boolean;
+  verificationMethod: string | null;
+  verifiedAt: Date | null;
+  authorizedAgent: string | null;
+  requestedAt: Date;
+  deadlineAt: Date;
+  extensionRequested: boolean;
+  extensionReason: string | null;
+  extendedDeadlineAt: Date | null;
+  completedAt: Date | null;
+  processedBy: string | null;
+  adminNotes: string | null;
+  rejectionReason: string | null;
+  dataCategoriesRequested: unknown | null;
+  downloadUrl: string | null;
+  downloadExpiresAt: Date | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type GdprCookieConsent = {
   gdprCookieConsentId: string;
   createdAt: Date;
@@ -2198,6 +2127,44 @@ export type IdentityCustomerSession = {
   isActive: boolean;
 };
 
+export type IdentityKeyRotationPolicy = {
+  keyRotationPolicyId: string;
+  organizationId: string;
+  keyType: string;
+  keyIdentifier: string;
+  rotationIntervalDays: number;
+  lastRotatedAt: Date;
+  nextRotationAt: Date;
+  status: string;
+  previousKeyId: string | null;
+  rotationCount: number;
+  gracePeriodDays: number;
+  notifyBeforeDays: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type IdentityOidcProvider = {
+  providerId: string;
+  organizationId: string;
+  name: string;
+  issuerUrl: string;
+  clientId: string;
+  clientSecret: string;
+  scopes: unknown[];
+  redirectUri: string;
+  usePkce: boolean | null;
+  claimMapping: Record<string, unknown>;
+  isActive: boolean | null;
+  useDiscovery: boolean | null;
+  authorizationEndpoint: string | null;
+  tokenEndpoint: string | null;
+  userinfoEndpoint: string | null;
+  jwksUri: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type IdentityOrganizationSession = {
   organizationSessionId: string;
   createdAt: Date;
@@ -2226,6 +2193,54 @@ export type IdentityRefreshTokens = {
   ipAddress: string | null;
 };
 
+export type IdentityRolePolicy = {
+  rolePolicyId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string | null;
+  storeId: string | null;
+  roleName: string;
+  description: string | null;
+  permissions: unknown[];
+  isSystem: boolean;
+  isActive: boolean;
+};
+
+export type IdentitySamlProvider = {
+  providerId: string;
+  organizationId: string;
+  name: string;
+  entityId: string;
+  ssoUrl: string;
+  sloUrl: string | null;
+  certificate: string;
+  spEntityId: string;
+  acsUrl: string;
+  binding: string | null;
+  nameIdFormat: string | null;
+  signAuthnRequest: boolean | null;
+  spPrivateKey: string | null;
+  spCertificate: string | null;
+  attributeMapping: Record<string, unknown>;
+  isActive: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
+export type IdentityScimProvisioningRecord = {
+  recordId: string;
+  organizationId: string;
+  userId: string;
+  userType: string;
+  scimUserId: string;
+  externalId: string | null;
+  source: string;
+  providerId: string | null;
+  isActive: boolean | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+};
+
 export type IdentitySocialAccount = {
   socialAccountId: string;
   userId: string;
@@ -2247,6 +2262,18 @@ export type IdentitySocialAccount = {
   providerData: unknown | null;
   lastUsedAt: Date | null;
   lastLoginIp: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type IdentityStoreUser = {
+  userStoreId: string;
+  userId: string;
+  storeId: string;
+  role: string;
+  isPrimary: boolean;
+  isActive: boolean;
+  permissions: unknown[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -2597,23 +2624,6 @@ export type InventoryTransactionType = {
   requiresDocumentation: boolean;
 };
 
-export type KeyRotationPolicy = {
-  keyRotationPolicyId: string;
-  organizationId: string;
-  keyType: string;
-  keyIdentifier: string;
-  rotationIntervalDays: number;
-  lastRotatedAt: Date;
-  nextRotationAt: Date;
-  status: string;
-  previousKeyId: string | null;
-  rotationCount: number;
-  gracePeriodDays: number;
-  notifyBeforeDays: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type KnexMigrations = {
   id: number;
   name: string | null;
@@ -2959,18 +2969,6 @@ export type MembershipSubscription = {
   createdBy: string | null;
 };
 
-export type MerchandisingRule = {
-  ruleId: string;
-  ruleType: string;
-  productId: string;
-  position: number | null;
-  searchTerm: string | null;
-  categoryId: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type Notification = {
   notificationId: string;
   createdAt: Date;
@@ -3165,27 +3163,6 @@ export type NotificationWebhook = {
   lastSuccess: Date | null;
   lastFailure: Date | null;
   lastFailureReason: string | null;
-};
-
-export type OidcProvider = {
-  providerId: string;
-  organizationId: string;
-  name: string;
-  issuerUrl: string;
-  clientId: string;
-  clientSecret: string;
-  scopes: unknown[];
-  redirectUri: string;
-  usePkce: boolean | null;
-  claimMapping: Record<string, unknown>;
-  isActive: boolean | null;
-  useDiscovery: boolean | null;
-  authorizationEndpoint: string | null;
-  tokenEndpoint: string | null;
-  userinfoEndpoint: string | null;
-  jwksUri: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type Order = {
@@ -3697,7 +3674,7 @@ export type OrganizationPaymentInfo = {
   createdBy: string | null;
 };
 
-export type PageDraft = {
+export type PagebuilderPageDraft = {
   draftId: string;
   pageId: string | null;
   storeId: string | null;
@@ -3902,6 +3879,18 @@ export type PaymentPlan = {
   allowedPaymentMethods: string;
 };
 
+export type PaymentPspRoute = {
+  routeId: string;
+  organizationId: string;
+  provider: string;
+  priority: number;
+  isActive: boolean;
+  config: unknown;
+  capabilities: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type PaymentRefund = {
   paymentRefundId: string;
   createdAt: Date;
@@ -4047,6 +4036,24 @@ export type PaymentWebhook = {
   error: string | null;
   relatedEntityType: string | null;
   relatedEntityId: string | null;
+};
+
+export type PlatformEventOutbox = {
+  eventOutboxId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  eventType: string;
+  payload: unknown;
+  correlationId: string | null;
+  source: string | null;
+  status: string;
+  attempts: number;
+  maxAttempts: number;
+  nextRetryAt: Date;
+  processedAt: Date | null;
+  lastError: string | null;
+  lockedBy: string | null;
+  lockedAt: Date | null;
 };
 
 export type PricingCommissionPlan = {
@@ -4358,6 +4365,23 @@ export type ProductBasePrice = {
   taxRate: string | null;
 };
 
+export type ProductBrand = {
+  brandId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+  organizationId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  logoUrl: string | null;
+  website: string | null;
+  countryOfOrigin: string | null;
+  status: string;
+  metadata: unknown | null;
+  externalId: string | null;
+};
+
 export type ProductBundle = {
   productBundleId: string;
   productId: string;
@@ -4433,6 +4457,16 @@ export type ProductCategory = {
   isGlobal: boolean;
   customLayout: string | null;
   displaySettings: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ProductCategoryManualOrder = {
+  orderId: string;
+  categoryId: string;
+  productId: string;
+  position: number;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -4569,6 +4603,18 @@ export type ProductMedia = {
   width: number | null;
   height: number | null;
   duration: number | null;
+};
+
+export type ProductMerchandisingRule = {
+  ruleId: string;
+  ruleType: string;
+  productId: string;
+  position: number | null;
+  searchTerm: string | null;
+  categoryId: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ProductPrice = {
@@ -5034,14 +5080,117 @@ export type PromotionUsage = {
   usedAt: Date;
 };
 
-export type PspRoute = {
-  routeId: string;
+export type RecommendationCandidate = {
+  recommendationCandidateId: string;
   organizationId: string;
-  provider: string;
+  storeId: string;
+  productId: string;
+  candidateProductId: string;
+  source: string;
+  relationType: string;
+  score: string;
+  reason: unknown | null;
+  computedAt: Date;
+  createdAt: Date;
+};
+
+export type RecommendationCoPurchase = {
+  recommendationCoPurchaseId: string;
+  organizationId: string;
+  storeId: string;
+  productId: string;
+  relatedProductId: string;
+  coCount: string;
+  lifetimeCoCount: number;
+  lastOrderedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationCoView = {
+  recommendationCoViewId: string;
+  organizationId: string;
+  storeId: string;
+  productId: string;
+  relatedProductId: string;
+  coViewCount: string;
+  lifetimeCoViewCount: number;
+  lastViewedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationExclusion = {
+  recommendationExclusionId: string;
+  organizationId: string;
+  storeId: string;
+  productId: string;
+  excludedProductId: string;
+  scope: string;
+  reason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationPopular = {
+  recommendationPopularId: string;
+  organizationId: string;
+  storeId: string;
+  scope: string;
+  categoryId: string;
+  productId: string;
+  rank: number;
+  score: string;
+  computedAt: Date;
+};
+
+export type RecommendationProcessedOrder = {
+  orderId: string;
+  organizationId: string;
+  storeId: string | null;
+  productIds: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationProductStat = {
+  recommendationProductStatId: string;
+  organizationId: string;
+  storeId: string;
+  productId: string;
+  orderCount: string;
+  lifetimeOrderCount: number;
+  lastOrderedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationRule = {
+  recommendationRuleId: string;
+  organizationId: string;
+  storeId: string;
+  name: string;
+  sourceType: string;
+  sourceId: string;
+  targetType: string;
+  targetId: string;
+  relationType: string;
+  targetSort: string;
+  priceBand: string;
+  maxItems: number;
   priority: number;
   isActive: boolean;
-  config: unknown;
-  capabilities: unknown | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RecommendationTenantStat = {
+  recommendationTenantStatId: string;
+  organizationId: string;
+  storeId: string;
+  totalOrders: string;
+  lastRebuiltAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -5107,52 +5256,48 @@ export type Role = {
   updatedAt: Date;
 };
 
-export type RolePolicy = {
-  rolePolicyId: string;
+export type SegmentCustomerProfile = {
+  customerProfileId: string;
+  customerId: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  status: string | null;
+  tier: string | null;
+  lifetimeValueCents: number;
+  totalSpentCents: number;
+  averageOrderValueCents: number;
+  totalOrders: number;
+  firstOrderDate: Date | null;
+  lastOrderDate: Date | null;
+  daysSinceLastOrder: number | null;
+  ordersLast30Days: number;
+  ordersLast90Days: number;
+  ordersLast12Months: number;
+  productViews: number;
+  cartCount: number;
+  abandonedCarts: number;
+  wishlistItemCount: number;
+  reviewCount: number;
+  averageReviewRating: string | null;
+  visitCount: number;
+  lastVisitDate: Date | null;
+  rfmSegment: string | null;
+  engagementScore: string | null;
+  churnRisk: string | null;
+  riskScore: string | null;
+  preferredCategories: unknown | null;
+  preferredProducts: unknown | null;
+  preferredPaymentMethods: unknown | null;
+  preferredShippingMethods: unknown | null;
+  deviceUsage: unknown | null;
+  tags: unknown | null;
+  customAttributes: unknown | null;
+  segmentIds: unknown | null;
+  organizationId: string | null;
+  lastComputedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  organizationId: string | null;
-  storeId: string | null;
-  roleName: string;
-  description: string | null;
-  permissions: unknown[];
-  isSystem: boolean;
-  isActive: boolean;
-};
-
-export type SamlProvider = {
-  providerId: string;
-  organizationId: string;
-  name: string;
-  entityId: string;
-  ssoUrl: string;
-  sloUrl: string | null;
-  certificate: string;
-  spEntityId: string;
-  acsUrl: string;
-  binding: string | null;
-  nameIdFormat: string | null;
-  signAuthnRequest: boolean | null;
-  spPrivateKey: string | null;
-  spCertificate: string | null;
-  attributeMapping: Record<string, unknown>;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type ScimProvisioningRecord = {
-  recordId: string;
-  organizationId: string;
-  userId: string;
-  userType: string;
-  scimUserId: string;
-  externalId: string | null;
-  source: string;
-  providerId: string | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
 };
 
 export type SegmentDefinition = {
@@ -5563,18 +5708,6 @@ export type StoreSettings = {
   customSettings: unknown | null;
   createdAt: Date | null;
   updatedAt: Date | null;
-};
-
-export type StoreUser = {
-  userStoreId: string;
-  userId: string;
-  storeId: string;
-  role: string;
-  isPrimary: boolean;
-  isActive: boolean;
-  permissions: unknown[];
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export type StoredPaymentMethod = {

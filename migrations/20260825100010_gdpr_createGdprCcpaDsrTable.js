@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('ccpaDsr', table => {
+  await knex.schema.createTable('gdprCcpaDsr', table => {
     table.string('ccpaDsrId').primary();
     table.string('customerId').notNullable().index();
     table.string('organizationId').notNullable().index();
@@ -31,5 +31,5 @@ export async function up(knex) {
 }
 
 export async function down(knex) {
-  await knex.schema.dropTableIfExists('ccpaDsr');
+  await knex.schema.dropTableIfExists('gdprCcpaDsr');
 }

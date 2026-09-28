@@ -3,7 +3,7 @@
  */
 
 exports.up = function (knex) {
-  return knex.schema.createTable('samlProvider', table => {
+  return knex.schema.createTable('identitySamlProvider', table => {
     table.string('providerId').primary();
     table.string('organizationId').notNullable().index();
     table.string('name').notNullable();
@@ -26,5 +26,5 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('samlProvider');
+  return knex.schema.dropTableIfExists('identitySamlProvider');
 };

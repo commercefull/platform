@@ -3,7 +3,7 @@
  *
  * System-defined role policies that ship with the platform.
  * Organizations can override these with custom policies stored
- * in the rolePolicy table.
+ * in the identityRolePolicy table.
  */
 
 import type { RolePolicy } from './types';

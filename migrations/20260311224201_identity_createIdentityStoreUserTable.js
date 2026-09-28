@@ -1,8 +1,8 @@
 exports.up = async function (knex) {
-  const hasTable = await knex.schema.hasTable('storeUser');
+  const hasTable = await knex.schema.hasTable('identityStoreUser');
   if (hasTable) return;
 
-  await knex.schema.createTable('storeUser', table => {
+  await knex.schema.createTable('identityStoreUser', table => {
     table.uuid('userStoreId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('userId').notNullable();
     table.uuid('storeId').notNullable().references('storeId').inTable('store').onDelete('CASCADE');
@@ -22,5 +22,5 @@ exports.up = async function (knex) {
 };
 
 exports.down = async function (knex) {
-  await knex.schema.dropTableIfExists('storeUser');
+  await knex.schema.dropTableIfExists('identityStoreUser');
 };

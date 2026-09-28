@@ -7,31 +7,31 @@ import { ScimProvisioningRecord, ScimProvisioningRepository } from '../../domain
 
 export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepository {
   async findByScimUserId(scimUserId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "scimProvisioningRecord" WHERE "scimUserId" = $1', [scimUserId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "scimUserId" = $1', [scimUserId]);
     return row ? this.mapToRecord(row) : null;
   }
 
   async findByUserId(userId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "scimProvisioningRecord" WHERE "userId" = $1', [userId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "userId" = $1', [userId]);
     return row ? this.mapToRecord(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<ScimProvisioningRecord[]> {
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "scimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "identityScimProvisioningRecord" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToRecord(row));
   }
 
   async save(record: ScimProvisioningRecord): Promise<ScimProvisioningRecord> {
-    const existing = await queryOne<Record<string, unknown>>('SELECT "recordId" FROM "scimProvisioningRecord" WHERE "recordId" = $1', [
+    const existing = await queryOne<Record<string, unknown>>('SELECT "recordId" FROM "identityScimProvisioningRecord" WHERE "recordId" = $1', [
       record.recordId,
     ]);
 
     if (existing) {
       await query(
-        `UPDATE "scimProvisioningRecord" SET
+        `UPDATE "identityScimProvisioningRecord" SET
           "organizationId" = $2, "userId" = $3, "scimUserId" = $4,
           "externalId" = $5, "source" = $6, "providerId" = $7,
           "isActive" = $8, "updatedAt" = NOW()
@@ -49,7 +49,7 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
       );
     } else {
       await query(
-        `INSERT INTO "scimProvisioningRecord" (
+        `INSERT INTO "identityScimProvisioningRecord" (
           "recordId", "organizationId", "userId", "userType",
           "scimUserId", "externalId", "source", "providerId",
           "isActive", "createdAt", "updatedAt"
@@ -74,11 +74,11 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async deactivate(recordId: string): Promise<void> {
-    await query('UPDATE "scimProvisioningRecord" SET "isActive" = false, "updatedAt" = NOW() WHERE "recordId" = $1', [recordId]);
+    await query('UPDATE "identityScimProvisioningRecord" SET "isActive" = false, "updatedAt" = NOW() WHERE "recordId" = $1', [recordId]);
   }
 
   async delete(recordId: string): Promise<void> {
-    await query('DELETE FROM "scimProvisioningRecord" WHERE "recordId" = $1', [recordId]);
+    await query('DELETE FROM "identityScimProvisioningRecord" WHERE "recordId" = $1', [recordId]);
   }
 
   private mapToRecord(row: Record<string, unknown>): ScimProvisioningRecord {

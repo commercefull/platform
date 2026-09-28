@@ -3,7 +3,7 @@
  */
 
 exports.up = function (knex) {
-  return knex.schema.createTable('scimProvisioningRecord', table => {
+  return knex.schema.createTable('identityScimProvisioningRecord', table => {
     table.string('recordId').primary();
     table.string('organizationId').notNullable().index();
     table.string('userId').notNullable().index();
@@ -19,5 +19,5 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('scimProvisioningRecord');
+  return knex.schema.dropTableIfExists('identityScimProvisioningRecord');
 };

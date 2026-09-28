@@ -128,12 +128,12 @@ Merchants define rules once instead of linking thousands of products by hand:
 
 | Field          | Meaning                                                                                                                          |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `sourceType`   | `category` \| `tag` \| `brand` \| `collection` \| `productType`                                                                  |
+| `sourceType`   | `category` \| `tag` \| `productBrand` \| `collection` \| `productType`                                                                  |
 | `sourceId`     | The id matched against the viewed product                                                                                        |
-| `targetType`   | `category` \| `tag` \| `brand` \| `collection`                                                                                   |
+| `targetType`   | `category` \| `tag` \| `productBrand` \| `collection`                                                                                   |
 | `targetId`     | Where candidates come from                                                                                                       |
 | `relationType` | `related` \| `accessory` \| `cross_sell` \| `up_sell`                                                                            |
-| `targetSort`   | How candidates in the target set are ordered: `bestSelling` (default), `newest`, `rating`, `manual` (uses `categoryManualOrder`) |
+| `targetSort`   | How candidates in the target set are ordered: `bestSelling` (default), `newest`, `rating`, `manual` (uses `productCategoryManualOrder`) |
 | `maxItems`     | Cap per rule (default 4)                                                                                                         |
 | `priority`     | Rule order when several rules match                                                                                              |
 | `priceBand`    | Optional: `any` \| `cheaper` \| `similar` \| `pricier` relative to the source product (useful for `up_sell`)                     |

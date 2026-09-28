@@ -1,5 +1,5 @@
 export async function up(knex) {
-  await knex.schema.createTable('keyRotationPolicy', table => {
+  await knex.schema.createTable('identityKeyRotationPolicy', table => {
     table.string('keyRotationPolicyId').primary();
     table.string('organizationId').notNullable().index();
     table.enum('keyType', ['paymentWebhookSecret', 'paymentApiKey', 'jwtSigningKey', 'hmacSigningKey', 'encryptionKey']).notNullable();
@@ -19,5 +19,5 @@ export async function up(knex) {
 }
 
 export async function down(knex) {
-  await knex.schema.dropTableIfExists('keyRotationPolicy');
+  await knex.schema.dropTableIfExists('identityKeyRotationPolicy');
 }

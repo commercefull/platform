@@ -24,13 +24,13 @@ export class AutomationActionEffectsImpl implements AutomationActionEffects {
   }
 
   async addCustomerTag(customerId: string, tag: string): Promise<void> {
-    await query(`UPDATE "customerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`, [
+    await query(`UPDATE "segmentCustomerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`, [
       tag,
       customerId,
     ]);
   }
 
   async removeCustomerTag(customerId: string, tag: string): Promise<void> {
-    await query(`UPDATE "customerProfile" SET "tags" = array_remove("tags", $1) WHERE "customerId" = $2`, [tag, customerId]);
+    await query(`UPDATE "segmentCustomerProfile" SET "tags" = array_remove("tags", $1) WHERE "customerId" = $2`, [tag, customerId]);
   }
 }

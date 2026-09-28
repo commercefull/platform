@@ -16,7 +16,7 @@ describe('OutboxWriter', () => {
 
       expect(id).toBe('evt-001');
       expect(tx.queryOne).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO "eventOutbox"'),
+        expect.stringContaining('INSERT INTO "platformEventOutbox"'),
         expect.arrayContaining(['order.created', JSON.stringify({ orderId: 'o1' })]),
       );
     });

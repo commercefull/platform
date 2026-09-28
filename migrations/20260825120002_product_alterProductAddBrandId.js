@@ -4,7 +4,7 @@
  */
 exports.up = function (knex) {
   return knex.schema.alterTable('product', t => {
-    t.uuid('brandId').references('brandId').inTable('brand').onDelete('SET NULL');
+    t.uuid('brandId').references('brandId').inTable('productBrand').onDelete('SET NULL');
     t.index('brandId');
   });
 };

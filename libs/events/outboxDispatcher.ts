@@ -2,7 +2,7 @@
  * Outbox Dispatcher
  *
  * A claim-based polling worker that reads pending events from the
- * `eventOutbox` table and dispatches them to the in-process eventBus.
+ * `platformEventOutbox` table and dispatches them to the in-process eventBus.
  *
  * Multi-node safe: uses `SELECT ... FOR UPDATE SKIP LOCKED` so multiple
  * workers can run concurrently without double-processing.
@@ -96,14 +96,14 @@ async function dispatchBatch(): Promise<void> {
   try {
     // Claim pending events
     const claimResult = await client.query(
-      `UPDATE "eventOutbox"
+      `UPDATE "platformEventOutbox"
        SET "status" = 'processing',
            "lockedBy" = $1,
            "lockedAt" = now(),
            "attempts" = "attempts" + 1,
            "updatedAt" = now()
        WHERE "eventOutboxId" IN (
-         SELECT "eventOutboxId" FROM "eventOutbox"
+         SELECT "eventOutboxId" FROM "platformEventOutbox"
          WHERE "status" = 'pending'
            AND "nextRetryAt" <= now()
          ORDER BY "createdAt"
@@ -142,7 +142,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
 
     // Mark as processed
     await client.query(
-      `UPDATE "eventOutbox"
+      `UPDATE "platformEventOutbox"
        SET "status" = 'processed',
            "processedAt" = now(),
            "lastError" = NULL,
@@ -165,7 +165,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
     if (row.attempts >= maxAttempts) {
       // Move to dead-letter
       await client.query(
-        `UPDATE "eventOutbox"
+        `UPDATE "platformEventOutbox"
          SET "status" = 'dead_letter',
              "lastError" = $2,
              "lockedBy" = NULL,
@@ -186,7 +186,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
       const nextRetry = new Date(Date.now() + backoff);
 
       await client.query(
-        `UPDATE "eventOutbox"
+        `UPDATE "platformEventOutbox"
          SET "status" = 'pending',
              "lastError" = $2,
              "nextRetryAt" = $3,
@@ -213,7 +213,7 @@ async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): P
 export async function replayEvent(eventOutboxId: string): Promise<boolean> {
   const pool = getActivePool();
   const result = await pool.query(
-    `UPDATE "eventOutbox"
+    `UPDATE "platformEventOutbox"
      SET "status" = 'pending',
          "attempts" = 0,
          "lastError" = NULL,
@@ -239,7 +239,7 @@ export async function replayEvent(eventOutboxId: string): Promise<boolean> {
 export async function replayAllDeadLetter(): Promise<number> {
   const pool = getActivePool();
   const result = await pool.query(
-    `UPDATE "eventOutbox"
+    `UPDATE "platformEventOutbox"
      SET "status" = 'pending',
          "attempts" = 0,
          "lastError" = NULL,
@@ -276,7 +276,7 @@ export async function getOutboxStats(): Promise<{
        COUNT(*) FILTER (WHERE "status" = 'processed') AS "processed",
        COUNT(*) FILTER (WHERE "status" = 'dead_letter') AS "deadLetter",
        MIN("createdAt") FILTER (WHERE "status" = 'pending') AS "oldestPending"
-     FROM "eventOutbox"`,
+     FROM "platformEventOutbox"`,
   );
 
   const row = result.rows[0] as Record<string, string | null>;
@@ -295,7 +295,7 @@ export async function getOutboxStats(): Promise<{
 export async function listDeadLetterEvents(limit: number = 50): Promise<OutboxEvent[]> {
   const pool = getActivePool();
   const result = await pool.query(
-    `SELECT * FROM "eventOutbox"
+    `SELECT * FROM "platformEventOutbox"
      WHERE "status" = 'dead_letter'
      ORDER BY "updatedAt" DESC
      LIMIT $1`,
@@ -310,7 +310,7 @@ export async function listDeadLetterEvents(limit: number = 50): Promise<OutboxEv
 export async function cleanupProcessedEvents(olderThanDays: number = 30): Promise<number> {
   const pool = getActivePool();
   const result = await pool.query(
-    `DELETE FROM "eventOutbox"
+    `DELETE FROM "platformEventOutbox"
      WHERE "status" = 'processed'
        AND "processedAt" < now() - ($1 || ' days')::interval
      RETURNING "eventOutboxId"`,

@@ -7,7 +7,7 @@
 
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 import { query, queryOne } from '../../../../libs/db';
-import type { StoreUser as DbStoreUser } from '../../../../libs/db/types';
+import type { IdentityStoreUser as DbStoreUser } from '../../../../libs/db/types';
 import { UserStoreAssignment, StoreRole } from '../../domain/entities/UserStoreAssignment';
 import { StoreUserRepository as IStoreUserRepository } from '../../domain/repositories/StoreUserRepository';
 
@@ -40,7 +40,7 @@ import type { AdminUserRecord, CreateAdminUserParams, RoleRecord } from '../../d
 
 export class IdentityRepository implements IStoreUserRepository {
   private readonly adminTable = 'adminUser';
-  private readonly storeUserTable = 'storeUser';
+  private readonly storeUserTable = 'identityStoreUser';
 
   // ==========================================================================
   // Admin User (from AdminRepository)

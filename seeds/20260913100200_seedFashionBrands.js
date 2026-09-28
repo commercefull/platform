@@ -3,7 +3,7 @@
  * Creates 8 fashion brands for the multi-brand merchant.
  */
 
-const tableName = 'brand';
+const tableName = 'productBrand';
 
 const ORG_ID = '01911000-0000-7000-8000-000000000001';
 

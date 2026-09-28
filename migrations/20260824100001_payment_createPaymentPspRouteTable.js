@@ -4,7 +4,7 @@
  */
 
 export async function up(knex) {
-  await knex.schema.createTable('pspRoute', table => {
+  await knex.schema.createTable('paymentPspRoute', table => {
     table.string('routeId').primary();
     table.string('organizationId').notNullable().index();
     table.string('provider').notNullable();
@@ -20,5 +20,5 @@ export async function up(knex) {
 }
 
 export async function down(knex) {
-  await knex.schema.dropTableIfExists('pspRoute');
+  await knex.schema.dropTableIfExists('paymentPspRoute');
 }

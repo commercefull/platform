@@ -3,9 +3,9 @@
  */
 
 exports.up = async function (knex) {
-  const hasMerchTable = await knex.schema.hasTable('merchandisingRule');
+  const hasMerchTable = await knex.schema.hasTable('productMerchandisingRule');
   if (!hasMerchTable) {
-    await knex.schema.createTable('merchandisingRule', t => {
+    await knex.schema.createTable('productMerchandisingRule', t => {
       t.uuid('ruleId').primary().defaultTo(knex.raw('uuidv7()'));
       t.string('ruleType').notNullable(); // 'boost' | 'bury' | 'pin'
       t.uuid('productId').notNullable();
@@ -22,9 +22,9 @@ exports.up = async function (knex) {
     });
   }
 
-  const hasManualOrderTable = await knex.schema.hasTable('categoryManualOrder');
+  const hasManualOrderTable = await knex.schema.hasTable('productCategoryManualOrder');
   if (!hasManualOrderTable) {
-    await knex.schema.createTable('categoryManualOrder', t => {
+    await knex.schema.createTable('productCategoryManualOrder', t => {
       t.uuid('orderId').primary().defaultTo(knex.raw('uuidv7()'));
       t.uuid('categoryId').notNullable();
       t.uuid('productId').notNullable();
@@ -40,13 +40,13 @@ exports.up = async function (knex) {
 };
 
 exports.down = async function (knex) {
-  const hasManualOrderTable = await knex.schema.hasTable('categoryManualOrder');
+  const hasManualOrderTable = await knex.schema.hasTable('productCategoryManualOrder');
   if (hasManualOrderTable) {
-    await knex.schema.dropTable('categoryManualOrder');
+    await knex.schema.dropTable('productCategoryManualOrder');
   }
 
-  const hasMerchTable = await knex.schema.hasTable('merchandisingRule');
+  const hasMerchTable = await knex.schema.hasTable('productMerchandisingRule');
   if (hasMerchTable) {
-    await knex.schema.dropTable('merchandisingRule');
+    await knex.schema.dropTable('productMerchandisingRule');
   }
 };

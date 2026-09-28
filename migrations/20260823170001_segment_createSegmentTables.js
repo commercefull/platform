@@ -2,7 +2,7 @@
  * Create segment module tables:
  * - segmentDefinition: dynamic segment rules with condition DSL
  * - segmentMembership: materialized segment memberships
- * - customerProfile: CDP profile with LTV, frequency, behaviour aggregates
+ * - segmentCustomerProfile: CDP profile with LTV, frequency, behaviour aggregates
  */
 
 exports.up = async function (knex) {
@@ -54,10 +54,10 @@ exports.up = async function (knex) {
     });
   }
 
-  // ── customerProfile ────────────────────────────────────────────
-  const hasCustomerProfile = await knex.schema.hasTable('customerProfile');
+  // ── segmentCustomerProfile ────────────────────────────────────────────
+  const hasCustomerProfile = await knex.schema.hasTable('segmentCustomerProfile');
   if (!hasCustomerProfile) {
-    await knex.schema.createTable('customerProfile', t => {
+    await knex.schema.createTable('segmentCustomerProfile', t => {
       t.uuid('customerProfileId').primary().defaultTo(knex.raw('uuidv7()'));
       t.uuid('customerId').notNullable().unique();
       t.string('email').nullable();
@@ -124,8 +124,8 @@ exports.up = async function (knex) {
 };
 
 exports.down = async function (knex) {
-  const hasCustomerProfile = await knex.schema.hasTable('customerProfile');
-  if (hasCustomerProfile) await knex.schema.dropTable('customerProfile');
+  const hasCustomerProfile = await knex.schema.hasTable('segmentCustomerProfile');
+  if (hasCustomerProfile) await knex.schema.dropTable('segmentCustomerProfile');
 
   const hasSegmentMember = await knex.schema.hasTable('segmentMembership');
   if (hasSegmentMember) await knex.schema.dropTable('segmentMembership');

@@ -46,7 +46,7 @@ The Segment module provides customer data platform (CDP) capabilities — custom
 | ------------------- | ------------------------------------------------ |
 | `segmentDefinition` | Segment definitions with conditions and status   |
 | `segmentMembership` | Membership records linking customers to segments |
-| `customerProfile`   | Aggregated customer profiles with metrics        |
+| `segmentCustomerProfile`   | Aggregated customer profiles with metrics        |
 
 ## Routes
 

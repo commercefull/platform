@@ -4,7 +4,7 @@
  */
 
 export async function up(knex) {
-  await knex.schema.createTable('pageDraft', table => {
+  await knex.schema.createTable('pagebuilderPageDraft', table => {
     table.uuid('draftId').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('pageId').nullable();
     table.uuid('storeId').nullable();
@@ -29,5 +29,5 @@ export async function up(knex) {
 }
 
 export async function down(knex) {
-  await knex.schema.dropTableIfExists('pageDraft');
+  await knex.schema.dropTableIfExists('pagebuilderPageDraft');
 }

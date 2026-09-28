@@ -61,7 +61,7 @@ The Page Builder module provides a drag-and-drop page editor with a block schema
 
 | Table       | Description                                     |
 | ----------- | ----------------------------------------------- |
-| `pageDraft` | Draft pages with JSONB blocks and region layout |
+| `pagebuilderPageDraft` | Draft pages with JSONB blocks and region layout |
 
 ## Routes
 

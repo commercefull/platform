@@ -181,7 +181,7 @@ Pass the `attributes` parameter as a JSON array:
 You can filter by either:
 
 - **`attributeId`** — UUID of the attribute (from `productAttribute` table)
-- **`attributeCode`** — Code string (e.g., `color`, `size`, `brand`)
+- **`attributeCode`** — Code string (e.g., `color`, `size`, `productBrand`)
 
 ### URL Encoding
 
@@ -428,8 +428,8 @@ Register it in `libs/search/init.ts` and set `SEARCH_BACKEND=opensearch`.
 
 ### Merchandising Tables
 
-- **`merchandisingRule`** — Boost/bury/pin rules with optional searchTerm and categoryId scoping
-- **`categoryManualOrder`** — Per-category product ordering with position
+- **`productMerchandisingRule`** — Boost/bury/pin rules with optional searchTerm and categoryId scoping
+- **`productCategoryManualOrder`** — Per-category product ordering with position
 
 ### Existing Tables Used
 

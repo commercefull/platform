@@ -318,11 +318,11 @@ All config routes require `isOrganizationLoggedIn` middleware:
 
 | Table                    | Description                                                      |
 | ------------------------ | ---------------------------------------------------------------- |
-| `samlProvider`           | SAML IdP configurations (JSONB for attribute mappings)           |
-| `oidcProvider`           | OIDC provider configurations (JSONB for scopes, claim mappings)  |
-| `scimProvisioningRecord` | SCIM provisioning records linking SCIM users to platform users   |
-| `rolePolicy`             | RBAC role policies (shared via `libs/rbac`)                      |
-| `keyRotationPolicy`      | Per-organization key rotation policies (JWT, payment, HMAC keys) |
+| `identitySamlProvider`           | SAML IdP configurations (JSONB for attribute mappings)           |
+| `identityOidcProvider`           | OIDC provider configurations (JSONB for scopes, claim mappings)  |
+| `identityScimProvisioningRecord` | SCIM provisioning records linking SCIM users to platform users   |
+| `identityRolePolicy`             | RBAC role policies (shared via `libs/rbac`)                      |
+| `identityKeyRotationPolicy`      | Per-organization key rotation policies (JWT, payment, HMAC keys) |
 
 ---
 
