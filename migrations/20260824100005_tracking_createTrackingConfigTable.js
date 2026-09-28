@@ -3,9 +3,9 @@
  */
 exports.up = function (knex) {
   return knex.schema.createTable('trackingConfig', table => {
-    table.string('configId').primary();
-    table.string('storeId').notNullable().unique();
-    table.string('organizationId').notNullable();
+    table.uuid('configId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('storeId').notNullable().unique();
+    table.uuid('organizationId').notNullable();
     table.string('status').notNullable().defaultTo('active');
     table.jsonb('gtm').nullable();
     table.jsonb('metaCapi').nullable();

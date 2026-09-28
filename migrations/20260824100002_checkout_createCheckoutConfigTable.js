@@ -5,9 +5,9 @@
 
 export async function up(knex) {
   await knex.schema.createTable('checkoutConfig', table => {
-    table.string('configId').primary();
-    table.string('storeId').notNullable().index();
-    table.string('organizationId').notNullable().index();
+    table.uuid('configId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('storeId').notNullable().index();
+    table.uuid('organizationId').notNullable().index();
     table.string('name').notNullable();
     table.jsonb('steps').notNullable().defaultTo('[]');
     table.jsonb('behavior').notNullable();

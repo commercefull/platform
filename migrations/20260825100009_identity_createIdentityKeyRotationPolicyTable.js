@@ -1,14 +1,14 @@
 export async function up(knex) {
   await knex.schema.createTable('identityKeyRotationPolicy', table => {
-    table.string('keyRotationPolicyId').primary();
-    table.string('organizationId').notNullable().index();
+    table.uuid('keyRotationPolicyId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('organizationId').notNullable().index();
     table.enum('keyType', ['paymentWebhookSecret', 'paymentApiKey', 'jwtSigningKey', 'hmacSigningKey', 'encryptionKey']).notNullable();
     table.string('keyIdentifier').notNullable();
     table.integer('rotationIntervalDays').notNullable();
     table.timestamp('lastRotatedAt').notNullable();
     table.timestamp('nextRotationAt').notNullable().index();
     table.enum('status', ['active', 'rotating', 'retired', 'expired']).notNullable().defaultTo('active');
-    table.string('previousKeyId');
+    table.uuid('previousKeyId');
     table.integer('rotationCount').notNullable().defaultTo(0);
     table.integer('gracePeriodDays').notNullable().defaultTo(7);
     table.integer('notifyBeforeDays').notNullable().defaultTo(14);

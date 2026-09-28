@@ -6,8 +6,8 @@
 export function up(knex) {
   return knex.schema
     .createTable('integration', table => {
-      table.string('integrationId').primary();
-      table.string('organizationId').notNullable();
+      table.uuid('integrationId').primary().defaultTo(knex.raw('uuidv7()'));
+      table.uuid('organizationId').notNullable();
       table.string('name').notNullable();
       table.string('provider').notNullable();
       table.string('status').notNullable().defaultTo('pending');
@@ -24,8 +24,8 @@ export function up(knex) {
       table.index(['status']);
     })
     .createTable('integrationCredential', table => {
-      table.string('credentialId').primary();
-      table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
+      table.uuid('credentialId').primary().defaultTo(knex.raw('uuidv7()'));
+      table.uuid('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
       table.string('type').notNullable();
       table.string('label').notNullable();
       table.text('encryptedData').notNullable();
@@ -40,8 +40,8 @@ export function up(knex) {
       table.index(['integrationId', 'isActive']);
     })
     .createTable('integrationSubscription', table => {
-      table.string('subscriptionId').primary();
-      table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
+      table.uuid('subscriptionId').primary().defaultTo(knex.raw('uuidv7()'));
+      table.uuid('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
       table.string('eventType').notNullable();
       table.string('targetAction').notNullable();
       table.text('description').nullable();
@@ -56,9 +56,9 @@ export function up(knex) {
       table.index(['isActive']);
     })
     .createTable('integrationLog', table => {
-      table.string('logId').primary();
-      table.string('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
-      table.string('subscriptionId').nullable();
+      table.uuid('logId').primary().defaultTo(knex.raw('uuidv7()'));
+      table.uuid('integrationId').notNullable().references('integration.integrationId').onDelete('CASCADE');
+      table.uuid('subscriptionId').nullable();
       table.string('eventType').notNullable();
       table.string('targetAction').notNullable();
       table.string('status').notNullable().defaultTo('pending');

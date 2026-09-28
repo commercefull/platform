@@ -1,6 +1,6 @@
 export async function up(knex) {
   await knex.schema.createTable('b2bApprovalWorkflow', table => {
-    table.uuid('workflowId').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.uuid('workflowId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('companyId').notNullable().references('companyId').inTable('b2bCompany').onDelete('CASCADE').index();
     table.uuid('organizationId').notNullable().index();
     table.string('type').notNullable();

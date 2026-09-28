@@ -5,8 +5,8 @@
 
 export async function up(knex) {
   await knex.schema.createTable('paymentPspRoute', table => {
-    table.string('routeId').primary();
-    table.string('organizationId').notNullable().index();
+    table.uuid('routeId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('organizationId').notNullable().index();
     table.string('provider').notNullable();
     table.integer('priority').notNullable().defaultTo(1);
     table.boolean('isActive').notNullable().defaultTo(true);

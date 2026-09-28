@@ -1,6 +1,6 @@
 export async function up(knex) {
   await knex.schema.createTable('marketplaceVendorPayout', table => {
-    table.uuid('payoutId').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.uuid('payoutId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('vendorId').notNullable().references('vendorId').inTable('marketplaceVendor').onDelete('CASCADE').index();
     table.uuid('organizationId').notNullable().index();
     table.string('payoutNumber').notNullable().unique();

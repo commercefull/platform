@@ -4,8 +4,8 @@
 
 exports.up = function (knex) {
   return knex.schema.createTable('identitySamlProvider', table => {
-    table.string('providerId').primary();
-    table.string('organizationId').notNullable().index();
+    table.uuid('providerId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('organizationId').notNullable().index();
     table.string('name').notNullable();
     table.text('entityId').notNullable();
     table.text('ssoUrl').notNullable();

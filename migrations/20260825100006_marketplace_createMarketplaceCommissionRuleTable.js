@@ -1,6 +1,6 @@
 export async function up(knex) {
   await knex.schema.createTable('marketplaceCommissionRule', table => {
-    table.uuid('ruleId').primary().defaultTo(knex.raw('gen_random_uuid()'));
+    table.uuid('ruleId').primary().defaultTo(knex.raw('uuidv7()'));
     table.uuid('organizationId').notNullable().index();
     table.string('name').notNullable();
     table.string('type').notNullable();

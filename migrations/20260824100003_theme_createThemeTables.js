@@ -6,7 +6,7 @@
 export async function up(knex) {
   // Theme table — stores theme definitions (built-in and custom)
   await knex.schema.createTable('theme', table => {
-    table.string('themeId').primary();
+    table.uuid('themeId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('slug').notNullable().unique();
     table.string('name').notNullable();
     table.text('description');
@@ -23,7 +23,7 @@ export async function up(knex) {
     table.jsonb('assets').notNullable().defaultTo('{}');
     table.jsonb('tags').notNullable().defaultTo('[]');
     table.boolean('isCustomizable').notNullable().defaultTo(true);
-    table.string('organizationId').index();
+    table.uuid('organizationId').index();
     table.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     table.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
 
@@ -32,10 +32,10 @@ export async function up(knex) {
 
   // Theme override table — per-store theme setting overrides
   await knex.schema.createTable('themeOverride', table => {
-    table.string('overrideId').primary();
-    table.string('storeId').notNullable().index();
-    table.string('themeId').notNullable().index();
-    table.string('organizationId').notNullable().index();
+    table.uuid('overrideId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('storeId').notNullable().index();
+    table.uuid('themeId').notNullable().index();
+    table.uuid('organizationId').notNullable().index();
     table.jsonb('settings').notNullable().defaultTo('{}');
     table.text('customCss');
     table.string('customLogoUrl');
@@ -52,10 +52,10 @@ export async function up(knex) {
 
   // Theme assignment table — which theme is assigned to which store
   await knex.schema.createTable('themeAssignment', table => {
-    table.string('storeId').primary();
-    table.string('themeId').notNullable().index();
-    table.string('organizationId').notNullable().index();
-    table.string('overrideId');
+    table.uuid('storeId').primary();
+    table.uuid('themeId').notNullable().index();
+    table.uuid('organizationId').notNullable().index();
+    table.uuid('overrideId');
     table.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     table.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
   });

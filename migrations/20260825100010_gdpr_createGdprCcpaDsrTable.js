@@ -1,8 +1,8 @@
 export async function up(knex) {
   await knex.schema.createTable('gdprCcpaDsr', table => {
-    table.string('ccpaDsrId').primary();
-    table.string('customerId').notNullable().index();
-    table.string('organizationId').notNullable().index();
+    table.uuid('ccpaDsrId').primary().defaultTo(knex.raw('uuidv7()'));
+    table.uuid('customerId').notNullable().index();
+    table.uuid('organizationId').notNullable().index();
     table.enum('requestType', ['know', 'delete', 'optOutSale', 'optOutShare', 'limitUse', 'correct']).notNullable();
     table.enum('status', ['pending', 'verified', 'processing', 'completed', 'rejected', 'cancelled']).notNullable().defaultTo('pending');
     table.enum('source', ['web', 'email', 'phone', 'toll_free_number', 'authorizedAgent']).notNullable();
