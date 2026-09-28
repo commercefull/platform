@@ -14,7 +14,7 @@
 const ALL_STORES = '00000000-0000-0000-0000-000000000000';
 
 exports.up = async function (knex) {
-  await knex.schema.createTable('recommendationCoPurchase', t => {
+  if (!(await knex.schema.hasTable('recommendationCoPurchase'))) await knex.schema.createTable('recommendationCoPurchase', t => {
     t.uuid('recommendationCoPurchaseId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -32,7 +32,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'productId', 'coCount'], 'idx_recoCoPurchase_rank');
   });
 
-  await knex.schema.createTable('recommendationCoView', t => {
+  if (!(await knex.schema.hasTable('recommendationCoView'))) await knex.schema.createTable('recommendationCoView', t => {
     t.uuid('recommendationCoViewId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -48,7 +48,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'productId'], 'idx_recoCoView_org_product');
   });
 
-  await knex.schema.createTable('recommendationProductStat', t => {
+  if (!(await knex.schema.hasTable('recommendationProductStat'))) await knex.schema.createTable('recommendationProductStat', t => {
     t.uuid('recommendationProductStatId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -63,7 +63,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'orderCount'], 'idx_recoProductStat_org_count');
   });
 
-  await knex.schema.createTable('recommendationTenantStat', t => {
+  if (!(await knex.schema.hasTable('recommendationTenantStat'))) await knex.schema.createTable('recommendationTenantStat', t => {
     t.uuid('recommendationTenantStatId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -75,7 +75,7 @@ exports.up = async function (knex) {
     t.unique(['organizationId', 'storeId'], { indexName: 'uq_recoTenantStat' });
   });
 
-  await knex.schema.createTable('recommendationProcessedOrder', t => {
+  if (!(await knex.schema.hasTable('recommendationProcessedOrder'))) await knex.schema.createTable('recommendationProcessedOrder', t => {
     t.uuid('orderId').primary();
     t.uuid('organizationId').notNullable();
     t.uuid('storeId').nullable();
@@ -86,7 +86,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'status'], 'idx_recoProcessedOrder_org_status');
   });
 
-  await knex.schema.createTable('recommendationRule', t => {
+  if (!(await knex.schema.hasTable('recommendationRule'))) await knex.schema.createTable('recommendationRule', t => {
     t.uuid('recommendationRuleId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -108,7 +108,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'isActive', 'priority'], 'idx_recoRule_active');
   });
 
-  await knex.schema.createTable('recommendationExclusion', t => {
+  if (!(await knex.schema.hasTable('recommendationExclusion'))) await knex.schema.createTable('recommendationExclusion', t => {
     t.uuid('recommendationExclusionId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -123,7 +123,7 @@ exports.up = async function (knex) {
     t.index(['organizationId', 'productId'], 'idx_recoExclusion_product');
   });
 
-  await knex.schema.createTable('recommendationCandidate', t => {
+  if (!(await knex.schema.hasTable('recommendationCandidate'))) await knex.schema.createTable('recommendationCandidate', t => {
     t.uuid('recommendationCandidateId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -136,13 +136,14 @@ exports.up = async function (knex) {
     t.jsonb('reason');
     t.timestamp('computedAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.unique(['organizationId', 'storeId', 'productId', 'candidateProductId', 'source'], { indexName: 'uq_recoCandidate' });
     t.index(['organizationId', 'productId', 'relationType', 'score'], 'idx_recoCandidate_serve');
     t.index(['organizationId', 'candidateProductId'], 'idx_recoCandidate_reverse');
     t.index(['organizationId', 'productId', 'score'], 'idx_recoCandidate_rank');
   });
 
-  await knex.schema.createTable('recommendationPopular', t => {
+  if (!(await knex.schema.hasTable('recommendationPopular'))) await knex.schema.createTable('recommendationPopular', t => {
     t.uuid('recommendationPopularId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     // No FK: the ALL_STORES sentinel is not a store row.
@@ -153,6 +154,8 @@ exports.up = async function (knex) {
     t.integer('rank').notNullable();
     t.decimal('score', 12, 4).notNullable().defaultTo(0);
     t.timestamp('computedAt').notNullable().defaultTo(knex.fn.now());
+    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.unique(['organizationId', 'storeId', 'scope', 'categoryId', 'productId'], { indexName: 'uq_recoPopular' });
     t.index(['organizationId', 'scope', 'categoryId', 'rank'], 'idx_recoPopular_serve');
   });

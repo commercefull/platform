@@ -5092,6 +5092,7 @@ export type RecommendationCandidate = {
   reason: unknown | null;
   computedAt: Date;
   createdAt: Date;
+  updatedAt: Date;
 };
 
 export type RecommendationCoPurchase = {
@@ -5142,6 +5143,8 @@ export type RecommendationPopular = {
   rank: number;
   score: string;
   computedAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type RecommendationProcessedOrder = {

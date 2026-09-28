@@ -64,7 +64,8 @@ exports.down = function (knex) {
 - **Fold schema changes into the original `create` migration when the create migration has not yet been released**. Keep create migrations as the single source of truth for a table's initial schema; avoid trailing `alter` migrations that patch tables that were just created in the same batch.
 - **Use `alter` migrations for post-release schema evolution** — once a migration has run in an environment, changes must go in a new `alter` migration, never by editing the original.
 - **Always implement `exports.down`** to allow rollback. Drop indexes, FKs, and columns in reverse order of creation.
-- **Avoid `increments()`** — use `t.uuid(...).primary().defaultTo(knex.raw('uuidv7()'))`.
+- **Avoid `increments()`** — use `t.uuid(...).primary().defaultTo(knex.raw('uuidv7()'))`. Exception: a natural primary key whose value is another entity's id (e.g. `themeAssignment.storeId`, `recommendationProcessedOrder.orderId`) stays `t.uuid('xId').primary()` with **no** `uuidv7()` default — generating a fresh id would be a bug.
+- **Guard every `createTable` / `alterTable`** with `hasTable` / `hasColumn` so migrations are idempotent — even for brand-new tables.
 - **Use `knex.fn.now()`** for `createdAt` / `updatedAt` defaults.
 - **Soft delete**: add `t.timestamp('deletedAt')` instead of physical deletion.
 - **Indexes**: add explicit `t.index(...)` on FK columns and any column used in `WHERE`, `ORDER BY`, or filtering.
@@ -101,7 +102,8 @@ yarn db:types                              # Regenerate Knex types from DB schem
 - [ ] Filename includes `<module>_` prefix matching the owning module in `docs/migrations/module-tables.md`
 - [ ] Filename includes `<action>` verb (`create`, `alter`, or `drop`)
 - [ ] Table and column names are camelCase
-- [ ] Primary key is `uuid` with `uuidv7()` default
+- [ ] Primary key is `uuid` with `uuidv7()` default (natural-key PKs excepted — see Rules)
+- [ ] `createTable`/`alterTable` wrapped in `hasTable`/`hasColumn` guards
 - [ ] FKs use `.references(...).inTable(...)` and have an index
 - [ ] `createdAt` / `updatedAt` timestamps present
 - [ ] Soft-delete `deletedAt` column where applicable
