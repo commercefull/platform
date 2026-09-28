@@ -49,7 +49,7 @@ path specifically. Baseline at 20k products before tuning: p95 â‰ˆ 347ms, p99 â‰
 
 ### Trigram indexes for `ILIKE` search
 
-`migrations/20260921000001_addTrgmSearchIndexes.js` creates `pg_trgm` plus GIN trigram
+`migrations/20260921000001_product_alterProductAddTrgmSearchIndexes.js` creates `pg_trgm` plus GIN trigram
 indexes on `product(name, description, shortDescription, sku, slug)` and
 `productVariant(sku, barcode)`.
 
