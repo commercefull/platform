@@ -100,8 +100,79 @@ describe('CreateOrderUseCase', () => {
   it('should throw ShippingAddressRequiredError when address is missing', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }], undefined as unknown as AddressInput),
+        new CreateOrderCommand(
+          'c1',
+          'test@test.com',
+          [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+          undefined as unknown as AddressInput,
+        ),
       ),
     ).rejects.toThrow(ShippingAddressRequiredError);
+  });
+
+  it('should create a guest order without shipping address when allowGuestOrder is set', async () => {
+    const result = await useCase.execute(
+      new CreateOrderCommand(
+        undefined,
+        'pos@example.com',
+        [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+        undefined,
+        undefined,
+        undefined,
+        'store-1',
+        undefined,
+        'user-1',
+        'pos',
+        'USD',
+        undefined,
+        'Walk-in',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true,
+      ),
+    );
+
+    expect(result.orderId).toBe('o1');
+    expect(mockOrderRepository.save).toHaveBeenCalled();
+  });
+
+  it('should create a guest order without customer email when allowGuestOrder is set', async () => {
+    const result = await useCase.execute(
+      new CreateOrderCommand(
+        undefined,
+        undefined,
+        [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'pos',
+        'USD',
+        undefined,
+        'Walk-in',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true,
+      ),
+    );
+
+    expect(result.orderId).toBe('o1');
+    expect(mockOrderRepository.save).toHaveBeenCalled();
   });
 });

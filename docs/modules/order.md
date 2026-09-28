@@ -90,6 +90,8 @@ POST /orders/:orderId/cancel |
 GET /orders/number/:orderNumber |
 | GET | `/orders` | `asyncHandler(orderController.listOrders)` | List all orders with filters
 GET /business/orders |
+| POST | `/orders` | `asyncHandler(orderController.createOrder)` | Create an order on behalf of the organization (POS / manual orders)
+POST /business/orders |
 | GET | `/orders/:orderId` | `asyncHandler(orderController.getOrder)` | Get order details
 GET /business/orders/:orderId |
 | POST | `/orders/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order

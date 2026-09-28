@@ -3,7 +3,7 @@
 > Auto-generated from router source files. Do not edit manually.
 > Run `yarn docs:routes` to regenerate.
 
-**Total routes:** 1229
+**Total routes:** 1230
 
 ## (unmounted)
 
@@ -729,6 +729,8 @@ POST /orders/:orderId/cancel |
 GET /orders/number/:orderNumber |
 | <span class="badge badge-get">GET</span> | `/orders` | `asyncHandler(orderController.listOrders)` | List all orders with filters
 GET /business/orders |
+| <span class="badge badge-post">POST</span> | `/orders` | `asyncHandler(orderController.createOrder)` | Create an order on behalf of the organization (POS / manual orders)
+POST /business/orders |
 | <span class="badge badge-get">GET</span> | `/orders/:orderId` | `asyncHandler(orderController.getOrder)` | Get order details
 GET /business/orders/:orderId |
 | <span class="badge badge-post">POST</span> | `/orders/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order

@@ -6,6 +6,7 @@
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { GetOrderCommand } from '../../application/useCases/GetOrder';
 import { ListOrdersCommand } from '../../application/useCases/ListOrders';
+import { CreateOrderCommand, OrderItemInput, AddressInput } from '../../application/useCases/CreateOrder';
 import { UpdateOrderStatusCommand } from '../../application/useCases/UpdateOrderStatus';
 import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
 import { ProcessRefundCommand } from '../../application/useCases/ProcessRefund';
@@ -22,6 +23,7 @@ import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
   listOrdersUseCase,
   getOrderUseCase,
+  createOrderUseCase,
   updateOrderStatusUseCase,
   updatePaymentStatusUseCase,
   updateFulfillmentStatusUseCase,
@@ -108,6 +110,71 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
   const result = await useCase.execute(command);
 
   respond(req, res, result, 200);
+};
+
+/**
+ * Create an order on behalf of the organization (POS / back-office / manual orders).
+ * POST /business/orders
+ *
+ * Unlike the customer-facing endpoint, customerEmail and shippingAddress are
+ * optional — walk-in POS sales often have neither.
+ */
+export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const body = req.body as {
+    items: OrderItemInput[];
+    customerId?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    customerName?: string;
+    customerNotes?: string;
+    shippingAddress?: AddressInput;
+    billingAddress?: AddressInput;
+    basketId?: string;
+    storeId?: string;
+    channelId?: string;
+    orderSource?: string;
+    currencyCode?: string;
+    shippingTotalCents?: number;
+    hasGiftWrapping?: boolean;
+    giftMessage?: string;
+    isGift?: boolean;
+    metadata?: Record<string, unknown>;
+  };
+
+  if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
+    respondError(req, res, 'Order must contain at least one item', 400);
+    return;
+  }
+
+  const command = new CreateOrderCommand(
+    body.customerId,
+    body.customerEmail,
+    body.items,
+    body.shippingAddress,
+    body.billingAddress,
+    body.basketId,
+    body.storeId,
+    body.channelId,
+    req.user?.userId,
+    body.orderSource || 'manual',
+    body.currencyCode,
+    body.customerPhone,
+    body.customerName,
+    body.customerNotes,
+    body.shippingTotalCents,
+    body.hasGiftWrapping,
+    body.giftMessage,
+    body.isGift,
+    req.ip,
+    req.get('User-Agent'),
+    undefined,
+    body.metadata,
+    true, // allowGuestOrder — back-office/POS orders may lack email and address
+  );
+
+  const order = await createOrderUseCase.execute(command);
+
+  respond(req, res, order, 201);
 };
 
 /**
@@ -522,9 +589,7 @@ export const updatePaymentStatus = async (req: HttpRequest, res: HttpResponse): 
   const { paymentStatus } = body;
 
   try {
-    const result = await updatePaymentStatusUseCase.execute(
-      new UpdatePaymentStatusCommand(orderId, paymentStatus as PaymentStatus),
-    );
+    const result = await updatePaymentStatusUseCase.execute(new UpdatePaymentStatusCommand(orderId, paymentStatus as PaymentStatus));
     respond(req, res, result, 200);
   } catch (error) {
     respondError(req, res, getErrorMessage(error), getErrorStatusCode(error));
