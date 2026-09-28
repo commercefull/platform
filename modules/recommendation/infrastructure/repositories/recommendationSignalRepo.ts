@@ -2,7 +2,7 @@
  * Recommendation signal repositories — SQL implementations over
  * recommendationCoPurchase, recommendationProductStat,
  * recommendationTenantStat and the recommendationProcessedOrder ledger.
- * storeId uses the ALL_STORES sentinel when the scope is tenant-wide.
+ * storeId is NULL when the scope is tenant-wide.
  */
 
 import { query, queryOne } from '../../../../libs/db';
@@ -14,10 +14,8 @@ import type {
   SignalScope,
 } from '../../domain/repositories/CoPurchaseRepository';
 
-export const ALL_STORES = '00000000-0000-0000-0000-000000000000';
-
-function storeKey(scope: SignalScope): string {
-  return scope.storeId ?? ALL_STORES;
+function storeKey(scope: SignalScope): string | null {
+  return scope.storeId ?? null;
 }
 
 interface DbCoPurchaseRow {
@@ -83,7 +81,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
     if (productIds.length === 0) return [];
     const rows = await query<DbCoPurchaseRow[]>(
       `SELECT "productId", "relatedProductId", "coCount" FROM "recommendationCoPurchase"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND "productId" = ANY($3)`,
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "productId" = ANY($3)`,
       [scope.organizationId, storeKey(scope), productIds],
     );
     return (rows || []).map(r => ({ productId: r.productId, relatedProductId: r.relatedProductId, coCount: Number(r.coCount) }));
@@ -92,7 +90,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
   async listAllPairs(scope: SignalScope): Promise<CoPurchaseRow[]> {
     const rows = await query<DbCoPurchaseRow[]>(
       `SELECT "productId", "relatedProductId", "coCount" FROM "recommendationCoPurchase"
-       WHERE "organizationId" = $1 AND "storeId" = $2`,
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2`,
       [scope.organizationId, storeKey(scope)],
     );
     return (rows || []).map(r => ({ productId: r.productId, relatedProductId: r.relatedProductId, coCount: Number(r.coCount) }));
@@ -102,7 +100,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
     if (productIds.length === 0) return new Map();
     const rows = await query<Array<{ productId: string; orderCount: string }>>(
       `SELECT "productId", "orderCount" FROM "recommendationProductStat"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND "productId" = ANY($3)`,
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "productId" = ANY($3)`,
       [scope.organizationId, storeKey(scope), productIds],
     );
     return new Map((rows || []).map(r => [r.productId, Number(r.orderCount)]));
@@ -111,7 +109,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
   async listAllProductCounts(scope: SignalScope): Promise<Map<string, number>> {
     const rows = await query<Array<{ productId: string; orderCount: string }>>(
       `SELECT "productId", "orderCount" FROM "recommendationProductStat"
-       WHERE "organizationId" = $1 AND "storeId" = $2`,
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2`,
       [scope.organizationId, storeKey(scope)],
     );
     return new Map((rows || []).map(r => [r.productId, Number(r.orderCount)]));
@@ -119,7 +117,7 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
 
   async getTotalOrders(scope: SignalScope): Promise<number> {
     const row = await queryOne<{ totalOrders: string }>(
-      `SELECT "totalOrders" FROM "recommendationTenantStat" WHERE "organizationId" = $1 AND "storeId" = $2`,
+      `SELECT "totalOrders" FROM "recommendationTenantStat" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2`,
       [scope.organizationId, storeKey(scope)],
     );
     return row ? Number(row.totalOrders) : 0;
@@ -131,22 +129,25 @@ export class RecommendationSignalRepository implements CoPurchaseRepository {
     const deleteParams = [scope.organizationId, storeKey(scope), floor];
     await query(
       `UPDATE "recommendationCoPurchase" SET "coCount" = "coCount" * $1, "updatedAt" = NOW()
-       WHERE "organizationId" = $2 AND "storeId" = $3`,
+       WHERE "organizationId" = $2 AND "storeId" IS NOT DISTINCT FROM $3`,
       updateParams,
     );
-    await query(`DELETE FROM "recommendationCoPurchase" WHERE "organizationId" = $1 AND "storeId" = $2 AND "coCount" < $3`, deleteParams);
+    await query(
+      `DELETE FROM "recommendationCoPurchase" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "coCount" < $3`,
+      deleteParams,
+    );
     await query(
       `UPDATE "recommendationProductStat" SET "orderCount" = "orderCount" * $1, "updatedAt" = NOW()
-       WHERE "organizationId" = $2 AND "storeId" = $3`,
+       WHERE "organizationId" = $2 AND "storeId" IS NOT DISTINCT FROM $3`,
       updateParams,
     );
     await query(
-      `DELETE FROM "recommendationProductStat" WHERE "organizationId" = $1 AND "storeId" = $2 AND "orderCount" < $3`,
+      `DELETE FROM "recommendationProductStat" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "orderCount" < $3`,
       deleteParams,
     );
     await query(
       `UPDATE "recommendationTenantStat" SET "totalOrders" = "totalOrders" * $1, "updatedAt" = NOW()
-       WHERE "organizationId" = $2 AND "storeId" = $3`,
+       WHERE "organizationId" = $2 AND "storeId" IS NOT DISTINCT FROM $3`,
       updateParams,
     );
   }
@@ -165,7 +166,7 @@ export class ProcessedOrderRepositoryImpl implements ProcessedOrderRepository {
     return {
       orderId: row.orderId,
       organizationId: row.organizationId,
-      storeId: row.storeId === ALL_STORES ? null : row.storeId,
+      storeId: row.storeId,
       productIds: row.productIds || [],
       status: row.status,
     };
@@ -176,7 +177,7 @@ export class ProcessedOrderRepositoryImpl implements ProcessedOrderRepository {
       `INSERT INTO "recommendationProcessedOrder" ("orderId", "organizationId", "storeId", "productIds", "status", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
        ON CONFLICT ("orderId") DO NOTHING`,
-      [record.orderId, record.organizationId, record.storeId ?? ALL_STORES, record.productIds, record.status],
+      [record.orderId, record.organizationId, record.storeId ?? null, record.productIds, record.status],
     );
   }
 

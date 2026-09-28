@@ -13,7 +13,6 @@ import type {
   RecommendationRuleUpdateProps,
 } from '../../domain/entities/RecommendationRule';
 import type { RecommendationExclusionCreateProps, RecommendationExclusionProps } from '../../domain/entities/RecommendationExclusion';
-import { ALL_STORES } from './recommendationSignalRepo';
 
 export class RecommendationRuleRepository implements RuleRepository {
   async list(organizationId: string): Promise<RecommendationRuleProps[]> {
@@ -57,7 +56,7 @@ export class RecommendationRuleRepository implements RuleRepository {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) RETURNING *`,
       [
         props.organizationId,
-        props.storeId ?? ALL_STORES,
+        props.storeId ?? null,
         props.name,
         props.sourceType,
         props.sourceId,
@@ -93,7 +92,7 @@ export class RecommendationRuleRepository implements RuleRepository {
       maxItems: props.maxItems,
       priority: props.priority,
       isActive: props.isActive,
-      storeId: props.storeId === null ? ALL_STORES : props.storeId,
+      storeId: props.storeId,
     };
     for (const [key, value] of Object.entries(map)) {
       if (value !== undefined) {
@@ -136,7 +135,7 @@ export class RecommendationExclusionRepository implements ExclusionRepository {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        ON CONFLICT ("organizationId", "storeId", "productId", "excludedProductId", scope) DO UPDATE SET reason = EXCLUDED.reason
        RETURNING *`,
-      [props.organizationId, props.storeId ?? ALL_STORES, props.productId, props.excludedProductId, props.scope, props.reason, now, now],
+      [props.organizationId, props.storeId ?? null, props.productId, props.excludedProductId, props.scope, props.reason, now, now],
     );
     if (!result) throw new Error('Failed to create recommendation exclusion');
     return result;
@@ -153,8 +152,8 @@ export class RecommendationExclusionRepository implements ExclusionRepository {
   async listForProducts(scope: SignalScope, productIds: string[]): Promise<RecommendationExclusionProps[]> {
     const rows = await query<RecommendationExclusionProps[]>(
       `SELECT * FROM "recommendationExclusion"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND ("productId" = ANY($3) OR scope = 'global')`,
-      [scope.organizationId, scope.storeId ?? ALL_STORES, productIds],
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND ("productId" = ANY($3) OR scope = 'global')`,
+      [scope.organizationId, scope.storeId ?? null, productIds],
     );
     return rows || [];
   }

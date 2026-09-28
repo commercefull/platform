@@ -11,10 +11,9 @@ import type {
   RecommendationCandidateProps,
   RecommendationRelationType,
 } from '../../domain/entities/RecommendationCandidate';
-import { ALL_STORES } from './recommendationSignalRepo';
 
-function storeKey(scope: SignalScope): string {
-  return scope.storeId ?? ALL_STORES;
+function storeKey(scope: SignalScope): string | null {
+  return scope.storeId ?? null;
 }
 
 interface DbCandidateRow {
@@ -34,7 +33,7 @@ interface DbCandidateRow {
 function toProps(row: DbCandidateRow): RecommendationCandidateProps {
   return {
     ...row,
-    storeId: row.storeId === ALL_STORES ? null : row.storeId,
+    storeId: row.storeId,
     score: Number(row.score),
   };
 }
@@ -47,7 +46,7 @@ export class RecommendationCandidateRepository implements CandidateRepository {
   ): Promise<RecommendationCandidateProps[]> {
     if (productIds.length === 0) return [];
     let sql = `SELECT * FROM "recommendationCandidate"
-      WHERE "organizationId" = $1 AND "storeId" = $2 AND "productId" = ANY($3)`;
+      WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "productId" = ANY($3)`;
     const params: unknown[] = [scope.organizationId, storeKey(scope), productIds];
     let i = 4;
     if (opts?.source) {
@@ -67,7 +66,7 @@ export class RecommendationCandidateRepository implements CandidateRepository {
   async listSuggestions(scope: SignalScope, productId: string, limit: number = 20): Promise<RecommendationCandidateProps[]> {
     const rows = await query<DbCandidateRow[]>(
       `SELECT * FROM "recommendationCandidate"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND "productId" = $3
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND "productId" = $3
        ORDER BY score DESC LIMIT $4`,
       [scope.organizationId, storeKey(scope), productId, limit],
     );
@@ -104,7 +103,7 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     // Swap: drop stale rows for this source not recomputed this run
     await query(
       `DELETE FROM "recommendationCandidate"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND source = $3 AND "computedAt" < $4`,
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND source = $3 AND "computedAt" < $4`,
       [scope.organizationId, storeKey(scope), source, runStartedAt],
     );
   }
@@ -117,11 +116,11 @@ export class RecommendationCandidateRepository implements CandidateRepository {
   ): Promise<PopularRow[]> {
     const rows = await query<Array<{ scope: 'overall' | 'category'; categoryId: string; productId: string; rank: number; score: string }>>(
       `SELECT scope, "categoryId", "productId", rank, score FROM "recommendationPopular"
-       WHERE "organizationId" = $1 AND "storeId" = $2 AND scope = $3 AND "categoryId" = $4
+       WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND scope = $3 AND "categoryId" IS NOT DISTINCT FROM $4
        ORDER BY rank ASC LIMIT $5`,
-      [scope.organizationId, storeKey(scope), popularScope, categoryId ?? ALL_STORES, limit],
+      [scope.organizationId, storeKey(scope), popularScope, categoryId ?? null, limit],
     );
-    return (rows || []).map(r => ({ ...r, categoryId: r.categoryId === ALL_STORES ? null : r.categoryId, score: Number(r.score) }));
+    return (rows || []).map(r => ({ ...r, categoryId: r.categoryId, score: Number(r.score) }));
   }
 
   async replacePopular(
@@ -130,17 +129,15 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     categoryId: string | null,
     rows: PopularRow[],
   ): Promise<void> {
-    await query(`DELETE FROM "recommendationPopular" WHERE "organizationId" = $1 AND "storeId" = $2 AND scope = $3 AND "categoryId" = $4`, [
-      scope.organizationId,
-      storeKey(scope),
-      popularScope,
-      categoryId ?? ALL_STORES,
-    ]);
+    await query(
+      `DELETE FROM "recommendationPopular" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND scope = $3 AND "categoryId" IS NOT DISTINCT FROM $4`,
+      [scope.organizationId, storeKey(scope), popularScope, categoryId ?? null],
+    );
     for (const r of rows) {
       await query(
         `INSERT INTO "recommendationPopular" ("organizationId", "storeId", scope, "categoryId", "productId", rank, score, "computedAt")
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
-        [scope.organizationId, storeKey(scope), popularScope, categoryId ?? ALL_STORES, r.productId, r.rank, r.score],
+        [scope.organizationId, storeKey(scope), popularScope, categoryId ?? null, r.productId, r.rank, r.score],
       );
     }
   }
@@ -157,11 +154,11 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     const [fbt, rebuilt, counted] = await Promise.all([
       queryOne<{ count: string }>(
         `SELECT COUNT(DISTINCT "productId") as count FROM "recommendationCandidate"
-         WHERE "organizationId" = $1 AND "storeId" = $2 AND source = 'fbt'`,
+         WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND source = 'fbt'`,
         [scope.organizationId, storeKey(scope)],
       ),
       queryOne<{ lastRebuiltAt: string | null }>(
-        `SELECT "lastRebuiltAt" FROM "recommendationTenantStat" WHERE "organizationId" = $1 AND "storeId" = $2`,
+        `SELECT "lastRebuiltAt" FROM "recommendationTenantStat" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2`,
         [scope.organizationId, storeKey(scope)],
       ),
       queryOne<{ count: string }>(

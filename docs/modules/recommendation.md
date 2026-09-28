@@ -126,17 +126,17 @@ Merchants define rules once instead of linking thousands of products by hand:
 > "Products tagged **espresso-machine** → recommend tag **coffee-beans** as **cross_sell**."
 > "Brand **Acme** → recommend brand **Acme** in the same primary category as **related**."
 
-| Field          | Meaning                                                                                                                          |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Field          | Meaning                                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `sourceType`   | `category` \| `tag` \| `productBrand` \| `collection` \| `productType`                                                                  |
-| `sourceId`     | The id matched against the viewed product                                                                                        |
+| `sourceId`     | The id matched against the viewed product                                                                                               |
 | `targetType`   | `category` \| `tag` \| `productBrand` \| `collection`                                                                                   |
-| `targetId`     | Where candidates come from                                                                                                       |
-| `relationType` | `related` \| `accessory` \| `cross_sell` \| `up_sell`                                                                            |
+| `targetId`     | Where candidates come from                                                                                                              |
+| `relationType` | `related` \| `accessory` \| `cross_sell` \| `up_sell`                                                                                   |
 | `targetSort`   | How candidates in the target set are ordered: `bestSelling` (default), `newest`, `rating`, `manual` (uses `productCategoryManualOrder`) |
-| `maxItems`     | Cap per rule (default 4)                                                                                                         |
-| `priority`     | Rule order when several rules match                                                                                              |
-| `priceBand`    | Optional: `any` \| `cheaper` \| `similar` \| `pricier` relative to the source product (useful for `up_sell`)                     |
+| `maxItems`     | Cap per rule (default 4)                                                                                                                |
+| `priority`     | Rule order when several rules match                                                                                                     |
+| `priceBand`    | Optional: `any` \| `cheaper` \| `similar` \| `pricier` relative to the source product (useful for `up_sell`)                            |
 
 Rules are resolved in the **nightly job** into the candidate table (§5), so they cost nothing to serve.
 
@@ -213,6 +213,8 @@ For brand-new stores with no orders, fall back to `isFeatured DESC, isBestseller
 ## 5. Data Model
 
 All tables use camelCase with double-quoted identifiers, `uuidv7()` PKs, `createdAt`/`updatedAt`, and are **tenant-scoped by `organizationId`** (plus `storeId` where the storefront is store-scoped). See [database.md](../guidelines/database.md) and [migrations.md](../guidelines/migrations.md).
+
+`storeId` is a nullable FK to `store`: `NULL` means the row applies organization-wide, a non-null value is a store-specific aggregate. Unique constraints that include `storeId` (and `categoryId` on `recommendationPopular`) are declared `NULLS NOT DISTINCT` so the NULL scope still participates in upsert dedup; reads match the scope exactly (`storeId IS NOT DISTINCT FROM :scope`).
 
 ### 5.1 Owned by `product` (existing, to be hardened)
 
@@ -831,26 +833,25 @@ These events are also useful for the built-in engine (for example, tuning `minSu
 3. Compare against built-in for a few weeks. Expand only if the metrics improve.
 4. Online/personalised mode, with consent gating, for the placements that benefit.
 
-
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/recommendation/exclusions` | `asyncHandler(controller.listExclusions)` | — |
-| POST | `/recommendation/exclusions` | `asyncHandler(controller.createExclusion)` | — |
-| DELETE | `/recommendation/exclusions/:exclusionId` | `asyncHandler(controller.deleteExclusion)` | — |
-| GET | `/recommendation/popular` | `asyncHandler(controller.getPopular)` | — |
-| POST | `/recommendation/products` | `asyncHandler(controller.postProductRecommendations)` | — |
-| GET | `/recommendation/products/:productId` | `asyncHandler(controller.getProductRecommendations)` | — |
-| GET | `/recommendation/products/:productId/preview` | `asyncHandler(controller.previewPlacement)` | — |
-| GET | `/recommendation/products/:productId/suggestions` | `asyncHandler(controller.listSuggestions)` | — |
-| POST | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)` | — |
-| POST | `/recommendation/products/:productId/suggestions/hide` | `asyncHandler(controller.hideSuggestion)` | — |
-| POST | `/recommendation/rebuild` | `asyncHandler(controller.rebuild)` | — |
-| GET | `/recommendation/rules` | `asyncHandler(controller.listRules)` | — |
-| POST | `/recommendation/rules` | `asyncHandler(controller.createRule)` | — |
-| PUT | `/recommendation/rules/:ruleId` | `asyncHandler(controller.updateRule)` | — |
-| DELETE | `/recommendation/rules/:ruleId` | `asyncHandler(controller.deleteRule)` | — |
-| GET | `/recommendation/stats` | `asyncHandler(controller.getStats)` | — |
+| Method | Endpoint                                                 | Controller                                            | Description |
+| ------ | -------------------------------------------------------- | ----------------------------------------------------- | ----------- |
+| GET    | `/recommendation/exclusions`                             | `asyncHandler(controller.listExclusions)`             | —           |
+| POST   | `/recommendation/exclusions`                             | `asyncHandler(controller.createExclusion)`            | —           |
+| DELETE | `/recommendation/exclusions/:exclusionId`                | `asyncHandler(controller.deleteExclusion)`            | —           |
+| GET    | `/recommendation/popular`                                | `asyncHandler(controller.getPopular)`                 | —           |
+| POST   | `/recommendation/products`                               | `asyncHandler(controller.postProductRecommendations)` | —           |
+| GET    | `/recommendation/products/:productId`                    | `asyncHandler(controller.getProductRecommendations)`  | —           |
+| GET    | `/recommendation/products/:productId/preview`            | `asyncHandler(controller.previewPlacement)`           | —           |
+| GET    | `/recommendation/products/:productId/suggestions`        | `asyncHandler(controller.listSuggestions)`            | —           |
+| POST   | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)`           | —           |
+| POST   | `/recommendation/products/:productId/suggestions/hide`   | `asyncHandler(controller.hideSuggestion)`             | —           |
+| POST   | `/recommendation/rebuild`                                | `asyncHandler(controller.rebuild)`                    | —           |
+| GET    | `/recommendation/rules`                                  | `asyncHandler(controller.listRules)`                  | —           |
+| POST   | `/recommendation/rules`                                  | `asyncHandler(controller.createRule)`                 | —           |
+| PUT    | `/recommendation/rules/:ruleId`                          | `asyncHandler(controller.updateRule)`                 | —           |
+| DELETE | `/recommendation/rules/:ruleId`                          | `asyncHandler(controller.deleteRule)`                 | —           |
+| GET    | `/recommendation/stats`                                  | `asyncHandler(controller.getStats)`                   | —           |
 
 <!-- GENERATED:ENDPOINTS:END -->

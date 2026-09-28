@@ -2,7 +2,6 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-const ALL_STORES = '00000000-0000-0000-0000-000000000000';
 
 exports.up = async function (knex) {
   const hasTable = await knex.schema.hasTable('recommendationRule');
@@ -11,8 +10,7 @@ exports.up = async function (knex) {
   await knex.schema.createTable('recommendationRule', t => {
     t.uuid('recommendationRuleId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
-    // No FK: the ALL_STORES sentinel is not a store row.
-    t.uuid('storeId').notNullable().defaultTo(ALL_STORES);
+    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('CASCADE');
     t.string('name', 255).notNullable();
     t.string('sourceType', 20).notNullable(); // category | brand | collection | productType | tag
     t.uuid('sourceId').notNullable();

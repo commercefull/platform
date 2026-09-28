@@ -2,7 +2,6 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-const ALL_STORES = '00000000-0000-0000-0000-000000000000';
 
 exports.up = async function (knex) {
   const hasTable = await knex.schema.hasTable('recommendationCoPurchase');
@@ -11,8 +10,7 @@ exports.up = async function (knex) {
   await knex.schema.createTable('recommendationCoPurchase', t => {
     t.uuid('recommendationCoPurchaseId').primary().defaultTo(knex.raw('uuidv7()'));
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
-    // No FK: the ALL_STORES sentinel is not a store row.
-    t.uuid('storeId').notNullable().defaultTo(ALL_STORES);
+    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('CASCADE');
     t.uuid('productId').notNullable();
     t.uuid('relatedProductId').notNullable();
     t.decimal('coCount', 12, 4).notNullable().defaultTo(0);
@@ -20,11 +18,13 @@ exports.up = async function (knex) {
     t.timestamp('lastOrderedAt');
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-
-    t.unique(['organizationId', 'storeId', 'productId', 'relatedProductId'], { indexName: 'uq_recoCoPurchase_pair' });
     t.index(['organizationId', 'productId'], 'idx_recoCoPurchase_org_product');
     t.index(['organizationId', 'productId', 'coCount'], 'idx_recoCoPurchase_rank');
   });
+
+  await knex.raw(
+    `ALTER TABLE "recommendationCoPurchase" ADD CONSTRAINT "uq_recoCoPurchase_pair" UNIQUE NULLS NOT DISTINCT ("organizationId", "storeId", "productId", "relatedProductId")`,
+  );
 };
 
 /**
