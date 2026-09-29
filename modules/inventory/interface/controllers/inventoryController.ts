@@ -170,7 +170,7 @@ export const createInventoryLocation = async (req: HttpRequest, res: HttpRespons
   const { name, address, address1, city, country } = body;
   if (name && (address || address1) && city && country) {
     const saved = await pickupLocationPort.create({
-      storeId: body.storeId || 'default',
+      storeId: body.storeId ?? null,
       name,
       address: {
         line1: address || address1 || '',

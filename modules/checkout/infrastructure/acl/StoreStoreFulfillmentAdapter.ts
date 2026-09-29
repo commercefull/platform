@@ -10,6 +10,11 @@ import { StoreFulfillmentPort, StoreFulfillmentOption, PickupLocation } from '..
 import type StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
 import type * as pickupLocationRepo from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
+// Locations without an assigned store can't be pickup targets.
+type AssignedPickupLocation = pickupLocationRepo.PickupLocation & { storeId: string };
+const isAssignedLocation = <T extends { storeId: string | null }>(loc: T): loc is T & { storeId: string } =>
+  loc.storeId !== null;
+
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   constructor(
     private readonly storeRepo: Pick<typeof StoreRepo, 'findActive'>,
@@ -28,6 +33,7 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }): Promise<{ eligible: boolean; options: StoreFulfillmentOption[] }> {
     const stores = await this.storeRepo.findActive();
     const options: StoreFulfillmentOption[] = [];
+
 
     for (const store of stores) {
       const deliverySettings = store.settings?.localDelivery;
@@ -72,20 +78,20 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
 
   async getAllPickupLocations(): Promise<PickupLocation[]> {
     const locations = await this.pickupLocations.getLocations();
-    return locations.map(loc => this.mapLocation(loc));
+    return locations.filter(isAssignedLocation).map(loc => this.mapLocation(loc));
   }
 
   async getPickupLocation(locationId: string): Promise<PickupLocation | null> {
     const loc = await this.pickupLocations.getLocation(locationId);
-    return loc ? this.mapLocation(loc) : null;
+    return loc && isAssignedLocation(loc) ? this.mapLocation(loc) : null;
   }
 
   async findNearestPickupLocations(lat: number, lng: number, radiusKm?: number): Promise<PickupLocation[]> {
     const locations = await this.pickupLocations.findNearestLocations(lat, lng, radiusKm ?? 50);
-    return locations.map(loc => this.mapLocation(loc));
+    return locations.filter(isAssignedLocation).map(loc => this.mapLocation(loc));
   }
 
-  private mapLocation(loc: pickupLocationRepo.PickupLocation): PickupLocation {
+  private mapLocation(loc: AssignedPickupLocation): PickupLocation {
     return {
       locationId: loc.pickupLocationId,
       storeId: loc.storeId,

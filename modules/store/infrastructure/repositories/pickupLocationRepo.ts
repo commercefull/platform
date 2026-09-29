@@ -6,10 +6,11 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import { generateUUID } from '../../../../libs/uuid';
 
 export interface PickupLocation {
   pickupLocationId: string;
-  storeId: string;
+  storeId: string | null;
   name: string;
   address: {
     line1: string;
@@ -33,7 +34,7 @@ export interface PickupLocation {
 }
 
 export interface CreatePickupLocationParams {
-  storeId: string;
+  storeId: string | null;
   name: string;
   address: PickupLocation['address'];
   latitude?: number;
@@ -64,7 +65,7 @@ export interface UpdatePickupLocationParams {
  * Save (create) a new pickup location
  */
 export async function saveLocation(params: CreatePickupLocationParams): Promise<PickupLocation> {
-  const pickupLocationId = `ploc_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
+  const pickupLocationId = generateUUID();
   const now = new Date();
 
   const sql = `
@@ -251,7 +252,7 @@ function mapToPickupLocation(row: Record<string, unknown>): PickupLocation {
   const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : v != null ? String(v) : undefined);
   return {
     pickupLocationId: str(row.pickupLocationId) as string,
-    storeId: str(row.storeId) as string,
+    storeId: str(row.storeId) ?? null,
     name: str(row.name) as string,
     address: {
       line1: str(row.addressLine1) as string,

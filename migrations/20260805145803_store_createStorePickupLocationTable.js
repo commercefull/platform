@@ -8,7 +8,7 @@ exports.up = async function (knex) {
 
   await knex.schema.createTable('storePickupLocation', table => {
     table.uuid('pickupLocationId').primary().defaultTo(knex.raw('uuidv7()'));
-    table.uuid('storeId').notNullable();
+    table.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('CASCADE');
     table.string('name').notNullable();
     table.text('addressLine1').notNullable();
     table.text('addressLine2');
