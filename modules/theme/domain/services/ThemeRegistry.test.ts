@@ -123,7 +123,7 @@ describe('ThemeRegistry', () => {
 
   it('should get theme by ID', () => {
     registry.registerBuiltInThemes();
-    const theme = registry.getTheme('theme_builtin_default');
+    const theme = registry.getTheme('0198b000-0000-7000-8000-000000000001');
     expect(theme).toBeDefined();
     expect(theme?.slug).toBe('default');
   });
@@ -161,8 +161,8 @@ describe('ThemeRegistry', () => {
 
   it('should not unregister built-in themes', () => {
     registry.registerBuiltInThemes();
-    registry.unregisterTheme('theme_builtin_default');
-    expect(registry.getTheme('theme_builtin_default')).toBeDefined();
+    registry.unregisterTheme('0198b000-0000-7000-8000-000000000001');
+    expect(registry.getTheme('0198b000-0000-7000-8000-000000000001')).toBeDefined();
   });
 
   it('should resolve theme for store without override', async () => {

@@ -58,7 +58,7 @@ export async function getMerchandisingRules(searchTerm?: string, categoryId?: st
     }
 
     const results = await query<MerchandisingRule[]>(
-      `SELECT * FROM "merchandisingRule" WHERE ${conditions.join(' AND ')} ORDER BY "position" ASC`,
+      `SELECT * FROM "productMerchandisingRule" WHERE ${conditions.join(' AND ')} ORDER BY "position" ASC`,
       params,
     );
 
@@ -102,7 +102,7 @@ export async function getMerchandisingRules(searchTerm?: string, categoryId?: st
 export async function getCategoryManualOrder(categoryId: string): Promise<ManualOrderingContext | undefined> {
   try {
     const results = await query<CategoryManualOrder[]>(
-      `SELECT * FROM "categoryManualOrder" WHERE "categoryId" = $1 AND "isActive" = true ORDER BY "position" ASC`,
+      `SELECT * FROM "productCategoryManualOrder" WHERE "categoryId" = $1 AND "isActive" = true ORDER BY "position" ASC`,
       [categoryId],
     );
 
@@ -126,7 +126,7 @@ export async function createMerchandisingRule(
   rule: Omit<MerchandisingRule, 'ruleId' | 'createdAt' | 'updatedAt'>,
 ): Promise<MerchandisingRule> {
   const results = await query<MerchandisingRule[]>(
-    `INSERT INTO "merchandisingRule" ("ruleType", "productId", "position", "searchTerm", "categoryId", "isActive", "createdAt", "updatedAt")
+    `INSERT INTO "productMerchandisingRule" ("ruleType", "productId", "position", "searchTerm", "categoryId", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
      RETURNING *`,
     [rule.ruleType, rule.productId, rule.position ?? null, rule.searchTerm ?? null, rule.categoryId ?? null, rule.isActive ?? true],
@@ -168,7 +168,7 @@ export async function updateMerchandisingRule(ruleId: string, updates: Partial<M
   setClauses.push(`"updatedAt" = NOW()`);
 
   const results = await query<MerchandisingRule[]>(
-    `UPDATE "merchandisingRule" SET ${setClauses.join(', ')} WHERE "ruleId" = $1 RETURNING *`,
+    `UPDATE "productMerchandisingRule" SET ${setClauses.join(', ')} WHERE "ruleId" = $1 RETURNING *`,
     params,
   );
 
@@ -176,7 +176,7 @@ export async function updateMerchandisingRule(ruleId: string, updates: Partial<M
 }
 
 export async function deleteMerchandisingRule(ruleId: string): Promise<boolean> {
-  await query(`DELETE FROM "merchandisingRule" WHERE "ruleId" = $1`, [ruleId]);
+  await query(`DELETE FROM "productMerchandisingRule" WHERE "ruleId" = $1`, [ruleId]);
   return true;
 }
 
@@ -203,7 +203,7 @@ export async function listMerchandisingRules(filters?: {
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-  const results = await query<MerchandisingRule[]>(`SELECT * FROM "merchandisingRule" ${whereClause} ORDER BY "createdAt" DESC`, params);
+  const results = await query<MerchandisingRule[]>(`SELECT * FROM "productMerchandisingRule" ${whereClause} ORDER BY "createdAt" DESC`, params);
 
   return results || [];
 }
@@ -214,12 +214,12 @@ export async function listMerchandisingRules(filters?: {
 
 export async function setCategoryManualOrder(categoryId: string, productIds: string[]): Promise<void> {
   // Delete existing orders for this category
-  await query(`DELETE FROM "categoryManualOrder" WHERE "categoryId" = $1`, [categoryId]);
+  await query(`DELETE FROM "productCategoryManualOrder" WHERE "categoryId" = $1`, [categoryId]);
 
   // Insert new orders
   for (let i = 0; i < productIds.length; i++) {
     await query(
-      `INSERT INTO "categoryManualOrder" ("categoryId", "productId", "position", "isActive", "createdAt", "updatedAt")
+      `INSERT INTO "productCategoryManualOrder" ("categoryId", "productId", "position", "isActive", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, true, NOW(), NOW())`,
       [categoryId, productIds[i], i],
     );
@@ -228,12 +228,12 @@ export async function setCategoryManualOrder(categoryId: string, productIds: str
 
 export async function getCategoryManualOrderList(categoryId: string): Promise<CategoryManualOrder[]> {
   const results = await query<CategoryManualOrder[]>(
-    `SELECT * FROM "categoryManualOrder" WHERE "categoryId" = $1 ORDER BY "position" ASC`,
+    `SELECT * FROM "productCategoryManualOrder" WHERE "categoryId" = $1 ORDER BY "position" ASC`,
     [categoryId],
   );
   return results || [];
 }
 
 export async function deleteCategoryManualOrder(categoryId: string): Promise<void> {
-  await query(`DELETE FROM "categoryManualOrder" WHERE "categoryId" = $1`, [categoryId]);
+  await query(`DELETE FROM "productCategoryManualOrder" WHERE "categoryId" = $1`, [categoryId]);
 }

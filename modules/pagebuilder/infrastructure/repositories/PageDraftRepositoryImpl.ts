@@ -3,20 +3,20 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { PageDraft as DbPageDraft } from '../../../../libs/db/types';
+import { PagebuilderPageDraft as DbPageDraft } from '../../../../libs/db/types';
 import { PageDraft, PageDraftProps } from '../../domain/entities/PageDraft';
 import { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { PageDraftValidationError } from '../../domain/errors/PageBuilderErrors';
 
 export class PageDraftRepositoryImpl implements PageDraftRepository {
   async findById(draftId: string): Promise<PageDraft | null> {
-    const row = await queryOne<DbPageDraft>(`SELECT * FROM "pageDraft" WHERE "draftId" = $1`, [draftId]);
+    const row = await queryOne<DbPageDraft>(`SELECT * FROM "pagebuilderPageDraft" WHERE "draftId" = $1`, [draftId]);
     return row ? this.mapToDraft(row) : null;
   }
 
   async findByPageId(pageId: string): Promise<PageDraft | null> {
     const row = await queryOne<DbPageDraft>(
-      `SELECT * FROM "pageDraft" WHERE "pageId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC LIMIT 1`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "pageId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC LIMIT 1`,
       [pageId],
     );
     return row ? this.mapToDraft(row) : null;
@@ -24,7 +24,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findByStore(storeId: string): Promise<PageDraft[]> {
     const rows = await query<DbPageDraft[]>(
-      `SELECT * FROM "pageDraft" WHERE "storeId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "storeId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
       [storeId],
     );
     return (rows || []).map(row => this.mapToDraft(row));
@@ -32,7 +32,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findByOrganization(organizationId: string): Promise<PageDraft[]> {
     const rows = await query<DbPageDraft[]>(
-      `SELECT * FROM "pageDraft" WHERE "organizationId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "organizationId" = $1 AND "status" != 'archived' ORDER BY "updatedAt" DESC`,
       [organizationId],
     );
     return (rows || []).map(row => this.mapToDraft(row));
@@ -40,7 +40,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findAll(): Promise<PageDraft[]> {
     const rows = await query<DbPageDraft[]>(
-      `SELECT * FROM "pageDraft" WHERE "status" != 'archived' ORDER BY "updatedAt" DESC`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "status" != 'archived' ORDER BY "updatedAt" DESC`,
       [],
     );
     return (rows || []).map(row => this.mapToDraft(row));
@@ -48,7 +48,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findBySlug(slug: string, storeId: string): Promise<PageDraft | null> {
     const row = await queryOne<DbPageDraft>(
-      `SELECT * FROM "pageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" != 'archived' LIMIT 1`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" != 'archived' LIMIT 1`,
       [slug, storeId],
     );
     return row ? this.mapToDraft(row) : null;
@@ -56,7 +56,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findPublishedByStore(storeId: string): Promise<PageDraft[]> {
     const rows = await query<DbPageDraft[]>(
-      `SELECT * FROM "pageDraft" WHERE "storeId" = $1 AND "status" = 'published' ORDER BY "publishedAt" DESC`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "storeId" = $1 AND "status" = 'published' ORDER BY "publishedAt" DESC`,
       [storeId],
     );
     return (rows || []).map(row => this.mapToDraft(row));
@@ -64,7 +64,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
   async findPublishedBySlug(slug: string, storeId: string): Promise<PageDraft | null> {
     const row = await queryOne<DbPageDraft>(
-      `SELECT * FROM "pageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" = 'published' LIMIT 1`,
+      `SELECT * FROM "pagebuilderPageDraft" WHERE "slug" = $1 AND "storeId" = $2 AND "status" = 'published' LIMIT 1`,
       [slug, storeId],
     );
     return row ? this.mapToDraft(row) : null;
@@ -77,7 +77,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
 
     if (existing) {
       const row = await queryOne<DbPageDraft>(
-        `UPDATE "pageDraft" SET
+        `UPDATE "pagebuilderPageDraft" SET
           "pageId" = $2,
           "themeId" = $3,
           "title" = $4,
@@ -108,7 +108,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
     }
 
     const row = await queryOne<DbPageDraft>(
-      `INSERT INTO "pageDraft" (
+      `INSERT INTO "pagebuilderPageDraft" (
         "draftId", "pageId", "storeId", "organizationId", "themeId",
         "title", "slug", "pageType", "status", "blocks", "version",
         "publishedAt", "createdAt", "updatedAt"
@@ -134,7 +134,7 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async delete(draftId: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(`DELETE FROM "pageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`, [draftId]);
+    const result = await queryOne<{ id: string }>(`DELETE FROM "pagebuilderPageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`, [draftId]);
     return !!result;
   }
 

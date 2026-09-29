@@ -15,16 +15,16 @@ const BLOCK_IDS = {
 };
 
 exports.seed = async function (knex) {
-  const hasPageDraft = await knex.schema.hasTable('pageDraft');
+  const hasPageDraft = await knex.schema.hasTable('pagebuilderPageDraft');
   if (!hasPageDraft) {
     return;
   }
 
-  await knex('pageDraft').where('draftId', DRAFT_ID).del();
+  await knex('pagebuilderPageDraft').where('draftId', DRAFT_ID).del();
 
   const now = new Date();
 
-  await knex('pageDraft').insert({
+  await knex('pagebuilderPageDraft').insert({
     draftId: DRAFT_ID,
     organizationId: ORGANIZATION_ID,
     title: 'Ops Page',

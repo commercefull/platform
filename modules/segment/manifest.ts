@@ -11,6 +11,6 @@ export const manifest: ModuleManifest = {
     subscribes: ['order.created', 'order.completed', 'customer.registered'],
     publishes: ['segment.member_added', 'segment.member_removed'],
   },
-  tables: { names: ['segmentDefinition', 'segmentMembership', 'customerProfile'] },
+  tables: { names: ['segmentDefinition', 'segmentMembership', 'segmentCustomerProfile'] },
   featureFlagKey: 'module.segment.enabled',
 };

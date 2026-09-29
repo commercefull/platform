@@ -8,7 +8,7 @@ The platform uses a **durable event bus** with a transactional outbox pattern fo
 Business Operation (within DB transaction)
   │
   ├── Write business data (orders, products, etc.)
-  ├── Write event to eventOutbox table (same transaction)
+  ├── Write event to platformEventOutbox table (same transaction)
   │
   ▼
 Outbox Dispatcher (background worker)

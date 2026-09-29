@@ -316,11 +316,12 @@ All config routes require `isOrganizationLoggedIn` middleware:
 
 ### Database Tables
 
-| Table                    | Description                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| `samlProvider`           | SAML IdP configurations (JSONB for attribute mappings)          |
-| `oidcProvider`           | OIDC provider configurations (JSONB for scopes, claim mappings) |
-| `scimProvisioningRecord` | SCIM provisioning records linking SCIM users to platform users  |
+| Table                    | Description                                                      |
+| ------------------------ | ---------------------------------------------------------------- |
+| `identitySamlProvider`           | SAML IdP configurations (JSONB for attribute mappings)           |
+| `identityOidcProvider`           | OIDC provider configurations (JSONB for scopes, claim mappings)  |
+| `identityScimProvisioningRecord` | SCIM provisioning records linking SCIM users to platform users   |
+| `identityRolePolicy`             | RBAC role policies (shared via `libs/rbac`)                      |
 
 ---
 

@@ -11,7 +11,7 @@
 
 export interface PickupLocationSummary {
   id: string;
-  storeId: string;
+  storeId: string | null;
   name: string;
   address: {
     line1: string;
@@ -26,7 +26,7 @@ export interface PickupLocationSummary {
 }
 
 export interface CreatePickupLocationInput {
-  storeId: string;
+  storeId: string | null;
   name: string;
   address: PickupLocationSummary['address'];
   prepareTimeMinutes?: number;

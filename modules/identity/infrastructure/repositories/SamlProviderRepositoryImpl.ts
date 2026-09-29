@@ -8,13 +8,13 @@ import { SamlProviderRepository } from '../../domain/repositories/SsoProviderRep
 
 export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   async findById(providerId: string): Promise<SamlProvider | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "samlProvider" WHERE "providerId" = $1', [providerId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "samlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -22,7 +22,7 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async findActiveByOrganizationId(organizationId: string): Promise<SamlProvider[]> {
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "samlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+      'SELECT * FROM "identitySamlProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -30,13 +30,13 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
 
   async save(provider: SamlProvider): Promise<SamlProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "samlProvider" WHERE "providerId" = $1', [
+    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "identitySamlProvider" WHERE "providerId" = $1', [
       props.providerId,
     ]);
 
     if (existing) {
       await query(
-        `UPDATE "samlProvider" SET
+        `UPDATE "identitySamlProvider" SET
           "organizationId" = $2, "name" = $3, "entityId" = $4, "ssoUrl" = $5,
           "sloUrl" = $6, "certificate" = $7, "spEntityId" = $8, "acsUrl" = $9,
           "binding" = $10, "nameIdFormat" = $11, "signAuthnRequest" = $12,
@@ -64,7 +64,7 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
       );
     } else {
       await query(
-        `INSERT INTO "samlProvider" (
+        `INSERT INTO "identitySamlProvider" (
           "providerId", "organizationId", "name", "entityId", "ssoUrl",
           "sloUrl", "certificate", "spEntityId", "acsUrl", "binding",
           "nameIdFormat", "signAuthnRequest", "spPrivateKey", "spCertificate",
@@ -95,7 +95,7 @@ export class SamlProviderRepositoryImpl implements SamlProviderRepository {
   }
 
   async delete(providerId: string): Promise<void> {
-    await query('DELETE FROM "samlProvider" WHERE "providerId" = $1', [providerId]);
+    await query('DELETE FROM "identitySamlProvider" WHERE "providerId" = $1', [providerId]);
   }
 
   private getProps(provider: SamlProvider): SamlProviderProps {

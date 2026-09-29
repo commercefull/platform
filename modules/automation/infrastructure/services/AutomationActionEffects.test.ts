@@ -50,7 +50,7 @@ describe('AutomationActionEffectsImpl', () => {
     await effects.addCustomerTag('cust-1', 'vip');
 
     expect(mockedQuery).toHaveBeenCalledWith(expect.stringContaining('array_prepend'), ['vip', 'cust-1']);
-    expect(mockedQuery.mock.calls[0][0]).toContain('customerProfile');
+    expect(mockedQuery.mock.calls[0][0]).toContain('segmentCustomerProfile');
   });
 
   it('should remove tags', async () => {

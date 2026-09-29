@@ -42,11 +42,12 @@ The Returns module provides return, exchange, and store credit management — ex
 
 ## Tables
 
-| Table               | Description                            |
-| ------------------- | -------------------------------------- |
-| `orderReturn`       | Return requests with items and status  |
-| `orderReturnItem`   | Individual return line items           |
-| `storeCreditLedger` | Store credit balances and transactions |
+| Table               | Description                                                  |
+| ------------------- | ------------------------------------------------------------ |
+| `orderReturn`       | Return requests with items and status                        |
+| `orderReturnItem`   | Individual return line items                                 |
+| `storeCreditLedger` | Store credit balances and transactions                       |
+| `returnRule`        | Return eligibility rules (window, condition, restocking fee) |
 
 ## Routes
 
@@ -61,7 +62,6 @@ The Returns module provides return, exchange, and store credit management — ex
 | PUT    | `/business/returns/:id/complete`     | Complete return with refund |
 | GET    | `/business/store-credit`             | List store credit balances  |
 | GET    | `/business/store-credit/:customerId` | Get customer store credit   |
-
 
 <!-- GENERATED:ENDPOINTS:START -->
 

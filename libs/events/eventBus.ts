@@ -524,7 +524,7 @@ class EventBus {
 
   /**
    * Enable or disable outbox mode.
-   * When enabled, emit() writes to the eventOutbox table instead of
+   * When enabled, emit() writes to the platformEventOutbox table instead of
    * dispatching directly. The OutboxDispatcher reads the table and
    * calls dispatchFromOutbox() to actually run handlers.
    */

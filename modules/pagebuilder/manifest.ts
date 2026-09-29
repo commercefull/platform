@@ -22,6 +22,6 @@ export const manifest: ModuleManifest = {
       'pagebuilder.blocks.reordered',
     ],
   },
-  tables: { names: ['pageDraft'] },
+  tables: { names: ['pagebuilderPageDraft'] },
   featureFlagKey: 'module.pagebuilder.enabled',
 };

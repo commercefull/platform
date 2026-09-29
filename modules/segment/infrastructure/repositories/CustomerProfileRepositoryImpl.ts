@@ -63,12 +63,12 @@ function rowToEntity(row: ProfileDbRow): CustomerProfile {
 
 export class CustomerProfileRepositoryImpl implements CustomerProfileRepository {
   async findByCustomerId(customerId: string): Promise<CustomerProfile | null> {
-    const row = await queryOne<ProfileDbRow>(`SELECT * FROM "customerProfile" WHERE "customerId" = $1`, [customerId]);
+    const row = await queryOne<ProfileDbRow>(`SELECT * FROM "segmentCustomerProfile" WHERE "customerId" = $1`, [customerId]);
     return row ? rowToEntity(row) : null;
   }
 
   async findAll(limit = 50, offset = 0): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`, [
       limit,
       offset,
     ]);
@@ -77,7 +77,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
 
   async findBySegment(segmentId: string): Promise<CustomerProfile[]> {
     const rows = await query<ProfileDbRow[]>(
-      `SELECT cp.* FROM "customerProfile" cp
+      `SELECT cp.* FROM "segmentCustomerProfile" cp
        INNER JOIN "segmentMembership" sm ON cp."customerId" = sm."customerId"
        WHERE sm."segmentId" = $1 AND sm."isActive" = true
        ORDER BY cp."lifetimeValueCents" DESC`,
@@ -87,12 +87,12 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async findByTier(tier: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`, [tier]);
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`, [tier]);
     return (rows || []).map(rowToEntity);
   }
 
   async findByRFM(rfmSegment: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "customerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`, [
+    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`, [
       rfmSegment,
     ]);
     return (rows || []).map(rowToEntity);
@@ -101,7 +101,7 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   async upsert(profile: CustomerProfile): Promise<CustomerProfile> {
     const p = profile.toJSON();
     const row = await queryOne<ProfileDbRow>(
-      `INSERT INTO "customerProfile" (
+      `INSERT INTO "segmentCustomerProfile" (
         "customerId", "email", "firstName", "lastName", "status", "tier",
         "lifetimeValueCents", "totalSpentCents", "averageOrderValueCents", "totalOrders",
         "firstOrderDate", "lastOrderDate", "daysSinceLastOrder",
@@ -236,21 +236,21 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
     setClauses.push(`"lastComputedAt" = NOW()`, `"updatedAt" = NOW()`);
 
     const row = await queryOne<ProfileDbRow>(
-      `UPDATE "customerProfile" SET ${setClauses.join(', ')} WHERE "customerId" = $1 RETURNING *`,
+      `UPDATE "segmentCustomerProfile" SET ${setClauses.join(', ')} WHERE "customerId" = $1 RETURNING *`,
       params,
     );
     return row ? rowToEntity(row) : null;
   }
 
   async delete(customerId: string): Promise<boolean> {
-    const row = await queryOne<{ customerId: string }>(`DELETE FROM "customerProfile" WHERE "customerId" = $1 RETURNING "customerId"`, [
+    const row = await queryOne<{ customerId: string }>(`DELETE FROM "segmentCustomerProfile" WHERE "customerId" = $1 RETURNING "customerId"`, [
       customerId,
     ]);
     return !!row;
   }
 
   async count(): Promise<number> {
-    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "customerProfile"`);
+    const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "segmentCustomerProfile"`);
     return result ? parseInt(result.count, 10) : 0;
   }
 

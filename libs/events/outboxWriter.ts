@@ -1,7 +1,7 @@
 /**
  * Outbox Writer
  *
- * Writes domain events to the `eventOutbox` table within the same database
+ * Writes domain events to the `platformEventOutbox` table within the same database
  * transaction as the business operation that produced them. This guarantees
  * that events are not lost if the process crashes after the business write
  * but before the event is dispatched.
@@ -46,7 +46,7 @@ export async function writeToOutbox(
   const source = options?.source;
 
   const row = await tx.queryOne<{ eventOutboxId: string }>(
-    `INSERT INTO "eventOutbox" ("eventType", "payload", "correlationId", "source", "status", "attempts", "maxAttempts", "nextRetryAt")
+    `INSERT INTO "platformEventOutbox" ("eventType", "payload", "correlationId", "source", "status", "attempts", "maxAttempts", "nextRetryAt")
      VALUES ($1, $2, $3, $4, 'pending', 0, 10, now())
      RETURNING "eventOutboxId"`,
     [type, JSON.stringify(data), correlationId ?? null, source ?? null],

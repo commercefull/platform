@@ -144,7 +144,7 @@ See [Module Registry & Feature Flags](#/guides/module-registry) for details.
 
 The platform uses a transactional outbox pattern for at-least-once event delivery:
 
-1. **Write**: Business operations write events to the `eventOutbox` table within the same DB transaction as the business data.
+1. **Write**: Business operations write events to the `platformEventOutbox` table within the same DB transaction as the business data.
 2. **Dispatch**: A claim-based polling worker (`FOR UPDATE SKIP LOCKED`) picks up pending events and delivers them to registered handlers.
 3. **Retry**: Exponential backoff (2s base, 5min max), dead-letter queue after 10 attempts.
 4. **Shutdown**: Graceful stop on SIGTERM/SIGINT.

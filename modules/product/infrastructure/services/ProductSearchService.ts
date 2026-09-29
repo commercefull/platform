@@ -504,7 +504,7 @@ class ProductSearchService implements ProductSearchServicePort {
         b."name",
         COUNT(DISTINCT p."productId") as count
       FROM "${this.productTable}" p
-      JOIN "${Table.Brand}" b ON b."brandId" = p."brandId"
+      JOIN "${Table.ProductBrand}" b ON b."brandId" = p."brandId"
       WHERE p."deletedAt" IS NULL AND p."status" = 'active'
         AND b."deletedAt" IS NULL
       GROUP BY b."brandId", b."name"

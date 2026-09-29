@@ -8,13 +8,13 @@ import { OidcProviderRepository } from '../../domain/repositories/SsoProviderRep
 
 export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   async findById(providerId: string): Promise<OidcProvider | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "oidcProvider" WHERE "providerId" = $1', [providerId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityOidcProvider" WHERE "providerId" = $1', [providerId]);
     return row ? this.mapToEntity(row) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "oidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
+      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -22,7 +22,7 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
 
   async findActiveByOrganizationId(organizationId: string): Promise<OidcProvider[]> {
     const rows = await query<Record<string, unknown>[]>(
-      'SELECT * FROM "oidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
+      'SELECT * FROM "identityOidcProvider" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY "createdAt" DESC',
       [organizationId],
     );
     return (rows || []).map(row => this.mapToEntity(row));
@@ -30,13 +30,13 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
 
   async save(provider: OidcProvider): Promise<OidcProvider> {
     const props = this.getProps(provider);
-    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "oidcProvider" WHERE "providerId" = $1', [
+    const existing = await queryOne<Record<string, unknown>>('SELECT "providerId" FROM "identityOidcProvider" WHERE "providerId" = $1', [
       props.providerId,
     ]);
 
     if (existing) {
       await query(
-        `UPDATE "oidcProvider" SET
+        `UPDATE "identityOidcProvider" SET
           "organizationId" = $2, "name" = $3, "issuerUrl" = $4, "clientId" = $5,
           "clientSecret" = $6, "scopes" = $7, "redirectUri" = $8, "usePkce" = $9,
           "claimMapping" = $10, "isActive" = $11, "useDiscovery" = $12,
@@ -64,7 +64,7 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
       );
     } else {
       await query(
-        `INSERT INTO "oidcProvider" (
+        `INSERT INTO "identityOidcProvider" (
           "providerId", "organizationId", "name", "issuerUrl", "clientId",
           "clientSecret", "scopes", "redirectUri", "usePkce", "claimMapping",
           "isActive", "useDiscovery", "authorizationEndpoint", "tokenEndpoint",
@@ -95,7 +95,7 @@ export class OidcProviderRepositoryImpl implements OidcProviderRepository {
   }
 
   async delete(providerId: string): Promise<void> {
-    await query('DELETE FROM "oidcProvider" WHERE "providerId" = $1', [providerId]);
+    await query('DELETE FROM "identityOidcProvider" WHERE "providerId" = $1', [providerId]);
   }
 
   private getProps(provider: OidcProvider): OidcProviderProps {
