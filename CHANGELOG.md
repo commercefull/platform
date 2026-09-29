@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.1](https://github.com/commercefull/platform/compare/v1.3.0...v1.3.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **inventory:** repair store-location create broken by uuid PK conversion ([3366711](https://github.com/commercefull/platform/commit/3366711fe6b169314df0e7f5943bc23277cd3a3b))
+* **migrations:** align recommendation tables to standard, fold brandId alter ([b44bffb](https://github.com/commercefull/platform/commit/b44bffb894b612963c9d8692bf15a68938819792))
+* **migrations:** attribute storeUser to identity module ([b3ea5d1](https://github.com/commercefull/platform/commit/b3ea5d1165e5c6a092a1cee877ea30996bd709a9))
+* **migrations:** enforce uuid+uuidv7 PK convention on 2026+ tables ([bde5597](https://github.com/commercefull/platform/commit/bde559744a5acf3b5b45925b4f23828ba25c1073))
+* **seeds:** seed pickup location after the store it references ([fb4cf27](https://github.com/commercefull/platform/commit/fb4cf27107ea3068c8192f7a69e14224f4df1f8c))
+* **theme:** use UUID ids for built-in themes after uuid PK conversion ([8d6a88d](https://github.com/commercefull/platform/commit/8d6a88d10a1214068b39c0e83cdf2c99c74e9bf2))
+
 ## [1.3.0](https://github.com/commercefull/platform/compare/v1.2.2...v1.3.0) (2026-09-27)
 
 
