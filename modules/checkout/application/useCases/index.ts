@@ -16,4 +16,3 @@ export * from './RemoveCoupon';
 export * from './CompleteCheckout';
 export * from './AbandonCheckout';
 export * from './CreatePaymentIntent';
-export * from './CheckoutConfig';

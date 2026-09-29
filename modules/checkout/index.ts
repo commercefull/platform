@@ -6,8 +6,7 @@
 export * from './application/useCases';
 export { getCheckoutPorts, type CheckoutPorts } from './infrastructure/compositionRoot';
 export * from './domain/repositories/CheckoutRepository';
-export * from './domain/repositories/CheckoutConfigRepository';
-export * from './domain/entities/CheckoutConfig';
+
 export * from './domain/events/CheckoutEvents';
 export * from './domain/errors/CheckoutErrors';
 

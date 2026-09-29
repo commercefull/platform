@@ -6,7 +6,6 @@
 export * from './application/useCases';
 export * from './domain/repositories/PaymentRepository';
 export * from './domain/repositories/PaymentBillingRepository';
-export * from './domain/repositories/PayoutRepository';
 export * from './domain/repositories/FraudRepository';
 export * from './domain/repositories/PaymentGatewayRepository';
 export * from './domain/repositories/PSPRoutingRepository';

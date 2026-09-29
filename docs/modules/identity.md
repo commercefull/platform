@@ -322,7 +322,6 @@ All config routes require `isOrganizationLoggedIn` middleware:
 | `identityOidcProvider`           | OIDC provider configurations (JSONB for scopes, claim mappings)  |
 | `identityScimProvisioningRecord` | SCIM provisioning records linking SCIM users to platform users   |
 | `identityRolePolicy`             | RBAC role policies (shared via `libs/rbac`)                      |
-| `identityKeyRotationPolicy`      | Per-organization key rotation policies (JWT, payment, HMAC keys) |
 
 ---
 

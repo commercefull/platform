@@ -17,7 +17,6 @@ exports.seed = async function (knex) {
   const now = knex.fn.now();
 
   // Clean up existing fashion price lists
-  await knex('pricingPriceListScope').whereIn('priceListId', Object.values(PRICE_LIST)).del();
   await knex('pricingPriceList').whereIn('priceListId', Object.values(PRICE_LIST)).del();
 
   // Clean up tier pricing rules
