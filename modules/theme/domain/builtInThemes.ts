@@ -13,7 +13,7 @@ export function createBuiltInThemes(): Theme[] {
 
 function createDefaultTheme(): Theme {
   return Theme.create({
-    themeId: 'theme_builtin_default',
+    themeId: '0198b000-0000-7000-8000-000000000001',
     slug: 'default',
     name: 'Default',
     description: 'Clean, modern storefront with full feature support. Great starting point for any store.',
@@ -226,7 +226,7 @@ function createDefaultTheme(): Theme {
 
 function createMinimalTheme(): Theme {
   return Theme.create({
-    themeId: 'theme_builtin_minimal',
+    themeId: '0198b000-0000-7000-8000-000000000002',
     slug: 'minimal',
     name: 'Minimal',
     description: 'Distraction-free minimalist design. Focus on products with lots of whitespace.',
@@ -430,7 +430,7 @@ function createMinimalTheme(): Theme {
 
 function createBoutiqueTheme(): Theme {
   return Theme.create({
-    themeId: 'theme_builtin_boutique',
+    themeId: '0198b000-0000-7000-8000-000000000003',
     slug: 'boutique',
     name: 'Boutique',
     description: 'Elegant theme for fashion and lifestyle brands. Rich typography and refined aesthetics.',
