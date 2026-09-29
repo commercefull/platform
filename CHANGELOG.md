@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/commercefull/platform/compare/v1.3.1...v1.3.2) (2026-09-29)
+
+
+### Bug Fixes
+
+* **deps:** bump multer to 2.4.0 for orphaned disk-upload advisory ([bc1e2f9](https://github.com/commercefull/platform/commit/bc1e2f93329047ea30777ce49c71139283187498))
+* **deps:** bump multer to 2.4.0 for orphaned disk-upload advisory ([2c5a61d](https://github.com/commercefull/platform/commit/2c5a61d5610ddcdedb0840c26858fa1c4fd67189))
+
 ## [1.3.1](https://github.com/commercefull/platform/compare/v1.3.0...v1.3.1) (2026-09-29)
 
 
