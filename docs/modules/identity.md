@@ -52,76 +52,76 @@ The Identity feature unifies customer and merchant authentication under `feature
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method                                                               | Endpoint                                     | Controller                                                     | Description                                        |
-| -------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------- |
-| POST                                                                 | `/auth/cleanup-tokens`                       | `asyncHandler(cleanupExpiredTokens)`                           | —                                                  |
-| POST                                                                 | `/auth/force-reset`                          | `asyncHandler(forceResetPassword)`                             | —                                                  |
-| POST                                                                 | `/auth/forgot-password`                      | `asyncHandler(requestPasswordReset)`                           | Password reset flow                                |
-| POST                                                                 | `/auth/login`                                | `asyncHandler(loginOrganization)`                              | Simple login (returns access token only)           |
-| POST                                                                 | `/auth/refresh`                              | `asyncHandler(renewAccessToken)`                               | Refresh access token                               |
-| POST                                                                 | `/auth/register`                             | `asyncHandler(registerOrganization)`                           | Register new merchant account                      |
-| POST                                                                 | `/auth/reset-password`                       | `asyncHandler(resetPassword)`                                  | —                                                  |
-| POST                                                                 | `/auth/revoke-tokens`                        | `asyncHandler(revokeUserTokens)`                               | —                                                  |
-| GET                                                                  | `/auth/stores/:storeId/users`                | `asyncHandler(listStoreUsers)`                                 | —                                                  |
-| POST                                                                 | `/auth/token`                                | `asyncHandler(issueTokenPair)`                                 | Token-based auth (returns access + refresh tokens) |
-| GET                                                                  | `/auth/user/:userId`                         | `asyncHandler(getUserAuthDetails)`                             | —                                                  |
-| POST                                                                 | `/auth/users/:userId/stores`                 | `asyncHandler(assignUserToStore)`                              | —                                                  |
-| GET                                                                  | `/auth/users/:userId/stores`                 | `asyncHandler(getUserStores)`                                  | —                                                  |
-| DELETE                                                               | `/auth/users/:userId/stores/:storeId`        | `asyncHandler(removeUserFromStore)`                            | —                                                  |
-| POST                                                                 | `/auth/validate`                             | `asyncHandler(checkTokenValidity)`                             | Validate token                                     |
-| GET                                                                  | `/identity/:provider/config`                 | `asyncHandler(getOAuthConfig)`                                 | GET /identity/social/:provider/config              |
-| Get OAuth configuration for a provider (client ID, auth URL, scopes) |
-| POST                                                                 | `/identity/:provider/customer`               | `asyncHandler(customerSocialLogin)`                            | POST /identity/social/:provider/customer           |
-| Authenticate or register a customer via social login                 |
-| Body: { accessToken, idToken?, profile: { id, email, name?, ... } }  |
-| POST                                                                 | `/identity/:provider/customer/link`          | `isCustomerLoggedIn`                                           | POST /identity/social/:provider/customer/link      |
-| Link a social account to an existing customer (requires auth)        |
-| Body: { accessToken, profile: { id, email?, ... } }                  |
-| DELETE                                                               | `/identity/:provider/customer/unlink`        | `isCustomerLoggedIn`                                           | DELETE /identity/social/:provider/customer/unlink  |
-| Unlink a social account from a customer (requires auth)              |
-| POST                                                                 | `/identity/:provider/merchant`               | `asyncHandler(merchantSocialLogin)`                            | POST /identity/social/:provider/merchant           |
-| Authenticate or register a merchant via social login                 |
-| Body: { accessToken, idToken?, profile: { id, email, name?, ... } }  |
-| POST                                                                 | `/identity/:provider/organization`           | `asyncHandler(merchantSocialLogin)`                            | —                                                  |
-| GET                                                                  | `/identity/2fa/status`                       | `isCustomerLoggedIn`                                           | 2FA status (requires auth)                         |
-| GET                                                                  | `/identity/customer/accounts`                | `isCustomerLoggedIn`                                           | GET /identity/social/customer/accounts             |
-| Get all linked social accounts for a customer (requires auth)        |
-| POST                                                                 | `/identity/forgot-password`                  | `asyncHandler(requestPasswordReset)`                           | Password reset flow                                |
-| POST                                                                 | `/identity/login`                            | `asyncHandler(loginCustomer)`                                  | Simple login (returns access token only)           |
-| POST                                                                 | `/identity/logout`                           | `isCustomerLoggedIn`                                           | Logout (requires auth to blacklist token)          |
-| GET                                                                  | `/identity/merchant/accounts`                | `isOrganizationLoggedIn`                                       | GET /identity/social/merchant/accounts             |
-| Get all linked social accounts for a merchant (requires auth)        |
-| GET                                                                  | `/identity/organization/accounts`            | `isOrganizationLoggedIn`                                       | —                                                  |
-| POST                                                                 | `/identity/refresh`                          | `asyncHandler(renewAccessToken)`                               | Refresh access token                               |
-| POST                                                                 | `/identity/register`                         | `asyncHandler(registerCustomer)`                               | Register new customer account                      |
-| POST                                                                 | `/identity/request-verification`             | `asyncHandler(requestEmailVerification)`                       | —                                                  |
-| POST                                                                 | `/identity/reset-password`                   | `asyncHandler(resetPassword)`                                  | —                                                  |
-| POST                                                                 | `/identity/token`                            | `asyncHandler(issueTokenPair)`                                 | Token-based auth (returns access + refresh tokens) |
-| POST                                                                 | `/identity/validate`                         | `asyncHandler(checkTokenValidity)`                             | Validate token                                     |
-| GET                                                                  | `/identity/verify-email`                     | `asyncHandler(verifyEmail)`                                    | —                                                  |
-| GET                                                                  | `/scim/v2/Users`                             | `asyncHandler(scimController.listUsers.bind(scimController))`  | SCIM 2.0 /Users endpoints                          |
-| POST                                                                 | `/scim/v2/Users`                             | `asyncHandler(scimController.createUser.bind(scimController))` | —                                                  |
-| GET                                                                  | `/scim/v2/Users/:id`                         | `asyncHandler(scimController.getUser.bind(scimController))`    | —                                                  |
-| PUT                                                                  | `/scim/v2/Users/:id`                         | `asyncHandler(scimController.replaceUser.bind(scimController)` | —                                                  |
-| PATCH                                                                | `/scim/v2/Users/:id`                         | `asyncHandler(scimController.patchUser.bind(scimController))`  | —                                                  |
-| DELETE                                                               | `/scim/v2/Users/:id`                         | `asyncHandler(scimController.deleteUser.bind(scimController))` | —                                                  |
-| POST                                                                 | `/sso/oidc/callback/:providerId`             | `asyncHandler(ssoController.oidcCallback.bind(ssoController))` | —                                                  |
-| POST                                                                 | `/sso/oidc/login/:providerId`                | `asyncHandler(ssoController.initiateOidcLogin.bind(ssoControl` | OIDC SSO                                           |
-| POST                                                                 | `/sso/oidc/providers`                        | `asyncHandler(ssoController.createOidcProvider.bind(ssoContro` | OIDC provider CRUD                                 |
-| GET                                                                  | `/sso/oidc/providers/:providerId`            | `asyncHandler(ssoController.getOidcProvider.bind(ssoControlle` | —                                                  |
-| PUT                                                                  | `/sso/oidc/providers/:providerId`            | `asyncHandler(ssoController.updateOidcProvider.bind(ssoContro` | —                                                  |
-| DELETE                                                               | `/sso/oidc/providers/:providerId`            | `asyncHandler(ssoController.deleteOidcProvider.bind(ssoContro` | —                                                  |
-| POST                                                                 | `/sso/oidc/providers/:providerId/activate`   | `asyncHandler(ssoController.activateOidcProvider.bind(ssoCont` | —                                                  |
-| POST                                                                 | `/sso/oidc/providers/:providerId/deactivate` | `asyncHandler(ssoController.deactivateOidcProvider.bind(ssoCo` | —                                                  |
-| GET                                                                  | `/sso/providers`                             | `asyncHandler(ssoController.listProviders.bind(ssoController)` | List all SSO providers                             |
-| POST                                                                 | `/sso/saml/callback/:providerId`             | `asyncHandler(ssoController.samlCallback.bind(ssoController))` | —                                                  |
-| POST                                                                 | `/sso/saml/login/:providerId`                | `asyncHandler(ssoController.initiateSamlLogin.bind(ssoControl` | SAML SSO                                           |
-| POST                                                                 | `/sso/saml/providers`                        | `asyncHandler(ssoController.createSamlProvider.bind(ssoContro` | SAML provider CRUD                                 |
-| GET                                                                  | `/sso/saml/providers/:providerId`            | `asyncHandler(ssoController.getSamlProvider.bind(ssoControlle` | —                                                  |
-| PUT                                                                  | `/sso/saml/providers/:providerId`            | `asyncHandler(ssoController.updateSamlProvider.bind(ssoContro` | —                                                  |
-| DELETE                                                               | `/sso/saml/providers/:providerId`            | `asyncHandler(ssoController.deleteSamlProvider.bind(ssoContro` | —                                                  |
-| POST                                                                 | `/sso/saml/providers/:providerId/activate`   | `asyncHandler(ssoController.activateSamlProvider.bind(ssoCont` | —                                                  |
-| POST                                                                 | `/sso/saml/providers/:providerId/deactivate` | `asyncHandler(ssoController.deactivateSamlProvider.bind(ssoCo` | —                                                  |
+| Method | Endpoint | Controller | Description |
+|---|---|---|---|
+| POST | `/auth/cleanup-tokens` | `asyncHandler(cleanupExpiredTokens)` | — |
+| POST | `/auth/force-reset` | `asyncHandler(forceResetPassword)` | — |
+| POST | `/auth/forgot-password` | `asyncHandler(requestPasswordReset)` | Password reset flow |
+| POST | `/auth/login` | `asyncHandler(loginOrganization)` | Simple login (returns access token only) |
+| POST | `/auth/refresh` | `asyncHandler(renewAccessToken)` | Refresh access token |
+| POST | `/auth/register` | `asyncHandler(registerOrganization)` | Register new merchant account |
+| POST | `/auth/reset-password` | `asyncHandler(resetPassword)` | — |
+| POST | `/auth/revoke-tokens` | `asyncHandler(revokeUserTokens)` | — |
+| GET | `/auth/stores/:storeId/users` | `asyncHandler(listStoreUsers)` | — |
+| POST | `/auth/token` | `asyncHandler(issueTokenPair)` | Token-based auth (returns access + refresh tokens) |
+| GET | `/auth/user/:userId` | `asyncHandler(getUserAuthDetails)` | — |
+| POST | `/auth/users/:userId/stores` | `asyncHandler(assignUserToStore)` | — |
+| GET | `/auth/users/:userId/stores` | `asyncHandler(getUserStores)` | — |
+| DELETE | `/auth/users/:userId/stores/:storeId` | `asyncHandler(removeUserFromStore)` | — |
+| POST | `/auth/validate` | `asyncHandler(checkTokenValidity)` | Validate token |
+| GET | `/identity/:provider/config` | `asyncHandler(getOAuthConfig)` | GET /identity/social/:provider/config
+Get OAuth configuration for a provider (client ID, auth URL, scopes) |
+| POST | `/identity/:provider/customer` | `asyncHandler(customerSocialLogin)` | POST /identity/social/:provider/customer
+Authenticate or register a customer via social login
+Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| POST | `/identity/:provider/customer/link` | `isCustomerLoggedIn` | POST /identity/social/:provider/customer/link
+Link a social account to an existing customer (requires auth)
+Body: { accessToken, profile: { id, email?, ... } } |
+| DELETE | `/identity/:provider/customer/unlink` | `isCustomerLoggedIn` | DELETE /identity/social/:provider/customer/unlink
+Unlink a social account from a customer (requires auth) |
+| POST | `/identity/:provider/merchant` | `asyncHandler(merchantSocialLogin)` | POST /identity/social/:provider/merchant
+Authenticate or register a merchant via social login
+Body: { accessToken, idToken?, profile: { id, email, name?, ... } } |
+| POST | `/identity/:provider/organization` | `asyncHandler(merchantSocialLogin)` | — |
+| GET | `/identity/2fa/status` | `isCustomerLoggedIn` | 2FA status (requires auth) |
+| GET | `/identity/customer/accounts` | `isCustomerLoggedIn` | GET /identity/social/customer/accounts
+Get all linked social accounts for a customer (requires auth) |
+| POST | `/identity/forgot-password` | `asyncHandler(requestPasswordReset)` | Password reset flow |
+| POST | `/identity/login` | `asyncHandler(loginCustomer)` | Simple login (returns access token only) |
+| POST | `/identity/logout` | `isCustomerLoggedIn` | Logout (requires auth to blacklist token) |
+| GET | `/identity/merchant/accounts` | `isOrganizationLoggedIn` | GET /identity/social/merchant/accounts
+Get all linked social accounts for a merchant (requires auth) |
+| GET | `/identity/organization/accounts` | `isOrganizationLoggedIn` | — |
+| POST | `/identity/refresh` | `asyncHandler(renewAccessToken)` | Refresh access token |
+| POST | `/identity/register` | `asyncHandler(registerCustomer)` | Register new customer account |
+| POST | `/identity/request-verification` | `asyncHandler(requestEmailVerification)` | — |
+| POST | `/identity/reset-password` | `asyncHandler(resetPassword)` | — |
+| POST | `/identity/token` | `asyncHandler(issueTokenPair)` | Token-based auth (returns access + refresh tokens) |
+| POST | `/identity/validate` | `asyncHandler(checkTokenValidity)` | Validate token |
+| GET | `/identity/verify-email` | `asyncHandler(verifyEmail)` | — |
+| GET | `/scim/v2/Users` | `asyncHandler(scimController.listUsers.bind(scimController))` | SCIM 2.0 /Users endpoints |
+| POST | `/scim/v2/Users` | `asyncHandler(scimController.createUser.bind(scimController))` | — |
+| GET | `/scim/v2/Users/:id` | `asyncHandler(scimController.getUser.bind(scimController))` | — |
+| PUT | `/scim/v2/Users/:id` | `asyncHandler(scimController.replaceUser.bind(scimController)` | — |
+| PATCH | `/scim/v2/Users/:id` | `asyncHandler(scimController.patchUser.bind(scimController))` | — |
+| DELETE | `/scim/v2/Users/:id` | `asyncHandler(scimController.deleteUser.bind(scimController))` | — |
+| POST | `/sso/oidc/callback/:providerId` | `asyncHandler(ssoController.oidcCallback.bind(ssoController))` | — |
+| POST | `/sso/oidc/login/:providerId` | `asyncHandler(ssoController.initiateOidcLogin.bind(ssoControl` | OIDC SSO |
+| POST | `/sso/oidc/providers` | `asyncHandler(ssoController.createOidcProvider.bind(ssoContro` | OIDC provider CRUD |
+| GET | `/sso/oidc/providers/:providerId` | `asyncHandler(ssoController.getOidcProvider.bind(ssoControlle` | — |
+| PUT | `/sso/oidc/providers/:providerId` | `asyncHandler(ssoController.updateOidcProvider.bind(ssoContro` | — |
+| DELETE | `/sso/oidc/providers/:providerId` | `asyncHandler(ssoController.deleteOidcProvider.bind(ssoContro` | — |
+| POST | `/sso/oidc/providers/:providerId/activate` | `asyncHandler(ssoController.activateOidcProvider.bind(ssoCont` | — |
+| POST | `/sso/oidc/providers/:providerId/deactivate` | `asyncHandler(ssoController.deactivateOidcProvider.bind(ssoCo` | — |
+| GET | `/sso/providers` | `asyncHandler(ssoController.listProviders.bind(ssoController)` | List all SSO providers |
+| POST | `/sso/saml/callback/:providerId` | `asyncHandler(ssoController.samlCallback.bind(ssoController))` | — |
+| POST | `/sso/saml/login/:providerId` | `asyncHandler(ssoController.initiateSamlLogin.bind(ssoControl` | SAML SSO |
+| POST | `/sso/saml/providers` | `asyncHandler(ssoController.createSamlProvider.bind(ssoContro` | SAML provider CRUD |
+| GET | `/sso/saml/providers/:providerId` | `asyncHandler(ssoController.getSamlProvider.bind(ssoControlle` | — |
+| PUT | `/sso/saml/providers/:providerId` | `asyncHandler(ssoController.updateSamlProvider.bind(ssoContro` | — |
+| DELETE | `/sso/saml/providers/:providerId` | `asyncHandler(ssoController.deleteSamlProvider.bind(ssoContro` | — |
+| POST | `/sso/saml/providers/:providerId/activate` | `asyncHandler(ssoController.activateSamlProvider.bind(ssoCont` | — |
+| POST | `/sso/saml/providers/:providerId/deactivate` | `asyncHandler(ssoController.deactivateSamlProvider.bind(ssoCo` | — |
 
 <!-- GENERATED:ENDPOINTS:END -->
 
