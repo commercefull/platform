@@ -169,11 +169,43 @@ export class Product {
 
 1. **Domain entity defines the types** — `ProductProps`, `ProductStatus`, etc. live in `domain/entities/`.
 2. **Domain repository port imports from entity** — `domain/repositories/ProductRepository.ts` imports types from `domain/entities/Product.ts`, not from `libs/db/types`.
-3. **Infrastructure imports from domain** — `infrastructure/repositories/*.ts` import types from `domain/entities/`, not from `libs/db/types` or their own redefinitions.
+3. **Infrastructure returns domain types** — `infrastructure/repositories/*.ts` declare their method signatures with types from `domain/entities/` / `domain/repositories/`, never their own redefinitions.
 4. **Application imports from domain** — `application/wired.ts` imports types from `domain/entities/` and `domain/repositories/`.
 5. **Module `index.ts` exports domain entities** — so they are reachable from the entry point and do not trigger `no-orphans` violations.
 
 **Anti-pattern**: Infrastructure files that define their own `interface Product { ... }` instead of importing from `domain/entities/` create duplicate types and orphan the domain entity.
+
+#### Generated DB types at the infrastructure boundary
+
+`libs/db/types.ts` types ARE allowed inside `infrastructure/` — they describe what raw SQL actually returns and are the honest row-typing for `query<T>()`/`queryOne<T>()`. The convention:
+
+- Import them aliased: `import type { Product as DbProduct } from '../../../../libs/db/types'`.
+- Type queries with them: `query<DbProduct[]>(...)`, `queryOne<DbProduct>(...)`.
+- Map `DbRow → domain type` in a `mapTo*(row)` function before returning — signatures and returns always use domain types.
+
+```typescript
+function mapToDiscount(row: DbOrderDiscount): OrderDiscount {
+  return {
+    ...row,
+    orderItemId: row.orderItemId ?? undefined, // null → undefined for optional fields
+    type: row.type as DiscountType,
+    value: Number(row.value), // numeric columns arrive as strings
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
+  };
+}
+```
+
+Type-mapping cheatsheet for generated rows:
+
+| Generated type        | Domain contract                    | Conversion                       |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| `Date` (timestamps)   | `Date` (or `Date \| null`)         | passthrough — no `.toISOString()` |
+| `T \| null`           | `T \| undefined` / `?`             | `row.x ?? undefined`             |
+| `string` (numeric)    | `number`                           | `Number(row.x)`                  |
+| `unknown` (json/jsonb)| `Record<string, unknown>`          | cast at the boundary             |
+
+**Timestamps are `Date` everywhere in domain.** `pg` returns `Date` objects for `timestamp`/`timestamptz` (only `bigint` is custom-parsed to `number` in `libs/db/pool.ts`). Domain entities and repository contracts use `Date`; serialization to ISO strings happens at the application DTO boundary via `.toISOString()`. Declaring `createdAt: string` in a domain type is a lie — the runtime value is a `Date`.
 
 ## Repository Pattern
 

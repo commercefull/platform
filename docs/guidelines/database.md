@@ -126,9 +126,10 @@ SELECT * FROM "product" WHERE "deletedAt" IS NULL;
 
 ```typescript
 import { query, queryOne } from '../../libs/db';
+import type { Product as DbProduct } from '../../libs/db/types';
 
-// Query multiple rows
-const products = await query<Product[]>(
+// Query multiple rows — type the result with the generated row type
+const products = await query<DbProduct[]>(
   `SELECT * FROM "product"
    WHERE "status" = $1 AND "deletedAt" IS NULL
    ORDER BY "createdAt" DESC
@@ -137,8 +138,16 @@ const products = await query<Product[]>(
 );
 
 // Query single row
-const product = await queryOne<Product>(`SELECT * FROM "product" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
+const product = await queryOne<DbProduct>(`SELECT * FROM "product" WHERE "productId" = $1 AND "deletedAt" IS NULL`, [productId]);
 ```
+
+`query<T>`/`queryOne<T>` do **not** transform rows — `T` must describe what `pg` actually returns. Use the generated types from `libs/db/types` (aliased `X as DbX`), then map to the domain contract before returning from a repository. Runtime facts to keep in mind when mapping:
+
+- `timestamp`/`timestamptz` columns arrive as `Date` objects (only `bigint` is custom-parsed to `number` in `libs/db/pool.ts`).
+- Nullable columns arrive as `T | null`; domain optional fields use `undefined` — convert with `?? undefined`.
+- `numeric`/`decimal` columns arrive as `string` — convert with `Number(...)`.
+- `json`/`jsonb` columns arrive as `unknown` — cast at the boundary.
+- Writes accept `Date` objects or ISO strings (`unixTimestamp()` returns ISO).
 
 Always use parameterized queries (`$1`, `$2`, …). Never interpolate user input into SQL strings.
 

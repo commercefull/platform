@@ -3,7 +3,7 @@
 | File / Dir                        | Purpose                                                            |
 | --------------------------------- | ------------------------------------------------------------------ |
 | `db/`                             | Database connection pool, client, query helpers                    |
-| `db/types.ts`                     | Auto-generated Knex table/column types                             |
+| `db/types.ts`                     | Auto-generated Knex table/column types — infra row typing only (`X as DbX`); banned in `domain/` (`domain-no-db-imports`) |
 | `db/dataModelTypes.ts`            | Shared data model type definitions                                 |
 | `auth.ts`                         | Authentication middleware (JWT + session)                          |
 | `apiResponse.ts`                  | Standard API response helpers                                      |

@@ -57,10 +57,11 @@ postgres provider runs the outbox claim loop. `memory` needs no subscriber.
 ### Direct emission (fire-and-forget)
 
 ```typescript
-import { emitEvent } from '../../../libs/events';
+import { eventBus } from '../../../libs/events/eventBus';
 
-// Emit — handler errors are logged but swallowed
-emitEvent('order.created', { orderId, customerId, total });
+// Emit — publishes through the configured provider; memory handlers
+// dispatch inline, durable providers write before dispatching.
+await eventBus.emit('order.created', { orderId, customerId, total });
 ```
 
 ### Transactional outbox (durable)

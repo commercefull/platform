@@ -22,7 +22,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Group related CRUD on sub-aggregates into a single `Manage*` facade use case.
 - Emit domain events (`eventBus.emit`, `writeToOutbox`) from use cases, not controllers.
 - Create domain entities with `create()` and `reconstitute()` factory methods.
-- Import types from `domain/entities/` in all layers — domain entities are the single source of truth.
+- Import types from `domain/entities/` for all signatures and returns — domain entities are the single source of truth. Generated `libs/db/types` types may be used inside `infrastructure/` for `query<DbX>` row typing only.
+- Declare domain timestamp fields as `Date` — `pg` returns `Date` objects; serialize to ISO via `.toISOString()` at the use-case DTO boundary.
 - Export domain entities from the module's `index.ts` so they are reachable from the entry point.
 - Check for existing data before inserting in seed files.
 - Use `t.timestamp('deletedAt')` for soft deletes.
@@ -75,5 +76,5 @@ Quick reference. For the full rules, see the individual standards documents.
 - Leave empty or stub domain files — every domain file must be wired through the module or deleted.
 - Add a module without declaring `manifest.ts` and registering it in `boot/moduleManifests.ts`.
 - Mount routes without checking `moduleRegistry.shouldMountRoutes()`.
-- Use `emitEvent()` for events that must survive crashes — use `writeToOutbox()` within a transaction instead.
+- Use `emitEvent()` — it does not exist; use `eventBus.emit()` for normal events and `writeToOutbox()` within a DB transaction for events that must commit atomically with the business write.
 - Add a new module without writing module documentation and integration tests.

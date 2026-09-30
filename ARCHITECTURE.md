@@ -104,7 +104,7 @@ Domain entities (`domain/entities/*.ts`) are the canonical type definitions for 
 
 1. `domain/entities/SupportTicket.ts` defines `SupportTicketProps`, `TicketStatus`, `TicketPriority`, etc.
 2. `domain/repositories/SupportRepository.ts` imports types from the entity, defines `type SupportTicket = SupportTicketProps`.
-3. `infrastructure/repositories/supportRepo.ts` imports types from the domain entity (not from `libs/db/types`).
+3. `infrastructure/repositories/supportRepo.ts` returns domain entity types. Generated row types from `libs/db/types` may be imported (aliased `X as DbX`) to type `query<T>()` results, then mapped to domain types — generated types never appear in signatures.
 4. `application/wired.ts` imports types from the domain entity and domain repository.
 5. `index.ts` exports the domain entity so it is reachable from the entry point.
 
