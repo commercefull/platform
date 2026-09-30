@@ -56,7 +56,7 @@ yarn job:new:admin --email=ops@example.com --pass=secure123 --name="Operations U
 
 ## Security Notes
 
-- Passwords are automatically hashed using bcrypt
+- Passwords are automatically hashed using scrypt (`node:crypto`)
 - Admin users are created with `active` status by default
 - Duplicate email addresses are not allowed
 - The job validates role names and required parameters

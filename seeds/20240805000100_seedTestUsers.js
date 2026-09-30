@@ -12,7 +12,7 @@ exports.seed = async function (knex) {
   if (!existingCustomer) {
     await knex('customer').insert({
       email: 'customer@example.com',
-      password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC', // "password123"
+      password: '$scrypt$N=16384,r=8,p=1$FRVlDZ2lBmARzrl8amO6KA==$GDWDynJV9M9R37fBiCsFwTqYi+Cxe4phTH9/M8ue+6aBuowqdomP2nEqPhs7jUA9EUCloe0KOp88sty82vkpoA==', // "password123"
       firstName: 'Test',
       lastName: 'Customer',
       isActive: true,
@@ -25,7 +25,7 @@ exports.seed = async function (knex) {
   if (!existingAdmin) {
     await knex('customer').insert({
       email: 'admin@example.com',
-      password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC', // "password123"
+      password: '$scrypt$N=16384,r=8,p=1$FRVlDZ2lBmARzrl8amO6KA==$GDWDynJV9M9R37fBiCsFwTqYi+Cxe4phTH9/M8ue+6aBuowqdomP2nEqPhs7jUA9EUCloe0KOp88sty82vkpoA==', // "password123"
       firstName: 'Admin',
       lastName: 'User',
       isActive: true,

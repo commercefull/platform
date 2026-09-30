@@ -6,7 +6,7 @@
  * yarn job:new:admin --email=admin@example.com --pass=password123 --name="Admin User" --role=admin
  */
 
-import { hashAString } from '../../../../libs/hash';
+import { hashString } from '../../../../libs/hash';
 import { provisionAdminUserUseCase } from '../../application/wired';
 
 async function run() {
@@ -41,7 +41,7 @@ async function run() {
   try {
     // Hash the password
     console.log('🔐 Hashing password...');
-    const passwordHash = hashAString(password);
+    const passwordHash = await hashString(password);
 
     // Create the admin user (role validation, duplicate check, and default
     // permissions are handled by the use case)

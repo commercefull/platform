@@ -24,7 +24,7 @@ describe('ChangePasswordUseCase', () => {
     const result = await useCase.execute(new ChangePasswordCommand('cust-1', 'old-password', 'new-password-123'));
 
     expect(result.success).toBe(true);
-    expect(hashStringMock).toHaveBeenCalledWith('new-password-123', 12);
+    expect(hashStringMock).toHaveBeenCalledWith('new-password-123');
     expect(customerRepository.updatePassword).toHaveBeenCalledWith('cust-1', 'hashed-password');
     expect(emitMock).toHaveBeenCalledWith('customer.password_changed', { customerId: 'cust-1' });
   });

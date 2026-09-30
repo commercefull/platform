@@ -14,7 +14,7 @@
 | `logger.ts`                       | Winston logger with daily rotation                                 |
 | `validation.ts`                   | Input validation utilities                                         |
 | `form.ts`                         | EJS form helper functions                                          |
-| `hash.ts`                         | Password hashing (bcrypt)                                          |
+| `hash.ts`                         | Password hashing (scrypt via `node:crypto`)                        |
 | `slug.ts`                         | Slug generation utilities                                          |
 | `amount.ts`                       | Money/amount formatting (legacy, unused)                           |
 | `money.ts`                        | **Shared Kernel** — `Money` value object                           |
