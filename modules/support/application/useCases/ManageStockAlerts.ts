@@ -126,9 +126,10 @@ export class ManageStockAlertsUseCase {
     const alerts = await this.alerts.getActiveStockAlertsForProduct(productId, productVariantId);
 
     for (const alert of alerts) {
+      if (!alert.customerId) continue;
       await this.alerts.notifyStockAlert(alert.stockAlertId);
       await this.scheduler.scheduleNotification({
-        userId: alert.customerId || '',
+        userId: alert.customerId,
         type: 'stock_alert',
         title: 'Back in Stock',
         message: `Your saved item is back in stock!`,
@@ -145,9 +146,10 @@ export class ManageStockAlertsUseCase {
     const alerts = await this.alerts.getPriceAlertsToNotify(productId, newPriceCents);
 
     for (const alert of alerts) {
+      if (!alert.customerId) continue;
       await this.alerts.notifyPriceAlert(alert.priceAlertId, newPriceCents);
       await this.scheduler.scheduleNotification({
-        userId: alert.customerId || '',
+        userId: alert.customerId,
         type: 'price_alert',
         title: 'Price Drop Alert',
         message: `The price has dropped to $${newPrice}!`,

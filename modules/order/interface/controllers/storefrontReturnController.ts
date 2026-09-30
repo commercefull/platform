@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Return Controller
  * Manages order returns for customers
@@ -20,7 +21,7 @@ interface CustomerUser {
 export const listReturns = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const returns = await manageStorefrontReturnsUseCase.findByCustomerIdWithOrderNumber(user.customerId);
@@ -37,7 +38,7 @@ export const listReturns = async (req: HttpRequest, res: HttpResponse) => {
 export const returnRequestForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { orderId } = req.params;
@@ -66,7 +67,7 @@ export const returnRequestForm = async (req: HttpRequest, res: HttpResponse) => 
 export const submitReturnRequest = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { orderId } = req.params;
@@ -89,10 +90,10 @@ export const submitReturnRequest = async (req: HttpRequest, res: HttpResponse) =
   );
 
   if (result) {
-    return res.redirect(`/returns`);
+    return redirectResponse(res, `/returns`);
   }
 
-  return res.redirect('/orders');
+  return redirectResponse(res, '/orders');
 };
 
 /**
@@ -101,7 +102,7 @@ export const submitReturnRequest = async (req: HttpRequest, res: HttpResponse) =
 export const viewReturn = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { returnId } = req.params;

@@ -1,6 +1,17 @@
 import Redis, { RedisOptions } from 'ioredis';
 import { logger } from './logger';
 
+/** Consumers import the client type from here — `ioredis` stays confined to this file. */
+export type { default as Redis } from 'ioredis';
+
+export interface RedisConnectionConfig {
+  url?: string;
+  host?: string;
+  port?: number;
+  password?: string;
+  db?: number;
+}
+
 /**
  * Shared ioredis connection for cache/session backends.
  * Connection env convention: REDIS_URL, or REDIS_HOST/REDIS_PORT/REDIS_PASSWORD/REDIS_DB.
@@ -16,7 +27,7 @@ export function isRedisConfigured(): boolean {
  * Common resilience options: capped exponential backoff reconnect,
  * offline queue while reconnecting, TCP keepalive.
  */
-export function redisClientOptions(): RedisOptions {
+function redisClientOptions(): RedisOptions {
   return {
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
@@ -41,18 +52,33 @@ function attachErrorLogging(client: Redis): void {
   });
 }
 
+/**
+ * Create a new (unshared) client for callers that need an explicit
+ * connection rather than the shared one.
+ */
+export function createRedisClient(config: RedisConnectionConfig = {}): Redis {
+  const client = config.url
+    ? new Redis(config.url, redisClientOptions())
+    : new Redis({
+        host: config.host || 'localhost',
+        port: config.port || 6379,
+        password: config.password || undefined,
+        db: config.db || 0,
+        ...redisClientOptions(),
+      });
+  attachErrorLogging(client);
+  return client;
+}
+
 export function getRedisClient(): Redis {
   if (!sharedClient) {
-    sharedClient = process.env.REDIS_URL
-      ? new Redis(process.env.REDIS_URL, redisClientOptions())
-      : new Redis({
-          host: process.env.REDIS_HOST || 'localhost',
-          port: parseInt(process.env.REDIS_PORT || '6379', 10),
-          password: process.env.REDIS_PASSWORD || undefined,
-          db: parseInt(process.env.REDIS_DB || '0', 10),
-          ...redisClientOptions(),
-        });
-    attachErrorLogging(sharedClient);
+    sharedClient = createRedisClient({
+      url: process.env.REDIS_URL,
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB || '0', 10),
+    });
   }
   return sharedClient;
 }

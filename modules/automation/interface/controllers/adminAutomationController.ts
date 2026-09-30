@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Automation Controller
  * Handles automation rules management for the Admin Hub
@@ -75,7 +76,7 @@ export const createAutomationRule = async (req: HttpRequest, res: HttpResponse):
       priority: priority ? parseInt(priority as string, 10) : 0,
     } as unknown as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
 
-    res.redirect(`/admin/automation/${rule.automationRuleId}?success=Automation rule created successfully`);
+    redirectResponse(res, `/admin/automation/${rule.automationRuleId}?success=Automation rule created successfully`);
   } catch (error: unknown) {
     logger.warn('Error creating automation rule:', error);
     adminRespond(req, res, 'operations/automation/create', {
@@ -167,7 +168,7 @@ export const updateAutomationRule = async (req: HttpRequest, res: HttpResponse):
     if (priority !== undefined) updates.priority = parseInt(priority as string, 10);
 
     const rule = await updateAutomationRuleUseCase.execute(ruleId, updates as never);
-    res.redirect(`/admin/automation/${rule.automationRuleId}?success=Automation rule updated successfully`);
+    redirectResponse(res, `/admin/automation/${rule.automationRuleId}?success=Automation rule updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating automation rule:', error);
     const { ruleId } = req.params;
@@ -188,10 +189,10 @@ export const deleteAutomationRule = async (req: HttpRequest, res: HttpResponse):
   try {
     const { ruleId } = req.params;
     await deleteAutomationRuleUseCase.execute(ruleId);
-    res.redirect('/admin/automation?success=Automation rule deleted successfully');
+    redirectResponse(res, '/admin/automation?success=Automation rule deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error deleting automation rule:', error);
-    res.redirect('/admin/automation?error=Failed to delete automation rule');
+    redirectResponse(res, '/admin/automation?error=Failed to delete automation rule');
   }
 };
 
@@ -203,10 +204,10 @@ export const activateAutomationRule = async (req: HttpRequest, res: HttpResponse
   try {
     const { ruleId } = req.params;
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: true } as never);
-    res.redirect(`/admin/automation/${ruleId}?success=Rule activated successfully`);
+    redirectResponse(res, `/admin/automation/${ruleId}?success=Rule activated successfully`);
   } catch (error: unknown) {
     logger.warn('Error activating automation rule:', error);
-    res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to activate rule`);
+    redirectResponse(res, `/admin/automation/${req.params.ruleId}?error=Failed to activate rule`);
   }
 };
 
@@ -214,10 +215,10 @@ export const deactivateAutomationRule = async (req: HttpRequest, res: HttpRespon
   try {
     const { ruleId } = req.params;
     await updateAutomationRuleUseCase.execute(ruleId, { isActive: false } as never);
-    res.redirect(`/admin/automation/${ruleId}?success=Rule deactivated successfully`);
+    redirectResponse(res, `/admin/automation/${ruleId}?success=Rule deactivated successfully`);
   } catch (error: unknown) {
     logger.warn('Error deactivating automation rule:', error);
-    res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to deactivate rule`);
+    redirectResponse(res, `/admin/automation/${req.params.ruleId}?error=Failed to deactivate rule`);
   }
 };
 
@@ -229,9 +230,9 @@ export const triggerAutomationRule = async (req: HttpRequest, res: HttpResponse)
   try {
     const { ruleId } = req.params;
     await triggerAutomationRuleUseCase.execute(ruleId, req.body as Record<string, unknown>);
-    res.redirect(`/admin/automation/${ruleId}?success=Rule triggered successfully`);
+    redirectResponse(res, `/admin/automation/${ruleId}?success=Rule triggered successfully`);
   } catch (error: unknown) {
     logger.warn('Error triggering automation rule:', error);
-    res.redirect(`/admin/automation/${req.params.ruleId}?error=Failed to trigger rule`);
+    redirectResponse(res, `/admin/automation/${req.params.ruleId}?error=Failed to trigger rule`);
   }
 };

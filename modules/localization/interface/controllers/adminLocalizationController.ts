@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Localization Controller for Admin Hub
  * Handles Languages, Currencies, and Regions management
@@ -42,7 +43,7 @@ export const createLanguageForm = async (req: HttpRequest, res: HttpResponse): P
 
 export const createLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/languages?success=Language added successfully');
+    redirectResponse(res, '/admin/settings/localization/languages?success=Language added successfully');
   } catch (error: unknown) {
     logger.warn('Error creating language:', error);
     adminRespond(req, res, 'settings/localization/languages/create', {
@@ -62,7 +63,7 @@ export const editLanguageForm = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/languages?success=Language updated successfully');
+    redirectResponse(res, '/admin/settings/localization/languages?success=Language updated successfully');
   } catch (error: unknown) {
     logger.warn('Error updating language:', error);
     adminRespond(req, res, 'settings/localization/languages/edit', {
@@ -75,7 +76,7 @@ export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const deleteLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Language deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Language deleted successfully' });
 };
 
 // ============================================================================
@@ -99,7 +100,7 @@ export const createCurrencyForm = async (req: HttpRequest, res: HttpResponse): P
 
 export const createCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/currencies?success=Currency added successfully');
+    redirectResponse(res, '/admin/settings/localization/currencies?success=Currency added successfully');
   } catch (error: unknown) {
     logger.warn('Error creating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/create', {
@@ -119,7 +120,7 @@ export const editCurrencyForm = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/currencies?success=Currency updated successfully');
+    redirectResponse(res, '/admin/settings/localization/currencies?success=Currency updated successfully');
   } catch (error: unknown) {
     logger.warn('Error updating currency:', error);
     adminRespond(req, res, 'settings/localization/currencies/edit', {
@@ -132,7 +133,7 @@ export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Currency deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Currency deleted successfully' });
 };
 
 // ============================================================================
@@ -156,7 +157,7 @@ export const createRegionForm = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const createRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/regions?success=Region added successfully');
+    redirectResponse(res, '/admin/settings/localization/regions?success=Region added successfully');
   } catch (error: unknown) {
     logger.warn('Error creating region:', error);
     adminRespond(req, res, 'settings/localization/regions/create', {
@@ -176,7 +177,7 @@ export const editRegionForm = async (req: HttpRequest, res: HttpResponse): Promi
 
 export const updateRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/localization/regions?success=Region updated successfully');
+    redirectResponse(res, '/admin/settings/localization/regions?success=Region updated successfully');
   } catch (error: unknown) {
     logger.warn('Error updating region:', error);
     adminRespond(req, res, 'settings/localization/regions/edit', {
@@ -189,5 +190,5 @@ export const updateRegion = async (req: HttpRequest, res: HttpResponse): Promise
 };
 
 export const deleteRegion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Region deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Region deleted successfully' });
 };

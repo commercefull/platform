@@ -32643,15 +32643,8 @@
           "user": {
             "type": "string",
             "description": "{ _id?: string; id?: string; organizationId?: string; } | undefined"
-          },
-          "flash": {
-            "type": "string",
-            "description": "{ (): { [key: string]: string[]; }; (message: string): string[]; (type: string, message: string | string[]): number; (type: string, format: string, ...args: unknown[]): number; }"
           }
-        },
-        "required": [
-          "flash"
-        ]
+        }
       },
       "CreateBenefitBody": {
         "type": "object",

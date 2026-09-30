@@ -1,5 +1,5 @@
 import type { AuditRepository, AuditLogFilters } from '../../domain/repositories/AuditRepository';
-import type { PaginationOptions } from 'libs/types/shared';
+import type { PaginationOptions } from 'libs/types/pagination';
 
 export class ManageAuditLogsUseCase {
   constructor(private readonly auditRepository: AuditRepository) {}

@@ -3,7 +3,7 @@
  * Defines the contract for customer persistence operations
  */
 
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import { CustomerRecord as Customer, CustomerAddressRecord as CustomerAddress } from '../entities/CustomerModel';
 
 export interface CustomerFilters {

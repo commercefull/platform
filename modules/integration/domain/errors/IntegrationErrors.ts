@@ -14,6 +14,13 @@ export class IntegrationAlreadyExistsError extends AppError {
   }
 }
 
+export class IntegrationValidationError extends AppError {
+  constructor(message: string) {
+    super(message, 400, { code: 'INTEGRATION_VALIDATION' });
+    this.name = 'IntegrationValidationError';
+  }
+}
+
 export class CredentialNotFoundError extends AppError {
   constructor(credentialId: string) {
     super(`Credential not found: ${credentialId}`, 404, { code: 'CREDENTIAL_NOT_FOUND' });

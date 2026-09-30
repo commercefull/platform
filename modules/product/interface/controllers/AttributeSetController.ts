@@ -1,22 +1,23 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageAttributeSetsUseCase } from '../../application/useCases/wired';
 import { AttributeSetCreateInput, AttributeSetUpdateInput } from '../../application/useCases/ManageAttributeSets';
 import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) || fallback });
+  jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) || fallback });
 }
 
 class AttributeSetController {
   async listAttributeSets(req: HttpRequest, res: HttpResponse): Promise<void> {
     const sets = await manageAttributeSetsUseCase.list();
-    res.json({ success: true, data: sets });
+    jsonResponse(res, 200, { success: true, data: sets });
   }
 
   async getAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const set = await manageAttributeSetsUseCase.getByIdWithAttributes(req.params.id);
-      res.json({ success: true, data: set });
+      jsonResponse(res, 200, { success: true, data: set });
     } catch (error) {
       respondError(res, error, 'Attribute set not found');
     }
@@ -25,7 +26,7 @@ class AttributeSetController {
   async createAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const set = await manageAttributeSetsUseCase.create(req.body as AttributeSetCreateInput);
-      res.status(201).json({ success: true, data: set });
+      jsonResponse(res, 201, { success: true, data: set });
     } catch (error) {
       respondError(res, error, 'Failed to create attribute set');
     }
@@ -34,7 +35,7 @@ class AttributeSetController {
   async updateAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const updated = await manageAttributeSetsUseCase.update(req.params.id, req.body as AttributeSetUpdateInput);
-      res.json({ success: true, data: updated });
+      jsonResponse(res, 200, { success: true, data: updated });
     } catch (error) {
       respondError(res, error, 'Attribute set not found');
     }
@@ -43,7 +44,7 @@ class AttributeSetController {
   async deleteAttributeSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       await manageAttributeSetsUseCase.delete(req.params.id);
-      res.json({ success: true, message: 'Attribute set deleted' });
+      jsonResponse(res, 200, { success: true, message: 'Attribute set deleted' });
     } catch (error) {
       respondError(res, error, 'Attribute set not found');
     }
@@ -59,7 +60,7 @@ class AttributeSetController {
     };
     try {
       const updated = await manageAttributeSetsUseCase.addAttribute(id, { attributeId, position, isRequired, defaultValue });
-      res.json({ success: true, data: updated });
+      jsonResponse(res, 200, { success: true, data: updated });
     } catch (error) {
       respondError(res, error, 'Failed to add attribute to set');
     }
@@ -68,13 +69,13 @@ class AttributeSetController {
   async removeAttributeFromSet(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { id, attributeId } = req.params;
     await manageAttributeSetsUseCase.removeAttribute(id, attributeId);
-    res.json({ success: true, message: 'Attribute removed from set' });
+    jsonResponse(res, 200, { success: true, message: 'Attribute removed from set' });
   }
 
   async reorderAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       await manageAttributeSetsUseCase.reorderAttributes(req.params.id, (req.body as { attributeIds?: unknown }).attributeIds);
-      res.json({ success: true, message: 'Attributes reordered' });
+      jsonResponse(res, 200, { success: true, message: 'Attributes reordered' });
     } catch (error) {
       respondError(res, error, 'Failed to reorder attributes');
     }

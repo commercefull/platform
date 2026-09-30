@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Checkout Controller
  * HTTP interface for checkout operations with content negotiation (JSON/HTML)
@@ -41,11 +42,11 @@ import {
 // ============================================================================
 
 function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, error: message });
+  jsonResponse(res, statusCode, { success: false, error: message });
 }
 
 interface InitiateCheckoutBody {

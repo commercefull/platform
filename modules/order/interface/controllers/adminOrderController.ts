@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Order Controller for Admin Hub
  * Uses order use cases directly from modules - no HTTP API calls
@@ -132,7 +133,7 @@ export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Pr
 
   const validStatuses = Object.values(OrderStatus);
   if (!validStatuses.includes(status)) {
-    res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    jsonResponse(res, 400, { success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     return;
   }
 
@@ -141,9 +142,9 @@ export const updateOrderStatus = async (req: HttpRequest, res: HttpResponse): Pr
 
   // Check if this is an AJAX request
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true, message: 'Order status updated' });
+    jsonResponse(res, 200, { success: true, message: 'Order status updated' });
   } else {
-    res.redirect(`/hub/orders/${orderId}?success=Order status updated`);
+    redirectResponse(res, `/hub/orders/${orderId}?success=Order status updated`);
   }
 };
 
@@ -161,9 +162,9 @@ export const cancelOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   await cancelOrderUseCase.execute(command);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true, message: 'Order cancelled' });
+    jsonResponse(res, 200, { success: true, message: 'Order cancelled' });
   } else {
-    res.redirect(`/hub/orders/${orderId}?success=Order cancelled`);
+    redirectResponse(res, `/hub/orders/${orderId}?success=Order cancelled`);
   }
 };
 
@@ -206,9 +207,9 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
   await processRefundUseCase.execute(command);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true, message: 'Refund processed' });
+    jsonResponse(res, 200, { success: true, message: 'Refund processed' });
   } else {
-    res.redirect(`/hub/orders/${orderId}?success=Refund processed successfully`);
+    redirectResponse(res, `/hub/orders/${orderId}?success=Refund processed successfully`);
   }
 };
 
@@ -233,11 +234,11 @@ export const addOrderNote = async (req: HttpRequest, res: HttpResponse): Promise
     await addOrderNoteUseCase.execute(command);
 
     req.flash?.('success', 'Note added');
-    res.redirect(`/admin/orders/${orderId}`);
+    redirectResponse(res, `/admin/orders/${orderId}`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to add note');
-    res.redirect(`/admin/orders/${req.params.orderId}`);
+    redirectResponse(res, `/admin/orders/${req.params.orderId}`);
   }
 };
 
@@ -246,11 +247,11 @@ export const deleteOrderNote = async (req: HttpRequest, res: HttpResponse): Prom
     const { orderId, noteId } = req.params;
     await manageOrderNotesUseCase.softDelete(noteId);
     req.flash?.('success', 'Note deleted');
-    res.redirect(`/admin/orders/${orderId}`);
+    redirectResponse(res, `/admin/orders/${orderId}`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to delete note');
-    res.redirect(`/admin/orders/${req.params.orderId}`);
+    redirectResponse(res, `/admin/orders/${req.params.orderId}`);
   }
 };
 
@@ -299,10 +300,10 @@ export const updatePackageTracking = async (req: HttpRequest, res: HttpResponse)
     await trackFulfillmentPackageUseCase.execute(command);
 
     req.flash?.('success', 'Tracking updated');
-    res.redirect(`/admin/orders/${orderId}`);
+    redirectResponse(res, `/admin/orders/${orderId}`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     req.flash?.('error', (error as Error).message || 'Failed to update tracking');
-    res.redirect(`/admin/orders/${req.params.orderId}`);
+    redirectResponse(res, `/admin/orders/${req.params.orderId}`);
   }
 };

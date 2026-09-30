@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Supplier Controller
  * Handles supplier management for the Admin Hub
@@ -91,7 +92,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
       parseSupplierCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageSuppliersUseCase.create>[0],
     );
 
-    res.redirect(`/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
+    redirectResponse(res, `/hub/suppliers/${supplier.supplierId}?success=Supplier created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -187,7 +188,7 @@ export const updateSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     throw new Error('Supplier not found after update');
   }
 
-  res.redirect(`/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
+  redirectResponse(res, `/hub/suppliers/${supplierId}?success=Supplier updated successfully`);
 };
 
 export const approveSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -199,7 +200,7 @@ export const approveSupplier = async (req: HttpRequest, res: HttpResponse): Prom
     throw new Error('Supplier not found');
   }
 
-  res.json({ success: true, message: 'Supplier approved successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Supplier approved successfully' });
 };
 
 export const suspendSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -211,7 +212,7 @@ export const suspendSupplier = async (req: HttpRequest, res: HttpResponse): Prom
     throw new Error('Supplier not found');
   }
 
-  res.json({ success: true, message: 'Supplier suspended successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Supplier suspended successfully' });
 };
 
 export const activateSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -223,7 +224,7 @@ export const activateSupplier = async (req: HttpRequest, res: HttpResponse): Pro
     throw new Error('Supplier not found');
   }
 
-  res.json({ success: true, message: 'Supplier activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Supplier activated successfully' });
 };
 
 export const deactivateSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -235,7 +236,7 @@ export const deactivateSupplier = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Supplier not found');
   }
 
-  res.json({ success: true, message: 'Supplier deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Supplier deactivated successfully' });
 };
 
 export const deleteSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -247,5 +248,5 @@ export const deleteSupplier = async (req: HttpRequest, res: HttpResponse): Promi
     throw new Error('Failed to delete supplier');
   }
 
-  res.json({ success: true, message: 'Supplier deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Supplier deleted successfully' });
 };

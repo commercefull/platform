@@ -27,17 +27,15 @@ export class RecordOrderCoPurchaseUseCase {
 
     const lines = await this.orderLines.getLines(orderId);
     const productIds = [...new Set(lines.map(l => l.productId).filter(Boolean))];
-    const scope = {
-      organizationId: lines.find(l => l.organizationId)?.organizationId ?? '',
-      storeId: lines.find(l => l.storeId)?.storeId ?? null,
-    };
-
-    if (!scope.organizationId) {
+    const organizationId = lines.find(l => l.organizationId)?.organizationId ?? null;
+    if (!organizationId) {
       // Unscoped order (no organization on lines) — record as skipped so we
       // never reprocess, but don't pollute a tenant's stats.
-      await this.ledger.insert({ orderId, organizationId: '', storeId: null, productIds: [], status: 'skipped' });
+      await this.ledger.insert({ orderId, organizationId: null, storeId: null, productIds: [], status: 'skipped' });
       return;
     }
+
+    const scope = { organizationId, storeId: lines.find(l => l.storeId)?.storeId ?? null };
 
     const cfg = await this.config.getConfig(scope.organizationId, scope.storeId ?? undefined);
     if (productIds.length === 0 || productIds.length > cfg.fbtMaxItemsPerOrder) {

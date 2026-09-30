@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Coupon Controller
  *
@@ -86,7 +87,7 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     body.metadata,
   );
   const coupon = await useCase.execute(command);
-  res.status(201).json({ success: true, data: coupon });
+  jsonResponse(res, 201, { success: true, data: coupon });
 };
 
 export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -95,10 +96,10 @@ export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promi
   const command = new ValidateCouponCommand(body.code || req.params.code, body.orderValueCents, body.customerId, body.items);
   const result = await useCase.execute(command);
   if (!result.valid) {
-    res.status(400).json({ success: false, error: { message: result.error || 'Invalid coupon' } });
+    jsonResponse(res, 400, { success: false, error: { message: result.error || 'Invalid coupon' } });
     return;
   }
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const applyCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -111,7 +112,7 @@ export const applyCoupon = async (req: HttpRequest, res: HttpResponse): Promise<
     orderTotalCents: body.orderTotalCents,
     items: body.items,
   });
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const redeemCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -123,7 +124,7 @@ export const redeemCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     customerId: body.customerId,
     discountAmountCents: body.discountAmountCents,
   });
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const getCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -132,16 +133,16 @@ export const getCoupon = async (req: HttpRequest, res: HttpResponse): Promise<vo
   // Validate UUID format to prevent route collisions (e.g. /coupons/inventory-receipts)
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!couponId || !uuidRegex.test(couponId)) {
-    res.status(400).json({ success: false, error: 'Invalid coupon ID format' });
+    jsonResponse(res, 400, { success: false, error: 'Invalid coupon ID format' });
     return;
   }
 
   const coupon = await manageCouponsUseCase.findById(couponId);
   if (!coupon) {
-    res.status(404).json({ success: false, error: 'Coupon not found' });
+    jsonResponse(res, 404, { success: false, error: 'Coupon not found' });
     return;
   }
-  res.json({ success: true, data: coupon });
+  jsonResponse(res, 200, { success: true, data: coupon });
 };
 
 export const listCoupons = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -156,12 +157,12 @@ export const listCoupons = async (req: HttpRequest, res: HttpResponse): Promise<
       offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
     },
   );
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   await manageCouponsUseCase.delete(req.params.couponId);
-  res.json({ success: true, message: 'Coupon deleted' });
+  jsonResponse(res, 200, { success: true, message: 'Coupon deleted' });
 };
 
 export default {

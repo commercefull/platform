@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Membership Controller
  * Handles membership plans, tiers, and benefits management for the Admin Hub
@@ -83,7 +84,7 @@ export const createMembershipPlan = async (req: HttpRequest, res: HttpResponse):
       parsePlanCreateInput(req.body as HttpRequestBody) as Parameters<typeof managePlansUseCase.create>[0],
     );
 
-    res.redirect(`/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
+    redirectResponse(res, `/hub/membership/plans/${plan.membershipPlanId}?success=Membership plan created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -176,7 +177,7 @@ export const updateMembershipPlan = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Membership plan not found after update');
   }
 
-  res.redirect(`/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
+  redirectResponse(res, `/hub/membership/plans/${planId}?success=Membership plan updated successfully`);
 };
 
 export const activateMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -188,7 +189,7 @@ export const activateMembershipPlan = async (req: HttpRequest, res: HttpResponse
     throw new Error('Membership plan not found');
   }
 
-  res.json({ success: true, message: 'Membership plan activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Membership plan activated successfully' });
 };
 
 export const deactivateMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -200,7 +201,7 @@ export const deactivateMembershipPlan = async (req: HttpRequest, res: HttpRespon
     throw new Error('Membership plan not found');
   }
 
-  res.json({ success: true, message: 'Membership plan deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Membership plan deactivated successfully' });
 };
 
 export const deleteMembershipPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -212,7 +213,7 @@ export const deleteMembershipPlan = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Failed to delete membership plan');
   }
 
-  res.json({ success: true, message: 'Membership plan deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Membership plan deleted successfully' });
 };
 
 // ============================================================================
@@ -296,11 +297,11 @@ export const bulkMembershipOperations = async (req: HttpRequest, res: HttpRespon
     newTierId,
   );
 
-  res.json({
-    success: true,
-    message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
-    results,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
+        results,
+      });
 };
 
 export const membershipUpgradeDowngrade = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -319,16 +320,16 @@ export const membershipUpgradeDowngrade = async (req: HttpRequest, res: HttpResp
     notes: notes || undefined,
   });
 
-  res.json({
-    success: true,
-    message: `Membership ${change.isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
-    change: {
-      from: change.from,
-      to: change.to,
-      effective: change.effective.toISOString(),
-      prorated: change.prorated,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: `Membership ${change.isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
+        change: {
+          from: change.from,
+          to: change.to,
+          effective: change.effective.toISOString(),
+          prorated: change.prorated,
+        },
+      });
 };
 
 export const membershipAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

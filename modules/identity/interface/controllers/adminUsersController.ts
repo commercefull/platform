@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Users Controller
  * Handles admin user management, roles, and permissions
@@ -84,14 +85,14 @@ export const createUser = async (req: HttpRequest, res: HttpResponse): Promise<v
   };
 
   if (!email || !password) {
-    res.status(400).json({ success: false, message: 'Email and password are required' });
+    jsonResponse(res, 400, { success: false, message: 'Email and password are required' });
     return;
   }
 
   const existing = await manageAdminUsersUseCase.findByEmail(email);
 
   if (existing) {
-    res.status(400).json({ success: false, message: 'Email already exists' });
+    jsonResponse(res, 400, { success: false, message: 'Email already exists' });
     return;
   }
 
@@ -104,7 +105,7 @@ export const createUser = async (req: HttpRequest, res: HttpResponse): Promise<v
     roleId,
   });
 
-  res.json({ success: true, userId });
+  jsonResponse(res, 200, { success: true, userId });
 };
 
 export const updateUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -119,20 +120,20 @@ export const updateUser = async (req: HttpRequest, res: HttpResponse): Promise<v
 
   await manageAdminUsersUseCase.update(userId, { firstName, lastName, status, roleId });
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const deleteUser = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { userId } = req.params;
 
   if (req.user?.userId === userId) {
-    res.status(400).json({ success: false, message: 'Cannot delete your own account' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot delete your own account' });
     return;
   }
 
   await manageAdminUsersUseCase.delete(userId);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -154,13 +155,13 @@ export const createRole = async (req: HttpRequest, res: HttpResponse): Promise<v
   const { name, description, permissions } = body as { name?: string; description?: string; permissions: string[] };
 
   if (!name) {
-    res.status(400).json({ success: false, message: 'Role name is required' });
+    jsonResponse(res, 400, { success: false, message: 'Role name is required' });
     return;
   }
 
   const roleId = await manageRolesUseCase.create({ name, description, permissions });
 
-  res.json({ success: true, roleId });
+  jsonResponse(res, 200, { success: true, roleId });
 };
 
 export const updateRole = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -171,13 +172,13 @@ export const updateRole = async (req: HttpRequest, res: HttpResponse): Promise<v
   const role = await manageRolesUseCase.findById(roleId);
 
   if (role?.isSystem) {
-    res.status(400).json({ success: false, message: 'Cannot modify system roles' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot modify system roles' });
     return;
   }
 
   await manageRolesUseCase.update(roleId, { name, description, permissions });
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const deleteRole = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -186,20 +187,20 @@ export const deleteRole = async (req: HttpRequest, res: HttpResponse): Promise<v
   const role = await manageRolesUseCase.findById(roleId);
 
   if (role?.isSystem) {
-    res.status(400).json({ success: false, message: 'Cannot delete system roles' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot delete system roles' });
     return;
   }
 
   const usageCount = await manageRolesUseCase.countAssignments(roleId);
 
   if (usageCount > 0) {
-    res.status(400).json({ success: false, message: 'Cannot delete role that is assigned to users' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot delete role that is assigned to users' });
     return;
   }
 
   await manageRolesUseCase.delete(roleId);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================

@@ -13,6 +13,16 @@ declare global {
       companyUser?: HttpCompanyUser;
       b2bCompanyUserId?: string;
       customer?: HttpCustomerContext;
+      /** Populated by libs/cookieParser. */
+      cookies: Record<string, string>;
+      /** Populated by libs/cookieParser when a COOKIE_SECRET is configured. */
+      signedCookies: Record<string, string>;
+      /** Populated by libs/flash.flashMiddleware. */
+      flash: {
+        (type: string, message: string | string[]): string[];
+        (type: string): string[];
+        (): Record<string, string[]>;
+      };
     }
   }
 }

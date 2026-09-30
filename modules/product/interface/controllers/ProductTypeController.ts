@@ -1,9 +1,10 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageProductTypesUseCase } from '../../application/useCases/wired';
 import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 
 function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  res.status(getErrorStatusCode(error)).json({ success: false, error: getErrorMessage(error) || fallback });
+  jsonResponse(res, getErrorStatusCode(error), { success: false, error: getErrorMessage(error) || fallback });
 }
 
 class ProductTypeController {
@@ -14,10 +15,10 @@ class ProductTypeController {
   async listProductTypes(req: HttpRequest, res: HttpResponse): Promise<void> {
     const productTypes = await manageProductTypesUseCase.list(req.query.active === 'true');
 
-    res.json({
-      success: true,
-      data: productTypes,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: productTypes,
+          });
   }
 
   /**
@@ -27,10 +28,10 @@ class ProductTypeController {
   async getProductType(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const productType = await manageProductTypesUseCase.getByIdWithAttributeSets(req.params.id);
-      res.json({
-        success: true,
-        data: productType,
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                data: productType,
+              });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -43,10 +44,10 @@ class ProductTypeController {
   async getProductTypeBySlug(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const productType = await manageProductTypesUseCase.getBySlug(req.params.slug);
-      res.json({
-        success: true,
-        data: productType,
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                data: productType,
+              });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -61,10 +62,10 @@ class ProductTypeController {
 
     try {
       const productType = await manageProductTypesUseCase.create({ name, slug });
-      res.status(201).json({
-        success: true,
-        data: productType,
-      });
+      jsonResponse(res, 201, {
+                success: true,
+                data: productType,
+              });
     } catch (error) {
       respondError(res, error, 'Failed to create product type');
     }
@@ -80,10 +81,10 @@ class ProductTypeController {
 
     try {
       const updated = await manageProductTypesUseCase.update(id, { name, slug });
-      res.json({
-        success: true,
-        data: updated,
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                data: updated,
+              });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -96,10 +97,10 @@ class ProductTypeController {
   async deleteProductType(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       await manageProductTypesUseCase.delete(req.params.id);
-      res.json({
-        success: true,
-        message: 'Product type deleted successfully',
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                message: 'Product type deleted successfully',
+              });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -112,10 +113,10 @@ class ProductTypeController {
   async getProductTypeAttributes(req: HttpRequest, res: HttpResponse): Promise<void> {
     try {
       const attributes = await manageProductTypesUseCase.getAttributes(req.params.id);
-      res.json({
-        success: true,
-        data: attributes,
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                data: attributes,
+              });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }

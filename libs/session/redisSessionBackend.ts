@@ -7,7 +7,7 @@
  *   isession:user:<userType>:<userId>    → SET of sessionIds (user index)
  */
 
-import type Redis from 'ioredis';
+import type { Redis } from '../redisClient';
 import { generateUUID as uuidv4 } from '../uuid';
 import type { CreateSessionInput, SessionBackend, SessionData } from './types';
 

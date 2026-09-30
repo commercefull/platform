@@ -6,7 +6,7 @@
 | `db/types.ts`                     | Auto-generated Knex table/column types — infra row typing only (`X as DbX`); banned in `domain/` (`domain-no-db-imports`) |
 | `db/dataModelTypes.ts`            | Shared data model type definitions                                 |
 | `auth.ts`                         | Authentication middleware (JWT + session)                          |
-| `apiResponse.ts`                  | Standard API response helpers                                      |
+| `apiResponse.ts`                  | Response transport seam (`jsonResponse`/`sendResponse`/`redirectResponse`/`renderResponse`/`setStatus`/`setHeader`/`cookieResponse`) + standard envelope helpers (`successResponse`/`errorResponse`) — controllers never call `res.*` directly |
 | `events/`                         | Event bus (EventEmitter-based + durable outbox)                    |
 | `events/eventBus.ts`              | EventEmitter-based event bus with error boundaries                 |
 | `events/providers/postgres/`      | Postgres provider internals — outbox writer, claim-based dispatcher (retry + DLQ) |
@@ -14,13 +14,15 @@
 | `logger.ts`                       | Winston logger with daily rotation                                 |
 | `validation.ts`                   | Input validation utilities                                         |
 | `form.ts`                         | EJS form helper functions                                          |
-| `hash.ts`                         | Password hashing (bcrypt)                                          |
+| `hash.ts`                         | Password hashing (scrypt via `node:crypto`)                        |
 | `slug.ts`                         | Slug generation utilities                                          |
 | `amount.ts`                       | Money/amount formatting (legacy, unused)                           |
 | `money.ts`                        | **Shared Kernel** — `Money` value object                           |
 | `date.ts`                         | Date formatting utilities                                          |
 | `cache/`                          | Shared cache abstraction — Redis or memory (`CACHE_BACKEND` env)   |
-| `flash.ts`                        | `popFlashMessages` — reads flash without dirtying the session      |
+| `cookieParser.ts`                 | `Cookie` header parsing + `s:`-signed cookie verification (in-house cookie-parser) |
+| `hpp.ts`                          | HTTP Parameter Pollution dedupe with whitelist                     |
+| `flash.ts`                        | Session flash middleware (`flashMiddleware`) + `popFlashMessages` — reads flash without dirtying the session |
 | `geoip.ts`                        | GeoIP lookup utilities                                             |
 | `roles.ts`                        | Role definitions                                                   |
 | `uuid.ts`                         | UUID generation                                                    |
@@ -42,6 +44,27 @@
 - All cross-cutting utilities belong in `libs/`, not in individual modules.
 - Libraries must not import from `modules/` or `web/` — dependency flows one way: `web → modules → libs`.
 - Avoid circular imports between sibling libraries.
+
+## Third-party dependency seams
+
+Third-party packages must be imported through their designated seam file only — never scattered across modules. This keeps library swaps to a single-file change:
+
+| Package | Sole importer(s) | Seam |
+| --- | --- | --- |
+| `winston`, `winston-daily-rotate-file` | `libs/logger.ts` | import `logger`/`expressHttpLogger` |
+| `ioredis` | `libs/redisClient.ts` | import `getRedisClient`/`createRedisClient`/`type Redis` |
+| `pg` | `libs/db/*`, `libs/session/sessionStoreFactory.ts` | import `query`/`queryOne`/`pool` |
+| `connect-pg-simple`, `connect-redis`, `express-session` | `libs/session/sessionStoreFactory.ts` (+ `app.ts` mount) | `createSessionStore` |
+| `express-rate-limit` | `libs/httpSecurity.ts` | `createRateLimiters` |
+| `sharp` | `modules/media/.../SharpImageProcessingService.ts` | image-processing domain port |
+| `@aws-sdk/*` | `modules/media/.../S3StorageService.ts` | storage domain port |
+| `multer` | `modules/media/.../MediaController.ts` | upload surface |
+| `graphql` | `libs/graphqlAuth.ts`, `libs/graphqlSecurity.ts` | modules write SDL strings — never import `graphql` |
+| `@apollo/server`, `@as-integrations/express5` | `boot/graphql.ts` | composition root |
+| `helmet`, `cors`, `compression`, `i18next`, `swagger-ui-express`, `ejs` | `app.ts` / `boot/routes.ts` | composition root — mount/config only |
+| `node:crypto` scrypt | `libs/hash.ts` | `hashString`/`compareString` |
+
+When adding a package that has a plausible alternative, prefer creating or extending a seam over importing it directly from modules.
 
 ## Shared Kernel Admission Criteria
 

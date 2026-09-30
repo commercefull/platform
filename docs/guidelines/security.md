@@ -29,7 +29,7 @@ Enabled with a whitelist for common filter parameters: `ids`, `tags`, `categorie
 
 ## Input Validation & SQL Injection
 
-- Use `express-validator` for request validation.
+- Validate request inputs with the `fieldRule`/`collectErrors` helpers pattern (see `modules/content/validator.ts`).
 - **Always** use parameterized SQL queries. Never interpolate user input.
 - Body size limits: JSON 1 MB, URL-encoded 10 MB.
 
@@ -43,8 +43,8 @@ const result = await query(`SELECT * FROM "product" WHERE "productId" = '${produ
 
 ## Password Hashing
 
-- **Algorithm**: bcrypt via `bcryptjs`
-- **Salt rounds**: 10
+- **Algorithm**: scrypt via `node:crypto` (`libs/hash.ts`)
+- **Parameters**: N=16384, r=8, p=1, keylen=64 — stored inside each hash so they can be upgraded later
 
 ## Session Security
 

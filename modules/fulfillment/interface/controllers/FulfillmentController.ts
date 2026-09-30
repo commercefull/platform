@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Fulfillment Controller
  *
@@ -80,27 +81,27 @@ interface InitiateReturnBody {
 export const createFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateFulfillmentBody;
   if (!body.orderId?.trim()) {
-    res.status(400).json({ success: false, error: 'orderId is required' });
+    jsonResponse(res, 400, { success: false, error: 'orderId is required' });
     return;
   }
   if (!body.sourceType?.trim()) {
-    res.status(400).json({ success: false, error: 'sourceType is required' });
+    jsonResponse(res, 400, { success: false, error: 'sourceType is required' });
     return;
   }
   if (!body.sourceId?.trim()) {
-    res.status(400).json({ success: false, error: 'sourceId is required' });
+    jsonResponse(res, 400, { success: false, error: 'sourceId is required' });
     return;
   }
   if (!body.shipFromAddress) {
-    res.status(400).json({ success: false, error: 'shipFromAddress is required' });
+    jsonResponse(res, 400, { success: false, error: 'shipFromAddress is required' });
     return;
   }
   if (!body.shipToAddress) {
-    res.status(400).json({ success: false, error: 'shipToAddress is required' });
+    jsonResponse(res, 400, { success: false, error: 'shipToAddress is required' });
     return;
   }
   if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
-    res.status(400).json({ success: false, error: 'items is required and must be a non-empty array' });
+    jsonResponse(res, 400, { success: false, error: 'items is required and must be a non-empty array' });
     return;
   }
   const useCase = createFulfillmentUseCase;
@@ -128,7 +129,7 @@ export const createFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
     fulfillment: result.fulfillment.toPersistence(),
     items: result.items.map(i => i.toPersistence()),
   };
-  res.status(201).json({ success: true, data: plain });
+  jsonResponse(res, 201, { success: true, data: plain });
 };
 
 export const getFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -138,10 +139,10 @@ export const getFulfillment = async (req: HttpRequest, res: HttpResponse): Promi
     trackingNumber: req.query.trackingNumber as string | undefined,
   });
   if (!result.fulfillment) {
-    res.status(404).json({ success: false, error: 'Fulfillment not found' });
+    jsonResponse(res, 404, { success: false, error: 'Fulfillment not found' });
     return;
   }
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const processPicking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -152,7 +153,7 @@ export const processPicking = async (req: HttpRequest, res: HttpResponse): Promi
     items: body.items,
     completePickingProcess: body.completePickingProcess,
   });
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const shipOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -166,7 +167,7 @@ export const shipOrder = async (req: HttpRequest, res: HttpResponse): Promise<vo
     carrierName: body.carrierName,
     shippingCostCents: body.shippingCostCents,
   });
-  res.json({ success: true, data: result.fulfillment });
+  jsonResponse(res, 200, { success: true, data: result.fulfillment });
 };
 
 export const markDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -174,12 +175,12 @@ export const markDelivered = async (req: HttpRequest, res: HttpResponse): Promis
   const result = await useCase.execute({
     fulfillmentId: req.params.fulfillmentId,
   });
-  res.json({ success: true, data: result.fulfillment });
+  jsonResponse(res, 200, { success: true, data: result.fulfillment });
 };
 
 export const listFulfillmentsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fulfillments = await manageFulfillmentsUseCase.findByOrderId(req.params.orderId);
-  res.json({ success: true, data: fulfillments.map(f => f.toPersistence()) });
+  jsonResponse(res, 200, { success: true, data: fulfillments.map(f => f.toPersistence()) });
 };
 
 export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -198,7 +199,7 @@ export const listFulfillments = async (req: HttpRequest, res: HttpResponse): Pro
         : 0,
     },
   );
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const processPacking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -210,7 +211,7 @@ export const processPacking = async (req: HttpRequest, res: HttpResponse): Promi
     weight: body.weight,
     dimensions: body.dimensions,
   });
-  res.json({ success: true, data: result.fulfillment });
+  jsonResponse(res, 200, { success: true, data: result.fulfillment });
 };
 
 export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -220,7 +221,7 @@ export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
     fulfillmentId: req.params.fulfillmentId,
     reason: body.reason,
   });
-  res.json({ success: true, data: result.fulfillment });
+  jsonResponse(res, 200, { success: true, data: result.fulfillment });
 };
 
 export const updateTracking = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -231,7 +232,7 @@ export const updateTracking = async (req: HttpRequest, res: HttpResponse): Promi
     trackingNumber: body.trackingNumber,
     trackingUrl: body.trackingUrl,
   });
-  res.json({ success: true, data: result.fulfillment });
+  jsonResponse(res, 200, { success: true, data: result.fulfillment });
 };
 
 export const initiateReturn = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -241,27 +242,27 @@ export const initiateReturn = async (req: HttpRequest, res: HttpResponse): Promi
     fulfillmentId: req.params.fulfillmentId,
     reason: body.reason,
   });
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const getTrackingInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const fulfillment = await manageFulfillmentsUseCase.findById(req.params.fulfillmentId);
   if (!fulfillment) {
-    res.status(404).json({ success: false, error: 'Fulfillment not found' });
+    jsonResponse(res, 404, { success: false, error: 'Fulfillment not found' });
     return;
   }
-  res.json({
-    success: true,
-    data: {
-      fulfillmentId: fulfillment.fulfillmentId,
-      status: fulfillment.status,
-      trackingNumber: fulfillment.trackingNumber,
-      trackingUrl: fulfillment.trackingUrl,
-      carrierName: fulfillment.carrierName,
-      shippedAt: fulfillment.shippedAt,
-      deliveredAt: fulfillment.deliveredAt,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          fulfillmentId: fulfillment.fulfillmentId,
+          status: fulfillment.status,
+          trackingNumber: fulfillment.trackingNumber,
+          trackingUrl: fulfillment.trackingUrl,
+          carrierName: fulfillment.carrierName,
+          shippedAt: fulfillment.shippedAt,
+          deliveredAt: fulfillment.deliveredAt,
+        },
+      });
 };
 
 export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -272,18 +273,18 @@ export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
   };
 
   if (!sourceType || !sourceId) {
-    res.status(400).json({ success: false, error: 'sourceType and sourceId are required' });
+    jsonResponse(res, 400, { success: false, error: 'sourceType and sourceId are required' });
     return;
   }
 
   try {
     const saved = await manageFulfillmentsUseCase.assign(fulfillmentId, sourceType, sourceId);
-    res.json({ success: true, data: saved });
+    jsonResponse(res, 200, { success: true, data: saved });
   } catch (error) {
     const statusCode = error instanceof AppError ? error.statusCode : 500;
-    res.status(statusCode).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to assign fulfillment',
-    });
+    jsonResponse(res, statusCode, {
+            success: false,
+            error: error instanceof Error ? error.message : 'Failed to assign fulfillment',
+          });
   }
 };

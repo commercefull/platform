@@ -14,6 +14,7 @@ import { query } from '../../../libs/db';
 import { logger } from '../../../libs/logger';
 import { JobScheduler } from '../../../libs/jobs/cronScheduler';
 import type { OrderRepository } from '../../order/domain/repositories/OrderRepository';
+import { OrderStatus } from '../../order/domain/valueObjects/OrderStatus';
 import type { IFulfillmentRepository } from '../domain/repositories/FulfillmentRepository';
 import { CreateFulfillmentUseCase } from './useCases/CreateFulfillment';
 import { CancelFulfillmentUseCase, CancelFulfillmentCommand } from './useCases/CancelFulfillment';
@@ -21,7 +22,7 @@ import { planFulfillmentUseCase } from './wired';
 
 /** Narrow ports for cross-module dependencies, injected at boot. */
 export interface FulfillmentEventHandlerDeps {
-  orders: Pick<OrderRepository, 'findById'>;
+  orders: Pick<OrderRepository, 'findById' | 'recordStatusChange'>;
   reservations: {
     consumeByOrder(orderId: string): Promise<unknown>;
   };
@@ -241,12 +242,14 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
 
     try {
       // Update order status to shipped
-      await query('UPDATE "order" SET status = \'shipped\', "updatedAt" = now() WHERE "orderId" = $1', [orderId]);
-      await query('INSERT INTO "orderStatusHistory" ("orderId", status, "createdAt") VALUES ($1, \'shipped\', now())', [orderId]);
+      const order = await orders.findById(orderId);
+      if (order) {
+        await query('UPDATE "order" SET status = \'shipped\', "updatedAt" = now() WHERE "orderId" = $1', [orderId]);
+        await orders.recordStatusChange(orderId, OrderStatus.SHIPPED, undefined, order.status);
+      }
 
       // Notify customer
       if (customerId) {
-        const order = await orders.findById(orderId);
         await JobScheduler.scheduleNotification({
           userId: customerId,
           type: 'order_shipped',
@@ -272,12 +275,14 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
 
     try {
       // Update order status to delivered
-      await query('UPDATE "order" SET status = \'delivered\', "updatedAt" = now() WHERE "orderId" = $1', [orderId]);
-      await query('INSERT INTO "orderStatusHistory" ("orderId", status, "createdAt") VALUES ($1, \'delivered\', now())', [orderId]);
+      const order = await orders.findById(orderId);
+      if (order) {
+        await query('UPDATE "order" SET status = \'delivered\', "updatedAt" = now() WHERE "orderId" = $1', [orderId]);
+        await orders.recordStatusChange(orderId, OrderStatus.DELIVERED, undefined, order.status);
+      }
 
       // Notify customer
       if (customerId) {
-        const order = await orders.findById(orderId);
         await JobScheduler.scheduleNotification({
           userId: customerId,
           type: 'order_delivered',
@@ -288,7 +293,7 @@ export function registerFulfillmentEventHandlers(deps: FulfillmentEventHandlerDe
       }
 
       // Emit order.completed for loyalty points and analytics
-      eventBus.emit('order.completed', { orderId, customerId, orderNumber: (await orders.findById(orderId))?.orderNumber });
+      eventBus.emit('order.completed', { orderId, customerId, orderNumber: order?.orderNumber });
 
       logger.info(`fulfillment.delivered: order ${orderId} marked delivered, emitted order.completed`);
     } catch (err: unknown) {

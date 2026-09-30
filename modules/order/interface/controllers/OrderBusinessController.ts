@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Order Business Controller
  * HTTP interface for business/admin order operations with content negotiation
@@ -47,11 +48,11 @@ import { OrderNotFoundError, RefundAmountMustBePositiveError } from '../../domai
 // ============================================================================
 
 function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, error: message });
+  jsonResponse(res, statusCode, { success: false, error: message });
 }
 
 // ============================================================================

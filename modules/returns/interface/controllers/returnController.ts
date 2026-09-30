@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { query, queryOne } from '../../../../libs/db';
 import {
@@ -22,12 +23,12 @@ class ReturnController {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const offset = req.query.offset ? parseInt(req.query.offset as string, 10) : 0;
     const returns = await listReturnRequestsUseCase.execute(status, limit, offset);
-    res.json({ success: true, data: returns.map(r => r.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: returns.map(r => r.toJSON()) });
   }
 
   async getReturn(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
     const returnRequest = await getReturnRequestUseCase.execute(req.params.returnId);
-    res.json({ success: true, data: returnRequest.toJSON() });
+    jsonResponse(res, 200, { success: true, data: returnRequest.toJSON() });
   }
 
   async createReturn(
@@ -122,7 +123,7 @@ class ReturnController {
       customerId,
     };
     const result = await createReturnRequestUseCase.execute(payload as Parameters<typeof createReturnRequestUseCase.execute>[0]);
-    res.status(201).json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 201, { success: true, data: result.toJSON() });
   }
 
   async approveReturn(
@@ -130,12 +131,12 @@ class ReturnController {
     res: HttpResponse,
   ): Promise<void> {
     const result = await approveReturnRequestUseCase.execute(req.params.returnId, req.body?.rmaNumber);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async denyReturn(req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>, res: HttpResponse): Promise<void> {
     const result = await denyReturnRequestUseCase.execute(req.params.returnId, req.body?.reason);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async markInTransit(
@@ -143,12 +144,12 @@ class ReturnController {
     res: HttpResponse,
   ): Promise<void> {
     const result = await markReturnInTransitUseCase.execute(req.params.returnId, req.body?.trackingNumber, req.body?.trackingUrl);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async markReceived(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
     const result = await markReturnReceivedUseCase.execute(req.params.returnId);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async completeInspection(
@@ -160,38 +161,38 @@ class ReturnController {
     res: HttpResponse,
   ): Promise<void> {
     const result = await completeReturnInspectionUseCase.execute(req.params.returnId, req.body?.passedItems, req.body?.failedItems);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async completeReturn(req: HttpRequest<{ returnId: string }>, res: HttpResponse): Promise<void> {
     const result = await completeReturnRequestUseCase.execute(req.params.returnId);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async cancelReturn(req: HttpRequest<{ returnId: string }, Record<string, never>, { reason?: string }>, res: HttpResponse): Promise<void> {
     const result = await cancelReturnRequestUseCase.execute(req.params.returnId, req.body?.reason);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 
   async getStoreCreditBalance(req: HttpRequest, res: HttpResponse): Promise<void> {
     const customerId = (req.query.customerId as string) || '';
     if (!customerId) {
-      res.json({ success: true, data: { customerId: '', balanceCents: 0, currency: 'USD' } });
+      jsonResponse(res, 200, { success: true, data: { customerId: '', balanceCents: 0, currency: 'USD' } });
       return;
     }
     const balanceCents = await getStoreCreditBalanceUseCase.execute(customerId);
-    res.json({ success: true, data: balanceCents });
+    jsonResponse(res, 200, { success: true, data: balanceCents });
   }
 
   async getStoreCreditLedger(req: HttpRequest, res: HttpResponse): Promise<void> {
     const customerId = (req.query.customerId as string) || '';
     if (!customerId) {
-      res.json({ success: true, data: [] });
+      jsonResponse(res, 200, { success: true, data: [] });
       return;
     }
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const ledger = await getStoreCreditLedgerUseCase.execute(customerId, limit);
-    res.json({ success: true, data: ledger.map(e => e.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: ledger.map(e => e.toJSON()) });
   }
 
   async debitStoreCredit(
@@ -209,7 +210,7 @@ class ReturnController {
     res: HttpResponse,
   ): Promise<void> {
     const result = await debitStoreCreditUseCase.execute(req.body as Parameters<typeof debitStoreCreditUseCase.execute>[0]);
-    res.json({ success: true, data: result.toJSON() });
+    jsonResponse(res, 200, { success: true, data: result.toJSON() });
   }
 }
 

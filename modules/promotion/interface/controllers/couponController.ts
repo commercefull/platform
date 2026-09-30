@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   type CreateCouponInput,
@@ -36,14 +37,14 @@ export const getActiveCoupons = async (req: HttpRequest, res: HttpResponse): Pro
     direction: direction as 'ASC' | 'DESC' | undefined,
   });
 
-  res.status(200).json({
-    success: true,
-    data: coupons || [],
-    pagination: {
-      limit: limit ? parseInt(limit as string) : 50,
-      offset: offset ? parseInt(offset as string) : 0,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: coupons || [],
+        pagination: {
+          limit: limit ? parseInt(limit as string) : 50,
+          offset: offset ? parseInt(offset as string) : 0,
+        },
+      });
 };
 
 /**
@@ -54,11 +55,11 @@ export const getCouponById = async (req: HttpRequest, res: HttpResponse): Promis
   const coupon = await manageCouponsUseCase.findById(id);
 
   if (!coupon) {
-    res.status(404).json({ success: false, message: 'Coupon not found' });
+    jsonResponse(res, 404, { success: false, message: 'Coupon not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: coupon });
+  jsonResponse(res, 200, { success: true, data: coupon });
 };
 
 /**
@@ -71,11 +72,11 @@ export const getCouponByCode = async (req: HttpRequest, res: HttpResponse): Prom
   const coupon = await manageCouponsUseCase.findByCode(code, organizationId as string | undefined);
 
   if (!coupon) {
-    res.status(404).json({ success: false, message: 'Coupon not found' });
+    jsonResponse(res, 404, { success: false, message: 'Coupon not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: coupon });
+  jsonResponse(res, 200, { success: true, data: coupon });
 };
 
 /**
@@ -103,13 +104,13 @@ export const createCoupon = async (
   try {
     const coupon = await createCouponUseCase.execute(couponData);
 
-    res.status(201).json({
-      success: true,
-      data: coupon,
-      message: 'Coupon created successfully',
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: coupon,
+            message: 'Coupon created successfully',
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -126,10 +127,10 @@ export const updateCoupon = async (
   // Check if coupon exists
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
-    res.status(404).json({
-      success: false,
-      message: 'Coupon not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Coupon not found',
+          });
     return;
   }
 
@@ -137,11 +138,11 @@ export const updateCoupon = async (
 
   const updatedCoupon = await manageCouponsUseCase.update(id, couponData);
 
-  res.status(200).json({
-    success: true,
-    data: updatedCoupon,
-    message: 'Coupon updated successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: updatedCoupon,
+        message: 'Coupon updated successfully',
+      });
 };
 
 /**
@@ -153,19 +154,19 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   // Check if coupon exists
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
-    res.status(404).json({
-      success: false,
-      message: 'Coupon not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Coupon not found',
+          });
     return;
   }
 
   await manageCouponsUseCase.delete(id);
 
-  res.status(200).json({
-    success: true,
-    message: 'Coupon deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Coupon deleted successfully',
+      });
 };
 
 /**
@@ -186,19 +187,19 @@ export const validateCoupon = async (
     });
 
     if (!result.valid) {
-      res.status(400).json({
-        success: false,
-        data: result,
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                data: result,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: result,
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -211,24 +212,24 @@ export const getCouponUsage = async (req: HttpRequest, res: HttpResponse): Promi
   // Check if coupon exists
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
-    res.status(404).json({
-      success: false,
-      message: 'Coupon not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Coupon not found',
+          });
     return;
   }
 
   const usage = await manageCouponsUseCase.getUsage(id);
 
-  res.status(200).json({
-    success: true,
-    data: {
-      coupon: existingCoupon,
-      usage,
-      totalUsage: existingCoupon.usageCount,
-      remainingUsage: existingCoupon.maxUsage ? existingCoupon.maxUsage - existingCoupon.usageCount : null,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          coupon: existingCoupon,
+          usage,
+          totalUsage: existingCoupon.usageCount,
+          remainingUsage: existingCoupon.maxUsage ? existingCoupon.maxUsage - existingCoupon.usageCount : null,
+        },
+      });
 };
 
 /**
@@ -243,11 +244,11 @@ export const calculateCouponDiscount = async (
   try {
     const result = await calculateCouponDiscountUseCase.execute({ code, orderTotalCents, organizationId });
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: result,
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };

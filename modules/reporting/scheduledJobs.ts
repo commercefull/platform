@@ -32,7 +32,7 @@ export function wireReportJobCreator(): void {
     });
     logger.info(`[JobScheduler.scheduleReport] generated ${data.reportType} report for ${data.recipientEmail}`);
     await JobScheduler.scheduleNotification({
-      userId: data.recipientEmail,
+      recipientEmail: data.recipientEmail,
       type: 'report_ready',
       title: `Report Ready: ${data.reportType}`,
       message: `Your ${data.reportType} report has been generated.`,

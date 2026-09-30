@@ -3,7 +3,7 @@ import type {
   GdprRequestFilters,
 } from '../../domain/repositories/GdprRepository';
 import { GdprDataRequest } from '../../domain/entities/GdprDataRequest';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 
 export class ManageGdprRequestsUseCase {
   constructor(private readonly gdprDataRequestRepo: GdprDataRequestRepository) {}

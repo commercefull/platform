@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Category Customer Controller
  * HTTP interface for customer-facing category operations
@@ -26,7 +27,7 @@ export const listCategories = async (req: HttpRequest, res: HttpResponse): Promi
     categories = await manageCategoriesUseCase.findActive();
   }
 
-  res.json({ success: true, data: categories });
+  jsonResponse(res, 200, { success: true, data: categories });
 };
 
 /**
@@ -40,11 +41,11 @@ export const getCategory = async (req: HttpRequest, res: HttpResponse): Promise<
   const category = isUuid ? await manageCategoriesUseCase.findOne(identifier) : await manageCategoriesUseCase.findBySlug(identifier);
 
   if (!category || !category.isActive) {
-    res.status(404).json({ success: false, error: 'Category not found' });
+    jsonResponse(res, 404, { success: false, error: 'Category not found' });
     return;
   }
 
-  res.json({ success: true, data: category });
+  jsonResponse(res, 200, { success: true, data: category });
 };
 
 /**
@@ -57,5 +58,5 @@ export const getCategoryChildren = async (req: HttpRequest, res: HttpResponse): 
   const children = await manageCategoriesUseCase.findChildren(categoryId);
   const activeChildren = children.filter(c => c.isActive);
 
-  res.json({ success: true, data: activeChildren });
+  jsonResponse(res, 200, { success: true, data: activeChildren });
 };

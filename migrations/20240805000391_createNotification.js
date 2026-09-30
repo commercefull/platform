@@ -12,25 +12,10 @@ exports.up = function (knex) {
     t.uuid('userId').notNullable();
     t.enum('userType', ['customer', 'organization', 'admin']).notNullable().defaultTo('customer');
 
-    // Notification content
-    t.enum('type', [
-      'account_registration',
-      'password_reset',
-      'email_verification',
-      'order_confirmation',
-      'order_shipped',
-      'order_delivered',
-      'order_cancelled',
-      'return_initiated',
-      'refund_processed',
-      'back_in_stock',
-      'price_drop',
-      'new_product',
-      'review_request',
-      'abandoned_cart',
-      'coupon_offer',
-      'promotion',
-    ]).notNullable();
+    // Notification content — free-form string: the domain declares
+    // NotificationType as `string` and modules emit ~40 distinct types;
+    // an enum CHECK would reject every type added after this migration.
+    t.string('type', 100).notNullable();
     t.string('title', 255).notNullable();
     t.text('content').notNullable();
 
@@ -68,5 +53,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema.dropTable('notification');
+  return knex.schema.dropTableIfExists('notification');
 };

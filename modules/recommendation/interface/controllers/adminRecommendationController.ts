@@ -1,3 +1,4 @@
+import { redirectResponse, renderResponse } from "libs/apiResponse";
 /**
  * Recommendation Controller for Admin Hub
  * Rules, exclusions, stats and per-product suggestions — calls the
@@ -24,7 +25,7 @@ const orgIdFrom = (req: HttpRequest): string =>
 
 const backToDashboard = (req: HttpRequest, res: HttpResponse, params: string) => {
   const org = orgIdFrom(req);
-  res.redirect(`/admin/recommendations${org ? `?organizationId=${encodeURIComponent(org)}&${params}` : `?${params}`}`);
+  redirectResponse(res, `/admin/recommendations${org ? `?organizationId=${encodeURIComponent(org)}&${params}` : `?${params}`}`);
 };
 
 // ============================================================================
@@ -148,12 +149,12 @@ const productOrg = async (productId: string): Promise<string | null> => {
 export const productSuggestionsPartial = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   if (!enabled()) {
-    res.render('admin/views/recommendations/partials/suggestions', { suggestions: [], productId, moduleEnabled: false });
+    renderResponse(res, 'admin/views/recommendations/partials/suggestions', { suggestions: [], productId, moduleEnabled: false });
     return;
   }
   const organizationId = await productOrg(productId);
   const suggestions = organizationId ? await listProductSuggestionsUseCase.list(organizationId, productId).catch(() => []) : [];
-  res.render('admin/views/recommendations/partials/suggestions', { suggestions, productId, moduleEnabled: true });
+  renderResponse(res, 'admin/views/recommendations/partials/suggestions', { suggestions, productId, moduleEnabled: true });
 };
 
 export const acceptProductSuggestion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -163,12 +164,10 @@ export const acceptProductSuggestion = async (req: HttpRequest, res: HttpRespons
     if (!organizationId) throw new Error('Product not found');
     const relationType = (req.body as { relationType?: string })?.relationType || 'related';
     await listProductSuggestionsUseCase.accept(organizationId, productId, candidateProductId, relationType);
-    res.redirect(`/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion accepted'));
+    redirectResponse(res, `/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion accepted'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to accept suggestion'),
-    );
+    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to accept suggestion'));
   }
 };
 
@@ -178,9 +177,9 @@ export const hideProductSuggestion = async (req: HttpRequest, res: HttpResponse)
     const organizationId = await productOrg(productId);
     if (!organizationId) throw new Error('Product not found');
     await listProductSuggestionsUseCase.hide(organizationId, productId, candidateProductId);
-    res.redirect(`/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion hidden'));
+    redirectResponse(res, `/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion hidden'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to hide suggestion'));
+    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to hide suggestion'));
   }
 };

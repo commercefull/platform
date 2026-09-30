@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Migration Admin UI Controller
  * Admin views for managing import jobs
@@ -68,31 +69,31 @@ export const createImportJob = async (req: HttpRequest, res: HttpResponse): Prom
     autoActivate: body.autoActivate as boolean | undefined,
   });
 
-  res.redirect(`/admin/migration/${job.importJobId}?success=Import job created successfully`);
+  redirectResponse(res, `/admin/migration/${job.importJobId}?success=Import job created successfully`);
 };
 
 export const startImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.startJob(importJobId);
-  res.redirect(`/admin/migration/${importJobId}?success=Import job started`);
+  redirectResponse(res, `/admin/migration/${importJobId}?success=Import job started`);
 };
 
 export const pauseImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.pauseJob(importJobId);
-  res.redirect(`/admin/migration/${importJobId}?success=Import job paused`);
+  redirectResponse(res, `/admin/migration/${importJobId}?success=Import job paused`);
 };
 
 export const cancelImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.cancelJob(importJobId);
-  res.redirect(`/admin/migration/${importJobId}?success=Import job cancelled`);
+  redirectResponse(res, `/admin/migration/${importJobId}?success=Import job cancelled`);
 };
 
 export const deleteImportJob = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importJobId } = req.params;
   await manageImportJobs.deleteJob(importJobId);
-  res.redirect('/admin/migration?success=Import job deleted');
+  redirectResponse(res, '/admin/migration?success=Import job deleted');
 };
 
 export const viewImportMappings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -128,5 +129,5 @@ export const viewImportErrors = async (req: HttpRequest, res: HttpResponse): Pro
 export const resolveImportError = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { importErrorId } = req.params;
   await manageImportErrors.resolveError(importErrorId);
-  res.redirect('back');
+  redirectResponse(res, 'back');
 };

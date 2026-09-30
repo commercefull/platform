@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Address Controller
  * Manages customer address book
@@ -19,7 +20,7 @@ interface CustomerUser {
 export const listAddresses = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const addresses = await manageStorefrontAddressesUseCase.findActiveByCustomerId(user.customerId);
@@ -36,7 +37,7 @@ export const listAddresses = async (req: HttpRequest, res: HttpResponse) => {
 export const addAddressForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   storefrontRespond(req, res, 'addresses/create', {
@@ -50,7 +51,7 @@ export const addAddressForm = async (req: HttpRequest, res: HttpResponse) => {
 export const addAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const body = req.body as HttpRequestBody;
@@ -81,7 +82,7 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse) => {
     isDefault: !!isDefault,
   });
 
-  return res.redirect('/addresses');
+  return redirectResponse(res, '/addresses');
 };
 
 /**
@@ -90,7 +91,7 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse) => {
 export const editAddressForm = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { addressId } = req.params;
@@ -116,7 +117,7 @@ export const editAddressForm = async (req: HttpRequest, res: HttpResponse) => {
 export const updateAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { addressId } = req.params;
@@ -150,7 +151,7 @@ export const updateAddress = async (req: HttpRequest, res: HttpResponse) => {
     isDefault: !!isDefault,
   });
 
-  return res.redirect('/addresses');
+  return redirectResponse(res, '/addresses');
 };
 
 /**
@@ -159,12 +160,12 @@ export const updateAddress = async (req: HttpRequest, res: HttpResponse) => {
 export const deleteAddress = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { addressId } = req.params;
 
   await manageStorefrontAddressesUseCase.softDelete(addressId, user.customerId);
 
-  return res.redirect('/addresses');
+  return redirectResponse(res, '/addresses');
 };

@@ -27,12 +27,12 @@ web/
 Web controllers import use cases directly from `modules/`:
 
 ```typescript
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { ListProductsUseCase, ListProductsCommand } from '../../../modules/product/application/useCases/ListProducts';
 import ProductRepo from '../../../modules/product/infrastructure/repositories/ProductRepository';
 import { adminRespond } from '../../respond';
 
-export const listProducts = async (req: Request, res: Response) => {
+export const listProducts = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const useCase = new ListProductsUseCase(ProductRepo);
     const result = await useCase.execute(new ListProductsCommand());
@@ -48,7 +48,7 @@ export const listProducts = async (req: Request, res: Response) => {
 };
 ```
 
-> **HTTP facade:** Controllers import project-owned Express-backed types (`HttpRequest`, `HttpResponse`, `HttpNext`) from `libs/http` rather than `express`. `res.render`, `res.locals`, `req.flash`, and `req.session` work unchanged through the global Express augmentation. See the [HTTP Framework Abstraction Guide](../guides/http-framework-abstraction.md).
+> **HTTP facade:** Controllers import project-owned Express-backed types (`HttpRequest`, `HttpResponse`, `HttpNext`) from `libs/http` rather than `express`, and send responses through `libs/apiResponse` transport helpers — never `res.*` directly. `res.locals`, `req.flash`, and `req.session` work unchanged through the global Express augmentation; full pages render via `adminRespond`/`storefrontRespond`, partials via `renderResponse`. See the [HTTP Framework Abstraction Guide](../guides/http-framework-abstraction.md).
 
 ## Response Helpers (`web/respond.ts`)
 
@@ -63,7 +63,7 @@ export const listProducts = async (req: Request, res: Response) => {
 - Layouts wrap content via a `body` variable.
 - Flash messages available as `successMsg` / `errorMsg`.
   - Read them via `popFlashMessages(req)` from `libs/flash` — **never** call `req.flash()`
-    unconditionally in render paths: connect-flash lazily writes `session.flash`, which
+    unconditionally in render paths: flash reads lazily touch `session.flash`, which
     creates a session row + cookie for every anonymous page view.
 - Current user/session available as `user` and `session`.
 - i18n available via `t('key')`.

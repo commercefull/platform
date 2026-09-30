@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse, renderResponse, sendResponse } from "libs/apiResponse";
 /**
  * Page Builder Admin Controller
  * Renders the page builder admin views (EJS templates)
@@ -102,7 +103,7 @@ export const createDraft = async (req: HttpRequest, res: HttpResponse): Promise<
       slug,
       pageType: pageType || 'page',
     });
-    res.redirect(`/hub/page-builder/${draft.draftId}`);
+    redirectResponse(res, `/hub/page-builder/${draft.draftId}`);
   } catch (err) {
     adminRespond(req, res, 'pagebuilder/drafts/create', {
       pageName: 'Create Page',
@@ -119,17 +120,17 @@ export const pageBuilderPreview = async (req: HttpRequest, res: HttpResponse): P
   try {
     const preview = await previewDraftUseCase.preview(draftId);
 
-    res.render('admin/views/pagebuilder/preview', {
-      title: preview.draft.title,
-      theme: preview.theme,
-      blocks: preview.blocks,
-      draft: preview.draft,
-      blockTypes: preview.blockTypes,
-      user: req.user,
-      session: req.session,
-    });
+    renderResponse(res, 'admin/views/pagebuilder/preview', {
+            title: preview.draft.title,
+            theme: preview.theme,
+            blocks: preview.blocks,
+            draft: preview.draft,
+            blockTypes: preview.blockTypes,
+            user: req.user,
+            session: req.session,
+          });
   } catch {
-    res.status(404).send('Draft not found');
+    sendResponse(res, 404, 'Draft not found');
   }
 };
 
@@ -139,9 +140,9 @@ export const publishDraft = async (req: HttpRequest, res: HttpResponse): Promise
   const { draftId } = req.params;
   try {
     await publishDraftUseCase.publish(draftId);
-    res.json({ success: true, message: 'Draft published successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Draft published successfully' });
   } catch (err) {
-    res.status(400).json({ success: false, message: (err as Error).message });
+    jsonResponse(res, 400, { success: false, message: (err as Error).message });
   }
 };
 
@@ -150,5 +151,5 @@ export const publishDraft = async (req: HttpRequest, res: HttpResponse): Promise
 export const deleteDraft = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { draftId } = req.params;
   const success = await manageDraftsUseCase.delete(draftId);
-  res.json({ success, message: success ? 'Draft deleted' : 'Draft not found' });
+  jsonResponse(res, 200, { success, message: success ? 'Draft deleted' : 'Draft not found' });
 };

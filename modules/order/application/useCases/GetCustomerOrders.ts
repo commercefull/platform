@@ -4,7 +4,7 @@
  */
 
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 import { Order } from '../../domain/entities/Order';
 import { CustomerIdRequiredError } from '../../domain/errors/OrderErrors';
 

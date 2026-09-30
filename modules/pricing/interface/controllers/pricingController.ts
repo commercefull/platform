@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
@@ -74,16 +75,16 @@ export const getPricingRules = async (req: HttpRequest, res: HttpResponse): Prom
   // Get the total count for pagination
   const total = await managePricingAdminUseCase.countRules(filters);
 
-  res.json({
-    success: true,
-    data: { rules, total },
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      pages: Math.ceil(total / limitNum),
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: { rules, total },
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum),
+        },
+      });
 };
 
 /**
@@ -94,17 +95,17 @@ export const getPricingRule = async (req: HttpRequest, res: HttpResponse): Promi
   const rule = await managePricingAdminUseCase.findRuleById(id);
 
   if (!rule) {
-    res.status(404).json({
-      success: false,
-      message: 'Pricing rule not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Pricing rule not found',
+          });
     return;
   }
 
-  res.json({
-    success: true,
-    data: rule,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: rule,
+      });
 };
 
 /**
@@ -117,12 +118,12 @@ export const createPricingRule = async (
   try {
     const newRule = await createPricingRuleUseCase.execute(req.body as PricingRuleCreateProps);
 
-    res.status(201).json({
-      success: true,
-      data: newRule,
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: newRule,
+          });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -138,19 +139,19 @@ export const updatePricingRule = async (
 
   const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
-    res.status(404).json({
-      success: false,
-      message: 'Pricing rule not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Pricing rule not found',
+          });
     return;
   }
 
   const updatedRule = await managePricingAdminUseCase.updateRule(id, ruleData as PricingRuleUpdateProps);
 
-  res.json({
-    success: true,
-    data: updatedRule,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: updatedRule,
+      });
 };
 
 /**
@@ -161,19 +162,19 @@ export const deletePricingRule = async (req: HttpRequest, res: HttpResponse): Pr
 
   const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
-    res.status(404).json({
-      success: false,
-      message: 'Pricing rule not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Pricing rule not found',
+          });
     return;
   }
 
   await managePricingAdminUseCase.deleteRule(id);
 
-  res.json({
-    success: true,
-    message: 'Pricing rule deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Pricing rule deleted successfully',
+      });
 };
 
 /**
@@ -193,16 +194,16 @@ export const getTierPrices = async (req: HttpRequest, res: HttpResponse): Promis
     customerGroupId: customerGroupId as string,
   });
 
-  res.json({
-    success: true,
-    data: tierPrices,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total,
-      pages: Math.ceil(total / limitNum),
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: tierPrices,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum),
+        },
+      });
 };
 
 /**
@@ -213,17 +214,17 @@ export const getTierPrice = async (req: HttpRequest, res: HttpResponse): Promise
   const tierPrice = await managePricingAdminUseCase.findTierPriceById(id);
 
   if (!tierPrice) {
-    res.status(404).json({
-      success: false,
-      message: 'Tier price not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Tier price not found',
+          });
     return;
   }
 
-  res.json({
-    success: true,
-    data: tierPrice,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: tierPrice,
+      });
 };
 
 /**
@@ -236,12 +237,12 @@ export const createTierPrice = async (
   try {
     const newTierPrice = await createTierPriceUseCase.execute(req.body as TierPriceCreateProps);
 
-    res.status(201).json({
-      success: true,
-      data: newTierPrice,
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: newTierPrice,
+          });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -257,10 +258,10 @@ export const updateTierPrice = async (
 
   const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
-    res.status(404).json({
-      success: false,
-      message: 'Tier price not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Tier price not found',
+          });
     return;
   }
 
@@ -269,10 +270,10 @@ export const updateTierPrice = async (
     tierPriceData as Partial<Omit<TierPrice, 'id' | 'createdAt' | 'updatedAt'>>,
   );
 
-  res.json({
-    success: true,
-    data: updatedTierPrice,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: updatedTierPrice,
+      });
 };
 
 /**
@@ -283,19 +284,19 @@ export const deleteTierPrice = async (req: HttpRequest, res: HttpResponse): Prom
 
   const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
-    res.status(404).json({
-      success: false,
-      message: 'Tier price not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Tier price not found',
+          });
     return;
   }
 
   await managePricingAdminUseCase.deleteTierPrice(id);
 
-  res.json({
-    success: true,
-    message: 'Tier price deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Tier price deleted successfully',
+      });
 };
 
 /**
@@ -319,16 +320,16 @@ export const getPriceLists = async (req: HttpRequest, res: HttpResponse): Promis
     priceLists = [];
   }
 
-  res.json({
-    success: true,
-    data: priceLists,
-    pagination: {
-      page: pageNum,
-      limit: limitNum,
-      total: priceLists.length,
-      pages: Math.ceil(priceLists.length / limitNum),
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: priceLists,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: priceLists.length,
+          pages: Math.ceil(priceLists.length / limitNum),
+        },
+      });
 };
 
 /**
@@ -339,23 +340,23 @@ export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise
   const priceList = await managePricingAdminUseCase.findPriceListById(id);
 
   if (!priceList) {
-    res.status(404).json({
-      success: false,
-      message: 'Price list not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Price list not found',
+          });
     return;
   }
 
   // Get associated prices
   const prices = await managePricingAdminUseCase.findPricesByPriceListId(id);
 
-  res.json({
-    success: true,
-    data: {
-      ...priceList,
-      prices,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          ...priceList,
+          prices,
+        },
+      });
 };
 
 /**
@@ -369,10 +370,10 @@ export const createPriceList = async (
 
   // Validate required fields
   if (!priceListData.name) {
-    res.status(400).json({
-      success: false,
-      message: 'Missing required field: name is required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Missing required field: name is required',
+          });
     return;
   }
 
@@ -380,10 +381,10 @@ export const createPriceList = async (
     priceListData as Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>,
   );
 
-  res.status(201).json({
-    success: true,
-    data: newPriceList,
-  });
+  jsonResponse(res, 201, {
+        success: true,
+        data: newPriceList,
+      });
 };
 
 /**
@@ -398,10 +399,10 @@ export const updatePriceList = async (
 
   const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
-    res.status(404).json({
-      success: false,
-      message: 'Price list not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Price list not found',
+          });
     return;
   }
 
@@ -410,10 +411,10 @@ export const updatePriceList = async (
     priceListData as Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>,
   );
 
-  res.json({
-    success: true,
-    data: updatedPriceList,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: updatedPriceList,
+      });
 };
 
 /**
@@ -424,19 +425,19 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
 
   const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
-    res.status(404).json({
-      success: false,
-      message: 'Price list not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Price list not found',
+          });
     return;
   }
 
   await managePricingAdminUseCase.deleteCustomerPriceList(id);
 
-  res.json({
-    success: true,
-    message: 'Price list deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Price list deleted successfully',
+      });
 };
 
 /**
@@ -451,11 +452,11 @@ export const addPriceToList = async (req: HttpRequest<Record<string, string>, un
       req.body as Omit<CustomerPriceCreateProps, 'priceListId'>,
     );
 
-    res.status(201).json({
-      success: true,
-      data: newPrice,
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: newPrice,
+          });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };

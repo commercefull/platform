@@ -268,12 +268,15 @@ export interface ReportJobData {
 }
 
 export interface NotificationJobData {
-  userId: string;
+  userId?: string;
+  userType?: 'customer' | 'organization' | 'admin';
   type: string;
   title: string;
   message: string;
   data?: Record<string, unknown>;
   channels?: ('email' | 'sms' | 'push' | 'in_app')[];
+  /** Resolve the recipient user by email when userId is not known (e.g. report delivery). */
+  recipientEmail?: string;
 }
 
 /**

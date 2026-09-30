@@ -4,7 +4,7 @@
  * Defines the contract for Fulfillment persistence operations.
  */
 
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import { Fulfillment, FulfillmentStatus, SourceType } from '../entities/Fulfillment';
 import { FulfillmentItem } from '../entities/FulfillmentItem';
 

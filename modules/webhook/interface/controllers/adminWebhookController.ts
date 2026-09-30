@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Webhook Admin UI Controller
  * Admin views for managing webhook endpoints
@@ -73,7 +74,7 @@ export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promis
     retryPolicy: body.retryPolicy as Record<string, unknown> | undefined,
   });
 
-  res.redirect(`/admin/webhooks/${result.webhookEndpointId}?success=Webhook created successfully`);
+  redirectResponse(res, `/admin/webhooks/${result.webhookEndpointId}?success=Webhook created successfully`);
 };
 
 export const editWebhookForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -106,14 +107,14 @@ export const updateWebhook = async (req: HttpRequest, res: HttpResponse): Promis
   if (body.headers !== undefined) updates.headers = body.headers;
 
   await manageWebhooksUseCase.updateEndpoint(webhookEndpointId, updates);
-  res.redirect(`/admin/webhooks/${webhookEndpointId}?success=Webhook updated successfully`);
+  redirectResponse(res, `/admin/webhooks/${webhookEndpointId}?success=Webhook updated successfully`);
 };
 
 export const deleteWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookEndpointId } = req.params;
   const useCase = unregisterWebhookUseCase;
   await useCase.execute(webhookEndpointId);
-  res.redirect('/admin/webhooks?success=Webhook deleted');
+  redirectResponse(res, '/admin/webhooks?success=Webhook deleted');
 };
 
 export const viewWebhookDeliveries = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

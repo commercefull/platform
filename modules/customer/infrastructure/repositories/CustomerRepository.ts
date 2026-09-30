@@ -8,7 +8,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { CustomerRepository as ICustomerRepository, CustomerFilters } from '../../domain/repositories/CustomerRepository';
 import { Customer, CustomerAddress } from '../../../../libs/db/types';
 import { CustomerAddressNotFoundError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 
 export class CustomerRepo implements ICustomerRepository {
   async findById(customerId: string): Promise<Customer | null> {

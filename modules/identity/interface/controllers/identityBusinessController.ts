@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import { generateAccessToken, verifyAccessToken } from '../../utils/jwtHelpers';
@@ -65,29 +66,29 @@ export const loginOrganization = async (req: HttpRequest<Record<string, string>,
 
   // Validate required fields
   if (!email || !password) {
-    res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email and password are required',
+          });
     return;
   }
 
   // Authenticate organization
   const subject = await orgPort.authenticate(email, password);
   if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            message: 'Invalid email or password',
+          });
     return;
   }
 
   // Check organization account status
   if (subject.status !== 'active') {
-    res.status(403).json({
-      success: false,
-      message: `Your account is ${subject.status}. Please contact support for assistance.`,
-    });
+    jsonResponse(res, 403, {
+            success: false,
+            message: `Your account is ${subject.status}. Please contact support for assistance.`,
+          });
     return;
   }
 
@@ -103,16 +104,16 @@ export const loginOrganization = async (req: HttpRequest<Record<string, string>,
   // Generate access token
   const accessToken = generateAccessToken(subject.id, subject.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
-  res.json({
-    success: true,
-    accessToken,
-    organization: {
-      id: subject.id,
-      email: subject.email,
-      name: subject.name,
-      status: subject.status,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        accessToken,
+        organization: {
+          id: subject.id,
+          email: subject.email,
+          name: subject.name,
+          status: subject.status,
+        },
+      });
 };
 
 /**
@@ -127,20 +128,20 @@ export const registerOrganization = async (
 
   // Validate required fields
   if (!email || !password || !name) {
-    res.status(400).json({
-      success: false,
-      message: 'Email, password, and business name are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email, password, and business name are required',
+          });
     return;
   }
 
   // Check for existing organization
   const existing = await orgPort.findByEmail(email);
   if (existing) {
-    res.status(409).json({
-      success: false,
-      message: 'A organization account with this email already exists',
-    });
+    jsonResponse(res, 409, {
+            success: false,
+            message: 'A organization account with this email already exists',
+          });
     return;
   }
 
@@ -161,16 +162,16 @@ export const registerOrganization = async (
     status: newSubject.status || 'pending',
   });
 
-  res.status(201).json({
-    success: true,
-    message: 'organization account created successfully. Your account is pending approval.',
-    organization: {
-      id: newSubject.id,
-      email: newSubject.email,
-      name: newSubject.name,
-      status: newSubject.status,
-    },
-  });
+  jsonResponse(res, 201, {
+        success: true,
+        message: 'organization account created successfully. Your account is pending approval.',
+        organization: {
+          id: newSubject.id,
+          email: newSubject.email,
+          name: newSubject.name,
+          status: newSubject.status,
+        },
+      });
 };
 
 /**
@@ -184,20 +185,20 @@ export const issueTokenPair = async (req: HttpRequest<Record<string, string>, un
       new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
     );
 
-    res.json({
-      success: true,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-      organization: {
-        id: result.subject.id,
-        email: result.subject.email,
-        name: result.subject.name,
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            tokenType: 'Bearer',
+            expiresIn: result.expiresIn,
+            organization: {
+              id: result.subject.id,
+              email: result.subject.email,
+              name: result.subject.name,
+            },
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -212,14 +213,14 @@ export const renewAccessToken = async (
     const { refreshToken } = req.body;
     const result = await renewOrganizationAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
-    res.json({
-      success: true,
-      accessToken: result.accessToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            accessToken: result.accessToken,
+            tokenType: 'Bearer',
+            expiresIn: result.expiresIn,
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -233,10 +234,10 @@ export const checkTokenValidity = async (
   const { token } = req.body;
 
   if (!token) {
-    res.status(400).json({
-      success: false,
-      message: 'Token is required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Token is required',
+          });
     return;
   }
 
@@ -244,23 +245,23 @@ export const checkTokenValidity = async (
   const decodedPayload = verifyAccessToken(token, ORGANIZATION_JWT_SECRET);
 
   if (!decodedPayload || decodedPayload.role !== 'organization') {
-    res.status(401).json({
-      success: false,
-      valid: false,
-      message: 'Token is invalid or has expired',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            valid: false,
+            message: 'Token is invalid or has expired',
+          });
     return;
   }
 
-  res.json({
-    success: true,
-    valid: true,
-    organization: {
-      id: decodedPayload.id,
-      email: decodedPayload.email,
-      role: decodedPayload.role,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        valid: true,
+        organization: {
+          id: decodedPayload.id,
+          email: decodedPayload.email,
+          role: decodedPayload.role,
+        },
+      });
 };
 
 /**
@@ -273,10 +274,10 @@ export const requestPasswordReset = async (
   const { email } = req.body;
 
   if (!email) {
-    res.status(400).json({
-      success: false,
-      message: 'Email is required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email is required',
+          });
     return;
   }
 
@@ -284,10 +285,10 @@ export const requestPasswordReset = async (
 
   // Always return success to prevent email enumeration attacks
   if (!subject?.id) {
-    res.json({
-      success: true,
-      message: 'If an account exists with that email, a password reset link has been sent',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'If an account exists with that email, a password reset link has been sent',
+          });
     return;
   }
 
@@ -302,12 +303,12 @@ export const requestPasswordReset = async (
     data: { resetToken, email },
   });
 
-  res.json({
-    success: true,
-    message: 'Password reset instructions have been sent to your email',
-    // REMOVE IN PRODUCTION - only for development
-    resetToken,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Password reset instructions have been sent to your email',
+        // REMOVE IN PRODUCTION - only for development
+        resetToken,
+      });
 };
 
 /**
@@ -321,30 +322,30 @@ export const resetPassword = async (
   const finalPassword = newPassword || password;
 
   if (!token || !finalPassword) {
-    res.status(400).json({
-      success: false,
-      message: 'Reset token and new password are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Reset token and new password are required',
+          });
     return;
   }
 
   // Verify reset token and get organization ID
   const organizationId = await orgPort.verifyPasswordResetToken(token);
   if (!organizationId) {
-    res.status(400).json({
-      success: false,
-      message: 'Password reset token is invalid or has expired',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Password reset token is invalid or has expired',
+          });
     return;
   }
 
   // Update organization password
   await orgPort.changePassword(organizationId, finalPassword);
 
-  res.json({
-    success: true,
-    message: 'Your password has been successfully reset',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Your password has been successfully reset',
+      });
 };
 
 // ============================================================================
@@ -372,35 +373,35 @@ export const getUserAuthDetails = async (
   if (userType === 'customer') {
     const subject = await customerPort.findById(userId);
     if (!subject) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      jsonResponse(res, 404, { success: false, message: 'User not found' });
       return;
     }
-    res.json({
-      success: true,
-      data: {
-        id: subject.id,
-        email: subject.email,
-        lastLogin: subject.lastLoginAt || null,
-        emailVerified: subject.isVerified || false,
-        status: subject.status,
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: {
+              id: subject.id,
+              email: subject.email,
+              lastLogin: subject.lastLoginAt || null,
+              emailVerified: subject.isVerified || false,
+              status: subject.status,
+            },
+          });
   } else {
     const subject = await orgPort.findById(userId);
     if (!subject) {
-      res.status(404).json({ success: false, message: 'User not found' });
+      jsonResponse(res, 404, { success: false, message: 'User not found' });
       return;
     }
-    res.json({
-      success: true,
-      data: {
-        id: subject.id,
-        email: subject.email,
-        lastLogin: null,
-        emailVerified: false,
-        status: subject.status,
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: {
+              id: subject.id,
+              email: subject.email,
+              lastLogin: null,
+              emailVerified: false,
+              status: subject.status,
+            },
+          });
   }
 };
 
@@ -411,12 +412,12 @@ export const revokeUserTokens = async (
   const { userId, userType } = req.body;
 
   if (!userId || !userType) {
-    res.status(400).json({ success: false, message: 'userId and userType are required' });
+    jsonResponse(res, 400, { success: false, message: 'userId and userType are required' });
     return;
   }
 
   const revokedCount = await logoutSessionUseCase.revokeAllForUser(userId, userType);
-  res.json({ success: true, data: { revokedCount } });
+  jsonResponse(res, 200, { success: true, data: { revokedCount } });
 };
 
 export const forceResetPassword = async (
@@ -426,7 +427,7 @@ export const forceResetPassword = async (
   const { userId, userType, newPassword } = req.body;
 
   if (!userId || !userType || !newPassword) {
-    res.status(400).json({ success: false, message: 'userId, userType, and newPassword are required' });
+    jsonResponse(res, 400, { success: false, message: 'userId, userType, and newPassword are required' });
     return;
   }
 
@@ -436,19 +437,19 @@ export const forceResetPassword = async (
     await orgPort.changePassword(userId, newPassword);
   }
 
-  res.json({ success: true, message: 'Password has been reset successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Password has been reset successfully' });
 };
 
 export const cleanupExpiredTokens = async (_req: HttpRequest<Record<string, string>, unknown>, res: HttpResponse): Promise<void> => {
   const { refreshTokens, blacklistTokens } = await cleanupExpiredTokensUseCase.execute();
 
-  res.json({
-    success: true,
-    data: {
-      passwordReset: 0,
-      emailVerification: 0,
-      refreshTokens,
-      blacklistTokens,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          passwordReset: 0,
+          emailVerification: 0,
+          refreshTokens,
+          blacklistTokens,
+        },
+      });
 };

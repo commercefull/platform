@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Brand Controller for Admin Hub
  * Manages brand CRUD operations using the brand repository directly.
@@ -46,7 +47,7 @@ export const viewBrand = async (req: HttpRequest, res: HttpResponse): Promise<vo
 
   if (!brand) {
     req.flash('error', 'Brand not found');
-    return res.redirect('/hub/catalog/brands');
+    return redirectResponse(res, '/hub/catalog/brands');
   }
 
   adminRespond(req, res, 'catalog/brands/view', {
@@ -83,7 +84,7 @@ export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<
 
   if (!name) {
     req.flash('error', 'Brand name is required');
-    return res.redirect('/hub/catalog/brands/new');
+    return redirectResponse(res, '/hub/catalog/brands/new');
   }
 
   try {
@@ -97,10 +98,10 @@ export const createBrand = async (req: HttpRequest, res: HttpResponse): Promise<
       countryOfOrigin: countryOfOrigin || undefined,
     });
     req.flash('success', `Brand "${name}" created successfully`);
-    res.redirect('/hub/catalog/brands');
+    redirectResponse(res, '/hub/catalog/brands');
   } catch (err) {
     req.flash('error', `Failed to create brand: ${(err as Error).message}`);
-    res.redirect('/hub/catalog/brands/new');
+    redirectResponse(res, '/hub/catalog/brands/new');
   }
 };
 
@@ -114,7 +115,7 @@ export const editBrandForm = async (req: HttpRequest, res: HttpResponse): Promis
 
   if (!brand) {
     req.flash('error', 'Brand not found');
-    return res.redirect('/hub/catalog/brands');
+    return redirectResponse(res, '/hub/catalog/brands');
   }
 
   adminRespond(req, res, 'catalog/brands/edit', {
@@ -142,7 +143,7 @@ export const updateBrand = async (req: HttpRequest, res: HttpResponse): Promise<
   const brand = await manageBrandsUseCase.findById(brandId);
   if (!brand) {
     req.flash('error', 'Brand not found');
-    return res.redirect('/hub/catalog/brands');
+    return redirectResponse(res, '/hub/catalog/brands');
   }
 
   try {
@@ -158,10 +159,10 @@ export const updateBrand = async (req: HttpRequest, res: HttpResponse): Promise<
       status === 'active' || status === 'inactive' || status === 'archived' ? status : undefined,
     );
     req.flash('success', 'Brand updated successfully');
-    res.redirect('/hub/catalog/brands');
+    redirectResponse(res, '/hub/catalog/brands');
   } catch (err) {
     req.flash('error', `Failed to update brand: ${(err as Error).message}`);
-    res.redirect(`/hub/catalog/brands/${brandId}/edit`);
+    redirectResponse(res, `/hub/catalog/brands/${brandId}/edit`);
   }
 };
 
@@ -179,5 +180,5 @@ export const deleteBrand = async (req: HttpRequest, res: HttpResponse): Promise<
     req.flash('error', `Failed to delete brand: ${(err as Error).message}`);
   }
 
-  res.redirect('/hub/catalog/brands');
+  redirectResponse(res, '/hub/catalog/brands');
 };

@@ -64,7 +64,7 @@ export class ChangePasswordUseCase {
     }
 
     // Hash and update new password
-    const newHash = await hashString(command.newPassword, 12);
+    const newHash = await hashString(command.newPassword);
     await this.customerRepository.updatePassword(command.customerId, newHash);
 
     // Emit event

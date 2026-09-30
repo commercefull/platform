@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   attributeSearchProductsUseCase as searchProductsUseCase,
@@ -70,11 +71,11 @@ class ProductSearchController {
     });
 
     if (!result.success) {
-      res.status(400).json(result);
+      jsonResponse(res, 400, result);
       return;
     }
 
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 
   /**
@@ -85,11 +86,11 @@ class ProductSearchController {
     const result = await searchProductsUseCase.execute(req.body as SearchProductsQuery);
 
     if (!result.success) {
-      res.status(400).json(result);
+      jsonResponse(res, 400, result);
       return;
     }
 
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 
   /**
@@ -105,11 +106,11 @@ class ProductSearchController {
     });
 
     if (!result.success) {
-      res.status(400).json(result);
+      jsonResponse(res, 400, result);
       return;
     }
 
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 
   /**
@@ -126,11 +127,11 @@ class ProductSearchController {
     });
 
     if (!result.success) {
-      res.status(400).json(result);
+      jsonResponse(res, 400, result);
       return;
     }
 
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 
   /**
@@ -146,11 +147,11 @@ class ProductSearchController {
     });
 
     if (!result.success) {
-      res.status(400).json(result);
+      jsonResponse(res, 400, result);
       return;
     }
 
-    res.json(result);
+    jsonResponse(res, 200, result);
   }
 }
 

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Audit Log Admin Controller
  *
@@ -31,36 +32,36 @@ export class AuditAdminController {
 
     const result = await manageAuditLogsUseCase.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
 
-    res.json({ success: true, data: result });
+    jsonResponse(res, 200, { success: true, data: result });
   });
 
   getLog = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const log = await manageAuditLogsUseCase.findById(String(req.params.id));
     if (!log) {
-      res.status(404).json({ success: false, error: 'Audit log entry not found' });
+      jsonResponse(res, 404, { success: false, error: 'Audit log entry not found' });
       return;
     }
-    res.json({ success: true, data: log.toJSON() });
+    jsonResponse(res, 200, { success: true, data: log.toJSON() });
   });
 
   verifyChain = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const fromId = req.query.fromId as string | undefined;
     const toId = req.query.toId as string | undefined;
     const result = await manageAuditLogsUseCase.verifyChain(fromId, toId);
-    res.json({ success: true, data: result });
+    jsonResponse(res, 200, { success: true, data: result });
   });
 
   getStats = asyncHandler(async (_req: HttpRequest, res: HttpResponse) => {
     const [byAction, byActor] = await Promise.all([manageAuditLogsUseCase.countByAction(), manageAuditLogsUseCase.countByActor()]);
-    res.json({ success: true, data: { byAction, byActor } });
+    jsonResponse(res, 200, { success: true, data: { byAction, byActor } });
   });
 
   findByCorrelationId = asyncHandler(async (req: HttpRequest, res: HttpResponse) => {
     const logs = await manageAuditLogsUseCase.findByCorrelationId(String(req.params.correlationId));
     if (logs.length === 0) {
-      res.status(404).json({ success: false, error: 'No audit logs found for correlation ID' });
+      jsonResponse(res, 404, { success: false, error: 'No audit logs found for correlation ID' });
       return;
     }
-    res.json({ success: true, data: logs.map(l => l.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: logs.map(l => l.toJSON()) });
   });
 }

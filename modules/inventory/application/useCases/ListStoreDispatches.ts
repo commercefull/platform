@@ -1,5 +1,5 @@
 import { DispatchFilters, StoreDispatchRepository } from '../../domain/repositories/StoreDispatchRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 
 export interface ListStoreDispatchesInput extends DispatchFilters {
   limit?: number;

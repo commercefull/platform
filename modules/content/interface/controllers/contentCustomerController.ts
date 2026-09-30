@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageContentUseCase } from '../../application/useCases/wired';
 
@@ -25,15 +26,15 @@ export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Pr
     publishedAt: page.publishedAt,
   }));
 
-  res.status(200).json({
-    success: true,
-    data: sanitizedPages,
-    pagination: {
-      limit,
-      offset,
-      total: pages.length,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: sanitizedPages,
+        pagination: {
+          limit,
+          offset,
+          total: pages.length,
+        },
+      });
 };
 
 /**
@@ -46,10 +47,10 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
   const page = await contentUC.findPageBySlug(slug);
 
   if (!page) {
-    res.status(404).json({
-      success: false,
-      message: 'Page not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Page not found',
+          });
     return;
   }
 
@@ -80,10 +81,10 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
 
   // Check if the page is published
   if (pageData.page.status !== 'published') {
-    res.status(404).json({
-      success: false,
-      message: `Page not found`,
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: `Page not found`,
+          });
     return;
   }
 
@@ -121,14 +122,14 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
     publishedAt: pageData.page.publishedAt,
   };
 
-  res.status(200).json({
-    success: true,
-    data: {
-      page: sanitizedPage,
-      blocks: sanitizedBlocks,
-      template: sanitizedTemplate,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          page: sanitizedPage,
+          blocks: sanitizedBlocks,
+          template: sanitizedTemplate,
+        },
+      });
 };
 
 /**
@@ -145,8 +146,8 @@ export const getActiveContentTypes = async (req: HttpRequest, res: HttpResponse)
     description: type.description,
   }));
 
-  res.status(200).json({
-    success: true,
-    data: sanitizedContentTypes,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: sanitizedContentTypes,
+      });
 };

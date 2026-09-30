@@ -5,7 +5,6 @@
  */
 
 import { eventBus } from '../../../libs/events/eventBus';
-import { query } from '../../../libs/db';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn(), registerHandler: jest.fn() },
@@ -33,7 +32,6 @@ jest.mock('../../../libs/cache', () => ({
 }));
 
 export const emitMock = jest.mocked(eventBus.emit);
-export const queryMock = jest.mocked(query);
 
 export function lazyMock<T extends object>(): jest.Mocked<T> {
   const cache = new Map<string | symbol, jest.Mock>();

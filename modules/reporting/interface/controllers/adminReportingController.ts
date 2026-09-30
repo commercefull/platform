@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
@@ -101,7 +102,7 @@ export const createSchedule = async (req: HttpRequest, res: HttpResponse): Promi
         : [],
       format: (body.format || 'pdf') as never,
     });
-    res.redirect(`/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
+    redirectResponse(res, `/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
       const templates = await getReportTemplatesUseCase.execute().catch(() => ({}));
@@ -147,7 +148,7 @@ export const updateSchedule = async (req: HttpRequest, res: HttpResponse): Promi
       format: (body.format || undefined) as never,
       isActive: body.isActive === 'true',
     });
-    res.redirect(`/admin/reporting/schedules/${req.params.scheduleId}?success=Scheduled report updated successfully`);
+    redirectResponse(res, `/admin/reporting/schedules/${req.params.scheduleId}?success=Scheduled report updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     const scheduleUseCase = getReportScheduleUseCase;
@@ -165,9 +166,9 @@ export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promi
   try {
     const useCase = deleteReportScheduleUseCase;
     await useCase.execute(req.params.scheduleId);
-    res.redirect('/admin/reporting/schedules?success=Scheduled report deleted successfully');
+    redirectResponse(res, '/admin/reporting/schedules?success=Scheduled report deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/reporting/schedules?error=${encodeURIComponent((error as Error).message || 'Failed to delete schedule')}`);
+    redirectResponse(res, `/admin/reporting/schedules?error=${encodeURIComponent((error as Error).message || 'Failed to delete schedule')}`);
   }
 };

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import {
@@ -15,18 +16,18 @@ class AutomationController {
   async listRules(req: HttpRequest, res: HttpResponse): Promise<void> {
     const activeOnly = req.query.activeOnly === 'true';
     const rules = await listAutomationRulesUseCase.execute(activeOnly);
-    res.json({ success: true, data: rules.map(r => r.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: rules.map(r => r.toJSON()) });
   }
 
   async getRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       const rule = await getAutomationRuleUseCase.execute(req.params.ruleId);
-      res.json({ success: true, data: rule.toJSON() });
+      jsonResponse(res, 200, { success: true, data: rule.toJSON() });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {
-        res.status(404).json({ success: false, error: error.message });
+        jsonResponse(res, 404, { success: false, error: error.message });
       } else {
-        res.status(500).json({ success: false, error: 'Internal error' });
+        jsonResponse(res, 500, { success: false, error: 'Internal error' });
       }
     }
   }
@@ -79,13 +80,13 @@ class AutomationController {
         createdBy: body.createdBy || (req.user as { id?: string })?.id || '',
       };
       const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
-      res.status(201).json({ success: true, data: rule.toJSON() });
+      jsonResponse(res, 201, { success: true, data: rule.toJSON() });
     } catch (error) {
       logger.error('Automation createRule error:', error);
       if (error instanceof InvalidAutomationRuleError) {
-        res.status(400).json({ success: false, error: error.message });
+        jsonResponse(res, 400, { success: false, error: error.message });
       } else {
-        res.status(500).json({ success: false, error: 'Internal error' });
+        jsonResponse(res, 500, { success: false, error: 'Internal error' });
       }
     }
   }
@@ -113,12 +114,12 @@ class AutomationController {
         req.params.ruleId,
         req.body as Parameters<typeof updateAutomationRuleUseCase.execute>[1],
       );
-      res.json({ success: true, data: rule.toJSON() });
+      jsonResponse(res, 200, { success: true, data: rule.toJSON() });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {
-        res.status(404).json({ success: false, error: error.message });
+        jsonResponse(res, 404, { success: false, error: error.message });
       } else {
-        res.status(500).json({ success: false, error: 'Internal error' });
+        jsonResponse(res, 500, { success: false, error: 'Internal error' });
       }
     }
   }
@@ -126,12 +127,12 @@ class AutomationController {
   async deleteRule(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     try {
       await deleteAutomationRuleUseCase.execute(req.params.ruleId);
-      res.json({ success: true });
+      jsonResponse(res, 200, { success: true });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {
-        res.status(404).json({ success: false, error: error.message });
+        jsonResponse(res, 404, { success: false, error: error.message });
       } else {
-        res.status(500).json({ success: false, error: 'Internal error' });
+        jsonResponse(res, 500, { success: false, error: 'Internal error' });
       }
     }
   }
@@ -142,12 +143,12 @@ class AutomationController {
   ): Promise<void> {
     try {
       const result = await triggerAutomationRuleUseCase.execute(req.params.ruleId, req.body?.context);
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
       if (error instanceof AutomationRuleNotFoundError) {
-        res.status(404).json({ success: false, error: error.message });
+        jsonResponse(res, 404, { success: false, error: error.message });
       } else {
-        res.status(500).json({ success: false, error: (error as Error).message });
+        jsonResponse(res, 500, { success: false, error: (error as Error).message });
       }
     }
   }
@@ -155,7 +156,7 @@ class AutomationController {
   async getExecutionLogs(req: HttpRequest<{ ruleId: string }>, res: HttpResponse): Promise<void> {
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
     const logs = await listExecutionLogsUseCase.findByRule(req.params.ruleId, limit);
-    res.json({ success: true, data: logs });
+    jsonResponse(res, 200, { success: true, data: logs });
   }
 }
 

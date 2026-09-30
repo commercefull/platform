@@ -1,8 +1,9 @@
+import { redirectResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import type { StoreRole } from '../../../identity/domain/entities/UserStoreAssignment';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import type { PaginatedResult } from '../../../../libs/types/shared';
+import type { PaginatedResult } from '../../../../libs/types/pagination';
 import {
   listStoresUseCase,
   getStoreUseCase,
@@ -123,7 +124,7 @@ export const createStore = async (req: HttpRequest, res: HttpResponse): Promise<
         defaultCurrency: body.defaultCurrency || 'USD',
       }),
     );
-    res.redirect(`/admin/stores/${result.storeId}?success=Store created successfully`);
+    redirectResponse(res, `/admin/stores/${result.storeId}?success=Store created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     const organizations = await organizationLookupAdapter.findAll().catch(() => []);
@@ -185,7 +186,7 @@ export const updateStore = async (req: HttpRequest, res: HttpResponse): Promise<
         },
       }),
     );
-    res.redirect(`/admin/stores/${req.params.storeId}?success=Store updated successfully`);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}?success=Store updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     const organizations = await organizationLookupAdapter.findAll().catch(() => []);
@@ -227,23 +228,19 @@ export const assignUserToStore = async (req: HttpRequest, res: HttpResponse): Pr
             .filter(Boolean)
         : [],
     });
-    res.redirect(`/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`,
-    );
+    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`);
   }
 };
 
 export const removeUserFromStore = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await removeUserFromStoreUseCase.execute(req.params.userId, req.params.storeId);
-    res.redirect(`/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`,
-    );
+    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`);
   }
 };

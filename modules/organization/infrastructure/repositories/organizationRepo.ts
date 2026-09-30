@@ -343,8 +343,7 @@ export class OrganizationRepo {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
-    return hashString(password, saltRounds);
+    return hashString(password);
   }
 
   async changePassword(organizationId: string, newPassword: string): Promise<boolean> {

@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Shipping Rate Controller
  * Handles shipping rate management for the Admin Hub
@@ -109,7 +110,7 @@ export const createShippingRate = async (req: HttpRequest, res: HttpResponse): P
     createdBy: 'admin', // Required field
   });
 
-  res.redirect(`/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
+  redirectResponse(res, `/hub/shipping/rates/${rate.shippingRateId}?success=Shipping rate created successfully`);
 };
 
 export const viewShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -194,7 +195,7 @@ export const updateShippingRate = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Shipping rate not found after update');
   }
 
-  res.redirect(`/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
+  redirectResponse(res, `/hub/shipping/rates/${rateId}?success=Shipping rate updated successfully`);
 };
 
 export const activateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -206,7 +207,7 @@ export const activateShippingRate = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Shipping rate not found');
   }
 
-  res.json({ success: true, message: 'Shipping rate activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping rate activated successfully' });
 };
 
 export const deactivateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -218,7 +219,7 @@ export const deactivateShippingRate = async (req: HttpRequest, res: HttpResponse
     throw new Error('Shipping rate not found');
   }
 
-  res.json({ success: true, message: 'Shipping rate deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping rate deactivated successfully' });
 };
 
 export const deleteShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -230,7 +231,7 @@ export const deleteShippingRate = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Failed to delete shipping rate');
   }
 
-  res.json({ success: true, message: 'Shipping rate deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping rate deleted successfully' });
 };
 
 export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -246,7 +247,7 @@ export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse)
   const rate = await manageShippingRatesUseCase.findByZoneAndMethod(zoneId, methodId);
 
   if (!rate) {
-    res.json({ calculatedRate: null, message: 'No applicable shipping rate found' });
+    jsonResponse(res, 200, { calculatedRate: null, message: 'No applicable shipping rate found' });
     return;
   }
 
@@ -257,10 +258,10 @@ export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse)
     weight ? parseFloat(weight) : undefined,
   );
 
-  res.json({
-    calculatedRate,
-    rateId: rate.shippingRateId,
-    rateType: rate.rateType,
-    currency: rate.currencyCode,
-  });
+  jsonResponse(res, 200, {
+        calculatedRate,
+        rateId: rate.shippingRateId,
+        rateType: rate.rateType,
+        currency: rate.currencyCode,
+      });
 };

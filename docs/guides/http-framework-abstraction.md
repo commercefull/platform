@@ -14,7 +14,7 @@ req.params;
 req.query;
 req.user;
 
-res.status(201).json({ success: true });
+jsonResponse(res, 201, { success: true });
 router.get('/resource', handler);
 ```
 
@@ -154,7 +154,7 @@ export type HttpRequestBody = Record<string, unknown>;
 
 ### 3.3 Express augmentation
 
-`libs/http/expressAugmentation.ts` declares `Express.Request`/`Express.User` extensions globally so third-party middleware (`passport`, `express-session`, `connect-flash`, `multer`) and the platform's own fields (`req.rawBody`, `req.companyUser`, `req.customer`) stay typed:
+`libs/http/expressAugmentation.ts` declares `Express.Request`/`Express.User` extensions globally so third-party middleware (`express-session`, `multer`) and the platform's own middleware and fields (`req.cookies`/`req.signedCookies` from `libs/cookieParser`, `req.flash` from `libs/flash`, plus `req.rawBody`, `req.companyUser`, `req.customer`) stay typed:
 
 ```ts
 declare global {
@@ -166,6 +166,9 @@ declare global {
       companyUser?: HttpCompanyUser;
       b2bCompanyUserId?: string;
       customer?: HttpCustomerContext;
+      cookies: Record<string, string>;
+      signedCookies: Record<string, string>;
+      flash: { /* overloaded — see expressAugmentation.ts */ };
     }
   }
 }
@@ -173,7 +176,7 @@ declare global {
 
 It is loaded automatically by `libs/http/index.ts` — consumers never import it directly.
 
-**Consequence:** because `@types/express-session`, `@types/connect-flash`, `@types/multer`, and `@types/passport` also augment `Express.Request`/`Express.Response` globally, `HttpRequest` inherits `req.session`, `req.flash()`, `req.file`/`req.files`, and `HttpResponse` inherits `res.render`. Portal and upload code compiles against facade types without extra imports.
+**Consequence:** because `@types/express-session` and `@types/multer` also augment `Express.Request`/`Express.Response` globally — and our own augmentation covers cookies and flash — `HttpRequest` inherits `req.session`, `req.flash()`, `req.cookies`, `req.file`/`req.files`, and `HttpResponse` inherits `res.render`. Portal and upload code compiles against facade types without extra imports. Response methods (`res.render`, `res.json`, …) still exist on the type, but controllers route every response through the `libs/apiResponse` transport helpers (see [§5.1](#51-controllers)).
 
 ### 3.4 Runtime adapter
 
@@ -210,8 +213,10 @@ Everything else — all `modules/`, all `web/`, all other `libs/` — uses the f
 
 The ban targets the literal `express` package only. These remain legitimate imports anywhere (they are distinct packages, not Express itself):
 
-- `express-session`, `connect-flash`, `express-winston`, `express-validator`
-- `swagger-ui-express`, `@as-integrations/express5`, `passport`, `multer`
+- `express-session`
+- `swagger-ui-express`, `@as-integrations/express5`, `multer`
+
+In-house middleware replaced the former `connect-flash`, `cookie-parser`, `hpp`, `express-winston`, `express-validator`, and `passport` packages — see `libs/flash`, `libs/cookieParser`, `libs/hpp`, `libs/logger` (`expressHttpLogger`), and `modules/content/validator.ts`.
 
 ---
 
@@ -220,12 +225,15 @@ The ban targets the literal `express` package only. These remain legitimate impo
 ### 5.1 Controllers
 
 ```ts
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 export async function list(req: HttpRequest, res: HttpResponse): Promise<void> {
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 }
 ```
+
+Controllers never call `res.status`/`res.json`/`res.redirect`/`res.render`/`res.send`/`res.cookie`/`res.setHeader` directly. All response transport goes through `libs/apiResponse` (`jsonResponse`, `sendResponse`, `redirectResponse`, `renderResponse`, `setStatus`, `setHeader`, `cookieResponse`) — the helpers delegate to Express so test mocks and wire behavior are unchanged, and a future framework swap edits one file. See [API Response Standards](../guidelines/api-responses.md).
 
 ### 5.2 Routers
 
@@ -273,7 +281,7 @@ params: body as Parameters<typeof useCase.create>[0],
 
 ### 5.5 Portals (web layer)
 
-Admin and storefront controllers use the same facade types while remaining explicitly Express-backed at runtime. `res.render`, `res.locals`, `req.flash`, `req.session`, redirects, and view callbacks work unchanged (see [§3.3](#33-express-augmentation)). The facade does **not** promise these portals can run unchanged on another framework.
+Admin and storefront controllers use the same facade types while remaining explicitly Express-backed at runtime. `res.locals`, `req.flash`, `req.session`, and view callbacks work unchanged (see [§3.3](#33-express-augmentation)); renders go through `renderResponse` (partials/previews) or `adminRespond`/`storefrontRespond` (full pages with layout), and redirects through `redirectResponse`. The facade does **not** promise these portals can run unchanged on another framework.
 
 ---
 
@@ -286,7 +294,7 @@ Admin and storefront controllers use the same facade types while remaining expli
 | Sessions/flash/render | `web/` portal controllers              | Typed via global augmentation; Express-specific by design.                                     |
 | GraphQL               | `boot/graphql.ts`                      | Apollo `expressMiddleware`; handler typed as `express.RequestHandler` (see §5.3 caveat).       |
 | Sessions store        | `libs/session/sessionStoreFactory.ts`  | Imports `express-session` directly — a distinct package, not the banned `express`.             |
-| Validation            | `modules/content/validator.ts`         | Imports `express-validator` (distinct package); handlers exported as `HttpHandler`.            |
+| Validation            | `modules/content/validator.ts`         | In-house field-rule middleware; handlers exported as `HttpHandler`.                            |
 
 ---
 
@@ -324,7 +332,7 @@ The facade prepares for, but does not implement, a framework swap. When evaluate
 
 ### 9.1 Inventory the consumed facade
 
-Determine which APIs application code actually uses — request properties, response methods, router methods, middleware signatures, cookies/sessions, rendering, uploads, streams. Do not design an adapter against the entire Express API.
+Determine which APIs application code actually uses — request properties, response methods, router methods, middleware signatures, cookies/sessions, rendering, uploads, streams. Do not design an adapter against the entire Express API. Response transport is already inventoried: the entire `res.*` surface application code consumes is the ~7 helpers in `libs/apiResponse`.
 
 ### 9.2 Choose a migration boundary
 
@@ -349,12 +357,13 @@ Run the same API integration tests against both frameworks: routing and path par
 1. New module controllers import `HttpRequest` and `HttpResponse` from `libs/http`.
 2. New module middleware imports `HttpNext` (or exports `HttpHandler` if mounted via `app.use`-style signatures) from `libs/http`.
 3. New module routers use `createHttpRouter()`.
-4. Direct Express imports require a framework-boundary justification and are enforced by ESLint.
-5. Do not add methods to the facade without a real consumer.
-6. Do not put module-specific user or request fields into the shared facade without cross-module need.
-7. Use `import type` for type-only imports.
-8. Keep endpoint behavior changes separate from facade work.
-9. Treat a future framework replacement as a runtime-adapter project, not a TypeScript alias edit.
+4. Controllers send responses only via `libs/apiResponse` transport helpers — never call `res.status`/`res.json`/`res.redirect`/`res.render`/`res.send`/`res.cookie`/`res.setHeader` directly.
+5. Direct Express imports require a framework-boundary justification and are enforced by ESLint.
+6. Do not add methods to the facade without a real consumer.
+7. Do not put module-specific user or request fields into the shared facade without cross-module need.
+8. Use `import type` for type-only imports.
+9. Keep endpoint behavior changes separate from facade work.
+10. Treat a future framework replacement as a runtime-adapter project, not a TypeScript alias edit.
 
 ---
 
@@ -368,3 +377,5 @@ Key outcomes:
 - 520 unit suites (3,665 tests) and all module integration suites pass unchanged; generated route docs (1,215 routes) and OpenAPI (826 paths, 162 schemas) stayed stable throughout.
 - 18 EJS templates with pre-existing delimiter/TDZ bugs were discovered and fixed during portal verification.
 - Notable patterns preserved: `interface-no-infra` forces inline literal-union or `Parameters<>` casts where enum types live in `infrastructure/`; `HttpHandler` is used where `HttpRequest`'s narrower `Query` default breaks assignability to Express `RequestHandler` signatures.
+
+**Phase 2 — response transport (2026-09-30):** ~1,970 direct `res.*` call sites across 155 files (`modules/` + `web/`) moved onto `libs/apiResponse` transport helpers via `scripts/codemod-response-helpers.ts`. Helpers delegate to Express — wire behavior and test mocks unchanged; a framework swap now edits `libs/apiResponse` + `libs/http` + composition roots instead of ~2,000 call sites. Remaining direct `res.*` usage lives only in `libs/apiResponse.ts`, the `*Respond` helpers, `errorMiddleware`, and test mocks.

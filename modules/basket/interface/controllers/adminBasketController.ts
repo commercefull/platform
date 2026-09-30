@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Basket Controller
  * Handles abandoned cart recovery and basket analytics for the Admin Hub
@@ -80,12 +81,12 @@ export const recoverAbandonedCart = async (req: HttpRequest, res: HttpResponse):
   // 3. Track recovery attempts
   // 4. Update basket status
 
-  res.json({
-    success: true,
-    message: 'Recovery action initiated successfully',
-    recoveryMethod,
-    basketId,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Recovery action initiated successfully',
+        recoveryMethod,
+        basketId,
+      });
 };
 
 export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -114,12 +115,12 @@ export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Pr
     cartValueCents: manageBasketUseCase.getCartValueCents(basket),
   });
 
-  res.json({
-    success: true,
-    message: 'Recovery email sent successfully',
-    basketId,
-    customerId: basket.customerId,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Recovery email sent successfully',
+        basketId,
+        customerId: basket.customerId,
+      });
 };
 
 export const markCartRecovered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -127,7 +128,7 @@ export const markCartRecovered = async (req: HttpRequest, res: HttpResponse): Pr
 
   // In a real implementation, this would be called when a customer completes purchase from recovered cart
 
-  res.json({ success: true, message: 'Cart marked as recovered' });
+  jsonResponse(res, 200, { success: true, message: 'Cart marked as recovered' });
 };
 
 // ============================================================================
@@ -146,9 +147,9 @@ export const basketAnalytics = async (req: HttpRequest, res: HttpResponse): Prom
 export const cleanupExpiredBaskets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const deletedCount = await manageBasketUseCase.cleanupExpiredBaskets();
 
-  res.json({
-    success: true,
-    message: `Successfully cleaned up ${deletedCount} expired baskets`,
-    deletedCount,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: `Successfully cleaned up ${deletedCount} expired baskets`,
+        deletedCount,
+      });
 };

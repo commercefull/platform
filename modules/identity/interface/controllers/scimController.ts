@@ -1,3 +1,4 @@
+import { jsonResponse, sendResponse } from "libs/apiResponse";
 /**
  * SCIM 2.0 Controller
  *
@@ -16,11 +17,11 @@ import type { ManageScimProvisioningUseCase, ScimPatchOperation } from '../../ap
 const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
 function scimError(status: number, detail: string, res: HttpResponse): void {
-  res.status(status).json({
-    schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
-    status: status.toString(),
-    detail,
-  });
+  jsonResponse(res, status, {
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
+        status: status.toString(),
+        detail,
+      });
 }
 
 function validateScimToken(req: HttpRequest): void {
@@ -75,13 +76,13 @@ export class ScimController {
         this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
       );
 
-      res.json({
-        schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-        totalResults: resources.length,
-        Resources: resources,
-        itemsPerPage: resources.length,
-        startIndex: 1,
-      });
+      jsonResponse(res, 200, {
+                schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
+                totalResults: resources.length,
+                Resources: resources,
+                itemsPerPage: resources.length,
+                startIndex: 1,
+              });
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -103,7 +104,7 @@ export class ScimController {
       const { id } = req.params;
 
       const { record, user } = await this.scimUseCase.getUser(id);
-      res.json(this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
+      jsonResponse(res, 200, this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -142,9 +143,7 @@ export class ScimController {
         externalId: body.externalId as string | undefined,
       });
 
-      res
-        .status(201)
-        .json(this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
+      jsonResponse(res, 201, this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -172,16 +171,14 @@ export class ScimController {
         active: body.active as boolean | undefined,
       });
 
-      res.json(
-        this.toScimUser(
-          updatedRecord.scimUserId,
-          user,
-          active,
-          updatedRecord.createdAt,
-          updatedRecord.updatedAt,
-          updatedRecord.externalId,
-        ),
-      );
+      jsonResponse(res, 200, this.toScimUser(
+                  updatedRecord.scimUserId,
+                  user,
+                  active,
+                  updatedRecord.createdAt,
+                  updatedRecord.updatedAt,
+                  updatedRecord.externalId,
+                ));
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -206,7 +203,7 @@ export class ScimController {
       const operations = body.Operations as ScimPatchOperation[] | undefined;
       await this.scimUseCase.patchUser(id, operations);
 
-      res.status(204).send();
+      sendResponse(res, 204);
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -229,7 +226,7 @@ export class ScimController {
 
       await this.scimUseCase.deprovisionUser(id);
 
-      res.status(204).send();
+      sendResponse(res, 204);
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);

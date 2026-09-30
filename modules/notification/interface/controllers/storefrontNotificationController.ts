@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Notification Controller
  * Customer-facing notification pages
@@ -18,7 +19,7 @@ import { RegisterNotificationDeviceCommand } from '../../application/useCases/Re
  */
 export const listNotifications = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const page = parseInt(req.query.page as string) || 1;
   const limit = 20;
@@ -43,7 +44,7 @@ export const listNotifications = async (req: HttpRequest, res: HttpResponse) => 
  */
 export const markAsRead = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const { notificationId } = req.params;
 
@@ -51,11 +52,11 @@ export const markAsRead = async (req: HttpRequest, res: HttpResponse) => {
 
   // If AJAX request, return JSON
   if (req.xhr || req.headers.accept?.includes('json')) {
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
     return;
   }
 
-  res.redirect('/notifications');
+  redirectResponse(res, '/notifications');
 };
 
 /**
@@ -63,17 +64,17 @@ export const markAsRead = async (req: HttpRequest, res: HttpResponse) => {
  */
 export const markAllAsRead = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   await manageNotificationsUseCase.markAllAsRead(customerId);
 
   if (req.xhr || req.headers.accept?.includes('json')) {
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
     return;
   }
 
   req.flash?.('success', 'All notifications marked as read');
-  res.redirect('/notifications');
+  redirectResponse(res, '/notifications');
 };
 
 /**
@@ -81,7 +82,7 @@ export const markAllAsRead = async (req: HttpRequest, res: HttpResponse) => {
  */
 export const getPreferences = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const preferences = await manageNotificationsUseCase.getPreferences(customerId);
 
@@ -97,7 +98,7 @@ export const getPreferences = async (req: HttpRequest, res: HttpResponse) => {
 export const updatePreferences = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+    if (!customerId) return redirectResponse(res, '/signin');
 
     const body = req.body as HttpRequestBody;
     const { emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = body;
@@ -110,11 +111,11 @@ export const updatePreferences = async (req: HttpRequest, res: HttpResponse) => 
     });
 
     req.flash?.('success', 'Notification preferences updated');
-    res.redirect('/notifications/preferences');
+    redirectResponse(res, '/notifications/preferences');
   } catch (error) {
     logger.warn('Error:', error);
     req.flash?.('error', 'Failed to update preferences');
-    res.redirect('/notifications/preferences');
+    redirectResponse(res, '/notifications/preferences');
   }
 };
 
@@ -124,7 +125,7 @@ export const updatePreferences = async (req: HttpRequest, res: HttpResponse) => 
  */
 export const getDevices = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const devices = await manageDevicesUseCase.findByUser(customerId);
 
@@ -141,7 +142,7 @@ export const getDevices = async (req: HttpRequest, res: HttpResponse) => {
 export const registerDevice = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+    if (!customerId) return redirectResponse(res, '/signin');
 
     const body = req.body as HttpRequestBody;
     const { deviceToken, platform } = body;
@@ -151,11 +152,11 @@ export const registerDevice = async (req: HttpRequest, res: HttpResponse) => {
     );
 
     req.flash?.('success', 'Device registered successfully');
-    res.redirect('/notifications/devices');
+    redirectResponse(res, '/notifications/devices');
   } catch (error) {
     logger.warn('Error registering notification device:', error);
     req.flash?.('error', 'Failed to register device');
-    res.redirect('/notifications/devices');
+    redirectResponse(res, '/notifications/devices');
   }
 };
 
@@ -166,17 +167,17 @@ export const registerDevice = async (req: HttpRequest, res: HttpResponse) => {
 export const deleteDevice = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+    if (!customerId) return redirectResponse(res, '/signin');
 
     const { deviceToken } = req.params;
 
     await manageDevicesUseCase.deactivate(deviceToken);
 
     req.flash?.('success', 'Device removed successfully');
-    res.redirect('/notifications/devices');
+    redirectResponse(res, '/notifications/devices');
   } catch (error) {
     logger.warn('Error deleting notification device:', error);
     req.flash?.('error', 'Failed to remove device');
-    res.redirect('/notifications/devices');
+    redirectResponse(res, '/notifications/devices');
   }
 };

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Theme Business Controller
  * Handles theme management, overrides, and assignment via /business/theme routes.
@@ -26,38 +27,38 @@ class ThemeController {
       const organizationId = req.query.organizationId as string | undefined;
 
       const themes = await manageThemesUseCase.list({ status, type, tags, organizationId });
-      res.json({ success: true, data: themes });
+      jsonResponse(res, 200, { success: true, data: themes });
     } catch (error) {
       logger.error('Error listing themes:', error);
-      res.status(500).json({ success: false, message: 'Failed to list themes' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to list themes' });
     }
   }
 
   async listBuiltInThemes(_req: HttpRequest, res: HttpResponse) {
     try {
       const themes = await manageThemesUseCase.listBuiltIn();
-      res.json({ success: true, data: themes });
+      jsonResponse(res, 200, { success: true, data: themes });
     } catch (error) {
       logger.error('Error listing built-in themes:', error);
-      res.status(500).json({ success: false, message: 'Failed to list built-in themes' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to list built-in themes' });
     }
   }
 
   async getTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const theme = await manageThemesUseCase.getById(req.params.themeId);
-      res.json({ success: true, data: theme });
+      jsonResponse(res, 200, { success: true, data: theme });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async getThemeBySlug(req: HttpRequest, res: HttpResponse) {
     try {
       const theme = await manageThemesUseCase.getBySlug(req.params.slug);
-      res.json({ success: true, data: theme });
+      jsonResponse(res, 200, { success: true, data: theme });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -90,9 +91,9 @@ class ThemeController {
       });
 
       const result = await manageThemesUseCase.create(command);
-      res.status(201).json({ success: true, data: result });
+      jsonResponse(res, 201, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -109,36 +110,36 @@ class ThemeController {
         assets: body.assets as CreateThemeCommand['themeData']['assets'] | undefined,
         tags: body.tags as string[] | undefined,
       });
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async deleteTheme(req: HttpRequest, res: HttpResponse) {
     try {
       await manageThemesUseCase.delete(req.params.themeId);
-      res.json({ success: true, message: 'Theme deleted' });
+      jsonResponse(res, 200, { success: true, message: 'Theme deleted' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async activateTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const result = await manageThemesUseCase.activate(req.params.themeId);
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async archiveTheme(req: HttpRequest, res: HttpResponse) {
     try {
       const result = await manageThemesUseCase.archive(req.params.themeId);
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -147,20 +148,20 @@ class ThemeController {
   async getOverrideByStore(req: HttpRequest, res: HttpResponse) {
     try {
       const override = await manageOverridesUseCase.getByStore(req.params.storeId);
-      res.json({ success: true, data: override });
+      jsonResponse(res, 200, { success: true, data: override });
     } catch (error) {
       logger.error('Error getting override:', error);
-      res.status(500).json({ success: false, message: 'Failed to get override' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to get override' });
     }
   }
 
   async getOverridesByOrganization(req: HttpRequest, res: HttpResponse) {
     try {
       const overrides = await manageOverridesUseCase.getByOrganization(req.params.organizationId);
-      res.json({ success: true, data: overrides });
+      jsonResponse(res, 200, { success: true, data: overrides });
     } catch (error) {
       logger.error('Error listing overrides:', error);
-      res.status(500).json({ success: false, message: 'Failed to list overrides' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to list overrides' });
     }
   }
 
@@ -181,9 +182,9 @@ class ThemeController {
       });
 
       const result = await manageOverridesUseCase.create(command);
-      res.status(201).json({ success: true, data: result });
+      jsonResponse(res, 201, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -199,18 +200,18 @@ class ThemeController {
         customHeadTags: body.customHeadTags as string[] | undefined,
         customBodyAttributes: body.customBodyAttributes as Record<string, string> | undefined,
       });
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async deleteOverride(req: HttpRequest, res: HttpResponse) {
     try {
       await manageOverridesUseCase.delete(req.params.overrideId);
-      res.json({ success: true, message: 'Override deleted' });
+      jsonResponse(res, 200, { success: true, message: 'Override deleted' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -225,28 +226,28 @@ class ThemeController {
         (body.organizationId as string) || (req.user?.id as string) || '',
       );
       await assignThemeUseCase.execute(command);
-      res.json({ success: true, message: 'Theme assigned to store' });
+      jsonResponse(res, 200, { success: true, message: 'Theme assigned to store' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async unassignTheme(req: HttpRequest, res: HttpResponse) {
     try {
       await assignThemeUseCase.unassign(req.params.storeId);
-      res.json({ success: true, message: 'Theme unassigned from store' });
+      jsonResponse(res, 200, { success: true, message: 'Theme unassigned from store' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
   async getAssignment(req: HttpRequest, res: HttpResponse) {
     try {
       const assignment = await assignThemeUseCase.getAssignment(req.params.storeId);
-      res.json({ success: true, data: assignment });
+      jsonResponse(res, 200, { success: true, data: assignment });
     } catch (error) {
       logger.error('Error getting assignment:', error);
-      res.status(500).json({ success: false, message: 'Failed to get assignment' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to get assignment' });
     }
   }
 
@@ -256,27 +257,27 @@ class ThemeController {
     try {
       const resolved = await resolveThemeUseCase.execute(req.params.storeId);
       if (!resolved) {
-        res.status(404).json({ success: false, message: 'No theme assigned to this store' });
+        jsonResponse(res, 404, { success: false, message: 'No theme assigned to this store' });
         return;
       }
 
-      res.json({
-        success: true,
-        data: {
-          theme: resolved.theme.toJSON(),
-          settings: resolved.settings,
-          cssVariables: resolved.cssVariables,
-          css: themeRegistry.generateCSS(resolved),
-          headTags: themeRegistry.generateHeadTags(resolved),
-          bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
-          customLogoUrl: resolved.customLogoUrl,
-          customFaviconUrl: resolved.customFaviconUrl,
-          customBannerUrl: resolved.customBannerUrl,
-        },
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                data: {
+                  theme: resolved.theme.toJSON(),
+                  settings: resolved.settings,
+                  cssVariables: resolved.cssVariables,
+                  css: themeRegistry.generateCSS(resolved),
+                  headTags: themeRegistry.generateHeadTags(resolved),
+                  bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
+                  customLogoUrl: resolved.customLogoUrl,
+                  customFaviconUrl: resolved.customFaviconUrl,
+                  customBannerUrl: resolved.customBannerUrl,
+                },
+              });
     } catch (error) {
       logger.error('Error resolving theme:', error);
-      res.status(500).json({ success: false, message: 'Failed to resolve theme' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to resolve theme' });
     }
   }
 
@@ -285,10 +286,10 @@ class ThemeController {
   async seedBuiltInThemes(_req: HttpRequest, res: HttpResponse) {
     try {
       const count = await manageThemesUseCase.seedBuiltInThemes();
-      res.json({ success: true, message: `Seeded ${count} built-in themes` });
+      jsonResponse(res, 200, { success: true, message: `Seeded ${count} built-in themes` });
     } catch (error) {
       logger.error('Error seeding themes:', error);
-      res.status(500).json({ success: false, message: 'Failed to seed built-in themes' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to seed built-in themes' });
     }
   }
 }

@@ -94,5 +94,5 @@ COOKIE_SECRET=<secure-secret>        # Cookie signing
 
 ## Password Hashing
 
-- Algorithm: **bcrypt** via `bcryptjs`
-- Salt rounds: **10**
+- Algorithm: **scrypt** via `node:crypto` (`libs/hash.ts`)
+- Parameters: N=16384, r=8, p=1, keylen=64 — stored inside each hash so they can be upgraded later

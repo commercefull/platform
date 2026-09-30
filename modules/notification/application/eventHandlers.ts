@@ -280,6 +280,7 @@ const registerInventoryEventHandlers = () => {
     for (const merchant of merchants || []) {
       await JobScheduler.scheduleNotification({
         userId: merchant.organizationId,
+        userType: 'organization',
         type: 'low_stock_alert',
         title: 'Low Stock Alert',
         message: `Product ${sku} is running low on stock (${currentStock} remaining, reorder at ${reorderPoint}).`,
@@ -300,6 +301,7 @@ const registerInventoryEventHandlers = () => {
     for (const merchant of merchants || []) {
       await JobScheduler.scheduleNotification({
         userId: merchant.organizationId,
+        userType: 'organization',
         type: 'out_of_stock_alert',
         title: 'Out of Stock Alert',
         message: `Product ${sku} is now out of stock.`,
@@ -333,6 +335,7 @@ const registerInventoryEventHandlers = () => {
     for (const merchant of merchants || []) {
       await JobScheduler.scheduleNotification({
         userId: merchant.organizationId,
+        userType: 'organization',
         type: 'reservation_failed_alert',
         title: 'Stock Reservation Failed',
         message: `Order ${orderId} could not reserve stock${reason ? `: ${reason}` : ''}. Manual review required.`,

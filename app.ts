@@ -1,21 +1,18 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
-import cookieParser from 'cookie-parser';
-import flash from 'connect-flash';
-import { popFlashMessages } from './libs/flash';
+import { cookieParser } from './libs/cookieParser';
+import { flashMiddleware, popFlashMessages } from './libs/flash';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
-import bodyParser from 'body-parser';
 import i18nextMiddleware from 'i18next-http-middleware';
 import helmet from 'helmet';
 import compression from 'compression';
 import session from 'express-session';
 import cors from 'cors';
-import hpp from 'hpp';
+import { hpp } from './libs/hpp';
 import { pool } from './libs/db/pool';
 import { resolveTestDatabase, runWithTestDb } from './libs/db/testDbContext';
 import { startQueryCounterContext } from './libs/db/queryCounter';
-import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
 import { configureRoutes } from './boot/routes';
@@ -321,7 +318,7 @@ app.use(
   }),
 );
 
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true, parameterLimit: 1000 }));
+app.use(express.urlencoded({ limit: '10mb', extended: true, parameterLimit: 1000 }));
 
 app.set('view engine', 'ejs');
 app.locals.t = function (key: string) {
@@ -388,9 +385,7 @@ app.use(
     },
   }),
 );
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(flashMiddleware());
 
 // Make session data available in templates
 app.use((req, res, next) => {

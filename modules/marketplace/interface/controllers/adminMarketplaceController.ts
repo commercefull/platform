@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Marketplace Admin UI Controller
  * Admin views for vendors, commission rules, and payouts
@@ -55,7 +56,7 @@ export const createVendor = async (req: HttpRequest, res: HttpResponse): Promise
     organizationId,
   } as Parameters<typeof manageVendorUseCase.create>[0]);
 
-  res.redirect(`/admin/marketplace/vendors/${vendor.vendorId}?success=Vendor created successfully`);
+  redirectResponse(res, `/admin/marketplace/vendors/${vendor.vendorId}?success=Vendor created successfully`);
 };
 
 export const editVendorForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -77,19 +78,19 @@ export const updateVendor = async (req: HttpRequest, res: HttpResponse): Promise
   const { vendorId } = req.params;
   const body = req.body as HttpRequestBody;
   await manageVendorUseCase.updateProfile(vendorId, body as Parameters<typeof manageVendorUseCase.updateProfile>[1]);
-  res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor updated successfully`);
+  redirectResponse(res, `/admin/marketplace/vendors/${vendorId}?success=Vendor updated successfully`);
 };
 
 export const approveVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   await manageVendorUseCase.approve(vendorId);
-  res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor approved`);
+  redirectResponse(res, `/admin/marketplace/vendors/${vendorId}?success=Vendor approved`);
 };
 
 export const suspendVendor = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { vendorId } = req.params;
   await manageVendorUseCase.suspend(vendorId);
-  res.redirect(`/admin/marketplace/vendors/${vendorId}?success=Vendor suspended`);
+  redirectResponse(res, `/admin/marketplace/vendors/${vendorId}?success=Vendor suspended`);
 };
 
 export const listCommissionRules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

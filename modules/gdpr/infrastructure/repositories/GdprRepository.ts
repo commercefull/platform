@@ -6,7 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { GdprDataRequest as GdprDataRequestDb, GdprCookieConsent as GdprCookieConsentDb } from '../../../../libs/db/types';
 import { GdprDataRequestRepository, GdprCookieConsentRepository, GdprRequestFilters } from '../../domain/repositories/GdprRepository';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../../domain/entities/GdprDataRequest';
 import { GdprCookieConsent } from '../../domain/entities/GdprCookieConsent';
 

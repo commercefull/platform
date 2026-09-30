@@ -7,7 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { Coupon, CouponUsage, DiscountType } from '../../domain/entities/Coupon';
 import { PromotionCoupon, PromotionCouponUsage } from '../../../../libs/db/types';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export interface CouponFilters {
   code?: string;

@@ -27,6 +27,7 @@ export function registerOrganizationEventHandlers(deps: OrganizationEventHandler
     try {
       await JobScheduler.scheduleNotification({
         userId: organizationId,
+        userType: 'organization',
         type: 'merchant_approved',
         title: 'Merchant Account Approved',
         message: `Welcome to Commercefull! Your merchant account${businessName ? ` "${businessName}"` : ''} has been approved.`,
@@ -54,6 +55,7 @@ export function registerOrganizationEventHandlers(deps: OrganizationEventHandler
 
       await JobScheduler.scheduleNotification({
         userId: vendor.organizationId,
+        userType: 'organization',
         type: 'settlement_created',
         title: 'Settlement Created',
         message: `A settlement of $${amount} has been created.`,
@@ -80,6 +82,7 @@ export function registerOrganizationEventHandlers(deps: OrganizationEventHandler
 
       await JobScheduler.scheduleNotification({
         userId: vendor.organizationId,
+        userType: 'organization',
         type: 'payout_processed',
         title: 'Payout Processed',
         message: `A payout of $${amount} has been processed to your account.`,

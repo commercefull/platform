@@ -4,7 +4,7 @@
 
 import { WebhookEndpointProps } from '../entities/WebhookEndpoint';
 import { WebhookDeliveryProps, DeliveryStatus } from '../entities/WebhookDelivery';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 
 export interface WebhookEndpointFilters {
   organizationId?: string;

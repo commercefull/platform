@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import { DispatchStatus } from '../../domain/entities/StoreDispatch';
@@ -39,11 +40,11 @@ interface CancelDispatchBody {
 }
 
 function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, error: message });
+  jsonResponse(res, statusCode, { success: false, error: message });
 }
 
 export const createStoreDispatch = async (

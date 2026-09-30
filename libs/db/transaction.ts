@@ -1,4 +1,5 @@
-import { getActivePool } from './pool';
+import type { QueryResult } from 'pg';
+import { getActivePool, mapPgError } from './pool';
 import { incrementQueryCounter } from './queryCounter';
 
 /**
@@ -43,7 +44,12 @@ export async function withTransaction<T>(fn: (tx: TxClient) => Promise<T>): Prom
     const tx: TxClient = {
       async query<U>(text: string, params?: Array<unknown>): Promise<U | null> {
         incrementQueryCounter(text);
-        const res = await client.query(text, params);
+        let res: QueryResult;
+        try {
+          res = await client.query(text, params);
+        } catch (e: unknown) {
+          throw mapPgError(e);
+        }
         if (res.rows.length > 0) {
           return res.rows as unknown as U;
         }
@@ -52,7 +58,12 @@ export async function withTransaction<T>(fn: (tx: TxClient) => Promise<T>): Prom
 
       async queryOne<U>(text: string, params: Array<unknown>): Promise<U | null> {
         incrementQueryCounter(text);
-        const res = await client.query(text, params);
+        let res: QueryResult;
+        try {
+          res = await client.query(text, params);
+        } catch (e: unknown) {
+          throw mapPgError(e);
+        }
         if (res.rows.length === 1) {
           return res.rows[0] as unknown as U;
         }

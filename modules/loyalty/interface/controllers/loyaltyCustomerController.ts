@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Loyalty Customer Controller
  *
@@ -23,15 +24,15 @@ interface UserRequest extends HttpRequest {
 // ============================================================================
 
 function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondWithMessage(res: HttpResponse, data: unknown, message: string, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data, message });
+  jsonResponse(res, statusCode, { success: true, data, message });
 }
 
 function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, message });
+  jsonResponse(res, statusCode, { success: false, message });
 }
 
 function getCustomerId(req: UserRequest): string | null {
@@ -152,11 +153,11 @@ export const getMyTransactions = async (req: UserRequest, res: HttpResponse): Pr
     date: transaction.createdAt,
   }));
 
-  res.json({
-    success: true,
-    data: formattedTransactions,
-    pagination: { limit },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: formattedTransactions,
+        pagination: { limit },
+      });
 };
 
 /**

@@ -4,7 +4,7 @@
  */
 
 import { Brand, BrandStatus } from '../entities/Brand';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export interface BrandFilters {
   organizationId?: string;

@@ -9,7 +9,7 @@ import { Fulfillment as DbFulfillment, FulfillmentItem as DbFulfillmentItem } fr
 import { Fulfillment, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import { IFulfillmentRepository, FulfillmentFilters } from '../../domain/repositories/FulfillmentRepository';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 
 export class FulfillmentRepository implements IFulfillmentRepository {
   // ===== Fulfillment Operations =====

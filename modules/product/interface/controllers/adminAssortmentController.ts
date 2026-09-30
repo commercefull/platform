@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Catalog Controller for Admin Panel
  * Handles Categories and Collections management.
@@ -66,7 +67,7 @@ export const createCategory = async (req: HttpRequest, res: HttpResponse): Promi
       metaDescription,
     });
 
-    res.redirect(`/admin/catalog/categories/${category.productCategoryId}?success=Category created successfully`);
+    redirectResponse(res, `/admin/catalog/categories/${category.productCategoryId}?success=Category created successfully`);
   } catch (error: unknown) {
     logger.warn('Error creating category:', error);
     const parentCategories = await manageCategoriesUseCase.findAll();
@@ -148,7 +149,7 @@ export const updateCategory = async (req: HttpRequest, res: HttpResponse): Promi
       metaDescription,
     });
 
-    res.redirect(`/admin/catalog/categories/${categoryId}?success=Category updated successfully`);
+    redirectResponse(res, `/admin/catalog/categories/${categoryId}?success=Category updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating category:', error);
     const category = await manageCategoriesUseCase.findOne(req.params.categoryId);
@@ -166,7 +167,7 @@ export const updateCategory = async (req: HttpRequest, res: HttpResponse): Promi
 export const deleteCategory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   await manageCategoriesUseCase.delete(categoryId);
-  res.json({ success: true, message: 'Category deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Category deleted successfully' });
 };
 
 export const reorderCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -175,7 +176,7 @@ export const reorderCategories = async (req: HttpRequest, res: HttpResponse): Pr
 
   await manageCategoriesUseCase.reorder(categories);
 
-  res.json({ success: true, message: 'Categories reordered successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Categories reordered successfully' });
 };
 
 // ============================================================================
@@ -207,7 +208,7 @@ export const createCollectionForm = async (req: HttpRequest, res: HttpResponse):
 export const createCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     // Placeholder - would need collection repository
-    res.redirect('/admin/catalog/collections?success=Collection created successfully');
+    redirectResponse(res, '/admin/catalog/collections?success=Collection created successfully');
   } catch (error: unknown) {
     logger.warn('Error creating collection:', error);
     adminRespond(req, res, 'catalog/collections/create', {
@@ -236,7 +237,7 @@ export const editCollectionForm = async (req: HttpRequest, res: HttpResponse): P
 export const updateCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { collectionId } = req.params;
-    res.redirect(`/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
+    redirectResponse(res, `/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating collection:', error);
     adminRespond(req, res, 'catalog/collections/edit', {
@@ -249,5 +250,5 @@ export const updateCollection = async (req: HttpRequest, res: HttpResponse): Pro
 };
 
 export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Collection deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Collection deleted successfully' });
 };

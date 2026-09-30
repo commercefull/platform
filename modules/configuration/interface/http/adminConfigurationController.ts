@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * System Configuration Admin UI Controller
  * Admin views for managing system configuration
@@ -53,7 +54,7 @@ export const createSystemConfiguration = async (req: HttpRequest, res: HttpRespo
 
   await manageSystemConfigurationUseCase.save(config);
 
-  res.redirect(`/admin/configuration/${config.configId}?success=Configuration created successfully`);
+  redirectResponse(res, `/admin/configuration/${config.configId}?success=Configuration created successfully`);
 };
 
 export const editSystemConfigurationForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -92,5 +93,5 @@ export const updateSystemConfiguration = async (req: HttpRequest, res: HttpRespo
 
   await manageSystemConfigurationUseCase.save(config);
 
-  res.redirect(`/admin/configuration/${configId}?success=Configuration updated successfully`);
+  redirectResponse(res, `/admin/configuration/${configId}?success=Configuration updated successfully`);
 };

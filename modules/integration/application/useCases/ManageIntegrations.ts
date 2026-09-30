@@ -4,7 +4,7 @@ import type {
 } from '../../domain/repositories/IntegrationRepository';
 import { Integration, type IntegrationProvider } from '../../domain/entities/Integration';
 import { IntegrationCredential, type CredentialType } from '../../domain/entities/IntegrationCredential';
-import { IntegrationNotFoundError, CredentialNotFoundError } from '../../domain/errors/IntegrationErrors';
+import { IntegrationNotFoundError, CredentialNotFoundError, IntegrationValidationError } from '../../domain/errors/IntegrationErrors';
 import { encryptCredential, decryptCredential } from '../../domain/services/CredentialCrypto';
 
 export class ManageIntegrationsUseCase {
@@ -21,6 +21,8 @@ export class ManageIntegrationsUseCase {
     webhookUrl?: string;
     config?: Record<string, unknown>;
   }): Promise<Integration> {
+    if (!params.name) throw new IntegrationValidationError('Integration name is required');
+    if (!params.provider) throw new IntegrationValidationError('Integration provider is required');
     const integration = Integration.create({
       integrationId: randomUUID(),
       organizationId: params.organizationId,

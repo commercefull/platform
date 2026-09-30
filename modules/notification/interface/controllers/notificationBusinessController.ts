@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
 import { ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
@@ -69,16 +70,10 @@ interface UserRequest extends HttpRequest {
     id?: string;
     organizationId?: string;
   };
-  flash: {
-    (): { [key: string]: string[] };
-    (message: string): string[];
-    (type: string, message: string | string[]): number;
-    (type: string, format: string, ...args: unknown[]): number;
-  };
 }
 
 function respondError(res: HttpResponse, error: unknown, fallback: string): void {
-  res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) || fallback });
+  jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) || fallback });
 }
 
 // ============================================================================
@@ -88,18 +83,19 @@ function respondError(res: HttpResponse, error: unknown, fallback: string): void
 export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const notifications = await manageNotificationRecordsUseCase.list(limit, offset);
-  res.status(200).json({
-    success: true,
-    data: notifications,
-    pagination: { limit, offset, total: notifications.length },
-  });
+  const type = req.query.type as string | undefined;
+  const notifications = await manageNotificationRecordsUseCase.list(limit, offset, type);
+  jsonResponse(res, 200, {
+        success: true,
+        data: notifications,
+        pagination: { limit, offset, total: notifications.length },
+      });
 };
 
 export const getNotificationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   try {
-    res.status(200).json({ success: true, data: await manageNotificationRecordsUseCase.getById(id) });
+    jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.getById(id) });
   } catch (error) {
     respondError(res, error, 'Notification not found');
   }
@@ -123,7 +119,7 @@ export const createNotification = async (
       data,
       metadata,
     });
-    res.status(201).json({ success: true, data: notification });
+    jsonResponse(res, 201, { success: true, data: notification });
   } catch (error) {
     respondError(res, error, 'Failed to create notification');
   }
@@ -137,7 +133,7 @@ export const updateNotification = async (
   const { title, content, priority, category, data, metadata } = req.body;
   try {
     const updated = await manageNotificationRecordsUseCase.update(id, { title, content, priority, category, data, metadata });
-    res.status(200).json({ success: true, data: updated });
+    jsonResponse(res, 200, { success: true, data: updated });
   } catch (error) {
     respondError(res, error, 'Failed to update notification');
   }
@@ -146,7 +142,7 @@ export const updateNotification = async (
 export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   try {
-    res.status(200).json({ success: true, data: await manageNotificationRecordsUseCase.markAsSent(id) });
+    jsonResponse(res, 200, { success: true, data: await manageNotificationRecordsUseCase.markAsSent(id) });
   } catch (error) {
     respondError(res, error, 'Notification not found');
   }
@@ -155,34 +151,34 @@ export const markNotificationAsSent = async (req: HttpRequest, res: HttpResponse
 export const getUnreadNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   const notifications = await manageNotificationRecordsUseCase.findUnreadByUser(userId);
-  res.json({ success: true, data: notifications });
+  jsonResponse(res, 200, { success: true, data: notifications });
 };
 
 export const getRecentNotifications = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 50;
   const notifications = await manageNotificationRecordsUseCase.findByUser(userId, limit);
-  res.json({ success: true, data: notifications });
+  jsonResponse(res, 200, { success: true, data: notifications });
 };
 
 export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   try {
     const updatedNotification = await manageNotificationRecordsUseCase.markAsReadOwned(id, userId);
-    res.json({ success: true, data: updatedNotification });
+    jsonResponse(res, 200, { success: true, data: updatedNotification });
   } catch (error) {
     respondError(res, error, 'Failed to mark notification as read');
   }
@@ -191,23 +187,23 @@ export const markNotificationAsRead = async (req: UserRequest, res: HttpResponse
 export const markAllNotificationsAsRead = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   const updatedCount = await manageNotificationRecordsUseCase.markAllAsRead(userId);
-  res.json({ success: true, data: { count: updatedCount } });
+  jsonResponse(res, 200, { success: true, data: { count: updatedCount } });
 };
 
 export const deleteNotification = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   try {
     const result = await manageNotificationRecordsUseCase.deleteOwned(id, userId);
-    res.json({ success: true, data: result });
+    jsonResponse(res, 200, { success: true, data: result });
   } catch (error) {
     respondError(res, error, 'Failed to delete notification');
   }
@@ -216,11 +212,11 @@ export const deleteNotification = async (req: UserRequest, res: HttpResponse): P
 export const getUnreadCount = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const userId = req.user?._id || req.user?.id || req.user?.organizationId;
   if (!userId) {
-    res.status(401).json({ success: false, message: 'User not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'User not authenticated' });
     return;
   }
   const count = await manageNotificationRecordsUseCase.countUnread(userId);
-  res.json({ success: true, data: { count } });
+  jsonResponse(res, 200, { success: true, data: { count } });
 };
 
 // ============================================================================

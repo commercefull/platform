@@ -1,4 +1,4 @@
-import type Redis from 'ioredis';
+import type { Redis } from '../redisClient';
 import { logger } from '../logger';
 import type { Cache } from './types';
 

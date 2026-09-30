@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Advanced Analytics Controller
  * Provides comprehensive business intelligence, predictive analytics, and real-time insights
@@ -271,11 +272,11 @@ export const realTimeMetrics = async (req: HttpRequest, res: HttpResponse): Prom
   // Get current real-time metrics
   const metrics = await getAnalyticsDataUseCase.getRealTimeMetricsEnriched();
 
-  res.json({
-    success: true,
-    data: metrics,
-    timestamp: new Date().toISOString(),
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: metrics,
+        timestamp: new Date().toISOString(),
+      });
 };
 
 // ============================================================================
@@ -324,11 +325,11 @@ export const createReportSchedule = async (req: HttpRequest, res: HttpResponse):
     parameters: (parameters ? JSON.parse(parameters) : {}) as Record<string, unknown>,
   });
 
-  res.json({
-    success: true,
-    message: 'Report schedule created successfully',
-    schedule,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Report schedule created successfully',
+        schedule,
+      });
 };
 
 export const updateReportSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -337,10 +338,10 @@ export const updateReportSchedule = async (req: HttpRequest, res: HttpResponse):
 
   // Placeholder - would update schedule in database
 
-  res.json({
-    success: true,
-    message: 'Report schedule updated successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Report schedule updated successfully',
+      });
 };
 
 export const deleteReportSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -348,10 +349,10 @@ export const deleteReportSchedule = async (req: HttpRequest, res: HttpResponse):
 
   // Placeholder - would delete schedule from database
 
-  res.json({
-    success: true,
-    message: 'Report schedule deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Report schedule deleted successfully',
+      });
 };
 
 export const runReportNow = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -372,11 +373,11 @@ export const runReportNow = async (req: HttpRequest, res: HttpResponse): Promise
     ...(parameters ? JSON.parse(parameters) : {}),
   });
 
-  res.json({
-    success: true,
-    message: 'Report generated successfully',
-    report: reportData,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Report generated successfully',
+        report: reportData,
+      });
 };
 
 // ============================================================================

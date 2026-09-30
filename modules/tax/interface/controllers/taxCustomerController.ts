@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { manageTaxRecordsUseCase, calculateLineItemTaxUseCase, calculateBasketTaxUseCase } from '../../application/wired';
@@ -7,9 +8,9 @@ import type { CalculateBasketTaxCommand } from '../../application/useCases/Calcu
 export const calculateTaxForLineItem = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const taxResult = await calculateLineItemTaxUseCase.execute(req.body as CalculateLineItemTaxCommand);
-    res.json(taxResult);
+    jsonResponse(res, 200, taxResult);
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ error: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { error: getErrorMessage(error) });
   }
 };
 
@@ -24,9 +25,9 @@ export const calculateTaxForBasket = async (req: HttpRequest, res: HttpResponse)
       ...(req.body as CalculateBasketTaxCommand),
       basketId,
     });
-    res.json(taxResult);
+    jsonResponse(res, 200, taxResult);
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ error: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { error: getErrorMessage(error) });
   }
 };
 
@@ -37,7 +38,7 @@ export const getTaxCategoryByCode = async (req: HttpRequest, res: HttpResponse) 
   const { code } = req.params;
 
   if (!code) {
-    res.status(400).json({ error: 'Tax category code is required' });
+    jsonResponse(res, 400, { error: 'Tax category code is required' });
     return;
   }
 
@@ -45,11 +46,11 @@ export const getTaxCategoryByCode = async (req: HttpRequest, res: HttpResponse) 
   const taxCategory = await manageTaxRecordsUseCase.findTaxCategoryByCode(code);
 
   if (!taxCategory) {
-    res.status(404).json({ error: 'Tax category not found' });
+    jsonResponse(res, 404, { error: 'Tax category not found' });
     return;
   }
 
-  res.json(taxCategory);
+  jsonResponse(res, 200, taxCategory);
 };
 
 /**
@@ -61,7 +62,7 @@ export const getTaxRates = async (req: HttpRequest, res: HttpResponse) => {
   // Call repository - returns data with id field already added
   const taxRates = await manageTaxRecordsUseCase.findAllTaxRates(true, country as string, region as string);
 
-  res.json(taxRates);
+  jsonResponse(res, 200, taxRates);
 };
 
 /**
@@ -71,7 +72,7 @@ export const checkCustomerTaxExemption = async (req: HttpRequest, res: HttpRespo
   const { customerId } = req.params;
 
   if (!customerId) {
-    res.status(400).json({ error: 'Customer ID is required' });
+    jsonResponse(res, 400, { error: 'Customer ID is required' });
     return;
   }
 
@@ -79,10 +80,10 @@ export const checkCustomerTaxExemption = async (req: HttpRequest, res: HttpRespo
   const exemptions = await manageTaxRecordsUseCase.findTaxExemptionsByCustomerId(customerId);
 
   // Format response in camelCase as per platform convention
-  res.json({
-    hasExemption: exemptions.length > 0,
-    exemptions,
-  });
+  jsonResponse(res, 200, {
+        hasExemption: exemptions.length > 0,
+        exemptions,
+      });
 };
 
 /**
@@ -93,7 +94,7 @@ export const findTaxZoneForAddress = async (req: HttpRequest, res: HttpResponse)
   const { country, region, postalCode, city } = body;
 
   if (!country) {
-    res.status(400).json({ error: 'Country is required' });
+    jsonResponse(res, 400, { error: 'Country is required' });
     return;
   }
 
@@ -101,11 +102,11 @@ export const findTaxZoneForAddress = async (req: HttpRequest, res: HttpResponse)
   const taxZone = await manageTaxRecordsUseCase.findTaxZoneForAddress(country, region, postalCode, city);
 
   if (!taxZone) {
-    res.status(404).json({ error: 'No matching tax zone found' });
+    jsonResponse(res, 404, { error: 'No matching tax zone found' });
     return;
   }
 
-  res.json(taxZone);
+  jsonResponse(res, 200, taxZone);
 };
 
 /**
@@ -115,18 +116,18 @@ export const getCustomerTaxSettings = async (req: HttpRequest, res: HttpResponse
   const { organizationId } = req.params;
 
   if (!organizationId) {
-    res.status(400).json({ error: 'Merchant ID is required' });
+    jsonResponse(res, 400, { error: 'Merchant ID is required' });
     return;
   }
 
   //  default settings for now
   // The enhanced method will be implemented in taxRepo
   // Note: This is using camelCase for the API response as per our convention
-  res.json({
-    displayPricesWithTax: false,
-    priceDisplaySettings: {
-      includesTax: false,
-      showTaxSeparately: true,
-    },
-  });
+  jsonResponse(res, 200, {
+        displayPricesWithTax: false,
+        priceDisplaySettings: {
+          includesTax: false,
+          showTaxSeparately: true,
+        },
+      });
 };

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * SSO Business Controller
  *
@@ -17,14 +18,14 @@ class SsoController {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
-        res.status(401).json({ success: false, message: 'Authentication required' });
+        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
         return;
       }
       const providers = await listProvidersUseCase.execute(organizationId);
-      res.json({ success: true, data: providers });
+      jsonResponse(res, 200, { success: true, data: providers });
     } catch (error) {
       logger.error('Error listing SSO providers:', error);
-      res.status(500).json({ success: false, message: 'Failed to list SSO providers' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to list SSO providers' });
     }
   }
 
@@ -34,7 +35,7 @@ class SsoController {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
-        res.status(401).json({ success: false, message: 'Authentication required' });
+        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
         return;
       }
       const body = req.body as Record<string, unknown>;
@@ -54,9 +55,9 @@ class SsoController {
         spCertificate: body.spCertificate as string | undefined,
         attributeMapping: body.attributeMapping as Record<string, string> | undefined,
       });
-      res.status(201).json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 201, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -76,9 +77,9 @@ class SsoController {
         nameIdFormat: body.nameIdFormat as 'unspecified' | 'emailAddress' | 'persistent' | 'transient' | undefined,
         signAuthnRequest: body.signAuthnRequest as boolean | undefined,
       });
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -87,13 +88,13 @@ class SsoController {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.getById(providerId);
       if (!provider) {
-        res.status(404).json({ success: false, message: 'SAML provider not found' });
+        jsonResponse(res, 404, { success: false, message: 'SAML provider not found' });
         return;
       }
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
       logger.error('Error getting SAML provider:', error);
-      res.status(500).json({ success: false, message: 'Failed to get SAML provider' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to get SAML provider' });
     }
   }
 
@@ -101,9 +102,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       await manageSamlUseCase.delete(providerId);
-      res.json({ success: true, message: 'SAML provider deleted' });
+      jsonResponse(res, 200, { success: true, message: 'SAML provider deleted' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -111,9 +112,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.activate(providerId);
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -121,9 +122,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const provider = await manageSamlUseCase.deactivate(providerId);
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -133,7 +134,7 @@ class SsoController {
     try {
       const organizationId = (req as unknown as { user?: { id?: string } }).user?.id;
       if (!organizationId) {
-        res.status(401).json({ success: false, message: 'Authentication required' });
+        jsonResponse(res, 401, { success: false, message: 'Authentication required' });
         return;
       }
       const body = req.body as Record<string, unknown>;
@@ -153,9 +154,9 @@ class SsoController {
         jwksUri: body.jwksUri as string | undefined,
         claimMapping: body.claimMapping as Record<string, string> | undefined,
       });
-      res.status(201).json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 201, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -177,9 +178,9 @@ class SsoController {
         userinfoEndpoint: body.userinfoEndpoint as string | undefined,
         jwksUri: body.jwksUri as string | undefined,
       });
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -188,13 +189,13 @@ class SsoController {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.getById(providerId);
       if (!provider) {
-        res.status(404).json({ success: false, message: 'OIDC provider not found' });
+        jsonResponse(res, 404, { success: false, message: 'OIDC provider not found' });
         return;
       }
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
       logger.error('Error getting OIDC provider:', error);
-      res.status(500).json({ success: false, message: 'Failed to get OIDC provider' });
+      jsonResponse(res, 500, { success: false, message: 'Failed to get OIDC provider' });
     }
   }
 
@@ -202,9 +203,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       await manageOidcUseCase.delete(providerId);
-      res.json({ success: true, message: 'OIDC provider deleted' });
+      jsonResponse(res, 200, { success: true, message: 'OIDC provider deleted' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -212,9 +213,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.activate(providerId);
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -222,9 +223,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const provider = await manageOidcUseCase.deactivate(providerId);
-      res.json({ success: true, data: provider.toJSON() });
+      jsonResponse(res, 200, { success: true, data: provider.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -234,9 +235,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const result = await ssoLoginUseCase.initiateSamlAsync(providerId);
-      res.json({ success: true, redirectUrl: result.redirectUrl, requestId: result.requestId });
+      jsonResponse(res, 200, { success: true, redirectUrl: result.redirectUrl, requestId: result.requestId });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -246,13 +247,13 @@ class SsoController {
       const body = req.body as Record<string, unknown>;
       const samlResponse = (body.SAMLResponse as string) || (req.query.SAMLResponse as string);
       if (!samlResponse) {
-        res.status(400).json({ success: false, message: 'SAMLResponse is required' });
+        jsonResponse(res, 400, { success: false, message: 'SAMLResponse is required' });
         return;
       }
       const result = await ssoLoginUseCase.handleSamlCallback(providerId, samlResponse, req.ip);
-      res.json({ success: true, ...result });
+      jsonResponse(res, 200, { success: true, ...result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -260,9 +261,9 @@ class SsoController {
     try {
       const { providerId } = req.params;
       const result = await ssoLoginUseCase.initiateOidc(providerId);
-      res.json({ success: true, authUrl: result.authUrl, state: result.state });
+      jsonResponse(res, 200, { success: true, authUrl: result.authUrl, state: result.state });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -273,13 +274,13 @@ class SsoController {
       const code = (body.code as string) || (req.query.code as string);
       const codeVerifier = body.codeVerifier as string | undefined;
       if (!code) {
-        res.status(400).json({ success: false, message: 'Authorization code is required' });
+        jsonResponse(res, 400, { success: false, message: 'Authorization code is required' });
         return;
       }
       const result = await ssoLoginUseCase.handleOidcCallback(providerId, code, codeVerifier, req.ip);
-      res.json({ success: true, ...result });
+      jsonResponse(res, 200, { success: true, ...result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 }

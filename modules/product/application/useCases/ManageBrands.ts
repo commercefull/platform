@@ -1,6 +1,6 @@
 import { Brand } from '../../domain/entities/Brand';
 import type { BrandFilters, BrandRepository } from '../../domain/repositories/BrandRepository';
-import type { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import type { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export class ManageBrandsUseCase {
   constructor(private readonly brands: BrandRepository) {}

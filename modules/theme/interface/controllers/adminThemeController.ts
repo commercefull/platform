@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse, renderResponse, sendResponse } from "libs/apiResponse";
 /**
  * Theme Admin Controller
  * Renders the theme management admin views (EJS templates)
@@ -86,9 +87,9 @@ export const assignTheme = async (req: HttpRequest, res: HttpResponse): Promise<
       themeId,
       organizationId,
     });
-    res.redirect(`/admin/themes/${themeId}?storeId=${storeId}&assigned=1`);
+    redirectResponse(res, `/admin/themes/${themeId}?storeId=${storeId}&assigned=1`);
   } catch (err) {
-    res.redirect(`/admin/themes/${themeId}?storeId=${storeId}&error=${encodeURIComponent((err as Error).message)}`);
+    redirectResponse(res, `/admin/themes/${themeId}?storeId=${storeId}&error=${encodeURIComponent((err as Error).message)}`);
   }
 };
 
@@ -100,9 +101,9 @@ export const unassignTheme = async (req: HttpRequest, res: HttpResponse): Promis
 
   try {
     await assignThemeUseCase.unassign(storeId);
-    res.redirect(`/admin/themes/${themeId}?storeId=${storeId}&unassigned=1`);
+    redirectResponse(res, `/admin/themes/${themeId}?storeId=${storeId}&unassigned=1`);
   } catch (err) {
-    res.redirect(`/admin/themes/${themeId}?storeId=${storeId}&error=${encodeURIComponent((err as Error).message)}`);
+    redirectResponse(res, `/admin/themes/${themeId}?storeId=${storeId}&error=${encodeURIComponent((err as Error).message)}`);
   }
 };
 
@@ -135,9 +136,9 @@ export const saveOverride = async (req: HttpRequest, res: HttpResponse): Promise
       }),
     );
 
-    res.json({ success: true, data: override });
+    jsonResponse(res, 200, { success: true, data: override });
   } catch (err) {
-    res.status(400).json({ success: false, message: (err as Error).message });
+    jsonResponse(res, 400, { success: false, message: (err as Error).message });
   }
 };
 
@@ -147,9 +148,9 @@ export const activateTheme = async (req: HttpRequest, res: HttpResponse): Promis
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.activate(themeId);
-    res.json({ success: true, message: 'Theme activated' });
+    jsonResponse(res, 200, { success: true, message: 'Theme activated' });
   } catch (err) {
-    res.status(400).json({ success: false, message: (err as Error).message });
+    jsonResponse(res, 400, { success: false, message: (err as Error).message });
   }
 };
 
@@ -159,9 +160,9 @@ export const archiveTheme = async (req: HttpRequest, res: HttpResponse): Promise
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.archive(themeId);
-    res.json({ success: true, message: 'Theme archived' });
+    jsonResponse(res, 200, { success: true, message: 'Theme archived' });
   } catch (err) {
-    res.status(400).json({ success: false, message: (err as Error).message });
+    jsonResponse(res, 400, { success: false, message: (err as Error).message });
   }
 };
 
@@ -171,9 +172,9 @@ export const deleteTheme = async (req: HttpRequest, res: HttpResponse): Promise<
   const { themeId } = req.params;
   try {
     await manageThemesUseCase.delete(themeId);
-    res.json({ success: true, message: 'Theme deleted' });
+    jsonResponse(res, 200, { success: true, message: 'Theme deleted' });
   } catch (err) {
-    res.status(400).json({ success: false, message: (err as Error).message });
+    jsonResponse(res, 400, { success: false, message: (err as Error).message });
   }
 };
 
@@ -192,34 +193,34 @@ export const themePreview = async (req: HttpRequest, res: HttpResponse): Promise
     if (!resolved) {
       const theme = await manageThemesUseCase.getById(themeId);
       const defaultSettings = theme.defaultSettings;
-      res.render('admin/views/theme/preview', {
-        title: `Preview: ${theme.name}`,
-        theme,
-        settings: defaultSettings,
-        cssVariables: {},
-        customCss: '',
-        user: req.user,
-        session: req.session,
-      });
+      renderResponse(res, 'admin/views/theme/preview', {
+                title: `Preview: ${theme.name}`,
+                theme,
+                settings: defaultSettings,
+                cssVariables: {},
+                customCss: '',
+                user: req.user,
+                session: req.session,
+              });
       return;
     }
 
     const theme = resolved.theme;
-    res.render('admin/views/theme/preview', {
-      title: `Preview: ${theme.name}`,
-      theme: theme.toJSON(),
-      settings: resolved.settings,
-      cssVariables: resolved.cssVariables,
-      customCss: resolved.customCss || '',
-      customLogoUrl: resolved.customLogoUrl,
-      customFaviconUrl: resolved.customFaviconUrl,
-      customBannerUrl: resolved.customBannerUrl,
-      headTags: themeRegistry.generateHeadTags(resolved),
-      bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
-      user: req.user,
-      session: req.session,
-    });
+    renderResponse(res, 'admin/views/theme/preview', {
+            title: `Preview: ${theme.name}`,
+            theme: theme.toJSON(),
+            settings: resolved.settings,
+            cssVariables: resolved.cssVariables,
+            customCss: resolved.customCss || '',
+            customLogoUrl: resolved.customLogoUrl,
+            customFaviconUrl: resolved.customFaviconUrl,
+            customBannerUrl: resolved.customBannerUrl,
+            headTags: themeRegistry.generateHeadTags(resolved),
+            bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
+            user: req.user,
+            session: req.session,
+          });
   } catch {
-    res.status(404).send('Theme not found');
+    sendResponse(res, 404, 'Theme not found');
   }
 };

@@ -1,3 +1,4 @@
+import { redirectResponse, sendResponse, setHeader } from "libs/apiResponse";
 /**
  * SEO Controller
  * Handles SEO settings management for the Admin Hub
@@ -73,7 +74,7 @@ export const updateSEOSettings = async (req: HttpRequest, res: HttpResponse): Pr
       canonicalUrls: canonicalUrls === 'true',
     });
 
-    res.redirect('/hub/marketing/seo?success=SEO settings updated successfully');
+    redirectResponse(res, '/hub/marketing/seo?success=SEO settings updated successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -101,9 +102,9 @@ Allow: /categories/
 
 Sitemap: https://Commercefull.com/sitemap.xml`;
 
-  res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Content-Disposition', 'attachment; filename="robots.txt"');
-  res.send(robotsTxt);
+  setHeader(res, 'Content-Type', 'text/plain');
+  setHeader(res, 'Content-Disposition', 'attachment; filename="robots.txt"');
+  sendResponse(res, 200, robotsTxt);
 };
 
 export const generateSitemap = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -142,7 +143,7 @@ export const generateSitemap = async (req: HttpRequest, res: HttpResponse): Prom
 </url>
 </urlset>`;
 
-  res.setHeader('Content-Type', 'application/xml');
-  res.setHeader('Content-Disposition', 'attachment; filename="sitemap.xml"');
-  res.send(sitemapXml);
+  setHeader(res, 'Content-Type', 'application/xml');
+  setHeader(res, 'Content-Disposition', 'attachment; filename="sitemap.xml"');
+  sendResponse(res, 200, sitemapXml);
 };

@@ -1,3 +1,4 @@
+import { cookieResponse, redirectResponse, setStatus } from "libs/apiResponse";
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { compareString } from '../../../../libs/hash';
@@ -36,7 +37,7 @@ export const getAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
   if (sessionId) {
     const session = await SessionService.getSession(sessionId);
     if (session && session.userType === 'admin') {
-      return res.redirect('/admin');
+      return redirectResponse(res, '/admin');
     }
   }
 
@@ -57,7 +58,7 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
 
     // Basic validation
     if (!email || !password) {
-      res.status(500);
+      setStatus(res, 500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Email and password are required',
@@ -68,7 +69,7 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
     const admin = await adminAuthUseCase.findByEmail(email);
 
     if (!admin) {
-      res.status(500);
+      setStatus(res, 500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Invalid email or password',
@@ -78,7 +79,7 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
     // Verify password
     const isValidPassword = await compareString(password, admin.passwordHash);
     if (!isValidPassword) {
-      res.status(500);
+      setStatus(res, 500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Invalid email or password',
@@ -87,7 +88,7 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
 
     // Check admin status
     if (admin.status !== 'active') {
-      res.status(500);
+      setStatus(res, 500);
       return adminRespond(req, res, 'login', {
         pageName: 'Admin Login',
         error: 'Account is not active. Please contact super admin.',
@@ -114,18 +115,18 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
     });
 
     // Set session cookie
-    res.cookie(SESSION_COOKIE_NAME, sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000,
-      sameSite: 'lax',
-    });
+    cookieResponse(res, SESSION_COOKIE_NAME, sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000,
+            sameSite: 'lax',
+          });
 
     // Update last login
     await adminAuthUseCase.updateLastLogin(admin.adminId);
 
     // Redirect to dashboard
-    return res.redirect('/admin');
+    return redirectResponse(res, '/admin');
   } catch (error) {
     logger.warn('Error:', error);
 
@@ -151,12 +152,12 @@ export const postAdminLogout = async (req: HttpRequest, res: HttpResponse) => {
     res.clearCookie(SESSION_COOKIE_NAME);
 
     // Redirect to login page
-    res.redirect('/admin/login');
+    redirectResponse(res, '/admin/login');
   } catch (error) {
     logger.warn('Error:', error);
 
     res.clearCookie(SESSION_COOKIE_NAME);
-    res.redirect('/admin/login');
+    redirectResponse(res, '/admin/login');
   }
 };
 

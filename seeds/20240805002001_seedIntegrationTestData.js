@@ -55,7 +55,7 @@ exports.seed = async function (knex) {
         email: 'testcustomer@example.com',
         firstName: 'Test',
         lastName: 'Customer',
-        password: '$2b$10$wADyOBQwHwy0mz49WoGA.OcCrjAAXaYnMhsOrWWQ9FzUmXkrq6.aC', // "password123"
+        password: '$scrypt$N=16384,r=8,p=1$FRVlDZ2lBmARzrl8amO6KA==$GDWDynJV9M9R37fBiCsFwTqYi+Cxe4phTH9/M8ue+6aBuowqdomP2nEqPhs7jUA9EUCloe0KOp88sty82vkpoA==', // "password123"
         isActive: true,
         isVerified: true,
         emailVerified: true,
@@ -753,7 +753,7 @@ exports.seed = async function (knex) {
         .insert({
           customerId: TEST_CUSTOMER_ID,
           email: 'testcustomer@example.com',
-          password: '$2b$10$pAWqLUgcde9xhByhHSqt5u0VvqQJZDUVFGJJfBViQXpOfpPUaoSES',
+          password: '$scrypt$N=16384,r=8,p=1$soqJQ3qt9DpLUqsExxRdyw==$fba6CC8FpWtxsgGgMxO6+8sUSSMUtUNN6CFYbpba7/ICMgw9scIX0AWjQqv3nwDSEa93kbYdJ3a9lfMYYcn7Nw==',
           firstName: 'Test',
           lastName: 'Customer',
           phone: '+1-555-123-4567',

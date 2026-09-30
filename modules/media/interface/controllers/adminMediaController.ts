@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Media Controller for Admin Hub
  * Handles Media Library management
@@ -26,7 +27,7 @@ export const uploadMediaForm = async (req: HttpRequest, res: HttpResponse): Prom
 
 export const uploadMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/content/media?success=Media uploaded successfully');
+    redirectResponse(res, '/admin/content/media?success=Media uploaded successfully');
   } catch (error: unknown) {
     logger.warn('Error uploading media:', error);
     adminRespond(req, res, 'content/media/upload', {
@@ -55,7 +56,7 @@ export const editMediaForm = async (req: HttpRequest, res: HttpResponse): Promis
 export const updateMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { mediaId } = req.params;
-    res.redirect(`/admin/content/media/${mediaId}?success=Media updated successfully`);
+    redirectResponse(res, `/admin/content/media/${mediaId}?success=Media updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating media:', error);
     adminRespond(req, res, 'content/media/edit', {
@@ -68,13 +69,13 @@ export const updateMedia = async (req: HttpRequest, res: HttpResponse): Promise<
 };
 
 export const deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Media deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Media deleted successfully' });
 };
 
 export const bulkDeleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Media items deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Media items deleted successfully' });
 };
 
 export const createFolder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Folder created successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Folder created successfully' });
 };

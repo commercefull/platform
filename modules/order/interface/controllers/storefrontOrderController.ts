@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Order Controller
  * Handles order history and order details for customers
@@ -15,7 +16,7 @@ import { GetOrderCommand } from '../../application/useCases/GetOrder';
 
 export const orderHistory = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
-    return res.redirect('/signin?redirect=/orders');
+    return redirectResponse(res, '/signin?redirect=/orders');
   }
 
   const customerId = req.user.customerId;
@@ -56,7 +57,7 @@ export const orderHistory = async (req: HttpRequest, res: HttpResponse): Promise
 
 export const orderDetails = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
-    return res.redirect('/signin?redirect=/orders');
+    return redirectResponse(res, '/signin?redirect=/orders');
   }
 
   const { orderId } = req.params;
@@ -76,7 +77,7 @@ export const orderDetails = async (req: HttpRequest, res: HttpResponse): Promise
 
   // Verify order belongs to customer
   if (order.customerId !== customerId) {
-    return res.status(403).redirect('/orders?error=' + encodeURIComponent('Access denied'));
+    return redirectResponse(res, '/orders?error=' + encodeURIComponent('Access denied'), 403);
   }
 
   // Calculate totals

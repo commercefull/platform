@@ -71,12 +71,12 @@ async function generateSalesSummary(from: Date, to: Date, params: ReportParamete
   const summary = await queryOne<Record<string, string>>(
     `SELECT
       COUNT(*) as "totalOrders",
-      COALESCE(SUM(o."totalAmount"), 0) as "totalRevenue",
-      COALESCE(AVG(o."totalAmount"), 0) as "averageOrderValue",
+      COALESCE(SUM(o."totalAmountCents"), 0) / 100.0 as "totalRevenue",
+      COALESCE(AVG(o."totalAmountCents"), 0) / 100.0 as "averageOrderValue",
       COUNT(CASE WHEN o."status" = 'completed' THEN 1 END) as "completedOrders",
       COUNT(CASE WHEN o."status" = 'cancelled' THEN 1 END) as "cancelledOrders",
       COUNT(CASE WHEN o."status" = 'refunded' THEN 1 END) as "refundedOrders",
-      COALESCE(SUM(CASE WHEN o."status" = 'refunded' THEN o."totalAmount" ELSE 0 END), 0) as "refundedAmount"
+      COALESCE(SUM(CASE WHEN o."status" = 'refunded' THEN o."totalAmountCents" ELSE 0 END), 0) / 100.0 as "refundedAmount"
      FROM "order" o ${whereClause}`,
     values,
   );
@@ -86,7 +86,7 @@ async function generateSalesSummary(from: Date, to: Date, params: ReportParamete
       `SELECT
       DATE(o."createdAt") as "date",
       COUNT(*) as "orderCount",
-      COALESCE(SUM(o."totalAmount"), 0) as "revenue"
+      COALESCE(SUM(o."totalAmountCents"), 0) / 100.0 as "revenue"
      FROM "order" o ${whereClause}
      GROUP BY DATE(o."createdAt")
      ORDER BY "date" ASC`,
@@ -124,7 +124,7 @@ async function generateProductPerformance(from: Date, to: Date, params: ReportPa
   let idx = 3;
 
   if (params.categoryId) {
-    whereClause += ` AND p."categoryId" = $${idx++}`;
+    whereClause += ` AND EXISTS (SELECT 1 FROM "productToCategory" ptc WHERE ptc."productId" = p."productId" AND ptc."productCategoryId" = $${idx++})`;
     values.push(params.categoryId);
   }
 
@@ -137,7 +137,7 @@ async function generateProductPerformance(from: Date, to: Date, params: ReportPa
       p."name" as "productName",
       p."sku",
       SUM(oi."quantity") as "unitsSold",
-      COALESCE(SUM(oi."quantity" * oi."unitPrice"), 0) as "revenue",
+      COALESCE(SUM(oi."quantity" * oi."unitPriceCents"), 0) / 100.0 as "revenue",
       COUNT(DISTINCT o."orderId") as "orderCount"
      FROM "orderItem" oi
      JOIN "order" o ON oi."orderId" = o."orderId"
@@ -153,7 +153,7 @@ async function generateProductPerformance(from: Date, to: Date, params: ReportPa
     `SELECT
       COUNT(DISTINCT oi."productId") as "totalProducts",
       COALESCE(SUM(oi."quantity"), 0) as "totalUnitsSold",
-      COALESCE(SUM(oi."quantity" * oi."unitPrice"), 0) as "totalRevenue"
+      COALESCE(SUM(oi."quantity" * oi."unitPriceCents"), 0) / 100.0 as "totalRevenue"
      FROM "orderItem" oi
      JOIN "order" o ON oi."orderId" = o."orderId"
      ${whereClause}`,
@@ -202,7 +202,7 @@ async function generateCustomerSummary(from: Date, to: Date, _params: ReportPara
       c."lastName",
       c."email",
       COUNT(o."orderId") as "orderCount",
-      COALESCE(SUM(o."totalAmount"), 0) as "totalSpent"
+      COALESCE(SUM(o."totalAmountCents"), 0) / 100.0 as "totalSpent"
      FROM "customer" c
      LEFT JOIN "order" o ON c."customerId" = o."customerId"
        AND o."createdAt" >= $1 AND o."createdAt" <= $2
@@ -238,7 +238,7 @@ async function generateCustomerSummary(from: Date, to: Date, _params: ReportPara
 // ============================================================================
 
 async function generateInventoryReport(params: ReportParameters): Promise<ReportData> {
-  let whereClause = `WHERE i."deletedAt" IS NULL`;
+  let whereClause = `WHERE 1 = 1`;
   const values: unknown[] = [];
   let idx = 1;
 
@@ -257,14 +257,13 @@ async function generateInventoryReport(params: ReportParameters): Promise<Report
   const rows =
     (await query<Record<string, string>[]>(
       `SELECT
-      i."inventoryId",
+      i."inventoryLocationId" as "inventoryId",
       i."productId",
       p."name" as "productName",
       p."sku",
       i."quantity",
       i."reservedQuantity",
       i."minimumStockLevel",
-      i."locationId",
       CASE
         WHEN i."quantity" = 0 THEN 'out_of_stock'
         WHEN i."quantity" <= COALESCE(i."minimumStockLevel", 0) THEN 'low_stock'
@@ -338,15 +337,15 @@ async function generateTaxReport(from: Date, to: Date, _params: ReportParameters
       o."orderId",
       o."orderNumber",
       o."createdAt",
-      o."countryCode",
-      o."region",
-      o."taxRate",
-      o."taxAmount",
-      o."totalAmount"
+      o."shippingAddress"->>'countryCode' as "countryCode",
+      o."shippingAddress"->>'state' as "region",
+      ROUND(o."taxTotalCents"::numeric / NULLIF(o."subtotalCents", 0) * 100, 2) as "taxRate",
+      o."taxTotalCents" / 100.0 as "taxAmount",
+      o."totalAmountCents" / 100.0 as "totalAmount"
      FROM "order" o
      WHERE o."createdAt" >= $1 AND o."createdAt" <= $2
        AND o."deletedAt" IS NULL
-       AND o."taxAmount" > 0
+       AND o."taxTotalCents" > 0
      ORDER BY o."createdAt" ASC`,
     [from, to],
   );
@@ -354,12 +353,12 @@ async function generateTaxReport(from: Date, to: Date, _params: ReportParameters
   const summary = await queryOne<TaxReportSummary>(
     `SELECT
       COUNT(*) as "totalTaxedOrders",
-      COALESCE(SUM(o."taxAmount"), 0) as "totalTaxCollected",
-      COALESCE(SUM(o."totalAmount"), 0) as "totalTaxableRevenue"
+      COALESCE(SUM(o."taxTotalCents"), 0) / 100.0 as "totalTaxCollected",
+      COALESCE(SUM(o."totalAmountCents"), 0) / 100.0 as "totalTaxableRevenue"
      FROM "order" o
      WHERE o."createdAt" >= $1 AND o."createdAt" <= $2
        AND o."deletedAt" IS NULL
-       AND o."taxAmount" > 0`,
+       AND o."taxTotalCents" > 0`,
     [from, to],
   );
 
@@ -412,10 +411,10 @@ async function generateOrderDetail(from: Date, to: Date, params: ReportParameter
       o."createdAt",
       o."customerName",
       o."customerEmail",
-      o."totalAmount",
-      o."itemCount",
-      o."shippingMethod",
-      o."paymentMethod"
+      o."totalAmountCents" / 100.0 as "totalAmount",
+      o."totalItems" as "itemCount",
+      (SELECT f."shippingMethodName" FROM "fulfillment" f WHERE f."orderId" = o."orderId" ORDER BY f."createdAt" DESC LIMIT 1) as "shippingMethod",
+      (SELECT op."type" FROM "orderPayment" op WHERE op."orderId" = o."orderId" ORDER BY op."createdAt" DESC LIMIT 1) as "paymentMethod"
      FROM "order" o
      ${whereClause}
      ORDER BY o."createdAt" DESC
@@ -451,14 +450,14 @@ async function generatePaymentReport(from: Date, to: Date, _params: ReportParame
   const rows =
     (await query<Record<string, string>[]>(
       `SELECT
-      p."paymentId",
+      p."orderPaymentId" as "paymentId",
       p."orderId",
-      p."paymentMethod",
-      p."gateway",
-      p."amount",
+      p."type" as "paymentMethod",
+      p."provider" as "gateway",
+      p."amountCents" / 100.0 as "amount",
       p."status",
       p."createdAt"
-     FROM "payment" p
+     FROM "orderPayment" p
      WHERE p."createdAt" >= $1 AND p."createdAt" <= $2
      ORDER BY p."createdAt" DESC
      LIMIT 500`,
@@ -468,11 +467,11 @@ async function generatePaymentReport(from: Date, to: Date, _params: ReportParame
   const summary = await queryOne<Record<string, string>>(
     `SELECT
       COUNT(*) as "totalPayments",
-      COALESCE(SUM(p."amount"), 0) as "totalAmount",
-      COUNT(CASE WHEN p."status" = 'completed' THEN 1 END) as "completedPayments",
+      COALESCE(SUM(p."amountCents"), 0) / 100.0 as "totalAmount",
+      COUNT(CASE WHEN p."status" = 'captured' THEN 1 END) as "completedPayments",
       COUNT(CASE WHEN p."status" = 'refunded' THEN 1 END) as "refundedPayments",
-      COALESCE(SUM(CASE WHEN p."status" = 'refunded' THEN p."amount" ELSE 0 END), 0) as "refundedAmount"
-     FROM "payment" p
+      COALESCE(SUM(CASE WHEN p."status" = 'refunded' THEN p."amountCents" ELSE 0 END), 0) / 100.0 as "refundedAmount"
+     FROM "orderPayment" p
      WHERE p."createdAt" >= $1 AND p."createdAt" <= $2`,
     [from, to],
   );
@@ -511,7 +510,7 @@ async function generateFulfillmentReport(from: Date, to: Date, _params: ReportPa
       f."fulfillmentId",
       f."orderId",
       f."status",
-      f."carrier",
+      f."carrierName" as "carrier",
       f."trackingNumber",
       f."createdAt",
       f."shippedAt",

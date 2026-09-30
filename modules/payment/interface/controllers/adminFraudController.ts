@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Fraud Controller for Admin Hub
  * Manages fraud rules, blacklist entries, and fraud checks.
@@ -59,10 +60,10 @@ export const createFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
       isActive: isActive === 'true' || isActive === true,
     });
 
-    res.redirect('/hub/payment/fraud/rules?success=Fraud rule created');
+    redirectResponse(res, '/hub/payment/fraud/rules?success=Fraud rule created');
   } catch (error: unknown) {
     logger.warn('Error creating fraud rule:', error);
-    res.redirect('/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -86,7 +87,7 @@ export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
 
     const existing = await manageFraudRecordsUseCase.getRule(fraudRuleId);
     if (!existing) {
-      res.redirect('/hub/payment/fraud/rules?error=Fraud rule not found');
+      redirectResponse(res, '/hub/payment/fraud/rules?error=Fraud rule not found');
       return;
     }
 
@@ -103,10 +104,10 @@ export const updateFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
       isActive: isActive === 'true' || isActive === true,
     });
 
-    res.redirect('/hub/payment/fraud/rules?success=Fraud rule updated');
+    redirectResponse(res, '/hub/payment/fraud/rules?success=Fraud rule updated');
   } catch (error: unknown) {
     logger.warn('Error updating fraud rule:', error);
-    res.redirect('/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/payment/fraud/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -118,10 +119,10 @@ export const deleteFraudRule = async (req: HttpRequest, res: HttpResponse): Prom
   try {
     const { fraudRuleId } = req.params;
     await manageFraudRecordsUseCase.deleteRule(fraudRuleId);
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } catch (error: unknown) {
     logger.warn('Error deleting fraud rule:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };
 
@@ -157,16 +158,16 @@ export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse
       isGuestCheckout: isGuestCheckout === 'true',
     });
 
-    res.json({
-      success: true,
-      decision: result.decision,
-      riskScore: result.riskScore,
-      riskLevel: result.riskLevel,
-      triggeredRules: result.triggeredRules,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            decision: result.decision,
+            riskScore: result.riskScore,
+            riskLevel: result.riskLevel,
+            triggeredRules: result.triggeredRules,
+          });
   } catch (error: unknown) {
     logger.warn('Error simulating fraud screening:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };
 

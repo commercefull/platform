@@ -1,4 +1,5 @@
 import type {
+  CookieOptions as ExpressCookieOptions,
   Express,
   NextFunction,
   Request as ExpressRequest,
@@ -24,3 +25,4 @@ export type HttpHandler = RequestHandler;
 export type HttpRouter = Router;
 export type HttpApplication = Express;
 export type HttpRequestBody = Record<string, unknown>;
+export type HttpCookieOptions = ExpressCookieOptions;

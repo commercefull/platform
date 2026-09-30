@@ -194,7 +194,7 @@ export class CreateMyEntityUseCase {
 ```typescript
 // modules/<moduleName>/interface/controllers/myModuleController.ts
 
-import { Request, Response } from 'express';
+import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { logger } from '../../../../libs/logger';
 import { MyEntityRepositoryImpl } from '../../infrastructure/repositories/MyEntityRepositoryImpl';
@@ -202,7 +202,7 @@ import { CreateMyEntityUseCase, CreateMyEntityCommand } from '../../application/
 
 const repo = new MyEntityRepositoryImpl();
 
-export const createMyEntity = async (req: Request, res: Response) => {
+export const createMyEntity = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const useCase = new CreateMyEntityUseCase(repo);
     const entity = await useCase.execute(new CreateMyEntityCommand(req.body.name));

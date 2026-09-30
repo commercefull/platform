@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Segment Admin UI Controller
  * Admin views for managing customer segments
@@ -50,7 +51,7 @@ export const createSegmentForm = async (req: HttpRequest, res: HttpResponse): Pr
 export const createSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
   const segment = await createSegmentUseCase.execute(body as Parameters<typeof createSegmentUseCase.execute>[0]);
-  res.redirect(`/admin/segments/${segment.segmentId}?success=Segment created successfully`);
+  redirectResponse(res, `/admin/segments/${segment.segmentId}?success=Segment created successfully`);
 };
 
 export const editSegmentForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -72,19 +73,19 @@ export const updateSegment = async (req: HttpRequest, res: HttpResponse): Promis
   const { segmentId } = req.params;
   const body = req.body as HttpRequestBody;
   await updateSegmentUseCase.execute(segmentId, body as Parameters<typeof updateSegmentUseCase.execute>[1]);
-  res.redirect(`/admin/segments/${segmentId}?success=Segment updated successfully`);
+  redirectResponse(res, `/admin/segments/${segmentId}?success=Segment updated successfully`);
 };
 
 export const deleteSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   await deleteSegmentUseCase.execute(segmentId);
-  res.redirect('/admin/segments?success=Segment deleted');
+  redirectResponse(res, '/admin/segments?success=Segment deleted');
 };
 
 export const evaluateSegment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { segmentId } = req.params;
   const result = await evaluateSegmentUseCase.execute(segmentId);
-  res.redirect(`/admin/segments/${segmentId}?success=Segment evaluated: ${result.matched} customers matched`);
+  redirectResponse(res, `/admin/segments/${segmentId}?success=Segment evaluated: ${result.matched} customers matched`);
 };
 
 export const viewSegmentMembers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Customer Controller for Admin Hub
  * Uses customer use cases directly from modules - no HTTP API calls
@@ -125,7 +126,7 @@ export const updateCustomer = async (req: HttpRequest, res: HttpResponse): Promi
 
   await updateCustomerUseCase.execute({ customerId, updates });
 
-  res.redirect(`/hub/customers/${customerId}?success=Customer updated successfully`);
+  redirectResponse(res, `/hub/customers/${customerId}?success=Customer updated successfully`);
 };
 
 // ============================================================================
@@ -139,7 +140,7 @@ export const deactivateCustomer = async (req: HttpRequest, res: HttpResponse): P
 
   await deactivateCustomerUseCase.execute({ customerId, reason });
 
-  res.json({ success: true, message: 'Customer deactivated' });
+  jsonResponse(res, 200, { success: true, message: 'Customer deactivated' });
 };
 
 // ============================================================================
@@ -151,7 +152,7 @@ export const reactivateCustomer = async (req: HttpRequest, res: HttpResponse): P
 
   await reactivateCustomerUseCase.execute({ customerId });
 
-  res.json({ success: true, message: 'Customer reactivated' });
+  jsonResponse(res, 200, { success: true, message: 'Customer reactivated' });
 };
 
 // ============================================================================
@@ -165,7 +166,7 @@ export const verifyCustomer = async (req: HttpRequest, res: HttpResponse): Promi
   const command = new VerifyCustomerCommand(customerId, verificationType);
   await verifyCustomerUseCase.execute(command);
 
-  res.json({ success: true, message: 'Customer verified' });
+  jsonResponse(res, 200, { success: true, message: 'Customer verified' });
 };
 
 // ============================================================================
@@ -237,8 +238,8 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
   await manageAddressesUseCase.addAddress(addCommand);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true, message: 'Address added' });
+    jsonResponse(res, 200, { success: true, message: 'Address added' });
   } else {
-    res.redirect(`/hub/customers/${customerId}/addresses?success=Address added`);
+    redirectResponse(res, `/hub/customers/${customerId}/addresses?success=Address added`);
   }
 };

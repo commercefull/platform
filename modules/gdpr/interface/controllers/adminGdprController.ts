@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * GDPR Controller for Admin Hub
  * Handles GDPR compliance features
@@ -54,11 +55,11 @@ export const createGdprRequest = async (req: HttpRequest, res: HttpResponse): Pr
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
 
-    res.redirect('/hub/gdpr?success=GDPR request created');
+    redirectResponse(res, '/hub/gdpr?success=GDPR request created');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/gdpr?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/gdpr?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -86,7 +87,7 @@ export const processGdprRequest = async (req: HttpRequest, res: HttpResponse): P
 
   await manageAdminGdprUseCase.updateStatus(requestId, 'processing');
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const completeGdprRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -96,7 +97,7 @@ export const completeGdprRequest = async (req: HttpRequest, res: HttpResponse): 
 
   await manageAdminGdprUseCase.completeRequest(requestId, notes);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================

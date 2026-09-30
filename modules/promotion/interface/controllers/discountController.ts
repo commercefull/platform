@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { managePromotionTargetsUseCase, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
 
@@ -5,7 +6,7 @@ import { managePromotionTargetsUseCase, type CreateProductDiscountInput, type Up
 export const getActiveDiscounts = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.query;
   const discounts = await managePromotionTargetsUseCase.findActiveProductDiscounts(organizationId as string | undefined);
-  res.status(200).json({ success: true, data: discounts || [] });
+  jsonResponse(res, 200, { success: true, data: discounts || [] });
 };
 
 // Get discounts by product ID
@@ -13,7 +14,7 @@ export const getDiscountsByProductId = async (req: HttpRequest, res: HttpRespons
   const { productId } = req.params;
   const { organizationId } = req.query;
   const discounts = await managePromotionTargetsUseCase.findDiscountsForProduct(productId, organizationId as string | undefined);
-  res.status(200).json({ success: true, data: discounts || [] });
+  jsonResponse(res, 200, { success: true, data: discounts || [] });
 };
 
 // Get discounts by category ID
@@ -21,7 +22,7 @@ export const getDiscountsByCategoryId = async (req: HttpRequest, res: HttpRespon
   const { categoryId } = req.params;
   const { organizationId } = req.query;
   const discounts = await managePromotionTargetsUseCase.findDiscountsForCategory(categoryId, organizationId as string | undefined);
-  res.status(200).json({ success: true, data: discounts || [] });
+  jsonResponse(res, 200, { success: true, data: discounts || [] });
 };
 
 // Get discount by ID
@@ -30,11 +31,11 @@ export const getDiscountById = async (req: HttpRequest, res: HttpResponse): Prom
   const discount = await managePromotionTargetsUseCase.findProductDiscountById(id);
 
   if (!discount) {
-    res.status(404).json({ success: false, message: 'Discount not found' });
+    jsonResponse(res, 404, { success: false, message: 'Discount not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: discount });
+  jsonResponse(res, 200, { success: true, data: discount });
 };
 
 // Create a new discount
@@ -46,12 +47,12 @@ export const createDiscount = async (
 
   // Validate required fields
   if (!discountData.name || !discountData.discountType || discountData.discountValue === undefined) {
-    res.status(400).json({ success: false, message: 'Missing required fields: name, discountType, and discountValue are required' });
+    jsonResponse(res, 400, { success: false, message: 'Missing required fields: name, discountType, and discountValue are required' });
     return;
   }
 
   const discount = await managePromotionTargetsUseCase.createProductDiscount(discountData);
-  res.status(201).json({ success: true, data: discount });
+  jsonResponse(res, 201, { success: true, data: discount });
 };
 
 // Update an existing discount
@@ -63,7 +64,7 @@ export const updateDiscount = async (
   const discountData = req.body;
 
   const discount = await managePromotionTargetsUseCase.updateProductDiscount(id, discountData);
-  res.status(200).json({ success: true, data: discount });
+  jsonResponse(res, 200, { success: true, data: discount });
 };
 
 // Delete a discount
@@ -72,9 +73,9 @@ export const deleteDiscount = async (req: HttpRequest, res: HttpResponse): Promi
 
   const deleted = await managePromotionTargetsUseCase.deleteProductDiscount(id);
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Discount not found' });
+    jsonResponse(res, 404, { success: false, message: 'Discount not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Discount deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Discount deleted successfully' });
 };

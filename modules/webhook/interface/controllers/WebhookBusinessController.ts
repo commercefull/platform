@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Webhook Business Controller
  *
@@ -54,7 +55,7 @@ export const registerWebhook = async (
     retryPolicy: req.body.retryPolicy,
   });
 
-  res.status(201).json({ success: true, data: result });
+  jsonResponse(res, 201, { success: true, data: result });
 };
 
 /**
@@ -66,7 +67,7 @@ export const unregisterWebhook = async (req: HttpRequest, res: HttpResponse): Pr
   const useCase = unregisterWebhookUseCase;
   await useCase.execute(webhookEndpointId);
 
-  res.json({ success: true, message: 'Webhook endpoint removed' });
+  jsonResponse(res, 200, { success: true, message: 'Webhook endpoint removed' });
 };
 
 /**
@@ -85,7 +86,7 @@ export const listWebhooks = async (req: HttpRequest, res: HttpResponse): Promise
     parseInt(offset as string) || 0,
   );
 
-  res.json({ success: true, data: result.data, total: result.total });
+  jsonResponse(res, 200, { success: true, data: result.data, total: result.total });
 };
 
 /**
@@ -97,13 +98,13 @@ export const getWebhook = async (req: HttpRequest, res: HttpResponse): Promise<v
   const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
-    res.status(404).json({ success: false, error: 'Webhook endpoint not found' });
+    jsonResponse(res, 404, { success: false, error: 'Webhook endpoint not found' });
     return;
   }
 
   // Strip secret from response for security
   const { secret: _secret, ...safeEndpoint } = endpoint as unknown as Record<string, unknown>;
-  res.json({ success: true, data: safeEndpoint });
+  jsonResponse(res, 200, { success: true, data: safeEndpoint });
 };
 
 /**
@@ -127,11 +128,11 @@ export const updateWebhook = async (
   const result = await manageWebhooksUseCase.updateEndpoint(webhookEndpointId, updates);
 
   if (!result) {
-    res.status(404).json({ success: false, error: 'Webhook endpoint not found' });
+    jsonResponse(res, 404, { success: false, error: 'Webhook endpoint not found' });
     return;
   }
 
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 /**
@@ -154,7 +155,7 @@ export const getDeliveries = async (req: HttpRequest, res: HttpResponse): Promis
     },
   );
 
-  res.json({ success: true, data: result.data, total: result.total });
+  jsonResponse(res, 200, { success: true, data: result.data, total: result.total });
 };
 
 /**
@@ -162,13 +163,13 @@ export const getDeliveries = async (req: HttpRequest, res: HttpResponse): Promis
  * GET /business/webhooks/events
  */
 export const getAvailableEvents = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({
-    success: true,
-    data: {
-      events: SYNC_RELEVANT_EVENTS,
-      wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          events: SYNC_RELEVANT_EVENTS,
+          wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
+        },
+      });
 };
 
 /**
@@ -180,7 +181,7 @@ export const testWebhook = async (req: HttpRequest, res: HttpResponse): Promise<
   const endpoint = await manageWebhooksUseCase.findEndpointById(webhookEndpointId);
 
   if (!endpoint) {
-    res.status(404).json({ success: false, error: 'Webhook endpoint not found' });
+    jsonResponse(res, 404, { success: false, error: 'Webhook endpoint not found' });
     return;
   }
 
@@ -217,22 +218,22 @@ export const testWebhook = async (req: HttpRequest, res: HttpResponse): Promise<
     const durationMs = Date.now() - startTime;
     const responseBody = await response.text();
 
-    res.json({
-      success: response.ok,
-      data: {
-        statusCode: response.status,
-        durationMs,
-        responseBody: responseBody.substring(0, 1024),
-      },
-    });
+    jsonResponse(res, 200, {
+            success: response.ok,
+            data: {
+              statusCode: response.status,
+              durationMs,
+              responseBody: responseBody.substring(0, 1024),
+            },
+          });
   } catch (fetchError: unknown) {
     clearTimeout(timeout);
-    res.json({
-      success: false,
-      data: {
-        error: (fetchError as Error).message,
-        durationMs: Date.now() - startTime,
-      },
-    });
+    jsonResponse(res, 200, {
+            success: false,
+            data: {
+              error: (fetchError as Error).message,
+              durationMs: Date.now() - startTime,
+            },
+          });
   }
 };

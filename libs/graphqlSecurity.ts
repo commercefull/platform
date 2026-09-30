@@ -5,8 +5,7 @@
  * to reject malicious or overly expensive queries before execution.
  */
 
-import { GraphQLError, ValidationContext, ASTVisitor } from 'graphql';
-import depthLimit from 'graphql-depth-limit';
+import { GraphQLError, ValidationContext, ASTVisitor, FragmentDefinitionNode, Kind, SelectionNode, SelectionSetNode } from 'graphql';
 import { logger } from './logger';
 
 export const DEFAULT_MAX_DEPTH = 10;
@@ -47,11 +46,68 @@ const defaultFieldCosts: Record<string, FieldCost> = {
 };
 
 /**
+ * Depth of a selection: each Field level adds 1, fragment spreads and inline
+ * fragments resolve to their own selection sets without adding a level.
+ */
+function selectionDepth(
+  selection: SelectionNode,
+  fragments: Map<string, FragmentDefinitionNode>,
+  visited: Set<string>,
+): number {
+  if (selection.kind === Kind.FIELD) {
+    return selection.selectionSet ? 1 + selectionSetDepth(selection.selectionSet, fragments, visited) : 0;
+  }
+  if (selection.kind === Kind.INLINE_FRAGMENT) {
+    return selectionSetDepth(selection.selectionSet, fragments, visited);
+  }
+  // FragmentSpread — resolve against the document's fragment definitions.
+  const name = selection.name.value;
+  if (visited.has(name)) {
+    return 0; // Cyclic fragments are rejected by spec validation; don't recurse.
+  }
+  const fragment = fragments.get(name);
+  if (!fragment) {
+    return 0;
+  }
+  visited.add(name);
+  const depth = selectionSetDepth(fragment.selectionSet, fragments, visited);
+  visited.delete(name);
+  return depth;
+}
+
+function selectionSetDepth(
+  selectionSet: SelectionSetNode,
+  fragments: Map<string, FragmentDefinitionNode>,
+  visited: Set<string>,
+): number {
+  let max = 0;
+  for (const selection of selectionSet.selections) {
+    const depth = selectionDepth(selection, fragments, visited);
+    if (depth > max) {
+      max = depth;
+    }
+  }
+  return max;
+}
+
+/**
  * Create a depth limit validation rule.
  */
 export function createDepthLimitRule(maxDepth: number = DEFAULT_MAX_DEPTH) {
-  return depthLimit(maxDepth, { ignore: [] }, (depth: number) => {
-    logger.warn('GraphQL query exceeded depth limit', { depth, maxDepth: maxDepth });
+  return (context: ValidationContext): ASTVisitor => ({
+    OperationDefinition(node) {
+      const fragments = new Map<string, FragmentDefinitionNode>();
+      for (const definition of context.getDocument().definitions) {
+        if (definition.kind === Kind.FRAGMENT_DEFINITION) {
+          fragments.set(definition.name.value, definition);
+        }
+      }
+      const depth = selectionSetDepth(node.selectionSet, fragments, new Set());
+      if (depth > maxDepth) {
+        logger.warn('GraphQL query exceeded depth limit', { depth, maxDepth });
+        context.reportError(new GraphQLError(`'${node.operation}' operation exceeds maximum operation depth of ${maxDepth}`));
+      }
+    },
   });
 }
 

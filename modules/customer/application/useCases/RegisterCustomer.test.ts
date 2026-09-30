@@ -36,7 +36,7 @@ describe('RegisterCustomerUseCase', () => {
     expect(result.customerId).toBe('new-cust-id');
     expect(result.email).toBe('jane@example.com');
     expect(result.isVerified).toBe(false);
-    expect(hashStringMock).toHaveBeenCalledWith('password123', 12);
+    expect(hashStringMock).toHaveBeenCalledWith('password123');
     expect(withTransactionMock).toHaveBeenCalled();
     expect(customerRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({ customerId: 'new-cust-id', email: 'jane@example.com' }),

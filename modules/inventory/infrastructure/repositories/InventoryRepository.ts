@@ -15,7 +15,7 @@ import {
   InventoryTransaction as DbInventoryTransaction,
   DistributionWarehouse as DbDistributionWarehouse,
 } from '../../../../libs/db/types';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import {
   InventoryItemNotFoundError,
   FailedToCreateInventoryError,

@@ -9,7 +9,7 @@ import { ProductVariant } from '../entities/ProductVariant';
 import { ProductCategory } from '../entities/ProductCategory';
 import { ProductStatus } from '../valueObjects/ProductStatus';
 import { ProductVisibility } from '../valueObjects/ProductVisibility';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export interface ProductFilters {
   status?: ProductStatus | ProductStatus[];

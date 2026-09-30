@@ -112,7 +112,7 @@ export class RegisterCustomerUseCase {
     // Hash password before saving so both writes happen in a single transaction.
     // Passwordless (provisioned) accounts keep an empty password column so
     // credential comparison can never match — they must sign in via their provider.
-    const passwordHash = command.password ? await hashString(command.password, 12) : null;
+    const passwordHash = command.password ? await hashString(command.password) : null;
 
     // Save customer + password atomically
     await withTransaction(async () => {
