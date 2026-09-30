@@ -19,7 +19,10 @@
 import { getActivePool } from '../db/pool';
 import { eventBus } from './eventBus';
 import { outboxRowToPayload, type OutboxEvent } from './outboxWriter';
+import type { EventPayload } from './eventTypes';
 import { logger } from '../logger';
+
+export type OutboxDispatchFn = (payload: EventPayload) => Promise<void>;
 
 const POLL_INTERVAL_MS = 500;
 const BATCH_SIZE = 20;
@@ -38,7 +41,10 @@ let shuttingDown = false;
 /**
  * Start the outbox dispatcher polling loop.
  */
-export function startOutboxDispatcher(intervalMs: number = POLL_INTERVAL_MS): void {
+export function startOutboxDispatcher(
+  intervalMs: number = POLL_INTERVAL_MS,
+  dispatch: OutboxDispatchFn = eventBus.dispatchFromOutbox.bind(eventBus),
+): void {
   if (isRunning) return;
   isRunning = true;
   shuttingDown = false;
@@ -48,7 +54,7 @@ export function startOutboxDispatcher(intervalMs: number = POLL_INTERVAL_MS): vo
     if (shuttingDown) return;
 
     try {
-      await dispatchBatch();
+      await dispatchBatch(dispatch);
     } catch (err: unknown) {
       logger.error('Outbox dispatcher poll error', { error: (err as Error).message });
     }
@@ -86,7 +92,7 @@ export async function stopOutboxDispatcher(): Promise<void> {
  * Process a single batch of pending events.
  * Uses FOR UPDATE SKIP LOCKED for multi-node safety.
  */
-async function dispatchBatch(): Promise<void> {
+async function dispatchBatch(dispatch: OutboxDispatchFn): Promise<void> {
   // Skip when no DB is configured (e.g. unit test environment)
   if (!process.env.POSTGRES_HOST) return;
 
@@ -119,7 +125,7 @@ async function dispatchBatch(): Promise<void> {
     logger.debug('Outbox dispatcher claimed events', { count: claimResult.rows.length });
 
     // Dispatch each event — handlers run in parallel for throughput
-    const dispatchPromises = claimResult.rows.map(row => dispatchOne(client, row as unknown as OutboxEvent));
+    const dispatchPromises = claimResult.rows.map(row => dispatchOne(client, row as unknown as OutboxEvent, dispatch));
 
     inFlight += dispatchPromises.length;
     await Promise.all(dispatchPromises);
@@ -133,12 +139,12 @@ async function dispatchBatch(): Promise<void> {
  * Dispatch a single outbox event to all registered handlers.
  * Marks the event as 'processed' on success, or schedules a retry on failure.
  */
-async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent): Promise<void> {
+async function dispatchOne(client: import('pg').PoolClient, row: OutboxEvent, dispatch: OutboxDispatchFn): Promise<void> {
   const payload = outboxRowToPayload(row);
 
   try {
     // Dispatch to the eventBus — handlers run with error boundaries
-    await eventBus.dispatchFromOutbox(payload);
+    await dispatch(payload);
 
     // Mark as processed
     await client.query(

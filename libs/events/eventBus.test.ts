@@ -84,11 +84,11 @@ describe('EventBus error boundaries', () => {
     expect(handler2).toHaveBeenCalledTimes(1);
   });
 
-  it('setOutboxMode / isOutboxMode', () => {
-    expect(eventBus.isOutboxMode()).toBe(false);
-    eventBus.setOutboxMode(true);
-    expect(eventBus.isOutboxMode()).toBe(true);
-    eventBus.setOutboxMode(false);
-    expect(eventBus.isOutboxMode()).toBe(false);
+  it('emit() dispatches through the default memory transport', async () => {
+    const handler = jest.fn();
+    eventBus.registerHandler('customer.registered', handler);
+    await eventBus.emit('customer.registered', { customerId: 'c1' });
+    expect(handler).toHaveBeenCalledTimes(1);
+    eventBus.unregisterHandler('customer.registered', handler);
   });
 });

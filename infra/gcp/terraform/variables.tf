@@ -128,6 +128,30 @@ variable "log_retention_days" {
   default     = 30
 }
 
+# Event Bus Configuration
+variable "event_bus_provider" {
+  description = "Event bus provider for the app runtime (memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus)"
+  type        = string
+  default     = "memory"
+
+  validation {
+    condition     = contains(["memory", "postgres", "gcp-pubsub", "aws-sqs", "azure-servicebus"], var.event_bus_provider)
+    error_message = "event_bus_provider must be one of: memory, postgres, gcp-pubsub, aws-sqs, azure-servicebus"
+  }
+}
+
+variable "enable_pubsub" {
+  description = "Provision Pub/Sub topic + subscription for the event bus (use with event_bus_provider = gcp-pubsub)"
+  type        = bool
+  default     = false
+}
+
+variable "pubsub_max_delivery_attempts" {
+  description = "Delivery attempts before an event is dead-lettered"
+  type        = number
+  default     = 10
+}
+
 # Cost Optimization
 variable "enable_deletion_protection" {
   description = "Enable deletion protection for critical resources"

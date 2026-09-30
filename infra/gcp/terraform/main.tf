@@ -23,7 +23,7 @@ provider "google" {
 
 # Enable required APIs
 resource "google_project_service" "apis" {
-  for_each = toset([
+  for_each = toset(concat([
     "run.googleapis.com",
     "sqladmin.googleapis.com",
     "secretmanager.googleapis.com",
@@ -31,8 +31,8 @@ resource "google_project_service" "apis" {
     "cloudbuild.googleapis.com",
     "compute.googleapis.com",
     "vpcaccess.googleapis.com",
-    "servicenetworking.googleapis.com"
-  ])
+    "servicenetworking.googleapis.com",
+  ], var.enable_pubsub ? ["pubsub.googleapis.com"] : []))
 
   service = each.value
 
@@ -177,6 +177,72 @@ resource "google_storage_bucket_iam_member" "cloud_run_media" {
   bucket = google_storage_bucket.media.name
   role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.cloud_run.email}"
+}
+
+# Event bus: Pub/Sub topic + subscription with dead-lettering.
+# Enable with enable_pubsub = true and event_bus_provider = "gcp-pubsub".
+resource "google_pubsub_topic" "events" {
+  count = var.enable_pubsub ? 1 : 0
+  name  = "${var.app_name}-events-${var.environment}"
+}
+
+resource "google_pubsub_topic" "events_dlq" {
+  count = var.enable_pubsub ? 1 : 0
+  name  = "${var.app_name}-events-dlq-${var.environment}"
+}
+
+resource "google_pubsub_subscription" "events" {
+  count   = var.enable_pubsub ? 1 : 0
+  name    = "${var.app_name}-events-${var.environment}"
+  topic   = google_pubsub_topic.events[0].name
+  project = var.project_id
+
+  ack_deadline_seconds = 60
+
+  dead_letter_policy {
+    dead_letter_topic     = google_pubsub_topic.events_dlq[0].id
+    max_delivery_attempts = var.pubsub_max_delivery_attempts
+  }
+
+  expiration_policy {
+    ttl = "" # never expire
+  }
+}
+
+# Pub/Sub service account needs publisher rights on the DLQ topic for
+# dead-letter forwarding.
+resource "google_pubsub_topic_iam_member" "events_dlq_publisher" {
+  count  = var.enable_pubsub ? 1 : 0
+  topic  = google_pubsub_topic.events_dlq[0].id
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+# Pub/Sub service account needs subscriber rights on the subscription to
+# forward dead-lettered messages.
+resource "google_pubsub_subscription_iam_member" "events_dlq_subscriber" {
+  count        = var.enable_pubsub ? 1 : 0
+  subscription = google_pubsub_subscription.events[0].id
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+}
+
+resource "google_pubsub_topic_iam_member" "app_publisher" {
+  count  = var.enable_pubsub ? 1 : 0
+  topic  = google_pubsub_topic.events[0].id
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:${google_service_account.cloud_run.email}"
+}
+
+resource "google_pubsub_subscription_iam_member" "app_subscriber" {
+  count        = var.enable_pubsub ? 1 : 0
+  subscription = google_pubsub_subscription.events[0].id
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${google_service_account.cloud_run.email}"
+}
+
+data "google_project" "project" {
+  project_id = var.project_id
 }
 
 # Per-secret access for the runtime service account
@@ -331,6 +397,35 @@ resource "google_cloud_run_service" "app" {
         env {
           name  = "GCS_PROJECT_ID"
           value = var.project_id
+        }
+
+        env {
+          name  = "EVENT_BUS_PROVIDER"
+          value = var.event_bus_provider
+        }
+
+        dynamic "env" {
+          for_each = var.enable_pubsub ? [1] : []
+          content {
+            name  = "GCP_PUBSUB_TOPIC"
+            value = google_pubsub_topic.events[0].name
+          }
+        }
+
+        dynamic "env" {
+          for_each = var.enable_pubsub ? [1] : []
+          content {
+            name  = "GCP_PUBSUB_SUBSCRIPTION"
+            value = google_pubsub_subscription.events[0].name
+          }
+        }
+
+        dynamic "env" {
+          for_each = var.enable_pubsub ? [1] : []
+          content {
+            name  = "GOOGLE_CLOUD_PROJECT"
+            value = var.project_id
+          }
         }
 
         env {

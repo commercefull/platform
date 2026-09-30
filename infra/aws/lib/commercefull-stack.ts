@@ -13,6 +13,7 @@ import { EcrConstruct } from './constructs/ecr-construct';
 import { EcsConstruct } from './constructs/ecs-construct';
 import { CloudFrontConstruct } from './constructs/cloudfront-construct';
 import { ApiGatewayConstruct } from './constructs/apigateway-construct';
+import { MessagingConstruct } from './constructs/messaging-construct';
 
 export interface CommercefullStackProps extends cdk.StackProps {
   readonly domainName?: string;
@@ -45,6 +46,15 @@ export interface CommercefullStackProps extends cdk.StackProps {
    * Defaults to true in cost-optimized mode, false otherwise.
    */
   readonly enableApiGateway?: boolean;
+
+  /**
+   * Event bus provider for the app runtime
+   * (memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus).
+   * When 'aws-sqs', an SQS queue + DLQ are provisioned and
+   * the ECS task gets AWS_EVENT_QUEUE_URL.
+   * Defaults to 'memory'.
+   */
+  readonly eventBusProvider?: string;
 }
 
 /**
@@ -104,6 +114,10 @@ export class CommercefullStack extends cdk.Stack {
     // ── ECR ──────────────────────────────────────────────────────────────
     const ecr = new EcrConstruct(this, 'Ecr');
 
+    // ── Event bus (SQS + DLQ) ───────────────────────────────────────────
+    const eventBusProvider = props.eventBusProvider || 'memory';
+    const messaging = eventBusProvider === 'aws-sqs' ? new MessagingConstruct(this, 'Messaging', { environment }) : undefined;
+
     // ── Application secrets ──────────────────────────────────────────────
     const sessionSecret = new secretsmanager.Secret(this, 'SessionSecret', {
       secretName: `commercefull/${environment}/session-secret`,
@@ -132,15 +146,14 @@ export class CommercefullStack extends cdk.Stack {
     };
 
     // Shared secret between CloudFront and the app — blocks direct-to-origin traffic
-    const originVerifySecret = enableCloudFront && (enableApiGateway || enableAlb) ? generatedSecret('OriginVerifySecret', 'origin-verify-secret') : undefined;
+    const originVerifySecret =
+      enableCloudFront && (enableApiGateway || enableAlb) ? generatedSecret('OriginVerifySecret', 'origin-verify-secret') : undefined;
     if (originVerifySecret) {
       appSecrets.ORIGIN_VERIFY_SECRET = originVerifySecret;
     }
 
     // ── ECS ──────────────────────────────────────────────────────────────
-    const containerImage =
-      props.containerImage ||
-      `${this.account}.dkr.ecr.${this.region}.amazonaws.com/commercefull:latest`;
+    const containerImage = props.containerImage || `${this.account}.dkr.ecr.${this.region}.amazonaws.com/commercefull:latest`;
 
     const ecs = new EcsConstruct(this, 'Ecs', {
       environment,
@@ -157,10 +170,22 @@ export class CommercefullStack extends cdk.Stack {
       // CloudFront → (API Gateway | ALB) → task
       trustProxyHops: enableCloudFront ? 2 : 1,
       enableAlb,
+      extraEnv: {
+        EVENT_BUS_PROVIDER: eventBusProvider,
+        ...(messaging
+          ? {
+              AWS_EVENT_QUEUE_URL: messaging.queue.queueUrl,
+              AWS_REGION: this.region,
+            }
+          : {}),
+      },
     });
 
     // Grant ECS task role access to S3
     storage.grantReadWrite(ecs.taskRole);
+
+    // Grant ECS task role send/consume on the event bus queue
+    messaging?.grantSendConsume(ecs.taskRole);
 
     // ── SSL Certificate ──────────────────────────────────────────────────
     const certificate = new acm.Certificate(this, 'Certificate', {
@@ -226,9 +251,7 @@ export class CommercefullStack extends cdk.Stack {
 
       new route53.ARecord(this, 'CloudFrontAlias', {
         zone: hostedZone,
-        target: route53.RecordTarget.fromAlias(
-          new route53targets.CloudFrontTarget(cloudFront.distribution),
-        ),
+        target: route53.RecordTarget.fromAlias(new route53targets.CloudFrontTarget(cloudFront.distribution)),
       });
     }
 

@@ -20,6 +20,23 @@ Outbox Dispatcher (background worker)
   └── After 10 attempts: move to dead-letter queue
 ```
 
+## Transport Providers
+
+`eventBus.emit()` publishes through a pluggable transport selected by `EVENT_BUS_PROVIDER`. The transport is split into a **publisher** (producer side — `emit()`/`writeToOutbox`) and a **subscriber** (consumer side — receives payloads and feeds them to `eventBus.dispatchFromOutbox()`).
+
+| Provider             | `EVENT_BUS_PROVIDER`  | Required env vars                                           | Delivery                        |
+| -------------------- | --------------------- | ----------------------------------------------------------- | ------------------------------- |
+| In-process (default) | `memory`              | —                                                           | At-most-once, synchronous       |
+| Postgres outbox      | `postgres`            | `POSTGRES_*`                                                | At-least-once, DLQ, replay      |
+| GCP Pub/Sub          | `gcp-pubsub`          | `GCP_PUBSUB_TOPIC`, `GCP_PUBSUB_SUBSCRIPTION`               | At-least-once, topic DLQ        |
+| AWS SQS              | `aws-sqs`             | `AWS_EVENT_QUEUE_URL`, `AWS_REGION`                            | At-least-once, queue DLQ        |
+| Azure Service Bus    | `azure-servicebus`    | `AZURE_SERVICE_BUS_*` (connection string, topic, subscription) | At-least-once, dead-letter sub |
+
+- Cloud SDKs (`@google-cloud/pubsub`, `@aws-sdk/client-sqs`, `@azure/service-bus`) are **optional peer dependencies**, lazy-imported only when the provider is configured. Install the one you need.
+- `subscriber` is optional per-provider config: a publish-only node (e.g. a web tier) can set just the topic/ARN; a worker node also sets the subscription/queue to consume.
+- The `postgres` provider writes every `emit()` to `platformEventOutbox` and the dispatcher drains it — use `writeToOutbox(tx, ...)` inside `withTransaction()` when the event must commit atomically with a business write.
+- Provisioning each provider's topic/queue/DLQ is opt-in per cloud: `enable_pubsub` (GCP TF), `enable_servicebus` (Azure TF), `eventBusProvider` prop → `MessagingConstruct` (AWS CDK).
+
 ## Emit & Handle
 
 ### Direct emission (fire-and-forget)
@@ -106,10 +123,11 @@ The dispatcher runs as a background worker started in `app.ts`:
 
 ### Environment flags
 
-| Flag                | Effect                                   |
-| ------------------- | ---------------------------------------- |
-| `OUTBOX_DISABLED=1` | Skip dispatcher startup (unit tests, CI) |
-| `CRON_DISABLED=1`   | Skip scheduled jobs startup              |
+| Flag                | Effect                                                    |
+| ------------------- | --------------------------------------------------------- |
+| `EVENT_BUS_PROVIDER` | Transport provider (see above; default `memory`)         |
+| `OUTBOX_DISABLED=1` | Legacy flag — treated as `memory` provider                |
+| `CRON_DISABLED=1`   | Skip scheduled jobs startup                               |
 
 ## Analytics Handlers
 

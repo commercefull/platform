@@ -30,6 +30,10 @@ const enableApiGateway = process.env.ENABLE_API_GATEWAY
   : costOptimized; // always on in cost-optimized mode
 const enableRoute53 = (process.env.ENABLE_ROUTE53 ?? 'true') !== 'false';
 
+// Event bus provider — set EVENT_BUS_PROVIDER=aws-sqs to provision the
+// SQS events queue + DLQ and inject AWS_EVENT_QUEUE_URL into the task.
+const eventBusProvider = process.env.EVENT_BUS_PROVIDER || 'memory';
+
 new CommercefullStack(app, 'Commercefull', {
   env,
   stackName: 'Commercefull',
@@ -48,6 +52,7 @@ new CommercefullStack(app, 'Commercefull', {
   enableCloudFront,
   enableApiGateway,
   enableRoute53,
+  eventBusProvider,
 });
 
 app.synth();

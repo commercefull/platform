@@ -151,3 +151,27 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# Event Bus Configuration
+variable "event_bus_provider" {
+  description = "Event bus provider for the app runtime (memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus)"
+  type        = string
+  default     = "memory"
+
+  validation {
+    condition     = contains(["memory", "postgres", "gcp-pubsub", "aws-sqs", "azure-servicebus"], var.event_bus_provider)
+    error_message = "event_bus_provider must be one of: memory, postgres, gcp-pubsub, aws-sqs, azure-servicebus"
+  }
+}
+
+variable "enable_servicebus" {
+  description = "Provision Service Bus namespace + topic + subscription (use with event_bus_provider = azure-servicebus)"
+  type        = bool
+  default     = false
+}
+
+variable "servicebus_max_delivery_count" {
+  description = "Delivery attempts before an event is dead-lettered"
+  type        = number
+  default     = 10
+}
