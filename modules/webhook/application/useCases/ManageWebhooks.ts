@@ -7,7 +7,7 @@
 
 import { WebhookRepositoryInterface, WebhookDeliveryFilters } from '../../domain/repositories/WebhookRepository';
 import { WebhookEndpointProps } from '../../domain/entities/WebhookEndpoint';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 
 export class ManageWebhooksUseCase {
   constructor(private readonly repo: WebhookRepositoryInterface) {}

@@ -2,7 +2,7 @@
  * User Repository Interface (Identity)
  */
 
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import { User, UserType, UserStatus } from '../entities/User';
 
 export interface UserFilters {

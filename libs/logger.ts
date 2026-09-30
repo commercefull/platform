@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { HttpRequest, HttpResponse } from './http';
+import type { HttpHandler, HttpRequest, HttpResponse } from './http';
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
-import expressWinston from 'express-winston';
 import path from 'path';
 import { stringify } from './strings';
 import { getCorrelationId } from './correlationId';
@@ -28,10 +27,6 @@ export interface TransformableInfo {
   version?: string;
   correlationId?: string;
   [key: `_${string}`]: unknown; // Allow for custom fields prefixed with underscore
-}
-
-interface ExtendedResponse extends HttpResponse {
-  responseTime?: number;
 }
 
 const { combine, timestamp, printf, errors } = format;
@@ -151,27 +146,27 @@ const httpAccessLogger = winston.createLogger({
   ],
 });
 
-// HTTP request logger middleware
-const expressHttpLogger = expressWinston.logger({
-  winstonInstance: httpAccessLogger,
-  meta: false, // Disable meta to reduce verbosity
-  msg: (req, res) => {
+// HTTP request logger middleware — logs one line per request on response finish.
+// Health checks, static assets, and other non-essential routes are skipped.
+const IGNORED_PATH_PREFIXES = ['/health', '/favicon.ico', '/assets', '/static', '/socket.io'];
+
+const expressHttpLogger: HttpHandler = (req, res, next) => {
+  if (IGNORED_PATH_PREFIXES.some(route => req.path.startsWith(route))) {
+    next();
+    return;
+  }
+  const start = Date.now();
+  res.on('finish', () => {
+    const responseTime = Date.now() - start;
     const isAjax =
       req.headers['x-requested-with'] === 'XMLHttpRequest' ||
       req.path.startsWith('/api/') ||
       req.headers.accept?.includes('application/json');
     const requestType = isAjax ? '[AJAX]' : '[PAGE]';
-    return `| ${res.statusCode} | ${requestType} ${req.method} ${req.url} ${(res as ExtendedResponse).responseTime}ms`;
-  },
-  expressFormat: false, // Disable express format to use our custom format
-  colorize: false, // Disable color codes in logs
-  ignoreRoute: req => {
-    // Ignore health checks, static assets, and other non-essential routes
-    return ['/health', '/favicon.ico', '/assets', '/static', '/socket.io'].some(route => req.path.startsWith(route));
-  },
-  requestWhitelist: [], // Don't log request headers
-  responseWhitelist: ['statusCode'], // Only log status code from response
-});
+    httpAccessLogger.http(`| ${res.statusCode} | ${requestType} ${req.method} ${req.url} ${responseTime}ms`);
+  });
+  next();
+};
 
 // Export the logger and httpLogger
 export { logger, expressHttpLogger };

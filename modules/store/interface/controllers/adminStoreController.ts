@@ -2,7 +2,7 @@ import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import type { StoreRole } from '../../../identity/domain/entities/UserStoreAssignment';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import type { PaginatedResult } from '../../../../libs/types/shared';
+import type { PaginatedResult } from '../../../../libs/types/pagination';
 import {
   listStoresUseCase,
   getStoreUseCase,

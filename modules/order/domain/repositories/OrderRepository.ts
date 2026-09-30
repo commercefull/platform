@@ -9,7 +9,7 @@ import { OrderAddress } from '../entities/OrderAddress';
 import { OrderStatus } from '../valueObjects/OrderStatus';
 import { PaymentStatus } from '../valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../valueObjects/FulfillmentStatus';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export interface OrderFilters {
   customerId?: string;

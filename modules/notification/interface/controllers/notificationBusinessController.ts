@@ -69,12 +69,6 @@ interface UserRequest extends HttpRequest {
     id?: string;
     organizationId?: string;
   };
-  flash: {
-    (): { [key: string]: string[] };
-    (message: string): string[];
-    (type: string, message: string | string[]): number;
-    (type: string, format: string, ...args: unknown[]): number;
-  };
 }
 
 function respondError(res: HttpResponse, error: unknown, fallback: string): void {

@@ -5,7 +5,7 @@
 import { PaymentTransaction } from '../entities/PaymentTransaction';
 import { PaymentRefund } from '../entities/PaymentRefund';
 import { TransactionStatus } from '../valueObjects/PaymentStatus';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import type { PaymentSettings, PaymentSettingsUpsertParams } from './PaymentSettingsRepository';
 import type { PaymentWebhook, PaymentWebhookCreateParams } from './PaymentWebhookRepository';
 import type { StoredPaymentMethod, StoredPaymentMethodCreateParams } from './StoredPaymentMethodRepository';

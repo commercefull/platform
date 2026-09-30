@@ -29,7 +29,7 @@ Enabled with a whitelist for common filter parameters: `ids`, `tags`, `categorie
 
 ## Input Validation & SQL Injection
 
-- Use `express-validator` for request validation.
+- Validate request inputs with the `fieldRule`/`collectErrors` helpers pattern (see `modules/content/validator.ts`).
 - **Always** use parameterized SQL queries. Never interpolate user input.
 - Body size limits: JSON 1 MB, URL-encoded 10 MB.
 

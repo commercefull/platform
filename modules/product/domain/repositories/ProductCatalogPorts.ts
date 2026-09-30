@@ -1,4 +1,4 @@
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 // ============================================================================
 // Product Q&A

@@ -11,7 +11,7 @@ import { logger } from '../../../../libs/logger';
 import { AuditLog } from '../../domain/entities/AuditLog';
 import type { AuditAction, ActorType, ResourceType } from '../../domain/enums/AuditAction';
 import { AuditRepository, AuditLogFilters } from '../../domain/repositories/AuditRepository';
-import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/shared';
+import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/pagination';
 import { AuditLogWriteError } from '../../domain/errors/AuditErrors';
 
 interface AuditLogRow {

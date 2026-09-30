@@ -7,7 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
 import { Product as DbProduct, ProductVariant as DbProductVariant, ProductImage as DbProductImage } from '../../../../libs/db/types';
 import { ProductRepository as IProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { Product, ProductImage } from '../../domain/entities/Product';
 import { CatalogFeature } from '../../domain/entities/CatalogFeature';
 import { ProductVariant } from '../../domain/entities/ProductVariant';

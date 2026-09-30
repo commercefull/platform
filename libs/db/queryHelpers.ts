@@ -1,5 +1,5 @@
 import { query, queryOne } from './index';
-import { PaginationOptions, PaginatedResult } from '../types/shared';
+import { PaginationOptions, PaginatedResult } from '../types/pagination';
 
 /**
  * Execute a paginated SELECT query with COUNT.

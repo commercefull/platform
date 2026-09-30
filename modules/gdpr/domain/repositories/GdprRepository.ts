@@ -5,7 +5,7 @@
 
 import { GdprDataRequest, GdprRequestType, GdprRequestStatus } from '../entities/GdprDataRequest';
 import { GdprCookieConsent } from '../entities/GdprCookieConsent';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 // ============================================================================
 // Filters and Pagination

@@ -1,5 +1,5 @@
 import { PaymentRepository, PaymentFilters } from '../../domain/repositories/PaymentRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import type { TransactionDetailResponse } from './GetTransaction';
 

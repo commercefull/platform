@@ -4,7 +4,7 @@
  */
 
 import { ProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';

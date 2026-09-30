@@ -4,7 +4,7 @@
  */
 
 import { OrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 import { Order } from '../../domain/entities/Order';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';

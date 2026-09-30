@@ -154,7 +154,7 @@ export type HttpRequestBody = Record<string, unknown>;
 
 ### 3.3 Express augmentation
 
-`libs/http/expressAugmentation.ts` declares `Express.Request`/`Express.User` extensions globally so third-party middleware (`passport`, `express-session`, `connect-flash`, `multer`) and the platform's own fields (`req.rawBody`, `req.companyUser`, `req.customer`) stay typed:
+`libs/http/expressAugmentation.ts` declares `Express.Request`/`Express.User` extensions globally so third-party middleware (`express-session`, `multer`) and the platform's own middleware and fields (`req.cookies`/`req.signedCookies` from `libs/cookieParser`, `req.flash` from `libs/flash`, plus `req.rawBody`, `req.companyUser`, `req.customer`) stay typed:
 
 ```ts
 declare global {
@@ -166,6 +166,9 @@ declare global {
       companyUser?: HttpCompanyUser;
       b2bCompanyUserId?: string;
       customer?: HttpCustomerContext;
+      cookies: Record<string, string>;
+      signedCookies: Record<string, string>;
+      flash: { /* overloaded — see expressAugmentation.ts */ };
     }
   }
 }
@@ -173,7 +176,7 @@ declare global {
 
 It is loaded automatically by `libs/http/index.ts` — consumers never import it directly.
 
-**Consequence:** because `@types/express-session`, `@types/connect-flash`, `@types/multer`, and `@types/passport` also augment `Express.Request`/`Express.Response` globally, `HttpRequest` inherits `req.session`, `req.flash()`, `req.file`/`req.files`, and `HttpResponse` inherits `res.render`. Portal and upload code compiles against facade types without extra imports.
+**Consequence:** because `@types/express-session` and `@types/multer` also augment `Express.Request`/`Express.Response` globally — and our own augmentation covers cookies and flash — `HttpRequest` inherits `req.session`, `req.flash()`, `req.cookies`, `req.file`/`req.files`, and `HttpResponse` inherits `res.render`. Portal and upload code compiles against facade types without extra imports.
 
 ### 3.4 Runtime adapter
 
@@ -210,8 +213,10 @@ Everything else — all `modules/`, all `web/`, all other `libs/` — uses the f
 
 The ban targets the literal `express` package only. These remain legitimate imports anywhere (they are distinct packages, not Express itself):
 
-- `express-session`, `connect-flash`, `express-winston`, `express-validator`
-- `swagger-ui-express`, `@as-integrations/express5`, `passport`, `multer`
+- `express-session`
+- `swagger-ui-express`, `@as-integrations/express5`, `multer`
+
+In-house middleware replaced the former `connect-flash`, `cookie-parser`, `hpp`, `express-winston`, `express-validator`, and `passport` packages — see `libs/flash`, `libs/cookieParser`, `libs/hpp`, `libs/logger` (`expressHttpLogger`), and `modules/content/validator.ts`.
 
 ---
 
@@ -286,7 +291,7 @@ Admin and storefront controllers use the same facade types while remaining expli
 | Sessions/flash/render | `web/` portal controllers              | Typed via global augmentation; Express-specific by design.                                     |
 | GraphQL               | `boot/graphql.ts`                      | Apollo `expressMiddleware`; handler typed as `express.RequestHandler` (see §5.3 caveat).       |
 | Sessions store        | `libs/session/sessionStoreFactory.ts`  | Imports `express-session` directly — a distinct package, not the banned `express`.             |
-| Validation            | `modules/content/validator.ts`         | Imports `express-validator` (distinct package); handlers exported as `HttpHandler`.            |
+| Validation            | `modules/content/validator.ts`         | In-house field-rule middleware; handlers exported as `HttpHandler`.                            |
 
 ---
 

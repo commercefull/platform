@@ -7,7 +7,7 @@ import { Order } from '../../domain/entities/Order';
 import { CustomerIdRequiredError } from '../../domain/errors/OrderErrors';
 
 import type { OrderRepository } from '../../domain/repositories/OrderRepository';
-import type { PaginatedResult } from 'libs/types/shared';
+import type { PaginatedResult } from 'libs/types/pagination';
 
 function createMockOrderRepo(orders: Order[] = []): jest.Mocked<OrderRepository> {
   const paginated: PaginatedResult<Order> = {

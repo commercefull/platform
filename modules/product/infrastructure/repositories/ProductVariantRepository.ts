@@ -7,7 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { ProductVariant, VariantAttribute } from '../../domain/entities/ProductVariant';
 import { Dimensions } from '../../domain/valueObjects/Dimensions';
 import { ProductVariant as DbProductVariant } from '../../../../libs/db/types';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 
 interface VariantAttributeRow {
   attributeId: string;

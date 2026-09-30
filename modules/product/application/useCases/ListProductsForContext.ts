@@ -4,7 +4,7 @@
  */
 
 import { ProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 import { Product } from '../../domain/entities/Product';
 import { OrganizationLookupPort } from '../../application/ports/OrganizationLookupPort';
 import { StoreLookupPort } from '../../application/ports/StoreLookupPort';

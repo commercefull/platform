@@ -1,7 +1,7 @@
 import { GetOrdersByStoreUseCase } from './GetOrdersByStore';
 import type { OrderRepository } from '../../domain/repositories/OrderRepository';
 import type { Order } from '../../domain/entities/Order';
-import type { PaginatedResult } from 'libs/types/shared';
+import type { PaginatedResult } from 'libs/types/pagination';
 
 const emptyPage: PaginatedResult<Order> = { data: [], total: 0, limit: 10, offset: 0, hasMore: false, length: 0 };
 

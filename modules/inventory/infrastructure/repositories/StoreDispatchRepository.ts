@@ -1,7 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { StoreDispatch, StoreDispatchItemProps } from '../../domain/entities/StoreDispatch';
 import { StoreDispatchRepository as IStoreDispatchRepository, DispatchFilters } from '../../domain/repositories/StoreDispatchRepository';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { StoreDispatch as DbStoreDispatch, StoreDispatchItem as DbStoreDispatchItem } from '../../../../libs/db/types';
 import { isUuid } from '../../../../libs/uuid';
 

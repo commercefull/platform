@@ -1,4 +1,4 @@
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import { StoreDispatch, DispatchStatus } from '../entities/StoreDispatch';
 
 export interface DispatchFilters {

@@ -143,8 +143,8 @@ export const isCustomerLoggedIn = (req: HttpRequest, res: HttpResponse, next: Ht
     return authenticateToken(req, res, next, CUSTOMER_JWT_SECRET);
   }
 
-  // Accept either a hydrated storefront session user or passport auth
-  if (req.user || req.isAuthenticated?.()) {
+  // Accept a hydrated storefront session user
+  if (req.user) {
     return next();
   }
 

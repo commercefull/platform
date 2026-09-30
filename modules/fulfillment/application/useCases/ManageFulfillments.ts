@@ -11,7 +11,7 @@ import {
 } from '../../domain/repositories/FulfillmentRepository';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { SourceType } from '../../domain/entities/Fulfillment';
-import { PaginationOptions } from 'libs/types/shared';
+import { PaginationOptions } from 'libs/types/pagination';
 
 export class ManageFulfillmentsUseCase {
   constructor(private readonly fulfillmentRepository: IFulfillmentRepository) {}

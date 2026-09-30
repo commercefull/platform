@@ -6,7 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { OrderRepository as IOrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
-import { PaginationOptions, PaginatedResult } from 'libs/types/shared';
+import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { OrderAddress } from '../../domain/entities/OrderAddress';

@@ -8,7 +8,7 @@
 
 import { AuditLog } from '../entities/AuditLog';
 import type { AuditAction, ActorType, ResourceType } from '../enums/AuditAction';
-import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/shared';
+import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/pagination';
 
 export interface AuditLogFilters {
   actorId?: string;

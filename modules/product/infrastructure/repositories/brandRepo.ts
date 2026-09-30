@@ -7,7 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { ProductBrand as DbBrand } from '../../../../libs/db/types';
 import { BrandRepository as IBrandRepository, BrandFilters } from '../../domain/repositories/BrandRepository';
 import { Brand, BrandStatus } from '../../domain/entities/Brand';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export class BrandRepo implements IBrandRepository {
   async findById(brandId: string): Promise<Brand | null> {

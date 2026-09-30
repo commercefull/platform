@@ -4,7 +4,7 @@
 
 import { InventoryItem } from '../entities/InventoryItem';
 import { InventoryLocation } from '../entities/Inventory';
-import { PaginatedResult, PaginationOptions } from 'libs/types/shared';
+import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
 export interface InventoryFilters {
   productId?: string;

@@ -3,11 +3,11 @@ import session from 'express-session';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
+import connectPgSimple from 'connect-pg-simple';
 import { getRedisClient, redisClientOptions } from '../redisClient';
 import { resolveSessionBackendType } from './createSessionBackend';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pgSession = require('connect-pg-simple')(session);
+const PgSessionStore = connectPgSimple(session);
 
 export interface SessionStoreConfig {
   /** Explicit backend. Omitted → SESSION_BACKEND env (default 'postgres'). */
@@ -108,7 +108,7 @@ function createPostgresStore(config?: SessionStoreConfig['postgres']): SessionSt
     throw new Error('PostgreSQL pool is required for PostgreSQL session store');
   }
 
-  const store = new pgSession({
+  const store = new PgSessionStore({
     pool: config.pool,
     tableName: config.tableName || 'session',
     pruneSessionInterval: config.pruneSessionInterval || 60 * 15, // 15 minutes
