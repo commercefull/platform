@@ -8,8 +8,8 @@ export type ProductQaStatus = 'pending' | 'answered' | 'closed';
 
 export interface ProductQa {
   productQaId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   productId: string;
   customerId?: string | null;
   question: string;
@@ -34,8 +34,8 @@ export type ProductQaAnswerStatus = 'pending' | 'approved' | 'rejected';
 
 export interface ProductQaAnswer {
   productQaAnswerId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   productQaId: string;
   customerId?: string | null;
   organizationId?: string | null;
@@ -54,9 +54,9 @@ export interface ProductQaAnswerPort {
 
 export interface ProductCategoryRow {
   productCategoryId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
   name: string;
   slug: string;
   description?: string | null;
@@ -85,7 +85,7 @@ export interface ProductCategoryPort {
 
 export interface ProductToCategory {
   productToCategoryId: string;
-  createdAt: string;
+  createdAt: Date;
   productId: string;
   productCategoryId: string;
   position: number;
@@ -102,9 +102,9 @@ export interface ProductToCategoryPort {
 
 export interface ProductTag {
   productTagId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
   name: string;
   slug: string;
   description?: string | null;
@@ -248,8 +248,8 @@ export type ReviewRating = 1 | 2 | 3 | 4 | 5;
 
 export interface ProductReview {
   productReviewId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   productId: string;
   productVariantId?: string;
   customerId?: string;
@@ -266,7 +266,7 @@ export interface ProductReview {
   reviewerName?: string;
   reviewerEmail?: string;
   adminResponse?: string;
-  adminResponseDate?: string;
+  adminResponseDate?: Date;
 }
 
 export type ProductReviewCreateParams = Omit<
@@ -320,8 +320,8 @@ export interface ProductReviewPort {
 
 export interface ProductReviewMedia {
   productReviewMediaId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   productReviewId: string;
   url: string;
   type: string;
@@ -341,7 +341,7 @@ export interface ProductReviewMediaPort {
 
 export interface ProductReviewVote {
   productReviewVoteId: string;
-  createdAt: string;
+  createdAt: Date;
   productReviewId: string;
   customerId: string;
   isHelpful: boolean;
@@ -360,8 +360,8 @@ export interface ProductReviewVotePort {
 
 export interface ProductCollection {
   productCollectionId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   name: string;
   slug: string;
   description?: string | null;
@@ -387,7 +387,7 @@ export interface ProductCollectionPort {
 
 export interface ProductCollectionMap {
   productCollectionMapId: string;
-  createdAt: string;
+  createdAt: Date;
   productCollectionId: string;
   productId: string;
   position: number;

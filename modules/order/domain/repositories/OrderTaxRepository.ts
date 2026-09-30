@@ -1,7 +1,7 @@
 export interface OrderTax {
   orderTaxId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   orderItemId?: string;
   taxType: string;

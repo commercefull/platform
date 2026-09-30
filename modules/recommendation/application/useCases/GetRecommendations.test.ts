@@ -23,8 +23,8 @@ function exclusionRow(overrides: Partial<{ productId: string; excludedProductId:
     excludedProductId: 'cand-1',
     scope: 'pair' as const,
     reason: null,
-    createdAt: '',
-    updatedAt: '',
+    createdAt: new Date(''),
+    updatedAt: new Date(''),
     ...overrides,
   };
 }

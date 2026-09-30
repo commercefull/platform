@@ -19,7 +19,7 @@ export interface AssignToStoreOutput {
   storeId: string;
   priority: number;
   isDefault: boolean;
-  assignedAt: string;
+  assignedAt: Date;
 }
 
 interface StoreRecord {
@@ -88,7 +88,7 @@ export class AssignToStoreUseCase {
       storeId: assignment.storeId,
       priority: assignment.priority,
       isDefault: assignment.isDefault,
-      assignedAt: new Date().toISOString(),
+      assignedAt: new Date(),
     };
   }
 }

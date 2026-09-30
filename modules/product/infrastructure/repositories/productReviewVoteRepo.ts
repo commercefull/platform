@@ -1,14 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export interface ProductReviewVote {
-  productReviewVoteId: string;
-  createdAt: string;
-  productReviewId: string;
-  customerId: string;
-  isHelpful: boolean;
-}
-
-export type ProductReviewVoteCreateParams = Omit<ProductReviewVote, 'productReviewVoteId' | 'createdAt'>;
+import type { ProductReviewVote, ProductReviewVoteCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductReviewVote, ProductReviewVoteCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductReviewVoteRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewVote[]> {

@@ -1,15 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductToCategory {
-  productToCategoryId: string;
-  createdAt: string;
-  productId: string;
-  productCategoryId: string;
-  position: number;
-  isPrimary: boolean;
-}
-
+import type { ProductToCategory } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductToCategory } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductToCategoryCreateParams = Omit<ProductToCategory, 'productToCategoryId' | 'createdAt'>;
 
 export class ProductToCategoryRepo {

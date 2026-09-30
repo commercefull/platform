@@ -101,8 +101,8 @@ export function createWarehouseRecord(overrides: Partial<WarehouseRecord> = {}):
     postalCode: '12345',
     country: 'US',
     timezone: 'America/Chicago',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     ...overrides,
   };
 }

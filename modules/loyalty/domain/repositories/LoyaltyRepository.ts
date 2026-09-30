@@ -67,7 +67,7 @@ export type TransactionType = 'earn' | 'redeem' | 'expire' | 'adjust' | 'bonus' 
 
 export interface CustomerLoyaltyTransaction {
   customerLoyaltyTransactionId: string;
-  createdAt: string;
+  createdAt: Date;
   customerId: string;
   type: TransactionType;
   points: number;
@@ -75,7 +75,7 @@ export interface CustomerLoyaltyTransaction {
   balanceAfter: number;
   orderId?: string;
   description?: string;
-  expiresAt?: string;
+  expiresAt?: Date;
   metadata?: Record<string, unknown>;
   createdBy?: string;
 }

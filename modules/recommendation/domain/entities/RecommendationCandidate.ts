@@ -40,8 +40,8 @@ export interface RecommendationCandidateProps {
   relationType: RecommendationRelationType;
   score: number;
   reason: CandidateReason | null;
-  computedAt: string;
-  createdAt: string;
+  computedAt: Date;
+  createdAt: Date;
 }
 
 export type RecommendationCandidateInsert = Omit<RecommendationCandidateProps, 'recommendationCandidateId' | 'createdAt'>;

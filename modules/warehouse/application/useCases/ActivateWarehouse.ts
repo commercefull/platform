@@ -13,7 +13,7 @@ export interface ActivateWarehouseOutput {
   warehouseId: string;
   name: string;
   isActive: boolean;
-  activatedAt: string;
+  activatedAt: Date;
 }
 
 interface WarehouseRecord {
@@ -41,7 +41,7 @@ export class ActivateWarehouseUseCase {
         warehouseId: warehouse.warehouseId,
         name: warehouse.name,
         isActive: true,
-        activatedAt: new Date().toISOString(),
+        activatedAt: new Date(),
       };
     }
 
@@ -58,7 +58,7 @@ export class ActivateWarehouseUseCase {
       warehouseId: updated.warehouseId,
       name: updated.name,
       isActive: true,
-      activatedAt: new Date().toISOString(),
+      activatedAt: new Date(),
     };
   }
 }

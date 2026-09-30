@@ -47,8 +47,8 @@ function createMockQueryRepo(): jest.Mocked<OrderQueryRepository> {
     findNotesByOrder: jest.fn().mockResolvedValue([]),
     createNote: jest.fn().mockResolvedValue({
       orderNoteId: 'note-1',
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
       orderId: 'o-1',
       content: 'Test note',
       isCustomerVisible: false,

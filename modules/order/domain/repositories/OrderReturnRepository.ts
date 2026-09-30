@@ -4,17 +4,17 @@ export type ReturnCarrier = 'ups' | 'fedex' | 'dhl' | 'usps' | 'custom';
 
 export interface OrderReturn {
   orderReturnId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   returnNumber: string;
   customerId?: string;
   status: OrderReturnStatus;
   returnType: OrderReturnType;
-  requestedAt: string;
-  approvedAt?: string;
-  receivedAt?: string;
-  completedAt?: string;
+  requestedAt: Date;
+  approvedAt?: Date;
+  receivedAt?: Date;
+  completedAt?: Date;
   rmaNumber?: string;
   paymentRefundId?: string;
   returnShippingPaid: boolean;

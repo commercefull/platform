@@ -42,10 +42,10 @@ export interface BaseNotification {
   content: string;
   channel: NotificationChannel | NotificationChannel[];
   isRead: boolean;
-  readAt?: string;
-  sentAt?: string;
-  deliveredAt?: string;
-  expiresAt?: string;
+  readAt?: Date;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  expiresAt?: Date;
   actionUrl?: string;
   actionLabel?: string;
   imageUrl?: string;
@@ -53,8 +53,8 @@ export interface BaseNotification {
   category?: string;
   data?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt?: string;
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 /**
@@ -103,7 +103,7 @@ export abstract class NotificationBuilder<_T> {
       channel: this.channel,
       isRead: false,
       priority: this.priority,
-      createdAt: formatDate(),
+      createdAt: new Date(),
       metadata: this.getMetadata(),
     };
   }

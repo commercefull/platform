@@ -1,20 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductCollection {
-  productCollectionId: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  slug: string;
-  description?: string | null;
-  imageUrl?: string | null;
-  isActive: boolean;
-  organizationId?: string | null;
-}
-
-export type ProductCollectionCreateParams = Omit<ProductCollection, 'productCollectionId' | 'createdAt' | 'updatedAt'>;
-export type ProductCollectionUpdateParams = Partial<Omit<ProductCollectionCreateParams, never>>;
+import type { ProductCollection, ProductCollectionCreateParams, ProductCollectionUpdateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductCollection, ProductCollectionCreateParams, ProductCollectionUpdateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductCollectionRepo {
   async findAll(): Promise<ProductCollection[]> {

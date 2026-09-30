@@ -69,7 +69,7 @@ export class AuditLog {
 
     const hash = computeHash({
       auditLogId,
-      createdAt: createdAt.toISOString(),
+      createdAt,
       actorId: input.actorId,
       actorType: input.actorType,
       action: input.action,
@@ -166,7 +166,7 @@ export class AuditLog {
   verifyHash(): boolean {
     const expectedHash = computeHash({
       auditLogId: this.props.auditLogId,
-      createdAt: this.props.createdAt.toISOString(),
+      createdAt: this.props.createdAt,
       actorId: this.props.actorId,
       actorType: this.props.actorType,
       action: this.props.action,
@@ -188,7 +188,7 @@ export class AuditLog {
  */
 function computeHash(data: {
   auditLogId: string;
-  createdAt: string;
+  createdAt: Date;
   actorId: string;
   actorType: string;
   action: string;

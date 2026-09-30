@@ -126,8 +126,8 @@ describe('ManageProductRelationshipsUseCase', () => {
     type: 'related' as const,
     position: 0,
     isAutomated: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   beforeEach(() => {

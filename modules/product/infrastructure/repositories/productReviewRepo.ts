@@ -20,9 +20,9 @@ export type {
   ReviewFilters,
 } from '../../domain/repositories/ProductCatalogPorts';
 
-const iso = (d: Date | string | null | undefined): string | undefined =>
-  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
-const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
+const toDate = (d: Date | string | null | undefined): Date | undefined =>
+  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToReview(row: DbProductReview): ProductReview {
   return {
@@ -43,9 +43,9 @@ function mapToReview(row: DbProductReview): ProductReview {
     reviewerName: row.reviewerName ?? undefined,
     reviewerEmail: row.reviewerEmail ?? undefined,
     adminResponse: row.adminResponse ?? undefined,
-    adminResponseDate: iso(row.adminResponseDate),
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    adminResponseDate: toDate(row.adminResponseDate),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -306,7 +306,7 @@ export class ProductReviewRepo {
   async addAdminResponse(productReviewId: string, response: string): Promise<ProductReview | null> {
     return this.update(productReviewId, {
       adminResponse: response,
-      adminResponseDate: new Date().toISOString(),
+      adminResponseDate: new Date(),
     });
   }
 

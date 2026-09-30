@@ -11,7 +11,7 @@ export type UserType = 'customer' | 'organization' | 'admin';
 
 export interface NotificationDeliveryLog {
   notificationDeliveryLogId: string;
-  createdAt: string;
+  createdAt: Date;
   notificationId?: string;
   userId: string;
   userType: UserType;
@@ -20,9 +20,9 @@ export interface NotificationDeliveryLog {
   recipient: string;
   status: DeliveryStatus;
   statusDetails?: string;
-  sentAt?: string;
-  deliveredAt?: string;
-  failedAt?: string;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  failedAt?: Date;
   failureReason?: string;
   provider?: string;
   providerMessageId?: string;

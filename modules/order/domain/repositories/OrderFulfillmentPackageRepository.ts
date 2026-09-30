@@ -1,7 +1,7 @@
 export interface OrderFulfillmentPackage {
   orderFulfillmentPackageId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderFulfillmentId: string;
   packageNumber: string;
   trackingNumber?: string;

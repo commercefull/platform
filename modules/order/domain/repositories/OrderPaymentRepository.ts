@@ -5,8 +5,8 @@ export type OrderPaymentStatus = 'pending' | 'authorized' | 'captured' | 'refund
 
 export interface OrderPayment {
   orderPaymentId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   paymentMethodId?: string;
   type: OrderPaymentType;
@@ -24,7 +24,7 @@ export interface OrderPayment {
   gatewayResponse?: Record<string, unknown>;
   /** Refunded amount in integer cents. */
   refundedAmountCents: number;
-  capturedAt?: string;
+  capturedAt?: Date;
 }
 
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;

@@ -20,8 +20,8 @@ function exclusion(overrides: Partial<RecommendationExclusionProps> = {}): Recom
     excludedProductId: 'cand-1',
     scope: 'pair',
     reason: null,
-    createdAt: '',
-    updatedAt: '',
+    createdAt: new Date(''),
+    updatedAt: new Date(''),
     ...overrides,
   };
 }

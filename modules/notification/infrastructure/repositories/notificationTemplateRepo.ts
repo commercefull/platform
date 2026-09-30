@@ -36,8 +36,8 @@ function mapToTemplate(row: DbNotificationTemplate): NotificationTemplate {
     categoryCode: row.categoryCode ?? undefined,
     previewData: (row.previewData as Record<string, unknown> | null) ?? undefined,
     createdBy: row.createdBy ?? undefined,
-    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
-    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
   };
 }
 

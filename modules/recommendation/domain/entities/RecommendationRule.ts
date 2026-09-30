@@ -30,8 +30,8 @@ export interface RecommendationRuleProps {
   maxItems: number;
   priority: number;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type RecommendationRuleCreateProps = Omit<RecommendationRuleProps, 'recommendationRuleId' | 'createdAt' | 'updatedAt'>;

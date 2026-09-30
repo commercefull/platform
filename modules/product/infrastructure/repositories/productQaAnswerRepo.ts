@@ -1,20 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export type ProductQaAnswerStatus = 'pending' | 'approved' | 'rejected';
-
-export interface ProductQaAnswer {
-  productQaAnswerId: string;
-  createdAt: string;
-  updatedAt: string;
-  productQaId: string;
-  customerId?: string | null;
-  organizationId?: string | null;
-  answer: string;
-  status: ProductQaAnswerStatus;
-  isOfficial: boolean;
-}
-
+import type { ProductQaAnswerStatus, ProductQaAnswer } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductQaAnswerStatus, ProductQaAnswer } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductQaAnswerCreateParams = Omit<ProductQaAnswer, 'productQaAnswerId' | 'createdAt' | 'updatedAt'>;
 
 export class ProductQaAnswerRepo {

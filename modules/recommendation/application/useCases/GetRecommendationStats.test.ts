@@ -9,7 +9,7 @@ import type { CandidateRepository } from '../../domain/repositories/CandidateRep
 describe('GetRecommendationStatsUseCase', () => {
   it('should return repo stats for the scope', async () => {
     const candidates = lazyMock<CandidateRepository>();
-    candidates.getStats.mockResolvedValue({ productsWithFbt: 12, lastRebuiltAt: '2026-09-26T00:00:00Z', ordersCounted: 340 });
+    candidates.getStats.mockResolvedValue({ productsWithFbt: 12, lastRebuiltAt: new Date('2026-09-26T00:00:00Z'), ordersCounted: 340 });
     const useCase = new GetRecommendationStatsUseCase(candidates);
 
     const res = await useCase.execute({ organizationId: ORG_ID, storeId: null });

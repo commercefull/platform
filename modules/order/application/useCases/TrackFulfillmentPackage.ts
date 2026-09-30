@@ -102,8 +102,8 @@ export class TrackFulfillmentPackageUseCase {
       dimensions: pkg.dimensions,
       packageType: pkg.packageType,
       customsInfo: pkg.customsInfo,
-      createdAt: pkg.createdAt,
-      updatedAt: pkg.updatedAt,
+      createdAt: pkg.createdAt.toISOString(),
+      updatedAt: pkg.updatedAt.toISOString(),
     };
   }
 }

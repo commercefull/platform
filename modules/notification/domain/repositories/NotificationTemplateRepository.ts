@@ -10,8 +10,8 @@ export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
 
 export interface NotificationTemplate {
   notificationTemplateId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   code: string;
   name: string;
   description?: string;

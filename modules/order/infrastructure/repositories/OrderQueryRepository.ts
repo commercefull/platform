@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
-import type { OrderNote as DbOrderNote, OrderPaymentRefund as DbOrderPaymentRefund, OrderShipping as DbOrderShipping, OrderShippingRate as DbOrderShippingRate, OrderTax as DbOrderTax } from '../../../../libs/db/types';
+import type { OrderNote as DbOrderNote, OrderDiscount as DbOrderDiscount, OrderPayment as DbOrderPayment, OrderPaymentRefund as DbOrderPaymentRefund, OrderShipping as DbOrderShipping, OrderShippingRate as DbOrderShippingRate, OrderTax as DbOrderTax } from '../../../../libs/db/types';
 import {
   FailedToCreateOrderNoteError,
   FailedToCreateOrderDiscountError,
@@ -18,23 +18,8 @@ import {
 import type { OrderNote, OrderNoteCreateParams } from '../../domain/repositories/OrderNoteRepository';
 export type { OrderNote, OrderNoteCreateParams } from '../../domain/repositories/OrderNoteRepository';
 
-export type DiscountType = 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyXGetY' | 'giftCard';
-export interface OrderDiscount {
-  orderDiscountId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  orderItemId?: string;
-  code?: string;
-  name: string;
-  description?: string;
-  type: DiscountType;
-  /** Polymorphic operand: percentage or fixed amount. */
-  value: number;
-  /** Discount amount in integer cents. */
-  discountAmountCents: number;
-}
-export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
+import type { DiscountType, OrderDiscount, OrderDiscountCreateParams } from '../../domain/repositories/OrderDiscountRepository';
+export type { DiscountType, OrderDiscount, OrderDiscountCreateParams } from '../../domain/repositories/OrderDiscountRepository';
 
 import type {
   OrderShipping,
@@ -55,31 +40,18 @@ export type {
 import type { OrderTax, OrderTaxCreateParams } from '../../domain/repositories/OrderTaxRepository';
 export type { OrderTax, OrderTaxCreateParams } from '../../domain/repositories/OrderTaxRepository';
 
-export type OrderPaymentType =
-  'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
-export type OrderPaymentStatus = 'pending' | 'authorized' | 'captured' | 'refunded' | 'partiallyRefunded' | 'voided' | 'failed';
-export interface OrderPayment {
-  orderPaymentId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  paymentMethodId?: string;
-  type: OrderPaymentType;
-  provider: string;
-  amountCents: number;
-  currency: string;
-  status: OrderPaymentStatus;
-  transactionId?: string;
-  authorizationCode?: string;
-  errorCode?: string;
-  errorMessage?: string;
-  maskedNumber?: string;
-  cardType?: string;
-  gatewayResponse?: Record<string, unknown>;
-  refundedAmountCents: number;
-  capturedAt?: string;
-}
-export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
+import type {
+  OrderPaymentType,
+  OrderPaymentStatus,
+  OrderPayment,
+  OrderPaymentCreateParams,
+} from '../../domain/repositories/OrderPaymentRepository';
+export type {
+  OrderPaymentType,
+  OrderPaymentStatus,
+  OrderPayment,
+  OrderPaymentCreateParams,
+} from '../../domain/repositories/OrderPaymentRepository';
 
 import type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
 export type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
@@ -96,17 +68,30 @@ export type {
 // Consolidated Order Query Repository
 // ============================================================================
 
-const iso = (d: Date | string | null | undefined): string | undefined =>
-  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
-const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
+const toDate = (d: Date | string | null | undefined): Date | undefined =>
+  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToNote(row: DbOrderNote): OrderNote {
   return {
     ...row,
     createdBy: row.createdBy ?? undefined,
-    deletedAt: iso(row.deletedAt),
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    deletedAt: toDate(row.deletedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
+  };
+}
+
+function mapToDiscount(row: DbOrderDiscount): OrderDiscount {
+  return {
+    ...row,
+    orderItemId: row.orderItemId ?? undefined,
+    code: row.code ?? undefined,
+    description: row.description ?? undefined,
+    type: row.type as DiscountType,
+    value: Number(row.value),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -118,9 +103,9 @@ function mapToShipping(row: DbOrderShipping): OrderShipping {
     taxAmountCents: row.taxAmountCents ?? undefined,
     trackingNumber: row.trackingNumber ?? undefined,
     trackingUrl: row.trackingUrl ?? undefined,
-    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    estimatedDeliveryDate: toDate(row.estimatedDeliveryDate),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -129,12 +114,12 @@ function mapToShippingRate(row: DbOrderShippingRate): OrderShippingRate {
     ...row,
     carrier: row.carrier as ShippingCarrier,
     estimatedDays: row.estimatedDays ?? undefined,
-    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
+    estimatedDeliveryDate: toDate(row.estimatedDeliveryDate),
     carrierAccountId: row.carrierAccountId ?? undefined,
     shipmentId: row.shipmentId ?? undefined,
     rateData: (row.rateData as Record<string, unknown> | null) ?? undefined,
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -146,8 +131,8 @@ function mapToTax(row: DbOrderTax): OrderTax {
     jurisdiction: row.jurisdiction ?? undefined,
     taxProvider: row.taxProvider ?? undefined,
     providerTaxId: row.providerTaxId ?? undefined,
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -160,8 +145,8 @@ function mapToRefund(row: DbOrderPaymentRefund): OrderPaymentRefund {
     status: row.status as OrderPaymentRefundStatus,
     gatewayResponse: (row.gatewayResponse as Record<string, unknown> | null) ?? undefined,
     refundedBy: row.refundedBy ?? undefined,
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -201,13 +186,13 @@ class OrderQueryRepo {
   // --- Order Discounts ---
 
   async findDiscountsByOrder(orderId: string): Promise<OrderDiscount[]> {
-    const results = await query<OrderDiscount[]>(`SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
-    return results || [];
+    const results = await query<DbOrderDiscount[]>(`SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    return (results || []).map(mapToDiscount);
   }
 
   async createDiscount(params: OrderDiscountCreateParams): Promise<OrderDiscount> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderDiscount>(
+    const result = await queryOne<DbOrderDiscount>(
       `INSERT INTO "orderDiscount" (
         "orderId", "orderItemId", "code", "name", "description",
         "type", "value", "discountAmountCents",
@@ -228,7 +213,7 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderDiscountError();
-    return result;
+    return mapToDiscount(result);
   }
 
   // --- Order Shipping ---
@@ -367,24 +352,40 @@ class OrderQueryRepo {
 
   // --- Order Payments ---
 
-  private toOrderPayment(row: Omit<OrderPayment, 'currency'> & { currencyCode?: string }): OrderPayment {
+  private toOrderPayment(row: DbOrderPayment): OrderPayment {
     const { currencyCode, ...rest } = row;
-    return { ...rest, currency: currencyCode ?? 'USD' } as OrderPayment;
+    return {
+      ...rest,
+      currency: currencyCode ?? 'USD',
+      paymentMethodId: row.paymentMethodId ?? undefined,
+      type: row.type as OrderPaymentType,
+      status: row.status as OrderPaymentStatus,
+      transactionId: row.transactionId ?? undefined,
+      authorizationCode: row.authorizationCode ?? undefined,
+      errorCode: row.errorCode ?? undefined,
+      errorMessage: row.errorMessage ?? undefined,
+      maskedNumber: row.maskedNumber ?? undefined,
+      cardType: row.cardType ?? undefined,
+      gatewayResponse: (row.gatewayResponse as Record<string, unknown> | null) ?? undefined,
+      capturedAt: toDate(row.capturedAt),
+      createdAt: toDateReq(row.createdAt),
+      updatedAt: toDateReq(row.updatedAt),
+    };
   }
 
   async findPaymentsByOrder(orderId: string): Promise<OrderPayment[]> {
-    const results = await query<OrderPayment[]>(`SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    const results = await query<DbOrderPayment[]>(`SELECT * FROM "orderPayment" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
     return (results || []).map(row => this.toOrderPayment(row));
   }
 
   async findPaymentById(orderPaymentId: string): Promise<OrderPayment | null> {
-    const row = await queryOne<OrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
+    const row = await queryOne<DbOrderPayment>(`SELECT * FROM "orderPayment" WHERE "orderPaymentId" = $1`, [orderPaymentId]);
     return row ? this.toOrderPayment(row) : null;
   }
 
   async createPayment(params: OrderPaymentCreateParams): Promise<OrderPayment> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderPayment>(
+    const result = await queryOne<DbOrderPayment>(
       `INSERT INTO "orderPayment" (
         "orderId", "paymentMethodId", "type", "provider", "amountCents", "currencyCode", "status",
         "transactionId", "authorizationCode", "errorCode", "errorMessage",

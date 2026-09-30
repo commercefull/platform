@@ -28,9 +28,9 @@ export type {
   OrderFulfillmentPackageTrackingParams,
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
-const iso = (d: Date | string | null | undefined): string | undefined =>
-  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
-const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
+const toDate = (d: Date | string | null | undefined): Date | undefined =>
+  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToFulfillment(row: DbOrderFulfillment): OrderFulfillment {
   return {
@@ -47,13 +47,13 @@ function mapToFulfillment(row: DbOrderFulfillment): OrderFulfillment {
     weightUnit: row.weightUnit ?? undefined,
     dimensions: (row.dimensions as Record<string, unknown> | null) ?? undefined,
     packageCount: row.packageCount ?? undefined,
-    shippedAt: iso(row.shippedAt),
-    deliveredAt: iso(row.deliveredAt),
-    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
+    shippedAt: toDate(row.shippedAt),
+    deliveredAt: toDate(row.deliveredAt),
+    estimatedDeliveryDate: toDate(row.estimatedDeliveryDate),
     notes: row.notes ?? undefined,
     fulfilledBy: row.fulfilledBy ?? undefined,
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -67,8 +67,8 @@ function mapToPackage(row: DbOrderFulfillmentPackage): OrderFulfillmentPackage {
     shippingLabelUrl: row.shippingLabelUrl ?? undefined,
     commercialInvoiceUrl: row.commercialInvoiceUrl ?? undefined,
     customsInfo: (row.customsInfo as Record<string, unknown> | null) ?? undefined,
-    createdAt: isoReq(row.createdAt),
-    updatedAt: isoReq(row.updatedAt),
+    createdAt: toDateReq(row.createdAt),
+    updatedAt: toDateReq(row.updatedAt),
   };
 }
 
@@ -266,20 +266,20 @@ export class OrderFulfillmentRepo {
   /**
    * Mark as shipped
    */
-  async markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null> {
+  async markAsShipped(orderFulfillmentId: string, shippedAt?: Date): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'shipped',
-      shippedAt: shippedAt ?? new Date().toISOString(),
+      shippedAt: shippedAt ?? new Date(),
     });
   }
 
   /**
    * Mark as delivered
    */
-  async markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null> {
+  async markAsDelivered(orderFulfillmentId: string, deliveredAt?: Date): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'delivered',
-      deliveredAt: deliveredAt ?? new Date().toISOString(),
+      deliveredAt: deliveredAt ?? new Date(),
     });
   }
 

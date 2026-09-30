@@ -1,17 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductTag {
-  productTagId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-  name: string;
-  slug: string;
-  description?: string | null;
-}
-
-export type ProductTagCreateParams = Omit<ProductTag, 'productTagId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+import type { ProductTag, ProductTagCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductTag, ProductTagCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductTagRepo {
   async findAll(includeDeleted = false): Promise<ProductTag[]> {

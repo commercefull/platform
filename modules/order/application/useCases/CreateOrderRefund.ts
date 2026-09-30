@@ -87,7 +87,7 @@ export class CreateOrderRefundUseCase {
       transactionId: refund.transactionId,
       status: refund.status,
       refundedBy: refund.refundedBy,
-      createdAt: refund.createdAt,
+      createdAt: refund.createdAt.toISOString(),
     };
   }
 }

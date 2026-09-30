@@ -2,8 +2,8 @@ export type ShippingCarrier = 'ups' | 'usps' | 'fedex' | 'dhl' | 'custom';
 
 export interface OrderShippingRate {
   orderShippingRateId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   carrier: ShippingCarrier;
   serviceLevel: string;
@@ -11,7 +11,7 @@ export interface OrderShippingRate {
   /** Shipping rate amount in integer cents. */
   rateCents: number;
   estimatedDays?: number;
-  estimatedDeliveryDate?: string;
+  estimatedDeliveryDate?: Date;
   currencyCode: string;
   isSelected: boolean;
   carrierAccountId?: string;

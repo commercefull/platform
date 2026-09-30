@@ -26,8 +26,8 @@ interface DbCandidateRow {
   relationType: RecommendationRelationType;
   score: string;
   reason: RecommendationCandidateProps['reason'];
-  computedAt: string;
-  createdAt: string;
+  computedAt: Date;
+  createdAt: Date;
 }
 
 function toProps(row: DbCandidateRow): RecommendationCandidateProps {
@@ -77,7 +77,7 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     scope: SignalScope,
     source: CandidateSource,
     rows: RecommendationCandidateInsert[],
-    runStartedAt: string,
+    runStartedAt: Date,
   ): Promise<void> {
     for (const r of rows) {
       await query(
@@ -150,14 +150,14 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     await query(`DELETE FROM "recommendationPopular" WHERE "organizationId" = $1 AND "productId" = $2`, [organizationId, productId]);
   }
 
-  async getStats(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: string | null; ordersCounted: number }> {
+  async getStats(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: Date | null; ordersCounted: number }> {
     const [fbt, rebuilt, counted] = await Promise.all([
       queryOne<{ count: string }>(
         `SELECT COUNT(DISTINCT "productId") as count FROM "recommendationCandidate"
          WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND source = 'fbt'`,
         [scope.organizationId, storeKey(scope)],
       ),
-      queryOne<{ lastRebuiltAt: string | null }>(
+      queryOne<{ lastRebuiltAt: Date | null }>(
         `SELECT "lastRebuiltAt" FROM "recommendationTenantStat" WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2`,
         [scope.organizationId, storeKey(scope)],
       ),
@@ -173,7 +173,7 @@ export class RecommendationCandidateRepository implements CandidateRepository {
     };
   }
 
-  async setLastRebuiltAt(scope: SignalScope, at: string): Promise<void> {
+  async setLastRebuiltAt(scope: SignalScope, at: Date): Promise<void> {
     await query(
       `INSERT INTO "recommendationTenantStat" ("organizationId", "storeId", "lastRebuiltAt", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, NOW(), NOW())

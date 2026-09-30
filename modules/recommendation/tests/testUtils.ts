@@ -109,8 +109,8 @@ export function createCandidate(overrides: Partial<RecommendationCandidateProps>
     relationType: 'cross_sell',
     score: 0.4,
     reason: { support: 10, confidence: 0.4, lift: 2.1 },
-    computedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+    computedAt: new Date(),
+    createdAt: new Date(),
     ...overrides,
   };
 }

@@ -47,8 +47,8 @@ export type UpdateMembershipPlanInput = Partial<
 
 export interface MembershipPlanBenefit {
   membershipPlanBenefitId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   planId: string;
   benefitId: string;
   isActive: boolean;

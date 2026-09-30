@@ -11,8 +11,8 @@ export type SupplierProductStatus = 'active' | 'inactive' | 'discontinued' | 'pe
 
 export interface SupplierAddress {
   supplierAddressId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   supplierId: string;
   name: string;
   addressLine1: string;
@@ -32,8 +32,8 @@ export interface SupplierAddress {
 
 export interface SupplierProduct {
   supplierProductId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   supplierId: string;
   productId: string;
   productVariantId?: string;
@@ -49,7 +49,7 @@ export interface SupplierProduct {
   packagingInfo?: Record<string, unknown>;
   dimensions?: Record<string, unknown>;
   weight?: number;
-  lastOrderedAt?: string;
+  lastOrderedAt?: Date;
   notes?: string;
 }
 

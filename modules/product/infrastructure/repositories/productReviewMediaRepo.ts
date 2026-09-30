@@ -1,17 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductReviewMedia {
-  productReviewMediaId: string;
-  createdAt: string;
-  updatedAt: string;
-  productReviewId: string;
-  url: string;
-  type: string;
-  position: number;
-}
-
-export type ProductReviewMediaCreateParams = Omit<ProductReviewMedia, 'productReviewMediaId' | 'createdAt' | 'updatedAt'>;
+import type { ProductReviewMedia, ProductReviewMediaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductReviewMedia, ProductReviewMediaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductReviewMediaRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewMedia[]> {

@@ -69,7 +69,7 @@ export class AddOrderNoteUseCase {
       content: note.content,
       isCustomerVisible: note.isCustomerVisible,
       createdBy: note.createdBy,
-      createdAt: note.createdAt,
+      createdAt: note.createdAt.toISOString(),
     };
   }
 }

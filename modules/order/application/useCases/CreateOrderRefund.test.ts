@@ -44,8 +44,8 @@ function createMockQueryRepo(payment: OrderPayment | null = createMockPayment())
     findRefundById: jest.fn().mockResolvedValue(null),
     createRefund: jest.fn().mockResolvedValue({
       orderPaymentRefundId: 'ref-1',
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
+      createdAt: new Date('2024-01-01T00:00:00Z'),
+      updatedAt: new Date('2024-01-01T00:00:00Z'),
       orderPaymentId: 'pay-1',
       amountCents: 50,
       reason: 'partial',

@@ -3,8 +3,8 @@ export type FulfillmentStatus = 'pending' | 'processing' | 'shipped' | 'delivere
 
 export interface OrderFulfillment {
   orderFulfillmentId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   fulfillmentNumber: string;
   type: FulfillmentType;
@@ -19,9 +19,9 @@ export interface OrderFulfillment {
   weightUnit?: string;
   dimensions?: Record<string, unknown>;
   packageCount?: number;
-  shippedAt?: string;
-  deliveredAt?: string;
-  estimatedDeliveryDate?: string;
+  shippedAt?: Date;
+  deliveredAt?: Date;
+  estimatedDeliveryDate?: Date;
   notes?: string;
   fulfilledBy?: string;
 }
@@ -60,8 +60,8 @@ export interface OrderFulfillmentRepository {
     carrierName?: string,
     trackingUrl?: string,
   ): Promise<OrderFulfillment | null>;
-  markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null>;
-  markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null>;
+  markAsShipped(orderFulfillmentId: string, shippedAt?: Date): Promise<OrderFulfillment | null>;
+  markAsDelivered(orderFulfillmentId: string, deliveredAt?: Date): Promise<OrderFulfillment | null>;
   cancel(orderFulfillmentId: string, notes?: string): Promise<OrderFulfillment | null>;
   delete(orderFulfillmentId: string): Promise<boolean>;
   countByOrderId(orderId: string): Promise<number>;

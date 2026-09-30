@@ -1,21 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export type ProductQaStatus = 'pending' | 'answered' | 'closed';
-
-export interface ProductQa {
-  productQaId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  customerId?: string | null;
-  question: string;
-  status: ProductQaStatus;
-  askerName?: string | null;
-  askerEmail?: string | null;
-}
-
-export type ProductQaCreateParams = Omit<ProductQa, 'productQaId' | 'createdAt' | 'updatedAt'>;
+import type { ProductQaStatus, ProductQa, ProductQaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductQaStatus, ProductQa, ProductQaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductQaRepo {
   async findByProduct(productId: string, status?: ProductQaStatus): Promise<ProductQa[]> {

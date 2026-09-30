@@ -14,8 +14,8 @@ export interface RecommendationExclusionProps {
   excludedProductId: string;
   scope: ExclusionScope;
   reason: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type RecommendationExclusionCreateProps = Omit<

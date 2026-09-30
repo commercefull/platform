@@ -385,7 +385,7 @@ export class ProductRepo implements IProductRepository {
         attributeValues: (row.attributeValues as CatalogFeature['attributeValues']) || [],
         basePriceCents: row.basePriceCents !== null ? Number(row.basePriceCents) : null,
         averageRating: row.averageRating !== null ? Number(row.averageRating) : null,
-        publishedAt: row.publishedAt,
+        publishedAt: row.publishedAt ? new Date(row.publishedAt) : null,
         isFeatured: row.isFeatured,
         isBestseller: row.isBestseller,
       };

@@ -34,7 +34,7 @@ export class RebuildRecommendationsUseCase {
   async execute(command: RebuildRecommendationsCommand): Promise<{ candidatesWritten: number }> {
     const scope = { organizationId: command.organizationId, storeId: command.storeId ?? null };
     const cfg = await this.config.getConfig(command.organizationId, command.storeId ?? undefined);
-    const runStartedAt = new Date().toISOString();
+    const runStartedAt = new Date();
     let written = 0;
 
     // 1. Decay raw counters, prune rows below the floor
@@ -153,7 +153,7 @@ export class RebuildRecommendationsUseCase {
     eligible: CatalogFeatureRow[],
     featureById: Map<string, CatalogFeatureRow>,
     counts: Map<string, number>,
-    runStartedAt: string,
+    runStartedAt: Date,
   ): Promise<RecommendationCandidateInsert[]> {
     const rows: RecommendationCandidateInsert[] = [];
     const activeRules = await this.rules.listActive(scope.organizationId);
@@ -179,7 +179,7 @@ export class RebuildRecommendationsUseCase {
       const targets = eligible
         .filter(f => sourceMatches(f, rule.targetType, rule.targetId))
         .sort((a, b) => {
-          if (rule.targetSort === 'newest') return (b.publishedAt ?? '').localeCompare(a.publishedAt ?? '');
+          if (rule.targetSort === 'newest') return (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0);
           if (rule.targetSort === 'rating') return (b.averageRating ?? 0) - (a.averageRating ?? 0);
           return (counts.get(b.productId) ?? 0) - (counts.get(a.productId) ?? 0);
         })

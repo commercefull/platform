@@ -28,7 +28,7 @@ export interface CatalogFeature {
   /** Product-level base price in integer cents (null when unpriced). */
   basePriceCents: number | null;
   averageRating: number | null;
-  publishedAt: string | null;
+  publishedAt: Date | null;
   isFeatured: boolean;
   isBestseller: boolean;
 }

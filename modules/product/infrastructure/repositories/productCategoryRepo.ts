@@ -1,24 +1,16 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductCategory {
-  productCategoryId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-  name: string;
-  slug: string;
-  description?: string | null;
-  parentId?: string | null;
-  position: number;
-  isActive: boolean;
-  imageUrl?: string | null;
-  metaTitle?: string | null;
-  metaDescription?: string | null;
-}
-
-export type ProductCategoryCreateParams = Omit<ProductCategory, 'productCategoryId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type ProductCategoryUpdateParams = Partial<Omit<ProductCategoryCreateParams, never>>;
+import type {
+  ProductCategoryRow,
+  ProductCategoryCreateParams,
+  ProductCategoryUpdateParams,
+} from '../../domain/repositories/ProductCatalogPorts';
+export type {
+  ProductCategoryCreateParams,
+  ProductCategoryUpdateParams,
+} from '../../domain/repositories/ProductCatalogPorts';
+export type ProductCategory = ProductCategoryRow;
 
 export class ProductCategoryRepo {
   async findAll(includeDeleted = false): Promise<ProductCategory[]> {

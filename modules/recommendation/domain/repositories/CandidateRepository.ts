@@ -32,7 +32,7 @@ export interface CandidateRepository {
   listSuggestions(scope: SignalScope, productId: string, limit?: number): Promise<RecommendationCandidateProps[]>;
 
   /** Replace a product's candidates for one source (nightly rebuild). */
-  replaceForSource(scope: SignalScope, source: CandidateSource, rows: RecommendationCandidateInsert[], runStartedAt: string): Promise<void>;
+  replaceForSource(scope: SignalScope, source: CandidateSource, rows: RecommendationCandidateInsert[], runStartedAt: Date): Promise<void>;
 
   /** Popularity fallback list. */
   listPopular(scope: SignalScope, popularScope: 'overall' | 'category', categoryId: string | null, limit: number): Promise<PopularRow[]>;
@@ -42,6 +42,6 @@ export interface CandidateRepository {
   deleteForProduct(organizationId: string, productId: string): Promise<void>;
 
   /** Stats card: counts for the merchant dashboard. */
-  getStats(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: string | null; ordersCounted: number }>;
-  setLastRebuiltAt(scope: SignalScope, at: string): Promise<void>;
+  getStats(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: Date | null; ordersCounted: number }>;
+  setLastRebuiltAt(scope: SignalScope, at: Date): Promise<void>;
 }

@@ -28,8 +28,8 @@ export interface ProductRelationshipProps {
   type: ProductRelationType;
   position: number;
   isAutomated: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type ProductRelationshipCreateProps = Omit<ProductRelationshipProps, 'productRelatedId' | 'createdAt' | 'updatedAt'>;

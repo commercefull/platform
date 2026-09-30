@@ -21,16 +21,16 @@ export interface SubscriptionProps {
   currentPeriodEnd: string;
   trialStart?: string;
   trialEnd?: string;
-  cancelledAt?: string;
+  cancelledAt?: Date;
   cancelReason?: string;
-  nextBillingDate?: string;
+  nextBillingDate?: Date;
   amountCents: number;
   currencyCode: string;
   paymentMethodId?: string;
   metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
 }
 
 export class Subscription {
@@ -76,7 +76,7 @@ export class Subscription {
 
   cancel(reason?: string): void {
     this.props.status = 'cancelled';
-    this.props.cancelledAt = new Date().toISOString();
+    this.props.cancelledAt = new Date();
     this.props.cancelReason = reason;
   }
 

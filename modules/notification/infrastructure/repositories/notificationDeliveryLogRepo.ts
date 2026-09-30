@@ -19,13 +19,13 @@ export type {
   NotificationDeliveryLogUpdateParams,
 } from '../../domain/repositories/NotificationDeliveryLogRepository';
 
-const iso = (d: Date | string | null | undefined): string | undefined =>
-  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
+const toDate = (d: Date | string | null | undefined): Date | undefined =>
+  d == null ? undefined : d instanceof Date ? d : new Date(d);
 
 function mapToDeliveryLog(row: DbNotificationDeliveryLog): NotificationDeliveryLog {
   return {
     notificationDeliveryLogId: row.notificationDeliveryLogId,
-    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
     notificationId: row.notificationId ?? undefined,
     userId: row.userId,
     userType: row.userType as UserType,
@@ -34,9 +34,9 @@ function mapToDeliveryLog(row: DbNotificationDeliveryLog): NotificationDeliveryL
     recipient: row.recipient,
     status: row.status as DeliveryStatus,
     statusDetails: row.statusDetails ?? undefined,
-    sentAt: iso(row.sentAt),
-    deliveredAt: iso(row.deliveredAt),
-    failedAt: iso(row.failedAt),
+    sentAt: toDate(row.sentAt),
+    deliveredAt: toDate(row.deliveredAt),
+    failedAt: toDate(row.failedAt),
     failureReason: row.failureReason ?? undefined,
     provider: row.provider ?? undefined,
     providerMessageId: row.providerMessageId ?? undefined,
@@ -241,7 +241,7 @@ export class NotificationDeliveryLogRepo {
   async markAsSent(notificationDeliveryLogId: string, providerMessageId?: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'sent',
-      sentAt: new Date().toISOString(),
+      sentAt: new Date(),
       providerMessageId,
     });
   }
@@ -252,7 +252,7 @@ export class NotificationDeliveryLogRepo {
   async markAsDelivered(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'delivered',
-      deliveredAt: new Date().toISOString(),
+      deliveredAt: new Date(),
     });
   }
 
@@ -264,7 +264,7 @@ export class NotificationDeliveryLogRepo {
 
     return this.update(notificationDeliveryLogId, {
       status: 'failed',
-      failedAt: new Date().toISOString(),
+      failedAt: new Date(),
       failureReason,
       retryCount: log ? (log.retryCount ?? 0) + 1 : 1,
     });
@@ -276,7 +276,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBounced(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'bounced',
-      failedAt: new Date().toISOString(),
+      failedAt: new Date(),
       failureReason,
     });
   }
@@ -287,7 +287,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBlocked(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'blocked',
-      failedAt: new Date().toISOString(),
+      failedAt: new Date(),
       failureReason,
     });
   }

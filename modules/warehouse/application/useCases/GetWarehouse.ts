@@ -36,8 +36,8 @@ export interface WarehouseDetails {
   supportedCarriers: string[];
   maxCapacity?: number;
   currentCapacity?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface GetWarehouseOutput {
@@ -70,8 +70,8 @@ interface WarehouseRecord {
   shippingMethods?: string[];
   maxCapacity?: number;
   currentCapacity?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface WarehouseRepositoryPort {

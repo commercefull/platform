@@ -1,7 +1,7 @@
 export interface OrderShipping {
   orderShippingId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   shippingMethod: string;
   carrier?: string;
@@ -10,7 +10,7 @@ export interface OrderShipping {
   taxAmountCents?: number;
   trackingNumber?: string;
   trackingUrl?: string;
-  estimatedDeliveryDate?: string;
+  estimatedDeliveryDate?: Date;
 }
 
 export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 'createdAt' | 'updatedAt'>;

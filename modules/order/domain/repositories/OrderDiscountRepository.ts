@@ -2,8 +2,8 @@ export type DiscountType = 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyX
 
 export interface OrderDiscount {
   orderDiscountId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   orderItemId?: string;
   code?: string;

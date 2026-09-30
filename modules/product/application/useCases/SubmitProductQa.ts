@@ -76,7 +76,7 @@ export class SubmitProductQaUseCase {
       customerId: qa.customerId,
       askerName: qa.askerName,
       askerEmail: qa.askerEmail,
-      createdAt: qa.createdAt,
+      createdAt: qa.createdAt.toISOString(),
     };
   }
 }

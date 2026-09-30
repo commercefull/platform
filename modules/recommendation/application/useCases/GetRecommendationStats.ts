@@ -9,7 +9,7 @@ import type { SignalScope } from '../../domain/repositories/CoPurchaseRepository
 export class GetRecommendationStatsUseCase {
   constructor(private readonly candidates: CandidateRepository) {}
 
-  async execute(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: string | null; ordersCounted: number }> {
+  async execute(scope: SignalScope): Promise<{ productsWithFbt: number; lastRebuiltAt: Date | null; ordersCounted: number }> {
     return this.candidates.getStats(scope);
   }
 }

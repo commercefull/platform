@@ -30,8 +30,8 @@ function rule(overrides: Partial<RecommendationRuleProps> = {}): RecommendationR
     maxItems: 4,
     priority: 0,
     isActive: true,
-    createdAt: '',
-    updatedAt: '',
+    createdAt: new Date(''),
+    updatedAt: new Date(''),
     ...overrides,
   };
 }
@@ -193,7 +193,7 @@ describe('RebuildRecommendationsUseCase', () => {
 
   it('should record the rebuild timestamp', async () => {
     await run();
-    expect(candidates.setLastRebuiltAt).toHaveBeenCalledWith({ organizationId: ORG_ID, storeId: null }, expect.any(String));
+    expect(candidates.setLastRebuiltAt).toHaveBeenCalledWith({ organizationId: ORG_ID, storeId: null }, expect.any(Date));
   });
 
   it('should drop serving rows when a product is removed', async () => {

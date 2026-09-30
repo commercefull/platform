@@ -24,8 +24,8 @@ function rule(overrides: Partial<RecommendationRuleProps> = {}): RecommendationR
     maxItems: 4,
     priority: 0,
     isActive: true,
-    createdAt: '',
-    updatedAt: '',
+    createdAt: new Date(''),
+    updatedAt: new Date(''),
     ...overrides,
   };
 }

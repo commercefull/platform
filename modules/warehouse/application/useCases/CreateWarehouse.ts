@@ -52,7 +52,7 @@ export interface CreateWarehouseOutput {
   type: WarehouseType;
   isActive: boolean;
   isDefault: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 interface WarehouseRecord {
@@ -62,7 +62,7 @@ interface WarehouseRecord {
   description?: string;
   isActive: boolean;
   isDefault: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 interface WarehouseRepositoryPort {

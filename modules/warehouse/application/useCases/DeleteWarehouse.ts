@@ -13,7 +13,7 @@ export interface DeleteWarehouseInput {
 export interface DeleteWarehouseOutput {
   deleted: boolean;
   warehouseId: string;
-  deletedAt: string;
+  deletedAt: Date;
 }
 
 interface WarehouseRecord {
@@ -59,7 +59,7 @@ export class DeleteWarehouseUseCase {
     return {
       deleted: true,
       warehouseId: input.warehouseId,
-      deletedAt: new Date().toISOString(),
+      deletedAt: new Date(),
     };
   }
 }

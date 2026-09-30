@@ -1,15 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductCollectionMap {
-  productCollectionMapId: string;
-  createdAt: string;
-  productCollectionId: string;
-  productId: string;
-  position: number;
-}
-
-export type ProductCollectionMapCreateParams = Omit<ProductCollectionMap, 'productCollectionMapId' | 'createdAt'>;
+import type { ProductCollectionMap, ProductCollectionMapCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductCollectionMap, ProductCollectionMapCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ProductCollectionMapRepo {
   async findByCollection(productCollectionId: string): Promise<ProductCollectionMap[]> {

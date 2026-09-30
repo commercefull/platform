@@ -2,8 +2,8 @@ export type OrderPaymentRefundStatus = 'pending' | 'completed' | 'failed';
 
 export interface OrderPaymentRefund {
   orderPaymentRefundId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderPaymentId: string;
   /** Refund amount in integer cents. */
   amountCents: number;

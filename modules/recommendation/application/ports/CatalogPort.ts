@@ -39,7 +39,7 @@ export interface CatalogFeatureRow {
   attributeValues: Array<{ attributeId: string; value: string }>;
   basePriceCents: number | null;
   averageRating: number | null;
-  publishedAt: string | null;
+  publishedAt: Date | null;
   isFeatured: boolean;
   isBestseller: boolean;
 }

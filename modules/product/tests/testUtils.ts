@@ -114,7 +114,7 @@ import type {
   ProductVariantRow,
 } from '../domain/repositories/ProductCatalogPorts';
 
-const ISO = '2026-01-01T00:00:00.000Z';
+const ISO = new Date('2026-01-01T00:00:00.000Z');
 
 export function createCategoryRow(overrides: Partial<CategoryRow> = {}): CategoryRow {
   return {

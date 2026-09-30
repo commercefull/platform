@@ -18,8 +18,8 @@ describe('Subscription', () => {
       currentPeriodEnd: '2024-02-01',
       amountCents: 29.99,
       currencyCode: 'USD',
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-01',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     });
   }
 

@@ -12,8 +12,8 @@ import type { Warehouse } from '../entities/Warehouse';
  */
 export interface WarehouseRecord {
   distributionWarehouseId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   name: string;
   code: string;
   description?: string;

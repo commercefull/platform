@@ -1,12 +1,12 @@
 export interface OrderNote {
   orderNoteId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   orderId: string;
   content: string;
   isCustomerVisible: boolean;
   createdBy?: string;
-  deletedAt?: string;
+  deletedAt?: Date;
 }
 
 export type OrderNoteCreateParams = Omit<OrderNote, 'orderNoteId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;

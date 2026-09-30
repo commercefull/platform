@@ -30,7 +30,7 @@ export interface UpdateWarehouseOutput {
   name: string;
   code: string;
   isActive: boolean;
-  updatedAt: string;
+  updatedAt: Date;
 }
 
 interface WarehouseRecord {
@@ -79,7 +79,7 @@ export class UpdateWarehouseUseCase {
       name: updated.name,
       code: updated.code,
       isActive: updated.isActive,
-      updatedAt: updated.updatedAt.toISOString(),
+      updatedAt: updated.updatedAt,
     };
   }
 }
