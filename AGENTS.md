@@ -123,6 +123,7 @@ yarn job:new:organization   # Create a new organization
 - **No empty or stub domain files** — every domain file must be wired through the module or deleted.
 - **`boot/` is the composition root** — it is exempt from deep-import and `no-restricted-imports` rules; it may import directly from module infrastructure for wiring.
 - **Dependency-cruiser violations are errors** — `yarn lint` runs `tsc --noEmit && eslint && dependency-cruiser`; any violation fails the build.
+- **Conventional Commits required** — release-please builds the changelog from commit messages, so every commit must be `type: description` (`feat`, `fix`, `perf`, `refactor`, `chore`, `docs`, `test`, `build`, `ci`, `revert`, `style`). Non-conventional commits are silently skipped by release-please. Enforced on PRs by the `commit-lint` workflow; check locally with `yarn commitlint --from origin/main --to HEAD`.
 
 ## Module & Migration Documentation
 
