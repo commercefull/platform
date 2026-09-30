@@ -28,7 +28,7 @@ export interface EventPublisher {
 }
 
 /** Consumer side: receives payloads and feeds them to the dispatch callback. */
-export interface EventSubscriber {
+interface EventSubscriber {
   start(dispatch: (payload: EventPayload) => Promise<void>): Promise<void> | void;
   stop(): Promise<void>;
 }

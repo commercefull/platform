@@ -27,7 +27,7 @@ export function isRedisConfigured(): boolean {
  * Common resilience options: capped exponential backoff reconnect,
  * offline queue while reconnecting, TCP keepalive.
  */
-export function redisClientOptions(): RedisOptions {
+function redisClientOptions(): RedisOptions {
   return {
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
