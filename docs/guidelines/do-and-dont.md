@@ -10,7 +10,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use parameterized queries (`$1`, `$2`) for all SQL.
 - Follow the DDD structure for new modules (`domain → application → infrastructure → interface`).
 - Use the `query<T>()` / `queryOne<T>()` helpers from `libs/db`.
-- Use `successResponse()` / `errorResponse()` for API responses.
+- Use `successResponse()` / `errorResponse()` for API responses, and the `libs/apiResponse` transport helpers (`jsonResponse`, `redirectResponse`, `renderResponse`, `sendResponse`, `setStatus`, `setHeader`, `cookieResponse`) — never call `res.*` transport methods directly in controllers.
 - Use `adminRespond()` / `merchantRespond()` / `b2bRespond()` / `storefrontRespond()` for portal views.
 - Apply auth middleware at the router level.
 - Use `isOrganizationLoggedIn` for all `/business` routers (except public auth endpoints in identity).
@@ -63,6 +63,7 @@ Quick reference. For the full rules, see the individual standards documents.
 - Leave any `/business` router without `isOrganizationLoggedIn` middleware.
 - Use bare route paths without a topic prefix (e.g. `/business/upload` instead of `/business/media/upload`).
 - Expose stack traces in production error responses.
+- Call `res.status`/`res.json`/`res.redirect`/`res.render`/`res.send`/`res.cookie`/`res.setHeader` directly in controllers — use the `libs/apiResponse` transport helpers (route partial renders through `renderResponse`, full pages through `adminRespond`/`storefrontRespond`).
 - Use inline SQL string interpolation (SQL injection risk).
 - Import from `web/` into `modules/` (dependency flows: `web → modules → libs`).
 - Create circular dependencies between modules.

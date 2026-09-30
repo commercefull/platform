@@ -113,6 +113,7 @@ yarn job:new:organization   # Create a new organization
 - **camelCase everywhere in the database** — tables, columns, JSON fields, and FK columns all use camelCase with double-quoted PostgreSQL identifiers.
 - **Parameterized SQL only** — never interpolate user input into query strings.
 - **Always use `libs/logger`** in production code — never `console.log`.
+- **Never call `res.*` transport methods directly in controllers** — use `libs/apiResponse` helpers (`jsonResponse`, `redirectResponse`, `renderResponse`, `sendResponse`, `setStatus`, `setHeader`, `cookieResponse`); full page renders go through `adminRespond`/`storefrontRespond`.
 - **All `/business` routes must use `isOrganizationLoggedIn`** — except public auth endpoints in `identityBusinessRouter` (login, register, token refresh, password reset).
 - **Follow `/business/{topic}/...` route naming** — every business router must include its module topic as a path prefix (e.g. `/business/media/upload`, not `/business/upload`).
 - **Domain entities are the single source of truth** — repository signatures and returns use domain types; domain ports import from `domain/entities/`, never `libs/db/types`. Generated `libs/db/types` types are allowed *inside* `infrastructure/repositories/` for `query<DbX>` row typing (imported `X as DbX`) and must be mapped to domain types before returning. Domain timestamp fields are `Date` (pg returns `Date`); serialize to ISO at the use-case DTO boundary. See [guidelines/modules-ddd.md](./docs/guidelines/modules-ddd.md).

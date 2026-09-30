@@ -6,7 +6,7 @@
 | `db/types.ts`                     | Auto-generated Knex table/column types — infra row typing only (`X as DbX`); banned in `domain/` (`domain-no-db-imports`) |
 | `db/dataModelTypes.ts`            | Shared data model type definitions                                 |
 | `auth.ts`                         | Authentication middleware (JWT + session)                          |
-| `apiResponse.ts`                  | Standard API response helpers                                      |
+| `apiResponse.ts`                  | Response transport seam (`jsonResponse`/`sendResponse`/`redirectResponse`/`renderResponse`/`setStatus`/`setHeader`/`cookieResponse`) + standard envelope helpers (`successResponse`/`errorResponse`) — controllers never call `res.*` directly |
 | `events/`                         | Event bus (EventEmitter-based + durable outbox)                    |
 | `events/eventBus.ts`              | EventEmitter-based event bus with error boundaries                 |
 | `events/providers/postgres/`      | Postgres provider internals — outbox writer, claim-based dispatcher (retry + DLQ) |
