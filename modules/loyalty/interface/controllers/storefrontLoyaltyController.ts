@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Loyalty Controller
  * Manages customer loyalty points and rewards
@@ -19,7 +20,7 @@ interface CustomerUser {
 export const loyaltyDashboard = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const membership = await manageStorefrontLoyaltyUseCase.findMemberWithTier(user.customerId);
@@ -42,7 +43,7 @@ export const loyaltyDashboard = async (req: HttpRequest, res: HttpResponse) => {
 export const pointsHistory = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const { page = '1' } = req.query;
@@ -74,7 +75,7 @@ export const pointsHistory = async (req: HttpRequest, res: HttpResponse) => {
 export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.status(401).json({ error: 'Please sign in' });
+    return jsonResponse(res, 401, { error: 'Please sign in' });
   }
 
   const { rewardId } = req.params;
@@ -82,7 +83,7 @@ export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
   const reward = await manageStorefrontLoyaltyUseCase.findRewardById(rewardId);
 
   if (!reward) {
-    return res.status(404).json({ error: 'Reward not found' });
+    return jsonResponse(res, 404, { error: 'Reward not found' });
   }
 
   const membership = await manageStorefrontLoyaltyUseCase.findMemberByCustomerId(user.customerId);
@@ -90,7 +91,7 @@ export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
   const membershipData = membership as Record<string, unknown> | null;
 
   if (!membershipData || (membershipData.pointsBalance as number) < (rewardData.pointsCost as number)) {
-    return res.status(400).json({ error: 'Insufficient points' });
+    return jsonResponse(res, 400, { error: 'Insufficient points' });
   }
 
   await manageStorefrontLoyaltyUseCase.deductPoints(user.customerId, rewardData.pointsCost as number);
@@ -101,7 +102,7 @@ export const redeemReward = async (req: HttpRequest, res: HttpResponse) => {
   );
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.json({ success: true });
+    return jsonResponse(res, 200, { success: true });
   }
-  return res.redirect('/loyalty');
+  return redirectResponse(res, '/loyalty');
 };

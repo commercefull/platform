@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Analytics Business Controller
  * Handles admin/merchant analytics and reporting operations
@@ -25,14 +26,14 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
     manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, 60),
   ]);
 
-  res.json({
-    success: true,
-    data: {
-      summary,
-      daily: dailyData.data,
-      realTime,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          summary,
+          daily: dailyData.data,
+          realTime,
+        },
+      });
 };
 
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
@@ -48,7 +49,7 @@ export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 30, offset: parseInt(offset as string) || 0 },
   );
 
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 // ============================================================================
@@ -67,7 +68,7 @@ export const getProductPerformance: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 30, offset: parseInt(offset as string) || 0 },
   );
 
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const getTopProducts: AsyncHandler = async (req, res, _next) => {
@@ -83,7 +84,7 @@ export const getTopProducts: AsyncHandler = async (req, res, _next) => {
     parseInt(limit as string) || 10,
   );
 
-  res.json({ success: true, data: products });
+  jsonResponse(res, 200, { success: true, data: products });
 };
 
 // ============================================================================
@@ -103,7 +104,7 @@ export const getSearchAnalytics: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0 },
   );
 
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
@@ -118,7 +119,7 @@ export const getZeroResultSearches: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 50, offset: 0 },
   );
 
-  res.json({ success: true, data: result.data });
+  jsonResponse(res, 200, { success: true, data: result.data });
 };
 
 // ============================================================================
@@ -133,7 +134,7 @@ export const getCustomerCohorts: AsyncHandler = async (req, res, _next) => {
     endMonth ? new Date(endMonth as string) : undefined,
   );
 
-  res.json({ success: true, data: cohorts });
+  jsonResponse(res, 200, { success: true, data: cohorts });
 };
 
 // ============================================================================
@@ -156,7 +157,7 @@ export const getEvents: AsyncHandler = async (req, res, _next) => {
     { limit: parseInt(limit as string) || 100, offset: parseInt(offset as string) || 0 },
   );
 
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const getEventCounts: AsyncHandler = async (req, res, _next) => {
@@ -167,7 +168,7 @@ export const getEventCounts: AsyncHandler = async (req, res, _next) => {
 
   const counts = await manageAnalyticsReportingUseCase.getEventCounts(start, end, (groupBy as 'hour' | 'day') || 'hour');
 
-  res.json({ success: true, data: counts });
+  jsonResponse(res, 200, { success: true, data: counts });
 };
 
 // ============================================================================
@@ -187,7 +188,7 @@ export const getSnapshots: AsyncHandler = async (req, res, _next) => {
     organizationId as string,
   );
 
-  res.json({ success: true, data: snapshots });
+  jsonResponse(res, 200, { success: true, data: snapshots });
 };
 
 export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
@@ -198,7 +199,7 @@ export const getLatestSnapshot: AsyncHandler = async (req, res, _next) => {
     organizationId as string,
   );
 
-  res.json({ success: true, data: snapshot });
+  jsonResponse(res, 200, { success: true, data: snapshot });
 };
 
 // ============================================================================
@@ -210,7 +211,7 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
 
   const metrics = await manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, parseInt(minutes as string) || 60);
 
-  res.json({ success: true, data: metrics });
+  jsonResponse(res, 200, { success: true, data: metrics });
 };
 
 // ============================================================================
@@ -220,16 +221,16 @@ export const getRealTimeMetrics: AsyncHandler = async (req, res, _next) => {
 export const getDashboards: AsyncHandler = async (req, res, _next) => {
   const organizationId = req.user?.organizationId || req.user?.id;
   const dashboards = await manageAnalyticsReportingUseCase.getDashboards(organizationId);
-  res.json({ success: true, data: dashboards });
+  jsonResponse(res, 200, { success: true, data: dashboards });
 };
 
 export const getDashboard: AsyncHandler = async (req, res, _next) => {
   const dashboard = await manageAnalyticsReportingUseCase.getDashboard(req.params.id);
   if (!dashboard) {
-    res.status(404).json({ success: false, message: 'Dashboard not found' });
+    jsonResponse(res, 404, { success: false, message: 'Dashboard not found' });
     return;
   }
-  res.json({ success: true, data: dashboard });
+  jsonResponse(res, 200, { success: true, data: dashboard });
 };
 
 export const createDashboard: AsyncHandler = async (req, res, _next) => {
@@ -244,7 +245,7 @@ export const createDashboard: AsyncHandler = async (req, res, _next) => {
     createdBy,
   });
 
-  res.status(201).json({ success: true, data: dashboard });
+  jsonResponse(res, 201, { success: true, data: dashboard });
 };
 
 export const updateDashboard: AsyncHandler = async (req, res, _next) => {
@@ -255,10 +256,10 @@ export const updateDashboard: AsyncHandler = async (req, res, _next) => {
     name: (body.name as string) || 'Untitled',
   });
 
-  res.json({ success: true, data: dashboard });
+  jsonResponse(res, 200, { success: true, data: dashboard });
 };
 
 export const deleteDashboard: AsyncHandler = async (req, res, _next) => {
   await manageAnalyticsReportingUseCase.deleteDashboard(req.params.id);
-  res.json({ success: true, message: 'Dashboard deleted' });
+  jsonResponse(res, 200, { success: true, message: 'Dashboard deleted' });
 };

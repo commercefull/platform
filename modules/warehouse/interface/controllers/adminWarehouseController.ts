@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Warehouse Controller
  * Handles warehouse management and fulfillment tracking for the Admin Hub
@@ -73,7 +74,7 @@ export const createWarehouse = async (req: HttpRequest, res: HttpResponse): Prom
       parseWarehouseCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageWarehouseUseCase.create>[0],
     );
 
-    res.redirect(`/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
+    redirectResponse(res, `/hub/warehouses/${warehouse.distributionWarehouseId}?success=Warehouse created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -163,7 +164,7 @@ export const updateWarehouse = async (req: HttpRequest, res: HttpResponse): Prom
     throw new Error('Warehouse not found after update');
   }
 
-  res.redirect(`/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
+  redirectResponse(res, `/hub/warehouses/${warehouseId}?success=Warehouse updated successfully`);
 };
 
 export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -175,7 +176,7 @@ export const activateWarehouse = async (req: HttpRequest, res: HttpResponse): Pr
     throw new Error('Warehouse not found');
   }
 
-  res.json({ success: true, message: 'Warehouse activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Warehouse activated successfully' });
 };
 
 export const deactivateWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -187,7 +188,7 @@ export const deactivateWarehouse = async (req: HttpRequest, res: HttpResponse): 
     throw new Error('Warehouse not found');
   }
 
-  res.json({ success: true, message: 'Warehouse deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Warehouse deactivated successfully' });
 };
 
 export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -199,5 +200,5 @@ export const deleteWarehouse = async (req: HttpRequest, res: HttpResponse): Prom
     throw new Error('Failed to delete warehouse');
   }
 
-  res.json({ success: true, message: 'Warehouse deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Warehouse deleted successfully' });
 };

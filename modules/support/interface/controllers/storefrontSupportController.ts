@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Support Controller
  * Handles support ticket views for customers
@@ -24,7 +25,7 @@ interface CustomerUser {
 export const listTickets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/support/tickets');
+    return redirectResponse(res, '/signin?redirect=/support/tickets');
   }
 
   const status = req.query.status as string | undefined;
@@ -47,7 +48,7 @@ export const listTickets = async (req: HttpRequest, res: HttpResponse): Promise<
 export const viewTicket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/support/tickets');
+    return redirectResponse(res, '/signin?redirect=/support/tickets');
   }
 
   const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
@@ -76,7 +77,7 @@ export const viewTicket = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const createTicketForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/support/tickets/new');
+    return redirectResponse(res, '/signin?redirect=/support/tickets/new');
   }
 
   storefrontRespond(req, res, 'support/create-ticket', {
@@ -93,7 +94,7 @@ export const createTicketSubmit = async (req: HttpRequest, res: HttpResponse): P
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets/new');
+      return redirectResponse(res, '/signin?redirect=/support/tickets/new');
     }
 
     const body = req.body as HttpRequestBody;
@@ -132,7 +133,7 @@ export const createTicketSubmit = async (req: HttpRequest, res: HttpResponse): P
       });
     }
 
-    res.redirect(`/support/tickets/${ticket.supportTicketId}?success=Ticket created successfully`);
+    redirectResponse(res, `/support/tickets/${ticket.supportTicketId}?success=Ticket created successfully`);
   } catch (error: unknown) {
     logger.warn('Error creating ticket:', error);
     storefrontRespond(req, res, 'support/create-ticket', {
@@ -151,7 +152,7 @@ export const addTicketMessage = async (req: HttpRequest, res: HttpResponse): Pro
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets');
+      return redirectResponse(res, '/signin?redirect=/support/tickets');
     }
 
     const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
@@ -163,7 +164,7 @@ export const addTicketMessage = async (req: HttpRequest, res: HttpResponse): Pro
 
     if (ticket.status === 'closed') {
       req.flash('error', 'Cannot reply to a closed ticket');
-      return res.redirect(`/support/tickets/${req.params.ticketId}`);
+      return redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
     }
 
     const body = req.body as HttpRequestBody;
@@ -171,7 +172,7 @@ export const addTicketMessage = async (req: HttpRequest, res: HttpResponse): Pro
 
     if (!message) {
       req.flash('error', 'Message is required');
-      return res.redirect(`/support/tickets/${req.params.ticketId}`);
+      return redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
     }
 
     await manageSupportUseCase.addMessage({
@@ -183,11 +184,11 @@ export const addTicketMessage = async (req: HttpRequest, res: HttpResponse): Pro
       message: message as string,
     });
 
-    res.redirect(`/support/tickets/${req.params.ticketId}?success=Message sent`);
+    redirectResponse(res, `/support/tickets/${req.params.ticketId}?success=Message sent`);
   } catch (error: unknown) {
     logger.warn('Error adding message:', error);
     req.flash('error', 'Failed to send message');
-    res.redirect(`/support/tickets/${req.params.ticketId}`);
+    redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
   }
 };
 
@@ -198,7 +199,7 @@ export const submitTicketFeedback = async (req: HttpRequest, res: HttpResponse):
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/support/tickets');
+      return redirectResponse(res, '/signin?redirect=/support/tickets');
     }
 
     const ticket = await manageSupportUseCase.getTicket(req.params.ticketId);
@@ -210,7 +211,7 @@ export const submitTicketFeedback = async (req: HttpRequest, res: HttpResponse):
 
     if (ticket.status !== 'resolved' && ticket.status !== 'closed') {
       req.flash('error', 'Feedback can only be submitted for resolved tickets');
-      return res.redirect(`/support/tickets/${req.params.ticketId}`);
+      return redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
     }
 
     const body = req.body as HttpRequestBody;
@@ -219,15 +220,15 @@ export const submitTicketFeedback = async (req: HttpRequest, res: HttpResponse):
 
     if (satisfaction < 1 || satisfaction > 5) {
       req.flash('error', 'Rating must be between 1 and 5');
-      return res.redirect(`/support/tickets/${req.params.ticketId}`);
+      return redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
     }
 
     await manageSupportUseCase.submitFeedback(req.params.ticketId, satisfaction, feedback);
     req.flash('success', 'Thank you for your feedback!');
-    res.redirect(`/support/tickets/${req.params.ticketId}`);
+    redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
   } catch (error: unknown) {
     logger.warn('Error submitting feedback:', error);
     req.flash('error', 'Failed to submit feedback');
-    res.redirect(`/support/tickets/${req.params.ticketId}`);
+    redirectResponse(res, `/support/tickets/${req.params.ticketId}`);
   }
 };

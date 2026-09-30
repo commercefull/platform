@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageAttributeGroupsUseCase } from '../../application/useCases/wired';
 
@@ -11,10 +12,10 @@ class AttributeGroupController {
   async listAttributeGroups(req: HttpRequest, res: HttpResponse): Promise<void> {
     const groups = await manageAttributeGroupsUseCase.findAll();
 
-    res.json({
-      success: true,
-      data: groups || [],
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: groups || [],
+          });
   }
 
   /**
@@ -26,17 +27,17 @@ class AttributeGroupController {
     const group = await manageAttributeGroupsUseCase.findOne(id);
 
     if (!group) {
-      res.status(404).json({
-        success: false,
-        error: 'Attribute group not found',
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                error: 'Attribute group not found',
+              });
       return;
     }
 
-    res.json({
-      success: true,
-      data: group,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: group,
+          });
   }
 
   /**
@@ -48,17 +49,17 @@ class AttributeGroupController {
     const group = await manageAttributeGroupsUseCase.findByCode(code);
 
     if (!group) {
-      res.status(404).json({
-        success: false,
-        error: 'Attribute group not found',
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                error: 'Attribute group not found',
+              });
       return;
     }
 
-    res.json({
-      success: true,
-      data: group,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: group,
+          });
   }
 
   /**
@@ -70,20 +71,20 @@ class AttributeGroupController {
 
     // Validate required fields
     if (!name || !code) {
-      res.status(400).json({
-        success: false,
-        error: 'Name and code are required',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                error: 'Name and code are required',
+              });
       return;
     }
 
     // Check for duplicate code
     const existing = await manageAttributeGroupsUseCase.findByCode(code);
     if (existing) {
-      res.status(400).json({
-        success: false,
-        error: 'Attribute group with this code already exists',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                error: 'Attribute group with this code already exists',
+              });
       return;
     }
 
@@ -94,10 +95,10 @@ class AttributeGroupController {
       position: sortOrder || 0,
     });
 
-    res.status(201).json({
-      success: true,
-      data: group,
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: group,
+          });
   }
 
   /**
@@ -111,10 +112,10 @@ class AttributeGroupController {
     // Check if group exists
     const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
-      res.status(404).json({
-        success: false,
-        error: 'Attribute group not found',
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                error: 'Attribute group not found',
+              });
       return;
     }
 
@@ -124,10 +125,10 @@ class AttributeGroupController {
       position: sortOrder,
     });
 
-    res.json({
-      success: true,
-      data: group,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: group,
+          });
   }
 
   /**
@@ -140,19 +141,19 @@ class AttributeGroupController {
     // Check if group exists
     const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
-      res.status(404).json({
-        success: false,
-        error: 'Attribute group not found',
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                error: 'Attribute group not found',
+              });
       return;
     }
 
     await manageAttributeGroupsUseCase.delete(id);
 
-    res.json({
-      success: true,
-      message: 'Attribute group deleted successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'Attribute group deleted successfully',
+          });
   }
 }
 

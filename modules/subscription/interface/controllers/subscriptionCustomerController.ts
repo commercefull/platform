@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Subscription Customer Controller
  * Handles customer-facing subscription operations
@@ -16,7 +17,7 @@ type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Pr
 
 export const getAvailableSubscriptionProducts: AsyncHandler = async (req, res, _next) => {
   const products = await manageCustomerSubscriptionsUseCase.getSubscriptionProducts(true);
-  res.json({ success: true, data: products });
+  jsonResponse(res, 200, { success: true, data: products });
 };
 
 export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _next) => {
@@ -28,21 +29,21 @@ export const getSubscriptionProductDetails: AsyncHandler = async (req, res, _nex
   }
 
   if (!product || !product.isActive) {
-    res.status(404).json({ success: false, message: 'Subscription product not found' });
+    jsonResponse(res, 404, { success: false, message: 'Subscription product not found' });
     return;
   }
 
   const plans = await manageCustomerSubscriptionsUseCase.getSubscriptionPlans(product.subscriptionProductId, true);
-  res.json({ success: true, data: { ...product, plans } });
+  jsonResponse(res, 200, { success: true, data: { ...product, plans } });
 };
 
 export const getSubscriptionPlanDetails: AsyncHandler = async (req, res, _next) => {
   const plan = await manageCustomerSubscriptionsUseCase.getSubscriptionPlan(req.params.planId);
   if (!plan || !plan.isActive) {
-    res.status(404).json({ success: false, message: 'Subscription plan not found' });
+    jsonResponse(res, 404, { success: false, message: 'Subscription plan not found' });
     return;
   }
-  res.json({ success: true, data: plan });
+  jsonResponse(res, 200, { success: true, data: plan });
 };
 
 // ============================================================================
@@ -57,7 +58,7 @@ export const getMySubscriptions: AsyncHandler = async (req, res, _next) => {
     { customerId, status: status as SubscriptionStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const getMySubscription: AsyncHandler = async (req, res, _next) => {
@@ -65,14 +66,14 @@ export const getMySubscription: AsyncHandler = async (req, res, _next) => {
   const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
+    jsonResponse(res, 404, { success: false, message: 'Subscription not found' });
     return;
   }
 
   const orders = await manageCustomerSubscriptionsUseCase.getSubscriptionOrders(req.params.id);
   const plan = await manageCustomerSubscriptionsUseCase.getSubscriptionPlan(subscription.subscriptionPlanId);
 
-  res.json({ success: true, data: { ...subscription, plan, orders } });
+  jsonResponse(res, 200, { success: true, data: { ...subscription, plan, orders } });
 };
 
 // ============================================================================
@@ -104,9 +105,9 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
       customizations,
     });
 
-    res.status(201).json({ success: true, data: subscription });
+    jsonResponse(res, 201, { success: true, data: subscription });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -119,7 +120,7 @@ export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
   const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
+    jsonResponse(res, 404, { success: false, message: 'Subscription not found' });
     return;
   }
 
@@ -134,7 +135,7 @@ export const updateMySubscription: AsyncHandler = async (req, res, _next) => {
   };
 
   // For now, we'll just return success - full update logic would need more implementation
-  res.json({ success: true, message: 'Subscription updated' });
+  jsonResponse(res, 200, { success: true, message: 'Subscription updated' });
 };
 
 export const changePlan: AsyncHandler = async (req, res, _next) => {
@@ -143,9 +144,9 @@ export const changePlan: AsyncHandler = async (req, res, _next) => {
 
   try {
     await manageCustomerSubscriptionsUseCase.changePlan(customerId || '', req.params.id, newPlanId);
-    res.json({ success: true, message: 'Plan change scheduled' });
+    jsonResponse(res, 200, { success: true, message: 'Plan change scheduled' });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -158,9 +159,9 @@ export const pauseMySubscription: AsyncHandler = async (req, res, _next) => {
       resumeAt: resumeAt ? new Date(resumeAt) : undefined,
       reason,
     });
-    res.json({ success: true, data: pause });
+    jsonResponse(res, 200, { success: true, data: pause });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -169,9 +170,9 @@ export const resumeMySubscription: AsyncHandler = async (req, res, _next) => {
 
   try {
     await manageCustomerSubscriptionsUseCase.resume(customerId || '', req.params.id);
-    res.json({ success: true, message: 'Subscription resumed' });
+    jsonResponse(res, 200, { success: true, message: 'Subscription resumed' });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -185,14 +186,14 @@ export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
       cancelAtPeriodEnd,
     });
 
-    res.json({
-      success: true,
-      message: result.cancelAtPeriodEnd
-        ? 'Subscription will be cancelled at the end of the current billing period'
-        : 'Subscription cancelled immediately',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: result.cancelAtPeriodEnd
+              ? 'Subscription will be cancelled at the end of the current billing period'
+              : 'Subscription cancelled immediately',
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -201,9 +202,9 @@ export const reactivateMySubscription: AsyncHandler = async (req, res, _next) =>
 
   try {
     await manageCustomerSubscriptionsUseCase.reactivate(customerId || '', req.params.id);
-    res.json({ success: true, message: 'Subscription reactivated' });
+    jsonResponse(res, 200, { success: true, message: 'Subscription reactivated' });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -216,12 +217,12 @@ export const getMySubscriptionOrders: AsyncHandler = async (req, res, _next) => 
   const subscription = await manageCustomerSubscriptionsUseCase.getCustomerSubscription(req.params.id);
 
   if (!subscription || subscription.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Subscription not found' });
+    jsonResponse(res, 404, { success: false, message: 'Subscription not found' });
     return;
   }
 
   const orders = await manageCustomerSubscriptionsUseCase.getSubscriptionOrders(req.params.id);
-  res.json({ success: true, data: orders });
+  jsonResponse(res, 200, { success: true, data: orders });
 };
 
 // ============================================================================
@@ -233,8 +234,8 @@ export const skipNextDelivery: AsyncHandler = async (req, res, _next) => {
 
   try {
     await manageCustomerSubscriptionsUseCase.skipNextDelivery(customerId || '', req.params.id);
-    res.json({ success: true, message: 'Next delivery skipped' });
+    jsonResponse(res, 200, { success: true, message: 'Next delivery skipped' });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };

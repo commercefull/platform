@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Support Controller for Admin Hub
  * Handles support tickets and FAQ management
@@ -86,7 +87,7 @@ export const updateTicketStatus = async (req: HttpRequest, res: HttpResponse): P
     await manageSupportTicketsUseCase.addTicketMessage(ticketId, response, req.user?.id || '');
   }
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -120,11 +121,11 @@ export const createFaq = async (req: HttpRequest, res: HttpResponse): Promise<vo
       sortOrder: parseInt(sortOrder) || 0,
     });
 
-    res.redirect('/hub/support?success=FAQ created');
+    redirectResponse(res, '/hub/support?success=FAQ created');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -148,16 +149,16 @@ export const updateFaq = async (req: HttpRequest, res: HttpResponse): Promise<vo
       sortOrder: parseInt(sortOrder) || 0,
     });
 
-    res.redirect('/hub/support?success=FAQ updated');
+    redirectResponse(res, '/hub/support?success=FAQ updated');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/support?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/support?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
 export const deleteFaq = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { faqId } = req.params;
   await manageFaqUseCase.deleteArticle(faqId);
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };

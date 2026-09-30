@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Pricing Controller for Admin Hub
  * Handles Price Lists and Pricing Rules management
@@ -40,7 +41,7 @@ export const createPriceListForm = async (req: HttpRequest, res: HttpResponse): 
 
 export const createPriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/catalog/pricing?success=Price list created successfully');
+    redirectResponse(res, '/admin/catalog/pricing?success=Price list created successfully');
   } catch (error: unknown) {
     logger.warn('Error creating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/create', {
@@ -69,7 +70,7 @@ export const editPriceListForm = async (req: HttpRequest, res: HttpResponse): Pr
 export const updatePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { listId } = req.params;
-    res.redirect(`/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
+    redirectResponse(res, `/admin/catalog/pricing/lists/${listId}?success=Price list updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating price list:', error);
     adminRespond(req, res, 'catalog/pricing/lists/edit', {
@@ -82,7 +83,7 @@ export const updatePriceList = async (req: HttpRequest, res: HttpResponse): Prom
 };
 
 export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Price list deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Price list deleted successfully' });
 };
 
 // ============================================================================
@@ -160,7 +161,7 @@ export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Prom
 
     await managePricingAdminUseCase.createRule(createProps);
 
-    res.redirect('/admin/catalog/pricing/rules?success=Price rule created successfully');
+    redirectResponse(res, '/admin/catalog/pricing/rules?success=Price rule created successfully');
   } catch (error: unknown) {
     logger.warn('Error creating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/create', {
@@ -241,7 +242,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
 
     await managePricingAdminUseCase.updateRule(ruleId, updateProps);
 
-    res.redirect(`/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
+    redirectResponse(res, `/admin/catalog/pricing/rules/${ruleId}?success=Price rule updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating price rule:', error);
     adminRespond(req, res, 'catalog/pricing/rules/edit', {
@@ -257,10 +258,10 @@ export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
   try {
     const { ruleId } = req.params;
     await managePricingAdminUseCase.deleteRule(ruleId);
-    res.json({ success: true, message: 'Price rule deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Price rule deleted successfully' });
   } catch (error: unknown) {
     logger.warn('Error deleting price rule:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };
 

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Settings Controller
  * Handles organization settings and store configuration
@@ -71,7 +72,7 @@ export const updateStoreSettings = async (req: HttpRequest, res: HttpResponse): 
 
   void { addressLine1, addressLine2, city, state, postalCode, country };
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -92,7 +93,7 @@ export const updateBusinessInfo = async (req: HttpRequest, res: HttpResponse): P
   const { legalName, taxId, registrationNumber } = body;
   void { legalName, taxId, registrationNumber };
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -132,13 +133,13 @@ export const createLanguage = async (req: HttpRequest, res: HttpResponse): Promi
   };
 
   if (!code || !name) {
-    res.status(400).json({ success: false, message: 'Code and name are required' });
+    jsonResponse(res, 400, { success: false, message: 'Code and name are required' });
     return;
   }
 
   const languageId = await manageLanguagesUseCase.createLanguage({ code, name, nativeName, isDefault, isActive });
 
-  res.json({ success: true, languageId });
+  jsonResponse(res, 200, { success: true, languageId });
 };
 
 export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -154,7 +155,7 @@ export const updateLanguage = async (req: HttpRequest, res: HttpResponse): Promi
 
   await manageLanguagesUseCase.updateLanguage(languageId, { name, nativeName, isDefault, isActive });
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const deleteLanguage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -163,13 +164,13 @@ export const deleteLanguage = async (req: HttpRequest, res: HttpResponse): Promi
   const language = await manageLanguagesUseCase.findLanguageById(languageId);
 
   if (language?.isDefault) {
-    res.status(400).json({ success: false, message: 'Cannot delete the default language' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot delete the default language' });
     return;
   }
 
   await manageLanguagesUseCase.deleteLanguage(languageId);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -188,13 +189,13 @@ export const createCurrency = async (req: HttpRequest, res: HttpResponse): Promi
   };
 
   if (!code || !name) {
-    res.status(400).json({ success: false, message: 'Code and name are required' });
+    jsonResponse(res, 400, { success: false, message: 'Code and name are required' });
     return;
   }
 
   const currencyId = await manageCurrenciesUseCase.createCurrency({ code, name, symbol, exchangeRate, isDefault, isActive });
 
-  res.json({ success: true, currencyId });
+  jsonResponse(res, 200, { success: true, currencyId });
 };
 
 export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -211,7 +212,7 @@ export const updateCurrency = async (req: HttpRequest, res: HttpResponse): Promi
 
   await manageCurrenciesUseCase.updateCurrency(currencyId, { name, symbol, exchangeRate, isDefault, isActive });
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -220,13 +221,13 @@ export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promi
   const currency = await manageCurrenciesUseCase.findCurrencyById(currencyId);
 
   if (currency?.isDefault) {
-    res.status(400).json({ success: false, message: 'Cannot delete the default currency' });
+    jsonResponse(res, 400, { success: false, message: 'Cannot delete the default currency' });
     return;
   }
 
   await manageCurrenciesUseCase.deleteCurrency(currencyId);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================

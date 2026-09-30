@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Loyalty Business Controller
  *
@@ -82,15 +83,15 @@ interface _RedeemRewardBody {
 // ============================================================================
 
 function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondWithMessage(res: HttpResponse, data: unknown, message: string, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data, message });
+  jsonResponse(res, statusCode, { success: true, data, message });
 }
 
 function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, message });
+  jsonResponse(res, statusCode, { success: false, message });
 }
 
 function respondUseCaseError(res: HttpResponse, error: unknown, fallback: string): void {
@@ -248,11 +249,11 @@ export const getCustomerPointsTransactions = async (req: HttpRequest, res: HttpR
 
   const transactions = await manageLoyaltyAdminUseCase.findCustomerTransactions(customerId, limit);
 
-  res.json({
-    success: true,
-    data: transactions,
-    pagination: { limit },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: transactions,
+        pagination: { limit },
+      });
 };
 
 export const adjustCustomerPoints = async (

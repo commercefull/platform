@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Support Customer Controller
  * Handles customer-facing support operations
@@ -41,7 +42,7 @@ export const createTicket: AsyncHandler = async (req, res, _next) => {
     channel: 'web',
   });
 
-  res.status(201).json({ success: true, data: ticket });
+  jsonResponse(res, 201, { success: true, data: ticket });
 };
 
 export const getMyTickets: AsyncHandler = async (req, res, _next) => {
@@ -52,16 +53,16 @@ export const getMyTickets: AsyncHandler = async (req, res, _next) => {
     { customerId, status: status as TicketStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const getMyTicket: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
   try {
     const data = await manageCustomerTicketsUseCase.getTicketDetail(req.params.id, customerId || '');
-    res.json({ success: true, data });
+    jsonResponse(res, 200, { success: true, data });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -73,9 +74,9 @@ export const addCustomerMessage: AsyncHandler = async (req, res, _next) => {
       customerId || '',
       req.body as { name?: string; email?: string; message: string },
     );
-    res.status(201).json({ success: true, data: message });
+    jsonResponse(res, 201, { success: true, data: message });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -84,9 +85,9 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
   const { satisfaction, feedback } = req.body as { satisfaction: number; feedback?: string };
   try {
     await manageCustomerTicketsUseCase.submitFeedback(req.params.id, customerId || '', satisfaction, feedback);
-    res.json({ success: true, message: 'Feedback submitted' });
+    jsonResponse(res, 200, { success: true, message: 'Feedback submitted' });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -96,30 +97,30 @@ export const submitTicketFeedback: AsyncHandler = async (req, res, _next) => {
 
 export const getFaqCategories: AsyncHandler = async (req, res, _next) => {
   const categories = await manageFaqUseCase.getCategories(true);
-  res.json({ success: true, data: categories });
+  jsonResponse(res, 200, { success: true, data: categories });
 };
 
 export const getFeaturedFaqCategories: AsyncHandler = async (req, res, _next) => {
   const categories = await manageFaqUseCase.getFeaturedCategories();
-  res.json({ success: true, data: categories });
+  jsonResponse(res, 200, { success: true, data: categories });
 };
 
 export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
   const category = await manageFaqUseCase.getCategoryBySlug(req.params.slug);
   if (!category || !category.isActive) {
-    res.status(404).json({ success: false, message: 'Category not found' });
+    jsonResponse(res, 404, { success: false, message: 'Category not found' });
     return;
   }
 
   const articles = await manageFaqUseCase.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
 
-  res.json({ success: true, data: { ...category, articles: articles.data } });
+  jsonResponse(res, 200, { success: true, data: { ...category, articles: articles.data } });
 };
 
 export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
   const article = await manageFaqUseCase.getArticleBySlug(req.params.slug);
   if (!article || !article.isPublished) {
-    res.status(404).json({ success: false, message: 'Article not found' });
+    jsonResponse(res, 404, { success: false, message: 'Article not found' });
     return;
   }
 
@@ -135,30 +136,30 @@ export const getFaqArticleBySlug: AsyncHandler = async (req, res, _next) => {
   // Get related articles
   const relatedArticles = await manageFaqUseCase.getRelatedArticles(article.faqArticleId);
 
-  res.json({ success: true, data: { ...article, relatedArticles } });
+  jsonResponse(res, 200, { success: true, data: { ...article, relatedArticles } });
 };
 
 export const searchFaq: AsyncHandler = async (req, res, _next) => {
   const { q, limit } = req.query;
   if (!q) {
-    res.status(400).json({ success: false, message: 'Search query required' });
+    jsonResponse(res, 400, { success: false, message: 'Search query required' });
     return;
   }
 
   const articles = await manageFaqUseCase.searchArticles(q as string, parseInt(limit as string) || 10);
-  res.json({ success: true, data: articles });
+  jsonResponse(res, 200, { success: true, data: articles });
 };
 
 export const getPopularFaqArticles: AsyncHandler = async (req, res, _next) => {
   const { limit } = req.query;
   const articles = await manageFaqUseCase.getPopularArticles(parseInt(limit as string) || 10);
-  res.json({ success: true, data: articles });
+  jsonResponse(res, 200, { success: true, data: articles });
 };
 
 export const submitFaqFeedback: AsyncHandler = async (req, res, _next) => {
   const { isHelpful } = req.body as { isHelpful: boolean };
   await manageFaqUseCase.submitHelpfulVote(req.params.id, isHelpful);
-  res.json({ success: true, message: 'Feedback submitted' });
+  jsonResponse(res, 200, { success: true, message: 'Feedback submitted' });
 };
 
 // ============================================================================
@@ -192,7 +193,7 @@ export const createStockAlert: AsyncHandler = async (req, res, _next) => {
     notificationChannel: body.notificationChannel,
   });
 
-  res.status(201).json({ success: true, data: alert });
+  jsonResponse(res, 201, { success: true, data: alert });
 };
 
 export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
@@ -203,7 +204,7 @@ export const getMyStockAlerts: AsyncHandler = async (req, res, _next) => {
     { customerId, status: status as AlertStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
@@ -211,12 +212,12 @@ export const cancelMyStockAlert: AsyncHandler = async (req, res, _next) => {
   const alert = await manageStockAlertsUseCase.getStockAlert(req.params.id);
 
   if (!alert || alert.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Alert not found' });
+    jsonResponse(res, 404, { success: false, message: 'Alert not found' });
     return;
   }
 
   await manageStockAlertsUseCase.cancelStockAlert(req.params.id);
-  res.json({ success: true, message: 'Alert cancelled' });
+  jsonResponse(res, 200, { success: true, message: 'Alert cancelled' });
 };
 
 // ============================================================================
@@ -261,7 +262,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
     notificationChannel: body.notificationChannel,
   });
 
-  res.status(201).json({ success: true, data: alert });
+  jsonResponse(res, 201, { success: true, data: alert });
 };
 
 export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
@@ -272,7 +273,7 @@ export const getMyPriceAlerts: AsyncHandler = async (req, res, _next) => {
     { customerId, status: status as AlertStatus | undefined },
     { limit: parseInt(limit as string) || 20, offset: parseInt(offset as string) || 0 },
   );
-  res.json({ success: true, ...result });
+  jsonResponse(res, 200, { success: true, ...result });
 };
 
 export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
@@ -280,10 +281,10 @@ export const cancelMyPriceAlert: AsyncHandler = async (req, res, _next) => {
   const alert = await manageStockAlertsUseCase.getPriceAlert(req.params.id);
 
   if (!alert || alert.customerId !== customerId) {
-    res.status(404).json({ success: false, message: 'Alert not found' });
+    jsonResponse(res, 404, { success: false, message: 'Alert not found' });
     return;
   }
 
   await manageStockAlertsUseCase.cancelPriceAlert(req.params.id);
-  res.json({ success: true, message: 'Alert cancelled' });
+  jsonResponse(res, 200, { success: true, message: 'Alert cancelled' });
 };

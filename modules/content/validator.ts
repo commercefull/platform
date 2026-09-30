@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 import type { HttpHandler, HttpRequest } from 'libs/http';
 
 type FieldCheck = (value: unknown) => boolean;
@@ -59,7 +60,7 @@ export const validateContactUs: HttpHandler = (req, res, next) => {
   const errors = collectErrors(req as ValidatedRequest);
   if (errors.length > 0) {
     req.flash('error', errors);
-    return res.redirect('/pages/contact-us');
+    return redirectResponse(res, '/pages/contact-us');
   }
   next();
 };
@@ -68,7 +69,7 @@ export const validateContactForm: HttpHandler = (req, res, next) => {
   const errors = collectErrors(req as ValidatedRequest);
   if (errors.length > 0) {
     req.flash('error', errors);
-    return res.redirect('/contact-form');
+    return redirectResponse(res, '/contact-form');
   }
   next();
 };

@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Customer Authentication Controller
  * Handles login, signup, profile, and logout for customers
@@ -37,7 +38,7 @@ async function mergeGuestBasket(req: HttpRequest, customerId: string): Promise<v
 export const signInForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
     return;
   }
 
@@ -54,7 +55,7 @@ export const signInForm = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const signUpForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   // If already logged in, redirect to profile
   if (req.user) {
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
     return;
   }
 
@@ -74,7 +75,7 @@ export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void>
 
     if (!email || !password) {
       req.flash('error', 'Email and password are required');
-      return res.redirect('/signin?redirect=' + encodeURIComponent(redirectTo as string));
+      return redirectResponse(res, '/signin?redirect=' + encodeURIComponent(redirectTo as string));
     }
 
     const command = new AuthenticateCustomerCommand(email as string, password as string);
@@ -82,7 +83,7 @@ export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void>
 
     if (!customer) {
       req.flash('error', 'Invalid email or password');
-      return res.redirect('/signin?redirect=' + encodeURIComponent(redirectTo as string));
+      return redirectResponse(res, '/signin?redirect=' + encodeURIComponent(redirectTo as string));
     }
 
     // Set customer session — persisted so later requests can hydrate req.user
@@ -98,12 +99,12 @@ export const signIn = async (req: HttpRequest, res: HttpResponse): Promise<void>
     await mergeGuestBasket(req, customer.customerId);
 
     req.flash('success', `Welcome back, ${customer.firstName}!`);
-    res.redirect(redirectTo as string);
+    redirectResponse(res, redirectTo as string);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to sign in');
-    res.redirect('/signin');
+    redirectResponse(res, '/signin');
   }
 };
 
@@ -119,17 +120,17 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
     // Basic validation
     if (!firstName || !lastName || !email || !password) {
       req.flash('error', 'All fields are required');
-      return res.redirect('/signup');
+      return redirectResponse(res, '/signup');
     }
 
     if (password !== confirmPassword) {
       req.flash('error', 'Passwords do not match');
-      return res.redirect('/signup');
+      return redirectResponse(res, '/signup');
     }
 
     if ((password as string).length < 8) {
       req.flash('error', 'Password must be at least 8 characters long');
-      return res.redirect('/signup');
+      return redirectResponse(res, '/signup');
     }
 
     const command = new RegisterCustomerCommand(email as string, firstName as string, lastName as string, password as string);
@@ -149,12 +150,12 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
     await mergeGuestBasket(req, customer.customerId);
 
     req.flash('success', `Welcome to our store, ${customer.firstName}!`);
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to create account');
-    res.redirect('/signup');
+    redirectResponse(res, '/signup');
   }
 };
 
@@ -164,7 +165,7 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
 
 export const profile = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   if (!req.user) {
-    return res.redirect('/signin?redirect=/profile');
+    return redirectResponse(res, '/signin?redirect=/profile');
   }
 
   const command = new GetCustomerCommand(req.user.customerId);
@@ -173,7 +174,7 @@ export const profile = async (req: HttpRequest, res: HttpResponse): Promise<void
   if (!customer) {
     // Clear invalid session
     req.user = undefined;
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   storefrontRespond(req, res, 'user/profile', {
@@ -189,7 +190,7 @@ export const profile = async (req: HttpRequest, res: HttpResponse): Promise<void
 export const updateProfile = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     if (!req.user) {
-      return res.redirect('/signin');
+      return redirectResponse(res, '/signin');
     }
 
     const body = req.body as HttpRequestBody;
@@ -204,12 +205,12 @@ export const updateProfile = async (req: HttpRequest, res: HttpResponse): Promis
     await updateCustomerUseCase.execute(command);
 
     req.flash('success', 'Profile updated successfully');
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to update profile');
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
   }
 };
 
@@ -226,11 +227,11 @@ export const signOut = async (req: HttpRequest, res: HttpResponse): Promise<void
     }
 
     req.flash('success', 'You have been signed out successfully');
-    res.redirect('/');
+    redirectResponse(res, '/');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/');
+    redirectResponse(res, '/');
   }
 };
 
@@ -241,7 +242,7 @@ export const signOut = async (req: HttpRequest, res: HttpResponse): Promise<void
 export const changePassword = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     if (!req.user) {
-      return res.redirect('/signin');
+      return redirectResponse(res, '/signin');
     }
 
     const body = req.body as HttpRequestBody;
@@ -249,17 +250,17 @@ export const changePassword = async (req: HttpRequest, res: HttpResponse): Promi
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       req.flash('error', 'All password fields are required');
-      return res.redirect('/profile');
+      return redirectResponse(res, '/profile');
     }
 
     if (newPassword !== confirmPassword) {
       req.flash('error', 'New passwords do not match');
-      return res.redirect('/profile');
+      return redirectResponse(res, '/profile');
     }
 
     if ((newPassword as string).length < 8) {
       req.flash('error', 'New password must be at least 8 characters long');
-      return res.redirect('/profile');
+      return redirectResponse(res, '/profile');
     }
 
     // Use ChangePassword use case
@@ -268,11 +269,11 @@ export const changePassword = async (req: HttpRequest, res: HttpResponse): Promi
     await changePasswordUseCase.execute(changeCommand);
 
     req.flash('success', 'Password changed successfully');
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
     req.flash('error', (error as Error).message || 'Failed to change password');
-    res.redirect('/profile');
+    redirectResponse(res, '/profile');
   }
 };

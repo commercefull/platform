@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse, renderResponse } from "libs/apiResponse";
 /**
  * Product Controller for Admin Hub
  * Uses product use cases directly from modules - no HTTP API calls
@@ -276,7 +277,7 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
 
     const product = await createProductUseCase.execute(command);
 
-    res.redirect(`/admin/products/${product.productId}?success=Product created successfully`);
+    redirectResponse(res, `/admin/products/${product.productId}?success=Product created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -361,10 +362,10 @@ export const addProductRelationship = async (req: HttpRequest, res: HttpResponse
       position: body.position ? parseInt(body.position, 10) : 0,
       bidirectional: body.bidirectional === 'on' || body.bidirectional === 'true',
     });
-    res.redirect(`/admin/products/${productId}/edit?success=Product link added`);
+    redirectResponse(res, `/admin/products/${productId}/edit?success=Product link added`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to add product link'));
+    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to add product link'));
   }
 };
 
@@ -372,12 +373,10 @@ export const removeProductRelationship = async (req: HttpRequest, res: HttpRespo
   const { productId, relationshipId } = req.params;
   try {
     await manageProductRelationshipsUseCase.delete(relationshipId);
-    res.redirect(`/admin/products/${productId}/edit?success=Product link removed`);
+    redirectResponse(res, `/admin/products/${productId}/edit?success=Product link removed`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to remove product link'),
-    );
+    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to remove product link'));
   }
 };
 
@@ -410,7 +409,7 @@ export const updateProduct = async (req: HttpRequest, res: HttpResponse): Promis
   const command = new UpdateProductCommand(productId, updates as UpdateProductCommand['updates']);
   await updateProductUseCase.execute(command);
 
-  res.redirect(`/admin/products/${productId}?success=Product updated successfully`);
+  redirectResponse(res, `/admin/products/${productId}?success=Product updated successfully`);
 };
 
 // ============================================================================
@@ -423,13 +422,13 @@ export const deleteProduct = async (req: HttpRequest, res: HttpResponse): Promis
 
   const product = await getProductUseCase.execute(new GetProductCommand(productId));
   if (!product) {
-    res.status(404).json({ success: false, message: 'Product not found' });
+    jsonResponse(res, 404, { success: false, message: 'Product not found' });
     return;
   }
 
   await deleteProductUseCase.execute(productId, permanent === 'true');
 
-  res.json({ success: true, message: 'Product deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Product deleted successfully' });
 };
 
 // ============================================================================
@@ -443,15 +442,15 @@ export const updateProductStatus = async (req: HttpRequest, res: HttpResponse): 
 
   const validStatuses = Object.values(ProductStatus);
   if (!validStatuses.includes(status)) {
-    res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    jsonResponse(res, 400, { success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     return;
   }
 
   try {
     const product = await updateProductStatusUseCase.updateStatus(productId, status);
-    res.json({ success: true, message: 'Status updated', data: { status: product.status } });
+    jsonResponse(res, 200, { success: true, message: 'Status updated', data: { status: product.status } });
   } catch {
-    res.status(404).json({ success: false, message: 'Product not found' });
+    jsonResponse(res, 404, { success: false, message: 'Product not found' });
   }
 };
 
@@ -464,9 +463,9 @@ export const publishProduct = async (req: HttpRequest, res: HttpResponse): Promi
 
   try {
     await updateProductStatusUseCase.publish(productId);
-    res.json({ success: true, message: 'Product published' });
+    jsonResponse(res, 200, { success: true, message: 'Product published' });
   } catch {
-    res.status(404).json({ success: false, message: 'Product not found' });
+    jsonResponse(res, 404, { success: false, message: 'Product not found' });
   }
 };
 
@@ -479,9 +478,9 @@ export const unpublishProduct = async (req: HttpRequest, res: HttpResponse): Pro
 
   try {
     await updateProductStatusUseCase.unpublish(productId);
-    res.json({ success: true, message: 'Product unpublished' });
+    jsonResponse(res, 200, { success: true, message: 'Product unpublished' });
   } catch {
-    res.status(404).json({ success: false, message: 'Product not found' });
+    jsonResponse(res, 404, { success: false, message: 'Product not found' });
   }
 };
 
@@ -533,10 +532,10 @@ export const createProductCategory = async (req: HttpRequest, res: HttpResponse)
       metaTitle: metaTitle || null,
       metaDescription: metaDescription || null,
     });
-    res.redirect('/admin/products/categories?success=Category created successfully');
+    redirectResponse(res, '/admin/products/categories?success=Category created successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'));
+    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'));
   }
 };
 
@@ -584,10 +583,10 @@ export const updateProductCategory = async (req: HttpRequest, res: HttpResponse)
       metaTitle: metaTitle || null,
       metaDescription: metaDescription || null,
     });
-    res.redirect('/admin/products/categories?success=Category updated successfully');
+    redirectResponse(res, '/admin/products/categories?success=Category updated successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'));
+    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'));
   }
 };
 
@@ -595,10 +594,10 @@ export const deleteProductCategory = async (req: HttpRequest, res: HttpResponse)
   try {
     const { categoryId } = req.params;
     await manageProductCategoriesUseCase.softDelete(categoryId);
-    res.redirect('/admin/products/categories?success=Category deleted successfully');
+    redirectResponse(res, '/admin/products/categories?success=Category deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'));
+    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'));
   }
 };
 
@@ -624,10 +623,10 @@ export const createProductTag = async (req: HttpRequest, res: HttpResponse): Pro
       slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
       description: description || null,
     });
-    res.redirect('/admin/products/tags?success=Tag created successfully');
+    redirectResponse(res, '/admin/products/tags?success=Tag created successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to create tag'));
+    redirectResponse(res, '/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to create tag'));
   }
 };
 
@@ -635,10 +634,10 @@ export const deleteProductTag = async (req: HttpRequest, res: HttpResponse): Pro
   try {
     const { tagId } = req.params;
     await manageProductTagsUseCase.softDelete(tagId);
-    res.redirect('/admin/products/tags?success=Tag deleted successfully');
+    redirectResponse(res, '/admin/products/tags?success=Tag deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to delete tag'));
+    redirectResponse(res, '/admin/products/tags?error=' + encodeURIComponent((error as Error).message || 'Failed to delete tag'));
   }
 };
 
@@ -682,10 +681,10 @@ export const createProductCollection = async (req: HttpRequest, res: HttpRespons
       isActive: isActive !== 'false',
       organizationId: null,
     });
-    res.redirect('/admin/products/collections?success=Collection created successfully');
+    redirectResponse(res, '/admin/products/collections?success=Collection created successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to create collection'));
+    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to create collection'));
   }
 };
 
@@ -722,10 +721,10 @@ export const updateProductCollection = async (req: HttpRequest, res: HttpRespons
       imageUrl: imageUrl || null,
       isActive: isActive !== 'false',
     });
-    res.redirect('/admin/products/collections?success=Collection updated successfully');
+    redirectResponse(res, '/admin/products/collections?success=Collection updated successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to update collection'));
+    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to update collection'));
   }
 };
 
@@ -733,10 +732,10 @@ export const deleteProductCollection = async (req: HttpRequest, res: HttpRespons
   try {
     const { collectionId } = req.params;
     await manageProductCollectionsUseCase.softDelete(collectionId);
-    res.redirect('/admin/products/collections?success=Collection deleted successfully');
+    redirectResponse(res, '/admin/products/collections?success=Collection deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to delete collection'));
+    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to delete collection'));
   }
 };
 
@@ -747,7 +746,7 @@ export const deleteProductCollection = async (req: HttpRequest, res: HttpRespons
 export const listProductQa = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const qaList = await manageProductQaUseCase.findByProduct(productId);
-  res.render('admin/views/products/partials/qa', { qaList, productId });
+  renderResponse(res, 'admin/views/products/partials/qa', { qaList, productId });
 };
 
 export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -756,12 +755,10 @@ export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promi
     const body = req.body as { status: ProductQaStatus };
     const { status } = body;
     await manageProductQaUseCase.updateStatus(qaId, status);
-    res.redirect(`/admin/products/${productId}?success=Q%26A status updated`);
+    redirectResponse(res, `/admin/products/${productId}?success=Q%26A status updated`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'),
-    );
+    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'));
   }
 };
 
@@ -772,19 +769,17 @@ export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promi
 export const listReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const mediaByReview = await manageReviewMediaUseCase.findMediaByProduct(productId);
-  res.render('admin/views/products/partials/review-media', { mediaByReview, productId });
+  renderResponse(res, 'admin/views/products/partials/review-media', { mediaByReview, productId });
 };
 
 export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { productId, mediaId } = req.params;
     await manageReviewMediaUseCase.deleteMedia(mediaId);
-    res.redirect(`/admin/products/${productId}?success=Media deleted`);
+    redirectResponse(res, `/admin/products/${productId}?success=Media deleted`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'),
-    );
+    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'));
   }
 };
 
@@ -795,7 +790,7 @@ export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Pr
 export const listProductPrices = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { productId } = req.params;
   const prices = await productPricingPort.listProductPrices(productId);
-  res.render('admin/views/products/partials/prices', { prices, productId });
+  renderResponse(res, 'admin/views/products/partials/prices', { prices, productId });
 };
 
 /**
@@ -829,9 +824,9 @@ export const upsertProductPrice = async (req: HttpRequest, res: HttpResponse): P
       compareAtPriceCents: compareAtAmount ? Math.round(parseFloat(compareAtAmount) * 100) : null,
       costPriceCents: costAmount ? Math.round(parseFloat(costAmount) * 100) : null,
     });
-    res.redirect(`/admin/products/${productId}?success=Price saved`);
+    redirectResponse(res, `/admin/products/${productId}?success=Price saved`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'));
+    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'));
   }
 };

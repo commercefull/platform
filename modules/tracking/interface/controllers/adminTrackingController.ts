@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Tracking Admin UI Controller
  * Admin views for managing tracking configurations
@@ -63,7 +64,7 @@ export const createTrackingConfig = async (req: HttpRequest, res: HttpResponse):
     serverSideEnabled: body.serverSideEnabled as boolean | undefined,
   });
 
-  res.redirect(`/admin/tracking/${config.storeId}?success=Tracking config created successfully`);
+  redirectResponse(res, `/admin/tracking/${config.storeId}?success=Tracking config created successfully`);
 };
 
 export const editTrackingConfigForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -85,17 +86,17 @@ export const editTrackingConfigForm = async (req: HttpRequest, res: HttpResponse
 export const activateTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.activate(storeId);
-  res.redirect(`/admin/tracking/${storeId}?success=Tracking config activated`);
+  redirectResponse(res, `/admin/tracking/${storeId}?success=Tracking config activated`);
 };
 
 export const disableTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.disable(storeId);
-  res.redirect(`/admin/tracking/${storeId}?success=Tracking config disabled`);
+  redirectResponse(res, `/admin/tracking/${storeId}?success=Tracking config disabled`);
 };
 
 export const deleteTrackingConfig = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { storeId } = req.params;
   await manageConfigUseCase.delete(storeId);
-  res.redirect('/admin/tracking?success=Tracking config deleted');
+  redirectResponse(res, '/admin/tracking?success=Tracking config deleted');
 };

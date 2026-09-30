@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Review Controller
  * Manages product reviews from customers
@@ -26,14 +27,14 @@ export const getProductReviews = async (req: HttpRequest, res: HttpResponse) => 
   const reviews = await manageProductReviewsUseCase.findByProductId(productId, 'approved', limit, offset);
   const stats = await manageProductReviewsUseCase.getProductStatistics(productId);
 
-  res.json({
-    success: true,
-    data: {
-      reviews,
-      totalReviews: stats.totalReviews,
-      averageRating: stats.averageRating,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          reviews,
+          totalReviews: stats.totalReviews,
+          averageRating: stats.averageRating,
+        },
+      });
 };
 
 /**
@@ -42,7 +43,7 @@ export const getProductReviews = async (req: HttpRequest, res: HttpResponse) => 
 export const submitReview = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.status(401).json({ error: 'Please sign in to leave a review' });
+    return jsonResponse(res, 401, { error: 'Please sign in to leave a review' });
   }
 
   const { productId } = req.params;
@@ -50,13 +51,13 @@ export const submitReview = async (req: HttpRequest, res: HttpResponse) => {
   const { rating, title, content } = body as { rating: ReviewRating; title?: string; content?: string };
 
   if (!rating || (rating as number) < 1 || (rating as number) > 5) {
-    return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    return jsonResponse(res, 400, { error: 'Rating must be between 1 and 5' });
   }
 
   const existing = await manageProductReviewsUseCase.findByCustomerAndProduct(user.customerId, productId);
 
   if (existing) {
-    return res.status(400).json({ error: 'You have already reviewed this product' });
+    return jsonResponse(res, 400, { error: 'You have already reviewed this product' });
   }
 
   const isVerifiedPurchase = await manageProductReviewsUseCase.checkCustomerPurchase(user.customerId, productId);
@@ -74,9 +75,9 @@ export const submitReview = async (req: HttpRequest, res: HttpResponse) => {
   } as Parameters<typeof manageProductReviewsUseCase.create>[0]);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.json({ success: true, reviewId: result.productReviewId });
+    return jsonResponse(res, 200, { success: true, reviewId: result.productReviewId });
   }
-  return res.redirect(`/products/${productId}`);
+  return redirectResponse(res, `/products/${productId}`);
 };
 
 /**
@@ -87,5 +88,5 @@ export const markReviewHelpful = async (req: HttpRequest, res: HttpResponse) => 
 
   await manageProductReviewsUseCase.incrementHelpful(reviewId);
 
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };

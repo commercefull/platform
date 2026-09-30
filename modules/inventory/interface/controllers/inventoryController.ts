@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Inventory Controller
  *
@@ -95,19 +96,19 @@ interface ReleaseReservationBody {
 // ============================================================================
 
 function respond(res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondWithPagination(res: HttpResponse, data: unknown[], limit: number, offset: number): void {
-  res.json({
-    success: true,
-    data,
-    pagination: { limit, offset, count: data.length },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data,
+        pagination: { limit, offset, count: data.length },
+      });
 }
 
 function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, error: message });
+  jsonResponse(res, statusCode, { success: false, error: message });
 }
 
 // ============================================================================
@@ -618,7 +619,7 @@ export const getInventoryItem = async (req: HttpRequest, res: HttpResponse): Pro
       // Use repository directly to search any location
       const any = await getInventoryItemUseCase.findBySku(sku);
       if (any && any.length > 0) {
-        res.status(200).json({ success: true, data: any[0] });
+        jsonResponse(res, 200, { success: true, data: any[0] });
         return;
       }
     }

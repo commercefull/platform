@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Loyalty Controller
  * Handles loyalty programs, points, rewards, and redemptions for the Admin Hub
@@ -52,7 +53,7 @@ export const createLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Pr
       benefits: benefits ? JSON.parse(benefits) : undefined,
     });
 
-    res.redirect(`/hub/loyalty/tiers/${tier.tierId}?success=Loyalty tier created successfully`);
+    redirectResponse(res, `/hub/loyalty/tiers/${tier.tierId}?success=Loyalty tier created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -128,7 +129,7 @@ export const updateLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Pr
 
   const _tier = await manageLoyaltyAdminUseCase.updateTier(tierId, updates);
 
-  res.redirect(`/hub/loyalty/tiers/${tierId}?success=Loyalty tier updated successfully`);
+  redirectResponse(res, `/hub/loyalty/tiers/${tierId}?success=Loyalty tier updated successfully`);
 };
 
 export const deleteLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -136,7 +137,7 @@ export const deleteLoyaltyTier = async (req: HttpRequest, res: HttpResponse): Pr
 
   await manageLoyaltyAdminUseCase.deleteTier(tierId);
 
-  res.json({ success: true, message: 'Loyalty tier deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Loyalty tier deleted successfully' });
 };
 
 // ============================================================================
@@ -190,7 +191,7 @@ export const createLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
       expiresAt: expiresAt ? new Date(expiresAt) : undefined,
     });
 
-    res.redirect(`/hub/loyalty/rewards/${reward.rewardId}?success=Loyalty reward created successfully`);
+    redirectResponse(res, `/hub/loyalty/rewards/${reward.rewardId}?success=Loyalty reward created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -274,7 +275,7 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
 
   const _reward = await manageLoyaltyAdminUseCase.updateReward(rewardId, updates);
 
-  res.redirect(`/hub/loyalty/rewards/${rewardId}?success=Loyalty reward updated successfully`);
+  redirectResponse(res, `/hub/loyalty/rewards/${rewardId}?success=Loyalty reward updated successfully`);
 };
 
 export const deleteLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -282,7 +283,7 @@ export const deleteLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
 
   await manageLoyaltyAdminUseCase.deleteReward(rewardId);
 
-  res.json({ success: true, message: 'Loyalty reward deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Loyalty reward deleted successfully' });
 };
 
 // ============================================================================

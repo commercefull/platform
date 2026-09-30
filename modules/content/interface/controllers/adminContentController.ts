@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Content Controller
  * Handles content management for the Admin Hub
@@ -101,7 +102,7 @@ export const createContentPage = async (req: HttpRequest, res: HttpResponse): Pr
 
   const result = await createPageUseCase.execute(command);
 
-  res.redirect(`/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
+  redirectResponse(res, `/hub/content/pages/${result.contentPageId}?success=Content page created successfully`);
 };
 
 export const viewContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -207,7 +208,7 @@ export const updateContentPage = async (req: HttpRequest, res: HttpResponse): Pr
   );
   await updatePageUseCase.execute(command);
 
-  res.redirect(`/hub/content/pages/${pageId}?success=Content page updated successfully`);
+  redirectResponse(res, `/hub/content/pages/${pageId}?success=Content page updated successfully`);
 };
 
 export const publishContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -216,7 +217,7 @@ export const publishContentPage = async (req: HttpRequest, res: HttpResponse): P
   const command = new PublishPageCommand(pageId);
   await publishPageUseCase.execute(command);
 
-  res.json({ success: true, message: 'Content page published successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Content page published successfully' });
 };
 
 export const deleteContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -228,7 +229,7 @@ export const deleteContentPage = async (req: HttpRequest, res: HttpResponse): Pr
     throw new Error('Failed to delete content page');
   }
 
-  res.json({ success: true, message: 'Content page deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Content page deleted successfully' });
 };
 
 // ============================================================================

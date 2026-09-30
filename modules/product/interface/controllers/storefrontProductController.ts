@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse, sendResponse, setHeader } from "libs/apiResponse";
 /**
  * Storefront Product Controller
  * Handles product listing, detail, and search for customers
@@ -117,18 +118,18 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
 
   // JSON response mode for AJAX infinite scroll
   if (req.query.format === 'json' || req.headers.accept?.includes('application/json')) {
-    res.json({
-      products: result.products.map(p => ({
-        productId: p.productId,
-        name: p.name,
-        slug: p.slug,
-        primaryImageUrl: p.primaryImageUrl,
-        priceFormatted: p.priceFormatted || null,
-        brandName: p.brandName || null,
-      })),
-      total: result.total,
-      pagination,
-    });
+    jsonResponse(res, 200, {
+            products: result.products.map(p => ({
+              productId: p.productId,
+              name: p.name,
+              slug: p.slug,
+              primaryImageUrl: p.primaryImageUrl,
+              priceFormatted: p.priceFormatted || null,
+              brandName: p.brandName || null,
+            })),
+            total: result.total,
+            pagination,
+          });
     return;
   }
 
@@ -289,18 +290,18 @@ export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): 
 
   // JSON response mode for AJAX infinite scroll
   if (req.query.format === 'json' || req.headers.accept?.includes('application/json')) {
-    res.json({
-      products: result.products.map(p => ({
-        productId: p.productId,
-        name: p.name,
-        slug: p.slug,
-        primaryImageUrl: p.primaryImageUrl,
-        priceFormatted: p.priceFormatted || null,
-        brandName: p.brandName || null,
-      })),
-      total: result.total,
-      pagination,
-    });
+    jsonResponse(res, 200, {
+            products: result.products.map(p => ({
+              productId: p.productId,
+              name: p.name,
+              slug: p.slug,
+              primaryImageUrl: p.primaryImageUrl,
+              priceFormatted: p.priceFormatted || null,
+              brandName: p.brandName || null,
+            })),
+            total: result.total,
+            pagination,
+          });
     return;
   }
 
@@ -327,7 +328,7 @@ export const searchProducts = async (req: HttpRequest, res: HttpResponse): Promi
   const storeCtx = getStoreContext(res);
 
   if (!search || (search as string).trim().length < 2) {
-    return res.redirect('/');
+    return redirectResponse(res, '/');
   }
 
   // Build filters — scope to current store
@@ -389,7 +390,7 @@ export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): P
   const storeCtx = getStoreContext(res);
 
   if (!search || (search as string).trim().length < 2) {
-    res.json({ products: [], brands: [], categories: [], total: 0 });
+    jsonResponse(res, 200, { products: [], brands: [], categories: [], total: 0 });
     return;
   }
 
@@ -427,12 +428,12 @@ export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): P
     .slice(0, 3)
     .map(c => ({ name: c.name || c.title || '', slug: c.slug }));
 
-  res.json({
-    products,
-    brands,
-    categories,
-    total: result.total,
-  });
+  jsonResponse(res, 200, {
+        products,
+        brands,
+        categories,
+        total: result.total,
+      });
 };
 
 // ============================================================================
@@ -506,6 +507,6 @@ ${urls
   .join('\n')}
 </urlset>`;
 
-  res.set('Content-Type', 'application/xml');
-  res.send(xml);
+  setHeader(res, 'Content-Type', 'application/xml');
+  sendResponse(res, 200, xml);
 };

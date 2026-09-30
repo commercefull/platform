@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Subscription Controller
  * Customer-facing subscription management pages
@@ -25,7 +26,7 @@ export const listPlans = async (req: HttpRequest, res: HttpResponse) => {
  */
 export const mySubscriptions = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const subscriptions = await manageStorefrontSubscriptionsUseCase.findByCustomerIdWithPlan(customerId);
 
@@ -40,7 +41,7 @@ export const mySubscriptions = async (req: HttpRequest, res: HttpResponse) => {
  */
 export const viewSubscription = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const { subscriptionId } = req.params;
 
@@ -48,7 +49,7 @@ export const viewSubscription = async (req: HttpRequest, res: HttpResponse) => {
 
   if (!subscription) {
     req.flash?.('error', 'Subscription not found');
-    return res.redirect('/subscriptions');
+    return redirectResponse(res, '/subscriptions');
   }
 
   const billingHistory = await manageStorefrontSubscriptionsUseCase.findBillingHistory(subscriptionId);
@@ -66,7 +67,7 @@ export const viewSubscription = async (req: HttpRequest, res: HttpResponse) => {
 export const cancelSubscription = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+    if (!customerId) return redirectResponse(res, '/signin');
 
     const { subscriptionId } = req.params;
     const body = req.body as HttpRequestBody;
@@ -76,16 +77,16 @@ export const cancelSubscription = async (req: HttpRequest, res: HttpResponse) =>
 
     if (!subscription) {
       req.flash?.('error', 'Subscription not found or already cancelled');
-      return res.redirect('/subscriptions');
+      return redirectResponse(res, '/subscriptions');
     }
 
     await manageStorefrontSubscriptionsUseCase.cancelSubscription(subscriptionId, (reason as string) || '');
 
     req.flash?.('success', 'Subscription cancelled successfully');
-    res.redirect('/subscriptions');
+    redirectResponse(res, '/subscriptions');
   } catch (error) {
     logger.warn('Error:', error);
     req.flash?.('error', 'Failed to cancel subscription');
-    res.redirect('/subscriptions');
+    redirectResponse(res, '/subscriptions');
   }
 };

@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Shipping Zone Controller
  * Handles shipping zone management for the Admin Hub
@@ -55,7 +56,7 @@ export const createShippingZone = async (req: HttpRequest, res: HttpResponse): P
       createdBy: 'admin', // Add required createdBy field
     });
 
-    res.redirect(`/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
+    redirectResponse(res, `/hub/shipping/zones/${zone.shippingZoneId}?success=Shipping zone created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -140,7 +141,7 @@ export const updateShippingZone = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Shipping zone not found after update');
   }
 
-  res.redirect(`/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
+  redirectResponse(res, `/hub/shipping/zones/${zoneId}?success=Shipping zone updated successfully`);
 };
 
 export const activateShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -152,7 +153,7 @@ export const activateShippingZone = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Shipping zone not found');
   }
 
-  res.json({ success: true, message: 'Shipping zone activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping zone activated successfully' });
 };
 
 export const deactivateShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -164,7 +165,7 @@ export const deactivateShippingZone = async (req: HttpRequest, res: HttpResponse
     throw new Error('Shipping zone not found');
   }
 
-  res.json({ success: true, message: 'Shipping zone deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping zone deactivated successfully' });
 };
 
 export const deleteShippingZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -176,5 +177,5 @@ export const deleteShippingZone = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Failed to delete shipping zone');
   }
 
-  res.json({ success: true, message: 'Shipping zone deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping zone deleted successfully' });
 };

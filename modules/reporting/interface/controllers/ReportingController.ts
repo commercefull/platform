@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Reporting Controller
  */
@@ -29,7 +30,7 @@ export const generateReport = async (
   res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.reportType) {
-    res.status(400).json({ success: false, error: 'reportType is required' });
+    jsonResponse(res, 400, { success: false, error: 'reportType is required' });
     return;
   }
   const useCase = generateReportUseCase;
@@ -37,13 +38,13 @@ export const generateReport = async (
     reportType: req.body.reportType as ReportType,
     parameters: req.body.parameters || {},
   });
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const getReportTemplates = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
   const templates = await getReportTemplatesUseCase.execute();
   const templateList = Object.values(templates);
-  res.json({ success: true, data: templateList });
+  jsonResponse(res, 200, { success: true, data: templateList });
 };
 
 export const createSchedule = async (
@@ -51,29 +52,29 @@ export const createSchedule = async (
   res: HttpResponse,
 ): Promise<void> => {
   if (!req.body.name || !req.body.reportType) {
-    res.status(400).json({ success: false, error: 'name and reportType are required' });
+    jsonResponse(res, 400, { success: false, error: 'name and reportType are required' });
     return;
   }
   const useCase = createReportScheduleUseCase;
   const result = await useCase.execute(req.body);
-  res.status(201).json({ success: true, data: result });
+  jsonResponse(res, 201, { success: true, data: result });
 };
 
 export const listSchedules = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = listReportSchedulesUseCase;
   const organizationId = req.query.organizationId as string | undefined;
   const result = await useCase.execute(organizationId);
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const getSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = getReportScheduleUseCase;
   const result = await useCase.execute(req.params.scheduleId);
   if (!result) {
-    res.status(404).json({ success: false, error: 'Report schedule not found' });
+    jsonResponse(res, 404, { success: false, error: 'Report schedule not found' });
     return;
   }
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const updateSchedule = async (
@@ -86,25 +87,25 @@ export const updateSchedule = async (
     ...req.body,
   });
   if (!result) {
-    res.status(404).json({ success: false, error: 'Report schedule not found' });
+    jsonResponse(res, 404, { success: false, error: 'Report schedule not found' });
     return;
   }
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };
 
 export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = deleteReportScheduleUseCase;
   const deleted = await useCase.execute(req.params.scheduleId);
   if (!deleted) {
-    res.status(404).json({ success: false, error: 'Report schedule not found' });
+    jsonResponse(res, 404, { success: false, error: 'Report schedule not found' });
     return;
   }
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 export const listExecutions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const useCase = listReportExecutionsUseCase;
   const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
   const result = await useCase.execute(req.params.scheduleId, limit);
-  res.json({ success: true, data: result });
+  jsonResponse(res, 200, { success: true, data: result });
 };

@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Integration Admin Controller
  * Handles integration management UI for the Admin panel
@@ -111,7 +112,7 @@ export const createIntegration = async (req: HttpRequest, res: HttpResponse): Pr
       webhookUrl: body.webhookUrl as string | undefined,
       config: body.config ? (typeof body.config === 'string' ? JSON.parse(body.config) : body.config) : undefined,
     });
-    res.redirect(`/admin/integrations/${integration.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${integration.integrationId}`);
   } catch (error) {
     adminRespond(req, res, 'settings/integrations/create', {
       pageName: 'Add Integration',
@@ -129,36 +130,36 @@ export const updateIntegration = async (req: HttpRequest, res: HttpResponse): Pr
       description: body.description as string | null,
       webhookUrl: body.webhookUrl as string | null,
     });
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
 export const activateIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.activateIntegration(req.params.integrationId);
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
 export const deactivateIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deactivateIntegration(req.params.integrationId);
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
 export const deleteIntegration = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deleteIntegration(req.params.integrationId);
-    res.redirect('/admin/integrations');
+    redirectResponse(res, '/admin/integrations');
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
@@ -180,18 +181,18 @@ export const addCredential = async (req: HttpRequest, res: HttpResponse): Promis
       credentials,
       expiresAt: body.expiresAt ? new Date(body.expiresAt as string) : undefined,
     });
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
 export const deleteCredential = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageIntegrations.deleteCredential(req.params.credentialId);
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
@@ -205,9 +206,9 @@ export const createSubscription = async (req: HttpRequest, res: HttpResponse): P
       description: body.description as string | undefined,
       payloadMapping: body.payloadMapping ? JSON.parse(body.payloadMapping as string) : undefined,
     });
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
@@ -218,17 +219,17 @@ export const updateSubscription = async (req: HttpRequest, res: HttpResponse): P
       targetAction: body.targetAction as string,
       isActive: body.isActive === 'true',
     });
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };
 
 export const deleteSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await manageSubscriptions.deleteSubscription(req.params.subscriptionId);
-    res.redirect(`/admin/integrations/${req.params.integrationId}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}`);
   } catch (error) {
-    res.redirect(`/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
+    redirectResponse(res, `/admin/integrations/${req.params.integrationId}?error=${encodeURIComponent(getErrorMessage(error))}`);
   }
 };

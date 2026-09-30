@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Notification Controller
  * Handles notification template management for the Admin Hub
@@ -108,7 +109,7 @@ export const createNotificationTemplate = async (req: HttpRequest, res: HttpResp
       createdBy: 'admin',
     });
 
-    res.redirect(`/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
+    redirectResponse(res, `/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -216,7 +217,7 @@ export const updateNotificationTemplate = async (req: HttpRequest, res: HttpResp
     throw new Error('Notification template not found after update');
   }
 
-  res.redirect(`/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
+  redirectResponse(res, `/hub/notifications/templates/${templateId}?success=Notification template updated successfully`);
 };
 
 export const activateNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -228,7 +229,7 @@ export const activateNotificationTemplate = async (req: HttpRequest, res: HttpRe
     throw new Error('Notification template not found');
   }
 
-  res.json({ success: true, message: 'Notification template activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Notification template activated successfully' });
 };
 
 export const deactivateNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -240,7 +241,7 @@ export const deactivateNotificationTemplate = async (req: HttpRequest, res: Http
     throw new Error('Notification template not found');
   }
 
-  res.json({ success: true, message: 'Notification template deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Notification template deactivated successfully' });
 };
 
 export const deleteNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -252,7 +253,7 @@ export const deleteNotificationTemplate = async (req: HttpRequest, res: HttpResp
     throw new Error('Failed to delete notification template');
   }
 
-  res.json({ success: true, message: 'Notification template deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Notification template deleted successfully' });
 };
 
 export const cloneNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -262,11 +263,11 @@ export const cloneNotificationTemplate = async (req: HttpRequest, res: HttpRespo
 
   const clonedTemplate = await manageTemplatesUseCase.clone(templateId, newCode, newName);
 
-  res.json({
-    success: true,
-    message: 'Notification template cloned successfully',
-    template: clonedTemplate,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Notification template cloned successfully',
+        template: clonedTemplate,
+      });
 };
 
 export const previewNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -275,10 +276,10 @@ export const previewNotificationTemplate = async (req: HttpRequest, res: HttpRes
 
   const preview = await manageTemplatesUseCase.getPreview(templateId, previewData);
 
-  res.json({
-    success: true,
-    preview,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        preview,
+      });
 };
 
 // ============================================================================
@@ -360,7 +361,7 @@ export const createWebhook = async (req: HttpRequest, res: HttpResponse): Promis
       organizationId: organizationId || undefined,
     });
 
-    res.redirect('/admin/notifications/webhooks?success=Webhook+created+successfully');
+    redirectResponse(res, '/admin/notifications/webhooks?success=Webhook+created+successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
     adminRespond(req, res, 'notifications/webhooks/form', {
@@ -376,10 +377,10 @@ export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Pr
   try {
     const { webhookId } = req.params;
     await manageWebhooksUseCase.deactivate(webhookId);
-    res.redirect('/admin/notifications/webhooks?success=Webhook+deactivated');
+    redirectResponse(res, '/admin/notifications/webhooks?success=Webhook+deactivated');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect('/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'));
+    redirectResponse(res, '/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'));
   }
 };
 

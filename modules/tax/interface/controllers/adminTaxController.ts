@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Tax Controller for Admin Hub
  * Manages tax rates, zones, and classes
@@ -57,11 +58,11 @@ export const createTaxRate = async (req: HttpRequest, res: HttpResponse): Promis
       isActive: isActive === 'true',
     });
 
-    res.redirect('/hub/tax?success=Tax rate created');
+    redirectResponse(res, '/hub/tax?success=Tax rate created');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -86,13 +87,13 @@ export const updateTaxRate = async (req: HttpRequest, res: HttpResponse): Promis
     isActive: isActive === 'true',
   });
 
-  res.redirect('/hub/tax?success=Tax rate updated');
+  redirectResponse(res, '/hub/tax?success=Tax rate updated');
 };
 
 export const deleteTaxRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxRateId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxRate(taxRateId);
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -117,11 +118,11 @@ export const createTaxZone = async (req: HttpRequest, res: HttpResponse): Promis
       isActive: isActive === 'true',
     });
 
-    res.redirect('/hub/tax?success=Tax zone created');
+    redirectResponse(res, '/hub/tax?success=Tax zone created');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -143,13 +144,13 @@ export const updateTaxZone = async (req: HttpRequest, res: HttpResponse): Promis
     isActive: isActive === 'true',
   });
 
-  res.redirect('/hub/tax?success=Tax zone updated');
+  redirectResponse(res, '/hub/tax?success=Tax zone updated');
 };
 
 export const deleteTaxZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxZoneId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxZone(taxZoneId);
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -166,11 +167,11 @@ export const createTaxClass = async (req: HttpRequest, res: HttpResponse): Promi
       description: description || undefined,
     });
 
-    res.redirect('/hub/tax?success=Tax class created');
+    redirectResponse(res, '/hub/tax?success=Tax class created');
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/hub/tax?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/tax?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -184,13 +185,13 @@ export const updateTaxClass = async (req: HttpRequest, res: HttpResponse): Promi
     description: description || undefined,
   });
 
-  res.redirect('/hub/tax?success=Tax class updated');
+  redirectResponse(res, '/hub/tax?success=Tax class updated');
 };
 
 export const deleteTaxClass = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { taxClassId } = req.params;
   await manageAdminTaxUseCase.softDeleteTaxClass(taxClassId);
-  res.json({ success: true });
+  jsonResponse(res, 200, { success: true });
 };
 
 // ============================================================================
@@ -215,10 +216,10 @@ export const approveTaxExemption = async (req: HttpRequest, res: HttpResponse): 
     const { exemptionId } = req.params;
     const verifiedBy = (req.user as { id?: string })?.id || 'admin';
     await approveTaxExemptionUseCase.execute(exemptionId, verifiedBy);
-    res.redirect('/hub/tax/exemptions?success=Exemption approved');
+    redirectResponse(res, '/hub/tax/exemptions?success=Exemption approved');
   } catch (error: unknown) {
     logger.warn('Error approving tax exemption:', error);
-    res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -228,9 +229,9 @@ export const rejectTaxExemption = async (req: HttpRequest, res: HttpResponse): P
     const body = req.body as HttpRequestBody;
     const reason = body.reason as string | undefined;
     await rejectTaxExemptionUseCase.execute(exemptionId, reason);
-    res.redirect('/hub/tax/exemptions?success=Exemption rejected');
+    redirectResponse(res, '/hub/tax/exemptions?success=Exemption rejected');
   } catch (error: unknown) {
     logger.warn('Error rejecting tax exemption:', error);
-    res.redirect('/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/tax/exemptions?error=' + encodeURIComponent((error as Error).message));
   }
 };

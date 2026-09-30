@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
@@ -59,7 +60,7 @@ export const getContactUsPage = (req: HttpRequest, res: HttpResponse): void => {
 export const submitContactForm = (req: HttpRequest, res: HttpResponse): void => {
   // This would typically send an email, but for now we'll just redirect with success
   req.flash('success', "Thank you for your message! We'll get back to you soon.");
-  res.redirect('/pages/contact-us');
+  redirectResponse(res, '/pages/contact-us');
 };
 
 // GET: display contact form page
@@ -128,5 +129,5 @@ export const submitContactFormAdvanced = (req: HttpRequest, res: HttpResponse): 
   });
 
   req.flash('success', "Thank you for your message! We've received your inquiry and will get back to you within 24 hours.");
-  res.redirect('/contact-form');
+  redirectResponse(res, '/contact-form');
 };

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   CreatePromotionInput,
@@ -40,10 +41,10 @@ export const getActivePromotions = async (req: HttpRequest, res: HttpResponse): 
 
   const promotions = await managePromotionsUseCase.findActive(scopeFilter, organizationId as string | undefined);
 
-  res.status(200).json({
-    success: true,
-    data: promotions,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: promotions,
+      });
 };
 
 /**
@@ -99,14 +100,14 @@ export const getPromotions = async (req: HttpRequest, res: HttpResponse): Promis
     },
   );
 
-  res.status(200).json({
-    success: true,
-    data: promotions,
-    pagination: {
-      limit: parseInt(limit as string),
-      offset: parseInt(offset as string),
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: promotions,
+        pagination: {
+          limit: parseInt(limit as string),
+          offset: parseInt(offset as string),
+        },
+      });
 };
 
 /**
@@ -118,17 +119,17 @@ export const getPromotionById = async (req: HttpRequest, res: HttpResponse): Pro
   const promotionData = await managePromotionsUseCase.getWithDetails(id);
 
   if (!promotionData) {
-    res.status(404).json({
-      success: false,
-      message: 'Promotion not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Promotion not found',
+          });
     return;
   }
 
-  res.status(200).json({
-    success: true,
-    data: promotionData,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: promotionData,
+      });
 };
 
 /**
@@ -141,13 +142,13 @@ export const createPromotion = async (
   try {
     const promotion = await createPromotionRecordUseCase.execute(req.body);
 
-    res.status(201).json({
-      success: true,
-      data: promotion,
-      message: 'Promotion created successfully',
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: promotion,
+            message: 'Promotion created successfully',
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -165,21 +166,21 @@ export const updatePromotion = async (
   const existingPromotion = await managePromotionsUseCase.findById(id);
 
   if (!existingPromotion) {
-    res.status(404).json({
-      success: false,
-      message: 'Promotion not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Promotion not found',
+          });
     return;
   }
 
   // Update the promotion
   const updatedPromotion = await managePromotionsUseCase.update(id, promotionData);
 
-  res.status(200).json({
-    success: true,
-    data: updatedPromotion,
-    message: 'Promotion updated successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: updatedPromotion,
+        message: 'Promotion updated successfully',
+      });
 };
 
 /**
@@ -192,10 +193,10 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   const existingPromotion = await managePromotionsUseCase.findById(id);
 
   if (!existingPromotion) {
-    res.status(404).json({
-      success: false,
-      message: 'Promotion not found',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Promotion not found',
+          });
     return;
   }
 
@@ -203,17 +204,17 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   const deleted = await managePromotionsUseCase.delete(id);
 
   if (!deleted) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete promotion',
-    });
+    jsonResponse(res, 500, {
+            success: false,
+            message: 'Failed to delete promotion',
+          });
     return;
   }
 
-  res.status(200).json({
-    success: true,
-    message: 'Promotion deleted successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Promotion deleted successfully',
+      });
 };
 
 /**
@@ -227,10 +228,10 @@ const _applyPromotionToCart = async (
 
   // Validation
   if (!cartId || !promotionId) {
-    res.status(400).json({
-      success: false,
-      message: 'Cart ID and Promotion ID are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Cart ID and Promotion ID are required',
+          });
     return;
   }
 
@@ -238,10 +239,10 @@ const _applyPromotionToCart = async (
   const promotionData = await managePromotionsUseCase.getWithDetails(promotionId);
 
   if (!promotionData || promotionData.promotion.status !== 'active') {
-    res.status(404).json({
-      success: false,
-      message: 'Promotion not found or not active',
-    });
+    jsonResponse(res, 404, {
+            success: false,
+            message: 'Promotion not found or not active',
+          });
     return;
   }
 
@@ -252,16 +253,16 @@ const _applyPromotionToCart = async (
   // 4. Save the updated cart
 
   // For this example, we'll just return success
-  res.status(200).json({
-    success: true,
-    message: 'Promotion applied to cart successfully',
-    data: {
-      cartId,
-      promotionId,
-      // Include promotion details
-      promotion: promotionData.promotion,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Promotion applied to cart successfully',
+        data: {
+          cartId,
+          promotionId,
+          // Include promotion details
+          promotion: promotionData.promotion,
+        },
+      });
 };
 
 /**
@@ -272,10 +273,10 @@ const _removePromotionFromCart = async (req: HttpRequest, res: HttpResponse): Pr
 
   // Validation
   if (!cartId || !promotionId) {
-    res.status(400).json({
-      success: false,
-      message: 'Cart ID and Promotion ID are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Cart ID and Promotion ID are required',
+          });
     return;
   }
 
@@ -285,14 +286,14 @@ const _removePromotionFromCart = async (req: HttpRequest, res: HttpResponse): Pr
   // 3. Save the updated cart
 
   // For this example, we'll just return success
-  res.status(200).json({
-    success: true,
-    message: 'Promotion removed from cart successfully',
-    data: {
-      cartId,
-      promotionId,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Promotion removed from cart successfully',
+        data: {
+          cartId,
+          promotionId,
+        },
+      });
 };
 
 /**
@@ -306,10 +307,10 @@ const _validatePromotionForCart = async (
 
   // Validation
   if (!promotionId || cartTotal === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Promotion ID and cart total are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Promotion ID and cart total are required',
+          });
     return;
   }
 
@@ -317,23 +318,23 @@ const _validatePromotionForCart = async (
   const isValid = await managePromotionsUseCase.isValidForOrder(promotionId, Math.round(parseFloat(cartTotal) * 100), customerId);
 
   if (isValid) {
-    res.status(200).json({
-      success: true,
-      data: {
-        valid: true,
-        promotionId,
-      },
-      message: 'Promotion is valid for this cart',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: {
+              valid: true,
+              promotionId,
+            },
+            message: 'Promotion is valid for this cart',
+          });
   } else {
-    res.status(200).json({
-      success: true,
-      data: {
-        valid: false,
-        promotionId,
-      },
-      message: 'Promotion is not valid for this cart',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: {
+              valid: false,
+              promotionId,
+            },
+            message: 'Promotion is not valid for this cart',
+          });
   }
 };
 
@@ -346,13 +347,13 @@ export const activatePromotion = async (req: HttpRequest, res: HttpResponse): Pr
   try {
     const updatedPromotion = await changePromotionStatusUseCase.activate(id);
 
-    res.status(200).json({
-      success: true,
-      data: updatedPromotion,
-      message: 'Promotion activated successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedPromotion,
+            message: 'Promotion activated successfully',
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -365,12 +366,12 @@ export const pausePromotion = async (req: HttpRequest, res: HttpResponse): Promi
   try {
     const updatedPromotion = await changePromotionStatusUseCase.pause(id);
 
-    res.status(200).json({
-      success: true,
-      data: updatedPromotion,
-      message: 'Promotion paused successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedPromotion,
+            message: 'Promotion paused successfully',
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };

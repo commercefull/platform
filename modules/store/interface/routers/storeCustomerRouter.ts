@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Store Customer Router
  *
@@ -12,9 +13,9 @@ const router = createHttpRouter();
 router.get('/stores', async (req: HttpRequest, res: HttpResponse) => {
   try {
     const stores = await manageStoresAdminUseCase.findAll();
-    res.json({ data: stores });
+    jsonResponse(res, 200, { data: stores });
   } catch {
-    res.status(500).json({ error: 'Failed to list stores' });
+    jsonResponse(res, 500, { error: 'Failed to list stores' });
   }
 });
 
@@ -22,11 +23,11 @@ router.get('/stores/:storeId', async (req: HttpRequest, res: HttpResponse) => {
   try {
     const store = await manageStoresAdminUseCase.findById(req.params.storeId);
     if (!store) {
-      return res.status(404).json({ error: 'Store not found' });
+      return jsonResponse(res, 404, { error: 'Store not found' });
     }
-    res.json({ data: store });
+    jsonResponse(res, 200, { data: store });
   } catch {
-    res.status(500).json({ error: 'Failed to get store' });
+    jsonResponse(res, 500, { error: 'Failed to get store' });
   }
 });
 

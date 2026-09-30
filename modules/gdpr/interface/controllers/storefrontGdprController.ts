@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront GDPR Controller
  * Handles GDPR data request views for customers
@@ -43,7 +44,7 @@ const REQUEST_TYPE_DESCRIPTIONS: Record<string, string> = {
 export const listRequests = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/gdpr/requests');
+    return redirectResponse(res, '/signin?redirect=/gdpr/requests');
   }
 
   const requests = await manageGdprRequestsUseCase.findByCustomerId(user.customerId);
@@ -61,7 +62,7 @@ export const listRequests = async (req: HttpRequest, res: HttpResponse): Promise
 export const viewRequest = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/gdpr/requests');
+    return redirectResponse(res, '/signin?redirect=/gdpr/requests');
   }
 
   const request = await manageGdprRequestsUseCase.findById(req.params.gdprDataRequestId);
@@ -84,7 +85,7 @@ export const viewRequest = async (req: HttpRequest, res: HttpResponse): Promise<
 export const createRequestForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin?redirect=/gdpr/requests/new');
+    return redirectResponse(res, '/signin?redirect=/gdpr/requests/new');
   }
 
   const requestType = req.query.type as string | undefined;
@@ -105,7 +106,7 @@ export const createRequestSubmit = async (req: HttpRequest, res: HttpResponse): 
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/gdpr/requests/new');
+      return redirectResponse(res, '/signin?redirect=/gdpr/requests/new');
     }
 
     const body = req.body as HttpRequestBody;
@@ -133,7 +134,7 @@ export const createRequestSubmit = async (req: HttpRequest, res: HttpResponse): 
 
     const result = await createDataRequestUseCase.execute(command);
 
-    res.redirect(`/gdpr/requests/${result.gdprDataRequestId}?success=Your data request has been submitted`);
+    redirectResponse(res, `/gdpr/requests/${result.gdprDataRequestId}?success=Your data request has been submitted`);
   } catch (error: unknown) {
     logger.warn('Error creating GDPR request:', error);
     storefrontRespond(req, res, 'gdpr/create-request', {
@@ -154,23 +155,23 @@ export const cancelRequest = async (req: HttpRequest, res: HttpResponse): Promis
   try {
     const user = req.user as CustomerUser;
     if (!user?.customerId) {
-      return res.redirect('/signin?redirect=/gdpr/requests');
+      return redirectResponse(res, '/signin?redirect=/gdpr/requests');
     }
 
     const request = await manageGdprRequestsUseCase.findById(req.params.gdprDataRequestId);
     if (!request || request.customerId !== user.customerId) {
       req.flash('error', 'Request not found');
-      return res.redirect('/gdpr/requests');
+      return redirectResponse(res, '/gdpr/requests');
     }
 
     request.cancel();
     await manageGdprRequestsUseCase.save(request);
 
     req.flash('success', 'Your data request has been cancelled');
-    res.redirect('/gdpr/requests');
+    redirectResponse(res, '/gdpr/requests');
   } catch (error: unknown) {
     logger.warn('Error cancelling GDPR request:', error);
     req.flash('error', (error as Error).message || 'Failed to cancel request');
-    res.redirect('/gdpr/requests');
+    redirectResponse(res, '/gdpr/requests');
   }
 };

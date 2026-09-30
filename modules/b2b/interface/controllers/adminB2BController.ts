@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * B2B Admin UI Controller
  * Admin views for B2B companies, users, quotes, and approval workflows
@@ -51,7 +52,7 @@ export const createB2BCompany = async (req: HttpRequest, res: HttpResponse): Pro
     organizationId,
   } as Parameters<typeof manageCompanyUseCase.create>[0]);
 
-  res.redirect(`/admin/b2b/companies/${company.companyId}?success=Company created successfully`);
+  redirectResponse(res, `/admin/b2b/companies/${company.companyId}?success=Company created successfully`);
 };
 
 export const editB2BCompanyForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -73,25 +74,25 @@ export const updateB2BCompany = async (req: HttpRequest, res: HttpResponse): Pro
   const { companyId } = req.params;
   const body = req.body as HttpRequestBody;
   await manageCompanyUseCase.updateProfile(companyId, body as Parameters<typeof manageCompanyUseCase.updateProfile>[1]);
-  res.redirect(`/admin/b2b/companies/${companyId}?success=Company updated successfully`);
+  redirectResponse(res, `/admin/b2b/companies/${companyId}?success=Company updated successfully`);
 };
 
 export const approveB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.approve(companyId);
-  res.redirect(`/admin/b2b/companies/${companyId}?success=Company approved`);
+  redirectResponse(res, `/admin/b2b/companies/${companyId}?success=Company approved`);
 };
 
 export const suspendB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.suspend(companyId);
-  res.redirect(`/admin/b2b/companies/${companyId}?success=Company suspended`);
+  redirectResponse(res, `/admin/b2b/companies/${companyId}?success=Company suspended`);
 };
 
 export const reactivateB2BCompany = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { companyId } = req.params;
   await manageCompanyUseCase.reactivate(companyId);
-  res.redirect(`/admin/b2b/companies/${companyId}?success=Company reactivated`);
+  redirectResponse(res, `/admin/b2b/companies/${companyId}?success=Company reactivated`);
 };
 
 export const listB2BQuotes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

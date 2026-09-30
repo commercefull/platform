@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
@@ -383,15 +384,15 @@ export class ContentController {
 
     const contentTypes = await this.contentUC.findAllContentTypes(isActive, limit, offset);
 
-    res.status(200).json({
-      success: true,
-      data: contentTypes,
-      pagination: {
-        limit,
-        offset,
-        total: contentTypes.length, // This should ideally be the total count from DB
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: contentTypes,
+            pagination: {
+              limit,
+              offset,
+              total: contentTypes.length, // This should ideally be the total count from DB
+            },
+          });
   };
 
   /**
@@ -402,17 +403,17 @@ export class ContentController {
     const contentType = await this.contentUC.findContentTypeById(id);
 
     if (!contentType) {
-      res.status(404).json({
-        success: false,
-        message: `Content type with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content type with ID ${id} not found`,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: contentType,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: contentType,
+          });
   };
 
   /**
@@ -423,17 +424,17 @@ export class ContentController {
     const contentType = await this.contentUC.findContentTypeBySlug(slug);
 
     if (!contentType) {
-      res.status(404).json({
-        success: false,
-        message: `Content type with slug ${slug} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content type with slug ${slug} not found`,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: contentType,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: contentType,
+          });
   };
 
   /**
@@ -458,10 +459,10 @@ export class ContentController {
 
     // Basic validation
     if (!name || !slug) {
-      res.status(400).json({
-        success: false,
-        message: 'Name and slug are required',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                message: 'Name and slug are required',
+              });
       return;
     }
 
@@ -478,11 +479,11 @@ export class ContentController {
       isActive,
     });
 
-    res.status(201).json({
-      success: true,
-      data: contentType,
-      message: 'Content type created successfully',
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: contentType,
+            message: 'Content type created successfully',
+          });
   };
 
   /**
@@ -498,10 +499,10 @@ export class ContentController {
     // Check if content type exists
     const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
-      res.status(404).json({
-        success: false,
-        message: `Content type with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content type with ID ${id} not found`,
+              });
       return;
     }
 
@@ -515,11 +516,11 @@ export class ContentController {
       isActive,
     });
 
-    res.status(200).json({
-      success: true,
-      data: updatedContentType,
-      message: 'Content type updated successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedContentType,
+            message: 'Content type updated successfully',
+          });
   };
 
   /**
@@ -531,19 +532,19 @@ export class ContentController {
     // Check if content type exists
     const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
-      res.status(404).json({
-        success: false,
-        message: `Content type with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content type with ID ${id} not found`,
+              });
       return;
     }
 
     await this.contentUC.deleteContentType(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Content type deleted successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'Content type deleted successfully',
+          });
   };
 
   // Content Page Handlers
@@ -560,15 +561,15 @@ export class ContentController {
 
     const pages = await this.contentUC.findAllPages(status, contentTypeId, limit, offset, search);
 
-    res.status(200).json({
-      success: true,
-      data: pages,
-      pagination: {
-        limit,
-        offset,
-        total: pages.length, // This should ideally be the total count from DB
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: pages,
+            pagination: {
+              limit,
+              offset,
+              total: pages.length, // This should ideally be the total count from DB
+            },
+          });
   };
 
   /**
@@ -579,17 +580,17 @@ export class ContentController {
     const page = await this.contentUC.findPageById(id);
 
     if (!page) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Page with ID ${id} not found`,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: page,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: page,
+          });
   };
 
   /**
@@ -601,10 +602,10 @@ export class ContentController {
     // Fetch the basic page data
     const page = await this.contentUC.findPageById(id);
     if (!page) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Page with ID ${id} not found`,
+              });
       return;
     }
 
@@ -631,10 +632,10 @@ export class ContentController {
       contentType,
     };
 
-    res.status(200).json({
-      success: true,
-      data: fullPage,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: fullPage,
+          });
   };
 
   /**
@@ -656,10 +657,10 @@ export class ContentController {
 
     // Basic validation
     if (!title || !slug || !contentTypeId) {
-      res.status(400).json({
-        success: false,
-        message: 'Title, slug, and contentTypeId are required',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                message: 'Title, slug, and contentTypeId are required',
+              });
       return;
     }
 
@@ -667,10 +668,10 @@ export class ContentController {
     if (layout) {
       const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid layout template specified',
-        });
+        jsonResponse(res, 400, {
+                    success: false,
+                    message: 'Invalid layout template specified',
+                  });
         return;
       }
     }
@@ -688,11 +689,11 @@ export class ContentController {
       visibility,
     });
 
-    res.status(201).json({
-      success: true,
-      data: page,
-      message: 'Page created successfully',
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: page,
+            message: 'Page created successfully',
+          });
   };
 
   /**
@@ -705,10 +706,10 @@ export class ContentController {
     // Check if page exists
     const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Page with ID ${id} not found`,
+              });
       return;
     }
 
@@ -716,10 +717,10 @@ export class ContentController {
     if (layout) {
       const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
-        res.status(400).json({
-          success: false,
-          message: 'Invalid layout template specified',
-        });
+        jsonResponse(res, 400, {
+                    success: false,
+                    message: 'Invalid layout template specified',
+                  });
         return;
       }
     }
@@ -735,11 +736,11 @@ export class ContentController {
       templateId: layout, // Layout corresponds to templateId
     });
 
-    res.status(200).json({
-      success: true,
-      data: updatedPage,
-      message: 'Page updated successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedPage,
+            message: 'Page updated successfully',
+          });
   };
 
   /**
@@ -751,19 +752,19 @@ export class ContentController {
     // Check if page exists
     const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Page with ID ${id} not found`,
+              });
       return;
     }
 
     await this.contentUC.deletePage(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Page deleted successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'Page deleted successfully',
+          });
   };
 
   // Content Block Handlers
@@ -777,19 +778,19 @@ export class ContentController {
     // Check if page exists
     const page = await this.contentUC.findPageById(pageId);
     if (!page) {
-      res.status(404).json({
-        success: false,
-        message: `Page with ID ${pageId} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Page with ID ${pageId} not found`,
+              });
       return;
     }
 
     const blocks = await this.contentUC.findBlocksByPageId(pageId);
 
-    res.status(200).json({
-      success: true,
-      data: blocks,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: blocks,
+          });
   };
 
   /**
@@ -800,17 +801,17 @@ export class ContentController {
     const block = await this.contentUC.findBlockById(id);
 
     if (!block) {
-      res.status(404).json({
-        success: false,
-        message: `Content block with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content block with ID ${id} not found`,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: block,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: block,
+          });
   };
 
   /**
@@ -821,20 +822,20 @@ export class ContentController {
 
     // Basic validation
     if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
-      res.status(400).json({
-        success: false,
-        message: 'contentPageId, blockTypeId, sortOrder, and content are required',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                message: 'contentPageId, blockTypeId, sortOrder, and content are required',
+              });
       return;
     }
 
     // Validate block type exists
     const blockType = await this.contentUC.findBlockTypeById(blockTypeId);
     if (!blockType) {
-      res.status(404).json({
-        success: false,
-        message: `Block type with ID ${blockTypeId} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Block type with ID ${blockTypeId} not found`,
+              });
       return;
     }
 
@@ -850,10 +851,10 @@ export class ContentController {
         }
       }
       if (missingFields.length > 0) {
-        res.status(400).json({
-          success: false,
-          message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
-        });
+        jsonResponse(res, 400, {
+                    success: false,
+                    message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+                  });
         return;
       }
     }
@@ -867,11 +868,11 @@ export class ContentController {
       isVisible,
     });
 
-    res.status(201).json({
-      success: true,
-      data: block,
-      message: 'Content block created successfully',
-    });
+    jsonResponse(res, 201, {
+            success: true,
+            data: block,
+            message: 'Content block created successfully',
+          });
   };
 
   /**
@@ -884,10 +885,10 @@ export class ContentController {
     // Check if block exists
     const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
-      res.status(404).json({
-        success: false,
-        message: `Content block with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content block with ID ${id} not found`,
+              });
       return;
     }
 
@@ -899,10 +900,10 @@ export class ContentController {
     if (blockTypeId || content) {
       const blockType = await this.contentUC.findBlockTypeById(effectiveBlockTypeId);
       if (!blockType) {
-        res.status(404).json({
-          success: false,
-          message: `Block type with ID ${effectiveBlockTypeId} not found`,
-        });
+        jsonResponse(res, 404, {
+                    success: false,
+                    message: `Block type with ID ${effectiveBlockTypeId} not found`,
+                  });
         return;
       }
 
@@ -918,10 +919,10 @@ export class ContentController {
           }
         }
         if (missingFields.length > 0) {
-          res.status(400).json({
-            success: false,
-            message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
-          });
+          jsonResponse(res, 400, {
+                        success: false,
+                        message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+                      });
           return;
         }
       }
@@ -936,11 +937,11 @@ export class ContentController {
       isVisible,
     });
 
-    res.status(200).json({
-      success: true,
-      data: updatedBlock,
-      message: 'Content block updated successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedBlock,
+            message: 'Content block updated successfully',
+          });
   };
 
   /**
@@ -952,19 +953,19 @@ export class ContentController {
     // Check if block exists
     const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
-      res.status(404).json({
-        success: false,
-        message: `Content block with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Content block with ID ${id} not found`,
+              });
       return;
     }
 
     await this.contentUC.deleteBlock(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Content block deleted successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'Content block deleted successfully',
+          });
   };
 
   /**
@@ -976,31 +977,31 @@ export class ContentController {
 
     // Validate input
     if (!Array.isArray(blockOrders) || blockOrders.length === 0) {
-      res.status(400).json({
-        success: false,
-        message: 'Block orders must be a non-empty array',
-      });
+      jsonResponse(res, 400, {
+                success: false,
+                message: 'Block orders must be a non-empty array',
+              });
       return;
     }
 
     for (const order of blockOrders) {
       if (!order.id || order.order === undefined) {
-        res.status(400).json({
-          success: false,
-          message: 'Each block order must have id and order properties',
-        });
+        jsonResponse(res, 400, {
+                    success: false,
+                    message: 'Each block order must have id and order properties',
+                  });
         return;
       }
     }
 
     try {
       await reorderPageBlocksUseCase.execute(new ReorderPageBlocksCommand(pageId, blockOrders, req.user?.id));
-      res.status(200).json({
-        success: true,
-        message: 'Content blocks reordered successfully',
-      });
+      jsonResponse(res, 200, {
+                success: true,
+                message: 'Content blocks reordered successfully',
+              });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1014,15 +1015,15 @@ export class ContentController {
 
     const templates = await this.contentUC.findAllTemplates(isActive, limit, offset);
 
-    res.status(200).json({
-      success: true,
-      data: templates,
-      pagination: {
-        limit,
-        offset,
-        total: templates.length, // This should ideally be the total count from DB
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: templates,
+            pagination: {
+              limit,
+              offset,
+              total: templates.length, // This should ideally be the total count from DB
+            },
+          });
   };
 
   /**
@@ -1033,17 +1034,17 @@ export class ContentController {
     const template = await this.contentUC.findTemplateById(id);
 
     if (!template) {
-      res.status(404).json({
-        success: false,
-        message: `Template with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Template with ID ${id} not found`,
+              });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: template,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: template,
+          });
   };
 
   /**
@@ -1082,9 +1083,9 @@ export class ContentController {
           isActive,
         ),
       );
-      res.status(201).json({ success: true, data: result, message: 'Template created successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Template created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1098,10 +1099,10 @@ export class ContentController {
     // Check if template exists
     const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
-      res.status(404).json({
-        success: false,
-        message: `Template with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Template with ID ${id} not found`,
+              });
       return;
     }
 
@@ -1114,11 +1115,11 @@ export class ContentController {
       isActive,
     });
 
-    res.status(200).json({
-      success: true,
-      data: updatedTemplate,
-      message: 'Template updated successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            data: updatedTemplate,
+            message: 'Template updated successfully',
+          });
   };
 
   /**
@@ -1130,19 +1131,19 @@ export class ContentController {
     // Check if template exists
     const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
-      res.status(404).json({
-        success: false,
-        message: `Template with ID ${id} not found`,
-      });
+      jsonResponse(res, 404, {
+                success: false,
+                message: `Template with ID ${id} not found`,
+              });
       return;
     }
 
     await this.contentUC.deleteTemplate(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Template deleted successfully',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'Template deleted successfully',
+          });
   };
 
   /**
@@ -1157,9 +1158,9 @@ export class ContentController {
 
     try {
       const result = await duplicateTemplateUseCase.execute(new DuplicateTemplateCommand(id, name, slug));
-      res.status(201).json({ success: true, data: result, message: 'Template duplicated successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Template duplicated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1172,9 +1173,9 @@ export class ContentController {
     try {
       const { id } = req.params;
       const result = await publishPageUseCase.execute(new PublishPageCommand(id, req.user?.id));
-      res.status(200).json({ success: true, data: result, message: 'Page published successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Page published successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1185,9 +1186,9 @@ export class ContentController {
     try {
       const { id } = req.params;
       const result = await unpublishPageUseCase.execute(new UnpublishPageCommand(id));
-      res.status(200).json({ success: true, data: result, message: 'Page unpublished successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Page unpublished successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1202,9 +1203,9 @@ export class ContentController {
       const result = await schedulePageUseCase.execute(
         new SchedulePageCommand(id, scheduledAt ? new Date(scheduledAt) : (undefined as unknown as Date), req.user?.id),
       );
-      res.status(200).json({ success: true, data: result, message: 'Page scheduled successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Page scheduled successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1217,9 +1218,9 @@ export class ContentController {
 
     try {
       const result = await duplicatePageUseCase.execute(new DuplicatePageCommand(id, title, slug, req.user?.id));
-      res.status(201).json({ success: true, data: result, message: 'Page duplicated successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Page duplicated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1232,13 +1233,13 @@ export class ContentController {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
     const categories = await this.contentUC.findAllCategories(parentId, isActive, limit, offset);
-    res.status(200).json({ success: true, data: categories });
+    jsonResponse(res, 200, { success: true, data: categories });
   };
 
   getCategoryTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
     const categories = await this.contentUC.getCategoryTree(isActive);
-    res.status(200).json({ success: true, data: categories });
+    jsonResponse(res, 200, { success: true, data: categories });
   };
 
   createCategory = async (req: HttpRequest<Record<string, string>, unknown, CreateCategoryBody>, res: HttpResponse): Promise<void> => {
@@ -1248,11 +1249,9 @@ export class ContentController {
       const result = await createCategoryUseCase.execute(
         new CreateCategoryCommand(name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive),
       );
-      res
-        .status(201)
-        .json({ success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category created successfully' });
+      jsonResponse(res, 201, { success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1260,10 +1259,10 @@ export class ContentController {
     const { id } = req.params;
     const category = await this.contentUC.findCategoryById(id);
     if (!category) {
-      res.status(404).json({ success: false, message: `Category with ID ${id} not found` });
+      jsonResponse(res, 404, { success: false, message: `Category with ID ${id} not found` });
       return;
     }
-    res.status(200).json({ success: true, data: category });
+    jsonResponse(res, 200, { success: true, data: category });
   };
 
   updateCategory = async (req: HttpRequest<Record<string, string>, unknown, UpdateCategoryBody>, res: HttpResponse): Promise<void> => {
@@ -1274,9 +1273,9 @@ export class ContentController {
       const result = await updateCategoryUseCase.execute(
         new UpdateCategoryCommand(id, { name, slug, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive }),
       );
-      res.status(200).json({ success: true, data: result, message: 'Category updated successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Category updated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1284,9 +1283,9 @@ export class ContentController {
     const { id } = req.params;
     try {
       await deleteCategoryUseCase.execute(id);
-      res.status(200).json({ success: true, message: 'Category deleted successfully' });
+      jsonResponse(res, 200, { success: true, message: 'Category deleted successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1296,9 +1295,9 @@ export class ContentController {
 
     try {
       const result = await moveCategoryUseCase.execute(new MoveCategoryCommand(id, newParentId ?? null));
-      res.status(200).json({ success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category moved successfully' });
+      jsonResponse(res, 200, { success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category moved successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1307,7 +1306,7 @@ export class ContentController {
   getNavigations = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
     const navigations = await this.contentUC.findAllNavigations(isActive);
-    res.status(200).json({ success: true, data: navigations });
+    jsonResponse(res, 200, { success: true, data: navigations });
   };
 
   createNavigation = async (req: HttpRequest<Record<string, string>, unknown, CreateNavigationBody>, res: HttpResponse): Promise<void> => {
@@ -1315,11 +1314,9 @@ export class ContentController {
 
     try {
       const result = await createNavigationUseCase.execute(new CreateNavigationCommand(name, slug, description, location, isActive));
-      res
-        .status(201)
-        .json({ success: true, data: { ...result, contentNavigationId: result.id }, message: 'Navigation created successfully' });
+      jsonResponse(res, 201, { success: true, data: { ...result, contentNavigationId: result.id }, message: 'Navigation created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1327,22 +1324,22 @@ export class ContentController {
     const { id } = req.params;
     const navigation = await this.contentUC.findNavigationById(id);
     if (!navigation) {
-      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
+      jsonResponse(res, 404, { success: false, message: `Navigation with ID ${id} not found` });
       return;
     }
-    res.status(200).json({ success: true, data: navigation });
+    jsonResponse(res, 200, { success: true, data: navigation });
   };
 
   getNavigationWithItems = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     const navigation = await this.contentUC.findNavigationById(id);
     if (!navigation) {
-      res.status(404).json({ success: false, message: `Navigation with ID ${id} not found` });
+      jsonResponse(res, 404, { success: false, message: `Navigation with ID ${id} not found` });
       return;
     }
 
     const items = await this.contentUC.findAllNavigationItems(id);
-    res.status(200).json({ success: true, data: { navigation, items } });
+    jsonResponse(res, 200, { success: true, data: { navigation, items } });
   };
 
   updateNavigation = async (req: HttpRequest<Record<string, string>, unknown, UpdateNavigationBody>, res: HttpResponse): Promise<void> => {
@@ -1353,16 +1350,16 @@ export class ContentController {
       const result = await updateNavigationUseCase.execute(
         new UpdateNavigationCommand(id, { name, slug, description, location, isActive }),
       );
-      res.status(200).json({ success: true, data: result, message: 'Navigation updated successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Navigation updated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
   deleteNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.contentUC.deleteNavigation(id);
-    res.status(200).json({ success: true, message: 'Navigation deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Navigation deleted successfully' });
   };
 
   addNavigationItem = async (
@@ -1405,11 +1402,9 @@ export class ContentController {
           conditions,
         ),
       );
-      res
-        .status(201)
-        .json({ success: true, data: { ...result, contentNavigationItemId: result.id }, message: 'Navigation item added successfully' });
+      jsonResponse(res, 201, { success: true, data: { ...result, contentNavigationItemId: result.id }, message: 'Navigation item added successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1430,13 +1425,13 @@ export class ContentController {
       isActive,
       sortOrder,
     });
-    res.status(200).json({ success: true, data: updated, message: 'Navigation item updated successfully' });
+    jsonResponse(res, 200, { success: true, data: updated, message: 'Navigation item updated successfully' });
   };
 
   deleteNavigationItem = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.contentUC.deleteNavigationItem(id);
-    res.status(200).json({ success: true, message: 'Navigation item deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Navigation item deleted successfully' });
   };
 
   reorderNavigationItems = async (
@@ -1447,12 +1442,12 @@ export class ContentController {
     const { itemOrders } = req.body;
 
     if (!itemOrders || !Array.isArray(itemOrders)) {
-      res.status(400).json({ success: false, message: 'Item orders array is required' });
+      jsonResponse(res, 400, { success: false, message: 'Item orders array is required' });
       return;
     }
 
     await this.contentUC.reorderNavigationItems(navigationId, itemOrders);
-    res.status(200).json({ success: true, message: 'Navigation items reordered successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Navigation items reordered successfully' });
   };
 
   // Media Handlers
@@ -1464,7 +1459,7 @@ export class ContentController {
     const fileType = req.query.fileType as string | undefined;
 
     const media = await this.contentUC.findAllMedia(folderId, fileType, limit, offset);
-    res.status(200).json({ success: true, data: media });
+    jsonResponse(res, 200, { success: true, data: media });
   };
 
   uploadMedia = async (req: HttpRequest<Record<string, string>, unknown, UploadMediaBody>, res: HttpResponse): Promise<void> => {
@@ -1513,13 +1508,13 @@ export class ContentController {
           req.user?.id,
         ),
       );
-      res.status(201).json({
-        success: true,
-        data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
-        message: 'Media uploaded successfully',
-      });
+      jsonResponse(res, 201, {
+                success: true,
+                data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
+                message: 'Media uploaded successfully',
+              });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1527,10 +1522,10 @@ export class ContentController {
     const { id } = req.params;
     const media = await this.contentUC.findMediaById(id);
     if (!media) {
-      res.status(404).json({ success: false, message: `Media with ID ${id} not found` });
+      jsonResponse(res, 404, { success: false, message: `Media with ID ${id} not found` });
       return;
     }
-    res.status(200).json({ success: true, data: media });
+    jsonResponse(res, 200, { success: true, data: media });
   };
 
   updateMedia = async (req: HttpRequest<Record<string, string>, unknown, UpdateMediaBody>, res: HttpResponse): Promise<void> => {
@@ -1546,16 +1541,16 @@ export class ContentController {
       tags,
       sortOrder,
     });
-    res.status(200).json({ success: true, data: updated, message: 'Media updated successfully' });
+    jsonResponse(res, 200, { success: true, data: updated, message: 'Media updated successfully' });
   };
 
   deleteMedia = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     try {
       await deleteMediaUseCase.execute(id);
-      res.status(200).json({ success: true, message: 'Media deleted successfully' });
+      jsonResponse(res, 200, { success: true, message: 'Media deleted successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1566,17 +1561,15 @@ export class ContentController {
     const { mediaIds, folderId } = req.body;
 
     if (!mediaIds || !Array.isArray(mediaIds)) {
-      res.status(400).json({ success: false, message: 'Media IDs array is required' });
+      jsonResponse(res, 400, { success: false, message: 'Media IDs array is required' });
       return;
     }
 
     try {
       const result = await organizeMediaFolderUseCase.moveMediaToFolder(new MoveMediaToFolderCommand(mediaIds, folderId ?? null));
-      res
-        .status(200)
-        .json({ success: true, data: result, message: `${result.movedCount} media items moved successfully` });
+      jsonResponse(res, 200, { success: true, data: result, message: `${result.movedCount} media items moved successfully` });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1585,12 +1578,12 @@ export class ContentController {
   getMediaFolders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const parentId = req.query.parentId as string | undefined;
     const folders = await this.contentUC.findAllFolders(parentId);
-    res.status(200).json({ success: true, data: folders });
+    jsonResponse(res, 200, { success: true, data: folders });
   };
 
   getMediaFolderTree = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const folders = await this.contentUC.findAllFolders();
-    res.status(200).json({ success: true, data: folders });
+    jsonResponse(res, 200, { success: true, data: folders });
   };
 
   createMediaFolder = async (
@@ -1601,11 +1594,9 @@ export class ContentController {
 
     try {
       const result = await organizeMediaFolderUseCase.createFolder(new CreateFolderCommand(name, parentId, req.user?.id));
-      res
-        .status(201)
-        .json({ success: true, data: { ...result, contentMediaFolderId: result.id }, message: 'Folder created successfully' });
+      jsonResponse(res, 201, { success: true, data: { ...result, contentMediaFolderId: result.id }, message: 'Folder created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1617,13 +1608,13 @@ export class ContentController {
     const { name, parentId, sortOrder } = req.body;
 
     const updated = await this.contentUC.updateFolder(id, { name, parentId, sortOrder });
-    res.status(200).json({ success: true, data: updated, message: 'Folder updated successfully' });
+    jsonResponse(res, 200, { success: true, data: updated, message: 'Folder updated successfully' });
   };
 
   deleteMediaFolder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { id } = req.params;
     await this.contentUC.deleteFolder(id);
-    res.status(200).json({ success: true, message: 'Folder deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Folder deleted successfully' });
   };
 
   // Redirect Handlers
@@ -1634,7 +1625,7 @@ export class ContentController {
     const isActive = req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined;
 
     const redirects = await this.contentUC.findAllRedirects(isActive, limit, offset);
-    res.status(200).json({ success: true, data: redirects });
+    jsonResponse(res, 200, { success: true, data: redirects });
   };
 
   createRedirect = async (req: HttpRequest<Record<string, string>, unknown, CreateRedirectBody>, res: HttpResponse): Promise<void> => {
@@ -1652,11 +1643,9 @@ export class ContentController {
           req.user?.id,
         ),
       );
-      res
-        .status(201)
-        .json({ success: true, data: { ...result, contentRedirectId: result.id }, message: 'Redirect created successfully' });
+      jsonResponse(res, 201, { success: true, data: { ...result, contentRedirectId: result.id }, message: 'Redirect created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1664,10 +1653,10 @@ export class ContentController {
     const { id } = req.params;
     const redirect = await this.contentUC.findRedirectById(id);
     if (!redirect) {
-      res.status(404).json({ success: false, message: `Redirect with ID ${id} not found` });
+      jsonResponse(res, 404, { success: false, message: `Redirect with ID ${id} not found` });
       return;
     }
-    res.status(200).json({ success: true, data: redirect });
+    jsonResponse(res, 200, { success: true, data: redirect });
   };
 
   updateRedirect = async (req: HttpRequest<Record<string, string>, unknown, UpdateRedirectBody>, res: HttpResponse): Promise<void> => {
@@ -1678,9 +1667,9 @@ export class ContentController {
       const result = await updateRedirectUseCase.execute(
         new UpdateRedirectCommand(id, { sourceUrl, targetUrl, statusCode, isRegex, isActive, notes }),
       );
-      res.status(200).json({ success: true, data: result, message: 'Redirect updated successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Redirect updated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1688,9 +1677,9 @@ export class ContentController {
     const { id } = req.params;
     try {
       await deleteRedirectUseCase.execute(id);
-      res.status(200).json({ success: true, message: 'Redirect deleted successfully' });
+      jsonResponse(res, 200, { success: true, message: 'Redirect deleted successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1703,12 +1692,12 @@ export class ContentController {
 
     const page = await this.contentUC.findPageById(pageId);
     if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
     const versions = await this.contentUC.findVersionsByPageId(pageId, limit, offset);
-    res.status(200).json({ success: true, data: versions });
+    jsonResponse(res, 200, { success: true, data: versions });
   };
 
   createPageVersion = async (
@@ -1720,9 +1709,9 @@ export class ContentController {
 
     try {
       const version = await createPageVersionUseCase.execute(new CreatePageVersionCommand(pageId, comment));
-      res.status(201).json({ success: true, data: version, message: 'Page version created successfully' });
+      jsonResponse(res, 201, { success: true, data: version, message: 'Page version created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1731,9 +1720,9 @@ export class ContentController {
 
     try {
       const { restoredPage, version } = await restorePageVersionUseCase.execute(new RestorePageVersionCommand(pageId, versionId));
-      res.status(200).json({ success: true, data: restoredPage, message: `Page restored to version ${version}` });
+      jsonResponse(res, 200, { success: true, data: restoredPage, message: `Page restored to version ${version}` });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1742,12 +1731,12 @@ export class ContentController {
 
     const version = await this.contentUC.findVersionById(versionId);
     if (!version) {
-      res.status(404).json({ success: false, message: `Version with ID ${versionId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Version with ID ${versionId} not found` });
       return;
     }
 
     await this.contentUC.deleteVersion(versionId);
-    res.status(200).json({ success: true, message: 'Page version deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Page version deleted successfully' });
   };
 
   // Page Translation Handlers
@@ -1757,12 +1746,12 @@ export class ContentController {
 
     const page = await this.contentUC.findPageById(pageId);
     if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
     const translations = await this.contentUC.findTranslationsByPageId(pageId);
-    res.status(200).json({ success: true, data: translations });
+    jsonResponse(res, 200, { success: true, data: translations });
   };
 
   getPageTranslationByLocale = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -1770,11 +1759,11 @@ export class ContentController {
 
     const translation = await this.contentUC.findTranslationByPageAndLocale(pageId, localeId);
     if (!translation) {
-      res.status(404).json({ success: false, message: `Translation for locale ${localeId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Translation for locale ${localeId} not found` });
       return;
     }
 
-    res.status(200).json({ success: true, data: translation });
+    jsonResponse(res, 200, { success: true, data: translation });
   };
 
   createPageTranslation = async (
@@ -1818,9 +1807,9 @@ export class ContentController {
           isPublished,
         }),
       );
-      res.status(201).json({ success: true, data: result, message: 'Page translation created successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Page translation created successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1867,9 +1856,9 @@ export class ContentController {
           publishedAt: publishedAt ? new Date(publishedAt) : undefined,
         }),
       );
-      res.status(200).json({ success: true, data: result, message: 'Page translation updated successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Page translation updated successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1877,9 +1866,9 @@ export class ContentController {
     const { translationId } = req.params;
     try {
       await deletePageTranslationUseCase.execute(translationId);
-      res.status(200).json({ success: true, message: 'Page translation deleted successfully' });
+      jsonResponse(res, 200, { success: true, message: 'Page translation deleted successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1890,12 +1879,12 @@ export class ContentController {
 
     const page = await this.contentUC.findPageById(pageId);
     if (!page) {
-      res.status(404).json({ success: false, message: `Page with ID ${pageId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Page with ID ${pageId} not found` });
       return;
     }
 
     const categorizations = await this.contentUC.findCategorizationsByPageId(pageId);
-    res.status(200).json({ success: true, data: categorizations });
+    jsonResponse(res, 200, { success: true, data: categorizations });
   };
 
   assignPageToCategory = async (
@@ -1907,9 +1896,9 @@ export class ContentController {
 
     try {
       const result = await assignPageToCategoryUseCase.execute(new AssignPageToCategoryCommand(pageId, categoryId, isPrimary));
-      res.status(201).json({ success: true, data: result, message: 'Page assigned to category successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Page assigned to category successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1917,9 +1906,9 @@ export class ContentController {
     const { pageId, categoryId } = req.params;
     try {
       await removePageFromCategoryUseCase.execute(new RemovePageFromCategoryCommand(pageId, categoryId));
-      res.status(200).json({ success: true, message: 'Page removed from category successfully' });
+      jsonResponse(res, 200, { success: true, message: 'Page removed from category successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1932,9 +1921,9 @@ export class ContentController {
 
     try {
       const result = await setPrimaryCategoryUseCase.execute(new SetPrimaryCategoryCommand(pageId, categorizationId));
-      res.status(200).json({ success: true, data: result, message: 'Primary category set successfully' });
+      jsonResponse(res, 200, { success: true, data: result, message: 'Primary category set successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1954,7 +1943,7 @@ export class ContentController {
     );
 
     const validPages = pages.filter(p => p !== null);
-    res.status(200).json({ success: true, data: validPages });
+    jsonResponse(res, 200, { success: true, data: validPages });
   };
 
   // Media Usage Handlers
@@ -1964,19 +1953,19 @@ export class ContentController {
 
     const media = await this.contentUC.findMediaById(mediaId);
     if (!media) {
-      res.status(404).json({ success: false, message: `Media with ID ${mediaId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Media with ID ${mediaId} not found` });
       return;
     }
 
     const usages = await this.contentUC.findUsageByMediaId(mediaId);
-    res.status(200).json({ success: true, data: usages });
+    jsonResponse(res, 200, { success: true, data: usages });
   };
 
   getMediaUsageByEntity = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { entityType, entityId } = req.params;
 
     const usages = await this.contentUC.findUsageByEntity(entityType, entityId);
-    res.status(200).json({ success: true, data: usages });
+    jsonResponse(res, 200, { success: true, data: usages });
   };
 
   trackMediaUsage = async (req: HttpRequest<Record<string, string>, unknown, TrackMediaUsageBody>, res: HttpResponse): Promise<void> => {
@@ -1986,9 +1975,9 @@ export class ContentController {
       const result = await trackMediaUsageUseCase.execute(
         new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder),
       );
-      res.status(201).json({ success: true, data: result, message: 'Media usage tracked successfully' });
+      jsonResponse(res, 201, { success: true, data: result, message: 'Media usage tracked successfully' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   };
 
@@ -1997,17 +1986,17 @@ export class ContentController {
 
     const deleted = await this.contentUC.deleteMediaUsage(usageId);
     if (!deleted) {
-      res.status(404).json({ success: false, message: `Media usage with ID ${usageId} not found` });
+      jsonResponse(res, 404, { success: false, message: `Media usage with ID ${usageId} not found` });
       return;
     }
 
-    res.status(200).json({ success: true, message: 'Media usage untracked successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Media usage untracked successfully' });
   };
 
   getMediaUsageCount = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
     const { mediaId } = req.params;
 
     const count = await this.contentUC.getMediaUsageCount(mediaId);
-    res.status(200).json({ success: true, data: { mediaId, usageCount: count } });
+    jsonResponse(res, 200, { success: true, data: { mediaId, usageCount: count } });
   };
 }

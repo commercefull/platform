@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import { generateAccessToken, verifyAccessToken } from '../../utils/jwtHelpers';
@@ -62,20 +63,20 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
 
   // Validate required fields
   if (!email || !password) {
-    res.status(400).json({
-      success: false,
-      message: 'Email and password are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email and password are required',
+          });
     return;
   }
 
   // Authenticate customer
   const subject = await credentialPort.authenticate(email, password);
   if (!subject) {
-    res.status(401).json({
-      success: false,
-      message: 'Invalid email or password',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            message: 'Invalid email or password',
+          });
     return;
   }
 
@@ -93,14 +94,14 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
   // Generate access token
   const accessToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
-  res.json({
-    success: true,
-    accessToken,
-    customer: {
-      id: subject.id,
-      email: subject.email,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        accessToken,
+        customer: {
+          id: subject.id,
+          email: subject.email,
+        },
+      });
 };
 
 /**
@@ -114,29 +115,29 @@ export const registerCustomer = async (
 
   // Validate required fields
   if (!email || !password || !firstName || !lastName) {
-    res.status(400).json({
-      success: false,
-      message: 'Email, password, first name, and last name are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email, password, first name, and last name are required',
+          });
     return;
   }
 
   // Validate password strength
   if (password.length < 8) {
-    res.status(400).json({
-      success: false,
-      message: 'Password must be at least 8 characters long',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Password must be at least 8 characters long',
+          });
     return;
   }
 
   // Check for existing customer
   const existing = await credentialPort.findByEmail(email);
   if (existing) {
-    res.status(409).json({
-      success: false,
-      message: 'An account with this email already exists',
-    });
+    jsonResponse(res, 409, {
+            success: false,
+            message: 'An account with this email already exists',
+          });
     return;
   }
 
@@ -157,16 +158,16 @@ export const registerCustomer = async (
   // Generate access token for immediate login
   const accessToken = generateAccessToken(newSubject.id, newSubject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
-  res.status(201).json({
-    success: true,
-    accessToken,
-    customer: {
-      id: newSubject.id,
-      email: newSubject.email,
-      firstName: newSubject.firstName,
-      lastName: newSubject.lastName,
-    },
-  });
+  jsonResponse(res, 201, {
+        success: true,
+        accessToken,
+        customer: {
+          id: newSubject.id,
+          email: newSubject.email,
+          firstName: newSubject.firstName,
+          lastName: newSubject.lastName,
+        },
+      });
 };
 
 /**
@@ -180,19 +181,19 @@ export const issueTokenPair = async (req: HttpRequest<Record<string, string>, un
       new IssueTokenPairCommand(email, password, req.headers['user-agent'] || null, req.ip || null),
     );
 
-    res.json({
-      success: true,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-      customer: {
-        id: result.subject.id,
-        email: result.subject.email,
-      },
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            tokenType: 'Bearer',
+            expiresIn: result.expiresIn,
+            customer: {
+              id: result.subject.id,
+              email: result.subject.email,
+            },
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -207,14 +208,14 @@ export const renewAccessToken = async (
     const { refreshToken } = req.body;
     const result = await renewCustomerAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
-    res.json({
-      success: true,
-      accessToken: result.accessToken,
-      tokenType: 'Bearer',
-      expiresIn: result.expiresIn,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            accessToken: result.accessToken,
+            tokenType: 'Bearer',
+            expiresIn: result.expiresIn,
+          });
   } catch (error) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -228,10 +229,10 @@ export const checkTokenValidity = async (
   const { token } = req.body;
 
   if (!token) {
-    res.status(400).json({
-      success: false,
-      message: 'Token is required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Token is required',
+          });
     return;
   }
 
@@ -239,23 +240,23 @@ export const checkTokenValidity = async (
   const decodedPayload = verifyAccessToken(token, CUSTOMER_JWT_SECRET);
 
   if (!decodedPayload || decodedPayload.role !== 'customer') {
-    res.status(401).json({
-      success: false,
-      valid: false,
-      message: 'Token is invalid or has expired',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            valid: false,
+            message: 'Token is invalid or has expired',
+          });
     return;
   }
 
-  res.json({
-    success: true,
-    valid: true,
-    customer: {
-      id: decodedPayload.id,
-      email: decodedPayload.email,
-      role: decodedPayload.role,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        valid: true,
+        customer: {
+          id: decodedPayload.id,
+          email: decodedPayload.email,
+          role: decodedPayload.role,
+        },
+      });
 };
 
 export const requestEmailVerification = async (
@@ -264,7 +265,7 @@ export const requestEmailVerification = async (
 ): Promise<void> => {
   const { email } = req.body;
   if (!email) {
-    res.status(400).json({ success: false, message: 'Email is required' });
+    jsonResponse(res, 400, { success: false, message: 'Email is required' });
     return;
   }
 
@@ -280,27 +281,27 @@ export const requestEmailVerification = async (
     });
   }
 
-  res.json({
-    success: true,
-    message: 'If an unverified account exists with that email, a verification link has been sent',
-    ...(process.env.NODE_ENV !== 'production' && token ? { data: { token } } : {}),
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'If an unverified account exists with that email, a verification link has been sent',
+        ...(process.env.NODE_ENV !== 'production' && token ? { data: { token } } : {}),
+      });
 };
 
 export const verifyEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const token = String(req.query.token || '');
   if (!token) {
-    res.status(400).json({ success: false, message: 'Verification token is required' });
+    jsonResponse(res, 400, { success: false, message: 'Verification token is required' });
     return;
   }
 
   const customerId = credentialPort.verifyEmailVerificationToken ? await credentialPort.verifyEmailVerificationToken(token) : null;
   if (!customerId) {
-    res.status(400).json({ success: false, error: 'Invalid verification token' });
+    jsonResponse(res, 400, { success: false, error: 'Invalid verification token' });
     return;
   }
 
-  res.json({ success: true, message: 'Email verified successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Email verified successfully' });
 };
 
 /**
@@ -313,10 +314,10 @@ export const requestPasswordReset = async (
   const { email } = req.body;
 
   if (!email) {
-    res.status(400).json({
-      success: false,
-      message: 'Email is required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Email is required',
+          });
     return;
   }
 
@@ -324,10 +325,10 @@ export const requestPasswordReset = async (
 
   // Always return success to prevent email enumeration attacks
   if (!subject?.id) {
-    res.json({
-      success: true,
-      message: 'If an account exists with that email, a password reset link has been sent',
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            message: 'If an account exists with that email, a password reset link has been sent',
+          });
     return;
   }
 
@@ -342,12 +343,12 @@ export const requestPasswordReset = async (
     data: { resetToken, email },
   });
 
-  res.json({
-    success: true,
-    message: 'Password reset instructions have been sent to your email',
-    // REMOVE IN PRODUCTION - only for development
-    resetToken,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Password reset instructions have been sent to your email',
+        // REMOVE IN PRODUCTION - only for development
+        resetToken,
+      });
 };
 
 /**
@@ -361,30 +362,30 @@ export const resetPassword = async (
   const finalPassword = newPassword || password;
 
   if (!token || !finalPassword) {
-    res.status(400).json({
-      success: false,
-      message: 'Reset token and new password are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Reset token and new password are required',
+          });
     return;
   }
 
   // Verify reset token and get customer ID
   const customerId = await credentialPort.verifyPasswordResetToken(token);
   if (!customerId) {
-    res.status(400).json({
-      success: false,
-      message: 'Password reset token is invalid or has expired',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'Password reset token is invalid or has expired',
+          });
     return;
   }
 
   // Update customer password
   await credentialPort.changePassword(customerId, finalPassword);
 
-  res.json({
-    success: true,
-    message: 'Your password has been successfully reset',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Your password has been successfully reset',
+      });
 };
 
 /**
@@ -400,19 +401,19 @@ export const logoutCustomer = async (req: HttpRequest<Record<string, string>, un
   const { refreshToken } = req.body;
 
   if (!customerId || !accessToken) {
-    res.status(401).json({
-      success: false,
-      message: 'Not authenticated',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            message: 'Not authenticated',
+          });
     return;
   }
 
   await logoutSessionUseCase.execute(new LogoutSessionCommand(customerId, 'customer', accessToken, refreshToken));
 
-  res.json({
-    success: true,
-    message: 'Logged out successfully',
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Logged out successfully',
+      });
 };
 
 /**
@@ -422,18 +423,18 @@ export const get2FAStatus = async (req: HttpRequest<Record<string, string>, unkn
   const customerId = req.user?.customerId || req.user?.id;
 
   if (!customerId) {
-    res.status(401).json({
-      success: false,
-      message: 'Not authenticated',
-    });
+    jsonResponse(res, 401, {
+            success: false,
+            message: 'Not authenticated',
+          });
     return;
   }
 
-  res.json({
-    success: true,
-    data: {
-      enabled: false,
-      method: null,
-    },
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        data: {
+          enabled: false,
+          method: null,
+        },
+      });
 };

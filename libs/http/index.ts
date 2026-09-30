@@ -2,6 +2,7 @@ import './expressAugmentation';
 
 export type {
   HttpApplication,
+  HttpCookieOptions,
   HttpHandler,
   HttpNext,
   HttpRequest,

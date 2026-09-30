@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Organization Controller for Admin Hub
  * Handles Organization management for multi-organization platforms
@@ -25,7 +26,7 @@ export const createOrganizationForm = async (req: HttpRequest, res: HttpResponse
 
 export const createOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/operations/organizations?success=Organization created successfully');
+    redirectResponse(res, '/admin/operations/organizations?success=Organization created successfully');
   } catch (error: unknown) {
     logger.warn('Error creating organization:', error);
     adminRespond(req, res, 'operations/organizations/create', {
@@ -54,7 +55,7 @@ export const editOrganizationForm = async (req: HttpRequest, res: HttpResponse):
 export const updateOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { organizationId } = req.params;
-    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
+    redirectResponse(res, `/admin/operations/organizations/${organizationId}?success=Organization updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating organization:', error);
     adminRespond(req, res, 'operations/organizations/edit', {
@@ -67,17 +68,17 @@ export const updateOrganization = async (req: HttpRequest, res: HttpResponse): P
 };
 
 export const deleteOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Organization deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Organization deleted successfully' });
 };
 
 export const approveOrganization = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { organizationId } = req.params;
   try {
     await approveOrganizationUseCase.execute(organizationId);
-    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
+    redirectResponse(res, `/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error approving organization:', error);
-    res.redirect(`/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve organization')}`);
+    redirectResponse(res, `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve organization')}`);
   }
 };
 
@@ -85,10 +86,10 @@ export const suspendOrganization = async (req: HttpRequest, res: HttpResponse): 
   const { organizationId } = req.params;
   try {
     await suspendOrganizationUseCase.execute(organizationId);
-    res.redirect(`/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
+    redirectResponse(res, `/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
   } catch (error: unknown) {
     logger.warn('Error suspending organization:', error);
-    res.redirect(`/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to suspend organization')}`);
+    redirectResponse(res, `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to suspend organization')}`);
   }
 };
 

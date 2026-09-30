@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Basket/Cart Controller
  * Handles shopping cart operations for customers
@@ -64,7 +65,7 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
     const product = await getProductUseCase.execute(productCmd);
 
     if (!product || product.status !== 'active') {
-      return res.redirect('/?error=' + encodeURIComponent('Product not found or unavailable'));
+      return redirectResponse(res, '/?error=' + encodeURIComponent('Product not found or unavailable'));
     }
 
     const addCmd = new AddItemCommand(
@@ -83,11 +84,11 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
 
     // Redirect back to product page or cart with success message
     const redirectTo = (req.body as HttpRequestBody).redirectTo || '/basket';
-    res.redirect(redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
+    redirectResponse(res, redirectTo + '?success=' + encodeURIComponent('Item added to cart'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
-    res.redirect('/?error=' + encodeURIComponent((error as Error).message || 'Failed to add item to cart'));
+    redirectResponse(res, '/?error=' + encodeURIComponent((error as Error).message || 'Failed to add item to cart'));
   }
 };
 
@@ -110,9 +111,9 @@ export const updateBasketItem = async (req: HttpRequest, res: HttpResponse): Pro
   await updateItemQuantityUseCase.execute(updCmd);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } else {
-    res.redirect('/basket?success=' + encodeURIComponent('Cart updated'));
+    redirectResponse(res, '/basket?success=' + encodeURIComponent('Cart updated'));
   }
 };
 
@@ -132,9 +133,9 @@ export const removeFromBasket = async (req: HttpRequest, res: HttpResponse): Pro
   await removeItemUseCase.execute(remCmd);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } else {
-    res.redirect('/basket?success=' + encodeURIComponent('Item removed from cart'));
+    redirectResponse(res, '/basket?success=' + encodeURIComponent('Item removed from cart'));
   }
 };
 
@@ -153,9 +154,9 @@ export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<
   await clearBasketUseCase.execute(clrCmd);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } else {
-    res.redirect('/basket?success=' + encodeURIComponent('Cart cleared'));
+    redirectResponse(res, '/basket?success=' + encodeURIComponent('Cart cleared'));
   }
 };
 

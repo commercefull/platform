@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Shipping Surcharge Controller
  * Handles shipping surcharge management for the Admin Hub
@@ -78,7 +79,7 @@ export const createShippingSurcharge = async (req: HttpRequest, res: HttpRespons
       isActive: isActive === 'true' || isActive === true,
     });
 
-    res.redirect(`/admin/shipping/surcharges/${surcharge.shippingSurchargeId}?success=Surcharge created successfully`);
+    redirectResponse(res, `/admin/shipping/surcharges/${surcharge.shippingSurchargeId}?success=Surcharge created successfully`);
   } catch (error: unknown) {
     logger.warn('Error creating shipping surcharge:', error);
     adminRespond(req, res, 'shipping/surcharges/create', {
@@ -164,7 +165,7 @@ export const updateShippingSurcharge = async (req: HttpRequest, res: HttpRespons
       return;
     }
 
-    res.redirect(`/admin/shipping/surcharges/${surchargeId}?success=Surcharge updated successfully`);
+    redirectResponse(res, `/admin/shipping/surcharges/${surchargeId}?success=Surcharge updated successfully`);
   } catch (error: unknown) {
     logger.warn('Error updating shipping surcharge:', error);
     const { surchargeId } = req.params;
@@ -186,9 +187,9 @@ export const deleteShippingSurcharge = async (req: HttpRequest, res: HttpRespons
   const deleted = await manageShippingConfigurationUseCase.deleteSurcharge(surchargeId);
 
   if (!deleted) {
-    res.json({ success: false, message: 'Surcharge not found' });
+    jsonResponse(res, 200, { success: false, message: 'Surcharge not found' });
     return;
   }
 
-  res.json({ success: true, message: 'Surcharge deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Surcharge deleted successfully' });
 };

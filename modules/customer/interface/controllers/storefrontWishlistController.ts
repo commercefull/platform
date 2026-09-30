@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Wishlist Controller
  * Manages customer wishlists
@@ -19,7 +20,7 @@ interface CustomerUser {
 export const viewWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.redirect('/signin');
+    return redirectResponse(res, '/signin');
   }
 
   const items = await manageWishlistUseCase.findByCustomer(user.customerId);
@@ -36,7 +37,7 @@ export const viewWishlist = async (req: HttpRequest, res: HttpResponse) => {
 export const addToWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.status(401).json({ error: 'Please sign in' });
+    return jsonResponse(res, 401, { error: 'Please sign in' });
   }
 
   const { productId } = req.params;
@@ -48,9 +49,9 @@ export const addToWishlist = async (req: HttpRequest, res: HttpResponse) => {
   }
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.json({ success: true });
+    return jsonResponse(res, 200, { success: true });
   }
-  return res.redirect('/wishlist');
+  return redirectResponse(res, '/wishlist');
 };
 
 /**
@@ -59,7 +60,7 @@ export const addToWishlist = async (req: HttpRequest, res: HttpResponse) => {
 export const removeFromWishlist = async (req: HttpRequest, res: HttpResponse) => {
   const user = req.user as CustomerUser;
   if (!user?.customerId) {
-    return res.status(401).json({ error: 'Please sign in' });
+    return jsonResponse(res, 401, { error: 'Please sign in' });
   }
 
   const { productId } = req.params;
@@ -67,7 +68,7 @@ export const removeFromWishlist = async (req: HttpRequest, res: HttpResponse) =>
   await manageWishlistUseCase.remove(user.customerId, productId);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    return res.json({ success: true });
+    return jsonResponse(res, 200, { success: true });
   }
-  return res.redirect('/wishlist');
+  return redirectResponse(res, '/wishlist');
 };

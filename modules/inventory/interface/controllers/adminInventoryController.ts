@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Inventory Controller for Admin Hub
  * Manages stock levels, adjustments, and inventory locations
@@ -79,14 +80,14 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
   const userId = req.user?.userId;
 
   if (!inventoryLevelId || quantity === undefined) {
-    res.status(400).json({ success: false, message: 'Missing required fields' });
+    jsonResponse(res, 400, { success: false, message: 'Missing required fields' });
     return;
   }
 
   const inventoryLevel = await manageAdminInventoryUseCase.findInventoryLevelById(inventoryLevelId);
 
   if (!inventoryLevel) {
-    res.status(404).json({ success: false, message: 'Inventory level not found' });
+    jsonResponse(res, 404, { success: false, message: 'Inventory level not found' });
     return;
   }
 
@@ -105,7 +106,7 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
       newQuantity = adjustmentQty;
       break;
     default:
-      res.status(400).json({ success: false, message: 'Invalid adjustment type' });
+      jsonResponse(res, 400, { success: false, message: 'Invalid adjustment type' });
       return;
   }
 
@@ -122,7 +123,7 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
     userId || '',
   );
 
-  res.json({ success: true, message: 'Stock adjusted successfully', newQuantity });
+  jsonResponse(res, 200, { success: true, message: 'Stock adjusted successfully', newQuantity });
 };
 
 // ============================================================================
@@ -251,7 +252,7 @@ export const createDispatch = async (req: HttpRequest, res: HttpResponse): Promi
       notes: body.notes || undefined,
       requestedBy: req.user?.userId || 'admin',
     });
-    res.redirect(`/admin/dispatches/${dispatch.dispatchId}?success=Dispatch created successfully`);
+    redirectResponse(res, `/admin/dispatches/${dispatch.dispatchId}?success=Dispatch created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
     const stores = await findActiveStoresUseCase.execute().catch(() => []);
@@ -276,24 +277,20 @@ export const viewDispatch = async (req: HttpRequest, res: HttpResponse): Promise
 export const approveDispatch = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await approveStoreDispatchUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`,
-    );
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`);
   }
 };
 
 export const markDispatched = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     await dispatchFromStoreUseCase.execute(req.params.dispatchId, req.user?.userId || 'admin');
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`,
-    );
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`);
   }
 };
 
@@ -315,12 +312,10 @@ export const receiveDispatch = async (req: HttpRequest, res: HttpResponse): Prom
         receivedQuantity: item.dispatchedQuantity || item.requestedQuantity,
       })),
     });
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`,
-    );
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`);
   }
 };
 
@@ -328,11 +323,9 @@ export const cancelDispatch = async (req: HttpRequest, res: HttpResponse): Promi
   try {
     const body = req.body as { reason?: string };
     await cancelStoreDispatchUseCase.execute(req.params.dispatchId, body.reason || undefined);
-    res.redirect(`/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(
-      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`,
-    );
+    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`);
   }
 };

@@ -1,3 +1,4 @@
+import { redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Membership Controller
  * Customer-facing membership pages
@@ -30,7 +31,7 @@ export const viewPlan = async (req: HttpRequest, res: HttpResponse) => {
 
   if (!plan) {
     req.flash?.('error', 'Membership plan not found');
-    return res.redirect('/membership');
+    return redirectResponse(res, '/membership');
   }
 
   const benefits = await manageStorefrontMembershipUseCase.findBenefitsByPlanId(planId);
@@ -47,7 +48,7 @@ export const viewPlan = async (req: HttpRequest, res: HttpResponse) => {
  */
 export const myMembership = async (req: HttpRequest, res: HttpResponse) => {
   const customerId = req.user?.customerId;
-  if (!customerId) return res.redirect('/signin');
+  if (!customerId) return redirectResponse(res, '/signin');
 
   const membership = await manageStorefrontMembershipUseCase.findActiveMembershipWithPlan(customerId);
 
@@ -68,7 +69,7 @@ export const myMembership = async (req: HttpRequest, res: HttpResponse) => {
 export const joinPlan = async (req: HttpRequest, res: HttpResponse) => {
   try {
     const customerId = req.user?.customerId;
-    if (!customerId) return res.redirect('/signin');
+    if (!customerId) return redirectResponse(res, '/signin');
 
     const { planId } = req.params;
 
@@ -76,23 +77,23 @@ export const joinPlan = async (req: HttpRequest, res: HttpResponse) => {
 
     if (!plan) {
       req.flash?.('error', 'Membership plan not found');
-      return res.redirect('/membership');
+      return redirectResponse(res, '/membership');
     }
 
     const existing = await manageStorefrontMembershipUseCase.findActiveMembershipByCustomerId(customerId);
 
     if (existing) {
       req.flash?.('error', 'You already have an active membership. Please cancel it first to switch plans.');
-      return res.redirect('/membership/my');
+      return redirectResponse(res, '/membership/my');
     }
 
     await manageStorefrontMembershipUseCase.createMembership(customerId, planId);
 
     req.flash?.('success', `Welcome! You've joined the ${(plan as Record<string, unknown>).name} plan.`);
-    res.redirect('/membership/my');
+    redirectResponse(res, '/membership/my');
   } catch (error) {
     logger.warn('Error:', error);
     req.flash?.('error', 'Failed to join membership plan');
-    res.redirect('/membership');
+    redirectResponse(res, '/membership');
   }
 };

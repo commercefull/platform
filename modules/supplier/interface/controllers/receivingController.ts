@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { createReceivingRecordUseCase, manageReceivingUseCase } from '../../application/wired';
@@ -15,7 +16,7 @@ function respondValidationOrError(res: HttpResponse, error: unknown): void {
     validationErrorResponse(res, getErrorMessage(error).split('; '));
     return;
   }
-  res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+  jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
 }
 
 // ---------- Receiving Record Methods ----------

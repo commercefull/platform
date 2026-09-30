@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Return Rule Controller for Admin Hub
  * Manages return policy rules (Epic I + Epic F).
@@ -94,10 +95,10 @@ export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
       isActive: isActive !== 'false',
     });
 
-    res.redirect('/hub/returns/rules?success=Return rule created');
+    redirectResponse(res, '/hub/returns/rules?success=Return rule created');
   } catch (error: unknown) {
     logger.warn('Error creating return rule:', error);
-    res.redirect('/hub/returns/rules?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/returns/rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -109,9 +110,9 @@ export const deleteReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
   try {
     const { returnRuleId: _returnRuleId } = req.params;
     // Soft delete by deactivating
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } catch (error: unknown) {
     logger.warn('Error deleting return rule:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };

@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Content Blocks Controller
  * Handles content block management for the Admin Hub
@@ -46,7 +47,7 @@ export const createContentBlockForm = async (req: HttpRequest, res: HttpResponse
   const pageId = req.query.pageId as string;
 
   if (!pageId) {
-    return res.redirect('/hub/content/pages');
+    return redirectResponse(res, '/hub/content/pages');
   }
 
   // Get the page details
@@ -93,7 +94,7 @@ export const createContentBlock = async (req: HttpRequest, res: HttpResponse): P
     isVisible: true,
   });
 
-  res.redirect(`/hub/content/pages/${contentPageId}?success=Content block created successfully`);
+  redirectResponse(res, `/hub/content/pages/${contentPageId}?success=Content block created successfully`);
 };
 
 export const editContentBlockForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -142,7 +143,7 @@ export const updateContentBlock = async (req: HttpRequest, res: HttpResponse): P
 
   const block = await manageContentUseCase.updateBlock(blockId, updates);
 
-  res.redirect(`/hub/content/pages/${block.contentPageId}?success=Content block updated successfully`);
+  redirectResponse(res, `/hub/content/pages/${block.contentPageId}?success=Content block updated successfully`);
 };
 
 export const deleteContentBlock = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -162,7 +163,7 @@ export const deleteContentBlock = async (req: HttpRequest, res: HttpResponse): P
     throw new Error('Failed to delete content block');
   }
 
-  res.json({ success: true, message: 'Content block deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Content block deleted successfully' });
 };
 
 export const reorderContentBlocks = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -180,5 +181,5 @@ export const reorderContentBlocks = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Failed to reorder blocks');
   }
 
-  res.json({ success: true, message: 'Content blocks reordered successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Content blocks reordered successfully' });
 };

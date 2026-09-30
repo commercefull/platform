@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Gift Card Controller
  * Handles gift card management for the Admin Hub
@@ -95,7 +96,7 @@ export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promi
           : undefined,
     });
 
-    res.redirect(`/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
+    redirectResponse(res, `/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -156,7 +157,7 @@ export const activateGiftCardAction = async (req: HttpRequest, res: HttpResponse
 
   await manageGiftCardsUseCase.activateGiftCard(giftCardId);
 
-  res.json({ success: true, message: 'Gift card activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Gift card activated successfully' });
 };
 
 export const assignGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -166,7 +167,7 @@ export const assignGiftCardAction = async (req: HttpRequest, res: HttpResponse):
 
   await manageGiftCardsUseCase.assignGiftCard(giftCardId, customerId);
 
-  res.json({ success: true, message: 'Gift card assigned successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Gift card assigned successfully' });
 };
 
 export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -176,11 +177,11 @@ export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse):
 
   const transaction = await manageGiftCardsUseCase.reloadGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin');
 
-  res.json({
-    success: true,
-    message: 'Gift card reloaded successfully',
-    transaction,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Gift card reloaded successfully',
+        transaction,
+      });
 };
 
 export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -190,11 +191,11 @@ export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse
 
   const transaction = await manageGiftCardsUseCase.refundToGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin', notes);
 
-  res.json({
-    success: true,
-    message: 'Refund applied to gift card successfully',
-    transaction,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Refund applied to gift card successfully',
+        transaction,
+      });
 };
 
 export const cancelGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -202,7 +203,7 @@ export const cancelGiftCardAction = async (req: HttpRequest, res: HttpResponse):
 
   await manageGiftCardsUseCase.cancelGiftCard(giftCardId);
 
-  res.json({ success: true, message: 'Gift card cancelled successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Gift card cancelled successfully' });
 };
 
 export const checkGiftCardBalance = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -211,15 +212,15 @@ export const checkGiftCardBalance = async (req: HttpRequest, res: HttpResponse):
   const giftCard = await manageGiftCardsUseCase.getGiftCardByCode(code);
 
   if (!giftCard) {
-    res.json({ valid: false, message: 'Gift card not found' });
+    jsonResponse(res, 200, { valid: false, message: 'Gift card not found' });
     return;
   }
 
-  res.json({
-    valid: true,
-    balanceCents: giftCard.currentBalanceCents,
-    currency: giftCard.currency,
-    status: giftCard.status,
-    expiresAt: giftCard.expiresAt,
-  });
+  jsonResponse(res, 200, {
+        valid: true,
+        balanceCents: giftCard.currentBalanceCents,
+        currency: giftCard.currency,
+        status: giftCard.status,
+        expiresAt: giftCard.expiresAt,
+      });
 };

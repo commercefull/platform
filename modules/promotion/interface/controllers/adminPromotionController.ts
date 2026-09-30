@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Promotion Controller
  * Handles promotion management for the Admin Hub
@@ -113,7 +114,7 @@ export const createPromotion = async (req: HttpRequest, res: HttpResponse): Prom
 
     const result = await createPromotionUseCase.execute(command);
 
-    res.redirect(`/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
+    redirectResponse(res, `/hub/promotions/${result.promotionId}?success=Promotion created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -233,7 +234,7 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   const command = new UpdatePromotionCommand(promotionId, updates);
   await updatePromotionUseCase.execute(command);
 
-  res.redirect(`/hub/promotions/${promotionId}?success=Promotion updated successfully`);
+  redirectResponse(res, `/hub/promotions/${promotionId}?success=Promotion updated successfully`);
 };
 
 // ============================================================================
@@ -246,7 +247,7 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   const command = new DeletePromotionCommand(promotionId);
   await deletePromotionUseCase.execute(command);
 
-  res.json({ success: true, message: 'Promotion deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Promotion deleted successfully' });
 };
 
 // ============================================================================
@@ -320,19 +321,19 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
 
     const result = await evaluatePromotionsUseCase.execute(context);
 
-    res.json({
-      success: true,
-      totalDiscountAmountCents: result.totalDiscountAmountCents,
-      shippingDiscountAmountCents: result.shippingDiscountAmountCents,
-      freeShipping: result.freeShipping,
-      lineItemDiscounts: result.lineItemDiscounts,
-      freeItems: result.freeItems,
-      appliedPromotions: result.appliedPromotions,
-      message: result.message,
-      finalTotalCents: context.subtotalCents - result.totalDiscountAmountCents,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            totalDiscountAmountCents: result.totalDiscountAmountCents,
+            shippingDiscountAmountCents: result.shippingDiscountAmountCents,
+            freeShipping: result.freeShipping,
+            lineItemDiscounts: result.lineItemDiscounts,
+            freeItems: result.freeItems,
+            appliedPromotions: result.appliedPromotions,
+            message: result.message,
+            finalTotalCents: context.subtotalCents - result.totalDiscountAmountCents,
+          });
   } catch (error: unknown) {
     logger.warn('Error previewing promotion:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };

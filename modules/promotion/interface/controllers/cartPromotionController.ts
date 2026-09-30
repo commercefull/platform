@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { managePromotionTargetsUseCase, type PromotionCart } from '../../application/wired';
 
@@ -13,7 +14,7 @@ interface CartPromotionBody extends CartCreateProps {
 export const getPromotionsByCartId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { cartId } = req.params;
   const promotions = await managePromotionTargetsUseCase.getCartPromotionsByBasketId(cartId);
-  res.status(200).json({ success: true, data: promotions || [] });
+  jsonResponse(res, 200, { success: true, data: promotions || [] });
 };
 
 // Get promotion by ID
@@ -22,11 +23,11 @@ export const getCartPromotionById = async (req: HttpRequest, res: HttpResponse):
   const promotion = await managePromotionTargetsUseCase.getCartPromotionById(id);
 
   if (!promotion) {
-    res.status(404).json({ success: false, message: 'Cart promotion not found' });
+    jsonResponse(res, 404, { success: false, message: 'Cart promotion not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: promotion });
+  jsonResponse(res, 200, { success: true, data: promotion });
 };
 
 // Apply a promotion to a cart
@@ -37,7 +38,7 @@ export const applyPromotion = async (
   const promotionData = req.body;
 
   const promotion = await managePromotionTargetsUseCase.createCartPromotion(promotionData);
-  res.status(201).json({ success: true, data: promotion });
+  jsonResponse(res, 201, { success: true, data: promotion });
 };
 
 // Update a cart promotion
@@ -49,12 +50,12 @@ export const updateCartPromotion = async (
   const promotionData = req.body;
 
   const promotion = await managePromotionTargetsUseCase.updateCartPromotion(id, promotionData);
-  res.status(200).json({ success: true, data: promotion });
+  jsonResponse(res, 200, { success: true, data: promotion });
 };
 
 // Remove a promotion from a cart
 export const removePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   await managePromotionTargetsUseCase.deleteCartPromotion(id);
-  res.status(200).json({ success: true, message: 'Cart promotion removed successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Cart promotion removed successfully' });
 };

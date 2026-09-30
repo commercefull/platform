@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageIntegrations, manageSubscriptions, manageIntegrationLogs } from '../../application/useCases/wired';
 import type { IntegrationProvider } from '../../domain/entities/Integration';
@@ -7,7 +8,7 @@ class IntegrationController {
   async createIntegration(req: HttpRequest, res: HttpResponse): Promise<void> {
     const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
-      res.status(401).json({ success: false, error: 'Organization not found' });
+      jsonResponse(res, 401, { success: false, error: 'Organization not found' });
       return;
     }
     const { name, provider, description, webhookUrl, config } = req.body as Record<string, unknown>;
@@ -19,18 +20,18 @@ class IntegrationController {
       webhookUrl: webhookUrl as string | undefined,
       config: config as Record<string, unknown> | undefined,
     });
-    res.status(201).json({ success: true, data: integration.toJSON() });
+    jsonResponse(res, 201, { success: true, data: integration.toJSON() });
   }
 
   async getIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     const integration = await manageIntegrations.getIntegration(req.params.integrationId);
-    res.json({ success: true, data: integration.toJSON() });
+    jsonResponse(res, 200, { success: true, data: integration.toJSON() });
   }
 
   async listIntegrations(req: HttpRequest, res: HttpResponse): Promise<void> {
     const organizationId = (req.user as { id?: string })?.id;
     if (!organizationId) {
-      res.status(401).json({ success: false, error: 'Organization not found' });
+      jsonResponse(res, 401, { success: false, error: 'Organization not found' });
       return;
     }
     const { provider, status } = req.query;
@@ -38,7 +39,7 @@ class IntegrationController {
       provider: provider as string | undefined,
       status: status as string | undefined,
     });
-    res.json({ success: true, data: integrations.map(i => i.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: integrations.map(i => i.toJSON()) });
   }
 
   async updateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
@@ -49,22 +50,22 @@ class IntegrationController {
       webhookUrl: webhookUrl as string | null | undefined,
       config: config as Record<string, unknown> | undefined,
     });
-    res.json({ success: true, data: integration.toJSON() });
+    jsonResponse(res, 200, { success: true, data: integration.toJSON() });
   }
 
   async activateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     const integration = await manageIntegrations.activateIntegration(req.params.integrationId);
-    res.json({ success: true, data: integration.toJSON() });
+    jsonResponse(res, 200, { success: true, data: integration.toJSON() });
   }
 
   async deactivateIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     const integration = await manageIntegrations.deactivateIntegration(req.params.integrationId);
-    res.json({ success: true, data: integration.toJSON() });
+    jsonResponse(res, 200, { success: true, data: integration.toJSON() });
   }
 
   async deleteIntegration(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     await manageIntegrations.deleteIntegration(req.params.integrationId);
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   }
 
   // Credentials
@@ -77,23 +78,23 @@ class IntegrationController {
       credentials: credentials as Record<string, unknown>,
       expiresAt: expiresAt ? new Date(expiresAt as string) : undefined,
     });
-    res.status(201).json({ success: true, data: credential.toJSON() });
+    jsonResponse(res, 201, { success: true, data: credential.toJSON() });
   }
 
   async listCredentials(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     const credentials = await manageIntegrations.getCredentials(req.params.integrationId);
-    res.json({ success: true, data: credentials.map(c => c.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: credentials.map(c => c.toJSON()) });
   }
 
   async updateCredential(req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> {
     const { credentials } = req.body as { credentials: Record<string, unknown> };
     const credential = await manageIntegrations.updateCredential(req.params.credentialId, credentials);
-    res.json({ success: true, data: credential.toJSON() });
+    jsonResponse(res, 200, { success: true, data: credential.toJSON() });
   }
 
   async deleteCredential(req: HttpRequest<{ integrationId: string; credentialId: string }>, res: HttpResponse): Promise<void> {
     await manageIntegrations.deleteCredential(req.params.credentialId);
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   }
 
   // Subscriptions
@@ -107,12 +108,12 @@ class IntegrationController {
       payloadMapping: payloadMapping as Record<string, unknown> | undefined,
       headers: headers as Record<string, string> | undefined,
     });
-    res.status(201).json({ success: true, data: subscription.toJSON() });
+    jsonResponse(res, 201, { success: true, data: subscription.toJSON() });
   }
 
   async listSubscriptions(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     const subscriptions = await manageSubscriptions.listSubscriptions(req.params.integrationId);
-    res.json({ success: true, data: subscriptions.map(s => s.toJSON()) });
+    jsonResponse(res, 200, { success: true, data: subscriptions.map(s => s.toJSON()) });
   }
 
   async updateSubscription(req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> {
@@ -123,12 +124,12 @@ class IntegrationController {
       headers: headers as Record<string, string> | null | undefined,
       isActive: isActive as boolean | undefined,
     });
-    res.json({ success: true, data: subscription.toJSON() });
+    jsonResponse(res, 200, { success: true, data: subscription.toJSON() });
   }
 
   async deleteSubscription(req: HttpRequest<{ integrationId: string; subscriptionId: string }>, res: HttpResponse): Promise<void> {
     await manageSubscriptions.deleteSubscription(req.params.subscriptionId);
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   }
 
   // Logs
@@ -139,12 +140,12 @@ class IntegrationController {
       limit: limit ? parseInt(limit as string, 10) : undefined,
       offset: offset ? parseInt(offset as string, 10) : undefined,
     });
-    res.json({ success: true, data: result.data.map(l => l.toJSON()), total: result.total });
+    jsonResponse(res, 200, { success: true, data: result.data.map(l => l.toJSON()), total: result.total });
   }
 
   async deleteLogs(req: HttpRequest<{ integrationId: string }>, res: HttpResponse): Promise<void> {
     await manageIntegrationLogs.deleteLogs(req.params.integrationId);
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   }
 }
 

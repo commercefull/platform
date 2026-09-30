@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Subscription Controller
  * Handles subscription plans and customer subscription management for the Admin Hub
@@ -103,7 +104,7 @@ export const createSubscriptionPlan = async (req: HttpRequest, res: HttpResponse
       >[0],
     );
 
-    res.redirect(`/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
+    redirectResponse(res, `/hub/subscription/plans/${plan.subscriptionPlanId}?success=Subscription plan created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -191,7 +192,7 @@ export const updateSubscriptionPlan = async (req: HttpRequest, res: HttpResponse
     ...updates,
   });
 
-  res.redirect(`/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
+  redirectResponse(res, `/hub/subscription/plans/${planId}?success=Subscription plan updated successfully`);
 };
 
 export const deleteSubscriptionPlan = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -199,7 +200,7 @@ export const deleteSubscriptionPlan = async (req: HttpRequest, res: HttpResponse
 
   await manageSubscriptionsUseCase.deleteSubscriptionPlan(planId);
 
-  res.json({ success: true, message: 'Subscription plan deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Subscription plan deleted successfully' });
 };
 
 // ============================================================================
@@ -256,7 +257,7 @@ export const updateSubscriptionStatus = async (req: HttpRequest, res: HttpRespon
 
   await manageSubscriptionsUseCase.updateSubscriptionStatus(subscriptionId, status);
 
-  res.json({ success: true, message: `Subscription status updated to ${status}` });
+  jsonResponse(res, 200, { success: true, message: `Subscription status updated to ${status}` });
 };
 
 export const cancelCustomerSubscription = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -266,7 +267,7 @@ export const cancelCustomerSubscription = async (req: HttpRequest, res: HttpResp
 
   await manageSubscriptionsUseCase.cancelSubscription(subscriptionId, reason, 'admin', cancelAtPeriodEnd === 'true');
 
-  res.json({ success: true, message: 'Subscription cancelled successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Subscription cancelled successfully' });
 };
 
 // ============================================================================
@@ -337,11 +338,11 @@ export const processSubscriptionBilling = async (req: HttpRequest, res: HttpResp
     // This would be calculated from all paid orders
   }
 
-  res.json({
-    success: true,
-    message: `Billing processed for subscription ${subscriptionId}`,
-    orderId: order.subscriptionOrderId,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: `Billing processed for subscription ${subscriptionId}`,
+        orderId: order.subscriptionOrderId,
+      });
 };
 
 export const manageFailedPayments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -364,13 +365,13 @@ export const manageFailedPayments = async (req: HttpRequest, res: HttpResponse):
       scheduledAt: retryDate ? new Date(retryDate) : new Date(),
     });
 
-    res.json({ success: true, message: 'Payment retry scheduled' });
+    jsonResponse(res, 200, { success: true, message: 'Payment retry scheduled' });
   } else if (action === 'cancel') {
     await manageSubscriptionsUseCase.cancelSubscription(subscriptionId, 'Payment failed - subscription cancelled');
-    res.json({ success: true, message: 'Subscription cancelled due to failed payment' });
+    jsonResponse(res, 200, { success: true, message: 'Subscription cancelled due to failed payment' });
   } else if (action === 'pause') {
     await manageSubscriptionsUseCase.pauseSubscription(subscriptionId, undefined, 'Payment failed - subscription paused');
-    res.json({ success: true, message: 'Subscription paused due to failed payment' });
+    jsonResponse(res, 200, { success: true, message: 'Subscription paused due to failed payment' });
   } else {
     throw new Error('Invalid action');
   }

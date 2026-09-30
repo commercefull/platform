@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Storefront Checkout Controller
  * Handles checkout process, payment, and order creation
@@ -26,7 +27,7 @@ export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<voi
 
   // Guests check out by session; without a session there is no basket to check out
   if (!customerId && !sessionId) {
-    return res.redirect('/signin?redirect=/checkout');
+    return redirectResponse(res, '/signin?redirect=/checkout');
   }
 
   // Get or create basket
@@ -35,7 +36,7 @@ export const checkout = async (req: HttpRequest, res: HttpResponse): Promise<voi
   const basket = await basketUseCase.execute(basketCommand);
 
   if (!basket || !basket.items || basket.items.length === 0) {
-    return res.redirect('/basket?error=' + encodeURIComponent('Your cart is empty'));
+    return redirectResponse(res, '/basket?error=' + encodeURIComponent('Your cart is empty'));
   }
 
   // Get customer details (authenticated shoppers only)
@@ -86,7 +87,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   const sessionId = req.session?.id;
 
   if (!customerId && !sessionId) {
-    res.status(401).json({ success: false, message: 'Not authenticated' });
+    jsonResponse(res, 401, { success: false, message: 'Not authenticated' });
     return;
   }
 
@@ -106,7 +107,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
     billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
   } catch {
-    res.status(400).json({ success: false, message: 'Invalid shipping or billing address' });
+    jsonResponse(res, 400, { success: false, message: 'Invalid shipping or billing address' });
     return;
   }
 
@@ -119,7 +120,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     (shippingAddress.email as string | undefined);
 
   if (!customerEmail) {
-    res.status(400).json({ success: false, message: 'An email address is required for checkout' });
+    jsonResponse(res, 400, { success: false, message: 'An email address is required for checkout' });
     return;
   }
 
@@ -129,7 +130,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   const basket = await basketUseCase.execute(basketCommand);
 
   if (!basket || !basket.items || basket.items.length === 0) {
-    res.status(400).json({ success: false, message: 'Cart is empty' });
+    jsonResponse(res, 400, { success: false, message: 'Cart is empty' });
     return;
   }
 
@@ -178,13 +179,13 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   }
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
-    res.json({
-      success: true,
-      orderId: order.orderId,
-      orderNumber: order.orderNumber,
-    });
+    jsonResponse(res, 200, {
+            success: true,
+            orderId: order.orderId,
+            orderNumber: order.orderNumber,
+          });
   } else {
-    res.redirect(`/order-confirmation/${order.orderId}`);
+    redirectResponse(res, `/order-confirmation/${order.orderId}`);
   }
 };
 
@@ -201,7 +202,7 @@ export const orderConfirmation = async (req: HttpRequest, res: HttpResponse): Pr
     const session = req.session as unknown as Record<string, unknown> | undefined;
     const guestOrderIds = (session?.guestOrderIds as string[] | undefined) ?? [];
     if (!guestOrderIds.includes(orderId)) {
-      return res.redirect('/signin');
+      return redirectResponse(res, '/signin');
     }
   }
 

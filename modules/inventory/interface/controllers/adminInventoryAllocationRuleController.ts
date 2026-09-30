@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Inventory Allocation Rule Controller for Admin Hub
  * Manages inventory allocation rules (Epic J + Epic F follow-up).
@@ -94,10 +95,10 @@ export const createAllocationRule = async (req: HttpRequest, res: HttpResponse):
       isActive: isActive !== 'false',
     });
 
-    res.redirect('/hub/inventory/allocation-rules?success=Allocation rule created');
+    redirectResponse(res, '/hub/inventory/allocation-rules?success=Allocation rule created');
   } catch (error: unknown) {
     logger.warn('Error creating allocation rule:', error);
-    res.redirect('/hub/inventory/allocation-rules?error=' + encodeURIComponent((error as Error).message));
+    redirectResponse(res, '/hub/inventory/allocation-rules?error=' + encodeURIComponent((error as Error).message));
   }
 };
 
@@ -109,10 +110,10 @@ export const deleteAllocationRule = async (req: HttpRequest, res: HttpResponse):
   try {
     const { allocationRuleId: _allocationRuleId } = req.params;
     // Soft delete by deactivating (repo doesn't expose delete yet)
-    res.json({ success: true });
+    jsonResponse(res, 200, { success: true });
   } catch (error: unknown) {
     logger.warn('Error deleting allocation rule:', error);
-    res.status(500).json({ success: false, error: (error as Error).message });
+    jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };
 

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Tracking Business Controller
  * Handles tracking configuration and event processing via /business/tracking routes.
@@ -24,20 +25,20 @@ class TrackingController {
       if (!storeId) {
         // No storeId → return all configs for the organization
         const configs = await manageConfigUseCase.getByOrganizationId(organizationId);
-        res.json({ success: true, data: configs.map(c => c.toJSON()) });
+        jsonResponse(res, 200, { success: true, data: configs.map(c => c.toJSON()) });
         return;
       }
 
       const config = await manageConfigUseCase.getByStoreId(storeId);
       if (!config) {
-        res.status(404).json({ success: false, message: 'Tracking config not found' });
+        jsonResponse(res, 404, { success: false, message: 'Tracking config not found' });
         return;
       }
 
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
       logger.error('Error getting tracking config:', error);
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -50,19 +51,19 @@ class TrackingController {
         // No storeId → return status for the organization's first config
         const configs = await manageConfigUseCase.getByOrganizationId(organizationId);
         if (configs.length === 0) {
-          res.json({ success: true, data: { active: false, providers: [] } });
+          jsonResponse(res, 200, { success: true, data: { active: false, providers: [] } });
           return;
         }
         const status = await getStatusUseCase.execute(configs[0].storeId);
-        res.json({ success: true, data: status });
+        jsonResponse(res, 200, { success: true, data: status });
         return;
       }
 
       const status = await getStatusUseCase.execute(storeId);
-      res.json({ success: true, data: status });
+      jsonResponse(res, 200, { success: true, data: status });
     } catch (error) {
       logger.error('Error getting tracking status:', error);
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -80,9 +81,9 @@ class TrackingController {
         serverSideEnabled: body.serverSideEnabled as boolean | undefined,
       });
 
-      res.status(201).json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 201, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -91,9 +92,9 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.updateGtm(storeId, body as unknown as GTMConfig);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -101,9 +102,9 @@ class TrackingController {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.removeGtm(storeId);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -112,9 +113,9 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.updateMetaCapi(storeId, body as unknown as MetaCAPIConfig);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -122,9 +123,9 @@ class TrackingController {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.removeMetaCapi(storeId);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -135,9 +136,9 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.addEventMapping(storeId, body as unknown as EventMapping);
-      res.status(201).json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 201, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -145,9 +146,9 @@ class TrackingController {
     try {
       const { storeId, sourceEvent } = req.params;
       const config = await manageConfigUseCase.removeEventMapping(storeId, decodeURIComponent(sourceEvent));
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -157,9 +158,9 @@ class TrackingController {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.activate(storeId);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -167,9 +168,9 @@ class TrackingController {
     try {
       const { storeId } = req.params;
       const config = await manageConfigUseCase.disable(storeId);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -178,9 +179,9 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.setHashPii(storeId, body.enabled as boolean);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -189,9 +190,9 @@ class TrackingController {
       const { storeId } = req.params;
       const body = req.body as Record<string, unknown>;
       const config = await manageConfigUseCase.setServerSideEnabled(storeId, body.enabled as boolean);
-      res.json({ success: true, data: config.toJSON() });
+      jsonResponse(res, 200, { success: true, data: config.toJSON() });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -199,9 +200,9 @@ class TrackingController {
     try {
       const { storeId } = req.params;
       await manageConfigUseCase.delete(storeId);
-      res.json({ success: true, message: 'Tracking config deleted' });
+      jsonResponse(res, 200, { success: true, message: 'Tracking config deleted' });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 
@@ -220,9 +221,9 @@ class TrackingController {
         correlationId: body.correlationId as string | undefined,
       });
 
-      res.json({ success: true, data: result });
+      jsonResponse(res, 200, { success: true, data: result });
     } catch (error) {
-      res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
   }
 }

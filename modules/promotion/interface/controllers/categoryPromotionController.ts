@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { managePromotionTargetsUseCase } from '../../application/wired';
 
@@ -19,14 +20,14 @@ type CategoryUpdateBody = Partial<Omit<CategoryCreateBody, 'productCategoryId' |
 
 export const getActiveCategoryPromotions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const promotions = await managePromotionTargetsUseCase.getActiveCategoryPromotions();
-  res.status(200).json({ success: true, data: promotions || [] });
+  jsonResponse(res, 200, { success: true, data: promotions || [] });
 };
 
 // Get promotions by category ID
 export const getPromotionsByCategoryId = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { categoryId } = req.params;
   const promotions = await managePromotionTargetsUseCase.getCategoryPromotionsByCategoryId(categoryId);
-  res.status(200).json({ success: true, data: promotions || [] });
+  jsonResponse(res, 200, { success: true, data: promotions || [] });
 };
 
 // Get promotion by ID
@@ -35,11 +36,11 @@ export const getCategoryPromotionById = async (req: HttpRequest, res: HttpRespon
   const promotion = await managePromotionTargetsUseCase.getCategoryPromotionById(id);
 
   if (!promotion) {
-    res.status(404).json({ success: false, message: 'Category promotion not found' });
+    jsonResponse(res, 404, { success: false, message: 'Category promotion not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: promotion });
+  jsonResponse(res, 200, { success: true, data: promotion });
 };
 
 // Create a new category promotion
@@ -50,7 +51,7 @@ export const createCategoryPromotion = async (
   const promotionData = req.body;
 
   const promotion = await managePromotionTargetsUseCase.createCategoryPromotion(promotionData);
-  res.status(201).json({ success: true, data: promotion });
+  jsonResponse(res, 201, { success: true, data: promotion });
 };
 
 // Update an existing category promotion
@@ -62,12 +63,12 @@ export const updateCategoryPromotion = async (
   const promotionData = req.body;
 
   const promotion = await managePromotionTargetsUseCase.updateCategoryPromotion(id, promotionData);
-  res.status(200).json({ success: true, data: promotion });
+  jsonResponse(res, 200, { success: true, data: promotion });
 };
 
 // Delete a category promotion
 export const deleteCategoryPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   await managePromotionTargetsUseCase.deleteCategoryPromotion(id);
-  res.status(200).json({ success: true, message: 'Category promotion deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Category promotion deleted successfully' });
 };

@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Shipping Controller
  * Handles shipping management for the Admin Hub
@@ -64,7 +65,7 @@ export const createShippingMethod = async (req: HttpRequest, res: HttpResponse):
       parseShippingMethodCreateInput(req.body as HttpRequestBody) as Parameters<typeof manageShippingMethodsUseCase.create>[0],
     );
 
-    res.redirect(`/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
+    redirectResponse(res, `/hub/shipping/methods/${method.shippingMethodId}?success=Shipping method created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -150,7 +151,7 @@ export const updateShippingMethod = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Shipping method not found after update');
   }
 
-  res.redirect(`/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
+  redirectResponse(res, `/hub/shipping/methods/${methodId}?success=Shipping method updated successfully`);
 };
 
 export const deleteShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -162,7 +163,7 @@ export const deleteShippingMethod = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Failed to delete shipping method');
   }
 
-  res.json({ success: true, message: 'Shipping method deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping method deleted successfully' });
 };
 
 export const activateShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -174,7 +175,7 @@ export const activateShippingMethod = async (req: HttpRequest, res: HttpResponse
     throw new Error('Shipping method not found');
   }
 
-  res.json({ success: true, message: 'Shipping method activated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping method activated successfully' });
 };
 
 export const deactivateShippingMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -186,5 +187,5 @@ export const deactivateShippingMethod = async (req: HttpRequest, res: HttpRespon
     throw new Error('Shipping method not found');
   }
 
-  res.json({ success: true, message: 'Shipping method deactivated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping method deactivated successfully' });
 };

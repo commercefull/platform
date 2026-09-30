@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Gateway Webhook Controller
  *
@@ -51,7 +52,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
     if (secret) {
       const valid = gatewayWebhooks.verifySignature(provider, rawBody, req.headers as Record<string, string | undefined>, secret);
       if (!valid) {
-        res.status(400).json({ error: 'Invalid signature' });
+        jsonResponse(res, 400, { error: 'Invalid signature' });
         return;
       }
     } else {
@@ -63,7 +64,7 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
     try {
       rawPayload = JSON.parse(rawBody.toString('utf8'));
     } catch {
-      res.status(400).json({ error: 'Invalid JSON body' });
+      jsonResponse(res, 400, { error: 'Invalid JSON body' });
       return;
     }
 
@@ -72,9 +73,9 @@ export async function handleGatewayWebhook(req: HttpRequest, res: HttpResponse):
     //    It never throws; every outcome acknowledges the webhook.
     await applyGatewayWebhookEventUseCase.execute(provider, rawPayload);
 
-    res.status(200).json({ received: true });
+    jsonResponse(res, 200, { received: true });
   } catch (error: unknown) {
     logger.error('[webhook] Unhandled error:', error);
-    res.status(200).json({ received: true });
+    jsonResponse(res, 200, { received: true });
   }
 }

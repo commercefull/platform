@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageAttributeOptionsUseCase } from '../../application/useCases/wired';
 import type { ProductAttributeOption } from '../../../../libs/db/types';
@@ -19,18 +20,18 @@ class AttributeOptionController {
 
     // Guard against literal "null" or "undefined" strings
     if (!id || id === 'null' || id === 'undefined') {
-      res.status(400).json({ success: false, error: 'Invalid attribute option ID' });
+      jsonResponse(res, 400, { success: false, error: 'Invalid attribute option ID' });
       return;
     }
 
     const option = await manageAttributeOptionsUseCase.findOne(id);
 
     if (!option) {
-      res.status(404).json({ success: false, error: 'Attribute option not found' });
+      jsonResponse(res, 404, { success: false, error: 'Attribute option not found' });
       return;
     }
 
-    res.json({ success: true, data: mapOption(option) });
+    jsonResponse(res, 200, { success: true, data: mapOption(option) });
   }
 
   /**
@@ -41,7 +42,7 @@ class AttributeOptionController {
     const { attributeId } = req.params;
     const options = await manageAttributeOptionsUseCase.findByAttribute(attributeId);
 
-    res.json({ success: true, data: options.map(mapOption) });
+    jsonResponse(res, 200, { success: true, data: options.map(mapOption) });
   }
 
   /**
@@ -53,11 +54,11 @@ class AttributeOptionController {
     const option = await manageAttributeOptionsUseCase.findByValue(attributeId, value);
 
     if (!option) {
-      res.status(404).json({ success: false, error: 'Attribute option not found' });
+      jsonResponse(res, 404, { success: false, error: 'Attribute option not found' });
       return;
     }
 
-    res.json({ success: true, data: mapOption(option) });
+    jsonResponse(res, 200, { success: true, data: mapOption(option) });
   }
 
   /**
@@ -73,7 +74,7 @@ class AttributeOptionController {
     };
 
     if (!attributeId || !value) {
-      res.status(400).json({ success: false, error: 'attributeId and value are required' });
+      jsonResponse(res, 400, { success: false, error: 'attributeId and value are required' });
       return;
     }
 
@@ -84,7 +85,7 @@ class AttributeOptionController {
       position: sortOrder ?? 0,
     });
 
-    res.status(201).json({ success: true, data: mapOption(option) });
+    jsonResponse(res, 201, { success: true, data: mapOption(option) });
   }
 
   /**
@@ -97,7 +98,7 @@ class AttributeOptionController {
 
     const existing = await manageAttributeOptionsUseCase.findOne(id);
     if (!existing) {
-      res.status(404).json({ success: false, error: 'Attribute option not found' });
+      jsonResponse(res, 404, { success: false, error: 'Attribute option not found' });
       return;
     }
 
@@ -107,7 +108,7 @@ class AttributeOptionController {
       position: sortOrder,
     });
 
-    res.json({ success: true, data: mapOption(updated as ProductAttributeOption) });
+    jsonResponse(res, 200, { success: true, data: mapOption(updated as ProductAttributeOption) });
   }
 
   /**
@@ -119,13 +120,13 @@ class AttributeOptionController {
 
     const existing = await manageAttributeOptionsUseCase.findOne(id);
     if (!existing) {
-      res.status(404).json({ success: false, error: 'Attribute option not found' });
+      jsonResponse(res, 404, { success: false, error: 'Attribute option not found' });
       return;
     }
 
     await manageAttributeOptionsUseCase.delete(id);
 
-    res.json({ success: true, message: 'Attribute option deleted successfully' });
+    jsonResponse(res, 200, { success: true, message: 'Attribute option deleted successfully' });
   }
 }
 

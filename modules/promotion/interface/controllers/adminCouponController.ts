@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Coupon Controller
  * Handles coupon management for the Admin Hub
@@ -101,7 +102,7 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
       organizationId: 'default-organization',
     });
 
-    res.redirect(`/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
+    redirectResponse(res, `/hub/promotions/coupons/${coupon.promotionCouponId}?success=Coupon created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -208,7 +209,7 @@ export const updateCoupon = async (req: HttpRequest, res: HttpResponse): Promise
 
   const _coupon = await manageCouponsUseCase.update(couponId, updates);
 
-  res.redirect(`/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
+  redirectResponse(res, `/hub/promotions/coupons/${couponId}?success=Coupon updated successfully`);
 };
 
 export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -220,7 +221,7 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
     throw new Error('Failed to delete coupon');
   }
 
-  res.json({ success: true, message: 'Coupon deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Coupon deleted successfully' });
 };
 
 export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -229,10 +230,10 @@ export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promi
 
   const result = await manageCouponsUseCase.validate(code, orderTotalCents, customerId, 'default-organization');
 
-  res.json({
-    valid: result.valid,
-    coupon: result.coupon,
-    message: result.message,
-    discountAmountCents: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotalCents) : 0,
-  });
+  jsonResponse(res, 200, {
+        valid: result.valid,
+        coupon: result.coupon,
+        message: result.message,
+        discountAmountCents: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotalCents) : 0,
+      });
 };

@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { createSupplierPurchaseOrderUseCase, managePurchaseOrdersUseCase } from '../../application/wired';
@@ -119,7 +120,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
       validationErrorResponse(res, getErrorMessage(error).split('; '));
       return;
     }
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -205,7 +206,7 @@ export const addPurchaseOrderItem = async (req: HttpRequest, res: HttpResponse):
       validationErrorResponse(res, getErrorMessage(error).split('; '));
       return;
     }
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 

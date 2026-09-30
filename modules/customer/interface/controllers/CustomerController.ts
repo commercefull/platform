@@ -1,3 +1,5 @@
+import { jsonResponse } from "libs/apiResponse";
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * Customer Controller
@@ -40,11 +42,11 @@ import {
 // ============================================================================
 
 function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode: number = 200): void {
-  res.status(statusCode).json({ success: true, data });
+  jsonResponse(res, statusCode, { success: true, data });
 }
 
 function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
-  res.status(statusCode).json({ success: false, error: message });
+  jsonResponse(res, statusCode, { success: false, error: message });
 }
 
 // ============================================================================
@@ -194,7 +196,7 @@ export const getCustomerGroup = async (req: HttpRequest, res: HttpResponse): Pro
   const { customerGroupId } = req.params;
   const group = await manageCustomerGroupsUseCase.findGroupById(customerGroupId);
   if (!group) {
-    res.status(404).json({ success: false, error: 'Customer group not found' });
+    jsonResponse(res, 404, { success: false, error: 'Customer group not found' });
     return;
   }
   respond(req, res, group);

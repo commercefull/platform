@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { manageSupplierDirectoryUseCase } from '../../application/wired';
@@ -17,7 +18,7 @@ function respondValidation(res: HttpResponse, error: unknown, fallbackStatus = 4
     validationErrorResponse(res, getErrorMessage(error).split('; '));
     return;
   }
-  res.status(getErrorStatusCode(error) || fallbackStatus).json({ success: false, message: getErrorMessage(error) });
+  jsonResponse(res, getErrorStatusCode(error) || fallbackStatus, { success: false, message: getErrorMessage(error) });
 }
 
 export const getSuppliers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -119,7 +120,7 @@ export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promi
       validationErrorResponse(res, getErrorMessage(error).split('; '));
       return;
     }
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -264,7 +265,7 @@ export const createSupplierAddress = async (req: HttpRequest, res: HttpResponse)
       validationErrorResponse(res, getErrorMessage(error).split('; '));
       return;
     }
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -361,7 +362,7 @@ export const addProductToSupplier = async (req: HttpRequest, res: HttpResponse):
       validationErrorResponse(res, getErrorMessage(error).split('; '));
       return;
     }
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 

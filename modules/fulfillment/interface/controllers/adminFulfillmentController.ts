@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Fulfillment Controller
  * Handles order fulfillment tracking and warehouse operations
@@ -102,11 +103,11 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
     await manageOrderFulfillmentsUseCase.update(fulfillmentId, { notes });
   }
 
-  res.json({
-    success: true,
-    message: `Fulfillment status updated to ${status}`,
-    fulfillment,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: `Fulfillment status updated to ${status}`,
+        fulfillment,
+      });
 };
 
 export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -131,11 +132,11 @@ export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promis
     await manageOrderFulfillmentsUseCase.addTracking(fulfillmentId, trackingNumber, carrierCode, carrierName, trackingUrl);
   }
 
-  res.json({
-    success: true,
-    message: 'Fulfillment marked as shipped',
-    fulfillment,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Fulfillment marked as shipped',
+        fulfillment,
+      });
 };
 
 export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -147,11 +148,11 @@ export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Prom
     throw new Error('Fulfillment not found');
   }
 
-  res.json({
-    success: true,
-    message: 'Fulfillment marked as delivered',
-    fulfillment,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Fulfillment marked as delivered',
+        fulfillment,
+      });
 };
 
 export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -165,11 +166,11 @@ export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
     throw new Error('Fulfillment not found');
   }
 
-  res.json({
-    success: true,
-    message: 'Fulfillment cancelled',
-    fulfillment,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        message: 'Fulfillment cancelled',
+        fulfillment,
+      });
 };
 
 export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -177,12 +178,12 @@ export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): 
   const overdue = await manageOrderFulfillmentsUseCase.findOverdue();
   const shippedToday = await manageOrderFulfillmentsUseCase.findShippedToday();
 
-  res.json({
-    success: true,
-    stats,
-    overdueCount: overdue.length,
-    shippedTodayCount: shippedToday.length,
-  });
+  jsonResponse(res, 200, {
+        success: true,
+        stats,
+        overdueCount: overdue.length,
+        shippedTodayCount: shippedToday.length,
+      });
 };
 
 // ============================================================================

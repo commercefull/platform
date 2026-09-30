@@ -1,3 +1,4 @@
+import { jsonResponse } from "libs/apiResponse";
 /**
  * Shipping Controller
  * Handles shipping-related HTTP requests
@@ -43,7 +44,7 @@ import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from 
 export const getCarriers = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const carriers = await manageShippingConfigurationUseCase.listCarriers(activeOnly === 'true');
-  res.status(200).json({ success: true, data: carriers });
+  jsonResponse(res, 200, { success: true, data: carriers });
 };
 
 export const getCarrierById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -51,11 +52,11 @@ export const getCarrierById = async (req: HttpRequest, res: HttpResponse): Promi
   const carrier = await manageShippingConfigurationUseCase.findCarrierById(id);
 
   if (!carrier) {
-    res.status(404).json({ success: false, message: 'Carrier not found' });
+    jsonResponse(res, 404, { success: false, message: 'Carrier not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: carrier });
+  jsonResponse(res, 200, { success: true, data: carrier });
 };
 
 export const createCarrier = async (
@@ -63,7 +64,7 @@ export const createCarrier = async (
   res: HttpResponse,
 ): Promise<void> => {
   const carrier = await manageShippingConfigurationUseCase.createCarrier(req.body);
-  res.status(201).json({ success: true, data: carrier });
+  jsonResponse(res, 201, { success: true, data: carrier });
 };
 
 export const updateCarrier = async (
@@ -74,11 +75,11 @@ export const updateCarrier = async (
   const carrier = await manageShippingConfigurationUseCase.updateCarrier(id, req.body);
 
   if (!carrier) {
-    res.status(404).json({ success: false, message: 'Carrier not found' });
+    jsonResponse(res, 404, { success: false, message: 'Carrier not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: carrier });
+  jsonResponse(res, 200, { success: true, data: carrier });
 };
 
 export const deleteCarrier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -86,11 +87,11 @@ export const deleteCarrier = async (req: HttpRequest, res: HttpResponse): Promis
   const deleted = await manageShippingConfigurationUseCase.deleteCarrier(id);
 
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Carrier not found' });
+    jsonResponse(res, 404, { success: false, message: 'Carrier not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Carrier deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Carrier deleted successfully' });
 };
 
 // ============================================================================
@@ -103,7 +104,7 @@ export const getMethods = async (req: HttpRequest, res: HttpResponse): Promise<v
   const query = new GetShippingMethodsQuery(activeOnly === 'true', displayOnFrontend === 'true', carrierId as string | undefined);
 
   const result = await getShippingMethodsUseCase.execute(query);
-  res.status(200).json({ success: result.success, data: result.methods, total: result.total });
+  jsonResponse(res, 200, { success: result.success, data: result.methods, total: result.total });
 };
 
 export const getMethodById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -111,11 +112,11 @@ export const getMethodById = async (req: HttpRequest, res: HttpResponse): Promis
   const method = await manageShippingMethodsUseCase.findById(id);
 
   if (!method) {
-    res.status(404).json({ success: false, message: 'Method not found' });
+    jsonResponse(res, 404, { success: false, message: 'Method not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: method });
+  jsonResponse(res, 200, { success: true, data: method });
 };
 
 export const createMethod = async (
@@ -123,7 +124,7 @@ export const createMethod = async (
   res: HttpResponse,
 ): Promise<void> => {
   const method = await manageShippingMethodsUseCase.create(req.body);
-  res.status(201).json({ success: true, data: method });
+  jsonResponse(res, 201, { success: true, data: method });
 };
 
 export const updateMethod = async (
@@ -134,11 +135,11 @@ export const updateMethod = async (
   const method = await manageShippingMethodsUseCase.update(id, req.body);
 
   if (!method) {
-    res.status(404).json({ success: false, message: 'Method not found' });
+    jsonResponse(res, 404, { success: false, message: 'Method not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: method });
+  jsonResponse(res, 200, { success: true, data: method });
 };
 
 export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -146,11 +147,11 @@ export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise
   const deleted = await manageShippingMethodsUseCase.delete(id);
 
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Method not found' });
+    jsonResponse(res, 404, { success: false, message: 'Method not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Method deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Method deleted successfully' });
 };
 
 // ============================================================================
@@ -160,7 +161,7 @@ export const deleteMethod = async (req: HttpRequest, res: HttpResponse): Promise
 export const getZones = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const zones = await manageShippingZonesUseCase.findAll(activeOnly === 'true');
-  res.status(200).json({ success: true, data: zones });
+  jsonResponse(res, 200, { success: true, data: zones });
 };
 
 export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -168,11 +169,11 @@ export const getZoneById = async (req: HttpRequest, res: HttpResponse): Promise<
   const zone = await manageShippingZonesUseCase.findById(id);
 
   if (!zone) {
-    res.status(404).json({ success: false, message: 'Zone not found' });
+    jsonResponse(res, 404, { success: false, message: 'Zone not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: zone });
+  jsonResponse(res, 200, { success: true, data: zone });
 };
 
 export const createZone = async (
@@ -180,7 +181,7 @@ export const createZone = async (
   res: HttpResponse,
 ): Promise<void> => {
   const zone = await manageShippingZonesUseCase.create(req.body);
-  res.status(201).json({ success: true, data: zone });
+  jsonResponse(res, 201, { success: true, data: zone });
 };
 
 export const updateZone = async (
@@ -191,11 +192,11 @@ export const updateZone = async (
   const zone = await manageShippingZonesUseCase.update(id, req.body);
 
   if (!zone) {
-    res.status(404).json({ success: false, message: 'Zone not found' });
+    jsonResponse(res, 404, { success: false, message: 'Zone not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: zone });
+  jsonResponse(res, 200, { success: true, data: zone });
 };
 
 export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -203,11 +204,11 @@ export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<v
   const deleted = await manageShippingZonesUseCase.delete(id);
 
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Zone not found' });
+    jsonResponse(res, 404, { success: false, message: 'Zone not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Zone deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Zone deleted successfully' });
 };
 
 // ============================================================================
@@ -217,7 +218,7 @@ export const deleteZone = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const getRates = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { zoneId, methodId } = req.query;
   const rates = await manageShippingRatesUseCase.findActive(zoneId as string | undefined, methodId as string | undefined);
-  res.status(200).json({ success: true, data: rates });
+  jsonResponse(res, 200, { success: true, data: rates });
 };
 
 export const getRateById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -225,11 +226,11 @@ export const getRateById = async (req: HttpRequest, res: HttpResponse): Promise<
   const rate = await manageShippingRatesUseCase.findById(id);
 
   if (!rate) {
-    res.status(404).json({ success: false, message: 'Rate not found' });
+    jsonResponse(res, 404, { success: false, message: 'Rate not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: rate });
+  jsonResponse(res, 200, { success: true, data: rate });
 };
 
 export const createRate = async (
@@ -237,7 +238,7 @@ export const createRate = async (
   res: HttpResponse,
 ): Promise<void> => {
   const rate = await manageShippingRatesUseCase.create(req.body);
-  res.status(201).json({ success: true, data: rate });
+  jsonResponse(res, 201, { success: true, data: rate });
 };
 
 export const updateRate = async (
@@ -248,11 +249,11 @@ export const updateRate = async (
   const rate = await manageShippingRatesUseCase.update(id, req.body);
 
   if (!rate) {
-    res.status(404).json({ success: false, message: 'Rate not found' });
+    jsonResponse(res, 404, { success: false, message: 'Rate not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: rate });
+  jsonResponse(res, 200, { success: true, data: rate });
 };
 
 export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -260,11 +261,11 @@ export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<v
   const deleted = await manageShippingRatesUseCase.delete(id);
 
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Rate not found' });
+    jsonResponse(res, 404, { success: false, message: 'Rate not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Rate deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Rate deleted successfully' });
 };
 
 // ============================================================================
@@ -274,7 +275,7 @@ export const deleteRate = async (req: HttpRequest, res: HttpResponse): Promise<v
 export const getPackagingTypes = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { activeOnly } = req.query;
   const types = await manageShippingConfigurationUseCase.listPackagingTypes(activeOnly === 'true');
-  res.status(200).json({ success: true, data: types });
+  jsonResponse(res, 200, { success: true, data: types });
 };
 
 export const getPackagingTypeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -282,11 +283,11 @@ export const getPackagingTypeById = async (req: HttpRequest, res: HttpResponse):
   const type = await manageShippingConfigurationUseCase.findPackagingTypeById(id);
 
   if (!type) {
-    res.status(404).json({ success: false, message: 'Packaging type not found' });
+    jsonResponse(res, 404, { success: false, message: 'Packaging type not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: type });
+  jsonResponse(res, 200, { success: true, data: type });
 };
 
 export const createPackagingType = async (
@@ -294,7 +295,7 @@ export const createPackagingType = async (
   res: HttpResponse,
 ): Promise<void> => {
   const type = await manageShippingConfigurationUseCase.createPackagingType(req.body);
-  res.status(201).json({ success: true, data: type });
+  jsonResponse(res, 201, { success: true, data: type });
 };
 
 export const updatePackagingType = async (
@@ -305,11 +306,11 @@ export const updatePackagingType = async (
   const type = await manageShippingConfigurationUseCase.updatePackagingType(id, req.body);
 
   if (!type) {
-    res.status(404).json({ success: false, message: 'Packaging type not found' });
+    jsonResponse(res, 404, { success: false, message: 'Packaging type not found' });
     return;
   }
 
-  res.status(200).json({ success: true, data: type });
+  jsonResponse(res, 200, { success: true, data: type });
 };
 
 export const deletePackagingType = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -317,11 +318,11 @@ export const deletePackagingType = async (req: HttpRequest, res: HttpResponse): 
   const deleted = await manageShippingConfigurationUseCase.deletePackagingType(id);
 
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Packaging type not found' });
+    jsonResponse(res, 404, { success: false, message: 'Packaging type not found' });
     return;
   }
 
-  res.status(200).json({ success: true, message: 'Packaging type deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Packaging type deleted successfully' });
 };
 
 // ============================================================================
@@ -339,10 +340,10 @@ export const estimateDelivery = async (
 ): Promise<void> => {
   try {
     const result = await estimateDeliveryWindowUseCase.execute(req.body);
-    res.status(200).json({ success: true, data: result });
+    jsonResponse(res, 200, { success: true, data: result });
   } catch (error: unknown) {
     const status = getErrorStatusCode(error);
-    res.status(status).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, status, { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -358,22 +359,22 @@ export const calculateRates = async (
   const { destinationAddress, orderDetails } = req.body;
 
   if (!destinationAddress || !orderDetails) {
-    res.status(400).json({
-      success: false,
-      message: 'destinationAddress and orderDetails are required',
-    });
+    jsonResponse(res, 400, {
+            success: false,
+            message: 'destinationAddress and orderDetails are required',
+          });
     return;
   }
 
   const command = new CalculateShippingRatesCommand(destinationAddress, orderDetails);
   const result = await calculateShippingRatesUseCase.execute(command);
 
-  res.status(200).json({
-    success: result.success,
-    data: result.rates,
-    zone: result.zone,
-    message: result.message,
-  });
+  jsonResponse(res, 200, {
+        success: result.success,
+        data: result.rates,
+        zone: result.zone,
+        message: result.message,
+      });
 };
 
 // ============================================================================
@@ -402,7 +403,7 @@ interface CreateLabelBody {
 
 export const createLabel = async (req: HttpRequest<Record<string, string>, unknown, CreateLabelBody>, res: HttpResponse): Promise<void> => {
   const result = await createShippingLabelUseCase.execute(req.body);
-  res.status(201).json({ success: true, data: result });
+  jsonResponse(res, 201, { success: true, data: result });
 };
 
 export const getLabel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -411,16 +412,16 @@ export const getLabel = async (req: HttpRequest, res: HttpResponse): Promise<voi
     trackingNumber: req.query.trackingNumber as string | undefined,
   });
   if (!result.found) {
-    res.status(404).json({ success: false, message: 'Shipping label not found' });
+    jsonResponse(res, 404, { success: false, message: 'Shipping label not found' });
     return;
   }
-  res.status(200).json({ success: true, data: result.label });
+  jsonResponse(res, 200, { success: true, data: result.label });
 };
 
 export const getLabelsByOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { orderId } = req.params;
   const labels = await getShippingLabelUseCase.findByOrderId(orderId);
-  res.status(200).json({ success: true, data: labels });
+  jsonResponse(res, 200, { success: true, data: labels });
 };
 
 export const voidLabel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -428,10 +429,10 @@ export const voidLabel = async (req: HttpRequest, res: HttpResponse): Promise<vo
   const { reason } = req.body as { reason?: string };
   const result = await voidShippingLabelUseCase.execute({ shippingLabelId: id, reason });
   if (!result.voided) {
-    res.status(404).json({ success: false, message: 'Label not found or already voided' });
+    jsonResponse(res, 404, { success: false, message: 'Label not found or already voided' });
     return;
   }
-  res.status(200).json({ success: true, data: result.label });
+  jsonResponse(res, 200, { success: true, data: result.label });
 };
 
 // ============================================================================
@@ -444,10 +445,10 @@ export const trackShipment = async (req: HttpRequest, res: HttpResponse): Promis
     trackingNumber: req.query.trackingNumber as string | undefined,
   });
   if (!result.found) {
-    res.status(404).json({ success: false, message: 'Tracking info not found' });
+    jsonResponse(res, 404, { success: false, message: 'Tracking info not found' });
     return;
   }
-  res.status(200).json({ success: true, data: result.tracking });
+  jsonResponse(res, 200, { success: true, data: result.tracking });
 };
 
 // ============================================================================
@@ -458,25 +459,25 @@ export const getSurchargesByRate = async (req: HttpRequest, res: HttpResponse): 
   const { rateId } = req.params;
   const { activeOnly } = req.query;
   const surcharges = await manageShippingConfigurationUseCase.listSurchargesByRate(rateId, activeOnly !== 'false');
-  res.status(200).json({ success: true, data: surcharges });
+  jsonResponse(res, 200, { success: true, data: surcharges });
 };
 
 export const getSurchargeById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const surcharge = await manageShippingConfigurationUseCase.findSurchargeById(id);
   if (!surcharge) {
-    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    jsonResponse(res, 404, { success: false, message: 'Surcharge not found' });
     return;
   }
-  res.status(200).json({ success: true, data: surcharge });
+  jsonResponse(res, 200, { success: true, data: surcharge });
 };
 
 export const createSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const surcharge = await manageShippingConfigurationUseCase.createSurcharge(req.body as CreateShippingSurchargeInput);
-    res.status(201).json({ success: true, data: surcharge });
+    jsonResponse(res, 201, { success: true, data: surcharge });
   } catch (error: unknown) {
-    res.status(getErrorStatusCode(error)).json({ success: false, message: getErrorMessage(error) });
+    jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
 };
 
@@ -485,18 +486,18 @@ export const updateSurcharge = async (req: HttpRequest, res: HttpResponse): Prom
   const input = req.body as UpdateShippingSurchargeInput;
   const surcharge = await manageShippingConfigurationUseCase.updateSurcharge(id, input);
   if (!surcharge) {
-    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    jsonResponse(res, 404, { success: false, message: 'Surcharge not found' });
     return;
   }
-  res.status(200).json({ success: true, data: surcharge });
+  jsonResponse(res, 200, { success: true, data: surcharge });
 };
 
 export const deleteSurcharge = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { id } = req.params;
   const deleted = await manageShippingConfigurationUseCase.deleteSurcharge(id);
   if (!deleted) {
-    res.status(404).json({ success: false, message: 'Surcharge not found' });
+    jsonResponse(res, 404, { success: false, message: 'Surcharge not found' });
     return;
   }
-  res.status(200).json({ success: true, message: 'Surcharge deleted' });
+  jsonResponse(res, 200, { success: true, message: 'Surcharge deleted' });
 };

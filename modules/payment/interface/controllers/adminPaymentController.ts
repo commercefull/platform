@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
   managePaymentGatewaysUseCase,
@@ -71,7 +72,7 @@ export const createPaymentGateway = async (req: HttpRequest, res: HttpResponse):
       checkoutSettings: {},
     } as Parameters<typeof managePaymentGatewaysUseCase.create>[0]);
 
-    res.redirect(`/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
+    redirectResponse(res, `/hub/payments/gateways/${gateway.paymentGatewayId}?success=Payment gateway created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -143,7 +144,7 @@ export const updatePaymentGateway = async (req: HttpRequest, res: HttpResponse):
 
   const _gateway = await managePaymentGatewaysUseCase.update(gatewayId, updates);
 
-  res.redirect(`/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
+  redirectResponse(res, `/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
 };
 
 export const deletePaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -155,7 +156,7 @@ export const deletePaymentGateway = async (req: HttpRequest, res: HttpResponse):
     throw new Error('Failed to delete payment gateway');
   }
 
-  res.json({ success: true, message: 'Payment gateway deleted successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Payment gateway deleted successfully' });
 };
 
 // ============================================================================
@@ -232,10 +233,10 @@ export const updateDisputeStatus = async (req: HttpRequest, res: HttpResponse): 
     const resolvedAt = status === 'resolved' ? new Date() : undefined;
 
     await managePaymentDisputesUseCase.updateStatus(disputeId, status, resolvedAt);
-    res.redirect(`/admin/payments/disputes/${disputeId}?success=Status updated`);
+    redirectResponse(res, `/admin/payments/disputes/${disputeId}?success=Status updated`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/payments/disputes/${req.params.disputeId}?error=${encodeURIComponent((error as Error).message)}`);
+    redirectResponse(res, `/admin/payments/disputes/${req.params.disputeId}?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
 
@@ -303,10 +304,10 @@ export const updatePaymentSettings = async (req: HttpRequest, res: HttpResponse)
       ...updates,
     });
 
-    res.redirect(`/admin/payments/settings?success=Settings updated`);
+    redirectResponse(res, `/admin/payments/settings?success=Settings updated`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    res.redirect(`/admin/payments/settings?error=${encodeURIComponent((error as Error).message)}`);
+    redirectResponse(res, `/admin/payments/settings?error=${encodeURIComponent((error as Error).message)}`);
   }
 };
 

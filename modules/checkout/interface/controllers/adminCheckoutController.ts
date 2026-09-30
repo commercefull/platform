@@ -1,3 +1,4 @@
+import { jsonResponse, redirectResponse } from "libs/apiResponse";
 /**
  * Checkout Controller for Admin Hub
  * Handles Checkout Configuration management
@@ -19,7 +20,7 @@ export const checkoutSettings = async (req: HttpRequest, res: HttpResponse): Pro
 
 export const updateCheckoutSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    res.redirect('/admin/settings/checkout?success=Checkout settings updated successfully');
+    redirectResponse(res, '/admin/settings/checkout?success=Checkout settings updated successfully');
   } catch (error: unknown) {
     logger.warn('Error updating checkout settings:', error);
     adminRespond(req, res, 'settings/checkout/index', {
@@ -41,7 +42,7 @@ export const listPaymentMethods = async (req: HttpRequest, res: HttpResponse): P
 };
 
 export const updatePaymentMethodOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Payment method order updated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Payment method order updated successfully' });
 };
 
 export const listShippingOptions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -53,5 +54,5 @@ export const listShippingOptions = async (req: HttpRequest, res: HttpResponse): 
 };
 
 export const updateShippingOptionOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  res.json({ success: true, message: 'Shipping option order updated successfully' });
+  jsonResponse(res, 200, { success: true, message: 'Shipping option order updated successfully' });
 };
