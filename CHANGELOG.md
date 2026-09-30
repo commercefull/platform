@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/commercefull/platform/compare/v1.3.2...v1.4.0) (2026-09-30)
+
+
+### Features
+
+* **events:** dedicated worker entrypoint for event consumers ([1670dc6](https://github.com/commercefull/platform/commit/1670dc6366bf9c2a76dcecbea6c233bfa41048c3))
+* **events:** pluggable event transports for cloud pub/sub providers ([b8ed763](https://github.com/commercefull/platform/commit/b8ed7639803b9a4d9ba88b16b3115849894a1633))
+
 ## [1.3.2](https://github.com/commercefull/platform/compare/v1.3.1...v1.3.2) (2026-09-29)
 
 
