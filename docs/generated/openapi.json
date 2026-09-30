@@ -32813,7 +32813,7 @@
           },
           "userType": {
             "type": "string",
-            "description": "string | undefined"
+            "description": "\"customer\" | \"organization\" | \"admin\" | undefined"
           },
           "type": {
             "type": "string"
@@ -32825,11 +32825,12 @@
             "type": "string"
           },
           "channel": {
-            "type": "string"
+            "type": "string",
+            "description": "\"email\" | \"in_app\" | \"inApp\" | \"push\" | \"sms\""
           },
           "priority": {
             "type": "string",
-            "description": "string | undefined"
+            "description": "\"low\" | \"normal\" | \"high\" | \"urgent\" | undefined"
           },
           "category": {
             "type": "string",
@@ -33017,7 +33018,7 @@
           },
           "status": {
             "type": "string",
-            "description": "string | undefined"
+            "description": "OrganizationStatus | undefined"
           }
         },
         "required": [
@@ -33054,7 +33055,7 @@
           },
           "status": {
             "type": "string",
-            "description": "string | undefined"
+            "description": "OrganizationStatus | undefined"
           }
         }
       },
