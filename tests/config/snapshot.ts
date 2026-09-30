@@ -32,6 +32,7 @@ const execPromise = async (file: string, args: string[] = [], envVars: Record<st
           if (line.match(/^\(Use `node --trace-/)) return false;
           if (line.match(/^NOTICE:/)) return false;
           if (line.match(/^npm notice/)) return false;
+          if (line.match(/^◇/)) return false;
           if (line.trim() === '') return false;
           return true;
         })
