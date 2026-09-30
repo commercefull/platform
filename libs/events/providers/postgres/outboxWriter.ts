@@ -16,6 +16,10 @@ import { logger } from '../../../logger';
 import { getCorrelationId } from '../../../correlationId';
 import type { EventType, EventPayload } from '../../eventBus';
 
+/** Shared INSERT statement — used by writeToOutbox and the provider publisher. */
+export const OUTBOX_INSERT_SQL = `INSERT INTO "platformEventOutbox" ("eventType", "payload", "correlationId", "source", "status", "attempts", "maxAttempts", "nextRetryAt")
+     VALUES ($1, $2, $3, $4, 'pending', 0, 10, now())`;
+
 export interface OutboxEvent {
   eventOutboxId: string;
   eventType: EventType;
@@ -45,12 +49,12 @@ export async function writeToOutbox(
   const correlationId = options?.correlationId ?? getCorrelationId();
   const source = options?.source;
 
-  const row = await tx.queryOne<{ eventOutboxId: string }>(
-    `INSERT INTO "platformEventOutbox" ("eventType", "payload", "correlationId", "source", "status", "attempts", "maxAttempts", "nextRetryAt")
-     VALUES ($1, $2, $3, $4, 'pending', 0, 10, now())
-     RETURNING "eventOutboxId"`,
-    [type, JSON.stringify(data), correlationId ?? null, source ?? null],
-  );
+  const row = await tx.queryOne<{ eventOutboxId: string }>(`${OUTBOX_INSERT_SQL}\n     RETURNING "eventOutboxId"`, [
+    type,
+    JSON.stringify(data),
+    correlationId ?? null,
+    source ?? null,
+  ]);
 
   const id = row?.eventOutboxId ?? '';
   logger.debug('Event written to outbox', { eventOutboxId: id, type, correlationId });

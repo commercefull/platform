@@ -15,14 +15,14 @@ class EventBus {
     this.emitter.setMaxListeners(100);
     // Default (memory) publisher: in-process dispatch with error boundaries.
     // initEventTransport() may replace this with a durable/cloud transport.
-    setEventDispatch(this.dispatchFromOutbox.bind(this));
+    setEventDispatch(this.dispatch.bind(this));
   }
 
   /**
    * Emit an event through the configured transport.
    * With the default memory provider this dispatches to registered handlers
    * in-process; other providers persist/publish for their subscriber to
-   * deliver to dispatchFromOutbox().
+   * deliver to dispatch().
    */
   async emit(type: EventType, data: unknown, correlationId?: string, source?: string): Promise<void> {
     const payload: EventPayload = {
@@ -33,21 +33,22 @@ class EventBus {
       source,
     };
 
-    logger.debug('Event emitted', { type, correlationId, source });
+    logger.debug('Event emitted', { type, correlationId: payload.correlationId, source });
     await getEventPublisher().publish(payload);
   }
 
   /**
-   * Dispatch an event payload from the outbox dispatcher.
+   * Dispatch a received event payload to registered handlers.
    *
-   * Unlike emit(), this method does NOT write to the outbox. It directly
-   * invokes registered handlers with error boundaries. If any handler
-   * throws, the error is re-thrown so the dispatcher can schedule a retry.
+   * Used by every provider's subscriber (postgres outbox loop, cloud
+   * receive loops, memory fallback). Unlike emit(), this does NOT publish —
+   * it invokes handlers directly with per-handler error boundaries. If any
+   * handler throws, the error is re-thrown so the provider can retry/nack.
    */
-  async dispatchFromOutbox(payload: EventPayload): Promise<void> {
+  async dispatch(payload: EventPayload): Promise<void> {
     const { type } = payload;
 
-    logger.debug('Dispatching outbox event', { type, correlationId: payload.correlationId });
+    logger.debug('Dispatching event', { type, correlationId: payload.correlationId });
 
     // Emit to EventEmitter listeners (wildcard + specific)
     this.emitter.emit(type, payload);
@@ -61,7 +62,7 @@ class EventBus {
       try {
         await handler(payload);
       } catch (err: unknown) {
-        logger.error('Outbox event handler error (boundary caught)', {
+        logger.error('Event handler error (boundary caught)', {
           type,
           correlationId: payload.correlationId,
           error: (err as Error).message,
@@ -71,10 +72,15 @@ class EventBus {
       }
     }
 
-    // If any handler failed, re-throw so the dispatcher can retry
+    // If any handler failed, re-throw so the subscriber can retry/nack
     if (errors.length > 0) {
-      throw new Error(`Outbox dispatch failed for ${type}: ${errors.length} handler(s) failed. First error: ${errors[0].message}`);
+      throw new Error(`Event dispatch failed for ${type}: ${errors.length} handler(s) failed. First error: ${errors[0].message}`);
     }
+  }
+
+  /** @deprecated Use dispatch() — provider-neutral name. */
+  dispatchFromOutbox(payload: EventPayload): Promise<void> {
+    return this.dispatch(payload);
   }
 
   /**

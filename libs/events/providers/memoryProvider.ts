@@ -11,6 +11,7 @@ import type { EventTransport } from '../eventTransport';
 
 export function createMemoryTransport(dispatch: (payload: EventPayload) => Promise<void>): EventTransport {
   return {
+    provider: 'memory',
     publisher: {
       // Dispatch re-throws an aggregate error after logging each handler
       // failure; in-process emit has always been best-effort, so swallow it.

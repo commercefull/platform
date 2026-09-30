@@ -23,7 +23,6 @@ import { registerAllEventHandlers } from './boot/registerEventHandlers';
 import { startEventSubscriber, stopEventTransport } from './libs/events/transportRegistry';
 import { initEventTransport } from './libs/events/providers';
 import { eventBus } from './libs/events/eventBus';
-import { initializeAnalyticsHandlers } from './modules/analytics';
 import { initializeScheduledJobs } from './boot/scheduledJobs';
 import { registerModuleManifestsSync } from './boot/moduleManifests';
 import { themeRegistry } from './modules/theme/domain/services/ThemeRegistry';
@@ -37,14 +36,20 @@ validateAllSecrets();
 
 // Register handlers, install the transport, and start consuming.
 registerAllEventHandlers();
-initializeAnalyticsHandlers();
 
-initEventTransport(eventBus.dispatchFromOutbox.bind(eventBus))
+// Readiness flipped once the subscriber is consuming — /health reports
+// 503 until then so orchestrators don't route/probe too early.
+let consuming = false;
+
+initEventTransport(eventBus.dispatch.bind(eventBus))
   .then(provider => {
     logger.info('Event worker transport ready', { provider });
     return startEventSubscriber();
   })
-  .then(() => logger.info('Event worker consuming'))
+  .then(() => {
+    consuming = true;
+    logger.info('Event worker consuming');
+  })
   .catch(err => {
     logger.error('Event transport init failed', { error: (err as Error).message });
     process.exit(1);
@@ -60,8 +65,8 @@ let server: http.Server | null = null;
 if (process.env.WORKER_NO_HTTP !== '1') {
   server = http.createServer((req, res) => {
     if (req.url === '/health') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end('{"status":"ok","role":"worker"}');
+      res.writeHead(consuming ? 200 : 503, { 'content-type': 'application/json' });
+      res.end(consuming ? '{"status":"ok","role":"worker"}' : '{"status":"starting","role":"worker"}');
     } else {
       res.writeHead(404).end();
     }

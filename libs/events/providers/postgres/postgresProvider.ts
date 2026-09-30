@@ -12,19 +12,22 @@
 
 import { getActivePool } from '../../../db/pool';
 import { startOutboxDispatcher, stopOutboxDispatcher } from './outboxDispatcher';
+import { OUTBOX_INSERT_SQL } from './outboxWriter';
 import type { EventTransport } from '../../eventTransport';
 import { logger } from '../../../logger';
 
 export function createPostgresTransport(): EventTransport {
   return {
+    provider: 'postgres',
     publisher: {
       async publish(payload) {
         const pool = getActivePool();
-        await pool.query(
-          `INSERT INTO "platformEventOutbox" ("eventType", "payload", "correlationId", "source", "status", "attempts", "maxAttempts", "nextRetryAt")
-           VALUES ($1, $2, $3, $4, 'pending', 0, 10, now())`,
-          [payload.type, JSON.stringify(payload.data), payload.correlationId ?? null, payload.source ?? null],
-        );
+        await pool.query(OUTBOX_INSERT_SQL, [
+          payload.type,
+          JSON.stringify(payload.data),
+          payload.correlationId ?? null,
+          payload.source ?? null,
+        ]);
         logger.debug('Event published to outbox transport', {
           type: payload.type,
           correlationId: payload.correlationId,

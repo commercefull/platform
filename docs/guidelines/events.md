@@ -22,7 +22,7 @@ Outbox Dispatcher (background worker)
 
 ## Transport Providers
 
-`eventBus.emit()` publishes through a pluggable transport selected by `EVENT_BUS_PROVIDER`. The transport is split into a **publisher** (producer side — `emit()`/`writeToOutbox`) and a **subscriber** (consumer side — receives payloads and feeds them to `eventBus.dispatchFromOutbox()`).
+`eventBus.emit()` publishes through a pluggable transport selected by `EVENT_BUS_PROVIDER`. The transport is split into a **publisher** (producer side — `emit()`/`writeToOutbox`) and a **subscriber** (consumer side — receives payloads and feeds them to `eventBus.dispatch()`).
 
 | Provider             | `EVENT_BUS_PROVIDER` | Required env vars                                              | Delivery                       |
 | -------------------- | -------------------- | -------------------------------------------------------------- | ------------------------------ |
@@ -151,7 +151,7 @@ Dispatcher details:
 | Flag                | Effect                                                    |
 | ------------------- | --------------------------------------------------------- |
 | `EVENT_BUS_PROVIDER` | Transport provider (see above; default `memory`)         |
-| `OUTBOX_DISABLED=1` | Legacy flag — treated as `memory` provider                |
+| `OUTBOX_DISABLED=1` | Legacy alias — forces the `memory` provider (overrides `EVENT_BUS_PROVIDER`) |
 | `CRON_DISABLED=1`   | Skip scheduled jobs startup                               |
 
 ## Analytics Handlers

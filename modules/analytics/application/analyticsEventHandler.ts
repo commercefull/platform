@@ -21,10 +21,15 @@ interface EventPayload {
 // Event Handlers
 // ============================================================================
 
+let handlersInitialized = false;
+
 /**
  * Initialize all analytics event handlers
  */
 export function initializeAnalyticsHandlers(): void {
+  if (handlersInitialized) return;
+  handlersInitialized = true;
+
   // Order events
   eventBus.registerHandler('order.created', handleOrderCreated);
   eventBus.registerHandler('order.completed', handleOrderCompleted);

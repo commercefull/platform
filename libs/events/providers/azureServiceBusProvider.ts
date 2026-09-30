@@ -73,6 +73,7 @@ export async function createAzureServiceBusTransport(
   let receiver: ServiceBusReceiverLike | null = null;
 
   const transport: EventTransport = {
+    provider: 'azure-servicebus',
     publisher: {
       async publish(payload) {
         if (!sender) {

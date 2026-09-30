@@ -8,9 +8,9 @@
  * (configured in infra) routes to the dead-letter queue.
  *
  * Config:
- *   AWS_EVENT_QUEUE_URL   (required) SQS queue URL — same queue for
- *                         publishing and consuming; set it on workers only
- *                         for publish-only nodes use AWS_EVENT_QUEUE_URL too
+ *   AWS_EVENT_QUEUE_URL   (required) SQS queue URL — the same queue is used
+ *                         for publishing and consuming. A node that only
+ *                         publishes can simply never start the subscriber.
  *   AWS_REGION            (required) e.g. us-east-1
  *
  * Requires optional peer dep: @aws-sdk/client-sqs
@@ -51,9 +51,11 @@ export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env
     );
 
   let stopping = false;
+  let started = false;
   let pollTimer: NodeJS.Timeout | null = null;
 
   return {
+    provider: 'aws-sqs',
     publisher: {
       async publish(payload) {
         await sqs.send({
@@ -62,6 +64,9 @@ export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env
             MessageBody: JSON.stringify(payload),
             MessageAttributes: {
               eventType: { DataType: 'String', StringValue: payload.type },
+              ...(payload.correlationId
+                ? { correlationId: { DataType: 'String', StringValue: payload.correlationId } }
+                : {}),
             },
           },
         });
@@ -73,6 +78,8 @@ export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env
     },
     subscriber: {
       start(dispatch) {
+        if (started) return;
+        started = true;
         stopping = false;
 
         const poll = async () => {
@@ -112,7 +119,11 @@ export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env
       },
       async stop() {
         stopping = true;
-        if (pollTimer) clearTimeout(pollTimer);
+        started = false;
+        if (pollTimer) {
+          clearTimeout(pollTimer);
+          pollTimer = null;
+        }
       },
     },
   };

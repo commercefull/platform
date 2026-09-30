@@ -17,7 +17,6 @@
  */
 
 import { getActivePool } from '../../../db/pool';
-import { eventBus } from '../../eventBus';
 import { outboxRowToPayload, type OutboxEvent } from './outboxWriter';
 import type { EventPayload } from '../../eventTypes';
 import { logger } from '../../../logger';
@@ -26,7 +25,7 @@ export type OutboxDispatchFn = (payload: EventPayload) => Promise<void>;
 
 const POLL_INTERVAL_MS = 500;
 const BATCH_SIZE = 20;
-const _LOCK_TIMEOUT_MS = 30_000; // auto-release lock after 30s
+const STALE_LOCK_MS = 300_000; // re-queue rows claimed >5min ago (crashed worker)
 const BASE_BACKOFF_MS = 2_000;
 const MAX_BACKOFF_MS = 300_000; // 5 minutes
 const MAX_ATTEMPTS_DEFAULT = 10;
@@ -39,12 +38,10 @@ let inFlight = 0;
 let shuttingDown = false;
 
 /**
- * Start the outbox dispatcher polling loop.
+ * Start the outbox dispatcher polling loop. `dispatch` receives each claimed
+ * payload — the postgres provider passes eventBus.dispatch.
  */
-export function startOutboxDispatcher(
-  intervalMs: number = POLL_INTERVAL_MS,
-  dispatch: OutboxDispatchFn = eventBus.dispatchFromOutbox.bind(eventBus),
-): void {
+export function startOutboxDispatcher(intervalMs: number = POLL_INTERVAL_MS, dispatch: OutboxDispatchFn): void {
   if (isRunning) return;
   isRunning = true;
   shuttingDown = false;
@@ -100,6 +97,23 @@ async function dispatchBatch(dispatch: OutboxDispatchFn): Promise<void> {
   const client = await pool.connect();
 
   try {
+    // Re-queue events stranded in 'processing' by a crashed worker. The lock
+    // auto-expires after STALE_LOCK_MS so rows never get stuck forever.
+    const recovered = await client.query(
+      `UPDATE "platformEventOutbox"
+       SET "status" = 'pending',
+           "lockedBy" = NULL,
+           "lockedAt" = NULL,
+           "updatedAt" = now()
+       WHERE "status" = 'processing'
+         AND "lockedAt" < now() - ($1 || ' milliseconds')::interval
+       RETURNING "eventOutboxId"`,
+      [String(STALE_LOCK_MS)],
+    );
+    if (recovered.rows.length > 0) {
+      logger.warn('Re-queued stale processing outbox events', { count: recovered.rows.length });
+    }
+
     // Claim pending events
     const claimResult = await client.query(
       `UPDATE "platformEventOutbox"
@@ -128,8 +142,11 @@ async function dispatchBatch(dispatch: OutboxDispatchFn): Promise<void> {
     const dispatchPromises = claimResult.rows.map(row => dispatchOne(client, row as unknown as OutboxEvent, dispatch));
 
     inFlight += dispatchPromises.length;
-    await Promise.all(dispatchPromises);
-    inFlight -= dispatchPromises.length;
+    try {
+      await Promise.all(dispatchPromises);
+    } finally {
+      inFlight -= dispatchPromises.length;
+    }
   } finally {
     client.release();
   }

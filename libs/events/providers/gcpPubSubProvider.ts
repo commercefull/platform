@@ -56,8 +56,10 @@ export async function createGcpPubSubTransport(env: NodeJS.ProcessEnv = process.
     );
 
   const topic = client.topic(topicName);
+  let subscription: PubSubSubscriptionLike | null = null;
 
   return {
+    provider: 'gcp-pubsub',
     publisher: {
       async publish(payload) {
         await topic.publishMessage({
@@ -76,7 +78,7 @@ export async function createGcpPubSubTransport(env: NodeJS.ProcessEnv = process.
     subscriber: env.GCP_PUBSUB_SUBSCRIPTION
       ? {
           start(dispatch) {
-            const subscription = client.subscription(env.GCP_PUBSUB_SUBSCRIPTION!);
+            subscription = client.subscription(env.GCP_PUBSUB_SUBSCRIPTION!);
             subscription.on('message', async (msg: PubSubMessage) => {
               try {
                 await dispatch(JSON.parse(msg.data.toString()) as EventPayload);
@@ -93,7 +95,8 @@ export async function createGcpPubSubTransport(env: NodeJS.ProcessEnv = process.
             });
           },
           async stop() {
-            await client.subscription(env.GCP_PUBSUB_SUBSCRIPTION!).close();
+            await subscription?.close();
+            subscription = null;
           },
         }
       : undefined,

@@ -10,7 +10,7 @@
  * - `postgres`          — durable transactional outbox on platformEventOutbox,
  *                         drained by the claim-based outbox dispatcher
  * - `gcp-pubsub`        — Google Cloud Pub/Sub topic + pull subscription
- * - `aws-sqs`        — SQS queue publish + consume
+ * - `aws-sqs`           — SQS queue publish + consume
  * - `azure-servicebus`  — Service Bus topic + subscription
  *
  * Select with EVENT_BUS_PROVIDER. A provider may omit `subscriber` when
@@ -34,6 +34,8 @@ export interface EventSubscriber {
 }
 
 export interface EventTransport {
+  /** Which provider built this transport — for logging and health reporting. */
+  provider: EventBusProvider;
   publisher: EventPublisher;
   subscriber?: EventSubscriber;
 }

@@ -42,6 +42,10 @@ describe('resolveEventBusProvider', () => {
     }
   });
 
+  it('should force memory when OUTBOX_DISABLED=1 even with a provider set', () => {
+    expect(resolveEventBusProvider(env({ EVENT_BUS_PROVIDER: 'postgres', OUTBOX_DISABLED: '1' }))).toBe('memory');
+  });
+
   it('should fall back to memory on an unknown provider', () => {
     expect(resolveEventBusProvider(env({ EVENT_BUS_PROVIDER: 'kafka' }))).toBe('memory');
   });
@@ -111,6 +115,16 @@ describe('gcp-pubsub provider', () => {
     expect(call.attributes).toMatchObject({ eventType: 'order.created', correlationId: 'corr-1' });
   });
 
+  it('should close the started subscription on stop', async () => {
+    const { client, subscription } = makeClient();
+    const t = await createGcpPubSubTransport(gcpEnv, { client });
+    await t.subscriber!.start(jest.fn());
+    await t.subscriber!.stop();
+    // Must close the instance that has the listener — not a fresh lookup
+    expect(subscription.close).toHaveBeenCalled();
+    expect(client.subscription).toHaveBeenCalledTimes(1);
+  });
+
   it('should ack on successful dispatch and nack on failure', async () => {
     const { client, handlers } = makeClient();
     const dispatch = jest.fn().mockResolvedValue(undefined);
@@ -145,6 +159,20 @@ describe('aws-sqs provider', () => {
     expect(input.QueueUrl).toBe(awsEnv.AWS_EVENT_QUEUE_URL);
     expect(JSON.parse(input.MessageBody)).toMatchObject({ type: 'order.created' });
     expect(input.MessageAttributes.eventType.StringValue).toBe('order.created');
+    expect(input.MessageAttributes.correlationId.StringValue).toBe('corr-1');
+  });
+
+  it('should ignore a second start while already consuming', async () => {
+    const send = jest.fn().mockResolvedValue({ Messages: [] });
+    const t = await createAwsSqsTransport(awsEnv, { sqs: { send, destroy: jest.fn() } });
+    await t.subscriber!.start(jest.fn());
+    await t.subscriber!.start(jest.fn());
+    await t.subscriber!.stop();
+    // Polls run back-to-back; only the first loop's sends count toward the
+    // assertion window — a second start must not double them.
+    const callsAfterStart = send.mock.calls.length;
+    await new Promise(r => setTimeout(r, 20));
+    expect(send.mock.calls.length).toBe(callsAfterStart);
   });
 
   it('should consume, dispatch and delete SQS messages', async () => {
@@ -217,6 +245,6 @@ describe('initEventTransport', () => {
   it('should install the transport so emit() uses the provider publisher', async () => {
     await initEventTransport(jest.fn(), env({ EVENT_BUS_PROVIDER: 'memory' }));
     expect(getEventPublisher()).toBeDefined();
-    setEventTransport({ publisher: { publish: jest.fn() } }); // reset-ish for other suites
+    setEventTransport({ provider: 'memory', publisher: { publish: jest.fn() } }); // reset-ish for other suites
   });
 });

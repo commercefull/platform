@@ -18,7 +18,6 @@ import { startQueryCounterContext } from './libs/db/queryCounter';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
-import { initializeAnalyticsHandlers } from './modules/analytics';
 import { configureRoutes } from './boot/routes';
 import { expressHttpLogger, logger } from './libs/logger';
 import { errorMiddleware } from './libs/errorMiddleware';
@@ -56,15 +55,14 @@ blockSchemaRegistry.registerBuiltIns();
 // Validate all required secrets before any service starts
 validateAllSecrets();
 
-// Initialize event handlers and event transport
+// Initialize event handlers (module-gated; analytics included) and event transport
 registerAllEventHandlers();
-initializeAnalyticsHandlers();
 
 // Install the configured event transport and start its subscriber.
 // EVENT_BUS_PROVIDER=memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus
 // (default: memory — in-process dispatch). OUTBOX_DISABLED=1 is a legacy
-// alias for the memory provider.
-initEventTransport(eventBus.dispatchFromOutbox.bind(eventBus))
+// override that forces the memory provider.
+initEventTransport(eventBus.dispatch.bind(eventBus))
   .then(() => startEventSubscriber())
   .catch(err => {
     logger.error('Event transport init failed; staying on in-memory dispatch', {

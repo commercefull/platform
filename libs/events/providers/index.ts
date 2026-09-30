@@ -19,21 +19,28 @@ const VALID_PROVIDERS: EventBusProvider[] = ['memory', 'postgres', 'gcp-pubsub',
 
 /**
  * Resolve the configured provider. Defaults to `memory` (historical
- * behavior). `OUTBOX_DISABLED=1` forces memory for backwards compatibility.
+ * behavior). `OUTBOX_DISABLED=1` is a legacy alias that forces `memory`
+ * even when EVENT_BUS_PROVIDER is set.
  */
 export function resolveEventBusProvider(env: NodeJS.ProcessEnv = process.env): EventBusProvider {
   const raw = env.EVENT_BUS_PROVIDER;
+  if (env.OUTBOX_DISABLED === '1') {
+    if (raw && raw !== 'memory') {
+      logger.warn('OUTBOX_DISABLED=1 overrides EVENT_BUS_PROVIDER', { provider: raw });
+    }
+    return 'memory';
+  }
   if (raw) {
     if ((VALID_PROVIDERS as string[]).includes(raw)) return raw as EventBusProvider;
     logger.warn('Unknown EVENT_BUS_PROVIDER, falling back to memory', { provider: raw });
-    return 'memory';
   }
-  // Default preserves historical behavior: in-process dispatch regardless of
-  // OUTBOX_DISABLED (the flag now only exists as a legacy hint).
   return 'memory';
 }
 
-export async function createEventTransport(dispatch: DispatchFn, env: NodeJS.ProcessEnv = process.env): Promise<EventTransport> {
+export async function createEventTransport(
+  dispatch: DispatchFn,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<EventTransport> {
   const provider = resolveEventBusProvider(env);
 
   switch (provider) {
@@ -60,9 +67,8 @@ export async function createEventTransport(dispatch: DispatchFn, env: NodeJS.Pro
  * Build and install the configured transport. Called once at application boot.
  */
 export async function initEventTransport(dispatch: DispatchFn, env: NodeJS.ProcessEnv = process.env): Promise<EventBusProvider> {
-  const provider = resolveEventBusProvider(env);
   const transport = await createEventTransport(dispatch, env);
   setEventTransport(transport);
-  logger.info('Event transport initialized', { provider });
-  return provider;
+  logger.info('Event transport initialized', { provider: transport.provider });
+  return transport.provider;
 }
