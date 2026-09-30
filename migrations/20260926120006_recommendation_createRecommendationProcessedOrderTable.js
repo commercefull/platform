@@ -10,7 +10,9 @@ exports.up = async function (knex) {
   await knex.schema.createTable('recommendationProcessedOrder', t => {
     // Natural PK: the order's own id — no uuidv7() default (dedupe ledger).
     t.uuid('orderId').primary();
-    t.uuid('organizationId').notNullable();
+    // Nullable: unscoped orders (lines without an organization) are
+    // recorded as 'skipped' in this dedupe ledger.
+    t.uuid('organizationId').nullable();
     t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
     t.specificType('productIds', 'uuid[]').notNullable();
     t.string('status', 20).notNullable().defaultTo('counted'); // counted | reversed | skipped
