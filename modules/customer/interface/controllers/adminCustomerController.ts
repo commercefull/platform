@@ -7,6 +7,7 @@ import { jsonResponse, redirectResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { VerifyCustomerCommand } from '../../application/useCases/VerifyCustomer';
 import { AddAddressCommand } from '../../application/useCases/ManageAddresses';
+import type { AddressType } from '../../domain/entities/Customer';
 import {
   getCustomerUseCase,
   updateCustomerUseCase,
@@ -210,7 +211,7 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
     postalCode: string;
     country: string;
     countryCode?: string;
-    addressType?: 'billing' | 'shipping';
+    addressType?: AddressType;
     addressLine2?: string;
     phone?: string;
     firstName?: string;

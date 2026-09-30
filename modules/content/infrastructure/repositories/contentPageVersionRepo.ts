@@ -14,7 +14,7 @@ import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
 export type PageVersionCreateParams = {
   contentPageId: string;
   title: string;
-  status: string;
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
   summary?: string;
   content?: Record<string, unknown>;
   customFields?: Record<string, unknown>;

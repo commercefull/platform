@@ -6,6 +6,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 import { CustomerAddressNotFoundError, CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { CustomerAddress } from '../../../../libs/db/types';
+import type { AddressType } from '../../domain/entities/Customer';
 
 // ============================================================================
 // Commands
@@ -20,7 +21,7 @@ export class AddAddressCommand {
     public readonly postalCode: string,
     public readonly country: string,
     public readonly countryCode: string,
-    public readonly addressType: 'billing' | 'shipping',
+    public readonly addressType: AddressType | undefined,
     public readonly addressLine2?: string,
     public readonly phone?: string,
     public readonly firstName?: string,
@@ -66,7 +67,7 @@ export interface AddressResponse {
   postalCode: string;
   country: string;
   countryCode: string;
-  addressType: string;
+  addressType: AddressType;
   isDefault: boolean;
   phone?: string;
   firstName?: string;

@@ -154,8 +154,8 @@ export const listInventoryLocations = async (req: HttpRequest, res: HttpResponse
   // Get inventory locations from the inventoryLocation table
   const inventoryLocations = await manageInventoryLocationsUseCase.findLocations(undefined, limit, offset);
   const inventoryData = inventoryLocations
-    .filter(loc => includeInactive || loc.status !== 'inactive')
-    .map(loc => ({ ...loc, isActive: loc.status === 'available' || loc.status === 'active' }));
+    .filter(loc => includeInactive || loc.status === 'available')
+    .map(loc => ({ ...loc, isActive: loc.status === 'available' }));
 
   // Merge both sources
   const data = [...storeData, ...inventoryData];

@@ -18,7 +18,7 @@ export class UpdatePageCommand {
     public readonly slug?: string,
     public readonly templateId?: string,
     public readonly status?: 'draft' | 'published' | 'scheduled' | 'archived',
-    public readonly visibility?: 'public' | 'private' | 'password_protected',
+    public readonly visibility?: 'public' | 'private' | 'passwordProtected',
     public readonly summary?: string,
     public readonly featuredImage?: string,
     public readonly metaTitle?: string,

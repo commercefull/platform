@@ -39,7 +39,7 @@ describe('ManageContentUseCase', () => {
 
   it('should create a page', async () => {
     repo.createPage.mockResolvedValue(createContentPage({ contentPageId: 'new', title: 'New' }));
-    const params = { title: 'New', slug: 'new', contentTypeId: 'ct-1', status: 'draft', visibility: 'public' };
+    const params = { title: 'New', slug: 'new', contentTypeId: 'ct-1', status: 'draft' as const, visibility: 'public' as const };
 
     const result = await useCase.createPage(params);
 

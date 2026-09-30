@@ -106,7 +106,7 @@ export const createLocale = async (
       countryCode: countryCode || null,
       isActive: isActive ?? true,
       isDefault: isDefault ?? false,
-      textDirection: textDirection || 'ltr',
+      textDirection: (textDirection || 'ltr') as 'ltr' | 'rtl',
       dateFormat: dateFormat || 'YYYY-MM-DD',
       timeFormat: timeFormat || 'HH:mm:ss',
       timeZone: timeZone || 'UTC',

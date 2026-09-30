@@ -7,6 +7,9 @@ import { CustomerAddressNotFoundError } from '../errors/CustomerErrors';
 
 export type CustomerStatus = 'active' | 'inactive' | 'suspended' | 'deleted';
 
+/** customerAddress.addressType — 'both' covers billing+shipping defaults. */
+export type AddressType = 'billing' | 'shipping' | 'both';
+
 export interface CustomerAddress {
   addressId: string;
   addressLine1: string;
@@ -16,7 +19,7 @@ export interface CustomerAddress {
   postalCode: string;
   country: string;
   countryCode: string;
-  addressType: 'billing' | 'shipping';
+  addressType: AddressType;
   isDefault: boolean;
   phone?: string;
   firstName?: string;
@@ -269,7 +272,7 @@ export class Customer {
     this.touch();
   }
 
-  setDefaultAddress(addressId: string, type: 'billing' | 'shipping'): void {
+  setDefaultAddress(addressId: string, type: AddressType): void {
     const address = this.props.addresses.find(a => a.addressId === addressId);
     if (!address) {
       throw new CustomerAddressNotFoundError(addressId);
@@ -282,9 +285,10 @@ export class Customer {
       }
     });
 
-    if (type === 'shipping') {
+    if (type === 'shipping' || type === 'both') {
       this.props.defaultShippingAddressId = addressId;
-    } else {
+    }
+    if (type === 'billing' || type === 'both') {
       this.props.defaultBillingAddressId = addressId;
     }
     this.touch();

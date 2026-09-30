@@ -14,7 +14,7 @@ export type LocaleRecord = {
   countryCode: string | null;
   isActive: boolean;
   isDefault: boolean;
-  textDirection: string;
+  textDirection: 'ltr' | 'rtl';
   dateFormat: string;
   timeFormat: string;
   timeZone: string;

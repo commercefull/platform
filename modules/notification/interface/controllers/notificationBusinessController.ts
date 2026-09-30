@@ -20,12 +20,12 @@ import { NotificationTemplate, NotificationPreference } from '../../application/
 // Typed body interfaces
 interface CreateNotificationBody {
   userId: string;
-  userType?: string;
+  userType?: 'customer' | 'organization' | 'admin';
   type: string;
   title: string;
   content: string;
-  channel: string;
-  priority?: string;
+  channel: 'email' | 'in_app' | 'inApp' | 'push' | 'sms';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
   category?: string;
   data?: Record<string, unknown>;
   metadata?: Record<string, unknown>;

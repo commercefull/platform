@@ -60,7 +60,7 @@ export class OrganizationCredentialSubjectAdapter implements CredentialSubjectPo
       email: data.email,
       phone: data.phone,
       password: data.password,
-      status: data.status ?? 'pending',
+      status: (data.status ?? 'pending') as 'pending' | 'active' | 'suspended' | 'inactive' | 'rejected',
     });
     return {
       id: org.organizationId,

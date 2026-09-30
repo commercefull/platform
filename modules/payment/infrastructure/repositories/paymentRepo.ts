@@ -556,7 +556,7 @@ export class PaymentRepo {
       const transaction = await this.createTransaction({
         orderPaymentId: paymentData.orderPaymentId,
         orderId: paymentData.orderId,
-        type: 'payment',
+        type: 'sale',
         amountCents: paymentData.amountCents,
         currencyCode: paymentData.currency,
         status: 'paid',

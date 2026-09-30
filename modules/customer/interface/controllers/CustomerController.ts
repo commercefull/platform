@@ -8,6 +8,7 @@ import { jsonResponse } from "libs/apiResponse";
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { CustomerAddress } from '../../../../libs/db/types';
+import type { AddressType } from '../../domain/entities/Customer';
 
 import { RegisterCustomerCommand } from '../../application/useCases/RegisterCustomer';
 import { GetCustomerCommand } from '../../application/useCases/GetCustomer';
@@ -158,7 +159,7 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse): Promise<v
     postalCode: string;
     country: string;
     countryCode?: string;
-    addressType: 'billing' | 'shipping';
+    addressType: AddressType;
     phone?: string;
     firstName?: string;
     lastName?: string;
@@ -430,7 +431,7 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
     postalCode: string;
     country: string;
     countryCode?: string;
-    addressType: 'billing' | 'shipping';
+    addressType: AddressType;
     phone?: string;
     firstName?: string;
     lastName?: string;

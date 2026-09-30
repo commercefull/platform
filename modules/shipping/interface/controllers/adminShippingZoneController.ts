@@ -48,7 +48,7 @@ export const createShippingZone = async (req: HttpRequest, res: HttpResponse): P
     const zone = await manageShippingZonesUseCase.create({
       name,
       description: description || null,
-      locationType: locationType || 'country',
+      locationType: (locationType || 'country') as 'continent' | 'country' | 'region' | 'state' | 'zipcode',
       locations: locations ? JSON.parse(locations) : [],
       excludedLocations: excludedLocations ? JSON.parse(excludedLocations) : undefined,
       priority: priority ? parseInt(priority) : 0,

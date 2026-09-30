@@ -19,31 +19,56 @@ const resolveEnvironmentConfig = (environment: string): Knex.Config => {
   return config as Knex.Config;
 };
 
+const toTypeName = (table: string): string =>
+  table.charAt(0).toUpperCase() + table.slice(1).replace(/(\d)([a-z])/g, (_m, d, c) => d + c.toUpperCase());
+
+const rewriteColumnType = (source: string, table: string, col: string, tsType: string): string => {
+  const blockRe = new RegExp(`export type ${toTypeName(table)} = \\{([\\s\\S]*?)\\};`);
+  const match = source.match(blockRe);
+  if (!match) return source;
+
+  let block = match[1];
+  // Preserve optionality: `col: string | null` -> `col: 'a' | 'b' | null`
+  const fieldRe = new RegExp(`(\\s${col}:) string( \\| null)?`, 'g');
+  block = block.replace(fieldRe, (_m, prefix, nullable) => `${prefix} ${tsType}${nullable ?? ''}`);
+  return source.replace(blockRe, `export type ${toTypeName(table)} = {${block}};`);
+};
+
 // knex-types maps Postgres bigint (int8) to `string`, but the pg driver is
 // configured (libs/db/pool.ts) to parse int8 into JS numbers. Post-process the
 // generated file so bigint columns are typed `number`, matching runtime values.
 const rewriteBigintFields = (columnsByTable: Map<string, Set<string>>): void => {
   let source = fs.readFileSync(TEMP_PATH, 'utf8');
 
-  // Generated blocks look like: export type TableName = { ... col: string; col: string | null; ... }
-  // knex-types names types upperFirst(camelCase(tableName)) — digits split words
-  // (e.g. "b2bQuote" -> "B2BQuote"). Table names are already camelCase, so
-  // uppercase the first letter and any letter following a digit.
-  const toTypeName = (table: string): string =>
-    table.charAt(0).toUpperCase() + table.slice(1).replace(/(\d)([a-z])/g, (_m, d, c) => d + c.toUpperCase());
-
   for (const [table, columns] of columnsByTable) {
-    const typeName = toTypeName(table);
-    const blockRe = new RegExp(`export type ${typeName} = \\{([\\s\\S]*?)\\};`);
-    const match = source.match(blockRe);
-    if (!match) continue;
-
-    let block = match[1];
     for (const col of columns) {
-      const fieldRe = new RegExp(`(\\s${col}:) string`, 'g');
-      block = block.replace(fieldRe, '$1 number');
+      source = rewriteColumnType(source, table, col, 'number');
     }
-    source = source.replace(blockRe, `export type ${typeName} = {${block}};`);
+  }
+
+  fs.writeFileSync(OUTPUT_PATH, source);
+};
+
+// Knex `t.enum(col, [...])` (non-native) stores text/varchar + a CHECK
+// constraint (`col = ANY (ARRAY['a', 'b', ...])`). knex-types types the column
+// as plain `string`, hiding the allowed values. Extract single-column enum
+// CHECKs and rewrite them as string-literal unions so writes of invalid
+// values fail type-checking.
+const parseEnumLiterals = (definition: string): string[] | null => {
+  const m = definition.match(/ARRAY\[([\s\S]*?)\]/) ?? definition.match(/\bIN\s*\(([\s\S]*?)\)/);
+  if (!m) return null;
+  const literals = [...m[1].matchAll(/'((?:[^']|'')*)'/g)].map(x => x[1].replace(/''/g, "'"));
+  return literals.length > 0 ? literals : null;
+};
+
+const rewriteEnumFields = (enumColumns: Map<string, Map<string, string[]>>): void => {
+  let source = fs.readFileSync(OUTPUT_PATH, 'utf8');
+
+  for (const [table, columns] of enumColumns) {
+    for (const [col, literals] of columns) {
+      const union = literals.map(l => `'${l.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`).join(' | ');
+      source = rewriteColumnType(source, table, col, union);
+    }
   }
 
   fs.writeFileSync(OUTPUT_PATH, source);
@@ -67,6 +92,25 @@ async function main(): Promise<void> {
     columnsByTable.get(table_name)!.add(column_name);
   }
 
+  // Single-column CHECK constraints carrying enum literal lists.
+  const { rows: checkRows } = await db.raw(
+    `SELECT rel.relname AS table_name, a.attname AS column_name,
+            pg_get_constraintdef(con.oid) AS definition
+     FROM pg_constraint con
+     JOIN pg_class rel ON rel.oid = con.conrelid
+     JOIN pg_namespace n ON n.oid = con.connamespace
+     JOIN pg_attribute a ON a.attrelid = con.conrelid AND a.attnum = con.conkey[1]
+     WHERE con.contype = 'c' AND n.nspname = 'public'
+       AND array_length(con.conkey, 1) = 1`,
+  );
+  const enumColumns = new Map<string, Map<string, string[]>>();
+  for (const { table_name, column_name, definition } of checkRows) {
+    const literals = parseEnumLiterals(definition);
+    if (!literals) continue;
+    if (!enumColumns.has(table_name)) enumColumns.set(table_name, new Map());
+    enumColumns.get(table_name)!.set(column_name, literals);
+  }
+
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
 
   // updateTypes resolves before its write stream finishes — await 'finish'
@@ -80,6 +124,7 @@ async function main(): Promise<void> {
 
   rewriteBigintFields(columnsByTable);
   fs.rmSync(TEMP_PATH, { force: true });
+  rewriteEnumFields(enumColumns);
 
   await db.destroy().catch(() => {});
 }

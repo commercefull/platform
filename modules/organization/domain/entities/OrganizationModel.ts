@@ -16,12 +16,12 @@ export type OrganizationRecord = {
   website: string | null;
   logo: string | null;
   bannerImage: string | null;
-  status: string;
-  verificationStatus: string;
+  status: 'pending' | 'active' | 'suspended' | 'inactive' | 'rejected';
+  verificationStatus: 'unverified' | 'inProgress' | 'verified' | 'rejected';
   verifiedAt: Date | null;
   verifiedBy: string | null;
   verificationNotes: string | null;
-  businessType: string | null;
+  businessType: 'individual' | 'soleProprietorship' | 'partnership' | 'llc' | 'corporation' | 'nonProfit' | null;
   yearEstablished: number | null;
   employeeCount: number | null;
   taxIdNumber: string | null;
@@ -43,10 +43,10 @@ export type OrganizationRecord = {
   metaDescription: string | null;
   metaKeywords: string | null;
   commissionRate: string | null;
-  commissionType: string | null;
+  commissionType: 'percentage' | 'flat' | 'tiered' | null;
   commissionTiers: unknown | null;
   minimumPayoutAmountCents: number | null;
-  payoutSchedule: string | null;
+  payoutSchedule: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | null;
   autoApproveProducts: boolean;
   autoApproveReviews: boolean;
   sellerRating: string | null;

@@ -29,7 +29,7 @@ type ContentTypeUpdateParams = Partial<Omit<ContentType, 'contentTypeId' | 'crea
 
 type ContentPageCreateParams = Partial<
   Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy' | 'path' | 'depth'>
-> & { title: string; slug: string; contentTypeId: string; status: string; visibility: string };
+> & { title: string; slug: string; contentTypeId: string; status: ContentPage['status']; visibility: ContentPage['visibility'] };
 type ContentPageUpdateParams = Partial<
   Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy'>
 >;

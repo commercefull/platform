@@ -2,7 +2,7 @@
  * Organization Entity
  */
 
-export type OrganizationStatus = 'pending' | 'active' | 'suspended' | 'inactive';
+export type OrganizationStatus = 'pending' | 'active' | 'suspended' | 'inactive' | 'rejected';
 
 export interface OrganizationProps {
   organizationId: string;

@@ -15,7 +15,7 @@ import type {
 // Create / Update params derived from generated types
 export type ContentPageCreateParams = Partial<
   Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy' | 'path' | 'depth'>
-> & { title: string; slug: string; contentTypeId: string; status: string; visibility: string };
+> & { title: string; slug: string; contentTypeId: string; status: ContentPage['status']; visibility: ContentPage['visibility'] };
 export type ContentPageUpdateParams = Partial<
   Omit<ContentPage, 'contentPageId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'publishedBy'>
 >;

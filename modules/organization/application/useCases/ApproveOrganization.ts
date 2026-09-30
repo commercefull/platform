@@ -18,7 +18,7 @@ export class ApproveOrganizationUseCase {
   constructor(private readonly repository: Pick<OrganizationRepository, 'update'>) {}
 
   async execute(organizationId: string): Promise<ApproveOrganizationOutput> {
-    const organization: OrganizationRecord = await this.repository.update(organizationId, { status: 'approved' });
+    const organization: OrganizationRecord = await this.repository.update(organizationId, { status: 'active' });
 
     await eventBus.emit('organization.approved', {
       organizationId: organization.organizationId,

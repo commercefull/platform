@@ -8,12 +8,13 @@ interface NotificationRecord {
 
 export interface CreateNotificationRecordParams {
   userId: string;
-  userType: string;
+  userType: 'customer' | 'organization' | 'admin';
   type: string;
   title: string;
   content: string;
-  channel: string;
-  priority: string;
+  /** Accepts 'inApp' (notificationBatch enum) — translated to 'in_app' on insert. */
+  channel: 'email' | 'in_app' | 'inApp' | 'push' | 'sms';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
   category?: string;
   data?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
@@ -50,12 +51,12 @@ export class ManageNotificationRecordsUseCase {
 
   async create(params: {
     userId?: string;
-    userType?: string;
+    userType?: 'customer' | 'organization' | 'admin';
     type?: string;
     title?: string;
     content?: string;
-    channel?: string;
-    priority?: string;
+    channel?: 'email' | 'in_app' | 'inApp' | 'push' | 'sms';
+    priority?: 'low' | 'normal' | 'high' | 'urgent';
     category?: string;
     data?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
