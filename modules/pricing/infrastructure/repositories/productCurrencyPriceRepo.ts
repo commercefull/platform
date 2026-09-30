@@ -1,5 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Table, ProductCurrencyPrice } from '../../../../libs/db/types';
+import { ProductCurrencyPrice, Table } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 
@@ -8,18 +8,7 @@ import { PricingValidationError, FailedToCreatePricingError } from '../../domain
  * Monetary amounts are integer cents — pg returns bigint as string,
  * so rows are mapped to numbers here.
  */
-export interface CurrencyPriceEntry {
-  productCurrencyPriceId: string;
-  productId: string;
-  productVariantId: string | null;
-  currencyId: string;
-  priceCents: number;
-  compareAtPriceCents: number | null;
-  isManual: boolean;
-  updatedBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type CurrencyPriceEntry = ProductCurrencyPrice;
 
 function mapRow(row: ProductCurrencyPrice): CurrencyPriceEntry {
   return {

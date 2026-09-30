@@ -8,7 +8,7 @@ describe('SearchFAQUseCase', () => {
   beforeEach(() => {
     supportRepository = createFaqSearchRepository();
     supportRepository.searchFAQ.mockResolvedValue([
-      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: 5 },
+      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: '5' },
     ]);
     useCase = new SearchFAQUseCase(supportRepository);
   });
@@ -17,7 +17,7 @@ describe('SearchFAQUseCase', () => {
     const result = await useCase.execute({ query: 'return order' });
 
     expect(result.results).toEqual([
-      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: 5 },
+      { faqId: 'f1', question: 'How to return?', answer: 'Within 30 days', categoryName: 'Returns', helpfulness: '5' },
     ]);
     expect(result.total).toBe(1);
   });

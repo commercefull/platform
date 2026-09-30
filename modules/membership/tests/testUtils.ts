@@ -172,14 +172,14 @@ export function createMembershipBenefit(overrides: Partial<MembershipBenefit> = 
 export function createMembershipPlanBenefit(overrides: Partial<MembershipPlanBenefit> = {}): MembershipPlanBenefit {
   return {
     membershipPlanBenefitId: 'mpb-1',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    createdAt: new Date('2024-01-01T00:00:00Z'),
+    updatedAt: new Date('2024-01-01T00:00:00Z'),
     planId: 'plan-1',
     benefitId: 'benefit-1',
     isActive: true,
     priority: 1,
     ...overrides,
-  };
+  } as MembershipPlanBenefit;
 }
 
 export function createMembershipSubscription(overrides: Partial<MembershipSubscription> = {}): MembershipSubscription {

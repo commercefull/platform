@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { SupplierCodeAlreadyExistsError, FailedToCreateSupplierError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import type { Supplier as DbSupplier } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -17,31 +18,7 @@ import { SupplierCodeAlreadyExistsError, FailedToCreateSupplierError, SupplierVa
 
 export type SupplierStatus = 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted';
 
-export interface Supplier {
-  supplierId: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  code: string;
-  description?: string;
-  website?: string;
-  email?: string;
-  phone?: string;
-  isActive: boolean;
-  isApproved: boolean;
-  status: SupplierStatus;
-  rating?: number;
-  taxId?: string;
-  paymentTerms?: string;
-  paymentMethod?: string;
-  currencyCode: string;
-  minOrderValueCents?: number;
-  leadTime?: number;
-  notes?: string;
-  categories?: string[];
-  tags?: string[];
-  customFields?: Record<string, unknown>;
-}
+export type Supplier = DbSupplier;
 
 export type SupplierCreateParams = Omit<Supplier, 'supplierId' | 'createdAt' | 'updatedAt'>;
 export type SupplierUpdateParams = Partial<Omit<Supplier, 'supplierId' | 'code' | 'createdAt' | 'updatedAt'>>;
@@ -324,7 +301,7 @@ export class SupplierRepo {
       throw new SupplierValidationError('Rating must be between 0 and 5');
     }
 
-    return this.update(supplierId, { rating });
+    return this.update(supplierId, { rating: String(rating) });
   }
 
   /**

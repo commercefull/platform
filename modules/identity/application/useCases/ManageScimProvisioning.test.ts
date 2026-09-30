@@ -31,7 +31,7 @@ const makeRecord = (overrides: Partial<ScimProvisioningRecord> = {}): ScimProvis
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   ...overrides,
-});
+} as ScimProvisioningRecord);
 
 describe('ManageScimProvisioningUseCase', () => {
   let provisioningRepo: jest.Mocked<ScimProvisioningRepository>;

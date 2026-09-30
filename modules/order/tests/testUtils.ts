@@ -84,42 +84,42 @@ export function createOrderItem(overrides: Partial<Parameters<typeof OrderItem.c
 export function createOrderFulfillment(overrides: Partial<OrderFulfillment> = {}): OrderFulfillment {
   return {
     orderFulfillmentId: 'ful-1',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     orderId: 'order-1',
     fulfillmentNumber: 'FUL-1',
     type: 'shipping',
     status: 'pending',
     ...overrides,
-  };
+  } as OrderFulfillment;
 }
 
 export function createOrderFulfillmentPackage(overrides: Partial<OrderFulfillmentPackage> = {}): OrderFulfillmentPackage {
   return {
     orderFulfillmentPackageId: 'pkg-1',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     orderFulfillmentId: 'ful-1',
     packageNumber: 'PKG-1',
     ...overrides,
-  };
+  } as OrderFulfillmentPackage;
 }
 
 export function createOrderReturn(overrides: Partial<OrderReturn> = {}): OrderReturn {
   return {
     orderReturnId: 'ret-1',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     orderId: 'order-1',
     returnNumber: 'RET-1',
     status: 'requested',
     returnType: 'refund',
-    requestedAt: '2024-01-01T00:00:00.000Z',
+    requestedAt: new Date('2024-01-01T00:00:00.000Z'),
     returnShippingPaid: false,
     returnCarrier: 'custom',
     requiresInspection: false,
     ...overrides,
-  };
+  } as OrderReturn;
 }
 
 export function createOrderReturnParams(overrides: Partial<OrderReturn> = {}): OrderReturnCreateParams {
@@ -138,23 +138,23 @@ export function createOrderReturnParams(overrides: Partial<OrderReturn> = {}): O
 export function createOrderNote(overrides: Partial<OrderNote> = {}): OrderNote {
   return {
     orderNoteId: 'note-1',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     orderId: 'order-1',
     content: 'note',
     isCustomerVisible: false,
     ...overrides,
-  };
+  } as OrderNote;
 }
 
 export function createOrderPaymentRefund(overrides: Partial<OrderPaymentRefund> = {}): OrderPaymentRefund {
   return {
     orderPaymentRefundId: 'ref-1',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     orderPaymentId: 'pay-1',
     amountCents: 10,
     status: 'pending',
     ...overrides,
-  };
+  } as OrderPaymentRefund;
 }

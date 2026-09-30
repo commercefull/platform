@@ -6,27 +6,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxNexus as DbTaxNexus } from '../../../../libs/db/types';
 
-export interface TaxNexus {
-  taxNexusId: string;
-  createdAt: string;
-  updatedAt: string;
-  organizationId: string;
-  name: string;
-  country: string;
-  region?: string;
-  regionCode?: string;
-  city?: string;
-  postalCode?: string;
-  streetAddress?: string;
-  taxId?: string;
-  registrationNumber?: string;
-  isDefault: boolean;
-  startDate: string;
-  endDate?: string;
-  isActive: boolean;
-  notes?: string;
-}
+export type TaxNexus = DbTaxNexus;
 
 export type TaxNexusCreateParams = Omit<TaxNexus, 'taxNexusId' | 'createdAt' | 'updatedAt'>;
 export type TaxNexusUpdateParams = Partial<Omit<TaxNexus, 'taxNexusId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;

@@ -274,7 +274,7 @@ export type ProductReviewCreateParams = Omit<
   'productReviewId' | 'createdAt' | 'updatedAt' | 'helpfulCount' | 'unhelpfulCount' | 'reportCount' | 'isHighlighted'
 >;
 
-export type ProductReviewUpdateParams = Partial<Omit<ProductReviewCreateParams, 'productId' | 'customerId'>>;
+export type ProductReviewUpdateParams = Partial<Omit<ProductReviewCreateParams, 'productId' | 'customerId'> & Pick<ProductReview, 'isHighlighted'>>;
 
 export interface ReviewFilters {
   productId?: string;
@@ -523,8 +523,16 @@ export interface ProductAttribute {
   isComparable: boolean;
   isVisibleOnFront: boolean;
   isUsedInProductListing: boolean;
+  useForVariants: boolean;
+  useForConfigurations: boolean;
   defaultValue?: string | null;
+  validationRules?: Record<string, unknown> | null;
+  options?: Record<string, unknown> | null;
+  organizationId?: string | null;
+  isGlobal: boolean;
   position: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ProductAttributeData {

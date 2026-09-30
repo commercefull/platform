@@ -17,7 +17,7 @@ function createZone(overrides: Partial<WarehouseZone> = {}): WarehouseZone {
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as WarehouseZone;
 }
 
 function createPort(): jest.Mocked<Port> {

@@ -10,12 +10,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import {
-  AnalyticsSalesDaily as AnalyticsSalesDailyRow,
-  AnalyticsProductPerformance as AnalyticsProductPerformanceRow,
-  AnalyticsSearchQuery as AnalyticsSearchQueryRow,
-  AnalyticsCustomerCohort as AnalyticsCustomerCohortRow,
-} from '../../../../libs/db/types';
+import { AnalyticsCustomerCohort as AnalyticsCustomerCohortRow, AnalyticsProductPerformance as AnalyticsProductPerformanceRow, AnalyticsSalesDaily as AnalyticsSalesDailyRow, AnalyticsSearchQuery as AnalyticsSearchQueryRow } from '../../../../libs/db/types';
 import type { ProductPerformance, CustomerCohort } from '../../domain/types';
 
 export type { ProductPerformance, CustomerCohort };
@@ -27,59 +22,9 @@ export type { ProductPerformance, CustomerCohort };
 // to preserve precision, but we convert them to numbers for computation.
 // ============================================================================
 
-export interface SalesDaily {
-  analyticsSalesDailyId: string;
-  organizationId?: string;
-  date: Date;
-  channel: string;
-  currency: string;
-  orderCount: number;
-  itemsSold: number;
-  grossRevenueCents: number;
-  discountTotalCents: number;
-  refundTotalCents: number;
-  netRevenueCents: number;
-  taxTotalCents: number;
-  shippingRevenueCents: number;
-  averageOrderValueCents: number;
-  newCustomers: number;
-  returningCustomers: number;
-  guestOrders: number;
-  cartCreated: number;
-  cartAbandoned: number;
-  checkoutStarted: number;
-  checkoutCompleted: number;
-  conversionRate: number;
-  paymentSuccessCount: number;
-  paymentFailedCount: number;
-  paymentSuccessRate: number;
-  computedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type SalesDaily = AnalyticsSalesDailyRow;
 
-export interface SearchQuery {
-  analyticsSearchQueryId: string;
-  organizationId?: string;
-  query: string;
-  queryNormalized?: string;
-  date: Date;
-  searchCount: number;
-  uniqueSearchers: number;
-  resultCount: number;
-  isZeroResult: boolean;
-  clickCount: number;
-  clickThroughRate: number;
-  averageClickPosition: number;
-  addToCartCount: number;
-  purchaseCount: number;
-  conversionRate: number;
-  revenueCents: number;
-  refinementCount: number;
-  exitCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type SearchQuery = AnalyticsSearchQueryRow;
 
 export interface ChannelAttribution {
   analyticsChannelAttributionId: string;
@@ -261,7 +206,7 @@ export async function upsertSalesDaily(
       data.organizationId,
       data.date,
       channel,
-      data.currency || 'USD',
+      data.currencyCode || 'USD',
       data.orderCount || 0,
       data.itemsSold || 0,
       data.grossRevenueCents || 0,
@@ -542,36 +487,7 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
 // ============================================================================
 
 function mapToSalesDaily(row: AnalyticsSalesDailyRow): SalesDaily {
-  return {
-    analyticsSalesDailyId: row.analyticsSalesDailyId,
-    organizationId: row.organizationId ?? undefined,
-    date: new Date(row.date),
-    channel: row.channel ?? 'all',
-    currency: row.currencyCode ?? 'USD',
-    orderCount: row.orderCount ?? 0,
-    itemsSold: row.itemsSold ?? 0,
-    grossRevenueCents: Number(row.grossRevenueCents ?? 0),
-    discountTotalCents: Number(row.discountTotalCents ?? 0),
-    refundTotalCents: Number(row.refundTotalCents ?? 0),
-    netRevenueCents: Number(row.netRevenueCents ?? 0),
-    taxTotalCents: Number(row.taxTotalCents ?? 0),
-    shippingRevenueCents: Number(row.shippingRevenueCents ?? 0),
-    averageOrderValueCents: Number(row.averageOrderValueCents ?? 0),
-    newCustomers: row.newCustomers ?? 0,
-    returningCustomers: row.returningCustomers ?? 0,
-    guestOrders: row.guestOrders ?? 0,
-    cartCreated: row.cartCreated ?? 0,
-    cartAbandoned: row.cartAbandoned ?? 0,
-    checkoutStarted: row.checkoutStarted ?? 0,
-    checkoutCompleted: row.checkoutCompleted ?? 0,
-    conversionRate: parseFloat(row.conversionRate ?? '0'),
-    paymentSuccessCount: row.paymentSuccessCount ?? 0,
-    paymentFailedCount: row.paymentFailedCount ?? 0,
-    paymentSuccessRate: parseFloat(row.paymentSuccessRate ?? '0'),
-    computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt ?? new Date()),
-    updatedAt: new Date(row.updatedAt ?? new Date()),
-  };
+  return row;
 }
 
 function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPerformance {
@@ -607,20 +523,20 @@ function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPe
 function mapToSearchQuery(row: AnalyticsSearchQueryRow): SearchQuery {
   return {
     analyticsSearchQueryId: row.analyticsSearchQueryId,
-    organizationId: row.organizationId ?? undefined,
+    organizationId: row.organizationId ?? null,
     query: row.query,
-    queryNormalized: row.queryNormalized ?? undefined,
+    queryNormalized: row.queryNormalized ?? null,
     date: new Date(row.date),
     searchCount: row.searchCount ?? 0,
     uniqueSearchers: row.uniqueSearchers ?? 0,
     resultCount: row.resultCount ?? 0,
     isZeroResult: Boolean(row.isZeroResult),
     clickCount: row.clickCount ?? 0,
-    clickThroughRate: parseFloat(row.clickThroughRate ?? '0'),
+    clickThroughRate: row.clickThroughRate,
     averageClickPosition: row.averageClickPosition ?? 0,
     addToCartCount: row.addToCartCount ?? 0,
     purchaseCount: row.purchaseCount ?? 0,
-    conversionRate: parseFloat(row.conversionRate ?? '0'),
+    conversionRate: row.conversionRate,
     revenueCents: Number(row.revenueCents ?? 0),
     refinementCount: row.refinementCount ?? 0,
     exitCount: row.exitCount ?? 0,

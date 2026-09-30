@@ -119,6 +119,7 @@ export class ManageScimProvisioningUseCase {
       userType: 'organization',
       scimUserId,
       externalId: command.externalId,
+      providerId: undefined,
       source: 'scim',
       isActive: active,
       createdAt: now,

@@ -4,10 +4,10 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import type { Language } from 'libs/db/types';
+import type { Language as DbLanguage } from 'libs/db/types';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 
-export type LanguageRecord = Language;
+export type LanguageRecord = DbLanguage;
 
 export async function listLanguages(): Promise<LanguageRecord[]> {
   const rows = await query<LanguageRecord[]>(`SELECT * FROM "language" ORDER BY "name"`);

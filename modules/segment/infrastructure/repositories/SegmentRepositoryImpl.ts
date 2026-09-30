@@ -3,29 +3,14 @@ import { SegmentDefinition } from '../../domain/entities/SegmentDefinition';
 import type { SegmentRepository } from '../../domain/repositories/SegmentRepository';
 import type { SegmentCondition, MatchMode } from '../../domain/entities/SegmentDefinition';
 import { SegmentValidationError } from '../../domain/errors/SegmentErrors';
+import type { SegmentDefinition as DbSegmentDefinition } from '../../../../libs/db/types';
 
-interface SegmentDbRow {
-  segmentId: string;
-  name: string;
-  code: string;
-  description: string | null;
-  conditions: SegmentCondition[];
-  matchMode: string;
-  isActive: boolean;
-  isSystem: boolean;
-  color: string | null;
-  icon: string | null;
-  memberCount: number;
-  lastEvaluatedAt: Date | null;
-  organizationId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-}
+type SegmentDbRow = DbSegmentDefinition;
 
 function rowToEntity(row: SegmentDbRow): SegmentDefinition {
   return SegmentDefinition.reconstitute({
     ...row,
+    conditions: row.conditions as unknown as SegmentCondition[],
     matchMode: row.matchMode as MatchMode,
   });
 }

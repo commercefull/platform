@@ -92,7 +92,7 @@ export const createReceivingRecordUseCase = new CreateReceivingRecordUseCase(rec
 
 // --- ManageSupplierDirectory wiring -------------------------------------------
 import { ManageSupplierDirectoryUseCase } from './useCases/ManageSupplierDirectory';
-import type { SupplierAddressCreateParams } from '../domain/repositories/SupplierRepository';
+import type { SupplierAddressCreateParams } from '../infrastructure/repositories/supplierAddressRepo';
 import type { SupplierProductCreateParams } from '../infrastructure/repositories/supplierProductRepo';
 
 const supplierDirectoryAdapter = {
@@ -202,8 +202,8 @@ const supplierRecordAdapter = {
     return {
       status: supplier.status,
       isActive: supplier.isActive,
-      minimumOrderValue: supplier.minOrderValueCents,
-      leadTimeDays: supplier.leadTime,
+      minimumOrderValue: supplier.minOrderValueCents ?? undefined,
+      leadTimeDays: supplier.leadTime ?? undefined,
     };
   },
   async create(data: Record<string, unknown>) {
@@ -212,7 +212,7 @@ const supplierRecordAdapter = {
       supplierId: result.supplierId,
       name: result.name,
       status: result.status,
-      createdAt: new Date(result.createdAt),
+      createdAt: result.createdAt,
     };
   },
 };
@@ -237,7 +237,7 @@ const purchaseOrderRecordAdapter = {
       supplierId: result.supplierId,
       totalAmountCents: result.totalCents,
       status: result.status,
-      createdAt: new Date(result.createdAt),
+      createdAt: result.createdAt,
     };
   },
   async update(id: string, data: Record<string, unknown>) {

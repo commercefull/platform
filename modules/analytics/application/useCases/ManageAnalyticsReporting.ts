@@ -5,60 +5,11 @@ import type {
   CustomerCohort,
   ProductPerformance,
 } from '../../domain/types';
+import type { AnalyticsSalesDaily, AnalyticsSearchQuery } from '../../../../libs/db/types';
 
-export interface AnalyticsSalesDailyRecord {
-  analyticsSalesDailyId: string;
-  organizationId?: string;
-  date: Date;
-  channel: string;
-  currency: string;
-  orderCount: number;
-  itemsSold: number;
-  grossRevenueCents: number;
-  discountTotalCents: number;
-  refundTotalCents: number;
-  netRevenueCents: number;
-  taxTotalCents: number;
-  shippingRevenueCents: number;
-  averageOrderValueCents: number;
-  newCustomers: number;
-  returningCustomers: number;
-  guestOrders: number;
-  cartCreated: number;
-  cartAbandoned: number;
-  checkoutStarted: number;
-  checkoutCompleted: number;
-  conversionRate: number;
-  paymentSuccessCount: number;
-  paymentFailedCount: number;
-  paymentSuccessRate: number;
-  computedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type AnalyticsSalesDailyRecord = AnalyticsSalesDaily;
 
-export interface AnalyticsSearchQueryRecord {
-  analyticsSearchQueryId: string;
-  organizationId?: string;
-  query: string;
-  queryNormalized?: string;
-  date: Date;
-  searchCount: number;
-  uniqueSearchers: number;
-  resultCount: number;
-  isZeroResult: boolean;
-  clickCount: number;
-  clickThroughRate: number;
-  averageClickPosition: number;
-  addToCartCount: number;
-  purchaseCount: number;
-  conversionRate: number;
-  revenueCents: number;
-  refinementCount: number;
-  exitCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type AnalyticsSearchQueryRecord = AnalyticsSearchQuery;
 
 export interface SalesSummaryRecord {
   totalRevenueCents: number;

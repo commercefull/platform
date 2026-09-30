@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxRate as DbTaxRate } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -17,27 +18,7 @@ import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 
 export type TaxRateType = 'percentage' | 'fixed';
 
-export interface TaxRate {
-  taxRateId: string;
-  createdAt: string;
-  updatedAt: string;
-  taxCategoryId: string;
-  taxZoneId: string;
-  name: string;
-  rate: number;
-  type: TaxRateType;
-  priority: number;
-  isCompound: boolean;
-  includeInPrice: boolean;
-  isShippingTaxable: boolean;
-  fixedAmountCents?: number;
-  minimumAmountCents?: number;
-  maximumAmountCents?: number;
-  thresholdCents?: number;
-  startDate: string;
-  endDate?: string;
-  isActive: boolean;
-}
+export type TaxRate = DbTaxRate;
 
 export type TaxRateCreateParams = Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>;
 export type TaxRateUpdateParams = Partial<Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>>;

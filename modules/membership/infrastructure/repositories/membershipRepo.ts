@@ -213,6 +213,9 @@ export class MembershipRepo {
         benefitId: benefit.membershipBenefitId,
         isActive: true,
         priority: 0,
+        valueOverride: undefined,
+        rulesOverride: undefined,
+        notes: undefined,
       });
     }
 

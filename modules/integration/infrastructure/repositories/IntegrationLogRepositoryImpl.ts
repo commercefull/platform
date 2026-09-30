@@ -1,22 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { IntegrationLog as DbIntegrationLog } from '../../../../libs/db/types';
 import { IntegrationLog, type IntegrationLogProps, type LogStatus } from '../../domain/entities/IntegrationLog';
 import type { IntegrationLogRepository } from '../../domain/repositories/IntegrationRepository';
 
-interface LogDbRow {
-  logId: string;
-  integrationId: string;
-  subscriptionId: string | null;
-  eventType: string;
-  targetAction: string;
-  status: string;
-  requestPayload: Record<string, unknown> | string | null;
-  responseStatus: number | null;
-  responseBody: string | null;
-  errorMessage: string | null;
-  durationMs: number | null;
-  createdAt: Date;
-}
+type LogDbRow = DbIntegrationLog;
 
 export class IntegrationLogRepositoryImpl implements IntegrationLogRepository {
   async create(log: IntegrationLog): Promise<IntegrationLog> {

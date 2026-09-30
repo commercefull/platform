@@ -2,13 +2,13 @@ import type { ProductAttributeSetAttribute } from '../../domain/repositories/Pro
 import { AttributeSetNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 export interface ProductAttributeSetRecord {
-  productAttributeSetId?: string;
-  name?: string;
-  code?: string;
-  description?: string;
-  productTypeId?: string;
-  isActive?: boolean;
-  isGlobal?: boolean;
+  productAttributeSetId?: string | null;
+  name?: string | null;
+  code?: string | null;
+  description?: string | null;
+  productTypeId?: string | null;
+  isActive?: boolean | null;
+  isGlobal?: boolean | null;
 }
 
 export interface AttributeSetCreateInput {

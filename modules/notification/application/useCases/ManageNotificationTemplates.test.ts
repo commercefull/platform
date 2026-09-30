@@ -38,7 +38,24 @@ describe('ManageNotificationTemplatesUseCase', () => {
     templateRepo.clone.mockResolvedValue(template);
     templateRepo.getPreview.mockResolvedValue({ template });
 
-    await useCase.create({ code: 'x', name: 'X', type: 'order', supportedChannels: ['email'], defaultChannel: 'email', isActive: true });
+    await useCase.create({
+      code: 'x',
+      name: 'X',
+      type: 'order',
+      supportedChannels: ['email'],
+      defaultChannel: 'email',
+      description: undefined,
+      subject: undefined,
+      htmlTemplate: undefined,
+      textTemplate: undefined,
+      pushTemplate: undefined,
+      smsTemplate: undefined,
+      parameters: undefined,
+      categoryCode: undefined,
+      previewData: undefined,
+      createdBy: undefined,
+      isActive: true,
+    });
     await useCase.update('tpl-1', { name: 'Renamed' });
     await useCase.activate('tpl-1');
     await useCase.deactivate('tpl-1');

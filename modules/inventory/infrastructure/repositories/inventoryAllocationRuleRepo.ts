@@ -12,45 +12,26 @@ import {
   type ReservationPolicy,
 } from '../../domain/entities/InventoryAllocationRule';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
+import type { InventoryAllocationRule as DbInventoryAllocationRule } from '../../../../libs/db/types';
 
-export interface InventoryAllocationRuleRow {
-  inventoryAllocationRuleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  scope: AllocationRuleScope;
-  poolId: string | null;
-  categoryId: string | null;
-  productId: string | null;
-  allocationStrategy: AllocationStrategy;
-  reservationPolicy: ReservationPolicy;
-  lowStockThreshold: number;
-  oversellBuffer: number;
-  allowBackorder: boolean;
-  allowOversell: boolean;
-  maxAllocationPerOrder: number;
-  conditions: unknown | null;
-  priority: number;
-  isActive: boolean;
-}
+export type InventoryAllocationRuleRow = DbInventoryAllocationRule;
 
 function mapToEntity(row: InventoryAllocationRuleRow): InventoryAllocationRule {
   return new InventoryAllocationRule({
     inventoryAllocationRuleId: row.inventoryAllocationRuleId,
     name: row.name,
     description: row.description ?? undefined,
-    scope: row.scope,
+    scope: row.scope as AllocationRuleScope,
     poolId: row.poolId ?? undefined,
     categoryId: row.categoryId ?? undefined,
     productId: row.productId ?? undefined,
-    allocationStrategy: row.allocationStrategy,
-    reservationPolicy: row.reservationPolicy,
-    lowStockThreshold: row.lowStockThreshold,
-    oversellBuffer: row.oversellBuffer,
+    allocationStrategy: row.allocationStrategy as AllocationStrategy,
+    reservationPolicy: row.reservationPolicy as ReservationPolicy,
+    lowStockThreshold: row.lowStockThreshold ?? 0,
+    oversellBuffer: row.oversellBuffer ?? 0,
     allowBackorder: row.allowBackorder,
     allowOversell: row.allowOversell,
-    maxAllocationPerOrder: row.maxAllocationPerOrder,
+    maxAllocationPerOrder: row.maxAllocationPerOrder ?? 0,
     conditions: (row.conditions as AttributeCondition[] | null) ?? null,
     priority: row.priority,
     isActive: row.isActive,

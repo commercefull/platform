@@ -16,7 +16,7 @@ function createReceiving(overrides: Partial<WarehouseReceiving> = {}): Warehouse
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as WarehouseReceiving;
 }
 
 function createPort(record: WarehouseReceiving | null = createReceiving()): jest.Mocked<Port> {

@@ -1,36 +1,36 @@
-import type { BundleType, PricingType } from '../../domain/bundle';
+import type { BundleType } from '../../domain/bundle';
 import { BundleItemNotFoundError, BundleNotFoundError } from '../../domain/errors/ProductErrors';
 
 export interface ProductBundleRecord {
   productBundleId: string;
   productId: string;
   name: string;
-  isActive: boolean;
-  bundleType?: BundleType;
-  pricingType?: PricingType;
-  slug?: string;
-  description?: string;
-  currency?: string;
-  metadata?: Record<string, unknown>;
-  createdAt?: Date;
-  updatedAt?: Date;
+  isActive: boolean | null;
+  bundleType?: string | null;
+  pricingType?: string | null;
+  slug?: string | null;
+  description?: string | null;
+  currencyCode?: string | null;
+  metadata?: unknown;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 }
 
 export interface BundleItemRecord {
   bundleItemId?: string;
   productBundleId?: string;
   productId?: string;
-  productVariantId?: string;
-  slotName?: string;
-  quantity?: number;
-  minQuantity?: number;
-  maxQuantity?: number;
-  isRequired?: boolean;
-  isDefault?: boolean;
-  priceAdjustmentCents?: number;
-  discountPercent?: number;
-  sortOrder?: number;
-  metadata?: Record<string, unknown>;
+  productVariantId?: string | null;
+  slotName?: string | null;
+  quantity?: number | null;
+  minQuantity?: number | null;
+  maxQuantity?: number | null;
+  isRequired?: boolean | null;
+  isDefault?: boolean | null;
+  priceAdjustmentCents?: number | null;
+  discountPercent?: string | null;
+  sortOrder?: number | null;
+  metadata?: unknown;
 }
 
 export interface BundlePricing {

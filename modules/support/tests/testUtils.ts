@@ -102,7 +102,7 @@ export function createTicketRecord(overrides: Partial<SupportTicketProps> = {}):
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as SupportTicketProps;
 }
 
 export function createFaqArticleRecord(overrides: Partial<FaqArticleRecord> = {}): FaqArticleRecord {
@@ -114,7 +114,7 @@ export function createFaqArticleRecord(overrides: Partial<FaqArticleRecord> = {}
     uniqueViews: 0,
     helpfulYes: 0,
     helpfulNo: 0,
-    helpfulScore: 0,
+    helpfulScore: '0',
     sortOrder: 0,
     isPublished: true,
     isFeatured: false,
@@ -122,5 +122,5 @@ export function createFaqArticleRecord(overrides: Partial<FaqArticleRecord> = {}
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as FaqArticleRecord;
 }

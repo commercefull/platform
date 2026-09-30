@@ -6,28 +6,12 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxProviderLog as DbTaxProviderLog } from '../../../../libs/db/types';
 
 export type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
 export type TaxProviderRequestType = 'calculation' | 'verification' | 'filing' | 'refund' | 'adjustment' | 'validation';
 
-export interface TaxProviderLog {
-  taxProviderLogId: string;
-  createdAt: string;
-  updatedAt: string;
-  organizationId: string;
-  provider: TaxProvider;
-  requestType: TaxProviderRequestType;
-  entityType: string;
-  entityId?: string;
-  requestData?: unknown;
-  responseData?: unknown;
-  responseStatus?: number;
-  isSuccess: boolean;
-  errorCode?: string;
-  errorMessage?: string;
-  processingTimeMs?: number;
-  providerReference?: string;
-}
+export type TaxProviderLog = DbTaxProviderLog;
 
 export type TaxProviderLogCreateParams = Omit<TaxProviderLog, 'taxProviderLogId' | 'createdAt' | 'updatedAt'>;
 

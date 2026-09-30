@@ -32,7 +32,7 @@ export class GetProductAttributesUseCase {
         attributeCode: attr.attribute.code,
         attributeName: attr.attribute.name,
         attributeType: attr.attribute.type,
-        value: attr.value,
+        value: attr.value ?? undefined,
         isFilterable: attr.attribute.isFilterable,
         isSearchable: attr.attribute.isSearchable,
       }));

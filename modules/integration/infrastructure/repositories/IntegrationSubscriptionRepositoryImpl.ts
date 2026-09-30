@@ -1,20 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { IntegrationSubscription as DbIntegrationSubscription } from '../../../../libs/db/types';
 import { IntegrationEventSubscription, type IntegrationEventSubscriptionProps } from '../../domain/entities/IntegrationEventSubscription';
 import type { IntegrationSubscriptionRepository } from '../../domain/repositories/IntegrationRepository';
 
-interface SubscriptionDbRow {
-  subscriptionId: string;
-  integrationId: string;
-  eventType: string;
-  targetAction: string;
-  description: string | null;
-  payloadMapping: Record<string, unknown> | string;
-  headers: Record<string, string> | string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type SubscriptionDbRow = DbIntegrationSubscription;
 
 export class IntegrationSubscriptionRepositoryImpl implements IntegrationSubscriptionRepository {
   async create(subscription: IntegrationEventSubscription): Promise<IntegrationEventSubscription> {

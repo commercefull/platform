@@ -1,171 +1,169 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateNotificationDeliveryLogError } from '../../domain/errors/NotificationErrors';
+import type { NotificationDeliveryLog as DbNotificationDeliveryLog } from '../../../../libs/db/types';
 
 export type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
 export type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
 export type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
 export type UserType = 'customer' | 'organization' | 'admin';
 
-export interface NotificationDeliveryLog {
-  notificationDeliveryLogId: string;
-  createdAt: string;
-  notificationId?: string;
-  userId: string;
-  userType: UserType;
-  type: NotificationType;
-  channel: NotificationChannel;
-  recipient: string;
-  status: DeliveryStatus;
-  statusDetails?: string;
-  sentAt?: string;
-  deliveredAt?: string;
-  failedAt?: string;
-  failureReason?: string;
-  provider?: string;
-  providerMessageId?: string;
-  providerResponse?: Record<string, unknown>;
-  retryCount: number;
-}
-
-export type NotificationDeliveryLogCreateParams = Omit<
+import type {
   NotificationDeliveryLog,
-  'notificationDeliveryLogId' | 'createdAt' | 'retryCount' | 'sentAt' | 'deliveredAt' | 'failedAt'
->;
+  NotificationDeliveryLogCreateParams,
+  NotificationDeliveryLogUpdateParams,
+} from '../../domain/repositories/NotificationDeliveryLogRepository';
+export type {
+  NotificationDeliveryLog,
+  NotificationDeliveryLogCreateParams,
+  NotificationDeliveryLogUpdateParams,
+} from '../../domain/repositories/NotificationDeliveryLogRepository';
 
-export type NotificationDeliveryLogUpdateParams = Partial<
-  Pick<
-    NotificationDeliveryLog,
-    | 'status'
-    | 'statusDetails'
-    | 'sentAt'
-    | 'deliveredAt'
-    | 'failedAt'
-    | 'failureReason'
-    | 'providerMessageId'
-    | 'providerResponse'
-    | 'retryCount'
-  >
->;
+const iso = (d: Date | string | null | undefined): string | undefined =>
+  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
+
+function mapToDeliveryLog(row: DbNotificationDeliveryLog): NotificationDeliveryLog {
+  return {
+    notificationDeliveryLogId: row.notificationDeliveryLogId,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    notificationId: row.notificationId ?? undefined,
+    userId: row.userId,
+    userType: row.userType as UserType,
+    type: row.type as NotificationType,
+    channel: row.channel as NotificationChannel,
+    recipient: row.recipient,
+    status: row.status as DeliveryStatus,
+    statusDetails: row.statusDetails ?? undefined,
+    sentAt: iso(row.sentAt),
+    deliveredAt: iso(row.deliveredAt),
+    failedAt: iso(row.failedAt),
+    failureReason: row.failureReason ?? undefined,
+    provider: row.provider ?? undefined,
+    providerMessageId: row.providerMessageId ?? undefined,
+    providerResponse: (row.providerResponse as Record<string, unknown> | null) ?? undefined,
+    retryCount: row.retryCount ?? 0,
+  };
+}
 
 export class NotificationDeliveryLogRepo {
   /**
    * Find delivery log by ID
    */
   async findById(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
-    return await queryOne<NotificationDeliveryLog>(`SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`, [
+    const row = await queryOne<DbNotificationDeliveryLog>(`SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`, [
       notificationDeliveryLogId,
     ]);
+    return row ? mapToDeliveryLog(row) : null;
   }
 
   /**
    * Find logs by notification ID
    */
   async findByNotificationId(notificationId: string): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "notificationId" = $1 
        ORDER BY "createdAt" DESC`,
       [notificationId],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find logs by user
    */
   async findByUserId(userId: string, limit: number = 50, offset: number = 0): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "userId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [userId, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find logs by batch ID (via notification table join)
    */
   async findByBatchId(batchId: string, limit: number = 100): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" WHERE "notificationId" IN (
         SELECT "notificationId" FROM "notification" WHERE "notificationBatchId" = $1
       ) ORDER BY "createdAt" DESC LIMIT $2`,
       [batchId, limit],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find logs by status
    */
   async findByStatus(status: DeliveryStatus, limit: number = 100, offset: number = 0): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [status, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find logs by channel
    */
   async findByChannel(channel: NotificationChannel, limit: number = 100, offset: number = 0): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "channel" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [channel, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find logs by provider
    */
   async findByProvider(provider: string, limit: number = 100, offset: number = 0): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "provider" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [provider, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find failed deliveries
    */
   async findFailed(limit: number = 100, offset: number = 0): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "status" IN ('failed', 'bounced', 'blocked') 
        ORDER BY "createdAt" DESC 
        LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
    * Find pending deliveries (for retry)
    */
   async findPending(limit: number = 100): Promise<NotificationDeliveryLog[]> {
-    const results = await query<NotificationDeliveryLog[]>(
+    const results = await query<DbNotificationDeliveryLog[]>(
       `SELECT * FROM "notificationDeliveryLog" 
        WHERE "status" = 'pending' 
        ORDER BY "createdAt" ASC 
        LIMIT $1`,
       [limit],
     );
-    return results || [];
+    return (results || []).map(mapToDeliveryLog);
   }
 
   /**
@@ -174,7 +172,7 @@ export class NotificationDeliveryLogRepo {
   async create(params: NotificationDeliveryLogCreateParams): Promise<NotificationDeliveryLog> {
     const now = unixTimestamp();
 
-    const result = await queryOne<NotificationDeliveryLog>(
+    const result = await queryOne<DbNotificationDeliveryLog>(
       `INSERT INTO "notificationDeliveryLog" (
         "notificationId", "userId", "userType", "type", "channel",
         "recipient", "status", "statusDetails", "provider",
@@ -202,7 +200,7 @@ export class NotificationDeliveryLogRepo {
       throw new FailedToCreateNotificationDeliveryLogError();
     }
 
-    return result;
+    return mapToDeliveryLog(result);
   }
 
   /**
@@ -226,7 +224,7 @@ export class NotificationDeliveryLogRepo {
 
     values.push(notificationDeliveryLogId);
 
-    const result = await queryOne<NotificationDeliveryLog>(
+    const result = await queryOne<DbNotificationDeliveryLog>(
       `UPDATE "notificationDeliveryLog" 
        SET ${updateFields.join(', ')}
        WHERE "notificationDeliveryLogId" = $${paramIndex}
@@ -234,7 +232,7 @@ export class NotificationDeliveryLogRepo {
       values,
     );
 
-    return result;
+    return result ? mapToDeliveryLog(result) : null;
   }
 
   /**
@@ -243,7 +241,7 @@ export class NotificationDeliveryLogRepo {
   async markAsSent(notificationDeliveryLogId: string, providerMessageId?: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'sent',
-      sentAt: String(unixTimestamp()),
+      sentAt: new Date().toISOString(),
       providerMessageId,
     });
   }
@@ -254,7 +252,7 @@ export class NotificationDeliveryLogRepo {
   async markAsDelivered(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'delivered',
-      deliveredAt: String(unixTimestamp()),
+      deliveredAt: new Date().toISOString(),
     });
   }
 
@@ -266,9 +264,9 @@ export class NotificationDeliveryLogRepo {
 
     return this.update(notificationDeliveryLogId, {
       status: 'failed',
-      failedAt: String(unixTimestamp()),
+      failedAt: new Date().toISOString(),
       failureReason,
-      retryCount: log ? log.retryCount + 1 : 1,
+      retryCount: log ? (log.retryCount ?? 0) + 1 : 1,
     });
   }
 
@@ -278,7 +276,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBounced(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'bounced',
-      failedAt: String(unixTimestamp()),
+      failedAt: new Date().toISOString(),
       failureReason,
     });
   }
@@ -289,7 +287,7 @@ export class NotificationDeliveryLogRepo {
   async markAsBlocked(notificationDeliveryLogId: string, failureReason: string): Promise<NotificationDeliveryLog | null> {
     return this.update(notificationDeliveryLogId, {
       status: 'blocked',
-      failedAt: String(unixTimestamp()),
+      failedAt: new Date().toISOString(),
       failureReason,
     });
   }
@@ -298,7 +296,7 @@ export class NotificationDeliveryLogRepo {
    * Increment retry count
    */
   async incrementRetryCount(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
-    const result = await queryOne<NotificationDeliveryLog>(
+    const result = await queryOne<DbNotificationDeliveryLog>(
       `UPDATE "notificationDeliveryLog" 
        SET "retryCount" = "retryCount" + 1
        WHERE "notificationDeliveryLogId" = $1
@@ -306,7 +304,7 @@ export class NotificationDeliveryLogRepo {
       [notificationDeliveryLogId],
     );
 
-    return result;
+    return result ? mapToDeliveryLog(result) : null;
   }
 
   /**

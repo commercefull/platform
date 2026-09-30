@@ -2,7 +2,6 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { successResponse, errorResponse, validationErrorResponse } from '../../../../libs/apiResponse';
 import { createSupplierPurchaseOrderUseCase, managePurchaseOrdersUseCase } from '../../application/wired';
 import {
-  SupplierPurchaseOrderCreateParams,
   SupplierPurchaseOrderUpdateParams,
   SupplierPurchaseOrderItemCreateParams,
   SupplierPurchaseOrderItemUpdateParams,
@@ -75,7 +74,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
     supplierNotes,
     attachments,
     items, // Array of purchase order items
-  } = req.body as SupplierPurchaseOrderCreateParams & { items: SupplierPurchaseOrderItemCreateParams[]; currency?: string };
+  } = req.body as CreateSupplierPurchaseOrderInput;
 
   try {
     const result = await createSupplierPurchaseOrderUseCase.execute({
@@ -101,7 +100,7 @@ export const createPurchaseOrder = async (req: HttpRequest, res: HttpResponse): 
       supplierNotes,
       attachments,
       items,
-    } as CreateSupplierPurchaseOrderInput);
+    });
 
     successResponse(
       res,

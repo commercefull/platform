@@ -4,10 +4,10 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import type { Currency } from 'libs/db/types';
+import type { Currency as DbCurrency } from 'libs/db/types';
 import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 
-export type CurrencyRecord = Currency;
+export type CurrencyRecord = DbCurrency;
 
 export async function listCurrencies(): Promise<CurrencyRecord[]> {
   const rows = await query<CurrencyRecord[]>(`SELECT * FROM "currency" ORDER BY "name"`);

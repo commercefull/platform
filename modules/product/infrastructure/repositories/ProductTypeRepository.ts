@@ -1,14 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { ProductType as DbProductType, Table } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductType {
-  productTypeId: string;
-  name: string;
-  slug: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type ProductType = DbProductType;
 
 export interface ProductTypeCreateInput {
   name: string;

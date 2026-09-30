@@ -1,30 +1,5 @@
-export interface FaqArticleRecord {
-  faqArticleId: string;
-  faqCategoryId?: string;
-  title: string;
-  slug?: string;
-  content: string;
-  contentHtml?: string;
-  excerpt?: string;
-  keywords?: string[];
-  relatedArticleIds?: string[];
-  views: number;
-  uniqueViews: number;
-  helpfulYes: number;
-  helpfulNo: number;
-  helpfulScore: number;
-  sortOrder: number;
-  isPublished: boolean;
-  isFeatured: boolean;
-  isPinned: boolean;
-  publishedAt?: Date;
-  authorId?: string;
-  authorName?: string;
-  lastEditedBy?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { SupportFaqArticle } from '../../../../libs/db/types';
+export type FaqArticleRecord = SupportFaqArticle;
 
 export interface FaqArticleFilters {
   faqCategoryId?: string;
@@ -35,13 +10,13 @@ export interface FaqArticleFilters {
 export interface FaqCategoryRecord {
   faqCategoryId: string;
   name: string;
-  slug?: string;
-  description?: string;
-  icon?: string;
-  sortOrder?: number;
-  isActive?: boolean;
-  parentId?: string;
-  metadata?: Record<string, unknown>;
+  slug?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  parentId?: string | null;
+  metadata?: unknown;
 }
 
 export interface FaqPort {

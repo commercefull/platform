@@ -1,31 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
+import type { SupplierProduct as DbSupplierProduct } from '../../../../libs/db/types';
 
 export type SupplierProductStatus = 'active' | 'inactive' | 'discontinued' | 'pending';
 
-export interface SupplierProduct {
-  supplierProductId: string;
-  createdAt: string;
-  updatedAt: string;
-  supplierId: string;
-  productId: string;
-  productVariantId?: string;
-  sku: string;
-  supplierSku?: string;
-  supplierProductName?: string;
-  status: SupplierProductStatus;
-  isPreferred: boolean;
-  unitCostCents: number;
-  currencyCode: string;
-  minimumOrderQuantity: number;
-  leadTime?: number;
-  packagingInfo?: Record<string, unknown>;
-  dimensions?: Record<string, unknown>;
-  weight?: number;
-  lastOrderedAt?: string;
-  notes?: string;
-}
+export type SupplierProduct = DbSupplierProduct;
 
 export type SupplierProductCreateParams = Omit<SupplierProduct, 'supplierProductId' | 'createdAt' | 'updatedAt'>;
 export type SupplierProductUpdateParams = Partial<

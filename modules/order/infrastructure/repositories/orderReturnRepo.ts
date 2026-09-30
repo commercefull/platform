@@ -2,62 +2,22 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateOrderReturnError } from '../../domain/errors/OrderErrors';
 
-export type OrderReturnStatus = 'requested' | 'approved' | 'denied' | 'inTransit' | 'received' | 'inspected' | 'completed' | 'cancelled';
-export type OrderReturnType = 'refund' | 'exchange' | 'storeCredit' | 'repair';
-export type ReturnCarrier = 'ups' | 'fedex' | 'dhl' | 'usps' | 'custom';
-
-export interface OrderReturn {
-  orderReturnId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  returnNumber: string;
-  customerId?: string;
-  status: OrderReturnStatus;
-  returnType: OrderReturnType;
-  requestedAt: string;
-  approvedAt?: string;
-  receivedAt?: string;
-  completedAt?: string;
-  rmaNumber?: string;
-  paymentRefundId?: string;
-  returnShippingPaid: boolean;
-  returnShippingAmount?: number;
-  returnShippingLabel?: string;
-  returnCarrier: ReturnCarrier;
-  returnTrackingNumber?: string;
-  returnTrackingUrl?: string;
-  returnReason?: string;
-  returnInstructions?: string;
-  customerNotes?: string;
-  adminNotes?: string;
-  requiresInspection: boolean;
-  inspectionPassedItems?: Record<string, unknown>;
-  inspectionFailedItems?: Record<string, unknown>;
-}
-
-export type OrderReturnCreateParams = Omit<
+export {
+  OrderReturnStatus,
+  OrderReturnType,
+  ReturnCarrier,
   OrderReturn,
-  'orderReturnId' | 'createdAt' | 'updatedAt' | 'returnNumber' | 'requestedAt' | 'approvedAt' | 'receivedAt' | 'completedAt'
->;
-
-export type OrderReturnUpdateParams = Partial<
-  Pick<
-    OrderReturn,
-    | 'status'
-    | 'rmaNumber'
-    | 'paymentRefundId'
-    | 'returnShippingPaid'
-    | 'returnShippingAmount'
-    | 'returnShippingLabel'
-    | 'returnTrackingNumber'
-    | 'returnTrackingUrl'
-    | 'customerNotes'
-    | 'adminNotes'
-    | 'inspectionPassedItems'
-    | 'inspectionFailedItems'
-  >
->;
+  OrderReturnCreateParams,
+  OrderReturnUpdateParams,
+} from '../../domain/repositories/OrderReturnRepository';
+import type {
+  OrderReturnStatus,
+  OrderReturnType,
+  ReturnCarrier,
+  OrderReturn,
+  OrderReturnCreateParams,
+  OrderReturnUpdateParams,
+} from '../../domain/repositories/OrderReturnRepository';
 
 export class OrderReturnRepo {
   /**
@@ -176,7 +136,7 @@ export class OrderReturnRepo {
     const result = await queryOne<OrderReturn>(
       `INSERT INTO "orderReturn" (
         "orderId", "returnNumber", "customerId", "status", "returnType", "requestedAt",
-        "rmaNumber", "paymentRefundId", "returnShippingPaid", "returnShippingAmount",
+        "rmaNumber", "paymentRefundId", "returnShippingPaid", "returnShippingAmountCents",
         "returnShippingLabel", "returnCarrier", "returnTrackingNumber", "returnTrackingUrl",
         "returnReason", "returnInstructions", "customerNotes", "adminNotes",
         "requiresInspection", "inspectionPassedItems", "inspectionFailedItems",
@@ -195,7 +155,7 @@ export class OrderReturnRepo {
         params.rmaNumber || null,
         params.paymentRefundId || null,
         params.returnShippingPaid || false,
-        params.returnShippingAmount || null,
+        params.returnShippingAmountCents || null,
         params.returnShippingLabel || null,
         params.returnCarrier || 'usps',
         params.returnTrackingNumber || null,

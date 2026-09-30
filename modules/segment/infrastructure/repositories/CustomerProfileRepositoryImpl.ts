@@ -3,61 +3,28 @@ import { logger } from '../../../../libs/logger';
 import { CustomerProfile } from '../../domain/entities/CustomerProfile';
 import type { CustomerProfileRepository } from '../../domain/repositories/SegmentRepository';
 import { SegmentValidationError } from '../../domain/errors/SegmentErrors';
+import type { SegmentCustomerProfile as DbSegmentCustomerProfile } from '../../../../libs/db/types';
 
-interface ProfileDbRow {
-  customerProfileId: string;
-  customerId: string;
-  email: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  status: string | null;
-  tier: string | null;
-  lifetimeValueCents: string;
-  totalSpentCents: string;
-  averageOrderValueCents: string;
-  totalOrders: number;
-  firstOrderDate: Date | null;
-  lastOrderDate: Date | null;
-  daysSinceLastOrder: number | null;
-  ordersLast30Days: number;
-  ordersLast90Days: number;
-  ordersLast12Months: number;
-  productViews: number;
-  cartCount: number;
-  abandonedCarts: number;
-  wishlistItemCount: number;
-  reviewCount: number;
-  averageReviewRating: string | null;
-  visitCount: number;
-  lastVisitDate: Date | null;
-  rfmSegment: string | null;
-  engagementScore: string | null;
-  churnRisk: string | null;
-  riskScore: string | null;
-  preferredCategories: string[] | null;
-  preferredProducts: string[] | null;
-  preferredPaymentMethods: string[] | null;
-  preferredShippingMethods: string[] | null;
-  deviceUsage: Record<string, unknown> | null;
-  tags: string[] | null;
-  customAttributes: Record<string, unknown> | null;
-  segmentIds: string[] | null;
-  organizationId: string | null;
-  lastComputedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type ProfileDbRow = DbSegmentCustomerProfile;
 
 function rowToEntity(row: ProfileDbRow): CustomerProfile {
   return CustomerProfile.reconstitute({
     ...row,
-    lifetimeValueCents: parseFloat(row.lifetimeValueCents),
-    totalSpentCents: parseFloat(row.totalSpentCents),
-    averageOrderValueCents: parseFloat(row.averageOrderValueCents),
+    lifetimeValueCents: Number(row.lifetimeValueCents ?? 0),
+    totalSpentCents: Number(row.totalSpentCents ?? 0),
+    averageOrderValueCents: Number(row.averageOrderValueCents ?? 0),
     averageReviewRating: row.averageReviewRating ? parseFloat(row.averageReviewRating) : null,
     engagementScore: row.engagementScore ? parseFloat(row.engagementScore) : null,
     churnRisk: row.churnRisk ? parseFloat(row.churnRisk) : null,
     riskScore: row.riskScore ? parseFloat(row.riskScore) : null,
+    segmentIds: (row.segmentIds as string[] | null) ?? null,
+    preferredCategories: row.preferredCategories as string[] | null,
+    preferredProducts: row.preferredProducts as string[] | null,
+    preferredPaymentMethods: row.preferredPaymentMethods as string[] | null,
+    preferredShippingMethods: row.preferredShippingMethods as string[] | null,
+    deviceUsage: row.deviceUsage as Record<string, unknown> | null,
+    tags: row.tags as string[] | null,
+    customAttributes: row.customAttributes as Record<string, unknown> | null,
   });
 }
 

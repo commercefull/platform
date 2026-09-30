@@ -50,10 +50,14 @@ export class SupplierReceivingAdapter {
       distributionWarehouseId: po?.distributionWarehouseId ?? data.warehouseId,
       supplierId: po?.supplierId ?? 'unknown',
       status: 'completed',
-      receivedDate: data.receivedAt.toISOString(),
-      notes: data.notes,
+      receivedDate: data.receivedAt,
+      carrierName: null,
+      trackingNumber: null,
+      packageCount: null,
+      notes: data.notes ?? null,
       discrepancies: hasDamage,
-      completedAt: data.receivedAt.toISOString(),
+      attachments: null,
+      completedAt: data.receivedAt,
     });
 
     for (const item of data.items) {
@@ -63,18 +67,24 @@ export class SupplierReceivingAdapter {
       const damaged = item.quantityDamaged ?? 0;
       await receivingItems.create({
         supplierReceivingRecordId: record.supplierReceivingRecordId,
-        supplierPurchaseOrderItemId: poItem?.supplierPurchaseOrderItemId,
+        supplierPurchaseOrderItemId: poItem?.supplierPurchaseOrderItemId ?? null,
         productId: item.productId,
-        productVariantId: item.variantId,
+        productVariantId: item.variantId ?? null,
         sku: poItem?.sku ?? '',
         name: poItem?.name ?? item.productId,
-        expectedQuantity: poItem?.quantity,
+        expectedQuantity: poItem?.quantity ?? null,
         receivedQuantity: item.quantityReceived - damaged,
         rejectedQuantity: damaged,
         status: damaged > 0 && damaged < item.quantityReceived ? 'partial' : damaged >= item.quantityReceived ? 'rejected' : 'received',
-        inspectionNotes: item.notes,
+        distributionWarehouseBinId: null,
+        lotNumber: null,
+        serialNumbers: null,
+        expiryDate: null,
+        acceptanceStatus: null,
+        inspectionNotes: item.notes ?? null,
+        discrepancyReason: null,
         processedBy: data.receivedBy,
-        processedAt: data.receivedAt.toISOString(),
+        processedAt: data.receivedAt,
       });
     }
   }

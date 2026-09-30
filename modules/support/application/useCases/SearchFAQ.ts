@@ -12,8 +12,8 @@ export interface FAQItem {
   faqId: string;
   question: string;
   answer: string;
-  categoryName?: string;
-  helpfulness?: number;
+  categoryName?: string | null;
+  helpfulness?: string | null;
 }
 
 export interface SearchFAQOutput {
@@ -25,8 +25,8 @@ interface FaqRecord {
   faqId: string;
   question: string;
   answer: string;
-  categoryName?: string;
-  helpfulness?: number;
+  categoryName?: string | null;
+  helpfulness?: string | null;
 }
 
 interface SupportRepository {

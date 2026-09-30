@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { TaxVatRegistration as DbTaxVatRegistration, TaxVatValidationLog as DbTaxVatValidationLog } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -15,59 +16,9 @@ import { query, queryOne } from '../../../../libs/db';
 
 export type VatRegistrationType = 'standard' | 'oss' | 'ioss' | 'moss' | 'non_union' | 'distance_selling';
 
-export interface VatRegistration {
-  vatRegistrationId: string;
-  organizationId: string;
-  countryCode: string;
-  vatNumber: string;
-  tradingName?: string;
-  legalName?: string;
-  registrationType: VatRegistrationType;
-  isVerified: boolean;
-  verifiedAt?: Date;
-  verificationSource?: string;
-  verificationRequestId?: string;
-  verificationResponse?: Record<string, unknown>;
-  registrationDate?: Date;
-  deregistrationDate?: Date;
-  effectiveFrom?: Date;
-  effectiveUntil?: Date;
-  annualThresholdCents?: number;
-  thresholdCurrency?: string;
-  currentYearSalesCents?: number;
-  thresholdExceeded?: boolean;
-  isActive: boolean;
-  notes?: string;
-  certificateUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type VatRegistration = DbTaxVatRegistration;
 
-export interface VatValidationLog {
-  vatValidationLogId: string;
-  customerId?: string;
-  organizationId?: string;
-  orderId?: string;
-  vatNumber: string;
-  countryCode: string;
-  vatNumberFormatted?: string;
-  isValid?: boolean;
-  validationStatus: 'valid' | 'invalid' | 'unavailable' | 'timeout' | 'error' | 'format_invalid';
-  validationSource: 'vies' | 'hmrc' | 'manual' | 'cache' | 'format';
-  requestId?: string;
-  response?: Record<string, unknown>;
-  companyName?: string;
-  companyAddress?: string;
-  companyCity?: string;
-  companyPostalCode?: string;
-  validatedAt: Date;
-  responseTimeMs?: number;
-  expiresAt?: Date;
-  reverseChargeApplicable?: boolean;
-  ipAddress?: string;
-  context?: string;
-  createdAt: Date;
-}
+export type VatValidationLog = DbTaxVatValidationLog;
 
 // ============================================================================
 // VAT Registration CRUD
@@ -347,25 +298,25 @@ function mapToVatRegistration(row: Record<string, unknown>): VatRegistration {
     organizationId: row.organizationId as string,
     countryCode: row.countryCode as string,
     vatNumber: row.vatNumber as string,
-    tradingName: row.tradingName as string | undefined,
-    legalName: row.legalName as string | undefined,
+    tradingName: row.tradingName as string | null,
+    legalName: row.legalName as string | null,
     registrationType: row.registrationType as VatRegistrationType,
     isVerified: Boolean(row.isVerified),
-    verifiedAt: row.verifiedAt ? new Date(row.verifiedAt as string) : undefined,
-    verificationSource: row.verificationSource as string | undefined,
-    verificationRequestId: row.verificationRequestId as string | undefined,
-    verificationResponse: row.verificationResponse as Record<string, unknown> | undefined,
-    registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : undefined,
-    deregistrationDate: row.deregistrationDate ? new Date(row.deregistrationDate as string) : undefined,
-    effectiveFrom: row.effectiveFrom ? new Date(row.effectiveFrom as string) : undefined,
-    effectiveUntil: row.effectiveUntil ? new Date(row.effectiveUntil as string) : undefined,
-    annualThresholdCents: row.annualThresholdCents ? parseFloat(row.annualThresholdCents as string) : undefined,
-    thresholdCurrency: row.thresholdCurrency as string | undefined,
-    currentYearSalesCents: row.currentYearSalesCents ? parseFloat(row.currentYearSalesCents as string) : undefined,
+    verifiedAt: row.verifiedAt ? new Date(row.verifiedAt as string) : null,
+    verificationSource: row.verificationSource as string | null,
+    verificationRequestId: row.verificationRequestId as string | null,
+    verificationResponse: row.verificationResponse as Record<string, unknown> | null,
+    registrationDate: row.registrationDate ? new Date(row.registrationDate as string) : null,
+    deregistrationDate: row.deregistrationDate ? new Date(row.deregistrationDate as string) : null,
+    effectiveFrom: row.effectiveFrom ? new Date(row.effectiveFrom as string) : null,
+    effectiveUntil: row.effectiveUntil ? new Date(row.effectiveUntil as string) : null,
+    annualThresholdCents: row.annualThresholdCents ? parseFloat(row.annualThresholdCents as string) : null,
+    thresholdCurrency: row.thresholdCurrency as string | null,
+    currentYearSalesCents: row.currentYearSalesCents ? parseFloat(row.currentYearSalesCents as string) : null,
     thresholdExceeded: Boolean(row.thresholdExceeded),
     isActive: Boolean(row.isActive),
-    notes: row.notes as string | undefined,
-    certificateUrl: row.certificateUrl as string | undefined,
+    notes: row.notes as string | null,
+    certificateUrl: row.certificateUrl as string | null,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };
@@ -374,27 +325,27 @@ function mapToVatRegistration(row: Record<string, unknown>): VatRegistration {
 function mapToVatValidationLog(row: Record<string, unknown>): VatValidationLog {
   return {
     vatValidationLogId: row.vatValidationLogId as string,
-    customerId: row.customerId as string | undefined,
-    organizationId: row.organizationId as string | undefined,
-    orderId: row.orderId as string | undefined,
+    customerId: row.customerId as string | null,
+    organizationId: row.organizationId as string | null,
+    orderId: row.orderId as string | null,
     vatNumber: row.vatNumber as string,
     countryCode: row.countryCode as string,
-    vatNumberFormatted: row.vatNumberFormatted as string | undefined,
-    isValid: row.isValid as boolean | undefined,
+    vatNumberFormatted: row.vatNumberFormatted as string | null,
+    isValid: row.isValid as boolean | null,
     validationStatus: row.validationStatus as VatValidationLog['validationStatus'],
     validationSource: row.validationSource as VatValidationLog['validationSource'],
-    requestId: row.requestId as string | undefined,
-    response: row.response as Record<string, unknown> | undefined,
-    companyName: row.companyName as string | undefined,
-    companyAddress: row.companyAddress as string | undefined,
-    companyCity: row.companyCity as string | undefined,
-    companyPostalCode: row.companyPostalCode as string | undefined,
+    requestId: row.requestId as string | null,
+    response: row.response as Record<string, unknown> | null,
+    companyName: row.companyName as string | null,
+    companyAddress: row.companyAddress as string | null,
+    companyCity: row.companyCity as string | null,
+    companyPostalCode: row.companyPostalCode as string | null,
     validatedAt: new Date(row.validatedAt as string),
-    responseTimeMs: row.responseTimeMs as number | undefined,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
+    responseTimeMs: row.responseTimeMs as number | null,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
     reverseChargeApplicable: Boolean(row.reverseChargeApplicable),
-    ipAddress: row.ipAddress as string | undefined,
-    context: row.context as string | undefined,
+    ipAddress: row.ipAddress as string | null,
+    context: row.context as string | null,
     createdAt: new Date(row.createdAt as string),
   };
 }

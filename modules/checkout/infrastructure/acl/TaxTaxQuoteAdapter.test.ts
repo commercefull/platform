@@ -78,8 +78,8 @@ describe('TaxTaxQuoteAdapter', () => {
   it('should map tax settings to checkout vocabulary', async () => {
     taxSettingsRepo.findByMerchant.mockResolvedValue({
       taxSettingsId: 'ts-1',
-      createdAt: '2024-01-01',
-      updatedAt: '2024-01-01',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
       organizationId: 'merchant-1',
       calculationMethod: 'itemBased',
       pricesIncludeTax: false,
@@ -90,7 +90,7 @@ describe('TaxTaxQuoteAdapter', () => {
       applyDiscountBeforeTax: true,
       roundTaxAtSubtotal: false,
       taxDecimalPlaces: 2,
-    });
+    } as Awaited<ReturnType<typeof taxSettingsRepo.findByMerchant>>);
 
     const result = await adapter.getTaxSettings('merchant-1');
 

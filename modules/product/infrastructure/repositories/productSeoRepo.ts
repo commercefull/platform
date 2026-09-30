@@ -1,27 +1,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductSeo as DbProductSeo } from '../../../../libs/db/types';
 
-export interface ProductSeo {
-  productSeoId: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string;
-  productId: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  twitterCard: string;
-  twitterTitle?: string;
-  twitterDescription?: string;
-  twitterImage?: string;
-  canonicalUrl?: string;
-  robots: string;
-  structuredData?: Record<string, unknown>;
-}
+export type ProductSeo = DbProductSeo;
 
 export type ProductSeoCreateParams = Omit<ProductSeo, 'productSeoId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type ProductSeoUpdateParams = Partial<Omit<ProductSeo, 'productSeoId' | 'productId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;

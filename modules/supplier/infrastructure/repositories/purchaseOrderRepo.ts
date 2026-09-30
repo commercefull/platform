@@ -7,6 +7,7 @@ import { query, queryOne } from '../../../../libs/db';
 
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError, PurchaseOrderItemNotFoundError } from '../../domain/errors/SupplierErrors';
+import type { SupplierPurchaseOrder as DbSupplierPurchaseOrder, SupplierPurchaseOrderItem as DbSupplierPurchaseOrderItem } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -26,62 +27,9 @@ export type SupplierPurchaseOrderType = 'standard' | 'restock' | 'backOrder' | '
 export type SupplierPurchaseOrderPriority = 'low' | 'normal' | 'high' | 'urgent';
 export type SupplierPurchaseOrderItemStatus = 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
 
-export interface SupplierPurchaseOrder {
-  supplierPurchaseOrderId: string;
-  createdAt: string;
-  updatedAt: string;
-  poNumber: string;
-  supplierId: string;
-  distributionWarehouseId: string;
-  status: SupplierPurchaseOrderStatus;
-  orderType: SupplierPurchaseOrderType;
-  priority: SupplierPurchaseOrderPriority;
-  orderDate: string;
-  expectedDeliveryDate?: string;
-  deliveryDate?: string;
-  shippingMethod?: string;
-  trackingNumber?: string;
-  carrierName?: string;
-  paymentTerms?: string;
-  currencyCode: string;
-  subtotalCents: number;
-  taxCents: number;
-  shippingCents: number;
-  discountCents: number;
-  totalCents: number;
-  notes?: string;
-  supplierNotes?: string;
-  attachments?: Record<string, unknown>;
-  approvedAt?: string;
-  sentAt?: string;
-  confirmedAt?: string;
-  completedAt?: string;
-  cancelledAt?: string;
-}
+export type SupplierPurchaseOrder = DbSupplierPurchaseOrder;
 
-export interface SupplierPurchaseOrderItem {
-  supplierPurchaseOrderItemId: string;
-  createdAt: string;
-  updatedAt: string;
-  supplierPurchaseOrderId: string;
-  supplierProductId?: string;
-  productId: string;
-  productVariantId?: string;
-  sku: string;
-  supplierSku?: string;
-  name: string;
-  description?: string;
-  quantity: number;
-  receivedQuantity: number;
-  unitCostCents: number;
-  taxCents: number;
-  discountCents: number;
-  totalCents: number;
-  status: SupplierPurchaseOrderItemStatus;
-  expectedDeliveryDate?: string;
-  receivedAt?: string;
-  notes?: string;
-}
+export type SupplierPurchaseOrderItem = DbSupplierPurchaseOrderItem;
 
 export type SupplierPurchaseOrderCreateParams = Omit<
   SupplierPurchaseOrder,

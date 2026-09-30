@@ -1,20 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { ImportError as DbImportError } from '../../../../libs/db/types';
 import { ImportError, type ImportErrorProps, type ImportErrorSeverity } from '../../domain/entities/ImportError';
 import type { ImportErrorRepository } from '../../domain/repositories/MigrationRepository';
 
-interface ImportErrorDbRow {
-  importErrorId: string;
-  importJobId: string;
-  entityType: string;
-  sourceId: string | null;
-  severity: string;
-  message: string;
-  stackTrace: string | null;
-  rawData: Record<string, unknown> | string | null;
-  resolvedAt: Date | null;
-  createdAt: Date;
-}
+type ImportErrorDbRow = DbImportError;
 
 export class ImportErrorRepositoryImpl implements ImportErrorRepository {
   async create(error: ImportError): Promise<ImportError> {

@@ -6,21 +6,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxRule as DbTaxRule } from '../../../../libs/db/types';
 
 export type TaxRuleConditionType = 'product' | 'category' | 'brand';
 
-export interface TaxRule {
-  taxRuleId: string;
-  createdAt: string;
-  updatedAt: string;
-  taxRateId: string;
-  name?: string;
-  description?: string;
-  conditionType: TaxRuleConditionType;
-  conditionValue: unknown; // JSON
-  sortOrder: number;
-  isActive: boolean;
-}
+export type TaxRule = DbTaxRule;
 
 export type TaxRuleCreateParams = Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>;
 export type TaxRuleUpdateParams = Partial<Omit<TaxRule, 'taxRuleId' | 'createdAt' | 'updatedAt'>>;

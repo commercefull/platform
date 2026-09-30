@@ -30,8 +30,8 @@ interface CommentRecord {
   commentId: string;
   ticketId: string;
   authorType: string;
-  isInternal: boolean;
-  createdAt: Date;
+  isInternal: boolean | null;
+  createdAt: Date | null;
 }
 
 interface SupportRepository {
@@ -94,8 +94,8 @@ export class AddTicketCommentUseCase {
       commentId: comment.commentId,
       ticketId: comment.ticketId,
       authorType: comment.authorType,
-      isInternal: comment.isInternal,
-      createdAt: comment.createdAt.toISOString(),
+      isInternal: comment.isInternal ?? false,
+      createdAt: comment.createdAt?.toISOString() ?? new Date().toISOString(),
     };
   }
 }

@@ -53,8 +53,13 @@ export class ManageProductReviewsUseCase {
       content: input.content,
       reviewerName: input.reviewerName,
       reviewerEmail: input.reviewerEmail,
+      productVariantId: undefined,
+      orderId: undefined,
       isVerifiedPurchase: !!input.customerId,
       status: 'pending',
+
+      adminResponse: undefined,
+      adminResponseDate: undefined,
     });
   }
   async getApprovedReviewsWithStats(productId: string, limit?: number, offset?: number) {

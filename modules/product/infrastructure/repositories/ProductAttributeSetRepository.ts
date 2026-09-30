@@ -1,19 +1,8 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { ProductAttributeSet as DbProductAttributeSet, Table } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface ProductAttributeSet {
-  productAttributeSetId: string;
-  name: string;
-  code: string;
-  description?: string;
-  productTypeId?: string;
-  isActive: boolean;
-  organizationId?: string;
-  isGlobal: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type ProductAttributeSet = DbProductAttributeSet;
 
 export interface ProductAttributeSetWithAttributes extends ProductAttributeSet {
   attributes: ProductAttributeSetAttribute[];

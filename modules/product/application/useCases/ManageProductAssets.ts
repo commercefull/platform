@@ -104,48 +104,48 @@ export class ManageProductImagesUseCase {
 }
 
 interface ProductDownloadRecord {
-  productDownloadId?: string;
-  productId?: string;
-  productVariantId?: string;
-  name?: string;
-  fileUrl?: string;
-  filePath?: string;
-  fileSize?: number;
-  mimeType?: string;
-  maxDownloads?: number;
-  daysValid?: number;
-  isActive?: boolean;
-  sampleUrl?: string;
-  sortOrder?: number;
+  productDownloadId?: string | null;
+  productId?: string | null;
+  productVariantId?: string | null;
+  name?: string | null;
+  fileUrl?: string | null;
+  filePath?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
+  maxDownloads?: number | null;
+  daysValid?: number | null;
+  isActive?: boolean | null;
+  sampleUrl?: string | null;
+  sortOrder?: number | null;
 }
 
 export interface ProductDownloadCreateProps {
   productId: string;
-  productVariantId?: string;
+  productVariantId?: string | null;
   name: string;
   fileUrl: string;
-  filePath?: string;
-  fileSize?: number;
-  mimeType?: string;
-  maxDownloads?: number;
-  daysValid?: number;
+  filePath?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
+  maxDownloads?: number | null;
+  daysValid?: number | null;
   isActive: boolean;
-  sampleUrl?: string;
+  sampleUrl?: string | null;
   sortOrder: number;
 }
 
 export interface ProductDownloadUpdateProps {
-  name?: string;
-  fileUrl?: string;
-  filePath?: string;
-  fileSize?: number;
-  mimeType?: string;
-  maxDownloads?: number;
-  daysValid?: number;
-  isActive?: boolean;
-  sampleUrl?: string;
-  sortOrder?: number;
-  productVariantId?: string;
+  name?: string | null;
+  fileUrl?: string | null;
+  filePath?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
+  maxDownloads?: number | null;
+  daysValid?: number | null;
+  isActive?: boolean | null;
+  sampleUrl?: string | null;
+  sortOrder?: number | null;
+  productVariantId?: string | null;
 }
 
 interface ProductDownloadPort {

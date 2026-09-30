@@ -15,57 +15,9 @@ import { ProductPricingAdapter } from '../acl/ProductPricingAdapter';
 export type BundleType = 'fixed' | 'customizable' | 'mix_and_match';
 export type PricingType = 'fixed' | 'calculated' | 'percentage_discount';
 
-export interface ProductBundle {
-  productBundleId: string;
-  productId: string;
-  name: string;
-  slug?: string;
-  description?: string;
-  bundleType: BundleType;
-  pricingType: PricingType;
-  fixedPriceCents?: number;
-  discountPercent?: number;
-  discountAmountCents?: number;
-  minPriceCents?: number;
-  maxPriceCents?: number;
-  currency: string;
-  minItems?: number;
-  maxItems?: number;
-  minQuantity: number;
-  maxQuantity?: number;
-  requireAllItems: boolean;
-  allowDuplicates: boolean;
-  showSavings: boolean;
-  savingsAmountCents?: number;
-  savingsPercent?: number;
-  imageUrl?: string;
-  sortOrder: number;
-  isActive: boolean;
-  startDate?: Date;
-  endDate?: Date;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type ProductBundle = DbProductBundle;
 
-export interface BundleItem {
-  bundleItemId: string;
-  productBundleId: string;
-  productId: string;
-  productVariantId?: string;
-  slotName?: string;
-  quantity: number;
-  minQuantity: number;
-  maxQuantity?: number;
-  isRequired: boolean;
-  isDefault: boolean;
-  priceAdjustmentCents: number;
-  discountPercent: number;
-  sortOrder: number;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type BundleItem = DbProductBundleItem;
 
 // ============================================================================
 // Product Bundles
@@ -161,7 +113,7 @@ export async function saveBundle(
         bundle.discountAmountCents,
         bundle.minPriceCents,
         bundle.maxPriceCents,
-        bundle.currency || 'USD',
+        bundle.currencyCode || 'USD',
         bundle.minItems,
         bundle.maxItems,
         bundle.minQuantity || 1,
@@ -205,7 +157,7 @@ export async function saveBundle(
         bundle.discountAmountCents,
         bundle.minPriceCents,
         bundle.maxPriceCents,
-        bundle.currency || 'USD',
+        bundle.currencyCode || 'USD',
         bundle.minItems,
         bundle.maxItems,
         bundle.minQuantity || 1,
@@ -277,7 +229,7 @@ export async function saveBundleItem(
         item.isRequired !== false,
         item.isDefault || false,
         item.priceAdjustmentCents || 0,
-        item.discountPercent || 0,
+        item.discountPercent || null,
         item.sortOrder || 0,
         item.metadata ? JSON.stringify(item.metadata) : null,
         now,
@@ -305,7 +257,7 @@ export async function saveBundleItem(
         item.isRequired !== false,
         item.isDefault || false,
         item.priceAdjustmentCents || 0,
-        item.discountPercent || 0,
+        item.discountPercent || null,
         item.sortOrder || 0,
         item.metadata ? JSON.stringify(item.metadata) : null,
         now,
@@ -351,8 +303,8 @@ export async function calculateBundlePrice(
     const fixedPriceCents = toCents(bundle.fixedPriceCents);
     let individualTotalCents = 0;
     for (const item of items) {
-      const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId);
-      individualTotalCents += itemPriceCents * item.quantity;
+      const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId ?? undefined);
+      individualTotalCents += itemPriceCents * (item.quantity ?? 1);
     }
     const savingsCents = individualTotalCents - fixedPriceCents;
     return {
@@ -366,16 +318,16 @@ export async function calculateBundlePrice(
   let originalTotalCents = 0;
 
   for (const item of items) {
-    const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId);
-    const quantity = selectedItems?.find(s => s.productId === item.productId)?.quantity || item.quantity;
-    const discountedPriceCents = Math.round(itemPriceCents * (1 - item.discountPercent / 100)) + toCents(item.priceAdjustmentCents);
+    const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId ?? undefined);
+    const quantity = selectedItems?.find(s => s.productId === item.productId)?.quantity ?? item.quantity ?? 1;
+    const discountedPriceCents = Math.round(itemPriceCents * (1 - Number(item.discountPercent || 0) / 100)) + toCents(item.priceAdjustmentCents);
 
     totalCents += discountedPriceCents * quantity;
     originalTotalCents += itemPriceCents * quantity;
   }
 
   if (bundle.discountPercent) {
-    totalCents = Math.round(totalCents * (1 - bundle.discountPercent / 100));
+    totalCents = Math.round(totalCents * (1 - Number(bundle.discountPercent) / 100));
   }
   if (bundle.discountAmountCents) {
     totalCents = totalCents - toCents(bundle.discountAmountCents);
@@ -397,57 +349,9 @@ export async function calculateBundlePrice(
 // ============================================================================
 
 function mapToBundle(row: DbProductBundle): ProductBundle {
-  return {
-    productBundleId: row.productBundleId,
-    productId: row.productId,
-    name: row.name,
-    slug: row.slug ?? undefined,
-    description: row.description ?? undefined,
-    bundleType: (row.bundleType as BundleType) ?? 'fixed',
-    pricingType: (row.pricingType as PricingType) ?? 'fixed',
-    fixedPriceCents: row.fixedPriceCents != null ? Number(row.fixedPriceCents) : undefined,
-    discountPercent: row.discountPercent ? parseFloat(row.discountPercent) : undefined,
-    discountAmountCents: row.discountAmountCents != null ? Number(row.discountAmountCents) : undefined,
-    minPriceCents: row.minPriceCents != null ? Number(row.minPriceCents) : undefined,
-    maxPriceCents: row.maxPriceCents != null ? Number(row.maxPriceCents) : undefined,
-    currency: row.currencyCode || 'USD',
-    minItems: row.minItems ?? undefined,
-    maxItems: row.maxItems ?? undefined,
-    minQuantity: row.minQuantity ?? 1,
-    maxQuantity: row.maxQuantity ?? undefined,
-    requireAllItems: Boolean(row.requireAllItems),
-    allowDuplicates: Boolean(row.allowDuplicates),
-    showSavings: Boolean(row.showSavings),
-    savingsAmountCents: row.savingsAmountCents != null ? Number(row.savingsAmountCents) : undefined,
-    savingsPercent: row.savingsPercent ? parseFloat(row.savingsPercent) : undefined,
-    imageUrl: row.imageUrl ?? undefined,
-    sortOrder: row.sortOrder ?? 0,
-    isActive: Boolean(row.isActive),
-    startDate: row.startDate ? new Date(row.startDate) : undefined,
-    endDate: row.endDate ? new Date(row.endDate) : undefined,
-    metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
-    createdAt: new Date(row.createdAt!),
-    updatedAt: new Date(row.updatedAt!),
-  };
+  return row;
 }
 
 function mapToBundleItem(row: DbProductBundleItem): BundleItem {
-  return {
-    bundleItemId: row.bundleItemId,
-    productBundleId: row.productBundleId,
-    productId: row.productId,
-    productVariantId: row.productVariantId ?? undefined,
-    slotName: row.slotName ?? undefined,
-    quantity: row.quantity ?? 1,
-    minQuantity: row.minQuantity ?? 1,
-    maxQuantity: row.maxQuantity ?? undefined,
-    isRequired: Boolean(row.isRequired),
-    isDefault: Boolean(row.isDefault),
-    priceAdjustmentCents: row.priceAdjustmentCents != null ? Number(row.priceAdjustmentCents) : 0,
-    discountPercent: row.discountPercent ? parseFloat(row.discountPercent) : 0,
-    sortOrder: row.sortOrder ?? 0,
-    metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
-    createdAt: new Date(row.createdAt!),
-    updatedAt: new Date(row.updatedAt!),
-  };
+  return row;
 }

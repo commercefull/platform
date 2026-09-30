@@ -1,64 +1,71 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import type { NotificationTemplate as DbNotificationTemplate } from '../../../../libs/db/types';
 import {
   NotificationTemplateNotFoundError,
   NotificationTemplateAlreadyExistsError,
   FailedToCreateNotificationTemplateError,
 } from '../../domain/errors/NotificationErrors';
 
-export type NotificationType = string;
+import type {
+  NotificationType,
+  NotificationChannel,
+  NotificationTemplate,
+  NotificationTemplateCreateParams,
+  NotificationTemplateUpdateParams,
+} from '../../domain/repositories/NotificationTemplateRepository';
+export type {
+  NotificationType,
+  NotificationChannel,
+  NotificationTemplate,
+  NotificationTemplateCreateParams,
+  NotificationTemplateUpdateParams,
+} from '../../domain/repositories/NotificationTemplateRepository';
 
-export type NotificationChannel = 'email' | 'sms' | 'push' | 'in_app';
-
-export interface NotificationTemplate {
-  notificationTemplateId: string;
-  createdAt: string;
-  updatedAt: string;
-  code: string;
-  name: string;
-  description?: string;
-  type: NotificationType;
-  supportedChannels: string[];
-  defaultChannel: string;
-  subject?: string;
-  htmlTemplate?: string;
-  textTemplate?: string;
-  pushTemplate?: string;
-  smsTemplate?: string;
-  parameters?: Record<string, unknown>;
-  isActive: boolean;
-  categoryCode?: string;
-  previewData?: Record<string, unknown>;
-  createdBy?: string;
+function mapToTemplate(row: DbNotificationTemplate): NotificationTemplate {
+  return {
+    ...row,
+    description: row.description ?? undefined,
+    supportedChannels: (row.supportedChannels as string[]) ?? [],
+    subject: row.subject ?? undefined,
+    htmlTemplate: row.htmlTemplate ?? undefined,
+    textTemplate: row.textTemplate ?? undefined,
+    pushTemplate: row.pushTemplate ?? undefined,
+    smsTemplate: row.smsTemplate ?? undefined,
+    parameters: (row.parameters as Record<string, unknown> | null) ?? undefined,
+    categoryCode: row.categoryCode ?? undefined,
+    previewData: (row.previewData as Record<string, unknown> | null) ?? undefined,
+    createdBy: row.createdBy ?? undefined,
+    createdAt: row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt),
+  };
 }
-
-export type NotificationTemplateCreateParams = Omit<NotificationTemplate, 'notificationTemplateId' | 'createdAt' | 'updatedAt'>;
-export type NotificationTemplateUpdateParams = Partial<
-  Omit<NotificationTemplate, 'notificationTemplateId' | 'code' | 'createdAt' | 'updatedAt'>
->;
 
 export class NotificationTemplateRepo {
   /**
    * Find template by ID
    */
   async findById(notificationTemplateId: string): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "notificationTemplateId" = $1`, [
+    const row = await queryOne<DbNotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "notificationTemplateId" = $1`, [
       notificationTemplateId,
     ]);
+    return row ? mapToTemplate(row) : null;
   }
 
   /**
    * Find template by code
    */
   async findByCode(code: string): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "code" = $1`, [code]);
+    const row = await queryOne<DbNotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "code" = $1`, [code]);
+    return row ? mapToTemplate(row) : null;
   }
 
   /**
    * Find template by type
    */
   async findByType(type: NotificationType): Promise<NotificationTemplate | null> {
-    return await queryOne<NotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "type" = $1 AND "isActive" = true`, [type]);
+    const row = await queryOne<DbNotificationTemplate>(`SELECT * FROM "notificationTemplate" WHERE "type" = $1 AND "isActive" = true`, [type]);
+    return row ? mapToTemplate(row) : null;
   }
 
   /**
@@ -73,8 +80,8 @@ export class NotificationTemplateRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<NotificationTemplate[]>(sql);
-    return results || [];
+    const results = await query<DbNotificationTemplate[]>(sql);
+    return (results || []).map(mapToTemplate);
   }
 
   /**
@@ -90,8 +97,8 @@ export class NotificationTemplateRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<NotificationTemplate[]>(sql, params);
-    return results || [];
+    const results = await query<DbNotificationTemplate[]>(sql, params);
+    return (results || []).map(mapToTemplate);
   }
 
   /**
@@ -107,8 +114,8 @@ export class NotificationTemplateRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<NotificationTemplate[]>(sql, params);
-    return results || [];
+    const results = await query<DbNotificationTemplate[]>(sql, params);
+    return (results || []).map(mapToTemplate);
   }
 
   /**
@@ -123,7 +130,7 @@ export class NotificationTemplateRepo {
       throw new NotificationTemplateAlreadyExistsError(params.code);
     }
 
-    const result = await queryOne<NotificationTemplate>(
+    const result = await queryOne<DbNotificationTemplate>(
       `INSERT INTO "notificationTemplate" (
         "code", "name", "description", "type", "supportedChannels", "defaultChannel",
         "subject", "htmlTemplate", "textTemplate", "pushTemplate", "smsTemplate",
@@ -159,7 +166,7 @@ export class NotificationTemplateRepo {
       throw new FailedToCreateNotificationTemplateError();
     }
 
-    return result;
+    return mapToTemplate(result);
   }
 
   /**
@@ -186,7 +193,7 @@ export class NotificationTemplateRepo {
     values.push(unixTimestamp());
     values.push(notificationTemplateId);
 
-    const result = await queryOne<NotificationTemplate>(
+    const result = await queryOne<DbNotificationTemplate>(
       `UPDATE "notificationTemplate" 
        SET ${updateFields.join(', ')}
        WHERE "notificationTemplateId" = $${paramIndex}
@@ -194,7 +201,7 @@ export class NotificationTemplateRepo {
       values,
     );
 
-    return result;
+    return result ? mapToTemplate(result) : null;
   }
 
   /**
@@ -300,8 +307,8 @@ export class NotificationTemplateRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<NotificationTemplate[]>(sql, params);
-    return results || [];
+    const results = await query<DbNotificationTemplate[]>(sql, params);
+    return (results || []).map(mapToTemplate);
   }
 
   /**
@@ -323,10 +330,10 @@ export class NotificationTemplateRepo {
       throw new NotificationTemplateNotFoundError(notificationTemplateId);
     }
 
-    const previewData = data || template.previewData || {};
+    const previewData = (data || template.previewData || {}) as Record<string, unknown>;
 
     // Simple template variable replacement ({{variable}})
-    const compile = (text?: string): string | undefined => {
+    const compile = (text?: string | null): string | undefined => {
       if (!text) return undefined;
 
       return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {

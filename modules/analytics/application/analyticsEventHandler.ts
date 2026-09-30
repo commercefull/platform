@@ -110,7 +110,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       date: today,
       organizationId: data.organizationId as string | undefined,
       channel: (data.channel as string) || 'all',
-      currency: (data.currency as string) || 'USD',
+      currencyCode: (data.currency as string) || 'USD',
       orderCount: 1,
       itemsSold: (data.itemCount as number) || 0,
       grossRevenueCents: ((data.totalAmountCents) as number) || 0,

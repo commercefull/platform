@@ -6,33 +6,28 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
+import type { DistributionWarehouseZone as DbDistributionWarehouseZone } from '../../../../libs/db/types';
+import type { WarehouseZone, CreateZoneInput, UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
+export type { WarehouseZone, CreateZoneInput, UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
 
-export interface WarehouseZone {
-  distributionWarehouseZoneId: string;
-  distributionWarehouseId: string;
-  name: string;
-  code: string;
-  description?: string;
-  zoneType: string;
-  isActive: boolean;
-  sortOrder: number;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
+const rec = (v: unknown): Record<string, unknown> | undefined => (v as Record<string, unknown> | null) ?? undefined;
+
+function mapToZone(row: DbDistributionWarehouseZone): WarehouseZone {
+  return {
+    ...row,
+    description: row.description ?? undefined,
+    sortOrder: row.sortOrder ?? 0,
+    metadata: rec(row.metadata),
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+  };
 }
 
-export interface CreateZoneInput {
-  distributionWarehouseId: string;
-  name: string;
-  code: string;
-  description?: string;
-  zoneType?: string;
-  isActive?: boolean;
-  sortOrder?: number;
-  metadata?: Record<string, unknown>;
-}
 
-export type UpdateZoneInput = Partial<Omit<CreateZoneInput, 'distributionWarehouseId' | 'code'>>;
+
+
+
+
 
 export async function createZone(input: CreateZoneInput): Promise<WarehouseZone> {
   const id = generateUUID();
@@ -46,7 +41,7 @@ export async function createZone(input: CreateZoneInput): Promise<WarehouseZone>
     RETURNING *
   `;
 
-  const result = await queryOne<WarehouseZone>(sql, [
+  const result = await queryOne<DbDistributionWarehouseZone>(sql, [
     id,
     input.distributionWarehouseId,
     input.name,
@@ -61,19 +56,20 @@ export async function createZone(input: CreateZoneInput): Promise<WarehouseZone>
   ]);
 
   if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create warehouse zone');
-  return result;
+  return result ? mapToZone(result) : result;
 }
 
 export async function findZoneById(zoneId: string): Promise<WarehouseZone | null> {
-  return queryOne<WarehouseZone>('SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1', [zoneId]);
+  const row = await queryOne<DbDistributionWarehouseZone>('SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1', [zoneId]);
+  return row ? mapToZone(row) : null;
 }
 
 export async function findZonesByWarehouse(warehouseId: string): Promise<WarehouseZone[]> {
-  const result = await query<WarehouseZone[]>(
+  const result = await query<DbDistributionWarehouseZone[]>(
     'SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseId" = $1 ORDER BY "sortOrder" ASC, "name" ASC',
     [warehouseId],
   );
-  return result || [];
+  return (result || []).map(mapToZone);
 }
 
 export async function updateZone(zoneId: string, input: UpdateZoneInput): Promise<WarehouseZone | null> {
@@ -113,7 +109,8 @@ export async function updateZone(zoneId: string, input: UpdateZoneInput): Promis
   values.push(zoneId);
 
   const sql = `UPDATE "distributionWarehouseZone" SET ${fields.join(', ')} WHERE "distributionWarehouseZoneId" = $${paramIndex} RETURNING *`;
-  return queryOne<WarehouseZone>(sql, values);
+  const row = await queryOne<DbDistributionWarehouseZone>(sql, values);
+  return row ? mapToZone(row) : null;
 }
 
 export async function deleteZone(zoneId: string): Promise<boolean> {

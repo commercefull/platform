@@ -154,7 +154,7 @@ export function createPromotionCouponUsage(overrides: Partial<PromotionCouponUsa
     createdAt: new Date('2024-06-01'),
     updatedAt: new Date('2024-06-01'),
     ...overrides,
-  };
+  } as PromotionCouponUsage;
 }
 
 export function createGiftCard(overrides: Partial<PromotionGiftCard> = {}): PromotionGiftCard {

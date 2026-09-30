@@ -1,27 +1,12 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
+import type { MembershipPayment as DbMembershipPayment } from '../../../../libs/db/types';
 
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded';
 export type PaymentType = 'subscription' | 'setupFee' | 'manual' | 'refund';
 
-export interface MembershipPayment {
-  membershipPaymentId: string;
-  createdAt: string;
-  updatedAt: string;
-  subscriptionId: string;
-  customerId: string;
-  amountCents: number;
-  currencyCode: string;
-  paymentDate: string;
-  status: PaymentStatus;
-  paymentType: PaymentType;
-  paymentMethod?: string;
-  transactionId?: string;
-  billingPeriodStart?: string;
-  billingPeriodEnd?: string;
-  notes?: string;
-}
+export type MembershipPayment = DbMembershipPayment;
 
 export type MembershipPaymentCreateParams = Omit<MembershipPayment, 'membershipPaymentId' | 'createdAt' | 'updatedAt'>;
 export type MembershipPaymentUpdateParams = Partial<Pick<MembershipPayment, 'status' | 'transactionId' | 'notes'>>;

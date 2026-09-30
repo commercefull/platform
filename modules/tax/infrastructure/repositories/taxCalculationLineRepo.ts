@@ -6,27 +6,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxCalculationLine as DbTaxCalculationLine } from '../../../../libs/db/types';
 
-export interface TaxCalculationLine {
-  taxCalculationLineId: string;
-  createdAt: string;
-  updatedAt: string;
-  calculationId: string;
-  lineItemId?: string;
-  lineItemType: string;
-  productId?: string;
-  productVariantId?: string;
-  sku?: string;
-  name: string;
-  quantity: number;
-  unitPriceCents: number;
-  lineTotalCents: number;
-  discountAmountCents: number;
-  taxableAmountCents: number;
-  taxExemptAmountCents: number;
-  taxCategoryId?: string;
-  taxCategoryCode?: string;
-}
+export type TaxCalculationLine = DbTaxCalculationLine;
 
 export type TaxCalculationLineCreateParams = Omit<TaxCalculationLine, 'taxCalculationLineId' | 'createdAt' | 'updatedAt'>;
 export type TaxCalculationLineUpdateParams = Partial<

@@ -1,48 +1,52 @@
+import type { NotificationPreference as DbNotificationPreference } from '../../../../libs/db/types';
 import { query, queryOne } from '../../../../libs/db';
 
-export interface NotificationPreference {
-  notificationPreferenceId: string;
-  userId: string;
-  userType: string;
-  type: string;
-  channelPreferences: Record<string, boolean>;
-  isEnabled: boolean;
-  schedulePreferences?: Record<string, unknown> | null;
-  metadata?: Record<string, unknown> | null;
-  updatedAt: Date;
+import type {
+  NotificationPreference,
+  NotificationPreferenceUpsertParams,
+} from '../../domain/repositories/NotificationPreferenceRepository';
+export type { NotificationPreference, NotificationPreferenceUpsertParams } from '../../domain/repositories/NotificationPreferenceRepository';
+
+function mapToPreference(row: DbNotificationPreference): NotificationPreference {
+  return {
+    ...row,
+    channelPreferences: (row.channelPreferences ?? {}) as Record<string, boolean>,
+    schedulePreferences: (row.schedulePreferences as Record<string, unknown> | null) ?? null,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? null,
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+  };
 }
 
-export type NotificationPreferenceUpsertParams = Omit<NotificationPreference, 'notificationPreferenceId' | 'updatedAt'>;
-
 export async function findByUser(userId: string, userType: string): Promise<NotificationPreference[]> {
-  return (
-    (await query<NotificationPreference[]>(
-      `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 ORDER BY "updatedAt" DESC`,
-      [userId, userType],
-    )) || []
+  const rows = await query<DbNotificationPreference[]>(
+    `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 ORDER BY "updatedAt" DESC`,
+    [userId, userType],
   );
+  return (rows || []).map(mapToPreference);
 }
 
 export async function findById(notificationPreferenceId: string): Promise<NotificationPreference | null> {
-  return queryOne<NotificationPreference>(`SELECT * FROM "notificationPreference" WHERE "notificationPreferenceId" = $1`, [
+  const row = await queryOne<DbNotificationPreference>(`SELECT * FROM "notificationPreference" WHERE "notificationPreferenceId" = $1`, [
     notificationPreferenceId,
   ]);
+  return row ? mapToPreference(row) : null;
 }
 
 export async function findByUserAndType(userId: string, userType: string, type: string): Promise<NotificationPreference | null> {
-  return queryOne<NotificationPreference>(
+  const row = await queryOne<DbNotificationPreference>(
     `SELECT * FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = $2 AND "type" = $3`,
     [userId, userType, type],
   );
+  return row ? mapToPreference(row) : null;
 }
 
 export async function findAll(): Promise<NotificationPreference[]> {
-  return (await query<NotificationPreference[]>(`SELECT * FROM "notificationPreference" ORDER BY "updatedAt" DESC`)) || [];
+  return ((await query<DbNotificationPreference[]>(`SELECT * FROM "notificationPreference" ORDER BY "updatedAt" DESC`)) || []).map(mapToPreference);
 }
 
 export async function upsert(params: NotificationPreferenceUpsertParams): Promise<NotificationPreference | null> {
   const now = new Date().toISOString();
-  return queryOne<NotificationPreference>(
+  const row = await queryOne<DbNotificationPreference>(
     `INSERT INTO "notificationPreference" ("userId", "userType", "type", "channelPreferences", "isEnabled", "schedulePreferences", "metadata", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      ON CONFLICT ("userId", "userType", "type") DO UPDATE SET
@@ -63,6 +67,7 @@ export async function upsert(params: NotificationPreferenceUpsertParams): Promis
       now,
     ],
   );
+  return row ? mapToPreference(row) : null;
 }
 
 export async function update(
@@ -98,10 +103,11 @@ export async function update(
   values.push(new Date().toISOString());
   values.push(notificationPreferenceId);
 
-  return queryOne<NotificationPreference>(
+  const row = await queryOne<DbNotificationPreference>(
     `UPDATE "notificationPreference" SET ${setClauses.join(', ')} WHERE "notificationPreferenceId" = $${idx} RETURNING *`,
     values,
   );
+  return row ? mapToPreference(row) : null;
 }
 
 export async function deleteById(notificationPreferenceId: string): Promise<boolean> {

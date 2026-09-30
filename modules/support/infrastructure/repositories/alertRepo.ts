@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { InventoryStockAlert as DbInventoryStockAlert, SupportPriceAlert as DbSupportPriceAlert } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -22,61 +23,9 @@ export type AlertStatus = 'active' | 'notified' | 'purchased' | 'cancelled' | 'e
 export type NotificationChannel = 'email' | 'sms' | 'push' | 'all';
 export type PriceAlertType = 'target' | 'any_drop' | 'percentage_drop';
 
-export interface StockAlert {
-  stockAlertId: string;
-  customerId?: string;
-  email?: string;
-  phone?: string;
-  productId: string;
-  productVariantId?: string;
-  productName?: string;
-  variantName?: string;
-  sku?: string;
-  status: AlertStatus;
-  desiredQuantity: number;
-  stockThreshold: number;
-  notifyOnAnyStock: boolean;
-  notificationChannel: NotificationChannel;
-  notifiedAt?: Date;
-  notificationCount: number;
-  lastNotifiedAt?: Date;
-  purchasedAt?: Date;
-  purchaseOrderId?: string;
-  expiresAt?: Date;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type StockAlert = DbInventoryStockAlert;
 
-export interface PriceAlert {
-  priceAlertId: string;
-  customerId?: string;
-  email?: string;
-  phone?: string;
-  productId: string;
-  productVariantId?: string;
-  productName?: string;
-  variantName?: string;
-  sku?: string;
-  status: AlertStatus;
-  alertType: PriceAlertType;
-  targetPriceCents?: number;
-  percentageDrop?: number;
-  originalPriceCents?: number;
-  currentPriceCents?: number;
-  currency: string;
-  notificationChannel: NotificationChannel;
-  notifiedAt?: Date;
-  notifiedPriceCents?: number;
-  notificationCount: number;
-  lastNotifiedAt?: Date;
-  purchasedAt?: Date;
-  purchaseOrderId?: string;
-  expiresAt?: Date;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type PriceAlert = DbSupportPriceAlert;
 
 // ============================================================================
 // Stock Alerts
@@ -404,26 +353,26 @@ export async function expirePriceAlerts(): Promise<number> {
 function mapToStockAlert(row: Record<string, unknown>): StockAlert {
   return {
     stockAlertId: row.stockAlertId as string,
-    customerId: row.customerId as string | undefined,
-    email: row.email as string | undefined,
-    phone: row.phone as string | undefined,
+    customerId: row.customerId as string | null,
+    email: row.email as string | null,
+    phone: row.phone as string | null,
     productId: row.productId as string,
-    productVariantId: row.productVariantId as string | undefined,
-    productName: row.productName as string | undefined,
-    variantName: row.variantName as string | undefined,
-    sku: row.sku as string | undefined,
+    productVariantId: row.productVariantId as string | null,
+    productName: row.productName as string | null,
+    variantName: row.variantName as string | null,
+    sku: row.sku as string | null,
     status: row.status as AlertStatus,
     desiredQuantity: parseInt(row.desiredQuantity as string) || 1,
     stockThreshold: parseInt(row.stockThreshold as string) || 1,
     notifyOnAnyStock: Boolean(row.notifyOnAnyStock),
     notificationChannel: row.notificationChannel as NotificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
     notificationCount: parseInt(row.notificationCount as string) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : undefined,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : undefined,
-    purchaseOrderId: row.purchaseOrderId as string | undefined,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
+    purchaseOrderId: row.purchaseOrderId as string | null,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };
@@ -432,30 +381,30 @@ function mapToStockAlert(row: Record<string, unknown>): StockAlert {
 function mapToPriceAlert(row: Record<string, unknown>): PriceAlert {
   return {
     priceAlertId: row.priceAlertId as string,
-    customerId: row.customerId as string | undefined,
-    email: row.email as string | undefined,
-    phone: row.phone as string | undefined,
+    customerId: row.customerId as string | null,
+    email: row.email as string | null,
+    phone: row.phone as string | null,
     productId: row.productId as string,
-    productVariantId: row.productVariantId as string | undefined,
-    productName: row.productName as string | undefined,
-    variantName: row.variantName as string | undefined,
-    sku: row.sku as string | undefined,
+    productVariantId: row.productVariantId as string | null,
+    productName: row.productName as string | null,
+    variantName: row.variantName as string | null,
+    sku: row.sku as string | null,
     status: row.status as AlertStatus,
     alertType: row.alertType as PriceAlertType,
-    targetPriceCents: row.targetPriceCents != null ? Number(row.targetPriceCents) : undefined,
-    percentageDrop: row.percentageDrop ? parseFloat(row.percentageDrop as string) : undefined,
-    originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : undefined,
-    currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : undefined,
-    currency: (row.currencyCode as string) || 'USD',
+    targetPriceCents: row.targetPriceCents != null ? Number(row.targetPriceCents) : null,
+    percentageDrop: row.percentageDrop as string | null,
+    originalPriceCents: row.originalPriceCents != null ? Number(row.originalPriceCents) : null,
+    currentPriceCents: row.currentPriceCents != null ? Number(row.currentPriceCents) : null,
+    currencyCode: (row.currencyCode as string) || 'USD',
     notificationChannel: row.notificationChannel as NotificationChannel,
-    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : undefined,
-    notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : undefined,
+    notifiedAt: row.notifiedAt ? new Date(row.notifiedAt as string) : null,
+    notifiedPriceCents: row.notifiedPriceCents != null ? Number(row.notifiedPriceCents) : null,
     notificationCount: parseInt(row.notificationCount as string) || 0,
-    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : undefined,
-    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : undefined,
-    purchaseOrderId: row.purchaseOrderId as string | undefined,
-    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    lastNotifiedAt: row.lastNotifiedAt ? new Date(row.lastNotifiedAt as string) : null,
+    purchasedAt: row.purchasedAt ? new Date(row.purchasedAt as string) : null,
+    purchaseOrderId: row.purchaseOrderId as string | null,
+    expiresAt: row.expiresAt ? new Date(row.expiresAt as string) : null,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };

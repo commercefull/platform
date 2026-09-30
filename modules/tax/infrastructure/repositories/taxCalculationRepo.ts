@@ -6,35 +6,13 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxCalculation as DbTaxCalculation } from '../../../../libs/db/types';
 
 export type TaxCalculationMethod = 'unitBased' | 'itemBased';
 export type TaxCalculationStatus = 'pending' | 'completed' | 'failed';
 export type TaxCalculationSourceType = 'order' | 'invoice' | 'basket';
 
-export interface TaxCalculation {
-  taxCalculationId: string;
-  createdAt: string;
-  updatedAt: string;
-  organizationId: string;
-  orderId?: string;
-  invoiceId?: string;
-  basketId?: string;
-  customerId?: string;
-  calculationMethod: TaxCalculationMethod;
-  status: TaxCalculationStatus;
-  sourceType: TaxCalculationSourceType;
-  sourceId?: string;
-  taxAddress?: unknown; // JSON
-  taxableAmountCents: number;
-  taxExemptAmountCents: number;
-  taxAmountCents: number;
-  totalAmountCents: number;
-  currencyCode: string;
-  exchangeRate: number;
-  taxProviderResponse?: unknown; // JSON
-  taxProviderReference?: string;
-  errorMessage?: string;
-}
+export type TaxCalculation = DbTaxCalculation;
 
 export type TaxCalculationCreateParams = Omit<TaxCalculation, 'taxCalculationId' | 'createdAt' | 'updatedAt'>;
 export type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;

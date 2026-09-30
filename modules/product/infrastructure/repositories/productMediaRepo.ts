@@ -1,28 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductMedia as DbProductMedia } from '../../../../libs/db/types';
 
 export type MediaType = 'image' | 'video' | 'document' | '3d_model' | 'audio';
 
-export interface ProductMedia {
-  productMediaId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  productVariantId?: string;
-  type: MediaType;
-  url: string;
-  filename?: string;
-  filesize?: number;
-  mimeType?: string;
-  altText?: string;
-  title?: string;
-  sortOrder: number;
-  isPrimary: boolean;
-  width?: number;
-  height?: number;
-  duration?: number;
-}
+export type ProductMedia = DbProductMedia;
 
 export type ProductMediaCreateParams = Omit<ProductMedia, 'productMediaId' | 'createdAt' | 'updatedAt'>;
 export type ProductMediaUpdateParams = Partial<

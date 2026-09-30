@@ -1,24 +1,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductDownload as DbProductDownload } from '../../../../libs/db/types';
 
-export interface ProductDownload {
-  productDownloadId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  productVariantId?: string;
-  name: string;
-  fileUrl: string;
-  filePath?: string;
-  fileSize?: number;
-  mimeType?: string;
-  maxDownloads?: number;
-  daysValid?: number;
-  isActive: boolean;
-  sampleUrl?: string;
-  sortOrder: number;
-}
+export type ProductDownload = DbProductDownload;
 
 export type ProductDownloadCreateParams = Omit<ProductDownload, 'productDownloadId' | 'createdAt' | 'updatedAt'>;
 export type ProductDownloadUpdateParams = Partial<Omit<ProductDownload, 'productDownloadId' | 'productId' | 'createdAt' | 'updatedAt'>>;

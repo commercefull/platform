@@ -14,56 +14,11 @@ import type {
 import { StoreCreditLedgerEntry } from '../../domain/entities/StoreCredit';
 import type { StoreCreditEntryType, CustomerStoreCreditBalance } from '../../domain/entities/StoreCredit';
 import { ReturnValidationError } from '../../domain/errors/ReturnErrors';
+import type { OrderReturn as DbOrderReturn, OrderReturnItem as DbOrderReturnItem } from '../../../../libs/db/types';
 
-interface ReturnDbRow {
-  orderReturnId: string;
-  orderId: string;
-  returnNumber: string;
-  customerId: string | null;
-  status: string;
-  returnType: string;
-  requestedAt: Date;
-  approvedAt: Date | null;
-  receivedAt: Date | null;
-  completedAt: Date | null;
-  rmaNumber: string | null;
-  paymentRefundId: string | null;
-  returnShippingPaid: boolean;
-  returnShippingAmountCents: number | null;
-  returnShippingLabel: string | null;
-  returnCarrier: string;
-  returnTrackingNumber: string | null;
-  returnTrackingUrl: string | null;
-  returnReason: string | null;
-  returnInstructions: string | null;
-  customerNotes: string | null;
-  adminNotes: string | null;
-  requiresInspection: boolean;
-  inspectionPassedItems: Record<string, unknown> | null;
-  inspectionFailedItems: Record<string, unknown> | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type ReturnDbRow = DbOrderReturn;
 
-interface ReturnItemDbRow {
-  orderReturnItemId: string;
-  orderReturnId: string;
-  orderItemId: string;
-  quantity: number;
-  returnReason: string;
-  returnReasonDetail: string | null;
-  condition: string;
-  restockItem: boolean;
-  refundAmountCents: number | null;
-  exchangeProductId: string | null;
-  exchangeVariantId: string | null;
-  notes: string | null;
-  inspectionNotes: string | null;
-  warrantyClaimId: string | null;
-  warrantyStatus: string | null;
-  warrantyExpiresAt: Date | null;
-  createdAt: Date;
-}
+type ReturnItemDbRow = DbOrderReturnItem;
 
 function itemRowToEntity(row: ReturnItemDbRow): ReturnItem {
   return {
@@ -112,8 +67,8 @@ function rowToEntity(row: ReturnDbRow, items: ReturnItem[] = []): ReturnRequest 
     customerNotes: row.customerNotes ?? undefined,
     adminNotes: row.adminNotes ?? undefined,
     requiresInspection: row.requiresInspection,
-    inspectionPassedItems: row.inspectionPassedItems ?? undefined,
-    inspectionFailedItems: row.inspectionFailedItems ?? undefined,
+    inspectionPassedItems: (row.inspectionPassedItems as Record<string, unknown> | null) ?? undefined,
+    inspectionFailedItems: (row.inspectionFailedItems as Record<string, unknown> | null) ?? undefined,
     items,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

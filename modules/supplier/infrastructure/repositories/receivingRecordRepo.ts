@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
+import type { SupplierReceivingRecord as DbSupplierReceivingRecord } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -17,24 +18,7 @@ import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierE
 
 export type SupplierReceivingStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 
-export interface SupplierReceivingRecord {
-  supplierReceivingRecordId: string;
-  createdAt: string;
-  updatedAt: string;
-  receiptNumber: string;
-  supplierPurchaseOrderId?: string;
-  distributionWarehouseId: string;
-  supplierId: string;
-  status: SupplierReceivingStatus;
-  receivedDate: string;
-  carrierName?: string;
-  trackingNumber?: string;
-  packageCount?: number;
-  notes?: string;
-  discrepancies: boolean;
-  attachments?: Record<string, unknown>;
-  completedAt?: string;
-}
+export type SupplierReceivingRecord = DbSupplierReceivingRecord;
 
 export type SupplierReceivingRecordCreateParams = Omit<
   SupplierReceivingRecord,
@@ -169,7 +153,7 @@ export class SupplierReceivingRecordRepo {
   }
 
   async complete(id: string): Promise<SupplierReceivingRecord | null> {
-    return this.update(id, { status: 'completed', completedAt: String(unixTimestamp()) });
+    return this.update(id, { status: 'completed', completedAt: new Date() });
   }
 
   async cancel(id: string): Promise<SupplierReceivingRecord | null> {

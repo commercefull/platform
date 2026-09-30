@@ -1,3 +1,4 @@
+import type { SupportAttachment } from '../../../../libs/db/types';
 import type {
   SupportTicketProps,
   TicketStatus,
@@ -46,24 +47,7 @@ export interface StorefrontTicketFilters {
   isEscalated?: boolean;
 }
 
-export interface SupportAttachmentRecord {
-  supportAttachmentId: string;
-  supportTicketId: string;
-  supportMessageId?: string;
-  fileName: string;
-  originalName: string;
-  mimeType: string;
-  fileSize: number;
-  storageUrl: string;
-  thumbnailUrl?: string;
-  uploadedBy?: string;
-  uploadedByType?: string;
-  isPublic: boolean;
-  isScanned: boolean;
-  isSafe: boolean;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-}
+export type SupportAttachmentRecord = SupportAttachment;
 
 export interface StorefrontSupportPort {
   getAgent(supportAgentId: string): Promise<SupportAgent | null>;

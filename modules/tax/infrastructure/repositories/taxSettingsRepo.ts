@@ -6,6 +6,7 @@
 import { queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxSettings as DbTaxSettings } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -20,26 +21,7 @@ export type TaxBasedOn = 'shippingAddress' | 'billingAddress';
 export type TaxDisplayTotals = 'itemized' | 'summary';
 export type TaxProvider = 'internal' | 'external';
 
-export interface TaxSettings {
-  taxSettingsId: string;
-  createdAt: string;
-  updatedAt: string;
-  organizationId: string;
-  calculationMethod: TaxCalculationMethod;
-  pricesIncludeTax: boolean;
-  displayPricesWithTax: boolean;
-  taxBasedOn: TaxBasedOn;
-  shippingTaxClass?: string;
-  displayTaxTotals: TaxDisplayTotals;
-  applyTaxToShipping: boolean;
-  applyDiscountBeforeTax: boolean;
-  roundTaxAtSubtotal: boolean;
-  taxDecimalPlaces: number;
-  defaultTaxCategory?: string;
-  defaultTaxZone?: string;
-  taxProvider?: TaxProvider;
-  taxProviderSettings?: unknown; // JSON
-}
+export type TaxSettings = DbTaxSettings;
 
 export type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
 export type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;

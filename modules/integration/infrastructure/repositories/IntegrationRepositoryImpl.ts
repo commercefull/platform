@@ -1,22 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { Integration as DbIntegration } from '../../../../libs/db/types';
 import { Integration, type IntegrationProps, type IntegrationStatus } from '../../domain/entities/Integration';
 import type { IntegrationRepository, IntegrationFilters } from '../../domain/repositories/IntegrationRepository';
 
-interface IntegrationDbRow {
-  integrationId: string;
-  organizationId: string;
-  name: string;
-  provider: string;
-  status: string;
-  description: string | null;
-  webhookUrl: string | null;
-  config: Record<string, unknown> | string;
-  lastSyncAt: Date | null;
-  lastError: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type IntegrationDbRow = DbIntegration;
 
 export class IntegrationRepositoryImpl implements IntegrationRepository {
   async create(integration: Integration): Promise<Integration> {

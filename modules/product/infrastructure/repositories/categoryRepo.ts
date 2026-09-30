@@ -1,101 +1,84 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { ProductCategory as DbProductCategory } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-export interface Category {
-  productCategoryId: string;
-  name: string;
-  slug: string;
-  description?: string;
-  parentId?: string;
-  path?: string;
-  depth: number;
-  position: number;
-  isActive: boolean;
-  isFeatured: boolean;
-  imageUrl?: string;
-  bannerUrl?: string;
-  iconUrl?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  includeInMenu: boolean;
-  productCount: number;
-  organizationId?: string;
-  isGlobal: boolean;
-  customLayout?: string;
-  displaySettings?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type { CategoryRow as Category, CategoryCreateProps, CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
+import type { CategoryRow as Category, CategoryCreateProps, CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
 
 // Alias for backward compatibility
 export type { Category as ProductCategory };
 
-export interface CategoryCreateProps {
-  name: string;
-  slug?: string;
-  description?: string;
-  parentId?: string;
-  position?: number;
-  isActive?: boolean;
-  isFeatured?: boolean;
-  imageUrl?: string;
-  bannerUrl?: string;
-  iconUrl?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  includeInMenu?: boolean;
-  organizationId?: string;
-  isGlobal?: boolean;
-  customLayout?: string;
-  displaySettings?: Record<string, unknown>;
+function mapToCategory(row: DbProductCategory): Category {
+  return {
+    productCategoryId: row.productCategoryId,
+    name: row.name,
+    slug: row.slug ?? '',
+    depth: row.depth,
+    position: row.position,
+    isActive: row.isActive,
+    isFeatured: row.isFeatured,
+    includeInMenu: row.includeInMenu,
+    productCount: row.productCount,
+    isGlobal: row.isGlobal,
+    description: row.description ?? undefined,
+    parentId: row.parentId ?? undefined,
+    path: row.path ?? undefined,
+    imageUrl: row.imageUrl ?? undefined,
+    bannerUrl: row.bannerUrl ?? undefined,
+    iconUrl: row.iconUrl ?? undefined,
+    metaTitle: row.metaTitle ?? undefined,
+    metaDescription: row.metaDescription ?? undefined,
+    metaKeywords: row.metaKeywords ?? undefined,
+    organizationId: row.organizationId ?? undefined,
+    customLayout: row.customLayout ?? undefined,
+    displaySettings: (row.displaySettings as Record<string, unknown> | null) ?? undefined,
+  };
 }
-
-export type CategoryUpdateProps = Partial<CategoryCreateProps>;
 
 export class CategoryRepo {
   private readonly tableName = Table.ProductCategory;
 
   async findOne(id: string): Promise<Category | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "productCategoryId" = $1`;
-    return await queryOne<Category>(sql, [id]);
+    const row = await queryOne<DbProductCategory>(sql, [id]);
+    return row ? mapToCategory(row) : null;
   }
 
   async findBySlug(slug: string): Promise<Category | null> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "slug" = $1`;
-    return await queryOne<Category>(sql, [slug]);
+    const row = await queryOne<DbProductCategory>(sql, [slug]);
+    return row ? mapToCategory(row) : null;
   }
 
   async findAll(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql)) || [];
+    return ((await query<DbProductCategory[]>(sql)) || []).map(mapToCategory);
   }
 
   async findActive(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isActive" = true ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql)) || [];
+    return ((await query<DbProductCategory[]>(sql)) || []).map(mapToCategory);
   }
 
   async findChildren(parentId: string): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "parentId" = $1 ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql, [parentId])) || [];
+    return ((await query<DbProductCategory[]>(sql, [parentId])) || []).map(mapToCategory);
   }
 
   async findRootCategories(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "parentId" IS NULL ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql)) || [];
+    return ((await query<DbProductCategory[]>(sql)) || []).map(mapToCategory);
   }
 
   async findFeatured(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "isFeatured" = true AND "isActive" = true ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql)) || [];
+    return ((await query<DbProductCategory[]>(sql)) || []).map(mapToCategory);
   }
 
   async findForMenu(): Promise<Category[]> {
     const sql = `SELECT * FROM "${this.tableName}" WHERE "includeInMenu" = true AND "isActive" = true ORDER BY "position" ASC`;
-    return (await query<Category[]>(sql)) || [];
+    return ((await query<DbProductCategory[]>(sql)) || []).map(mapToCategory);
   }
 
   async create(props: CategoryCreateProps): Promise<Category> {
@@ -149,13 +132,13 @@ export class CategoryRepo {
       props.displaySettings ? JSON.stringify(props.displaySettings) : null,
     ];
 
-    const result = await queryOne<Category>(sql, values);
+    const result = await queryOne<DbProductCategory>(sql, values);
 
     if (!result) {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return mapToCategory(result);
   }
 
   async update(id: string, props: CategoryUpdateProps): Promise<Category | null> {
@@ -206,7 +189,8 @@ export class CategoryRepo {
       RETURNING *
     `;
 
-    return await queryOne<Category>(sql, values);
+    const row = await queryOne<DbProductCategory>(sql, values);
+    return row ? mapToCategory(row) : null;
   }
 
   async delete(id: string): Promise<boolean> {

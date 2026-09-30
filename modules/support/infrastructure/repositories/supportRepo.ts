@@ -11,9 +11,10 @@ import type {
   TicketCategory,
   TicketChannel,
   SenderType,
-  SupportTicketProps,
+  SupportTicketProps as SupportTicketProps,
 } from '../../domain/entities/SupportTicket';
 import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
+import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage } from '../../../../libs/db/types';
 
 export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType, SupportTicketProps, SupportAgent, AgentRole };
 
@@ -23,43 +24,9 @@ export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, Sende
 
 export type SupportTicket = SupportTicketProps;
 
-export interface SupportMessage {
-  supportMessageId: string;
-  supportTicketId: string;
-  senderId?: string;
-  senderType: SenderType;
-  senderName?: string;
-  senderEmail?: string;
-  message: string;
-  messageHtml?: string;
-  messageType: string;
-  isInternal: boolean;
-  isAutoReply: boolean;
-  isRead: boolean;
-  readAt?: Date;
-  readBy?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-}
+export type SupportMessage = DbSupportMessage;
 
-export interface SupportAttachment {
-  supportAttachmentId: string;
-  supportTicketId: string;
-  supportMessageId?: string;
-  fileName: string;
-  originalName: string;
-  mimeType: string;
-  fileSize: number;
-  storageUrl: string;
-  thumbnailUrl?: string;
-  uploadedBy?: string;
-  uploadedByType?: string;
-  isPublic: boolean;
-  isScanned: boolean;
-  isSafe: boolean;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-}
+export type SupportAttachment = DbSupportAttachment;
 
 // ============================================================================
 // Support Agents
@@ -604,12 +571,12 @@ function mapToAgent(row: Record<string, unknown>): SupportAgent {
     email: row.email as string,
     firstName: row.firstName as string,
     lastName: row.lastName as string,
-    displayName: row.displayName as string | undefined,
-    avatarUrl: row.avatarUrl as string | undefined,
+    displayName: (row.displayName as string | null) ?? undefined,
+    avatarUrl: (row.avatarUrl as string | null) ?? undefined,
     role: row.role as AgentRole,
-    department: row.department as string | undefined,
-    skills: row.skills as string[] | undefined,
-    languages: row.languages as string[] | undefined,
+    department: (row.department as string | null) ?? undefined,
+    skills: (row.skills as string[] | null) ?? undefined,
+    languages: (row.languages as string[] | null) ?? undefined,
     isActive: Boolean(row.isActive),
     isAvailable: Boolean(row.isAvailable),
     maxTickets: parseInt(row.maxTickets as string) || 20,
@@ -620,9 +587,9 @@ function mapToAgent(row: Record<string, unknown>): SupportAgent {
     satisfactionScore: row.satisfactionScore ? parseFloat(row.satisfactionScore as string) : undefined,
     satisfactionCount: parseInt(row.satisfactionCount as string) || 0,
     timezone: (row.timezone as string) || 'UTC',
-    workingHours: row.workingHours as Record<string, unknown> | undefined,
-    notificationPreferences: row.notificationPreferences as Record<string, unknown> | undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    workingHours: (row.workingHours as Record<string, unknown> | null) ?? undefined,
+    notificationPreferences: (row.notificationPreferences as Record<string, unknown> | null) ?? undefined,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
     lastActiveAt: row.lastActiveAt ? new Date(row.lastActiveAt as string) : undefined,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
@@ -684,14 +651,14 @@ function mapToMessage(row: Record<string, unknown>): SupportMessage {
     senderName: row.senderName as string,
     senderEmail: row.senderEmail as string,
     message: row.message as string,
-    messageHtml: row.messageHtml as string | undefined,
+    messageHtml: row.messageHtml as string | null,
     messageType: row.messageType as string,
     isInternal: Boolean(row.isInternal),
     isAutoReply: Boolean(row.isAutoReply),
     isRead: Boolean(row.isRead),
-    readAt: row.readAt ? new Date(row.readAt as string) : undefined,
-    readBy: row.readBy as string | undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    readAt: row.readAt ? new Date(row.readAt as string) : null,
+    readBy: row.readBy as string | null,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
   };
 }
@@ -700,19 +667,19 @@ function mapToAttachment(row: Record<string, unknown>): SupportAttachment {
   return {
     supportAttachmentId: row.supportAttachmentId as string,
     supportTicketId: row.supportTicketId as string,
-    supportMessageId: row.supportMessageId as string | undefined,
+    supportMessageId: row.supportMessageId as string | null,
     fileName: row.fileName as string,
     originalName: row.originalName as string,
     mimeType: row.mimeType as string,
     fileSize: parseInt(row.fileSize as string) || 0,
     storageUrl: row.storageUrl as string,
-    thumbnailUrl: row.thumbnailUrl as string | undefined,
-    uploadedBy: row.uploadedBy as string | undefined,
-    uploadedByType: row.uploadedByType as string | undefined,
+    thumbnailUrl: row.thumbnailUrl as string | null,
+    uploadedBy: row.uploadedBy as string | null,
+    uploadedByType: row.uploadedByType as string | null,
     isPublic: Boolean(row.isPublic),
     isScanned: Boolean(row.isScanned),
     isSafe: Boolean(row.isSafe),
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
   };
 }

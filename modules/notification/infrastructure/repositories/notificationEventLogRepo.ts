@@ -1,18 +1,7 @@
+import type { NotificationEventLog as DbNotificationEventLog } from '../../../../libs/db/types';
 import { query, queryOne } from '../../../../libs/db';
 
-export interface NotificationEventLog {
-  notificationEventLogId: string;
-  notificationId?: string;
-  deliveryLogId?: string;
-  userId?: string;
-  userType?: string;
-  eventType: string;
-  eventData?: Record<string, unknown>;
-  userAgent?: string;
-  ipAddress?: string;
-  deviceInfo?: Record<string, unknown>;
-  createdAt: Date;
-}
+export type NotificationEventLog = DbNotificationEventLog;
 
 export async function create(
   params: Omit<NotificationEventLog, 'notificationEventLogId' | 'createdAt'>,

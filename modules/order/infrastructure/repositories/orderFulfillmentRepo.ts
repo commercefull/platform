@@ -1,71 +1,76 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateOrderFulfillmentError, FailedToCreateOrderFulfillmentPackageError } from '../../domain/errors/OrderErrors';
+import type { OrderFulfillment as DbOrderFulfillment, OrderFulfillmentPackage as DbOrderFulfillmentPackage } from '../../../../libs/db/types';
 
-export interface OrderFulfillmentPackage {
-  orderFulfillmentPackageId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderFulfillmentId: string;
-  packageNumber: string;
-  trackingNumber?: string;
-  weight?: number;
-  dimensions?: Record<string, unknown>;
-  packageType?: string;
-  shippingLabelUrl?: string;
-  commercialInvoiceUrl?: string;
-  customsInfo?: Record<string, unknown>;
+import type {
+  FulfillmentType,
+  FulfillmentStatus,
+  OrderFulfillment,
+  OrderFulfillmentCreateParams,
+  OrderFulfillmentUpdateParams,
+} from '../../domain/repositories/OrderFulfillmentRepository';
+import type {
+  OrderFulfillmentPackage,
+  OrderFulfillmentPackageCreateParams,
+  OrderFulfillmentPackageTrackingParams,
+} from '../../domain/repositories/OrderFulfillmentPackageRepository';
+export type {
+  FulfillmentType,
+  FulfillmentStatus,
+  OrderFulfillment,
+  OrderFulfillmentCreateParams,
+  OrderFulfillmentUpdateParams,
+} from '../../domain/repositories/OrderFulfillmentRepository';
+export type {
+  OrderFulfillmentPackage,
+  OrderFulfillmentPackageCreateParams,
+  OrderFulfillmentPackageTrackingParams,
+} from '../../domain/repositories/OrderFulfillmentPackageRepository';
+
+const iso = (d: Date | string | null | undefined): string | undefined =>
+  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
+const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
+
+function mapToFulfillment(row: DbOrderFulfillment): OrderFulfillment {
+  return {
+    ...row,
+    type: row.type as FulfillmentType,
+    status: row.status as FulfillmentStatus,
+    trackingNumber: row.trackingNumber ?? undefined,
+    trackingUrl: row.trackingUrl ?? undefined,
+    carrierCode: row.carrierCode ?? undefined,
+    carrierName: row.carrierName ?? undefined,
+    shippingMethod: row.shippingMethod ?? undefined,
+    shippingAddressId: row.shippingAddressId ?? undefined,
+    weight: row.weight != null ? Number(row.weight) : undefined,
+    weightUnit: row.weightUnit ?? undefined,
+    dimensions: (row.dimensions as Record<string, unknown> | null) ?? undefined,
+    packageCount: row.packageCount ?? undefined,
+    shippedAt: iso(row.shippedAt),
+    deliveredAt: iso(row.deliveredAt),
+    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
+    notes: row.notes ?? undefined,
+    fulfilledBy: row.fulfilledBy ?? undefined,
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
 }
 
-export type OrderFulfillmentPackageCreateParams = Omit<OrderFulfillmentPackage, 'orderFulfillmentPackageId' | 'createdAt' | 'updatedAt'>;
-export type OrderFulfillmentPackageTrackingParams = Partial<
-  Pick<OrderFulfillmentPackage, 'trackingNumber' | 'shippingLabelUrl' | 'commercialInvoiceUrl'>
->;
-
-export type FulfillmentType = 'shipping' | 'pickup' | 'digital' | 'service';
-export type FulfillmentStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled';
-
-export interface OrderFulfillment {
-  orderFulfillmentId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  fulfillmentNumber: string;
-  type: FulfillmentType;
-  status: FulfillmentStatus;
-  trackingNumber?: string;
-  trackingUrl?: string;
-  carrierCode?: string;
-  carrierName?: string;
-  shippingMethod?: string;
-  shippingAddressId?: string;
-  weight?: number;
-  weightUnit?: string;
-  dimensions?: Record<string, unknown>;
-  packageCount?: number;
-  shippedAt?: string;
-  deliveredAt?: string;
-  estimatedDeliveryDate?: string;
-  notes?: string;
-  fulfilledBy?: string;
+function mapToPackage(row: DbOrderFulfillmentPackage): OrderFulfillmentPackage {
+  return {
+    ...row,
+    trackingNumber: row.trackingNumber ?? undefined,
+    weight: row.weight != null ? Number(row.weight) : undefined,
+    dimensions: (row.dimensions as Record<string, unknown> | null) ?? undefined,
+    packageType: row.packageType ?? undefined,
+    shippingLabelUrl: row.shippingLabelUrl ?? undefined,
+    commercialInvoiceUrl: row.commercialInvoiceUrl ?? undefined,
+    customsInfo: (row.customsInfo as Record<string, unknown> | null) ?? undefined,
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
 }
-
-export type OrderFulfillmentCreateParams = Omit<OrderFulfillment, 'orderFulfillmentId' | 'createdAt' | 'updatedAt' | 'fulfillmentNumber'>;
-export type OrderFulfillmentUpdateParams = Partial<
-  Pick<
-    OrderFulfillment,
-    | 'status'
-    | 'trackingNumber'
-    | 'trackingUrl'
-    | 'carrierCode'
-    | 'carrierName'
-    | 'shippingMethod'
-    | 'shippedAt'
-    | 'deliveredAt'
-    | 'estimatedDeliveryDate'
-    | 'notes'
-  >
->;
 
 export class OrderFulfillmentRepo {
   /**
@@ -81,60 +86,62 @@ export class OrderFulfillmentRepo {
    * Find fulfillment by ID
    */
   async findById(orderFulfillmentId: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [orderFulfillmentId]);
+    const row = await queryOne<DbOrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [orderFulfillmentId]);
+    return row ? mapToFulfillment(row) : null;
   }
 
   /**
    * Find fulfillment by number
    */
   async findByFulfillmentNumber(fulfillmentNumber: string): Promise<OrderFulfillment | null> {
-    return await queryOne<OrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "fulfillmentNumber" = $1`, [fulfillmentNumber]);
+    const row = await queryOne<DbOrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "fulfillmentNumber" = $1`, [fulfillmentNumber]);
+    return row ? mapToFulfillment(row) : null;
   }
 
   /**
    * Find all fulfillments for an order
    */
   async findByOrderId(orderId: string): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`, [
+    const results = await query<DbOrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "orderId" = $1 ORDER BY "createdAt" DESC`, [
       orderId,
     ]);
-    return results || [];
+    return (results || []).map(mapToFulfillment);
   }
 
   /**
    * Find fulfillments by status
    */
   async findByStatus(status: FulfillmentStatus, limit: number = 50, offset: number = 0): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(
+    const results = await query<DbOrderFulfillment[]>(
       `SELECT * FROM "orderFulfillment" 
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [status, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToFulfillment);
   }
 
   /**
    * Find fulfillments by tracking number
    */
   async findByTrackingNumber(trackingNumber: string): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "trackingNumber" = $1`, [trackingNumber]);
-    return results || [];
+    const results = await query<DbOrderFulfillment[]>(`SELECT * FROM "orderFulfillment" WHERE "trackingNumber" = $1`, [trackingNumber]);
+    return (results || []).map(mapToFulfillment);
   }
 
   /**
    * Find fulfillments by carrier
    */
   async findByCarrier(carrierCode: string, limit: number = 50, offset: number = 0): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(
+    const results = await query<DbOrderFulfillment[]>(
       `SELECT * FROM "orderFulfillment" 
        WHERE "carrierCode" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [carrierCode, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToFulfillment);
   }
 
   /**
@@ -144,7 +151,7 @@ export class OrderFulfillmentRepo {
     const now = unixTimestamp();
     const fulfillmentNumber = await this.generateFulfillmentNumber();
 
-    const result = await queryOne<OrderFulfillment>(
+    const result = await queryOne<DbOrderFulfillment>(
       `INSERT INTO "orderFulfillment" (
         "orderId", "fulfillmentNumber", "type", "status",
         "trackingNumber", "trackingUrl", "carrierCode", "carrierName",
@@ -185,7 +192,7 @@ export class OrderFulfillmentRepo {
       throw new FailedToCreateOrderFulfillmentError();
     }
 
-    return result;
+    return mapToFulfillment(result);
   }
 
   /**
@@ -211,7 +218,7 @@ export class OrderFulfillmentRepo {
     values.push(unixTimestamp());
     values.push(orderFulfillmentId);
 
-    const result = await queryOne<OrderFulfillment>(
+    const result = await queryOne<DbOrderFulfillment>(
       `UPDATE "orderFulfillment" 
        SET ${updateFields.join(', ')}
        WHERE "orderFulfillmentId" = $${paramIndex}
@@ -219,7 +226,7 @@ export class OrderFulfillmentRepo {
       values,
     );
 
-    return result;
+    return result ? mapToFulfillment(result) : null;
   }
 
   /**
@@ -262,7 +269,7 @@ export class OrderFulfillmentRepo {
   async markAsShipped(orderFulfillmentId: string, shippedAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'shipped',
-      shippedAt: shippedAt || String(unixTimestamp()),
+      shippedAt: shippedAt ?? new Date().toISOString(),
     });
   }
 
@@ -272,7 +279,7 @@ export class OrderFulfillmentRepo {
   async markAsDelivered(orderFulfillmentId: string, deliveredAt?: string): Promise<OrderFulfillment | null> {
     return this.update(orderFulfillmentId, {
       status: 'delivered',
-      deliveredAt: deliveredAt || String(unixTimestamp()),
+      deliveredAt: deliveredAt ?? new Date().toISOString(),
     });
   }
 
@@ -333,7 +340,7 @@ export class OrderFulfillmentRepo {
    */
   async findOverdue(): Promise<OrderFulfillment[]> {
     const now = unixTimestamp();
-    const results = await query<OrderFulfillment[]>(
+    const results = await query<DbOrderFulfillment[]>(
       `SELECT * FROM "orderFulfillment" 
        WHERE "status" NOT IN ('delivered', 'cancelled') 
        AND "estimatedDeliveryDate" IS NOT NULL 
@@ -341,21 +348,21 @@ export class OrderFulfillmentRepo {
        ORDER BY "estimatedDeliveryDate" ASC`,
       [now],
     );
-    return results || [];
+    return (results || []).map(mapToFulfillment);
   }
 
   /**
    * Find fulfillments shipped today
    */
   async findShippedToday(): Promise<OrderFulfillment[]> {
-    const results = await query<OrderFulfillment[]>(
+    const results = await query<DbOrderFulfillment[]>(
       `SELECT * FROM "orderFulfillment" 
        WHERE "status" = 'shipped' 
        AND DATE("shippedAt") = CURRENT_DATE
        ORDER BY "shippedAt" DESC`,
       [],
     );
-    return results || [];
+    return (results || []).map(mapToFulfillment);
   }
 
   // ==========================================================================
@@ -363,22 +370,22 @@ export class OrderFulfillmentRepo {
   // ==========================================================================
 
   async findPackagesByOrder(orderId: string): Promise<OrderFulfillmentPackage[]> {
-    const results = await query<OrderFulfillmentPackage[]>(
+    const results = await query<DbOrderFulfillmentPackage[]>(
       `SELECT p.* FROM "orderFulfillmentPackage" p
        JOIN "orderFulfillment" f ON f."orderFulfillmentId" = p."orderFulfillmentId"
        WHERE f."orderId" = $1
        ORDER BY p."createdAt" ASC`,
       [orderId],
     );
-    return results || [];
+    return (results || []).map(mapToPackage);
   }
 
   async findPackagesByFulfillment(orderFulfillmentId: string): Promise<OrderFulfillmentPackage[]> {
-    const results = await query<OrderFulfillmentPackage[]>(
+    const results = await query<DbOrderFulfillmentPackage[]>(
       `SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentId" = $1 ORDER BY "createdAt" ASC`,
       [orderFulfillmentId],
     );
-    return results || [];
+    return (results || []).map(mapToPackage);
   }
 
   async findByOrder(orderId: string): Promise<OrderFulfillmentPackage[]> {
@@ -391,7 +398,7 @@ export class OrderFulfillmentRepo {
 
   async createPackage(params: OrderFulfillmentPackageCreateParams): Promise<OrderFulfillmentPackage> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderFulfillmentPackage>(
+    const result = await queryOne<DbOrderFulfillmentPackage>(
       `INSERT INTO "orderFulfillmentPackage" (
         "orderFulfillmentId", "packageNumber", "trackingNumber", "weight", "dimensions",
         "packageType", "shippingLabelUrl", "commercialInvoiceUrl", "customsInfo",
@@ -413,7 +420,7 @@ export class OrderFulfillmentRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderFulfillmentPackageError();
-    return result;
+    return mapToPackage(result);
   }
 
   async updateTracking(
@@ -439,19 +446,21 @@ export class OrderFulfillmentRepo {
     }
 
     if (fields.length === 0) {
-      return queryOne<OrderFulfillmentPackage>(`SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`, [
+      const row = await queryOne<DbOrderFulfillmentPackage>(`SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`, [
         orderFulfillmentPackageId,
       ]);
+      return row ? mapToPackage(row) : null;
     }
 
     fields.push(`"updatedAt" = $${i++}`);
     values.push(unixTimestamp());
     values.push(orderFulfillmentPackageId);
 
-    return queryOne<OrderFulfillmentPackage>(
+    const row = await queryOne<DbOrderFulfillmentPackage>(
       `UPDATE "orderFulfillmentPackage" SET ${fields.join(', ')} WHERE "orderFulfillmentPackageId" = $${i} RETURNING *`,
       values,
     );
+    return row ? mapToPackage(row) : null;
   }
 }
 

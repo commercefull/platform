@@ -6,43 +6,31 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
+import type { DistributionWarehouseBin as DbDistributionWarehouseBin } from '../../../../libs/db/types';
+import type { WarehouseBin, CreateBinInput, UpdateBinInput } from '../../domain/repositories/WarehouseRepository';
+export type { WarehouseBin, CreateBinInput, UpdateBinInput } from '../../domain/repositories/WarehouseRepository';
 
-export interface WarehouseBin {
-  distributionWarehouseBinId: string;
-  distributionWarehouseId: string;
-  locationCode: string;
-  isActive: boolean;
-  binType: string;
-  height?: number;
-  width?: number;
-  depth?: number;
-  maxVolume?: number;
-  maxWeight?: number;
-  isPickable: boolean;
-  isReceivable: boolean;
-  isMixed: boolean;
-  priority: number;
-  createdAt: Date;
-  updatedAt: Date;
+const num = (v: string | number | null | undefined): number | undefined => (v == null ? undefined : Number(v));
+
+function mapToBin(row: DbDistributionWarehouseBin): WarehouseBin {
+  return {
+    ...row,
+    height: num(row.height),
+    width: num(row.width),
+    depth: num(row.depth),
+    maxVolume: num(row.maxVolume),
+    maxWeight: num(row.maxWeight),
+    priority: row.priority ?? 0,
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+  };
 }
 
-export interface CreateBinInput {
-  distributionWarehouseId: string;
-  locationCode: string;
-  binType: string;
-  isActive?: boolean;
-  height?: number;
-  width?: number;
-  depth?: number;
-  maxVolume?: number;
-  maxWeight?: number;
-  isPickable?: boolean;
-  isReceivable?: boolean;
-  isMixed?: boolean;
-  priority?: number;
-}
 
-export type UpdateBinInput = Partial<Omit<CreateBinInput, 'distributionWarehouseId' | 'locationCode'>>;
+
+
+
+
 
 export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
   const id = generateUUID();
@@ -57,7 +45,7 @@ export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
     RETURNING *
   `;
 
-  const result = await queryOne<WarehouseBin>(sql, [
+  const result = await queryOne<DbDistributionWarehouseBin>(sql, [
     id,
     input.distributionWarehouseId,
     input.locationCode,
@@ -77,19 +65,20 @@ export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
   ]);
 
   if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create warehouse bin');
-  return result;
+  return result ? mapToBin(result) : result;
 }
 
 export async function findBinById(binId: string): Promise<WarehouseBin | null> {
-  return queryOne<WarehouseBin>('SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1', [binId]);
+  const row = await queryOne<DbDistributionWarehouseBin>('SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1', [binId]);
+  return row ? mapToBin(row) : null;
 }
 
 export async function findBinsByWarehouse(warehouseId: string): Promise<WarehouseBin[]> {
-  const result = await query<WarehouseBin[]>(
+  const result = await query<DbDistributionWarehouseBin[]>(
     'SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseId" = $1 ORDER BY "priority" ASC, "locationCode" ASC',
     [warehouseId],
   );
-  return result || [];
+  return (result || []).map(mapToBin);
 }
 
 export async function updateBin(binId: string, input: UpdateBinInput): Promise<WarehouseBin | null> {
@@ -149,7 +138,8 @@ export async function updateBin(binId: string, input: UpdateBinInput): Promise<W
   values.push(binId);
 
   const sql = `UPDATE "distributionWarehouseBin" SET ${fields.join(', ')} WHERE "distributionWarehouseBinId" = $${paramIndex} RETURNING *`;
-  return queryOne<WarehouseBin>(sql, values);
+  const row = await queryOne<DbDistributionWarehouseBin>(sql, values);
+  return row ? mapToBin(row) : null;
 }
 
 export async function deleteBin(binId: string): Promise<boolean> {

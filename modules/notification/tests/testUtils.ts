@@ -110,9 +110,9 @@ export function createNotificationDeliveryLog(overrides: Partial<NotificationDel
     recipient: 'u-1',
     status: 'delivered',
     retryCount: 0,
-    createdAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
     ...overrides,
-  };
+  } as NotificationDeliveryLog;
 }
 
 export function createNotificationEventLog(overrides: Partial<NotificationEventLog> = {}): NotificationEventLog {
@@ -134,7 +134,7 @@ export function createNotificationPreference(overrides: Partial<NotificationPref
     isEnabled: true,
     updatedAt: new Date('2024-01-01'),
     ...overrides,
-  };
+  } as NotificationPreference;
 }
 
 export function createNotificationTemplate(overrides: Partial<NotificationTemplate> = {}): NotificationTemplate {
@@ -148,10 +148,10 @@ export function createNotificationTemplate(overrides: Partial<NotificationTempla
     subject: 'Your order shipped',
     textTemplate: 'Hi {{name}}',
     isActive: true,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: new Date('2024-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
     ...overrides,
-  };
+  } as NotificationTemplate;
 }
 
 export function createNotificationTemplateTranslation(

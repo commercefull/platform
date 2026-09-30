@@ -1,29 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
+import type { SupplierAddress as DbSupplierAddress } from '../../../../libs/db/types';
 
 export type SupplierAddressType = 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
 
-export interface SupplierAddress {
-  supplierAddressId: string;
-  createdAt: string;
-  updatedAt: string;
-  supplierId: string;
-  name: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  addressType: SupplierAddressType;
-  isDefault: boolean;
-  contactName?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  notes?: string;
-  isActive: boolean;
-}
+export type SupplierAddress = DbSupplierAddress;
 
 export type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;
 export type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplierAddressId' | 'supplierId' | 'createdAt' | 'updatedAt'>>;

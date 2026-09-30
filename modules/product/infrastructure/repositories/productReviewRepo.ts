@@ -1,60 +1,67 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductReview as DbProductReview } from '../../../../libs/db/types';
 
-export type ReviewStatus = 'pending' | 'approved' | 'rejected';
-export type ReviewRating = 1 | 2 | 3 | 4 | 5;
-
-export interface ProductReview {
-  productReviewId: string;
-  createdAt: string;
-  updatedAt: string;
-  productId: string;
-  productVariantId?: string;
-  customerId?: string;
-  orderId?: string;
-  rating: ReviewRating;
-  title?: string;
-  content?: string;
-  status: ReviewStatus;
-  isVerifiedPurchase: boolean;
-  isHighlighted: boolean;
-  helpfulCount: number;
-  unhelpfulCount: number;
-  reportCount: number;
-  reviewerName?: string;
-  reviewerEmail?: string;
-  adminResponse?: string;
-  adminResponseDate?: string;
-}
-
-export type ProductReviewCreateParams = Omit<
+import type {
+  ReviewStatus,
+  ReviewRating,
   ProductReview,
-  'productReviewId' | 'createdAt' | 'updatedAt' | 'helpfulCount' | 'unhelpfulCount' | 'reportCount' | 'isHighlighted'
->;
+  ProductReviewCreateParams,
+  ProductReviewUpdateParams,
+  ReviewFilters,
+} from '../../domain/repositories/ProductCatalogPorts';
+export type {
+  ReviewStatus,
+  ReviewRating,
+  ProductReview,
+  ProductReviewCreateParams,
+  ProductReviewUpdateParams,
+  ReviewFilters,
+} from '../../domain/repositories/ProductCatalogPorts';
 
-export type ProductReviewUpdateParams = Partial<
-  Pick<ProductReview, 'rating' | 'title' | 'content' | 'status' | 'isHighlighted' | 'adminResponse' | 'adminResponseDate'>
->;
+const iso = (d: Date | string | null | undefined): string | undefined =>
+  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
+const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
 
-export interface ReviewFilters {
-  productId?: string;
-  productVariantId?: string;
-  customerId?: string;
-  status?: ReviewStatus;
-  rating?: ReviewRating;
-  isVerifiedPurchase?: boolean;
-  isHighlighted?: boolean;
-  minRating?: number;
-  maxRating?: number;
+function mapToReview(row: DbProductReview): ProductReview {
+  return {
+    productReviewId: row.productReviewId,
+    productId: row.productId,
+    rating: row.rating as ReviewRating,
+    status: row.status as ReviewStatus,
+    isVerifiedPurchase: row.isVerifiedPurchase,
+    isHighlighted: row.isHighlighted,
+    helpfulCount: row.helpfulCount,
+    unhelpfulCount: row.unhelpfulCount,
+    reportCount: row.reportCount,
+    productVariantId: row.productVariantId ?? undefined,
+    customerId: row.customerId ?? undefined,
+    orderId: row.orderId ?? undefined,
+    title: row.title ?? undefined,
+    content: row.content ?? undefined,
+    reviewerName: row.reviewerName ?? undefined,
+    reviewerEmail: row.reviewerEmail ?? undefined,
+    adminResponse: row.adminResponse ?? undefined,
+    adminResponseDate: iso(row.adminResponseDate),
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
 }
+
+
+
+
+
+
 
 export class ProductReviewRepo {
   /**
    * Find review by ID
    */
   async findById(productReviewId: string): Promise<ProductReview | null> {
-    return await queryOne<ProductReview>(`SELECT * FROM "productReview" WHERE "productReviewId" = $1`, [productReviewId]);
+    const row = await queryOne<DbProductReview>(`SELECT * FROM "productReview" WHERE "productReviewId" = $1`, [productReviewId]);
+    return row ? mapToReview(row) : null;
   }
 
   /**
@@ -72,22 +79,22 @@ export class ProductReviewRepo {
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
-    const results = await query<ProductReview[]>(sql, params);
-    return results || [];
+    const results = await query<DbProductReview[]>(sql, params);
+    return (results || []).map(mapToReview);
   }
 
   /**
    * Find reviews by customer
    */
   async findByCustomerId(customerId: string, limit: number = 50, offset: number = 0): Promise<ProductReview[]> {
-    const results = await query<ProductReview[]>(
+    const results = await query<DbProductReview[]>(
       `SELECT * FROM "productReview" 
        WHERE "customerId" = $1 
        ORDER BY "createdAt" DESC 
        LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToReview);
   }
 
   /**
@@ -147,7 +154,7 @@ export class ProductReviewRepo {
 
     params.push(limit, offset);
 
-    const results = await query<ProductReview[]>(
+    const results = await query<DbProductReview[]>(
       `SELECT * FROM "productReview" 
        ${whereClause}
        ORDER BY "createdAt" DESC 
@@ -155,21 +162,21 @@ export class ProductReviewRepo {
       params,
     );
 
-    return results || [];
+    return (results || []).map(mapToReview);
   }
 
   /**
    * Find pending reviews
    */
   async findPending(limit: number = 50, offset: number = 0): Promise<ProductReview[]> {
-    const results = await query<ProductReview[]>(
+    const results = await query<DbProductReview[]>(
       `SELECT * FROM "productReview" 
        WHERE "status" = 'pending' 
        ORDER BY "createdAt" ASC 
        LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
-    return results || [];
+    return (results || []).map(mapToReview);
   }
 
   /**
@@ -187,8 +194,8 @@ export class ProductReviewRepo {
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1}`;
     params.push(limit);
 
-    const results = await query<ProductReview[]>(sql, params);
-    return results || [];
+    const results = await query<DbProductReview[]>(sql, params);
+    return (results || []).map(mapToReview);
   }
 
   /**
@@ -197,7 +204,7 @@ export class ProductReviewRepo {
   async create(params: ProductReviewCreateParams): Promise<ProductReview> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ProductReview>(
+    const result = await queryOne<DbProductReview>(
       `INSERT INTO "productReview" (
         "productId", "productVariantId", "customerId", "orderId",
         "rating", "title", "content", "status", "isVerifiedPurchase",
@@ -228,7 +235,7 @@ export class ProductReviewRepo {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return mapToReview(result);
   }
 
   /**
@@ -254,7 +261,7 @@ export class ProductReviewRepo {
     values.push(unixTimestamp());
     values.push(productReviewId);
 
-    const result = await queryOne<ProductReview>(
+    const result = await queryOne<DbProductReview>(
       `UPDATE "productReview" 
        SET ${updateFields.join(', ')}
        WHERE "productReviewId" = $${paramIndex}
@@ -262,7 +269,7 @@ export class ProductReviewRepo {
       values,
     );
 
-    return result;
+    return result ? mapToReview(result) : null;
   }
 
   /**
@@ -299,7 +306,7 @@ export class ProductReviewRepo {
   async addAdminResponse(productReviewId: string, response: string): Promise<ProductReview | null> {
     return this.update(productReviewId, {
       adminResponse: response,
-      adminResponseDate: String(unixTimestamp()),
+      adminResponseDate: new Date().toISOString(),
     });
   }
 
@@ -307,7 +314,7 @@ export class ProductReviewRepo {
    * Increment helpful count
    */
   async incrementHelpful(productReviewId: string): Promise<ProductReview | null> {
-    const result = await queryOne<ProductReview>(
+    const result = await queryOne<DbProductReview>(
       `UPDATE "productReview" 
        SET "helpfulCount" = "helpfulCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
@@ -315,14 +322,14 @@ export class ProductReviewRepo {
       [unixTimestamp(), productReviewId],
     );
 
-    return result;
+    return result ? mapToReview(result) : null;
   }
 
   /**
    * Increment unhelpful count
    */
   async incrementUnhelpful(productReviewId: string): Promise<ProductReview | null> {
-    const result = await queryOne<ProductReview>(
+    const result = await queryOne<DbProductReview>(
       `UPDATE "productReview" 
        SET "unhelpfulCount" = "unhelpfulCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
@@ -330,14 +337,14 @@ export class ProductReviewRepo {
       [unixTimestamp(), productReviewId],
     );
 
-    return result;
+    return result ? mapToReview(result) : null;
   }
 
   /**
    * Increment report count
    */
   async incrementReport(productReviewId: string): Promise<ProductReview | null> {
-    const result = await queryOne<ProductReview>(
+    const result = await queryOne<DbProductReview>(
       `UPDATE "productReview" 
        SET "reportCount" = "reportCount" + 1, "updatedAt" = $1
        WHERE "productReviewId" = $2
@@ -345,7 +352,7 @@ export class ProductReviewRepo {
       [unixTimestamp(), productReviewId],
     );
 
-    return result;
+    return result ? mapToReview(result) : null;
   }
 
   /**

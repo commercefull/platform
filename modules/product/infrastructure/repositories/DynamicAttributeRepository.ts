@@ -1,76 +1,80 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Table } from '../../../../libs/db/types';
+import { ProductAttribute as DbProductAttribute, ProductAttributeValue as DbProductAttributeValue, ProductAttributeValueMap, Table } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 /**
  * Product Attribute - defines an attribute that can be assigned to products
  */
-export interface ProductAttribute {
-  productAttributeId: string;
-  name: string;
-  code: string;
-  description?: string;
-  groupId?: string;
-  type: AttributeType;
-  inputType: AttributeInputType;
-  isRequired: boolean;
-  isUnique: boolean;
-  isSystem: boolean;
-  isSearchable: boolean;
-  isFilterable: boolean;
-  isComparable: boolean;
-  isVisibleOnFront: boolean;
-  isUsedInProductListing: boolean;
-  useForVariants: boolean;
-  useForConfigurations: boolean;
-  position: number;
-  defaultValue?: string;
-  validationRules?: Record<string, unknown>;
-  options?: Record<string, unknown>;
-  organizationId?: string;
-  isGlobal: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export type AttributeType =
-  'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'datetime' | 'time' | 'file' | 'image' | 'video' | 'document';
-
+import type {
+  AttributeType,
+  ProductAttribute,
+  ProductAttributeValue,
+  ProductAttributeData,
+} from '../../domain/repositories/ProductCatalogPorts';
+export type {
+  AttributeType,
+  ProductAttribute,
+  ProductAttributeValue,
+  ProductAttributeData,
+} from '../../domain/repositories/ProductCatalogPorts';
 export type AttributeInputType = AttributeType;
 
-/**
- * Attribute Value - predefined values for select/radio/checkbox attributes
- */
-export interface ProductAttributeValue {
-  productAttributeValueId: string;
-  attributeId: string;
-  value: string;
-  displayValue?: string;
-  position: number;
-  isDefault: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+function mapToAttribute(row: DbProductAttribute): ProductAttribute {
+  return {
+    productAttributeId: row.productAttributeId,
+    name: row.name,
+    code: row.code,
+    type: row.type as AttributeType,
+    inputType: (row.inputType ?? row.type) as AttributeType,
+    isRequired: row.isRequired,
+    isUnique: row.isUnique,
+    isSystem: row.isSystem,
+    isSearchable: row.isSearchable,
+    isFilterable: row.isFilterable,
+    isComparable: row.isComparable,
+    isVisibleOnFront: row.isVisibleOnFront,
+    isUsedInProductListing: row.isUsedInProductListing,
+    position: row.position,
+    useForVariants: row.useForVariants,
+    useForConfigurations: row.useForConfigurations,
+    description: row.description ?? undefined,
+    groupId: row.groupId ?? undefined,
+    defaultValue: row.defaultValue ?? undefined,
+    validationRules: (row.validationRules as Record<string, unknown> | null) ?? undefined,
+    options: (row.options as Record<string, unknown> | null) ?? undefined,
+    organizationId: row.organizationId ?? undefined,
+    isGlobal: row.isGlobal,
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+  };
 }
 
-/**
- * Product Attribute Data - actual attribute values assigned to a product
- * Maps to productAttributeValueMap table
- */
-export interface ProductAttributeData {
-  productAttributeValueMapId: string;
-  productId: string;
-  productVariantId?: string;
-  attributeId: string;
-  value?: string;
-  valueText?: string;
-  valueNumeric?: number;
-  valueBoolean?: boolean;
-  valueJson?: Record<string, unknown>;
-  valueDate?: Date;
-  isSystem: boolean;
-  language: string;
-  createdAt: Date;
-  updatedAt: Date;
+function mapToAttributeValue(row: DbProductAttributeValue): ProductAttributeValue {
+  return {
+    productAttributeValueId: row.productAttributeValueId,
+    attributeId: row.attributeId,
+    value: row.value,
+    position: row.position ?? 0,
+    isDefault: row.isDefault,
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+    displayValue: row.displayValue ?? undefined,
+  };
+}
+
+function mapToAttributeData(row: ProductAttributeValueMap): ProductAttributeData {
+  return {
+    productAttributeValueMapId: row.productAttributeValueMapId,
+    productId: row.productId,
+    attributeId: row.attributeId,
+    productVariantId: row.productVariantId ?? undefined,
+    value: row.value ?? undefined,
+    valueText: row.valueText ?? undefined,
+    valueNumeric: row.valueNumeric != null ? Number(row.valueNumeric) : undefined,
+    valueBoolean: row.valueBoolean ?? undefined,
+    valueJson: (row.valueJson as Record<string, unknown> | null) ?? undefined,
+    valueDate: row.valueDate ?? undefined,
+  };
 }
 
 export interface ProductAttributeCreateInput {
@@ -124,17 +128,19 @@ export class DynamicAttributeRepository {
 
   async findAttributeById(id: string): Promise<ProductAttribute | null> {
     const sql = `SELECT * FROM "${this.attributeTable}" WHERE "productAttributeId" = $1`;
-    return await queryOne<ProductAttribute>(sql, [id]);
+    const row = await queryOne<DbProductAttribute>(sql, [id]);
+    return row ? mapToAttribute(row) : null;
   }
 
   async findAttributeByCode(code: string): Promise<ProductAttribute | null> {
     const sql = `SELECT * FROM "${this.attributeTable}" WHERE "code" = $1`;
-    return await queryOne<ProductAttribute>(sql, [code]);
+    const row = await queryOne<DbProductAttribute>(sql, [code]);
+    return row ? mapToAttribute(row) : null;
   }
 
   async findAllAttributes(): Promise<ProductAttribute[]> {
     const sql = `SELECT * FROM "${this.attributeTable}" ORDER BY "position" ASC, "name" ASC`;
-    return (await query<ProductAttribute[]>(sql)) || [];
+    return ((await query<DbProductAttribute[]>(sql)) || []).map(mapToAttribute);
   }
 
   async findAttributesByGroup(groupId: string): Promise<ProductAttribute[]> {
@@ -143,7 +149,7 @@ export class DynamicAttributeRepository {
       WHERE "groupId" = $1 
       ORDER BY "position" ASC, "name" ASC
     `;
-    return (await query<ProductAttribute[]>(sql, [groupId])) || [];
+    return ((await query<DbProductAttribute[]>(sql, [groupId])) || []).map(mapToAttribute);
   }
 
   async findSearchableAttributes(): Promise<ProductAttribute[]> {
@@ -152,7 +158,7 @@ export class DynamicAttributeRepository {
       WHERE "isSearchable" = true 
       ORDER BY "position" ASC
     `;
-    return (await query<ProductAttribute[]>(sql)) || [];
+    return ((await query<DbProductAttribute[]>(sql)) || []).map(mapToAttribute);
   }
 
   async findFilterableAttributes(): Promise<ProductAttribute[]> {
@@ -161,7 +167,7 @@ export class DynamicAttributeRepository {
       WHERE "isFilterable" = true 
       ORDER BY "position" ASC
     `;
-    return (await query<ProductAttribute[]>(sql)) || [];
+    return ((await query<DbProductAttribute[]>(sql)) || []).map(mapToAttribute);
   }
 
   async findVariantAttributes(): Promise<ProductAttribute[]> {
@@ -170,7 +176,7 @@ export class DynamicAttributeRepository {
       WHERE "useForVariants" = true 
       ORDER BY "position" ASC
     `;
-    return (await query<ProductAttribute[]>(sql)) || [];
+    return ((await query<DbProductAttribute[]>(sql)) || []).map(mapToAttribute);
   }
 
   async createAttribute(input: ProductAttributeCreateInput): Promise<ProductAttribute> {
@@ -185,7 +191,7 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttribute>(sql, [
+    const result = await queryOne<DbProductAttribute>(sql, [
       input.name,
       input.code,
       input.description || null,
@@ -213,7 +219,7 @@ export class DynamicAttributeRepository {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return mapToAttribute(result);
   }
 
   async updateAttribute(id: string, input: ProductAttributeUpdateInput): Promise<ProductAttribute | null> {
@@ -261,7 +267,8 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    return await queryOne<ProductAttribute>(sql, values);
+    const row = await queryOne<DbProductAttribute>(sql, values);
+    return row ? mapToAttribute(row) : null;
   }
 
   async deleteAttribute(id: string): Promise<boolean> {
@@ -283,7 +290,7 @@ export class DynamicAttributeRepository {
       WHERE "attributeId" = $1 
       ORDER BY "position" ASC
     `;
-    return (await query<ProductAttributeValue[]>(sql, [attributeId])) || [];
+    return ((await query<DbProductAttributeValue[]>(sql, [attributeId])) || []).map(mapToAttributeValue);
   }
 
   async createAttributeValue(input: AttributeValueCreateInput): Promise<ProductAttributeValue> {
@@ -295,7 +302,7 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeValue>(sql, [
+    const result = await queryOne<DbProductAttributeValue>(sql, [
       input.attributeId,
       input.value,
       input.displayValue || input.value,
@@ -307,7 +314,7 @@ export class DynamicAttributeRepository {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return mapToAttributeValue(result);
   }
 
   async deleteAttributeValue(id: string): Promise<boolean> {
@@ -343,18 +350,14 @@ export class DynamicAttributeRepository {
     return results.map(row => ({
       productAttributeValueMapId: row.productAttributeValueMapId as string,
       productId: row.productId as string,
-      productVariantId: row.productVariantId as string | undefined,
+      productVariantId: (row.productVariantId as string | null) ?? undefined,
       attributeId: row.attributeId as string,
-      value: row.value as string | undefined,
-      valueText: row.valueText as string | undefined,
-      valueNumeric: row.valueNumeric as number | undefined,
-      valueBoolean: row.valueBoolean as boolean | undefined,
-      valueJson: row.valueJson as Record<string, unknown> | undefined,
-      valueDate: row.valueDate as Date | undefined,
-      isSystem: row.isSystem as boolean,
-      language: row.language as string,
-      createdAt: row.createdAt as Date,
-      updatedAt: row.updatedAt as Date,
+      value: (row.value as string | null) ?? undefined,
+      valueText: (row.valueText as string | null) ?? undefined,
+      valueNumeric: row.valueNumeric != null ? Number(row.valueNumeric) : undefined,
+      valueBoolean: (row.valueBoolean as boolean | null) ?? undefined,
+      valueJson: (row.valueJson as Record<string, unknown> | null) ?? undefined,
+      valueDate: (row.valueDate as Date | null) ?? undefined,
       attribute: {
         productAttributeId: row.attribute_productAttributeId,
         name: row.attribute_name,
@@ -382,13 +385,13 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeData>(sql, [input.productId, input.attributeId, input.value, valueText, valueNumeric]);
+    const result = await queryOne<ProductAttributeValueMap>(sql, [input.productId, input.attributeId, input.value, valueText, valueNumeric]);
 
     if (!result) {
       throw new FailedToCreateProductError();
     }
 
-    return result;
+    return mapToAttributeData(result);
   }
 
   /**

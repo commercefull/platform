@@ -18,7 +18,7 @@ export interface OrderReturn {
   rmaNumber?: string;
   paymentRefundId?: string;
   returnShippingPaid: boolean;
-  returnShippingAmount?: number;
+  returnShippingAmountCents?: number;
   returnShippingLabel?: string;
   returnCarrier: ReturnCarrier;
   returnTrackingNumber?: string;
@@ -44,7 +44,7 @@ export type OrderReturnUpdateParams = Partial<
     | 'rmaNumber'
     | 'paymentRefundId'
     | 'returnShippingPaid'
-    | 'returnShippingAmount'
+    | 'returnShippingAmountCents'
     | 'returnShippingLabel'
     | 'returnTrackingNumber'
     | 'returnTrackingUrl'

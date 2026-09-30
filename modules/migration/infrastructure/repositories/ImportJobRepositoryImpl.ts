@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { ImportJob as DbImportJob } from '../../../../libs/db/types';
 import {
   ImportJob,
   type ImportJobProps,
@@ -9,25 +10,7 @@ import {
 } from '../../domain/entities/ImportJob';
 import type { ImportJobRepository } from '../../domain/repositories/MigrationRepository';
 
-interface ImportJobDbRow {
-  importJobId: string;
-  organizationId: string;
-  jobType: string;
-  source: string;
-  status: string;
-  sourceStoreUrl: string | null;
-  sourceApiKey: string | null;
-  sourceConfig: Record<string, unknown> | string | null;
-  stats: Record<string, unknown> | string;
-  startedAt: Date | null;
-  completedAt: Date | null;
-  errorMessage: string | null;
-  dryRun: boolean;
-  autoActivate: boolean;
-  metadata: Record<string, unknown> | string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type ImportJobDbRow = DbImportJob;
 
 export class ImportJobRepositoryImpl implements ImportJobRepository {
   async create(job: ImportJob): Promise<ImportJob> {

@@ -74,6 +74,7 @@ export class CreateOrderRefundUseCase {
       notes: command.notes,
       transactionId: command.transactionId,
       status: command.status,
+      gatewayResponse: undefined,
       refundedBy: command.refundedBy,
     });
 

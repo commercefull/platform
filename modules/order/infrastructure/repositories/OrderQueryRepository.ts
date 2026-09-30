@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
+import type { OrderNote as DbOrderNote, OrderPaymentRefund as DbOrderPaymentRefund, OrderShipping as DbOrderShipping, OrderShippingRate as DbOrderShippingRate, OrderTax as DbOrderTax } from '../../../../libs/db/types';
 import {
   FailedToCreateOrderNoteError,
   FailedToCreateOrderDiscountError,
@@ -14,17 +15,8 @@ import {
 // Types — re-exported from the old sub-repos for backward compatibility
 // ============================================================================
 
-export interface OrderNote {
-  orderNoteId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  content: string;
-  isCustomerVisible: boolean;
-  createdBy?: string;
-  deletedAt?: string;
-}
-export type OrderNoteCreateParams = Omit<OrderNote, 'orderNoteId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
+import type { OrderNote, OrderNoteCreateParams } from '../../domain/repositories/OrderNoteRepository';
+export type { OrderNote, OrderNoteCreateParams } from '../../domain/repositories/OrderNoteRepository';
 
 export type DiscountType = 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyXGetY' | 'giftCard';
 export interface OrderDiscount {
@@ -44,66 +36,24 @@ export interface OrderDiscount {
 }
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderShipping {
-  orderShippingId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  shippingMethod: string;
-  carrier?: string;
-  service?: string;
-  amountCents: number;
-  taxAmountCents?: number;
-  trackingNumber?: string;
-  trackingUrl?: string;
-  estimatedDeliveryDate?: string;
-}
-export type OrderShippingCreateParams = Omit<OrderShipping, 'orderShippingId' | 'createdAt' | 'updatedAt'>;
-export type OrderShippingUpdateParams = Partial<
-  Pick<
-    OrderShipping,
-    'shippingMethod' | 'carrier' | 'service' | 'amountCents' | 'taxAmountCents' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
-  >
->;
-
-export type ShippingCarrier = 'ups' | 'usps' | 'fedex' | 'dhl' | 'custom';
-export interface OrderShippingRate {
-  orderShippingRateId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  carrier: ShippingCarrier;
-  serviceLevel: string;
-  serviceName: string;
-  rateCents: number;
-  estimatedDays?: number;
-  estimatedDeliveryDate?: string;
-  currencyCode: string;
-  isSelected: boolean;
-  carrierAccountId?: string;
-  shipmentId?: string;
-  rateData?: Record<string, unknown>;
-}
-export type OrderShippingRateCreateParams = Omit<OrderShippingRate, 'orderShippingRateId' | 'createdAt' | 'updatedAt'>;
-
-export interface OrderTax {
-  orderTaxId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderId: string;
-  orderItemId?: string;
-  taxType: string;
-  name: string;
-  /** Tax rate percentage. */
-  rate: number;
-  /** Tax amount in integer cents. */
-  amountCents: number;
-  jurisdiction?: string;
-  taxProvider?: string;
-  providerTaxId?: string;
-  isIncludedInPrice: boolean;
-}
-export type OrderTaxCreateParams = Omit<OrderTax, 'orderTaxId' | 'createdAt' | 'updatedAt'>;
+import type {
+  OrderShipping,
+  OrderShippingCreateParams,
+  OrderShippingUpdateParams,
+} from '../../domain/repositories/OrderShippingRepository';
+export type {
+  OrderShipping,
+  OrderShippingCreateParams,
+  OrderShippingUpdateParams,
+} from '../../domain/repositories/OrderShippingRepository';
+import type { ShippingCarrier, OrderShippingRate, OrderShippingRateCreateParams } from '../../domain/repositories/OrderShippingRateRepository';
+export type {
+  ShippingCarrier,
+  OrderShippingRate,
+  OrderShippingRateCreateParams,
+} from '../../domain/repositories/OrderShippingRateRepository';
+import type { OrderTax, OrderTaxCreateParams } from '../../domain/repositories/OrderTaxRepository';
+export type { OrderTax, OrderTaxCreateParams } from '../../domain/repositories/OrderTaxRepository';
 
 export type OrderPaymentType =
   'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
@@ -131,40 +81,104 @@ export interface OrderPayment {
 }
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
 
-export type OrderPaymentRefundStatus = 'pending' | 'completed' | 'failed';
-export interface OrderPaymentRefund {
-  orderPaymentRefundId: string;
-  createdAt: string;
-  updatedAt: string;
-  orderPaymentId: string;
-  amountCents: number;
-  reason?: string;
-  notes?: string;
-  transactionId?: string;
-  status: OrderPaymentRefundStatus;
-  gatewayResponse?: Record<string, unknown>;
-  refundedBy?: string;
-}
-export type OrderPaymentRefundCreateParams = Omit<OrderPaymentRefund, 'orderPaymentRefundId' | 'createdAt' | 'updatedAt'>;
+import type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
+export type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
+import type {
+  OrderPaymentRefund,
+  OrderPaymentRefundCreateParams,
+} from '../../domain/repositories/OrderPaymentRefundRepository';
+export type {
+  OrderPaymentRefund,
+  OrderPaymentRefundCreateParams,
+} from '../../domain/repositories/OrderPaymentRefundRepository';
 
 // ============================================================================
 // Consolidated Order Query Repository
 // ============================================================================
 
+const iso = (d: Date | string | null | undefined): string | undefined =>
+  d == null ? undefined : d instanceof Date ? d.toISOString() : String(d);
+const isoReq = (d: Date | string): string => (d instanceof Date ? d.toISOString() : String(d));
+
+function mapToNote(row: DbOrderNote): OrderNote {
+  return {
+    ...row,
+    createdBy: row.createdBy ?? undefined,
+    deletedAt: iso(row.deletedAt),
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
+}
+
+function mapToShipping(row: DbOrderShipping): OrderShipping {
+  return {
+    ...row,
+    carrier: row.carrier ?? undefined,
+    service: row.service ?? undefined,
+    taxAmountCents: row.taxAmountCents ?? undefined,
+    trackingNumber: row.trackingNumber ?? undefined,
+    trackingUrl: row.trackingUrl ?? undefined,
+    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
+}
+
+function mapToShippingRate(row: DbOrderShippingRate): OrderShippingRate {
+  return {
+    ...row,
+    carrier: row.carrier as ShippingCarrier,
+    estimatedDays: row.estimatedDays ?? undefined,
+    estimatedDeliveryDate: iso(row.estimatedDeliveryDate),
+    carrierAccountId: row.carrierAccountId ?? undefined,
+    shipmentId: row.shipmentId ?? undefined,
+    rateData: (row.rateData as Record<string, unknown> | null) ?? undefined,
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
+}
+
+function mapToTax(row: DbOrderTax): OrderTax {
+  return {
+    ...row,
+    orderItemId: row.orderItemId ?? undefined,
+    rate: Number(row.rate),
+    jurisdiction: row.jurisdiction ?? undefined,
+    taxProvider: row.taxProvider ?? undefined,
+    providerTaxId: row.providerTaxId ?? undefined,
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
+}
+
+function mapToRefund(row: DbOrderPaymentRefund): OrderPaymentRefund {
+  return {
+    ...row,
+    reason: row.reason ?? undefined,
+    notes: row.notes ?? undefined,
+    transactionId: row.transactionId ?? undefined,
+    status: row.status as OrderPaymentRefundStatus,
+    gatewayResponse: (row.gatewayResponse as Record<string, unknown> | null) ?? undefined,
+    refundedBy: row.refundedBy ?? undefined,
+    createdAt: isoReq(row.createdAt),
+    updatedAt: isoReq(row.updatedAt),
+  };
+}
+
 class OrderQueryRepo {
   // --- Order Notes ---
 
   async findNotesByOrder(orderId: string): Promise<OrderNote[]> {
-    const results = await query<OrderNote[]>(
+    const results = await query<DbOrderNote[]>(
       `SELECT * FROM "orderNote" WHERE "orderId" = $1 AND "deletedAt" IS NULL ORDER BY "createdAt" ASC`,
       [orderId],
     );
-    return results || [];
+    return (results || []).map(mapToNote);
   }
 
   async createNote(params: OrderNoteCreateParams): Promise<OrderNote> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderNote>(
+    const result = await queryOne<DbOrderNote>(
       `INSERT INTO "orderNote" (
         "orderId", "content", "isCustomerVisible", "createdBy",
         "createdAt", "updatedAt"
@@ -173,7 +187,7 @@ class OrderQueryRepo {
       [params.orderId, params.content, params.isCustomerVisible ?? false, params.createdBy || null, now, now],
     );
     if (!result) throw new FailedToCreateOrderNoteError();
-    return result;
+    return mapToNote(result);
   }
 
   async softDeleteNote(orderNoteId: string): Promise<boolean> {
@@ -220,13 +234,13 @@ class OrderQueryRepo {
   // --- Order Shipping ---
 
   async findShippingByOrder(orderId: string): Promise<OrderShipping[]> {
-    const results = await query<OrderShipping[]>(`SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
-    return results || [];
+    const results = await query<DbOrderShipping[]>(`SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    return (results || []).map(mapToShipping);
   }
 
   async createShipping(params: OrderShippingCreateParams): Promise<OrderShipping> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderShipping>(
+    const result = await queryOne<DbOrderShipping>(
       `INSERT INTO "orderShipping" (
         "orderId", "shippingMethod", "carrier", "service", "amountCents",
         "taxAmountCents", "trackingNumber", "trackingUrl", "estimatedDeliveryDate",
@@ -248,7 +262,7 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderShippingError();
-    return result;
+    return mapToShipping(result);
   }
 
   async updateShipping(orderShippingId: string, params: OrderShippingUpdateParams): Promise<OrderShipping | null> {
@@ -264,28 +278,30 @@ class OrderQueryRepo {
     }
 
     if (fields.length === 0) {
-      return queryOne<OrderShipping>(`SELECT * FROM "orderShipping" WHERE "orderShippingId" = $1`, [orderShippingId]);
+      const row = await queryOne<DbOrderShipping>(`SELECT * FROM "orderShipping" WHERE "orderShippingId" = $1`, [orderShippingId]);
+      return row ? mapToShipping(row) : null;
     }
 
     fields.push(`"updatedAt" = $${i++}`);
     values.push(unixTimestamp());
     values.push(orderShippingId);
 
-    return queryOne<OrderShipping>(`UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`, values);
+    const row = await queryOne<DbOrderShipping>(`UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`, values);
+    return row ? mapToShipping(row) : null;
   }
 
   // --- Order Shipping Rates ---
 
   async findShippingRatesByOrder(orderId: string): Promise<OrderShippingRate[]> {
-    const results = await query<OrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rateCents" ASC`, [
+    const results = await query<DbOrderShippingRate[]>(`SELECT * FROM "orderShippingRate" WHERE "orderId" = $1 ORDER BY "rateCents" ASC`, [
       orderId,
     ]);
-    return results || [];
+    return (results || []).map(mapToShippingRate);
   }
 
   async createShippingRate(params: OrderShippingRateCreateParams): Promise<OrderShippingRate> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderShippingRate>(
+    const result = await queryOne<DbOrderShippingRate>(
       `INSERT INTO "orderShippingRate" (
         "orderId", "carrier", "serviceLevel", "serviceName", "rateCents",
         "estimatedDays", "estimatedDeliveryDate", "currencyCode", "isSelected",
@@ -311,19 +327,19 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderShippingRateError();
-    return result;
+    return mapToShippingRate(result);
   }
 
   // --- Order Tax ---
 
   async findTaxesByOrder(orderId: string): Promise<OrderTax[]> {
-    const results = await query<OrderTax[]>(`SELECT * FROM "orderTax" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
-    return results || [];
+    const results = await query<DbOrderTax[]>(`SELECT * FROM "orderTax" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    return (results || []).map(mapToTax);
   }
 
   async createTax(params: OrderTaxCreateParams): Promise<OrderTax> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderTax>(
+    const result = await queryOne<DbOrderTax>(
       `INSERT INTO "orderTax" (
         "orderId", "orderItemId", "taxType", "name", "rate", "amountCents",
         "jurisdiction", "taxProvider", "providerTaxId", "isIncludedInPrice",
@@ -346,7 +362,7 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderTaxError();
-    return result;
+    return mapToTax(result);
   }
 
   // --- Order Payments ---
@@ -404,23 +420,24 @@ class OrderQueryRepo {
   // --- Order Payment Refunds ---
 
   async findRefundsByOrder(orderId: string): Promise<OrderPaymentRefund[]> {
-    const results = await query<OrderPaymentRefund[]>(
+    const results = await query<DbOrderPaymentRefund[]>(
       `SELECT r.* FROM "orderPaymentRefund" r
        JOIN "orderPayment" p ON p."orderPaymentId" = r."orderPaymentId"
        WHERE p."orderId" = $1
        ORDER BY r."createdAt" ASC`,
       [orderId],
     );
-    return results || [];
+    return (results || []).map(mapToRefund);
   }
 
   async findRefundById(orderPaymentRefundId: string): Promise<OrderPaymentRefund | null> {
-    return queryOne<OrderPaymentRefund>(`SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`, [orderPaymentRefundId]);
+    const row = await queryOne<DbOrderPaymentRefund>(`SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`, [orderPaymentRefundId]);
+    return row ? mapToRefund(row) : null;
   }
 
   async createRefund(params: OrderPaymentRefundCreateParams): Promise<OrderPaymentRefund> {
     const now = unixTimestamp();
-    const result = await queryOne<OrderPaymentRefund>(
+    const result = await queryOne<DbOrderPaymentRefund>(
       `INSERT INTO "orderPaymentRefund" (
         "orderPaymentId", "amountCents", "reason", "notes", "transactionId",
         "status", "gatewayResponse", "refundedBy",
@@ -441,7 +458,7 @@ class OrderQueryRepo {
       ],
     );
     if (!result) throw new FailedToCreateOrderPaymentRefundError();
-    return result;
+    return mapToRefund(result);
   }
 }
 

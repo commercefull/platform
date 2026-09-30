@@ -6,29 +6,13 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxReport as DbTaxReport } from '../../../../libs/db/types';
 
 export type TaxReportType = 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
 export type TaxReportStatus = 'pending' | 'processing' | 'completed' | 'failed';
 export type TaxReportFileFormat = 'csv' | 'xlsx' | 'pdf' | 'json';
 
-export interface TaxReport {
-  taxReportId: string;
-  createdAt: string;
-  updatedAt: string;
-  organizationId: string;
-  name: string;
-  reportType: TaxReportType;
-  dateFrom: string;
-  dateTo: string;
-  taxJurisdictions?: unknown; // JSON
-  fileUrl?: string;
-  fileFormat?: TaxReportFileFormat;
-  status: TaxReportStatus;
-  generatedBy?: string;
-  parameters?: unknown; // JSON
-  results?: unknown; // JSON
-  errorMessage?: string;
-}
+export type TaxReport = DbTaxReport;
 
 export type TaxReportCreateParams = Omit<TaxReport, 'taxReportId' | 'createdAt' | 'updatedAt'>;
 export type TaxReportUpdateParams = Partial<Omit<TaxReport, 'taxReportId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;

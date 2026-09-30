@@ -67,10 +67,10 @@ export class ManageNotificationPreferenceUseCase {
       userId: preference.userId,
       userType: preference.userType,
       type: preference.type,
-      channelPreferences: preference.channelPreferences,
+      channelPreferences: preference.channelPreferences as Record<string, boolean>,
       isEnabled: preference.isEnabled,
-      schedulePreferences: preference.schedulePreferences || null,
-      metadata: preference.metadata || null,
+      schedulePreferences: preference.schedulePreferences as Record<string, unknown> | null,
+      metadata: preference.metadata as Record<string, unknown> | null,
       updatedAt: preference.updatedAt.toISOString(),
     };
   }

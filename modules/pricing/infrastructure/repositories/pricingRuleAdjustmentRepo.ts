@@ -1,17 +1,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { PricingRuleAdjustment as DbPricingRuleAdjustment } from '../../../../libs/db/types';
 
 export type RuleAdjustmentType = 'percentage' | 'fixed';
 
-export interface RuleAdjustment {
-  ruleAdjustmentId: string;
-  pricingRuleId: string;
-  type: RuleAdjustmentType;
-  value: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export type RuleAdjustment = DbPricingRuleAdjustment;
 
 export type RuleAdjustmentCreateParams = Omit<RuleAdjustment, 'ruleAdjustmentId' | 'createdAt' | 'updatedAt'>;
 export type RuleAdjustmentUpdateParams = Partial<Omit<RuleAdjustment, 'ruleAdjustmentId' | 'pricingRuleId' | 'createdAt' | 'updatedAt'>>;

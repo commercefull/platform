@@ -1,7 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
-import type { ProductRelationType, ProductRelationshipProps } from '../../domain/entities/ProductRelationship';
+import type { ProductRelationType as ProductRelationType, ProductRelationshipProps as ProductRelationshipProps } from '../../domain/entities/ProductRelationship';
 import type { ProductRelationshipRepository } from '../../domain/repositories/ProductRelationshipRepository';
 
 // Backward-compatible aliases — the canonical types live in

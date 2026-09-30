@@ -3,41 +3,21 @@ import type { AutomationRuleRepository, ExecutionLogRepository } from '../../dom
 import { AutomationRule } from '../../domain/entities/AutomationRule';
 import type {
   TriggerType,
-  TriggerConfig,
   RuleCondition,
   ConditionMatchMode,
   RuleAction,
   ActionExecutionMode,
 } from '../../domain/entities/AutomationRule';
 import { AutomationValidationError } from '../../domain/errors/AutomationErrors';
+import type { AutomationRule as DbAutomationRule } from '../../../../libs/db/types';
 
-interface RuleDbRow {
-  automationRuleId: string;
-  name: string;
-  description: string | null;
-  triggerType: string;
-  triggerConfig: TriggerConfig;
-  conditions: RuleCondition[];
-  conditionMatchMode: string;
-  actions: RuleAction[];
-  actionExecutionMode: string;
-  isActive: boolean;
-  priority: number;
-  executionCount: number;
-  successCount: number;
-  failureCount: number;
-  lastTriggeredAt: Date | null;
-  lastExecutedAt: Date | null;
-  organizationId: string | null;
-  createdBy: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-}
+type RuleDbRow = DbAutomationRule;
 
 function rowToEntity(row: RuleDbRow): AutomationRule {
   return AutomationRule.reconstitute({
     ...row,
+    conditions: (row.conditions ?? []) as RuleCondition[],
+    actions: (row.actions ?? []) as RuleAction[],
     triggerType: row.triggerType as TriggerType,
     conditionMatchMode: row.conditionMatchMode as ConditionMatchMode,
     actionExecutionMode: row.actionExecutionMode as ActionExecutionMode,

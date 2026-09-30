@@ -6,28 +6,11 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxCalculationApplied as DbTaxCalculationApplied } from '../../../../libs/db/types';
 
 export type TaxJurisdictionLevel = 'country' | 'state' | 'county' | 'city' | 'district' | 'special';
 
-export interface TaxCalculationApplied {
-  taxCalculationAppliedId: string;
-  createdAt: string;
-  updatedAt: string;
-  calculationId: string;
-  calculationLineId?: string;
-  taxRateId?: string;
-  taxRateName: string;
-  taxZoneId?: string;
-  taxZoneName?: string;
-  taxCategoryId?: string;
-  taxCategoryName?: string;
-  jurisdictionLevel: TaxJurisdictionLevel;
-  jurisdictionName: string;
-  rate: number;
-  isCompound: boolean;
-  taxableAmountCents: number;
-  taxAmountCents: number;
-}
+export type TaxCalculationApplied = DbTaxCalculationApplied;
 
 export type TaxCalculationAppliedCreateParams = Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'createdAt' | 'updatedAt'>;
 export type TaxCalculationAppliedUpdateParams = Partial<

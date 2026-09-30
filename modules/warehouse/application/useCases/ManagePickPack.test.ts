@@ -14,7 +14,7 @@ function createPickPack(overrides: Partial<WarehousePickPack> = {}): WarehousePi
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as WarehousePickPack;
 }
 
 function createPort(record: WarehousePickPack | null = createPickPack()): jest.Mocked<Port> {

@@ -1,21 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { IntegrationCredential as DbIntegrationCredential } from '../../../../libs/db/types';
 import { IntegrationCredential, type IntegrationCredentialProps, type CredentialType } from '../../domain/entities/IntegrationCredential';
 import type { IntegrationCredentialRepository } from '../../domain/repositories/IntegrationRepository';
 
-interface CredentialDbRow {
-  credentialId: string;
-  integrationId: string;
-  type: string;
-  label: string;
-  encryptedData: string;
-  iv: string;
-  authTag: string;
-  expiresAt: Date | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type CredentialDbRow = DbIntegrationCredential;
 
 export class IntegrationCredentialRepositoryImpl implements IntegrationCredentialRepository {
   async create(credential: IntegrationCredential): Promise<IntegrationCredential> {

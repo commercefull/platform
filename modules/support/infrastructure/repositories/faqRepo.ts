@@ -4,6 +4,7 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
+import type { SupportFaqArticle as DbSupportFaqArticle, SupportFaqCategory as DbSupportFaqCategory } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -18,51 +19,9 @@ import { query, queryOne } from '../../../../libs/db';
 // Types
 // ============================================================================
 
-export interface FaqCategory {
-  faqCategoryId: string;
-  parentCategoryId?: string;
-  name: string;
-  slug?: string;
-  description?: string;
-  icon?: string;
-  color?: string;
-  imageUrl?: string;
-  sortOrder: number;
-  articleCount: number;
-  isActive: boolean;
-  isFeatured: boolean;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type FaqCategory = DbSupportFaqCategory;
 
-export interface FaqArticle {
-  faqArticleId: string;
-  faqCategoryId?: string;
-  title: string;
-  slug?: string;
-  content: string;
-  contentHtml?: string;
-  excerpt?: string;
-  keywords?: string[];
-  relatedArticleIds?: string[];
-  views: number;
-  uniqueViews: number;
-  helpfulYes: number;
-  helpfulNo: number;
-  helpfulScore: number;
-  sortOrder: number;
-  isPublished: boolean;
-  isFeatured: boolean;
-  isPinned: boolean;
-  publishedAt?: Date;
-  authorId?: string;
-  authorName?: string;
-  lastEditedBy?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type FaqArticle = DbSupportFaqArticle;
 
 // ============================================================================
 // FAQ Categories
@@ -440,18 +399,18 @@ async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> 
 function mapToCategory(row: Record<string, unknown>): FaqCategory {
   return {
     faqCategoryId: row.faqCategoryId as string,
-    parentCategoryId: row.parentCategoryId as string | undefined,
+    parentCategoryId: row.parentCategoryId as string | null,
     name: row.name as string,
-    slug: row.slug as string | undefined,
-    description: row.description as string | undefined,
-    icon: row.icon as string | undefined,
-    color: row.color as string | undefined,
-    imageUrl: row.imageUrl as string | undefined,
+    slug: row.slug as string | null,
+    description: row.description as string | null,
+    icon: row.icon as string | null,
+    color: row.color as string | null,
+    imageUrl: row.imageUrl as string | null,
     sortOrder: parseInt(row.sortOrder as string) || 0,
     articleCount: parseInt(row.articleCount as string) || 0,
     isActive: Boolean(row.isActive),
     isFeatured: Boolean(row.isFeatured),
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };
@@ -460,28 +419,28 @@ function mapToCategory(row: Record<string, unknown>): FaqCategory {
 function mapToArticle(row: Record<string, unknown>): FaqArticle {
   return {
     faqArticleId: row.faqArticleId as string,
-    faqCategoryId: row.faqCategoryId as string | undefined,
+    faqCategoryId: row.faqCategoryId as string | null,
     title: row.title as string,
-    slug: row.slug as string | undefined,
+    slug: row.slug as string | null,
     content: row.content as string,
-    contentHtml: row.contentHtml as string | undefined,
-    excerpt: row.excerpt as string | undefined,
-    keywords: row.keywords as string[] | undefined,
-    relatedArticleIds: row.relatedArticleIds as string[] | undefined,
+    contentHtml: row.contentHtml as string | null,
+    excerpt: row.excerpt as string | null,
+    keywords: row.keywords as string[] | null,
+    relatedArticleIds: row.relatedArticleIds as string[] | null,
     views: parseInt(row.views as string) || 0,
     uniqueViews: parseInt(row.uniqueViews as string) || 0,
     helpfulYes: parseInt(row.helpfulYes as string) || 0,
     helpfulNo: parseInt(row.helpfulNo as string) || 0,
-    helpfulScore: parseFloat(row.helpfulScore as string) || 0,
+    helpfulScore: row.helpfulScore as string | null,
     sortOrder: parseInt(row.sortOrder as string) || 0,
     isPublished: Boolean(row.isPublished),
     isFeatured: Boolean(row.isFeatured),
     isPinned: Boolean(row.isPinned),
-    publishedAt: row.publishedAt ? new Date(row.publishedAt as string) : undefined,
-    authorId: row.authorId as string | undefined,
-    authorName: row.authorName as string | undefined,
-    lastEditedBy: row.lastEditedBy as string | undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
+    publishedAt: row.publishedAt ? new Date(row.publishedAt as string) : null,
+    authorId: row.authorId as string | null,
+    authorName: row.authorName as string | null,
+    lastEditedBy: row.lastEditedBy as string | null,
+    metadata: row.metadata as Record<string, unknown> | null,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };

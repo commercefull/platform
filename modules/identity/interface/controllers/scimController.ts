@@ -245,15 +245,15 @@ export class ScimController {
   private toScimUser(
     scimUserId: string,
     user: { id: string; email: string; name?: string; firstName?: string; lastName?: string; isActive: boolean },
-    active: boolean,
-    createdAt: Date,
-    updatedAt: Date,
-    externalId?: string,
+    active: boolean | null,
+    createdAt: Date | null,
+    updatedAt: Date | null,
+    externalId?: string | null,
   ): ScimUser {
     return {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
       id: scimUserId,
-      externalId,
+      externalId: externalId ?? undefined,
       userName: user.email,
       name: {
         givenName: user.firstName,
@@ -261,11 +261,11 @@ export class ScimController {
       },
       displayName: user.name,
       emails: [{ value: user.email, type: 'work', primary: true }],
-      active: active && user.isActive,
+      active: (active ?? false) && user.isActive,
       meta: {
         resourceType: 'User',
-        created: createdAt.toISOString(),
-        lastModified: updatedAt.toISOString(),
+        created: createdAt?.toISOString() ?? new Date().toISOString(),
+        lastModified: updatedAt?.toISOString() ?? new Date().toISOString(),
       },
     };
   }

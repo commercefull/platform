@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
+import type { TaxZone as DbTaxZone } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -15,20 +16,7 @@ import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 // Types
 // ============================================================================
 
-export interface TaxZone {
-  taxZoneId: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  code: string;
-  description?: string;
-  isDefault: boolean;
-  countries: unknown; // JSON array
-  states?: unknown; // JSON array
-  postcodes?: unknown; // JSON array
-  cities?: unknown; // JSON array
-  isActive: boolean;
-}
+export type TaxZone = DbTaxZone;
 
 export type TaxZoneCreateParams = Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>;
 export type TaxZoneUpdateParams = Partial<Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>>;

@@ -5,41 +5,33 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
+import type { WarehouseReceiving as DbWarehouseReceiving } from '../../../../libs/db/types';
+import type { WarehouseReceiving, CreateReceivingInput } from '../../domain/repositories/WarehouseRepository';
+export type { WarehouseReceiving, CreateReceivingInput } from '../../domain/repositories/WarehouseRepository';
 
-export interface WarehouseReceiving {
-  warehouseReceivingId: string;
-  distributionWarehouseId: string;
-  receiptNumber: string;
-  sourceType: string;
-  sourceId?: string;
-  status: string;
-  expectedDate?: Date;
-  receivedDate?: Date;
-  carrierName?: string;
-  trackingNumber?: string;
-  packageCount?: number;
-  notes?: string;
-  hasDiscrepancies: boolean;
-  items?: Record<string, unknown>[];
-  completedAt?: Date;
-  receivedBy?: string;
-  createdAt: Date;
-  updatedAt: Date;
+const optDate = (d: Date | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
+
+function mapToReceiving(row: DbWarehouseReceiving): WarehouseReceiving {
+  return {
+    ...row,
+    sourceId: row.sourceId ?? undefined,
+    expectedDate: optDate(row.expectedDate),
+    receivedDate: optDate(row.receivedDate),
+    carrierName: row.carrierName ?? undefined,
+    trackingNumber: row.trackingNumber ?? undefined,
+    packageCount: row.packageCount ?? undefined,
+    notes: row.notes ?? undefined,
+    items: (row.items as Record<string, unknown>[] | null) ?? undefined,
+    completedAt: optDate(row.completedAt),
+    receivedBy: row.receivedBy ?? undefined,
+    createdAt: row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt),
+    updatedAt: row.updatedAt instanceof Date ? row.updatedAt : new Date(row.updatedAt),
+  };
 }
 
-export interface CreateReceivingInput {
-  distributionWarehouseId: string;
-  receiptNumber: string;
-  sourceType: string;
-  sourceId?: string;
-  expectedDate?: Date;
-  carrierName?: string;
-  trackingNumber?: string;
-  packageCount?: number;
-  notes?: string;
-  items?: Record<string, unknown>[];
-  receivedBy?: string;
-}
+
+
+
 
 export async function create(input: CreateReceivingInput): Promise<WarehouseReceiving> {
   const id = generateUUID();
@@ -54,7 +46,7 @@ export async function create(input: CreateReceivingInput): Promise<WarehouseRece
     RETURNING *
   `;
 
-  const result = await queryOne<WarehouseReceiving>(sql, [
+  const result = await queryOne<DbWarehouseReceiving>(sql, [
     id,
     input.distributionWarehouseId,
     input.receiptNumber,
@@ -74,11 +66,12 @@ export async function create(input: CreateReceivingInput): Promise<WarehouseRece
   ]);
 
   if (!result) throw new FailedToCreateWarehouseEntityError('Failed to create receiving record');
-  return result;
+  return result ? mapToReceiving(result) : result;
 }
 
 export async function findById(id: string): Promise<WarehouseReceiving | null> {
-  return queryOne<WarehouseReceiving>('SELECT * FROM "warehouseReceiving" WHERE "warehouseReceivingId" = $1', [id]);
+  const row = await queryOne<DbWarehouseReceiving>('SELECT * FROM "warehouseReceiving" WHERE "warehouseReceivingId" = $1', [id]);
+  return row ? mapToReceiving(row) : null;
 }
 
 export async function findByWarehouse(warehouseId: string, status?: string): Promise<WarehouseReceiving[]> {
@@ -89,7 +82,8 @@ export async function findByWarehouse(warehouseId: string, status?: string): Pro
     params.push(status);
   }
   sql += ' ORDER BY "createdAt" DESC';
-  return (await query<WarehouseReceiving[]>(sql, params)) || [];
+  const rows = await query<DbWarehouseReceiving[]>(sql, params);
+  return (rows || []).map(mapToReceiving);
 }
 
 export async function updateStatus(id: string, status: string, receivedBy?: string): Promise<WarehouseReceiving | null> {
@@ -108,10 +102,11 @@ export async function updateStatus(id: string, status: string, receivedBy?: stri
   }
   values.push(id);
 
-  return queryOne<WarehouseReceiving>(
+  const row = await queryOne<DbWarehouseReceiving>(
     `UPDATE "warehouseReceiving" SET ${fields.join(', ')} WHERE "warehouseReceivingId" = $${values.length} RETURNING *`,
     values,
   );
+  return row ? mapToReceiving(row) : null;
 }
 
 export async function updateItems(
@@ -120,10 +115,11 @@ export async function updateItems(
   hasDiscrepancies: boolean,
 ): Promise<WarehouseReceiving | null> {
   const now = new Date();
-  return queryOne<WarehouseReceiving>(
+  const row = await queryOne<DbWarehouseReceiving>(
     `UPDATE "warehouseReceiving" SET "items" = $1, "hasDiscrepancies" = $2, "updatedAt" = $3 WHERE "warehouseReceivingId" = $4 RETURNING *`,
     [JSON.stringify(items), hasDiscrepancies, now, id],
   );
+  return row ? mapToReceiving(row) : null;
 }
 
 export default { create, findById, findByWarehouse, updateStatus, updateItems };

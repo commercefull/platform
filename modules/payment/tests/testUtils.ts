@@ -223,7 +223,7 @@ export function createPaymentSettings(overrides: Partial<PaymentSettings> = {}):
     createdAt: now,
     updatedAt: now,
     ...overrides,
-  };
+  } as PaymentSettings;
 }
 
 export function createPaymentWebhook(overrides: Partial<PaymentWebhook> = {}): PaymentWebhook {

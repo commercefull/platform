@@ -73,7 +73,8 @@ export function createAttribute(overrides: Partial<ProductAttribute> = {}): Prod
     isUsedInProductListing: false,
     position: 0,
     ...overrides,
-  };
+ } as ProductAttribute;
+
 }
 
 export function createAttributeValue(overrides: Partial<ProductAttributeValue> = {}): ProductAttributeValue {
@@ -86,7 +87,7 @@ export function createAttributeValue(overrides: Partial<ProductAttributeValue> =
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...overrides,
-  };
+  } as ProductAttributeValue;
 }
 
 export function createAttributeData(overrides: Partial<ProductAttributeData> = {}): ProductAttributeData {
@@ -96,7 +97,8 @@ export function createAttributeData(overrides: Partial<ProductAttributeData> = {
     attributeId: 'attr-1',
     value: 'Red',
     ...overrides,
-  };
+ } as ProductAttributeData;
+
 }
 
 import type {
@@ -127,7 +129,8 @@ export function createCategoryRow(overrides: Partial<CategoryRow> = {}): Categor
     productCount: 0,
     isGlobal: true,
     ...overrides,
-  };
+ } as CategoryRow;
+
 }
 
 export function createProductCategory(overrides: Partial<ProductCategoryRow> = {}): ProductCategoryRow {
@@ -246,8 +249,8 @@ import type {
 export function createProductReview(overrides: Partial<ProductReview> = {}): ProductReview {
   return {
     productReviewId: 'r1',
-    createdAt: ISO,
-    updatedAt: ISO,
+    createdAt: new Date(ISO),
+    updatedAt: new Date(ISO),
     productId: 'p1',
     rating: 5,
     status: 'pending',
@@ -257,7 +260,7 @@ export function createProductReview(overrides: Partial<ProductReview> = {}): Pro
     unhelpfulCount: 0,
     reportCount: 0,
     ...overrides,
-  };
+  } as ProductReview;
 }
 
 export function createReviewMedia(overrides: Partial<ProductReviewMedia> = {}): ProductReviewMedia {

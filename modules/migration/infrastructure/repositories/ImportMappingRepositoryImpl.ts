@@ -1,19 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
+import type { ImportMapping as DbImportMapping } from '../../../../libs/db/types';
 import { ImportMapping, type ImportMappingProps } from '../../domain/entities/ImportMapping';
 import type { ImportMappingRepository } from '../../domain/repositories/MigrationRepository';
 
-interface ImportMappingDbRow {
-  importMappingId: string;
-  importJobId: string;
-  entityType: string;
-  sourceId: string;
-  platformId: string;
-  sourceData: Record<string, unknown> | string | null;
-  metadata: Record<string, unknown> | string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+type ImportMappingDbRow = DbImportMapping;
 
 export class ImportMappingRepositoryImpl implements ImportMappingRepository {
   async create(mapping: ImportMapping): Promise<ImportMapping> {

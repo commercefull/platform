@@ -1,15 +1,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
+import type { PricingRuleCondition as DbPricingRuleCondition } from '../../../../libs/db/types';
 
-export interface RuleCondition {
-  ruleConditionId: string;
-  createdAt: string;
-  updatedAt: string;
-  pricingRuleId: string;
-  type: string;
-  parameters: unknown;
-}
+export type RuleCondition = DbPricingRuleCondition;
 
 export type RuleConditionCreateParams = Omit<RuleCondition, 'ruleConditionId' | 'createdAt' | 'updatedAt'>;
 export type RuleConditionUpdateParams = Partial<Omit<RuleCondition, 'ruleConditionId' | 'pricingRuleId' | 'createdAt' | 'updatedAt'>>;

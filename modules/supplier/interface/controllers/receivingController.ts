@@ -5,7 +5,6 @@ import { CreateReceivingRecordInput } from '../../application/useCases/CreateRec
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
-  SupplierReceivingRecordCreateParams,
   SupplierReceivingRecordUpdateParams,
   SupplierReceivingItemCreateParams,
   SupplierReceivingItemUpdateParams,
@@ -66,7 +65,7 @@ export const createReceivingRecord = async (req: HttpRequest, res: HttpResponse)
     discrepancies,
     attachments,
     items, // Array of receiving items
-  } = req.body as SupplierReceivingRecordCreateParams & { items: SupplierReceivingItemCreateParams[] };
+  } = req.body as CreateReceivingRecordInput;
 
   try {
     const result = await createReceivingRecordUseCase.execute({
@@ -82,7 +81,7 @@ export const createReceivingRecord = async (req: HttpRequest, res: HttpResponse)
       discrepancies,
       attachments,
       items,
-    } as CreateReceivingRecordInput);
+    });
 
     successResponse(
       res,

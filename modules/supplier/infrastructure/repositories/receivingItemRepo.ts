@@ -6,6 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierErrors';
+import type { SupplierReceivingItem as DbSupplierReceivingItem } from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -18,30 +19,7 @@ import { FailedToCreateSupplierEntityError } from '../../domain/errors/SupplierE
 export type SupplierReceivingItemStatus = 'received' | 'inspecting' | 'accepted' | 'rejected' | 'partial';
 export type SupplierReceivingAcceptanceStatus = 'pending' | 'accepted' | 'rejected' | 'partial';
 
-export interface SupplierReceivingItem {
-  supplierReceivingItemId: string;
-  createdAt: string;
-  updatedAt: string;
-  supplierReceivingRecordId: string;
-  supplierPurchaseOrderItemId?: string;
-  productId: string;
-  productVariantId?: string;
-  sku: string;
-  name: string;
-  expectedQuantity?: number;
-  receivedQuantity: number;
-  rejectedQuantity: number;
-  distributionWarehouseBinId?: string;
-  lotNumber?: string;
-  serialNumbers?: string[];
-  expiryDate?: string;
-  status: SupplierReceivingItemStatus;
-  acceptanceStatus?: SupplierReceivingAcceptanceStatus;
-  inspectionNotes?: string;
-  discrepancyReason?: string;
-  processedAt?: string;
-  processedBy?: string;
-}
+export type SupplierReceivingItem = DbSupplierReceivingItem;
 
 export type SupplierReceivingItemCreateParams = Omit<SupplierReceivingItem, 'supplierReceivingItemId' | 'createdAt' | 'updatedAt'>;
 export type SupplierReceivingItemUpdateParams = Partial<
@@ -185,8 +163,8 @@ export class SupplierReceivingItemRepo {
     return this.update(id, {
       status: 'accepted',
       acceptanceStatus: 'accepted',
-      processedAt: String(unixTimestamp()),
-      processedBy,
+      processedAt: new Date(),
+      processedBy: processedBy ?? null,
     });
   }
 
@@ -195,8 +173,8 @@ export class SupplierReceivingItemRepo {
       status: 'rejected',
       acceptanceStatus: 'rejected',
       discrepancyReason: reason,
-      processedAt: String(unixTimestamp()),
-      processedBy,
+      processedAt: new Date(),
+      processedBy: processedBy ?? null,
     });
   }
 

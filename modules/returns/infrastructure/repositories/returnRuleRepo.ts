@@ -6,36 +6,16 @@
 import { query, queryOne } from '../../../../libs/db';
 import { ReturnRule, type ReturnRuleProps, type ReturnRuleScope, type RefundMethod } from '../../domain/entities/ReturnRule';
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
+import type { ReturnRule as DbReturnRule } from '../../../../libs/db/types';
 
-export interface ReturnRuleRow {
-  returnRuleId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  description: string | null;
-  scope: ReturnRuleScope;
-  categoryId: string | null;
-  productId: string | null;
-  returnWindowDays: number | null;
-  restockingFeePercent: string | null;
-  restockingFeeFlatCents: number | null;
-  returnShippingCostCents: number | null;
-  customerPaysReturnShipping: boolean;
-  autoApprove: boolean;
-  requiresManualReview: boolean;
-  requiresInspection: boolean;
-  refundMethod: RefundMethod;
-  conditions: unknown | null;
-  priority: number;
-  isActive: boolean;
-}
+export type ReturnRuleRow = DbReturnRule;
 
 function mapToEntity(row: ReturnRuleRow): ReturnRule {
   return new ReturnRule({
     returnRuleId: row.returnRuleId,
     name: row.name,
     description: row.description ?? undefined,
-    scope: row.scope,
+    scope: row.scope as ReturnRuleScope,
     categoryId: row.categoryId ?? undefined,
     productId: row.productId ?? undefined,
     returnWindowDays: row.returnWindowDays ?? undefined,
@@ -46,7 +26,7 @@ function mapToEntity(row: ReturnRuleRow): ReturnRule {
     autoApprove: row.autoApprove,
     requiresManualReview: row.requiresManualReview,
     requiresInspection: row.requiresInspection,
-    refundMethod: row.refundMethod,
+    refundMethod: row.refundMethod as RefundMethod,
     conditions: (row.conditions as AttributeCondition[] | null) ?? null,
     priority: row.priority,
     isActive: row.isActive,

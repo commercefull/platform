@@ -19,7 +19,7 @@ function createBin(overrides: Partial<WarehouseBin> = {}): WarehouseBin {
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  };
+  } as WarehouseBin;
 }
 
 function createPort(): jest.Mocked<Port> {
@@ -30,7 +30,7 @@ function createPort(): jest.Mocked<Port> {
     findBinById: jest.fn(),
     findBinsByWarehouse: jest.fn(),
   };
-  port.createBin.mockImplementation(input => Promise.resolve({ ...createBin(), ...input }));
+  port.createBin.mockImplementation(input => Promise.resolve({ ...createBin(), ...input } as WarehouseBin));
   port.updateBin.mockResolvedValue(createBin());
   port.deleteBin.mockResolvedValue(true);
   return port;
