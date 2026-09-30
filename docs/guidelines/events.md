@@ -24,18 +24,33 @@ Outbox Dispatcher (background worker)
 
 `eventBus.emit()` publishes through a pluggable transport selected by `EVENT_BUS_PROVIDER`. The transport is split into a **publisher** (producer side — `emit()`/`writeToOutbox`) and a **subscriber** (consumer side — receives payloads and feeds them to `eventBus.dispatchFromOutbox()`).
 
-| Provider             | `EVENT_BUS_PROVIDER`  | Required env vars                                           | Delivery                        |
-| -------------------- | --------------------- | ----------------------------------------------------------- | ------------------------------- |
-| In-process (default) | `memory`              | —                                                           | At-most-once, synchronous       |
-| Postgres outbox      | `postgres`            | `POSTGRES_*`                                                | At-least-once, DLQ, replay      |
-| GCP Pub/Sub          | `gcp-pubsub`          | `GCP_PUBSUB_TOPIC`, `GCP_PUBSUB_SUBSCRIPTION`               | At-least-once, topic DLQ        |
-| AWS SQS              | `aws-sqs`             | `AWS_EVENT_QUEUE_URL`, `AWS_REGION`                            | At-least-once, queue DLQ        |
-| Azure Service Bus    | `azure-servicebus`    | `AZURE_SERVICE_BUS_*` (connection string, topic, subscription) | At-least-once, dead-letter sub |
+| Provider             | `EVENT_BUS_PROVIDER` | Required env vars                                              | Delivery                       |
+| -------------------- | -------------------- | -------------------------------------------------------------- | ------------------------------ |
+| In-process (default) | `memory`             | —                                                              | At-most-once, synchronous      |
+| Postgres outbox      | `postgres`           | `POSTGRES_*`                                                   | At-least-once, DLQ, replay     |
+| GCP Pub/Sub          | `gcp-pubsub`         | `GCP_PUBSUB_TOPIC`, `GCP_PUBSUB_SUBSCRIPTION`                  | At-least-once, topic DLQ       |
+| AWS SQS              | `aws-sqs`            | `AWS_EVENT_QUEUE_URL`, `AWS_REGION`                            | At-least-once, queue DLQ       |
+| Azure Service Bus    | `azure-servicebus`   | `AZURE_SERVICE_BUS_*` (connection string, topic, subscription) | At-least-once, dead-letter sub |
 
 - Cloud SDKs (`@google-cloud/pubsub`, `@aws-sdk/client-sqs`, `@azure/service-bus`) are **optional peer dependencies**, lazy-imported only when the provider is configured. Install the one you need.
 - `subscriber` is optional per-provider config: a publish-only node (e.g. a web tier) can set just the topic/ARN; a worker node also sets the subscription/queue to consume.
 - The `postgres` provider writes every `emit()` to `platformEventOutbox` and the dispatcher drains it — use `writeToOutbox(tx, ...)` inside `withTransaction()` when the event must commit atomically with a business write.
 - Provisioning each provider's topic/queue/DLQ is opt-in per cloud: `enable_pubsub` (GCP TF), `enable_servicebus` (Azure TF), `eventBusProvider` prop → `MessagingConstruct` (AWS CDK).
+
+### Consumer topology
+
+Subscribers are long-running receive loops (not cron) started at boot:
+SQS long-polls, Pub/Sub streams, Service Bus holds an AMQP listener, the
+postgres provider runs the outbox claim loop. `memory` needs no subscriber.
+
+- **Same process (default)** — the web app consumes in-process. Fine for
+  always-on deployments (VM, ECS, Cloud Run/Container Apps with
+  `min_replicas >= 1`). Beware scale-to-zero: no replicas = no consumption.
+- **Dedicated worker** — `worker.ts` runs only the event subscriber +
+  scheduled jobs (no web stack). Deploy the same image with a different
+  command: `yarn worker` (dev), `node worker.mjs` (prod — built by
+  `yarn prd:build` alongside `app.mjs`), or `docker run <image> node ./worker.mjs`.
+  Exposes `GET /health` on `PORT` (default 3001; `WORKER_NO_HTTP=1` disables).
 
 ## Emit & Handle
 
@@ -78,7 +93,8 @@ export function registerNotificationEventHandlers(): void {
   });
 }
 ```
-```
+
+````
 
 ## Naming Convention
 
@@ -145,6 +161,6 @@ export class ProductCreatedEvent {
     public readonly timestamp: Date = new Date(),
   ) {}
 }
-```
+````
 
 These are emitted through the event bus using the corresponding `product.created` identifier.

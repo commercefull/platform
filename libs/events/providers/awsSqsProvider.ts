@@ -36,10 +36,7 @@ export interface AwsSqsDeps {
 const POLL_WAIT_SECONDS = 20;
 const MAX_MESSAGES = 10;
 
-export async function createAwsSqsTransport(
-  env: NodeJS.ProcessEnv = process.env,
-  deps: AwsSqsDeps = {},
-): Promise<EventTransport> {
+export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env, deps: AwsSqsDeps = {}): Promise<EventTransport> {
   const queueUrl = env.AWS_EVENT_QUEUE_URL;
   if (!queueUrl) {
     throw new Error('EVENT_BUS_PROVIDER=aws-sqs requires AWS_EVENT_QUEUE_URL');
@@ -49,10 +46,9 @@ export async function createAwsSqsTransport(
 
   const sqs =
     deps.sqs ??
-    new (await loadProviderSdk<{ SQSClient: new (o?: { region?: string }) => SqsClientLike }>(
-      '@aws-sdk/client-sqs',
-      'aws-sqs',
-    )).SQSClient(region ? { region } : undefined);
+    new (await loadProviderSdk<{ SQSClient: new (o?: { region?: string }) => SqsClientLike }>('@aws-sdk/client-sqs', 'aws-sqs')).SQSClient(
+      region ? { region } : undefined,
+    );
 
   let stopping = false;
   let pollTimer: NodeJS.Timeout | null = null;

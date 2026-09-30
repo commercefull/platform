@@ -61,7 +61,7 @@ registerAllEventHandlers();
 initializeAnalyticsHandlers();
 
 // Install the configured event transport and start its subscriber.
-// EVENT_BUS_PROVIDER=memory|postgres|gcp-pubsub|aws-snssqs|azure-servicebus
+// EVENT_BUS_PROVIDER=memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus
 // (default: memory — in-process dispatch). OUTBOX_DISABLED=1 is a legacy
 // alias for the memory provider.
 initEventTransport(eventBus.dispatchFromOutbox.bind(eventBus))
