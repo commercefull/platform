@@ -31,6 +31,8 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use `knex.fn.now()` for default timestamps.
 - Follow the master variant architecture for products.
 - Use `t('namespace:key')` for all user-facing text in EJS templates (labels, buttons, headings, placeholders, alerts, fallbacks).
+- Use `generateUUID()` from `libs/uuid` for app-generated DB identifiers — it emits UUIDv7 matching the `uuidv7()` column defaults.
+- Re-run `yarn db:types` after every migration — `yarn lint` validates static SQL identifiers and enum unions against `libs/db/types.ts`.
 - Use ES module `import` syntax for all imports in TypeScript files.
 - Place all imports at the top of the file.
 - Fold schema changes into the original `create` migration when it hasn't been released yet; otherwise add a new `alter` migration.
@@ -70,6 +72,9 @@ Quick reference. For the full rules, see the individual standards documents.
 - Use `require()` in any TypeScript file — always use `import`.
 - Place imports inside functions or conditionally — all imports must be top-level.
 - Edit a migration that has already been released; write an `alter` migration instead.
+- Delete a `create` migration file for a table you want gone — drop it with a forward `drop` migration; deleting applied migrations corrupts the `knexMigrations` record.
+- Cast an enum-union generated type to `string` to silence `tsc` — the union is the DB CHECK constraint; fix the literal or change the enum via migration.
+- Use `crypto.randomUUID` for DB identifiers — it produces v4; use `generateUUID()` (v7).
 - Store plaintext credentials in the database — use `libs/secrets` encryption.
 - Log decrypted credential values or sensitive PII.
 - Use `throw new Error('...')` in `domain/` or `application/` — use typed domain errors.

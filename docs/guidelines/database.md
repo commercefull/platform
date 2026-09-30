@@ -151,6 +151,27 @@ const product = await queryOne<DbProduct>(`SELECT * FROM "product" WHERE "produc
 
 Always use parameterized queries (`$1`, `$2`, …). Never interpolate user input into SQL strings.
 
+## Generated Types & Schema Checks
+
+`libs/db/types.ts` is generated from the live database by `yarn db:types`
+(`scripts/generate-knex-types.ts`). Regenerate it after every migration —
+lint validates SQL against it, so stale types produce stale checks.
+
+- **`t.enu`/`t.enum` columns emit literal unions**, not `string`. The generator
+  reads the single-column `= ANY (ARRAY[…])` CHECK constraints that Knex
+  creates and produces e.g. `status: 'active' | 'expired'`. An invalid literal
+  fails `tsc` instead of raising `23514` at runtime — fix the literal (or the
+  enum via a new migration), never cast to `string` to silence it.
+- **`bigint` columns emit `number`** matching the int8 parser in
+  `libs/db/pool.ts`.
+- **`yarn lint:sql`** (`scripts/check-sql-schema.ts`, also the last step of
+  `yarn lint`) checks every quoted column identifier in static SQL against the
+  generated types. It validates identifier existence only — join compatibility,
+  `NOT NULL` insert completeness, and FK semantics still need integration tests.
+- **App-generated IDs** use `generateUUID()` from `libs/uuid`, which emits
+  UUIDv7 matching the `uuidv7()` column defaults. Never use
+  `crypto.randomUUID` (v4) for DB identifiers.
+
 ## Search & Indexing
 
 - **Substring search (`ILIKE '%…%'`)** uses `pg_trgm` GIN indexes (`idx_product_*_trgm`,

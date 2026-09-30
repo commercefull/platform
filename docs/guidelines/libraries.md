@@ -25,7 +25,7 @@
 | `flash.ts`                        | Session flash middleware (`flashMiddleware`) + `popFlashMessages` — reads flash without dirtying the session |
 | `geoip.ts`                        | GeoIP lookup utilities                                             |
 | `roles.ts`                        | Role definitions                                                   |
-| `uuid.ts`                         | UUID generation                                                    |
+| `uuid.ts`                         | UUIDv7 generation (`generateUUID`, `isUuid`) — matches `uuidv7()` DB defaults; never use `crypto.randomUUID` (v4) for DB identifiers |
 | `strings.ts`                      | String manipulation utilities                                      |
 | `errors.ts`                       | Custom error classes (`AppError` base)                             |
 | `secrets.ts`                      | AES-256-GCM encryption for credential storage                      |

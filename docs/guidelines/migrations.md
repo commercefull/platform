@@ -35,6 +35,16 @@ Migrations dated `2024*`/`2025*` predate the module-prefix convention and are gr
 - **FKs**: `.references(...).inTable(...)` plus an index on the FK column. Index every column used in `WHERE`, `ORDER BY`, or lookups.
 - **Timestamps**: `createdAt` / `updatedAt` with `knex.fn.now()` defaults; `deletedAt` for soft delete.
 - **Parameterized SQL only** in `knex.raw` — never interpolate values.
+- **`t.enu`/`t.enum` values become TypeScript unions** in `libs/db/types.ts`
+  (the generator reads the CHECK constraints Knex creates). Changing the value
+  list is a schema change: fold into the create migration if unreleased,
+  otherwise write a new `alter` that drops/recreates the CHECK constraint.
+  Regenerate types afterward — code writing a value outside the union will
+  fail `tsc`.
+- **Dropping an unused table is a forward `drop` migration**, never a deleted
+  `create` migration — removing an applied migration file corrupts the
+  `knexMigrations` record on existing databases. Record dropped tables in
+  `docs/migrations/module-tables.md` ("Dropped Tables").
 
 ```javascript
 /**
@@ -77,7 +87,7 @@ exports.down = async function (knex) {
 - [ ] `createdAt`/`updatedAt` present; `deletedAt` where applicable
 - [ ] `exports.down` reverses `exports.up`
 - [ ] `docs/migrations/module-tables.md` updated for any new table; module doc's table list updated
-- [ ] Repositories/types updated (`yarn db:types`)
+- [ ] `yarn db:types` re-run — `yarn lint` validates all static SQL and enum unions against the regenerated `libs/db/types.ts`, so this is not optional
 
 ## Expand/Contract Policy
 
