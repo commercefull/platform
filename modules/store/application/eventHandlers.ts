@@ -24,6 +24,7 @@ export function registerStoreEventHandlers(): void {
       if (organizationId) {
         await JobScheduler.scheduleNotification({
           userId: organizationId,
+          userType: 'organization',
           type: 'store_created',
           title: 'Store Created',
           message: `Store "${storeName || storeId}" has been created successfully.`,

@@ -28,8 +28,14 @@ export class NotificationRepo {
     return await queryOne<Notification>('SELECT * FROM notification WHERE "notificationId" = $1', [notificationId]);
   }
 
-  async findAll(limit: number = 50, offset: number = 0): Promise<Notification[]> {
-    const results = await query<Notification[]>('SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
+  async findAll(limit: number = 50, offset: number = 0, type?: string): Promise<Notification[]> {
+    const results = type
+      ? await query<Notification[]>('SELECT * FROM notification WHERE type = $3 ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
+          limit,
+          offset,
+          type,
+        ])
+      : await query<Notification[]>('SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 

@@ -24,14 +24,36 @@ import { NotificationRepo } from './infrastructure/repositories/notificationRepo
  * Wire notification/email creators so JobScheduler can delegate to
  * module infrastructure without libs/ importing from modules/.
  */
+type ResolvedRecipient = { userId: string; userType: 'customer' | 'organization' };
+
+async function resolveRecipientByEmail(email: string): Promise<ResolvedRecipient | null> {
+  const rows = await query<ResolvedRecipient[]>(
+    `SELECT 'customer' AS "userType", "customerId" AS "userId" FROM customer WHERE email = $1 AND "deletedAt" IS NULL
+     UNION ALL
+     SELECT 'organization' AS "userType", "organizationId" AS "userId" FROM "organization" WHERE email = $1 AND "deletedAt" IS NULL`,
+    [email],
+  );
+  return rows?.[0] ?? null;
+}
+
 export function wireNotificationJobCreators(): void {
   setNotificationCreator(async (data: NotificationJobData) => {
+    let userId = data.userId;
+    let userType: 'customer' | 'organization' | 'admin' = data.userType || 'customer';
+    if (!userId && data.recipientEmail) {
+      const resolved = await resolveRecipientByEmail(data.recipientEmail);
+      if (resolved) ({ userId, userType } = resolved);
+    }
+    if (!userId) {
+      logger.warn('[notification] skipped: no recipient userId', { type: data.type, title: data.title });
+      return;
+    }
     const repo = new NotificationRepo();
     const channels = data.channels || ['in_app'];
     for (const channel of channels) {
       await repo.create({
-        userId: data.userId,
-        userType: 'customer',
+        userId,
+        userType,
         type: data.type,
         title: data.title,
         content: data.message,
@@ -44,10 +66,15 @@ export function wireNotificationJobCreators(): void {
   });
 
   setEmailCreator(async (data: EmailJobData) => {
+    const resolved = await resolveRecipientByEmail(data.to);
+    if (!resolved) {
+      logger.warn('[email] skipped: recipient is not a registered user', { to: data.to });
+      return;
+    }
     const repo = new NotificationRepo();
     await repo.create({
-      userId: data.to,
-      userType: 'customer',
+      userId: resolved.userId,
+      userType: resolved.userType,
       type: data.template,
       title: data.subject,
       content: JSON.stringify(data.data),

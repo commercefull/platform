@@ -57,7 +57,7 @@ describe('Fulfillment event handlers: order.cancelled', () => {
       save: jest.fn((f: Fulfillment) => Promise.resolve(f)),
     } as unknown as jest.Mocked<IFulfillmentRepository>;
     deps = {
-      orders: { findById: jest.fn() },
+      orders: { findById: jest.fn(), recordStatusChange: jest.fn() },
       reservations: { consumeByOrder: jest.fn() },
       fulfillments,
     };

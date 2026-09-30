@@ -17,7 +17,7 @@ export interface SignalScope {
 
 export interface ProcessedOrderRecord {
   orderId: string;
-  organizationId: string;
+  organizationId: string | null;
   storeId: string | null;
   productIds: string[];
   status: 'counted' | 'reversed' | 'skipped';

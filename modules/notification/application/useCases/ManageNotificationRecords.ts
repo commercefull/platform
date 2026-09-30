@@ -20,7 +20,7 @@ export interface CreateNotificationRecordParams {
 }
 
 interface NotificationRecordPort {
-  findAll(limit?: number, offset?: number): Promise<NotificationRecord[]>;
+  findAll(limit?: number, offset?: number, type?: string): Promise<NotificationRecord[]>;
   findById(id: string): Promise<NotificationRecord | null>;
   create(params: CreateNotificationRecordParams): Promise<NotificationRecord>;
   update(id: string, params: Record<string, unknown>): Promise<NotificationRecord | null>;
@@ -36,8 +36,8 @@ interface NotificationRecordPort {
 export class ManageNotificationRecordsUseCase {
   constructor(private readonly notificationRepo: NotificationRecordPort) {}
 
-  async list(limit: number, offset: number) {
-    return this.notificationRepo.findAll(limit, offset);
+  async list(limit: number, offset: number, type?: string) {
+    return this.notificationRepo.findAll(limit, offset, type);
   }
 
   async getById(id: string) {

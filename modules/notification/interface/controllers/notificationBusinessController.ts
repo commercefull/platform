@@ -83,7 +83,8 @@ function respondError(res: HttpResponse, error: unknown, fallback: string): void
 export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
-  const notifications = await manageNotificationRecordsUseCase.list(limit, offset);
+  const type = req.query.type as string | undefined;
+  const notifications = await manageNotificationRecordsUseCase.list(limit, offset, type);
   jsonResponse(res, 200, {
         success: true,
         data: notifications,

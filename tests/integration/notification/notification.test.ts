@@ -171,10 +171,11 @@ describe('Notification Tests', () => {
         return;
       }
 
-      // Create a notification to delete
+      // Create a notification owned by the caller — DELETE enforces ownership
+      const callerId = JSON.parse(Buffer.from(adminToken.split('.')[1], 'base64url').toString()).id as string;
       const deleteTestData = {
-        userId: testUserId,
-        userType: 'customer',
+        userId: callerId,
+        userType: 'organization',
         type: 'system',
         title: 'Delete Test Notification',
         content: 'This notification will be deleted.',
