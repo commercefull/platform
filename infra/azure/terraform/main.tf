@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -131,8 +131,8 @@ resource "azurerm_storage_account" "storage" {
 
 # Storage Container
 resource "azurerm_storage_container" "media" {
-  name                 = "media"
-  storage_account_name = azurerm_storage_account.storage.name
+  name               = "media"
+  storage_account_id = azurerm_storage_account.storage.id
   # SECURITY: private — serve media via SAS URLs or Front Door, never anonymous listing/reads
   container_access_type = "private"
 }
