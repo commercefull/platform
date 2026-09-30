@@ -65,7 +65,7 @@ export class RestorePageVersionUseCase {
 
     const restoredPage = await this.contentRepo.updatePage(command.pageId, {
       title: version.title,
-      status: version.status,
+      status: version.status as 'draft' | 'published' | 'scheduled' | 'archived',
       summary: version.summary ?? undefined,
       customFields: (version.customFields as Record<string, unknown>) || undefined,
     });

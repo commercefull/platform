@@ -31,7 +31,7 @@
     "test:storefront": "jest --selectProjects storefront --detectOpenHandles",
     "test:int": "jest --selectProjects integration --runInBand --detectOpenHandles --forceExit",
     "test:all": "yarn test:unit && yarn test:storefront && yarn test:int",
-    "lint": "node_modules/@typescript/native/bin/tsc --noEmit && eslint . --ext .ts,.js && dependency-cruiser .",
+    "lint": "node_modules/@typescript/native/bin/tsc --noEmit && eslint . --ext .ts,.js && dependency-cruiser . && tsx scripts/check-sql-schema.ts",
     "lint:errors": "eslint . --ext .ts,.js --quiet",
     "lint:fix": "eslint . --ext .ts,.js --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md,html,css,scss}\"",
@@ -72,7 +72,8 @@
     "perf:load:storefront": "k6 run tests/performance/load-storefront.js",
     "perf:load": "yarn perf:load:browse && yarn perf:load:basket && yarn perf:load:auth && yarn perf:load:checkout && yarn perf:load:merchant && yarn perf:load:order && yarn perf:load:coupon && yarn perf:load:storefront",
     "perf:stress": "k6 run tests/performance/stress.js",
-    "perf:spike": "k6 run tests/performance/spike.js"
+    "perf:spike": "k6 run tests/performance/spike.js",
+    "lint:sql": "tsx scripts/check-sql-schema.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",

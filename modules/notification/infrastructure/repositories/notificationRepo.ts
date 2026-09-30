@@ -8,13 +8,15 @@ import { FailedToCreateNotificationError } from '../../domain/errors/Notificatio
 export type Notification = DbNotification;
 
 // Derived types for create/update operations
-export type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>> & {
+export type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt' | 'channel' | 'userType' | 'priority'>> & {
   userId: string;
-  userType: string;
+  userType: 'customer' | 'organization' | 'admin';
   type: string;
   title: string;
   content: string;
-  channel: string;
+  /** Accepts 'inApp' (notificationBatch enum) — translated to 'in_app' on insert. */
+  channel: 'email' | 'in_app' | 'inApp' | 'push' | 'sms';
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
 };
 
 export type NotificationUpdateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>>;

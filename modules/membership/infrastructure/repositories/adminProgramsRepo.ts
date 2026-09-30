@@ -78,7 +78,7 @@ export async function getSubscriptionStats(): Promise<{
     `SELECT COALESCE(SUM(sp."priceCents"), 0) as "mrr"
      FROM "subscription" s
      JOIN "subscriptionPlan" sp ON s."subscriptionPlanId" = sp."subscriptionPlanId"
-     WHERE s."status" = 'active' AND sp."billingCycle" = 'monthly'`,
+     WHERE s."status" = 'active' AND sp."billingInterval" = 'month'`,
   );
 
   return {
@@ -94,7 +94,7 @@ export async function findSubscriptionPlansWithCounts(): Promise<unknown[]> {
       `SELECT sp.*, COUNT(s."subscriptionId") as "subscriberCount"
        FROM "subscriptionPlan" sp
        LEFT JOIN "subscription" s ON sp."subscriptionPlanId" = s."subscriptionPlanId"
-       WHERE sp."deletedAt" IS NULL
+       WHERE sp."isActive" = true
        GROUP BY sp."subscriptionPlanId"
        ORDER BY sp."priceCents"`,
     )) || []
@@ -143,11 +143,11 @@ export async function getLoyaltyStats(): Promise<{
 export async function findLoyaltyRewardsWithCounts(): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
-      `SELECT lr.*, COUNT(lrd."loyaltyRedemptionId") as "redemptionCount"
+      `SELECT lr.*, COUNT(lrd."redemptionId") as "redemptionCount"
        FROM "loyaltyReward" lr
-       LEFT JOIN "loyaltyRedemption" lrd ON lr."loyaltyRewardId" = lrd."loyaltyRewardId"
-       WHERE lr."deletedAt" IS NULL
-       GROUP BY lr."loyaltyRewardId"
+       LEFT JOIN "loyaltyRedemption" lrd ON lr."rewardId" = lrd."rewardId"
+       WHERE lr."isActive" = true
+       GROUP BY lr."rewardId"
        ORDER BY lr."pointsCost"`,
     )) || []
   );

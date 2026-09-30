@@ -8,12 +8,12 @@ export class ProductTagRepo {
   async findAll(includeDeleted = false): Promise<ProductTag[]> {
     const sql = includeDeleted
       ? `SELECT * FROM "productTag" ORDER BY "name" ASC`
-      : `SELECT * FROM "productTag" WHERE "deletedAt" IS NULL ORDER BY "name" ASC`;
+      : `SELECT * FROM "productTag" ORDER BY "name" ASC`;
     return (await query<ProductTag[]>(sql)) || [];
   }
 
   async findById(productTagId: string): Promise<ProductTag | null> {
-    return queryOne<ProductTag>(`SELECT * FROM "productTag" WHERE "productTagId" = $1 AND "deletedAt" IS NULL`, [productTagId]);
+    return queryOne<ProductTag>(`SELECT * FROM "productTag" WHERE "productTagId" = $1`, [productTagId]);
   }
 
   async create(params: ProductTagCreateParams): Promise<ProductTag> {
@@ -29,7 +29,7 @@ export class ProductTagRepo {
 
   async softDelete(productTagId: string): Promise<boolean> {
     const result = await queryOne<{ productTagId: string }>(
-      `UPDATE "productTag" SET "deletedAt" = $1 WHERE "productTagId" = $2 AND "deletedAt" IS NULL RETURNING "productTagId"`,
+      `DELETE FROM "productTag" WHERE "productTagId" = $1 RETURNING "productTagId"`,
       [new Date(), productTagId],
     );
     return !!result;

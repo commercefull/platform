@@ -19,7 +19,7 @@ export class CreatePageCommand {
     public readonly contentTypeId: string,
     public readonly templateId?: string,
     public readonly status: 'draft' | 'published' | 'scheduled' | 'archived' = 'draft',
-    public readonly visibility: 'public' | 'private' | 'password_protected' = 'public',
+    public readonly visibility: 'public' | 'private' | 'passwordProtected' = 'public',
     public readonly summary?: string,
     public readonly featuredImage?: string,
     public readonly parentId?: string,

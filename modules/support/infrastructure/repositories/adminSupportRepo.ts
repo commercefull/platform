@@ -43,7 +43,6 @@ export async function listRecentTickets(limit: number = 20): Promise<SupportTick
             COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
      FROM "supportTicket" st
      LEFT JOIN "customer" c ON st."customerId" = c."customerId"
-     WHERE st."deletedAt" IS NULL
      ORDER BY st."createdAt" DESC
      LIMIT $1`,
     [limit],
@@ -58,7 +57,7 @@ export async function listTickets(filters: {
   limit?: number;
   offset?: number;
 }): Promise<SupportTicketWithCustomer[]> {
-  let whereClause = 'st."deletedAt" IS NULL';
+  let whereClause = 'true';
   const params: unknown[] = [];
   let paramIndex = 1;
 
@@ -98,7 +97,7 @@ export async function findTicketById(ticketId: string): Promise<SupportTicketWit
             COALESCE(c."firstName" || ' ' || c."lastName", c."email") as "customerName"
      FROM "supportTicket" st
      LEFT JOIN "customer" c ON st."customerId" = c."customerId"
-     WHERE st."supportTicketId" = $1 AND st."deletedAt" IS NULL`,
+     WHERE st."supportTicketId" = $1`,
     [ticketId],
   );
 }

@@ -15,7 +15,7 @@ export class ProductAttributeToGroupRepo {
   async findByGroup(attributeGroupId: string): Promise<ProductAttributeToGroup[]> {
     return (
       (await query<ProductAttributeToGroup[]>(
-        `SELECT * FROM "productAttributeToGroup" WHERE "attributeGroupId" = $1 ORDER BY "position" ASC`,
+        `SELECT * FROM "productAttributeToGroup" WHERE "groupId" = $1 ORDER BY "position" ASC`,
         [attributeGroupId],
       )) || []
     );
@@ -24,7 +24,7 @@ export class ProductAttributeToGroupRepo {
   async create(params: ProductAttributeToGroupCreateParams): Promise<ProductAttributeToGroup> {
     const now = new Date();
     const result = await queryOne<ProductAttributeToGroup>(
-      `INSERT INTO "productAttributeToGroup" ("attributeGroupId", "attributeId", "position", "createdAt")
+      `INSERT INTO "productAttributeToGroup" ("groupId", "attributeId", "position", "createdAt")
        VALUES ($1, $2, $3, $4) RETURNING *`,
       [params.attributeGroupId, params.attributeId, params.position ?? 0, now],
     );

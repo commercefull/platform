@@ -17,7 +17,7 @@ const row = (overrides: Partial<PaymentGateway> = {}): PaymentGateway => ({
   publicKey: 'pk_test',
   webhookSecret: 'whsec',
   apiEndpoint: null,
-  supportedPaymentMethods: 'card',
+  supportedPaymentMethods: 'creditCard',
   supportedCurrencies: ['USD'],
   processingFees: null,
   checkoutSettings: null,

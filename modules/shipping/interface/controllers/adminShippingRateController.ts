@@ -93,7 +93,7 @@ export const createShippingRate = async (req: HttpRequest, res: HttpResponse): P
     shippingMethodId,
     name: name || null,
     description: description || null,
-    rateType,
+    rateType: rateType as 'flat' | 'weightBased' | 'priceBased' | 'itemBased' | 'dimensional' | 'calculated' | 'free',
     baseRateCents: Math.round(parseFloat(baseRate) * 100),
     perItemRateCents: perItemRate ? Math.round(parseFloat(perItemRate) * 100) : null,
     freeThresholdCents: freeThreshold ? Math.round(parseFloat(freeThreshold) * 100) : null,

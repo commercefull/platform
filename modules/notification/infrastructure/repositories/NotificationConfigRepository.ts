@@ -11,7 +11,6 @@
 
 import notificationTemplateRepo from './notificationTemplateRepo';
 import notificationTemplateTranslationRepo from './notificationTemplateTranslationRepo';
-import notificationCategoryRepo from './notificationCategoryRepo';
 import notificationPreferenceRepo from './notificationPreferenceRepo';
 import notificationUnsubscribeRepo from './notificationUnsubscribeRepo';
 import notificationWebhookRepo from './notificationWebhookRepo';
@@ -23,7 +22,6 @@ export type { NotificationTemplate } from './notificationTemplateRepo';
 class NotificationConfigRepository {
   readonly templates = notificationTemplateRepo;
   readonly templateTranslations = notificationTemplateTranslationRepo;
-  readonly categories = notificationCategoryRepo;
   readonly preferences = notificationPreferenceRepo;
   readonly unsubscribes = notificationUnsubscribeRepo;
   readonly webhooks = notificationWebhookRepo;

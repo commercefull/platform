@@ -46,8 +46,8 @@ export type ContentPageRecord = {
   slug: string;
   contentTypeId: string;
   templateId: string | null;
-  status: string;
-  visibility: string;
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
+  visibility: 'public' | 'private' | 'passwordProtected';
   accessPassword: string | null;
   summary: string | null;
   featuredImage: string | null;
@@ -146,7 +146,7 @@ export type ContentNavigationItem = {
   navigationId: string;
   parentId: string | null;
   title: string;
-  type: string;
+  type: 'url' | 'page' | 'category' | 'product' | 'blog';
   url: string | null;
   contentPageId: string | null;
   targetId: string | null;

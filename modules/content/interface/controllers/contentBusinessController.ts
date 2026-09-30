@@ -682,11 +682,11 @@ export class ContentController {
       summary: description ?? null, // Using description value but assigning to the correct field name 'summary'
       metaTitle: metaTitle ?? null,
       metaDescription: metaDescription ?? null,
-      status,
+      status: status as 'draft' | 'published' | 'scheduled' | 'archived',
       publishedAt: publishedAt ? new Date(publishedAt) : null,
       templateId: layout ?? null, // Layout corresponds to templateId
       contentTypeId,
-      visibility,
+      visibility: visibility as 'public' | 'private' | 'passwordProtected',
     });
 
     jsonResponse(res, 201, {
@@ -731,7 +731,7 @@ export class ContentController {
       summary: description, // Using description value but mapping to 'summary' field
       metaTitle,
       metaDescription,
-      status,
+      status: status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
       publishedAt: publishedAt ? new Date(publishedAt) : undefined,
       templateId: layout, // Layout corresponds to templateId
     });
@@ -1417,7 +1417,7 @@ export class ContentController {
 
     const updated = await this.contentUC.updateNavigationItem(id, {
       title,
-      type,
+      type: type as 'url' | 'page' | 'category' | 'product' | 'blog' | undefined,
       url,
       contentPageId,
       icon,

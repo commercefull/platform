@@ -193,7 +193,7 @@ export class TaxQueryRepo {
          WHERE "customerId" = $1 
          AND "status" = $2
          AND ("expiryDate" IS NULL OR "expiryDate" > CURRENT_TIMESTAMP)
-         ORDER BY "taxCategoryId", "startDate" DESC`,
+         ORDER BY "startDate" DESC`,
         [customerId, status],
       );
 

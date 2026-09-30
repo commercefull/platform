@@ -62,7 +62,7 @@ export type CustomerAddressRecord = {
   isDefault: boolean;
   isDefaultBilling: boolean;
   isDefaultShipping: boolean;
-  addressType: string;
+  addressType: 'billing' | 'shipping' | 'both';
   isVerified: boolean;
   verifiedAt: Date | null;
   verificationData: unknown | null;

@@ -74,7 +74,7 @@ yarn db:migrate:new <name>  # Create a new migration file
 yarn db:rollback            # Rollback last migration batch
 yarn db:rollback:all        # Rollback all migrations
 yarn db:seed                # Run all seed files
-yarn db:types               # Generate Knex types from DB schema
+yarn db:types               # Regenerate libs/db/types.ts (required after every migration — lint depends on it)
 
 # Testing
 yarn test                   # Unit tests (with coverage)
@@ -82,8 +82,9 @@ yarn test:unit              # Unit tests
 yarn test:int               # Integration tests (requires PostgreSQL)
 
 # Code Quality
-yarn lint                   # TypeScript check + ESLint + dependency-cruiser
+yarn lint                   # TypeScript check + ESLint + dependency-cruiser + SQL schema check
 yarn lint:errors            # ESLint errors only
+yarn lint:sql               # Validate static SQL column identifiers against generated types
 yarn lint:fix               # ESLint with auto-fix
 yarn format                 # Prettier format all files
 yarn format:check           # Check formatting

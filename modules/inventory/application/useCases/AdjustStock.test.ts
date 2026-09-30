@@ -34,7 +34,7 @@ function makeLocation(overrides: Partial<InventoryLocation> = {}): InventoryLoca
     serialNumber: null,
     expiryDate: null,
     receivedDate: null,
-    status: 'active',
+    status: 'available',
     lastCountDate: null,
     ...overrides,
   };

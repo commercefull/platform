@@ -17,7 +17,7 @@ describe('ApproveOrganizationUseCase', () => {
 
     const result = await useCase.execute('org-1');
 
-    expect(repository.update).toHaveBeenCalledWith('org-1', { status: 'approved' });
+    expect(repository.update).toHaveBeenCalledWith('org-1', { status: 'active' });
     expect(emitMock).toHaveBeenCalledWith('organization.approved', {
       organizationId: 'org-1',
       businessName: 'Acme Corp',

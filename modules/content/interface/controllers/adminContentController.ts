@@ -21,7 +21,12 @@ export const listContentPages = async (req: HttpRequest, res: HttpResponse): Pro
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
-  const pages = await manageContentUseCase.findAllPages(status as string | undefined, contentTypeId, limit, offset);
+  const pages = await manageContentUseCase.findAllPages(
+    status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
+    contentTypeId,
+    limit,
+    offset,
+  );
 
   // Get content types for filtering
   const contentTypes = await manageContentUseCase.findAllContentTypes(true);
@@ -86,7 +91,7 @@ export const createContentPage = async (req: HttpRequest, res: HttpResponse): Pr
     contentTypeId, // 3. contentTypeId
     templateId || undefined, // 4. templateId
     status as 'draft' | 'published' | 'scheduled' | 'archived', // 5. status
-    visibility as 'public' | 'private' | 'password_protected', // 6. visibility
+    visibility as 'public' | 'private' | 'passwordProtected', // 6. visibility
     summary || undefined, // 7. summary
     featuredImage || undefined, // 8. featuredImage
     undefined, // 9. parentId (not implemented yet)
@@ -195,7 +200,7 @@ export const updateContentPage = async (req: HttpRequest, res: HttpResponse): Pr
     updates.slug as string | undefined,
     updates.templateId as string | undefined,
     updates.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
-    updates.visibility as 'public' | 'private' | 'password_protected' | undefined,
+    updates.visibility as 'public' | 'private' | 'passwordProtected' | undefined,
     updates.summary as string | undefined,
     updates.featuredImage as string | undefined,
     updates.metaTitle as string | undefined,

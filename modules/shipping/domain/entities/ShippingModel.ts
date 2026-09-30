@@ -34,7 +34,7 @@ export type ShippingMethodRecord = {
   isActive: boolean;
   isDefault: boolean;
   serviceCode: string | null;
-  domesticInternational: string;
+  domesticInternational: 'domestic' | 'international' | 'both';
   estimatedDeliveryDays: unknown | null;
   handlingDays: number | null;
   priority: number | null;
@@ -58,7 +58,7 @@ export type ShippingZoneRecord = {
   description: string | null;
   isActive: boolean;
   priority: number | null;
-  locationType: string;
+  locationType: 'country' | 'state' | 'zipcode' | 'region' | 'continent';
   locations: unknown;
   excludedLocations: unknown | null;
   createdBy: string | null;
@@ -73,7 +73,7 @@ export type ShippingRateRecord = {
   name: string | null;
   description: string | null;
   isActive: boolean;
-  rateType: string;
+  rateType: 'flat' | 'weightBased' | 'priceBased' | 'itemBased' | 'dimensional' | 'calculated' | 'free';
   baseRateCents: number;
   perItemRateCents: number | null;
   freeThresholdCents: number | null;

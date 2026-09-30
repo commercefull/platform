@@ -47,7 +47,6 @@ export enum Table {
   CustomerCurrencyPreference = "customerCurrencyPreference",
   CustomerGroup = "customerGroup",
   CustomerGroupMembership = "customerGroupMembership",
-  CustomerLoyaltyTransaction = "customerLoyaltyTransaction",
   CustomerPasswordReset = "customerPasswordReset",
   CustomerPrice = "customerPrice",
   CustomerPriceList = "customerPriceList",
@@ -64,9 +63,7 @@ export enum Table {
   Fulfillment = "fulfillment",
   FulfillmentItem = "fulfillmentItem",
   FulfillmentLocation = "fulfillmentLocation",
-  FulfillmentNetworkRule = "fulfillmentNetworkRule",
   FulfillmentPartner = "fulfillmentPartner",
-  FulfillmentRule = "fulfillmentRule",
   GdprCookieConsent = "gdprCookieConsent",
   GdprDataRequest = "gdprDataRequest",
   IdentityOidcProvider = "identityOidcProvider",
@@ -117,7 +114,6 @@ export enum Table {
   MembershipSubscription = "membershipSubscription",
   Notification = "notification",
   NotificationBatch = "notificationBatch",
-  NotificationCategory = "notificationCategory",
   NotificationDeliveryLog = "notificationDeliveryLog",
   NotificationDevice = "notificationDevice",
   NotificationEventLog = "notificationEventLog",
@@ -186,13 +182,10 @@ export enum Table {
   ProductCurrencyPrice = "productCurrencyPrice",
   ProductDownload = "productDownload",
   ProductImage = "productImage",
-  ProductList = "productList",
-  ProductListItem = "productListItem",
   ProductMedia = "productMedia",
   ProductMerchandisingRule = "productMerchandisingRule",
   ProductQa = "productQa",
   ProductQaAnswer = "productQaAnswer",
-  ProductQaVote = "productQaVote",
   ProductRelated = "productRelated",
   ProductReview = "productReview",
   ProductReviewMedia = "productReviewMedia",
@@ -340,7 +333,6 @@ export type Tables = {
   "customerCurrencyPreference": CustomerCurrencyPreference,
   "customerGroup": CustomerGroup,
   "customerGroupMembership": CustomerGroupMembership,
-  "customerLoyaltyTransaction": CustomerLoyaltyTransaction,
   "customerPasswordReset": CustomerPasswordReset,
   "customerPrice": CustomerPrice,
   "customerPriceList": CustomerPriceList,
@@ -357,9 +349,7 @@ export type Tables = {
   "fulfillment": Fulfillment,
   "fulfillmentItem": FulfillmentItem,
   "fulfillmentLocation": FulfillmentLocation,
-  "fulfillmentNetworkRule": FulfillmentNetworkRule,
   "fulfillmentPartner": FulfillmentPartner,
-  "fulfillmentRule": FulfillmentRule,
   "gdprCookieConsent": GdprCookieConsent,
   "gdprDataRequest": GdprDataRequest,
   "identityOidcProvider": IdentityOidcProvider,
@@ -410,7 +400,6 @@ export type Tables = {
   "membershipSubscription": MembershipSubscription,
   "notification": Notification,
   "notificationBatch": NotificationBatch,
-  "notificationCategory": NotificationCategory,
   "notificationDeliveryLog": NotificationDeliveryLog,
   "notificationDevice": NotificationDevice,
   "notificationEventLog": NotificationEventLog,
@@ -479,13 +468,10 @@ export type Tables = {
   "productCurrencyPrice": ProductCurrencyPrice,
   "productDownload": ProductDownload,
   "productImage": ProductImage,
-  "productList": ProductList,
-  "productListItem": ProductListItem,
   "productMedia": ProductMedia,
   "productMerchandisingRule": ProductMerchandisingRule,
   "productQa": ProductQa,
   "productQaAnswer": ProductQaAnswer,
-  "productQaVote": ProductQaVote,
   "productRelated": ProductRelated,
   "productReview": ProductReview,
   "productReviewMedia": ProductReviewMedia,
@@ -788,9 +774,9 @@ export type AuditLog = {
   metadata: unknown | null;
   previousHash: string;
   hash: string;
-  category: string | null;
-  outcome: string;
-  severity: string;
+  category: 'authentication' | 'authorization' | 'dataAccess' | 'dataModification' | 'configuration' | 'payment' | 'compliance' | 'security' | null;
+  outcome: 'success' | 'failure' | 'denied';
+  severity: 'info' | 'warning' | 'critical';
   requestId: string | null;
   previousState: unknown | null;
   newState: unknown | null;
@@ -927,7 +913,7 @@ export type Basket = {
   updatedAt: Date;
   customerId: string | null;
   sessionId: string | null;
-  status: string;
+  status: 'active' | 'merged' | 'converted' | 'abandoned' | 'completed';
   currencyCode: string;
   itemsCount: number;
   subTotalCents: number;
@@ -961,7 +947,7 @@ export type BasketAnalytics = {
   timeToLastAddItem: number | null;
   itemsBrowsed: number | null;
   addToCartRate: string | null;
-  conversionOutcome: string | null;
+  conversionOutcome: 'purchased' | 'abandoned' | 'savedForLater' | 'expired' | null;
 };
 
 export type BasketDiscount = {
@@ -969,12 +955,12 @@ export type BasketDiscount = {
   createdAt: Date;
   updatedAt: Date;
   basketId: string;
-  type: string;
+  type: 'coupon' | 'promotion' | 'automatic' | 'loyalty' | 'referral' | 'system';
   code: string | null;
   description: string;
   value: string;
   isPercentage: boolean;
-  targetType: string;
+  targetType: 'cart' | 'item' | 'shipping';
   targetId: string | null;
   priority: number;
 };
@@ -984,7 +970,7 @@ export type BasketHistory = {
   createdAt: Date;
   updatedAt: Date;
   basketId: string;
-  eventType: string;
+  eventType: 'created' | 'itemAdded' | 'itemRemoved' | 'itemUpdated' | 'merged' | 'discountApplied' | 'discountRemoved' | 'cleared' | 'abandoned' | 'converted' | 'expired' | 'restored';
   entityId: string | null;
   data: unknown;
   userId: string | null;
@@ -1021,9 +1007,9 @@ export type BasketMerge = {
   updatedAt: Date;
   targetBasketId: string;
   sourceBasketId: string;
-  mergeType: string;
+  mergeType: 'login' | 'manual' | 'system';
   itemsMerged: number;
-  conflictStrategy: string;
+  conflictStrategy: 'keepBoth' | 'useSource' | 'useTarget' | 'highestQuantity';
   mergedBy: string | null;
 };
 
@@ -1034,8 +1020,8 @@ export type CheckoutSession = {
   customerId: string | null;
   email: string;
   phoneNumber: string | null;
-  status: string;
-  step: string;
+  status: 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
+  step: 'cart' | 'contact' | 'shipping' | 'billing' | 'payment' | 'review';
   shippingAddressId: string | null;
   billingAddressId: string | null;
   sameBillingAsShipping: boolean;
@@ -1163,7 +1149,7 @@ export type ContentMediaFolder = {
 export type ContentMediaUsage = {
   contentMediaUsageId: string;
   mediaId: string;
-  entityType: string;
+  entityType: 'contentPage' | 'contentBlock' | 'product' | 'category' | 'organization' | 'blog';
   entityId: string;
   field: string | null;
   sortOrder: number | null;
@@ -1188,7 +1174,7 @@ export type ContentNavigationItem = {
   navigationId: string;
   parentId: string | null;
   title: string;
-  type: string;
+  type: 'url' | 'page' | 'category' | 'product' | 'blog';
   url: string | null;
   contentPageId: string | null;
   targetId: string | null;
@@ -1210,8 +1196,8 @@ export type ContentPage = {
   slug: string;
   contentTypeId: string;
   templateId: string | null;
-  status: string;
-  visibility: string;
+  status: 'draft' | 'published' | 'scheduled' | 'archived';
+  visibility: 'public' | 'private' | 'passwordProtected';
   accessPassword: string | null;
   summary: string | null;
   featuredImage: string | null;
@@ -1278,7 +1264,7 @@ export type ContentRedirect = {
   contentRedirectId: string;
   sourceUrl: string;
   targetUrl: string;
-  statusCode: string;
+  statusCode: '301' | '302' | '303' | '307' | '308';
   isRegex: boolean;
   isActive: boolean;
   hits: number;
@@ -1352,7 +1338,7 @@ export type Currency = {
   decimalPlaces: number;
   decimalSeparator: string;
   thousandsSeparator: string;
-  symbolPosition: string;
+  symbolPosition: 'before' | 'after';
   isActive: boolean;
   isDefault: boolean;
 };
@@ -1444,7 +1430,7 @@ export type CustomerAddress = {
   isDefault: boolean;
   isDefaultBilling: boolean;
   isDefaultShipping: boolean;
-  addressType: string;
+  addressType: 'billing' | 'shipping' | 'both';
   isVerified: boolean;
   verifiedAt: Date | null;
   verificationData: unknown | null;
@@ -1490,20 +1476,6 @@ export type CustomerGroupMembership = {
   deletedAt: Date | null;
 };
 
-export type CustomerLoyaltyTransaction = {
-  customerLoyaltyTransactionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  orderId: string | null;
-  type: string;
-  points: number;
-  balance: number;
-  description: string;
-  source: string;
-  status: string;
-  expiresAt: Date | null;
-};
-
 export type CustomerPasswordReset = {
   customerPasswordResetId: string;
   createdAt: Date;
@@ -1521,7 +1493,7 @@ export type CustomerPrice = {
   priceListId: string;
   productId: string;
   productVariantId: string | null;
-  adjustmentType: string;
+  adjustmentType: 'percentage' | 'fixed';
   adjustmentValue: string;
   priority: number | null;
 };
@@ -1587,8 +1559,8 @@ export type CustomerTaxExemption = {
   updatedAt: Date;
   customerId: string;
   taxZoneId: string | null;
-  type: string;
-  status: string;
+  type: 'business' | 'individual' | 'resale' | 'diplomatic' | 'nonprofit' | 'vatReverseCharge' | 'agricultural' | 'manufacturing' | 'government' | 'educational' | 'medical' | 'export';
+  status: 'pending' | 'approved' | 'rejected';
   name: string;
   exemptionNumber: string;
   businessName: string | null;
@@ -1669,7 +1641,7 @@ export type DistributionWarehouseBin = {
   distributionWarehouseId: string;
   locationCode: string;
   isActive: boolean;
-  binType: string;
+  binType: 'storage' | 'picking' | 'receiving' | 'packing' | 'shipping' | 'returns' | 'damaged' | 'inspection';
   height: string | null;
   width: string | null;
   depth: string | null;
@@ -1689,7 +1661,7 @@ export type DistributionWarehouseZone = {
   name: string;
   code: string;
   description: string | null;
-  zoneType: string;
+  zoneType: 'storage' | 'picking' | 'receiving' | 'packing' | 'shipping' | 'returns' | 'cold_storage' | 'hazardous' | 'secure';
   isActive: boolean;
   sortOrder: number | null;
   metadata: unknown | null;
@@ -1855,21 +1827,6 @@ export type FulfillmentLocation = {
   updatedAt: Date | null;
 };
 
-export type FulfillmentNetworkRule = {
-  fulfillmentNetworkRuleId: string;
-  organizationId: string;
-  storeId: string | null;
-  channelId: string | null;
-  name: string;
-  priority: number | null;
-  ruleType: string;
-  conditions: Record<string, unknown> | null;
-  actions: Record<string, unknown> | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
 export type FulfillmentPartner = {
   fulfillmentPartnerId: string;
   name: string;
@@ -1879,18 +1836,6 @@ export type FulfillmentPartner = {
   address: unknown | null;
   contactEmail: string | null;
   contactPhone: string | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type FulfillmentRule = {
-  fulfillmentRuleId: string;
-  name: string;
-  type: string;
-  conditions: unknown;
-  actions: unknown;
-  priority: number | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -1924,8 +1869,8 @@ export type GdprDataRequest = {
   createdAt: Date;
   updatedAt: Date;
   customerId: string;
-  requestType: string;
-  status: string;
+  requestType: 'export' | 'deletion' | 'rectification' | 'restriction' | 'access' | 'objection';
+  status: 'pending' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'failed';
   reason: string | null;
   requestedData: unknown | null;
   downloadUrl: string | null;
@@ -2104,7 +2049,7 @@ export type ImportError = {
   importJobId: string;
   entityType: string;
   sourceId: string | null;
-  severity: string;
+  severity: 'error' | 'warning' | 'info';
   message: string;
   stackTrace: string | null;
   rawData: unknown | null;
@@ -2118,7 +2063,7 @@ export type ImportJob = {
   organizationId: string;
   jobType: string;
   source: string;
-  status: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'paused';
   sourceStoreUrl: string | null;
   sourceApiKey: string | null;
   sourceConfig: unknown | null;
@@ -2221,12 +2166,12 @@ export type InventoryAllocationRule = {
   updatedAt: Date;
   name: string;
   description: string | null;
-  scope: string;
+  scope: 'global' | 'pool' | 'product' | 'category';
   poolId: string | null;
   categoryId: string | null;
   productId: string | null;
-  allocationStrategy: string;
-  reservationPolicy: string;
+  allocationStrategy: 'fifo' | 'lifo' | 'nearest' | 'even_split' | 'priority';
+  reservationPolicy: 'immediate' | 'deferred';
   lowStockThreshold: number | null;
   oversellBuffer: number | null;
   allowBackorder: boolean;
@@ -2254,9 +2199,9 @@ export type InventoryLevel = {
   minStockLevel: number | null;
   maxStockLevel: number | null;
   reorderQuantity: number | null;
-  reorderStatus: string | null;
+  reorderStatus: 'none' | 'pending' | 'ordered' | 'received' | null;
   reorderDate: Date | null;
-  stockStatus: string;
+  stockStatus: 'inStock' | 'outOfStock' | 'lowStock' | 'backOrder' | 'preOrder';
   binLocation: string | null;
   lowStockNotificationSent: boolean;
   metricWeight: string | null;
@@ -2289,7 +2234,7 @@ export type InventoryLocation = {
   serialNumber: string | null;
   expiryDate: Date | null;
   receivedDate: Date | null;
-  status: string;
+  status: 'available' | 'reserved' | 'damaged' | 'quarantine' | 'expired' | 'pending';
   lastCountDate: Date | null;
 };
 
@@ -2369,7 +2314,7 @@ export type InventoryStockReservation = {
   productVariantId: string | null;
   distributionWarehouseId: string;
   quantity: number;
-  reservationType: string;
+  reservationType: 'cart' | 'order' | 'pending' | 'custom';
   referenceId: string | null;
   referenceType: string | null;
   expiresAt: Date | null;
@@ -2395,7 +2340,7 @@ export type InventoryTransaction = {
   serialNumber: string | null;
   expiryDate: Date | null;
   notes: string | null;
-  status: string;
+  status: 'pending' | 'completed' | 'cancelled' | 'rejected';
   reason: string | null;
 };
 
@@ -2407,7 +2352,7 @@ export type InventoryTransactionType = {
   name: string;
   description: string | null;
   affectsAvailable: boolean;
-  direction: string;
+  direction: 'in' | 'out' | 'transfer' | 'adjust';
   requiresApproval: boolean;
   requiresDocumentation: boolean;
 };
@@ -2446,7 +2391,7 @@ export type Locale = {
   countryCode: string | null;
   isActive: boolean;
   isDefault: boolean;
-  textDirection: string;
+  textDirection: 'ltr' | 'rtl';
   dateFormat: string;
   timeFormat: string;
   timeZone: string;
@@ -2546,7 +2491,7 @@ export type LoyaltyTransaction = {
   updatedAt: Date;
   customerId: string;
   orderId: string | null;
-  action: string;
+  action: 'credit' | 'debit';
   points: number;
   description: string | null;
   referenceId: string | null;
@@ -2643,8 +2588,8 @@ export type MembershipBenefit = {
   shortDescription: string | null;
   isActive: boolean;
   priority: number | null;
-  benefitType: string;
-  valueType: string;
+  benefitType: 'discount' | 'freeShipping' | 'contentAccess' | 'prioritySupport' | 'rewardPoints' | 'gift' | 'earlyAccess' | 'custom';
+  valueType: 'fixed' | 'percentage' | 'boolean' | 'text' | 'json';
   value: unknown | null;
   icon: string | null;
   rules: unknown | null;
@@ -2662,8 +2607,8 @@ export type MembershipPayment = {
   amountCents: number;
   currencyCode: string;
   paymentDate: Date;
-  status: string;
-  paymentType: string;
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded';
+  paymentType: 'subscription' | 'setupFee' | 'manual' | 'refund';
   paymentMethod: string | null;
   transactionId: string | null;
   billingPeriodStart: Date | null;
@@ -2687,7 +2632,7 @@ export type MembershipPlan = {
   salePriceCents: number | null;
   setupFeeCents: number | null;
   currencyCode: string;
-  billingCycle: string;
+  billingCycle: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'annual' | 'lifetime';
   billingPeriod: number | null;
   maxMembers: number | null;
   autoRenew: boolean;
@@ -2724,7 +2669,7 @@ export type MembershipSubscription = {
   updatedAt: Date;
   customerId: string;
   membershipPlanId: string;
-  status: string;
+  status: 'active' | 'cancelled' | 'expired' | 'paused' | 'trial' | 'pending' | 'pastDue';
   membershipNumber: string | null;
   startDate: Date;
   endDate: Date | null;
@@ -2746,11 +2691,11 @@ export type Notification = {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  userType: string;
+  userType: 'customer' | 'organization' | 'admin';
   type: string;
   title: string;
   content: string;
-  channel: string;
+  channel: 'email' | 'sms' | 'push' | 'in_app';
   isRead: boolean;
   readAt: Date | null;
   sentAt: Date | null;
@@ -2759,7 +2704,7 @@ export type Notification = {
   actionUrl: string | null;
   actionLabel: string | null;
   imageUrl: string | null;
-  priority: string | null;
+  priority: 'low' | 'normal' | 'high' | 'urgent' | null;
   category: string | null;
   data: unknown | null;
   metadata: unknown | null;
@@ -2772,10 +2717,10 @@ export type NotificationBatch = {
   updatedAt: Date;
   name: string;
   description: string | null;
-  type: string;
+  type: 'orderStatus' | 'promotion' | 'accountAlert';
   templateId: string | null;
-  channel: string;
-  status: string;
+  channel: 'email' | 'sms' | 'inApp' | 'push';
+  status: 'draft' | 'scheduled' | 'inProgress' | 'completed' | 'cancelled' | 'failed';
   scheduledAt: Date | null;
   startedAt: Date | null;
   completedAt: Date | null;
@@ -2790,27 +2735,16 @@ export type NotificationBatch = {
   createdBy: string | null;
 };
 
-export type NotificationCategory = {
-  notificationCategoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  code: string;
-  name: string;
-  description: string | null;
-  defaultPriority: string;
-  isTransactional: boolean;
-};
-
 export type NotificationDeliveryLog = {
   notificationDeliveryLogId: string;
   createdAt: Date;
   notificationId: string | null;
   userId: string;
-  userType: string;
-  type: string;
-  channel: string;
+  userType: 'customer' | 'organization' | 'admin';
+  type: 'orderStatus' | 'promotion' | 'accountAlert';
+  channel: 'email' | 'sms' | 'in_app' | 'push';
   recipient: string;
-  status: string;
+  status: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
   statusDetails: string | null;
   sentAt: Date | null;
   deliveredAt: Date | null;
@@ -2827,9 +2761,9 @@ export type NotificationDevice = {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  userType: string;
+  userType: 'customer' | 'organization' | 'admin';
   deviceToken: string;
-  deviceType: string;
+  deviceType: 'ios' | 'android' | 'web' | 'desktop' | 'other';
   deviceName: string | null;
   deviceModel: string | null;
   appVersion: string | null;
@@ -2845,7 +2779,7 @@ export type NotificationEventLog = {
   deliveryLogId: string | null;
   userId: string | null;
   userType: string | null;
-  eventType: string;
+  eventType: 'open' | 'click' | 'bounce' | 'complaint' | 'unsubscribe' | 'block' | 'dropped' | 'impression' | 'deferred';
   eventData: unknown | null;
   userAgent: string | null;
   ipAddress: string | null;
@@ -2856,7 +2790,7 @@ export type NotificationPreference = {
   notificationPreferenceId: string;
   updatedAt: Date;
   userId: string;
-  userType: string;
+  userType: 'customer' | 'organization' | 'admin';
   type: string;
   channelPreferences: Record<string, unknown>;
   isEnabled: boolean;
@@ -2873,7 +2807,7 @@ export type NotificationTemplate = {
   description: string | null;
   type: string;
   supportedChannels: unknown;
-  defaultChannel: string;
+  defaultChannel: 'email' | 'sms' | 'push' | 'in_app';
   subject: string | null;
   htmlTemplate: string | null;
   textTemplate: string | null;
@@ -2928,7 +2862,7 @@ export type NotificationWebhook = {
   url: string;
   secret: string | null;
   events: unknown;
-  format: string;
+  format: 'json' | 'form' | 'xml';
   headers: unknown | null;
   isActive: boolean;
   failureCount: number | null;
@@ -2948,9 +2882,9 @@ export type Order = {
   channelId: string | null;
   createdByUserId: string | null;
   orderSource: string;
-  status: string;
-  paymentStatus: string;
-  fulfillmentStatus: string;
+  status: 'pending' | 'processing' | 'onHold' | 'completed' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'failed' | 'paymentPending' | 'paymentFailed' | 'backordered';
+  paymentStatus: 'pending' | 'authorized' | 'paid' | 'partiallyPaid' | 'partiallyRefunded' | 'refunded' | 'failed' | 'voided' | 'requiresAction';
+  fulfillmentStatus: 'unfulfilled' | 'partiallyFulfilled' | 'fulfilled' | 'partiallyShipped' | 'shipped' | 'delivered' | 'restocked' | 'failed' | 'canceled' | 'cancelled' | 'pendingPickup' | 'pickedUp' | 'returned';
   currencyCode: string;
   subtotalCents: number;
   discountTotalCents: number;
@@ -2997,7 +2931,7 @@ export type OrderAddress = {
   updatedAt: Date;
   orderId: string;
   customerAddressId: string | null;
-  addressType: string;
+  addressType: 'billing' | 'shipping';
   firstName: string;
   lastName: string;
   company: string | null;
@@ -3023,7 +2957,7 @@ export type OrderDiscount = {
   code: string | null;
   name: string;
   description: string | null;
-  type: string;
+  type: 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyXGetY' | 'giftCard';
   value: string;
   discountAmountCents: number;
 };
@@ -3034,8 +2968,8 @@ export type OrderFulfillment = {
   updatedAt: Date;
   orderId: string;
   fulfillmentNumber: string;
-  type: string;
-  status: string;
+  type: 'shipping' | 'pickup' | 'digital' | 'service';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'failed' | 'cancelled';
   trackingNumber: string | null;
   trackingUrl: string | null;
   carrierCode: string | null;
@@ -3058,7 +2992,7 @@ export type OrderFulfillmentHistory = {
   createdAt: Date;
   updatedAt: Date;
   orderId: string;
-  fulfillmentStatus: string;
+  fulfillmentStatus: 'unfulfilled' | 'partiallyFulfilled' | 'fulfilled' | 'partiallyShipped' | 'shipped' | 'delivered' | 'restocked' | 'failed' | 'cancelled' | 'pendingPickup' | 'pickedUp' | 'returned';
   notes: string | null;
 };
 
@@ -3099,7 +3033,7 @@ export type OrderItem = {
   taxExempt: boolean;
   options: unknown | null;
   attributes: unknown | null;
-  fulfillmentStatus: string;
+  fulfillmentStatus: 'unfulfilled' | 'partiallyFulfilled' | 'fulfilled' | 'shipped' | 'delivered' | 'cancelled' | 'returned' | 'pendingPickup' | 'pickedUp';
   giftWrapped: boolean;
   giftMessage: string | null;
   weight: string | null;
@@ -3128,11 +3062,11 @@ export type OrderPayment = {
   orderPaymentId: string;
   orderId: string;
   paymentMethodId: string | null;
-  type: string;
+  type: 'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer' | 'crypto' | 'giftCard' | 'storeCredit';
   provider: string;
   amountCents: number;
   currencyCode: string;
-  status: string;
+  status: 'pending' | 'authorized' | 'captured' | 'refunded' | 'partiallyRefunded' | 'voided' | 'failed';
   transactionId: string | null;
   authorizationCode: string | null;
   errorCode: string | null;
@@ -3151,7 +3085,7 @@ export type OrderPaymentHistory = {
   createdAt: Date;
   updatedAt: Date;
   orderId: string;
-  paymentStatus: string;
+  paymentStatus: 'pending' | 'authorized' | 'paid' | 'partiallyPaid' | 'partiallyRefunded' | 'refunded' | 'failed' | 'voided' | 'requiresAction';
   transactionId: string | null;
   notes: string | null;
 };
@@ -3163,7 +3097,7 @@ export type OrderPaymentRefund = {
   reason: string | null;
   notes: string | null;
   transactionId: string | null;
-  status: string;
+  status: 'pending' | 'completed' | 'failed';
   gatewayResponse: unknown | null;
   refundedBy: string | null;
   createdAt: Date;
@@ -3177,8 +3111,8 @@ export type OrderReturn = {
   orderId: string;
   returnNumber: string;
   customerId: string | null;
-  status: string;
-  returnType: string;
+  status: 'requested' | 'approved' | 'denied' | 'inTransit' | 'received' | 'inspected' | 'completed' | 'cancelled';
+  returnType: 'refund' | 'exchange' | 'storeCredit' | 'repair';
   requestedAt: Date;
   approvedAt: Date | null;
   receivedAt: Date | null;
@@ -3188,7 +3122,7 @@ export type OrderReturn = {
   returnShippingPaid: boolean;
   returnShippingAmountCents: number | null;
   returnShippingLabel: string | null;
-  returnCarrier: string;
+  returnCarrier: 'ups' | 'fedex' | 'dhl' | 'usps' | 'custom';
   returnTrackingNumber: string | null;
   returnTrackingUrl: string | null;
   returnReason: string | null;
@@ -3205,9 +3139,9 @@ export type OrderReturnItem = {
   orderReturnId: string;
   orderItemId: string;
   quantity: number;
-  returnReason: string;
+  returnReason: 'productNotAsDescribed' | 'wrongProduct' | 'damaged' | 'expired' | 'other';
   returnReasonDetail: string | null;
-  condition: string;
+  condition: 'new' | 'likeNew' | 'used' | 'damaged' | 'unsellable';
   restockItem: boolean;
   refundAmountCents: number | null;
   exchangeProductId: string | null;
@@ -3216,7 +3150,7 @@ export type OrderReturnItem = {
   inspectionNotes: string | null;
   createdAt: Date;
   warrantyClaimId: string | null;
-  warrantyStatus: string | null;
+  warrantyStatus: 'none' | 'claimed' | 'approved' | 'denied' | 'expired' | null;
   warrantyExpiresAt: Date | null;
 };
 
@@ -3240,7 +3174,7 @@ export type OrderShippingRate = {
   createdAt: Date;
   updatedAt: Date;
   orderId: string;
-  carrier: string;
+  carrier: 'ups' | 'usps' | 'fedex' | 'dhl' | 'custom';
   serviceLevel: string;
   serviceName: string;
   rateCents: number;
@@ -3258,8 +3192,8 @@ export type OrderStatusHistory = {
   createdAt: Date;
   updatedAt: Date;
   orderId: string;
-  status: string;
-  previousStatus: string;
+  status: 'pending' | 'processing' | 'onHold' | 'completed' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'failed' | 'paymentPending' | 'paymentFailed' | 'backordered';
+  previousStatus: 'pending' | 'processing' | 'onHold' | 'completed' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'failed' | 'paymentPending' | 'paymentFailed' | 'backordered';
   notes: string | null;
   createdBy: string | null;
 };
@@ -3293,12 +3227,12 @@ export type Organization = {
   website: string | null;
   logo: string | null;
   bannerImage: string | null;
-  status: string;
-  verificationStatus: string;
+  status: 'pending' | 'active' | 'suspended' | 'inactive' | 'rejected';
+  verificationStatus: 'unverified' | 'inProgress' | 'verified' | 'rejected';
   verifiedAt: Date | null;
   verifiedBy: string | null;
   verificationNotes: string | null;
-  businessType: string | null;
+  businessType: 'individual' | 'soleProprietorship' | 'partnership' | 'llc' | 'corporation' | 'nonProfit' | null;
   yearEstablished: number | null;
   employeeCount: number | null;
   taxIdNumber: string | null;
@@ -3320,10 +3254,10 @@ export type Organization = {
   metaDescription: string | null;
   metaKeywords: string | null;
   commissionRate: string | null;
-  commissionType: string | null;
+  commissionType: 'percentage' | 'flat' | 'tiered' | null;
   commissionTiers: unknown | null;
   minimumPayoutAmountCents: number | null;
-  payoutSchedule: string | null;
+  payoutSchedule: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | null;
   autoApproveProducts: boolean;
   autoApproveReviews: boolean;
   sellerRating: string | null;
@@ -3358,7 +3292,7 @@ export type OrganizationAddress = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  addressType: string;
+  addressType: 'billing' | 'shipping' | 'business' | 'warehouse' | 'returns';
   isDefault: boolean;
   firstName: string | null;
   lastName: string | null;
@@ -3393,7 +3327,7 @@ export type OrganizationPaymentInfo = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  paymentType: string;
+  paymentType: 'bankAccount' | 'paypal' | 'stripe' | 'venmo' | 'other';
   isDefault: boolean;
   accountHolderName: string | null;
   bankName: string | null;
@@ -3454,7 +3388,7 @@ export type PaymentDispute = {
   amountCents: number;
   currencyCode: string;
   reason: string;
-  status: string;
+  status: 'pending' | 'underReview' | 'won' | 'lost' | 'withdrawn';
   evidenceDetails: unknown | null;
   evidenceSubmittedAt: Date | null;
   evidenceDueBy: Date | null;
@@ -3467,7 +3401,7 @@ export type PaymentFee = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  type: string;
+  type: 'transaction' | 'subscription' | 'dispute' | 'refund' | 'chargeback' | 'payout' | 'platform' | 'other';
   amountCents: number;
   currencyCode: string;
   description: string | null;
@@ -3491,7 +3425,7 @@ export type PaymentGateway = {
   publicKey: string | null;
   webhookSecret: string | null;
   apiEndpoint: string | null;
-  supportedPaymentMethods: string;
+  supportedPaymentMethods: 'creditCard' | 'debitCard' | 'giftCard' | 'storeCredit' | 'other';
   supportedCurrencies: string[] | null;
   processingFees: unknown | null;
   checkoutSettings: unknown | null;
@@ -3504,7 +3438,7 @@ export type PaymentMethod = {
   createdAt: Date;
   updatedAt: Date;
   customerId: string;
-  type: string;
+  type: 'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer';
   provider: string;
   token: string | null;
   gatewayCustomerId: string | null;
@@ -3523,7 +3457,7 @@ export type PaymentMethodConfig = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  paymentMethod: string;
+  paymentMethod: 'creditCard' | 'debitCard' | 'giftCard' | 'storeCredit' | 'other';
   isEnabled: boolean;
   displayName: string | null;
   description: string | null;
@@ -3567,11 +3501,11 @@ export type PaymentReport = {
   updatedAt: Date;
   organizationId: string;
   name: string;
-  type: string;
-  format: string;
+  type: 'transaction' | 'payout' | 'fee' | 'settlement' | 'summary' | 'tax' | 'custom';
+  format: 'csv' | 'pdf' | 'json' | 'xlsx';
   parameters: unknown | null;
   dateRange: unknown;
-  status: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   fileUrl: string | null;
   size: number | null;
   errorMessage: string | null;
@@ -3622,7 +3556,7 @@ export type PaymentTransaction = {
   updatedAt: Date;
   orderPaymentId: string;
   orderId: string;
-  type: string;
+  type: 'authorization' | 'capture' | 'sale' | 'refund' | 'void' | 'verification';
   amountCents: number;
   currencyCode: string;
   status: string;
@@ -3650,18 +3584,19 @@ export type PaymentWebhook = {
   paymentWebhookId: string;
   createdAt: Date;
   updatedAt: Date;
-  organizationId: string;
+  organizationId: string | null;
   gatewayId: string | null;
-  provider: string;
+  provider: 'stripe' | 'square' | 'paypal' | 'manual' | 'other';
   eventType: string;
   payload: unknown;
   headers: unknown | null;
   ipAddress: string | null;
   processedAt: Date | null;
-  status: string;
+  status: 'pending' | 'processed' | 'failed' | 'ignored';
   error: string | null;
   relatedEntityType: string | null;
   relatedEntityId: string | null;
+  externalId: string | null;
 };
 
 export type PlatformEventOutbox = {
@@ -3672,7 +3607,7 @@ export type PlatformEventOutbox = {
   payload: unknown;
   correlationId: string | null;
   source: string | null;
-  status: string;
+  status: 'pending' | 'processing' | 'processed' | 'dead_letter';
   attempts: number;
   maxAttempts: number;
   nextRetryAt: Date;
@@ -3702,8 +3637,8 @@ export type PricingRule = {
   updatedAt: Date;
   name: string;
   description: string | null;
-  ruleType: string;
-  scope: string;
+  ruleType: 'percentage' | 'fixed';
+  scope: 'global' | 'product' | 'category' | 'customer' | 'customer_group';
   productIds: string[] | null;
   categoryIds: string[] | null;
   customerIds: string[] | null;
@@ -3723,7 +3658,7 @@ export type PricingRule = {
 export type PricingRuleAdjustment = {
   ruleAdjustmentId: string;
   pricingRuleId: string;
-  type: string;
+  type: 'percentage' | 'fixed';
   value: string;
   createdAt: Date;
   updatedAt: Date;
@@ -3746,9 +3681,9 @@ export type Product = {
   name: string;
   slug: string;
   description: string | null;
-  type: string;
-  status: string;
-  visibility: string;
+  type: 'simple' | 'configurable' | 'grouped' | 'virtual' | 'downloadable' | 'bundle' | 'subscription';
+  status: 'draft' | 'active' | 'inactive' | 'archived' | 'discontinued';
+  visibility: 'visible' | 'not_visible' | 'catalog' | 'search';
   taxClass: string | null;
   isTaxable: boolean;
   isInventoryManaged: boolean;
@@ -3810,8 +3745,8 @@ export type ProductAttribute = {
   code: string;
   description: string | null;
   groupId: string | null;
-  type: string;
-  inputType: string | null;
+  type: 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'datetime' | 'time' | 'file' | 'image' | 'video' | 'document';
+  inputType: 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'date' | 'datetime' | 'time' | 'file' | 'image' | 'video' | 'document' | null;
   isRequired: boolean;
   isUnique: boolean;
   isSystem: boolean;
@@ -3942,7 +3877,7 @@ export type ProductBrand = {
   logoUrl: string | null;
   website: string | null;
   countryOfOrigin: string | null;
-  status: string;
+  status: 'active' | 'inactive' | 'archived';
   metadata: unknown | null;
   externalId: string | null;
 };
@@ -4124,39 +4059,13 @@ export type ProductImage = {
   isVisible: boolean;
 };
 
-export type ProductList = {
-  productListId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  name: string;
-  type: string;
-  isDefault: boolean;
-  isPublic: boolean;
-  description: string | null;
-  shareUrl: string | null;
-};
-
-export type ProductListItem = {
-  productListItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  listId: string;
-  productId: string;
-  productVariantId: string | null;
-  addedAt: Date;
-  quantity: number;
-  notes: string | null;
-  priority: string | null;
-};
-
 export type ProductMedia = {
   productMediaId: string;
   createdAt: Date;
   updatedAt: Date;
   productId: string;
   productVariantId: string | null;
-  type: string;
+  type: 'image' | 'video' | 'document' | '3d_model' | 'audio';
   url: string;
   filename: string | null;
   filesize: number | null;
@@ -4191,7 +4100,7 @@ export type ProductQa = {
   question: string;
   askerName: string | null;
   askerEmail: string | null;
-  status: string;
+  status: 'pending' | 'answered' | 'closed';
   isAnonymous: boolean;
   helpfulCount: number;
   viewCount: number;
@@ -4208,20 +4117,7 @@ export type ProductQaAnswer = {
   isVerified: boolean;
   helpfulCount: number;
   unhelpfulCount: number;
-  status: string;
-};
-
-export type ProductQaVote = {
-  productQaVoteId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  questionId: string | null;
-  answerId: string | null;
-  customerId: string | null;
-  sessionId: string | null;
-  isHelpful: boolean;
-  ipAddress: string | null;
-  userAgent: string | null;
+  status: 'pending' | 'answered' | 'unanswered';
 };
 
 export type ProductRelated = {
@@ -4230,7 +4126,7 @@ export type ProductRelated = {
   updatedAt: Date;
   productId: string;
   relatedProductId: string;
-  type: string;
+  type: 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
   position: number;
   isAutomated: boolean;
 };
@@ -4246,7 +4142,7 @@ export type ProductReview = {
   rating: number;
   title: string | null;
   content: string | null;
-  status: string;
+  status: 'pending' | 'approved' | 'rejected';
   isVerifiedPurchase: boolean;
   isHighlighted: boolean;
   helpfulCount: number;
@@ -4263,12 +4159,12 @@ export type ProductReviewMedia = {
   createdAt: Date;
   updatedAt: Date;
   reviewId: string;
-  type: string;
+  type: 'image' | 'video' | 'document';
   url: string;
   filename: string | null;
   filesize: number | null;
   mimeType: string | null;
-  status: string;
+  status: 'pending' | 'approved' | 'rejected';
 };
 
 export type ProductReviewVote = {
@@ -4379,7 +4275,7 @@ export type ProductVariant = {
   productId: string;
   sku: string;
   name: string | null;
-  status: string;
+  status: 'active' | 'inactive' | 'archived' | 'discontinued';
   isDefault: boolean;
   weight: string | null;
   length: string | null;
@@ -4397,14 +4293,14 @@ export type Promotion = {
   updatedAt: Date;
   name: string;
   description: string | null;
-  status: string;
-  scope: string;
+  status: 'draft' | 'scheduled' | 'active' | 'paused' | 'expired' | 'cancelled' | 'disabled' | 'pendingApproval';
+  scope: 'cart' | 'product' | 'category' | 'organization' | 'shipping' | 'global';
   priority: number;
   startDate: Date;
   endDate: Date | null;
   isActive: boolean;
   isExclusive: boolean;
-  stackability: string;
+  stackability: 'none' | 'stackable' | 'exclusive';
   maxUsage: number | null;
   usageCount: number;
   maxUsagePerCustomer: number | null;
@@ -4424,7 +4320,7 @@ export type PromotionAction = {
   promotionId: string;
   name: string | null;
   description: string | null;
-  actionType: string;
+  actionType: 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
   value: unknown;
   targetType: string | null;
   targetIds: unknown | null;
@@ -4445,7 +4341,7 @@ export type PromotionCart = {
   isCustomerInitiated: boolean;
   appliedBy: string | null;
   appliedAt: Date;
-  status: string;
+  status: 'active' | 'removed' | 'expired' | 'invalid';
   validUntil: Date | null;
 };
 
@@ -4472,7 +4368,7 @@ export type PromotionCoupon = {
   promotionId: string | null;
   name: string;
   description: string | null;
-  type: string;
+  type: 'percentage' | 'fixedAmount' | 'freeShipping' | 'buyXGetY' | 'firstOrder' | 'giftCard';
   discountAmount: string | null;
   currencyCode: string | null;
   minOrderAmountCents: number | null;
@@ -4484,7 +4380,7 @@ export type PromotionCoupon = {
   maxUsage: number | null;
   usageCount: number;
   maxUsagePerCustomer: number | null;
-  generationMethod: string;
+  generationMethod: 'manual' | 'automatic' | 'pattern' | 'imported';
   isReferral: boolean;
   referrerId: string | null;
   isPublic: boolean;
@@ -4560,14 +4456,14 @@ export type PromotionProductDiscount = {
   promotionId: string | null;
   name: string;
   description: string | null;
-  discountType: string;
+  discountType: 'percentage' | 'fixed_amount';
   discountValue: string;
   currencyCode: string | null;
   startDate: Date;
   endDate: Date | null;
   isActive: boolean;
   priority: number;
-  appliesTo: string;
+  appliesTo: 'specific_products' | 'all_products';
   minimumQuantity: number | null;
   maximumQuantity: number | null;
   minimumAmountCents: number | null;
@@ -4598,7 +4494,7 @@ export type PromotionProductDiscountItem = {
   productId: string | null;
   productVariantId: string | null;
   productCategoryId: string;
-  itemType: string;
+  itemType: 'product' | 'variant' | 'category';
 };
 
 export type PromotionRule = {
@@ -4608,7 +4504,7 @@ export type PromotionRule = {
   promotionId: string;
   name: string | null;
   description: string | null;
-  condition: string;
+  condition: 'cartTotal' | 'itemQuantity' | 'productCategory' | 'customerGroup' | 'firstOrder' | 'dateRange' | 'timeOfDay' | 'dayOfWeek' | 'shippingMethod' | 'paymentMethod';
   operator: string;
   value: unknown;
   isActive: boolean;
@@ -4750,7 +4646,7 @@ export type RecommendationTenantStat = {
 export type ReportingReportExecution = {
   reportExecutionId: string;
   reportScheduleId: string;
-  status: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
   startedAt: Date;
   completedAt: Date | null;
   fileUrl: string | null;
@@ -4764,10 +4660,10 @@ export type ReportingReportSchedule = {
   organizationId: string | null;
   name: string;
   reportType: string;
-  type: string;
+  type: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
   parameters: Record<string, unknown>;
   recipients: unknown[];
-  format: string;
+  format: 'pdf' | 'excel' | 'csv' | 'html';
   isActive: boolean;
   lastRunAt: Date | null;
   nextRunAt: Date | null;
@@ -4781,7 +4677,7 @@ export type ReturnRule = {
   updatedAt: Date;
   name: string;
   description: string | null;
-  scope: string;
+  scope: 'global' | 'category' | 'product';
   categoryId: string | null;
   productId: string | null;
   returnWindowDays: number | null;
@@ -4792,7 +4688,7 @@ export type ReturnRule = {
   autoApprove: boolean;
   requiresManualReview: boolean;
   requiresInspection: boolean;
-  refundMethod: string;
+  refundMethod: 'original' | 'storeCredit' | 'either';
   conditions: unknown | null;
   priority: number;
   isActive: boolean;
@@ -4948,7 +4844,7 @@ export type ShippingMethod = {
   isActive: boolean;
   isDefault: boolean;
   serviceCode: string | null;
-  domesticInternational: string;
+  domesticInternational: 'domestic' | 'international' | 'both';
   estimatedDeliveryDays: unknown | null;
   handlingDays: number | null;
   priority: number | null;
@@ -4997,7 +4893,7 @@ export type ShippingRate = {
   name: string | null;
   description: string | null;
   isActive: boolean;
-  rateType: string;
+  rateType: 'flat' | 'weightBased' | 'priceBased' | 'itemBased' | 'dimensional' | 'calculated' | 'free';
   baseRateCents: number;
   perItemRateCents: number | null;
   freeThresholdCents: number | null;
@@ -5018,8 +4914,8 @@ export type ShippingSurcharge = {
   createdAt: Date;
   updatedAt: Date;
   shippingRateId: string;
-  type: string;
-  calculationType: string;
+  type: 'fuel' | 'remoteArea' | 'residential' | 'oversize' | 'signature' | 'insurance';
+  calculationType: 'flat' | 'percentage';
   value: string;
   conditions: unknown | null;
   isActive: boolean;
@@ -5033,7 +4929,7 @@ export type ShippingZone = {
   description: string | null;
   isActive: boolean;
   priority: number | null;
-  locationType: string;
+  locationType: 'country' | 'state' | 'zipcode' | 'region' | 'continent';
   locations: unknown;
   excludedLocations: unknown | null;
   createdBy: string | null;
@@ -5046,8 +4942,8 @@ export type Store = {
   name: string;
   slug: string;
   description: string | null;
-  storeType: string;
-  channel: string;
+  storeType: 'merchant_store' | 'organization_store';
+  channel: 'physical' | 'digital' | 'hybrid';
   organizationId: string | null;
   isHeadquarters: boolean;
   parentStoreId: string | null;
@@ -5090,7 +4986,7 @@ export type Store = {
 export type StoreCreditLedger = {
   storeCreditLedgerId: string;
   customerId: string;
-  entryType: string;
+  entryType: 'credit' | 'debit' | 'adjustment' | 'expiry';
   referenceType: string | null;
   referenceId: string | null;
   amountCents: number;
@@ -5128,8 +5024,8 @@ export type StoreCurrencySettings = {
   activeProviderCode: string | null;
   markupPercentage: string;
   roundPrecision: number;
-  roundingMethod: string;
-  priceDisplayFormat: string;
+  roundingMethod: 'up' | 'down' | 'ceiling' | 'floor' | 'half_up' | 'half_down' | 'half_even';
+  priceDisplayFormat: 'symbol' | 'code' | 'symbol_code' | 'name';
   updatedBy: string | null;
 };
 
@@ -5138,7 +5034,7 @@ export type StoreDispatch = {
   fromStoreId: string;
   toStoreId: string;
   dispatchNumber: string;
-  status: string;
+  status: 'draft' | 'pending_approval' | 'approved' | 'dispatched' | 'in_transit' | 'received' | 'cancelled';
   requestedBy: string | null;
   approvedBy: string | null;
   dispatchedBy: string | null;
@@ -5232,8 +5128,8 @@ export type StoredPaymentMethod = {
   updatedAt: Date;
   customerId: string;
   nickname: string | null;
-  paymentMethod: string;
-  provider: string;
+  paymentMethod: 'creditCard' | 'debitCard' | 'paypal' | 'applePay' | 'googlePay' | 'bankTransfer';
+  provider: 'stripe' | 'square' | 'braintree' | 'adyen' | 'cybersource' | 'authorizenet';
   token: string;
   lastFour: string | null;
   cardType: string | null;
@@ -5393,7 +5289,7 @@ export type Supplier = {
   phone: string | null;
   isActive: boolean;
   isApproved: boolean;
-  status: string;
+  status: 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted';
   rating: string | null;
   taxId: string | null;
   paymentTerms: string | null;
@@ -5419,7 +5315,7 @@ export type SupplierAddress = {
   state: string;
   postalCode: string;
   country: string;
-  addressType: string;
+  addressType: 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
   isDefault: boolean;
   contactName: string | null;
   contactEmail: string | null;
@@ -5438,7 +5334,7 @@ export type SupplierProduct = {
   sku: string;
   supplierSku: string | null;
   supplierProductName: string | null;
-  status: string;
+  status: 'active' | 'inactive' | 'discontinued' | 'pending';
   isPreferred: boolean;
   unitCostCents: number;
   currencyCode: string;
@@ -5458,9 +5354,9 @@ export type SupplierPurchaseOrder = {
   poNumber: string;
   supplierId: string;
   distributionWarehouseId: string;
-  status: string;
-  orderType: string;
-  priority: string;
+  status: 'draft' | 'pending' | 'approved' | 'sent' | 'confirmed' | 'partial' | 'completed' | 'cancelled';
+  orderType: 'standard' | 'restock' | 'backOrder' | 'special' | 'emergency';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
   orderDate: Date;
   expectedDeliveryDate: Date | null;
   deliveryDate: Date | null;
@@ -5502,7 +5398,7 @@ export type SupplierPurchaseOrderItem = {
   taxCents: number;
   discountCents: number;
   totalCents: number;
-  status: string;
+  status: 'pending' | 'partial' | 'received' | 'cancelled' | 'backOrdered';
   expectedDeliveryDate: Date | null;
   receivedAt: Date | null;
   notes: string | null;
@@ -5525,8 +5421,8 @@ export type SupplierReceivingItem = {
   lotNumber: string | null;
   serialNumbers: string[] | null;
   expiryDate: Date | null;
-  status: string;
-  acceptanceStatus: string | null;
+  status: 'received' | 'inspecting' | 'accepted' | 'rejected' | 'partial';
+  acceptanceStatus: 'pending' | 'accepted' | 'rejected' | 'partial' | null;
   inspectionNotes: string | null;
   discrepancyReason: string | null;
   processedAt: Date | null;
@@ -5541,7 +5437,7 @@ export type SupplierReceivingRecord = {
   supplierPurchaseOrderId: string | null;
   distributionWarehouseId: string;
   supplierId: string;
-  status: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
   receivedDate: Date;
   carrierName: string | null;
   trackingNumber: string | null;
@@ -5743,7 +5639,7 @@ export type SystemConfiguration = {
   configId: string;
   createdAt: Date;
   updatedAt: Date;
-  systemMode: string;
+  systemMode: 'marketplace' | 'multi_store' | 'single_store';
   isActive: boolean;
   features: unknown | null;
   organizationSettings: unknown | null;
@@ -5763,9 +5659,9 @@ export type TaxCalculation = {
   invoiceId: string | null;
   basketId: string | null;
   customerId: string | null;
-  calculationMethod: string;
-  status: string;
-  sourceType: string;
+  calculationMethod: 'unitBased' | 'itemBased';
+  status: 'pending' | 'completed' | 'failed';
+  sourceType: 'order' | 'invoice' | 'basket';
   sourceId: string | null;
   taxAddress: unknown | null;
   taxableAmountCents: number;
@@ -5791,7 +5687,7 @@ export type TaxCalculationApplied = {
   taxZoneName: string | null;
   taxCategoryId: string | null;
   taxCategoryName: string | null;
-  jurisdictionLevel: string;
+  jurisdictionLevel: 'country' | 'state' | 'county' | 'city' | 'district' | 'special';
   jurisdictionName: string;
   rate: string;
   isCompound: boolean;
@@ -5858,8 +5754,8 @@ export type TaxProviderLog = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  provider: string;
-  requestType: string;
+  provider: 'internal' | 'avalara' | 'taxjar' | 'external';
+  requestType: 'calculation' | 'verification' | 'filing' | 'refund' | 'adjustment' | 'validation';
   entityType: string;
   entityId: string | null;
   requestData: unknown | null;
@@ -5880,7 +5776,7 @@ export type TaxRate = {
   taxZoneId: string;
   name: string;
   rate: string;
-  type: string;
+  type: 'percentage' | 'fixed';
   priority: number;
   isCompound: boolean;
   includeInPrice: boolean;
@@ -5900,13 +5796,13 @@ export type TaxReport = {
   updatedAt: Date;
   organizationId: string;
   name: string;
-  reportType: string;
+  reportType: 'sales' | 'filing' | 'jurisdiction' | 'summary' | 'exemption' | 'audit';
   dateFrom: Date;
   dateTo: Date;
   taxJurisdictions: unknown | null;
   fileUrl: string | null;
-  fileFormat: string | null;
-  status: string;
+  fileFormat: 'csv' | 'xlsx' | 'pdf' | 'json' | null;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
   generatedBy: string | null;
   parameters: unknown | null;
   results: unknown | null;
@@ -5920,7 +5816,7 @@ export type TaxRule = {
   taxRateId: string;
   name: string | null;
   description: string | null;
-  conditionType: string;
+  conditionType: 'product' | 'category' | 'brand';
   conditionValue: unknown;
   sortOrder: number;
   isActive: boolean;
@@ -5931,19 +5827,19 @@ export type TaxSettings = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
-  calculationMethod: string;
+  calculationMethod: 'unitBased' | 'itemBased';
   pricesIncludeTax: boolean;
   displayPricesWithTax: boolean;
-  taxBasedOn: string;
+  taxBasedOn: 'shippingAddress' | 'billingAddress';
   shippingTaxClass: string | null;
-  displayTaxTotals: string;
+  displayTaxTotals: 'itemized' | 'summary';
   applyTaxToShipping: boolean;
   applyDiscountBeforeTax: boolean;
   roundTaxAtSubtotal: boolean;
   taxDecimalPlaces: number;
   defaultTaxCategory: string | null;
   defaultTaxZone: string | null;
-  taxProvider: string | null;
+  taxProvider: 'internal' | 'external' | null;
   taxProviderSettings: unknown | null;
 };
 
@@ -5956,7 +5852,7 @@ export type TaxVatRegistration = {
   vatNumber: string;
   tradingName: string | null;
   legalName: string | null;
-  registrationType: string;
+  registrationType: 'standard' | 'oss' | 'ioss' | 'moss' | 'non_union' | 'distance_selling';
   isVerified: boolean;
   verifiedAt: Date | null;
   verificationSource: string | null;
@@ -5985,8 +5881,8 @@ export type TaxVatValidationLog = {
   countryCode: string;
   vatNumberFormatted: string | null;
   isValid: boolean | null;
-  validationStatus: string;
-  validationSource: string;
+  validationStatus: 'valid' | 'invalid' | 'unavailable' | 'timeout' | 'error' | 'format_invalid';
+  validationSource: 'vies' | 'hmrc' | 'manual' | 'cache' | 'format';
   requestId: string | null;
   response: unknown | null;
   companyName: string | null;
@@ -6022,8 +5918,8 @@ export type Theme = {
   name: string;
   description: string | null;
   version: string;
-  type: string;
-  status: string;
+  type: 'built_in' | 'custom';
+  status: 'draft' | 'active' | 'archived';
   author: string | null;
   screenshotUrl: string | null;
   previewUrl: string | null;
@@ -6086,7 +5982,7 @@ export type WarehousePickPack = {
   pickPackNumber: string;
   orderId: string | null;
   fulfillmentId: string | null;
-  status: string;
+  status: 'pending' | 'picking' | 'picked' | 'packing' | 'packed' | 'completed' | 'cancelled';
   items: unknown | null;
   assignedTo: string | null;
   pickingStartedAt: Date | null;
@@ -6104,7 +6000,7 @@ export type WarehouseReceiving = {
   receiptNumber: string;
   sourceType: string;
   sourceId: string | null;
-  status: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   expectedDate: Date | null;
   receivedDate: Date | null;
   carrierName: string | null;
@@ -6125,7 +6021,7 @@ export type WebhookDelivery = {
   eventType: string;
   eventId: string;
   payload: unknown;
-  status: string;
+  status: 'pending' | 'success' | 'failed' | 'retrying';
   attempts: number;
   lastAttemptAt: Date | null;
   nextRetryAt: Date | null;

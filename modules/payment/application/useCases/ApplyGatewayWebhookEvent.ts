@@ -43,7 +43,13 @@ export class ApplyGatewayWebhookEventUseCase {
             rawPayload,
           ),
         )
-        .catch(() => null);
+        .catch(err => {
+          logger.warn('webhook dedup record failed; processing without idempotency guard', {
+            provider,
+            error: (err as Error).message,
+          });
+          return null;
+        });
 
       if (recorded?.alreadyExisted) {
         // Already processed — acknowledge without re-running side effects

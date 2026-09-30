@@ -189,7 +189,7 @@ export class CustomerAddressRepo {
   async findActiveByCustomerId(customerId: string): Promise<CustomerAddress[]> {
     return (
       (await query<CustomerAddress[]>(
-        `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "deletedAt" IS NULL ORDER BY "isDefault" DESC, "createdAt" DESC`,
+        `SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
         [customerId],
       )) || []
     );
@@ -197,14 +197,14 @@ export class CustomerAddressRepo {
 
   async findActiveById(id: string, customerId: string): Promise<CustomerAddress | null> {
     return await queryOne<CustomerAddress>(
-      `SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL`,
+      `SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2`,
       [id, customerId],
     );
   }
 
   async softDelete(id: string, customerId: string): Promise<boolean> {
     const result = await queryOne<{ customerAddressId: string }>(
-      `UPDATE "customerAddress" SET "deletedAt" = NOW(), "updatedAt" = NOW() WHERE "customerAddressId" = $1 AND "customerId" = $2 AND "deletedAt" IS NULL RETURNING "customerAddressId"`,
+      `DELETE FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2 RETURNING "customerAddressId"`,
       [id, customerId],
     );
     return !!result;

@@ -157,7 +157,7 @@ export function createMembershipBenefit(overrides: Partial<MembershipBenefit> = 
     shortDescription: null,
     isActive: true,
     priority: 1,
-    benefitType: 'shipping',
+    benefitType: 'freeShipping',
     valueType: 'boolean',
     value: true,
     icon: null,

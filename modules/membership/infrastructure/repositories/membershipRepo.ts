@@ -182,7 +182,7 @@ export class MembershipRepo {
     name: string;
     description?: string;
     tierIds: string[];
-    benefitType: string;
+    benefitType: 'contentAccess' | 'custom' | 'discount' | 'earlyAccess' | 'freeShipping' | 'gift' | 'prioritySupport' | 'rewardPoints';
     discountPercentage?: number;
     discountAmountCents?: number;
     isActive?: boolean;

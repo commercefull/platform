@@ -104,7 +104,7 @@ export class PSPRoutingRepositoryImpl implements PSPRoutingRepository {
       publicKey: route.config.publishableKey ?? null,
       webhookSecret: route.config.webhookSecret,
       apiEndpoint: null,
-      supportedPaymentMethods: 'card',
+      supportedPaymentMethods: 'creditCard',
       supportedCurrencies: route.capabilities?.supportedCurrencies ?? null,
       processingFees: null,
       checkoutSettings: null,

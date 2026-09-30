@@ -1,6 +1,7 @@
 import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageOrganizationsUseCase, Organization } from '../../application/wired';
+import type { OrganizationStatus } from '../../domain/entities/Organization';
 
 interface CreateOrganizationBody {
   name: string;
@@ -11,7 +12,7 @@ interface CreateOrganizationBody {
   logo?: string;
   description?: string;
   password?: string;
-  status?: string;
+  status?: OrganizationStatus;
 }
 
 interface UpdateOrganizationBody {
@@ -21,7 +22,7 @@ interface UpdateOrganizationBody {
   website?: string;
   logoUrl?: string;
   description?: string;
-  status?: string;
+  status?: OrganizationStatus;
 }
 
 interface AddOrganizationAddressBody {
