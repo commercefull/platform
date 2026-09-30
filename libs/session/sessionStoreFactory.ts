@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import session from 'express-session';
 import { Pool } from 'pg';
-import Redis from 'ioredis';
 import { RedisStore } from 'connect-redis';
 import connectPgSimple from 'connect-pg-simple';
-import { getRedisClient, redisClientOptions } from '../redisClient';
+import { createRedisClient, getRedisClient } from '../redisClient';
+import type { Redis } from '../redisClient';
 import { resolveSessionBackendType } from './createSessionBackend';
 
 const PgSessionStore = connectPgSimple(session);
@@ -73,15 +73,13 @@ function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreRes
   let ownsClient = false;
 
   if (hasOverrides) {
-    client = config?.url
-      ? new Redis(config.url, redisClientOptions())
-      : new Redis({
-          host: config?.host || 'localhost',
-          port: config?.port || 6379,
-          password: config?.password || undefined,
-          db: config?.db || 0,
-          ...redisClientOptions(),
-        });
+    client = createRedisClient({
+      url: config?.url,
+      host: config?.host || 'localhost',
+      port: config?.port || 6379,
+      password: config?.password || undefined,
+      db: config?.db || 0,
+    });
     ownsClient = true;
   } else {
     client = getRedisClient();
