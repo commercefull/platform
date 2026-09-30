@@ -168,7 +168,7 @@ module.exports = {
       comment: 'Module is not reachable from any entry point',
       from: {
         orphan: true,
-        pathNot: '(__mocks__|\\.test\\.|\\.spec\\.|tests/|seeds/|migrations/|scripts/|tailwind\\.config\\.|postcss\\.config\\.|knexfile\\.|jest\\.config\\.|eslint\\.config\\.|\\.dependency-cruiser\\.|pm2\\.config\\.)',
+        pathNot: '(__mocks__|\\.test\\.|\\.spec\\.|tests/|seeds/|migrations/|scripts/|tailwind\\.config\\.|postcss\\.config\\.|knexfile\\.|jest\\.config\\.|eslint\\.config\\.|\\.dependency-cruiser\\.|pm2\\.config\\.|commitlint\\.config\\.)',
       },
       to: {},
     },
