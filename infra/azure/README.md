@@ -123,6 +123,23 @@ AZURE_STORAGE_ACCOUNT=commercefullstorage
 AZURE_STORAGE_CONTAINER=media
 ```
 
+### Event Bus (optional)
+
+Provision a Service Bus namespace + topic + subscription (dead-letters after
+`servicebus_max_delivery_count`):
+
+```hcl
+event_bus_provider = "azure-servicebus"
+enable_servicebus  = true
+```
+
+Terraform creates the Standard-SKU namespace, `domain-events` topic,
+`commercefull-worker` subscription, and a scoped send/listen SAS rule stored
+as a container-app secret. Env injected: `EVENT_BUS_PROVIDER`,
+`AZURE_SERVICE_BUS_TOPIC`, `AZURE_SERVICE_BUS_SUBSCRIPTION`,
+`AZURE_SERVICE_BUS_CONNECTION_STRING`. The app requires the optional SDK:
+`yarn add @azure/service-bus`.
+
 ### Bicep Template Structure
 
 ```bicep

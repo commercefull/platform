@@ -20,6 +20,38 @@ Outbox Dispatcher (background worker)
   └── After 10 attempts: move to dead-letter queue
 ```
 
+## Transport Providers
+
+`eventBus.emit()` publishes through a pluggable transport selected by `EVENT_BUS_PROVIDER`. The transport is split into a **publisher** (producer side — `emit()`/`writeToOutbox`) and a **subscriber** (consumer side — receives payloads and feeds them to `eventBus.dispatch()`).
+
+| Provider             | `EVENT_BUS_PROVIDER` | Required env vars                                              | Delivery                       |
+| -------------------- | -------------------- | -------------------------------------------------------------- | ------------------------------ |
+| In-process (default) | `memory`             | —                                                              | At-most-once, synchronous      |
+| Postgres outbox      | `postgres`           | `POSTGRES_*`                                                   | At-least-once, DLQ, replay     |
+| GCP Pub/Sub          | `gcp-pubsub`         | `GCP_PUBSUB_TOPIC`, `GCP_PUBSUB_SUBSCRIPTION`                  | At-least-once, topic DLQ       |
+| AWS SQS              | `aws-sqs`            | `AWS_EVENT_QUEUE_URL`, `AWS_REGION`                            | At-least-once, queue DLQ       |
+| Azure Service Bus    | `azure-servicebus`   | `AZURE_SERVICE_BUS_*` (connection string, topic, subscription) | At-least-once, dead-letter sub |
+
+- Cloud SDKs (`@google-cloud/pubsub`, `@aws-sdk/client-sqs`, `@azure/service-bus`) are **optional peer dependencies**, lazy-imported only when the provider is configured. Install the one you need.
+- `subscriber` is optional per-provider config: a publish-only node (e.g. a web tier) can set just the topic/ARN; a worker node also sets the subscription/queue to consume.
+- The `postgres` provider writes every `emit()` to `platformEventOutbox` and the dispatcher drains it — use `writeToOutbox(tx, ...)` inside `withTransaction()` when the event must commit atomically with a business write.
+- Provisioning each provider's topic/queue/DLQ is opt-in per cloud: `enable_pubsub` (GCP TF), `enable_servicebus` (Azure TF), `eventBusProvider` prop → `MessagingConstruct` (AWS CDK).
+
+### Consumer topology
+
+Subscribers are long-running receive loops (not cron) started at boot:
+SQS long-polls, Pub/Sub streams, Service Bus holds an AMQP listener, the
+postgres provider runs the outbox claim loop. `memory` needs no subscriber.
+
+- **Same process (default)** — the web app consumes in-process. Fine for
+  always-on deployments (VM, ECS, Cloud Run/Container Apps with
+  `min_replicas >= 1`). Beware scale-to-zero: no replicas = no consumption.
+- **Dedicated worker** — `worker.ts` runs only the event subscriber +
+  scheduled jobs (no web stack). Deploy the same image with a different
+  command: `yarn worker` (dev), `node worker.mjs` (prod — built by
+  `yarn prd:build` alongside `app.mjs`), or `docker run <image> node ./worker.mjs`.
+  Exposes `GET /health` on `PORT` (default 3001; `WORKER_NO_HTTP=1` disables).
+
 ## Emit & Handle
 
 ### Direct emission (fire-and-forget)
@@ -34,7 +66,7 @@ emitEvent('order.created', { orderId, customerId, total });
 ### Transactional outbox (durable)
 
 ```typescript
-import { writeToOutbox } from '../../../libs/events/outboxWriter';
+import { writeToOutbox } from '../../../libs/events/providers/postgres';
 
 // Inside a DB transaction — event survives crashes
 await writeToOutbox(
@@ -61,7 +93,8 @@ export function registerNotificationEventHandlers(): void {
   });
 }
 ```
-```
+
+````
 
 ## Naming Convention
 
@@ -92,9 +125,18 @@ Events follow `domain.action`.
 | `segment`         | created, updated, deleted, evaluated, member.added, member.removed, profile.computed                                                                                                         |
 | `marketplace`     | vendor.created, vendor.updated, vendor.approved, vendor.suspended, commission_rule.created, commission_rule.updated, payout.created, payout.processed, payout.completed, payout.failed       |
 
-## Outbox Dispatcher
+## Postgres Provider (outbox)
 
-The dispatcher runs as a background worker started in `app.ts`:
+The outbox stack lives entirely under `libs/events/providers/postgres/` and
+only runs when `EVENT_BUS_PROVIDER=postgres`:
+
+- `outboxWriter.ts` — `emit()` row insert + `writeToOutbox(tx)` for
+  transactional writes
+- `outboxDispatcher.ts` — the subscriber: claim-based polling loop started
+  by `startEventSubscriber()` in `app.ts`/`worker.ts`
+- `index.ts` — provider surface (transport + `writeToOutbox` + DLQ admin API)
+
+Dispatcher details:
 
 - **Polling interval**: 2 seconds (configurable)
 - **Claim strategy**: `FOR UPDATE SKIP LOCKED` (multi-node safe)
@@ -102,14 +144,15 @@ The dispatcher runs as a background worker started in `app.ts`:
 - **Backoff**: Exponential, 2s base, 5min cap
 - **Dead-letter replay**: `replayEvent(eventId)` and `replayAllDeadLetter()`
 - **Stats**: `getOutboxStats()` returns pending, dispatched, failed, dead-letter counts
-- **Cleanup**: `cleanupDispatchedEvents(olderThanDays)` removes successfully dispatched events
+- **Cleanup**: `cleanupProcessedEvents(olderThanDays)` removes successfully dispatched events
 
 ### Environment flags
 
-| Flag                | Effect                                   |
-| ------------------- | ---------------------------------------- |
-| `OUTBOX_DISABLED=1` | Skip dispatcher startup (unit tests, CI) |
-| `CRON_DISABLED=1`   | Skip scheduled jobs startup              |
+| Flag                | Effect                                                    |
+| ------------------- | --------------------------------------------------------- |
+| `EVENT_BUS_PROVIDER` | Transport provider (see above; default `memory`)         |
+| `OUTBOX_DISABLED=1` | Legacy alias — forces the `memory` provider (overrides `EVENT_BUS_PROVIDER`) |
+| `CRON_DISABLED=1`   | Skip scheduled jobs startup                               |
 
 ## Analytics Handlers
 
@@ -127,6 +170,6 @@ export class ProductCreatedEvent {
     public readonly timestamp: Date = new Date(),
   ) {}
 }
-```
+````
 
 These are emitted through the event bus using the corresponding `product.created` identifier.

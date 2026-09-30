@@ -128,6 +128,22 @@ JWT_SECRET=/commercefull/prod/jwt-secret
 SESSION_SECRET=/commercefull/prod/session-secret
 GOOGLE_CLIENT_ID=/commercefull/prod/google-client-id
 GOOGLE_CLIENT_SECRET=/commercefull/prod/google-client-secret
+```
+
+### Event Bus (optional)
+
+Provision an SQS events queue with a dead-letter queue:
+
+```ts
+new CommercefullStack(app, 'Commercefull', {
+  eventBusProvider: 'aws-sqs',
+});
+```
+
+The stack creates `commercefull-events-<env>` (SQS) + `-dlq`, grants the ECS
+task role send/consume, and injects `EVENT_BUS_PROVIDER`,
+`AWS_EVENT_QUEUE_URL`, `AWS_REGION`. The app requires the optional SDK:
+`yarn add @aws-sdk/client-sqs`.
 
 # Application Configuration
 NODE_ENV=production

@@ -111,6 +111,21 @@ db_tier        = "db-f1-micro"
 db_version     = "POSTGRES_18"
 ```
 
+### Event Bus (optional)
+
+Provision a Pub/Sub topic + pull subscription with a dead-letter topic:
+
+```hcl
+event_bus_provider = "gcp-pubsub"
+enable_pubsub      = true
+```
+
+Terraform enables the Pub/Sub API, creates `commercefull-events-<env>` and
+`commercefull-events-dlq-<env>`, wires the Cloud Run service account for
+publish/consume, and injects `EVENT_BUS_PROVIDER`, `GCP_PUBSUB_TOPIC`,
+`GCP_PUBSUB_SUBSCRIPTION`, `GOOGLE_CLOUD_PROJECT`. The app requires the
+optional SDK: `yarn add @google-cloud/pubsub`.
+
 ### Environment Variables
 
 ```yaml

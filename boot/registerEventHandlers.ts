@@ -9,7 +9,7 @@
 
 import { eventBus } from '../libs/events/eventBus';
 import { logger } from '../libs/logger';
-import { stopOutboxDispatcher } from '../libs/events/outboxDispatcher';
+import { stopEventTransport } from '../libs/events/transportRegistry';
 import { moduleRegistry } from './moduleManifests';
 
 import { OrderDataRepository as OrderDataRepo } from '../modules/order/infrastructure';
@@ -169,8 +169,8 @@ export async function unregisterAllEventHandlers(): Promise<void> {
     webhookDispatchService.stop();
     webhookDispatchService = null;
   }
-  // Stop the outbox dispatcher
-  await stopOutboxDispatcher();
+  // Stop the event transport (subscriber + publisher)
+  await stopEventTransport();
   isRegistered = false;
   // EventBus doesn't have a clearAll method, so handlers persist
   // This is mainly for tracking registration state

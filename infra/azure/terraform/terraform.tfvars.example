@@ -45,3 +45,7 @@ tags = {
   Project     = "commercefull"
   ManagedBy   = "terraform"
 }
+
+# Event Bus (optional — requires yarn add @azure/service-bus in the app)
+# event_bus_provider = "azure-servicebus"
+# enable_servicebus  = true

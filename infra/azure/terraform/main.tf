@@ -363,6 +363,35 @@ resource "azurerm_container_app" "app" {
         name        = "COOKIE_SECRET"
         secret_name = "cookie-secret"
       }
+
+      env {
+        name  = "EVENT_BUS_PROVIDER"
+        value = var.event_bus_provider
+      }
+
+      dynamic "env" {
+        for_each = var.enable_servicebus ? [1] : []
+        content {
+          name  = "AZURE_SERVICE_BUS_TOPIC"
+          value = azurerm_servicebus_topic.events[0].name
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.enable_servicebus ? [1] : []
+        content {
+          name  = "AZURE_SERVICE_BUS_SUBSCRIPTION"
+          value = azurerm_servicebus_subscription.events[0].name
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.enable_servicebus ? [1] : []
+        content {
+          name        = "AZURE_SERVICE_BUS_CONNECTION_STRING"
+          secret_name = "servicebus-connection-string"
+        }
+      }
     }
   }
 
@@ -388,6 +417,14 @@ resource "azurerm_container_app" "app" {
   secret {
     name  = "database-password"
     value = random_password.db_password.result
+  }
+
+  dynamic "secret" {
+    for_each = var.enable_servicebus ? [1] : []
+    content {
+      name  = "servicebus-connection-string"
+      value = azurerm_servicebus_namespace_authorization_rule.app[0].primary_connection_string
+    }
   }
 
   dynamic "secret" {
@@ -562,6 +599,46 @@ resource "azurerm_dns_zone" "zone" {
     Environment = var.environment
     Purpose     = "dns"
   }
+}
+
+# Event bus: Service Bus namespace + topic + subscription.
+# Enable with enable_servicebus = true and event_bus_provider = "azure-servicebus".
+# Standard SKU is required for topics (Basic only supports queues).
+resource "azurerm_servicebus_namespace" "events" {
+  count               = var.enable_servicebus ? 1 : 0
+  name                = "${var.app_name}-sb-${var.environment}"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "Standard"
+
+  tags = {
+    Environment = var.environment
+    Purpose     = "events"
+  }
+}
+
+resource "azurerm_servicebus_topic" "events" {
+  count        = var.enable_servicebus ? 1 : 0
+  name         = "domain-events"
+  namespace_id = azurerm_servicebus_namespace.events[0].id
+}
+
+resource "azurerm_servicebus_subscription" "events" {
+  count              = var.enable_servicebus ? 1 : 0
+  name               = "${var.app_name}-worker"
+  topic_id           = azurerm_servicebus_topic.events[0].id
+  max_delivery_count = var.servicebus_max_delivery_count
+  # Messages exceeding max_delivery_count are dead-lettered automatically.
+}
+
+# Scoped SAS rule (send + listen) instead of the root manage key.
+resource "azurerm_servicebus_namespace_authorization_rule" "app" {
+  count        = var.enable_servicebus ? 1 : 0
+  name         = "${var.app_name}-app"
+  namespace_id = azurerm_servicebus_namespace.events[0].id
+  listen       = true
+  send         = true
+  manage       = false
 }
 
 # Data source for current client config

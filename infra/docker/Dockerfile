@@ -50,6 +50,7 @@ RUN yarn install --frozen-lockfile --production=true \
 
 # Copy built application from builder stage
 COPY --from=builder /app/app.mjs ./
+COPY --from=builder /app/worker.mjs ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/web ./web
 COPY --from=builder /app/locales ./locales

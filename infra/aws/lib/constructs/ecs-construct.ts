@@ -39,6 +39,11 @@ export interface EcsConstructProps {
    * Defaults to true.
    */
   readonly enableAlb?: boolean;
+  /**
+   * Additional plain-string env vars merged into the container environment
+   * (e.g. EVENT_BUS_PROVIDER, AWS_EVENT_QUEUE_URL).
+   */
+  readonly extraEnv?: Record<string, string>;
 }
 
 /**
@@ -133,6 +138,7 @@ export class EcsConstruct extends Construct {
         // POSTGRES_SSL_CA and drop REJECT_UNAUTHORIZED=false to also verify the server.
         POSTGRES_SSL: 'true',
         POSTGRES_SSL_REJECT_UNAUTHORIZED: 'false',
+        ...props.extraEnv,
       },
       secrets: {
         POSTGRES_PASSWORD: ecs.Secret.fromSecretsManager(props.dbCredentials, 'password'),

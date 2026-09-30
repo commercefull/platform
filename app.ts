@@ -18,13 +18,14 @@ import { startQueryCounterContext } from './libs/db/queryCounter';
 import passport from 'passport';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
 import { createSessionStore } from './libs/session/sessionStoreFactory';
-import { initializeAnalyticsHandlers } from './modules/analytics';
 import { configureRoutes } from './boot/routes';
 import { expressHttpLogger, logger } from './libs/logger';
 import { errorMiddleware } from './libs/errorMiddleware';
 import { correlationIdMiddleware } from './libs/correlationId';
 import { registerAllEventHandlers } from './boot/registerEventHandlers';
-import { startOutboxDispatcher, stopOutboxDispatcher } from './libs/events/outboxDispatcher';
+import { startEventSubscriber, stopEventTransport } from './libs/events/transportRegistry';
+import { initEventTransport } from './libs/events/providers';
+import { eventBus } from './libs/events/eventBus';
 import { initializeScheduledJobs } from './boot/scheduledJobs';
 import { loadOrgRolePolicies } from './libs/rbac/rolePolicyRepository';
 import { registerModuleManifestsSync } from './boot/moduleManifests';
@@ -54,14 +55,20 @@ blockSchemaRegistry.registerBuiltIns();
 // Validate all required secrets before any service starts
 validateAllSecrets();
 
-// Initialize event handlers and outbox dispatcher
+// Initialize event handlers (module-gated; analytics included) and event transport
 registerAllEventHandlers();
-initializeAnalyticsHandlers();
 
-// Start the durable outbox dispatcher (claim-based, multi-node safe)
-if (process.env.OUTBOX_DISABLED !== '1') {
-  startOutboxDispatcher();
-}
+// Install the configured event transport and start its subscriber.
+// EVENT_BUS_PROVIDER=memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus
+// (default: memory — in-process dispatch). OUTBOX_DISABLED=1 is a legacy
+// override that forces the memory provider.
+initEventTransport(eventBus.dispatch.bind(eventBus))
+  .then(() => startEventSubscriber())
+  .catch(err => {
+    logger.error('Event transport init failed; staying on in-memory dispatch', {
+      error: (err as Error).message,
+    });
+  });
 
 // Start scheduled jobs (cron)
 if (process.env.CRON_DISABLED !== '1') {
@@ -439,13 +446,13 @@ server.on('error', (err: Error) => {
 });
 
 process.on('SIGTERM', () => {
-  stopOutboxDispatcher().finally(() => {
+  stopEventTransport().finally(() => {
     server.close(() => process.exit(0));
   });
 });
 
 process.on('SIGINT', () => {
-  stopOutboxDispatcher().finally(() => {
+  stopEventTransport().finally(() => {
     server.close(() => process.exit(0));
   });
 });

@@ -45,3 +45,7 @@ tags = {
   Project     = "commercefull"
   ManagedBy   = "terraform"
 }
+
+# Event Bus (optional — requires yarn add @google-cloud/pubsub in the app)
+# event_bus_provider = "gcp-pubsub"
+# enable_pubsub      = true

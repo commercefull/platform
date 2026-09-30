@@ -32,6 +32,7 @@ Thumbs.db
 # Build artifacts
 app.js
 app.mjs
+worker.mjs
 *.tsbuildinfo
 public/javascripts/storefront/bundle.min.js
 public/javascripts/storefront/bundle.min.js.map

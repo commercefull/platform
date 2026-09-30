@@ -35,7 +35,7 @@ describe('EventBus error boundaries', () => {
     expect(handler3).toHaveBeenCalledTimes(1);
   });
 
-  it('dispatchFromOutbox() should throw when any handler fails', async () => {
+  it('dispatch() should throw when any handler fails', async () => {
     const goodHandler = jest.fn().mockResolvedValue(undefined);
     const badHandler = jest.fn().mockRejectedValue(new Error('outbox handler fail'));
 
@@ -49,10 +49,10 @@ describe('EventBus error boundaries', () => {
       correlationId: 'corr-1',
     };
 
-    await expect(eventBus.dispatchFromOutbox(payload)).rejects.toThrow('Outbox dispatch failed');
+    await expect(eventBus.dispatch(payload)).rejects.toThrow('Event dispatch failed');
   });
 
-  it('dispatchFromOutbox() should not throw when all handlers succeed', async () => {
+  it('dispatch() should not throw when all handlers succeed', async () => {
     const handler = jest.fn().mockResolvedValue(undefined);
     eventBus.registerHandler('order.shipped', handler);
 
@@ -62,11 +62,11 @@ describe('EventBus error boundaries', () => {
       timestamp: new Date(),
     };
 
-    await expect(eventBus.dispatchFromOutbox(payload)).resolves.not.toThrow();
+    await expect(eventBus.dispatch(payload)).resolves.not.toThrow();
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it('dispatchFromOutbox() should call all handlers even if some fail', async () => {
+  it('dispatch() should call all handlers even if some fail', async () => {
     const handler1 = jest.fn().mockRejectedValue(new Error('fail 1'));
     const handler2 = jest.fn().mockResolvedValue(undefined);
 
@@ -79,16 +79,16 @@ describe('EventBus error boundaries', () => {
       timestamp: new Date(),
     };
 
-    await expect(eventBus.dispatchFromOutbox(payload)).rejects.toThrow();
+    await expect(eventBus.dispatch(payload)).rejects.toThrow();
     expect(handler1).toHaveBeenCalledTimes(1);
     expect(handler2).toHaveBeenCalledTimes(1);
   });
 
-  it('setOutboxMode / isOutboxMode', () => {
-    expect(eventBus.isOutboxMode()).toBe(false);
-    eventBus.setOutboxMode(true);
-    expect(eventBus.isOutboxMode()).toBe(true);
-    eventBus.setOutboxMode(false);
-    expect(eventBus.isOutboxMode()).toBe(false);
+  it('emit() dispatches through the default memory transport', async () => {
+    const handler = jest.fn();
+    eventBus.registerHandler('customer.registered', handler);
+    await eventBus.emit('customer.registered', { customerId: 'c1' });
+    expect(handler).toHaveBeenCalledTimes(1);
+    eventBus.unregisterHandler('customer.registered', handler);
   });
 });

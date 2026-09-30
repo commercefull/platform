@@ -142,14 +142,14 @@ See [Module Registry & Feature Flags](#/guides/module-registry) for details.
 
 ## Durable Event Bus
 
-The platform uses a transactional outbox pattern for at-least-once event delivery:
+The event bus is provider-pluggable (`EVENT_BUS_PROVIDER`): `memory` (in-process default), `postgres` (transactional outbox on `platformEventOutbox`), `gcp-pubsub`, `aws-sqs`, and `azure-servicebus`. With `postgres` selected, at-least-once delivery works as follows:
 
 1. **Write**: Business operations write events to the `platformEventOutbox` table within the same DB transaction as the business data.
 2. **Dispatch**: A claim-based polling worker (`FOR UPDATE SKIP LOCKED`) picks up pending events and delivers them to registered handlers.
 3. **Retry**: Exponential backoff (2s base, 5min max), dead-letter queue after 10 attempts.
 4. **Shutdown**: Graceful stop on SIGTERM/SIGINT.
 
-Environment flags: `OUTBOX_DISABLED=1` to skip dispatcher at boot, `CRON_DISABLED=1` to skip scheduled jobs.
+Environment flags: `OUTBOX_DISABLED=1` forces the `memory` provider, `CRON_DISABLED=1` skips scheduled jobs.
 
 ## Boot Sequence
 
