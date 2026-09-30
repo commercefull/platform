@@ -16,18 +16,18 @@ export class ProductCategoryRepo {
   async findAll(includeDeleted = false): Promise<ProductCategory[]> {
     const sql = includeDeleted
       ? `SELECT * FROM "productCategory" ORDER BY "position" ASC, "name" ASC`
-      : `SELECT * FROM "productCategory" WHERE "deletedAt" IS NULL ORDER BY "position" ASC, "name" ASC`;
+      : `SELECT * FROM "productCategory" ORDER BY "position" ASC, "name" ASC`;
     return (await query<ProductCategory[]>(sql)) || [];
   }
 
   async findById(productCategoryId: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1 AND "deletedAt" IS NULL`, [
+    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1`, [
       productCategoryId,
     ]);
   }
 
   async findBySlug(slug: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "slug" = $1 AND "deletedAt" IS NULL`, [slug]);
+    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "slug" = $1`, [slug]);
   }
 
   async create(params: ProductCategoryCreateParams): Promise<ProductCategory> {
@@ -71,14 +71,14 @@ export class ProductCategoryRepo {
     values.push(new Date(), productCategoryId);
 
     return queryOne<ProductCategory>(
-      `UPDATE "productCategory" SET ${fields.join(', ')} WHERE "productCategoryId" = $${i} AND "deletedAt" IS NULL RETURNING *`,
+      `UPDATE "productCategory" SET ${fields.join(', ')} WHERE "productCategoryId" = $${i} RETURNING *`,
       values,
     );
   }
 
   async softDelete(productCategoryId: string): Promise<boolean> {
     const result = await queryOne<{ productCategoryId: string }>(
-      `UPDATE "productCategory" SET "deletedAt" = $1 WHERE "productCategoryId" = $2 AND "deletedAt" IS NULL RETURNING "productCategoryId"`,
+      `DELETE FROM "productCategory" WHERE "productCategoryId" = $1 RETURNING "productCategoryId"`,
       [new Date(), productCategoryId],
     );
     return !!result;

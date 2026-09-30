@@ -2,10 +2,11 @@ import { query, queryOne } from '../../../../libs/db';
 
 export async function findMemberWithTier(customerId: string): Promise<unknown | null> {
   return await queryOne<unknown>(
-    `SELECT lm.*, lt."name" as "tierName", lt."minimumPoints", lt."multiplier"
-     FROM "loyaltyMember" lm
-     LEFT JOIN "loyaltyTier" lt ON lm."loyaltyTierId" = lt."loyaltyTierId"
-     WHERE lm."customerId" = $1`,
+    `SELECT lp.*, lp."currentPoints" as "pointsBalance",
+            lt."name" as "tierName", lt."pointsThreshold" as "minimumPoints", lt."pointsMultiplier" as "multiplier"
+     FROM "loyaltyPoints" lp
+     LEFT JOIN "loyaltyTier" lt ON lp."tierId" = lt."tierId"
+     WHERE lp."customerId" = $1`,
     [customerId],
   );
 }
@@ -38,12 +39,12 @@ export async function findRewardById(rewardId: string): Promise<unknown | null> 
 }
 
 export async function findMemberByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT * FROM "loyaltyMember" WHERE "customerId" = $1`, [customerId]);
+  return await queryOne<unknown>(`SELECT *, "currentPoints" as "pointsBalance" FROM "loyaltyPoints" WHERE "customerId" = $1`, [customerId]);
 }
 
 export async function deductPoints(customerId: string, points: number): Promise<void> {
   await queryOne<unknown>(
-    `UPDATE "loyaltyMember" SET "pointsBalance" = "pointsBalance" - $1, "updatedAt" = NOW() WHERE "customerId" = $2 RETURNING "loyaltyMemberId"`,
+    `UPDATE "loyaltyPoints" SET "currentPoints" = "currentPoints" - $1, "lastActivity" = NOW(), "updatedAt" = NOW() WHERE "customerId" = $2 RETURNING "loyaltyPointsId"`,
     [points, customerId],
   );
 }

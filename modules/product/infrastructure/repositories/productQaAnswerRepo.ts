@@ -7,7 +7,7 @@ export type ProductQaAnswerCreateParams = Omit<ProductQaAnswer, 'productQaAnswer
 
 export class ProductQaAnswerRepo {
   async findByQuestion(productQaId: string, status?: ProductQaAnswerStatus): Promise<ProductQaAnswer[]> {
-    let sql = `SELECT * FROM "productQaAnswer" WHERE "productQaId" = $1`;
+    let sql = `SELECT * FROM "productQaAnswer" WHERE "questionId" = $1`;
     const params: unknown[] = [productQaId];
 
     if (status) {
@@ -15,19 +15,18 @@ export class ProductQaAnswerRepo {
       params.push(status);
     }
 
-    sql += ` ORDER BY "isOfficial" DESC, "createdAt" ASC`;
+    sql += ` ORDER BY "isVerified" DESC, "createdAt" ASC`;
     return (await query<ProductQaAnswer[]>(sql, params)) || [];
   }
 
   async create(params: ProductQaAnswerCreateParams): Promise<ProductQaAnswer> {
     const now = new Date();
     const result = await queryOne<ProductQaAnswer>(
-      `INSERT INTO "productQaAnswer" ("productQaId", "customerId", "organizationId", "answer", "status", "isOfficial", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      `INSERT INTO "productQaAnswer" ("questionId", "customerId", "answer", "status", "isVerified", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         params.productQaId,
         params.customerId || null,
-        params.organizationId || null,
         params.answer,
         params.status || 'pending',
         params.isOfficial ?? false,

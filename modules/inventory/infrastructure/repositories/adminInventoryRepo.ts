@@ -1,7 +1,7 @@
 /**
  * Admin Inventory Repository
  * Handles legacy inventory queries for the admin hub using the inventoryLevel table
- * with product joins, inventoryLocation, and inventoryTransaction tables
+ * with product joins and distributionWarehouse locations
  */
 
 import { query, queryOne } from '../../../../libs/db';
@@ -32,6 +32,15 @@ export interface InventoryStats {
   outOfStock: number;
 }
 
+// available = on-hand minus reserved
+const AVAILABLE = `(il."onHandQuantity" - il."reservedQuantity")`;
+
+const ADJUSTMENT_TYPE_CODES: Record<string, string> = {
+  add: 'ADJUST_UP',
+  remove: 'ADJUST_DOWN',
+  set: 'COUNT',
+};
+
 // ============================================================================
 // Inventory Level Queries
 // ============================================================================
@@ -54,16 +63,17 @@ export async function findInventoryLevels(params: {
   }
 
   if (params.locationId) {
-    whereClause += ` AND il."locationId" = $${paramIndex}`;
+    whereClause += ` AND il."distributionWarehouseId" = $${paramIndex}`;
     queryParams.push(params.locationId);
+    paramIndex++;
   }
 
   if (params.stockStatus === 'out_of_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") <= 0`;
+    whereClause += ` AND ${AVAILABLE} <= 0`;
   } else if (params.stockStatus === 'low_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") > 0 AND (il."quantity" - il."reserved") <= il."reorderPoint"`;
+    whereClause += ` AND ${AVAILABLE} > 0 AND ${AVAILABLE} <= il."reorderQuantity"`;
   } else if (params.stockStatus === 'in_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") > il."reorderPoint"`;
+    whereClause += ` AND ${AVAILABLE} > il."reorderQuantity"`;
   }
 
   return (
@@ -72,17 +82,17 @@ export async function findInventoryLevels(params: {
         il."inventoryLevelId",
         il."productId",
         il."productVariantId",
-        il."locationId",
-        il."quantity",
-        il."reserved",
-        il."reorderPoint",
+        il."distributionWarehouseId" as "locationId",
+        il."onHandQuantity" as "quantity",
+        il."reservedQuantity" as "reserved",
+        il."reorderQuantity" as "reorderPoint",
         il."reorderQuantity",
         p."name" as "productName",
         p."sku",
-        loc."name" as "locationName"
+        dw."name" as "locationName"
        FROM "inventoryLevel" il
        LEFT JOIN "product" p ON il."productId" = p."productId"
-       LEFT JOIN "inventoryLocation" loc ON il."locationId" = loc."locationId"
+       LEFT JOIN "distributionWarehouse" dw ON il."distributionWarehouseId" = dw."distributionWarehouseId"
        ${whereClause}
        ORDER BY p."name" ASC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
@@ -103,16 +113,16 @@ export async function countInventoryLevels(params: { search?: string; locationId
   }
 
   if (params.locationId) {
-    whereClause += ` AND il."locationId" = $${paramIndex}`;
+    whereClause += ` AND il."distributionWarehouseId" = $${paramIndex}`;
     queryParams.push(params.locationId);
   }
 
   if (params.stockStatus === 'out_of_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") <= 0`;
+    whereClause += ` AND ${AVAILABLE} <= 0`;
   } else if (params.stockStatus === 'low_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") > 0 AND (il."quantity" - il."reserved") <= il."reorderPoint"`;
+    whereClause += ` AND ${AVAILABLE} > 0 AND ${AVAILABLE} <= il."reorderQuantity"`;
   } else if (params.stockStatus === 'in_stock') {
-    whereClause += ` AND (il."quantity" - il."reserved") > il."reorderPoint"`;
+    whereClause += ` AND ${AVAILABLE} > il."reorderQuantity"`;
   }
 
   const result = await queryOne<{ count: string }>(
@@ -129,9 +139,9 @@ export async function getInventoryStats(): Promise<InventoryStats> {
   const result = await queryOne<Record<string, string>>(
     `SELECT 
       COUNT(*) as "totalProducts",
-      SUM(CASE WHEN (il."quantity" - il."reserved") > il."reorderPoint" THEN 1 ELSE 0 END) as "inStock",
-      SUM(CASE WHEN (il."quantity" - il."reserved") > 0 AND (il."quantity" - il."reserved") <= il."reorderPoint" THEN 1 ELSE 0 END) as "lowStock",
-      SUM(CASE WHEN (il."quantity" - il."reserved") <= 0 THEN 1 ELSE 0 END) as "outOfStock"
+      SUM(CASE WHEN ${AVAILABLE} > il."reorderQuantity" THEN 1 ELSE 0 END) as "inStock",
+      SUM(CASE WHEN ${AVAILABLE} > 0 AND ${AVAILABLE} <= il."reorderQuantity" THEN 1 ELSE 0 END) as "lowStock",
+      SUM(CASE WHEN ${AVAILABLE} <= 0 THEN 1 ELSE 0 END) as "outOfStock"
      FROM "inventoryLevel" il`,
   );
 
@@ -145,7 +155,9 @@ export async function getInventoryStats(): Promise<InventoryStats> {
 
 export async function findAllLocations(): Promise<Array<{ locationId: string; name: string }>> {
   return (
-    (await query<Array<{ locationId: string; name: string }>>(`SELECT "locationId", "name" FROM "inventoryLocation" ORDER BY "name"`)) || []
+    (await query<Array<{ locationId: string; name: string }>>(
+      `SELECT "distributionWarehouseId" as "locationId", "name" FROM "distributionWarehouse" WHERE "isActive" = true ORDER BY "name"`,
+    )) || []
   );
 }
 
@@ -156,12 +168,12 @@ export async function findLowStockItems(limit: number = 10): Promise<Record<stri
         il."inventoryLevelId",
         p."name" as "productName",
         p."sku",
-        (il."quantity" - il."reserved") as "available"
+        ${AVAILABLE} as "available"
        FROM "inventoryLevel" il
        LEFT JOIN "product" p ON il."productId" = p."productId"
-       WHERE (il."quantity" - il."reserved") > 0 
-         AND (il."quantity" - il."reserved") <= il."reorderPoint"
-       ORDER BY (il."quantity" - il."reserved") ASC
+       WHERE ${AVAILABLE} > 0 
+         AND ${AVAILABLE} <= il."reorderQuantity"
+       ORDER BY ${AVAILABLE} ASC
        LIMIT $1`,
       [limit],
     )) || []
@@ -174,7 +186,8 @@ export async function findLowStockItems(limit: number = 10): Promise<Record<stri
 
 export async function findInventoryLevelById(inventoryLevelId: string): Promise<Record<string, string> | null> {
   return queryOne<Record<string, string>>(
-    `SELECT il.*, p."name" as "productName", p."sku"
+    `SELECT il.*, il."onHandQuantity" as "quantity", il."reservedQuantity" as "reserved",
+            il."distributionWarehouseId" as "locationId", p."name" as "productName", p."sku"
      FROM "inventoryLevel" il
      LEFT JOIN "product" p ON il."productId" = p."productId"
      WHERE il."inventoryLevelId" = $1`,
@@ -186,26 +199,45 @@ export async function findInventoryLevelById(inventoryLevelId: string): Promise<
 // Inventory Transactions
 // ============================================================================
 
+async function findLevelContext(inventoryLevelId: string): Promise<Record<string, string> | null> {
+  return queryOne<Record<string, string>>(
+    `SELECT "productId", "productVariantId", "distributionWarehouseId", "sku", "onHandQuantity"
+     FROM "inventoryLevel" WHERE "inventoryLevelId" = $1`,
+    [inventoryLevelId],
+  );
+}
+
 export async function findTransactionsByLevelId(
   inventoryLevelId: string,
   limit: number,
   offset: number,
 ): Promise<Record<string, string>[]> {
+  const level = await findLevelContext(inventoryLevelId);
+  if (!level) return [];
+
   return (
     (await query<Record<string, string>[]>(
-      `SELECT * FROM "inventoryTransaction"
-       WHERE "inventoryLevelId" = $1
-       ORDER BY "createdAt" DESC
-       LIMIT $2 OFFSET $3`,
-      [inventoryLevelId, limit, offset],
+      `SELECT t.*, tt."code" as "transactionType" FROM "inventoryTransaction" t
+       LEFT JOIN "inventoryTransactionType" tt ON t."typeId" = tt."inventoryTransactionTypeId"
+       WHERE t."productId" = $1 AND t."distributionWarehouseId" = $2
+         AND (t."productVariantId" = $3 OR (t."productVariantId" IS NULL AND $3 IS NULL))
+       ORDER BY t."createdAt" DESC
+       LIMIT $4 OFFSET $5`,
+      [level.productId, level.distributionWarehouseId, level.productVariantId ?? null, limit, offset],
     )) || []
   );
 }
 
 export async function countTransactionsByLevelId(inventoryLevelId: string): Promise<number> {
-  const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "inventoryTransaction" WHERE "inventoryLevelId" = $1`, [
-    inventoryLevelId,
-  ]);
+  const level = await findLevelContext(inventoryLevelId);
+  if (!level) return 0;
+
+  const result = await queryOne<{ count: string }>(
+    `SELECT COUNT(*) as count FROM "inventoryTransaction"
+     WHERE "productId" = $1 AND "distributionWarehouseId" = $2
+       AND ("productVariantId" = $3 OR ("productVariantId" IS NULL AND $3 IS NULL))`,
+    [level.productId, level.distributionWarehouseId, level.productVariantId ?? null],
+  );
   return parseInt(result?.count || '0');
 }
 
@@ -222,31 +254,42 @@ export async function adjustStockLevel(
   userId: string,
 ): Promise<void> {
   const now = new Date();
+  const level = await findLevelContext(inventoryLevelId);
 
-  await query(`UPDATE "inventoryLevel" SET "quantity" = $1, "updatedAt" = $2 WHERE "inventoryLevelId" = $3`, [
+  await query(`UPDATE "inventoryLevel" SET "onHandQuantity" = $1, "updatedAt" = $2, "updatedBy" = $4 WHERE "inventoryLevelId" = $3`, [
     newQuantity,
     now,
     inventoryLevelId,
+    userId,
   ]);
+
+  const typeCode = ADJUSTMENT_TYPE_CODES[adjustmentType] ?? 'COUNT';
+  const type = await queryOne<{ inventoryTransactionTypeId: string }>(
+    `SELECT "inventoryTransactionTypeId" FROM "inventoryTransactionType" WHERE "code" = $1`,
+    [typeCode],
+  );
 
   await query(
     `INSERT INTO "inventoryTransaction" (
-      "inventoryTransactionId", "inventoryLevelId", "productId", "locationId",
-      "transactionType", "quantity", "previousQuantity", "newQuantity",
-      "reason", "notes", "createdBy", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      "inventoryTransactionId", "typeId", "distributionWarehouseId", "productId", "productVariantId",
+      "sku", "quantity", "previousQuantity", "newQuantity",
+      "referenceType", "status", "reason", "notes", "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
     [
       generateUUID(),
-      inventoryLevelId,
+      type?.inventoryTransactionTypeId ?? null,
+      level?.distributionWarehouseId ?? locationId,
       productId,
-      locationId,
-      adjustmentType,
+      level?.productVariantId ?? null,
+      level?.sku ?? '',
       adjustmentQty,
       previousQuantity,
       newQuantity,
+      'manual_adjustment',
+      'completed',
       reason,
       notes,
-      userId,
+      now,
       now,
     ],
   );
@@ -260,13 +303,13 @@ export async function findLocationsWithStats(): Promise<Record<string, string>[]
   return (
     (await query<Record<string, string>[]>(
       `SELECT 
-        loc.*,
+        dw.*,
         COUNT(il."inventoryLevelId") as "productCount",
-        SUM(il."quantity") as "totalStock"
-       FROM "inventoryLocation" loc
-       LEFT JOIN "inventoryLevel" il ON loc."locationId" = il."locationId"
-       GROUP BY loc."locationId"
-       ORDER BY loc."name"`,
+        SUM(il."onHandQuantity") as "totalStock"
+       FROM "distributionWarehouse" dw
+       LEFT JOIN "inventoryLevel" il ON dw."distributionWarehouseId" = il."distributionWarehouseId"
+       GROUP BY dw."distributionWarehouseId"
+       ORDER BY dw."name"`,
     )) || []
   );
 }
@@ -282,13 +325,13 @@ export async function findLowStockReport(): Promise<Record<string, string>[]> {
         il.*,
         p."name" as "productName",
         p."sku",
-        loc."name" as "locationName",
-        (il."quantity" - il."reserved") as "available"
+        dw."name" as "locationName",
+        ${AVAILABLE} as "available"
        FROM "inventoryLevel" il
        LEFT JOIN "product" p ON il."productId" = p."productId"
-       LEFT JOIN "inventoryLocation" loc ON il."locationId" = loc."locationId"
-       WHERE (il."quantity" - il."reserved") <= il."reorderPoint"
-       ORDER BY (il."quantity" - il."reserved") ASC`,
+       LEFT JOIN "distributionWarehouse" dw ON il."distributionWarehouseId" = dw."distributionWarehouseId"
+       WHERE ${AVAILABLE} <= il."reorderQuantity"
+       ORDER BY ${AVAILABLE} ASC`,
     )) || []
   );
 }

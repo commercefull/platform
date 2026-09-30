@@ -1,4 +1,5 @@
 import { query, queryOne } from '../../../../libs/db';
+import { generateUUID as uuidv4 } from '../../../../libs/uuid';
 
 export async function findByUserId(userId: string, limit: number, offset: number): Promise<unknown[]> {
   const results = await query<unknown[]>(`SELECT * FROM "notification" WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2 OFFSET $3`, [
@@ -31,7 +32,11 @@ export async function markAllAsRead(userId: string): Promise<void> {
 }
 
 export async function getPreferences(userId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT * FROM "notificationPreference" WHERE "userId" = $1`, [userId]);
+  const row = await queryOne<{ channelPreferences: Record<string, boolean> }>(
+    `SELECT "channelPreferences" FROM "notificationPreference" WHERE "userId" = $1 AND "userType" = 'customer' AND "type" = 'general'`,
+    [userId],
+  );
+  return row?.channelPreferences ?? null;
 }
 
 export async function upsertPreferences(
@@ -39,12 +44,11 @@ export async function upsertPreferences(
   prefs: { emailOrderUpdates: boolean; emailPromotions: boolean; emailNewsletter: boolean; pushEnabled: boolean },
 ): Promise<void> {
   await query(
-    `INSERT INTO "notificationPreference" ("userId", "emailOrderUpdates", "emailPromotions", "emailNewsletter", "pushEnabled", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, NOW())
-     ON CONFLICT ("userId") DO UPDATE SET
-       "emailOrderUpdates" = $2, "emailPromotions" = $3, "emailNewsletter" = $4,
-       "pushEnabled" = $5, "updatedAt" = NOW()`,
-    [userId, prefs.emailOrderUpdates, prefs.emailPromotions, prefs.emailNewsletter, prefs.pushEnabled],
+    `INSERT INTO "notificationPreference" ("notificationPreferenceId", "userId", "userType", "type", "channelPreferences", "isEnabled", "updatedAt")
+     VALUES ($1, $2, 'customer', 'general', $3::jsonb, true, NOW())
+     ON CONFLICT ("userId", "userType", "type") DO UPDATE SET
+       "channelPreferences" = $3::jsonb, "updatedAt" = NOW()`,
+    [uuidv4(), userId, JSON.stringify(prefs)],
   );
 }
 

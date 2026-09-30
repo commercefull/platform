@@ -17,9 +17,7 @@ import productVariantRepository from './ProductVariantRepository';
 import { VariantRepo } from './variantRepo';
 import productTypeRepository from './ProductTypeRepository';
 import productSeoRepo from './productSeoRepo';
-import productTagRepo from './productTagRepo';
 import productToCategoryRepo from './productToCategoryRepo';
-import productCategoryRepo from './productCategoryRepo';
 import categoryRepo from './categoryRepo';
 import productDownloadRepo from './productDownloadRepo';
 
@@ -45,9 +43,7 @@ class ProductCatalogRepository {
   readonly variantRepo = variantRepoInstance;
   readonly types = productTypeRepository;
   readonly seo = productSeoRepo;
-  readonly tags = productTagRepo;
   readonly toCategory = productToCategoryRepo;
-  readonly productCategories = productCategoryRepo;
   readonly categories = categoryRepo;
   readonly downloads = productDownloadRepo;
 }

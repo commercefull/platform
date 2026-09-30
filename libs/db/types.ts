@@ -47,7 +47,6 @@ export enum Table {
   CustomerCurrencyPreference = "customerCurrencyPreference",
   CustomerGroup = "customerGroup",
   CustomerGroupMembership = "customerGroupMembership",
-  CustomerLoyaltyTransaction = "customerLoyaltyTransaction",
   CustomerPasswordReset = "customerPasswordReset",
   CustomerPrice = "customerPrice",
   CustomerPriceList = "customerPriceList",
@@ -64,9 +63,7 @@ export enum Table {
   Fulfillment = "fulfillment",
   FulfillmentItem = "fulfillmentItem",
   FulfillmentLocation = "fulfillmentLocation",
-  FulfillmentNetworkRule = "fulfillmentNetworkRule",
   FulfillmentPartner = "fulfillmentPartner",
-  FulfillmentRule = "fulfillmentRule",
   GdprCookieConsent = "gdprCookieConsent",
   GdprDataRequest = "gdprDataRequest",
   IdentityOidcProvider = "identityOidcProvider",
@@ -117,7 +114,6 @@ export enum Table {
   MembershipSubscription = "membershipSubscription",
   Notification = "notification",
   NotificationBatch = "notificationBatch",
-  NotificationCategory = "notificationCategory",
   NotificationDeliveryLog = "notificationDeliveryLog",
   NotificationDevice = "notificationDevice",
   NotificationEventLog = "notificationEventLog",
@@ -186,13 +182,10 @@ export enum Table {
   ProductCurrencyPrice = "productCurrencyPrice",
   ProductDownload = "productDownload",
   ProductImage = "productImage",
-  ProductList = "productList",
-  ProductListItem = "productListItem",
   ProductMedia = "productMedia",
   ProductMerchandisingRule = "productMerchandisingRule",
   ProductQa = "productQa",
   ProductQaAnswer = "productQaAnswer",
-  ProductQaVote = "productQaVote",
   ProductRelated = "productRelated",
   ProductReview = "productReview",
   ProductReviewMedia = "productReviewMedia",
@@ -340,7 +333,6 @@ export type Tables = {
   "customerCurrencyPreference": CustomerCurrencyPreference,
   "customerGroup": CustomerGroup,
   "customerGroupMembership": CustomerGroupMembership,
-  "customerLoyaltyTransaction": CustomerLoyaltyTransaction,
   "customerPasswordReset": CustomerPasswordReset,
   "customerPrice": CustomerPrice,
   "customerPriceList": CustomerPriceList,
@@ -357,9 +349,7 @@ export type Tables = {
   "fulfillment": Fulfillment,
   "fulfillmentItem": FulfillmentItem,
   "fulfillmentLocation": FulfillmentLocation,
-  "fulfillmentNetworkRule": FulfillmentNetworkRule,
   "fulfillmentPartner": FulfillmentPartner,
-  "fulfillmentRule": FulfillmentRule,
   "gdprCookieConsent": GdprCookieConsent,
   "gdprDataRequest": GdprDataRequest,
   "identityOidcProvider": IdentityOidcProvider,
@@ -410,7 +400,6 @@ export type Tables = {
   "membershipSubscription": MembershipSubscription,
   "notification": Notification,
   "notificationBatch": NotificationBatch,
-  "notificationCategory": NotificationCategory,
   "notificationDeliveryLog": NotificationDeliveryLog,
   "notificationDevice": NotificationDevice,
   "notificationEventLog": NotificationEventLog,
@@ -479,13 +468,10 @@ export type Tables = {
   "productCurrencyPrice": ProductCurrencyPrice,
   "productDownload": ProductDownload,
   "productImage": ProductImage,
-  "productList": ProductList,
-  "productListItem": ProductListItem,
   "productMedia": ProductMedia,
   "productMerchandisingRule": ProductMerchandisingRule,
   "productQa": ProductQa,
   "productQaAnswer": ProductQaAnswer,
-  "productQaVote": ProductQaVote,
   "productRelated": ProductRelated,
   "productReview": ProductReview,
   "productReviewMedia": ProductReviewMedia,
@@ -1490,20 +1476,6 @@ export type CustomerGroupMembership = {
   deletedAt: Date | null;
 };
 
-export type CustomerLoyaltyTransaction = {
-  customerLoyaltyTransactionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  orderId: string | null;
-  type: string;
-  points: number;
-  balance: number;
-  description: string;
-  source: string;
-  status: string;
-  expiresAt: Date | null;
-};
-
 export type CustomerPasswordReset = {
   customerPasswordResetId: string;
   createdAt: Date;
@@ -1855,21 +1827,6 @@ export type FulfillmentLocation = {
   updatedAt: Date | null;
 };
 
-export type FulfillmentNetworkRule = {
-  fulfillmentNetworkRuleId: string;
-  organizationId: string;
-  storeId: string | null;
-  channelId: string | null;
-  name: string;
-  priority: number | null;
-  ruleType: string;
-  conditions: Record<string, unknown> | null;
-  actions: Record<string, unknown> | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
 export type FulfillmentPartner = {
   fulfillmentPartnerId: string;
   name: string;
@@ -1879,18 +1836,6 @@ export type FulfillmentPartner = {
   address: unknown | null;
   contactEmail: string | null;
   contactPhone: string | null;
-  isActive: boolean | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-};
-
-export type FulfillmentRule = {
-  fulfillmentRuleId: string;
-  name: string;
-  type: string;
-  conditions: unknown;
-  actions: unknown;
-  priority: number | null;
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -2788,17 +2733,6 @@ export type NotificationBatch = {
   sendingSettings: unknown | null;
   testRecipients: unknown | null;
   createdBy: string | null;
-};
-
-export type NotificationCategory = {
-  notificationCategoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  code: string;
-  name: string;
-  description: string | null;
-  defaultPriority: string;
-  isTransactional: boolean;
 };
 
 export type NotificationDeliveryLog = {
@@ -4125,32 +4059,6 @@ export type ProductImage = {
   isVisible: boolean;
 };
 
-export type ProductList = {
-  productListId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  customerId: string;
-  name: string;
-  type: string;
-  isDefault: boolean;
-  isPublic: boolean;
-  description: string | null;
-  shareUrl: string | null;
-};
-
-export type ProductListItem = {
-  productListItemId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  listId: string;
-  productId: string;
-  productVariantId: string | null;
-  addedAt: Date;
-  quantity: number;
-  notes: string | null;
-  priority: string | null;
-};
-
 export type ProductMedia = {
   productMediaId: string;
   createdAt: Date;
@@ -4210,19 +4118,6 @@ export type ProductQaAnswer = {
   helpfulCount: number;
   unhelpfulCount: number;
   status: string;
-};
-
-export type ProductQaVote = {
-  productQaVoteId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  questionId: string | null;
-  answerId: string | null;
-  customerId: string | null;
-  sessionId: string | null;
-  isHelpful: boolean;
-  ipAddress: string | null;
-  userAgent: string | null;
 };
 
 export type ProductRelated = {

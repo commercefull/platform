@@ -101,10 +101,10 @@ export const updatePreferences = async (req: HttpRequest, res: HttpResponse) => 
     if (!customerId) return redirectResponse(res, '/signin');
 
     const body = req.body as HttpRequestBody;
-    const { emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = body;
+    const { emailNotifications, emailOrderUpdates, emailPromotions, emailNewsletter, pushEnabled } = body;
 
     await manageNotificationsUseCase.upsertPreferences(customerId, {
-      emailOrderUpdates: !!emailOrderUpdates,
+      emailOrderUpdates: !!(emailNotifications ?? emailOrderUpdates),
       emailPromotions: !!emailPromotions,
       emailNewsletter: !!emailNewsletter,
       pushEnabled: !!pushEnabled,

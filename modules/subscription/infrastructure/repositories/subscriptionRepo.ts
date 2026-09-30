@@ -1160,9 +1160,10 @@ function mapToDunningAttempt(row: Record<string, unknown>): DunningAttempt {
 
 export async function findActivePlansWithProduct(): Promise<unknown[]> {
   const results = await query<unknown[]>(
-    `SELECT sp.*, sprod."name" as "productName", sprod."description" as "productDescription"
+    `SELECT sp.*, p."name" as "productName", p."description" as "productDescription"
      FROM "subscriptionPlan" sp
      LEFT JOIN "subscriptionProduct" sprod ON sp."subscriptionProductId" = sprod."subscriptionProductId"
+     LEFT JOIN "product" p ON sprod."productId" = p."productId"
      WHERE sp."isActive" = true
      ORDER BY sp."sortOrder", sp."priceCents" ASC`,
     [],
