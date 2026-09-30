@@ -3650,7 +3650,7 @@ export type PaymentWebhook = {
   paymentWebhookId: string;
   createdAt: Date;
   updatedAt: Date;
-  organizationId: string;
+  organizationId: string | null;
   gatewayId: string | null;
   provider: string;
   eventType: string;
@@ -3662,6 +3662,7 @@ export type PaymentWebhook = {
   error: string | null;
   relatedEntityType: string | null;
   relatedEntityId: string | null;
+  externalId: string | null;
 };
 
 export type PlatformEventOutbox = {

@@ -101,7 +101,7 @@ export class ManageAddressesUseCase {
       isDefault: command.isDefault || false,
       isDefaultBilling: false,
       isDefaultShipping: false,
-      addressType: command.addressType,
+      addressType: command.addressType || 'both',
       isVerified: false,
       verifiedAt: null,
       verificationData: null,

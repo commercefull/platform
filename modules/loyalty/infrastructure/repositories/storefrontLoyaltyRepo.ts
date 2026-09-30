@@ -34,7 +34,7 @@ export async function findAvailableRewards(pointsBalance: number): Promise<unkno
 }
 
 export async function findRewardById(rewardId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT * FROM "loyaltyReward" WHERE "loyaltyRewardId" = $1 AND "isActive" = true`, [rewardId]);
+  return await queryOne<unknown>(`SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1 AND "isActive" = true`, [rewardId]);
 }
 
 export async function findMemberByCustomerId(customerId: string): Promise<unknown | null> {
@@ -50,9 +50,9 @@ export async function deductPoints(customerId: string, points: number): Promise<
 
 export async function createRedeemTransaction(customerId: string, points: number, description: string): Promise<void> {
   await queryOne<unknown>(
-    `INSERT INTO "loyaltyTransaction" ("customerId", "type", "points", "description", "createdAt", "updatedAt")
-     VALUES ($1, 'redeem', $2, $3, NOW(), NOW()) RETURNING "loyaltyTransactionId"`,
-    [customerId, points, description],
+    `INSERT INTO "loyaltyTransaction" ("customerId", "action", "points", "description", "createdAt", "updatedAt")
+     VALUES ($1, 'debit', $2, $3, NOW(), NOW()) RETURNING "loyaltyTransactionId"`,
+    [customerId, -Math.abs(points), description],
   );
 }
 
