@@ -10,7 +10,7 @@ import type { EventPayload } from '../eventTypes';
 import type { EventBusProvider, EventTransport } from '../eventTransport';
 import { setEventTransport } from '../transportRegistry';
 import { createMemoryTransport } from './memoryProvider';
-import { createPostgresTransport } from './postgresProvider';
+import { createPostgresTransport } from './postgres/postgresProvider';
 import { logger } from '../../logger';
 
 type DispatchFn = (payload: EventPayload) => Promise<void>;

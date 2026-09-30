@@ -11,10 +11,10 @@
  * per-handler error boundaries.
  */
 
-import type { TxClient } from '../db/transaction';
-import { logger } from '../logger';
-import { getCorrelationId } from '../correlationId';
-import type { EventType, EventPayload } from './eventBus';
+import type { TxClient } from '../../../db/transaction';
+import { logger } from '../../../logger';
+import { getCorrelationId } from '../../../correlationId';
+import type { EventType, EventPayload } from '../../eventBus';
 
 export interface OutboxEvent {
   eventOutboxId: string;

@@ -5,7 +5,7 @@
 
 import { resolveEventBusProvider, initEventTransport } from './index';
 import { createMemoryTransport } from './memoryProvider';
-import { createPostgresTransport } from './postgresProvider';
+import { createPostgresTransport } from './postgres/postgresProvider';
 import { createGcpPubSubTransport } from './gcpPubSubProvider';
 import { createAwsSqsTransport } from './awsSqsProvider';
 import { createAzureServiceBusTransport } from './azureServiceBusProvider';
@@ -13,13 +13,13 @@ import { getEventPublisher, setEventTransport } from '../transportRegistry';
 import type { EventPayload } from '../eventTypes';
 
 jest.mock('../../db/pool', () => ({ getActivePool: jest.fn() }));
-jest.mock('../outboxDispatcher', () => ({
+jest.mock('./postgres/outboxDispatcher', () => ({
   startOutboxDispatcher: jest.fn(),
   stopOutboxDispatcher: jest.fn().mockResolvedValue(undefined),
 }));
 
 import { getActivePool } from '../../db/pool';
-import { startOutboxDispatcher, stopOutboxDispatcher } from '../outboxDispatcher';
+import { startOutboxDispatcher, stopOutboxDispatcher } from './postgres/outboxDispatcher';
 
 const payload: EventPayload = {
   type: 'order.created',

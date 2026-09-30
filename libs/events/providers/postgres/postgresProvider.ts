@@ -10,10 +10,10 @@
  * writeToOutbox(tx, ...) inside withTransaction() instead of emit().
  */
 
-import { getActivePool } from '../../db/pool';
-import { startOutboxDispatcher, stopOutboxDispatcher } from '../outboxDispatcher';
-import type { EventTransport } from '../eventTransport';
-import { logger } from '../../logger';
+import { getActivePool } from '../../../db/pool';
+import { startOutboxDispatcher, stopOutboxDispatcher } from './outboxDispatcher';
+import type { EventTransport } from '../../eventTransport';
+import { logger } from '../../../logger';
 
 export function createPostgresTransport(): EventTransport {
   return {

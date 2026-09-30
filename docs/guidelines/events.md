@@ -66,7 +66,7 @@ emitEvent('order.created', { orderId, customerId, total });
 ### Transactional outbox (durable)
 
 ```typescript
-import { writeToOutbox } from '../../../libs/events/outboxWriter';
+import { writeToOutbox } from '../../../libs/events/providers/postgres';
 
 // Inside a DB transaction — event survives crashes
 await writeToOutbox(
@@ -125,9 +125,18 @@ Events follow `domain.action`.
 | `segment`         | created, updated, deleted, evaluated, member.added, member.removed, profile.computed                                                                                                         |
 | `marketplace`     | vendor.created, vendor.updated, vendor.approved, vendor.suspended, commission_rule.created, commission_rule.updated, payout.created, payout.processed, payout.completed, payout.failed       |
 
-## Outbox Dispatcher
+## Postgres Provider (outbox)
 
-The dispatcher runs as a background worker started in `app.ts`:
+The outbox stack lives entirely under `libs/events/providers/postgres/` and
+only runs when `EVENT_BUS_PROVIDER=postgres`:
+
+- `outboxWriter.ts` — `emit()` row insert + `writeToOutbox(tx)` for
+  transactional writes
+- `outboxDispatcher.ts` — the subscriber: claim-based polling loop started
+  by `startEventSubscriber()` in `app.ts`/`worker.ts`
+- `index.ts` — provider surface (transport + `writeToOutbox` + DLQ admin API)
+
+Dispatcher details:
 
 - **Polling interval**: 2 seconds (configurable)
 - **Claim strategy**: `FOR UPDATE SKIP LOCKED` (multi-node safe)
@@ -135,7 +144,7 @@ The dispatcher runs as a background worker started in `app.ts`:
 - **Backoff**: Exponential, 2s base, 5min cap
 - **Dead-letter replay**: `replayEvent(eventId)` and `replayAllDeadLetter()`
 - **Stats**: `getOutboxStats()` returns pending, dispatched, failed, dead-letter counts
-- **Cleanup**: `cleanupDispatchedEvents(olderThanDays)` removes successfully dispatched events
+- **Cleanup**: `cleanupProcessedEvents(olderThanDays)` removes successfully dispatched events
 
 ### Environment flags
 

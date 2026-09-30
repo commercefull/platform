@@ -1,5 +1,5 @@
 import { writeToOutbox, writeToOutboxBatch, outboxRowToPayload, OutboxEvent } from './outboxWriter';
-import type { TxClient } from '../db/transaction';
+import type { TxClient } from '../../../db/transaction';
 
 describe('OutboxWriter', () => {
   function mockTx(returnsId: string = 'outbox-123'): TxClient {

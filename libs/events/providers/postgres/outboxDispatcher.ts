@@ -16,11 +16,11 @@
  * - Graceful shutdown: `stop()` waits for in-flight events
  */
 
-import { getActivePool } from '../db/pool';
-import { eventBus } from './eventBus';
+import { getActivePool } from '../../../db/pool';
+import { eventBus } from '../../eventBus';
 import { outboxRowToPayload, type OutboxEvent } from './outboxWriter';
-import type { EventPayload } from './eventTypes';
-import { logger } from '../logger';
+import type { EventPayload } from '../../eventTypes';
+import { logger } from '../../../logger';
 
 export type OutboxDispatchFn = (payload: EventPayload) => Promise<void>;
 
