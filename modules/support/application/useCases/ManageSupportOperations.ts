@@ -7,6 +7,8 @@
  * transitions.
  */
 
+import { eventBus } from '../../../../libs/events/eventBus';
+
 export interface AgentFilters {
   isActive?: boolean;
   isAvailable?: boolean;
@@ -77,7 +79,13 @@ export class ManageSupportOperationsUseCase {
   }
 
   async resolveTicket(ticketId: string, resolutionType: string, resolutionNotes?: string) {
-    return this.support.resolveTicket(ticketId, resolutionType, resolutionNotes);
+    const ticket = (await this.support.getTicket(ticketId)) as { customerId?: string; createdAt?: string | Date } | null;
+    await this.support.resolveTicket(ticketId, resolutionType, resolutionNotes);
+    eventBus.emit('ticket.resolved', {
+      ticketId,
+      customerId: ticket?.customerId,
+      resolutionTimeMinutes: ticket?.createdAt ? Math.round((Date.now() - new Date(ticket.createdAt).getTime()) / 60000) : undefined,
+    });
   }
 
   async closeTicket(ticketId: string) {

@@ -492,7 +492,7 @@ export class ProductRepo implements IProductRepository {
   async addProductImage(productId: string, image: ProductImage): Promise<void> {
     const now = new Date().toISOString();
     await query(
-      `INSERT INTO "productImage" ("productImageId", "productId", url, "altText", position, "isPrimary", "createdAt", "updatedAt")
+      `INSERT INTO "productImage" ("productImageId", "productId", url, "alt", position, "isPrimary", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [image.imageId, productId, image.url, image.altText, image.position, image.isPrimary, now, now],
     );
@@ -504,7 +504,7 @@ export class ProductRepo implements IProductRepository {
     let paramIndex = 2;
 
     if (updates.altText !== undefined) {
-      setClauses.push(`"altText" = $${paramIndex++}`);
+      setClauses.push(`"alt" = $${paramIndex++}`);
       params.push(updates.altText);
     }
     if (updates.position !== undefined) {

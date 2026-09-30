@@ -6,6 +6,8 @@
  * price alerts. Shared by business controllers and scheduled jobs.
  */
 
+import { eventBus } from '../../../../libs/events/eventBus';
+
 export interface AlertListFilters {
   customerId?: string;
   productId?: string;
@@ -104,7 +106,13 @@ export class ManageStockAlertsUseCase {
   }
 
   async createStockAlert(input: CreateStockAlertInput) {
-    return this.alerts.createStockAlert(input);
+    const alert = await this.alerts.createStockAlert(input);
+    eventBus.emit('alert.stock.created', {
+      alertId: alert.stockAlertId,
+      productId: input.productId,
+      customerId: input.customerId,
+    });
+    return alert;
   }
   async getStockAlert(stockAlertId: string) {
     return this.alerts.getStockAlert(stockAlertId);

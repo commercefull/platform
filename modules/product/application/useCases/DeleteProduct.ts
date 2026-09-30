@@ -1,5 +1,6 @@
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export class DeleteProductUseCase {
   constructor(private readonly productRepository: ProductRepository) {}
@@ -13,5 +14,10 @@ export class DeleteProductUseCase {
     } else {
       await this.productRepository.delete(productId);
     }
+
+    eventBus.emit('product.deleted', {
+      productId,
+      organizationId: product.organizationId,
+    });
   }
 }

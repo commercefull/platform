@@ -47,7 +47,7 @@ export function initializeAnalyticsHandlers(): void {
   eventBus.registerHandler('checkout.completed', handleCheckoutCompleted);
 
   // Payment events
-  eventBus.registerHandler('payment.success', handlePaymentSuccess);
+  eventBus.registerHandler('payment.completed', handlePaymentSuccess);
   eventBus.registerHandler('payment.failed', handlePaymentFailed);
 
   // Product events
@@ -55,7 +55,7 @@ export function initializeAnalyticsHandlers(): void {
   eventBus.registerHandler('product.created', handleProductCreated);
 
   // Customer events
-  eventBus.registerHandler('customer.created', handleCustomerCreated);
+  eventBus.registerHandler('customer.registered', handleCustomerCreated);
   eventBus.registerHandler('customer.updated', handleCustomerUpdated);
 
   // Subscription events

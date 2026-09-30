@@ -7,6 +7,7 @@
  */
 
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface PurchaseOrderPort {
   findByStatus(status: string, limit?: number, offset?: number): Promise<unknown[]>;
@@ -72,7 +73,16 @@ export class ManagePurchaseOrdersUseCase {
   }
 
   async approvePurchaseOrder(id: string): Promise<unknown> {
-    return this.purchaseOrders.approve(id);
+    const approved = await this.purchaseOrders.approve(id);
+    const record = approved as { purchaseOrderId?: string; supplierPurchaseOrderId?: string; poNumber?: string; supplierId?: string } | null;
+    if (record) {
+      eventBus.emit('purchase_order.approved', {
+        purchaseOrderId: record.purchaseOrderId ?? record.supplierPurchaseOrderId ?? id,
+        poNumber: record.poNumber,
+        supplierId: record.supplierId,
+      });
+    }
+    return approved;
   }
 
   async cancelPurchaseOrder(id: string): Promise<unknown> {

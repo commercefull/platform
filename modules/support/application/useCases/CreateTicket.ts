@@ -3,6 +3,7 @@
  */
 
 import { SupportValidationError } from '../../domain/errors/SupportErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface CreateTicketInput {
   customerId: string;
@@ -80,6 +81,15 @@ export class CreateTicketUseCase {
       orderId: input.orderId,
       attachments: input.attachments || [],
       tags: input.tags || [],
+    });
+
+    eventBus.emit('ticket.created', {
+      ticketId: ticket.ticketId,
+      ticketNumber: ticket.ticketNumber,
+      customerId: input.customerId,
+      orderId: input.orderId,
+      category: input.type,
+      priority,
     });
 
     return {

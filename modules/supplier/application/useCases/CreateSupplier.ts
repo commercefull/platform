@@ -3,6 +3,7 @@
  */
 
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface CreateSupplierInput {
   name: string;
@@ -70,6 +71,12 @@ export class CreateSupplierUseCase {
       dropshipEnabled: input.dropshipEnabled ?? false,
       status: 'pending',
       isActive: false,
+    });
+
+    eventBus.emit('supplier.created', {
+      supplierId: supplier.supplierId,
+      name: supplier.name,
+      email: input.email,
     });
 
     return {

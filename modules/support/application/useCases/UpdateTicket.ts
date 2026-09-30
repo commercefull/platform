@@ -3,6 +3,7 @@
  */
 
 import { SupportTicketNotFoundError } from '../../domain/errors/SupportErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface UpdateTicketInput {
   ticketId: string;
@@ -24,9 +25,11 @@ export interface UpdateTicketOutput {
 
 interface TicketRecord {
   ticketId: string;
+  customerId?: string;
   status: string;
   priority: string;
   assignedTo?: string;
+  createdAt?: Date;
   updatedAt: Date;
 }
 
@@ -64,6 +67,14 @@ export class UpdateTicketUseCase {
       ...updates,
       updatedBy: input.updatedBy,
     });
+
+    if (input.status === 'resolved' && ticket.status !== 'resolved') {
+      eventBus.emit('ticket.resolved', {
+        ticketId: updatedTicket.ticketId,
+        customerId: ticket.customerId,
+        resolutionTimeMinutes: ticket.createdAt ? Math.round((Date.now() - new Date(ticket.createdAt).getTime()) / 60000) : undefined,
+      });
+    }
 
     return {
       ticketId: updatedTicket.ticketId,

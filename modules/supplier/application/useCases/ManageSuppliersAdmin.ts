@@ -1,5 +1,6 @@
 import type { SupplierStatus } from '../../domain/entities/Supplier';
 import type { SupplierRepository, SupplierCreateParams, SupplierUpdateParams } from '../../domain/repositories/SupplierRepository';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export class ManageSuppliersAdminUseCase {
   constructor(private readonly supplierRepo: SupplierRepository) {}
@@ -23,7 +24,11 @@ export class ManageSuppliersAdminUseCase {
     return this.supplierRepo.update(id, params);
   }
   async approve(id: string) {
-    return this.supplierRepo.approve(id);
+    const supplier = await this.supplierRepo.approve(id);
+    if (supplier) {
+      eventBus.emit('supplier.approved', { supplierId: id, name: supplier.name, email: supplier.email });
+    }
+    return supplier;
   }
   async suspend(id: string) {
     return this.supplierRepo.suspend(id);

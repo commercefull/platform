@@ -8,6 +8,7 @@ import type {
   ProductReviewPort,
 } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export class ManageProductReviewsUseCase {
   constructor(private readonly productReviewRepo: ProductReviewPort) {}
@@ -28,7 +29,14 @@ export class ManageProductReviewsUseCase {
     return this.productReviewRepo.findPending(limit, offset);
   }
   async create(params: ProductReviewCreateParams): Promise<ProductReview> {
-    return this.productReviewRepo.create(params);
+    const review = await this.productReviewRepo.create(params);
+    eventBus.emit('review.created', {
+      reviewId: review.productReviewId,
+      productId: review.productId,
+      customerId: review.customerId,
+      rating: review.rating,
+    });
+    return review;
   }
   async submitReview(input: {
     productId: string;
@@ -45,7 +53,7 @@ export class ManageProductReviewsUseCase {
     if (!input.reviewerName?.trim()) {
       throw new ProductValidationError('Reviewer name is required');
     }
-    return this.productReviewRepo.create({
+    const review = await this.productReviewRepo.create({
       productId: input.productId,
       customerId: input.customerId,
       rating: input.rating as ReviewRating,
@@ -61,6 +69,13 @@ export class ManageProductReviewsUseCase {
       adminResponse: undefined,
       adminResponseDate: undefined,
     });
+    eventBus.emit('review.created', {
+      reviewId: review.productReviewId,
+      productId: review.productId,
+      customerId: review.customerId,
+      rating: review.rating,
+    });
+    return review;
   }
   async getApprovedReviewsWithStats(productId: string, limit?: number, offset?: number) {
     const reviews = await this.productReviewRepo.findByProductId(productId, 'approved', limit, offset);

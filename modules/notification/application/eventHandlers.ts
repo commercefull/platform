@@ -122,7 +122,8 @@ interface PurchaseOrderCreatedPayload {
 interface PurchaseOrderApprovedPayload {
   purchaseOrderId: string;
   poNumber: string;
-  supplierEmail: string;
+  supplierEmail?: string;
+  supplierId?: string;
 }
 
 interface ReceivingCompletedPayload {
@@ -407,7 +408,14 @@ const registerSupplierEventHandlers = () => {
   });
 
   eventBus.registerHandler('purchase_order.approved', async (payload: EventPayload) => {
-    const { purchaseOrderId, poNumber, supplierEmail } = payload.data as PurchaseOrderApprovedPayload;
+    const { purchaseOrderId, poNumber, supplierId } = payload.data as PurchaseOrderApprovedPayload;
+    let { supplierEmail } = payload.data as PurchaseOrderApprovedPayload;
+
+    if (!supplierEmail && supplierId) {
+      const rows = await query<Array<{ email: string }>>(`SELECT email FROM "supplier" WHERE "supplierId" = $1`, [supplierId]);
+      supplierEmail = rows?.[0]?.email;
+    }
+    if (!supplierEmail) return;
 
     // Notify supplier of approval
     await JobScheduler.scheduleEmail({

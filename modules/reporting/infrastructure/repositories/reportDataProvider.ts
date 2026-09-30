@@ -413,7 +413,7 @@ async function generateOrderDetail(from: Date, to: Date, params: ReportParameter
       o."customerEmail",
       o."totalAmountCents" / 100.0 as "totalAmount",
       o."totalItems" as "itemCount",
-      (SELECT f."shippingMethodName" FROM "fulfillment" f WHERE f."orderId" = o."orderId" ORDER BY f."createdAt" DESC LIMIT 1) as "shippingMethod",
+      (SELECT f."shippingMethodName" FROM "fulfillment" f WHERE f."orderId" = o."orderId"::text ORDER BY f."createdAt" DESC LIMIT 1) as "shippingMethod",
       (SELECT op."type" FROM "orderPayment" op WHERE op."orderId" = o."orderId" ORDER BY op."createdAt" DESC LIMIT 1) as "paymentMethod"
      FROM "order" o
      ${whereClause}

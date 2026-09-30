@@ -3,6 +3,7 @@ import { Product } from '../../domain/entities/Product';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductNotFoundError } from '../../domain/errors/ProductErrors';
+import { eventBus } from '../../../../libs/events/eventBus';
 
 export class UpdateProductStatusUseCase {
   constructor(private readonly productRepository: ProductRepository) {}
@@ -11,6 +12,9 @@ export class UpdateProductStatusUseCase {
     const product = await this.loadProduct(productId);
     product.updateStatus(status);
     await this.productRepository.save(product);
+    if (status === ProductStatus.ARCHIVED) {
+      eventBus.emit('product.archived', { productId, organizationId: product.organizationId });
+    }
     return product;
   }
 
@@ -32,6 +36,7 @@ export class UpdateProductStatusUseCase {
     const product = await this.loadProduct(productId);
     product.unpublish();
     await this.productRepository.save(product);
+    eventBus.emit('product.unpublished', { productId, organizationId: product.organizationId });
     return product;
   }
 
