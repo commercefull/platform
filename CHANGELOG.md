@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/commercefull/platform/compare/v1.4.0...v1.4.1) (2026-09-30)
+
+
+### Bug Fixes
+
+* ignore dotenv tips lines in snapshot stderr filter ([dbc19f5](https://github.com/commercefull/platform/commit/dbc19f5d32a1b9d50fa717a530000d52227c6940))
+* ignore dotenv tips lines in snapshot stderr filter ([8d14071](https://github.com/commercefull/platform/commit/8d140715a9817f2000e0c05bc76ce45ed98fa319))
+
 ## [1.4.0](https://github.com/commercefull/platform/compare/v1.3.2...v1.4.0) (2026-09-30)
 
 
