@@ -4,3 +4,21 @@
 # ===========================================
 
 postgres_version: '18'
+postgres_max_connections: 100
+postgres_shared_buffers: "{{ [128, (ansible_memtotal_mb * 0.25) | int] | max }}MB"
+postgres_effective_cache_size: "{{ [256, (ansible_memtotal_mb * 0.65) | int] | max }}MB"
+postgres_work_mem: '8MB'
+postgres_maintenance_work_mem: '256MB'
+postgres_wal_buffers: '16MB'
+postgres_checkpoint_timeout: '15min'
+postgres_checkpoint_completion_target: 0.9
+postgres_max_wal_size: '4GB'
+postgres_min_wal_size: '1GB'
+postgres_random_page_cost: 1.1
+postgres_effective_io_concurrency: 100
+postgres_autovacuum_max_workers: 5
+postgres_autovacuum_naptime: '30s'
+postgres_autovacuum_vacuum_scale_factor: 0.05
+postgres_autovacuum_analyze_scale_factor: 0.025
+postgres_log_min_duration_statement: 500
+postgres_idle_in_transaction_session_timeout: '60s'

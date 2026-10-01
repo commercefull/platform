@@ -29,6 +29,22 @@
 |---|---|---|
 | `LOG_LEVEL` | `debug` | Logging level (error | warn | info | debug) |
 
+## Disable duplicate file transports when PM2 or Docker captures stdout
+
+| Variable | Default | Description |
+|---|---|---|
+| `LOG_FILE_ENABLED` | `1` | Disable duplicate file transports when PM2 or Docker captures stdout |
+
+## HTTP and graceful shutdown bounds in milliseconds
+
+| Variable | Default | Description |
+|---|---|---|
+| `HTTP_KEEP_ALIVE_TIMEOUT_MS` | `5000` | HTTP and graceful shutdown bounds in milliseconds |
+| `HTTP_HEADERS_TIMEOUT_MS` | `10000` | — |
+| `HTTP_REQUEST_TIMEOUT_MS` | `30000` | — |
+| `SHUTDOWN_TIMEOUT_MS` | `30000` | — |
+| `HEALTH_CHECK_TIMEOUT_MS` | `2000` | — |
+
 ## but explicit values make sessions stable across restarts.
 
 | Variable | Default | Description |
@@ -97,6 +113,17 @@
 | Variable | Default | Description |
 |---|---|---|
 | `POSTGRES_SSL_CA` | `—` | Optional PEM CA bundle for certificate verification |
+
+## Per-process connection budget; multiply by PM2 web workers plus worker processes
+
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_POOL_MAX` | `10` | Per-process connection budget; multiply by PM2 web workers plus worker processes |
+| `POSTGRES_IDLE_TIMEOUT_MS` | `30000` | — |
+| `POSTGRES_CONNECTION_TIMEOUT_MS` | `2000` | — |
+| `POSTGRES_STATEMENT_TIMEOUT_MS` | `30000` | — |
+| `POSTGRES_QUERY_TIMEOUT_MS` | `35000` | — |
+| `POSTGRES_APPLICATION_NAME` | `commercefull-web` | — |
 
 ## CORS and Cookies
 

@@ -13,7 +13,7 @@
           <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-xl transition-shadow group">
             <div class="relative">
               <% if (item.imageUrl) { %>
-                <img src="<%= item.imageUrl %>" alt="<%= item.productName || item.name %>" class="w-full h-48 object-cover">
+                <img src="<%= item.imageUrl %>" alt="<%= item.productName || item.name %>" class="w-full h-48 object-cover" loading="lazy" decoding="async" width="400" height="192">
               <% } else { %>
                 <div class="w-full h-48 bg-gray-100 flex items-center justify-center">
                   <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

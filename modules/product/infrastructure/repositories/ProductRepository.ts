@@ -61,9 +61,6 @@ export class ProductRepo implements IProductRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params);
-    const total = parseInt(countResult?.count || '0');
-
     // Price sorting resolves against the pricing-owned productBasePrice table
     // (product-level rows only); all other columns sort on the product table.
     // orderBy comes from the query string — restrict to known product columns.
@@ -81,6 +78,14 @@ export class ProductRepo implements IProductRepository {
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
     );
+
+    // A short first page is already an exact total — skip the COUNT(*) scan.
+    const total =
+      offset === 0 && (rows?.length ?? 0) < limit
+        ? (rows?.length ?? 0)
+        : parseInt(
+            (await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params))?.count || '0',
+          );
 
     const products: Product[] = [];
     const rowsList = rows || [];

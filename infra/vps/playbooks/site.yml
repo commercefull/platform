@@ -27,6 +27,9 @@
     - role: postgresql
       tags: [postgres, setup]
 
+    - role: redis
+      tags: [redis, setup]
+
     - role: nginx
       tags: [nginx, setup]
 
@@ -42,6 +45,7 @@
           Installed:
           - Node.js {{ nodejs_version }}
           - PostgreSQL {{ postgres_version }}
+          - Redis
           - Nginx
           - UFW Firewall
 

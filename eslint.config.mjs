@@ -154,6 +154,7 @@ export default [
       '**/*.d.ts',
       '**/*.js',
       'app.mjs',
+      'worker.mjs',
       '!eslint.config.mjs',
       '.env*',
       '!.env.example',

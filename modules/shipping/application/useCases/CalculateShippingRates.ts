@@ -66,6 +66,7 @@ export interface CalculateShippingRatesResponse {
 
 export interface ShippingRateFinderPort {
   findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null>;
+  findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]>;
 }
 
 export class CalculateShippingRatesUseCase {
@@ -116,28 +117,46 @@ export class CalculateShippingRatesUseCase {
         };
       }
 
-      // 3. Get rates for each method across all matching zones
-      const rateOptions: ShippingRateOption[] = [];
-
-      for (const method of methods) {
-        // Evaluate method-level conditions (minWeight, maxWeight, minOrderValue, maxOrderValue)
+      // 3. Get rates for each method across all matching zones — one batch
+      // query instead of a zone×method loop of individual lookups.
+      const eligibleMethods = methods.filter(method => {
         const minOrderValueCents = method.minOrderValueCents ? Number(method.minOrderValueCents) : null;
         const maxOrderValueCents = method.maxOrderValueCents ? Number(method.maxOrderValueCents) : null;
         const minWeight = method.minWeight ? parseFloat(String(method.minWeight)) : null;
         const maxWeight = method.maxWeight ? parseFloat(String(method.maxWeight)) : null;
         const orderWeight = orderDetails.totalWeight ?? 0;
 
-        if (minOrderValueCents !== null && orderDetails.subtotalCents < minOrderValueCents) continue;
-        if (maxOrderValueCents !== null && orderDetails.subtotalCents > maxOrderValueCents) continue;
-        if (minWeight !== null && orderWeight < minWeight) continue;
-        if (maxWeight !== null && orderWeight > maxWeight) continue;
+        if (minOrderValueCents !== null && orderDetails.subtotalCents < minOrderValueCents) return false;
+        if (maxOrderValueCents !== null && orderDetails.subtotalCents > maxOrderValueCents) return false;
+        if (minWeight !== null && orderWeight < minWeight) return false;
+        if (maxWeight !== null && orderWeight > maxWeight) return false;
+        return true;
+      });
 
-        // Find rate for this method across all matching zones
-        let rate: ShippingRate | null = null;
-        for (const z of zones) {
-          rate = await this.shippingRateRepo.findByZoneAndMethod(z.shippingZoneId, method.shippingMethodId);
-          if (rate) break;
+      const zoneIds = zones.map(z => z.shippingZoneId);
+      const zoneRank = new Map(zoneIds.map((id, i) => [id, i]));
+      const allRates =
+        eligibleMethods.length === 0
+          ? []
+          : await this.shippingRateRepo.findByZonesAndMethods(
+              zoneIds,
+              eligibleMethods.map(m => m.shippingMethodId),
+            );
+
+      // For each method keep the rate from the earliest matching zone;
+      // rows arrive ordered by priority so the first seen per pair wins.
+      const rateByMethod = new Map<string, ShippingRate>();
+      for (const rate of allRates) {
+        const existing = rateByMethod.get(rate.shippingMethodId);
+        if (!existing || (zoneRank.get(rate.shippingZoneId) ?? Infinity) < (zoneRank.get(existing.shippingZoneId) ?? Infinity)) {
+          rateByMethod.set(rate.shippingMethodId, rate);
         }
+      }
+
+      const rateOptions: ShippingRateOption[] = [];
+
+      for (const method of eligibleMethods) {
+        const rate = rateByMethod.get(method.shippingMethodId) ?? null;
 
         if (rate) {
           // Evaluate conditions JSON field to filter/adjust the rate

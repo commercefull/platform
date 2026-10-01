@@ -2,6 +2,7 @@ import { query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import type { Product as DbProduct } from '../../../../libs/db/types';
 import { logger } from '../../../../libs/logger';
+import { createCache } from '../../../../libs/cache';
 import {
   ProductSearchFilters,
   ProductSearchResult,
@@ -54,6 +55,11 @@ function mapSearchRow(row: Record<string, unknown>): ProductSearchRow {
     currencyCode: (row.currencyCode as string | null) ?? null,
   };
 }
+
+// Facets aggregate over the whole active catalog (the facet queries ignore
+// request filters), so one short-TTL entry serves every shopper. Product
+// mutations settle within the TTL — facet counts are display-only.
+const facetsCache = createCache<SearchFacets>({ namespace: 'productFacets', ttlMs: 60_000 });
 
 class ProductSearchService implements ProductSearchServicePort {
   private readonly productTable = Table.Product;
@@ -459,6 +465,10 @@ class ProductSearchService implements ProductSearchServicePort {
    * Compute facets for the current search
    */
   private async computeFacets(filters: ProductSearchFilters): Promise<SearchFacets> {
+    return facetsCache.getOrSet('all', () => this.computeFacetsUncached(filters));
+  }
+
+  private async computeFacetsUncached(filters: ProductSearchFilters): Promise<SearchFacets> {
     const [categoryFacets, brandFacets, priceRangeFacets, attributeFacets] = await Promise.all([
       this.getCategoryFacets(filters),
       this.getBrandFacets(filters),
@@ -545,26 +555,39 @@ class ProductSearchService implements ProductSearchServicePort {
     const range = maxPriceCents - minPriceCents;
     const step = Math.ceil(range / 5);
 
-    // Generate price range buckets
-    const ranges: PriceRangeFacet[] = [];
+    // Count all five buckets in a single scan instead of one COUNT(*) per
+    // bucket — each previous bucket query re-scanned the full join.
+    const buckets: Array<{ min: number; max: number }> = [];
     for (let i = 0; i < 5; i++) {
-      const min = minPriceCents + step * i;
-      const max = i === 4 ? maxPriceCents : minPriceCents + step * (i + 1);
+      buckets.push({
+        min: minPriceCents + step * i,
+        max: i === 4 ? maxPriceCents : minPriceCents + step * (i + 1),
+      });
+    }
 
-      const countSql = `
-        SELECT COUNT(*) as count
-        FROM "${this.productTable}" p
-        JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."productVariantId" IS NULL
-        WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-          AND COALESCE(bp."salePriceCents", bp."priceCents") >= $1
-          AND COALESCE(bp."salePriceCents", bp."priceCents") <= $2
-      `;
+    const bucketCountsSql = `
+      SELECT ${buckets
+        .map(
+          (_, i) =>
+            `COUNT(*) FILTER (WHERE COALESCE(bp."salePriceCents", bp."priceCents") >= $${i * 2 + 1} AND COALESCE(bp."salePriceCents", bp."priceCents") <= $${i * 2 + 2}) AS "b${i}"`,
+        )
+        .join(',\n        ')}
+      FROM "${this.productTable}" p
+      JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."productVariantId" IS NULL
+      WHERE p."deletedAt" IS NULL AND p."status" = 'active'
+    `;
 
-      const countResult = await query<Array<{ count: string }>>(countSql, [min, max]);
-      const count = countResult ? parseInt(countResult[0]?.count || '0', 10) : 0;
+    const bucketRows = await query<Array<Record<string, string>>>(
+      bucketCountsSql,
+      buckets.flatMap(b => [b.min, b.max]),
+    );
+    const bucketRow = bucketRows?.[0] || {};
 
+    const ranges: PriceRangeFacet[] = [];
+    for (let i = 0; i < buckets.length; i++) {
+      const count = parseInt(bucketRow[`b${i}`] || '0', 10);
       if (count > 0) {
-        ranges.push({ min, max, count });
+        ranges.push({ ...buckets[i], count });
       }
     }
 

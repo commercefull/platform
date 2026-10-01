@@ -34,7 +34,7 @@ export function resolveTrustProxy(raw: string | undefined, isProduction: boolean
   return hops === 0 ? false : hops;
 }
 
-const ORIGIN_VERIFY_EXEMPT_PATHS = new Set(['/health']);
+const ORIGIN_VERIFY_EXEMPT_PATHS = new Set(['/health', '/live', '/ready']);
 
 /**
  * Reject requests that did not traverse the CDN/WAF.
@@ -111,7 +111,7 @@ export function isRateLimitEnabled(env: NodeJS.ProcessEnv = process.env): boolea
 export function createRateLimiters() {
   const enabled = isRateLimitEnabled();
   // Structural types: express-rate-limit is typed against raw Express, not libs/http
-  const skip = (req: RateLimitedRequest) => !enabled || req.path === '/health';
+  const skip = (req: RateLimitedRequest) => !enabled || ORIGIN_VERIFY_EXEMPT_PATHS.has(req.path);
   const handler = (req: RateLimitedRequest, res: { status(code: number): { json(body: unknown): unknown } }) => {
     logger.warn('Rate limit exceeded', { path: req.path, ip: req.ip });
     res.status(429).json({ success: false, message: 'Too many requests, please try again later.' });

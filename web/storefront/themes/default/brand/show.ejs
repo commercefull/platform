@@ -78,7 +78,7 @@
       <a href="/products/<%= product.slug %>/<%= product.productId %>" class="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
         <div class="aspect-square bg-gray-100 overflow-hidden">
           <% if (product.primaryImageUrl) { %>
-          <img src="<%= product.primaryImageUrl %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+          <img src="<%= product.primaryImageUrl %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" width="400" height="400">
           <% } else { %>
           <div class="w-full h-full flex items-center justify-center text-gray-300">
             <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">

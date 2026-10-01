@@ -36,6 +36,10 @@ worker.mjs
 *.tsbuildinfo
 public/javascripts/storefront/bundle.min.js
 public/javascripts/storefront/bundle.min.js.map
+public/javascripts/storefront/bundle.*.js
+public/stylesheets/storefront/compiled.*.css
+public/asset-manifest.json
+artifacts/performance/
 
 # Logs
 logs

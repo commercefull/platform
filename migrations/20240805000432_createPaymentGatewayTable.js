@@ -5,7 +5,8 @@ exports.up = function (knex) {
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
     t.string('name', 100).notNullable();
-    t.enum('provider', ['stripe', 'square', 'paypal', 'manual', 'other']).notNullable();
+    // Open identifier set (PSPRoute domain uses klarna/affirm/etc.) — a text column, not an enum CHECK
+    t.string('provider', 50).notNullable();
     t.boolean('isActive').notNullable().defaultTo(true);
     t.boolean('isDefault').notNullable().defaultTo(false);
     t.boolean('isTestMode').notNullable().defaultTo(false);

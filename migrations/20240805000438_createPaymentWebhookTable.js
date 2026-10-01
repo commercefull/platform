@@ -3,9 +3,12 @@ exports.up = function (knex) {
     t.uuid('paymentWebhookId').primary().defaultTo(knex.raw('uuidv7()'));
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.uuid('organizationId').notNullable().references('organizationId').inTable('organization').onDelete('CASCADE');
+    // Nullable: provider-level webhooks are ingested before the owning organization is resolved
+    t.uuid('organizationId').references('organizationId').inTable('organization').onDelete('CASCADE');
     t.uuid('gatewayId').references('paymentGatewayId').inTable('paymentGateway').onDelete('CASCADE');
     t.enum('provider', ['stripe', 'square', 'paypal', 'manual', 'other']).notNullable();
+    // Provider-side event id for idempotent webhook dedup (ProcessPaymentWebhook.findWebhookByExternalId)
+    t.string('externalId', 191).unique();
     t.string('eventType', 100).notNullable();
     t.jsonb('payload').notNullable();
     t.jsonb('headers');

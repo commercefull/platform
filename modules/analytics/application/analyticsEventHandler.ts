@@ -4,10 +4,13 @@
  */
 
 import { eventBus } from '../../../libs/events/eventBus';
-import { AnalyticsDataRepository } from '../infrastructure';
+import { analyticsWriteBuffer } from '../infrastructure';
 
-const reportingRepo = AnalyticsDataRepository.reporting;
-const analyticsRepo = AnalyticsDataRepository.analytics;
+// Analytics writes go through the write buffer: trackEvent rows are flushed
+// as multi-row INSERTs and sales/performance deltas are aggregated by
+// conflict key — one upsert per key per flush window instead of per event.
+const reportingRepo = analyticsWriteBuffer;
+const analyticsRepo = analyticsWriteBuffer;
 
 // ============================================================================
 // Event Payload Interfaces
@@ -91,7 +94,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       organizationId: data.organizationId as string | undefined,
       customerId: data.customerId as string | undefined,
       orderId: data.orderId as string | undefined,
-      eventValueCents: (data.totalAmountCents) as number | undefined,
+      eventValueCents: data.totalAmountCents as number | undefined,
       eventQuantity: data.itemCount as number | undefined,
       currency: data.currency as string | undefined,
       channel: (data.channel as string) || 'web',
@@ -113,11 +116,11 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
       currencyCode: (data.currency as string) || 'USD',
       orderCount: 1,
       itemsSold: (data.itemCount as number) || 0,
-      grossRevenueCents: ((data.totalAmountCents) as number) || 0,
+      grossRevenueCents: (data.totalAmountCents as number) || 0,
       discountTotalCents: (data.discountTotalCents as number) || 0,
       taxTotalCents: (data.taxTotalCents as number) || 0,
       shippingRevenueCents: (data.shippingTotalCents as number) || 0,
-      netRevenueCents: (((data.totalAmountCents) as number) || 0) - ((data.taxTotalCents as number) || 0),
+      netRevenueCents: ((data.totalAmountCents as number) || 0) - ((data.taxTotalCents as number) || 0),
       newCustomers: isNewCustomer ? 1 : 0,
       returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
       guestOrders: isGuest ? 1 : 0,

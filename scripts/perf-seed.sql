@@ -39,9 +39,10 @@ DROP TABLE perf_products;
 -- ---------------------------------------------------------------------------
 -- Products — mixed status/visibility so planner sees realistic selectivity
 -- (~90% active+visible, 5% draft, 5% hidden; ~5% featured; ~20% on sale)
+-- Prices live in "productBasePrice" (cents); ~20% of products get a sale price.
 -- ---------------------------------------------------------------------------
 INSERT INTO product (sku, name, slug, description, "shortDescription", status, visibility,
-                     price, "basePrice", "salePrice", currency, "isFeatured", "isNew", "isBestseller",
+                     "isFeatured", "isNew", "isBestseller",
                      "averageRating", "reviewCount", "storeId", "organizationId", "publishedAt")
 SELECT 'PERF-' || i,
        (ARRAY['Wireless','Ergonomic','Portable','Premium','Compact','Smart','Classic','Ultra'])[1 + (i % 8)]
@@ -55,10 +56,6 @@ SELECT 'PERF-' || i,
             WHEN i % 20 = 18 THEN 'draft'
             ELSE 'archived' END,
        CASE WHEN i % 20 = 19 THEN 'not_visible' ELSE 'visible' END,
-       (10 + (i % 490))::numeric + 0.99,
-       (10 + (i % 490))::numeric + 0.99,
-       CASE WHEN i % 5 = 0 THEN (8 + (i % 400))::numeric + 0.99 END,
-       'USD',
        i % 20 = 0,          -- 5% featured
        i % 10 = 0,          -- 10% new
        i % 15 = 0,          -- ~7% bestseller
@@ -69,15 +66,22 @@ SELECT 'PERF-' || i,
        now() - ((i % 365) || ' days')::interval
 FROM generate_series(1, :perf_products) AS i;
 
+INSERT INTO "productBasePrice" ("productId", "currencyCode", "priceCents", "salePriceCents")
+SELECT "productId", 'USD',
+       ((10 + (replace(sku, 'PERF-', '')::int % 490))::numeric * 100 + 99)::bigint,
+       CASE WHEN replace(sku, 'PERF-', '')::int % 5 = 0
+            THEN ((8 + (replace(sku, 'PERF-', '')::int % 400))::numeric * 100 + 99)::bigint END
+FROM product WHERE sku LIKE 'PERF-%';
+
 -- ---------------------------------------------------------------------------
 -- Variants — 1–2 per product
 -- ---------------------------------------------------------------------------
-INSERT INTO "productVariant" ("productId", sku, status, "isDefault", "optionValues", price)
-SELECT "productId", sku || '-V1', 'active', true, '{}'::jsonb, price
+INSERT INTO "productVariant" ("productId", sku, status, "isDefault", "optionValues")
+SELECT "productId", sku || '-V1', 'active', true, '{}'::jsonb
 FROM product WHERE sku LIKE 'PERF-%';
 
-INSERT INTO "productVariant" ("productId", sku, status, "isDefault", "optionValues", price)
-SELECT "productId", sku || '-V2', 'active', false, '{"size":"L"}'::jsonb, price + 5
+INSERT INTO "productVariant" ("productId", sku, status, "isDefault", "optionValues")
+SELECT "productId", sku || '-V2', 'active', false, '{"size":"L"}'::jsonb
 FROM product WHERE sku LIKE 'PERF-%' AND right(sku, 1) IN ('0','2','4','6','8'); -- 50% get a 2nd variant
 
 -- ---------------------------------------------------------------------------
@@ -132,7 +136,7 @@ FROM generate_series(1, :perf_customers) AS i;
 -- ---------------------------------------------------------------------------
 INSERT INTO "order" ("orderNumber", "customerId", "customerEmail", "customerName",
                      status, "paymentStatus", "fulfillmentStatus", "currencyCode",
-                     subtotal, "totalAmount", "totalItems", "totalQuantity",
+                     "subtotalCents", "totalAmountCents", "totalItems", "totalQuantity",
                      "orderDate", "storeId", "organizationId")
 SELECT 'PERF-' || i,
        c."customerId",
@@ -142,8 +146,8 @@ SELECT 'PERF-' || i,
        (ARRAY['pending','paid','paid','paid','refunded'])[1 + (i % 5)],
        (ARRAY['unfulfilled','partiallyFulfilled','fulfilled','fulfilled','unfulfilled'])[1 + (i % 5)],
        'USD',
-       (20 + (i % 300))::numeric,
-       (22 + (i % 300))::numeric,
+       ((20 + (i % 300))::numeric * 100)::bigint,
+       ((22 + (i % 300))::numeric * 100)::bigint,
        1 + (i % 3),
        1 + (i % 5),
        now() - ((i % 365) || ' days')::interval - ((i % 86400) || ' seconds')::interval,
@@ -153,14 +157,16 @@ FROM generate_series(1, :perf_orders) AS i
 JOIN customer c ON c.email = 'perf-' || (i % :perf_customers + 1) || '@example.com';
 
 CREATE TEMP TABLE perf_products AS
-SELECT "productId", sku, name, price,
-       row_number() OVER (ORDER BY sku) - 1 AS rn
-FROM product WHERE sku LIKE 'PERF-%';
+SELECT p."productId", p.sku, p.name, bp."priceCents",
+       row_number() OVER (ORDER BY p.sku) - 1 AS rn
+FROM product p
+JOIN "productBasePrice" bp ON bp."productId" = p."productId" AND bp."currencyCode" = 'USD'
+WHERE p.sku LIKE 'PERF-%';
 
 INSERT INTO "orderItem" ("orderId", "productId", "productVariantId", sku, name,
-                         quantity, "unitPrice", "discountedUnitPrice", "lineTotal")
+                         quantity, "unitPriceCents", "discountedUnitPriceCents", "lineTotalCents")
 SELECT o."orderId", p."productId", pv."productVariantId", p.sku, p.name,
-       1 + (i % 4), p.price, p.price, p.price * (1 + (i % 4))
+       1 + (i % 4), p."priceCents", p."priceCents", p."priceCents" * (1 + (i % 4))
 FROM "order" o
 JOIN LATERAL generate_series(1, o."totalItems") AS i ON true
 JOIN perf_products p ON p.rn = abs(hashtext(o."orderNumber" || i)) % (SELECT count(*) FROM perf_products)

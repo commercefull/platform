@@ -17,7 +17,7 @@ import { WebhookEndpointEntity } from '../../domain/entities/WebhookEndpoint';
 import { WebhookDeliveryEntity } from '../../domain/entities/WebhookDelivery';
 import { WebhookRepositoryInterface } from '../../domain/repositories/WebhookRepository';
 
-const RETRY_POLL_INTERVAL_MS = 5_000;
+const RETRY_POLL_INTERVAL_MS = Number(process.env.WEBHOOK_RETRY_POLL_INTERVAL_MS || 5_000);
 const RETRY_BATCH_SIZE = 20;
 
 export class WebhookDispatchService {
@@ -33,7 +33,12 @@ export class WebhookDispatchService {
    */
   start(): void {
     eventBus.on('*', this.handleEvent.bind(this));
-    this.startRetryWorker();
+    // The retry poller runs once per deployment — only in processes that
+    // consume events (worker, or a single-process deployment). PM2 web
+    // workers set EVENT_CONSUMER_DISABLED=1 and must not poll.
+    if (process.env.EVENT_CONSUMER_DISABLED !== '1') {
+      this.startRetryWorker();
+    }
     logger.info('[WEBHOOK] Dispatch service started', { nodeId: this.nodeId });
   }
 

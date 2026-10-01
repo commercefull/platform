@@ -1,14 +1,22 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Analytics Business Controller
  * Handles admin/merchant analytics and reporting operations
  */
 
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
+import { createCache } from '../../../../libs/cache';
 import { manageAnalyticsReportingUseCase } from '../../application/wired';
 
-
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
+
+// The sales dashboard runs several full-range aggregates per request. The
+// payload tolerates ~60s staleness, so cache it per org + date range; callers
+// that omit dates get a minute-quantized window so keys stay stable.
+const salesDashboardCache = createCache<unknown>({ namespace: 'analyticsSalesDashboard', ttlMs: 60_000 });
+
+const MINUTE_MS = 60_000;
+const DAY_MS = 24 * 60 * MINUTE_MS;
 
 // ============================================================================
 // Sales Analytics
@@ -17,23 +25,24 @@ type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Pr
 export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
   const { startDate, endDate, organizationId } = req.query;
 
-  const start = startDate ? new Date(startDate as string) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const end = endDate ? new Date(endDate as string) : new Date();
+  const end = endDate ? new Date(endDate as string) : new Date(Math.floor(Date.now() / MINUTE_MS) * MINUTE_MS);
+  const start = startDate ? new Date(startDate as string) : new Date(end.getTime() - 30 * DAY_MS);
 
-  const [summary, dailyData, realTime] = await Promise.all([
-    manageAnalyticsReportingUseCase.getSalesSummary(start, end, organizationId as string),
-    manageAnalyticsReportingUseCase.getSalesDaily({ startDate: start, endDate: end, organizationId: organizationId as string }),
-    manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, 60),
-  ]);
+  const cacheKey = `salesDashboard:${(organizationId as string) || 'all'}:${start.toISOString()}:${end.toISOString()}`;
+
+  const data = await salesDashboardCache.getOrSet(cacheKey, async () => {
+    const [summary, dailyData, realTime] = await Promise.all([
+      manageAnalyticsReportingUseCase.getSalesSummary(start, end, organizationId as string),
+      manageAnalyticsReportingUseCase.getSalesDaily({ startDate: start, endDate: end, organizationId: organizationId as string }),
+      manageAnalyticsReportingUseCase.getRealTimeMetrics(organizationId as string, 60),
+    ]);
+    return { summary, daily: dailyData.data, realTime };
+  });
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          summary,
-          daily: dailyData.data,
-          realTime,
-        },
-      });
+    success: true,
+    data,
+  });
 };
 
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {

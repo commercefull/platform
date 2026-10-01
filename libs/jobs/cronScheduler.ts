@@ -10,6 +10,7 @@
 import { query } from '../db';
 import { eventBus } from '../events/eventBus';
 import { logger } from '../logger';
+import { observeScheduledJob } from '../runtimeMetrics';
 
 export interface ScheduledJob {
   id: string;
@@ -99,6 +100,7 @@ class CronScheduler {
       };
 
       this.addToHistory(result);
+      observeScheduledJob(id, true, result.duration);
       job.runCount++;
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);
@@ -112,6 +114,7 @@ class CronScheduler {
       };
 
       this.addToHistory(result);
+      observeScheduledJob(id, false, result.duration);
       job.errorCount++;
       job.lastRun = new Date();
       job.nextRun = new Date(Date.now() + job.intervalMs);

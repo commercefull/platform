@@ -18,20 +18,14 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Counter, Trend } from 'k6/metrics';
-import { BASE_URL, checkResponse } from './config.js';
+import { BASE_URL, checkResponse, expectStatuses, fetchTestProduct, loadStages } from './config.js';
 
 const flowErrors = new Rate('order_flow_errors');
 const ordersCompleted = new Counter('orders_completed');
 const flowDuration = new Trend('order_flow_total_duration', true);
 
 export const options = {
-  stages: [
-    { duration: '20s', target: 5 },
-    { duration: '2m', target: 5 },
-    { duration: '20s', target: 10 },
-    { duration: '2m', target: 10 },
-    { duration: '20s', target: 0 },
-  ],
+  stages: loadStages(5, 10, '20s', '2m'),
   thresholds: {
     http_req_failed: ['rate<0.10'],
     http_req_duration: ['p(95)<1000', 'p(99)<3000'],
@@ -52,16 +46,22 @@ const SHIPPING_ADDRESS = {
   phone: '555-0100',
 };
 
-export default function () {
+export function setup() {
+  return { product: fetchTestProduct() };
+}
+
+export default function (data) {
+  const product = data.product;
   const flowStart = Date.now();
   let basketId;
   let checkoutId;
 
   // ─── 1. Create basket ──────────────────────────────────────────────
+  // POST /customer/basket returns 201 Created.
   group('Order Flow: Create Basket', function () {
     const res = http.post(`${BASE_URL}/customer/basket`, JSON.stringify({}), jsonHeaders);
-    flowErrors.add(!checkResponse(res, 200, 'create-basket'));
-    if (res.status === 200) {
+    flowErrors.add(!checkResponse(res, 201, 'create-basket'));
+    if (res.status === 201) {
       basketId = res.json('data.basketId');
     }
   });
@@ -75,18 +75,23 @@ export default function () {
 
   // ─── 2. Add item to basket ─────────────────────────────────────────
   group('Order Flow: Add Item', function () {
+    if (!product) {
+      console.error('No purchasable product found — seed the database before running load tests');
+      flowErrors.add(true);
+      return;
+    }
     const res = http.post(
       `${BASE_URL}/customer/basket/${basketId}/items`,
       JSON.stringify({
-        productId: `perf-test-product-${__VU}`,
-        sku: `PERF-SKU-${__VU}`,
-        name: 'Performance Test Product',
+        productId: product.productId,
+        sku: product.sku,
+        name: product.name,
         quantity: 1,
-        unitPrice: 29.99,
+        unitPrice: product.unitPrice,
       }),
       jsonHeaders,
     );
-    flowErrors.add(!checkResponse(res, 200, 'add-item'));
+    flowErrors.add(!checkResponse(res, 201, 'add-item'));
   });
 
   sleep(Math.random() * 0.5);
@@ -94,8 +99,8 @@ export default function () {
   // ─── 3. Initiate checkout ──────────────────────────────────────────
   group('Order Flow: Initiate Checkout', function () {
     const res = http.post(`${BASE_URL}/customer/checkout`, JSON.stringify({ basketId }), jsonHeaders);
-    flowErrors.add(!checkResponse(res, 200, 'initiate-checkout'));
-    if (res.status === 200) {
+    flowErrors.add(!checkResponse(res, 201, 'initiate-checkout'));
+    if (res.status === 201) {
       checkoutId = res.json('data.checkoutId');
     }
   });
@@ -182,7 +187,10 @@ export default function () {
 
     // ─── 10. Create payment intent ───────────────────────────────────
     group('Order Flow: Create Payment Intent', function () {
-      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/payment-intent`, JSON.stringify({}), jsonHeaders);
+      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/payment-intent`, JSON.stringify({}), {
+        ...jsonHeaders,
+        ...expectStatuses(400),
+      });
       // 200 (intent created) or 400 (invalid state) are acceptable
       flowErrors.add(!(res.status === 200 || res.status === 400));
     });
@@ -191,7 +199,10 @@ export default function () {
 
     // ─── 11. Complete checkout ───────────────────────────────────────
     group('Order Flow: Complete Checkout', function () {
-      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/complete`, JSON.stringify({}), jsonHeaders);
+      const res = http.post(`${BASE_URL}/customer/checkout/${checkoutId}/complete`, JSON.stringify({}), {
+        ...jsonHeaders,
+        ...expectStatuses(400),
+      });
       // 200 (order created) or 400 (missing prerequisites) are acceptable
       if (res.status === 200) {
         ordersCompleted.add(1);

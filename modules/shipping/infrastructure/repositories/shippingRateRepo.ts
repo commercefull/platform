@@ -46,6 +46,21 @@ export async function findByZoneAndMethod(zoneId: string, methodId: string): Pro
   );
 }
 
+/**
+ * Batch lookup — one query for all zone×method combinations. Callers pick the
+ * first match in their preferred zone order; ordering by priority preserves the
+ * per-(zone, method) "lowest priority wins" semantics of findByZoneAndMethod.
+ */
+export async function findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]> {
+  if (zoneIds.length === 0 || methodIds.length === 0) return [];
+  return (
+    (await query<ShippingRate[]>(
+      `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = ANY($1) AND "shippingMethodId" = ANY($2) AND "isActive" = true ORDER BY "priority" ASC`,
+      [zoneIds, methodIds],
+    )) || []
+  );
+}
+
 export async function findActive(zoneId?: string, methodId?: string): Promise<ShippingRate[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "isActive" = true`;
   const params: unknown[] = [];
@@ -161,6 +176,7 @@ export default {
   findByZone,
   findByMethod,
   findByZoneAndMethod,
+  findByZonesAndMethods,
   findActive,
   create,
   update,

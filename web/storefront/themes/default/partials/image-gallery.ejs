@@ -20,6 +20,10 @@
       alt="<%= productName %>"
       class="w-full h-full object-cover transition-transform duration-300"
       loading="eager"
+      decoding="async"
+      fetchpriority="high"
+      width="800"
+      height="800"
     >
     <!-- Zoom hint -->
     <div class="absolute bottom-4 right-4 bg-white/80 px-3 py-1 rounded text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -40,7 +44,7 @@
       data-gallery-thumb="<%= image %>"
       data-gallery-index="<%= index %>"
     >
-      <img src="<%= image %>" alt="<%= productName %> - View <%= index + 1 %>" class="w-full h-full object-cover" loading="lazy">
+      <img src="<%= image %>" alt="<%= productName %> - View <%= index + 1 %>" class="w-full h-full object-cover" loading="lazy" decoding="async" width="160" height="160">
     </button>
     <% }) %>
   </div>
@@ -57,7 +61,7 @@
     <button type="button" data-gallery-lightbox-next class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10" aria-label="Next image">
       <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
     </button>
-    <img data-gallery-lightbox-img src="<%= images[0] %>" alt="<%= productName %>" class="max-w-full max-h-full object-contain">
+    <img data-gallery-lightbox-img src="<%= images[0] %>" alt="<%= productName %>" class="max-w-full max-h-full object-contain" loading="lazy" decoding="async" width="1200" height="1200">
     <p data-gallery-lightbox-counter class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">1 / <%= images.length %></p>
   </div>
 </div>

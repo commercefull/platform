@@ -1,6 +1,7 @@
 import type { Redis } from '../redisClient';
 import { logger } from '../logger';
 import type { Cache } from './types';
+import { observeCache } from '../runtimeMetrics';
 
 /**
  * Redis-backed cache. Values are JSON-serialized; keys are namespaced as
@@ -22,8 +23,10 @@ export class RedisCache<T = unknown> implements Cache<T> {
   async get(key: string): Promise<T | undefined> {
     try {
       const raw = await this.client.get(this.prefix + key);
+      observeCache('redis', raw === null ? 'miss' : 'hit');
       return raw === null ? undefined : (JSON.parse(raw) as T);
     } catch (e) {
+      observeCache('redis', 'error');
       logger.warn('Redis cache get failed — treating as miss', { key, error: (e as Error).message });
       return undefined;
     }

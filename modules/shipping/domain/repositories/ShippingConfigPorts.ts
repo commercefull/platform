@@ -65,6 +65,7 @@ export interface ShippingRatePort {
   findActive(zoneId?: string, methodId?: string): Promise<ShippingRate[]>;
   findByMethod(methodId: string, activeOnly?: boolean): Promise<ShippingRate[]>;
   findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null>;
+  findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]>;
   create(input: CreateShippingRateInput): Promise<ShippingRate>;
   update(id: string, input: Record<string, unknown>): Promise<ShippingRate | null>;
   activate(id: string): Promise<ShippingRate | null>;

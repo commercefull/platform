@@ -1,4 +1,5 @@
 import type { Cache } from './types';
+import { observeCache } from '../runtimeMetrics';
 
 /**
  * In-process cache backed by a Map with per-entry expiry. Suitable for
@@ -17,11 +18,16 @@ export class MemoryCache<T = unknown> implements Cache<T> {
 
   async get(key: string): Promise<T | undefined> {
     const entry = this.entries.get(key);
-    if (!entry) return undefined;
-    if (entry.expiresAt <= Date.now()) {
-      this.entries.delete(key);
+    if (!entry) {
+      observeCache('memory', 'miss');
       return undefined;
     }
+    if (entry.expiresAt <= Date.now()) {
+      this.entries.delete(key);
+      observeCache('memory', 'miss');
+      return undefined;
+    }
+    observeCache('memory', 'hit');
     return entry.value;
   }
 

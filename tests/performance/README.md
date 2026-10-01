@@ -37,6 +37,13 @@ yarn db:seed     # Seed test data (needed for auth/merchant tests)
 yarn dev         # Start the dev server
 ```
 
+The auth and merchant suites need working credentials. If logins return 401,
+register a customer via `POST /customer/identity/register` (legacy bcrypt seed
+rows cannot verify — passwords are hashed with scrypt) and point `TEST_*` env
+vars at accounts created through the API. Basket/checkout/coupon/order suites
+need at least one purchasable product; they pick the first catalog entry
+automatically, or you can pin one with `TEST_PRODUCT_ID`.
+
 ## Test Suites
 
 | File                     | Type   | VUs    | Duration | Description                                                   |
@@ -104,13 +111,30 @@ docker run --rm -i --network host grafana/k6 run - < tests/performance/smoke.js
 
 Environment variables (all optional, have sensible defaults):
 
-| Variable                 | Default                 | Description            |
-| ------------------------ | ----------------------- | ---------------------- |
-| `BASE_URL`               | `http://localhost:3000` | Target server URL      |
-| `TEST_EMAIL`             | `user@example.com`      | Customer test email    |
-| `TEST_PASSWORD`          | `password123`           | Customer test password |
-| `TEST_MERCHANT_EMAIL`    | `merchant@example.com`  | Merchant test email    |
-| `TEST_MERCHANT_PASSWORD` | `password123`           | Merchant test password |
+| Variable                 | Default                 | Description                                    |
+| ------------------------ | ----------------------- | ---------------------------------------------- |
+| `BASE_URL`               | `http://localhost:3000` | Target server URL                              |
+| `TEST_EMAIL`             | `user@example.com`      | Customer test email                            |
+| `TEST_PASSWORD`          | `password123`           | Customer test password                         |
+| `TEST_MERCHANT_EMAIL`    | `merchant@example.com`  | Merchant test email                            |
+| `TEST_MERCHANT_PASSWORD` | `password123`           | Merchant test password                         |
+| `TEST_PRODUCT_ID`        | First catalog product   | Product used for basket/checkout/coupon writes |
+| `TEST_PRODUCT_SKU`       | `TEST-SKU`              | SKU paired with `TEST_PRODUCT_ID`              |
+| `TEST_PRODUCT_PRICE`     | `19.99`                 | Unit price paired with `TEST_PRODUCT_ID`       |
+| `COUPON_CODES`           | Seed promotion codes    | Comma-separated coupon codes to exercise       |
+| `TARGET_VUS`             | Suite default           | Override peak VUs for load suites              |
+| `RAMP_DURATION`          | Suite default           | Override each ramp stage duration              |
+| `STEADY_DURATION`        | Suite default           | Override each steady stage duration            |
+| `PERF_TARGETS`           | `50,100,250,500`        | VU matrix used by `yarn perf:baseline`         |
+| `PERF_SUITES`            | All load suites         | Comma-separated baseline suites                |
+
+Run baselines against a production build in an isolated performance environment. Set `RATE_LIMIT_DISABLED=1` there so the load generator's single source IP measures application capacity instead of the abuse-control budget. Keep rate limits enabled in real production.
+
+```bash
+BASE_URL=https://performance.example.com yarn perf:baseline
+```
+
+Summaries are written under `artifacts/performance/`.
 
 ## Realistic-volume testing
 

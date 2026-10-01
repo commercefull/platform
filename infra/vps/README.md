@@ -9,6 +9,7 @@ Hardened Ansible infrastructure for deploying Commercefull to a single VPS.
 | Ubuntu     | 22.04+  | Fresh VPS with SSH access         |
 | Node.js    | 22      | Via NodeSource repo               |
 | PostgreSQL | 18      | Via PGDG repo, scram-sha-256 auth |
+| Redis      | System  | Shared sessions and application cache |
 | Nginx      | Latest  | TLS 1.2/1.3, HSTS, rate limiting  |
 | PM2        | Latest  | Process manager, auto-restart     |
 | Yarn       | Latest  | Package manager                   |
@@ -17,9 +18,11 @@ Hardened Ansible infrastructure for deploying Commercefull to a single VPS.
 ## Architecture
 
 ```
-Internet → Nginx (443/SSL) → Node.js (:3000 via PM2) → PostgreSQL (localhost)
-                ↓
-         Static files served from /home/ubuntu/app/public/
+Internet → Nginx (443/SSL) → PM2 web cluster (:3000) → PostgreSQL (localhost)
+                ↓                    ↓
+         Static files             Redis (Unix socket)
+                                      ↑
+                            PM2 worker (:3001, internal)
 ```
 
 ### Directory Layout on VPS
@@ -72,6 +75,8 @@ vim group_vars/all.yml
 ssh ubuntu@your-server
 nano ~/deployments/shared/.env
 # Add: DATABASE_URL, NODE_ENV, SESSION_SECRET, etc.
+# PM2 config uses the local Redis Unix socket, Redis-backed sessions/cache,
+# the PostgreSQL event outbox, and a singleton worker automatically.
 ```
 
 ### 3. Deploy
