@@ -10,7 +10,7 @@ import compression from 'compression';
 import session from 'express-session';
 import cors from 'cors';
 import { hpp } from './libs/hpp';
-import { pool } from './libs/db/pool';
+import { closeDatabasePool, getPoolStats, pool } from './libs/db/pool';
 import { resolveTestDatabase, runWithTestDb } from './libs/db/testDbContext';
 import { startQueryCounterContext } from './libs/db/queryCounter';
 import { formCheckbox, formHidden, formInput, formLegend, formMultiSelect, formSelect, formSubmit, formText } from './libs/form';
@@ -28,8 +28,15 @@ import { loadOrgRolePolicies } from './libs/rbac/rolePolicyRepository';
 import { registerModuleManifestsSync } from './boot/moduleManifests';
 import { themeRegistry } from './modules/theme/domain/services/ThemeRegistry';
 import { blockSchemaRegistry } from './modules/pagebuilder/domain/services/BlockSchemaRegistry';
+import { flushAnalyticsWrites } from './modules/analytics/infrastructure';
 import { validateAllSecrets, validateCorsOrigins, getSecret } from './libs/secrets';
 import { AUTH_RATE_LIMITED_PATHS, createOriginVerifyMiddleware, createRateLimiters, resolveTrustProxy } from './libs/httpSecurity';
+import { closeRedisClient, getRedisClient } from './libs/redisClient';
+import { createHealthService } from './libs/health';
+import { cronScheduler } from './libs/jobs/cronScheduler';
+import { jsonResponse, sendResponse, setHeader } from './libs/apiResponse';
+import { loadAssetManifest } from './libs/assets';
+import { observeHttpRequest, renderRuntimeMetrics } from './libs/runtimeMetrics';
 
 const PRODUCTION_CDN_SCRIPTS = [
   'https://cdn.jsdelivr.net/npm/chart.js',
@@ -55,14 +62,29 @@ validateAllSecrets();
 // Initialize event handlers (module-gated; analytics included) and event transport
 registerAllEventHandlers();
 
+const redisRequired = process.env.CACHE_BACKEND === 'redis' || process.env.SESSION_BACKEND === 'redis';
+const healthService = createHealthService({
+  checkDatabase: async () => {
+    await pool.query('SELECT 1');
+  },
+  checkRedis: async () => {
+    await getRedisClient().ping();
+  },
+  requiresRedis: redisRequired,
+  timeoutMs: Number(process.env.HEALTH_CHECK_TIMEOUT_MS || 2_000),
+});
+
 // Install the configured event transport and start its subscriber.
 // EVENT_BUS_PROVIDER=memory|postgres|gcp-pubsub|aws-sqs|azure-servicebus
 // (default: memory — in-process dispatch). OUTBOX_DISABLED=1 is a legacy
 // override that forces the memory provider.
 initEventTransport(eventBus.dispatch.bind(eventBus))
-  .then(() => startEventSubscriber())
+  .then(async () => {
+    if (process.env.EVENT_CONSUMER_DISABLED !== '1') await startEventSubscriber();
+    healthService.markStarted();
+  })
   .catch(err => {
-    logger.error('Event transport init failed; staying on in-memory dispatch', {
+    logger.error('Event transport init failed', {
       error: (err as Error).message,
     });
   });
@@ -81,6 +103,10 @@ if (process.env.POSTGRES_HOST) {
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
+const rootDir = path.resolve();
+const assetManifest = loadAssetManifest();
+app.locals.storefrontJsPath = isProduction ? assetManifest.storefrontJs : '/javascripts/storefront/main.js';
+app.locals.storefrontCssPath = isProduction ? assetManifest.storefrontCss : '/stylesheets/storefront/compiled.css';
 let loadPath;
 
 // ============================================================================
@@ -166,28 +192,55 @@ const corsOptions: cors.CorsOptions = {
   maxAge: 86400, // 24 hours
 };
 app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => observeHttpRequest(req.method, req.path, res.statusCode, Date.now() - startedAt));
+  next();
+});
+
+app.get('/live', (_req, res) => jsonResponse(res, 200, healthService.liveness()));
+app.get('/ready', async (_req, res) => {
+  const report = await healthService.readiness();
+  jsonResponse(res, report.status === 'ok' ? 200 : 503, report);
+});
+app.get('/health', async (_req, res) => {
+  const report = await healthService.readiness();
+  jsonResponse(res, report.status === 'ok' ? 200 : 503, report);
+});
+if (process.env.METRICS_ENABLED === '1') {
+  app.get('/metrics', (_req, res) => {
+    setHeader(res, 'Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    sendResponse(res, 200, renderRuntimeMetrics(getPoolStats()));
+  });
+}
 
 // Static file serving — after helmet so assets also carry security headers
 app.use(
   '/javascripts',
-  express.static(path.join(__dirname, 'public/javascripts'), {
-    maxAge: isProduction ? '1y' : 0, // Cache for 1 year in production
+  express.static(path.join(rootDir, 'public/javascripts'), {
+    maxAge: isProduction ? '1h' : 0,
     etag: true,
     lastModified: true,
+    setHeaders: (res, filePath) => {
+      if (/\.[a-f0-9]{12}\.js$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
   }),
 );
 app.use(
   '/stylesheets',
-  express.static(path.join(__dirname, 'public/stylesheets'), {
-    maxAge: isProduction ? '1y' : 0,
+  express.static(path.join(rootDir, 'public/stylesheets'), {
+    maxAge: isProduction ? '1h' : 0,
     etag: true,
     lastModified: true,
+    setHeaders: (res, filePath) => {
+      if (/\.[a-f0-9]{12}\.css$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
   }),
 );
 app.use(
   '/images',
-  express.static(path.join(__dirname, 'public/images'), {
-    maxAge: isProduction ? '1y' : 0,
+  express.static(path.join(rootDir, 'public/images'), {
+    maxAge: isProduction ? '1d' : 0,
     etag: true,
     lastModified: true,
   }),
@@ -236,19 +289,18 @@ if (isProduction) {
 // ============================================================================
 
 if (isProduction) {
-  const __dirname = path.resolve();
-  app.set('views', path.join(__dirname, 'web'));
+  app.set('views', path.join(rootDir, 'web'));
   app.use(
-    express.static(path.join(__dirname, 'public'), {
+    express.static(path.join(rootDir, 'public'), {
       maxAge: '1d',
       etag: true,
     }),
   );
-  loadPath = path.join(__dirname, 'locales/{{lng}}/{{ns}}.json');
+  loadPath = path.join(rootDir, 'locales/{{lng}}/{{ns}}.json');
 } else {
-  app.set('views', path.join(__dirname, 'web'));
-  app.use(express.static(path.join(__dirname, 'public')));
-  loadPath = __dirname + '/locales/{{lng}}/{{ns}}.json';
+  app.set('views', path.join(rootDir, 'web'));
+  app.use(express.static(path.join(rootDir, 'public')));
+  loadPath = rootDir + '/locales/{{lng}}/{{ns}}.json';
 }
 
 i18next
@@ -337,7 +389,6 @@ app.use((req, res, next) => {
     express.json({ limit: '1mb' })(req, res, next);
   }
 });
-app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Test database isolation middleware — routes DB queries to a per-test database.
@@ -434,23 +485,47 @@ app.set('port', port);
 const server = app.listen(port, () => {
   logger.info(`Commercefull service started on port ${port}`);
 });
+server.keepAliveTimeout = Number(process.env.HTTP_KEEP_ALIVE_TIMEOUT_MS || 5_000);
+server.headersTimeout = Number(process.env.HTTP_HEADERS_TIMEOUT_MS || 10_000);
+server.requestTimeout = Number(process.env.HTTP_REQUEST_TIMEOUT_MS || 30_000);
 
 server.on('error', (err: Error) => {
   logger.error('Server error:', err);
   process.exit(1);
 });
 
-process.on('SIGTERM', () => {
-  stopEventTransport().finally(() => {
-    server.close(() => process.exit(0));
-  });
-});
+let shutdownRequested = false;
+const shutdown = (signal: string): void => {
+  if (shutdownRequested) return;
+  shutdownRequested = true;
+  healthService.startDraining();
+  cronScheduler.shutdown();
+  logger.info('Graceful shutdown started', { signal });
 
-process.on('SIGINT', () => {
-  stopEventTransport().finally(() => {
-    server.close(() => process.exit(0));
+  const forceShutdown = setTimeout(
+    () => {
+      server.closeAllConnections();
+      process.exit(1);
+    },
+    Number(process.env.SHUTDOWN_TIMEOUT_MS || 30_000),
+  );
+  forceShutdown.unref();
+
+  server.close(() => {
+    flushAnalyticsWrites()
+      .catch(() => {})
+      .then(() => Promise.allSettled([stopEventTransport(), closeRedisClient(), closeDatabasePool()]))
+      .then(results => {
+        clearTimeout(forceShutdown);
+        const failed = results.some(result => result.status === 'rejected');
+        process.exit(failed ? 1 : 0);
+      });
   });
-});
+  server.closeIdleConnections();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 process.on('uncaughtException', (err: Error) => {
   logger.error('Uncaught exception', { message: err.message, stack: err.stack });

@@ -50,17 +50,24 @@ export class OrderRepo implements IOrderRepository {
     const orderBy = pagination?.orderBy || 'createdAt';
     const orderDir = pagination?.orderDirection || 'desc';
 
-    const countResult = await queryOne<{ count: string }>(
-      'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-      [customerId],
-    );
-    const total = parseInt(countResult?.count || '0');
-
     const rows = await query<DbOrder[]>(
       `SELECT * FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()} LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
     );
+
+    // A short first page is already an exact total — skip the COUNT(*) scan.
+    const total =
+      offset === 0 && (rows?.length ?? 0) < limit
+        ? (rows?.length ?? 0)
+        : parseInt(
+            (
+              await queryOne<{ count: string }>(
+                'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
+                [customerId],
+              )
+            )?.count || '0',
+          );
 
     const orders = await this.hydrateOrders(rows || []);
 
@@ -75,15 +82,20 @@ export class OrderRepo implements IOrderRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
-    const total = parseInt(countResult?.count || '0');
-
     const rows = await query<DbOrder[]>(
       `SELECT * FROM "order" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
     );
+
+    // A short first page is already an exact total — skip the COUNT(*) scan.
+    const total =
+      offset === 0 && (rows?.length ?? 0) < limit
+        ? (rows?.length ?? 0)
+        : parseInt(
+            (await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params))?.count || '0',
+          );
 
     const orders = await this.hydrateOrders(rows || []);
 

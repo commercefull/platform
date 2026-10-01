@@ -15,19 +15,13 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Counter } from 'k6/metrics';
-import { BASE_URL, checkResponse } from './config.js';
+import { BASE_URL, checkResponse, loadStages } from './config.js';
 
 const merchantErrors = new Rate('merchant_errors');
 const loginsSuccessful = new Counter('merchant_logins_successful');
 
 export const options = {
-  stages: [
-    { duration: '20s', target: 5 },
-    { duration: '1m', target: 5 },
-    { duration: '20s', target: 15 },
-    { duration: '1m', target: 15 },
-    { duration: '20s', target: 0 },
-  ],
+  stages: loadStages(5, 15),
   thresholds: {
     http_req_failed: ['rate<0.05'],
     http_req_duration: ['p(95)<600', 'p(99)<1500'],

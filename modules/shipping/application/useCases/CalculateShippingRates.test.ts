@@ -51,7 +51,7 @@ describe('CalculateShippingRatesUseCase', () => {
   it('should calculate rates for matching methods', async () => {
     zoneRepo.findByLocation.mockResolvedValue([createShippingZone()]);
     methodRepo.findAll.mockResolvedValue([createShippingMethod({ name: 'Standard Shipping', code: 'STANDARD' })]);
-    rateRepo.findByZoneAndMethod.mockResolvedValue(createShippingRate({ rateType: 'flat', baseRateCents: 999 }));
+    rateRepo.findByZonesAndMethods.mockResolvedValue([createShippingRate({ rateType: 'flat', baseRateCents: 999 })]);
 
     const result = await useCase.execute(
       new CalculateShippingRatesCommand({ country: 'US', state: 'CA' }, { subtotalCents: 100, itemCount: 2 }),
@@ -67,7 +67,7 @@ describe('CalculateShippingRatesUseCase', () => {
   it('should flag free shipping when the calculated amountCents is zero', async () => {
     zoneRepo.findByLocation.mockResolvedValue([createShippingZone()]);
     methodRepo.findAll.mockResolvedValue([createShippingMethod({ name: 'Free Shipping', code: 'FREE', shippingCarrierId: null })]);
-    rateRepo.findByZoneAndMethod.mockResolvedValue(createShippingRate({ rateType: 'free', baseRateCents: 0 }));
+    rateRepo.findByZonesAndMethods.mockResolvedValue([createShippingRate({ rateType: 'free', baseRateCents: 0 })]);
 
     const result = await useCase.execute(new CalculateShippingRatesCommand({ country: 'US' }, { subtotalCents: 100, itemCount: 1 }));
 
@@ -84,6 +84,6 @@ describe('CalculateShippingRatesUseCase', () => {
 
     expect(result.success).toBe(true);
     expect(result.rates).toHaveLength(0);
-    expect(rateRepo.findByZoneAndMethod).not.toHaveBeenCalled();
+    expect(rateRepo.findByZonesAndMethods).not.toHaveBeenCalled();
   });
 });

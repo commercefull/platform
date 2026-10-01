@@ -62,6 +62,36 @@
   notify: Restart PostgreSQL
   tags: [postgres, security]
 
+- name: Configure PostgreSQL performance settings
+  ansible.builtin.lineinfile:
+    path: '/etc/postgresql/{{ postgres_version }}/main/postgresql.conf'
+    regexp: '^#?{{ item.key }}\s*='
+    line: "{{ item.key }} = {{ item.value }}"
+    state: present
+  loop:
+    - { key: 'max_connections', value: '{{ postgres_max_connections }}' }
+    - { key: 'shared_buffers', value: "'{{ postgres_shared_buffers }}'" }
+    - { key: 'effective_cache_size', value: "'{{ postgres_effective_cache_size }}'" }
+    - { key: 'work_mem', value: "'{{ postgres_work_mem }}'" }
+    - { key: 'maintenance_work_mem', value: "'{{ postgres_maintenance_work_mem }}'" }
+    - { key: 'wal_buffers', value: "'{{ postgres_wal_buffers }}'" }
+    - { key: 'checkpoint_timeout', value: "'{{ postgres_checkpoint_timeout }}'" }
+    - { key: 'checkpoint_completion_target', value: '{{ postgres_checkpoint_completion_target }}' }
+    - { key: 'max_wal_size', value: "'{{ postgres_max_wal_size }}'" }
+    - { key: 'min_wal_size', value: "'{{ postgres_min_wal_size }}'" }
+    - { key: 'random_page_cost', value: '{{ postgres_random_page_cost }}' }
+    - { key: 'effective_io_concurrency', value: '{{ postgres_effective_io_concurrency }}' }
+    - { key: 'autovacuum_max_workers', value: '{{ postgres_autovacuum_max_workers }}' }
+    - { key: 'autovacuum_naptime', value: "'{{ postgres_autovacuum_naptime }}'" }
+    - { key: 'autovacuum_vacuum_scale_factor', value: '{{ postgres_autovacuum_vacuum_scale_factor }}' }
+    - { key: 'autovacuum_analyze_scale_factor', value: '{{ postgres_autovacuum_analyze_scale_factor }}' }
+    - { key: 'log_min_duration_statement', value: '{{ postgres_log_min_duration_statement }}' }
+    - { key: 'idle_in_transaction_session_timeout', value: "'{{ postgres_idle_in_transaction_session_timeout }}'" }
+    - { key: 'shared_preload_libraries', value: "'pg_stat_statements'" }
+    - { key: 'pg_stat_statements.track', value: 'all' }
+  notify: Restart PostgreSQL
+  tags: [postgres, performance]
+
 # SECURITY: Configure pg_hba.conf for secure local-only access
 - name: Configure pg_hba.conf - local socket for postgres superuser
   community.postgresql.postgresql_pg_hba:

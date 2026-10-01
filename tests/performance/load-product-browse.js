@@ -11,18 +11,12 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate } from 'k6/metrics';
-import { BASE_URL, checkResponse } from './config.js';
+import { BASE_URL, checkResponse, loadStages } from './config.js';
 
 const browseErrors = new Rate('browse_errors');
 
 export const options = {
-  stages: [
-    { duration: '30s', target: 20 },
-    { duration: '1m', target: 20 },
-    { duration: '30s', target: 50 },
-    { duration: '1m', target: 50 },
-    { duration: '30s', target: 0 },
-  ],
+  stages: loadStages(20, 50, '30s', '1m'),
   thresholds: {
     http_req_failed: ['rate<0.05'],
     http_req_duration: ['p(95)<500', 'p(99)<1000'],

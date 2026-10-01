@@ -83,9 +83,9 @@ describe('createOriginVerifyMiddleware', () => {
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
-  it('should allow the health check without the header', () => {
+  it.each(['/health', '/live', '/ready'])('should allow the %s operational check without the header', path => {
     const next = jest.fn();
-    createOriginVerifyMiddleware('edge-secret', 'x-origin-verify')(buildReq('/health'), buildRes(), next);
+    createOriginVerifyMiddleware('edge-secret', 'x-origin-verify')(buildReq(path), buildRes(), next);
     expect(next).toHaveBeenCalledTimes(1);
   });
 });

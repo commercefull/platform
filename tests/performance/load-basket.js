@@ -11,19 +11,17 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Counter } from 'k6/metrics';
-import { BASE_URL, checkResponse } from './config.js';
+import { BASE_URL, checkResponse, fetchTestProduct, loadStages } from './config.js';
 
 const basketErrors = new Rate('basket_errors');
 const basketsCreated = new Counter('baskets_created');
 
+export function setup() {
+  return { product: fetchTestProduct() };
+}
+
 export const options = {
-  stages: [
-    { duration: '20s', target: 10 },
-    { duration: '1m', target: 10 },
-    { duration: '20s', target: 30 },
-    { duration: '1m', target: 30 },
-    { duration: '20s', target: 0 },
-  ],
+  stages: loadStages(10, 30),
   thresholds: {
     http_req_failed: ['rate<0.05'],
     http_req_duration: ['p(95)<500', 'p(99)<1500'],
@@ -31,18 +29,20 @@ export const options = {
   },
 };
 
-export default function () {
+export default function (data) {
+  const product = data.product;
   let basketId;
 
   // --- Create basket ---
   // Response shape: { success: true, data: { basketId, items, ... } }
+  // The API returns 201 Created for a new basket.
   group('Create Basket', function () {
     const res = http.post(`${BASE_URL}/customer/basket`, JSON.stringify({}), {
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     });
-    basketErrors.add(!checkResponse(res, 200, 'create-basket'));
+    basketErrors.add(!checkResponse(res, 201, 'create-basket'));
 
-    if (res.status === 200) {
+    if (res.status === 201) {
       const body = res.json();
       basketId = body.data?.basketId;
       if (basketId) {
@@ -78,19 +78,23 @@ export default function () {
   // AddItemBody requires: productId, sku, name, quantity, unitPrice (see BasketController.ts)
   group('Add Item', function () {
     const quantity = Math.floor(Math.random() * 3) + 1;
+    if (!product) {
+      console.error('No purchasable product found — seed the database before running load tests');
+      basketErrors.add(true);
+      return;
+    }
     const res = http.post(
       `${BASE_URL}/customer/basket/${basketId}/items`,
       JSON.stringify({
-        productId: `perf-test-product-${__VU}`,
-        sku: `PERF-SKU-${__VU}`,
-        name: 'Performance Test Product',
+        productId: product.productId,
+        sku: product.sku,
+        name: product.name,
         quantity: quantity,
-        unitPrice: 19.99,
+        unitPrice: product.unitPrice,
       }),
       { headers: { 'Content-Type': 'application/json', Accept: 'application/json' } },
     );
-    // Accept 200 (added) as success; item may fail domain validation (still measures latency)
-    basketErrors.add(!checkResponse(res, 200, 'add-item'));
+    basketErrors.add(!checkResponse(res, 201, 'add-item'));
   });
 
   sleep(Math.random() * 2 + 1);

@@ -43,6 +43,7 @@ const correlationFormat = format((info: TransformableInfo) => {
 const logDir = './logs';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const isTestEnv = process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === 'test';
+const fileLoggingEnabled = process.env.LOG_FILE_ENABLED !== '0';
 
 // Define log levels similar to Monolog.
 const levels = {
@@ -91,9 +92,9 @@ const transports: winston.transport[] = [
   } as winston.transports.ConsoleTransportOptions),
 ];
 
-// Error file transport — always enabled (dev + prod) so errors are traceable
+// Error file transport — enabled unless the process manager already captures stdout
 // Skip in test environment to avoid file stream handles keeping workers alive
-if (!isTestEnv) {
+if (!isTestEnv && fileLoggingEnabled) {
   transports.push(
     new winston.transports.DailyRotateFile({
       level: 'error',
@@ -108,7 +109,7 @@ if (!isTestEnv) {
 }
 
 // Additional info-level file transport in production only
-if (!isDevelopment) {
+if (!isDevelopment && fileLoggingEnabled) {
   transports.push(
     new winston.transports.DailyRotateFile({
       level: process.env.LOG_LEVEL || defaultLevel,

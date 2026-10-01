@@ -6,57 +6,61 @@
  * Stores raw events that get aggregated into analytics tables
  */
 exports.up = function (knex) {
-  return knex.schema
-    .createTable('analyticsReportEvent', table => {
-      table.uuid('analyticsReportEventId').primary().defaultTo(knex.raw('uuidv7()'));
-      table.uuid('organizationId').references('organizationId').inTable('organization');
+  return (
+    knex.schema
+      .createTable('analyticsReportEvent', table => {
+        table.uuid('analyticsReportEventId').primary().defaultTo(knex.raw('uuidv7()'));
+        table.uuid('organizationId').references('organizationId').inTable('organization');
 
-      // Event identification
-      table.string('eventType').notNullable(); // order.created, product.viewed, cart.abandoned, etc.
-      table.string('eventCategory').notNullable(); // order, product, customer, cart, payment, etc.
-      table.string('eventAction').notNullable(); // created, updated, viewed, purchased, etc.
+        // Event identification
+        table.string('eventType').notNullable(); // order.created, product.viewed, cart.abandoned, etc.
+        table.string('eventCategory').notNullable(); // order, product, customer, cart, payment, etc.
+        table.string('eventAction').notNullable(); // created, updated, viewed, purchased, etc.
 
-      // Entity references
-      table.uuid('customerId').references('customerId').inTable('customer');
-      table.uuid('orderId').references('orderId').inTable('order');
-      table.uuid('productId').references('productId').inTable('product');
-      table.uuid('basketId').references('basketId').inTable('basket');
+        // Entity references
+        table.uuid('customerId').references('customerId').inTable('customer');
+        table.uuid('orderId').references('orderId').inTable('order');
+        table.uuid('productId').references('productId').inTable('product');
+        table.uuid('basketId').references('basketId').inTable('basket');
 
-      // Session/visitor tracking
-      table.string('sessionId');
-      table.string('visitorId');
-      table.string('channel'); // web, mobile, api, pos
+        // Session/visitor tracking
+        table.string('sessionId');
+        table.string('visitorId');
+        table.string('channel'); // web, mobile, api, pos
 
-      // Event data
-      table.jsonb('eventData'); // Flexible data storage for event-specific info
-      table.bigInteger('eventValueCents'); // Monetary value if applicable
-      table.integer('eventQuantity'); // Quantity if applicable
-      table.string('currencyCode', 3).references('code').inTable('currency');
+        // Event data
+        table.jsonb('eventData'); // Flexible data storage for event-specific info
+        table.bigInteger('eventValueCents'); // Monetary value if applicable
+        table.integer('eventQuantity'); // Quantity if applicable
+        table.string('currencyCode', 3).references('code').inTable('currency');
 
-      // Context
-      table.string('ipAddress');
-      table.string('userAgent');
-      table.string('referrer');
-      table.string('utmSource');
-      table.string('utmMedium');
-      table.string('utmCampaign');
-      table.string('deviceType'); // desktop, mobile, tablet
-      table.string('country');
-      table.string('region');
+        // Context
+        table.string('ipAddress');
+        table.string('userAgent');
+        table.string('referrer');
+        table.string('utmSource');
+        table.string('utmMedium');
+        table.string('utmCampaign');
+        table.string('deviceType'); // desktop, mobile, tablet
+        table.string('country');
+        table.string('region');
 
-      // Processing status
-      table.boolean('isProcessed').defaultTo(false);
-      table.timestamp('processedAt');
+        // Processing status
+        table.boolean('isProcessed').defaultTo(false);
+        table.timestamp('processedAt');
 
-      table.timestamp('createdAt').defaultTo(knex.fn.now());
-    })
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("eventType", "createdAt")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("eventCategory", "createdAt")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("customerId", "createdAt")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("orderId")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("productId", "createdAt")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("isProcessed", "createdAt")'))
-    .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("createdAt")'));
+        table.timestamp('createdAt').defaultTo(knex.fn.now());
+      })
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("eventType", "createdAt")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("eventCategory", "createdAt")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("customerId", "createdAt")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("orderId")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("productId", "createdAt")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("isProcessed", "createdAt")'))
+      .then(() => knex.raw('CREATE INDEX ON "analyticsReportEvent"("createdAt")'))
+      // FK index — required for basket deletes and basketId lookups
+      .then(() => knex.raw('CREATE INDEX "analyticsReportEvent_basketId_index" ON "analyticsReportEvent"("basketId")'))
+  );
 };
 
 /**

@@ -180,14 +180,14 @@ export function configureRoutes(app: HttpApplication): void {
   const serveDocs = process.env.NODE_ENV !== 'production' || process.env.DOCS_PUBLIC === 'true';
 
   // ─── Documentation site (Docsify) ────────────────────────────────────────
-  const docsDir = path.resolve(__dirname, '../docs');
+  const docsDir = path.resolve('docs');
   if (serveDocs && fs.existsSync(docsDir)) {
     app.use('/docs', express.static(docsDir));
     app.get('/docs', (_req, res) => res.redirect('/docs/'));
   }
 
   // ─── Swagger UI (OpenAPI) ────────────────────────────────────────────────
-  const openApiPath = path.resolve(__dirname, '../docs/generated/openapi.json');
+  const openApiPath = path.resolve('docs/generated/openapi.json');
   if (serveDocs && fs.existsSync(openApiPath)) {
     const openApiSpec = JSON.parse(fs.readFileSync(openApiPath, 'utf-8'));
     app.use(
@@ -199,11 +199,6 @@ export function configureRoutes(app: HttpApplication): void {
       } as swaggerUi.SwaggerUiOptions),
     );
   }
-
-  // Health check endpoint (before other routes for load balancers)
-  app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
 
   // 404 handler - catch all unmatched routes
   app.use(function (req, res) {

@@ -21,10 +21,15 @@ export const options = {
 
 export default function () {
   // Health check
-  const health = http.get(`${BASE_URL}/health`);
-  check(health, {
-    'health returns 200': () => checkResponse(health, 200, 'health'),
-    'health returns ok status': () => health.json('status') === 'ok',
+  const live = http.get(`${BASE_URL}/live`);
+  check(live, {
+    'live returns 200': () => checkResponse(live, 200, 'live'),
+    'live returns ok status': () => live.json('status') === 'ok',
+  });
+  const ready = http.get(`${BASE_URL}/ready`);
+  check(ready, {
+    'ready returns 200': () => checkResponse(ready, 200, 'ready'),
+    'ready dependencies are healthy': () => ready.json('status') === 'ok',
   });
 
   // Product listing (public)

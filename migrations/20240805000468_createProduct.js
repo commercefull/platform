@@ -3,90 +3,99 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-  return knex.schema.createTable('product', t => {
-    t.uuid('productId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
-    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.string('sku', 100).notNullable().unique();
-    t.string('name', 255).notNullable();
-    t.string('slug', 255).notNullable().unique();
-    t.text('description');
-    t.enu('type', ['simple', 'configurable', 'grouped', 'virtual', 'downloadable', 'bundle', 'subscription'])
-      .notNullable()
-      .defaultTo('simple');
-    t.enu('status', ['draft', 'active', 'inactive', 'archived', 'discontinued']).notNullable().defaultTo('draft');
-    t.enu('visibility', ['visible', 'not_visible', 'catalog', 'search']).notNullable().defaultTo('visible');
-    // Catalog prices live in the pricing module's productBasePrice table
-    // (integer cents, per product/variant/currency) — no price columns here.
-    t.string('taxClass', 50).defaultTo('standard');
-    t.boolean('isTaxable').notNullable().defaultTo(true);
-    t.boolean('isInventoryManaged').notNullable().defaultTo(true);
-    t.integer('minOrderQuantity').defaultTo(1);
-    t.integer('maxOrderQuantity');
-    t.integer('orderIncrementQuantity').defaultTo(1);
-    t.decimal('weight', 10, 2);
-    t.string('weightUnit', 10).defaultTo('g');
-    t.decimal('length', 10, 2);
-    t.decimal('width', 10, 2);
-    t.decimal('height', 10, 2);
-    t.string('dimensionUnit', 5).defaultTo('cm');
-    t.string('metaTitle', 255);
-    t.text('metaDescription');
-    t.string('hsCode', 20);
-    t.string('countryOfOrigin', 2);
-    t.boolean('isFeatured').notNullable().defaultTo(false);
-    t.boolean('isNew').notNullable().defaultTo(false);
-    t.boolean('isBestseller').notNullable().defaultTo(false);
-    t.integer('warningThreshold');
-    t.boolean('preorderEnabled').notNullable().defaultTo(false);
-    t.timestamp('preorderReleaseDate');
-    t.integer('preorderAllowance');
-    t.decimal('averageRating', 3, 2);
-    t.integer('reviewCount').defaultTo(0);
-    t.jsonb('customFields');
-    t.jsonb('seoData');
-    t.specificType('relatedProducts', 'uuid[]');
-    t.specificType('crossSellProducts', 'uuid[]');
-    t.specificType('upSellProducts', 'uuid[]');
-    t.text('shortDescription');
-    t.string('metaKeywords', 255);
+  return knex.schema
+    .createTable('product', t => {
+      t.uuid('productId').primary().defaultTo(knex.raw('uuidv7()'));
+      t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+      t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
+      t.string('sku', 100).notNullable().unique();
+      t.string('name', 255).notNullable();
+      t.string('slug', 255).notNullable().unique();
+      t.text('description');
+      t.enu('type', ['simple', 'configurable', 'grouped', 'virtual', 'downloadable', 'bundle', 'subscription'])
+        .notNullable()
+        .defaultTo('simple');
+      t.enu('status', ['draft', 'active', 'inactive', 'archived', 'discontinued']).notNullable().defaultTo('draft');
+      t.enu('visibility', ['visible', 'not_visible', 'catalog', 'search']).notNullable().defaultTo('visible');
+      // Catalog prices live in the pricing module's productBasePrice table
+      // (integer cents, per product/variant/currency) — no price columns here.
+      t.string('taxClass', 50).defaultTo('standard');
+      t.boolean('isTaxable').notNullable().defaultTo(true);
+      t.boolean('isInventoryManaged').notNullable().defaultTo(true);
+      t.integer('minOrderQuantity').defaultTo(1);
+      t.integer('maxOrderQuantity');
+      t.integer('orderIncrementQuantity').defaultTo(1);
+      t.decimal('weight', 10, 2);
+      t.string('weightUnit', 10).defaultTo('g');
+      t.decimal('length', 10, 2);
+      t.decimal('width', 10, 2);
+      t.decimal('height', 10, 2);
+      t.string('dimensionUnit', 5).defaultTo('cm');
+      t.string('metaTitle', 255);
+      t.text('metaDescription');
+      t.string('hsCode', 20);
+      t.string('countryOfOrigin', 2);
+      t.boolean('isFeatured').notNullable().defaultTo(false);
+      t.boolean('isNew').notNullable().defaultTo(false);
+      t.boolean('isBestseller').notNullable().defaultTo(false);
+      t.integer('warningThreshold');
+      t.boolean('preorderEnabled').notNullable().defaultTo(false);
+      t.timestamp('preorderReleaseDate');
+      t.integer('preorderAllowance');
+      t.decimal('averageRating', 3, 2);
+      t.integer('reviewCount').defaultTo(0);
+      t.jsonb('customFields');
+      t.jsonb('seoData');
+      t.specificType('relatedProducts', 'uuid[]');
+      t.specificType('crossSellProducts', 'uuid[]');
+      t.specificType('upSellProducts', 'uuid[]');
+      t.text('shortDescription');
+      t.string('metaKeywords', 255);
 
-    t.boolean('isVirtual').notNullable().defaultTo(false);
-    t.boolean('isDownloadable').notNullable().defaultTo(false);
-    t.boolean('isSubscription').notNullable().defaultTo(false);
+      t.boolean('isVirtual').notNullable().defaultTo(false);
+      t.boolean('isDownloadable').notNullable().defaultTo(false);
+      t.boolean('isSubscription').notNullable().defaultTo(false);
 
-    t.uuid('primaryImageId');
-    t.timestamp('publishedAt');
-    t.timestamp('deletedAt');
-    t.uuid('userId');
-    t.uuid('organizationId').references('organizationId').inTable('organization');
-    t.text('returnPolicy');
-    t.text('warranty');
-    t.string('externalId', 255);
-    t.boolean('hasVariants').notNullable().defaultTo(false);
-    t.jsonb('variantAttributes');
+      t.uuid('primaryImageId');
+      t.timestamp('publishedAt');
+      t.timestamp('deletedAt');
+      t.uuid('userId');
+      t.uuid('organizationId').references('organizationId').inTable('organization');
+      t.text('returnPolicy');
+      t.text('warranty');
+      t.string('externalId', 255);
+      t.boolean('hasVariants').notNullable().defaultTo(false);
+      t.jsonb('variantAttributes');
 
-    t.uuid('storeId');
-    t.string('approvalStatus', 20).defaultTo('approved');
-    t.boolean('platformVisible').defaultTo(true);
+      t.uuid('storeId');
+      t.string('approvalStatus', 20).defaultTo('approved');
+      t.boolean('platformVisible').defaultTo(true);
 
-    t.uuid('createdBy');
-    t.uuid('updatedBy');
-    t.index('storeId');
-    t.index('organizationId');
-    t.index('approvalStatus');
-    t.index('sku');
-    t.index('name');
-    t.index('slug');
-    t.index('type');
-    t.index('status');
-    t.index('visibility');
-    t.index('isFeatured');
-    t.index('isNew');
-    t.index('isBestseller');
-    t.index('averageRating');
-    t.index('createdAt');
-  });
+      t.uuid('createdBy');
+      t.uuid('updatedBy');
+      t.index('storeId');
+      t.index('organizationId');
+      t.index('approvalStatus');
+      t.index('sku');
+      t.index('name');
+      t.index('slug');
+      t.index('type');
+      t.index('status');
+      t.index('visibility');
+      t.index('isFeatured');
+      t.index('isNew');
+      t.index('isBestseller');
+      t.index('averageRating');
+      t.index('createdAt');
+    })
+    .then(() =>
+      // Index-only counts for the common non-deleted status/visibility filters
+      knex.raw('CREATE INDEX product_status_visibility_active_index ON product (status, visibility) WHERE "deletedAt" IS NULL'),
+    )
+    .then(() =>
+      // Product list ordering: ORDER BY "createdAt" DESC NULLS LAST over non-deleted rows
+      knex.raw('CREATE INDEX product_active_createdat_desc_index ON product ("createdAt" DESC NULLS LAST) WHERE "deletedAt" IS NULL'),
+    );
 };
 
 /**

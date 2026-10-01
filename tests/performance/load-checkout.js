@@ -10,19 +10,17 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Counter } from 'k6/metrics';
-import { BASE_URL, checkResponse } from './config.js';
+import { BASE_URL, checkResponse, fetchTestProduct, loadStages } from './config.js';
 
 const checkoutErrors = new Rate('checkout_errors');
 const checkoutsInitiated = new Counter('checkouts_initiated');
 
+export function setup() {
+  return { product: fetchTestProduct() };
+}
+
 export const options = {
-  stages: [
-    { duration: '20s', target: 10 },
-    { duration: '1m', target: 10 },
-    { duration: '20s', target: 20 },
-    { duration: '1m', target: 20 },
-    { duration: '20s', target: 0 },
-  ],
+  stages: loadStages(10, 20),
   thresholds: {
     http_req_failed: ['rate<0.05'],
     http_req_duration: ['p(95)<800', 'p(99)<2000'],
@@ -30,7 +28,8 @@ export const options = {
   },
 };
 
-export default function () {
+export default function (data) {
+  const product = data.product;
   let checkoutId;
   let basketId;
 
@@ -54,20 +53,21 @@ export default function () {
 
   // --- Create a real basket with an item so checkout can actually initiate ---
   // POST /customer/checkout requires an existing, non-empty basketId (InitiateCheckoutBody).
+  // POST /customer/basket returns 201 Created.
   group('Setup Basket For Checkout', function () {
     const basketRes = http.post(`${BASE_URL}/customer/basket`, JSON.stringify({}), jsonHeaders);
-    if (basketRes.status === 200) {
+    if (basketRes.status === 201) {
       basketId = basketRes.json('data.basketId');
     }
-    if (basketId) {
+    if (basketId && product) {
       http.post(
         `${BASE_URL}/customer/basket/${basketId}/items`,
         JSON.stringify({
-          productId: `perf-test-product-${__VU}`,
-          sku: `PERF-SKU-${__VU}`,
-          name: 'Performance Test Product',
+          productId: product.productId,
+          sku: product.sku,
+          name: product.name,
           quantity: 1,
-          unitPrice: 19.99,
+          unitPrice: product.unitPrice,
         }),
         jsonHeaders,
       );
@@ -93,7 +93,7 @@ export default function () {
       jsonHeaders,
     );
 
-    if (res.status === 200) {
+    if (res.status === 201) {
       checkoutId = res.json('data.checkoutId');
       if (checkoutId) checkoutsInitiated.add(1);
       checkoutErrors.add(false);
@@ -117,6 +117,27 @@ export default function () {
   group('Get Fulfillment Options', function () {
     const res = http.get(`${BASE_URL}/customer/checkout/${checkoutId}/fulfillment-options`, { headers: { Accept: 'application/json' } });
     checkoutErrors.add(!checkResponse(res, 200, 'fulfillment-options'));
+  });
+
+  sleep(Math.random() * 1 + 0.5);
+
+  // --- Set shipping address (required before shipping-methods) ---
+  group('Set Shipping Address', function () {
+    const res = http.put(
+      `${BASE_URL}/customer/checkout/${checkoutId}/shipping-address`,
+      JSON.stringify({
+        firstName: 'Perf',
+        lastName: 'Test',
+        addressLine1: '123 Test St',
+        city: 'Test City',
+        postalCode: '12345',
+        country: 'US',
+        region: 'CA',
+        phone: '555-0100',
+      }),
+      jsonHeaders,
+    );
+    checkoutErrors.add(!checkResponse(res, 200, 'shipping-address'));
   });
 
   sleep(Math.random() * 1 + 0.5);

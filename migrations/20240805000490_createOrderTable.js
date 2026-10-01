@@ -1,120 +1,125 @@
 exports.up = function (knex) {
-  return knex.schema.createTable('order', t => {
-    t.uuid('orderId').primary().defaultTo(knex.raw('uuidv7()'));
-    t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
-    t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
-    t.string('orderNumber', 50).notNullable().unique();
-    t.uuid('customerId').references('customerId').inTable('customer');
-    t.uuid('basketId').references('basketId').inTable('basket');
-    t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
-    t.uuid('channelId').nullable();
-    t.uuid('createdByUserId').nullable();
-    t.string('orderSource', 50).notNullable().defaultTo('web');
-    t.enum('status', [
-      'pending',
-      'processing',
-      'onHold',
-      'completed',
-      'shipped',
-      'delivered',
-      'cancelled',
-      'refunded',
-      'failed',
-      'paymentPending',
-      'paymentFailed',
-      'backordered',
-    ])
-      .notNullable()
-      .defaultTo('pending');
-    t.enum('paymentStatus', [
-      'pending',
-      'authorized',
-      'paid',
-      'partiallyPaid',
-      'partiallyRefunded',
-      'refunded',
-      'failed',
-      'voided',
-      'requiresAction',
-    ])
-      .notNullable()
-      .defaultTo('pending');
-    t.enum('fulfillmentStatus', [
-      'unfulfilled',
-      'partiallyFulfilled',
-      'fulfilled',
-      'partiallyShipped',
-      'shipped',
-      'delivered',
-      'restocked',
-      'failed',
-      'canceled',
-      'cancelled',
-      'pendingPickup',
-      'pickedUp',
-      'returned',
-    ])
-      .notNullable()
-      .defaultTo('unfulfilled');
-    t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
-    t.bigInteger('subtotalCents').notNullable().defaultTo(0);
-    t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
-    t.bigInteger('taxTotalCents').notNullable().defaultTo(0);
-    t.bigInteger('shippingTotalCents').notNullable().defaultTo(0);
-    t.bigInteger('handlingFeeCents').notNullable().defaultTo(0);
-    t.bigInteger('totalAmountCents').notNullable().defaultTo(0);
-    t.integer('totalItems').notNullable().defaultTo(0);
-    t.integer('totalQuantity').notNullable().defaultTo(0);
-    t.boolean('taxExempt').notNullable().defaultTo(false);
-    t.timestamp('orderDate').notNullable().defaultTo(knex.fn.now());
-    t.timestamp('completedAt');
-    t.timestamp('cancelledAt');
-    t.timestamp('returnedAt');
-    t.uuid('shippingAddressId').references('customerAddressId').inTable('customerAddress');
-    t.uuid('billingAddressId').references('customerAddressId').inTable('customerAddress');
-    t.jsonb('shippingAddress');
-    t.jsonb('billingAddress');
-    t.string('customerEmail', 255).notNullable();
-    t.string('customerPhone', 50);
-    t.string('customerName', 100);
-    t.text('customerNotes');
-    t.text('adminNotes');
-    t.string('ipAddress', 45);
-    t.text('userAgent');
-    t.string('referralSource', 255);
-    t.timestamp('estimatedDeliveryDate');
-    t.boolean('hasGiftWrapping').notNullable().defaultTo(false);
-    t.text('giftMessage');
-    t.boolean('isGift').notNullable().defaultTo(false);
-    t.boolean('isSubscriptionOrder').notNullable().defaultTo(false);
-    t.uuid('parentOrderId').references('orderId').inTable('order');
-    t.uuid('accountId').nullable();
-    t.uuid('organizationId').nullable().references('organizationId').inTable('organization');
-    t.string('purchaseOrderNumber', 100).nullable();
-    t.specificType('tags', 'text[]');
-    t.jsonb('metadata').defaultTo('{}');
-    t.timestamp('deletedAt').nullable();
+  return knex.schema
+    .createTable('order', t => {
+      t.uuid('orderId').primary().defaultTo(knex.raw('uuidv7()'));
+      t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
+      t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
+      t.string('orderNumber', 50).notNullable().unique();
+      t.uuid('customerId').references('customerId').inTable('customer');
+      t.uuid('basketId').references('basketId').inTable('basket');
+      t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
+      t.uuid('channelId').nullable();
+      t.uuid('createdByUserId').nullable();
+      t.string('orderSource', 50).notNullable().defaultTo('web');
+      t.enum('status', [
+        'pending',
+        'processing',
+        'onHold',
+        'completed',
+        'shipped',
+        'delivered',
+        'cancelled',
+        'refunded',
+        'failed',
+        'paymentPending',
+        'paymentFailed',
+        'backordered',
+      ])
+        .notNullable()
+        .defaultTo('pending');
+      t.enum('paymentStatus', [
+        'pending',
+        'authorized',
+        'paid',
+        'partiallyPaid',
+        'partiallyRefunded',
+        'refunded',
+        'failed',
+        'voided',
+        'requiresAction',
+      ])
+        .notNullable()
+        .defaultTo('pending');
+      t.enum('fulfillmentStatus', [
+        'unfulfilled',
+        'partiallyFulfilled',
+        'fulfilled',
+        'partiallyShipped',
+        'shipped',
+        'delivered',
+        'restocked',
+        'failed',
+        'canceled',
+        'cancelled',
+        'pendingPickup',
+        'pickedUp',
+        'returned',
+      ])
+        .notNullable()
+        .defaultTo('unfulfilled');
+      t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
+      t.bigInteger('subtotalCents').notNullable().defaultTo(0);
+      t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
+      t.bigInteger('taxTotalCents').notNullable().defaultTo(0);
+      t.bigInteger('shippingTotalCents').notNullable().defaultTo(0);
+      t.bigInteger('handlingFeeCents').notNullable().defaultTo(0);
+      t.bigInteger('totalAmountCents').notNullable().defaultTo(0);
+      t.integer('totalItems').notNullable().defaultTo(0);
+      t.integer('totalQuantity').notNullable().defaultTo(0);
+      t.boolean('taxExempt').notNullable().defaultTo(false);
+      t.timestamp('orderDate').notNullable().defaultTo(knex.fn.now());
+      t.timestamp('completedAt');
+      t.timestamp('cancelledAt');
+      t.timestamp('returnedAt');
+      t.uuid('shippingAddressId').references('customerAddressId').inTable('customerAddress');
+      t.uuid('billingAddressId').references('customerAddressId').inTable('customerAddress');
+      t.jsonb('shippingAddress');
+      t.jsonb('billingAddress');
+      t.string('customerEmail', 255).notNullable();
+      t.string('customerPhone', 50);
+      t.string('customerName', 100);
+      t.text('customerNotes');
+      t.text('adminNotes');
+      t.string('ipAddress', 45);
+      t.text('userAgent');
+      t.string('referralSource', 255);
+      t.timestamp('estimatedDeliveryDate');
+      t.boolean('hasGiftWrapping').notNullable().defaultTo(false);
+      t.text('giftMessage');
+      t.boolean('isGift').notNullable().defaultTo(false);
+      t.boolean('isSubscriptionOrder').notNullable().defaultTo(false);
+      t.uuid('parentOrderId').references('orderId').inTable('order');
+      t.uuid('accountId').nullable();
+      t.uuid('organizationId').nullable().references('organizationId').inTable('organization');
+      t.string('purchaseOrderNumber', 100).nullable();
+      t.specificType('tags', 'text[]');
+      t.jsonb('metadata').defaultTo('{}');
+      t.timestamp('deletedAt').nullable();
 
-    // orderNumber index omitted — the unique constraint already creates a btree
-    t.index('customerId');
-    t.index('basketId');
-    t.index('storeId');
-    t.index('channelId');
-    t.index('createdByUserId');
-    t.index('status');
-    t.index('paymentStatus');
-    t.index('fulfillmentStatus');
-    t.index('orderSource');
-    t.index('orderDate');
-    t.index('shippingAddressId');
-    t.index('billingAddressId');
-    t.index('customerEmail');
-    t.index('accountId');
-    t.index('organizationId');
-    t.index('isSubscriptionOrder');
-    t.index('parentOrderId');
-    t.index('tags', null, 'gin');
-  });
+      // orderNumber index omitted — the unique constraint already creates a btree
+      t.index('customerId');
+      t.index('basketId');
+      t.index('storeId');
+      t.index('channelId');
+      t.index('createdByUserId');
+      t.index('status');
+      t.index('paymentStatus');
+      t.index('fulfillmentStatus');
+      t.index('orderSource');
+      t.index('orderDate');
+      t.index('shippingAddressId');
+      t.index('billingAddressId');
+      t.index('customerEmail');
+      t.index('accountId');
+      t.index('organizationId');
+      t.index('isSubscriptionOrder');
+      t.index('parentOrderId');
+      t.index('tags', null, 'gin');
+    })
+    .then(() =>
+      // Serves the hot list path: WHERE "deletedAt" IS NULL ORDER BY "createdAt" DESC
+      knex.raw('CREATE INDEX order_createdat_active_index ON "order" ("createdAt" DESC) WHERE "deletedAt" IS NULL'),
+    );
 };
 
 exports.down = function (knex) {

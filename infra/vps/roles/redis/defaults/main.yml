@@ -1,0 +1,9 @@
+---
+redis_bind: '127.0.0.1 ::1'
+redis_port: 6379
+redis_maxmemory: '512mb'
+redis_maxmemory_policy: 'allkeys-lru'
+redis_appendonly: 'yes'
+redis_password: ''
+redis_socket: '/run/redis/redis-server.sock'
+redis_socket_permissions: '770'

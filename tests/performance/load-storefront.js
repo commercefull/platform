@@ -15,19 +15,17 @@
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';
 import { Rate, Trend } from 'k6/metrics';
-import { BASE_URL } from './config.js';
+import { BASE_URL, expectStatuses, fetchTestProduct, loadStages } from './config.js';
 
 const pageErrors = new Rate('storefront_page_errors');
 const pageRenderTime = new Trend('storefront_render_time', true);
 
+export function setup() {
+  return { product: fetchTestProduct() };
+}
+
 export const options = {
-  stages: [
-    { duration: '30s', target: 15 },
-    { duration: '2m', target: 15 },
-    { duration: '30s', target: 40 },
-    { duration: '2m', target: 40 },
-    { duration: '30s', target: 0 },
-  ],
+  stages: loadStages(15, 40, '30s', '2m'),
   thresholds: {
     http_req_failed: ['rate<0.05'],
     http_req_duration: ['p(95)<800', 'p(99)<2000'],
@@ -48,7 +46,8 @@ function checkPage(res, tag) {
   return ok && isHtml;
 }
 
-export default function () {
+export default function (data) {
+  const product = data.product;
   // ─── Home page ─────────────────────────────────────────────────────
   group('Storefront: Home Page', function () {
     const res = http.get(`${BASE_URL}/`);
@@ -92,7 +91,7 @@ export default function () {
 
   // ─── Content page by slug ──────────────────────────────────────────
   group('Storefront: Content Page', function () {
-    const res = http.get(`${BASE_URL}/pages/shipping-policy`);
+    const res = http.get(`${BASE_URL}/pages/shipping-policy`, expectStatuses(404));
     // 200 or 404 (page may not exist) are both acceptable
     pageErrors.add(!(res.status === 200 || res.status === 404));
     if (res.status === 200) {
@@ -103,10 +102,13 @@ export default function () {
   sleep(Math.random() * 2 + 1);
 
   // ─── Product detail page (PDP) ─────────────────────────────────────
-  // Route: /products/:categorySlug/:productId — we don't know real slugs,
-  // so we try a generic one. 200 or 404 are both acceptable.
+  // Route: /products/:categorySlug/:productId — 'all' works as the category
+  // slug and productId comes from setup() so the real render path is measured.
   group('Storefront: Product Detail', function () {
-    const res = http.get(`${BASE_URL}/products/electronics/sample-product-1`);
+    if (!product) {
+      return;
+    }
+    const res = http.get(`${BASE_URL}/products/all/${product.productId}`, expectStatuses(404));
     pageErrors.add(!(res.status === 200 || res.status === 404));
     if (res.status === 200) {
       pageRenderTime.add(res.timings.duration);
@@ -117,7 +119,7 @@ export default function () {
 
   // ─── Products by category ──────────────────────────────────────────
   group('Storefront: Category Products', function () {
-    const res = http.get(`${BASE_URL}/products/category/electronics`);
+    const res = http.get(`${BASE_URL}/products/category/electronics`, expectStatuses(404));
     pageErrors.add(!(res.status === 200 || res.status === 404));
     if (res.status === 200) {
       pageRenderTime.add(res.timings.duration);

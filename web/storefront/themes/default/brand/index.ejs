@@ -31,7 +31,7 @@
         <!-- Brand Logo / Image -->
         <div class="aspect-[3/2] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden">
           <% if (brand.logoUrl) { %>
-          <img src="<%= brand.logoUrl %>" alt="<%= brand.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          <img src="<%= brand.logoUrl %>" alt="<%= brand.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" decoding="async" width="480" height="320">
           <% } else { %>
           <div class="text-4xl font-bold text-gray-400"><%= brand.name.charAt(0) %></div>
           <% } %>

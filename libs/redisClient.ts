@@ -6,6 +6,7 @@ export type { default as Redis } from 'ioredis';
 
 export interface RedisConnectionConfig {
   url?: string;
+  path?: string;
   host?: string;
   port?: number;
   password?: string;
@@ -20,7 +21,7 @@ let sharedClient: Redis | undefined;
 let errorLogged = false;
 
 export function isRedisConfigured(): boolean {
-  return !!(process.env.REDIS_URL || process.env.REDIS_HOST);
+  return !!(process.env.REDIS_URL || process.env.REDIS_SOCKET || process.env.REDIS_HOST);
 }
 
 /**
@@ -59,13 +60,19 @@ function attachErrorLogging(client: Redis): void {
 export function createRedisClient(config: RedisConnectionConfig = {}): Redis {
   const client = config.url
     ? new Redis(config.url, redisClientOptions())
-    : new Redis({
-        host: config.host || 'localhost',
-        port: config.port || 6379,
-        password: config.password || undefined,
-        db: config.db || 0,
-        ...redisClientOptions(),
-      });
+    : config.path
+      ? new Redis(config.path, {
+          password: config.password || undefined,
+          db: config.db || 0,
+          ...redisClientOptions(),
+        })
+      : new Redis({
+          host: config.host || 'localhost',
+          port: config.port || 6379,
+          password: config.password || undefined,
+          db: config.db || 0,
+          ...redisClientOptions(),
+        });
   attachErrorLogging(client);
   return client;
 }
@@ -74,6 +81,7 @@ export function getRedisClient(): Redis {
   if (!sharedClient) {
     sharedClient = createRedisClient({
       url: process.env.REDIS_URL,
+      path: process.env.REDIS_SOCKET,
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379', 10),
       password: process.env.REDIS_PASSWORD || undefined,
@@ -81,4 +89,10 @@ export function getRedisClient(): Redis {
     });
   }
   return sharedClient;
+}
+
+export async function closeRedisClient(): Promise<void> {
+  const client = sharedClient;
+  sharedClient = undefined;
+  if (client) await client.quit();
 }

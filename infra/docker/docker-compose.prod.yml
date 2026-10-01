@@ -10,6 +10,14 @@ services:
     environment:
       - NODE_ENV=production
       - BASE_URL=${BASE_URL:?BASE_URL must be set (e.g. https://shop.example.org)}
+      - CRON_DISABLED=1
+      - EVENT_CONSUMER_DISABLED=1
+      - EVENT_BUS_PROVIDER=postgres
+      - CACHE_BACKEND=redis
+      - SESSION_BACKEND=redis
+      - POSTGRES_APPLICATION_NAME=commercefull-web
+      - METRICS_ENABLED=1
+      - LOG_FILE_ENABLED=0
     env_file:
       - .env.prod
     deploy:
@@ -30,6 +38,55 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    command: ["node", "./worker.mjs"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - EVENT_BUS_PROVIDER=postgres
+      - CACHE_BACKEND=redis
+      - SESSION_BACKEND=redis
+      - POSTGRES_APPLICATION_NAME=commercefull-worker
+      - METRICS_ENABLED=1
+      - LOG_FILE_ENABLED=0
+    env_file:
+      - .env.prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../../logs:/app/logs
+      - ../../uploads:/app/public/uploads
+    networks:
+      - commercefull-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   postgres:
     ports: !reset []

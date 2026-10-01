@@ -16,3 +16,4 @@ db_password: ''
 # Note: uuid-ossp not needed — PG 18 has native UUIDv7
 db_extensions:
   - pgcrypto
+  - pg_stat_statements

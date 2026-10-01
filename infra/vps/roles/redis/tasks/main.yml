@@ -1,0 +1,50 @@
+---
+- name: Install Redis
+  ansible.builtin.apt:
+    name: redis-server
+    state: present
+    update_cache: yes
+  tags: [redis, setup]
+
+- name: Add application user to Redis group
+  ansible.builtin.user:
+    name: '{{ app_user }}'
+    groups: redis
+    append: true
+  notify: Restart Redis
+  tags: [redis, setup]
+
+- name: Configure Redis
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^#?\s*{{ item.key }}\s+'
+    line: '{{ item.key }} {{ item.value }}'
+  loop:
+    - { key: 'bind', value: '{{ redis_bind }}' }
+    - { key: 'protected-mode', value: 'yes' }
+    - { key: 'port', value: '{{ redis_port }}' }
+    - { key: 'supervised', value: 'systemd' }
+    - { key: 'appendonly', value: '{{ redis_appendonly }}' }
+    - { key: 'maxmemory', value: '{{ redis_maxmemory }}' }
+    - { key: 'maxmemory-policy', value: '{{ redis_maxmemory_policy }}' }
+    - { key: 'unixsocket', value: '{{ redis_socket }}' }
+    - { key: 'unixsocketperm', value: '{{ redis_socket_permissions }}' }
+  notify: Restart Redis
+  tags: [redis, config]
+
+- name: Configure Redis password
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: '^#?\s*requirepass\s+'
+    line: 'requirepass {{ redis_password }}'
+  when: redis_password | length > 0
+  no_log: true
+  notify: Restart Redis
+  tags: [redis, config]
+
+- name: Ensure Redis is running and enabled
+  ansible.builtin.service:
+    name: redis-server
+    state: started
+    enabled: yes
+  tags: [redis, service]
