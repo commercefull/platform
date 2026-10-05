@@ -39,4 +39,3 @@ export class EvaluateSegmentUseCase {
     return { matched, total: profiles.length };
   }
 }
-

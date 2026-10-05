@@ -8,18 +8,21 @@
 
 import type { CredentialSubjectPort, CredentialSubject } from '../../ports/CredentialSubjectPort';
 import type { TokenRepository } from '../../../domain/repositories/TokenRepository';
-import {
-  EmailAndPasswordRequiredError,
-  InvalidCredentialsError,
-  AccountNotActiveError,
-} from '../../../domain/errors/IdentityErrors';
+import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 import { parseExpirationDate } from '../../../utils/jwtHelpers';
 import type { JwtPayload } from 'jsonwebtoken';
 
 export type TokenSubjectType = 'customer' | 'organization';
 
 export interface JwtTokenPort {
-  sign(subjectId: string, email: string, userType: TokenSubjectType, secret: string, expiresIn: string, tokenUse?: 'access' | 'refresh'): string;
+  sign(
+    subjectId: string,
+    email: string,
+    userType: TokenSubjectType,
+    secret: string,
+    expiresIn: string,
+    tokenUse?: 'access' | 'refresh',
+  ): string;
   verify(token: string, secret: string): JwtPayload | null;
 }
 
@@ -74,7 +77,13 @@ export class IssueTokenPairUseCase {
       await this.credentialPort.updateLoginTimestamp(subject.id);
     }
 
-    const accessToken = this.jwt.sign(subject.id, subject.email, this.config.userType, this.config.jwtSecret, this.config.accessTokenDuration);
+    const accessToken = this.jwt.sign(
+      subject.id,
+      subject.email,
+      this.config.userType,
+      this.config.jwtSecret,
+      this.config.accessTokenDuration,
+    );
     const refreshToken = this.jwt.sign(
       subject.id,
       subject.email,

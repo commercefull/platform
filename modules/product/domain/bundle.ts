@@ -158,7 +158,12 @@ export class Bundle {
     this.touch();
   }
 
-  updatePricing(pricing: { pricingType?: PricingType; fixedPriceCents?: number; discountPercent?: number; discountAmountCents?: number }): void {
+  updatePricing(pricing: {
+    pricingType?: PricingType;
+    fixedPriceCents?: number;
+    discountPercent?: number;
+    discountAmountCents?: number;
+  }): void {
     if (pricing.pricingType) this.props.pricingType = pricing.pricingType;
     if (pricing.fixedPriceCents !== undefined) this.props.fixedPriceCents = pricing.fixedPriceCents;
     if (pricing.discountPercent !== undefined) this.props.discountPercent = pricing.discountPercent;

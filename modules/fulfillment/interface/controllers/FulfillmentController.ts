@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Fulfillment Controller
  *
@@ -252,17 +252,17 @@ export const getTrackingInfo = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          fulfillmentId: fulfillment.fulfillmentId,
-          status: fulfillment.status,
-          trackingNumber: fulfillment.trackingNumber,
-          trackingUrl: fulfillment.trackingUrl,
-          carrierName: fulfillment.carrierName,
-          shippedAt: fulfillment.shippedAt,
-          deliveredAt: fulfillment.deliveredAt,
-        },
-      });
+    success: true,
+    data: {
+      fulfillmentId: fulfillment.fulfillmentId,
+      status: fulfillment.status,
+      trackingNumber: fulfillment.trackingNumber,
+      trackingUrl: fulfillment.trackingUrl,
+      carrierName: fulfillment.carrierName,
+      shippedAt: fulfillment.shippedAt,
+      deliveredAt: fulfillment.deliveredAt,
+    },
+  });
 };
 
 export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -283,8 +283,8 @@ export const assignFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
   } catch (error) {
     const statusCode = error instanceof AppError ? error.statusCode : 500;
     jsonResponse(res, statusCode, {
-            success: false,
-            error: error instanceof Error ? error.message : 'Failed to assign fulfillment',
-          });
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to assign fulfillment',
+    });
   }
 };

@@ -31,34 +31,39 @@ describe('CreatePromotionUseCase', () => {
   it('should create a scheduled promotion when the start date is in the future', async () => {
     promotionRepository.create.mockResolvedValue(createPromotion({ status: 'scheduled' }));
 
-    await useCase.execute(new CreatePromotionCommand('Future Sale', 'fixed_amount', 20, undefined, undefined, undefined, undefined, undefined, undefined, new Date('2999-01-01')));
+    await useCase.execute(
+      new CreatePromotionCommand(
+        'Future Sale',
+        'fixed_amount',
+        20,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        new Date('2999-01-01'),
+      ),
+    );
 
     expect(promotionRepository.create).toHaveBeenCalledWith(expect.objectContaining({ status: 'scheduled' }));
   });
 
   it('should map fixed_amount to discountByAmount and free_shipping to discountShipping', async () => {
     await useCase.execute(new CreatePromotionCommand('Fixed', 'fixed_amount', 5));
-    expect(promotionRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ actions: [{ type: 'discountByAmount', value: 5 }] }),
-    );
+    expect(promotionRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actions: [{ type: 'discountByAmount', value: 5 }] }));
 
     await useCase.execute(new CreatePromotionCommand('Shipping', 'free_shipping', 0));
-    expect(promotionRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ actions: [{ type: 'discountShipping', value: 0 }] }),
-    );
+    expect(promotionRepository.create).toHaveBeenCalledWith(expect.objectContaining({ actions: [{ type: 'discountShipping', value: 0 }] }));
   });
 
   it('should throw PromotionValidationError when the name is empty', async () => {
-    await expect(useCase.execute(new CreatePromotionCommand('', 'percentage', 10))).rejects.toThrow(
-      PromotionValidationError,
-    );
+    await expect(useCase.execute(new CreatePromotionCommand('', 'percentage', 10))).rejects.toThrow(PromotionValidationError);
     expect(promotionRepository.create).not.toHaveBeenCalled();
   });
 
   it('should throw PromotionValidationError when the value is negative', async () => {
-    await expect(useCase.execute(new CreatePromotionCommand('Sale', 'percentage', -10))).rejects.toThrow(
-      PromotionValidationError,
-    );
+    await expect(useCase.execute(new CreatePromotionCommand('Sale', 'percentage', -10))).rejects.toThrow(PromotionValidationError);
     expect(promotionRepository.create).not.toHaveBeenCalled();
   });
 

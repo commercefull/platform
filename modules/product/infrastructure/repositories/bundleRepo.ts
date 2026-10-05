@@ -320,7 +320,8 @@ export async function calculateBundlePrice(
   for (const item of items) {
     const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId ?? undefined);
     const quantity = selectedItems?.find(s => s.productId === item.productId)?.quantity ?? item.quantity ?? 1;
-    const discountedPriceCents = Math.round(itemPriceCents * (1 - Number(item.discountPercent || 0) / 100)) + toCents(item.priceAdjustmentCents);
+    const discountedPriceCents =
+      Math.round(itemPriceCents * (1 - Number(item.discountPercent || 0) / 100)) + toCents(item.priceAdjustmentCents);
 
     totalCents += discountedPriceCents * quantity;
     originalTotalCents += itemPriceCents * quantity;

@@ -1,9 +1,7 @@
 import '../../tests/testUtils';
 import { ManageCommissionRuleUseCase } from './ManageCommissionRule';
 import { VendorNotFoundError, CommissionRuleNotFoundError } from '../../domain/errors/MarketplaceErrors';
-import type {
-  VendorRepository, CommissionRuleRepository,
-} from '../../domain/repositories/MarketplaceRepository';
+import type { VendorRepository, CommissionRuleRepository } from '../../domain/repositories/MarketplaceRepository';
 import { createCommissionRule, emitMock, lazyMock } from '../../tests/testUtils';
 
 describe('ManageCommissionRuleUseCase', () => {
@@ -20,7 +18,11 @@ describe('ManageCommissionRuleUseCase', () => {
 
   it('should create a rule and emit marketplace.commission.created', async () => {
     await useCase.create({
-      organizationId: 'org-1', name: 'R', type: 'percentage', scope: 'global', rate: 15,
+      organizationId: 'org-1',
+      name: 'R',
+      type: 'percentage',
+      scope: 'global',
+      rate: 15,
     });
 
     expect(ruleRepo.save).toHaveBeenCalled();
@@ -30,9 +32,16 @@ describe('ManageCommissionRuleUseCase', () => {
   it('should throw VendorNotFoundError when the rule targets a missing vendor', async () => {
     vendorRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.create({
-      organizationId: 'org-1', name: 'R', type: 'percentage', scope: 'vendor', rate: 10, vendorId: 'missing',
-    })).rejects.toThrow(VendorNotFoundError);
+    await expect(
+      useCase.create({
+        organizationId: 'org-1',
+        name: 'R',
+        type: 'percentage',
+        scope: 'vendor',
+        rate: 10,
+        vendorId: 'missing',
+      }),
+    ).rejects.toThrow(VendorNotFoundError);
   });
 
   it('should throw CommissionRuleNotFoundError when the rule does not exist', async () => {
@@ -50,4 +59,3 @@ describe('ManageCommissionRuleUseCase', () => {
     expect(ruleRepo.save).toHaveBeenCalled();
   });
 });
-

@@ -67,9 +67,7 @@ export function createPointsHistoryRepository(): jest.Mocked<ConstructorParamete
   return lazyMock();
 }
 
-export function createExpirationRepository(): jest.Mocked<
-  ConstructorParameters<typeof ProcessPointsExpirationUseCase>[0]
-> {
+export function createExpirationRepository(): jest.Mocked<ConstructorParameters<typeof ProcessPointsExpirationUseCase>[0]> {
   return lazyMock();
 }
 

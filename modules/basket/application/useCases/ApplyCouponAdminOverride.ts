@@ -34,7 +34,17 @@ export class ApplyCouponAdminOverrideUseCase {
     let discountValue = 0;
 
     try {
-      const validation = await this.discountQuotePort.validateDiscount(couponCode, basket.subtotal.cents, basket.customerId);
+      const validation = await this.discountQuotePort.validateDiscount(couponCode, basket.subtotal.cents, {
+        customerId: basket.customerId,
+        storeId: basket.storeId,
+        channelId: basket.channelId,
+        currency: basket.currency,
+        items: basket.items.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPriceCents: item.unitPrice.cents,
+        })),
+      });
       if (validation.valid && validation.discount) {
         discountType = validation.discount.type === 'fixed_amount' ? 'fixed' : 'percentage';
         discountValue = validation.discount.value;

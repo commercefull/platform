@@ -30,9 +30,7 @@ describe('AuthenticateCustomerUseCase', () => {
   });
 
   it('should throw PasswordRequiredError when password is empty', async () => {
-    await expect(useCase.execute(new AuthenticateCustomerCommand('jane@example.com', ''))).rejects.toThrow(
-      PasswordRequiredError,
-    );
+    await expect(useCase.execute(new AuthenticateCustomerCommand('jane@example.com', ''))).rejects.toThrow(PasswordRequiredError);
     expect(customerRepository.findByEmail).not.toHaveBeenCalled();
   });
 

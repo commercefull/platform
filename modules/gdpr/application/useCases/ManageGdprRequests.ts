@@ -1,7 +1,4 @@
-import type {
-  GdprDataRequestRepository,
-  GdprRequestFilters,
-} from '../../domain/repositories/GdprRepository';
+import type { GdprDataRequestRepository, GdprRequestFilters } from '../../domain/repositories/GdprRepository';
 import { GdprDataRequest } from '../../domain/entities/GdprDataRequest';
 import { PaginationOptions } from 'libs/types/pagination';
 
@@ -13,10 +10,7 @@ export class ManageGdprRequestsUseCase {
   async findByCustomerId(customerId: string) {
     return this.gdprDataRequestRepo.findByCustomerId(customerId);
   }
-  async findAll(
-    filters?: GdprRequestFilters,
-    pagination?: PaginationOptions,
-  ) {
+  async findAll(filters?: GdprRequestFilters, pagination?: PaginationOptions) {
     return this.gdprDataRequestRepo.findAll(filters, pagination);
   }
   async findOverdueRequests() {

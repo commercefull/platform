@@ -7,9 +7,7 @@ describe('AssignBasketToCustomerUseCase', () => {
     const basket = createBasket({ sessionId: 'session-1' });
     const repository = createBasketRepository(basket);
 
-    const result = await new AssignBasketToCustomerUseCase(repository).execute(
-      new AssignBasketToCustomerCommand(BASKET_ID, 'customer-1'),
-    );
+    const result = await new AssignBasketToCustomerUseCase(repository).execute(new AssignBasketToCustomerCommand(BASKET_ID, 'customer-1'));
 
     expect(result.customerId).toBe('customer-1');
     expect(result.sessionId).toBeUndefined();
@@ -30,9 +28,7 @@ describe('AssignBasketToCustomerUseCase', () => {
   it('should keep the same customer when the basket is already assigned to them', async () => {
     const repository = createBasketRepository(createBasket({ customerId: 'customer-1' }));
 
-    const result = await new AssignBasketToCustomerUseCase(repository).execute(
-      new AssignBasketToCustomerCommand(BASKET_ID, 'customer-1'),
-    );
+    const result = await new AssignBasketToCustomerUseCase(repository).execute(new AssignBasketToCustomerCommand(BASKET_ID, 'customer-1'));
 
     expect(result.customerId).toBe('customer-1');
   });

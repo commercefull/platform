@@ -48,6 +48,7 @@ export class CreateProductCommand {
     public readonly metaKeywords?: string,
     public readonly tags?: string[],
     public readonly metadata?: Record<string, unknown>,
+    public readonly isInventoryManaged?: boolean,
   ) {}
 }
 
@@ -60,6 +61,7 @@ export interface CreateProductResponse {
   name: string;
   slug: string;
   sku?: string;
+  productTypeId?: string | null;
   status: string;
   visibility: string;
   basePriceCents: number | null;
@@ -127,6 +129,7 @@ export class CreateProductUseCase {
       isDownloadable: command.isDownloadable,
       isSubscription: command.isSubscription,
       isTaxable: command.isTaxable,
+      isInventoryManaged: command.isInventoryManaged,
       taxClass: command.taxClass,
       metaTitle: command.metaTitle,
       metaDescription: command.metaDescription,
@@ -203,6 +206,7 @@ export class CreateProductUseCase {
       name: product.name,
       slug: product.slug,
       sku: product.sku,
+      productTypeId: product.productTypeId,
       status: product.status,
       visibility: product.visibility,
       basePriceCents: price?.priceCents ?? null,

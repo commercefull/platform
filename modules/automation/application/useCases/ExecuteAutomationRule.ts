@@ -11,12 +11,7 @@
 import type { AutomationRuleRepository, ExecutionLogRepository } from '../../domain/repositories/AutomationRepository';
 import type { AutomationRule, ActionType } from '../../domain/entities/AutomationRule';
 import { evaluateConditions } from '../../domain/services/ConditionEvaluator';
-import {
-  executeActions,
-  type ActionContext,
-  type ActionExecutionResult,
-  type ActionHandler,
-} from '../../domain/services/ActionExecutor';
+import { executeActions, type ActionContext, type ActionExecutionResult, type ActionHandler } from '../../domain/services/ActionExecutor';
 import { logger } from '../../../../libs/logger';
 
 export interface ExecutionResult {

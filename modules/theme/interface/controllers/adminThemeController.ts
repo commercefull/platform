@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse, renderResponse, sendResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse, renderResponse, sendResponse } from 'libs/apiResponse';
 /**
  * Theme Admin Controller
  * Renders the theme management admin views (EJS templates)
@@ -194,32 +194,32 @@ export const themePreview = async (req: HttpRequest, res: HttpResponse): Promise
       const theme = await manageThemesUseCase.getById(themeId);
       const defaultSettings = theme.defaultSettings;
       renderResponse(res, 'admin/views/theme/preview', {
-                title: `Preview: ${theme.name}`,
-                theme,
-                settings: defaultSettings,
-                cssVariables: {},
-                customCss: '',
-                user: req.user,
-                session: req.session,
-              });
+        title: `Preview: ${theme.name}`,
+        theme,
+        settings: defaultSettings,
+        cssVariables: {},
+        customCss: '',
+        user: req.user,
+        session: req.session,
+      });
       return;
     }
 
     const theme = resolved.theme;
     renderResponse(res, 'admin/views/theme/preview', {
-            title: `Preview: ${theme.name}`,
-            theme: theme.toJSON(),
-            settings: resolved.settings,
-            cssVariables: resolved.cssVariables,
-            customCss: resolved.customCss || '',
-            customLogoUrl: resolved.customLogoUrl,
-            customFaviconUrl: resolved.customFaviconUrl,
-            customBannerUrl: resolved.customBannerUrl,
-            headTags: themeRegistry.generateHeadTags(resolved),
-            bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
-            user: req.user,
-            session: req.session,
-          });
+      title: `Preview: ${theme.name}`,
+      theme: theme.toJSON(),
+      settings: resolved.settings,
+      cssVariables: resolved.cssVariables,
+      customCss: resolved.customCss || '',
+      customLogoUrl: resolved.customLogoUrl,
+      customFaviconUrl: resolved.customFaviconUrl,
+      customBannerUrl: resolved.customBannerUrl,
+      headTags: themeRegistry.generateHeadTags(resolved),
+      bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
+      user: req.user,
+      session: req.session,
+    });
   } catch {
     sendResponse(res, 404, 'Theme not found');
   }

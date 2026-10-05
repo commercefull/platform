@@ -152,12 +152,16 @@ describe('Notification Expanded Tests', () => {
     it('should create a notification template', async () => {
       if (!adminToken) return;
 
-      const resp = await client.post('/business/notification-templates', {
-        ...testTemplateData,
-        code: `test-template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      }, {
-        headers: adminAuthHeaders(),
-      });
+      const resp = await client.post(
+        '/business/notification-templates',
+        {
+          ...testTemplateData,
+          code: `test-template-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        },
+        {
+          headers: adminAuthHeaders(),
+        },
+      );
 
       expectStatus(resp, 201);
       expect(resp.data.success).toBe(true);

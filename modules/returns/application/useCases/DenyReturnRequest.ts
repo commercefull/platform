@@ -24,4 +24,3 @@ export class DenyReturnRequestUseCase {
     return updated;
   }
 }
-

@@ -744,5 +744,14 @@
   "emailPlaceholder": "your@email.com",
   "phonePlaceholder": "あなたの電話番号",
   "cardholderNamePlaceholder": "ジョン・ドゥ",
-  "cardExpiryPlaceholder": "YY/MM"
+  "cardExpiryPlaceholder": "YY/MM",
+  "collections": "コレクション",
+  "collectionsHeroDesc": "厳選されたコレクションをご覧ください",
+  "viewCollection": "コレクションを見る",
+  "noCollections": "コレクションはまだありません",
+  "noCollectionsDesc": "まもなく新しいコレクションをご用意します。",
+  "collectionEmpty": "このコレクションにはまだ商品がありません",
+  "collectionEmptyDesc": "まもなくご確認いただくか、全カタログをご覧ください。",
+  "backToCollections": "コレクションに戻る",
+  "featured": "注目"
 }

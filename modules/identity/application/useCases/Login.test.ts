@@ -1,11 +1,7 @@
 import { createActiveUser, createLockedUser, createMockUserRepo } from '../../tests/testUtils';
 import { LoginUseCase, LoginCommand } from './Login';
 import { User } from '../../domain/entities/User';
-import {
-  InvalidCredentialsError,
-  AccountLockedError,
-  AccountNotActiveError,
-} from '../../domain/errors/IdentityErrors';
+import { InvalidCredentialsError, AccountLockedError, AccountNotActiveError } from '../../domain/errors/IdentityErrors';
 
 describe('LoginUseCase', () => {
   it('should login successfully with valid credentials', async () => {
@@ -53,4 +49,3 @@ describe('LoginUseCase', () => {
     await expect(useCase.execute(new LoginCommand('inactive@example.com', 'password'))).rejects.toThrow(AccountNotActiveError);
   });
 });
-

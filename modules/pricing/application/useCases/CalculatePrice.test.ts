@@ -32,14 +32,7 @@ function buildUseCase(
   const loyaltyBalance = overrides.loyaltyBalance ?? createLoyaltyBalance();
   const convertPrice = new ConvertPriceUseCase(currencyCatalog, currencyPriceRules);
 
-  const useCase = new CalculatePriceUseCase(
-    currencyCatalog,
-    pricingData,
-    pricingRules,
-    membershipBenefits,
-    loyaltyBalance,
-    convertPrice,
-  );
+  const useCase = new CalculatePriceUseCase(currencyCatalog, pricingData, pricingRules, membershipBenefits, loyaltyBalance, convertPrice);
 
   return { useCase, currencyCatalog, pricingData, pricingRules, currencyPriceRules, membershipBenefits, loyaltyBalance };
 }

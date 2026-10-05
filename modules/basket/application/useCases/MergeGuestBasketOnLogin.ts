@@ -47,14 +47,10 @@ export class MergeGuestBasketOnLoginUseCase {
 
     // No existing customer basket — adopt the session basket
     if (!customerBasket || customerBasket.basketId === sessionBasket.basketId) {
-      return this.assignBasketToCustomerUseCase.execute(
-        new AssignBasketToCustomerCommand(sessionBasket.basketId, command.customerId),
-      );
+      return this.assignBasketToCustomerUseCase.execute(new AssignBasketToCustomerCommand(sessionBasket.basketId, command.customerId));
     }
 
     // Both exist — merge guest items into the customer basket
-    return this.mergeBasketsUseCase.execute(
-      new MergeBasketsCommand(sessionBasket.basketId, customerBasket.basketId),
-    );
+    return this.mergeBasketsUseCase.execute(new MergeBasketsCommand(sessionBasket.basketId, customerBasket.basketId));
   }
 }

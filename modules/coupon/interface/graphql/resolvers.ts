@@ -3,12 +3,7 @@ import { ValidateCouponCommand } from '../../application/useCases/ValidateCoupon
 import { ApplyCouponInput } from '../../application/useCases/ApplyCoupon';
 import { RedeemCouponInput } from '../../application/useCases/RedeemCoupon';
 import { CreateCouponCommand } from '../../application/useCases/CreateCoupon';
-import {
-  validateCouponUseCase,
-  createCouponUseCase,
-  applyCouponUseCase,
-  redeemCouponUseCase,
-} from '../../application/wired';
+import { validateCouponUseCase, createCouponUseCase, applyCouponUseCase, redeemCouponUseCase } from '../../application/wired';
 
 export const couponResolvers = {
   Query: {

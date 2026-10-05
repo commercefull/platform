@@ -67,4 +67,3 @@ export class CreateReturnRequestUseCase {
     return created;
   }
 }
-

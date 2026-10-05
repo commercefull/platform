@@ -27,7 +27,6 @@ export const SEEDED_PURCHASE_ORDER_IDS = {
 // Warehouse ID from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
 
-
 export function createTestClient(): AxiosInstance {
   return axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',

@@ -114,5 +114,4 @@ describe('Content Categorization API', () => {
     expect(response.status).toBe(200);
     expect(response.data.success).toBe(true);
   });
-
 });

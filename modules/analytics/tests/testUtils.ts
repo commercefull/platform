@@ -54,9 +54,7 @@ export function createDashboardRepository(): jest.Mocked<ConstructorParameters<t
   return lazyMock();
 }
 
-export function createProductPerformanceRepository(): jest.Mocked<
-  ConstructorParameters<typeof GetProductPerformanceUseCase>[0]
-> {
+export function createProductPerformanceRepository(): jest.Mocked<ConstructorParameters<typeof GetProductPerformanceUseCase>[0]> {
   return lazyMock();
 }
 

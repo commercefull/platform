@@ -13,4 +13,3 @@ describe('ListCustomerProfilesUseCase', () => {
     expect(repo.findAll).toHaveBeenCalledWith(10, 0);
   });
 });
-

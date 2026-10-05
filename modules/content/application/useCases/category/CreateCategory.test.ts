@@ -13,7 +13,7 @@ describe('CreateCategoryUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof CreateCategoryUseCase>[0]>();
     mockRepo.findCategoryById.mockResolvedValue(null);
-    mockRepo.createCategory.mockImplementation(async (params) => createContentCategory({ ...params, contentCategoryId: 'c1' }));
+    mockRepo.createCategory.mockImplementation(async params => createContentCategory({ ...params, contentCategoryId: 'c1' }));
     useCase = new CreateCategoryUseCase(mockRepo);
   });
 

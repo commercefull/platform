@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * System Configuration HTTP Controller
  * Handles system configuration-related HTTP requests
@@ -74,15 +74,15 @@ export class SystemConfigurationController {
       await manageSystemConfigurationUseCase.save(config);
 
       jsonResponse(res, 201, {
-                success: true,
-                data: config.toJSON(),
-              });
+        success: true,
+        data: config.toJSON(),
+      });
     } catch (error) {
       logger.error('Error:', error);
       jsonResponse(res, getErrorStatusCode(error), {
-                success: false,
-                message: getErrorMessage(error),
-              });
+        success: false,
+        message: getErrorMessage(error),
+      });
     }
   }
 
@@ -94,9 +94,9 @@ export class SystemConfigurationController {
     try {
       if (!isUuid(req.params.configId)) {
         return jsonResponse(res, 400, {
-                  success: false,
-                  message: 'Invalid configuration ID format',
-                });
+          success: false,
+          message: 'Invalid configuration ID format',
+        });
       }
       const body = req.body;
       const command = new UpdateSystemConfigurationCommand(req.params.configId, {
@@ -119,15 +119,15 @@ export class SystemConfigurationController {
       const result = await this.updateSystemConfigurationUseCase.execute(command);
 
       jsonResponse(res, 200, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       logger.error('Error:', error);
       jsonResponse(res, getErrorStatusCode(error), {
-                success: false,
-                message: getErrorMessage(error),
-              });
+        success: false,
+        message: getErrorMessage(error),
+      });
     }
   }
 
@@ -139,32 +139,32 @@ export class SystemConfigurationController {
     try {
       if (!isUuid(req.params.configId)) {
         return jsonResponse(res, 400, {
-                  success: false,
-                  message: 'Invalid configuration ID format',
-                });
+          success: false,
+          message: 'Invalid configuration ID format',
+        });
       }
       const config = await manageSystemConfigurationUseCase.findById(req.params.configId);
 
       if (!config) {
         return jsonResponse(res, 404, {
-                  success: false,
-                  message: 'System configuration not found',
-                });
+          success: false,
+          message: 'System configuration not found',
+        });
       }
 
       jsonResponse(res, 200, {
-                success: true,
-                data: config.toJSON(),
-              });
+        success: true,
+        data: config.toJSON(),
+      });
     } catch (error) {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
-                success: false,
-                message: 'Failed to get system configuration',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: 'Failed to get system configuration',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   }
 
@@ -178,24 +178,24 @@ export class SystemConfigurationController {
 
       if (!config) {
         return jsonResponse(res, 404, {
-                  success: false,
-                  message: 'No active system configuration found',
-                });
+          success: false,
+          message: 'No active system configuration found',
+        });
       }
 
       jsonResponse(res, 200, {
-                success: true,
-                data: config.toJSON(),
-              });
+        success: true,
+        data: config.toJSON(),
+      });
     } catch (error) {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
-                success: false,
-                message: 'Failed to get active system configuration',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: 'Failed to get active system configuration',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   }
 
@@ -208,19 +208,19 @@ export class SystemConfigurationController {
       const configs = await manageSystemConfigurationUseCase.findAll();
 
       jsonResponse(res, 200, {
-                success: true,
-                data: configs.map(config => config.toJSON()),
-                count: configs.length,
-              });
+        success: true,
+        data: configs.map(config => config.toJSON()),
+        count: configs.length,
+      });
     } catch (error) {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
-                success: false,
-                message: 'Failed to list system configurations',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: 'Failed to list system configurations',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   }
 }

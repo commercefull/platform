@@ -18,6 +18,7 @@ import { MoveCategoryUseCase } from './category/MoveCategory';
 import { CreateNavigationUseCase } from './navigation/CreateNavigation';
 import { UpdateNavigationUseCase } from './navigation/UpdateNavigation';
 import { AddNavigationItemUseCase } from './navigation/AddNavigationItem';
+import { GetNavigationWithItemsUseCase } from './navigation/GetNavigationWithItems';
 import { UploadMediaUseCase } from './media/UploadMedia';
 import { DeleteMediaUseCase } from './media/DeleteMedia';
 import { TrackMediaUsageUseCase } from './media/TrackMediaUsage';
@@ -72,6 +73,7 @@ export const moveCategoryUseCase = new MoveCategoryUseCase(categoryRepo);
 export const createNavigationUseCase = new CreateNavigationUseCase(navigationRepo);
 export const updateNavigationUseCase = new UpdateNavigationUseCase(navigationRepo);
 export const addNavigationItemUseCase = new AddNavigationItemUseCase(navigationRepo, contentRepo);
+export const getNavigationWithItemsUseCase = new GetNavigationWithItemsUseCase(navigationRepo);
 
 export const uploadMediaUseCase = new UploadMediaUseCase(mediaRepo);
 export const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepo);

@@ -60,9 +60,7 @@ describe('buildFraudConditionContext', () => {
   });
 
   it('should derive cardBinMismatch only when all card fields are present', () => {
-    expect(
-      buildFraudConditionContext({ cardBin: '411111', cardCountry: 'US', billingCountry: 'FR' }).cardBinMismatch,
-    ).toBe(true);
+    expect(buildFraudConditionContext({ cardBin: '411111', cardCountry: 'US', billingCountry: 'FR' }).cardBinMismatch).toBe(true);
     expect(buildFraudConditionContext({ cardBin: '411111' }).cardBinMismatch).toBe(false);
   });
 });

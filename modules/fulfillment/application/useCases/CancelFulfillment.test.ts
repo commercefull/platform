@@ -9,7 +9,7 @@ describe('CancelFulfillmentUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
+    fulfillmentRepository.save.mockImplementation(async f => f);
   });
 
   it('should cancel a pending fulfillment, persist it and emit fulfillment.cancelled', async () => {

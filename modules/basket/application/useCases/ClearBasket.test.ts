@@ -24,19 +24,13 @@ describe('ClearBasketUseCase', () => {
   it('should throw BasketNotFoundError when the basket does not exist', async () => {
     const repository = createBasketRepository(null);
 
-    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand('missing'))).rejects.toThrow(
-      BasketNotFoundError,
-    );
+    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand('missing'))).rejects.toThrow(BasketNotFoundError);
   });
 
   it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
     const repository = createBasketRepository();
-    repository.findById
-      .mockResolvedValueOnce(createBasket({ items: [createBasketItem()] }))
-      .mockResolvedValue(null);
+    repository.findById.mockResolvedValueOnce(createBasket({ items: [createBasketItem()] })).mockResolvedValue(null);
 
-    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand(BASKET_ID))).rejects.toThrow(
-      BasketNotFoundError,
-    );
+    await expect(new ClearBasketUseCase(repository).execute(new ClearBasketCommand(BASKET_ID))).rejects.toThrow(BasketNotFoundError);
   });
 });

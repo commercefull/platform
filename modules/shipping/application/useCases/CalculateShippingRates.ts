@@ -176,12 +176,7 @@ export class CalculateShippingRatesUseCase {
             continue;
           }
 
-          const calculatedAmountCents = calculateRate(
-            rate,
-            orderDetails.subtotalCents,
-            orderDetails.itemCount,
-            orderDetails.totalWeight,
-          );
+          const calculatedAmountCents = calculateRate(rate, orderDetails.subtotalCents, orderDetails.itemCount, orderDetails.totalWeight);
 
           const adjustedAmountCents = Math.max(0, calculatedAmountCents + condResult.adjustmentCents);
 
@@ -228,4 +223,3 @@ export class CalculateShippingRatesUseCase {
     }
   }
 }
-

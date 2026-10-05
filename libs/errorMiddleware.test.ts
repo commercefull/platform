@@ -82,14 +82,20 @@ describe('libs/errorMiddleware', () => {
     expect(res.status).toHaveBeenCalledWith(418);
   });
 
+  it('returns RFC 7807 JSON for /acp requests without an Accept header', () => {
+    const res = mockRes();
+    const req = mockReq({ path: '/acp/checkout_sessions', headers: {} });
+    errorMiddleware(new AppError('Missing or malformed Authorization header', 401), req, res, next);
+    expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/problem+json');
+    expect(res.json).toHaveBeenCalled();
+    expect(res.render).not.toHaveBeenCalled();
+  });
+
   it('renders the error page for browser (non-API) requests', () => {
     const res = mockRes();
     const req = mockReq({ path: '/admin/orders', headers: { accept: 'text/html' } });
     errorMiddleware(new AppError('kaboom', 500), req, res, next);
-    expect(res.render).toHaveBeenCalledWith(
-      'storefront/themes/default/error',
-      expect.objectContaining({ pageName: 'Error' }),
-    );
+    expect(res.render).toHaveBeenCalledWith('storefront/themes/default/error', expect.objectContaining({ pageName: 'Error' }));
     expect(res.json).not.toHaveBeenCalled();
   });
 

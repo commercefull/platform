@@ -19,7 +19,13 @@ describe('PublishPageUseCase', () => {
   it('should publish a draft page', async () => {
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us' }));
     mockRepo.updatePage.mockResolvedValue(
-      createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published', publishedAt: new Date('2024-06-01') }),
+      createContentPage({
+        contentPageId: 'page-1',
+        title: 'About Us',
+        slug: 'about-us',
+        status: 'published',
+        publishedAt: new Date('2024-06-01'),
+      }),
     );
 
     const result = await useCase.execute(new PublishPageCommand('page-1', 'user-1'));
@@ -53,8 +59,12 @@ describe('PublishPageUseCase', () => {
   });
 
   it('should republish an already published page (idempotent)', async () => {
-    mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }));
-    mockRepo.updatePage.mockResolvedValue(createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }));
+    mockRepo.findPageById.mockResolvedValue(
+      createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }),
+    );
+    mockRepo.updatePage.mockResolvedValue(
+      createContentPage({ contentPageId: 'page-1', title: 'About Us', slug: 'about-us', status: 'published' }),
+    );
 
     const result = await useCase.execute(new PublishPageCommand('page-1'));
 

@@ -49,6 +49,7 @@ describe('Organization: Product Lifecycle', () => {
       expect(res.status).toBe(201);
       expect(res.data.data.status).toBe('draft');
       expect(res.data.data.visibility).toBe('not_visible');
+      expect(res.data.data.productTypeId).toBe(SEEDED_PRODUCT_TYPE_SIMPLE_ID);
       createdProductId = res.data.data.productId;
     });
 
@@ -132,6 +133,16 @@ describe('Organization: Product Lifecycle', () => {
       });
       expect(res.status).toBe(200);
       expect(res.data.data).toHaveProperty('hasVariants', true);
+    });
+
+    it('should round-trip productTypeId independently of product kind', async () => {
+      if (!createdProductId) return;
+      const res = await client.get(`/business/products/${createdProductId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(res.status).toBe(200);
+      expect(res.data.data.productTypeId).toBe(SEEDED_PRODUCT_TYPE_SIMPLE_ID);
+      expect(res.data.data.productTypeId).not.toBe(res.data.data.type);
     });
 
     it('should return 404 for non-existent product', async () => {

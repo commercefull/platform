@@ -1,9 +1,5 @@
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
-import type {
-  ProductAttributeCreateInput,
-  ProductAttribute,
-  AttributeType,
-} from '../../../domain/repositories/ProductCatalogPorts';
+import type { ProductAttributeCreateInput, ProductAttribute, AttributeType } from '../../../domain/repositories/ProductCatalogPorts';
 
 export interface CreateAttributeCommand {
   name: string;
@@ -122,4 +118,3 @@ export class CreateAttributeUseCase {
     }
   }
 }
-

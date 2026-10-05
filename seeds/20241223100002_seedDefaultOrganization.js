@@ -12,7 +12,8 @@ exports.seed = async function (knex) {
       slug: 'default',
       type: 'single',
       email: 'default@organization.local',
-      password: '$scrypt$N=16384,r=8,p=1$kRnfoZQDkf8xTlQHtV6E3w==$kpu+7kCRL0AZcSsI9o3WMyN4MO1YzoEkuVfJarVb3u87f5GKy8wepVRYpyJttj6k7bAGRszSjn3kWQs+kaI91Q==',
+      password:
+        '$scrypt$N=16384,r=8,p=1$kRnfoZQDkf8xTlQHtV6E3w==$kpu+7kCRL0AZcSsI9o3WMyN4MO1YzoEkuVfJarVb3u87f5GKy8wepVRYpyJttj6k7bAGRszSjn3kWQs+kaI91Q==',
       status: 'active',
       verificationStatus: 'verified',
       settings: JSON.stringify({}),
@@ -29,7 +30,8 @@ exports.seed = async function (knex) {
     name: 'Ops Payment Info Org',
     slug: 'ops-payment-info-org',
     email: 'ops-payment-info@example.com',
-    password: '$scrypt$N=16384,r=8,p=1$kRnfoZQDkf8xTlQHtV6E3w==$kpu+7kCRL0AZcSsI9o3WMyN4MO1YzoEkuVfJarVb3u87f5GKy8wepVRYpyJttj6k7bAGRszSjn3kWQs+kaI91Q==',
+    password:
+      '$scrypt$N=16384,r=8,p=1$kRnfoZQDkf8xTlQHtV6E3w==$kpu+7kCRL0AZcSsI9o3WMyN4MO1YzoEkuVfJarVb3u87f5GKy8wepVRYpyJttj6k7bAGRszSjn3kWQs+kaI91Q==',
     status: 'active',
     verificationStatus: 'verified',
     settings: JSON.stringify({}),

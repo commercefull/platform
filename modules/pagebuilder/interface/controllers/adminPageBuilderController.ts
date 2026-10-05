@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse, renderResponse, sendResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse, renderResponse, sendResponse } from 'libs/apiResponse';
 /**
  * Page Builder Admin Controller
  * Renders the page builder admin views (EJS templates)
@@ -121,14 +121,14 @@ export const pageBuilderPreview = async (req: HttpRequest, res: HttpResponse): P
     const preview = await previewDraftUseCase.preview(draftId);
 
     renderResponse(res, 'admin/views/pagebuilder/preview', {
-            title: preview.draft.title,
-            theme: preview.theme,
-            blocks: preview.blocks,
-            draft: preview.draft,
-            blockTypes: preview.blockTypes,
-            user: req.user,
-            session: req.session,
-          });
+      title: preview.draft.title,
+      theme: preview.theme,
+      blocks: preview.blocks,
+      draft: preview.draft,
+      blockTypes: preview.blockTypes,
+      user: req.user,
+      session: req.session,
+    });
   } catch {
     sendResponse(res, 404, 'Draft not found');
   }

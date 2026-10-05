@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse, renderResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse, renderResponse } from 'libs/apiResponse';
 /**
  * Product Controller for Admin Hub
  * Uses product use cases directly from modules - no HTTP API calls
@@ -23,7 +23,6 @@ import {
   updateProductUseCase,
   manageProductCategoriesUseCase,
   manageProductTagsUseCase,
-  manageProductCollectionsUseCase,
   manageProductQaUseCase,
   manageReviewMediaUseCase,
   productPricingPort,
@@ -32,8 +31,11 @@ import {
   getReviewStatsUseCase,
   manageProductRelationshipsUseCase,
   getProductCardsUseCase,
+  updateVariantInventoryPolicyUseCase,
 } from '../../application/useCases/wired';
 import { GetProductCardsCommand } from '../../application/useCases/GetProductCards';
+import { UpdateVariantInventoryPolicyCommand } from '../../application/useCases/UpdateVariantInventoryPolicy';
+import type { InventoryPolicy } from '../../domain/entities/ProductVariant';
 import { adminRespond } from '../../../../libs/adminRespond';
 
 // ============================================================================
@@ -365,7 +367,10 @@ export const addProductRelationship = async (req: HttpRequest, res: HttpResponse
     redirectResponse(res, `/admin/products/${productId}/edit?success=Product link added`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to add product link'));
+    redirectResponse(
+      res,
+      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to add product link'),
+    );
   }
 };
 
@@ -376,7 +381,10 @@ export const removeProductRelationship = async (req: HttpRequest, res: HttpRespo
     redirectResponse(res, `/admin/products/${productId}/edit?success=Product link removed`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to remove product link'));
+    redirectResponse(
+      res,
+      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to remove product link'),
+    );
   }
 };
 
@@ -535,7 +543,10 @@ export const createProductCategory = async (req: HttpRequest, res: HttpResponse)
     redirectResponse(res, '/admin/products/categories?success=Category created successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'));
+    redirectResponse(
+      res,
+      '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to create category'),
+    );
   }
 };
 
@@ -586,7 +597,10 @@ export const updateProductCategory = async (req: HttpRequest, res: HttpResponse)
     redirectResponse(res, '/admin/products/categories?success=Category updated successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'));
+    redirectResponse(
+      res,
+      '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to update category'),
+    );
   }
 };
 
@@ -597,7 +611,10 @@ export const deleteProductCategory = async (req: HttpRequest, res: HttpResponse)
     redirectResponse(res, '/admin/products/categories?success=Category deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'));
+    redirectResponse(
+      res,
+      '/admin/products/categories?error=' + encodeURIComponent((error as Error).message || 'Failed to delete category'),
+    );
   }
 };
 
@@ -642,104 +659,6 @@ export const deleteProductTag = async (req: HttpRequest, res: HttpResponse): Pro
 };
 
 // ============================================================================
-// Product Collections
-// ============================================================================
-
-export const listProductCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const collections = await manageProductCollectionsUseCase.findAll();
-  adminRespond(req, res, 'products/collections/index', {
-    pageName: 'Product Collections',
-    collections,
-    success: req.query.success || null,
-  });
-};
-
-export const createProductCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  adminRespond(req, res, 'products/collections/form', {
-    pageName: 'Create Product Collection',
-    collection: null,
-    formData: {},
-  });
-};
-
-export const createProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const body = req.body as {
-      name: string;
-      slug?: string;
-      description?: string;
-      imageUrl?: string;
-      isActive?: string;
-      _position?: unknown;
-    };
-    const { name, slug, description, imageUrl, isActive, _position } = body;
-    await manageProductCollectionsUseCase.create({
-      name,
-      slug: slug || name.toLowerCase().replace(/\s+/g, '-'),
-      description: description || null,
-      imageUrl: imageUrl || null,
-      isActive: isActive !== 'false',
-      organizationId: null,
-    });
-    redirectResponse(res, '/admin/products/collections?success=Collection created successfully');
-  } catch (error: unknown) {
-    logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to create collection'));
-  }
-};
-
-export const editProductCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { collectionId } = req.params;
-  const collection = await manageProductCollectionsUseCase.findById(collectionId);
-  if (!collection) {
-    adminRespond(req, res, 'error', { pageName: 'Not Found', error: 'Collection not found' });
-    return;
-  }
-  adminRespond(req, res, 'products/collections/form', {
-    pageName: `Edit Collection: ${collection.name}`,
-    collection,
-    formData: collection,
-  });
-};
-
-export const updateProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const { collectionId } = req.params;
-    const body = req.body as {
-      name?: string;
-      slug?: string;
-      description?: string;
-      imageUrl?: string;
-      isActive?: string;
-      _position?: unknown;
-    };
-    const { name, slug, description, imageUrl, isActive, _position } = body;
-    await manageProductCollectionsUseCase.update(collectionId, {
-      name,
-      slug,
-      description: description || null,
-      imageUrl: imageUrl || null,
-      isActive: isActive !== 'false',
-    });
-    redirectResponse(res, '/admin/products/collections?success=Collection updated successfully');
-  } catch (error: unknown) {
-    logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to update collection'));
-  }
-};
-
-export const deleteProductCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const { collectionId } = req.params;
-    await manageProductCollectionsUseCase.softDelete(collectionId);
-    redirectResponse(res, '/admin/products/collections?success=Collection deleted successfully');
-  } catch (error: unknown) {
-    logger.warn('Error:', error);
-    redirectResponse(res, '/admin/products/collections?error=' + encodeURIComponent((error as Error).message || 'Failed to delete collection'));
-  }
-};
-
-// ============================================================================
 // Product Q&A
 // ============================================================================
 
@@ -758,7 +677,10 @@ export const updateQaStatus = async (req: HttpRequest, res: HttpResponse): Promi
     redirectResponse(res, `/admin/products/${productId}?success=Q%26A status updated`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'));
+    redirectResponse(
+      res,
+      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to update Q&A status'),
+    );
   }
 };
 
@@ -779,7 +701,10 @@ export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Pr
     redirectResponse(res, `/admin/products/${productId}?success=Media deleted`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'));
+    redirectResponse(
+      res,
+      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to delete media'),
+    );
   }
 };
 
@@ -827,6 +752,30 @@ export const upsertProductPrice = async (req: HttpRequest, res: HttpResponse): P
     redirectResponse(res, `/admin/products/${productId}?success=Price saved`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'));
+    redirectResponse(
+      res,
+      `/admin/products/${req.params.productId}?error=` + encodeURIComponent((error as Error).message || 'Failed to save price'),
+    );
+  }
+};
+
+/**
+ * Update a variant's inventory policy from the product admin screen.
+ * POST /admin/products/:productId/variants/:variantId/inventory-policy
+ */
+export const updateVariantInventoryPolicy = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { productId, variantId } = req.params;
+  try {
+    const { inventoryPolicy } = req.body as HttpRequestBody as { inventoryPolicy?: string };
+    if (!['tracked', 'unlimited', 'backorderable'].includes(inventoryPolicy || '')) {
+      throw new Error('inventoryPolicy must be tracked, unlimited, or backorderable');
+    }
+    await updateVariantInventoryPolicyUseCase.execute(
+      new UpdateVariantInventoryPolicyCommand(variantId, inventoryPolicy as InventoryPolicy),
+    );
+    redirectResponse(res, `/admin/products/${productId}/edit?success=` + encodeURIComponent('Variant inventory policy updated'));
+  } catch (error: unknown) {
+    logger.warn('Error updating variant inventory policy:', error);
+    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message));
   }
 };

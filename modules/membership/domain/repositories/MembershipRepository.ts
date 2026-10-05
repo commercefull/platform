@@ -41,9 +41,7 @@ export interface MembershipPlan {
 }
 
 export type CreateMembershipPlanInput = Omit<MembershipPlan, 'membershipPlanId' | 'createdAt' | 'updatedAt'>;
-export type UpdateMembershipPlanInput = Partial<
-  Omit<MembershipPlan, 'membershipPlanId' | 'code' | 'createdAt' | 'updatedAt'>
->;
+export type UpdateMembershipPlanInput = Partial<Omit<MembershipPlan, 'membershipPlanId' | 'code' | 'createdAt' | 'updatedAt'>>;
 
 export interface MembershipPlanBenefit {
   membershipPlanBenefitId: string;

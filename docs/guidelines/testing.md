@@ -75,10 +75,14 @@ export const emitMock = jest.mocked(eventBus.emit);
 beforeEach(() => emitMock.mockClear());
 
 // 2. Real domain factories — never hand-build entity-shaped object literals.
-export function createBasket(options: BasketOptions = {}): Basket { /* ... */ }
+export function createBasket(options: BasketOptions = {}): Basket {
+  /* ... */
+}
 
 // 3. Typed port mocks — jest.Mocked<Interface>, never `as never` casts.
-export function createBasketRepository(basket: Basket | null = null): jest.Mocked<BasketRepository> { /* ... */ }
+export function createBasketRepository(basket: Basket | null = null): jest.Mocked<BasketRepository> {
+  /* ... */
+}
 ```
 
 ### Naming
@@ -96,7 +100,7 @@ it('should throw BasketNotFoundError when the basket does not exist', ...);
 - **Outcome** — the returned response or entity state, not merely that a mock was called.
 - **Persistence contract** — repository calls that must happen (`save`, `updateItem`) or must not (`addItem` when merging quantities).
 - **Events** — `emitMock` assertions for every event the use case emits, including payload fields other modules rely on.
-- **Errors** — domain errors for every guard, including input validation that must happen *before* any repository access (`expect(repository.findById).not.toHaveBeenCalled()`).
+- **Errors** — domain errors for every guard, including input validation that must happen _before_ any repository access (`expect(repository.findById).not.toHaveBeenCalled()`).
 
 ### What not to do
 

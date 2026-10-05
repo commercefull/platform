@@ -10,7 +10,12 @@
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { AnalyticsCustomerCohort as AnalyticsCustomerCohortRow, AnalyticsProductPerformance as AnalyticsProductPerformanceRow, AnalyticsSalesDaily as AnalyticsSalesDailyRow, AnalyticsSearchQuery as AnalyticsSearchQueryRow } from '../../../../libs/db/types';
+import {
+  AnalyticsCustomerCohort as AnalyticsCustomerCohortRow,
+  AnalyticsProductPerformance as AnalyticsProductPerformanceRow,
+  AnalyticsSalesDaily as AnalyticsSalesDailyRow,
+  AnalyticsSearchQuery as AnalyticsSearchQueryRow,
+} from '../../../../libs/db/types';
 import type { ProductPerformance, CustomerCohort } from '../../domain/types';
 
 export type { ProductPerformance, CustomerCohort };
@@ -70,7 +75,7 @@ const TABLES = {
 // ============================================================================
 
 export async function getSalesDaily(
-  filters: { startDate?: Date; endDate?: Date; channel?: string; organizationId?: string },
+  filters: { startDate?: Date; endDate?: Date; channel?: string; salesChannelId?: string; organizationId?: string },
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SalesDaily[]; total: number }> {
   let whereClause = '1=1';
@@ -85,7 +90,10 @@ export async function getSalesDaily(
     whereClause += ` AND "date" <= $${paramIndex++}`;
     params.push(filters.endDate);
   }
-  if (filters.channel) {
+  if (filters.salesChannelId) {
+    whereClause += ` AND "salesChannelId" = $${paramIndex++}`;
+    params.push(filters.salesChannelId);
+  } else if (filters.channel) {
     whereClause += ` AND "channel" = $${paramIndex++}`;
     params.push(filters.channel);
   }
@@ -167,22 +175,26 @@ export async function upsertSalesDaily(
   data: Partial<SalesDaily> & {
     date: Date;
     channel?: string;
+    salesChannelId?: string;
     organizationId?: string;
   },
 ): Promise<void> {
   const now = new Date().toISOString();
-  const channel = data.channel || 'all';
+  // `channel` is the rollup key: the salesChannelId when attribution is
+  // known, otherwise the free-text fallback. `salesChannelId` carries the
+  // structured FK for joins/filtering.
+  const channel = data.salesChannelId ?? data.channel ?? 'all';
 
   await query(
     `INSERT INTO "analyticsSalesDaily" (
-      "organizationId", "date", "channel", "currencyCode",
+      "organizationId", "date", "channel", "salesChannelId", "currencyCode",
       "orderCount", "itemsSold", "grossRevenueCents", "discountTotalCents", "refundTotalCents",
       "netRevenueCents", "taxTotalCents", "shippingRevenueCents", "averageOrderValueCents",
       "newCustomers", "returningCustomers", "guestOrders",
       "cartCreated", "cartAbandoned", "checkoutStarted", "checkoutCompleted", "conversionRate",
       "paymentSuccessCount", "paymentFailedCount", "paymentSuccessRate",
       "computedAt", "createdAt", "updatedAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
     ON CONFLICT ("organizationId", "date", "channel", "currencyCode") DO UPDATE SET
       "orderCount" = "analyticsSalesDaily"."orderCount" + EXCLUDED."orderCount",
       "itemsSold" = "analyticsSalesDaily"."itemsSold" + EXCLUDED."itemsSold",
@@ -201,11 +213,12 @@ export async function upsertSalesDaily(
       "checkoutCompleted" = "analyticsSalesDaily"."checkoutCompleted" + EXCLUDED."checkoutCompleted",
       "paymentSuccessCount" = "analyticsSalesDaily"."paymentSuccessCount" + EXCLUDED."paymentSuccessCount",
       "paymentFailedCount" = "analyticsSalesDaily"."paymentFailedCount" + EXCLUDED."paymentFailedCount",
-      "updatedAt" = $27`,
+      "updatedAt" = $28`,
     [
       data.organizationId,
       data.date,
       channel,
+      data.salesChannelId ?? null,
       data.currencyCode || 'USD',
       data.orderCount || 0,
       data.itemsSold || 0,
@@ -239,13 +252,17 @@ export async function upsertSalesDaily(
 // ============================================================================
 
 export async function getProductPerformance(
-  filters: { productId?: string; startDate?: Date; endDate?: Date },
+  filters: { productId?: string; startDate?: Date; endDate?: Date; salesChannelId?: string },
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: ProductPerformance[]; total: number }> {
   let whereClause = '1=1';
   const params: unknown[] = [];
   let paramIndex = 1;
 
+  if (filters.salesChannelId) {
+    whereClause += ` AND "salesChannelId" = $${paramIndex++}`;
+    params.push(filters.salesChannelId);
+  }
   if (filters.productId) {
     whereClause += ` AND "productId" = $${paramIndex++}`;
     params.push(filters.productId);
@@ -309,20 +326,22 @@ export async function upsertProductPerformance(
   data: Partial<ProductPerformance> & {
     productId: string;
     date: Date;
+    salesChannelId?: string;
   },
 ): Promise<void> {
   const now = new Date().toISOString();
+  const channel = data.salesChannelId ?? data.channel ?? 'all';
 
   await query(
     `INSERT INTO "analyticsProductPerformance" (
-      "productId", "productVariantId", "date", "channel",
+      "productId", "productVariantId", "date", "channel", "salesChannelId",
       "views", "uniqueViews", "detailViews",
       "addToCarts", "removeFromCarts", "viewToCartRate",
       "purchases", "quantitySold", "revenueCents", "averagePriceCents", "cartToOrderRate",
       "returns", "returnQuantity", "returnRate",
       "reviews", "averageRating", "stockAlerts", "outOfStockViews",
       "computedAt", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
     ON CONFLICT ("productId", "productVariantId", "date", "channel") DO UPDATE SET
       "views" = "analyticsProductPerformance"."views" + EXCLUDED."views",
       "uniqueViews" = "analyticsProductPerformance"."uniqueViews" + EXCLUDED."uniqueViews",
@@ -340,7 +359,8 @@ export async function upsertProductPerformance(
       data.productId,
       data.productVariantId,
       data.date,
-      data.channel || 'all',
+      channel,
+      data.salesChannelId ?? null,
       data.views || 0,
       data.uniqueViews || 0,
       data.detailViews || 0,
@@ -497,6 +517,7 @@ function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPe
     productVariantId: row.productVariantId ?? undefined,
     date: new Date(row.date),
     channel: row.channel ?? 'all',
+    salesChannelId: row.salesChannelId ?? undefined,
     views: row.views ?? 0,
     uniqueViews: row.uniqueViews ?? 0,
     detailViews: row.detailViews ?? 0,

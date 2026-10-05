@@ -1,5 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
-import { ProductAttribute as DbProductAttribute, ProductAttributeValue as DbProductAttributeValue, ProductAttributeValueMap, Table } from '../../../../libs/db/types';
+import {
+  ProductAttribute as DbProductAttribute,
+  ProductAttributeValue as DbProductAttributeValue,
+  ProductAttributeValueMap,
+  Table,
+} from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 /**
@@ -385,7 +390,13 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<ProductAttributeValueMap>(sql, [input.productId, input.attributeId, input.value, valueText, valueNumeric]);
+    const result = await queryOne<ProductAttributeValueMap>(sql, [
+      input.productId,
+      input.attributeId,
+      input.value,
+      valueText,
+      valueNumeric,
+    ]);
 
     if (!result) {
       throw new FailedToCreateProductError();

@@ -37,9 +37,31 @@ describe('Merchandising Service', () => {
 
     it('returns boost/bury/pin from rules', async () => {
       mockedQuery.mockResolvedValueOnce([
-        { ruleId: 'r1', ruleType: 'boost', productId: 'p1', isActive: true, createdAt: new Date(), updatedAt: new Date() },
-        { ruleId: 'r2', ruleType: 'bury', productId: 'p2', isActive: true, createdAt: new Date(), updatedAt: new Date() },
-        { ruleId: 'r3', ruleType: 'pin', productId: 'p3', position: 0, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        {
+          assortmentMerchandisingRuleId: 'r1',
+          ruleType: 'boost',
+          productId: 'p1',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          assortmentMerchandisingRuleId: 'r2',
+          ruleType: 'bury',
+          productId: 'p2',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          assortmentMerchandisingRuleId: 'r3',
+          ruleType: 'pin',
+          productId: 'p3',
+          position: 0,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ] as never[]);
 
       const result = await getMerchandisingRules('test');
@@ -69,9 +91,9 @@ describe('Merchandising Service', () => {
 
     it('returns manual ordering context', async () => {
       mockedQuery.mockResolvedValueOnce([
-        { orderId: 'o1', categoryId: 'cat1', productId: 'p1', position: 0, isActive: true },
-        { orderId: 'o2', categoryId: 'cat1', productId: 'p2', position: 1, isActive: true },
-        { orderId: 'o3', categoryId: 'cat1', productId: 'p3', position: 2, isActive: true },
+        { assortmentCategoryManualOrderId: 'o1', categoryId: 'cat1', productId: 'p1', position: 0, isActive: true },
+        { assortmentCategoryManualOrderId: 'o2', categoryId: 'cat1', productId: 'p2', position: 1, isActive: true },
+        { assortmentCategoryManualOrderId: 'o3', categoryId: 'cat1', productId: 'p3', position: 2, isActive: true },
       ] as never[]);
 
       const result = await getCategoryManualOrder('cat1');
@@ -92,7 +114,14 @@ describe('Merchandising Service', () => {
 
   describe('CRUD operations', () => {
     it('createMerchandisingRule inserts and returns rule', async () => {
-      const mockRule = { ruleId: 'r1', ruleType: 'boost', productId: 'p1', isActive: true, createdAt: new Date(), updatedAt: new Date() };
+      const mockRule = {
+        assortmentMerchandisingRuleId: 'r1',
+        ruleType: 'boost',
+        productId: 'p1',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       mockedQuery.mockResolvedValueOnce([mockRule] as never[]);
 
       const result = await createMerchandisingRule({
@@ -101,12 +130,19 @@ describe('Merchandising Service', () => {
         isActive: true,
       });
 
-      expect(result.ruleId).toBe('r1');
+      expect(result.assortmentMerchandisingRuleId).toBe('r1');
       expect(result.ruleType).toBe('boost');
     });
 
     it('updateMerchandisingRule updates and returns rule', async () => {
-      const mockRule = { ruleId: 'r1', ruleType: 'bury', productId: 'p1', isActive: false, createdAt: new Date(), updatedAt: new Date() };
+      const mockRule = {
+        assortmentMerchandisingRuleId: 'r1',
+        ruleType: 'bury',
+        productId: 'p1',
+        isActive: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       mockedQuery.mockResolvedValueOnce([mockRule] as never[]);
 
       const result = await updateMerchandisingRule('r1', { isActive: false });
@@ -133,8 +169,22 @@ describe('Merchandising Service', () => {
 
     it('listMerchandisingRules returns rules', async () => {
       const mockRules = [
-        { ruleId: 'r1', ruleType: 'boost', productId: 'p1', isActive: true, createdAt: new Date(), updatedAt: new Date() },
-        { ruleId: 'r2', ruleType: 'bury', productId: 'p2', isActive: true, createdAt: new Date(), updatedAt: new Date() },
+        {
+          assortmentMerchandisingRuleId: 'r1',
+          ruleType: 'boost',
+          productId: 'p1',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          assortmentMerchandisingRuleId: 'r2',
+          ruleType: 'bury',
+          productId: 'p2',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
       mockedQuery.mockResolvedValueOnce(mockRules as never[]);
 
@@ -156,8 +206,8 @@ describe('Merchandising Service', () => {
 
     it('getCategoryManualOrderList returns ordered list', async () => {
       mockedQuery.mockResolvedValueOnce([
-        { orderId: 'o1', categoryId: 'cat1', productId: 'p1', position: 0, isActive: true },
-        { orderId: 'o2', categoryId: 'cat1', productId: 'p2', position: 1, isActive: true },
+        { assortmentCategoryManualOrderId: 'o1', categoryId: 'cat1', productId: 'p1', position: 0, isActive: true },
+        { assortmentCategoryManualOrderId: 'o2', categoryId: 'cat1', productId: 'p2', position: 1, isActive: true },
       ] as never[]);
 
       const result = await getCategoryManualOrderList('cat1');

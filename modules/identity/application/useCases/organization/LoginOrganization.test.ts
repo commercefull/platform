@@ -14,7 +14,13 @@ describe('LoginOrganizationUseCase', () => {
 
   beforeEach(() => {
     mockOrgRepo = lazyMock<ConstructorParameters<typeof LoginOrganizationUseCase>[0]>();
-    mockOrgRepo.findByEmail.mockResolvedValue({ organizationId: 'o1', email: 'o@test.com', passwordHash: 'hash', status: 'active', permissions: ['read'] });
+    mockOrgRepo.findByEmail.mockResolvedValue({
+      organizationId: 'o1',
+      email: 'o@test.com',
+      passwordHash: 'hash',
+      status: 'active',
+      permissions: ['read'],
+    });
     mockOrgRepo.updateLastLogin.mockResolvedValue(undefined);
     mockAuth = lazyMock<ConstructorParameters<typeof LoginOrganizationUseCase>[1]>();
     mockAuth.verifyPassword.mockResolvedValue(true);

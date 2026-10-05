@@ -1,8 +1,5 @@
-
 import { ManageProductQaUseCase } from './ManageProductQa';
 import { createProductQa, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('ManageProductQaUseCase', () => {
   let useCase: ManageProductQaUseCase;
@@ -10,7 +7,7 @@ describe('ManageProductQaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductQaUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof ManageProductQaUseCase>[0]>();
     mockRepo.findByProduct.mockResolvedValue([createProductQa()]);
     mockRepo.updateStatus.mockResolvedValue(createProductQa({ status: 'answered' }));
     useCase = new ManageProductQaUseCase(mockRepo);

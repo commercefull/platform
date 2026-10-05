@@ -11,6 +11,16 @@ export interface PaymentAuthorizationRequest {
   currency: string;
   paymentMethodId: string;
   customerId?: string;
+  /**
+   * Delegated/tokenized credential supplied by an external surface
+   * (e.g. ACP `payment_data.instrument.credential`, Stripe SPT).
+   * Opaque to checkout — forwarded to the payment module.
+   */
+  delegatedCredential?: {
+    provider: string;
+    credentialType: string;
+    token: string;
+  };
 }
 
 export interface PaymentAuthorizationResult {

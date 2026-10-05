@@ -6,10 +6,7 @@ import type {
   ProductCategoryCreateParams,
   ProductCategoryUpdateParams,
 } from '../../domain/repositories/ProductCatalogPorts';
-export type {
-  ProductCategoryCreateParams,
-  ProductCategoryUpdateParams,
-} from '../../domain/repositories/ProductCatalogPorts';
+export type { ProductCategoryCreateParams, ProductCategoryUpdateParams } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductCategory = ProductCategoryRow;
 
 export class ProductCategoryRepo {
@@ -21,9 +18,7 @@ export class ProductCategoryRepo {
   }
 
   async findById(productCategoryId: string): Promise<ProductCategory | null> {
-    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1`, [
-      productCategoryId,
-    ]);
+    return queryOne<ProductCategory>(`SELECT * FROM "productCategory" WHERE "productCategoryId" = $1`, [productCategoryId]);
   }
 
   async findBySlug(slug: string): Promise<ProductCategory | null> {

@@ -4,7 +4,6 @@ import { ThemeOverride } from '../../domain/entities/ThemeOverride';
 import { ThemeNotFoundError, ThemeOverrideNotFoundError } from '../../domain/errors/ThemeErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-
 // ============================================================================
 // Manage Theme Overrides
 // ============================================================================

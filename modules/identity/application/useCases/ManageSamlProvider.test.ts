@@ -17,8 +17,13 @@ describe('ManageSamlProviderUseCase', () => {
 
   it('should create a SAML provider', async () => {
     const result = await useCase.create({
-      organizationId: 'org-1', name: 'Okta', entityId: 'e', ssoUrl: 'https://x.test',
-      certificate: 'c', spEntityId: 'sp', acsUrl: 'https://a.test',
+      organizationId: 'org-1',
+      name: 'Okta',
+      entityId: 'e',
+      ssoUrl: 'https://x.test',
+      certificate: 'c',
+      spEntityId: 'sp',
+      acsUrl: 'https://a.test',
     });
 
     expect(result.isActive).toBe(true);
@@ -39,4 +44,3 @@ describe('ManageSamlProviderUseCase', () => {
     expect(result.isActive).toBe(false);
   });
 });
-

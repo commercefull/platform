@@ -10,6 +10,8 @@ exports.up = function (knex) {
       table.uuid('productVariantId').references('productVariantId').inTable('productVariant');
       table.date('date').notNullable();
       table.string('channel').defaultTo('all');
+      // Structured sales-channel attribution — nullable for legacy events.
+      table.uuid('salesChannelId').references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
 
       // View metrics
       table.integer('views').defaultTo(0);
@@ -44,8 +46,18 @@ exports.up = function (knex) {
       table.timestamp('computedAt');
       table.timestamp('createdAt').defaultTo(knex.fn.now());
 
-      table.unique(['productId', 'productVariantId', 'date', 'channel']);
+      table.index('salesChannelId');
     })
+    .then(() =>
+      // Rollup merge key for ON CONFLICT upserts. NULLS NOT DISTINCT:
+      // productVariantId is nullable (simple products) and standard unique
+      // constraints treat NULLs as distinct, which would defeat merging.
+      knex.raw(`
+        ALTER TABLE "analyticsProductPerformance"
+          ADD CONSTRAINT analyticsproductperformance_productid_productvariantid_date_cha
+          UNIQUE NULLS NOT DISTINCT ("productId", "productVariantId", "date", "channel")
+      `),
+    )
     .then(() => knex.raw('CREATE INDEX ON "analyticsProductPerformance"("productId", "date")'))
     .then(() => knex.raw('CREATE INDEX ON "analyticsProductPerformance"("date")'));
 };

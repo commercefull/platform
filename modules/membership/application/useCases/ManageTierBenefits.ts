@@ -3,7 +3,11 @@
  * Benefit create/update/delete with existence and tier-association checks.
  */
 
-import { MembershipBenefitNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
+import {
+  MembershipBenefitNotFoundError,
+  MembershipPlanNotFoundError,
+  MembershipValidationError,
+} from '../../domain/errors/MembershipErrors';
 import type { MembershipTierRecord } from './ManageUserMemberships';
 
 export interface MembershipBenefitRecord {

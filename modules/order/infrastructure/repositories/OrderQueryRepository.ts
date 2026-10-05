@@ -1,6 +1,14 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
-import type { OrderNote as DbOrderNote, OrderDiscount as DbOrderDiscount, OrderPayment as DbOrderPayment, OrderPaymentRefund as DbOrderPaymentRefund, OrderShipping as DbOrderShipping, OrderShippingRate as DbOrderShippingRate, OrderTax as DbOrderTax } from '../../../../libs/db/types';
+import type {
+  OrderNote as DbOrderNote,
+  OrderDiscount as DbOrderDiscount,
+  OrderPayment as DbOrderPayment,
+  OrderPaymentRefund as DbOrderPaymentRefund,
+  OrderShipping as DbOrderShipping,
+  OrderShippingRate as DbOrderShippingRate,
+  OrderTax as DbOrderTax,
+} from '../../../../libs/db/types';
 import {
   FailedToCreateOrderNoteError,
   FailedToCreateOrderDiscountError,
@@ -31,7 +39,11 @@ export type {
   OrderShippingCreateParams,
   OrderShippingUpdateParams,
 } from '../../domain/repositories/OrderShippingRepository';
-import type { ShippingCarrier, OrderShippingRate, OrderShippingRateCreateParams } from '../../domain/repositories/OrderShippingRateRepository';
+import type {
+  ShippingCarrier,
+  OrderShippingRate,
+  OrderShippingRateCreateParams,
+} from '../../domain/repositories/OrderShippingRateRepository';
 export type {
   ShippingCarrier,
   OrderShippingRate,
@@ -55,21 +67,14 @@ export type {
 
 import type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
 export type { OrderPaymentRefundStatus } from '../../domain/repositories/OrderPaymentRefundRepository';
-import type {
-  OrderPaymentRefund,
-  OrderPaymentRefundCreateParams,
-} from '../../domain/repositories/OrderPaymentRefundRepository';
-export type {
-  OrderPaymentRefund,
-  OrderPaymentRefundCreateParams,
-} from '../../domain/repositories/OrderPaymentRefundRepository';
+import type { OrderPaymentRefund, OrderPaymentRefundCreateParams } from '../../domain/repositories/OrderPaymentRefundRepository';
+export type { OrderPaymentRefund, OrderPaymentRefundCreateParams } from '../../domain/repositories/OrderPaymentRefundRepository';
 
 // ============================================================================
 // Consolidated Order Query Repository
 // ============================================================================
 
-const toDate = (d: Date | string | null | undefined): Date | undefined =>
-  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToNote(row: DbOrderNote): OrderNote {
@@ -186,7 +191,9 @@ class OrderQueryRepo {
   // --- Order Discounts ---
 
   async findDiscountsByOrder(orderId: string): Promise<OrderDiscount[]> {
-    const results = await query<DbOrderDiscount[]>(`SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    const results = await query<DbOrderDiscount[]>(`SELECT * FROM "orderDiscount" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [
+      orderId,
+    ]);
     return (results || []).map(mapToDiscount);
   }
 
@@ -219,7 +226,9 @@ class OrderQueryRepo {
   // --- Order Shipping ---
 
   async findShippingByOrder(orderId: string): Promise<OrderShipping[]> {
-    const results = await query<DbOrderShipping[]>(`SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [orderId]);
+    const results = await query<DbOrderShipping[]>(`SELECT * FROM "orderShipping" WHERE "orderId" = $1 ORDER BY "createdAt" ASC`, [
+      orderId,
+    ]);
     return (results || []).map(mapToShipping);
   }
 
@@ -271,7 +280,10 @@ class OrderQueryRepo {
     values.push(unixTimestamp());
     values.push(orderShippingId);
 
-    const row = await queryOne<DbOrderShipping>(`UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`, values);
+    const row = await queryOne<DbOrderShipping>(
+      `UPDATE "orderShipping" SET ${fields.join(', ')} WHERE "orderShippingId" = $${i} RETURNING *`,
+      values,
+    );
     return row ? mapToShipping(row) : null;
   }
 
@@ -432,7 +444,9 @@ class OrderQueryRepo {
   }
 
   async findRefundById(orderPaymentRefundId: string): Promise<OrderPaymentRefund | null> {
-    const row = await queryOne<DbOrderPaymentRefund>(`SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`, [orderPaymentRefundId]);
+    const row = await queryOne<DbOrderPaymentRefund>(`SELECT * FROM "orderPaymentRefund" WHERE "orderPaymentRefundId" = $1`, [
+      orderPaymentRefundId,
+    ]);
     return row ? mapToRefund(row) : null;
   }
 

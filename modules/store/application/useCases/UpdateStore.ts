@@ -138,9 +138,7 @@ export class UpdateStoreUseCase {
     if ((updates.supportedCurrencies || updates.defaultCurrency) && this.storeCurrencyRepository) {
       const supportedCurrencies = updates.supportedCurrencies ?? (await this.storeCurrencyRepository.getSupportedCodes(command.storeId));
       const defaultCurrency =
-        updates.defaultCurrency ??
-        (await this.storeCurrencyRepository.getDefaultCode(command.storeId)) ??
-        supportedCurrencies[0];
+        updates.defaultCurrency ?? (await this.storeCurrencyRepository.getDefaultCode(command.storeId)) ?? supportedCurrencies[0];
       await this.storeCurrencyRepository.replaceAll(command.storeId, supportedCurrencies, defaultCurrency);
     }
 

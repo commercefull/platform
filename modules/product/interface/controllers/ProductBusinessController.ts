@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Product Business Controller
  * HTTP interface for business/admin product operations
@@ -9,7 +9,6 @@ import { CreateProductCommand } from '../../application/useCases/CreateProduct';
 import { GetProductCommand } from '../../application/useCases/GetProduct';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
 import { UpdateProductCommand } from '../../application/useCases/UpdateProduct';
-import { ManageProductCollectionCommand } from '../../application/useCases/ManageProductCollection';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import {
@@ -17,7 +16,6 @@ import {
   getProductUseCase,
   createProductUseCase,
   updateProductUseCase,
-  manageProductCollectionUseCase,
   updateProductStatusUseCase,
   deleteProductUseCase,
   createCatalogVariantUseCase,
@@ -32,7 +30,6 @@ import {
   manageProductReviewsUseCase,
   manageProductQaUseCase,
   manageReviewMediaUseCase,
-  manageProductCollectionsUseCase,
   manageProductDownloadsUseCase,
   manageProductRelationshipsUseCase,
 } from '../../application/useCases/wired';
@@ -78,6 +75,7 @@ interface CreateProductBody {
   isDownloadable?: boolean;
   isSubscription?: boolean;
   isTaxable?: boolean;
+  isInventoryManaged?: boolean;
   taxClass?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -110,6 +108,7 @@ interface UpdateProductBody {
   isDownloadable?: boolean;
   isSubscription?: boolean;
   isTaxable?: boolean;
+  isInventoryManaged?: boolean;
   taxClass?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -164,17 +163,6 @@ interface ImageReorderBody {
 
 interface ReviewResponseBody {
   response?: string;
-}
-
-interface CollectionBody {
-  name?: string;
-  slug?: string;
-  description?: string;
-  imageUrl?: string;
-  isActive?: boolean;
-  position?: number;
-  addProducts?: Array<{ productId: string; position?: number }>;
-  removeMapIds?: string[];
 }
 
 interface DownloadBody {
@@ -331,6 +319,7 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
     metaKeywords,
     tags,
     metadata,
+    isInventoryManaged,
   } = body;
 
   if (!name?.trim()) {
@@ -376,6 +365,7 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
     metaKeywords,
     tags,
     metadata,
+    isInventoryManaged,
   );
 
   const useCase = createProductUseCase;
@@ -805,96 +795,7 @@ export const deleteReviewMedia = async (req: HttpRequest, res: HttpResponse): Pr
   successResponse(res, { deleted: true });
 };
 
-// ============================================================================
-// Collection Management (Business)
-// ============================================================================
-
-/**
- * List all collections
- * GET /collections
- */
-export const listCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const collections = await manageProductCollectionsUseCase.findAll();
-  successResponse(res, collections);
-};
-
-/**
- * Create a collection
- * POST /collections
- */
-export const createCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const organizationId = req.user?.organizationId || req.user?.id;
-  const { name, slug, description, imageUrl, isActive, position, addProducts } = req.body as CollectionBody;
-  if (!name?.trim()) {
-    errorResponse(res, 'name is required', 400);
-    return;
-  }
-  if (!slug?.trim()) {
-    errorResponse(res, 'slug is required', 400);
-    return;
-  }
-  const command = new ManageProductCollectionCommand(
-    name,
-    slug,
-    undefined,
-    description,
-    imageUrl,
-    isActive,
-    position,
-    organizationId,
-    addProducts,
-  );
-  const useCase = manageProductCollectionUseCase;
-  const result = await useCase.execute(command);
-  successResponse(res, result, 201);
-};
-
-/**
- * Update a collection
- * PUT /collections/:collectionId
- */
-export const updateCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { collectionId } = req.params;
-  const organizationId = req.user?.organizationId || req.user?.id;
-  const { name, slug, description, imageUrl, isActive, position, addProducts, removeMapIds } = req.body as CollectionBody;
-  if (!name?.trim()) {
-    errorResponse(res, 'name is required', 400);
-    return;
-  }
-  if (!slug?.trim()) {
-    errorResponse(res, 'slug is required', 400);
-    return;
-  }
-  const command = new ManageProductCollectionCommand(
-    name,
-    slug,
-    collectionId,
-    description,
-    imageUrl,
-    isActive,
-    position,
-    organizationId,
-    addProducts,
-    removeMapIds,
-  );
-  const useCase = manageProductCollectionUseCase;
-  const result = await useCase.execute(command);
-  successResponse(res, result);
-};
-
-/**
- * Delete a collection
- * DELETE /collections/:collectionId
- */
-export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { collectionId } = req.params;
-  const deleted = await manageProductCollectionsUseCase.softDelete(collectionId);
-  if (!deleted) {
-    errorResponse(res, 'Collection not found', 404);
-    return;
-  }
-  successResponse(res, { deleted: true });
-};
+// Collection management moved to modules/assortment (/business/assortment/*)
 
 // ============================================================================
 // Download Management (Business)

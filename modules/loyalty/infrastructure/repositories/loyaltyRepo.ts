@@ -320,6 +320,18 @@ export class LoyaltyRepo {
     return updatedPoints;
   }
 
+  async setMemberPoints(loyaltyPointsId: string, currentPoints: number, lifetimePoints?: number): Promise<void> {
+    const sql =
+      lifetimePoints === undefined
+        ? `UPDATE "loyaltyPoints" SET "currentPoints" = $2, "updatedAt" = $3 WHERE "loyaltyPointsId" = $1`
+        : `UPDATE "loyaltyPoints" SET "currentPoints" = $2, "lifetimePoints" = $3, "updatedAt" = $4 WHERE "loyaltyPointsId" = $1`;
+    const params: unknown[] =
+      lifetimePoints === undefined
+        ? [loyaltyPointsId, currentPoints, new Date()]
+        : [loyaltyPointsId, currentPoints, lifetimePoints, new Date()];
+    await query(sql, params);
+  }
+
   async checkAndUpdateTier(customerId: string, lifetimePoints: number): Promise<void> {
     const newTier = await this.findTierByPointsThreshold(lifetimePoints);
     if (!newTier) return;
@@ -336,9 +348,24 @@ export class LoyaltyRepo {
   // Transaction Management
   // ==========================================================================
 
+  async findCreditTransactionByReference(referenceId: string): Promise<LoyaltyTransaction | null> {
+    const sql = `SELECT * FROM "loyaltyTransaction" WHERE action = 'credit' AND "referenceId" = $1`;
+    return await queryOne<LoyaltyTransaction>(sql, [referenceId]);
+  }
+
   async findTransactionById(loyaltyTransactionId: string): Promise<LoyaltyTransaction | null> {
     const sql = `SELECT * FROM "loyaltyTransaction" WHERE "loyaltyTransactionId" = $1`;
     return await queryOne<LoyaltyTransaction>(sql, [loyaltyTransactionId]);
+  }
+
+  async findTransactionByOrderAndAction(orderId: string, action: 'credit' | 'debit'): Promise<LoyaltyTransaction | null> {
+    const sql = `
+      SELECT * FROM "loyaltyTransaction"
+      WHERE "orderId" = $1 AND "action" = $2
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `;
+    return await queryOne<LoyaltyTransaction>(sql, [orderId, action]);
   }
 
   async findCustomerTransactions(customerId: string, limit: number = 50): Promise<LoyaltyTransaction[]> {

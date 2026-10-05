@@ -5,6 +5,7 @@
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { OrderPlacementPort } from '../../application/ports/OrderPlacementPort';
+import { InventoryReservationPort } from '../../application/ports/InventoryReservationPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
 import { NotFoundError } from '../../../../libs/errors';
@@ -34,6 +35,7 @@ export class AbandonCheckoutUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
     private readonly orderPlacementPort?: OrderPlacementPort,
+    private readonly inventoryReservationPort?: InventoryReservationPort,
   ) {}
 
   async execute(command: AbandonCheckoutCommand): Promise<AbandonCheckoutResponse> {
@@ -48,6 +50,12 @@ export class AbandonCheckoutUseCase {
           // Log but don't fail — order may already be cancelled
           logger.warn(`AbandonCheckout: could not cancel order ${session.orderId}: ${(err as Error).message}`);
         }
+      }
+
+      // Release any stock held for the pending order (abandon, payment
+      // failure, or expiry all return inventory to the available pool).
+      if (session.orderId && this.inventoryReservationPort) {
+        await this.inventoryReservationPort.releaseForOrder(session.orderId, 'cancelled');
       }
 
       session.abandon();

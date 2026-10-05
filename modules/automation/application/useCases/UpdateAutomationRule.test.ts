@@ -27,4 +27,3 @@ describe('UpdateAutomationRuleUseCase', () => {
     await expect(useCase.execute('missing', { name: 'X' })).rejects.toThrow(AutomationRuleNotFoundError);
   });
 });
-

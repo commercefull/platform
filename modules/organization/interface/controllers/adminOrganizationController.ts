@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Organization Controller for Admin Hub
  * Handles Organization management for multi-organization platforms
@@ -78,7 +78,10 @@ export const approveOrganization = async (req: HttpRequest, res: HttpResponse): 
     redirectResponse(res, `/admin/operations/organizations/${organizationId}?success=Organization approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error approving organization:', error);
-    redirectResponse(res, `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve organization')}`);
+    redirectResponse(
+      res,
+      `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve organization')}`,
+    );
   }
 };
 
@@ -89,7 +92,10 @@ export const suspendOrganization = async (req: HttpRequest, res: HttpResponse): 
     redirectResponse(res, `/admin/operations/organizations/${organizationId}?success=Organization suspended successfully`);
   } catch (error: unknown) {
     logger.warn('Error suspending organization:', error);
-    redirectResponse(res, `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to suspend organization')}`);
+    redirectResponse(
+      res,
+      `/admin/operations/organizations/${organizationId}?error=${encodeURIComponent((error as Error).message || 'Failed to suspend organization')}`,
+    );
   }
 };
 

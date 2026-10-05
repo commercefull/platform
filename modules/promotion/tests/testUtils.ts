@@ -177,9 +177,7 @@ export function createGiftCard(overrides: Partial<PromotionGiftCard> = {}): Prom
   };
 }
 
-export function createGiftCardTransaction(
-  overrides: Partial<PromotionGiftCardTransaction> = {},
-): PromotionGiftCardTransaction {
+export function createGiftCardTransaction(overrides: Partial<PromotionGiftCardTransaction> = {}): PromotionGiftCardTransaction {
   return {
     promotionGiftCardTransactionId: 'txn-1',
     promotionGiftCardId: 'gc-1',

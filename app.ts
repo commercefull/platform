@@ -381,9 +381,9 @@ app.locals.t = function (key: string) {
 app.use(correlationIdMiddleware);
 
 app.use(expressHttpLogger);
-// Skip JSON parsing for webhook route — needs raw Buffer for signature verification
+// Skip JSON parsing for webhook/ACP routes — needs raw Buffer for signature verification
 app.use((req, res, next) => {
-  if (req.path === '/payment/webhook') {
+  if (req.path === '/payment/webhook' || req.path.startsWith('/acp')) {
     next();
   } else {
     express.json({ limit: '1mb' })(req, res, next);

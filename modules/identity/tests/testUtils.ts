@@ -122,7 +122,13 @@ export function createRefreshTokenInfo(
 }
 
 export function createUserStoreAssignment(
-  overrides: Partial<{ userStoreId: string; userId: string; storeId: string; isPrimary: boolean; role: 'cashier' | 'manager' | 'admin' }> = {},
+  overrides: Partial<{
+    userStoreId: string;
+    userId: string;
+    storeId: string;
+    isPrimary: boolean;
+    role: 'cashier' | 'manager' | 'admin';
+  }> = {},
 ) {
   return UserStoreAssignment.create({
     userStoreId: overrides.userStoreId ?? 'us-1',
@@ -135,18 +141,28 @@ export function createUserStoreAssignment(
 
 export function createSamlProvider(overrides: Partial<Parameters<typeof SamlProvider.create>[0]> = {}): SamlProvider {
   return SamlProvider.create({
-    providerId: 'saml-1', organizationId: 'org-1', name: 'Okta',
-    entityId: 'idp-entity', ssoUrl: 'https://idp.test/sso', certificate: 'CERT',
-    spEntityId: 'sp-entity', acsUrl: 'https://app.test/acs',
+    providerId: 'saml-1',
+    organizationId: 'org-1',
+    name: 'Okta',
+    entityId: 'idp-entity',
+    ssoUrl: 'https://idp.test/sso',
+    certificate: 'CERT',
+    spEntityId: 'sp-entity',
+    acsUrl: 'https://app.test/acs',
     ...overrides,
   });
 }
 
 export function createOidcProvider(overrides: Partial<Parameters<typeof OidcProvider.create>[0]> = {}): OidcProvider {
   return OidcProvider.create({
-    providerId: 'oidc-1', organizationId: 'org-1', name: 'Auth0',
-    issuerUrl: 'https://idp.test', clientId: 'client-1', clientSecret: 'secret',
-    redirectUri: 'https://app.test/callback', usePkce: true,
+    providerId: 'oidc-1',
+    organizationId: 'org-1',
+    name: 'Auth0',
+    issuerUrl: 'https://idp.test',
+    clientId: 'client-1',
+    clientSecret: 'secret',
+    redirectUri: 'https://app.test/callback',
+    usePkce: true,
     authorizationEndpoint: 'https://idp.test/authorize',
     ...overrides,
   });

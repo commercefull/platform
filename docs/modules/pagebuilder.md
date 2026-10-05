@@ -59,8 +59,8 @@ The Page Builder module provides a drag-and-drop page editor with a block schema
 
 ## Tables
 
-| Table       | Description                                     |
-| ----------- | ----------------------------------------------- |
+| Table                  | Description                                     |
+| ---------------------- | ----------------------------------------------- |
 | `pagebuilderPageDraft` | Draft pages with JSONB blocks and region layout |
 
 ## Routes
@@ -76,27 +76,26 @@ The Page Builder module provides a drag-and-drop page editor with a block schema
 | POST   | `/business/page-builder/drafts/:id/preview` | Preview draft              |
 | GET    | `/business/page-builder/blocks`             | List available block types |
 
-
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/page-builder/block-types` | `asyncHandler(pageBuilderController.listBlockTypes)` | Block types |
-| GET | `/page-builder/block-types/:category` | `asyncHandler(pageBuilderController.listBlockTypesByCategory)` | — |
-| GET | `/page-builder/drafts` | `asyncHandler(pageBuilderController.listDrafts)` | Drafts |
-| POST | `/page-builder/drafts` | `asyncHandler(pageBuilderController.createDraft)` | — |
-| GET | `/page-builder/drafts/:draftId` | `asyncHandler(pageBuilderController.getDraft)` | — |
-| DELETE | `/page-builder/drafts/:draftId` | `asyncHandler(pageBuilderController.deleteDraft)` | — |
-| POST | `/page-builder/drafts/:draftId/blocks` | `asyncHandler(pageBuilderController.addBlock)` | Blocks |
-| PATCH | `/page-builder/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.updateBlock)` | — |
-| DELETE | `/page-builder/drafts/:draftId/blocks/:blockId` | `asyncHandler(pageBuilderController.removeBlock)` | — |
-| PATCH | `/page-builder/drafts/:draftId/blocks/:blockId/move` | `asyncHandler(pageBuilderController.moveBlock)` | — |
-| GET | `/page-builder/drafts/:draftId/preview` | `asyncHandler(pageBuilderController.previewDraft)` | Preview |
-| POST | `/page-builder/drafts/:draftId/publish` | `asyncHandler(pageBuilderController.publishDraft)` | Publish |
-| POST | `/page-builder/drafts/:draftId/regions/:region/reorder` | `asyncHandler(pageBuilderController.reorderBlocks)` | — |
-| PATCH | `/page-builder/drafts/:draftId/slug` | `asyncHandler(pageBuilderController.updateDraftSlug)` | — |
-| PATCH | `/page-builder/drafts/:draftId/theme` | `asyncHandler(pageBuilderController.updateDraftTheme)` | — |
-| PATCH | `/page-builder/drafts/:draftId/title` | `asyncHandler(pageBuilderController.updateDraftTitle)` | — |
-| POST | `/page-builder/drafts/:draftId/unpublish` | `asyncHandler(pageBuilderController.unpublishDraft)` | — |
+| Method | Endpoint                                                | Controller                                                     | Description |
+| ------ | ------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| GET    | `/page-builder/block-types`                             | `asyncHandler(pageBuilderController.listBlockTypes)`           | Block types |
+| GET    | `/page-builder/block-types/:category`                   | `asyncHandler(pageBuilderController.listBlockTypesByCategory)` | —           |
+| GET    | `/page-builder/drafts`                                  | `asyncHandler(pageBuilderController.listDrafts)`               | Drafts      |
+| POST   | `/page-builder/drafts`                                  | `asyncHandler(pageBuilderController.createDraft)`              | —           |
+| GET    | `/page-builder/drafts/:draftId`                         | `asyncHandler(pageBuilderController.getDraft)`                 | —           |
+| DELETE | `/page-builder/drafts/:draftId`                         | `asyncHandler(pageBuilderController.deleteDraft)`              | —           |
+| POST   | `/page-builder/drafts/:draftId/blocks`                  | `asyncHandler(pageBuilderController.addBlock)`                 | Blocks      |
+| PATCH  | `/page-builder/drafts/:draftId/blocks/:blockId`         | `asyncHandler(pageBuilderController.updateBlock)`              | —           |
+| DELETE | `/page-builder/drafts/:draftId/blocks/:blockId`         | `asyncHandler(pageBuilderController.removeBlock)`              | —           |
+| PATCH  | `/page-builder/drafts/:draftId/blocks/:blockId/move`    | `asyncHandler(pageBuilderController.moveBlock)`                | —           |
+| GET    | `/page-builder/drafts/:draftId/preview`                 | `asyncHandler(pageBuilderController.previewDraft)`             | Preview     |
+| POST   | `/page-builder/drafts/:draftId/publish`                 | `asyncHandler(pageBuilderController.publishDraft)`             | Publish     |
+| POST   | `/page-builder/drafts/:draftId/regions/:region/reorder` | `asyncHandler(pageBuilderController.reorderBlocks)`            | —           |
+| PATCH  | `/page-builder/drafts/:draftId/slug`                    | `asyncHandler(pageBuilderController.updateDraftSlug)`          | —           |
+| PATCH  | `/page-builder/drafts/:draftId/theme`                   | `asyncHandler(pageBuilderController.updateDraftTheme)`         | —           |
+| PATCH  | `/page-builder/drafts/:draftId/title`                   | `asyncHandler(pageBuilderController.updateDraftTitle)`         | —           |
+| POST   | `/page-builder/drafts/:draftId/unpublish`               | `asyncHandler(pageBuilderController.unpublishDraft)`           | —           |
 
 <!-- GENERATED:ENDPOINTS:END -->

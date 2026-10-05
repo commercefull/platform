@@ -26,12 +26,6 @@ function mapToBin(row: DbDistributionWarehouseBin): WarehouseBin {
   };
 }
 
-
-
-
-
-
-
 export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
   const id = generateUUID();
   const now = new Date();
@@ -69,7 +63,10 @@ export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
 }
 
 export async function findBinById(binId: string): Promise<WarehouseBin | null> {
-  const row = await queryOne<DbDistributionWarehouseBin>('SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1', [binId]);
+  const row = await queryOne<DbDistributionWarehouseBin>(
+    'SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1',
+    [binId],
+  );
   return row ? mapToBin(row) : null;
 }
 

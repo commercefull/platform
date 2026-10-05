@@ -44,7 +44,7 @@ describe('ManageCustomerTicketsUseCase', () => {
   });
 
   describe('getTicketDetail', () => {
-    it('should reject another customer\'s ticket', async () => {
+    it("should reject another customer's ticket", async () => {
       support.getTicket.mockResolvedValue(ticket);
       await expect(useCase.getTicketDetail('t-1', 'cust-2')).rejects.toBeInstanceOf(SupportTicketNotFoundError);
     });
@@ -65,17 +65,13 @@ describe('ManageCustomerTicketsUseCase', () => {
   describe('addCustomerMessage', () => {
     it('should reject replies on a closed ticket', async () => {
       support.getTicket.mockResolvedValue({ ...ticket, status: 'closed' });
-      await expect(useCase.addCustomerMessage('t-1', 'cust-1', { message: 'hi' })).rejects.toBeInstanceOf(
-        SupportValidationError,
-      );
+      await expect(useCase.addCustomerMessage('t-1', 'cust-1', { message: 'hi' })).rejects.toBeInstanceOf(SupportValidationError);
       expect(support.addMessage).not.toHaveBeenCalled();
     });
 
-    it('should reject another customer\'s ticket', async () => {
+    it("should reject another customer's ticket", async () => {
       support.getTicket.mockResolvedValue(ticket);
-      await expect(useCase.addCustomerMessage('t-1', 'cust-2', { message: 'hi' })).rejects.toBeInstanceOf(
-        SupportTicketNotFoundError,
-      );
+      await expect(useCase.addCustomerMessage('t-1', 'cust-2', { message: 'hi' })).rejects.toBeInstanceOf(SupportTicketNotFoundError);
     });
 
     it('should add a message enriched from the ticket', async () => {

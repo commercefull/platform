@@ -10,7 +10,7 @@ describe('CreateInventoryItemUseCase', () => {
     uuidMock.mockReturnValue('inv-uuid');
     mockRepo = lazyMock<ConstructorParameters<typeof CreateInventoryItemUseCase>[0]>();
     mockRepo.findBySkuAndWarehouse.mockResolvedValue(null);
-    mockRepo.create.mockImplementation(async (params) => ({
+    mockRepo.create.mockImplementation(async params => ({
       inventoryId: 'inv-uuid',
       productId: params.productId,
       variantId: params.variantId,

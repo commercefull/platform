@@ -25,19 +25,19 @@ Every merchant eventually hits the same wall with the two dominant platforms:
 4. **Security is diffused** — most serious vulnerabilities live in the plugin ecosystem, not the core.
 5. **Poor trust signal** — low independent review ratings tied to maintenance complaints.
 
-**The insight:** Shopify's failure mode is *lock-in*. WooCommerce's failure mode is *abandonment*. Commercefull solves both without inheriting either.
+**The insight:** Shopify's failure mode is _lock-in_. WooCommerce's failure mode is _abandonment_. Commercefull solves both without inheriting either.
 
 ---
 
 ## The Five Pillars
 
-| Pillar | The Problem It Solves | The Commitment |
-|---|---|---|
-| **Your Data** | Shopify's lock-in | Self-hosted, fully exportable, never held hostage |
-| **Your Checkout** | Shopify's pixel/script sandbox | No restrictions — scripts run because you control the code |
-| **Your Cost** | Shopify's app tax | Loyalty, subscriptions, membership, compliance built in natively |
-| **Your Stability** | WooCommerce's plugin fragility | Native modules built to work together by design |
-| **Your Support** | WooCommerce's "figure it out yourself" | Real support included at every tier, not just managed |
+| Pillar             | The Problem It Solves                  | The Commitment                                                   |
+| ------------------ | -------------------------------------- | ---------------------------------------------------------------- |
+| **Your Data**      | Shopify's lock-in                      | Self-hosted, fully exportable, never held hostage                |
+| **Your Checkout**  | Shopify's pixel/script sandbox         | No restrictions — scripts run because you control the code       |
+| **Your Cost**      | Shopify's app tax                      | Loyalty, subscriptions, membership, compliance built in natively |
+| **Your Stability** | WooCommerce's plugin fragility         | Native modules built to work together by design                  |
+| **Your Support**   | WooCommerce's "figure it out yourself" | Real support included at every tier, not just managed            |
 
 ---
 
@@ -61,14 +61,14 @@ Custom-built modules and workflows for specific business needs — compliance, u
 
 ## Comparison
 
-| Dimension | Shopify | WooCommerce | Commercefull |
-|---|---|---|---|
-| **Data ownership** | Limited export, lives on their servers | Full, but fragile | Full, self-hosted, fully exportable |
-| **Checkout control** | Sandboxed (Plus for customization) | Full, but plugin-fragile | Full, no restrictions |
-| **App cost** | Stacked paid apps ($500–2,000+/mo) | Free plugins, but maintenance cost | Loyalty, subscriptions, membership built in |
-| **Stability** | High (managed) | Degrades with plugins | Native modules, designed together |
-| **Support** | Tiered, Plus-only for real support | Forums and community | Included at every tier |
-| **Migration** | Hard to leave | Easy to leave, hard to maintain | Your choice of who maintains it |
+| Dimension            | Shopify                                | WooCommerce                        | Commercefull                                |
+| -------------------- | -------------------------------------- | ---------------------------------- | ------------------------------------------- |
+| **Data ownership**   | Limited export, lives on their servers | Full, but fragile                  | Full, self-hosted, fully exportable         |
+| **Checkout control** | Sandboxed (Plus for customization)     | Full, but plugin-fragile           | Full, no restrictions                       |
+| **App cost**         | Stacked paid apps ($500–2,000+/mo)     | Free plugins, but maintenance cost | Loyalty, subscriptions, membership built in |
+| **Stability**        | High (managed)                         | Degrades with plugins              | Native modules, designed together           |
+| **Support**          | Tiered, Plus-only for real support     | Forums and community               | Included at every tier                      |
+| **Migration**        | Hard to leave                          | Easy to leave, hard to maintain    | Your choice of who maintains it             |
 
 ---
 

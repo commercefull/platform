@@ -71,45 +71,45 @@ The Basket (Shopping Cart) feature manages customer shopping sessions, allowing 
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/basket` | `asyncHandler(basketController.listBaskets)` | List/search baskets (admin) |
-| POST | `/basket` | `asyncHandler(basketController.getOrCreateBasket)` | Get or create basket for current user/session
-POST /basket |
-| GET | `/basket/:basketId` | `asyncHandler(basketController.getBasket)` | Get basket by ID |
-| DELETE | `/basket/:basketId` | `asyncHandler(basketController.deleteBasket)` | Delete basket |
-| GET | `/basket/:basketId` | `asyncHandler(basketController.getBasket)` | Get basket by ID
-GET /basket/:basketId |
-| DELETE | `/basket/:basketId` | `asyncHandler(basketController.deleteBasket)` | Delete basket
-DELETE /basket/:basketId |
-| POST | `/basket/:basketId/assign` | `asyncHandler(basketController.assignToCustomer)` | Assign basket to customer |
-| POST | `/basket/:basketId/assign` | `asyncHandler(basketController.assignToCustomer)` | Assign basket to customer
-POST /basket/:basketId/assign |
-| POST | `/basket/:basketId/coupon` | `asyncHandler(basketController.applyCouponAdmin)` | Apply coupon (admin override) |
-| DELETE | `/basket/:basketId/coupon` | `asyncHandler(basketController.removeCoupon)` | Remove coupon |
-| POST | `/basket/:basketId/coupon` | `asyncHandler(basketController.applyCoupon)` | Apply coupon to basket
-POST /basket/:basketId/coupon |
-| DELETE | `/basket/:basketId/coupon` | `asyncHandler(basketController.removeCoupon)` | Remove coupon from basket
-DELETE /basket/:basketId/coupon |
-| PUT | `/basket/:basketId/expiration` | `asyncHandler(basketController.extendExpiration)` | Extend expiration |
-| PUT | `/basket/:basketId/expiration` | `asyncHandler(basketController.extendExpiration)` | Extend basket expiration
-PUT /basket/:basketId/expiration |
-| POST | `/basket/:basketId/items` | `asyncHandler(basketController.addItem)` | Add item to basket
-POST /basket/:basketId/items |
-| DELETE | `/basket/:basketId/items` | `asyncHandler(basketController.clearBasket)` | Clear all items from basket
-DELETE /basket/:basketId/items |
-| PATCH | `/basket/:basketId/items/:basketItemId` | `asyncHandler(basketController.updateItemQuantity)` | Update item quantity
-PATCH /basket/:basketId/items/:basketItemId |
-| DELETE | `/basket/:basketId/items/:basketItemId` | `asyncHandler(basketController.removeItem)` | Remove item from basket
-DELETE /basket/:basketId/items/:basketItemId |
-| POST | `/basket/:basketId/items/:basketItemId/gift` | `asyncHandler(basketController.setItemAsGift)` | Set item as gift
-POST /basket/:basketId/items/:basketItemId/gift |
-| GET | `/basket/:basketId/summary` | `asyncHandler(basketController.getBasketSummary)` | Get basket summary |
-| GET | `/basket/:basketId/summary` | `asyncHandler(basketController.getBasketSummary)` | Get basket summary (lightweight response)
-GET /basket/:basketId/summary |
-| GET | `/basket/me` | `asyncHandler(basketController.getMyBasket)` | Get current user's basket
-GET /basket/me |
-| POST | `/basket/merge` | `asyncHandler(basketController.mergeBaskets)` | Merge baskets (typically when guest logs in)
-POST /basket/merge |
+| Method                                          | Endpoint                                     | Controller                                          | Description                                   |
+| ----------------------------------------------- | -------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| GET                                             | `/basket`                                    | `asyncHandler(basketController.listBaskets)`        | List/search baskets (admin)                   |
+| POST                                            | `/basket`                                    | `asyncHandler(basketController.getOrCreateBasket)`  | Get or create basket for current user/session |
+| POST /basket                                    |
+| GET                                             | `/basket/:basketId`                          | `asyncHandler(basketController.getBasket)`          | Get basket by ID                              |
+| DELETE                                          | `/basket/:basketId`                          | `asyncHandler(basketController.deleteBasket)`       | Delete basket                                 |
+| GET                                             | `/basket/:basketId`                          | `asyncHandler(basketController.getBasket)`          | Get basket by ID                              |
+| GET /basket/:basketId                           |
+| DELETE                                          | `/basket/:basketId`                          | `asyncHandler(basketController.deleteBasket)`       | Delete basket                                 |
+| DELETE /basket/:basketId                        |
+| POST                                            | `/basket/:basketId/assign`                   | `asyncHandler(basketController.assignToCustomer)`   | Assign basket to customer                     |
+| POST                                            | `/basket/:basketId/assign`                   | `asyncHandler(basketController.assignToCustomer)`   | Assign basket to customer                     |
+| POST /basket/:basketId/assign                   |
+| POST                                            | `/basket/:basketId/coupon`                   | `asyncHandler(basketController.applyCouponAdmin)`   | Apply coupon (admin override)                 |
+| DELETE                                          | `/basket/:basketId/coupon`                   | `asyncHandler(basketController.removeCoupon)`       | Remove coupon                                 |
+| POST                                            | `/basket/:basketId/coupon`                   | `asyncHandler(basketController.applyCoupon)`        | Apply coupon to basket                        |
+| POST /basket/:basketId/coupon                   |
+| DELETE                                          | `/basket/:basketId/coupon`                   | `asyncHandler(basketController.removeCoupon)`       | Remove coupon from basket                     |
+| DELETE /basket/:basketId/coupon                 |
+| PUT                                             | `/basket/:basketId/expiration`               | `asyncHandler(basketController.extendExpiration)`   | Extend expiration                             |
+| PUT                                             | `/basket/:basketId/expiration`               | `asyncHandler(basketController.extendExpiration)`   | Extend basket expiration                      |
+| PUT /basket/:basketId/expiration                |
+| POST                                            | `/basket/:basketId/items`                    | `asyncHandler(basketController.addItem)`            | Add item to basket                            |
+| POST /basket/:basketId/items                    |
+| DELETE                                          | `/basket/:basketId/items`                    | `asyncHandler(basketController.clearBasket)`        | Clear all items from basket                   |
+| DELETE /basket/:basketId/items                  |
+| PATCH                                           | `/basket/:basketId/items/:basketItemId`      | `asyncHandler(basketController.updateItemQuantity)` | Update item quantity                          |
+| PATCH /basket/:basketId/items/:basketItemId     |
+| DELETE                                          | `/basket/:basketId/items/:basketItemId`      | `asyncHandler(basketController.removeItem)`         | Remove item from basket                       |
+| DELETE /basket/:basketId/items/:basketItemId    |
+| POST                                            | `/basket/:basketId/items/:basketItemId/gift` | `asyncHandler(basketController.setItemAsGift)`      | Set item as gift                              |
+| POST /basket/:basketId/items/:basketItemId/gift |
+| GET                                             | `/basket/:basketId/summary`                  | `asyncHandler(basketController.getBasketSummary)`   | Get basket summary                            |
+| GET                                             | `/basket/:basketId/summary`                  | `asyncHandler(basketController.getBasketSummary)`   | Get basket summary (lightweight response)     |
+| GET /basket/:basketId/summary                   |
+| GET                                             | `/basket/me`                                 | `asyncHandler(basketController.getMyBasket)`        | Get current user's basket                     |
+| GET /basket/me                                  |
+| POST                                            | `/basket/merge`                              | `asyncHandler(basketController.mergeBaskets)`       | Merge baskets (typically when guest logs in)  |
+| POST /basket/merge                              |
 
 <!-- GENERATED:ENDPOINTS:END -->

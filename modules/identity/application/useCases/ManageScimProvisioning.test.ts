@@ -20,18 +20,19 @@ const makeUser = (overrides: Partial<CredentialSubject> = {}): CredentialSubject
   ...overrides,
 });
 
-const makeRecord = (overrides: Partial<ScimProvisioningRecord> = {}): ScimProvisioningRecord => ({
-  recordId: 'rec-1',
-  organizationId: 'org-1',
-  userId: 'user-1',
-  userType: 'organization',
-  scimUserId: 'scim-1',
-  source: 'scim',
-  isActive: true,
-  createdAt: new Date('2024-01-01'),
-  updatedAt: new Date('2024-01-01'),
-  ...overrides,
-} as ScimProvisioningRecord);
+const makeRecord = (overrides: Partial<ScimProvisioningRecord> = {}): ScimProvisioningRecord =>
+  ({
+    recordId: 'rec-1',
+    organizationId: 'org-1',
+    userId: 'user-1',
+    userType: 'organization',
+    scimUserId: 'scim-1',
+    source: 'scim',
+    isActive: true,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    ...overrides,
+  }) as ScimProvisioningRecord;
 
 describe('ManageScimProvisioningUseCase', () => {
   let provisioningRepo: jest.Mocked<ScimProvisioningRepository>;
@@ -49,7 +50,7 @@ describe('ManageScimProvisioningUseCase', () => {
     it('should create a credential subject and provisioning record for a new email', async () => {
       credentialPort.findByEmail.mockResolvedValue(null);
       credentialPort.createWithPassword.mockResolvedValue(makeUser({ id: 'user-new' }));
-      provisioningRepo.save.mockImplementation(async (r) => r);
+      provisioningRepo.save.mockImplementation(async r => r);
       credentialPort.findById.mockResolvedValue(makeUser({ id: 'user-new' }));
 
       const result = await useCase.provisionUser({
@@ -75,7 +76,7 @@ describe('ManageScimProvisioningUseCase', () => {
     it('should link an existing unprovisioned user', async () => {
       credentialPort.findByEmail.mockResolvedValue(makeUser());
       provisioningRepo.findByUserId.mockResolvedValue(null);
-      provisioningRepo.save.mockImplementation(async (r) => r);
+      provisioningRepo.save.mockImplementation(async r => r);
       credentialPort.findById.mockResolvedValue(makeUser());
 
       const result = await useCase.provisionUser({ organizationId: 'org-1', email: 'scim@example.com' });
@@ -88,17 +89,13 @@ describe('ManageScimProvisioningUseCase', () => {
       credentialPort.findByEmail.mockResolvedValue(makeUser());
       provisioningRepo.findByUserId.mockResolvedValue(makeRecord());
 
-      await expect(
-        useCase.provisionUser({ organizationId: 'org-1', email: 'scim@example.com' }),
-      ).rejects.toBeInstanceOf(ScimConflictError);
+      await expect(useCase.provisionUser({ organizationId: 'org-1', email: 'scim@example.com' })).rejects.toBeInstanceOf(ScimConflictError);
       expect(provisioningRepo.save).not.toHaveBeenCalled();
     });
 
     it('should reject when organizationId or email is missing', async () => {
       await expect(useCase.provisionUser({ email: 'a@b.c' })).rejects.toBeInstanceOf(ScimValidationError);
-      await expect(useCase.provisionUser({ organizationId: 'org-1' })).rejects.toBeInstanceOf(
-        ScimValidationError,
-      );
+      await expect(useCase.provisionUser({ organizationId: 'org-1' })).rejects.toBeInstanceOf(ScimValidationError);
     });
   });
 
@@ -115,10 +112,7 @@ describe('ManageScimProvisioningUseCase', () => {
 
       expect(provisioningRepo.deactivate).toHaveBeenCalledWith('rec-1');
       expect(result.active).toBe(false);
-      expect(emitMock).toHaveBeenCalledWith(
-        'identity.scim.user_updated',
-        expect.objectContaining({ scimUserId: 'scim-1', active: false }),
-      );
+      expect(emitMock).toHaveBeenCalledWith('identity.scim.user_updated', expect.objectContaining({ scimUserId: 'scim-1', active: false }));
     });
 
     it('should not deactivate when already inactive', async () => {
@@ -132,15 +126,11 @@ describe('ManageScimProvisioningUseCase', () => {
 
     it('should throw ScimResourceNotFoundError for unknown records or users', async () => {
       provisioningRepo.findByScimUserId.mockResolvedValue(null);
-      await expect(useCase.replaceUser('nope', { active: true })).rejects.toBeInstanceOf(
-        ScimResourceNotFoundError,
-      );
+      await expect(useCase.replaceUser('nope', { active: true })).rejects.toBeInstanceOf(ScimResourceNotFoundError);
 
       provisioningRepo.findByScimUserId.mockResolvedValue(makeRecord());
       credentialPort.findById.mockResolvedValue(null);
-      await expect(useCase.replaceUser('scim-1', { active: true })).rejects.toBeInstanceOf(
-        ScimResourceNotFoundError,
-      );
+      await expect(useCase.replaceUser('scim-1', { active: true })).rejects.toBeInstanceOf(ScimResourceNotFoundError);
     });
   });
 
@@ -151,10 +141,7 @@ describe('ManageScimProvisioningUseCase', () => {
       await useCase.patchUser('scim-1', [{ op: 'replace', path: 'active', value: false }]);
 
       expect(provisioningRepo.deactivate).toHaveBeenCalledWith('rec-1');
-      expect(emitMock).toHaveBeenCalledWith(
-        'identity.scim.user_updated',
-        expect.objectContaining({ scimUserId: 'scim-1' }),
-      );
+      expect(emitMock).toHaveBeenCalledWith('identity.scim.user_updated', expect.objectContaining({ scimUserId: 'scim-1' }));
     });
 
     it('should emit without deactivating for unrelated operations', async () => {
@@ -168,9 +155,7 @@ describe('ManageScimProvisioningUseCase', () => {
 
     it('should throw ScimResourceNotFoundError for an unknown user', async () => {
       provisioningRepo.findByScimUserId.mockResolvedValue(null);
-      await expect(useCase.patchUser('nope', undefined)).rejects.toBeInstanceOf(
-        ScimResourceNotFoundError,
-      );
+      await expect(useCase.patchUser('nope', undefined)).rejects.toBeInstanceOf(ScimResourceNotFoundError);
     });
   });
 

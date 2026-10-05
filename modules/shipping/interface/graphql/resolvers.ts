@@ -1,11 +1,7 @@
 import { CalculateShippingRatesCommand } from '../../application/useCases/CalculateShippingRates';
 import { GetShippingMethodsQuery } from '../../application/useCases/GetShippingMethods';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
-import {
-  calculateShippingRatesUseCase,
-  getShippingMethodsUseCase,
-  manageShippingConfigurationUseCase,
-} from '../../application/wired';
+import { calculateShippingRatesUseCase, getShippingMethodsUseCase, manageShippingConfigurationUseCase } from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
 
 export const shippingResolvers = {

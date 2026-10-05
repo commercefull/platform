@@ -111,11 +111,7 @@ describe('Supplier Detail Endpoints', () => {
 
   describe('Purchase order items', () => {
     it('PUT /business/purchase-order-items/:id updates quantity and cost', async () => {
-      const resp = await client.put(
-        `/business/purchase-order-items/${SEEDED.PO_ITEM_ID}`,
-        { quantity: 25, unitCostCents: 1500 },
-        auth(),
-      );
+      const resp = await client.put(`/business/purchase-order-items/${SEEDED.PO_ITEM_ID}`, { quantity: 25, unitCostCents: 1500 }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data.quantity).toBe(25);
       expect(resp.data.data.unitCostCents).toBe(1500);

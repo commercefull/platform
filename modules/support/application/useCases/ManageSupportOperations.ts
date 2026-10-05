@@ -28,10 +28,7 @@ export interface SupportOperationsPort {
   getAgents(filters?: AgentFilters): Promise<unknown[]>;
   getAgent(agentId: string): Promise<unknown>;
   saveAgent(agent: Record<string, unknown>): Promise<unknown>;
-  getTickets(
-    filters?: AdminTicketFilters,
-    pagination?: { limit?: number; offset?: number },
-  ): Promise<{ data: unknown[]; total: number }>;
+  getTickets(filters?: AdminTicketFilters, pagination?: { limit?: number; offset?: number }): Promise<{ data: unknown[]; total: number }>;
   getTicket(ticketId: string): Promise<unknown>;
   getMessages(ticketId: string, includeInternal?: boolean): Promise<unknown[]>;
   getAttachments(ticketId: string): Promise<unknown[]>;

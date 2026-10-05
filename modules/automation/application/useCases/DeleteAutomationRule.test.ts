@@ -23,4 +23,3 @@ describe('DeleteAutomationRuleUseCase', () => {
     expect(repo.delete).not.toHaveBeenCalled();
   });
 });
-

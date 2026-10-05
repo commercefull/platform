@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Support Customer Controller
  * Handles customer-facing support operations
@@ -8,7 +8,6 @@ import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase } from '../../application/wired';
 import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
 import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
-
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
 
@@ -112,7 +111,10 @@ export const getFaqCategoryBySlug: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const articles = await manageFaqUseCase.getArticles({ faqCategoryId: category.faqCategoryId, isPublished: true }, { limit: 100, offset: 0 });
+  const articles = await manageFaqUseCase.getArticles(
+    { faqCategoryId: category.faqCategoryId, isPublished: true },
+    { limit: 100, offset: 0 },
+  );
 
   jsonResponse(res, 200, { success: true, data: { ...category, articles: articles.data } });
 };

@@ -21,8 +21,7 @@ describe('ManageCustomerAddressesUseCase', () => {
 
   it('should delegate address creation', async () => {
     addressRepository.create.mockResolvedValue(createCustomerAddressRow());
-    const { customerAddressId: _addressId, createdAt: _created, updatedAt: _updated, ...params } =
-      createCustomerAddressRow();
+    const { customerAddressId: _addressId, createdAt: _created, updatedAt: _updated, ...params } = createCustomerAddressRow();
 
     const result = await useCase.create(params);
 
@@ -30,4 +29,3 @@ describe('ManageCustomerAddressesUseCase', () => {
     expect(addressRepository.create).toHaveBeenCalledWith(params);
   });
 });
-

@@ -32,10 +32,37 @@ describe('RedeemPointsUseCase', () => {
     expect(result.pointsRedeemed).toBe(100);
     expect(result.newBalance).toBe(400);
     expect(loyaltyRepository.updateMemberPoints).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith(
-      'loyalty.points_redeemed',
-      expect.objectContaining({ customerId: 'c1', points: 100 }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('loyalty.points_redeemed', expect.objectContaining({ customerId: 'c1', points: 100 }));
+  });
+
+  it('should return the existing redemption without deducting again when the order was already redeemed', async () => {
+    jest.mocked(loyaltyRepository.findTransactionByOrderAndAction!).mockResolvedValue({
+      loyaltyTransactionId: 'ltx-1',
+      points: -100,
+    });
+
+    const result = await useCase.execute({ customerId: 'c1', points: 100, orderId: 'order-1' });
+
+    expect(result.transactionId).toBe('ltx-1');
+    expect(result.pointsRedeemed).toBe(100);
+    expect(result.newBalance).toBe(500);
+    expect(loyaltyRepository.findTransactionByOrderAndAction).toHaveBeenCalledWith('order-1', 'debit');
+    expect(loyaltyRepository.createTransaction).not.toHaveBeenCalled();
+    expect(loyaltyRepository.updateMemberPoints).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalledWith('loyalty.points_redeemed', expect.anything());
+  });
+
+  it('should return the existing redemption even when the balance has since dropped below the request', async () => {
+    loyaltyRepository.findMemberByCustomerId.mockResolvedValue({ memberId: 'm1', availablePoints: 50 });
+    jest.mocked(loyaltyRepository.findTransactionByOrderAndAction!).mockResolvedValue({
+      loyaltyTransactionId: 'ltx-2',
+      points: -100,
+    });
+
+    const result = await useCase.execute({ customerId: 'c1', points: 100, orderId: 'order-2' });
+
+    expect(result.pointsRedeemed).toBe(100);
+    expect(loyaltyRepository.updateMemberPoints).not.toHaveBeenCalled();
   });
 
   it('should return the reward discount value when redeeming for a reward', async () => {
@@ -59,24 +86,18 @@ describe('RedeemPointsUseCase', () => {
   it('should throw LoyaltyRewardNotFoundError when the reward does not exist', async () => {
     rewardRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'missing' })).rejects.toThrow(
-      LoyaltyRewardNotFoundError,
-    );
+    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'missing' })).rejects.toThrow(LoyaltyRewardNotFoundError);
   });
 
   it('should throw RewardNotAvailableError when the reward is inactive', async () => {
     rewardRepository.findById.mockResolvedValue({ isActive: false, pointsCost: 100, name: 'Test' });
 
-    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'rwd1' })).rejects.toThrow(
-      RewardNotAvailableError,
-    );
+    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'rwd1' })).rejects.toThrow(RewardNotAvailableError);
   });
 
   it('should throw LoyaltyValidationError when the reward requires more points than given', async () => {
     rewardRepository.findById.mockResolvedValue({ isActive: true, pointsCost: 200, name: 'Expensive' });
 
-    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'rwd1' })).rejects.toThrow(
-      LoyaltyValidationError,
-    );
+    await expect(useCase.execute({ customerId: 'c1', points: 100, rewardId: 'rwd1' })).rejects.toThrow(LoyaltyValidationError);
   });
 });

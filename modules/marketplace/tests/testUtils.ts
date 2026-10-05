@@ -36,9 +36,7 @@ export function createVendor(overrides: Partial<Parameters<typeof Vendor.create>
   return Vendor.create({ organizationId: 'org-1', name: 'Vendor Co', email: 'v@x.test', ...overrides });
 }
 
-export function createCommissionRule(
-  overrides: Partial<Parameters<typeof CommissionRule.create>[0]> = {},
-): CommissionRule {
+export function createCommissionRule(overrides: Partial<Parameters<typeof CommissionRule.create>[0]> = {}): CommissionRule {
   return CommissionRule.create({
     organizationId: 'org-1',
     name: 'Default Rule',
@@ -49,9 +47,7 @@ export function createCommissionRule(
   });
 }
 
-export function createPayout(
-  overrides: Partial<Parameters<typeof VendorPayout.create>[0]> = {},
-): VendorPayout {
+export function createPayout(overrides: Partial<Parameters<typeof VendorPayout.create>[0]> = {}): VendorPayout {
   return VendorPayout.create({
     vendorId: 'v-1',
     organizationId: 'org-1',

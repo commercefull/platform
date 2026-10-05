@@ -46,13 +46,14 @@ export const getSalesDashboard: AsyncHandler = async (req, res, _next) => {
 };
 
 export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
-  const { startDate, endDate, channel, organizationId, limit, offset } = req.query;
+  const { startDate, endDate, channel, salesChannelId, organizationId, limit, offset } = req.query;
 
   const result = await manageAnalyticsReportingUseCase.getSalesDaily(
     {
       startDate: startDate ? new Date(startDate as string) : undefined,
       endDate: endDate ? new Date(endDate as string) : undefined,
       channel: channel as string,
+      salesChannelId: salesChannelId as string,
       organizationId: organizationId as string,
     },
     { limit: parseInt(limit as string) || 30, offset: parseInt(offset as string) || 0 },
@@ -66,11 +67,12 @@ export const getSalesDaily: AsyncHandler = async (req, res, _next) => {
 // ============================================================================
 
 export const getProductPerformance: AsyncHandler = async (req, res, _next) => {
-  const { productId, startDate, endDate, limit, offset } = req.query;
+  const { productId, salesChannelId, startDate, endDate, limit, offset } = req.query;
 
   const result = await manageAnalyticsReportingUseCase.getProductPerformance(
     {
       productId: productId as string,
+      salesChannelId: salesChannelId as string,
       startDate: startDate ? new Date(startDate as string) : undefined,
       endDate: endDate ? new Date(endDate as string) : undefined,
     },

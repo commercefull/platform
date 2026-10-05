@@ -72,56 +72,56 @@ The Order feature manages the complete order lifecycle from creation through ful
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/order` | `asyncHandler(orderController.getMyOrders)` | Get customer's orders
-GET /orders |
-| POST | `/order` | `asyncHandler(orderController.createOrder)` | Create a new order
-POST /orders |
-| POST | `/order-items` | `asyncHandler(orderController.createOrderItem)` | — |
-| GET | `/order-items/:orderItemId` | `asyncHandler(orderController.getOrderItemById)` | — |
-| PUT | `/order-items/:orderItemId` | `asyncHandler(orderController.updateOrderItem)` | — |
-| DELETE | `/order-items/:orderItemId` | `asyncHandler(orderController.deleteOrderItem)` | — |
-| GET | `/order/:orderId` | `asyncHandler(orderController.getOrder)` | Get order by ID
-GET /orders/:orderId |
-| POST | `/order/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order
-POST /orders/:orderId/cancel |
-| GET | `/order/number/:orderNumber` | `asyncHandler(orderController.getOrderByNumber)` | Get order by order number
-GET /orders/number/:orderNumber |
-| GET | `/orders` | `asyncHandler(orderController.listOrders)` | List all orders with filters
-GET /business/orders |
-| POST | `/orders` | `asyncHandler(orderController.createOrder)` | Create an order on behalf of the organization (POS / manual orders)
-POST /business/orders |
-| GET | `/orders/:orderId` | `asyncHandler(orderController.getOrder)` | Get order details
-GET /business/orders/:orderId |
-| POST | `/orders/:orderId/cancel` | `asyncHandler(orderController.cancelOrder)` | Cancel an order
-POST /business/orders/:orderId/cancel |
-| GET | `/orders/:orderId/fulfillment-history` | `asyncHandler(orderController.getFulfillmentHistory)` | — |
-| PUT | `/orders/:orderId/fulfillment-status` | `asyncHandler(orderController.updateFulfillmentStatus)` | — |
-| GET | `/orders/:orderId/history` | `asyncHandler(orderController.getOrderHistory)` | Get order status history
-GET /business/orders/:orderId/history |
-| GET | `/orders/:orderId/items` | `asyncHandler(orderController.getOrderItems)` | ============================================================================ Order Items ============================================================================ |
-| GET | `/orders/:orderId/notes` | `asyncHandler(orderController.listOrderNotes)` | — |
-| POST | `/orders/:orderId/notes` | `asyncHandler(orderController.addOrderNote)` | — |
-| DELETE | `/orders/:orderId/notes/:noteId` | `asyncHandler(orderController.deleteOrderNote)` | — |
-| GET | `/orders/:orderId/packages` | `asyncHandler(orderController.listFulfillmentPackages)` | — |
-| POST | `/orders/:orderId/packages` | `asyncHandler(orderController.createFulfillmentPackage)` | — |
-| POST | `/orders/:orderId/packages/:packageId/tracking` | `asyncHandler(orderController.trackFulfillmentPackage)` | — |
-| GET | `/orders/:orderId/payment-history` | `asyncHandler(orderController.getPaymentHistory)` | — |
-| PUT | `/orders/:orderId/payment-status` | `asyncHandler(orderController.updatePaymentStatus)` | ============================================================================ Payment & Fulfillment Status ============================================================================ |
-| POST | `/orders/:orderId/refund` | `asyncHandler(orderController.processRefund)` | Process refund
-POST /business/orders/:orderId/refund |
-| GET | `/orders/:orderId/refunds` | `asyncHandler(orderController.listOrderRefunds)` | — |
-| POST | `/orders/:orderId/refunds` | `asyncHandler(orderController.createOrderRefund)` | — |
-| PUT | `/orders/:orderId/status` | `asyncHandler(orderController.updateOrderStatus)` | Update order status
-PUT /business/orders/:orderId/status |
-| GET | `/orders/:orderId/status-history` | `asyncHandler(orderController.getStatusHistory)` | ============================================================================ Status History ============================================================================ |
-| GET | `/orders/number/:orderNumber` | `asyncHandler(orderController.getOrderByNumber)` | Get order by order number
-GET /business/orders/number/:orderNumber |
-| GET | `/orders/stats` | `asyncHandler(orderController.getOrderStats)` | Get order statistics
-GET /business/orders/stats |
-| GET | `/orders/store-summary` | `asyncHandler(orderController.getStoreSalesSummary)` | Get store sales summary
-GET /business/orders/store-summary |
+| Method                                   | Endpoint                                        | Controller                                               | Description                                                                                                                                                                            |
+| ---------------------------------------- | ----------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                                      | `/order`                                        | `asyncHandler(orderController.getMyOrders)`              | Get customer's orders                                                                                                                                                                  |
+| GET /orders                              |
+| POST                                     | `/order`                                        | `asyncHandler(orderController.createOrder)`              | Create a new order                                                                                                                                                                     |
+| POST /orders                             |
+| POST                                     | `/order-items`                                  | `asyncHandler(orderController.createOrderItem)`          | —                                                                                                                                                                                      |
+| GET                                      | `/order-items/:orderItemId`                     | `asyncHandler(orderController.getOrderItemById)`         | —                                                                                                                                                                                      |
+| PUT                                      | `/order-items/:orderItemId`                     | `asyncHandler(orderController.updateOrderItem)`          | —                                                                                                                                                                                      |
+| DELETE                                   | `/order-items/:orderItemId`                     | `asyncHandler(orderController.deleteOrderItem)`          | —                                                                                                                                                                                      |
+| GET                                      | `/order/:orderId`                               | `asyncHandler(orderController.getOrder)`                 | Get order by ID                                                                                                                                                                        |
+| GET /orders/:orderId                     |
+| POST                                     | `/order/:orderId/cancel`                        | `asyncHandler(orderController.cancelOrder)`              | Cancel an order                                                                                                                                                                        |
+| POST /orders/:orderId/cancel             |
+| GET                                      | `/order/number/:orderNumber`                    | `asyncHandler(orderController.getOrderByNumber)`         | Get order by order number                                                                                                                                                              |
+| GET /orders/number/:orderNumber          |
+| GET                                      | `/orders`                                       | `asyncHandler(orderController.listOrders)`               | List all orders with filters                                                                                                                                                           |
+| GET /business/orders                     |
+| POST                                     | `/orders`                                       | `asyncHandler(orderController.createOrder)`              | Create an order on behalf of the organization (POS / manual orders)                                                                                                                    |
+| POST /business/orders                    |
+| GET                                      | `/orders/:orderId`                              | `asyncHandler(orderController.getOrder)`                 | Get order details                                                                                                                                                                      |
+| GET /business/orders/:orderId            |
+| POST                                     | `/orders/:orderId/cancel`                       | `asyncHandler(orderController.cancelOrder)`              | Cancel an order                                                                                                                                                                        |
+| POST /business/orders/:orderId/cancel    |
+| GET                                      | `/orders/:orderId/fulfillment-history`          | `asyncHandler(orderController.getFulfillmentHistory)`    | —                                                                                                                                                                                      |
+| PUT                                      | `/orders/:orderId/fulfillment-status`           | `asyncHandler(orderController.updateFulfillmentStatus)`  | —                                                                                                                                                                                      |
+| GET                                      | `/orders/:orderId/history`                      | `asyncHandler(orderController.getOrderHistory)`          | Get order status history                                                                                                                                                               |
+| GET /business/orders/:orderId/history    |
+| GET                                      | `/orders/:orderId/items`                        | `asyncHandler(orderController.getOrderItems)`            | ============================================================================ Order Items ============================================================================                  |
+| GET                                      | `/orders/:orderId/notes`                        | `asyncHandler(orderController.listOrderNotes)`           | —                                                                                                                                                                                      |
+| POST                                     | `/orders/:orderId/notes`                        | `asyncHandler(orderController.addOrderNote)`             | —                                                                                                                                                                                      |
+| DELETE                                   | `/orders/:orderId/notes/:noteId`                | `asyncHandler(orderController.deleteOrderNote)`          | —                                                                                                                                                                                      |
+| GET                                      | `/orders/:orderId/packages`                     | `asyncHandler(orderController.listFulfillmentPackages)`  | —                                                                                                                                                                                      |
+| POST                                     | `/orders/:orderId/packages`                     | `asyncHandler(orderController.createFulfillmentPackage)` | —                                                                                                                                                                                      |
+| POST                                     | `/orders/:orderId/packages/:packageId/tracking` | `asyncHandler(orderController.trackFulfillmentPackage)`  | —                                                                                                                                                                                      |
+| GET                                      | `/orders/:orderId/payment-history`              | `asyncHandler(orderController.getPaymentHistory)`        | —                                                                                                                                                                                      |
+| PUT                                      | `/orders/:orderId/payment-status`               | `asyncHandler(orderController.updatePaymentStatus)`      | ============================================================================ Payment & Fulfillment Status ============================================================================ |
+| POST                                     | `/orders/:orderId/refund`                       | `asyncHandler(orderController.processRefund)`            | Process refund                                                                                                                                                                         |
+| POST /business/orders/:orderId/refund    |
+| GET                                      | `/orders/:orderId/refunds`                      | `asyncHandler(orderController.listOrderRefunds)`         | —                                                                                                                                                                                      |
+| POST                                     | `/orders/:orderId/refunds`                      | `asyncHandler(orderController.createOrderRefund)`        | —                                                                                                                                                                                      |
+| PUT                                      | `/orders/:orderId/status`                       | `asyncHandler(orderController.updateOrderStatus)`        | Update order status                                                                                                                                                                    |
+| PUT /business/orders/:orderId/status     |
+| GET                                      | `/orders/:orderId/status-history`               | `asyncHandler(orderController.getStatusHistory)`         | ============================================================================ Status History ============================================================================               |
+| GET                                      | `/orders/number/:orderNumber`                   | `asyncHandler(orderController.getOrderByNumber)`         | Get order by order number                                                                                                                                                              |
+| GET /business/orders/number/:orderNumber |
+| GET                                      | `/orders/stats`                                 | `asyncHandler(orderController.getOrderStats)`            | Get order statistics                                                                                                                                                                   |
+| GET /business/orders/stats               |
+| GET                                      | `/orders/store-summary`                         | `asyncHandler(orderController.getStoreSalesSummary)`     | Get store sales summary                                                                                                                                                                |
+| GET /business/orders/store-summary       |
 
 <!-- GENERATED:ENDPOINTS:END -->
 

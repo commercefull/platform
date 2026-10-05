@@ -56,10 +56,55 @@ function loadTableColumns(): Map<string, Set<string>> {
 // ---------- statement analysis ----------
 
 const SQL_KEYWORDS = new Set([
-  'on', 'as', 'join', 'left', 'right', 'inner', 'outer', 'full', 'cross', 'where', 'and', 'or', 'not', 'in',
-  'is', 'null', 'like', 'between', 'case', 'when', 'then', 'else', 'end', 'select', 'from', 'group', 'by',
-  'order', 'limit', 'offset', 'asc', 'desc', 'distinct', 'union', 'all', 'returning', 'values', 'set',
-  'using', 'lateral', 'exists', 'asc', 'insert', 'update', 'delete', 'into', 'default', 'true', 'false',
+  'on',
+  'as',
+  'join',
+  'left',
+  'right',
+  'inner',
+  'outer',
+  'full',
+  'cross',
+  'where',
+  'and',
+  'or',
+  'not',
+  'in',
+  'is',
+  'null',
+  'like',
+  'between',
+  'case',
+  'when',
+  'then',
+  'else',
+  'end',
+  'select',
+  'from',
+  'group',
+  'by',
+  'order',
+  'limit',
+  'offset',
+  'asc',
+  'desc',
+  'distinct',
+  'union',
+  'all',
+  'returning',
+  'values',
+  'set',
+  'using',
+  'lateral',
+  'exists',
+  'asc',
+  'insert',
+  'update',
+  'delete',
+  'into',
+  'default',
+  'true',
+  'false',
 ]);
 
 interface StmtCtx {
@@ -115,7 +160,9 @@ function analyzeStatement(sql: string, tableCols: Map<string, Set<string>>): { t
   if (knownTables.length === 1 && ctx.tables.size === 1) {
     const table = knownTables[0];
     const known = tableCols.get(table)!;
-    const clauses = sql.matchAll(/(?:WHERE|SET|GROUP\s+BY|ORDER\s+BY|RETURNING|HAVING)([\s\S]*?)(?:WHERE|SET|GROUP\s+BY|ORDER\s+BY|RETURNING|HAVING|$)/gi);
+    const clauses = sql.matchAll(
+      /(?:WHERE|SET|GROUP\s+BY|ORDER\s+BY|RETURNING|HAVING)([\s\S]*?)(?:WHERE|SET|GROUP\s+BY|ORDER\s+BY|RETURNING|HAVING|$)/gi,
+    );
     for (const m of clauses) {
       for (const cm of m[1].matchAll(/(?<![\w."])"([A-Za-z_]\w*)"(?!\s*[.(])/g)) {
         const col = cm[1];

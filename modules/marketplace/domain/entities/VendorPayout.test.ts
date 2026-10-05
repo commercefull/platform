@@ -105,7 +105,15 @@ describe('VendorPayout Entity', () => {
         periodStart: new Date('2024-01-01'),
         periodEnd: new Date('2024-01-31'),
         lineItems: [
-          { orderId: 'o-1', orderNumber: 'O', productId: 'p', productName: 'N', grossRevenueCents: 100, commissionAmountCents: 10, netAmountCents: 90 },
+          {
+            orderId: 'o-1',
+            orderNumber: 'O',
+            productId: 'p',
+            productName: 'N',
+            grossRevenueCents: 100,
+            commissionAmountCents: 10,
+            netAmountCents: 90,
+          },
         ],
       });
       p.startProcessing();

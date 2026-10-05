@@ -10,14 +10,7 @@
  * stored in major units and converted to cents at application time.
  */
 
-import {
-  CurrencyPriceRule,
-  PriceContext,
-  PricingAdjustment,
-  PricingAdjustmentType,
-  PricingRule,
-  PricingRuleScope,
-} from '../pricingRule';
+import { CurrencyPriceRule, PriceContext, PricingAdjustment, PricingAdjustmentType, PricingRule, PricingRuleScope } from '../pricingRule';
 import { Currency } from '../currency';
 
 /**
@@ -104,6 +97,46 @@ export function isRuleApplicable(rule: PricingRule, context: PriceContext): bool
         break;
       }
 
+      case 'store':
+        if (!context.storeId || !(params.storeIds as string[] | undefined)?.includes(context.storeId)) {
+          return false;
+        }
+        break;
+
+      case 'channel':
+        if (!context.channelId || !(params.channelIds as string[] | undefined)?.includes(context.channelId)) {
+          return false;
+        }
+        break;
+
+      case 'cart_total':
+        if (!compareScalar(cartTotal, params)) {
+          return false;
+        }
+        break;
+
+      case 'item_quantity':
+        if (!compareScalar(quantity, params)) {
+          return false;
+        }
+        break;
+
+      case 'category': {
+        const wanted = toIdList(params.value ?? params.categoryIds);
+        if (wanted.length > 0 && !wanted.some(id => (context.categoryIds ?? []).includes(id))) {
+          return false;
+        }
+        break;
+      }
+
+      case 'customer_group': {
+        const wanted = toIdList(params.value ?? params.customerGroupIds);
+        if (wanted.length > 0 && !wanted.some(id => customerGroupIds.includes(id))) {
+          return false;
+        }
+        break;
+      }
+
       case 'customer_attribute':
         // This would require additional customer data lookup
         // For now, just check if the attribute exists in additionalData
@@ -128,16 +161,44 @@ export function isRuleApplicable(rule: PricingRule, context: PriceContext): bool
   return true;
 }
 
+function compareScalar(actual: number, params: Record<string, unknown>): boolean {
+  const value = Number(params.value);
+  switch (params.operator) {
+    case 'neq':
+      return actual !== value;
+    case 'gt':
+      return actual > value;
+    case 'gte':
+      return actual >= value;
+    case 'lt':
+      return actual < value;
+    case 'lte':
+      return actual <= value;
+    case 'in':
+      return toIdList(params.value).map(Number).includes(actual);
+    default:
+      return actual === value;
+  }
+}
+
+function toIdList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value === 'string')
+    return value
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+  if (value != null) return [String(value)];
+  return [];
+}
+
 /**
  * Apply a rule's adjustments to a price, in order.
  * FIXED and OVERRIDE set an absolute price (operand in major units);
  * PERCENTAGE reduces the current price. Returns the adjusted price and
  * whether any adjustment was applied.
  */
-export function applyAdjustments(
-  priceCents: number,
-  adjustments: PricingAdjustment[],
-): { priceCents: number; applied: boolean } {
+export function applyAdjustments(priceCents: number, adjustments: PricingAdjustment[]): { priceCents: number; applied: boolean } {
   let current = priceCents;
   let applied = false;
 

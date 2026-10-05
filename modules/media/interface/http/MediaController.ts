@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Media HTTP Controller
  * Handles media upload and processing requests
@@ -59,9 +59,9 @@ export class MediaController {
     try {
       if (!req.file) {
         return jsonResponse(res, 400, {
-                  success: false,
-                  message: 'No image file provided',
-                });
+          success: false,
+          message: 'No image file provided',
+        });
       }
 
       const body = req.body;
@@ -80,12 +80,12 @@ export class MediaController {
       });
 
       jsonResponse(res, 200, {
-                success: true,
-                data: {
-                  media: result.media.toJSON(),
-                  urls: result.urls,
-                },
-              });
+        success: true,
+        data: {
+          media: result.media.toJSON(),
+          urls: result.urls,
+        },
+      });
     } catch (error) {
       logger.error('Error:', error);
 
@@ -102,10 +102,10 @@ export class MediaController {
         (error as { code?: string }).code === 'LIMIT_UNEXPECTED_FILE';
       const status = isClientError ? 400 : 500;
       jsonResponse(res, status, {
-                success: false,
-                message: status === 400 ? errorMessage : 'Failed to process image',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: status === 400 ? errorMessage : 'Failed to process image',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   };
 
@@ -116,9 +116,9 @@ export class MediaController {
     try {
       if (!req.files || !Array.isArray(req.files)) {
         return jsonResponse(res, 400, {
-                  success: false,
-                  message: 'No image files provided',
-                });
+          success: false,
+          message: 'No image files provided',
+        });
       }
 
       const body = req.body;
@@ -141,21 +141,21 @@ export class MediaController {
       );
 
       jsonResponse(res, 200, {
-                success: true,
-                data: results.map(result => ({
-                  media: result.media.toJSON(),
-                  urls: result.urls,
-                })),
-              });
+        success: true,
+        data: results.map(result => ({
+          media: result.media.toJSON(),
+          urls: result.urls,
+        })),
+      });
     } catch (error) {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, 500, {
-                success: false,
-                message: 'Failed to process images',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: 'Failed to process images',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   };
 
@@ -168,9 +168,9 @@ export class MediaController {
 
       if (!body.url) {
         return jsonResponse(res, 400, {
-                  success: false,
-                  message: 'No URL provided',
-                });
+          success: false,
+          message: 'No URL provided',
+        });
       }
 
       const result = await this.downloadImageUseCase.execute({
@@ -183,22 +183,22 @@ export class MediaController {
       });
 
       jsonResponse(res, 200, {
-                success: true,
-                data: {
-                  media: result.media.toJSON(),
-                  urls: result.urls,
-                },
-              });
+        success: true,
+        data: {
+          media: result.media.toJSON(),
+          urls: result.urls,
+        },
+      });
     } catch (error) {
       logger.error('Error:', error);
 
       const statusCode = (error as { statusCode?: number }).statusCode || 500;
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
       jsonResponse(res, statusCode, {
-                success: false,
-                message: 'Failed to download image',
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-              });
+        success: false,
+        message: 'Failed to download image',
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      });
     }
   };
 }

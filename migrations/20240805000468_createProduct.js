@@ -68,12 +68,14 @@ exports.up = function (knex) {
       t.jsonb('variantAttributes');
 
       t.uuid('storeId');
+      t.uuid('productTypeId').nullable().references('productTypeId').inTable('productType').onDelete('SET NULL');
       t.string('approvalStatus', 20).defaultTo('approved');
       t.boolean('platformVisible').defaultTo(true);
 
       t.uuid('createdBy');
       t.uuid('updatedBy');
       t.index('storeId');
+      t.index('productTypeId');
       t.index('organizationId');
       t.index('approvalStatus');
       t.index('sku');

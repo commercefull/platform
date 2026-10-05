@@ -1,4 +1,4 @@
-import { redirectResponse, sendResponse, setHeader } from "libs/apiResponse";
+import { redirectResponse, sendResponse, setHeader } from 'libs/apiResponse';
 /**
  * SEO Controller
  * Handles SEO settings management for the Admin Hub

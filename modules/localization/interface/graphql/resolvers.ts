@@ -3,12 +3,7 @@ import { ConvertCurrencyInput } from '../../application/useCases/ConvertCurrency
 import { CreateCurrencyInput } from '../../application/useCases/CreateCurrency';
 import { CreateLocaleInput } from '../../application/useCases/CreateLocale';
 import { SetExchangeRateInput } from '../../application/useCases/SetExchangeRate';
-import {
-  convertCurrencyUseCase,
-  createCurrencyUseCase,
-  createLocaleUseCase,
-  setExchangeRateUseCase,
-} from '../../application/wired';
+import { convertCurrencyUseCase, createCurrencyUseCase, createLocaleUseCase, setExchangeRateUseCase } from '../../application/wired';
 
 export const localizationResolvers = {
   Query: {

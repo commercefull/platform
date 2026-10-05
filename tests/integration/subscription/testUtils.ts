@@ -21,7 +21,6 @@ export const SEEDED_CUSTOMER_SUBSCRIPTION_IDS = {
   CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
-
 export function createTestClient(): AxiosInstance {
   return axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',

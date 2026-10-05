@@ -11,7 +11,6 @@ export interface LinkSocialAccountCommand {
   profile: SocialProfileData;
 }
 
-
 export class LinkSocialAccountUseCase {
   constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
 
@@ -99,4 +98,3 @@ export class LinkSocialAccountUseCase {
     };
   }
 }
-

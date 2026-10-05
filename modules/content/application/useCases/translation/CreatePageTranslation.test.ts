@@ -41,18 +41,14 @@ describe('CreatePageTranslationUseCase', () => {
   });
 
   it('should throw ContentValidationError when localeId or title is missing', async () => {
-    await expect(useCase.execute(new CreatePageTranslationCommand('page-1', '', 'x'))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(useCase.execute(new CreatePageTranslationCommand('page-1', '', 'x'))).rejects.toThrow(ContentValidationError);
     expect(mockContentRepo.findPageById).not.toHaveBeenCalled();
   });
 
   it('should throw ContentPageNotFoundError when the page does not exist', async () => {
     mockContentRepo.findPageById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new CreatePageTranslationCommand('missing', 'fr', 'Bonjour'))).rejects.toThrow(
-      ContentPageNotFoundError,
-    );
+    await expect(useCase.execute(new CreatePageTranslationCommand('missing', 'fr', 'Bonjour'))).rejects.toThrow(ContentPageNotFoundError);
     expect(mockTranslationRepo.createTranslation).not.toHaveBeenCalled();
   });
 });

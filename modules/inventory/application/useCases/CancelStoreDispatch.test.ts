@@ -13,7 +13,7 @@ describe('CancelStoreDispatchUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof CancelStoreDispatchUseCase>[0]>();
     mockRepo.findById.mockResolvedValue(createStoreDispatch({ status: 'pending_approval' }));
-    mockRepo.save.mockImplementation(async (d) => d);
+    mockRepo.save.mockImplementation(async d => d);
     useCase = new CancelStoreDispatchUseCase(mockRepo);
   });
 

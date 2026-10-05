@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Category Customer Controller
  * HTTP interface for customer-facing category operations
@@ -6,8 +6,6 @@ import { jsonResponse } from "libs/apiResponse";
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageCategoriesUseCase } from '../../application/useCases/wired';
-
-
 
 /**
  * List all active categories

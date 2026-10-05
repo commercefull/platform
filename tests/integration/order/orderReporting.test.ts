@@ -69,10 +69,7 @@ describe('Order Reporting Endpoints', () => {
     });
 
     it('accepts an explicit date range', async () => {
-      const resp = await client.get(
-        '/business/orders/store-summary?dateFrom=2020-01-01&dateTo=2030-01-01',
-        auth(),
-      );
+      const resp = await client.get('/business/orders/store-summary?dateFrom=2020-01-01&dateTo=2030-01-01', auth());
       expectStatus(resp, 200);
       const summary = resp.data.data as Array<Record<string, unknown>>;
       expect(Array.isArray(summary)).toBe(true);

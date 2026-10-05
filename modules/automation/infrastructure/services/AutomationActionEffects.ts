@@ -9,10 +9,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { JobScheduler } from '../../../../libs/jobs/cronScheduler';
 import { query } from '../../../../libs/db';
-import type {
-  AutomationActionEffects,
-  NotificationScheduleInput,
-} from '../../domain/services/ActionExecutor';
+import type { AutomationActionEffects, NotificationScheduleInput } from '../../domain/services/ActionExecutor';
 
 export class AutomationActionEffectsImpl implements AutomationActionEffects {
   async emitEvent(eventName: string, eventData: unknown, correlationId?: string): Promise<void> {
@@ -24,10 +21,10 @@ export class AutomationActionEffectsImpl implements AutomationActionEffects {
   }
 
   async addCustomerTag(customerId: string, tag: string): Promise<void> {
-    await query(`UPDATE "segmentCustomerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`, [
-      tag,
-      customerId,
-    ]);
+    await query(
+      `UPDATE "segmentCustomerProfile" SET "tags" = array_prepend($1, "tags") WHERE "customerId" = $2 AND NOT ($1 = ANY("tags"))`,
+      [tag, customerId],
+    );
   }
 
   async removeCustomerTag(customerId: string, tag: string): Promise<void> {

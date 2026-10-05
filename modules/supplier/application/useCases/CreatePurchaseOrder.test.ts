@@ -21,18 +21,12 @@ describe('CreatePurchaseOrderUseCase', () => {
   });
 
   it('should emit purchase_order.created when the order is created', async () => {
-    await new CreatePurchaseOrderUseCase(
-      createPoSupplierRepository(),
-      createPurchaseOrderCreateRepository(),
-    ).execute({
+    await new CreatePurchaseOrderUseCase(createPoSupplierRepository(), createPurchaseOrderCreateRepository()).execute({
       supplierId: 's1',
       items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 10, unitCostCents: 10 }],
     });
 
-    expect(emitMock).toHaveBeenCalledWith(
-      'purchase_order.created',
-      expect.objectContaining({ supplierId: 's1', totalAmountCents: 100 }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('purchase_order.created', expect.objectContaining({ supplierId: 's1', totalAmountCents: 100 }));
   });
 
   it('should throw SupplierNotFoundError when the supplier does not exist', async () => {
@@ -51,10 +45,10 @@ describe('CreatePurchaseOrderUseCase', () => {
     const purchaseOrderRepository = createPurchaseOrderCreateRepository();
 
     await expect(
-      new CreatePurchaseOrderUseCase(
-        createPoSupplierRepository({ status: 'pending', isActive: false }),
-        purchaseOrderRepository,
-      ).execute({ supplierId: 's1', items: [] }),
+      new CreatePurchaseOrderUseCase(createPoSupplierRepository({ status: 'pending', isActive: false }), purchaseOrderRepository).execute({
+        supplierId: 's1',
+        items: [],
+      }),
     ).rejects.toThrow(SupplierNotActiveError);
     expect(purchaseOrderRepository.create).not.toHaveBeenCalled();
   });

@@ -15,7 +15,11 @@ export function createTaxQueryPort(): jest.Mocked<TaxQueryPort> {
   return {
     getTaxRateForAddress: jest.fn().mockResolvedValue(10),
     getTaxRateForAddressAndCategory: jest.fn().mockResolvedValue(0),
+    getTaxRateInfoForAddress: jest.fn().mockResolvedValue(null),
     findCustomerTaxExemptions: jest.fn().mockResolvedValue([]),
+    validateCustomerVatNumber: jest.fn().mockResolvedValue(false),
+    hasActiveVatRegistration: jest.fn().mockResolvedValue(false),
+    hasNexusCoverage: jest.fn().mockResolvedValue(null),
   };
 }
 
@@ -54,9 +58,7 @@ export function createTaxRateRepository(): jest.Mocked<ConstructorParameters<typ
   };
 }
 
-export function createRatesForAddressRepository(): jest.Mocked<
-  ConstructorParameters<typeof GetTaxRateForAddressUseCase>[0]
-> {
+export function createRatesForAddressRepository(): jest.Mocked<ConstructorParameters<typeof GetTaxRateForAddressUseCase>[0]> {
   return {
     findRatesForAddress: jest.fn().mockResolvedValue([]),
   };

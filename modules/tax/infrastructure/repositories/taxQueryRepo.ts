@@ -15,6 +15,8 @@ import {
   LineItemTax,
   TaxExemptionStatus,
 } from '../../taxTypes';
+import taxNexusRepo from './taxNexusRepo';
+import { getVatRegistrationsByMerchant, validateVatNumberFormat, extractCountryFromVat } from './taxVatRegistrationRepo';
 
 // ============================================================================
 // Table Constants
@@ -117,6 +119,18 @@ export class TaxQueryRepo {
   }
 
   async findTaxZoneForAddress(country: string, state?: string, postalCode?: string, city?: string): Promise<TaxZone | null> {
+    const zones = await this.findTaxZonesForAddress(country, state, postalCode, city);
+    return zones[0] ?? null;
+  }
+
+  /**
+   * All zones matching an address, most specific first:
+   * state-scoped matches beat country-wide ones, fewer covered countries rank
+   * higher (a single-country zone like FR outranks a broad EU zone), then the
+   * default flag. Callers should walk the list until a zone yields a rate —
+   * the first match may have none configured.
+   */
+  async findTaxZonesForAddress(country: string, state?: string, postalCode?: string, city?: string): Promise<TaxZone[]> {
     let sql = `
       SELECT * FROM "taxZone"
       WHERE "isActive" = true
@@ -140,11 +154,15 @@ export class TaxQueryRepo {
       params.push(JSON.stringify([city]));
     }
 
-    sql += ` ORDER BY "isDefault" DESC LIMIT 1`;
+    if (state) {
+      sql += ` ORDER BY ("states" IS NOT NULL AND "states" @> $2::jsonb) DESC,`;
+    } else {
+      sql += ` ORDER BY`;
+    }
+    sql += ` jsonb_array_length("countries") ASC, "isDefault" DESC`;
 
-    const result = await queryOne<Record<string, unknown>>(sql, params);
-    if (!result) return null;
-    return { ...result, id: result.taxZoneId } as TaxZone;
+    const results = await query<Record<string, unknown>[]>(sql, params);
+    return (results || []).map(result => ({ ...result, id: result.taxZoneId }) as TaxZone);
   }
 
   // Tax Category query methods
@@ -263,28 +281,48 @@ export class TaxQueryRepo {
    * Falls back to the default category if no category-specific rate is found.
    */
   async getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number> {
-    // Find the appropriate tax zone for this address
-    const taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode, address.city);
+    const rateInfo = await this.resolveRateForAddress(address, taxCategoryId);
+    return rateInfo?.rate ?? 0;
+  }
 
-    if (!taxZone) return 0;
+  async getTaxRateInfoForAddress(address: AddressInput, taxCategoryId?: string): Promise<{ rate: number; includeInPrice: boolean } | null> {
+    return this.resolveRateForAddress(address, taxCategoryId);
+  }
 
-    // If a specific tax category is provided, try to find rates for it
-    if (taxCategoryId) {
-      const categoryRates = await this.findTaxRatesByCategoryAndZone(taxCategoryId, taxZone.id, true);
-      if (categoryRates && categoryRates.length > 0) {
-        return categoryRates[0].rate; // highest priority (sorted DESC)
+  private async resolveRateForAddress(
+    address: AddressInput,
+    taxCategoryId?: string,
+  ): Promise<{ rate: number; includeInPrice: boolean } | null> {
+    // Candidate zones for this address, most specific first. A broad zone
+    // (e.g. EU-wide) with no configured rates must not mask a narrower zone
+    // that has them — walk the candidates until one yields a rate.
+    const taxZones = await this.findTaxZonesForAddress(address.country, address.region, address.postalCode, address.city);
+    if (taxZones.length === 0) return null;
+
+    const defaultCategory = await this.findDefaultTaxCategory();
+
+    for (const taxZone of taxZones) {
+      // If a specific tax category is provided, try to find rates for it
+      if (taxCategoryId) {
+        const categoryRates = await this.findTaxRatesByCategoryAndZone(taxCategoryId, taxZone.id, true);
+        if (categoryRates && categoryRates.length > 0) {
+          const applied = categoryRates[0]; // highest priority (sorted DESC)
+          return { rate: applied.rate, includeInPrice: applied.includeInPrice === true };
+        }
+        // Fall through to default category if no category-specific rate found
       }
-      // Fall through to default category if no category-specific rate found
+
+      // Use the default tax category
+      if (!defaultCategory) return null;
+
+      const taxRates = await this.findTaxRatesByCategoryAndZone(defaultCategory.id, taxZone.id, true);
+      if (!taxRates || taxRates.length === 0) continue;
+
+      const applied = taxRates[0];
+      return { rate: applied.rate, includeInPrice: applied.includeInPrice === true };
     }
 
-    // Use the default tax category
-    const defaultCategory = await this.findDefaultTaxCategory();
-    if (!defaultCategory) return 0;
-
-    const taxRates = await this.findTaxRatesByCategoryAndZone(defaultCategory.id, taxZone.id, true);
-    if (!taxRates || taxRates.length === 0) return 0;
-
-    return taxRates[0].rate;
+    return null;
   }
 
   /**
@@ -292,36 +330,8 @@ export class TaxQueryRepo {
    * This method determines the applicable tax rate based on location data
    */
   async getTaxRateForAddress(address: AddressInput): Promise<number> {
-    // Find the appropriate tax zone for this address
-    const taxZone = await this.findTaxZoneForAddress(address.country, address.region, address.postalCode, address.city);
-
-    if (!taxZone) {
-      // No applicable tax zone found, return default rate (0%)
-      return 0;
-    }
-
-    // Get the default tax category (usually general/standard sales tax)
-    const defaultCategory = await this.findDefaultTaxCategory();
-
-    if (!defaultCategory) {
-      // No default tax category defined, return default rate (0%)
-      return 0;
-    }
-
-    // Find applicable tax rates for this zone and category
-    const taxRates = await this.findTaxRatesByCategoryAndZone(
-      defaultCategory.id,
-      taxZone.id,
-      true, // Only active tax rates
-    );
-
-    if (!taxRates || taxRates.length === 0) {
-      // No applicable tax rates found, return default rate (0%)
-      return 0;
-    }
-
-    // Return the rate of the first applicable tax rate (highest priority)
-    return taxRates[0].rate;
+    const rateInfo = await this.resolveRateForAddress(address);
+    return rateInfo?.rate ?? 0;
   }
 
   /**
@@ -548,6 +558,47 @@ export class TaxQueryRepo {
       ],
       lineItemTaxes: [], // This would contain tax details for each line item
     };
+  }
+
+  /**
+   * Validate a customer VAT number for a destination country.
+   * The VAT prefix must match the destination country and pass the
+   * country-specific format check.
+   */
+  async validateCustomerVatNumber(vatNumber: string, destinationCountry: string): Promise<boolean> {
+    const vatCountry = extractCountryFromVat(vatNumber);
+    if (!vatCountry || vatCountry !== destinationCountry.toUpperCase()) return false;
+    return validateVatNumberFormat(vatNumber, destinationCountry.toUpperCase());
+  }
+
+  /**
+   * Whether the organization holds any active VAT registration
+   * (standard country registration or OSS/IOSS).
+   */
+  async hasActiveVatRegistration(organizationId: string): Promise<boolean> {
+    const registrations = await getVatRegistrationsByMerchant(organizationId);
+    const now = Date.now();
+    return registrations.some(
+      r => r.isActive && !r.deregistrationDate && (!r.effectiveUntil || new Date(r.effectiveUntil).getTime() > now),
+    );
+  }
+
+  /**
+   * Nexus coverage check for a destination.
+   * Returns null when the organization has no nexus records configured at
+   * all (permissive fallback — zones alone drive the rates), false when
+   * nexus records exist but none covers the destination, true when covered.
+   */
+  async hasNexusCoverage(organizationId: string, address: AddressInput): Promise<boolean | null> {
+    const nexusRecords = await taxNexusRepo.findByMerchant(organizationId, true);
+    if (!nexusRecords || nexusRecords.length === 0) return null;
+    const country = address.country?.toUpperCase();
+    const region = (address.region || '').toUpperCase();
+    return nexusRecords.some(nexus => {
+      if (nexus.country?.toUpperCase() !== country) return false;
+      if (!nexus.regionCode) return true; // country-wide nexus
+      return nexus.regionCode.toUpperCase() === region;
+    });
   }
 }
 

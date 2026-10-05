@@ -4,6 +4,7 @@
  */
 
 import { eventBus } from '../../../libs/events/eventBus';
+import { queryOne } from '../../../libs/db';
 import { analyticsWriteBuffer } from '../infrastructure';
 
 // Analytics writes go through the write buffer: trackEvent rows are flushed
@@ -18,6 +19,17 @@ const analyticsRepo = analyticsWriteBuffer;
 
 interface EventPayload {
   data: Record<string, unknown>;
+}
+
+// Orders don't persist organizationId — resolve it via the store when the
+// event doesn't carry it so org-scoped rollups stay attributable.
+async function resolveOrganizationId(data: Record<string, unknown>): Promise<string | undefined> {
+  if (data.organizationId) return data.organizationId as string;
+  if (!data.storeId) return undefined;
+  const row = await queryOne<{ organizationId: string | null }>(`SELECT "organizationId" FROM "store" WHERE "storeId" = $1`, [
+    data.storeId,
+  ]);
+  return row?.organizationId ?? undefined;
 }
 
 // ============================================================================
@@ -85,19 +97,21 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
     const { data } = payload as EventPayload;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const organizationId = await resolveOrganizationId(data);
 
     // Track event
     await reportingRepo.trackEvent({
       eventType: 'order.created',
       eventCategory: 'order',
       eventAction: 'created',
-      organizationId: data.organizationId as string | undefined,
+      organizationId,
       customerId: data.customerId as string | undefined,
       orderId: data.orderId as string | undefined,
       eventValueCents: data.totalAmountCents as number | undefined,
       eventQuantity: data.itemCount as number | undefined,
       currency: data.currency as string | undefined,
       channel: (data.channel as string) || 'web',
+      salesChannelId: data.channelId as string | undefined,
       eventData: {
         orderNumber: data.orderNumber,
         paymentMethod: data.paymentMethod,
@@ -111,8 +125,9 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
-      organizationId: data.organizationId as string | undefined,
+      organizationId,
       channel: (data.channel as string) || 'all',
+      salesChannelId: data.channelId as string | undefined,
       currencyCode: (data.currency as string) || 'USD',
       orderCount: 1,
       itemsSold: (data.itemCount as number) || 0,
@@ -135,6 +150,7 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
           productVariantId: item.productVariantId as string | undefined,
           date: today,
           channel: (data.channel as string) || 'all',
+          salesChannelId: data.channelId as string | undefined,
           purchases: 1,
           quantitySold: (item.quantity as number) || 1,
           revenueCents: (item.lineTotalCents as number) || (item.unitPriceCents as number) * ((item.quantity as number) || 1),
@@ -240,12 +256,14 @@ async function handleCartItemAdded(payload: unknown): Promise<void> {
       customerId: data.customerId as string | undefined,
       eventQuantity: data.quantity as number | undefined,
       eventValueCents: data.unitPriceCents as number | undefined,
+      salesChannelId: data.channelId as string | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId as string,
       productVariantId: data.productVariantId as string | undefined,
       date: today,
+      salesChannelId: data.channelId as string | undefined,
       addToCarts: 1,
     });
   } catch {}
@@ -265,12 +283,14 @@ async function handleCartItemRemoved(payload: unknown): Promise<void> {
       productId: data.productId as string | undefined,
       customerId: data.customerId as string | undefined,
       eventQuantity: data.quantity as number | undefined,
+      salesChannelId: data.channelId as string | undefined,
     });
 
     await analyticsRepo.upsertProductPerformance({
       productId: data.productId as string,
       productVariantId: data.productVariantId as string | undefined,
       date: today,
+      salesChannelId: data.channelId as string | undefined,
       removeFromCarts: 1,
     });
   } catch {}
@@ -316,11 +336,13 @@ async function handleCheckoutStarted(payload: unknown): Promise<void> {
       basketId: data.basketId as string | undefined,
       customerId: data.customerId as string | undefined,
       eventValueCents: data.totalCents as number | undefined,
+      salesChannelId: data.channelId as string | undefined,
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       organizationId: data.organizationId as string | undefined,
+      salesChannelId: data.channelId as string | undefined,
       checkoutStarted: 1,
     });
   } catch {}
@@ -336,6 +358,7 @@ async function handleCheckoutCompleted(payload: unknown): Promise<void> {
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
       eventValueCents: data.totalCents as number | undefined,
+      salesChannelId: data.channelId as string | undefined,
     });
   } catch {}
 }
@@ -357,12 +380,14 @@ async function handlePaymentSuccess(payload: unknown): Promise<void> {
       orderId: data.orderId as string | undefined,
       customerId: data.customerId as string | undefined,
       eventValueCents: data.amountCents as number | undefined,
+      salesChannelId: data.channelId as string | undefined,
       eventData: { paymentMethod: data.paymentMethod },
     });
 
     await analyticsRepo.upsertSalesDaily({
       date: today,
       organizationId: data.organizationId as string | undefined,
+      salesChannelId: data.channelId as string | undefined,
       paymentSuccessCount: 1,
     });
   } catch {}

@@ -34,7 +34,9 @@ export interface CouponRepository {
     /** Discount amount in integer cents. */
     discountAmountCents: number;
     redeemedAt: Date;
-  }): Promise<void>;
+  }): Promise<boolean>;
+  /** Existing redemption for (coupon, order) — idempotent-retry guard. */
+  findRedemptionByOrder(couponId: string, orderId: string): Promise<{ redemptionId: string; redeemedAt: Date } | null>;
   incrementUsageCount(couponId: string): Promise<void>;
   getUsageHistory(couponId: string, limit?: number): Promise<CouponUsage[]>;
   getCustomerUsageCount(couponId: string, customerId: string): Promise<number>;

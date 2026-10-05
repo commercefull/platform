@@ -15,13 +15,7 @@
 
 import { AxiosInstance } from 'axios';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
-import {
-  SEEDED_CARRIER_IDS,
-  SEEDED_METHOD_IDS,
-  SEEDED_ZONE_IDS,
-  SEEDED_RATE_IDS,
-  createTestRate,
-} from './testUtils';
+import { SEEDED_CARRIER_IDS, SEEDED_METHOD_IDS, SEEDED_ZONE_IDS, SEEDED_RATE_IDS, createTestRate } from './testUtils';
 
 const SEEDED_LABEL_ID = '01936005-0000-7000-8000-000000000001';
 const SEEDED_TRACKING = 'TRK-OPS-SEED-001';

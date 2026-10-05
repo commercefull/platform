@@ -16,11 +16,13 @@ const localDelivery = (overrides: Partial<LocalDelivery> = {}): LocalDelivery =>
   ...overrides,
 });
 
-const createStore = (opts: {
-  name?: string;
-  address?: CreateStoreProps['address'];
-  delivery?: LocalDelivery;
-} = {}): Store =>
+const createStore = (
+  opts: {
+    name?: string;
+    address?: CreateStoreProps['address'];
+    delivery?: LocalDelivery;
+  } = {},
+): Store =>
   Store.create({
     storeId: 'store-1',
     name: opts.name ?? 'Store',
@@ -33,9 +35,7 @@ const createStore = (opts: {
 describe('StoreStoreFulfillmentAdapter', () => {
   let adapter: StoreStoreFulfillmentAdapter;
   let StoreRepo: jest.Mocked<Pick<typeof StoreRepoType, 'findActive'>>;
-  let pickupLocationRepo: jest.Mocked<
-    Pick<typeof pickupLocationRepoModule, 'getLocations' | 'getLocation' | 'findNearestLocations'>
-  >;
+  let pickupLocationRepo: jest.Mocked<Pick<typeof pickupLocationRepoModule, 'getLocations' | 'getLocation' | 'findNearestLocations'>>;
 
   beforeEach(() => {
     StoreRepo = { findActive: jest.fn() };
@@ -89,7 +89,15 @@ describe('StoreStoreFulfillmentAdapter', () => {
     StoreRepo.findActive.mockResolvedValue([
       createStore({
         name: 'Nearby Store',
-        address: { line1: '1 Main St', city: 'Portland', state: 'OR', postalCode: '97201', country: 'US', latitude: 45.5152, longitude: -122.6784 },
+        address: {
+          line1: '1 Main St',
+          city: 'Portland',
+          state: 'OR',
+          postalCode: '97201',
+          country: 'US',
+          latitude: 45.5152,
+          longitude: -122.6784,
+        },
         delivery: localDelivery({ radiusKm: 10, deliveryFee: 3, estimatedDeliveryMinutes: 20 }),
       }),
     ]);

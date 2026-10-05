@@ -1,8 +1,5 @@
-
 import { ManageProductCategoriesUseCase } from './ManageProductCategories';
 import { createProductCategory, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('ManageProductCategoriesUseCase', () => {
   let useCase: ManageProductCategoriesUseCase;
@@ -10,7 +7,7 @@ describe('ManageProductCategoriesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductCategoriesUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof ManageProductCategoriesUseCase>[0]>();
     mockRepo.findAll.mockResolvedValue([createProductCategory()]);
     mockRepo.findById.mockResolvedValue(createProductCategory({ productCategoryId: 'c1' }));
     mockRepo.create.mockResolvedValue(createProductCategory({ productCategoryId: 'c2', name: 'Books' }));

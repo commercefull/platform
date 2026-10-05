@@ -18,7 +18,15 @@ describe('GetPageWithBlocksUseCase', () => {
 
   it('should get page with blocks by ID', async () => {
     mockRepo.findPageById.mockResolvedValue(
-      createContentPage({ contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public', summary: 'About us', contentTypeId: 'ct-1' }),
+      createContentPage({
+        contentPageId: 'p1',
+        title: 'About',
+        slug: 'about',
+        status: 'published',
+        visibility: 'public',
+        summary: 'About us',
+        contentTypeId: 'ct-1',
+      }),
     );
     mockRepo.findBlocksByPageId.mockResolvedValue([
       createContentBlock({ contentBlockId: 'b1', title: 'Hero', sortOrder: 0, isVisible: true }),
@@ -44,7 +52,15 @@ describe('GetPageWithBlocksUseCase', () => {
 
   it('should filter inactive blocks by default', async () => {
     mockRepo.findPageById.mockResolvedValue(
-      createContentPage({ contentPageId: 'p1', title: 'About', slug: 'about', status: 'published', visibility: 'public', summary: null, contentTypeId: 'ct-1' }),
+      createContentPage({
+        contentPageId: 'p1',
+        title: 'About',
+        slug: 'about',
+        status: 'published',
+        visibility: 'public',
+        summary: null,
+        contentTypeId: 'ct-1',
+      }),
     );
     mockRepo.findBlocksByPageId.mockResolvedValue([
       createContentBlock({ contentBlockId: 'b1', title: 'Visible', sortOrder: 0, isVisible: true }),

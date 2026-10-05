@@ -9,6 +9,18 @@ import { ProductValidationError } from '../errors/ProductErrors';
 
 describe('Product Entity', () => {
   describe('create', () => {
+    it('should default downloadable products to unlimited inventory', () => {
+      const product = Product.create({
+        productId: 'p-digital',
+        name: 'Digital Guide',
+        description: 'desc',
+        productTypeId: 'downloadable',
+        isDownloadable: true,
+      });
+
+      expect(product.isInventoryManaged).toBe(false);
+    });
+
     it('should create a draft product with auto-generated slug and sku', () => {
       const product = Product.create({
         productId: 'p-1',

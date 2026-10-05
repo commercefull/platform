@@ -21,6 +21,7 @@ export class ListProductsCommand {
       status?: ProductStatus | ProductStatus[];
       visibility?: ProductVisibility | ProductVisibility[];
       categoryId?: string;
+      brandId?: string;
       organizationId?: string;
       storeId?: string;
       isFeatured?: boolean;
@@ -31,6 +32,10 @@ export class ListProductsCommand {
       priceMaxCents?: number;
       tags?: string[];
       search?: string;
+      /** Constrain to these ids — used for store/channel assortment enforcement. */
+      productIds?: string[];
+      /** Exclude these ids — used for store/channel assortment enforcement. */
+      excludeProductIds?: string[];
     },
     public readonly limit: number = 20,
     public readonly offset: number = 0,

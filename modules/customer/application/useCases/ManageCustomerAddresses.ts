@@ -25,4 +25,3 @@ export class ManageCustomerAddressesUseCase {
     return this.customerAddressRepo.findActiveById(id, customerId);
   }
 }
-

@@ -40,7 +40,12 @@ describe('Page Builder Operations Tests', () => {
     // Seeded draft has two blocks in the main region
     const resp = await client.post(
       `/business/page-builder/drafts/${draftId}/regions/main/reorder`,
-      { blockOrders: [{ blockId: blockIds[1], order: 0 }, { blockId: blockIds[0], order: 1 }] },
+      {
+        blockOrders: [
+          { blockId: blockIds[1], order: 0 },
+          { blockId: blockIds[0], order: 1 },
+        ],
+      },
       { headers: headers() },
     );
     expectStatus(resp, 200);

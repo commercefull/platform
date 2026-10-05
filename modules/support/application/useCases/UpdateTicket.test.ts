@@ -42,19 +42,13 @@ describe('UpdateTicketUseCase', () => {
   it('should set resolvedAt when the status transitions to resolved', async () => {
     await useCase.execute({ ticketId: 'tkt-1', status: 'resolved', updatedBy: 'agent-1' });
 
-    expect(supportRepository.updateTicket).toHaveBeenCalledWith(
-      'tkt-1',
-      expect.objectContaining({ resolvedAt: expect.any(Date) }),
-    );
+    expect(supportRepository.updateTicket).toHaveBeenCalledWith('tkt-1', expect.objectContaining({ resolvedAt: expect.any(Date) }));
   });
 
   it('should set closedAt when the status transitions to closed', async () => {
     await useCase.execute({ ticketId: 'tkt-1', status: 'closed', updatedBy: 'agent-1' });
 
-    expect(supportRepository.updateTicket).toHaveBeenCalledWith(
-      'tkt-1',
-      expect.objectContaining({ closedAt: expect.any(Date) }),
-    );
+    expect(supportRepository.updateTicket).toHaveBeenCalledWith('tkt-1', expect.objectContaining({ closedAt: expect.any(Date) }));
   });
 
   it('should not reset resolvedAt when the ticket is already resolved', async () => {
@@ -62,9 +56,6 @@ describe('UpdateTicketUseCase', () => {
 
     await useCase.execute({ ticketId: 'tkt-1', status: 'resolved', updatedBy: 'agent-1' });
 
-    expect(supportRepository.updateTicket).toHaveBeenCalledWith(
-      'tkt-1',
-      expect.not.objectContaining({ resolvedAt: expect.any(Date) }),
-    );
+    expect(supportRepository.updateTicket).toHaveBeenCalledWith('tkt-1', expect.not.objectContaining({ resolvedAt: expect.any(Date) }));
   });
 });

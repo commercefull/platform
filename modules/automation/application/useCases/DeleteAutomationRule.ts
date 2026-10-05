@@ -10,4 +10,3 @@ export class DeleteAutomationRuleUseCase {
     return this.ruleRepo.delete(ruleId);
   }
 }
-

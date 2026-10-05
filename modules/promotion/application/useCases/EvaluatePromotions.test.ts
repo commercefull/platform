@@ -2,19 +2,11 @@ jest.mock('../../../../libs/logger', () => ({
   logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
 }));
 
-import {
-  lazyMock,
-  createPromotion,
-  createPromotionRule,
-  createPromotionAction,
-} from '../../tests/testUtils';
+import { lazyMock, createPromotion, createPromotionRule, createPromotionAction } from '../../tests/testUtils';
 import type { PromotionRepository } from '../../domain/repositories/PromotionRepository';
 import { EvaluatePromotionsUseCase, PromotionEvaluationContext } from './EvaluatePromotions';
 
-type PromotionsPort = Pick<
-  PromotionRepository,
-  'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'
->;
+type PromotionsPort = Pick<PromotionRepository, 'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'>;
 
 const baseContext: PromotionEvaluationContext = {
   items: [
@@ -238,9 +230,7 @@ describe('EvaluatePromotionsUseCase', () => {
 
   it('should evaluate cartTotal rule with >= operator', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
-    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 150 }),
-    ]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 150 })]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
@@ -251,9 +241,7 @@ describe('EvaluatePromotionsUseCase', () => {
 
   it('should fail cartTotal rule when below threshold', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
-    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 500 }),
-    ]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([createPromotionRule({ condition: 'cartTotal', operator: '>=', value: 500 })]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
@@ -264,9 +252,7 @@ describe('EvaluatePromotionsUseCase', () => {
 
   it('should evaluate itemQuantity rule', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
-    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'itemQuantity', operator: '>=', value: 3 }),
-    ]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([createPromotionRule({ condition: 'itemQuantity', operator: '>=', value: 3 })]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
@@ -329,9 +315,7 @@ describe('EvaluatePromotionsUseCase', () => {
 
   it('should evaluate firstOrder rule', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
-    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'firstOrder', operator: '=', value: true }),
-    ]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([createPromotionRule({ condition: 'firstOrder', operator: '=', value: true })]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
@@ -370,7 +354,11 @@ describe('EvaluatePromotionsUseCase', () => {
     const now = new Date();
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
     promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'dateRange', operator: '=', value: { start: now.toISOString(), end: new Date(now.getTime() + 86400000).toISOString() } }),
+      createPromotionRule({
+        condition: 'dateRange',
+        operator: '=',
+        value: { start: now.toISOString(), end: new Date(now.getTime() + 86400000).toISOString() },
+      }),
     ]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
@@ -447,9 +435,7 @@ describe('EvaluatePromotionsUseCase', () => {
 
   it('should compare with > operator', async () => {
     promotionsRepo.findActive.mockResolvedValue([activePromotion]);
-    promotionsRepo.findRulesByPromotionId.mockResolvedValue([
-      createPromotionRule({ condition: 'cartTotal', operator: '>', value: 150 }),
-    ]);
+    promotionsRepo.findRulesByPromotionId.mockResolvedValue([createPromotionRule({ condition: 'cartTotal', operator: '>', value: 150 })]);
     promotionsRepo.findActionsByPromotionId.mockResolvedValue([
       createPromotionAction({ actionType: 'discountByPercentage', value: 10, targetIds: null }),
     ]);
@@ -513,7 +499,13 @@ describe('EvaluatePromotionsUseCase', () => {
 
     it('should fall back to isExclusive when stackability is missing (backward compat)', async () => {
       const exclusivePromo = createPromotion({ ...activePromotion, isExclusive: true, stackability: undefined, priority: 10 });
-      const stackablePromo = createPromotion({ ...activePromotion, promotionId: 'stk', isExclusive: false, stackability: undefined, priority: 5 });
+      const stackablePromo = createPromotion({
+        ...activePromotion,
+        promotionId: 'stk',
+        isExclusive: false,
+        stackability: undefined,
+        priority: 5,
+      });
       promotionsRepo.findActive.mockResolvedValue([exclusivePromo, stackablePromo]);
       promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
       promotionsRepo.findActionsByPromotionId.mockResolvedValue([
@@ -652,7 +644,11 @@ describe('EvaluatePromotionsUseCase', () => {
       promotionsRepo.findActive.mockResolvedValue([activePromotion]);
       promotionsRepo.findRulesByPromotionId.mockResolvedValue([]);
       promotionsRepo.findActionsByPromotionId.mockResolvedValue([
-        createPromotionAction({ actionType: 'freeGift', value: { productId: 'gift1', minCartTotal: 100, minQuantity: 2 }, targetIds: null }),
+        createPromotionAction({
+          actionType: 'freeGift',
+          value: { productId: 'gift1', minCartTotal: 100, minQuantity: 2 },
+          targetIds: null,
+        }),
       ]);
 
       const result = await useCase.execute(baseContext); // subtotalCents 200 >= 100, qty 3 >= 2

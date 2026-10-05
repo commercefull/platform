@@ -290,5 +290,4 @@ describe('Content Media & Redirects API', () => {
       expect(response.data.success).toBe(true);
     });
   });
-
 });

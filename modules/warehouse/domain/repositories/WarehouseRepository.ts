@@ -44,7 +44,9 @@ export interface WarehouseRecord {
 }
 
 export type WarehouseCreateParams = Omit<WarehouseRecord, 'distributionWarehouseId' | 'createdAt' | 'updatedAt'>;
-export type WarehouseUpdateParams = Partial<Omit<WarehouseRecord, 'distributionWarehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>>;
+export type WarehouseUpdateParams = Partial<
+  Omit<WarehouseRecord, 'distributionWarehouseId' | 'code' | 'createdAt' | 'updatedAt' | 'createdBy'>
+>;
 
 export interface WarehouseStatistics {
   total: number;

@@ -48,7 +48,6 @@ export function cookieResponse(res: HttpResponse, name: string, value: string, o
   return res;
 }
 
-
 /**
  * Standard API response format for success cases
  * @param res Express response object

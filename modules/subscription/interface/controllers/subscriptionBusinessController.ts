@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Subscription Business Controller
  * Handles admin/merchant subscription operations
@@ -152,7 +152,12 @@ export const pauseSubscriptionAdmin: AsyncHandler = async (req, res, _next) => {
   const { resumeAt, reason } = req.body as { resumeAt?: string; reason?: string };
   const adminId = req.user?.userId || req.user?.organizationId;
 
-  const pause = await adminSubscriptions.pauseSubscription(req.params.id, resumeAt ? new Date(resumeAt) : undefined, reason, `admin:${adminId}`);
+  const pause = await adminSubscriptions.pauseSubscription(
+    req.params.id,
+    resumeAt ? new Date(resumeAt) : undefined,
+    reason,
+    `admin:${adminId}`,
+  );
 
   jsonResponse(res, 200, { success: true, data: pause });
 };

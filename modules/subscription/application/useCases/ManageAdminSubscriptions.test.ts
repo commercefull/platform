@@ -2,11 +2,7 @@
  * Unit Tests for ManageAdminSubscriptions Use Case
  */
 
-import {
-  createSubscriptionRepository,
-  createSubscriptionPlan,
-  createCustomerSubscription,
-} from '../../tests/testUtils';
+import { createSubscriptionRepository, createSubscriptionPlan, createCustomerSubscription } from '../../tests/testUtils';
 import { ManageAdminSubscriptionsUseCase } from './ManageAdminSubscriptions';
 
 describe('ManageAdminSubscriptionsUseCase', () => {

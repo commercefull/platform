@@ -13,7 +13,13 @@ describe('DuplicateTemplateUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof DuplicateTemplateUseCase>[0]>();
     mockRepo.findTemplateById.mockResolvedValue(
-      createContentTemplate({ contentTemplateId: 't1', name: 'Original', slug: 'original', description: 'Original template', htmlStructure: '<div></div>' }),
+      createContentTemplate({
+        contentTemplateId: 't1',
+        name: 'Original',
+        slug: 'original',
+        description: 'Original template',
+        htmlStructure: '<div></div>',
+      }),
     );
     mockRepo.createTemplate.mockResolvedValue(createContentTemplate({ contentTemplateId: 't2', name: 'Copy', slug: 'copy' }));
     useCase = new DuplicateTemplateUseCase(mockRepo);

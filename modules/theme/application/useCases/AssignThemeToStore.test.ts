@@ -25,23 +25,24 @@ describe('AssignThemeToStoreUseCase', () => {
     const repo = lazyMock<ThemeRepository>();
     repo.findById.mockResolvedValue(createTheme());
 
-    await expect(new AssignThemeToStoreUseCase(repo).execute(new AssignThemeToStoreCommand('s-1', 't-1', 'org-1')))
-      .rejects.toThrow(ThemeValidationError);
+    await expect(new AssignThemeToStoreUseCase(repo).execute(new AssignThemeToStoreCommand('s-1', 't-1', 'org-1'))).rejects.toThrow(
+      ThemeValidationError,
+    );
   });
 
   it('should throw ThemeNotFoundError when the theme does not exist', async () => {
     const repo = lazyMock<ThemeRepository>();
     repo.findById.mockResolvedValue(null);
 
-    await expect(new AssignThemeToStoreUseCase(repo).execute(new AssignThemeToStoreCommand('s-1', 'missing', 'org-1')))
-      .rejects.toThrow(ThemeNotFoundError);
+    await expect(new AssignThemeToStoreUseCase(repo).execute(new AssignThemeToStoreCommand('s-1', 'missing', 'org-1'))).rejects.toThrow(
+      ThemeNotFoundError,
+    );
   });
 
   it('should throw ThemeAssignmentNotFoundError when unassigning a store with no theme', async () => {
     const repo = lazyMock<ThemeRepository>();
     repo.findThemeAssignment.mockResolvedValue(null);
 
-    await expect(new AssignThemeToStoreUseCase(repo).unassign('s-1'))
-      .rejects.toThrow(ThemeAssignmentNotFoundError);
+    await expect(new AssignThemeToStoreUseCase(repo).unassign('s-1')).rejects.toThrow(ThemeAssignmentNotFoundError);
   });
 });

@@ -8,7 +8,9 @@ import { FailedToCreateNotificationError } from '../../domain/errors/Notificatio
 export type Notification = DbNotification;
 
 // Derived types for create/update operations
-export type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt' | 'channel' | 'userType' | 'priority'>> & {
+export type NotificationCreateParams = Partial<
+  Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt' | 'channel' | 'userType' | 'priority'>
+> & {
   userId: string;
   userType: 'customer' | 'organization' | 'admin';
   type: string;

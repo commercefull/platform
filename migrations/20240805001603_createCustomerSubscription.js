@@ -7,6 +7,10 @@ exports.up = function (knex) {
     table.uuid('customerSubscriptionId').primary().defaultTo(knex.raw('uuidv7()'));
     table.string('subscriptionNumber').unique();
     table.uuid('customerId').notNullable().references('customerId').inTable('customer').onDelete('CASCADE');
+    // Store/sales channel the subscription was placed through — nullable for
+    // channel-agnostic subscriptions.
+    table.uuid('storeId').references('storeId').inTable('store').onDelete('SET NULL');
+    table.uuid('salesChannelId').references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
     table.uuid('subscriptionPlanId').notNullable().references('subscriptionPlanId').inTable('subscriptionPlan');
     table.uuid('subscriptionProductId').references('subscriptionProductId').inTable('subscriptionProduct');
     table.uuid('productVariantId').references('productVariantId').inTable('productVariant');
@@ -49,6 +53,8 @@ exports.up = function (knex) {
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
     table.index('customerId');
+    table.index('storeId');
+    table.index('salesChannelId');
     table.index('subscriptionPlanId');
     table.index('status');
     table.index('nextBillingAt');

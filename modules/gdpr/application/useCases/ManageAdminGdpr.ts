@@ -1,7 +1,4 @@
-import type {
-  AdminGdprRepository,
-  AdminGdprCreateRequestParams,
-} from '../../domain/repositories/GdprRepository';
+import type { AdminGdprRepository, AdminGdprCreateRequestParams } from '../../domain/repositories/GdprRepository';
 
 export class ManageAdminGdprUseCase {
   constructor(private readonly adminGdprRepo: AdminGdprRepository) {}
@@ -30,4 +27,3 @@ export class ManageAdminGdprUseCase {
     return this.adminGdprRepo.completeRequest(requestId, notes);
   }
 }
-

@@ -47,12 +47,8 @@ exports.up = async function (knex) {
       ...pref,
       userId,
       // Align the order_confirmation row with testPreferenceData in tests/integration/notification/testUtils.ts
-      channelPreferences: JSON.stringify(
-        isTestPref ? { email: true, sms: false, in_app: true, push: false } : pref.channelPreferences,
-      ),
-      schedulePreferences: JSON.stringify(
-        isTestPref ? { doNotDisturbStart: '22:00', doNotDisturbEnd: '08:00', timezone: 'UTC' } : null,
-      ),
+      channelPreferences: JSON.stringify(isTestPref ? { email: true, sms: false, in_app: true, push: false } : pref.channelPreferences),
+      schedulePreferences: JSON.stringify(isTestPref ? { doNotDisturbStart: '22:00', doNotDisturbEnd: '08:00', timezone: 'UTC' } : null),
     };
 
     if (isTestPref) {

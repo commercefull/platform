@@ -126,10 +126,9 @@ describe('Tracking Module Integration Tests', () => {
 
     it('DELETE /business/tracking/config/:storeId/mappings/:sourceEvent removes mapping', async () => {
       if (!orgToken) return;
-      const resp = await client.delete(
-        `/business/tracking/config/${testStoreId}/mappings/custom.event.test`,
-        { headers: { Authorization: `Bearer ${orgToken}` } },
-      );
+      const resp = await client.delete(`/business/tracking/config/${testStoreId}/mappings/custom.event.test`, {
+        headers: { Authorization: `Bearer ${orgToken}` },
+      });
       expect(resp.status).toBe(200);
     });
   });

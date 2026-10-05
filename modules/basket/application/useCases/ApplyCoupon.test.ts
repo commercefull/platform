@@ -18,9 +18,7 @@ describe('ApplyCouponUseCase', () => {
     const result = await new ApplyCouponUseCase(repository, discounts).execute(new ApplyCouponCommand(BASKET_ID, 'SAVE10'));
 
     expect(result.basketId).toBe(BASKET_ID);
-    expect(result.coupon).toEqual(
-      expect.objectContaining({ couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10 }),
-    );
+    expect(result.coupon).toEqual(expect.objectContaining({ couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10 }));
     expect(result.discountAmountCents).toBe(1000);
     expect(repository.save).toHaveBeenCalledWith(basket);
   });
@@ -39,14 +37,16 @@ describe('ApplyCouponUseCase', () => {
   });
 
   it('should validate the coupon against the basket subtotalCents when checking the discount', async () => {
-    const repository = createBasketRepository(
-      createBasket({ customerId: 'customer-1', items: [createBasketItem({ quantity: 2 })] }),
-    );
+    const repository = createBasketRepository(createBasket({ customerId: 'customer-1', items: [createBasketItem({ quantity: 2 })] }));
     const discounts = createDiscountQuotePort();
 
     await new ApplyCouponUseCase(repository, discounts).execute(new ApplyCouponCommand(BASKET_ID, 'SAVE10'));
 
-    expect(discounts.validateDiscount).toHaveBeenCalledWith('SAVE10', 10000, 'customer-1');
+    expect(discounts.validateDiscount).toHaveBeenCalledWith(
+      'SAVE10',
+      10000,
+      expect.objectContaining({ customerId: 'customer-1', currency: 'USD' }),
+    );
   });
 
   it('should emit promotion.coupon_applied when a coupon is applied', async () => {
@@ -57,7 +57,13 @@ describe('ApplyCouponUseCase', () => {
 
     expect(emitMock).toHaveBeenCalledWith(
       'promotion.coupon_applied',
-      expect.objectContaining({ basketId: BASKET_ID, couponCode: 'SAVE10', discountType: 'percentage', discountValue: 10, discountAmountCents: 1000 }),
+      expect.objectContaining({
+        basketId: BASKET_ID,
+        couponCode: 'SAVE10',
+        discountType: 'percentage',
+        discountValue: 10,
+        discountAmountCents: 1000,
+      }),
     );
   });
 

@@ -10,9 +10,7 @@ describe('GetDashboardMetricsUseCase', () => {
     jest.clearAllMocks();
     analyticsRepo.getOrderMetrics.mockResolvedValue({ count: 100, revenueCents: 5000 });
     analyticsRepo.getCustomerMetrics.mockResolvedValue({ total: 200, new: 50, conversionRate: 2.5 });
-    analyticsRepo.getTopProducts.mockResolvedValue([
-      { productId: 'p1', name: 'Widget', quantity: 30, revenueCents: 900 },
-    ]);
+    analyticsRepo.getTopProducts.mockResolvedValue([{ productId: 'p1', name: 'Widget', quantity: 30, revenueCents: 900 }]);
     analyticsRepo.getRecentOrders.mockResolvedValue([
       { orderId: 'o1', totalCents: 100, status: 'completed', createdAt: new Date().toISOString() },
     ]);

@@ -26,5 +26,4 @@ export type NotificationRecord = {
   data: unknown | null;
   metadata: unknown | null;
   deletedAt: Date | null;
-}
-
+};

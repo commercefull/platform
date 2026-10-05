@@ -15,16 +15,7 @@ export const ADMIN_ROLES: AdminRole[] = ['super_admin', 'admin', 'support', 'ope
 
 const ROLE_PERMISSIONS: Record<AdminRole, string[]> = {
   super_admin: ['*'],
-  admin: [
-    'users:read',
-    'users:write',
-    'users:delete',
-    'orders:read',
-    'orders:write',
-    'products:read',
-    'products:write',
-    'analytics:read',
-  ],
+  admin: ['users:read', 'users:write', 'users:delete', 'orders:read', 'orders:write', 'products:read', 'products:write', 'analytics:read'],
   support: ['users:read', 'orders:read', 'orders:write', 'support:read', 'support:write'],
   operations: ['orders:read', 'orders:write', 'inventory:read', 'inventory:write', 'fulfillment:read', 'fulfillment:write'],
 };
@@ -58,12 +49,7 @@ interface AdminProvisioningPort {
 export class ProvisionAdminUserUseCase {
   constructor(private readonly adminRepo: AdminProvisioningPort) {}
 
-  async execute(input: {
-    email: string;
-    name: string;
-    passwordHash: string;
-    role: string;
-  }): Promise<AdminUser> {
+  async execute(input: { email: string; name: string; passwordHash: string; role: string }): Promise<AdminUser> {
     if (!ADMIN_ROLES.includes(input.role as AdminRole)) {
       throw new InvalidAdminRoleError(input.role);
     }

@@ -3,11 +3,7 @@ import { RenewAccessTokenUseCase, RenewAccessTokenCommand, RenewAccessTokenConfi
 import type { JwtTokenPort } from './IssueTokenPair';
 import type { CredentialSubjectPort } from '../../ports/CredentialSubjectPort';
 import type { TokenRepository } from '../../../domain/repositories/TokenRepository';
-import {
-  RefreshTokenRequiredError,
-  InvalidRefreshTokenError,
-  AccountNotActiveError,
-} from '../../../domain/errors/IdentityErrors';
+import { RefreshTokenRequiredError, InvalidRefreshTokenError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 
 describe('RenewAccessTokenUseCase', () => {
   let credentialPort: jest.Mocked<CredentialSubjectPort>;
@@ -52,7 +48,10 @@ describe('RenewAccessTokenUseCase', () => {
   it('should emit a customer token_refreshed event', async () => {
     await useCase.execute(new RenewAccessTokenCommand('refresh-token-1'));
 
-    expect(emitMock).toHaveBeenCalledWith('identity.customer.token_refreshed', expect.objectContaining({ userId: 'subject-1', userType: 'customer' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'identity.customer.token_refreshed',
+      expect.objectContaining({ userId: 'subject-1', userType: 'customer' }),
+    );
   });
 
   it('should emit an organization token_refreshed event for organization config', async () => {

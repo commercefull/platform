@@ -12,7 +12,6 @@ import { TrackingConfig, GTMConfig, MetaCAPIConfig, EventMapping } from '../../d
 import { getDefaultEventMappings } from '../../domain/services/defaultEventMappings';
 import { TrackingConfigNotFoundError, TrackingConfigAlreadyExistsError } from '../../domain/errors/TrackingErrors';
 
-
 // ============================================================================
 // Manage Tracking Config
 // ============================================================================

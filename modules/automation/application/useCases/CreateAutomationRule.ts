@@ -42,4 +42,3 @@ export class CreateAutomationRuleUseCase {
     return this.ruleRepo.create(rule);
   }
 }
-

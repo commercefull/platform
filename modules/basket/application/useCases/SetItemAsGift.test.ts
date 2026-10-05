@@ -6,9 +6,7 @@ describe('SetItemAsGiftUseCase', () => {
   it('should mark the item as a gift when it exists', async () => {
     const repository = createBasketRepository(createBasket({ items: [createBasketItem()] }));
 
-    const result = await new SetItemAsGiftUseCase(repository).execute(
-      new SetItemAsGiftCommand(BASKET_ID, ITEM_ID, 'Happy Birthday!'),
-    );
+    const result = await new SetItemAsGiftUseCase(repository).execute(new SetItemAsGiftCommand(BASKET_ID, ITEM_ID, 'Happy Birthday!'));
 
     const updatedItem = repository.updateItem.mock.calls[0][0];
     expect(updatedItem.isGift).toBe(true);

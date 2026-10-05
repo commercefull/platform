@@ -21,7 +21,18 @@ type RepoCustomer = NonNullable<Awaited<ReturnType<CustomerRepo['findCustomerByI
 
 describe('CustomerCredentialSubjectAdapter', () => {
   let adapter: CustomerCredentialSubjectAdapter;
-  let mockCustomerRepo: jest.Mocked<Pick<CustomerRepo, 'authenticateCustomer' | 'findCustomerById' | 'findCustomerByEmail' | 'updateCustomerLoginTimestamp' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
+  let mockCustomerRepo: jest.Mocked<
+    Pick<
+      CustomerRepo,
+      | 'authenticateCustomer'
+      | 'findCustomerById'
+      | 'findCustomerByEmail'
+      | 'updateCustomerLoginTimestamp'
+      | 'changePassword'
+      | 'createPasswordResetToken'
+      | 'verifyPasswordResetToken'
+    >
+  >;
   let mockCustomers: jest.Mocked<Pick<CustomerRepository, 'findByEmail' | 'save' | 'updatePassword'>>;
 
   beforeEach(() => {
@@ -62,7 +73,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       email: 'test@test.com',
       firstName: 'John',
       lastName: 'Doe',
-  } as unknown as RepoCustomer);
+    } as unknown as RepoCustomer);
 
     const result = await adapter.authenticate('test@test.com', 'password');
 
@@ -90,7 +101,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       isActive: true,
       isVerified: true,
       lastLoginAt: new Date('2024-01-01'),
-  } as unknown as RepoCustomer);
+    } as unknown as RepoCustomer);
 
     const result = await adapter.findById('cust-1');
 
@@ -113,7 +124,7 @@ describe('CustomerCredentialSubjectAdapter', () => {
       customerId: 'cust-1',
       email: 'test@test.com',
       isActive: true,
-  } as unknown as RepoCustomer);
+    } as unknown as RepoCustomer);
 
     const result = await adapter.findByEmail('test@test.com');
 

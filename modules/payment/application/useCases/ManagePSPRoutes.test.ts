@@ -1,9 +1,5 @@
 import { emitMock, createPSPRoutingRepository, createPSPRoute } from '../../tests/testUtils';
-import {
-  ManagePSPRoutesUseCase,
-  CreatePSPRouteCommand,
-  UpdatePSPRouteCommand,
-} from './ManagePSPRoutes';
+import { ManagePSPRoutesUseCase, CreatePSPRouteCommand, UpdatePSPRouteCommand } from './ManagePSPRoutes';
 import { ProviderNotSupportedError } from '../../domain/errors/PaymentErrors';
 import type { PSPRoute } from '../../domain/entities/PSPRoute';
 
@@ -36,9 +32,7 @@ describe('ManagePSPRoutesUseCase', () => {
 
   it('should throw ProviderNotSupportedError for an unknown provider', async () => {
     await expect(
-      useCase.create(
-        new CreatePSPRouteCommand('org-1', 'unknown-psp', 1, 'key', undefined, 'secret', true, undefined, undefined),
-      ),
+      useCase.create(new CreatePSPRouteCommand('org-1', 'unknown-psp', 1, 'key', undefined, 'secret', true, undefined, undefined)),
     ).rejects.toThrow(ProviderNotSupportedError);
     expect(routingRepo.createRoute).not.toHaveBeenCalled();
   });

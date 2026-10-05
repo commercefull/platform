@@ -19,13 +19,14 @@ describe('SetFulfillmentMethodUseCase', () => {
 
     expect(result.fulfillmentType).toBe('pickup');
     expect(checkoutRepository.save).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'fulfillmentType', fulfillmentType: 'pickup' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'fulfillmentType', fulfillmentType: 'pickup' }),
+    );
   });
 
   it('should clear the shipping method when switching to pickup', async () => {
-    checkoutRepository.findById.mockResolvedValue(
-      createCheckoutSession({ shippingMethodId: 'sm-1', shippingMethodName: 'Standard' }),
-    );
+    checkoutRepository.findById.mockResolvedValue(createCheckoutSession({ shippingMethodId: 'sm-1', shippingMethodName: 'Standard' }));
 
     const result = await useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'pickup'));
 
@@ -40,9 +41,9 @@ describe('SetFulfillmentMethodUseCase', () => {
   });
 
   it('should throw CheckoutValidationError when the fulfillment type is invalid', async () => {
-    await expect(
-      useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'teleport' as unknown as FulfillmentType)),
-    ).rejects.toThrow(CheckoutValidationError);
+    await expect(useCase.execute(new SetFulfillmentMethodCommand('ck-1', 'teleport' as unknown as FulfillmentType))).rejects.toThrow(
+      CheckoutValidationError,
+    );
     expect(checkoutRepository.save).not.toHaveBeenCalled();
   });
 });

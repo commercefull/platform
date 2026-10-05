@@ -14,7 +14,13 @@ describe('SchedulePageUseCase', () => {
     mockRepo = lazyMock<ConstructorParameters<typeof SchedulePageUseCase>[0]>();
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1', title: 'Post', slug: 'post' }));
     mockRepo.updatePage.mockResolvedValue(
-      createContentPage({ contentPageId: 'p1', title: 'Post', slug: 'post', status: 'scheduled', scheduledAt: new Date(Date.now() + 86400000) }),
+      createContentPage({
+        contentPageId: 'p1',
+        title: 'Post',
+        slug: 'post',
+        status: 'scheduled',
+        scheduledAt: new Date(Date.now() + 86400000),
+      }),
     );
     useCase = new SchedulePageUseCase(mockRepo);
   });

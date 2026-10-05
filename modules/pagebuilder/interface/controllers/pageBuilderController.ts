@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Page Builder Business Controller
  * REST API for managing page builder drafts, blocks, and publishing.

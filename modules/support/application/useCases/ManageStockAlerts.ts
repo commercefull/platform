@@ -36,14 +36,8 @@ export interface NotificationSchedulerPort {
 }
 
 export interface AlertPort {
-  getStockAlerts(
-    filters?: AlertListFilters,
-    pagination?: { limit?: number; offset?: number },
-  ): Promise<{ data: unknown[]; total: number }>;
-  getPriceAlerts(
-    filters?: AlertListFilters,
-    pagination?: { limit?: number; offset?: number },
-  ): Promise<{ data: unknown[]; total: number }>;
+  getStockAlerts(filters?: AlertListFilters, pagination?: { limit?: number; offset?: number }): Promise<{ data: unknown[]; total: number }>;
+  getPriceAlerts(filters?: AlertListFilters, pagination?: { limit?: number; offset?: number }): Promise<{ data: unknown[]; total: number }>;
   getActiveStockAlertsForProduct(productId: string, productVariantId?: string): Promise<StockAlertRecord[]>;
   getPriceAlertsToNotify(productId: string, newPriceCents: number): Promise<PriceAlertRecord[]>;
   notifyStockAlert(stockAlertId: string): Promise<void>;

@@ -4,6 +4,8 @@
  */
 
 import type { IContentNavigationRepository } from '../../../domain/repositories/ContentNavigationRepository';
+import type { ContentPublicationContext } from '../../../domain/repositories/ContentRepository';
+import { matchesContentScope } from '../../../domain/valueObjects/contentScope';
 import { ContentNavigationItem } from '../../../../../libs/db/types';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
@@ -13,6 +15,7 @@ export class GetNavigationWithItemsQuery {
     public readonly slug?: string,
     public readonly location?: string,
     public readonly includeInactive: boolean = false,
+    public readonly context?: ContentPublicationContext,
   ) {}
 }
 
@@ -67,8 +70,11 @@ export class GetNavigationWithItemsUseCase {
     // Filter inactive items if needed
     const filteredItems = query.includeInactive ? items : items.filter(item => item.isActive);
 
-    // Build tree structure
-    const itemTree = this.buildItemTree(filteredItems);
+    // Build tree structure. Store/channel/locale-scoped items drop out
+    // for non-matching contexts; children of a scoped-out item stay
+    // hidden (visibility requires the whole ancestor chain to match).
+    const scopedItems = query.context ? this.filterByScope(filteredItems, query.context) : filteredItems;
+    const itemTree = this.buildItemTree(scopedItems);
 
     return {
       id: navigation.contentNavigationId,
@@ -126,5 +132,17 @@ export class GetNavigationWithItemsUseCase {
     sortNodes(rootNodes);
 
     return rootNodes;
+  }
+
+  private filterByScope(items: ContentNavigationItem[], context: ContentPublicationContext): ContentNavigationItem[] {
+    const byId = new Map(items.map(item => [item.contentNavigationItemId, item]));
+    return items.filter(item => {
+      let current: ContentNavigationItem | undefined = item;
+      while (current) {
+        if (!matchesContentScope(current.conditions, context)) return false;
+        current = current.parentId ? byId.get(current.parentId) : undefined;
+      }
+      return true;
+    });
   }
 }

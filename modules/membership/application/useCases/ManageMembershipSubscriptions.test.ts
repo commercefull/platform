@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManageMembershipSubscriptionsUseCase } from './ManageMembershipSubscriptions';
-import {
-  createMembershipSubscriptionsPort,
-  createMembershipSubscription,
-} from '../../tests/testUtils';
+import { createMembershipSubscriptionsPort, createMembershipSubscription } from '../../tests/testUtils';
 
 describe('ManageMembershipSubscriptionsUseCase', () => {
   const subscriptionsPort = createMembershipSubscriptionsPort();

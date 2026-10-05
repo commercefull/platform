@@ -25,4 +25,3 @@ export class ManageCurrenciesUseCase {
     return this.currencyRepo.deleteCurrency(id);
   }
 }
-

@@ -8,21 +8,17 @@ afterEach(() => {
 
 describe('DownloadImageUseCase', () => {
   it('should reject when the url is empty', async () => {
-    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: '' })).rejects.toThrow(
-      InvalidImageUrlError,
-    );
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: '' })).rejects.toThrow(InvalidImageUrlError);
   });
 
   it('should reject when the url is not http', async () => {
-    await expect(
-      new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'ftp://example.com/image.png' }),
-    ).rejects.toThrow(InvalidImageUrlError);
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'ftp://example.com/image.png' })).rejects.toThrow(
+      InvalidImageUrlError,
+    );
   });
 
   it('should reject when the url is malformed', async () => {
-    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'not-a-url' })).rejects.toThrow(
-      InvalidImageUrlError,
-    );
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'not-a-url' })).rejects.toThrow(InvalidImageUrlError);
   });
 
   it('should delegate to ProcessImageUseCase when the fetch succeeds', async () => {
@@ -48,33 +44,33 @@ describe('DownloadImageUseCase', () => {
   it('should reject when the content type is not an image', async () => {
     mockFetchResponse({ contentType: 'text/html' });
 
-    await expect(
-      new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/page.html' }),
-    ).rejects.toThrow(InvalidImageUrlError);
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/page.html' })).rejects.toThrow(
+      InvalidImageUrlError,
+    );
   });
 
   it('should reject when the fetch returns a non-OK status', async () => {
     mockFetchResponse({ status: 404 });
 
-    await expect(
-      new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/missing.png' }),
-    ).rejects.toThrow(MediaDownloadError);
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/missing.png' })).rejects.toThrow(
+      MediaDownloadError,
+    );
   });
 
   it('should reject when the fetch throws a network error', async () => {
     jest.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
 
-    await expect(
-      new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/image.png' }),
-    ).rejects.toThrow(MediaDownloadError);
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/image.png' })).rejects.toThrow(
+      MediaDownloadError,
+    );
   });
 
   it('should reject when the image exceeds the maximum download size', async () => {
     mockFetchResponse({ body: new ArrayBuffer(11 * 1024 * 1024) });
 
-    await expect(
-      new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/huge.png' }),
-    ).rejects.toThrow(MediaDownloadError);
+    await expect(new DownloadImageUseCase(createProcessImageUseCase()).execute({ url: 'https://example.com/huge.png' })).rejects.toThrow(
+      MediaDownloadError,
+    );
   });
 
   it('should extract the filename from the url path when delegating', async () => {
@@ -101,9 +97,7 @@ describe('DownloadImageUseCase', () => {
     });
 
     const command = processImageUseCase.execute.mock.calls[0][0];
-    expect(command.metadata).toEqual(
-      expect.objectContaining({ productId: 'prod-123', sourceUrl: 'https://example.com/img.webp' }),
-    );
+    expect(command.metadata).toEqual(expect.objectContaining({ productId: 'prod-123', sourceUrl: 'https://example.com/img.webp' }));
     expect(command.tags).toEqual(['product', 'hero']);
   });
 });

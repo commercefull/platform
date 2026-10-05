@@ -79,4 +79,3 @@ export class CreateShippingLabelUseCase {
     return label;
   }
 }
-

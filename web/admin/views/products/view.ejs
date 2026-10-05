@@ -193,6 +193,7 @@
                     <th><%= t('product:attribute') %></th>
                     <th class="text-right"><%= t('common.price') %></th>
                     <th class="text-center"><%= t('shared:common.stock') %></th>
+                    <th class="text-center">Policy</th>
                     <th class="text-center"><%= t('common.status') %></th>
                   </tr>
                 </thead>
@@ -230,6 +231,9 @@
                       <% } else { %>
                         <span class="badge badge-danger">0</span>
                       <% } %>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge badge-outline-secondary"><%= variant.inventoryPolicy || 'tracked' %></span>
                     </td>
                     <td class="text-center">
                       <% if (variant.isActive) { %>

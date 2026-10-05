@@ -19,4 +19,3 @@ describe('GetSegmentMembersUseCase', () => {
     expect(profileRepo.findBySegment).toHaveBeenCalledWith('seg-1');
   });
 });
-

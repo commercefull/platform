@@ -19,6 +19,7 @@ exports.up = function (knex) {
     t.decimal('width', 10, 2);
     t.decimal('height', 10, 2);
     t.jsonb('optionValues').notNullable();
+    t.enu('inventoryPolicy', ['tracked', 'unlimited', 'backorderable']).notNullable().defaultTo('tracked');
     t.string('barcode', 100);
     t.string('mpn', 100);
     t.integer('position').defaultTo(0);
@@ -27,6 +28,7 @@ exports.up = function (knex) {
     t.index('sku');
     t.index('status');
     t.index('isDefault');
+    t.index('inventoryPolicy');
     t.index('barcode');
     t.index('mpn');
     t.index('position');

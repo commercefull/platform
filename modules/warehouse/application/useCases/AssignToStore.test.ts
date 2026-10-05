@@ -27,10 +27,7 @@ describe('AssignToStoreUseCase', () => {
     expect(result.storeId).toBe('s1');
     expect(result.isDefault).toBe(true);
     expect(warehouseRepository.unsetDefaultForStore).toHaveBeenCalledWith('s1');
-    expect(emitMock).toHaveBeenCalledWith(
-      'warehouse.assigned_to_store',
-      expect.objectContaining({ warehouseId: 'wh-1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('warehouse.assigned_to_store', expect.objectContaining({ warehouseId: 'wh-1' }));
   });
 
   it('should throw WarehouseNotFoundError when the warehouse does not exist', async () => {

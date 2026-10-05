@@ -8,4 +8,3 @@ export class ComputeCustomerProfileUseCase {
     return this.profileRepo.computeAggregatesFromOrder(customerId);
   }
 }
-

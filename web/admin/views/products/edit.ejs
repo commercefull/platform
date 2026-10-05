@@ -245,6 +245,7 @@
                       <th><%= t('product:attribute') %></th>
                       <th class="text-right"><%= t('common.price') %></th>
                       <th class="text-center"><%= t('shared:common.stock') %></th>
+                      <th class="text-center">Inventory policy</th>
                       <th class="text-center"><%= t('common.status') %></th>
                     </tr>
                   </thead>
@@ -275,6 +276,16 @@
                         <% } else { %>
                           <span class="badge badge-danger">0</span>
                         <% } %>
+                      </td>
+                      <td class="text-center">
+                        <form method="POST" action="/admin/products/<%= product.productId %>/variants/<%= variant.variantId %>/inventory-policy" class="d-flex align-items-center justify-content-center gap-1">
+                          <select name="inventoryPolicy" class="form-select form-select-sm" style="width:auto">
+                            <option value="tracked" <%= variant.inventoryPolicy === 'tracked' ? 'selected' : '' %>>Tracked</option>
+                            <option value="unlimited" <%= variant.inventoryPolicy === 'unlimited' ? 'selected' : '' %>>Unlimited</option>
+                            <option value="backorderable" <%= variant.inventoryPolicy === 'backorderable' ? 'selected' : '' %>>Backorderable</option>
+                          </select>
+                          <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                        </form>
                       </td>
                       <td class="text-center">
                         <% if (variant.isActive) { %>

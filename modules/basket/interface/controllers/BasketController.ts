@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Basket Controller
  * HTTP interface for basket operations with content negotiation (JSON/HTML)
@@ -45,6 +45,7 @@ interface GetOrCreateBasketBody {
   sessionId?: string;
   currency?: string;
   storeId?: string;
+  channelId?: string;
 }
 
 interface AddItemBody {
@@ -177,7 +178,8 @@ export const getOrCreateBasket = async (req: HttpRequest, res: HttpResponse): Pr
     return;
   }
 
-  const command = new GetOrCreateBasketCommand(customerId, sessionId, body.currency, storeId);
+  const channelId = (res.locals.channelId as string) || body.channelId;
+  const command = new GetOrCreateBasketCommand(customerId, sessionId, body.currency, storeId, channelId);
   const basket = await getOrCreateBasketUseCase.execute(command);
 
   // Return 201 if the basket was newly created, 200 if it already existed

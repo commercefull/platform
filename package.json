@@ -1,6 +1,6 @@
 {
   "name": "commercefull",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "main": "app.mjs",
   "license": "Apache-2.0",
   "private": true,
@@ -59,8 +59,8 @@
     "docs:db": "tsx scripts/docs/generate-db-docs.ts",
     "docs:code": "typedoc",
     "docs:sidebar": "tsx scripts/docs/generate-sidebar.ts",
-    "docs:generate": "yarn docs:env && yarn docs:routes && yarn docs:openapi && yarn docs:sidebar",
-    "docs:generate:full": "yarn docs:env && yarn docs:routes && yarn docs:openapi && yarn docs:db && yarn docs:code && yarn docs:sidebar",
+    "docs:generate": "yarn docs:env && yarn docs:routes && yarn docs:openapi && yarn docs:sidebar && prettier --write \"docs/generated/**/*.md\" \"docs/modules/*.md\" \"docs/_sidebar.md\" --log-level warn",
+    "docs:generate:full": "yarn docs:env && yarn docs:routes && yarn docs:openapi && yarn docs:db && yarn docs:code && yarn docs:sidebar && prettier --write \"docs/generated/**/*.md\" \"docs/modules/*.md\" \"docs/_sidebar.md\" --log-level warn",
     "docs:check": "yarn docs:generate && git diff --exit-code -- docs/",
     "docs:serve": "npx docsify-cli serve docs --port 4000",
     "perf:smoke": "k6 run tests/performance/smoke.js",

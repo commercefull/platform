@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Subscription Customer Controller
  * Handles customer-facing subscription operations
@@ -82,16 +82,27 @@ export const getMySubscription: AsyncHandler = async (req, res, _next) => {
 
 export const createSubscription: AsyncHandler = async (req, res, _next) => {
   const customerId = req.user?.customerId || req.user?.id;
-  const { subscriptionPlanId, productVariantId, quantity, shippingAddressId, billingAddressId, paymentMethodId, customizations } =
-    req.body as {
-      subscriptionPlanId: string;
-      productVariantId?: string;
-      quantity?: number;
-      shippingAddressId?: string;
-      billingAddressId?: string;
-      paymentMethodId?: string;
-      customizations?: Record<string, unknown>;
-    };
+  const {
+    subscriptionPlanId,
+    productVariantId,
+    quantity,
+    shippingAddressId,
+    billingAddressId,
+    paymentMethodId,
+    customizations,
+    vatNumber,
+    currencyCode,
+  } = req.body as {
+    subscriptionPlanId: string;
+    productVariantId?: string;
+    quantity?: number;
+    shippingAddressId?: string;
+    billingAddressId?: string;
+    paymentMethodId?: string;
+    customizations?: Record<string, unknown>;
+    vatNumber?: string;
+    currencyCode?: string;
+  };
 
   try {
     const subscription = await manageCustomerSubscriptionsUseCase.subscribe({
@@ -103,6 +114,10 @@ export const createSubscription: AsyncHandler = async (req, res, _next) => {
       billingAddressId,
       paymentMethodId,
       customizations,
+      vatNumber,
+      currencyCode,
+      storeId: (res.locals.storeId as string | undefined) || undefined,
+      salesChannelId: (res.locals.channelId as string | undefined) || undefined,
     });
 
     jsonResponse(res, 201, { success: true, data: subscription });
@@ -187,11 +202,11 @@ export const cancelMySubscription: AsyncHandler = async (req, res, _next) => {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            message: result.cancelAtPeriodEnd
-              ? 'Subscription will be cancelled at the end of the current billing period'
-              : 'Subscription cancelled immediately',
-          });
+      success: true,
+      message: result.cancelAtPeriodEnd
+        ? 'Subscription will be cancelled at the end of the current billing period'
+        : 'Subscription cancelled immediately',
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }

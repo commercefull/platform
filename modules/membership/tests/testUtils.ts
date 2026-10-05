@@ -74,15 +74,11 @@ export function createCancelMembershipRepository(): jest.Mocked<ConstructorParam
   return lazyMock();
 }
 
-export function createMembershipTierRepository(): jest.Mocked<
-  ConstructorParameters<typeof CreateMembershipTierUseCase>[0]
-> {
+export function createMembershipTierRepository(): jest.Mocked<ConstructorParameters<typeof CreateMembershipTierUseCase>[0]> {
   return lazyMock();
 }
 
-export function createDowngradeMembershipRepository(): jest.Mocked<
-  ConstructorParameters<typeof DowngradeMembershipUseCase>[0]
-> {
+export function createDowngradeMembershipRepository(): jest.Mocked<ConstructorParameters<typeof DowngradeMembershipUseCase>[0]> {
   return lazyMock();
 }
 
@@ -98,9 +94,7 @@ export function createUpdateTierRepository(): jest.Mocked<ConstructorParameters<
   return lazyMock();
 }
 
-export function createUpgradeMembershipRepository(): jest.Mocked<
-  ConstructorParameters<typeof UpgradeMembershipUseCase>[0]
-> {
+export function createUpgradeMembershipRepository(): jest.Mocked<ConstructorParameters<typeof UpgradeMembershipUseCase>[0]> {
   return lazyMock();
 }
 

@@ -24,7 +24,6 @@ export class ListTransactionsCommand {
 // Response
 // ============================================================================
 
-
 export interface ListTransactionsResponse {
   transactions: TransactionDetailResponse[];
   total: number;
@@ -36,7 +35,6 @@ export interface ListTransactionsResponse {
 // ============================================================================
 // Use Case
 // ============================================================================
-
 
 export class ListTransactionsUseCase {
   constructor(private readonly paymentRepository: PaymentRepository) {}

@@ -45,13 +45,9 @@ function makePort(location: InventoryLocation | null = makeLocation()): jest.Moc
     findLocationById: jest.fn().mockResolvedValue(location),
     adjustQuantity: jest
       .fn()
-      .mockImplementation(async (_id: string, delta: number) =>
-        location ? { ...location, quantity: location.quantity + delta } : null,
-      ),
+      .mockImplementation(async (_id: string, delta: number) => (location ? { ...location, quantity: location.quantity + delta } : null)),
     createTransaction: jest.fn().mockResolvedValue({ inventoryTransactionId: 'txn-1' }),
-    findTransactionTypeByCode: jest
-      .fn()
-      .mockImplementation(async (code: string) => ({ inventoryTransactionTypeId: `tt-${code}` })),
+    findTransactionTypeByCode: jest.fn().mockImplementation(async (code: string) => ({ inventoryTransactionTypeId: `tt-${code}` })),
   };
 }
 

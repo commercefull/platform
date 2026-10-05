@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageProductTypesUseCase } from '../../application/useCases/wired';
 import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
@@ -16,9 +16,9 @@ class ProductTypeController {
     const productTypes = await manageProductTypesUseCase.list(req.query.active === 'true');
 
     jsonResponse(res, 200, {
-            success: true,
-            data: productTypes,
-          });
+      success: true,
+      data: productTypes,
+    });
   }
 
   /**
@@ -29,9 +29,9 @@ class ProductTypeController {
     try {
       const productType = await manageProductTypesUseCase.getByIdWithAttributeSets(req.params.id);
       jsonResponse(res, 200, {
-                success: true,
-                data: productType,
-              });
+        success: true,
+        data: productType,
+      });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -45,9 +45,9 @@ class ProductTypeController {
     try {
       const productType = await manageProductTypesUseCase.getBySlug(req.params.slug);
       jsonResponse(res, 200, {
-                success: true,
-                data: productType,
-              });
+        success: true,
+        data: productType,
+      });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -63,9 +63,9 @@ class ProductTypeController {
     try {
       const productType = await manageProductTypesUseCase.create({ name, slug });
       jsonResponse(res, 201, {
-                success: true,
-                data: productType,
-              });
+        success: true,
+        data: productType,
+      });
     } catch (error) {
       respondError(res, error, 'Failed to create product type');
     }
@@ -82,9 +82,9 @@ class ProductTypeController {
     try {
       const updated = await manageProductTypesUseCase.update(id, { name, slug });
       jsonResponse(res, 200, {
-                success: true,
-                data: updated,
-              });
+        success: true,
+        data: updated,
+      });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -98,9 +98,9 @@ class ProductTypeController {
     try {
       await manageProductTypesUseCase.delete(req.params.id);
       jsonResponse(res, 200, {
-                success: true,
-                message: 'Product type deleted successfully',
-              });
+        success: true,
+        message: 'Product type deleted successfully',
+      });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }
@@ -114,9 +114,9 @@ class ProductTypeController {
     try {
       const attributes = await manageProductTypesUseCase.getAttributes(req.params.id);
       jsonResponse(res, 200, {
-                success: true,
-                data: attributes,
-              });
+        success: true,
+        data: attributes,
+      });
     } catch (error) {
       respondError(res, error, 'Product type not found');
     }

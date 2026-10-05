@@ -9,12 +9,7 @@ import { eventBus } from '../../../../libs/events/eventBus';
 export interface CancelSubscriptionRepoPort {
   getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null>;
   getSubscriptionProduct(subscriptionProductId: string): Promise<SubscriptionProduct | null>;
-  cancelSubscription(
-    customerSubscriptionId: string,
-    reason?: string,
-    cancelledBy?: string,
-    cancelAtPeriodEnd?: boolean,
-  ): Promise<void>;
+  cancelSubscription(customerSubscriptionId: string, reason?: string, cancelledBy?: string, cancelAtPeriodEnd?: boolean): Promise<void>;
 }
 
 // ============================================================================

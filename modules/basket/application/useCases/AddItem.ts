@@ -12,6 +12,8 @@ import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BasketResponse } from './GetOrCreateBasket';
 import type { ProductPricePort } from '../ports/ProductPricePort';
+import type { ProductDetailsPort } from '../ports/ProductDetailsPort';
+import type { SellabilityPort } from '../ports/SellabilityPort';
 
 // ============================================================================
 // Command
@@ -39,6 +41,8 @@ export class AddItemUseCase {
   constructor(
     private readonly basketRepository: BasketRepository,
     private readonly productPricePort: ProductPricePort,
+    private readonly productDetailsPort?: ProductDetailsPort,
+    private readonly sellabilityPort?: SellabilityPort,
   ) {}
 
   async execute(command: AddItemCommand): Promise<BasketResponse> {
@@ -51,6 +55,16 @@ export class AddItemUseCase {
       throw new BasketNotFoundError(command.basketId);
     }
 
+    // Assortment enforcement — the product must be sellable on the basket's
+    // store and channel before it can be added.
+    if (this.sellabilityPort && basket.storeId) {
+      const sellable = await this.sellabilityPort.isSellable(basket.storeId, command.productId, basket.channelId);
+      if (!sellable) {
+        throw new BasketValidationError(`Product ${command.productId} is not sellable on this store or channel`);
+      }
+    }
+
+    const productDetails = await this.productDetailsPort?.findProductDetails(command.productId);
     const existingItem = basket.findItemByProduct(command.productId, command.productVariantId);
     let unitPriceCents: number | undefined;
 
@@ -60,12 +74,10 @@ export class AddItemUseCase {
       await this.basketRepository.updateItem(existingItem);
     } else {
       // The sellable price comes from the pricing module — never from the client
-      const price = await this.productPricePort.getPrice(
-        command.productId,
-        command.productVariantId,
-        basket.currency,
-        command.quantity,
-      );
+      const price = await this.productPricePort.getPrice(command.productId, command.productVariantId, basket.currency, command.quantity, {
+        storeId: basket.storeId,
+        channelId: basket.channelId,
+      });
       if (!price) {
         throw new BasketValidationError(`Product ${command.productId} has no price and cannot be purchased`);
       }
@@ -76,13 +88,13 @@ export class AddItemUseCase {
         basketId: command.basketId,
         productId: command.productId,
         productVariantId: command.productVariantId,
-        sku: command.sku,
-        name: command.name,
+        sku: productDetails?.sku || command.sku,
+        name: productDetails?.name || command.name,
         quantity: command.quantity,
         unitPrice: Money.fromCents(price.unitPriceCents, price.currency),
         imageUrl: command.imageUrl,
-        attributes: command.attributes,
-        itemType: command.itemType,
+        attributes: { ...command.attributes, inventoryPolicy: productDetails?.inventoryPolicy ?? 'tracked' },
+        itemType: productDetails?.itemType ?? command.itemType,
         isGift: false,
       });
 
@@ -96,6 +108,8 @@ export class AddItemUseCase {
       productVariantId: command.productVariantId,
       quantity: command.quantity,
       unitPriceCents,
+      storeId: basket.storeId,
+      channelId: basket.channelId,
     });
 
     const updatedBasket = await this.basketRepository.findById(command.basketId);
@@ -110,6 +124,8 @@ export class AddItemUseCase {
       basketId: basket.basketId,
       customerId: basket.customerId,
       sessionId: basket.sessionId,
+      storeId: basket.storeId,
+      channelId: basket.channelId,
       status: basket.status,
       currency: basket.currency,
       items: basket.items.map(item => ({

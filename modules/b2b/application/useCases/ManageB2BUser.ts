@@ -1,8 +1,11 @@
 import { B2BUser, B2BUserRole, SpendingLimit } from '../../domain/entities/B2BUser';
 import { CompanyRepository, B2BUserRepository } from '../../domain/repositories/B2BRepository';
 import {
-  CompanyNotFoundError, B2BUserNotFoundError, B2BUserAlreadyExistsError,
-  B2BUserStatusError, SpendingLimitExceededError,
+  CompanyNotFoundError,
+  B2BUserNotFoundError,
+  B2BUserAlreadyExistsError,
+  B2BUserStatusError,
+  SpendingLimitExceededError,
 } from '../../domain/errors/B2BErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
@@ -123,4 +126,3 @@ export class ManageB2BUserUseCase {
     return true;
   }
 }
-

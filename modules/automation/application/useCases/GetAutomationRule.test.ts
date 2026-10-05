@@ -20,4 +20,3 @@ describe('GetAutomationRuleUseCase', () => {
     await expect(new GetAutomationRuleUseCase(repo).execute('missing')).rejects.toThrow(AutomationRuleNotFoundError);
   });
 });
-

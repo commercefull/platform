@@ -60,48 +60,48 @@ The Shipping feature manages carrier integrations, rate calculations, and label 
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| POST | `/calculate-rates` | `asyncHandler(shippingController.calculateRates)` | — |
-| POST | `/calculate-rates` | `asyncHandler(shippingController.calculateRates)` | Calculate shipping rates for an order |
-| GET | `/carriers` | `asyncHandler(shippingController.getCarriers)` | — |
-| POST | `/carriers` | `asyncHandler(shippingController.createCarrier)` | — |
-| GET | `/carriers/:id` | `asyncHandler(shippingController.getCarrierById)` | — |
-| PUT | `/carriers/:id` | `asyncHandler(shippingController.updateCarrier)` | — |
-| DELETE | `/carriers/:id` | `asyncHandler(shippingController.deleteCarrier)` | — |
-| POST | `/estimate-delivery` | `asyncHandler(shippingController.estimateDelivery)` | Estimate delivery time for a shipping method |
-| POST | `/labels` | `asyncHandler(shippingController.createLabel)` | — |
-| GET | `/labels/:id` | `asyncHandler(shippingController.getLabel)` | — |
-| POST | `/labels/:id/void` | `asyncHandler(shippingController.voidLabel)` | — |
-| GET | `/labels/order/:orderId` | `asyncHandler(shippingController.getLabelsByOrder)` | — |
-| GET | `/methods` | `asyncHandler(shippingController.getMethods)` | — |
-| POST | `/methods` | `asyncHandler(shippingController.createMethod)` | — |
-| GET | `/methods` | `asyncHandler(shippingController.getMethods)` | Get available shipping methods (for checkout) |
-| GET | `/methods/:id` | `asyncHandler(shippingController.getMethodById)` | — |
-| PUT | `/methods/:id` | `asyncHandler(shippingController.updateMethod)` | — |
-| DELETE | `/methods/:id` | `asyncHandler(shippingController.deleteMethod)` | — |
-| GET | `/packaging-types` | `asyncHandler(shippingController.getPackagingTypes)` | — |
-| POST | `/packaging-types` | `asyncHandler(shippingController.createPackagingType)` | — |
-| GET | `/packaging-types` | `asyncHandler(shippingController.getPackagingTypes)` | Get packaging types (for reference) |
-| GET | `/packaging-types/:id` | `asyncHandler(shippingController.getPackagingTypeById)` | — |
-| PUT | `/packaging-types/:id` | `asyncHandler(shippingController.updatePackagingType)` | — |
-| DELETE | `/packaging-types/:id` | `asyncHandler(shippingController.deletePackagingType)` | — |
-| GET | `/rates` | `asyncHandler(shippingController.getRates)` | — |
-| POST | `/rates` | `asyncHandler(shippingController.createRate)` | — |
-| GET | `/rates/:id` | `asyncHandler(shippingController.getRateById)` | — |
-| PUT | `/rates/:id` | `asyncHandler(shippingController.updateRate)` | — |
-| DELETE | `/rates/:id` | `asyncHandler(shippingController.deleteRate)` | — |
-| GET | `/rates/:rateId/surcharges` | `asyncHandler(shippingController.getSurchargesByRate)` | — |
-| POST | `/surcharges` | `asyncHandler(shippingController.createSurcharge)` | — |
-| GET | `/surcharges/:id` | `asyncHandler(shippingController.getSurchargeById)` | — |
-| PUT | `/surcharges/:id` | `asyncHandler(shippingController.updateSurcharge)` | — |
-| DELETE | `/surcharges/:id` | `asyncHandler(shippingController.deleteSurcharge)` | — |
-| GET | `/track` | `asyncHandler(shippingController.trackShipment)` | — |
-| GET | `/track/:id` | `asyncHandler(shippingController.trackShipment)` | — |
-| GET | `/zones` | `asyncHandler(shippingController.getZones)` | — |
-| POST | `/zones` | `asyncHandler(shippingController.createZone)` | — |
-| GET | `/zones/:id` | `asyncHandler(shippingController.getZoneById)` | — |
-| PUT | `/zones/:id` | `asyncHandler(shippingController.updateZone)` | — |
-| DELETE | `/zones/:id` | `asyncHandler(shippingController.deleteZone)` | — |
+| Method | Endpoint                    | Controller                                              | Description                                   |
+| ------ | --------------------------- | ------------------------------------------------------- | --------------------------------------------- |
+| POST   | `/calculate-rates`          | `asyncHandler(shippingController.calculateRates)`       | —                                             |
+| POST   | `/calculate-rates`          | `asyncHandler(shippingController.calculateRates)`       | Calculate shipping rates for an order         |
+| GET    | `/carriers`                 | `asyncHandler(shippingController.getCarriers)`          | —                                             |
+| POST   | `/carriers`                 | `asyncHandler(shippingController.createCarrier)`        | —                                             |
+| GET    | `/carriers/:id`             | `asyncHandler(shippingController.getCarrierById)`       | —                                             |
+| PUT    | `/carriers/:id`             | `asyncHandler(shippingController.updateCarrier)`        | —                                             |
+| DELETE | `/carriers/:id`             | `asyncHandler(shippingController.deleteCarrier)`        | —                                             |
+| POST   | `/estimate-delivery`        | `asyncHandler(shippingController.estimateDelivery)`     | Estimate delivery time for a shipping method  |
+| POST   | `/labels`                   | `asyncHandler(shippingController.createLabel)`          | —                                             |
+| GET    | `/labels/:id`               | `asyncHandler(shippingController.getLabel)`             | —                                             |
+| POST   | `/labels/:id/void`          | `asyncHandler(shippingController.voidLabel)`            | —                                             |
+| GET    | `/labels/order/:orderId`    | `asyncHandler(shippingController.getLabelsByOrder)`     | —                                             |
+| GET    | `/methods`                  | `asyncHandler(shippingController.getMethods)`           | —                                             |
+| POST   | `/methods`                  | `asyncHandler(shippingController.createMethod)`         | —                                             |
+| GET    | `/methods`                  | `asyncHandler(shippingController.getMethods)`           | Get available shipping methods (for checkout) |
+| GET    | `/methods/:id`              | `asyncHandler(shippingController.getMethodById)`        | —                                             |
+| PUT    | `/methods/:id`              | `asyncHandler(shippingController.updateMethod)`         | —                                             |
+| DELETE | `/methods/:id`              | `asyncHandler(shippingController.deleteMethod)`         | —                                             |
+| GET    | `/packaging-types`          | `asyncHandler(shippingController.getPackagingTypes)`    | —                                             |
+| POST   | `/packaging-types`          | `asyncHandler(shippingController.createPackagingType)`  | —                                             |
+| GET    | `/packaging-types`          | `asyncHandler(shippingController.getPackagingTypes)`    | Get packaging types (for reference)           |
+| GET    | `/packaging-types/:id`      | `asyncHandler(shippingController.getPackagingTypeById)` | —                                             |
+| PUT    | `/packaging-types/:id`      | `asyncHandler(shippingController.updatePackagingType)`  | —                                             |
+| DELETE | `/packaging-types/:id`      | `asyncHandler(shippingController.deletePackagingType)`  | —                                             |
+| GET    | `/rates`                    | `asyncHandler(shippingController.getRates)`             | —                                             |
+| POST   | `/rates`                    | `asyncHandler(shippingController.createRate)`           | —                                             |
+| GET    | `/rates/:id`                | `asyncHandler(shippingController.getRateById)`          | —                                             |
+| PUT    | `/rates/:id`                | `asyncHandler(shippingController.updateRate)`           | —                                             |
+| DELETE | `/rates/:id`                | `asyncHandler(shippingController.deleteRate)`           | —                                             |
+| GET    | `/rates/:rateId/surcharges` | `asyncHandler(shippingController.getSurchargesByRate)`  | —                                             |
+| POST   | `/surcharges`               | `asyncHandler(shippingController.createSurcharge)`      | —                                             |
+| GET    | `/surcharges/:id`           | `asyncHandler(shippingController.getSurchargeById)`     | —                                             |
+| PUT    | `/surcharges/:id`           | `asyncHandler(shippingController.updateSurcharge)`      | —                                             |
+| DELETE | `/surcharges/:id`           | `asyncHandler(shippingController.deleteSurcharge)`      | —                                             |
+| GET    | `/track`                    | `asyncHandler(shippingController.trackShipment)`        | —                                             |
+| GET    | `/track/:id`                | `asyncHandler(shippingController.trackShipment)`        | —                                             |
+| GET    | `/zones`                    | `asyncHandler(shippingController.getZones)`             | —                                             |
+| POST   | `/zones`                    | `asyncHandler(shippingController.createZone)`           | —                                             |
+| GET    | `/zones/:id`                | `asyncHandler(shippingController.getZoneById)`          | —                                             |
+| PUT    | `/zones/:id`                | `asyncHandler(shippingController.updateZone)`           | —                                             |
+| DELETE | `/zones/:id`                | `asyncHandler(shippingController.deleteZone)`           | —                                             |
 
 <!-- GENERATED:ENDPOINTS:END -->

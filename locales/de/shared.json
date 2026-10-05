@@ -24,7 +24,10 @@
     "gateways": "Tore",
     "finance": "Finanzen",
     "storeConfiguration": "Store-Konfiguration",
-    "administration": "Verwaltung"
+    "administration": "Verwaltung",
+    "automation": "Automatisierung",
+    "returns": "Retouren",
+    "recommendations": "Empfehlungen"
   },
   "footer": {
     "documentation": "Dokumentation",

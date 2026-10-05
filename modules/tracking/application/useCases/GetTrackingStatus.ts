@@ -1,6 +1,5 @@
 import { TrackingConfigRepository } from '../../domain/repositories/TrackingConfigRepository';
 
-
 // ============================================================================
 // Get Tracking Status
 // ============================================================================

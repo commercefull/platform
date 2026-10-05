@@ -3,11 +3,7 @@
  * Creates a new customer subscription
  */
 
-import {
-  CustomerSubscription,
-  SubscriptionPlan,
-  SubscriptionProduct,
-} from '../../domain/repositories/SubscriptionRepository';
+import { CustomerSubscription, SubscriptionPlan, SubscriptionProduct } from '../../domain/repositories/SubscriptionRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 export interface CreateSubscriptionRepoPort {
@@ -23,6 +19,12 @@ export interface CreateSubscriptionRepoPort {
     billingAddressId?: string;
     paymentMethodId?: string;
     customizations?: Record<string, unknown>;
+    storeId?: string;
+    salesChannelId?: string;
+    taxAmountCents?: number;
+    taxAddedCents?: number;
+    currencyCode?: string;
+    metadata?: Record<string, unknown>;
   }): Promise<CustomerSubscription>;
 }
 
@@ -40,6 +42,12 @@ export interface CreateSubscriptionInput {
   billingAddressId?: string;
   customizations?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  storeId?: string;
+  salesChannelId?: string;
+  vatNumber?: string;
+  currencyCode?: string;
+  taxAmountCents?: number;
+  taxAddedCents?: number;
 }
 
 export class CreateSubscriptionCommand {
@@ -120,8 +128,7 @@ export class CreateSubscriptionUseCase {
       const unitPriceCents = plan.priceCents;
       const discountAmountCents = plan.discountAmountCents || 0;
       const subtotalCents = unitPriceCents * quantity - discountAmountCents;
-      const taxAmountCents = 0; // Would be calculated by tax service
-      const _totalPrice = subtotalCents + taxAmountCents;
+      const _totalPrice = subtotalCents + (input.taxAddedCents ?? input.taxAmountCents ?? 0);
 
       // 4. Determine trial period
       const trialDays = plan.trialDays || product.trialDays || 0;
@@ -156,6 +163,12 @@ export class CreateSubscriptionUseCase {
         billingAddressId: input.billingAddressId,
         paymentMethodId: input.paymentMethodId,
         customizations: input.customizations,
+        storeId: input.storeId,
+        salesChannelId: input.salesChannelId,
+        taxAmountCents: input.taxAmountCents,
+        taxAddedCents: input.taxAddedCents,
+        currencyCode: input.currencyCode,
+        metadata: input.vatNumber ? { ...(input.metadata ?? {}), vatNumber: input.vatNumber } : input.metadata,
       });
 
       // Emit SubscriptionCreated event

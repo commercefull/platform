@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManageMembershipPlansUseCase } from './ManageMembershipPlans';
-import {
-  createMembershipPlansPort,
-  createMembershipPlan,
-} from '../../tests/testUtils';
+import { createMembershipPlansPort, createMembershipPlan } from '../../tests/testUtils';
 
 describe('ManageMembershipPlansUseCase', () => {
   const plansPort = createMembershipPlansPort();
@@ -51,4 +48,3 @@ describe('ManageMembershipPlansUseCase', () => {
     expect(plansPort.activate).toHaveBeenCalledWith('plan-1');
   });
 });
-

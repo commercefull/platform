@@ -11,4 +11,3 @@ export class GetAutomationRuleUseCase {
     return rule;
   }
 }
-

@@ -112,7 +112,10 @@ export class ManageAttributeSetsUseCase {
     await this.attributeSetRepo.delete(id);
   }
 
-  async addAttribute(attributeSetId: string, input: { attributeId?: string; position?: number; isRequired?: boolean; defaultValue?: string }) {
+  async addAttribute(
+    attributeSetId: string,
+    input: { attributeId?: string; position?: number; isRequired?: boolean; defaultValue?: string },
+  ) {
     if (!input.attributeId) {
       throw new ProductValidationError('attributeId is required');
     }

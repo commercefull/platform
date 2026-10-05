@@ -89,9 +89,7 @@ export function createStorageService(): jest.Mocked<StorageService> {
   return service;
 }
 
-export function createProcessImageUseCase(
-  result?: Awaited<ReturnType<ProcessImageUseCase['execute']>>,
-): jest.Mocked<ProcessImageUseCase> {
+export function createProcessImageUseCase(result?: Awaited<ReturnType<ProcessImageUseCase['execute']>>): jest.Mocked<ProcessImageUseCase> {
   const useCase = { execute: jest.fn() } as unknown as jest.Mocked<ProcessImageUseCase>;
   useCase.execute.mockResolvedValue(
     result ?? {

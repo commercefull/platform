@@ -1,5 +1,5 @@
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { getStoreUseCase } from '../../modules/store';
+import { getStoreUseCase, manageSalesChannelsUseCase } from '../../modules/store';
 import { createCache } from '../../libs/cache';
 
 /**
@@ -40,7 +40,10 @@ interface ResolvedStore {
   slug: string;
   defaultCurrency?: string;
   supportedCurrencies?: string[];
+  countryCode?: string;
+  defaultSalesChannelId?: string;
   settings?: Record<string, unknown>;
+  channelSettings?: Record<string, unknown>;
 }
 
 // Hostname → store slug mapping (configurable via env)
@@ -51,12 +54,18 @@ const HOST_STORE_MAP: Record<string, string> = {
   'us-store': 'us',
   uk: 'uk',
   us: 'us',
+  'de.shop': 'enterprise-eu-de',
+  'fr.shop': 'enterprise-eu-fr',
+  'us-ny.shop': 'enterprise-us-ny',
+  'us-ca.shop': 'enterprise-us-ca',
 };
 
 // Region → default locale + currency
 const REGION_DEFAULTS: Record<string, { locale: string; currency: string }> = {
   GB: { locale: 'en-GB', currency: 'GBP' },
   US: { locale: 'en-US', currency: 'USD' },
+  DE: { locale: 'de-DE', currency: 'EUR' },
+  FR: { locale: 'fr-FR', currency: 'EUR' },
 };
 
 const DEFAULT_STORE_SLUG = process.env.DEFAULT_STORE_SLUG || 'us';
@@ -108,11 +117,10 @@ function resolveRegionFromHeaders(req: HttpRequest): string | null {
  */
 function regionToStoreSlug(region: string): string {
   const upper = region.toUpperCase();
-  if (upper === 'GB' || upper === 'UK') {
-    return 'uk';
-  }
-  // Default to US store for all other regions
-  return 'us';
+  if (upper === 'GB' || upper === 'UK') return 'enterprise-uk';
+  if (upper === 'DE') return 'enterprise-eu-de';
+  if (upper === 'FR') return 'enterprise-eu-fr';
+  return 'enterprise-us-digital';
 }
 
 /**
@@ -149,15 +157,15 @@ function resolveStoreSlug(req: HttpRequest): string {
  * Determine region, locale, and currency from the resolved store slug.
  */
 function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region: string; locale: string; currency: string } {
-  let region = DEFAULT_REGION;
-  let locale = DEFAULT_LOCALE;
-  let currency = DEFAULT_CURRENCY;
+  let region = store?.countryCode || DEFAULT_REGION;
+  let locale = REGION_DEFAULTS[region]?.locale || DEFAULT_LOCALE;
+  let currency = REGION_DEFAULTS[region]?.currency || DEFAULT_CURRENCY;
 
-  if (slug === 'uk') {
+  if (slug === 'uk' || slug === 'enterprise-uk') {
     region = 'GB';
     locale = 'en-GB';
     currency = 'GBP';
-  } else if (slug === 'us') {
+  } else if (slug === 'us' || slug.startsWith('enterprise-us-')) {
     region = 'US';
     locale = 'en-US';
     currency = 'USD';
@@ -167,6 +175,13 @@ function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region
       locale = regionDefaults.locale;
       currency = regionDefaults.currency;
     }
+  }
+
+  // Store- and channel-level localization defaults take precedence over
+  // slug/region defaults; channel settings win over store settings.
+  const configuredLocale = store?.channelSettings?.locale ?? store?.settings?.locale;
+  if (typeof configuredLocale === 'string' && configuredLocale.length > 0) {
+    locale = configuredLocale;
   }
 
   // Override currency from store if available
@@ -183,6 +198,7 @@ function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region
 function setDefaultLocals(res: HttpResponse): void {
   res.locals.store = null;
   res.locals.storeId = '';
+  res.locals.channelId = '';
   res.locals.storeSlug = DEFAULT_STORE_SLUG;
   res.locals.currency = DEFAULT_CURRENCY;
   res.locals.locale = DEFAULT_LOCALE;
@@ -196,15 +212,21 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
     // Fetch store (30s TTL — same slug is resolved on every storefront request)
     const store = await storeBySlugCache.getOrSet(storeSlug, async () => {
       const response = await getStoreUseCase.execute({ slug: storeSlug });
-      return response.store
-        ? {
-            storeId: response.store.storeId,
-            slug: response.store.slug,
-            defaultCurrency: response.store.defaultCurrency,
-            supportedCurrencies: response.store.supportedCurrencies,
-            settings: response.store.settings,
-          }
-        : null;
+      if (!response.store) return null;
+      const assignments = response.store.organizationId
+        ? await manageSalesChannelsUseCase.listForStore(response.store.organizationId, response.store.storeId)
+        : [];
+      const defaultAssignment = assignments.find(assignment => assignment.isDefault && assignment.isActive);
+      return {
+        storeId: response.store.storeId,
+        slug: response.store.slug,
+        defaultCurrency: response.store.defaultCurrency,
+        supportedCurrencies: response.store.supportedCurrencies,
+        countryCode: response.store.address?.country as string | undefined,
+        defaultSalesChannelId: defaultAssignment?.salesChannelId,
+        settings: response.store.settings,
+        channelSettings: defaultAssignment?.settings as Record<string, unknown> | undefined,
+      };
     });
 
     const { region, locale, currency } = resolveStoreLocale(storeSlug, store);
@@ -213,6 +235,7 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
     // Attach to res.locals for controllers and views
     res.locals.store = store;
     res.locals.storeId = storeId;
+    res.locals.channelId = store?.defaultSalesChannelId || '';
     res.locals.storeSlug = storeSlug;
     res.locals.currency = currency;
     res.locals.locale = locale;

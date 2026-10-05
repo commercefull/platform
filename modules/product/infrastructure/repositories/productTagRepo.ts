@@ -6,9 +6,7 @@ export type { ProductTag, ProductTagCreateParams } from '../../domain/repositori
 
 export class ProductTagRepo {
   async findAll(includeDeleted = false): Promise<ProductTag[]> {
-    const sql = includeDeleted
-      ? `SELECT * FROM "productTag" ORDER BY "name" ASC`
-      : `SELECT * FROM "productTag" ORDER BY "name" ASC`;
+    const sql = includeDeleted ? `SELECT * FROM "productTag" ORDER BY "name" ASC` : `SELECT * FROM "productTag" ORDER BY "name" ASC`;
     return (await query<ProductTag[]>(sql)) || [];
   }
 
@@ -28,10 +26,10 @@ export class ProductTagRepo {
   }
 
   async softDelete(productTagId: string): Promise<boolean> {
-    const result = await queryOne<{ productTagId: string }>(
-      `DELETE FROM "productTag" WHERE "productTagId" = $1 RETURNING "productTagId"`,
-      [new Date(), productTagId],
-    );
+    const result = await queryOne<{ productTagId: string }>(`DELETE FROM "productTag" WHERE "productTagId" = $1 RETURNING "productTagId"`, [
+      new Date(),
+      productTagId,
+    ]);
     return !!result;
   }
 }

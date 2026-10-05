@@ -27,9 +27,7 @@ export const RULE_TRIGGER: { triggerType: TriggerType; triggerConfig: TriggerCon
 
 export const RULE_ACTION: RuleAction = { type: 'send_notification', config: { channel: 'email' } };
 
-export function createAutomationRule(
-  overrides: Partial<Parameters<typeof AutomationRule.create>[0]> = {},
-): AutomationRule {
+export function createAutomationRule(overrides: Partial<Parameters<typeof AutomationRule.create>[0]> = {}): AutomationRule {
   return AutomationRule.create({
     name: 'Order Alert',
     ...RULE_TRIGGER,

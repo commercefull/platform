@@ -61,6 +61,7 @@ export class CreateProductVariantUseCase {
       attributes,
       stockQuantity: command.inventoryQuantity,
       lowStockThreshold: command.lowStockThreshold,
+      inventoryPolicy: command.allowBackorders ? 'backorderable' : command.trackInventory === false ? 'unlimited' : 'tracked',
       isDefault: command.isDefault,
       position: command.sortOrder,
       metadata: command.metadata,

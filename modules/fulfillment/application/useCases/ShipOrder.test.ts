@@ -1,11 +1,7 @@
 import '../../tests/testUtils';
 import { ShipOrderUseCase } from './ShipOrder';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
-import {
-  createFulfillmentRepository,
-  createFulfillment,
-  emitFulfillmentShippedMock,
-} from '../../tests/testUtils';
+import { createFulfillmentRepository, createFulfillment, emitFulfillmentShippedMock } from '../../tests/testUtils';
 
 describe('ShipOrderUseCase', () => {
   const fulfillmentRepository = createFulfillmentRepository();
@@ -13,7 +9,7 @@ describe('ShipOrderUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
+    fulfillmentRepository.save.mockImplementation(async f => f);
   });
 
   it('should ship a packed fulfillment with tracking details', async () => {
@@ -42,9 +38,7 @@ describe('ShipOrderUseCase', () => {
   it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
     fulfillmentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' })).rejects.toThrow(
-      FulfillmentNotFoundError,
-    );
+    await expect(useCase.execute({ fulfillmentId: 'ful-x', trackingNumber: 'TRK-1' })).rejects.toThrow(FulfillmentNotFoundError);
     expect(emitFulfillmentShippedMock).not.toHaveBeenCalled();
   });
 

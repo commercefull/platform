@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Inventory Controller
  *
@@ -101,10 +101,10 @@ function respond(res: HttpResponse, data: unknown, statusCode: number = 200): vo
 
 function respondWithPagination(res: HttpResponse, data: unknown[], limit: number, offset: number): void {
   jsonResponse(res, 200, {
-        success: true,
-        data,
-        pagination: { limit, offset, count: data.length },
-      });
+    success: true,
+    data,
+    pagination: { limit, offset, count: data.length },
+  });
 }
 
 function respondError(res: HttpResponse, message: string, statusCode: number = 500): void {
@@ -693,7 +693,7 @@ export const confirmReservation = async (
 ): Promise<void> => {
   const useCase = confirmReservationUseCase;
   const result = await useCase.execute({
-    reservationId: req.body.reservationId,
+    reservationId: req.body.reservationId || req.params.reservationId,
     orderId: req.body.orderId,
   });
   if (!result.confirmed) {

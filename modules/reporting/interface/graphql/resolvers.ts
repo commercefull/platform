@@ -1,8 +1,4 @@
-import {
-  generateReportUseCase,
-  createReportScheduleUseCase,
-  listReportSchedulesUseCase,
-} from '../../application/wired';
+import { generateReportUseCase, createReportScheduleUseCase, listReportSchedulesUseCase } from '../../application/wired';
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 
 export const reportingResolvers = {

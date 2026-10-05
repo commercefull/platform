@@ -12,7 +12,10 @@ import FormData from 'form-data';
 // Create a minimal 1x1 PNG for testing (Sharp-readable)
 const createTestImageBuffer = (): Buffer => {
   // This is a minimal 1x1 red PNG that Sharp can process
-  return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADElEQVQImWP4z8AAAAMBAQCc479ZAAAAAElFTkSuQmCC', 'base64');
+  return Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADElEQVQImWP4z8AAAAMBAQCc479ZAAAAAElFTkSuQmCC',
+    'base64',
+  );
 };
 
 const createClient = (): AxiosInstance =>
@@ -46,9 +49,11 @@ describe('Media API Integration', () => {
     adminToken = await loginTestAdmin(client);
   });
 
-afterAll(async () => {
+  afterAll(async () => {
     await Promise.all(
-      [...uploadedMediaIds].map(mediaId => fs.rm(path.join(process.cwd(), 'public/uploads/media', mediaId), { recursive: true, force: true })),
+      [...uploadedMediaIds].map(mediaId =>
+        fs.rm(path.join(process.cwd(), 'public/uploads/media', mediaId), { recursive: true, force: true }),
+      ),
     );
   });
 

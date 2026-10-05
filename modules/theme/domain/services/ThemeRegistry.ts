@@ -138,6 +138,31 @@ export class ThemeRegistry {
   }
 
   /**
+   * Resolve a theme by slug with ad-hoc setting overrides — used for
+   * store/channel settings that pin a theme without a DB assignment.
+   */
+  async resolveThemeForSlug(
+    slug: string,
+    overrides: Record<string, string | number | boolean> | undefined,
+    repository: ThemeRepository,
+  ): Promise<ResolvedTheme | null> {
+    let theme = this.themesBySlug.get(slug);
+    if (!theme) {
+      const found = await repository.findBySlug(slug);
+      if (!found) return null;
+      theme = found;
+      this.registerTheme(theme);
+    }
+    if (!theme.isActive()) return null;
+
+    return {
+      theme,
+      settings: theme.resolveSettings(overrides),
+      cssVariables: theme.toCSSVariables(overrides),
+    };
+  }
+
+  /**
    * Generate the CSS string for a resolved theme.
    */
   generateCSS(resolved: ResolvedTheme): string {

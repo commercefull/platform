@@ -27,11 +27,16 @@ export class CouponRepository {
     return this.mapToCoupon(row);
   }
 
-  async findByCode(code: string): Promise<Coupon | null> {
+  async findByCode(code: string, organizationId?: string): Promise<Coupon | null> {
     if (!code) return null;
-    const row = await queryOne<PromotionCoupon>(`SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true LIMIT 1`, [
-      code.toUpperCase(),
-    ]);
+    const params: unknown[] = [code.toUpperCase()];
+    let sql = `SELECT * FROM "promotionCoupon" WHERE code = $1 AND "isActive" = true`;
+    if (organizationId) {
+      params.push(organizationId);
+      sql += ` AND ("organizationId" IS NULL OR "organizationId" = $2)`;
+    }
+    sql += ' LIMIT 1';
+    const row = await queryOne<PromotionCoupon>(sql, params);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -69,7 +74,7 @@ export class CouponRepository {
 
   async save(coupon: Coupon): Promise<Coupon> {
     const now = new Date().toISOString();
-    const mappedType = coupon.type === 'fixed_amount' ? 'fixedAmount' : (coupon.type === 'free_shipping' ? 'freeShipping' : coupon.type);
+    const mappedType = coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type === 'free_shipping' ? 'freeShipping' : coupon.type;
 
     const existing = await queryOne<{ promotionCouponId: string }>(
       'SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1',
@@ -84,7 +89,7 @@ export class CouponRepository {
           "isOneTimeUse" = $9, "maxUsage" = $10, "usageCount" = $11,
           "maxUsagePerCustomer" = $12, "isActive" = $13,
           "startDate" = $14, "endDate" = $15,
-          "updatedAt" = $16
+          "updatedAt" = $16, "promotionId" = $18, "organizationId" = $19
         WHERE "promotionCouponId" = $17`,
         [
           coupon.code,
@@ -104,6 +109,8 @@ export class CouponRepository {
           coupon.expiresAt?.toISOString() ?? null,
           now,
           coupon.couponId,
+          coupon.promotionId ?? null,
+          coupon.organizationId ?? null,
         ],
       );
     } else {
@@ -113,8 +120,8 @@ export class CouponRepository {
           "currencyCode", "minOrderAmountCents", "maxDiscountAmountCents",
           "isOneTimeUse", "maxUsage", "usageCount", "maxUsagePerCustomer",
           "isActive", "startDate", "endDate", "generationMethod", "isReferral", "isPublic",
-          "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
+          "promotionId", "organizationId", "createdAt", "updatedAt"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
         [
           coupon.couponId,
           coupon.code,
@@ -135,6 +142,8 @@ export class CouponRepository {
           'manual',
           false,
           false,
+          coupon.promotionId ?? null,
+          coupon.organizationId ?? null,
           now,
           now,
         ],
@@ -150,7 +159,7 @@ export class CouponRepository {
 
   // Coupon Usage tracking
   async recordUsage(
-    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmountCents: number },
+    usage: CouponUsage | { couponId: string; basketId?: string; customerId?: string; discountAmountCents: number; currencyCode?: string },
   ): Promise<CouponUsage> {
     const now = new Date().toISOString();
     const fullUsage: CouponUsage = {
@@ -172,7 +181,7 @@ export class CouponRepository {
         fullUsage.orderId || null,
         fullUsage.customerId || null,
         fullUsage.discountAmountCents,
-        'USD',
+        'currencyCode' in usage && usage.currencyCode ? usage.currencyCode : 'USD',
         now,
       ],
     );
@@ -192,22 +201,34 @@ export class CouponRepository {
     orderId: string;
     customerId?: string;
     discountAmountCents: number;
+    currencyCode?: string;
     redeemedAt: Date;
-  }): Promise<void> {
-    await query(
+  }): Promise<boolean> {
+    const inserted = await queryOne<{ promotionCouponUsageId: string }>(
       `INSERT INTO "promotionCouponUsage" (
         "promotionCouponUsageId", "promotionCouponId", "orderId", "customerId", "discountAmountCents", "currencyCode", "usedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      ON CONFLICT DO NOTHING
+      RETURNING "promotionCouponUsageId"`,
       [
         redemption.redemptionId,
         redemption.couponId,
         redemption.orderId,
         redemption.customerId || null,
         redemption.discountAmountCents,
-        'USD',
+        redemption.currencyCode || 'USD',
         redemption.redeemedAt.toISOString(),
       ],
     );
+    return !!inserted;
+  }
+
+  async findRedemptionByOrder(couponId: string, orderId: string): Promise<{ redemptionId: string; redeemedAt: Date } | null> {
+    const row = await queryOne<{ promotionCouponUsageId: string; usedAt: string }>(
+      'SELECT "promotionCouponUsageId", "usedAt" FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 AND "orderId" = $2 LIMIT 1',
+      [couponId, orderId],
+    );
+    return row ? { redemptionId: row.promotionCouponUsageId, redeemedAt: new Date(row.usedAt) } : null;
   }
 
   async incrementUsageCount(couponId: string): Promise<void> {
@@ -261,13 +282,14 @@ export class CouponRepository {
     code: string,
     orderValueCents: number,
     customerId?: string,
+    organizationId?: string,
   ): Promise<{
     valid: boolean;
     coupon?: Coupon;
     discountAmountCents?: number;
     error?: string;
   }> {
-    const coupon = await this.findByCode(code);
+    const coupon = await this.findByCode(code, organizationId);
 
     if (!coupon) {
       return { valid: false, error: 'Coupon not found' };
@@ -348,6 +370,8 @@ export class CouponRepository {
       couponId: row.promotionCouponId,
       code: row.code,
       name: row.name,
+      promotionId: row.promotionId ?? undefined,
+      organizationId: row.organizationId ?? undefined,
       description: row.description ?? undefined,
       type: mappedType,
       value: parseFloat(String(row.discountAmount ?? 0)),

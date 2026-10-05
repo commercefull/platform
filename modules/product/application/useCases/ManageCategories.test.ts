@@ -1,7 +1,5 @@
-
 import { ManageCategoriesUseCase } from './ManageCategories';
 import { createCategoryRow, lazyMock } from '../../tests/testUtils';
-
 
 describe('ManageCategoriesUseCase', () => {
   let useCase: ManageCategoriesUseCase;
@@ -9,7 +7,7 @@ describe('ManageCategoriesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof ManageCategoriesUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof ManageCategoriesUseCase>[0]>();
     mockRepo.findOne.mockResolvedValue(createCategoryRow({ productCategoryId: 'c1' }));
     mockRepo.findBySlug.mockResolvedValue(createCategoryRow({ productCategoryId: 'c1' }));
     mockRepo.findAll.mockResolvedValue([createCategoryRow()]);

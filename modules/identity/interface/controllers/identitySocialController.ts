@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Identity Social Login Controller
  *
@@ -81,9 +81,9 @@ export async function getOAuthConfig(req: HttpRequest, res: HttpResponse): Promi
 
   if (!isValidProvider(provider)) {
     jsonResponse(res, 400, {
-            success: false,
-            message: `Unsupported provider: ${provider}. Supported providers: ${SUPPORTED_PROVIDERS.join(', ')}`,
-          });
+      success: false,
+      message: `Unsupported provider: ${provider}. Supported providers: ${SUPPORTED_PROVIDERS.join(', ')}`,
+    });
     return;
   }
 
@@ -127,10 +127,10 @@ export async function getOAuthConfig(req: HttpRequest, res: HttpResponse): Promi
   };
 
   jsonResponse(res, 200, {
-        success: true,
-        provider,
-        config: config[provider],
-      });
+    success: true,
+    provider,
+    config: config[provider],
+  });
 }
 
 /**
@@ -145,17 +145,17 @@ export async function customerSocialLogin(
 
   if (!isValidProvider(provider)) {
     jsonResponse(res, 400, {
-            success: false,
-            message: `Unsupported provider: ${provider}`,
-          });
+      success: false,
+      message: `Unsupported provider: ${provider}`,
+    });
     return;
   }
 
   if (!accessToken && !idToken) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Access token or ID token is required',
-          });
+      success: false,
+      message: 'Access token or ID token is required',
+    });
     return;
   }
 
@@ -166,9 +166,9 @@ export async function customerSocialLogin(
 
   if (!clientProfile || !clientProfile.id || !clientProfile.email) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Profile with id and email is required',
-          });
+      success: false,
+      message: 'Profile with id and email is required',
+    });
     return;
   }
 
@@ -198,20 +198,20 @@ export async function customerSocialLogin(
   const jwtToken = generateAccessToken(result.userId, result.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
   jsonResponse(res, 200, {
-        success: true,
-        isNewUser: result.isNewUser,
-        accessToken: jwtToken,
-        tokenType: 'Bearer',
-        expiresIn: ACCESS_TOKEN_DURATION,
-        customer: {
-          id: result.userId,
-          email: result.email,
-          firstName: result.profile.firstName,
-          lastName: result.profile.lastName,
-          avatarUrl: result.profile.avatarUrl,
-        },
-        provider: result.provider,
-      });
+    success: true,
+    isNewUser: result.isNewUser,
+    accessToken: jwtToken,
+    tokenType: 'Bearer',
+    expiresIn: ACCESS_TOKEN_DURATION,
+    customer: {
+      id: result.userId,
+      email: result.email,
+      firstName: result.profile.firstName,
+      lastName: result.profile.lastName,
+      avatarUrl: result.profile.avatarUrl,
+    },
+    provider: result.provider,
+  });
 }
 
 /**
@@ -226,25 +226,25 @@ export async function merchantSocialLogin(
 
   if (!isValidProvider(provider)) {
     jsonResponse(res, 400, {
-            success: false,
-            message: `Unsupported provider: ${provider}`,
-          });
+      success: false,
+      message: `Unsupported provider: ${provider}`,
+    });
     return;
   }
 
   if (!accessToken && !idToken) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Access token or ID token is required',
-          });
+      success: false,
+      message: 'Access token or ID token is required',
+    });
     return;
   }
 
   if (!clientProfile || !clientProfile.id || !clientProfile.email) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Profile with id and email is required',
-          });
+      success: false,
+      message: 'Profile with id and email is required',
+    });
     return;
   }
 
@@ -274,19 +274,19 @@ export async function merchantSocialLogin(
   const jwtToken = generateAccessToken(result.userId, result.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
   jsonResponse(res, 200, {
-        success: true,
-        isNewUser: result.isNewUser,
-        accessToken: jwtToken,
-        tokenType: 'Bearer',
-        expiresIn: ACCESS_TOKEN_DURATION,
-        organization: {
-          id: result.userId,
-          email: result.email,
-          name: result.profile.displayName,
-          avatarUrl: result.profile.avatarUrl,
-        },
-        provider: result.provider,
-      });
+    success: true,
+    isNewUser: result.isNewUser,
+    accessToken: jwtToken,
+    tokenType: 'Bearer',
+    expiresIn: ACCESS_TOKEN_DURATION,
+    organization: {
+      id: result.userId,
+      email: result.email,
+      name: result.profile.displayName,
+      avatarUrl: result.profile.avatarUrl,
+    },
+    provider: result.provider,
+  });
 }
 
 /**
@@ -301,17 +301,17 @@ export async function linkCustomerSocialAccount(
 
   if (!customerId) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Authentication required',
-          });
+      success: false,
+      message: 'Authentication required',
+    });
     return;
   }
 
   if (!isValidProvider(provider)) {
     jsonResponse(res, 400, {
-            success: false,
-            message: `Unsupported provider: ${provider}`,
-          });
+      success: false,
+      message: `Unsupported provider: ${provider}`,
+    });
     return;
   }
 
@@ -319,9 +319,9 @@ export async function linkCustomerSocialAccount(
 
   if (!clientProfile || !clientProfile.id) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Profile with id is required',
-          });
+      success: false,
+      message: 'Profile with id is required',
+    });
     return;
   }
 
@@ -347,10 +347,10 @@ export async function linkCustomerSocialAccount(
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `${provider} account linked successfully`,
-        linkedAccount,
-      });
+    success: true,
+    message: `${provider} account linked successfully`,
+    linkedAccount,
+  });
 }
 
 /**
@@ -362,17 +362,17 @@ export async function unlinkCustomerSocialAccount(req: HttpRequest, res: HttpRes
 
   if (!customerId) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Authentication required',
-          });
+      success: false,
+      message: 'Authentication required',
+    });
     return;
   }
 
   if (!isValidProvider(provider)) {
     jsonResponse(res, 400, {
-            success: false,
-            message: `Unsupported provider: ${provider}`,
-          });
+      success: false,
+      message: `Unsupported provider: ${provider}`,
+    });
     return;
   }
 
@@ -383,9 +383,9 @@ export async function unlinkCustomerSocialAccount(req: HttpRequest, res: HttpRes
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `${provider} account unlinked successfully`,
-      });
+    success: true,
+    message: `${provider} account unlinked successfully`,
+  });
 }
 
 /**
@@ -396,19 +396,19 @@ export async function getCustomerLinkedAccounts(req: HttpRequest, res: HttpRespo
 
   if (!customerId) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Authentication required',
-          });
+      success: false,
+      message: 'Authentication required',
+    });
     return;
   }
 
   const linkedAccounts = await getLinkedAccountsUseCase.execute(customerId, 'customer');
 
   jsonResponse(res, 200, {
-        success: true,
-        linkedAccounts,
-        supportedProviders: SUPPORTED_PROVIDERS,
-      });
+    success: true,
+    linkedAccounts,
+    supportedProviders: SUPPORTED_PROVIDERS,
+  });
 }
 
 /**
@@ -419,17 +419,17 @@ export async function getOrganizationLinkedAccounts(req: HttpRequest, res: HttpR
 
   if (!organizationId) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Authentication required',
-          });
+      success: false,
+      message: 'Authentication required',
+    });
     return;
   }
 
   const linkedAccounts = await getLinkedAccountsUseCase.execute(organizationId, 'organization');
 
   jsonResponse(res, 200, {
-        success: true,
-        linkedAccounts,
-        supportedProviders: SUPPORTED_PROVIDERS,
-      });
+    success: true,
+    linkedAccounts,
+    supportedProviders: SUPPORTED_PROVIDERS,
+  });
 }

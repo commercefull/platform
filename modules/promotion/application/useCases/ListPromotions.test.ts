@@ -26,7 +26,10 @@ describe('ListPromotionsUseCase', () => {
 
   it('should forward filters and pagination to the repository', async () => {
     await useCase.execute(
-      new ListPromotionsCommand({ status: 'active', organizationId: 'org-1' }, { limit: 10, offset: 20, orderBy: 'name', direction: 'ASC' }),
+      new ListPromotionsCommand(
+        { status: 'active', organizationId: 'org-1' },
+        { limit: 10, offset: 20, orderBy: 'name', direction: 'ASC' },
+      ),
     );
 
     expect(promotionRepository.findAll).toHaveBeenCalledWith(

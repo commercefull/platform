@@ -82,27 +82,27 @@ The Loyalty feature manages customer loyalty programs including points earning, 
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/loyalty/customers/:customerId/points` | `asyncHandler(getCustomerPoints)` | Customer Management |
-| POST | `/loyalty/customers/:customerId/points/adjust` | `asyncHandler(adjustCustomerPoints)` | — |
-| GET | `/loyalty/customers/:customerId/redemptions` | `asyncHandler(getCustomerRedemptions)` | — |
-| GET | `/loyalty/customers/:customerId/transactions` | `asyncHandler(getCustomerPointsTransactions)` | — |
-| GET | `/loyalty/my-redemptions` | `isCustomerLoggedIn` | — |
-| GET | `/loyalty/my-status` | `isCustomerLoggedIn` | Customer authenticated routes |
-| GET | `/loyalty/my-transactions` | `isCustomerLoggedIn` | — |
-| POST | `/loyalty/orders/:orderId/points` | `asyncHandler(processOrderPoints)` | Order Processing |
-| POST | `/loyalty/redeem` | `isCustomerLoggedIn` | — |
-| PUT | `/loyalty/redemptions/:id/status` | `asyncHandler(updateRedemptionStatus)` | Redemption Management |
-| GET | `/loyalty/rewards` | `asyncHandler(getRewards)` | Reward Management |
-| POST | `/loyalty/rewards` | `asyncHandler(createReward)` | — |
-| GET | `/loyalty/rewards` | `asyncHandler(loyaltyController.getPublicRewards)` | — |
-| GET | `/loyalty/rewards/:id` | `asyncHandler(getRewardById)` | — |
-| PUT | `/loyalty/rewards/:id` | `asyncHandler(updateReward)` | — |
-| GET | `/loyalty/tiers` | `asyncHandler(getTiers)` | Tier Management |
-| POST | `/loyalty/tiers` | `asyncHandler(createTier)` | — |
-| GET | `/loyalty/tiers` | `asyncHandler(loyaltyController.getPublicTiers)` | Public routes (no authentication required) |
-| GET | `/loyalty/tiers/:id` | `asyncHandler(getTierById)` | — |
-| PUT | `/loyalty/tiers/:id` | `asyncHandler(updateTier)` | — |
+| Method | Endpoint                                       | Controller                                         | Description                                |
+| ------ | ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| GET    | `/loyalty/customers/:customerId/points`        | `asyncHandler(getCustomerPoints)`                  | Customer Management                        |
+| POST   | `/loyalty/customers/:customerId/points/adjust` | `asyncHandler(adjustCustomerPoints)`               | —                                          |
+| GET    | `/loyalty/customers/:customerId/redemptions`   | `asyncHandler(getCustomerRedemptions)`             | —                                          |
+| GET    | `/loyalty/customers/:customerId/transactions`  | `asyncHandler(getCustomerPointsTransactions)`      | —                                          |
+| GET    | `/loyalty/my-redemptions`                      | `isCustomerLoggedIn`                               | —                                          |
+| GET    | `/loyalty/my-status`                           | `isCustomerLoggedIn`                               | Customer authenticated routes              |
+| GET    | `/loyalty/my-transactions`                     | `isCustomerLoggedIn`                               | —                                          |
+| POST   | `/loyalty/orders/:orderId/points`              | `asyncHandler(processOrderPoints)`                 | Order Processing                           |
+| POST   | `/loyalty/redeem`                              | `isCustomerLoggedIn`                               | —                                          |
+| PUT    | `/loyalty/redemptions/:id/status`              | `asyncHandler(updateRedemptionStatus)`             | Redemption Management                      |
+| GET    | `/loyalty/rewards`                             | `asyncHandler(getRewards)`                         | Reward Management                          |
+| POST   | `/loyalty/rewards`                             | `asyncHandler(createReward)`                       | —                                          |
+| GET    | `/loyalty/rewards`                             | `asyncHandler(loyaltyController.getPublicRewards)` | —                                          |
+| GET    | `/loyalty/rewards/:id`                         | `asyncHandler(getRewardById)`                      | —                                          |
+| PUT    | `/loyalty/rewards/:id`                         | `asyncHandler(updateReward)`                       | —                                          |
+| GET    | `/loyalty/tiers`                               | `asyncHandler(getTiers)`                           | Tier Management                            |
+| POST   | `/loyalty/tiers`                               | `asyncHandler(createTier)`                         | —                                          |
+| GET    | `/loyalty/tiers`                               | `asyncHandler(loyaltyController.getPublicTiers)`   | Public routes (no authentication required) |
+| GET    | `/loyalty/tiers/:id`                           | `asyncHandler(getTierById)`                        | —                                          |
+| PUT    | `/loyalty/tiers/:id`                           | `asyncHandler(updateTier)`                         | —                                          |
 
 <!-- GENERATED:ENDPOINTS:END -->

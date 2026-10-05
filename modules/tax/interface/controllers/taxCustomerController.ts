@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { manageTaxRecordsUseCase, calculateLineItemTaxUseCase, calculateBasketTaxUseCase } from '../../application/wired';
@@ -81,9 +81,9 @@ export const checkCustomerTaxExemption = async (req: HttpRequest, res: HttpRespo
 
   // Format response in camelCase as per platform convention
   jsonResponse(res, 200, {
-        hasExemption: exemptions.length > 0,
-        exemptions,
-      });
+    hasExemption: exemptions.length > 0,
+    exemptions,
+  });
 };
 
 /**
@@ -124,10 +124,10 @@ export const getCustomerTaxSettings = async (req: HttpRequest, res: HttpResponse
   // The enhanced method will be implemented in taxRepo
   // Note: This is using camelCase for the API response as per our convention
   jsonResponse(res, 200, {
-        displayPricesWithTax: false,
-        priceDisplaySettings: {
-          includesTax: false,
-          showTaxSeparately: true,
-        },
-      });
+    displayPricesWithTax: false,
+    priceDisplaySettings: {
+      includesTax: false,
+      showTaxSeparately: true,
+    },
+  });
 };

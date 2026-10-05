@@ -13,8 +13,16 @@
   ],
   "tags": [
     {
+      "name": "agentic-checkout",
+      "description": "agentic-checkout module"
+    },
+    {
       "name": "analytics",
       "description": "analytics module"
+    },
+    {
+      "name": "assortment",
+      "description": "assortment module"
     },
     {
       "name": "automation",
@@ -182,6 +190,142 @@
     }
   ],
   "paths": {
+    "/checkout_sessions": {
+      "post": {
+        "summary": "asyncHandler(createCheckoutSession)",
+        "operationId": "asyncHandler(createCheckoutSession)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/checkout_sessions/{id}": {
+      "get": {
+        "summary": "asyncHandler(getCheckoutSession)",
+        "operationId": "asyncHandler(getCheckoutSession)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(updateCheckoutSession)",
+        "operationId": "asyncHandler(updateCheckoutSession)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/checkout_sessions/{id}/complete": {
+      "post": {
+        "summary": "asyncHandler(completeCheckoutSession)",
+        "operationId": "asyncHandler(completeCheckoutSession)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/checkout_sessions/{id}/cancel": {
+      "post": {
+        "summary": "asyncHandler(cancelCheckoutSession)",
+        "operationId": "asyncHandler(cancelCheckoutSession)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/feed": {
+      "get": {
+        "summary": "asyncHandler(getProductFeed)",
+        "operationId": "asyncHandler(getProductFeed)_agentic-checkout",
+        "tags": [
+          "agentic-checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/analytics/sales/dashboard": {
       "get": {
         "summary": "GET /business/analytics/sales/dashboard - Get sales dashboard with summary",
@@ -550,6 +694,391 @@
         "operationId": "asyncHandler(analyticsController.deleteDashboard)_analytics",
         "tags": [
           "analytics"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/collections": {
+      "get": {
+        "summary": "List published collections\nGET /customer/assortment/collections",
+        "operationId": "asyncHandler(controller.listCollections)_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create collection\nPOST /business/assortment/collections",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssortmentEntryFormBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assortment/collections/{collectionId}": {
+      "get": {
+        "summary": "Get collection (with members)\nGET /business/assortment/collections/:collectionId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update collection\nPUT /business/assortment/collections/:collectionId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssortmentEntryFormBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete collection (soft)\nDELETE /business/assortment/collections/:collectionId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/collections/{collectionId}/products": {
+      "get": {
+        "summary": "Resolve collection products (manual or smart)\nGET /business/assortment/collections/:collectionId/products",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/collections/{collectionId}/publications": {
+      "get": {
+        "summary": "List collection visibility publications (store/channel scoping)\nGET /business/assortment/collections/:collectionId/publications",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update a collection publication for a store/channel scope\nPOST /business/assortment/collections/:collectionId/publications",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssortmentEntryFormBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assortment/collections/{collectionId}/publications/{publicationId}": {
+      "delete": {
+        "summary": "Remove a collection publication\nDELETE /business/assortment/collections/:collectionId/publications/:publicationId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/stores/{storeId}": {
+      "get": {
+        "summary": "Get store assortment config + entries\nGET /business/assortment/stores/:storeId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Set assortment mode (all | include | exclude)\nPUT /business/assortment/stores/:storeId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssortmentEntryFormBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assortment/stores/{storeId}/entries": {
+      "post": {
+        "summary": "Add assortment entry (product | collection | category)\nPOST /business/assortment/stores/:storeId/entries",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssortmentEntryFormBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assortment/stores/{storeId}/entries/{entryId}": {
+      "delete": {
+        "summary": "Remove assortment entry\nDELETE /business/assortment/stores/:storeId/entries/:entryId",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/stores/{storeId}/catalog": {
+      "get": {
+        "summary": "Resolve effective store catalog\nGET /business/assortment/stores/:storeId/catalog",
+        "operationId": "isOrganizationLoggedIn_assortment",
+        "tags": [
+          "assortment"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/assortment/collections/{slug}": {
+      "get": {
+        "summary": "Get collection page by slug (metadata + resolved products)\nGET /customer/assortment/collections/:slug",
+        "operationId": "asyncHandler(controller.getCollectionBySlug)_assortment",
+        "tags": [
+          "assortment"
         ],
         "responses": {
           "200": {
@@ -2371,6 +2900,39 @@
         }
       }
     },
+    "/checkout/{checkoutId}/vat-number": {
+      "put": {
+        "summary": "Set customer VAT ID (B2B reverse charge)\nPUT /checkout/:checkoutId/vat-number",
+        "operationId": "asyncHandler(checkoutController.setVatNumber)_checkout",
+        "tags": [
+          "checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiateCheckoutBody"
+              }
+            }
+          }
+        }
+      }
+    },
     "/checkout/{checkoutId}/shipping-methods": {
       "get": {
         "summary": "Get available shipping methods\nGET /checkout/:checkoutId/shipping-methods",
@@ -2541,6 +3103,60 @@
       "delete": {
         "summary": "Remove coupon code\nDELETE /checkout/:checkoutId/coupon",
         "operationId": "asyncHandler(checkoutController.removeCoupon)_checkout",
+        "tags": [
+          "checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/checkout/{checkoutId}/loyalty-reward": {
+      "post": {
+        "summary": "Apply loyalty reward\nPOST /checkout/:checkoutId/loyalty-reward",
+        "operationId": "asyncHandler(checkoutController.applyLoyaltyReward)_checkout",
+        "tags": [
+          "checkout"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitiateCheckoutBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove loyalty reward\nDELETE /checkout/:checkoutId/loyalty-reward",
+        "operationId": "asyncHandler(checkoutController.removeLoyaltyReward)_checkout",
         "tags": [
           "checkout"
         ],
@@ -3528,6 +4144,83 @@
                 "$ref": "#/components/schemas/CreateContentTypeBody"
               }
             }
+          }
+        }
+      }
+    },
+    "/content/pages/{id}/publications": {
+      "get": {
+        "summary": "Page publication assignments (store/channel/locale scoping)",
+        "operationId": "asyncHandler(contentController.getPagePublications)_content",
+        "tags": [
+          "content"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(contentController.createPagePublication)",
+        "operationId": "asyncHandler(contentController.createPagePublication)_content",
+        "tags": [
+          "content"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContentTypeBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/pages/{id}/publications/{publicationId}": {
+      "delete": {
+        "summary": "asyncHandler(contentController.deletePagePublication)",
+        "operationId": "asyncHandler(contentController.deletePagePublication)_content",
+        "tags": [
+          "content"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -4914,6 +5607,29 @@
       "get": {
         "summary": "asyncHandler(getPublishedPageBySlug)",
         "operationId": "asyncHandler(getPublishedPageBySlug)_content",
+        "tags": [
+          "content"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/content/navigations/{slug}": {
+      "get": {
+        "summary": "asyncHandler(getNavigationBySlug)",
+        "operationId": "asyncHandler(getNavigationBySlug)_content",
         "tags": [
           "content"
         ],
@@ -10569,6 +11285,16 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
+          }
         }
       }
     },
@@ -10612,6 +11338,16 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
           }
         }
       }
@@ -10657,6 +11393,16 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
+          }
         }
       }
     },
@@ -10700,6 +11446,16 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
           }
         }
       }
@@ -10770,6 +11526,16 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
+          }
         }
       }
     },
@@ -10816,6 +11582,16 @@
           "500": {
             "description": "Internal server error"
           }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
+          }
         }
       }
     },
@@ -10838,6 +11614,16 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
           }
         }
       }
@@ -10930,6 +11716,16 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoyaltyRewardBody"
+              }
+            }
           }
         }
       }
@@ -19942,114 +20738,6 @@
         }
       }
     },
-    "/collections": {
-      "get": {
-        "summary": "asyncHandler(productController.listCollections)",
-        "operationId": "asyncHandler(productController.listCollections)_product",
-        "tags": [
-          "product"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "asyncHandler(productController.createCollection)",
-        "operationId": "asyncHandler(productController.createCollection)_product",
-        "tags": [
-          "product"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateProductBody"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/collections/{collectionId}": {
-      "put": {
-        "summary": "asyncHandler(productController.updateCollection)",
-        "operationId": "asyncHandler(productController.updateCollection)_product",
-        "tags": [
-          "product"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateProductBody"
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "asyncHandler(productController.deleteCollection)",
-        "operationId": "asyncHandler(productController.deleteCollection)_product",
-        "tags": [
-          "product"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
     "/products/{productId}/downloads": {
       "get": {
         "summary": "asyncHandler(productController.getProductDownloads)",
@@ -24006,6 +24694,191 @@
                 "$ref": "#/components/schemas/ShippingAddressBody"
               }
             }
+          }
+        }
+      }
+    },
+    "/stores/channels": {
+      "get": {
+        "summary": "asyncHandler(listSalesChannels)",
+        "operationId": "asyncHandler(listSalesChannels)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(createSalesChannel)",
+        "operationId": "asyncHandler(createSalesChannel)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferBetweenStoresBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/channels/{channelId}": {
+      "put": {
+        "summary": "asyncHandler(updateSalesChannel)",
+        "operationId": "asyncHandler(updateSalesChannel)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferBetweenStoresBody"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "asyncHandler(deleteSalesChannel)",
+        "operationId": "asyncHandler(deleteSalesChannel)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/stores/{storeId}/channels": {
+      "get": {
+        "summary": "asyncHandler(listStoreSalesChannels)",
+        "operationId": "asyncHandler(listStoreSalesChannels)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "asyncHandler(assignSalesChannel)",
+        "operationId": "asyncHandler(assignSalesChannel)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferBetweenStoresBody"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/{storeId}/channels/{channelId}": {
+      "delete": {
+        "summary": "asyncHandler(unassignSalesChannel)",
+        "operationId": "asyncHandler(unassignSalesChannel)_store",
+        "tags": [
+          "store"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -29816,6 +30689,113 @@
   },
   "components": {
     "schemas": {
+      "CollectionFormBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "slug": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "bannerUrl": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isActive": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isFeatured": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isAutomated": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "conditionsJson": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "sortOrder": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "publishAt": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "unpublishAt": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
+      },
+      "PublicationFormBody": {
+        "type": "object",
+        "properties": {
+          "storeId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "channelId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "sortOrder": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
+      },
+      "AssortmentEntryFormBody": {
+        "type": "object",
+        "properties": {
+          "targetType": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "targetId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "effect": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "channelId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "position": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isHidden": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          }
+        }
+      },
       "GetOrCreateBasketBody": {
         "type": "object",
         "properties": {
@@ -29828,6 +30808,10 @@
             "description": "string | undefined"
           },
           "storeId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "channelId": {
             "type": "string",
             "description": "string | undefined"
           }
@@ -30084,6 +31068,24 @@
         "required": [
           "couponCode"
         ]
+      },
+      "VatNumberBody": {
+        "type": "object",
+        "properties": {
+          "vatNumber": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
+      },
+      "LoyaltyRewardBody": {
+        "type": "object",
+        "properties": {
+          "rewardId": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
       },
       "CreateContentTypeBody": {
         "type": "object",
@@ -33400,6 +34402,10 @@
             "type": "string",
             "description": "boolean | undefined"
           },
+          "isInventoryManaged": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
           "taxClass": {
             "type": "string",
             "description": "string | undefined"
@@ -33514,6 +34520,10 @@
             "description": "boolean | undefined"
           },
           "isTaxable": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "isInventoryManaged": {
             "type": "string",
             "description": "boolean | undefined"
           },
@@ -33682,43 +34692,6 @@
           "response": {
             "type": "string",
             "description": "string | undefined"
-          }
-        }
-      },
-      "CollectionBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "imageUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "position": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "addProducts": {
-            "type": "string",
-            "description": "{ productId: string; position?: number; }[] | undefined"
-          },
-          "removeMapIds": {
-            "type": "string",
-            "description": "string[] | undefined"
           }
         }
       },

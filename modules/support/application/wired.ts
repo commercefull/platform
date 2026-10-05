@@ -35,16 +35,18 @@ const supportOperationsAdapter = {
   saveAgent: (agent: Record<string, unknown>) =>
     supportDataRepository.tickets.saveAgent(agent as Partial<SupportAgent> & { email: string; firstName: string; lastName: string }),
   getTickets: (
-    filters?: { customerId?: string; assignedAgentId?: string; status?: string; priority?: string; category?: string; isEscalated?: boolean },
+    filters?: {
+      customerId?: string;
+      assignedAgentId?: string;
+      status?: string;
+      priority?: string;
+      category?: string;
+      isEscalated?: boolean;
+    },
     pagination?: { limit?: number; offset?: number },
-  ) =>
-    supportDataRepository.tickets.getTickets(
-      filters as Parameters<typeof supportDataRepository.tickets.getTickets>[0],
-      pagination,
-    ),
+  ) => supportDataRepository.tickets.getTickets(filters as Parameters<typeof supportDataRepository.tickets.getTickets>[0], pagination),
   getTicket: (ticketId: string) => supportDataRepository.tickets.getTicket(ticketId),
-  getMessages: (ticketId: string, includeInternal?: boolean) =>
-    supportDataRepository.tickets.getMessages(ticketId, includeInternal),
+  getMessages: (ticketId: string, includeInternal?: boolean) => supportDataRepository.tickets.getMessages(ticketId, includeInternal),
   getAttachments: (ticketId: string) => supportDataRepository.tickets.getAttachments(ticketId),
   updateTicket: (ticketId: string, updates: Record<string, unknown>) =>
     supportDataRepository.tickets.updateTicket(ticketId, updates as Partial<SupportTicket>),
@@ -58,9 +60,15 @@ const supportOperationsAdapter = {
 export const manageSupportOperationsUseCase = new ManageSupportOperationsUseCase(supportOperationsAdapter);
 
 const stockAlertAdapter = {
-  getStockAlerts: (filters?: { customerId?: string; productId?: string; status?: string }, pagination?: { limit?: number; offset?: number }) =>
+  getStockAlerts: (
+    filters?: { customerId?: string; productId?: string; status?: string },
+    pagination?: { limit?: number; offset?: number },
+  ) =>
     supportInfoRepository.alerts.getStockAlerts(filters as Parameters<typeof supportInfoRepository.alerts.getStockAlerts>[0], pagination),
-  getPriceAlerts: (filters?: { customerId?: string; productId?: string; status?: string }, pagination?: { limit?: number; offset?: number }) =>
+  getPriceAlerts: (
+    filters?: { customerId?: string; productId?: string; status?: string },
+    pagination?: { limit?: number; offset?: number },
+  ) =>
     supportInfoRepository.alerts.getPriceAlerts(filters as Parameters<typeof supportInfoRepository.alerts.getPriceAlerts>[0], pagination),
   getActiveStockAlertsForProduct: (productId: string, productVariantId?: string) =>
     supportInfoRepository.alerts.getActiveStockAlertsForProduct(productId, productVariantId),

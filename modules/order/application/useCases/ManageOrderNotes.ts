@@ -1,6 +1,5 @@
 import { OrderQueryRepository } from '../../domain/repositories/OrderQueryRepository';
 
-
 export class ManageOrderNotesUseCase {
   constructor(private readonly queryRepo: OrderQueryRepository) {}
 

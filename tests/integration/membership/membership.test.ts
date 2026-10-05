@@ -1,11 +1,5 @@
 import { AxiosInstance } from 'axios';
-import {
-  testTier,
-  testBenefit,
-  SEEDED_TIER_ID,
-  SEEDED_BENEFIT_ID,
-  SEEDED_USER_MEMBERSHIP_ID,
-} from './testUtils';
+import { testTier, testBenefit, SEEDED_TIER_ID, SEEDED_BENEFIT_ID, SEEDED_USER_MEMBERSHIP_ID } from './testUtils';
 import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Membership Tests', () => {
@@ -283,9 +277,9 @@ describe('Membership Tests', () => {
       expect(tier).toHaveProperty('updatedAt');
 
       expect(tier).not.toHaveProperty('monthlyPrice');
-        expect(tier).not.toHaveProperty('monthly_price');
+      expect(tier).not.toHaveProperty('monthly_price');
       expect(tier).not.toHaveProperty('annualPrice');
-        expect(tier).not.toHaveProperty('annual_price');
+      expect(tier).not.toHaveProperty('annual_price');
       expect(tier).not.toHaveProperty('is_active');
       expect(tier).not.toHaveProperty('created_at');
       expect(tier).not.toHaveProperty('updated_at');

@@ -1,6 +1,5 @@
 import { PaymentRepository, PaymentSettingsUpsertParams } from '../../domain/repositories/PaymentRepository';
 
-
 export class ManagePaymentSettingsUseCase {
   constructor(private readonly paymentRepo: PaymentRepository) {}
 

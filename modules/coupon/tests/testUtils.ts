@@ -69,6 +69,7 @@ export function createCouponRepository(coupon: Coupon | null = null): jest.Mocke
     delete: jest.fn(),
     recordUsage: jest.fn(),
     createRedemption: jest.fn(),
+    findRedemptionByOrder: jest.fn(),
     incrementUsageCount: jest.fn(),
     getUsageHistory: jest.fn(),
     getCustomerUsageCount: jest.fn(),
@@ -89,7 +90,8 @@ export function createCouponRepository(coupon: Coupon | null = null): jest.Mocke
     discountAmountCents: 0,
     usedAt: new Date(),
   });
-  repository.createRedemption.mockResolvedValue(undefined);
+  repository.createRedemption.mockResolvedValue(true);
+  repository.findRedemptionByOrder.mockResolvedValue(null);
   repository.incrementUsageCount.mockResolvedValue(undefined);
   repository.getUsageHistory.mockResolvedValue([]);
   repository.getCustomerUsageCount.mockResolvedValue(0);

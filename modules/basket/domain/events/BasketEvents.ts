@@ -41,7 +41,14 @@ export class ItemAddedToBasketEvent implements DomainEvent {
     unitPriceCents: number;
   };
 
-  constructor(basketId: string, basketItemId: string, productId: string, quantity: number, unitPriceCents: number, productVariantId?: string) {
+  constructor(
+    basketId: string,
+    basketItemId: string,
+    productId: string,
+    quantity: number,
+    unitPriceCents: number,
+    productVariantId?: string,
+  ) {
     this.occurredAt = new Date();
     this.aggregateId = basketId;
     this.payload = { basketId, basketItemId, productId, productVariantId, quantity, unitPriceCents };

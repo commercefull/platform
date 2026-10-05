@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse, sendResponse, setHeader } from "libs/apiResponse";
+import { jsonResponse, redirectResponse, sendResponse, setHeader } from 'libs/apiResponse';
 /**
  * Storefront Product Controller
  * Handles product listing, detail, and search for customers
@@ -48,6 +48,49 @@ function getStoreContext(res: HttpResponse): StoreContext {
 }
 
 // ============================================================================
+// Assortment constraint — res.locals.assortmentFilter is populated by
+// web/storefront/assortmentMiddleware (null/absent = unconstrained catalog)
+// ============================================================================
+
+interface AssortmentConstraint {
+  includeProductIds?: string[];
+  excludeProductIds?: string[];
+}
+
+/**
+ * Merge the resolved store/channel assortment into listing filters.
+ * Returns false when the constraint resolves to an empty sellable set —
+ * callers should render an empty listing instead of querying the catalog.
+ */
+export function applyAssortmentConstraint(res: HttpResponse, filters: Record<string, unknown>): boolean {
+  const constraint = res.locals.assortmentFilter as AssortmentConstraint | null | undefined;
+  if (!constraint) return true;
+  if (constraint.includeProductIds) {
+    const requested = filters.productIds as string[] | undefined;
+    const merged = requested ? constraint.includeProductIds.filter(id => requested.includes(id)) : constraint.includeProductIds;
+    if (merged.length === 0) return false;
+    filters.productIds = merged;
+  }
+  if (constraint.excludeProductIds?.length) {
+    filters.excludeProductIds = [...((filters.excludeProductIds as string[] | undefined) ?? []), ...constraint.excludeProductIds];
+  }
+  return true;
+}
+
+export function emptyListing(limit: number, offset: number) {
+  return { products: [] as never[], total: 0, limit, offset, hasMore: false };
+}
+
+/** PDP guard — a product outside the store/channel assortment is not sellable here. */
+function isProductSellable(res: HttpResponse, productId: string): boolean {
+  const constraint = res.locals.assortmentFilter as AssortmentConstraint | null | undefined;
+  if (!constraint) return true;
+  if (constraint.excludeProductIds?.includes(productId)) return false;
+  if (constraint.includeProductIds && !constraint.includeProductIds.includes(productId)) return false;
+  return true;
+}
+
+// ============================================================================
 // Product Listing (PLP)
 // ============================================================================
 
@@ -93,10 +136,11 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
     filters.onSale = true;
   }
 
+  const assortmentOk = applyAssortmentConstraint(res, filters);
   const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
   const useCase = listProductsUseCase;
-  const result = await useCase.execute(command);
+  const result = assortmentOk ? await useCase.execute(command) : emptyListing(command.limit, command.offset);
 
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
@@ -119,17 +163,17 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
   // JSON response mode for AJAX infinite scroll
   if (req.query.format === 'json' || req.headers.accept?.includes('application/json')) {
     jsonResponse(res, 200, {
-            products: result.products.map(p => ({
-              productId: p.productId,
-              name: p.name,
-              slug: p.slug,
-              primaryImageUrl: p.primaryImageUrl,
-              priceFormatted: p.priceFormatted || null,
-              brandName: p.brandName || null,
-            })),
-            total: result.total,
-            pagination,
-          });
+      products: result.products.map(p => ({
+        productId: p.productId,
+        name: p.name,
+        slug: p.slug,
+        primaryImageUrl: p.primaryImageUrl,
+        priceFormatted: p.priceFormatted || null,
+        brandName: p.brandName || null,
+      })),
+      total: result.total,
+      pagination,
+    });
     return;
   }
 
@@ -159,7 +203,7 @@ export const getProduct = async (req: HttpRequest, res: HttpResponse): Promise<v
   const useCase = getProductUseCase;
   const product = await useCase.execute(command);
 
-  if (!product) {
+  if (!product || !isProductSellable(res, productId)) {
     storefrontRespond(req, res, '404', {
       pageName: 'Product Not Found',
       user: req.user,
@@ -265,10 +309,11 @@ export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): 
     filters.onSale = true;
   }
 
+  const assortmentOk = applyAssortmentConstraint(res, filters);
   const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
   const useCase = listProductsUseCase;
-  const result = await useCase.execute(command);
+  const result = assortmentOk ? await useCase.execute(command) : emptyListing(command.limit, command.offset);
 
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
@@ -291,17 +336,17 @@ export const getCategoryProducts = async (req: HttpRequest, res: HttpResponse): 
   // JSON response mode for AJAX infinite scroll
   if (req.query.format === 'json' || req.headers.accept?.includes('application/json')) {
     jsonResponse(res, 200, {
-            products: result.products.map(p => ({
-              productId: p.productId,
-              name: p.name,
-              slug: p.slug,
-              primaryImageUrl: p.primaryImageUrl,
-              priceFormatted: p.priceFormatted || null,
-              brandName: p.brandName || null,
-            })),
-            total: result.total,
-            pagination,
-          });
+      products: result.products.map(p => ({
+        productId: p.productId,
+        name: p.name,
+        slug: p.slug,
+        primaryImageUrl: p.primaryImageUrl,
+        priceFormatted: p.priceFormatted || null,
+        brandName: p.brandName || null,
+      })),
+      total: result.total,
+      pagination,
+    });
     return;
   }
 
@@ -349,10 +394,11 @@ export const searchProducts = async (req: HttpRequest, res: HttpResponse): Promi
     filters.onSale = true;
   }
 
+  const assortmentOk = applyAssortmentConstraint(res, filters);
   const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
 
   const useCase = listProductsUseCase;
-  const result = await useCase.execute(command);
+  const result = assortmentOk ? await useCase.execute(command) : emptyListing(command.limit, command.offset);
 
   // Fetch available brands for filter sidebar
   let availableBrands: { brandId: string; name: string; slug: string }[] = [];
@@ -399,8 +445,9 @@ export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): P
   if (storeCtx.storeId) {
     filters.storeId = storeCtx.storeId;
   }
+  const assortmentOk = applyAssortmentConstraint(res, filters);
   const command = new ListProductsCommand(filters, 5, 0);
-  const result = await listProductsUseCase.execute(command);
+  const result = assortmentOk ? await listProductsUseCase.execute(command) : emptyListing(command.limit, command.offset);
 
   const products = (result.products || []).map(p => ({
     productId: p.productId,
@@ -429,11 +476,11 @@ export const searchAutocomplete = async (req: HttpRequest, res: HttpResponse): P
     .map(c => ({ name: c.name || c.title || '', slug: c.slug }));
 
   jsonResponse(res, 200, {
-        products,
-        brands,
-        categories,
-        total: result.total,
-      });
+    products,
+    brands,
+    categories,
+    total: result.total,
+  });
 };
 
 // ============================================================================

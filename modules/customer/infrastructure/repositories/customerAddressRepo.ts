@@ -196,10 +196,10 @@ export class CustomerAddressRepo {
   }
 
   async findActiveById(id: string, customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
-      `SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2`,
-      [id, customerId],
-    );
+    return await queryOne<CustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2`, [
+      id,
+      customerId,
+    ]);
   }
 
   async softDelete(id: string, customerId: string): Promise<boolean> {

@@ -24,10 +24,7 @@ describe('ProcessPointsExpirationUseCase', () => {
     expect(result.processedCount).toBe(2);
     expect(result.totalPointsExpired).toBe(80);
     expect(loyaltyRepository.updatePointsBalance).toHaveBeenCalledTimes(2);
-    expect(emitMock).toHaveBeenCalledWith(
-      'loyalty.points_expired',
-      expect.objectContaining({ customerId: 'c1', pointsExpired: 50 }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('loyalty.points_expired', expect.objectContaining({ customerId: 'c1', pointsExpired: 50 }));
   });
 
   it('should report expirations without persisting changes when dry run is enabled', async () => {
@@ -40,9 +37,7 @@ describe('ProcessPointsExpirationUseCase', () => {
   });
 
   it('should skip customers whose loyalty record is missing', async () => {
-    loyaltyRepository.getCustomerLoyalty
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ pointsBalance: 100 });
+    loyaltyRepository.getCustomerLoyalty.mockResolvedValueOnce(null).mockResolvedValueOnce({ pointsBalance: 100 });
 
     const result = await useCase.execute({});
 

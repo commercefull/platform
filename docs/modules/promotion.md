@@ -81,53 +81,53 @@ The Promotion feature manages discounts, coupons, gift cards, and promotional ca
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| POST | `/cart-promotions` | `asyncHandler(cartPromotionController.applyPromotion)` | — |
-| GET | `/cart-promotions/:id` | `asyncHandler(cartPromotionController.getCartPromotionById)` | Cart Promotion routes |
-| PUT | `/cart-promotions/:id` | `asyncHandler(cartPromotionController.updateCartPromotion)` | — |
-| DELETE | `/cart-promotions/:id` | `asyncHandler(cartPromotionController.removePromotion)` | — |
-| GET | `/cart-promotions/cart/:cartId` | `asyncHandler(cartPromotionController.getPromotionsByCartId)` | — |
-| POST | `/category-promotions` | `asyncHandler(categoryPromotionController.createCategoryPromo` | — |
-| GET | `/category-promotions/:id` | `asyncHandler(categoryPromotionController.getCategoryPromotio` | — |
-| PUT | `/category-promotions/:id` | `asyncHandler(categoryPromotionController.updateCategoryPromo` | — |
-| DELETE | `/category-promotions/:id` | `asyncHandler(categoryPromotionController.deleteCategoryPromo` | — |
-| GET | `/category-promotions/active` | `asyncHandler(categoryPromotionController.getActiveCategoryPr` | Category Promotion routes |
-| GET | `/category-promotions/category/:categoryId` | `asyncHandler(categoryPromotionController.getPromotionsByCate` | — |
-| GET | `/coupons` | `asyncHandler(couponController.getActiveCoupons)` | Coupon routes |
-| POST | `/coupons` | `asyncHandler(couponController.createCoupon)` | — |
-| GET | `/coupons/:id` | `asyncHandler(couponController.getCouponById)` | — |
-| PUT | `/coupons/:id` | `asyncHandler(couponController.updateCoupon)` | — |
-| DELETE | `/coupons/:id` | `asyncHandler(couponController.deleteCoupon)` | — |
-| GET | `/coupons/:id/usage` | `asyncHandler(couponController.getCouponUsage)` | — |
-| POST | `/coupons/calculate` | `asyncHandler(couponController.calculateCouponDiscount)` | — |
-| GET | `/coupons/code/:code` | `asyncHandler(couponController.getCouponByCode)` | — |
-| POST | `/coupons/validate` | `asyncHandler(couponController.validateCoupon)` | — |
-| GET | `/discounts` | `asyncHandler(discountController.getActiveDiscounts)` | Discount routes |
-| POST | `/discounts` | `asyncHandler(discountController.createDiscount)` | — |
-| GET | `/discounts/:id` | `asyncHandler(discountController.getDiscountById)` | — |
-| PUT | `/discounts/:id` | `asyncHandler(discountController.updateDiscount)` | — |
-| DELETE | `/discounts/:id` | `asyncHandler(discountController.deleteDiscount)` | — |
-| GET | `/discounts/category/:categoryId` | `asyncHandler(discountController.getDiscountsByCategoryId)` | — |
-| GET | `/discounts/product/:productId` | `asyncHandler(discountController.getDiscountsByProductId)` | — |
-| GET | `/gift-cards` | `asyncHandler(giftCardController.getGiftCards)` | Gift Card routes |
-| POST | `/gift-cards` | `asyncHandler(giftCardController.createGiftCard)` | — |
-| GET | `/gift-cards/:id` | `asyncHandler(giftCardController.getGiftCard)` | — |
-| POST | `/gift-cards/:id/activate` | `asyncHandler(giftCardController.activateGiftCard)` | — |
-| POST | `/gift-cards/:id/assign` | `asyncHandler(giftCardController.assignGiftCard)` | — |
-| POST | `/gift-cards/:id/cancel` | `asyncHandler(giftCardController.cancelGiftCard)` | — |
-| POST | `/gift-cards/:id/refund` | `asyncHandler(giftCardController.refundToGiftCard)` | — |
-| GET | `/gift-cards/balance/:code` | `asyncHandler(giftCardController.checkGiftCardBalance)` | Gift Card routes |
-| GET | `/gift-cards/mine` | `isCustomerLoggedIn` | — |
-| POST | `/gift-cards/redeem` | `isCustomerLoggedIn` | — |
-| POST | `/gift-cards/reload` | `isCustomerLoggedIn` | — |
-| GET | `/promotions` | `asyncHandler(promotionController.getPromotions)` | Promotion routes |
-| POST | `/promotions` | `asyncHandler(promotionController.createPromotion)` | — |
-| GET | `/promotions/:id` | `asyncHandler(promotionController.getPromotionById)` | — |
-| PUT | `/promotions/:id` | `asyncHandler(promotionController.updatePromotion)` | — |
-| DELETE | `/promotions/:id` | `asyncHandler(promotionController.deletePromotion)` | — |
-| POST | `/promotions/:id/activate` | `asyncHandler(promotionController.activatePromotion)` | — |
-| POST | `/promotions/:id/pause` | `asyncHandler(promotionController.pausePromotion)` | — |
-| GET | `/promotions/active` | `asyncHandler(promotionController.getActivePromotions)` | — |
+| Method | Endpoint                                    | Controller                                                     | Description               |
+| ------ | ------------------------------------------- | -------------------------------------------------------------- | ------------------------- |
+| POST   | `/cart-promotions`                          | `asyncHandler(cartPromotionController.applyPromotion)`         | —                         |
+| GET    | `/cart-promotions/:id`                      | `asyncHandler(cartPromotionController.getCartPromotionById)`   | Cart Promotion routes     |
+| PUT    | `/cart-promotions/:id`                      | `asyncHandler(cartPromotionController.updateCartPromotion)`    | —                         |
+| DELETE | `/cart-promotions/:id`                      | `asyncHandler(cartPromotionController.removePromotion)`        | —                         |
+| GET    | `/cart-promotions/cart/:cartId`             | `asyncHandler(cartPromotionController.getPromotionsByCartId)`  | —                         |
+| POST   | `/category-promotions`                      | `asyncHandler(categoryPromotionController.createCategoryPromo` | —                         |
+| GET    | `/category-promotions/:id`                  | `asyncHandler(categoryPromotionController.getCategoryPromotio` | —                         |
+| PUT    | `/category-promotions/:id`                  | `asyncHandler(categoryPromotionController.updateCategoryPromo` | —                         |
+| DELETE | `/category-promotions/:id`                  | `asyncHandler(categoryPromotionController.deleteCategoryPromo` | —                         |
+| GET    | `/category-promotions/active`               | `asyncHandler(categoryPromotionController.getActiveCategoryPr` | Category Promotion routes |
+| GET    | `/category-promotions/category/:categoryId` | `asyncHandler(categoryPromotionController.getPromotionsByCate` | —                         |
+| GET    | `/coupons`                                  | `asyncHandler(couponController.getActiveCoupons)`              | Coupon routes             |
+| POST   | `/coupons`                                  | `asyncHandler(couponController.createCoupon)`                  | —                         |
+| GET    | `/coupons/:id`                              | `asyncHandler(couponController.getCouponById)`                 | —                         |
+| PUT    | `/coupons/:id`                              | `asyncHandler(couponController.updateCoupon)`                  | —                         |
+| DELETE | `/coupons/:id`                              | `asyncHandler(couponController.deleteCoupon)`                  | —                         |
+| GET    | `/coupons/:id/usage`                        | `asyncHandler(couponController.getCouponUsage)`                | —                         |
+| POST   | `/coupons/calculate`                        | `asyncHandler(couponController.calculateCouponDiscount)`       | —                         |
+| GET    | `/coupons/code/:code`                       | `asyncHandler(couponController.getCouponByCode)`               | —                         |
+| POST   | `/coupons/validate`                         | `asyncHandler(couponController.validateCoupon)`                | —                         |
+| GET    | `/discounts`                                | `asyncHandler(discountController.getActiveDiscounts)`          | Discount routes           |
+| POST   | `/discounts`                                | `asyncHandler(discountController.createDiscount)`              | —                         |
+| GET    | `/discounts/:id`                            | `asyncHandler(discountController.getDiscountById)`             | —                         |
+| PUT    | `/discounts/:id`                            | `asyncHandler(discountController.updateDiscount)`              | —                         |
+| DELETE | `/discounts/:id`                            | `asyncHandler(discountController.deleteDiscount)`              | —                         |
+| GET    | `/discounts/category/:categoryId`           | `asyncHandler(discountController.getDiscountsByCategoryId)`    | —                         |
+| GET    | `/discounts/product/:productId`             | `asyncHandler(discountController.getDiscountsByProductId)`     | —                         |
+| GET    | `/gift-cards`                               | `asyncHandler(giftCardController.getGiftCards)`                | Gift Card routes          |
+| POST   | `/gift-cards`                               | `asyncHandler(giftCardController.createGiftCard)`              | —                         |
+| GET    | `/gift-cards/:id`                           | `asyncHandler(giftCardController.getGiftCard)`                 | —                         |
+| POST   | `/gift-cards/:id/activate`                  | `asyncHandler(giftCardController.activateGiftCard)`            | —                         |
+| POST   | `/gift-cards/:id/assign`                    | `asyncHandler(giftCardController.assignGiftCard)`              | —                         |
+| POST   | `/gift-cards/:id/cancel`                    | `asyncHandler(giftCardController.cancelGiftCard)`              | —                         |
+| POST   | `/gift-cards/:id/refund`                    | `asyncHandler(giftCardController.refundToGiftCard)`            | —                         |
+| GET    | `/gift-cards/balance/:code`                 | `asyncHandler(giftCardController.checkGiftCardBalance)`        | Gift Card routes          |
+| GET    | `/gift-cards/mine`                          | `isCustomerLoggedIn`                                           | —                         |
+| POST   | `/gift-cards/redeem`                        | `isCustomerLoggedIn`                                           | —                         |
+| POST   | `/gift-cards/reload`                        | `isCustomerLoggedIn`                                           | —                         |
+| GET    | `/promotions`                               | `asyncHandler(promotionController.getPromotions)`              | Promotion routes          |
+| POST   | `/promotions`                               | `asyncHandler(promotionController.createPromotion)`            | —                         |
+| GET    | `/promotions/:id`                           | `asyncHandler(promotionController.getPromotionById)`           | —                         |
+| PUT    | `/promotions/:id`                           | `asyncHandler(promotionController.updatePromotion)`            | —                         |
+| DELETE | `/promotions/:id`                           | `asyncHandler(promotionController.deletePromotion)`            | —                         |
+| POST   | `/promotions/:id/activate`                  | `asyncHandler(promotionController.activatePromotion)`          | —                         |
+| POST   | `/promotions/:id/pause`                     | `asyncHandler(promotionController.pausePromotion)`             | —                         |
+| GET    | `/promotions/active`                        | `asyncHandler(promotionController.getActivePromotions)`        | —                         |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -114,11 +114,7 @@ describe('Organization Detail Endpoints', () => {
     });
 
     it('PUT /business/organizations/:id/addresses/:addressId updates it', async () => {
-      const resp = await client.put(
-        `/business/organizations/${SEEDED_ORG_ID}/addresses/${addressId}`,
-        { city: 'Dallas' },
-        auth(),
-      );
+      const resp = await client.put(`/business/organizations/${SEEDED_ORG_ID}/addresses/${addressId}`, { city: 'Dallas' }, auth());
       expectStatus(resp, 200);
     });
   });

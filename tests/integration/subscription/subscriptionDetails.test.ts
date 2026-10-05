@@ -13,10 +13,7 @@
 
 import { AxiosInstance } from 'axios';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
-import {
-  SEEDED_CUSTOMER_SUBSCRIPTION_IDS,
-  createTestSubscriptionProduct,
-} from './testUtils';
+import { SEEDED_CUSTOMER_SUBSCRIPTION_IDS, createTestSubscriptionProduct } from './testUtils';
 import { createTestProduct } from '../product/testUtils';
 
 const UNKNOWN_ID = '00000000-0000-0000-0000-000000099999';
@@ -38,11 +35,7 @@ describe('Subscription Detail Endpoints', () => {
       const productId = await createTestProduct(client, adminToken);
       expect(productId).toBeTruthy();
 
-      const create = await client.post(
-        '/business/subscriptions/products',
-        createTestSubscriptionProduct(productId as string),
-        auth(),
-      );
+      const create = await client.post('/business/subscriptions/products', createTestSubscriptionProduct(productId as string), auth());
       expectStatus(create, 201);
       const subProductId = create.data.data.subscriptionProductId || create.data.data.id;
       const del = await client.delete(`/business/subscriptions/products/${subProductId}`, auth());
@@ -66,11 +59,7 @@ describe('Subscription Detail Endpoints', () => {
     });
 
     it('POST /business/subscriptions/:id/resume resumes a paused subscription', async () => {
-      const resp = await client.post(
-        `/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.PAUSED_WEEKLY}/resume`,
-        {},
-        auth(),
-      );
+      const resp = await client.post(`/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.PAUSED_WEEKLY}/resume`, {}, auth());
       // PAUSED_WEEKLY is seeded paused — resume must succeed
       expectStatus(resp, 200);
     });
@@ -92,19 +81,13 @@ describe('Subscription Detail Endpoints', () => {
 
   describe('Subscription orders and dunning', () => {
     it('GET /business/subscriptions/:id/orders lists orders', async () => {
-      const resp = await client.get(
-        `/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}/orders`,
-        auth(),
-      );
+      const resp = await client.get(`/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}/orders`, auth());
       expectStatus(resp, 200);
       expect(resp.data.data !== undefined).toBe(true);
     });
 
     it('GET /business/subscriptions/:id/dunning lists dunning attempts', async () => {
-      const resp = await client.get(
-        `/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}/dunning`,
-        auth(),
-      );
+      const resp = await client.get(`/business/subscriptions/${SEEDED_CUSTOMER_SUBSCRIPTION_IDS.ACTIVE_MONTHLY}/dunning`, auth());
       expectStatus(resp, 200);
       expect(resp.data.data !== undefined).toBe(true);
     });

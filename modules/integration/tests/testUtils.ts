@@ -21,9 +21,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
   });
 }
 
-export function createIntegration(
-  overrides: Partial<Parameters<typeof Integration.create>[0]> = {},
-): Integration {
+export function createIntegration(overrides: Partial<Parameters<typeof Integration.create>[0]> = {}): Integration {
   return Integration.create({
     integrationId: 'int-1',
     organizationId: 'org-1',
@@ -32,7 +30,6 @@ export function createIntegration(
     ...overrides,
   });
 }
-
 
 export function createSubscription(
   overrides: Partial<Parameters<typeof IntegrationEventSubscription.create>[0]> = {},
@@ -46,9 +43,7 @@ export function createSubscription(
   });
 }
 
-export function createIntegrationLog(
-  overrides: Partial<Parameters<typeof IntegrationLog.create>[0]> = {},
-): IntegrationLog {
+export function createIntegrationLog(overrides: Partial<Parameters<typeof IntegrationLog.create>[0]> = {}): IntegrationLog {
   return IntegrationLog.create({
     logId: 'log-1',
     integrationId: 'int-1',

@@ -13,6 +13,8 @@ export interface VariantAttribute {
   displayValue?: string;
 }
 
+export type InventoryPolicy = 'tracked' | 'unlimited' | 'backorderable';
+
 export interface ProductVariantProps {
   variantId: string;
   productId: string;
@@ -24,6 +26,7 @@ export interface ProductVariantProps {
   imageUrl?: string;
   stockQuantity: number;
   lowStockThreshold: number;
+  inventoryPolicy: InventoryPolicy;
   isDefault: boolean;
   isActive: boolean;
   position: number;
@@ -57,6 +60,7 @@ export class ProductVariant {
     imageUrl?: string;
     stockQuantity?: number;
     lowStockThreshold?: number;
+    inventoryPolicy?: InventoryPolicy;
     isDefault?: boolean;
     position?: number;
     barcode?: string;
@@ -82,8 +86,9 @@ export class ProductVariant {
       attributes: props.attributes,
       imageId: props.imageId,
       imageUrl: props.imageUrl,
-      stockQuantity: props.stockQuantity || 0,
-      lowStockThreshold: props.lowStockThreshold || 5,
+      stockQuantity: props.stockQuantity ?? 0,
+      lowStockThreshold: props.lowStockThreshold ?? 5,
+      inventoryPolicy: props.inventoryPolicy ?? 'tracked',
       isDefault: props.isDefault || false,
       isActive: true,
       position: props.position || 0,
@@ -130,6 +135,9 @@ export class ProductVariant {
   get lowStockThreshold(): number {
     return this.props.lowStockThreshold;
   }
+  get inventoryPolicy(): InventoryPolicy {
+    return this.props.inventoryPolicy;
+  }
   get isDefault(): boolean {
     return this.props.isDefault;
   }
@@ -157,15 +165,17 @@ export class ProductVariant {
 
   // Computed properties
   get isInStock(): boolean {
-    return this.props.stockQuantity > 0;
+    return this.props.inventoryPolicy !== 'tracked' || this.props.stockQuantity > 0;
   }
 
   get isLowStock(): boolean {
-    return this.props.stockQuantity > 0 && this.props.stockQuantity <= this.props.lowStockThreshold;
+    return (
+      this.props.inventoryPolicy === 'tracked' && this.props.stockQuantity > 0 && this.props.stockQuantity <= this.props.lowStockThreshold
+    );
   }
 
   get isOutOfStock(): boolean {
-    return this.props.stockQuantity <= 0;
+    return this.props.inventoryPolicy === 'tracked' && this.props.stockQuantity <= 0;
   }
 
   get attributeString(): string {
@@ -186,7 +196,7 @@ export class ProductVariant {
   }
 
   updateStock(quantity: number): void {
-    if (quantity < 0) {
+    if (quantity < 0 && this.props.inventoryPolicy !== 'backorderable') {
       throw new ProductValidationError('Stock quantity cannot be negative');
     }
     this.props.stockQuantity = quantity;
@@ -199,10 +209,19 @@ export class ProductVariant {
   }
 
   decrementStock(amount: number): void {
-    if (this.props.stockQuantity - amount < 0) {
+    if (this.props.inventoryPolicy === 'unlimited') return;
+    if (this.props.inventoryPolicy === 'tracked' && this.props.stockQuantity - amount < 0) {
       throw new ProductValidationError('Insufficient stock');
     }
     this.props.stockQuantity -= amount;
+    this.touch();
+  }
+
+  setInventoryPolicy(policy: InventoryPolicy): void {
+    if (!['tracked', 'unlimited', 'backorderable'].includes(policy)) {
+      throw new ProductValidationError(`Invalid inventory policy: ${policy}`);
+    }
+    this.props.inventoryPolicy = policy;
     this.touch();
   }
 
@@ -287,6 +306,7 @@ export class ProductVariant {
       imageUrl: this.props.imageUrl,
       stockQuantity: this.props.stockQuantity,
       lowStockThreshold: this.props.lowStockThreshold,
+      inventoryPolicy: this.props.inventoryPolicy,
       isInStock: this.isInStock,
       isLowStock: this.isLowStock,
       isOutOfStock: this.isOutOfStock,

@@ -39,7 +39,9 @@ function rowToPolicy(row: RolePolicyRow): RolePolicy {
  */
 export async function loadOrgRolePolicies(): Promise<void> {
   try {
-    const rows = await query<RolePolicyRow[]>('SELECT * FROM "identityRolePolicy" WHERE "isActive" = true AND "organizationId" IS NOT NULL');
+    const rows = await query<RolePolicyRow[]>(
+      'SELECT * FROM "identityRolePolicy" WHERE "isActive" = true AND "organizationId" IS NOT NULL',
+    );
 
     const cache = new Map<string, RolePolicy[]>();
 

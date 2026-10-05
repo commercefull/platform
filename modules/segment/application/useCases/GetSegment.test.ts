@@ -25,4 +25,3 @@ describe('GetSegmentUseCase', () => {
     await expect(useCase.execute('missing')).rejects.toThrow(SegmentNotFoundError);
   });
 });
-

@@ -24,11 +24,6 @@ export class ValidateCouponCodeUseCase {
       throw new PromotionValidationError('Coupon code and order total are required');
     }
 
-    return this.coupons.validate(
-      command.code,
-      parseFloat(command.orderTotalCents),
-      command.customerId,
-      command.organizationId,
-    );
+    return this.coupons.validate(command.code, parseFloat(command.orderTotalCents), command.customerId, command.organizationId);
   }
 }

@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**

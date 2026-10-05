@@ -30,9 +30,7 @@ export const manageMembershipSubscriptionsUseCase = new ManageMembershipSubscrip
   membershipPlanRepository.plans,
 );
 export const manageMembershipProgramsUseCase = new ManageMembershipProgramsUseCase(membershipPlanRepository.admin);
-export const manageStorefrontMembershipUseCase = new ManageStorefrontMembershipUseCase(
-  membershipPlanRepository.storefront,
-);
+export const manageStorefrontMembershipUseCase = new ManageStorefrontMembershipUseCase(membershipPlanRepository.storefront);
 export const manageUserMembershipsUseCase = new ManageUserMembershipsUseCase(membershipSubscriptionDataRepository.memberships);
 export const manageMembershipTiersUseCase = new ManageMembershipTiersUseCase(membershipSubscriptionDataRepository.memberships);
 export const manageTierBenefitsUseCase = new ManageTierBenefitsUseCase(membershipSubscriptionDataRepository.memberships);

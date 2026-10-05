@@ -28,7 +28,14 @@ describe('ManageCustomersUseCase', () => {
   });
 
   it('should forward filters and pagination to findAll', async () => {
-    customerRepository.findAll.mockResolvedValue({ data: [createCustomerRow()], total: 1, limit: 10, offset: 0, hasMore: false, length: 1 });
+    customerRepository.findAll.mockResolvedValue({
+      data: [createCustomerRow()],
+      total: 1,
+      limit: 10,
+      offset: 0,
+      hasMore: false,
+      length: 1,
+    });
 
     const result = await useCase.findAll({ status: 'active' }, { limit: 10 });
 
@@ -70,4 +77,3 @@ describe('ManageCustomersUseCase', () => {
     expect(customerRepository.updatePasswordHash).toHaveBeenCalledWith('cust-1', 'new-hash');
   });
 });
-

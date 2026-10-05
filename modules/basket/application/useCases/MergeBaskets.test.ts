@@ -7,9 +7,7 @@ function repositoryWithTwoBaskets(): jest.Mocked<BasketRepository> {
   const source = createBasket({ basketId: 'source-1', items: [createBasketItem({ basketId: 'source-1' })] });
   const target = createBasket({ basketId: 'target-1' });
   const repository = createBasketRepository();
-  repository.findById.mockImplementation(id =>
-    Promise.resolve(id === 'source-1' ? source : id === 'target-1' ? target : null),
-  );
+  repository.findById.mockImplementation(id => Promise.resolve(id === 'source-1' ? source : id === 'target-1' ? target : null));
   repository.mergeBaskets.mockResolvedValue(target);
   return repository;
 }

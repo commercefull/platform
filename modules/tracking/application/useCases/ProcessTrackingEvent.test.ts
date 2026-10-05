@@ -14,19 +14,32 @@ describe('ProcessTrackingEventUseCase', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     repo = lazyMock<TrackingConfigRepository>();
-    gtmAdapter = { providerName: 'gtm', send: jest.fn().mockResolvedValue({ success: true, provider: 'gtm', eventId: 'e-1' }), validateConfig: jest.fn() };
-    metaAdapter = { providerName: 'meta_capi', send: jest.fn().mockResolvedValue({ success: true, provider: 'meta_capi', eventId: 'e-1' }), validateConfig: jest.fn() };
+    gtmAdapter = {
+      providerName: 'gtm',
+      send: jest.fn().mockResolvedValue({ success: true, provider: 'gtm', eventId: 'e-1' }),
+      validateConfig: jest.fn(),
+    };
+    metaAdapter = {
+      providerName: 'meta_capi',
+      send: jest.fn().mockResolvedValue({ success: true, provider: 'meta_capi', eventId: 'e-1' }),
+      validateConfig: jest.fn(),
+    };
     uuidMock.mockReturnValue('uuid-1');
     useCase = new ProcessTrackingEventUseCase(repo, gtmAdapter, metaAdapter);
   });
 
   it('should send a mapped event to enabled providers when consent is granted', async () => {
-    repo.findByStoreId.mockResolvedValue(createTrackingConfig({
-      metaCapi: { pixelId: 'px-1', accessToken: 'tok' },
-    }));
+    repo.findByStoreId.mockResolvedValue(
+      createTrackingConfig({
+        metaCapi: { pixelId: 'px-1', accessToken: 'tok' },
+      }),
+    );
 
     const result = await useCase.execute({
-      storeId: 's-1', sourceEvent: 'order.paid', userData: {}, consentGranted: true,
+      storeId: 's-1',
+      sourceEvent: 'order.paid',
+      userData: {},
+      consentGranted: true,
     });
 
     expect(result.sent).toHaveLength(2);
@@ -40,7 +53,10 @@ describe('ProcessTrackingEventUseCase', () => {
     repo.findByStoreId.mockResolvedValue(config);
 
     const result = await useCase.execute({
-      storeId: 's-1', sourceEvent: 'order.paid', userData: {}, consentGranted: true,
+      storeId: 's-1',
+      sourceEvent: 'order.paid',
+      userData: {},
+      consentGranted: true,
     });
 
     expect(result.skipped).toContain('tracking_disabled');
@@ -50,7 +66,10 @@ describe('ProcessTrackingEventUseCase', () => {
     repo.findByStoreId.mockResolvedValue(createTrackingConfig());
 
     const result = await useCase.execute({
-      storeId: 's-1', sourceEvent: 'order.paid', userData: {}, consentGranted: false,
+      storeId: 's-1',
+      sourceEvent: 'order.paid',
+      userData: {},
+      consentGranted: false,
     });
 
     expect(result.skipped).toContain('consent_not_granted');
@@ -60,16 +79,26 @@ describe('ProcessTrackingEventUseCase', () => {
   it('should throw TrackingEventNotMappedError when the event has no mapping', async () => {
     repo.findByStoreId.mockResolvedValue(createTrackingConfig());
 
-    await expect(useCase.execute({
-      storeId: 's-1', sourceEvent: 'unknown.event', userData: {}, consentGranted: true,
-    })).rejects.toThrow(TrackingEventNotMappedError);
+    await expect(
+      useCase.execute({
+        storeId: 's-1',
+        sourceEvent: 'unknown.event',
+        userData: {},
+        consentGranted: true,
+      }),
+    ).rejects.toThrow(TrackingEventNotMappedError);
   });
 
   it('should throw TrackingConfigNotFoundError when the store has no config', async () => {
     repo.findByStoreId.mockResolvedValue(null);
 
-    await expect(useCase.execute({
-      storeId: 'missing', sourceEvent: 'order.paid', userData: {}, consentGranted: true,
-    })).rejects.toThrow(TrackingConfigNotFoundError);
+    await expect(
+      useCase.execute({
+        storeId: 'missing',
+        sourceEvent: 'order.paid',
+        userData: {},
+        consentGranted: true,
+      }),
+    ).rejects.toThrow(TrackingConfigNotFoundError);
   });
 });

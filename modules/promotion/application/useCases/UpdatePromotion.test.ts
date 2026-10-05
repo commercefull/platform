@@ -34,16 +34,12 @@ describe('UpdatePromotionUseCase', () => {
   it('should throw PromotionNotFoundError when the promotion does not exist', async () => {
     promotionRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdatePromotionCommand('missing', { name: 'X' }))).rejects.toThrow(
-      PromotionNotFoundError,
-    );
+    await expect(useCase.execute(new UpdatePromotionCommand('missing', { name: 'X' }))).rejects.toThrow(PromotionNotFoundError);
     expect(promotionRepository.update).not.toHaveBeenCalled();
   });
 
   it('should throw PromotionValidationError when the value is negative', async () => {
-    await expect(useCase.execute(new UpdatePromotionCommand('promo-1', { value: -5 }))).rejects.toThrow(
-      PromotionValidationError,
-    );
+    await expect(useCase.execute(new UpdatePromotionCommand('promo-1', { value: -5 }))).rejects.toThrow(PromotionValidationError);
     expect(promotionRepository.update).not.toHaveBeenCalled();
   });
 });

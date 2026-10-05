@@ -20,5 +20,4 @@ export type SupportMessage = {
   readBy: string | null;
   metadata: unknown | null;
   createdAt: Date | null;
-}
-
+};

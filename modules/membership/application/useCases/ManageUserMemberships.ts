@@ -57,7 +57,11 @@ export type CreateUserMembershipParams = Omit<CreateUserMembershipInput, 'userId
 export interface ManageUserMembershipsPort {
   findMembershipByUserId(userId: string): Promise<UserMembershipRecord | null>;
   findUserMembershipById(id: string): Promise<UserMembershipRecord | null>;
-  findAllUserMemberships(limit?: number, offset?: number, filter?: { isActive?: boolean; tierId?: string }): Promise<UserMembershipRecord[]>;
+  findAllUserMemberships(
+    limit?: number,
+    offset?: number,
+    filter?: { isActive?: boolean; tierId?: string },
+  ): Promise<UserMembershipRecord[]>;
   getUserMembershipBenefits(userId: string): Promise<unknown[]>;
   findTierById(tierId: string): Promise<MembershipTierRecord | null>;
   createUserMembership(params: CreateUserMembershipParams): Promise<UserMembershipRecord>;

@@ -16,11 +16,7 @@ const CUSTOMER_ID = 'cust-1';
 const SESSION_ID = 'sess-1';
 
 function buildUseCase(repository: ReturnType<typeof createBasketRepository>) {
-  return new MergeGuestBasketOnLoginUseCase(
-    repository,
-    new MergeBasketsUseCase(repository),
-    new AssignBasketToCustomerUseCase(repository),
-  );
+  return new MergeGuestBasketOnLoginUseCase(repository, new MergeBasketsUseCase(repository), new AssignBasketToCustomerUseCase(repository));
 }
 
 describe('MergeGuestBasketOnLoginUseCase', () => {
@@ -45,9 +41,7 @@ describe('MergeGuestBasketOnLoginUseCase', () => {
     const repository = createBasketRepository(null);
     repository.findBySessionId.mockResolvedValue(sessionBasket);
     repository.findByCustomerId.mockResolvedValue(customerBasket);
-    repository.findById.mockImplementation(async (id: string) =>
-      id === 'basket-session' ? sessionBasket : customerBasket,
-    );
+    repository.findById.mockImplementation(async (id: string) => (id === 'basket-session' ? sessionBasket : customerBasket));
     repository.mergeBaskets.mockResolvedValue(customerBasket);
 
     const result = await buildUseCase(repository).execute(new MergeGuestBasketOnLoginCommand(CUSTOMER_ID, SESSION_ID));

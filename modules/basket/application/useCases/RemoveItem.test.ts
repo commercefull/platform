@@ -35,17 +35,13 @@ describe('RemoveItemUseCase', () => {
   it('should throw BasketNotFoundError when the basket does not exist', async () => {
     const repository = createBasketRepository(null);
 
-    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand('missing', ITEM_ID))).rejects.toThrow(
-      BasketNotFoundError,
-    );
+    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand('missing', ITEM_ID))).rejects.toThrow(BasketNotFoundError);
   });
 
   it('should throw BasketNotFoundError when the basket is removed during the operation', async () => {
     const repository = createBasketRepository();
     repository.findById.mockResolvedValueOnce(createBasket({ items: [createBasketItem()] })).mockResolvedValue(null);
 
-    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, ITEM_ID))).rejects.toThrow(
-      BasketNotFoundError,
-    );
+    await expect(new RemoveItemUseCase(repository).execute(new RemoveItemCommand(BASKET_ID, ITEM_ID))).rejects.toThrow(BasketNotFoundError);
   });
 });

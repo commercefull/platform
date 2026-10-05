@@ -139,5 +139,4 @@ describe('Attribute Option Tests', () => {
       expect(getResponse.status).toBe(404);
     });
   });
-
 });

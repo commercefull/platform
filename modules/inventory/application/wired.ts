@@ -18,6 +18,7 @@ import { SetLowStockThresholdUseCase } from './useCases/SetLowStockThreshold';
 import { GetLowStockItemsUseCase } from './useCases/GetLowStockItems';
 import { GetOutOfStockItemsUseCase } from './useCases/GetOutOfStockItems';
 import { ReserveStockUseCase } from './useCases/ReserveStock';
+import { ReleaseReservationUseCase } from './useCases/ReleaseReservation';
 import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
 
 export const pickupLocationAdapter = new StorePickupLocationAdapter(pickupLocationRepo);
@@ -83,15 +84,23 @@ const reserveStockAdapter = {
   findByProduct: async (productId: string, variantId: string | undefined, locationId: string | undefined) => {
     const item = locationId
       ? await inventoryDataRepository.items.findByProduct(productId, variantId, locationId)
-      : (await inventoryDataRepository.items.findAll({ productId }, { limit: 50, offset: 0 })).data.find(
-          i => i.variantId === variantId,
-        );
+      : (await inventoryDataRepository.items.findAll({ productId }, { limit: 50, offset: 0 })).data.find(i => i.variantId === variantId);
     if (!item) return null;
     return {
       inventoryItemId: item.inventoryId,
       quantity: item.quantity,
       reservedQuantity: item.reservedQuantity,
     };
+  },
+  findReservationsByOrderId: (orderId: string) => inventoryDataRepository.stock.findReservationsByOrderId(orderId),
+  findStoreLocations: async (storeId: string, productId: string, variantId?: string) => {
+    const locations = await inventoryDataRepository.stock.findLocationsByStoreProduct(storeId, productId, variantId);
+    return locations.map(l => ({
+      inventoryItemId: l.inventoryLocationId,
+      quantity: l.quantity,
+      reservedQuantity: l.reservedQuantity,
+      locationId: l.distributionWarehouseId,
+    }));
   },
   createReservation: (input: {
     reservationId: string;
@@ -102,17 +111,37 @@ const reserveStockAdapter = {
     sku?: string;
     quantity: number;
     locationId?: string;
+    orderItemId?: string;
     expiresAt: Date;
     status: string;
   }) => inventoryDataRepository.stock.createReservation(input),
   updateReservedQuantity: async (inventoryItemId: string, newReservedQuantity: number) => {
     await inventoryDataRepository.stock.updateLocation(inventoryItemId, { reservedQuantity: newReservedQuantity });
   },
+  reserveStockAtomically: (inventoryItemId: string, delta: number, allowBackorder: boolean) =>
+    inventoryDataRepository.stock.reserveLocationAtomic(inventoryItemId, delta, allowBackorder),
+  attachOrderItem: (orderId: string, productId: string, variantId: string | undefined, orderItemId: string) =>
+    inventoryDataRepository.stock.attachReservationsToOrderItem(orderId, productId, variantId, orderItemId),
+};
+
+const releaseReservationAdapter = {
+  findReservationById: (reservationId: string) => inventoryDataRepository.stock.findReservationById(reservationId),
+  findReservationsByOrderId: (orderId: string) => inventoryDataRepository.stock.findReservationsByOrderId(orderId),
+  findById: async (inventoryItemId: string) => {
+    const location = await inventoryDataRepository.stock.findLocationById(inventoryItemId);
+    return location ? { inventoryItemId: location.inventoryLocationId, reservedQuantity: location.reservedQuantity } : null;
+  },
+  updateReservedQuantity: async (inventoryItemId: string, newReservedQuantity: number) => {
+    await inventoryDataRepository.stock.updateLocation(inventoryItemId, { reservedQuantity: newReservedQuantity });
+  },
+  updateReservationStatus: (reservationId: string, status: string, reason?: string) =>
+    inventoryDataRepository.stock.updateReservationStatus(reservationId, status, reason),
 };
 
 export const getLowStockItemsUseCase = new GetLowStockItemsUseCase(lowStockItemsAdapter);
 export const getOutOfStockItemsUseCase = new GetOutOfStockItemsUseCase(outOfStockItemsAdapter);
 export const reserveStockUseCase = new ReserveStockUseCase(reserveStockAdapter);
+export const releaseReservationUseCase = new ReleaseReservationUseCase(releaseReservationAdapter);
 
 export { inventoryDataRepository, storeDispatchRepository };
 

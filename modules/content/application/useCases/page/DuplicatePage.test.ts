@@ -15,7 +15,7 @@ describe('DuplicatePageUseCase', () => {
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1', title: 'Original', slug: 'original' }));
     mockRepo.createPage.mockResolvedValue(createContentPage({ contentPageId: 'p2', title: 'Copy', slug: 'copy' }));
     mockRepo.findBlocksByPageId.mockResolvedValue([]);
-    mockRepo.createBlock.mockImplementation(async (params) => createContentBlock(params));
+    mockRepo.createBlock.mockImplementation(async params => createContentBlock(params));
     useCase = new DuplicatePageUseCase(mockRepo);
   });
 

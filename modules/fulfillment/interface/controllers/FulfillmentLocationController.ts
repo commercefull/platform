@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Fulfillment Location & Partner Controller
  *
@@ -46,7 +46,10 @@ export const listLocations = async (req: HttpRequest, res: HttpResponse): Promis
 
 export const updateLocation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const result = await manageFulfillmentLocationsUseCase.updateLocation(req.params.locationId, req.body as UpdateFulfillmentLocationParams);
+    const result = await manageFulfillmentLocationsUseCase.updateLocation(
+      req.params.locationId,
+      req.body as UpdateFulfillmentLocationParams,
+    );
     jsonResponse(res, 200, { success: true, data: result });
   } catch (error) {
     respondError(res, error, 'Location not found');

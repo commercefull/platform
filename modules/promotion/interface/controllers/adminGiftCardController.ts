@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Gift Card Controller
  * Handles gift card management for the Admin Hub
@@ -178,10 +178,10 @@ export const reloadGiftCardAction = async (req: HttpRequest, res: HttpResponse):
   const transaction = await manageGiftCardsUseCase.reloadGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin');
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Gift card reloaded successfully',
-        transaction,
-      });
+    success: true,
+    message: 'Gift card reloaded successfully',
+    transaction,
+  });
 };
 
 export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -192,10 +192,10 @@ export const refundToGiftCardAction = async (req: HttpRequest, res: HttpResponse
   const transaction = await manageGiftCardsUseCase.refundToGiftCard(giftCardId, parseFloat(amountCents), orderId, 'admin', notes);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Refund applied to gift card successfully',
-        transaction,
-      });
+    success: true,
+    message: 'Refund applied to gift card successfully',
+    transaction,
+  });
 };
 
 export const cancelGiftCardAction = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -217,10 +217,10 @@ export const checkGiftCardBalance = async (req: HttpRequest, res: HttpResponse):
   }
 
   jsonResponse(res, 200, {
-        valid: true,
-        balanceCents: giftCard.currentBalanceCents,
-        currency: giftCard.currency,
-        status: giftCard.status,
-        expiresAt: giftCard.expiresAt,
-      });
+    valid: true,
+    balanceCents: giftCard.currentBalanceCents,
+    currency: giftCard.currency,
+    status: giftCard.status,
+    expiresAt: giftCard.expiresAt,
+  });
 };

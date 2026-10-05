@@ -22,4 +22,3 @@ export class MarkReturnReceivedUseCase {
     return updated;
   }
 }
-

@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import { generateAccessToken, verifyAccessToken } from '../../utils/jwtHelpers';
@@ -64,9 +64,9 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
   // Validate required fields
   if (!email || !password) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Email and password are required',
-          });
+      success: false,
+      message: 'Email and password are required',
+    });
     return;
   }
 
@@ -74,9 +74,9 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
   const subject = await credentialPort.authenticate(email, password);
   if (!subject) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Invalid email or password',
-          });
+      success: false,
+      message: 'Invalid email or password',
+    });
     return;
   }
 
@@ -95,13 +95,13 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
   const accessToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
   jsonResponse(res, 200, {
-        success: true,
-        accessToken,
-        customer: {
-          id: subject.id,
-          email: subject.email,
-        },
-      });
+    success: true,
+    accessToken,
+    customer: {
+      id: subject.id,
+      email: subject.email,
+    },
+  });
 };
 
 /**
@@ -116,18 +116,18 @@ export const registerCustomer = async (
   // Validate required fields
   if (!email || !password || !firstName || !lastName) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Email, password, first name, and last name are required',
-          });
+      success: false,
+      message: 'Email, password, first name, and last name are required',
+    });
     return;
   }
 
   // Validate password strength
   if (password.length < 8) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Password must be at least 8 characters long',
-          });
+      success: false,
+      message: 'Password must be at least 8 characters long',
+    });
     return;
   }
 
@@ -135,9 +135,9 @@ export const registerCustomer = async (
   const existing = await credentialPort.findByEmail(email);
   if (existing) {
     jsonResponse(res, 409, {
-            success: false,
-            message: 'An account with this email already exists',
-          });
+      success: false,
+      message: 'An account with this email already exists',
+    });
     return;
   }
 
@@ -159,15 +159,15 @@ export const registerCustomer = async (
   const accessToken = generateAccessToken(newSubject.id, newSubject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
 
   jsonResponse(res, 201, {
-        success: true,
-        accessToken,
-        customer: {
-          id: newSubject.id,
-          email: newSubject.email,
-          firstName: newSubject.firstName,
-          lastName: newSubject.lastName,
-        },
-      });
+    success: true,
+    accessToken,
+    customer: {
+      id: newSubject.id,
+      email: newSubject.email,
+      firstName: newSubject.firstName,
+      lastName: newSubject.lastName,
+    },
+  });
 };
 
 /**
@@ -182,16 +182,16 @@ export const issueTokenPair = async (req: HttpRequest<Record<string, string>, un
     );
 
     jsonResponse(res, 200, {
-            success: true,
-            accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
-            tokenType: 'Bearer',
-            expiresIn: result.expiresIn,
-            customer: {
-              id: result.subject.id,
-              email: result.subject.email,
-            },
-          });
+      success: true,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
+      customer: {
+        id: result.subject.id,
+        email: result.subject.email,
+      },
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -209,11 +209,11 @@ export const renewAccessToken = async (
     const result = await renewCustomerAccessTokenUseCase.execute(new RenewAccessTokenCommand(refreshToken, req.ip));
 
     jsonResponse(res, 200, {
-            success: true,
-            accessToken: result.accessToken,
-            tokenType: 'Bearer',
-            expiresIn: result.expiresIn,
-          });
+      success: true,
+      accessToken: result.accessToken,
+      tokenType: 'Bearer',
+      expiresIn: result.expiresIn,
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -230,9 +230,9 @@ export const checkTokenValidity = async (
 
   if (!token) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Token is required',
-          });
+      success: false,
+      message: 'Token is required',
+    });
     return;
   }
 
@@ -241,22 +241,22 @@ export const checkTokenValidity = async (
 
   if (!decodedPayload || decodedPayload.role !== 'customer') {
     jsonResponse(res, 401, {
-            success: false,
-            valid: false,
-            message: 'Token is invalid or has expired',
-          });
+      success: false,
+      valid: false,
+      message: 'Token is invalid or has expired',
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        valid: true,
-        customer: {
-          id: decodedPayload.id,
-          email: decodedPayload.email,
-          role: decodedPayload.role,
-        },
-      });
+    success: true,
+    valid: true,
+    customer: {
+      id: decodedPayload.id,
+      email: decodedPayload.email,
+      role: decodedPayload.role,
+    },
+  });
 };
 
 export const requestEmailVerification = async (
@@ -282,10 +282,10 @@ export const requestEmailVerification = async (
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'If an unverified account exists with that email, a verification link has been sent',
-        ...(process.env.NODE_ENV !== 'production' && token ? { data: { token } } : {}),
-      });
+    success: true,
+    message: 'If an unverified account exists with that email, a verification link has been sent',
+    ...(process.env.NODE_ENV !== 'production' && token ? { data: { token } } : {}),
+  });
 };
 
 export const verifyEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -315,9 +315,9 @@ export const requestPasswordReset = async (
 
   if (!email) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Email is required',
-          });
+      success: false,
+      message: 'Email is required',
+    });
     return;
   }
 
@@ -326,9 +326,9 @@ export const requestPasswordReset = async (
   // Always return success to prevent email enumeration attacks
   if (!subject?.id) {
     jsonResponse(res, 200, {
-            success: true,
-            message: 'If an account exists with that email, a password reset link has been sent',
-          });
+      success: true,
+      message: 'If an account exists with that email, a password reset link has been sent',
+    });
     return;
   }
 
@@ -344,11 +344,11 @@ export const requestPasswordReset = async (
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Password reset instructions have been sent to your email',
-        // REMOVE IN PRODUCTION - only for development
-        resetToken,
-      });
+    success: true,
+    message: 'Password reset instructions have been sent to your email',
+    // REMOVE IN PRODUCTION - only for development
+    resetToken,
+  });
 };
 
 /**
@@ -363,9 +363,9 @@ export const resetPassword = async (
 
   if (!token || !finalPassword) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Reset token and new password are required',
-          });
+      success: false,
+      message: 'Reset token and new password are required',
+    });
     return;
   }
 
@@ -373,9 +373,9 @@ export const resetPassword = async (
   const customerId = await credentialPort.verifyPasswordResetToken(token);
   if (!customerId) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Password reset token is invalid or has expired',
-          });
+      success: false,
+      message: 'Password reset token is invalid or has expired',
+    });
     return;
   }
 
@@ -383,9 +383,9 @@ export const resetPassword = async (
   await credentialPort.changePassword(customerId, finalPassword);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Your password has been successfully reset',
-      });
+    success: true,
+    message: 'Your password has been successfully reset',
+  });
 };
 
 /**
@@ -402,18 +402,18 @@ export const logoutCustomer = async (req: HttpRequest<Record<string, string>, un
 
   if (!customerId || !accessToken) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Not authenticated',
-          });
+      success: false,
+      message: 'Not authenticated',
+    });
     return;
   }
 
   await logoutSessionUseCase.execute(new LogoutSessionCommand(customerId, 'customer', accessToken, refreshToken));
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Logged out successfully',
-      });
+    success: true,
+    message: 'Logged out successfully',
+  });
 };
 
 /**
@@ -424,17 +424,17 @@ export const get2FAStatus = async (req: HttpRequest<Record<string, string>, unkn
 
   if (!customerId) {
     jsonResponse(res, 401, {
-            success: false,
-            message: 'Not authenticated',
-          });
+      success: false,
+      message: 'Not authenticated',
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          enabled: false,
-          method: null,
-        },
-      });
+    success: true,
+    data: {
+      enabled: false,
+      method: null,
+    },
+  });
 };

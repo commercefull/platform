@@ -1,5 +1,15 @@
 import { queryOne, query } from '../../../../libs/db';
-import { Table, ContentType, ContentPage, ContentBlock, ContentBlockType, ContentTemplate } from '../../../../libs/db/types';
+import {
+  Table,
+  ContentType,
+  ContentPage,
+  ContentBlock,
+  ContentBlockType,
+  ContentTemplate,
+  ContentPagePublication,
+  ContentPageTranslation,
+} from '../../../../libs/db/types';
+import type { ContentPublicationContext } from '../../domain/repositories/ContentRepository';
 import { unixTimestamp } from '../../../../libs/date';
 import {
   ContentTypeNotFoundError,
@@ -18,6 +28,8 @@ const TABLES = {
   CONTENT_BLOCK: Table.ContentBlock,
   CONTENT_BLOCK_TYPE: Table.ContentBlockType,
   CONTENT_TEMPLATE: Table.ContentTemplate,
+  CONTENT_PAGE_PUBLICATION: Table.ContentPagePublication,
+  CONTENT_PAGE_TRANSLATION: Table.ContentPageTranslation,
 };
 
 // Re-export generated types for convenience
@@ -427,6 +439,159 @@ export class ContentRepo {
     }
 
     return result;
+  }
+
+  // Content Page Publication methods
+
+  async findPagePublications(contentPageId: string): Promise<ContentPagePublication[]> {
+    const rows = await query<ContentPagePublication[]>(
+      `SELECT * FROM "${TABLES.CONTENT_PAGE_PUBLICATION}" WHERE "contentPageId" = $1 ORDER BY "createdAt" ASC`,
+      [contentPageId],
+    );
+    return rows || [];
+  }
+
+  async createPagePublication(params: {
+    contentPageId: string;
+    storeId: string;
+    channelId?: string | null;
+    locale?: string | null;
+  }): Promise<ContentPagePublication> {
+    const now = unixTimestamp();
+    const result = await queryOne<ContentPagePublication>(
+      `INSERT INTO "${TABLES.CONTENT_PAGE_PUBLICATION}"
+         ("contentPageId", "storeId", "channelId", "locale", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $5)
+       ON CONFLICT ("contentPageId", "storeId", "channelId", "locale") DO UPDATE SET "updatedAt" = $5
+       RETURNING *`,
+      [params.contentPageId, params.storeId, params.channelId ?? null, params.locale ?? null, now],
+    );
+    if (!result) {
+      throw new FailedToCreateContentError(`Failed to publish page ${params.contentPageId} to store ${params.storeId}`);
+    }
+    return result;
+  }
+
+  async deletePagePublication(contentPagePublicationId: string): Promise<boolean> {
+    const result = await queryOne<{ id: string }>(
+      `DELETE FROM "${TABLES.CONTENT_PAGE_PUBLICATION}" WHERE "contentPagePublicationId" = $1 RETURNING "contentPagePublicationId" as id`,
+      [contentPagePublicationId],
+    );
+    return !!result;
+  }
+
+  async findPagePublicationByContext(
+    contentPageId: string,
+    storeId: string,
+    channelId?: string | null,
+    locale?: string | null,
+  ): Promise<ContentPagePublication | null> {
+    return queryOne<ContentPagePublication>(
+      `SELECT * FROM "${TABLES.CONTENT_PAGE_PUBLICATION}"
+       WHERE "contentPageId" = $1 AND "storeId" = $2
+         AND "channelId" IS NOT DISTINCT FROM $3
+         AND "locale" IS NOT DISTINCT FROM $4
+       LIMIT 1`,
+      [contentPageId, storeId, channelId ?? null, locale ?? null],
+    );
+  }
+
+  private publicationVisibilityClause(context: ContentPublicationContext, paramStart: number): { sql: string; params: unknown[] } {
+    // A page with no publication rows stays globally visible; otherwise a row
+    // must match the resolved store/channel/locale (null publication fields
+    // mean "all channels" / "all locales").
+    return {
+      sql: `(
+        NOT EXISTS (
+          SELECT 1 FROM "${TABLES.CONTENT_PAGE_PUBLICATION}" pp
+          WHERE pp."contentPageId" = "${TABLES.CONTENT_PAGE}"."contentPageId"
+        )
+        OR EXISTS (
+          SELECT 1 FROM "${TABLES.CONTENT_PAGE_PUBLICATION}" pp
+          WHERE pp."contentPageId" = "${TABLES.CONTENT_PAGE}"."contentPageId"
+            AND pp."storeId" = $${paramStart}
+            AND (pp."channelId" IS NULL OR pp."channelId" = $${paramStart + 1})
+            AND (pp."locale" IS NULL OR pp."locale" = $${paramStart + 2})
+        )
+      )`,
+      params: [context.storeId ?? null, context.channelId ?? null, context.locale ?? null],
+    };
+  }
+
+  async findPublishedPageBySlugForContext(slug: string, context: ContentPublicationContext): Promise<ContentPage | null> {
+    // Translated slugs resolve first: a published translation for the
+    // requested locale (exact `de-DE`, falling back to the `de` language
+    // prefix) maps the slug back to its base page.
+    if (context.locale) {
+      const language = context.locale.split('-')[0];
+      const clause = this.publicationVisibilityClause(context, 4);
+      const translated = await queryOne<ContentPage>(
+        `SELECT "${TABLES.CONTENT_PAGE}".* FROM "${TABLES.CONTENT_PAGE}"
+         JOIN "${TABLES.CONTENT_PAGE_TRANSLATION}" t
+           ON t."contentPageId" = "${TABLES.CONTENT_PAGE}"."contentPageId"
+         JOIN "locale" l ON l."localeId" = t."localeId"
+         WHERE t."slug" = $1 AND t."isPublished" = true
+           AND (l."code" = $2 OR l."language" = $3)
+           AND "${TABLES.CONTENT_PAGE}"."status" = 'published' AND ${clause.sql}
+         ORDER BY (l."code" = $2) DESC, "${TABLES.CONTENT_PAGE}"."updatedAt" DESC
+         LIMIT 1`,
+        [slug, context.locale, language, ...clause.params],
+      );
+      if (translated) {
+        return this.overlayPageTranslation(translated, context.locale);
+      }
+    }
+
+    const { sql, params } = this.publicationVisibilityClause(context, 2);
+    const page = await queryOne<ContentPage>(
+      `SELECT * FROM "${TABLES.CONTENT_PAGE}"
+       WHERE "slug" = $1 AND "status" = 'published' AND ${sql}
+       ORDER BY "updatedAt" DESC
+       LIMIT 1`,
+      [slug, ...params],
+    );
+    if (page && context.locale) {
+      return this.overlayPageTranslation(page, context.locale);
+    }
+    return page;
+  }
+
+  /**
+   * Overlay a published translation's display fields onto the base page
+   * for the requested locale (exact match preferred over language prefix).
+   */
+  private async overlayPageTranslation(page: ContentPage, locale: string): Promise<ContentPage> {
+    const language = locale.split('-')[0];
+    const translation = await queryOne<ContentPageTranslation>(
+      `SELECT t.* FROM "${TABLES.CONTENT_PAGE_TRANSLATION}" t
+       JOIN "locale" l ON l."localeId" = t."localeId"
+       WHERE t."contentPageId" = $1 AND t."isPublished" = true
+         AND (l."code" = $2 OR l."language" = $3)
+       ORDER BY (l."code" = $2) DESC
+       LIMIT 1`,
+      [page.contentPageId, locale, language],
+    );
+    if (!translation) return page;
+    return {
+      ...page,
+      title: translation.title ?? page.title,
+      summary: translation.summary ?? page.summary,
+      metaTitle: translation.metaTitle ?? page.metaTitle,
+      metaDescription: translation.metaDescription ?? page.metaDescription,
+      metaKeywords: translation.metaKeywords ?? page.metaKeywords,
+    };
+  }
+
+  async findPublishedPagesForContext(context: ContentPublicationContext, limit: number = 50, offset: number = 0): Promise<ContentPage[]> {
+    const { sql, params } = this.publicationVisibilityClause(context, 3);
+    const rows = await query<ContentPage[]>(
+      `SELECT * FROM "${TABLES.CONTENT_PAGE}"
+       WHERE "status" = 'published' AND ${sql}
+       ORDER BY "sortOrder" ASC, "publishedAt" DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset, ...params],
+    );
+    return rows || [];
   }
 
   // Content Block methods

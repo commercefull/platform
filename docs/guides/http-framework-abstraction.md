@@ -168,7 +168,7 @@ declare global {
       customer?: HttpCustomerContext;
       cookies: Record<string, string>;
       signedCookies: Record<string, string>;
-      flash: { /* overloaded — see expressAugmentation.ts */ };
+      flash: {/* overloaded — see expressAugmentation.ts */};
     }
   }
 }

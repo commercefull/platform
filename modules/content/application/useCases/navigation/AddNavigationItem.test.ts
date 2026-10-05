@@ -14,7 +14,7 @@ describe('AddNavigationItemUseCase', () => {
   beforeEach(() => {
     mockNavRepo = lazyMock<ConstructorParameters<typeof AddNavigationItemUseCase>[0]>();
     mockNavRepo.findNavigationById.mockResolvedValue(createContentNavigation({ contentNavigationId: 'n1' }));
-    mockNavRepo.createNavigationItem.mockImplementation(async (params) =>
+    mockNavRepo.createNavigationItem.mockImplementation(async params =>
       createContentNavigationItem({ ...params, contentNavigationItemId: 'ni1' }),
     );
     mockContentRepo = lazyMock<ConstructorParameters<typeof AddNavigationItemUseCase>[1]>();

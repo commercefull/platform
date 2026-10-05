@@ -28,9 +28,7 @@ describe('DeleteMediaUseCase', () => {
     const repository = createDeleteMediaRepository();
     repository.findById.mockResolvedValue(null);
 
-    await expect(new DeleteMediaUseCase(repository).execute({ mediaId: 'missing' })).rejects.toThrow(
-      MediaAssetNotFoundError,
-    );
+    await expect(new DeleteMediaUseCase(repository).execute({ mediaId: 'missing' })).rejects.toThrow(MediaAssetNotFoundError);
     expect(repository.delete).not.toHaveBeenCalled();
   });
 

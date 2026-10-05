@@ -12,11 +12,21 @@ import { logger } from '../../../../libs/logger';
 import type { ProductDetailsPort } from '../../application/ports/ProductDetailsPort';
 
 export class ProductDetailsAdapter implements ProductDetailsPort {
-  async findProductDetails(productId: string): Promise<{ sku: string; name: string } | null> {
+  async findProductDetails(productId: string): Promise<{
+    sku: string;
+    name: string;
+    itemType: 'physical' | 'digital' | 'subscription';
+    inventoryPolicy: 'tracked' | 'unlimited';
+  } | null> {
     try {
       const product = await getProductUseCase.execute(new GetProductCommand(productId));
       if (!product) return null;
-      return { sku: product.sku ?? '', name: product.name };
+      return {
+        sku: product.sku ?? '',
+        name: product.name,
+        itemType: product.isSubscription ? 'subscription' : product.isVirtual || product.isDownloadable ? 'digital' : 'physical',
+        inventoryPolicy: product.isInventoryManaged ? 'tracked' : 'unlimited',
+      };
     } catch (error) {
       logger.debug('Product details lookup failed', { productId, error: (error as Error).message });
       return null;

@@ -1,8 +1,4 @@
-import type {
-  ShippingZonePort,
-  CreateShippingZoneInput,
-  UpdateShippingZoneInput,
-} from '../../domain/repositories/ShippingConfigPorts';
+import type { ShippingZonePort, CreateShippingZoneInput, UpdateShippingZoneInput } from '../../domain/repositories/ShippingConfigPorts';
 
 export class ManageShippingZonesUseCase {
   constructor(private readonly shippingZoneRepo: ShippingZonePort) {}
@@ -32,4 +28,3 @@ export class ManageShippingZonesUseCase {
     return this.shippingZoneRepo.delete(id);
   }
 }
-

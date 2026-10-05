@@ -50,7 +50,6 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
 // Entity factories
 // ============================================================================
 
-
 export function createStoreDispatch(overrides: Partial<Parameters<typeof StoreDispatch.create>[0]> = {}): StoreDispatch {
   return StoreDispatch.create({
     dispatchId: 'd1',

@@ -70,4 +70,62 @@ describe('StripeAdapter', () => {
     const result = adapter.normalize({ type: 'payment_intent.succeeded', data: {} });
     expect(result).toBeNull();
   });
+
+  describe('initiatePayment', () => {
+    const config = { apiKey: 'sk_test_xxx', webhookSecret: 'whsec_xxx', testMode: true };
+    const request = { orderId: 'order-1', amountCents: 48.18, currency: 'USD' };
+
+    function lastRequestBody(): URLSearchParams {
+      const call = jest.mocked(fetch).mock.calls[0];
+      return call[1]?.body as URLSearchParams;
+    }
+
+    beforeEach(() => {
+      global.fetch = jest.fn(async () => ({
+        ok: true,
+        json: async () => ({ id: 'pi_123', status: 'succeeded' }),
+      })) as unknown as typeof fetch;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should send the delegated token as payment_method with confirm=true', async () => {
+      await adapter.initiatePayment({ ...request, paymentMethodToken: 'spt_token_123' }, config);
+
+      const body = lastRequestBody();
+      expect(body.get('payment_method')).toBe('spt_token_123');
+      expect(body.get('confirm')).toBe('true');
+    });
+
+    it('should not send payment_method or confirm for regular intents', async () => {
+      await adapter.initiatePayment(request, config);
+
+      const body = lastRequestBody();
+      expect(body.get('payment_method')).toBeNull();
+      expect(body.get('confirm')).toBeNull();
+    });
+
+    it('should map a succeeded response to captured', async () => {
+      const result = await adapter.initiatePayment({ ...request, paymentMethodToken: 'spt_token_123' }, config);
+
+      expect(result.success).toBe(true);
+      expect(result.status).toBe('captured');
+      expect(result.externalTransactionId).toBe('pi_123');
+    });
+
+    it('should map a Stripe error response to a failed result', async () => {
+      global.fetch = jest.fn(async () => ({
+        ok: false,
+        json: async () => ({ error: { code: 'card_declined', message: 'Card declined' } }),
+      })) as unknown as typeof fetch;
+
+      const result = await adapter.initiatePayment({ ...request, paymentMethodToken: 'spt_bad' }, config);
+
+      expect(result.success).toBe(false);
+      expect(result.status).toBe('failed');
+      expect(result.errorCode).toBe('card_declined');
+    });
+  });
 });

@@ -39,18 +39,18 @@ describe('CreatePriceListUseCase', () => {
   it('should throw PricingValidationError when the name is empty', async () => {
     const repository = createPriceListRepository();
 
-    await expect(
-      new CreatePriceListUseCase(repository).execute({ name: '', currencyCode: 'USD', type: 'standard' }),
-    ).rejects.toThrow(PricingValidationError);
+    await expect(new CreatePriceListUseCase(repository).execute({ name: '', currencyCode: 'USD', type: 'standard' })).rejects.toThrow(
+      PricingValidationError,
+    );
     expect(repository.createPriceList).not.toHaveBeenCalled();
   });
 
   it('should throw PricingValidationError when the currencyCode is empty', async () => {
     const repository = createPriceListRepository();
 
-    await expect(
-      new CreatePriceListUseCase(repository).execute({ name: 'Test', currencyCode: '', type: 'standard' }),
-    ).rejects.toThrow(PricingValidationError);
+    await expect(new CreatePriceListUseCase(repository).execute({ name: 'Test', currencyCode: '', type: 'standard' })).rejects.toThrow(
+      PricingValidationError,
+    );
     expect(repository.createPriceList).not.toHaveBeenCalled();
   });
 });

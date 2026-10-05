@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Inventory Controller for Admin Hub
  * Manages stock levels, adjustments, and inventory locations
@@ -18,8 +18,6 @@ import {
   cancelStoreDispatchUseCase,
   manageAdminInventoryUseCase,
 } from '../../application/useCases/wired';
-
-
 
 // ============================================================================
 // List Inventory
@@ -280,7 +278,10 @@ export const approveDispatch = async (req: HttpRequest, res: HttpResponse): Prom
     redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch approved successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`);
+    redirectResponse(
+      res,
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to approve dispatch')}`,
+    );
   }
 };
 
@@ -290,7 +291,10 @@ export const markDispatched = async (req: HttpRequest, res: HttpResponse): Promi
     redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch marked as shipped`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`);
+    redirectResponse(
+      res,
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to ship dispatch')}`,
+    );
   }
 };
 
@@ -315,7 +319,10 @@ export const receiveDispatch = async (req: HttpRequest, res: HttpResponse): Prom
     redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch received successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`);
+    redirectResponse(
+      res,
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to receive dispatch')}`,
+    );
   }
 };
 
@@ -326,6 +333,9 @@ export const cancelDispatch = async (req: HttpRequest, res: HttpResponse): Promi
     redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?success=Dispatch cancelled successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`);
+    redirectResponse(
+      res,
+      `/admin/dispatches/${req.params.dispatchId}?error=${encodeURIComponent((error as Error).message || 'Failed to cancel dispatch')}`,
+    );
   }
 };

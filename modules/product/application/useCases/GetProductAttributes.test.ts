@@ -1,4 +1,3 @@
-
 import { GetProductAttributesUseCase } from './GetProductAttributes';
 import { createAttribute, createAttributeData, lazyMock } from '../../tests/testUtils';
 

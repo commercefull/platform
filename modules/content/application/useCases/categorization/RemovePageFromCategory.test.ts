@@ -28,9 +28,7 @@ describe('RemovePageFromCategoryUseCase', () => {
   it('should throw CategorizationNotFoundError when the link does not exist', async () => {
     mockRepo.deleteCategorizationByPageAndCategory.mockResolvedValue(false);
 
-    await expect(useCase.execute(new RemovePageFromCategoryCommand('page-1', 'cat-9'))).rejects.toThrow(
-      CategorizationNotFoundError,
-    );
+    await expect(useCase.execute(new RemovePageFromCategoryCommand('page-1', 'cat-9'))).rejects.toThrow(CategorizationNotFoundError);
     expect(emitMock).not.toHaveBeenCalled();
   });
 });

@@ -182,5 +182,4 @@ describe('Content Page Actions API', () => {
       expect(response.data.data).toBeDefined();
     });
   });
-
 });

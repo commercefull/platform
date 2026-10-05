@@ -20,9 +20,7 @@ export class CreateCurrencyPriceRuleUseCase {
 
   async execute(ruleData: CurrencyPriceRuleCreateProps): Promise<CurrencyPriceRule> {
     if (!ruleData.currencyCode || ruleData.priority === undefined || !ruleData.adjustments || ruleData.adjustments.length === 0) {
-      throw new PricingValidationError(
-        'Missing required fields: currencyCode, priority, and at least one adjustment are required',
-      );
+      throw new PricingValidationError('Missing required fields: currencyCode, priority, and at least one adjustment are required');
     }
 
     const currency = await this.port.getCurrencyByCode(ruleData.currencyCode);

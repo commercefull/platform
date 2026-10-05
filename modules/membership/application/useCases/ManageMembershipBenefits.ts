@@ -11,7 +11,6 @@ export interface MembershipPlanBenefitsPort {
   findByPlanId(planId: string, activeOnly?: boolean): Promise<MembershipPlanBenefit[]>;
 }
 
-
 export class ManageMembershipBenefitsUseCase {
   constructor(
     private readonly benefitRepo: MembershipBenefitsPort,
@@ -51,4 +50,3 @@ export class ManageMembershipBenefitsUseCase {
     return benefits;
   }
 }
-

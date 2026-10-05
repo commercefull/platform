@@ -20,7 +20,6 @@ export interface SsoLoginResult {
   expiresIn: string;
 }
 
-
 export class SsoLoginUseCase {
   private readonly samlParser = new SamlAssertionParser();
   private readonly oidcExchange = new OidcTokenExchange();
@@ -170,4 +169,3 @@ export class SsoLoginUseCase {
 // ============================================================================
 // List SSO Providers
 // ============================================================================
-

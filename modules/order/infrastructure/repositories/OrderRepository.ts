@@ -62,10 +62,9 @@ export class OrderRepo implements IOrderRepository {
         ? (rows?.length ?? 0)
         : parseInt(
             (
-              await queryOne<{ count: string }>(
-                'SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL',
-                [customerId],
-              )
+              await queryOne<{ count: string }>('SELECT COUNT(*) as count FROM "order" WHERE "customerId" = $1 AND "deletedAt" IS NULL', [
+                customerId,
+              ])
             )?.count || '0',
           );
 
@@ -93,9 +92,7 @@ export class OrderRepo implements IOrderRepository {
     const total =
       offset === 0 && (rows?.length ?? 0) < limit
         ? (rows?.length ?? 0)
-        : parseInt(
-            (await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params))?.count || '0',
-          );
+        : parseInt((await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params))?.count || '0');
 
     const orders = await this.hydrateOrders(rows || []);
 
@@ -744,7 +741,8 @@ export class OrderRepo implements IOrderRepository {
       quantity: row.quantity,
       unitPrice: Money.fromCents(Number(row.unitPriceCents), currency),
       unitCost: row.unitCostCents != null ? Money.fromCents(Number(row.unitCostCents), currency) : undefined,
-      discountedUnitPrice: row.discountedUnitPriceCents != null ? Money.fromCents(Number(row.discountedUnitPriceCents), currency) : undefined,
+      discountedUnitPrice:
+        row.discountedUnitPriceCents != null ? Money.fromCents(Number(row.discountedUnitPriceCents), currency) : undefined,
       lineTotal: Money.fromCents(Number(row.lineTotalCents || '0'), currency),
       discountTotal: Money.fromCents(Number(row.discountTotalCents || '0'), currency),
       taxTotal: Money.fromCents(Number(row.taxTotalCents || '0'), currency),

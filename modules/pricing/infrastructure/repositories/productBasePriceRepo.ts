@@ -121,7 +121,9 @@ export class ProductBasePriceRepo {
       }
     }
     if (fields.length === 0) {
-      const row = await queryOne<DbProductBasePrice>(`SELECT * FROM "${this.tableName}" WHERE "productBasePriceId" = $1`, [productBasePriceId]);
+      const row = await queryOne<DbProductBasePrice>(`SELECT * FROM "${this.tableName}" WHERE "productBasePriceId" = $1`, [
+        productBasePriceId,
+      ]);
       return row ? mapRow(row) : null;
     }
 

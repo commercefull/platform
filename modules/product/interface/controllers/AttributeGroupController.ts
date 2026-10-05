@@ -1,8 +1,6 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageAttributeGroupsUseCase } from '../../application/useCases/wired';
-
-
 
 class AttributeGroupController {
   /**
@@ -13,9 +11,9 @@ class AttributeGroupController {
     const groups = await manageAttributeGroupsUseCase.findAll();
 
     jsonResponse(res, 200, {
-            success: true,
-            data: groups || [],
-          });
+      success: true,
+      data: groups || [],
+    });
   }
 
   /**
@@ -28,16 +26,16 @@ class AttributeGroupController {
 
     if (!group) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute group not found',
-              });
+        success: false,
+        error: 'Attribute group not found',
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: group,
-          });
+      success: true,
+      data: group,
+    });
   }
 
   /**
@@ -50,16 +48,16 @@ class AttributeGroupController {
 
     if (!group) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute group not found',
-              });
+        success: false,
+        error: 'Attribute group not found',
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: group,
-          });
+      success: true,
+      data: group,
+    });
   }
 
   /**
@@ -72,9 +70,9 @@ class AttributeGroupController {
     // Validate required fields
     if (!name || !code) {
       jsonResponse(res, 400, {
-                success: false,
-                error: 'Name and code are required',
-              });
+        success: false,
+        error: 'Name and code are required',
+      });
       return;
     }
 
@@ -82,9 +80,9 @@ class AttributeGroupController {
     const existing = await manageAttributeGroupsUseCase.findByCode(code);
     if (existing) {
       jsonResponse(res, 400, {
-                success: false,
-                error: 'Attribute group with this code already exists',
-              });
+        success: false,
+        error: 'Attribute group with this code already exists',
+      });
       return;
     }
 
@@ -96,9 +94,9 @@ class AttributeGroupController {
     });
 
     jsonResponse(res, 201, {
-            success: true,
-            data: group,
-          });
+      success: true,
+      data: group,
+    });
   }
 
   /**
@@ -113,9 +111,9 @@ class AttributeGroupController {
     const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute group not found',
-              });
+        success: false,
+        error: 'Attribute group not found',
+      });
       return;
     }
 
@@ -126,9 +124,9 @@ class AttributeGroupController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: group,
-          });
+      success: true,
+      data: group,
+    });
   }
 
   /**
@@ -142,18 +140,18 @@ class AttributeGroupController {
     const existing = await manageAttributeGroupsUseCase.findOne(id);
     if (!existing) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute group not found',
-              });
+        success: false,
+        error: 'Attribute group not found',
+      });
       return;
     }
 
     await manageAttributeGroupsUseCase.delete(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Attribute group deleted successfully',
-          });
+      success: true,
+      message: 'Attribute group deleted successfully',
+    });
   }
 }
 

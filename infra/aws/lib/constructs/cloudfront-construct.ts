@@ -109,7 +109,7 @@ export class CloudFrontConstruct extends Construct {
         compress: true,
       },
       additionalBehaviors:
-        props.enableCaching ?? true ? Object.fromEntries(STATIC_PATH_PATTERNS.map(pattern => [pattern, staticBehavior])) : undefined,
+        (props.enableCaching ?? true) ? Object.fromEntries(STATIC_PATH_PATTERNS.map(pattern => [pattern, staticBehavior])) : undefined,
       certificate: props.certificate,
       domainNames: [props.domainName, `www.${props.domainName}`],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,

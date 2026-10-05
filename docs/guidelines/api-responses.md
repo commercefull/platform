@@ -7,18 +7,15 @@ All API endpoints return a consistent JSON envelope. Helpers live in `libs/apiRe
 Controllers never call `res.status`/`res.json`/`res.redirect`/`res.render`/`res.send`/`res.cookie`/`res.setHeader` directly — every response goes through a helper. The helpers delegate to Express, so wire behavior (and test mocks of `res.*`) is unchanged; they are the only files to edit if the framework is ever swapped.
 
 ```typescript
-import {
-  jsonResponse, sendResponse, redirectResponse, renderResponse,
-  setStatus, setHeader, cookieResponse,
-} from 'libs/apiResponse';
+import { jsonResponse, sendResponse, redirectResponse, renderResponse, setStatus, setHeader, cookieResponse } from 'libs/apiResponse';
 
-jsonResponse(res, 200, { items });                 // res.status(200).json(...)
-sendResponse(res, 200, '<xml/>');                  // res.status(200).send(...)
-redirectResponse(res, '/admin/products');          // res.redirect(302, url)
-redirectResponse(res, '/admin/products', 301);     // custom status
+jsonResponse(res, 200, { items }); // res.status(200).json(...)
+sendResponse(res, 200, '<xml/>'); // res.status(200).send(...)
+redirectResponse(res, '/admin/products'); // res.redirect(302, url)
+redirectResponse(res, '/admin/products', 301); // custom status
 renderResponse(res, 'partials/suggestions', data); // res.render — partials/previews only
-setStatus(res, 204);                               // bare res.status (rare)
-setHeader(res, 'X-Total-Count', '42');             // res.setHeader / res.set
+setStatus(res, 204); // bare res.status (rare)
+setHeader(res, 'X-Total-Count', '42'); // res.setHeader / res.set
 cookieResponse(res, 'token', value, { httpOnly: true }); // res.cookie
 ```
 

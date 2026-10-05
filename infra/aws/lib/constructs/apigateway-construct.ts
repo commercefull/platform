@@ -65,11 +65,9 @@ export class ApiGatewayConstruct extends Construct {
 
     if (props.cloudMapService) {
       // Cost-optimized: API Gateway → Cloud Map → ECS tasks (no ALB)
-      integration = new apigatewayv2integrations.HttpServiceDiscoveryIntegration(
-        'ServiceDiscoveryIntegration',
-        props.cloudMapService,
-        { vpcLink: this.vpcLink },
-      );
+      integration = new apigatewayv2integrations.HttpServiceDiscoveryIntegration('ServiceDiscoveryIntegration', props.cloudMapService, {
+        vpcLink: this.vpcLink,
+      });
     } else if (props.listener) {
       // Standard: API Gateway → ALB → ECS tasks
       integration = new apigatewayv2integrations.HttpAlbIntegration('AlbIntegration', props.listener, {

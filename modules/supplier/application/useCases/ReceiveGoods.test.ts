@@ -1,9 +1,4 @@
-import {
-  createPurchaseOrderRepository,
-  createReceivingRepository,
-  createInventoryRepository,
-  emitMock,
-} from '../../tests/testUtils';
+import { createPurchaseOrderRepository, createReceivingRepository, createInventoryRepository, emitMock } from '../../tests/testUtils';
 import { ReceiveGoodsUseCase } from './ReceiveGoods';
 import { PurchaseOrderNotFoundError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
@@ -21,60 +16,41 @@ describe('ReceiveGoodsUseCase', () => {
     const receivingRepository = createReceivingRepository();
     const inventoryRepository = createInventoryRepository();
 
-    const result = await new ReceiveGoodsUseCase(
-      purchaseOrderRepository,
-      receivingRepository,
-      inventoryRepository,
-    ).execute(receiveInput());
+    const result = await new ReceiveGoodsUseCase(purchaseOrderRepository, receivingRepository, inventoryRepository).execute(receiveInput());
 
     expect(result.status).toBe('complete');
     expect(result.itemsReceived).toBe(10);
     expect(inventoryRepository.adjustStock).toHaveBeenCalledWith(
       expect.objectContaining({ productId: 'p1', locationId: 'w1', adjustment: 10, reason: 'purchase_order_receipt' }),
     );
-    expect(purchaseOrderRepository.update).toHaveBeenCalledWith(
-      'po1',
-      expect.objectContaining({ status: 'received' }),
-    );
+    expect(purchaseOrderRepository.update).toHaveBeenCalledWith('po1', expect.objectContaining({ status: 'received' }));
   });
 
   it('should emit receiving.completed when goods are received', async () => {
-    await new ReceiveGoodsUseCase(
-      createPurchaseOrderRepository(),
-      createReceivingRepository(),
-      createInventoryRepository(),
-    ).execute(receiveInput());
-
-    expect(emitMock).toHaveBeenCalledWith(
-      'receiving.completed',
-      expect.objectContaining({ purchaseOrderId: 'po1', itemsReceived: 10 }),
+    await new ReceiveGoodsUseCase(createPurchaseOrderRepository(), createReceivingRepository(), createInventoryRepository()).execute(
+      receiveInput(),
     );
+
+    expect(emitMock).toHaveBeenCalledWith('receiving.completed', expect.objectContaining({ purchaseOrderId: 'po1', itemsReceived: 10 }));
   });
 
   it('should mark the order partially received when fewer quantities arrive', async () => {
     const purchaseOrderRepository = createPurchaseOrderRepository();
 
-    const result = await new ReceiveGoodsUseCase(
-      purchaseOrderRepository,
-      createReceivingRepository(),
-      createInventoryRepository(),
-    ).execute(receiveInput({ receivedItems: [{ productId: 'p1', quantityReceived: 5 }] }));
+    const result = await new ReceiveGoodsUseCase(purchaseOrderRepository, createReceivingRepository(), createInventoryRepository()).execute(
+      receiveInput({ receivedItems: [{ productId: 'p1', quantityReceived: 5 }] }),
+    );
 
     expect(result.status).toBe('partial');
-    expect(purchaseOrderRepository.update).toHaveBeenCalledWith(
-      'po1',
-      expect.objectContaining({ status: 'partial_received' }),
-    );
+    expect(purchaseOrderRepository.update).toHaveBeenCalledWith('po1', expect.objectContaining({ status: 'partial_received' }));
   });
 
   it('should skip the stock adjustment when all received units are damaged', async () => {
     const inventoryRepository = createInventoryRepository();
 
-    const result = await new ReceiveGoodsUseCase(
-      createPurchaseOrderRepository(),
-      createReceivingRepository(),
-      inventoryRepository,
-    ).execute(receiveInput({ receivedItems: [{ productId: 'p1', quantityReceived: 5, quantityDamaged: 5 }] }));
+    const result = await new ReceiveGoodsUseCase(createPurchaseOrderRepository(), createReceivingRepository(), inventoryRepository).execute(
+      receiveInput({ receivedItems: [{ productId: 'p1', quantityReceived: 5, quantityDamaged: 5 }] }),
+    );
 
     expect(result.itemsDamaged).toBe(5);
     expect(inventoryRepository.adjustStock).not.toHaveBeenCalled();
@@ -85,11 +61,9 @@ describe('ReceiveGoodsUseCase', () => {
     const inventoryRepository = createInventoryRepository();
 
     await expect(
-      new ReceiveGoodsUseCase(
-        createPurchaseOrderRepository(null),
-        receivingRepository,
-        inventoryRepository,
-      ).execute(receiveInput({ purchaseOrderId: 'nonexistent' })),
+      new ReceiveGoodsUseCase(createPurchaseOrderRepository(null), receivingRepository, inventoryRepository).execute(
+        receiveInput({ purchaseOrderId: 'nonexistent' }),
+      ),
     ).rejects.toThrow(PurchaseOrderNotFoundError);
     expect(receivingRepository.create).not.toHaveBeenCalled();
     expect(inventoryRepository.adjustStock).not.toHaveBeenCalled();

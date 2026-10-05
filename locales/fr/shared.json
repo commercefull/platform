@@ -24,7 +24,10 @@
     "gateways": "Passerelles",
     "finance": "Finance",
     "storeConfiguration": "Configuration du magasin",
-    "administration": "Administration"
+    "administration": "Administration",
+    "automation": "Automatisation",
+    "returns": "Retours",
+    "recommendations": "Recommandations"
   },
   "footer": {
     "documentation": "Documentation",

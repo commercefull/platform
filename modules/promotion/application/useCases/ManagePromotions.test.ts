@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManagePromotionsUseCase } from './ManagePromotions';
-import {
-  createPromotionRepository,
-  createPromotion,
-} from '../../tests/testUtils';
+import { createPromotionRepository, createPromotion } from '../../tests/testUtils';
 
 describe('ManagePromotionsUseCase', () => {
   const promotionRepository = createPromotionRepository();
@@ -59,4 +56,3 @@ describe('ManagePromotionsUseCase', () => {
     expect(promotionRepository.delete).toHaveBeenCalledWith('promo-1');
   });
 });
-

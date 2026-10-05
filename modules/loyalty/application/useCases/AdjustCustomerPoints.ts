@@ -45,10 +45,6 @@ export class AdjustCustomerPointsUseCase {
 
     const pointsDelta = typeof input.points === 'string' ? parseInt(input.points) : input.points;
 
-    return this.loyalty.adjustCustomerPoints(
-      input.customerId,
-      pointsDelta,
-      input.reason || 'Manual adjustment by admin',
-    );
+    return this.loyalty.adjustCustomerPoints(input.customerId, pointsDelta, input.reason || 'Manual adjustment by admin');
   }
 }

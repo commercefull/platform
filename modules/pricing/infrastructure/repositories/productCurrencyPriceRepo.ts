@@ -34,17 +34,18 @@ export type ProductCurrencyPriceCreateParams = {
   isManual?: boolean;
   updatedBy?: string | null;
 };
-export type ProductCurrencyPriceUpdateParams = Partial<Pick<CurrencyPriceEntry, 'priceCents' | 'compareAtPriceCents' | 'isManual' | 'updatedBy'>>;
+export type ProductCurrencyPriceUpdateParams = Partial<
+  Pick<CurrencyPriceEntry, 'priceCents' | 'compareAtPriceCents' | 'isManual' | 'updatedBy'>
+>;
 
 export class ProductCurrencyPriceRepo {
   /**
    * Find price by ID
    */
   async findById(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
-    const row = await queryOne<ProductCurrencyPrice>(
-      `SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`,
-      [productCurrencyPriceId],
-    );
+    const row = await queryOne<ProductCurrencyPrice>(`SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`, [
+      productCurrencyPriceId,
+    ]);
     return row ? mapRow(row) : null;
   }
 
@@ -274,7 +275,10 @@ export class ProductCurrencyPriceRepo {
    * Bulk update prices for currency (e.g., when exchange rate changes).
    * Amounts are integer cents.
    */
-  async bulkUpdateForCurrency(currencyId: string, priceUpdates: Array<{ productCurrencyPriceId: string; priceCents: number }>): Promise<number> {
+  async bulkUpdateForCurrency(
+    currencyId: string,
+    priceUpdates: Array<{ productCurrencyPriceId: string; priceCents: number }>,
+  ): Promise<number> {
     const now = unixTimestamp();
     let updated = 0;
 

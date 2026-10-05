@@ -5,16 +5,87 @@
         <h2 class="page-title"><%= pageName %></h2>
       </div>
       <div class="col-auto ms-auto">
-        <a href="/admin/catalog/collections/create" class="btn btn-primary"><%= t('product:collection.create') %></a>
+        <a href="/admin/catalog/collections/create" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+          <%= t('product:collection.create') %>
+        </a>
       </div>
     </div>
   </div>
+
   <% if (typeof success !== 'undefined' && success) { %>
-  <div class="alert alert-success"><%= success %></div>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= success %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
   <% } %>
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= error %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  <% } %>
+
   <div class="card">
-    <div class="card-body">
-      <p class="text-muted"><%= t('product:collection.managementComingSoon') %></p>
+    <div class="card-header">
+      <h3 class="card-title"><%= t('nav.collections') %></h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table">
+        <thead>
+          <tr>
+            <th><%= t('common.name') %></th>
+            <th><%= t('shared:common.slug') %></th>
+            <th><%= t('product:collection.type') %></th>
+            <th><%= t('common.status') %></th>
+            <th><%= t('product:collection.featured') %></th>
+            <th class="w-1"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (collections && collections.length > 0) { %>
+            <% collections.forEach(function(collection) { %>
+            <tr>
+              <td>
+                <a href="/admin/catalog/collections/<%= collection.assortmentCollectionId %>"><%= collection.name %></a>
+              </td>
+              <td class="text-muted"><%= collection.slug %></td>
+              <td>
+                <% if (collection.isAutomated) { %>
+                <span class="badge bg-blue"><%= t('product:collection.automated') %></span>
+                <% } else { %>
+                <span class="badge bg-secondary"><%= t('product:collection.manual') %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (collection.isActive) { %>
+                <span class="badge bg-success"><%= t('common.active') %></span>
+                <% } else { %>
+                <span class="badge bg-secondary"><%= t('common.inactive') %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (collection.isFeatured) { %>
+                <span class="badge bg-yellow"><%= t('product:collection.featured') %></span>
+                <% } %>
+              </td>
+              <td>
+                <a href="/admin/catalog/collections/<%= collection.assortmentCollectionId %>" class="btn btn-sm"><%= t('common.view') %></a>
+                <a href="/admin/catalog/collections/<%= collection.assortmentCollectionId %>/edit" class="btn btn-sm"><%= t('common.edit') %></a>
+              </td>
+            </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center text-muted"><%= t('product:collection.notFound') %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

@@ -51,19 +51,14 @@ export interface DashboardSaveInput extends Partial<AnalyticsReportDashboard> {
 interface AnalyticsPort {
   getSalesSummary(startDate: Date, endDate: Date, organizationId?: string): Promise<SalesSummaryRecord>;
   getSalesDaily(
-    filters: { startDate?: Date; endDate?: Date; channel?: string; organizationId?: string },
+    filters: { startDate?: Date; endDate?: Date; channel?: string; salesChannelId?: string; organizationId?: string },
     pagination?: ReportPagination,
   ): Promise<{ data: AnalyticsSalesDailyRecord[]; total: number }>;
   getProductPerformance(
-    filters: { productId?: string; startDate?: Date; endDate?: Date },
+    filters: { productId?: string; startDate?: Date; endDate?: Date; salesChannelId?: string },
     pagination?: ReportPagination,
   ): Promise<{ data: ProductPerformance[]; total: number }>;
-  getTopProducts(
-    startDate: Date,
-    endDate: Date,
-    metric?: 'revenue' | 'purchases' | 'views',
-    limit?: number,
-  ): Promise<ProductPerformance[]>;
+  getTopProducts(startDate: Date, endDate: Date, metric?: 'revenue' | 'purchases' | 'views', limit?: number): Promise<ProductPerformance[]>;
   getSearchQueries(
     filters: { startDate?: Date; endDate?: Date; isZeroResult?: boolean; query?: string },
     pagination?: ReportPagination,
@@ -101,13 +96,13 @@ export class ManageAnalyticsReportingUseCase {
     return this.analytics.getSalesSummary(startDate, endDate, organizationId);
   }
   async getSalesDaily(
-    filters: { startDate?: Date; endDate?: Date; channel?: string; organizationId?: string },
+    filters: { startDate?: Date; endDate?: Date; channel?: string; salesChannelId?: string; organizationId?: string },
     pagination?: ReportPagination,
   ) {
     return this.analytics.getSalesDaily(filters, pagination);
   }
   async getProductPerformance(
-    filters: { productId?: string; startDate?: Date; endDate?: Date },
+    filters: { productId?: string; startDate?: Date; endDate?: Date; salesChannelId?: string },
     pagination?: ReportPagination,
   ) {
     return this.analytics.getProductPerformance(filters, pagination);
@@ -131,12 +126,7 @@ export class ManageAnalyticsReportingUseCase {
   async getEventCounts(startDate: Date, endDate: Date, groupBy?: 'hour' | 'day') {
     return this.reporting.getEventCounts(startDate, endDate, groupBy);
   }
-  async getSnapshots(
-    snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly',
-    startDate: Date,
-    endDate: Date,
-    organizationId?: string,
-  ) {
+  async getSnapshots(snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly', startDate: Date, endDate: Date, organizationId?: string) {
     return this.reporting.getSnapshots(snapshotType, startDate, endDate, organizationId);
   }
   async getLatestSnapshot(snapshotType: 'hourly' | 'daily' | 'weekly' | 'monthly', organizationId?: string) {

@@ -37,4 +37,3 @@ describe('ManageLanguagesUseCase', () => {
     expect(repository.deleteLanguage).toHaveBeenCalledWith('lang-1');
   });
 });
-

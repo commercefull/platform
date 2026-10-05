@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Basket Controller
  * Handles abandoned cart recovery and basket analytics for the Admin Hub
@@ -82,11 +82,11 @@ export const recoverAbandonedCart = async (req: HttpRequest, res: HttpResponse):
   // 4. Update basket status
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Recovery action initiated successfully',
-        recoveryMethod,
-        basketId,
-      });
+    success: true,
+    message: 'Recovery action initiated successfully',
+    recoveryMethod,
+    basketId,
+  });
 };
 
 export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -116,11 +116,11 @@ export const sendRecoveryEmail = async (req: HttpRequest, res: HttpResponse): Pr
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Recovery email sent successfully',
-        basketId,
-        customerId: basket.customerId,
-      });
+    success: true,
+    message: 'Recovery email sent successfully',
+    basketId,
+    customerId: basket.customerId,
+  });
 };
 
 export const markCartRecovered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -148,8 +148,8 @@ export const cleanupExpiredBaskets = async (req: HttpRequest, res: HttpResponse)
   const deletedCount = await manageBasketUseCase.cleanupExpiredBaskets();
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `Successfully cleaned up ${deletedCount} expired baskets`,
-        deletedCount,
-      });
+    success: true,
+    message: `Successfully cleaned up ${deletedCount} expired baskets`,
+    deletedCount,
+  });
 };

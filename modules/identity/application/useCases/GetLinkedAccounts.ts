@@ -15,7 +15,6 @@ export interface LinkedAccount {
 // Use Cases
 // ============================================================================
 
-
 export class GetLinkedAccountsUseCase {
   constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
 

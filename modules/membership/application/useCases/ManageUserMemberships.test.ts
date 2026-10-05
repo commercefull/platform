@@ -32,18 +32,14 @@ describe('ManageUserMembershipsUseCase', () => {
 
     it('should reject when the user already has an active membership', async () => {
       port.findMembershipByUserId.mockResolvedValue(membership);
-      await expect(useCase.create({ userId: 'u-1', tierId: 'tier-1' })).rejects.toBeInstanceOf(
-        MembershipValidationError,
-      );
+      await expect(useCase.create({ userId: 'u-1', tierId: 'tier-1' })).rejects.toBeInstanceOf(MembershipValidationError);
       expect(port.createUserMembership).not.toHaveBeenCalled();
     });
 
     it('should reject when the tier does not exist', async () => {
       port.findMembershipByUserId.mockResolvedValue(null);
       port.findTierById.mockResolvedValue(null);
-      await expect(useCase.create({ userId: 'u-1', tierId: 'tier-x' })).rejects.toBeInstanceOf(
-        MembershipPlanNotFoundError,
-      );
+      await expect(useCase.create({ userId: 'u-1', tierId: 'tier-x' })).rejects.toBeInstanceOf(MembershipPlanNotFoundError);
     });
 
     it('should create with defaults when valid', async () => {

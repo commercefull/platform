@@ -52,9 +52,6 @@ describe('SetLocalDeliveryZoneUseCase', () => {
     const result = await useCase.execute({ storeId: 'store-1', enabled: false });
 
     expect(result.localDeliveryEnabled).toBe(false);
-    expect(storeRepository.updateLocalDeliverySettings).toHaveBeenCalledWith(
-      'store-1',
-      expect.objectContaining({ enabled: false }),
-    );
+    expect(storeRepository.updateLocalDeliverySettings).toHaveBeenCalledWith('store-1', expect.objectContaining({ enabled: false }));
   });
 });

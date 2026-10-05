@@ -14,4 +14,3 @@ export class AdminAuthUseCase {
     return this.identityRepo.findStoreUsersByUserId(userId);
   }
 }
-

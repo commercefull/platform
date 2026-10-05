@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { RegisterCustomerUseCase, RegisterCustomerCommand } from './RegisterCustomer';
-import {
-  CustomerEmailAlreadyExistsError,
-  EmailRequiredError,
-  CustomerValidationError,
-} from '../../domain/errors/CustomerErrors';
+import { CustomerEmailAlreadyExistsError, EmailRequiredError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
 import {
   createCustomerRepository,
   createCustomerRow,
@@ -29,18 +25,14 @@ describe('RegisterCustomerUseCase', () => {
   });
 
   it('should register the customer, persist password in a transaction, and emit customer.registered', async () => {
-    const result = await useCase.execute(
-      new RegisterCustomerCommand('Jane@Example.com', 'Jane', 'Doe', 'password123'),
-    );
+    const result = await useCase.execute(new RegisterCustomerCommand('Jane@Example.com', 'Jane', 'Doe', 'password123'));
 
     expect(result.customerId).toBe('new-cust-id');
     expect(result.email).toBe('jane@example.com');
     expect(result.isVerified).toBe(false);
     expect(hashStringMock).toHaveBeenCalledWith('password123');
     expect(withTransactionMock).toHaveBeenCalled();
-    expect(customerRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ customerId: 'new-cust-id', email: 'jane@example.com' }),
-    );
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'new-cust-id', email: 'jane@example.com' }));
     expect(customerRepository.updatePassword).toHaveBeenCalledWith('new-cust-id', 'hashed-password');
     expect(emitMock).toHaveBeenCalledWith(
       'customer.registered',
@@ -49,9 +41,7 @@ describe('RegisterCustomerUseCase', () => {
   });
 
   it('should throw EmailRequiredError when the email is empty', async () => {
-    await expect(useCase.execute(new RegisterCustomerCommand('', 'Jane', 'Doe', 'password123'))).rejects.toThrow(
-      EmailRequiredError,
-    );
+    await expect(useCase.execute(new RegisterCustomerCommand('', 'Jane', 'Doe', 'password123'))).rejects.toThrow(EmailRequiredError);
     expect(customerRepository.save).not.toHaveBeenCalled();
   });
 
@@ -84,18 +74,16 @@ describe('RegisterCustomerUseCase', () => {
   });
 
   it('should throw CustomerValidationError when the password is too short', async () => {
-    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', 'Jane', 'Doe', 'short'))).rejects.toThrow(
-      CustomerValidationError,
-    );
+    await expect(useCase.execute(new RegisterCustomerCommand('j@x.com', 'Jane', 'Doe', 'short'))).rejects.toThrow(CustomerValidationError);
     expect(customerRepository.findByEmail).not.toHaveBeenCalled();
   });
 
   it('should throw CustomerEmailAlreadyExistsError when the email is taken', async () => {
     customerRepository.findByEmail.mockResolvedValue(createCustomerRow());
 
-    await expect(
-      useCase.execute(new RegisterCustomerCommand('jane@example.com', 'Jane', 'Doe', 'password123')),
-    ).rejects.toThrow(CustomerEmailAlreadyExistsError);
+    await expect(useCase.execute(new RegisterCustomerCommand('jane@example.com', 'Jane', 'Doe', 'password123'))).rejects.toThrow(
+      CustomerEmailAlreadyExistsError,
+    );
     expect(customerRepository.save).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
   });

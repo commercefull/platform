@@ -39,10 +39,7 @@ export const updateTaxZoneUseCase = new UpdateTaxZoneUseCase({
   updateTaxZone: (id, zone) => taxCommandRepository.commands.updateTaxZone(id, zone),
 });
 
-export const manageTaxRecordsUseCase = new ManageTaxRecordsUseCase(
-  taxQueryRepository.query,
-  taxCommandRepository.commands,
-);
+export const manageTaxRecordsUseCase = new ManageTaxRecordsUseCase(taxQueryRepository.query, taxCommandRepository.commands);
 
 const taxRateQueryAdapter = {
   async findRatesForAddress(params: { country: string; state?: string; city?: string; postalCode?: string; taxCategory?: string }) {

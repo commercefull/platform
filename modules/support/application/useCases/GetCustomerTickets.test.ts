@@ -28,10 +28,7 @@ describe('GetCustomerTicketsUseCase', () => {
 
     expect(result.tickets).toHaveLength(1);
     expect(result.total).toBe(1);
-    expect(supportRepository.findTickets).toHaveBeenCalledWith(
-      expect.objectContaining({ customerId: 'cust-1' }),
-      expect.any(Object),
-    );
+    expect(supportRepository.findTickets).toHaveBeenCalledWith(expect.objectContaining({ customerId: 'cust-1' }), expect.any(Object));
   });
 
   it('should pass status and type filters to the repository', async () => {

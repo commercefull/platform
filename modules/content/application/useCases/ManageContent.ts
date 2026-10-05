@@ -2,6 +2,9 @@ import type {
   IContentRepository,
   ContentPageCreateParams,
   ContentPageUpdateParams,
+  ContentPagePublication,
+  ContentPagePublicationCreateParams,
+  ContentPublicationContext,
   ContentTypeCreateParams,
   ContentTypeUpdateParams,
   ContentBlockCreateParams,
@@ -12,12 +15,7 @@ import type { IContentCategoryRepository } from '../../domain/repositories/Conte
 import type { IContentNavigationRepository } from '../../domain/repositories/ContentNavigationRepository';
 import type { IContentMediaRepository } from '../../domain/repositories/ContentMediaRepository';
 import type { IContentRedirectRepository } from '../../domain/repositories/ContentRedirectRepository';
-import type {
-  ContentPageVersion,
-  ContentPageTranslation,
-  ContentCategorization,
-  ContentMediaUsage,
-} from '../../../../libs/db/types';
+import type { ContentPageVersion, ContentPageTranslation, ContentCategorization, ContentMediaUsage } from '../../../../libs/db/types';
 
 export interface ContentVersionReadPort {
   findVersionsByPageId(pageId: string, limit?: number, offset?: number): Promise<ContentPageVersion[]>;
@@ -54,7 +52,10 @@ export interface ManageContentDeps {
 }
 
 export class ManageContentUseCase {
-  constructor(private readonly contentRepo: IContentRepository, private readonly deps: ManageContentDeps = {}) {}
+  constructor(
+    private readonly contentRepo: IContentRepository,
+    private readonly deps: ManageContentDeps = {},
+  ) {}
 
   async findPageById(id: string) {
     return this.contentRepo.findPageById(id);
@@ -79,6 +80,29 @@ export class ManageContentUseCase {
   }
   async publishPage(id: string) {
     return this.contentRepo.publishPage(id);
+  }
+  async findPagePublications(contentPageId: string): Promise<ContentPagePublication[]> {
+    return this.contentRepo.findPagePublications(contentPageId);
+  }
+  async createPagePublication(params: ContentPagePublicationCreateParams): Promise<ContentPagePublication> {
+    return this.contentRepo.createPagePublication(params);
+  }
+  async deletePagePublication(contentPagePublicationId: string): Promise<boolean> {
+    return this.contentRepo.deletePagePublication(contentPagePublicationId);
+  }
+  async findPagePublicationByContext(
+    contentPageId: string,
+    storeId: string,
+    channelId?: string | null,
+    locale?: string | null,
+  ): Promise<ContentPagePublication | null> {
+    return this.contentRepo.findPagePublicationByContext(contentPageId, storeId, channelId, locale);
+  }
+  async findPublishedPageBySlugForContext(slug: string, context: ContentPublicationContext) {
+    return this.contentRepo.findPublishedPageBySlugForContext(slug, context);
+  }
+  async findPublishedPagesForContext(context: ContentPublicationContext, limit?: number, offset?: number) {
+    return this.contentRepo.findPublishedPagesForContext(context, limit, offset);
   }
   async findBlockById(id: string) {
     return this.contentRepo.findBlockById(id);

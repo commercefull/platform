@@ -224,6 +224,36 @@ describe('Order', () => {
     });
   });
 
+  describe('setTaxTotal', () => {
+    it('should add an externally-quoted tax total to the grand total', () => {
+      const order = Order.create({ orderId: 'o-1', customerEmail: 't@e.com' });
+      order.addItem(createItem('i-1', 2, 50));
+      order.setShippingTotal(Money.create(15, 'USD'));
+      order.setTaxTotal(Money.fromCents(690, 'USD'));
+
+      expect(order.taxTotal.cents).toBe(690);
+      expect(order.totalAmount.cents).toBe(12190);
+    });
+
+    it('should record embedded tax without adding it to the grand total when prices are tax-inclusive', () => {
+      const order = Order.create({ orderId: 'o-1', customerEmail: 't@e.com' });
+      order.addItem(createItem('i-1', 1, 120));
+      order.setTaxTotal(Money.fromCents(2000, 'USD'), Money.zero('USD'));
+
+      expect(order.taxTotal.cents).toBe(2000);
+      expect(order.totalAmount.cents).toBe(12000);
+    });
+
+    it('should add only the exclusive portion of a mixed tax quote', () => {
+      const order = Order.create({ orderId: 'o-1', customerEmail: 't@e.com' });
+      order.addItem(createItem('i-1', 1, 100));
+      order.setTaxTotal(Money.fromCents(2000, 'USD'), Money.fromCents(500, 'USD'));
+
+      expect(order.taxTotal.cents).toBe(2000);
+      expect(order.totalAmount.cents).toBe(10500);
+    });
+  });
+
   describe('addAdminNote', () => {
     it('should append a note with timestamp', () => {
       const order = Order.create({ orderId: 'o-1', customerEmail: 't@e.com' });

@@ -47,6 +47,7 @@ async function flushEvents(): Promise<void> {
     '"sessionId"',
     '"visitorId"',
     '"channel"',
+    '"salesChannelId"',
     '"eventData"',
     '"eventValueCents"',
     '"eventQuantity"',
@@ -77,7 +78,8 @@ async function flushEvents(): Promise<void> {
       event.basketId,
       event.sessionId,
       event.visitorId,
-      event.channel,
+      event.salesChannelId ?? event.channel,
+      event.salesChannelId,
       event.eventData ? JSON.stringify(event.eventData) : null,
       event.eventValueCents,
       event.eventQuantity,
@@ -92,9 +94,9 @@ async function flushEvents(): Promise<void> {
       event.country,
       event.region,
     );
-    const base = params.length - 24;
+    const base = params.length - 25;
     return `(${cols
-      .slice(0, 24)
+      .slice(0, 25)
       .map((_, i) => `$${base + i + 1}`)
       .join(', ')}, false, NOW())`;
   });
@@ -149,11 +151,11 @@ const salesDailyBuffer = new Map<string, SalesDailyDelta>();
 const productPerformanceBuffer = new Map<string, ProductPerformanceDelta>();
 
 function salesDailyKey(data: SalesDailyDelta): string {
-  return `${data.organizationId || ''}|${data.date.toISOString()}|${data.channel || 'all'}|${data.currencyCode || 'USD'}`;
+  return `${data.organizationId || ''}|${data.date.toISOString()}|${data.channel || 'all'}|${data.salesChannelId || ''}|${data.currencyCode || 'USD'}`;
 }
 
 function productPerformanceKey(data: ProductPerformanceDelta): string {
-  return `${data.productId}|${data.productVariantId || ''}|${data.date.toISOString()}|${data.channel || 'all'}`;
+  return `${data.productId}|${data.productVariantId || ''}|${data.date.toISOString()}|${data.channel || 'all'}|${data.salesChannelId || ''}`;
 }
 
 function accumulate(acc: Record<string, unknown>, delta: Record<string, unknown>, additive: readonly string[]): void {

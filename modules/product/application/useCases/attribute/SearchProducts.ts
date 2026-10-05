@@ -1,8 +1,4 @@
-import type {
-  ProductSearchFilters,
-  ProductSearchResult,
-  AttributeFilter,
-} from '../../ports/ProductSearchPort';
+import type { ProductSearchFilters, ProductSearchResult, AttributeFilter } from '../../ports/ProductSearchPort';
 
 export type { ProductSearchServicePort } from '../../ports/ProductSearchPort';
 import type { ProductSearchServicePort } from '../../ports/ProductSearchPort';
@@ -93,4 +89,3 @@ export class SearchProductsUseCase {
 }
 
 // ==================== Get Search Suggestions ====================
-

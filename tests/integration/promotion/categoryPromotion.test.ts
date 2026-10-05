@@ -104,5 +104,4 @@ describe('Category Promotion Tests', () => {
       expect(foundPromotion).toBeUndefined();
     }
   });
-
 });

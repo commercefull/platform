@@ -1,8 +1,5 @@
-
 import { GetReviewStatsUseCase } from './GetReviewStats';
 import { lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('GetReviewStatsUseCase', () => {
   let useCase: GetReviewStatsUseCase;
@@ -10,8 +7,13 @@ describe('GetReviewStatsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof GetReviewStatsUseCase>[0]>();
-    mockRepo.getProductStatistics.mockResolvedValue({ totalReviews: 10, averageRating: 4.5, distribution: { 1: 0, 2: 0, 3: 0, 4: 2, 5: 8 }, verifiedPurchaseCount: 3 });
+    mockRepo = lazyMock<ConstructorParameters<typeof GetReviewStatsUseCase>[0]>();
+    mockRepo.getProductStatistics.mockResolvedValue({
+      totalReviews: 10,
+      averageRating: 4.5,
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 2, 5: 8 },
+      verifiedPurchaseCount: 3,
+    });
     useCase = new GetReviewStatsUseCase(mockRepo);
   });
 

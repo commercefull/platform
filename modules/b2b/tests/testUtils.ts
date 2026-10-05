@@ -57,9 +57,7 @@ export function createQuote(overrides: Partial<Parameters<typeof Quote.create>[0
   });
 }
 
-export function createApprovalWorkflow(
-  overrides: Partial<Parameters<typeof ApprovalWorkflow.create>[0]> = {},
-): ApprovalWorkflow {
+export function createApprovalWorkflow(overrides: Partial<Parameters<typeof ApprovalWorkflow.create>[0]> = {}): ApprovalWorkflow {
   return ApprovalWorkflow.create({
     companyId: 'co-1',
     organizationId: 'org-1',

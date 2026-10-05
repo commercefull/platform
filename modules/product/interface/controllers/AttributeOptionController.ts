@@ -1,9 +1,7 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageAttributeOptionsUseCase } from '../../application/useCases/wired';
 import type { ProductAttributeOption } from '../../../../libs/db/types';
-
-
 
 /** Expose `sortOrder` as an alias for `position` in API responses */
 function mapOption(option: ProductAttributeOption): Record<string, unknown> {

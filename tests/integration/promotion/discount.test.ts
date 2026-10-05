@@ -133,5 +133,4 @@ describe('Discount Tests', () => {
 
     expect(getResponse.status).toBe(404);
   });
-
 });

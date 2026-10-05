@@ -43,7 +43,6 @@ export interface SupportAdminPort {
   addTicketMessage(ticketId: string, message: string, senderId: string): Promise<void>;
 }
 
-
 export class ManageSupportTicketsUseCase {
   constructor(private readonly adminRepo: SupportAdminPort) {}
 
@@ -69,4 +68,3 @@ export class ManageSupportTicketsUseCase {
     return this.adminRepo.addTicketMessage(ticketId, message, userId);
   }
 }
-

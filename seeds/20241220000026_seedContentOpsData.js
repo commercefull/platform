@@ -78,9 +78,7 @@ exports.seed = async function (knex) {
 
   if (await knex.schema.hasTable('contentNavigation')) {
     if (await knex.schema.hasTable('contentNavigationItem')) {
-      await knex('contentNavigationItem')
-        .whereIn('contentNavigationItemId', [IDS.NAV_ITEM_1, IDS.NAV_ITEM_2])
-        .del();
+      await knex('contentNavigationItem').whereIn('contentNavigationItemId', [IDS.NAV_ITEM_1, IDS.NAV_ITEM_2]).del();
     }
     await knex('contentNavigation').where('contentNavigationId', IDS.NAVIGATION).del();
     await knex('contentNavigation').insert({

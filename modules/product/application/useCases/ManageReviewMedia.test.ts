@@ -1,9 +1,5 @@
-
-
 import { ManageReviewMediaUseCase } from './ManageReviewMedia';
 import { createProductReview, createReviewMedia, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('ManageReviewMediaUseCase', () => {
   let useCase: ManageReviewMediaUseCase;
@@ -12,7 +8,7 @@ describe('ManageReviewMediaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo1 = lazyMock<ConstructorParameters<typeof ManageReviewMediaUseCase>[0]>();
+    mockRepo1 = lazyMock<ConstructorParameters<typeof ManageReviewMediaUseCase>[0]>();
     mockRepo1.findByProductId.mockResolvedValue([createProductReview()]);
     mockRepo2 = lazyMock<ConstructorParameters<typeof ManageReviewMediaUseCase>[1]>();
     mockRepo2.findByReview.mockResolvedValue([createReviewMedia()]);

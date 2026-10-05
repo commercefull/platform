@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   createSegmentUseCase,
@@ -147,22 +147,22 @@ class SegmentController {
     if (!profile) {
       // Return a default empty profile instead of 404
       jsonResponse(res, 200, {
-                success: true,
-                data: {
-                  customerId: req.params.customerId,
-                  totalOrders: 0,
-                  totalSpentCents: 0,
-                  avgOrderValue: 0,
-                  lastOrderDate: null,
-                  firstOrderDate: null,
-                  preferredCategories: [],
-                  preferredBrands: [],
-                  tags: [],
-                  customAttributes: {},
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                },
-              });
+        success: true,
+        data: {
+          customerId: req.params.customerId,
+          totalOrders: 0,
+          totalSpentCents: 0,
+          avgOrderValue: 0,
+          lastOrderDate: null,
+          firstOrderDate: null,
+          preferredCategories: [],
+          preferredBrands: [],
+          tags: [],
+          customAttributes: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      });
       return;
     }
     jsonResponse(res, 200, { success: true, data: profile.toJSON() });
@@ -188,22 +188,22 @@ class SegmentController {
     if (!profile) {
       // Return a default empty profile instead of 404
       jsonResponse(res, 200, {
-                success: true,
-                data: {
-                  customerId: req.params.customerId,
-                  totalOrders: 0,
-                  totalSpentCents: 0,
-                  avgOrderValue: 0,
-                  lastOrderDate: null,
-                  firstOrderDate: null,
-                  preferredCategories: [],
-                  preferredBrands: [],
-                  tags: [],
-                  customAttributes: {},
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                },
-              });
+        success: true,
+        data: {
+          customerId: req.params.customerId,
+          totalOrders: 0,
+          totalSpentCents: 0,
+          avgOrderValue: 0,
+          lastOrderDate: null,
+          firstOrderDate: null,
+          preferredCategories: [],
+          preferredBrands: [],
+          tags: [],
+          customAttributes: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      });
       return;
     }
     jsonResponse(res, 200, { success: true, data: profile.toJSON() });

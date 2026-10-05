@@ -57,7 +57,11 @@ async function resolveTaxCategoryId(nameOrCode?: string): Promise<string> {
      ORDER BY ("isDefault") DESC, "sortOrder" ASC LIMIT 1`,
     [nameOrCode ?? null],
   );
-  const fallback = row ?? (await queryOne<{ taxCategoryId: string }>(`SELECT "taxCategoryId" FROM "taxCategory" ORDER BY "isDefault" DESC, "sortOrder" ASC LIMIT 1`));
+  const fallback =
+    row ??
+    (await queryOne<{ taxCategoryId: string }>(
+      `SELECT "taxCategoryId" FROM "taxCategory" ORDER BY "isDefault" DESC, "sortOrder" ASC LIMIT 1`,
+    ));
   if (!fallback) throw new Error('No tax category exists — create one before adding rates');
   return fallback.taxCategoryId;
 }
@@ -100,7 +104,10 @@ export async function createTaxRate(params: {
   taxClass?: string;
   isActive: boolean;
 }): Promise<void> {
-  const [taxCategoryId, taxZoneId] = await Promise.all([resolveTaxCategoryId(params.taxClass), resolveTaxZoneId(params.country, params.state)]);
+  const [taxCategoryId, taxZoneId] = await Promise.all([
+    resolveTaxCategoryId(params.taxClass),
+    resolveTaxZoneId(params.country, params.state),
+  ]);
   await query(
     `INSERT INTO "taxRate" ("taxRateId", "taxCategoryId", "taxZoneId", "name", "rate", "type", "priority", "isCompound", "includeInPrice", "isShippingTaxable", "startDate", "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, 'percentage', 0, false, false, false, NOW(), $6, NOW(), NOW())`,
@@ -119,7 +126,10 @@ export async function updateTaxRate(
     isActive: boolean;
   },
 ): Promise<void> {
-  const [taxCategoryId, taxZoneId] = await Promise.all([resolveTaxCategoryId(params.taxClass), resolveTaxZoneId(params.country, params.state)]);
+  const [taxCategoryId, taxZoneId] = await Promise.all([
+    resolveTaxCategoryId(params.taxClass),
+    resolveTaxZoneId(params.country, params.state),
+  ]);
   await query(
     `UPDATE "taxRate" SET "name" = $1, "rate" = $2, "taxCategoryId" = $3, "taxZoneId" = $4, "isActive" = $5, "updatedAt" = NOW()
      WHERE "taxRateId" = $6`,

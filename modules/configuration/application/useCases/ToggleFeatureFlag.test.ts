@@ -57,9 +57,9 @@ describe('ToggleFeatureFlagUseCase', () => {
   it('should throw ConfigurationValidationError when the key is empty', async () => {
     const repository = createToggleFlagRepository();
 
-    await expect(
-      new ToggleFeatureFlagUseCase(repository).execute({ key: '', enabled: true, updatedBy: 'admin' }),
-    ).rejects.toThrow(ConfigurationValidationError);
+    await expect(new ToggleFeatureFlagUseCase(repository).execute({ key: '', enabled: true, updatedBy: 'admin' })).rejects.toThrow(
+      ConfigurationValidationError,
+    );
     expect(repository.upsertFeatureFlag).not.toHaveBeenCalled();
   });
 });

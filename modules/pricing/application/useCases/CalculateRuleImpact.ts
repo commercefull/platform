@@ -21,8 +21,7 @@ export interface PricingRuleImpact {
 
 /** Identify the rule by ID (fetched) or pass the rule object directly. */
 export type CalculateRuleImpactInput =
-  | { ruleId: string; productId: string; context?: PriceContext }
-  | { rule: PricingRule; context: PriceContext };
+  { ruleId: string; productId: string; context?: PriceContext } | { rule: PricingRule; context: PriceContext };
 
 export class CalculateRuleImpactUseCase {
   constructor(

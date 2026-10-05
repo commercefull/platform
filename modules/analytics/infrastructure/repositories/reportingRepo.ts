@@ -31,9 +31,6 @@ export type { AnalyticsReportEvent, AnalyticsReportSnapshot, AnalyticsReportDash
 // Types
 // ============================================================================
 
-
-
-
 // ============================================================================
 // Event Tracking
 // ============================================================================
@@ -50,6 +47,7 @@ export async function trackEvent(event: {
   sessionId?: string;
   visitorId?: string;
   channel?: string;
+  salesChannelId?: string;
   eventData?: Record<string, unknown>;
   eventValueCents?: number;
   eventQuantity?: number;
@@ -68,13 +66,13 @@ export async function trackEvent(event: {
     `INSERT INTO "analyticsReportEvent" (
       "eventType", "eventCategory", "eventAction",
       "organizationId", "customerId", "orderId", "productId", "basketId",
-      "sessionId", "visitorId", "channel",
+      "sessionId", "visitorId", "channel", "salesChannelId",
       "eventData", "eventValueCents", "eventQuantity", "currencyCode",
       "ipAddress", "userAgent", "referrer",
       "utmSource", "utmMedium", "utmCampaign",
       "deviceType", "country", "region",
       "isProcessed", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, false, NOW())
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, false, NOW())
     RETURNING *`,
     [
       event.eventType,
@@ -87,7 +85,8 @@ export async function trackEvent(event: {
       event.basketId,
       event.sessionId,
       event.visitorId,
-      event.channel,
+      event.salesChannelId ?? event.channel,
+      event.salesChannelId ?? null,
       event.eventData ? JSON.stringify(event.eventData) : null,
       event.eventValueCents,
       event.eventQuantity,
@@ -114,6 +113,7 @@ export async function getEvents(
     customerId?: string;
     orderId?: string;
     productId?: string;
+    salesChannelId?: string;
     startDate?: Date;
     endDate?: Date;
     isProcessed?: boolean;
@@ -143,6 +143,10 @@ export async function getEvents(
   if (filters.productId) {
     whereClause += ` AND "productId" = $${paramIndex++}`;
     params.push(filters.productId);
+  }
+  if (filters.salesChannelId) {
+    whereClause += ` AND "salesChannelId" = $${paramIndex++}`;
+    params.push(filters.salesChannelId);
   }
   if (filters.startDate) {
     whereClause += ` AND "createdAt" >= $${paramIndex++}`;
@@ -515,6 +519,7 @@ function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsRepor
     sessionId: row.sessionId ?? undefined,
     visitorId: row.visitorId ?? undefined,
     channel: row.channel ?? undefined,
+    salesChannelId: row.salesChannelId ?? undefined,
     eventData: (row.eventData as Record<string, unknown>) ?? undefined,
     eventValueCents: row.eventValueCents ? Number(row.eventValueCents) : undefined,
     eventQuantity: row.eventQuantity ?? undefined,

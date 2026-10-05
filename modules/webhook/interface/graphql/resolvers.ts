@@ -1,10 +1,6 @@
 import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/graphqlAuth';
 import type { RegisterWebhookInput } from '../../application/useCases/RegisterWebhook';
-import {
-  listWebhooksUseCase,
-  registerWebhookUseCase,
-  unregisterWebhookUseCase,
-} from '../../application/wired';
+import { listWebhooksUseCase, registerWebhookUseCase, unregisterWebhookUseCase } from '../../application/wired';
 
 export const webhookResolvers = {
   Query: {

@@ -35,12 +35,10 @@ describe('ValidateCouponCodeUseCase', () => {
     const coupons = lazyMock<ValidateCouponCodePort>();
     const useCase = new ValidateCouponCodeUseCase(coupons);
 
-    await expect(
-      useCase.execute({ code: '', orderTotalCents: '100' }),
-    ).rejects.toBeInstanceOf(PromotionValidationError);
-    await expect(
-      useCase.execute({ code: 'X', orderTotalCents: undefined as unknown as string }),
-    ).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute({ code: '', orderTotalCents: '100' })).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute({ code: 'X', orderTotalCents: undefined as unknown as string })).rejects.toBeInstanceOf(
+      PromotionValidationError,
+    );
     expect(coupons.validate).not.toHaveBeenCalled();
   });
 });

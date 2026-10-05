@@ -9,7 +9,10 @@ describe('ManageImportMappingsUseCase', () => {
     repo.create.mockImplementation(async m => m);
 
     const result = await new ManageImportMappingsUseCase(repo).createMapping({
-      importJobId: 'j-1', entityType: 'product', sourceId: 's-1', platformId: 'p-1',
+      importJobId: 'j-1',
+      entityType: 'product',
+      sourceId: 's-1',
+      platformId: 'p-1',
     });
 
     expect(result.importJobId).toBe('j-1');
@@ -25,4 +28,3 @@ describe('ManageImportMappingsUseCase', () => {
     expect(result).toHaveLength(1);
   });
 });
-

@@ -70,23 +70,25 @@ The Notification feature manages in-app notifications for merchants and administ
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/notification-preferences` | `asyncHandler(getAllPreferences)` | ============================================================================ Admin preference routes ============================================================================ |
-| PUT | `/notification-preferences/:id` | `asyncHandler(updatePreferenceAdmin)` | — |
-| GET | `/notification-preferences/user/:userId` | `asyncHandler(getPreferencesByUser)` | — |
-| GET | `/notification-templates` | `asyncHandler(getAllTemplates)` | ============================================================================ Template routes ============================================================================ |
-| POST | `/notification-templates` | `asyncHandler(createTemplate)` | — |
-| GET | `/notification-templates/:id` | `asyncHandler(getTemplateById)` | — |
-| PUT | `/notification-templates/:id` | `asyncHandler(updateTemplate)` | — |
-| DELETE | `/notification-templates/:id` | `asyncHandler(deleteTemplate)` | — |
-| POST | `/notification-templates/:id/preview` | `asyncHandler(previewTemplate)` | — |
-| GET | `/notification-templates/type/:type` | `asyncHandler(getTemplatesByType)` | — |
-| GET | `/notifications` | `asyncHandler(getAllNotifications)` | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
-| POST | `/notifications` | `asyncHandler(createNotification)` | — |
-| GET | `/notifications` | `async (req, res) => {
-  try {
+| Method | Endpoint                                 | Controller                            | Description                                                                                                                                                                                                                          |
+| ------ | ---------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/notification-preferences`              | `asyncHandler(getAllPreferences)`     | ============================================================================ Admin preference routes ============================================================================                                                    |
+| PUT    | `/notification-preferences/:id`          | `asyncHandler(updatePreferenceAdmin)` | —                                                                                                                                                                                                                                    |
+| GET    | `/notification-preferences/user/:userId` | `asyncHandler(getPreferencesByUser)`  | —                                                                                                                                                                                                                                    |
+| GET    | `/notification-templates`                | `asyncHandler(getAllTemplates)`       | ============================================================================ Template routes ============================================================================                                                            |
+| POST   | `/notification-templates`                | `asyncHandler(createTemplate)`        | —                                                                                                                                                                                                                                    |
+| GET    | `/notification-templates/:id`            | `asyncHandler(getTemplateById)`       | —                                                                                                                                                                                                                                    |
+| PUT    | `/notification-templates/:id`            | `asyncHandler(updateTemplate)`        | —                                                                                                                                                                                                                                    |
+| DELETE | `/notification-templates/:id`            | `asyncHandler(deleteTemplate)`        | —                                                                                                                                                                                                                                    |
+| POST   | `/notification-templates/:id/preview`    | `asyncHandler(previewTemplate)`       | —                                                                                                                                                                                                                                    |
+| GET    | `/notification-templates/type/:type`     | `asyncHandler(getTemplatesByType)`    | —                                                                                                                                                                                                                                    |
+| GET    | `/notifications`                         | `asyncHandler(getAllNotifications)`   | ============================================================================ Literal notification routes — must be registered before /notifications/:id ============================================================================ |
+| POST   | `/notifications`                         | `asyncHandler(createNotification)`    | —                                                                                                                                                                                                                                    |
+| GET    | `/notifications`                         | `async (req, res) => {                |
+| try {  |
+
     const customerId = req.use` | — |
+
 | GET | `/notifications/:id` | `asyncHandler(getNotificationById)` | ============================================================================ Admin CRUD routes for notifications (parameterized — after all literals) ============================================================================ |
 | PUT | `/notifications/:id` | `asyncHandler(updateNotification)` | — |
 | DELETE | `/notifications/:id` | `asyncHandler(deleteNotification)` | — |

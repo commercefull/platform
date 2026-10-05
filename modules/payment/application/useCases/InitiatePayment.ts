@@ -5,6 +5,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { PaymentRepository } from '../../domain/repositories/PaymentRepository';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
+import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
 
@@ -47,6 +48,22 @@ export class InitiatePaymentUseCase {
   async execute(command: InitiatePaymentCommand): Promise<InitiatePaymentResponse> {
     if (command.amountCents <= 0) {
       throw new AmountMustBePositiveError();
+    }
+
+    // Idempotent replay: a live transaction already exists for this order
+    // (e.g., a retried checkout payment intent) — return it instead of
+    // creating a duplicate charge intent.
+    const LIVE_STATUSES: TransactionStatus[] = [TransactionStatus.PENDING, TransactionStatus.AUTHORIZED, TransactionStatus.PAID];
+    const existing = (await this.paymentRepository.findTransactionsByOrderId(command.orderId)).find(t => LIVE_STATUSES.includes(t.status));
+    if (existing) {
+      return {
+        transactionId: existing.transactionId,
+        orderId: existing.orderId,
+        amountCents: existing.amountCents,
+        currency: existing.currency,
+        status: existing.status,
+        createdAt: existing.createdAt.toISOString(),
+      };
     }
 
     // Get default gateway

@@ -14,7 +14,16 @@ describe('UploadMediaUseCase', () => {
     mockRepo = lazyMock<ConstructorParameters<typeof UploadMediaUseCase>[0]>();
     mockRepo.findFolderById.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f1' }));
     mockRepo.createMedia.mockResolvedValue(
-      createContentMedia({ contentMediaId: 'm1', title: 'Test Image', fileName: 'test.jpg', fileType: 'image/jpeg', width: 800, height: 600, altText: 'Test', contentMediaFolderId: 'f1' }),
+      createContentMedia({
+        contentMediaId: 'm1',
+        title: 'Test Image',
+        fileName: 'test.jpg',
+        fileType: 'image/jpeg',
+        width: 800,
+        height: 600,
+        altText: 'Test',
+        contentMediaFolderId: 'f1',
+      }),
     );
     useCase = new UploadMediaUseCase(mockRepo);
   });

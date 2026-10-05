@@ -1,5 +1,5 @@
-export type HealthStatus = 'ok' | 'unavailable';
-export type HealthCheckStatus = 'ok' | 'failed' | 'starting' | 'draining' | 'not_required';
+type HealthStatus = 'ok' | 'unavailable';
+type HealthCheckStatus = 'ok' | 'failed' | 'starting' | 'draining' | 'not_required';
 
 export interface HealthReport {
   status: HealthStatus;
@@ -70,5 +70,3 @@ export function createHealthService(dependencies: HealthDependencies) {
     },
   };
 }
-
-export type HealthService = ReturnType<typeof createHealthService>;

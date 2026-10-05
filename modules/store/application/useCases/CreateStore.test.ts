@@ -2,12 +2,7 @@
  * Unit Tests for CreateStore Use Case
  */
 
-import {
-  createStoreRepository,
-  createSystemConfigPort,
-  createOrganizationLookupPort,
-  createStore,
-} from '../../tests/testUtils';
+import { createStoreRepository, createSystemConfigPort, createOrganizationLookupPort, createStore } from '../../tests/testUtils';
 import { CreateStoreUseCase, CreateStoreCommand } from './CreateStore';
 import { StoreSlugAlreadyExistsError, StoreValidationError, StoreNotFoundError } from '../../domain/errors/StoreErrors';
 
@@ -43,16 +38,12 @@ describe('CreateStoreUseCase', () => {
   });
 
   it('should throw StoreValidationError when the name is missing', async () => {
-    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, name: '' }))).rejects.toThrow(
-      StoreValidationError,
-    );
+    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, name: '' }))).rejects.toThrow(StoreValidationError);
     expect(storeRepository.save).not.toHaveBeenCalled();
   });
 
   it('should throw StoreValidationError when the slug is missing', async () => {
-    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, slug: '' }))).rejects.toThrow(
-      StoreValidationError,
-    );
+    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, slug: '' }))).rejects.toThrow(StoreValidationError);
   });
 
   it('should throw StoreValidationError when no system configuration is active', async () => {
@@ -99,8 +90,6 @@ describe('CreateStoreUseCase', () => {
   it('should throw StoreNotFoundError when the parent store does not exist', async () => {
     storeRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, parentStoreId: 'missing' }))).rejects.toThrow(
-      StoreNotFoundError,
-    );
+    await expect(useCase.execute(new CreateStoreCommand({ ...storeData, parentStoreId: 'missing' }))).rejects.toThrow(StoreNotFoundError);
   });
 });

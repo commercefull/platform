@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Shipping Controller
  * Handles shipping-related HTTP requests
@@ -34,8 +34,6 @@ import {
   UpdateShippingPackagingTypeInput,
 } from '../../application/wired';
 import type { CreateShippingSurchargeInput, UpdateShippingSurchargeInput } from '../../application/wired';
-
-
 
 // ============================================================================
 // Carriers
@@ -360,9 +358,9 @@ export const calculateRates = async (
 
   if (!destinationAddress || !orderDetails) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'destinationAddress and orderDetails are required',
-          });
+      success: false,
+      message: 'destinationAddress and orderDetails are required',
+    });
     return;
   }
 
@@ -370,11 +368,11 @@ export const calculateRates = async (
   const result = await calculateShippingRatesUseCase.execute(command);
 
   jsonResponse(res, 200, {
-        success: result.success,
-        data: result.rates,
-        zone: result.zone,
-        message: result.message,
-      });
+    success: result.success,
+    data: result.rates,
+    zone: result.zone,
+    message: result.message,
+  });
 };
 
 // ============================================================================

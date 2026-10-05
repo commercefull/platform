@@ -1,7 +1,4 @@
-import {
-  createShippingZonePort,
-  createShippingZone,
-} from '../../tests/testUtils';
+import { createShippingZonePort, createShippingZone } from '../../tests/testUtils';
 import { ManageShippingZonesUseCase } from './ManageShippingZones';
 
 describe('ManageShippingZonesUseCase', () => {
@@ -57,4 +54,3 @@ describe('ManageShippingZonesUseCase', () => {
     expect(zoneRepo.delete).toHaveBeenCalledWith('z1');
   });
 });
-

@@ -24,6 +24,8 @@ export class PaymentPaymentAuthorizationAdapter implements PaymentAuthorizationP
         request.currency,
         request.paymentMethodId,
         request.customerId,
+        undefined,
+        request.delegatedCredential ? { delegatedCredential: request.delegatedCredential } : undefined,
       );
       const response = await this.initiatePaymentUseCase.execute(command);
       return {

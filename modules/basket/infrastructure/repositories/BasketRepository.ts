@@ -49,19 +49,31 @@ export class BasketRepo implements BasketRepository {
     return this.mapToBasket(basketRow, items);
   }
 
-  async findActiveBasket(customerId?: string, sessionId?: string): Promise<Basket | null> {
-    // Try customer basket first
+  async findActiveBasket(customerId?: string, sessionId?: string, storeId?: string, channelId?: string): Promise<Basket | null> {
+    const findForOwner = async (column: 'customerId' | 'sessionId', ownerId: string): Promise<Basket | null> => {
+      const params: unknown[] = [ownerId];
+      const conditions = [`"${column}" = $1`, `status = 'active'`];
+      if (storeId) {
+        params.push(storeId);
+        conditions.push(`"storeId" = $${params.length}`);
+      }
+      if (channelId) {
+        params.push(channelId);
+        conditions.push(`"channelId" = $${params.length}`);
+      }
+      const row = await queryOne<DbBasket>(
+        `SELECT * FROM basket WHERE ${conditions.join(' AND ')} ORDER BY "updatedAt" DESC LIMIT 1`,
+        params,
+      );
+      if (!row) return null;
+      return this.mapToBasket(row, await this.getItemsWithCurrency(row.basketId, row.currencyCode));
+    };
+
     if (customerId) {
-      const basket = await this.findByCustomerId(customerId);
+      const basket = await findForOwner('customerId', customerId);
       if (basket) return basket;
     }
-
-    // Fall back to session basket
-    if (sessionId) {
-      return this.findBySessionId(sessionId);
-    }
-
-    return null;
+    return sessionId ? findForOwner('sessionId', sessionId) : null;
   }
 
   async findSummaries(limit: number = 20, offset: number = 0): Promise<BasketSummaryRecord[]> {
@@ -91,18 +103,22 @@ export class BasketRepo implements BasketRepository {
         `UPDATE basket SET
           "customerId" = $1,
           "sessionId" = $2,
-          status = $3,
-          "currencyCode" = $4,
-          metadata = $5,
-          "expiresAt" = $6,
-          "convertedToOrderId" = $7,
-          "updatedAt" = $8,
-          "lastActivityAt" = $9,
-          "discountAmountCents" = $10
-        WHERE "basketId" = $11`,
+          "storeId" = $3,
+          "channelId" = $4,
+          status = $5,
+          "currencyCode" = $6,
+          metadata = $7,
+          "expiresAt" = $8,
+          "convertedToOrderId" = $9,
+          "updatedAt" = $10,
+          "lastActivityAt" = $11,
+          "discountAmountCents" = $12
+        WHERE "basketId" = $13`,
         [
           basket.customerId || null,
           basket.sessionId || null,
+          basket.storeId || null,
+          basket.channelId || null,
           basket.status,
           basket.currency,
           Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
@@ -118,15 +134,16 @@ export class BasketRepo implements BasketRepository {
       // Insert
       await query(
         `INSERT INTO basket (
-          "basketId", "customerId", "sessionId", "storeId", status, "currencyCode",
+          "basketId", "customerId", "sessionId", "storeId", "channelId", status, "currencyCode",
           metadata, "expiresAt", "convertedToOrderId",
           "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
         [
           basket.basketId,
           basket.customerId || null,
           basket.sessionId || null,
           basket.storeId || null,
+          basket.channelId || null,
           basket.status,
           basket.currency,
           Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
@@ -450,6 +467,7 @@ export class BasketRepo implements BasketRepository {
       customerId: row.customerId ?? undefined,
       sessionId: row.sessionId ?? undefined,
       storeId: row.storeId ?? undefined,
+      channelId: row.channelId ?? undefined,
       status: row.status as BasketStatus,
       currency: row.currencyCode,
       items,

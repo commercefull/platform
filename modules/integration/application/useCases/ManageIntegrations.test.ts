@@ -1,9 +1,7 @@
 import '../../tests/testUtils';
 import { ManageIntegrationsUseCase } from './ManageIntegrations';
 import { CredentialNotFoundError, IntegrationNotFoundError } from '../../domain/errors/IntegrationErrors';
-import type {
-  IntegrationRepository, IntegrationCredentialRepository,
-} from '../../domain/repositories/IntegrationRepository';
+import type { IntegrationRepository, IntegrationCredentialRepository } from '../../domain/repositories/IntegrationRepository';
 import { createIntegration, lazyMock } from '../../tests/testUtils';
 
 describe('ManageIntegrationsUseCase', () => {
@@ -47,7 +45,10 @@ describe('ManageIntegrationsUseCase', () => {
     process.env.INTEGRATION_ENCRYPTION_KEY = 'a'.repeat(64);
 
     const result = await useCase.addCredential({
-      integrationId: 'int-1', type: 'api_key', label: 'Key', credentials: { key: 'secret' },
+      integrationId: 'int-1',
+      type: 'api_key',
+      label: 'Key',
+      credentials: { key: 'secret' },
     });
 
     expect(result.encryptedData).not.toBe('secret');
@@ -57,7 +58,10 @@ describe('ManageIntegrationsUseCase', () => {
   it('should decrypt a credential back to its original payload', async () => {
     process.env.INTEGRATION_ENCRYPTION_KEY = 'a'.repeat(64);
     const added = await useCase.addCredential({
-      integrationId: 'int-1', type: 'api_key', label: 'Key', credentials: { key: 'secret' },
+      integrationId: 'int-1',
+      type: 'api_key',
+      label: 'Key',
+      credentials: { key: 'secret' },
     });
     credentialRepo.findById.mockResolvedValue(added);
 
@@ -78,4 +82,3 @@ describe('ManageIntegrationsUseCase', () => {
     await expect(useCase.getDecryptedCredentialsByIntegration('int-1')).resolves.toBeNull();
   });
 });
-

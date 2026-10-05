@@ -2,11 +2,7 @@ import { lazyMock, createCredentialSubject, createRefreshTokenInfo } from '../..
 import { IssueTokenPairUseCase, IssueTokenPairCommand, IssueTokenPairConfig, JwtTokenPort } from './IssueTokenPair';
 import type { CredentialSubjectPort } from '../../ports/CredentialSubjectPort';
 import type { TokenRepository } from '../../../domain/repositories/TokenRepository';
-import {
-  EmailAndPasswordRequiredError,
-  InvalidCredentialsError,
-  AccountNotActiveError,
-} from '../../../domain/errors/IdentityErrors';
+import { EmailAndPasswordRequiredError, InvalidCredentialsError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 
 describe('IssueTokenPairUseCase', () => {
   let credentialPort: jest.Mocked<CredentialSubjectPort>;
@@ -50,7 +46,13 @@ describe('IssueTokenPairUseCase', () => {
     expect(result.refreshToken).toBe('signed-token');
     expect(result.expiresIn).toBe('7d');
     expect(tokenRepo.createRefreshToken).toHaveBeenCalledWith(
-      expect.objectContaining({ token: 'signed-token', userType: 'customer', userId: 'subject-1', userAgent: 'agent', ipAddress: '1.2.3.4' }),
+      expect.objectContaining({
+        token: 'signed-token',
+        userType: 'customer',
+        userId: 'subject-1',
+        userAgent: 'agent',
+        ipAddress: '1.2.3.4',
+      }),
     );
   });
 

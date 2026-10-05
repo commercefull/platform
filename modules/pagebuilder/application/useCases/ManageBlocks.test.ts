@@ -1,8 +1,11 @@
 import '../../tests/testUtils';
 import { ManageBlocksUseCase } from './ManageBlocks';
 import {
-  PageDraftNotFoundError, BlockTypeNotRegisteredError, BlockNotFoundError,
-  BlockPlacementError, PageDraftValidationError,
+  PageDraftNotFoundError,
+  BlockTypeNotRegisteredError,
+  BlockNotFoundError,
+  BlockPlacementError,
+  PageDraftValidationError,
 } from '../../domain/errors/PageBuilderErrors';
 import type { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { createPageDraft, emitMock, lazyMock, registerBuiltInBlocks } from '../../tests/testUtils';
@@ -29,15 +32,13 @@ describe('ManageBlocksUseCase', () => {
   });
 
   it('should throw BlockTypeNotRegisteredError when the type is unknown', async () => {
-    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'nope', region: 'main' }))
-      .rejects.toThrow(BlockTypeNotRegisteredError);
+    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'nope', region: 'main' })).rejects.toThrow(BlockTypeNotRegisteredError);
   });
 
   it('should throw PageDraftNotFoundError when the draft does not exist', async () => {
     repo.findById.mockResolvedValue(null);
 
-    await expect(useCase.addBlock({ draftId: 'missing', typeId: 'heading', region: 'main' }))
-      .rejects.toThrow(PageDraftNotFoundError);
+    await expect(useCase.addBlock({ draftId: 'missing', typeId: 'heading', region: 'main' })).rejects.toThrow(PageDraftNotFoundError);
   });
 
   it('should throw BlockNotFoundError when removing a missing block', async () => {
@@ -46,8 +47,9 @@ describe('ManageBlocksUseCase', () => {
 
   it('should throw PageDraftValidationError when required block fields are missing', async () => {
     // 'heading' requires the 'text' field; passing explicit empty content skips defaults
-    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'heading', region: 'main', content: {} }))
-      .rejects.toThrow(PageDraftValidationError);
+    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'heading', region: 'main', content: {} })).rejects.toThrow(
+      PageDraftValidationError,
+    );
     expect(repo.save).not.toHaveBeenCalled();
   });
 
@@ -69,9 +71,7 @@ describe('ManageBlocksUseCase', () => {
     });
     repo.findById.mockResolvedValue(draft);
 
-    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'test-single', region: 'main' }))
-      .rejects.toThrow(BlockPlacementError);
+    await expect(useCase.addBlock({ draftId: 'd-1', typeId: 'test-single', region: 'main' })).rejects.toThrow(BlockPlacementError);
     expect(repo.save).not.toHaveBeenCalled();
   });
 });
-

@@ -1,8 +1,6 @@
 import '../../tests/testUtils';
 import { ManageDraftsUseCase } from './ManageDrafts';
-import {
-  PageDraftNotFoundError, PageDraftValidationError,
-} from '../../domain/errors/PageBuilderErrors';
+import { PageDraftNotFoundError, PageDraftValidationError } from '../../domain/errors/PageBuilderErrors';
 import type { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { emitMock, lazyMock } from '../../tests/testUtils';
 
@@ -25,13 +23,15 @@ describe('ManageDraftsUseCase', () => {
   });
 
   it('should throw PageDraftValidationError when the title is blank', async () => {
-    await expect(useCase.create({ organizationId: 'org-1', title: ' ', slug: 'x', pageType: 'page' }))
-      .rejects.toThrow(PageDraftValidationError);
+    await expect(useCase.create({ organizationId: 'org-1', title: ' ', slug: 'x', pageType: 'page' })).rejects.toThrow(
+      PageDraftValidationError,
+    );
   });
 
   it('should throw PageDraftValidationError when the slug is missing', async () => {
-    await expect(useCase.create({ organizationId: 'org-1', title: 'T', slug: '', pageType: 'page' }))
-      .rejects.toThrow(PageDraftValidationError);
+    await expect(useCase.create({ organizationId: 'org-1', title: 'T', slug: '', pageType: 'page' })).rejects.toThrow(
+      PageDraftValidationError,
+    );
   });
 
   it('should throw PageDraftNotFoundError when the draft does not exist', async () => {
@@ -40,4 +40,3 @@ describe('ManageDraftsUseCase', () => {
     await expect(useCase.getById('missing')).rejects.toThrow(PageDraftNotFoundError);
   });
 });
-

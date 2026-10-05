@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { DowngradeMembershipUseCase } from './DowngradeMembership';
-import {
-  MembershipNotFoundError,
-  MembershipPlanNotFoundError,
-  MembershipValidationError,
-} from '../../domain/errors/MembershipErrors';
+import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 import { createDowngradeMembershipRepository, emitMock } from '../../tests/testUtils';
 
 describe('DowngradeMembershipUseCase', () => {
@@ -32,10 +28,7 @@ describe('DowngradeMembershipUseCase', () => {
     const result = await useCase.execute({ membershipId: 'm1', newTierId: 't2' });
 
     expect(result.membershipId).toBe('m1');
-    expect(emitMock).toHaveBeenCalledWith(
-      'membership.downgraded',
-      expect.objectContaining({ membershipId: 'm1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('membership.downgraded', expect.objectContaining({ membershipId: 'm1' }));
   });
 
   it('should throw MembershipNotFoundError when the membership does not exist', async () => {
@@ -52,9 +45,7 @@ describe('DowngradeMembershipUseCase', () => {
   });
 
   it('should throw MembershipPlanNotFoundError when the new tier does not exist', async () => {
-    await expect(useCase.execute({ membershipId: 'm1', newTierId: 'missing' })).rejects.toThrow(
-      MembershipPlanNotFoundError,
-    );
+    await expect(useCase.execute({ membershipId: 'm1', newTierId: 'missing' })).rejects.toThrow(MembershipPlanNotFoundError);
   });
 
   it('should throw MembershipValidationError when the new tier is more expensive', async () => {

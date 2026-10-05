@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManageGiftCardsUseCase } from './ManageGiftCards';
-import {
-  createGiftCardRepository,
-  createGiftCard,
-} from '../../tests/testUtils';
+import { createGiftCardRepository, createGiftCard } from '../../tests/testUtils';
 
 describe('ManageGiftCardsUseCase', () => {
   const giftCardRepository = createGiftCardRepository();

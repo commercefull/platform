@@ -1,9 +1,4 @@
-import {
-  createShippingCarrierPort,
-  createShippingMethodPort,
-  createShippingCarrier,
-  createShippingMethod,
-} from '../../tests/testUtils';
+import { createShippingCarrierPort, createShippingMethodPort, createShippingCarrier, createShippingMethod } from '../../tests/testUtils';
 import { CreateShipmentUseCase } from './CreateShipment';
 import { ShippingCarrierNotFoundError, ShippingMethodNotFoundError } from '../../domain/errors/ShippingErrors';
 

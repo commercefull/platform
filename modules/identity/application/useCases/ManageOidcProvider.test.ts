@@ -17,8 +17,12 @@ describe('ManageOidcProviderUseCase', () => {
 
   it('should create an OIDC provider', async () => {
     const result = await useCase.create({
-      organizationId: 'org-1', name: 'Auth0', issuerUrl: 'https://idp.test',
-      clientId: 'c', clientSecret: 's', redirectUri: 'https://app.test/cb',
+      organizationId: 'org-1',
+      name: 'Auth0',
+      issuerUrl: 'https://idp.test',
+      clientId: 'c',
+      clientSecret: 's',
+      redirectUri: 'https://app.test/cb',
     });
 
     expect(repo.save).toHaveBeenCalled();
@@ -31,4 +35,3 @@ describe('ManageOidcProviderUseCase', () => {
     await expect(useCase.updateClaimMapping('missing', {})).rejects.toThrow(SsoProviderNotFoundError);
   });
 });
-

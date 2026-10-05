@@ -5,176 +5,175 @@
 
 ## Core Application
 
-| Variable | Default | Description |
-|---|---|---|
-| `PORT` | `3000` | ============================================================================ Core Application ============================================================================ |
-| `SERVERLESS` | `0` | — |
-| `NODE_ENV` | `development` | — |
+| Variable     | Default       | Description                                                                                                                                                                |
+| ------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PORT`       | `3000`        | ============================================================================ Core Application ============================================================================ |
+| `SERVERLESS` | `0`           | —                                                                                                                                                                          |
+| `NODE_ENV`   | `development` | —                                                                                                                                                                          |
 
 ## Default organization ID (used by admin controllers as fallback)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable                  | Default                                | Description                                                     |
+| ------------------------- | -------------------------------------- | --------------------------------------------------------------- |
 | `DEFAULT_ORGANIZATION_ID` | `01911000-0000-7000-8000-000000000001` | Default organization ID (used by admin controllers as fallback) |
 
 ## Default storefront store slug (multi-store: 'us' or 'uk')
 
-| Variable | Default | Description |
-|---|---|---|
-| `DEFAULT_STORE_SLUG` | `us` | Default storefront store slug (multi-store: 'us' or 'uk') |
+| Variable             | Default | Description                                               |
+| -------------------- | ------- | --------------------------------------------------------- |
+| `DEFAULT_STORE_SLUG` | `us`    | Default storefront store slug (multi-store: 'us' or 'uk') |
 
 ## Logging level (error | warn | info | debug)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable    | Default | Description          |
+| ----------- | ------- | -------------------- |
 | `LOG_LEVEL` | `debug` | Logging level (error | warn | info | debug) |
 
 ## Disable duplicate file transports when PM2 or Docker captures stdout
 
-| Variable | Default | Description |
-|---|---|---|
-| `LOG_FILE_ENABLED` | `1` | Disable duplicate file transports when PM2 or Docker captures stdout |
+| Variable           | Default | Description                                                          |
+| ------------------ | ------- | -------------------------------------------------------------------- |
+| `LOG_FILE_ENABLED` | `1`     | Disable duplicate file transports when PM2 or Docker captures stdout |
 
 ## HTTP and graceful shutdown bounds in milliseconds
 
-| Variable | Default | Description |
-|---|---|---|
-| `HTTP_KEEP_ALIVE_TIMEOUT_MS` | `5000` | HTTP and graceful shutdown bounds in milliseconds |
-| `HTTP_HEADERS_TIMEOUT_MS` | `10000` | — |
-| `HTTP_REQUEST_TIMEOUT_MS` | `30000` | — |
-| `SHUTDOWN_TIMEOUT_MS` | `30000` | — |
-| `HEALTH_CHECK_TIMEOUT_MS` | `2000` | — |
+| Variable                     | Default | Description                                       |
+| ---------------------------- | ------- | ------------------------------------------------- |
+| `HTTP_KEEP_ALIVE_TIMEOUT_MS` | `5000`  | HTTP and graceful shutdown bounds in milliseconds |
+| `HTTP_HEADERS_TIMEOUT_MS`    | `10000` | —                                                 |
+| `HTTP_REQUEST_TIMEOUT_MS`    | `30000` | —                                                 |
+| `SHUTDOWN_TIMEOUT_MS`        | `30000` | —                                                 |
+| `HEALTH_CHECK_TIMEOUT_MS`    | `2000`  | —                                                 |
 
 ## but explicit values make sessions stable across restarts.
 
-| Variable | Default | Description |
-|---|---|---|
-| `CUSTOMER_JWT_SECRET` | `generate-a-secure-random-string-at-least-32-chars-long` | ============================================================================ Required Secrets — ephemeral dev secrets are auto-generated if missing, but explicit values make sessions stable across restarts. ============================================================================ |
-| `ORGANIZATION_JWT_SECRET` | `generate-a-secure-random-string-at-least-32-chars-long` | — |
-| `ADMIN_JWT_SECRET` | `generate-a-secure-random-string-at-least-32-chars-long` | — |
-| `B2B_JWT_SECRET` | `generate-a-secure-random-string-at-least-32-chars-long` | — |
-| `SESSION_SECRET` | `bb90e8b58596c55070ee88b25ff01627ab0c227cd11d6f876af9e81a0...` | — |
+| Variable                  | Default                                                        | Description                                                                                                                                                                                                                                                                                 |
+| ------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CUSTOMER_JWT_SECRET`     | `generate-a-secure-random-string-at-least-32-chars-long`       | ============================================================================ Required Secrets — ephemeral dev secrets are auto-generated if missing, but explicit values make sessions stable across restarts. ============================================================================ |
+| `ORGANIZATION_JWT_SECRET` | `generate-a-secure-random-string-at-least-32-chars-long`       | —                                                                                                                                                                                                                                                                                           |
+| `ADMIN_JWT_SECRET`        | `generate-a-secure-random-string-at-least-32-chars-long`       | —                                                                                                                                                                                                                                                                                           |
+| `B2B_JWT_SECRET`          | `generate-a-secure-random-string-at-least-32-chars-long`       | —                                                                                                                                                                                                                                                                                           |
+| `SESSION_SECRET`          | `bb90e8b58596c55070ee88b25ff01627ab0c227cd11d6f876af9e81a0...` | —                                                                                                                                                                                                                                                                                           |
 
 ## JWT token expiry
 
-| Variable | Default | Description |
-|---|---|---|
-| `JWT_EXPIRES_IN` | `7d` | JWT token expiry |
-| `JWT_REFRESH_EXPIRES_IN` | `30d` | — |
+| Variable                 | Default | Description      |
+| ------------------------ | ------- | ---------------- |
+| `JWT_EXPIRES_IN`         | `7d`    | JWT token expiry |
+| `JWT_REFRESH_EXPIRES_IN` | `30d`   | —                |
 
 ## Payment webhook signature verification
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable                 | Default           | Description                            |
+| ------------------------ | ----------------- | -------------------------------------- |
 | `PAYMENT_WEBHOOK_SECRET` | `test-secret-key` | Payment webhook signature verification |
 
 ## SCIM API bearer token (for SSO/identity provisioning)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable            | Default                                        | Description                                           |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------------- |
 | `SCIM_BEARER_TOKEN` | `generate-a-secure-random-string-for-scim-api` | SCIM API bearer token (for SSO/identity provisioning) |
 
 ## Integration encryption key (for storing third-party API keys encrypted in DB)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable                     | Default                           | Description                                                                   |
+| ---------------------------- | --------------------------------- | ----------------------------------------------------------------------------- |
 | `INTEGRATION_ENCRYPTION_KEY` | `generate-32-byte-encryption-key` | Integration encryption key (for storing third-party API keys encrypted in DB) |
 
 ## Database (PostgreSQL 18)
 
-| Variable | Default | Description |
-|---|---|---|
-| `POSTGRES_PORT` | `5432` | ============================================================================ Database (PostgreSQL 18) ============================================================================ |
-| `POSTGRES_HOST` | `127.0.0.1` | — |
-| `POSTGRES_USER` | `ecomm-user` | — |
-| `POSTGRES_PASSWORD` | `ecomm-password` | — |
-| `POSTGRES_DB` | `ecomm-db` | — |
+| Variable            | Default          | Description                                                                                                                                                                        |
+| ------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POSTGRES_PORT`     | `5432`           | ============================================================================ Database (PostgreSQL 18) ============================================================================ |
+| `POSTGRES_HOST`     | `127.0.0.1`      | —                                                                                                                                                                                  |
+| `POSTGRES_USER`     | `ecomm-user`     | —                                                                                                                                                                                  |
+| `POSTGRES_PASSWORD` | `ecomm-password` | —                                                                                                                                                                                  |
+| `POSTGRES_DB`       | `ecomm-db`       | —                                                                                                                                                                                  |
 
 ## Alternative: single connection URL
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable       | Default                                                        | Description                        |
+| -------------- | -------------------------------------------------------------- | ---------------------------------- |
 | `DATABASE_URL` | `postgres://ecomm-user:ecomm-password@127.0.0.1:5432/ecomm-db` | Alternative: single connection URL |
 
 ## Enable TLS to PostgreSQL (required for RDS / Cloud SQL / Azure Flexible Server)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable       | Default | Description                                                                     |
+| -------------- | ------- | ------------------------------------------------------------------------------- |
 | `POSTGRES_SSL` | `false` | Enable TLS to PostgreSQL (required for RDS / Cloud SQL / Azure Flexible Server) |
 
 ## Verify the server certificate (set false only when the CA is not available)
 
-| Variable | Default | Description |
-|---|---|---|
-| `POSTGRES_SSL_REJECT_UNAUTHORIZED` | `true` | Verify the server certificate (set false only when the CA is not available) |
+| Variable                           | Default | Description                                                                 |
+| ---------------------------------- | ------- | --------------------------------------------------------------------------- |
+| `POSTGRES_SSL_REJECT_UNAUTHORIZED` | `true`  | Verify the server certificate (set false only when the CA is not available) |
 
 ## Optional PEM CA bundle for certificate verification
 
-| Variable | Default | Description |
-|---|---|---|
-| `POSTGRES_SSL_CA` | `—` | Optional PEM CA bundle for certificate verification |
+| Variable          | Default | Description                                         |
+| ----------------- | ------- | --------------------------------------------------- |
+| `POSTGRES_SSL_CA` | `—`     | Optional PEM CA bundle for certificate verification |
 
 ## Per-process connection budget; multiply by PM2 web workers plus worker processes
 
-| Variable | Default | Description |
-|---|---|---|
-| `POSTGRES_POOL_MAX` | `10` | Per-process connection budget; multiply by PM2 web workers plus worker processes |
-| `POSTGRES_IDLE_TIMEOUT_MS` | `30000` | — |
-| `POSTGRES_CONNECTION_TIMEOUT_MS` | `2000` | — |
-| `POSTGRES_STATEMENT_TIMEOUT_MS` | `30000` | — |
-| `POSTGRES_QUERY_TIMEOUT_MS` | `35000` | — |
-| `POSTGRES_APPLICATION_NAME` | `commercefull-web` | — |
+| Variable                         | Default            | Description                                                                      |
+| -------------------------------- | ------------------ | -------------------------------------------------------------------------------- |
+| `POSTGRES_POOL_MAX`              | `10`               | Per-process connection budget; multiply by PM2 web workers plus worker processes |
+| `POSTGRES_IDLE_TIMEOUT_MS`       | `30000`            | —                                                                                |
+| `POSTGRES_CONNECTION_TIMEOUT_MS` | `2000`             | —                                                                                |
+| `POSTGRES_STATEMENT_TIMEOUT_MS`  | `30000`            | —                                                                                |
+| `POSTGRES_QUERY_TIMEOUT_MS`      | `35000`            | —                                                                                |
+| `POSTGRES_APPLICATION_NAME`      | `commercefull-web` | —                                                                                |
 
 ## CORS and Cookies
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable          | Default                  | Description                                                                                                                                                                |
+| ----------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ALLOWED_ORIGINS` | `https://yourdomain.com` | ============================================================================ CORS and Cookies ============================================================================ |
-| `COOKIE_SECRET` | `—` | — |
-| `COOKIE_DOMAIN` | `—` | — |
+| `COOKIE_SECRET`   | `—`                      | —                                                                                                                                                                          |
+| `COOKIE_DOMAIN`   | `—`                      | —                                                                                                                                                                          |
 
 ## Edge / Network Security
 
-| Variable | Default | Description |
-|---|---|---|
-| `TRUST_PROXY` | `—` | ============================================================================ Edge / Network Security ============================================================================ Number of reverse-proxy hops in front of the app (1 = nginx, 2 = CDN + LB). Never "true". |
-| `ORIGIN_VERIFY_SECRET` | `—` | When set, requests without this value in ORIGIN_VERIFY_HEADER are rejected (blocks CDN/WAF bypass) |
+| Variable               | Default | Description                                                                                                                                                                                                                                                                 |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TRUST_PROXY`          | `—`     | ============================================================================ Edge / Network Security ============================================================================ Number of reverse-proxy hops in front of the app (1 = nginx, 2 = CDN + LB). Never "true". |
+| `ORIGIN_VERIFY_SECRET` | `—`     | When set, requests without this value in ORIGIN_VERIFY_HEADER are rejected (blocks CDN/WAF bypass)                                                                                                                                                                          |
 
 ## Header carrying the origin secret (x-azure-fdid for Azure Front Door)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable               | Default           | Description                                                           |
+| ---------------------- | ----------------- | --------------------------------------------------------------------- |
 | `ORIGIN_VERIFY_HEADER` | `x-origin-verify` | Header carrying the origin secret (x-azure-fdid for Azure Front Door) |
 
 ## Per-IP request budget per minute (all routes)
 
-| Variable | Default | Description |
-|---|---|---|
-| `RATE_LIMIT_GLOBAL_PER_MINUTE` | `600` | Per-IP request budget per minute (all routes) |
+| Variable                       | Default | Description                                   |
+| ------------------------------ | ------- | --------------------------------------------- |
+| `RATE_LIMIT_GLOBAL_PER_MINUTE` | `600`   | Per-IP request budget per minute (all routes) |
 
 ## Per-IP login/register/token/password-reset attempts per 15 minutes
 
-| Variable | Default | Description |
-|---|---|---|
-| `RATE_LIMIT_AUTH_PER_15_MINUTES` | `20` | Per-IP login/register/token/password-reset attempts per 15 minutes |
+| Variable                         | Default | Description                                                        |
+| -------------------------------- | ------- | ------------------------------------------------------------------ |
+| `RATE_LIMIT_AUTH_PER_15_MINUTES` | `20`    | Per-IP login/register/token/password-reset attempts per 15 minutes |
 
 ## Force rate limiting on in development/test (off by default there)
 
-| Variable | Default | Description |
-|---|---|---|
-| `RATE_LIMIT_ENABLED` | `0` | Force rate limiting on in development/test (off by default there) |
+| Variable             | Default | Description                                                       |
+| -------------------- | ------- | ----------------------------------------------------------------- |
+| `RATE_LIMIT_ENABLED` | `0`     | Force rate limiting on in development/test (off by default there) |
 
 ## Serve /docs and /docs/api in production (internal docs are hidden by default)
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable      | Default | Description                                                                   |
+| ------------- | ------- | ----------------------------------------------------------------------------- |
 | `DOCS_PUBLIC` | `false` | Serve /docs and /docs/api in production (internal docs are hidden by default) |
 
 ## File Storage
 
-| Variable | Default | Description |
-|---|---|---|
-| `STORAGE_TYPE` | `local` | ============================================================================ File Storage ============================================================================ |
-| `STORAGE_LOCAL_DIR` | `public/uploads` | — |
-| `STORAGE_LOCAL_URL` | `http://127.0.0.1:3000/uploads` | — |
-
+| Variable            | Default                         | Description                                                                                                                                                            |
+| ------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `STORAGE_TYPE`      | `local`                         | ============================================================================ File Storage ============================================================================ |
+| `STORAGE_LOCAL_DIR` | `public/uploads`                | —                                                                                                                                                                      |
+| `STORAGE_LOCAL_URL` | `http://127.0.0.1:3000/uploads` | —                                                                                                                                                                      |

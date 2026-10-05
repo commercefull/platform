@@ -1,7 +1,4 @@
-import type {
-  ShippingRatePort,
-  CreateShippingRateInput,
-} from '../../domain/repositories/ShippingConfigPorts';
+import type { ShippingRatePort, CreateShippingRateInput } from '../../domain/repositories/ShippingConfigPorts';
 import type { ShippingRate } from '../../../../libs/db/types';
 import { calculateRate } from '../../domain/services/calculateRate';
 
@@ -36,4 +33,3 @@ export class ManageShippingRatesUseCase {
     return calculateRate(rate, orderTotal, itemCount, weight);
   }
 }
-

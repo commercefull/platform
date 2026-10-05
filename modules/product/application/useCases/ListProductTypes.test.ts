@@ -1,8 +1,5 @@
-
 import { ListProductTypesUseCase } from './ListProductTypes';
 import { createProductTypeRow, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('ListProductTypesUseCase', () => {
   let useCase: ListProductTypesUseCase;
@@ -10,7 +7,7 @@ describe('ListProductTypesUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof ListProductTypesUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof ListProductTypesUseCase>[0]>();
     mockRepo.findAll.mockResolvedValue([createProductTypeRow({ productTypeId: 't1', name: 'Simple' })]);
     useCase = new ListProductTypesUseCase(mockRepo);
   });

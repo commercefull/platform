@@ -36,7 +36,7 @@
 | Categorise        | `ManageProductCategories`, `productCategoryMap` (`isPrimary`, `position`)              | Many-to-many; one primary category.                                                                            |
 | Brand / tags      | `ManageBrands` (`product.brandId`), `ManageProductTags` (`productTag`)                 |                                                                                                                |
 | Attributes        | `SetProductAttributes`, `productAttributeValueMap`                                     | Dynamic attributes (colour, size, material…).                                                                  |
-| Collections       | `ManageProductCollection(s)`, `productCollectionMap`                                   | `productCollection.isAutomated` exists.                                                                        |
+| Collections       | `ManageProductCollection(s)`, `assortmentCollectionMap`                                | `assortmentCollection.isAutomated` exists.                                                                     |
 | Bundles           | `ManageBundles`, `productBundle`                                                       | Priced bundles (fixed / dynamic / mix_match).                                                                  |
 | **Relationships** | `ManageProductRelationshipsUseCase` (`ManageProductAssets.ts`), table `productRelated` | Types: `related`, `accessory`, `bundle`, `cross_sell`, `up_sell`, `grouped`. Has `position` and `isAutomated`. |
 | Publish           | `UpdateProductStatus` → `product.published`                                            |                                                                                                                |
@@ -126,17 +126,17 @@ Merchants define rules once instead of linking thousands of products by hand:
 > "Products tagged **espresso-machine** → recommend tag **coffee-beans** as **cross_sell**."
 > "Brand **Acme** → recommend brand **Acme** in the same primary category as **related**."
 
-| Field          | Meaning                                                                                                                                 |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `sourceType`   | `category` \| `tag` \| `productBrand` \| `collection` \| `productType`                                                                  |
-| `sourceId`     | The id matched against the viewed product                                                                                               |
-| `targetType`   | `category` \| `tag` \| `productBrand` \| `collection`                                                                                   |
-| `targetId`     | Where candidates come from                                                                                                              |
-| `relationType` | `related` \| `accessory` \| `cross_sell` \| `up_sell`                                                                                   |
-| `targetSort`   | How candidates in the target set are ordered: `bestSelling` (default), `newest`, `rating`, `manual` (uses `productCategoryManualOrder`) |
-| `maxItems`     | Cap per rule (default 4)                                                                                                                |
-| `priority`     | Rule order when several rules match                                                                                                     |
-| `priceBand`    | Optional: `any` \| `cheaper` \| `similar` \| `pricier` relative to the source product (useful for `up_sell`)                            |
+| Field          | Meaning                                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sourceType`   | `category` \| `tag` \| `productBrand` \| `collection` \| `productType`                                                                     |
+| `sourceId`     | The id matched against the viewed product                                                                                                  |
+| `targetType`   | `category` \| `tag` \| `productBrand` \| `collection`                                                                                      |
+| `targetId`     | Where candidates come from                                                                                                                 |
+| `relationType` | `related` \| `accessory` \| `cross_sell` \| `up_sell`                                                                                      |
+| `targetSort`   | How candidates in the target set are ordered: `bestSelling` (default), `newest`, `rating`, `manual` (uses `assortmentCategoryManualOrder`) |
+| `maxItems`     | Cap per rule (default 4)                                                                                                                   |
+| `priority`     | Rule order when several rules match                                                                                                        |
+| `priceBand`    | Optional: `any` \| `cheaper` \| `similar` \| `pricier` relative to the source product (useful for `up_sell`)                               |
 
 Rules are resolved in the **nightly job** into the candidate table (§5), so they cost nothing to serve.
 
@@ -835,23 +835,23 @@ These events are also useful for the built-in engine (for example, tuning `minSu
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/recommendation/exclusions` | `asyncHandler(controller.listExclusions)` | — |
-| POST | `/recommendation/exclusions` | `asyncHandler(controller.createExclusion)` | — |
-| DELETE | `/recommendation/exclusions/:exclusionId` | `asyncHandler(controller.deleteExclusion)` | — |
-| GET | `/recommendation/popular` | `asyncHandler(controller.getPopular)` | — |
-| POST | `/recommendation/products` | `asyncHandler(controller.postProductRecommendations)` | — |
-| GET | `/recommendation/products/:productId` | `asyncHandler(controller.getProductRecommendations)` | — |
-| GET | `/recommendation/products/:productId/preview` | `asyncHandler(controller.previewPlacement)` | — |
-| GET | `/recommendation/products/:productId/suggestions` | `asyncHandler(controller.listSuggestions)` | — |
-| POST | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)` | — |
-| POST | `/recommendation/products/:productId/suggestions/hide` | `asyncHandler(controller.hideSuggestion)` | — |
-| POST | `/recommendation/rebuild` | `asyncHandler(controller.rebuild)` | — |
-| GET | `/recommendation/rules` | `asyncHandler(controller.listRules)` | — |
-| POST | `/recommendation/rules` | `asyncHandler(controller.createRule)` | — |
-| PUT | `/recommendation/rules/:ruleId` | `asyncHandler(controller.updateRule)` | — |
-| DELETE | `/recommendation/rules/:ruleId` | `asyncHandler(controller.deleteRule)` | — |
-| GET | `/recommendation/stats` | `asyncHandler(controller.getStats)` | — |
+| Method | Endpoint                                                 | Controller                                            | Description |
+| ------ | -------------------------------------------------------- | ----------------------------------------------------- | ----------- |
+| GET    | `/recommendation/exclusions`                             | `asyncHandler(controller.listExclusions)`             | —           |
+| POST   | `/recommendation/exclusions`                             | `asyncHandler(controller.createExclusion)`            | —           |
+| DELETE | `/recommendation/exclusions/:exclusionId`                | `asyncHandler(controller.deleteExclusion)`            | —           |
+| GET    | `/recommendation/popular`                                | `asyncHandler(controller.getPopular)`                 | —           |
+| POST   | `/recommendation/products`                               | `asyncHandler(controller.postProductRecommendations)` | —           |
+| GET    | `/recommendation/products/:productId`                    | `asyncHandler(controller.getProductRecommendations)`  | —           |
+| GET    | `/recommendation/products/:productId/preview`            | `asyncHandler(controller.previewPlacement)`           | —           |
+| GET    | `/recommendation/products/:productId/suggestions`        | `asyncHandler(controller.listSuggestions)`            | —           |
+| POST   | `/recommendation/products/:productId/suggestions/accept` | `asyncHandler(controller.acceptSuggestion)`           | —           |
+| POST   | `/recommendation/products/:productId/suggestions/hide`   | `asyncHandler(controller.hideSuggestion)`             | —           |
+| POST   | `/recommendation/rebuild`                                | `asyncHandler(controller.rebuild)`                    | —           |
+| GET    | `/recommendation/rules`                                  | `asyncHandler(controller.listRules)`                  | —           |
+| POST   | `/recommendation/rules`                                  | `asyncHandler(controller.createRule)`                 | —           |
+| PUT    | `/recommendation/rules/:ruleId`                          | `asyncHandler(controller.updateRule)`                 | —           |
+| DELETE | `/recommendation/rules/:ruleId`                          | `asyncHandler(controller.deleteRule)`                 | —           |
+| GET    | `/recommendation/stats`                                  | `asyncHandler(controller.getStats)`                   | —           |
 
 <!-- GENERATED:ENDPOINTS:END -->

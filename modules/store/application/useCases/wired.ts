@@ -11,6 +11,7 @@ import { ConfigureStorePickupUseCase } from './ConfigureStorePickup';
 import { SetLocalDeliveryZoneUseCase } from './SetLocalDeliveryZone';
 import { CreateStoreHierarchyUseCase } from './CreateStoreHierarchy';
 import { ManageStoresAdminUseCase } from './ManageStoresAdmin';
+import { ManageSalesChannelsUseCase } from './ManageSalesChannels';
 import { SystemConfigAdapter } from '../../infrastructure/acl/SystemConfigAdapter';
 import { OrganizationLookupAdapter } from '../../infrastructure/acl/OrganizationLookupAdapter';
 import systemConfigurationRepo from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
@@ -31,6 +32,7 @@ export const configureStorePickupUseCase = new ConfigureStorePickupUseCase(store
 export const setLocalDeliveryZoneUseCase = new SetLocalDeliveryZoneUseCase(storeRepo);
 export const createStoreHierarchyUseCase = new CreateStoreHierarchyUseCase(storeRepo);
 export const manageStoresAdminUseCase = new ManageStoresAdminUseCase(storeRepo);
+export const manageSalesChannelsUseCase = new ManageSalesChannelsUseCase(storeDataRepository.salesChannels, storeRepo);
 
 export class FindActiveStoresUseCase {
   async execute() {

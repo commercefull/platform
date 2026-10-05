@@ -3,6 +3,7 @@ import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { asyncHandler } from '../../libs/asyncHandler';
 import { resolveTheme } from './themeMiddleware';
 import { resolveStore } from './storeResolutionMiddleware';
+import { resolveAssortment } from './assortmentMiddleware';
 import {
   userContactUsValidationRules,
   validateContactUs,
@@ -97,6 +98,7 @@ import {
 import { cancelRequest, createRequestForm, createRequestSubmit, listRequests, viewRequest } from '../../modules/gdpr';
 import { getStoreLocator } from '../../modules/store';
 import { getPromotionsPage } from '../../modules/promotion';
+import { listCollectionsPage, getCollectionPage } from '../../modules/assortment';
 
 const router = createHttpRouter();
 
@@ -208,18 +210,21 @@ router.post('/contact-form', [...userContactFormValidationRules(), validateConta
 // Product Routes
 // ============================================================================
 
+// Assortment constraint — catalog routes only expose sellable products
+const assortment = resolveAssortment;
+
 // GET: all products (PLP)
-router.get('/products', asyncHandler(listProducts));
+router.get('/products', assortment, asyncHandler(listProducts));
 
 // GET: products by category
-router.get('/products/category/:categorySlug', asyncHandler(getCategoryProducts));
+router.get('/products/category/:categorySlug', assortment, asyncHandler(getCategoryProducts));
 
 // GET: product detail (PDP)
-router.get('/products/:categorySlug/:productId', asyncHandler(getProduct));
+router.get('/products/:categorySlug/:productId', assortment, asyncHandler(getProduct));
 
 // GET: search products
-router.get('/search', asyncHandler(searchProducts));
-router.get('/search/autocomplete', asyncHandler(searchAutocomplete));
+router.get('/search', assortment, asyncHandler(searchProducts));
+router.get('/search/autocomplete', assortment, asyncHandler(searchAutocomplete));
 
 // ============================================================================
 // Sitemap
@@ -235,10 +240,10 @@ router.get('/sitemap.xml', asyncHandler(generateSitemap));
 router.get('/brands', asyncHandler(listBrands));
 
 // GET: brand products (PLP filtered by brand)
-router.get('/brands/:slug/products', asyncHandler(getBrandProducts));
+router.get('/brands/:slug/products', assortment, asyncHandler(getBrandProducts));
 
 // GET: brand landing page
-router.get('/brands/:slug', asyncHandler(getBrand));
+router.get('/brands/:slug', assortment, asyncHandler(getBrand));
 
 // ============================================================================
 // Category Routes
@@ -255,6 +260,16 @@ router.get('/api/categories/:categoryId', asyncHandler(getCategoryDetails));
 
 // GET: category landing page
 router.get('/categories/:categorySlug', asyncHandler(getCategoryPage));
+
+// ============================================================================
+// Collection Routes (assortment)
+// ============================================================================
+
+// GET: published collections index
+router.get('/collections', asyncHandler(listCollectionsPage));
+
+// GET: collection landing page
+router.get('/collections/:slug', assortment, asyncHandler(getCollectionPage));
 
 // ============================================================================
 // Basket/Cart Routes

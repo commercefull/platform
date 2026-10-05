@@ -7,7 +7,10 @@ import { query, queryOne } from '../../../../libs/db';
 
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateSupplierEntityError, PurchaseOrderItemNotFoundError } from '../../domain/errors/SupplierErrors';
-import type { SupplierPurchaseOrder as DbSupplierPurchaseOrder, SupplierPurchaseOrderItem as DbSupplierPurchaseOrderItem } from '../../../../libs/db/types';
+import type {
+  SupplierPurchaseOrder as DbSupplierPurchaseOrder,
+  SupplierPurchaseOrderItem as DbSupplierPurchaseOrderItem,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Table Constants
@@ -71,7 +74,15 @@ export type SupplierPurchaseOrderItemCreateParams = Omit<
 export type SupplierPurchaseOrderItemUpdateParams = Partial<
   Pick<
     SupplierPurchaseOrderItem,
-    'quantity' | 'receivedQuantity' | 'unitCostCents' | 'taxCents' | 'discountCents' | 'totalCents' | 'status' | 'expectedDeliveryDate' | 'notes'
+    | 'quantity'
+    | 'receivedQuantity'
+    | 'unitCostCents'
+    | 'taxCents'
+    | 'discountCents'
+    | 'totalCents'
+    | 'status'
+    | 'expectedDeliveryDate'
+    | 'notes'
   >
 >;
 

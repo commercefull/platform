@@ -45,4 +45,3 @@ describe('ManageVendorUseCase', () => {
     expect(emitMock).toHaveBeenCalledWith('marketplace.vendor.approved', expect.objectContaining({ vendorId: vendor.vendorId }));
   });
 });
-

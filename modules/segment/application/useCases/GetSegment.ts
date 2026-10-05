@@ -11,4 +11,3 @@ export class GetSegmentUseCase {
     return segment;
   }
 }
-

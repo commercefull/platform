@@ -47,9 +47,7 @@ describe('ManageAddressesUseCase', () => {
 
   describe('updateAddress', () => {
     it('should update the address and return the mapped response', async () => {
-      customerRepository.updateAddress.mockResolvedValue(
-        createCustomerAddressRow({ customerAddressId: 'addr-1', city: 'Portland' }),
-      );
+      customerRepository.updateAddress.mockResolvedValue(createCustomerAddressRow({ customerAddressId: 'addr-1', city: 'Portland' }));
 
       const result = await useCase.updateAddress(new UpdateAddressCommand('cust-1', 'addr-1', { city: 'Portland' }));
 
@@ -60,9 +58,7 @@ describe('ManageAddressesUseCase', () => {
     it('should throw CustomerNotFoundError when the customer does not exist', async () => {
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(useCase.updateAddress(new UpdateAddressCommand('missing', 'addr-1', {}))).rejects.toThrow(
-        CustomerNotFoundError,
-      );
+      await expect(useCase.updateAddress(new UpdateAddressCommand('missing', 'addr-1', {}))).rejects.toThrow(CustomerNotFoundError);
     });
 
     it('should throw CustomerAddressNotFoundError when the address is not owned by the customer', async () => {
@@ -85,15 +81,11 @@ describe('ManageAddressesUseCase', () => {
     it('should throw CustomerNotFoundError when the customer does not exist', async () => {
       customerRepository.findById.mockResolvedValue(null);
 
-      await expect(useCase.deleteAddress(new DeleteAddressCommand('missing', 'addr-1'))).rejects.toThrow(
-        CustomerNotFoundError,
-      );
+      await expect(useCase.deleteAddress(new DeleteAddressCommand('missing', 'addr-1'))).rejects.toThrow(CustomerNotFoundError);
     });
 
     it('should throw CustomerAddressNotFoundError when the address is not owned by the customer', async () => {
-      await expect(useCase.deleteAddress(new DeleteAddressCommand('cust-1', 'foreign-addr'))).rejects.toThrow(
-        CustomerAddressNotFoundError,
-      );
+      await expect(useCase.deleteAddress(new DeleteAddressCommand('cust-1', 'foreign-addr'))).rejects.toThrow(CustomerAddressNotFoundError);
       expect(customerRepository.deleteAddress).not.toHaveBeenCalled();
     });
   });

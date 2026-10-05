@@ -29,6 +29,7 @@ export interface BasketProps {
   customerId?: string;
   sessionId?: string;
   storeId?: string;
+  channelId?: string;
   status: BasketStatus;
   currency: string;
   items: BasketItem[];
@@ -55,6 +56,7 @@ export class Basket {
     customerId?: string;
     sessionId?: string;
     storeId?: string;
+    channelId?: string;
     currency?: string;
     expiresAt?: Date;
   }): Basket {
@@ -64,6 +66,7 @@ export class Basket {
       customerId: props.customerId,
       sessionId: props.sessionId,
       storeId: props.storeId,
+      channelId: props.channelId,
       status: 'active',
       currency: props.currency || 'USD',
       items: [],
@@ -93,6 +96,10 @@ export class Basket {
 
   get storeId(): string | undefined {
     return this.props.storeId;
+  }
+
+  get channelId(): string | undefined {
+    return this.props.channelId;
   }
 
   get status(): BasketStatus {
@@ -315,6 +322,19 @@ export class Basket {
     this.touch();
   }
 
+  /**
+   * Recomputes the coupon discount against the current subtotal — used after
+   * a reprice so percentage/fixed coupons track authoritative prices.
+   */
+  refreshCouponDiscount(): void {
+    if (!this.props.coupon) return;
+    const { discountType, discountValue } = this.props.coupon;
+    const subtotalCents = this.subtotal.cents;
+    this.props.discountAmountCents =
+      discountType === 'percentage' ? Math.round((subtotalCents * discountValue) / 100) : Math.min(discountValue, subtotalCents);
+    this.touch();
+  }
+
   extendExpiration(days: number = 7): void {
     this.props.expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     this.touch();
@@ -340,6 +360,7 @@ export class Basket {
       customerId: this.props.customerId,
       sessionId: this.props.sessionId,
       storeId: this.props.storeId,
+      channelId: this.props.channelId,
       status: this.props.status,
       currency: this.props.currency,
       items: this.props.items.map(item => item.toJSON()),

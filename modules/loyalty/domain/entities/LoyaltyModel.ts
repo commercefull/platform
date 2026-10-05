@@ -18,7 +18,7 @@ export type LoyaltyTier = {
   isActive: boolean | null;
   createdAt: Date | null;
   updatedAt: Date | null;
-}
+};
 
 export type LoyaltyPoints = {
   loyaltyPointsId: string;
@@ -30,7 +30,7 @@ export type LoyaltyPoints = {
   lifetimePoints: number;
   lastActivity: Date;
   expiryDate: Date | null;
-}
+};
 
 export type LoyaltyTransaction = {
   loyaltyTransactionId: string;
@@ -42,7 +42,7 @@ export type LoyaltyTransaction = {
   points: number;
   description: string | null;
   referenceId: string | null;
-}
+};
 
 export type LoyaltyReward = {
   rewardId: string;
@@ -66,7 +66,7 @@ export type LoyaltyReward = {
   metadata: Record<string, unknown> | null;
   createdAt: Date | null;
   updatedAt: Date | null;
-}
+};
 
 export type LoyaltyRedemption = {
   redemptionId: string;
@@ -80,5 +80,4 @@ export type LoyaltyRedemption = {
   expiresAt: Date | null;
   usedAt: Date | null;
   metadata: Record<string, unknown> | null;
-}
-
+};

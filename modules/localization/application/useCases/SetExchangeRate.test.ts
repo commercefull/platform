@@ -29,35 +29,33 @@ describe('SetExchangeRateUseCase', () => {
     });
 
     expect(result.effectiveDate).toBe('2026-03-01T00:00:00.000Z');
-    expect(repository.createExchangeRateHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ source: 'ecb', effectiveDate }),
-    );
+    expect(repository.createExchangeRateHistory).toHaveBeenCalledWith(expect.objectContaining({ source: 'ecb', effectiveDate }));
   });
 
   it('should throw LocalizationValidationError when required fields are missing', async () => {
     const repository = createSetExchangeRateRepository();
 
-    await expect(
-      new SetExchangeRateUseCase(repository).execute({ currencyCode: '', exchangeRate: 1 }),
-    ).rejects.toThrow(LocalizationValidationError);
+    await expect(new SetExchangeRateUseCase(repository).execute({ currencyCode: '', exchangeRate: 1 })).rejects.toThrow(
+      LocalizationValidationError,
+    );
     expect(repository.updateCurrency).not.toHaveBeenCalled();
   });
 
   it.each([0, -1])('should throw InvalidExchangeRateError when the rate is %s', async exchangeRate => {
     const repository = createSetExchangeRateRepository();
 
-    await expect(
-      new SetExchangeRateUseCase(repository).execute({ currencyCode: 'EUR', exchangeRate }),
-    ).rejects.toThrow(InvalidExchangeRateError);
+    await expect(new SetExchangeRateUseCase(repository).execute({ currencyCode: 'EUR', exchangeRate })).rejects.toThrow(
+      InvalidExchangeRateError,
+    );
     expect(repository.updateCurrency).not.toHaveBeenCalled();
   });
 
   it('should throw CurrencyNotFoundError when the currency does not exist', async () => {
     const repository = createSetExchangeRateRepository(null);
 
-    await expect(
-      new SetExchangeRateUseCase(repository).execute({ currencyCode: 'XYZ', exchangeRate: 1 }),
-    ).rejects.toThrow(CurrencyNotFoundError);
+    await expect(new SetExchangeRateUseCase(repository).execute({ currencyCode: 'XYZ', exchangeRate: 1 })).rejects.toThrow(
+      CurrencyNotFoundError,
+    );
     expect(repository.updateCurrency).not.toHaveBeenCalled();
     expect(repository.createExchangeRateHistory).not.toHaveBeenCalled();
   });

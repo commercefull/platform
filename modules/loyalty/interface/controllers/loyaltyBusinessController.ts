@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Loyalty Business Controller
  *
@@ -178,8 +178,18 @@ export const createReward = async (
   req: HttpRequest<Record<string, string>, unknown, CreateRewardBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
-    req.body;
+  const {
+    name,
+    description,
+    pointsCost,
+    discountAmountCents,
+    discountPercent,
+    discountCode,
+    freeShipping,
+    productIds,
+    expiresAt,
+    isActive,
+  } = req.body;
 
   try {
     const reward = await manageLoyaltyAdminUseCase.createReward({
@@ -205,8 +215,18 @@ export const updateReward = async (
   res: HttpResponse,
 ): Promise<void> => {
   const { id } = req.params;
-  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
-    req.body;
+  const {
+    name,
+    description,
+    pointsCost,
+    discountAmountCents,
+    discountPercent,
+    discountCode,
+    freeShipping,
+    productIds,
+    expiresAt,
+    isActive,
+  } = req.body;
 
   const reward = await manageLoyaltyAdminUseCase.updateReward(id, {
     name,
@@ -250,10 +270,10 @@ export const getCustomerPointsTransactions = async (req: HttpRequest, res: HttpR
   const transactions = await manageLoyaltyAdminUseCase.findCustomerTransactions(customerId, limit);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: transactions,
-        pagination: { limit },
-      });
+    success: true,
+    data: transactions,
+    pagination: { limit },
+  });
 };
 
 export const adjustCustomerPoints = async (

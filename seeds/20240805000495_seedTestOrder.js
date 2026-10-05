@@ -118,8 +118,22 @@ exports.seed = async function (knex) {
     isDefault: false,
   };
   await knex('orderAddress').insert([
-    { orderAddressId: '00000000-0000-0000-0000-000000000220', orderId: TEST_ORDER_ID, addressType: 'shipping', ...orderAddress, createdAt: knex.fn.now(), updatedAt: knex.fn.now() },
-    { orderAddressId: '00000000-0000-0000-0000-000000000221', orderId: TEST_ORDER_ID, addressType: 'billing', ...orderAddress, createdAt: knex.fn.now(), updatedAt: knex.fn.now() },
+    {
+      orderAddressId: '00000000-0000-0000-0000-000000000220',
+      orderId: TEST_ORDER_ID,
+      addressType: 'shipping',
+      ...orderAddress,
+      createdAt: knex.fn.now(),
+      updatedAt: knex.fn.now(),
+    },
+    {
+      orderAddressId: '00000000-0000-0000-0000-000000000221',
+      orderId: TEST_ORDER_ID,
+      addressType: 'billing',
+      ...orderAddress,
+      createdAt: knex.fn.now(),
+      updatedAt: knex.fn.now(),
+    },
   ]);
 
   // Initial status history rows — mirror what a created order records

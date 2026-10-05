@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Gift Card Customer Controller
  * Handles customer-facing gift card operations
@@ -35,14 +35,14 @@ export const checkGiftCardBalance: AsyncHandler = async (req, res, _next) => {
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          code: giftCard.code,
-          currentBalanceCents: giftCard.currentBalanceCents,
-          currency: giftCard.currency,
-          expiresAt: giftCard.expiresAt,
-        },
-      });
+    success: true,
+    data: {
+      code: giftCard.code,
+      currentBalanceCents: giftCard.currentBalanceCents,
+      currency: giftCard.currency,
+      expiresAt: giftCard.expiresAt,
+    },
+  });
 };
 
 export const redeemGiftCard: AsyncHandler = async (req, res, _next) => {

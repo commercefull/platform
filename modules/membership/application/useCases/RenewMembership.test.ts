@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { RenewMembershipUseCase } from './RenewMembership';
-import {
-  MembershipNotFoundError,
-  MembershipPlanNotFoundError,
-  MembershipValidationError,
-} from '../../domain/errors/MembershipErrors';
+import { MembershipNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 import { createRenewMembershipRepository, emitMock } from '../../tests/testUtils';
 
 describe('RenewMembershipUseCase', () => {
@@ -32,10 +28,7 @@ describe('RenewMembershipUseCase', () => {
     expect(result.membershipId).toBe('m1');
     expect(result.status).toBe('active');
     expect(result.amountCents).toBe(50);
-    expect(emitMock).toHaveBeenCalledWith(
-      'membership.renewed',
-      expect.objectContaining({ membershipId: 'm1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('membership.renewed', expect.objectContaining({ membershipId: 'm1' }));
   });
 
   it('should reactivate a membership pending cancellation', async () => {

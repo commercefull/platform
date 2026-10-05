@@ -31,7 +31,7 @@ describe('ManageMembershipTiersUseCase', () => {
     });
 
     it('should create with defaults', async () => {
-      port.createTier.mockImplementation(async (input) => {
+      port.createTier.mockImplementation(async input => {
         expect(input).toEqual({
           name: 'Gold',
           description: '',

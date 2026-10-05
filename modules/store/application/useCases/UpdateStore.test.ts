@@ -33,9 +33,7 @@ describe('UpdateStoreUseCase', () => {
   it('should throw StoreSlugAlreadyExistsError when the new slug is taken', async () => {
     storeRepository.findBySlug.mockResolvedValue(createStore({ storeId: 'other-store', slug: 'taken' }));
 
-    await expect(useCase.execute(new UpdateStoreCommand('store-1', { slug: 'taken' }))).rejects.toThrow(
-      StoreSlugAlreadyExistsError,
-    );
+    await expect(useCase.execute(new UpdateStoreCommand('store-1', { slug: 'taken' }))).rejects.toThrow(StoreSlugAlreadyExistsError);
     expect(storeRepository.save).not.toHaveBeenCalled();
   });
 

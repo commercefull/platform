@@ -1,9 +1,5 @@
 import type { LoyaltyRepository } from '../../domain/repositories/LoyaltyRepository';
-import {
-  LoyaltyRewardNotFoundError,
-  LoyaltyTierNotFoundError,
-  LoyaltyValidationError,
-} from '../../domain/errors/LoyaltyErrors';
+import { LoyaltyRewardNotFoundError, LoyaltyTierNotFoundError, LoyaltyValidationError } from '../../domain/errors/LoyaltyErrors';
 
 const REDEMPTION_STATUSES = ['pending', 'used', 'expired', 'cancelled'] as const;
 type RedemptionStatus = (typeof REDEMPTION_STATUSES)[number];
@@ -90,4 +86,3 @@ export class ManageLoyaltyAdminUseCase {
     );
   }
 }
-

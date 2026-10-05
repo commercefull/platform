@@ -96,8 +96,7 @@ import type { SupplierAddressCreateParams } from '../infrastructure/repositories
 import type { SupplierProductCreateParams } from '../infrastructure/repositories/supplierProductRepo';
 
 const supplierDirectoryAdapter = {
-  createSupplier: (params: Record<string, unknown>) =>
-    supplierDataRepository.suppliers.create(params as SupplierCreateParams),
+  createSupplier: (params: Record<string, unknown>) => supplierDataRepository.suppliers.create(params as SupplierCreateParams),
   createSupplierAddress: (params: Record<string, unknown>) =>
     supplierDataRepository.addresses.create(params as unknown as SupplierAddressCreateParams),
   createSupplierProduct: (params: Record<string, unknown>) =>
@@ -110,8 +109,7 @@ const supplierDirectoryAdapter = {
   updateSupplier: (id: string, params: Record<string, unknown>) =>
     supplierDataRepository.suppliers.update(id, params as SupplierUpdateParams),
   deleteSupplier: (id: string) => supplierDataRepository.suppliers.delete(id),
-  updateSupplierStatus: (id: string, status: string) =>
-    supplierDataRepository.suppliers.updateStatus(id, status as SupplierStatus),
+  updateSupplierStatus: (id: string, status: string) => supplierDataRepository.suppliers.updateStatus(id, status as SupplierStatus),
   approveSupplier: (id: string) => supplierDataRepository.suppliers.approve(id),
   suspendSupplier: (id: string) => supplierDataRepository.suppliers.suspend(id),
   getSupplierStatistics: () => supplierDataRepository.suppliers.getStatistics(),
@@ -172,8 +170,7 @@ const receivingRecordsAdapter = {
 };
 
 const receivingItemsAdapter = {
-  findByReceivingRecordId: (recordId: string) =>
-    supplierPurchaseOrderDataRepository.receivingItems.findByReceivingRecordId(recordId),
+  findByReceivingRecordId: (recordId: string) => supplierPurchaseOrderDataRepository.receivingItems.findByReceivingRecordId(recordId),
   create: (params: Record<string, unknown>) =>
     supplierPurchaseOrderDataRepository.receivingItems.create(params as SupplierReceivingItemCreateParams),
   update: (id: string, params: Record<string, unknown>) =>
@@ -228,9 +225,7 @@ const purchaseOrderRecordAdapter = {
     };
   },
   async create(data: Record<string, unknown>) {
-    const result = await supplierPurchaseOrderDataRepository.purchaseOrders.create(
-      data as SupplierPurchaseOrderCreateParams,
-    );
+    const result = await supplierPurchaseOrderDataRepository.purchaseOrders.create(data as SupplierPurchaseOrderCreateParams);
     return {
       purchaseOrderId: result.supplierPurchaseOrderId,
       poNumber: result.poNumber,
@@ -246,10 +241,7 @@ const purchaseOrderRecordAdapter = {
 };
 
 export const createSupplierUseCase = new CreateSupplierUseCase(supplierRecordAdapter);
-export const createPurchaseOrderUseCase = new CreatePurchaseOrderUseCase(
-  supplierRecordAdapter,
-  purchaseOrderRecordAdapter,
-);
+export const createPurchaseOrderUseCase = new CreatePurchaseOrderUseCase(supplierRecordAdapter, purchaseOrderRecordAdapter);
 
 export {
   supplierDataRepository,

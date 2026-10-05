@@ -51,9 +51,7 @@ const pricingDataQuery: PricingDataQueryPort = {
     pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, priceListIds),
   findPriceListItem: async (priceListId, productId, variantId) => {
     const prices = await pricingDataRepository.customerPrices.findPricesForProduct(productId, variantId, [priceListId]);
-    const entry = prices.find(
-      p => p.adjustmentType === PricingAdjustmentType.OVERRIDE || p.adjustmentType === PricingAdjustmentType.FIXED,
-    );
+    const entry = prices.find(p => p.adjustmentType === PricingAdjustmentType.OVERRIDE || p.adjustmentType === PricingAdjustmentType.FIXED);
     // Price-list amounts are stored in major units — convert to cents
     return entry ? { priceCents: Math.round(entry.adjustmentValue * 100) } : null;
   },
@@ -66,8 +64,7 @@ const pricingRuleQuery: PricingRuleQueryPort = {
 };
 
 const currencyPriceRuleQuery: CurrencyPriceRuleQueryPort = {
-  findByCurrencyCode: (currencyCode, activeOnly) =>
-    pricingRuleRepository.currencyPriceRules.findByCurrencyCode(currencyCode, activeOnly),
+  findByCurrencyCode: (currencyCode, activeOnly) => pricingRuleRepository.currencyPriceRules.findByCurrencyCode(currencyCode, activeOnly),
 };
 
 // ── Wired use-case instances (composition root) ─────────────────────

@@ -172,12 +172,7 @@ export class ManageSupplierDirectoryUseCase {
     });
   }
 
-  async listSuppliers(query: {
-    search?: string;
-    filters: Record<string, unknown>;
-    limit: number;
-    offset: number;
-  }): Promise<unknown[]> {
+  async listSuppliers(query: { search?: string; filters: Record<string, unknown>; limit: number; offset: number }): Promise<unknown[]> {
     if (query.search) {
       return this.suppliers.searchSuppliers(query.search);
     }

@@ -21,7 +21,10 @@ export const listAuditLogs = async (req: HttpRequest, res: HttpResponse): Promis
   };
 
   const activeFilters = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
-  const result = await manageAuditLogsUseCase.findAll(Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined, pagination);
+  const result = await manageAuditLogsUseCase.findAll(
+    Object.keys(activeFilters).length > 0 ? (activeFilters as never) : undefined,
+    pagination,
+  );
 
   adminRespond(req, res, 'audit/index', {
     pageName: 'Audit Logs',

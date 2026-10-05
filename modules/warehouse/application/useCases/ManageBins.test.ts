@@ -54,9 +54,7 @@ describe('ManageBinsUseCase', () => {
     const port = createPort();
     const useCase = new ManageBinsUseCase(port);
 
-    await expect(useCase.create('w1', { locationCode: '', binType: 'standard' })).rejects.toBeInstanceOf(
-      WarehouseValidationError,
-    );
+    await expect(useCase.create('w1', { locationCode: '', binType: 'standard' })).rejects.toBeInstanceOf(WarehouseValidationError);
     expect(port.createBin).not.toHaveBeenCalled();
   });
 

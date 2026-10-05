@@ -1,7 +1,6 @@
 import { OrderFulfillmentRepository, FulfillmentStatus } from '../../domain/repositories/OrderFulfillmentRepository';
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
 
-
 export class ManageOrderFulfillmentsUseCase {
   constructor(
     private readonly fulfillmentRepo: OrderFulfillmentRepository,

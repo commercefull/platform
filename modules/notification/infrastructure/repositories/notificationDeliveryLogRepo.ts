@@ -19,8 +19,7 @@ export type {
   NotificationDeliveryLogUpdateParams,
 } from '../../domain/repositories/NotificationDeliveryLogRepository';
 
-const toDate = (d: Date | string | null | undefined): Date | undefined =>
-  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 
 function mapToDeliveryLog(row: DbNotificationDeliveryLog): NotificationDeliveryLog {
   return {
@@ -50,9 +49,10 @@ export class NotificationDeliveryLogRepo {
    * Find delivery log by ID
    */
   async findById(notificationDeliveryLogId: string): Promise<NotificationDeliveryLog | null> {
-    const row = await queryOne<DbNotificationDeliveryLog>(`SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`, [
-      notificationDeliveryLogId,
-    ]);
+    const row = await queryOne<DbNotificationDeliveryLog>(
+      `SELECT * FROM "notificationDeliveryLog" WHERE "notificationDeliveryLogId" = $1`,
+      [notificationDeliveryLogId],
+    );
     return row ? mapToDeliveryLog(row) : null;
   }
 

@@ -1,5 +1,3 @@
-
-
 // Seeded test data IDs
 // From seeds/20241220000023_seedStoreInventoryLocations.js
 export const SEEDED_INVENTORY_LOCATION_ID = '20000000-0000-7001-8000-000000000001';

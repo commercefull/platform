@@ -35,8 +35,6 @@ export const SEEDED_PRICE_ALERT_IDS = {
   ALERT_2: '01939006-0000-7000-8000-000000000002',
 };
 
-
-
 export function createTestClient(): AxiosInstance {
   return axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',

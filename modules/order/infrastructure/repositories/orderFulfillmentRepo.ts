@@ -1,7 +1,10 @@
 import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateOrderFulfillmentError, FailedToCreateOrderFulfillmentPackageError } from '../../domain/errors/OrderErrors';
-import type { OrderFulfillment as DbOrderFulfillment, OrderFulfillmentPackage as DbOrderFulfillmentPackage } from '../../../../libs/db/types';
+import type {
+  OrderFulfillment as DbOrderFulfillment,
+  OrderFulfillmentPackage as DbOrderFulfillmentPackage,
+} from '../../../../libs/db/types';
 
 import type {
   FulfillmentType,
@@ -28,8 +31,7 @@ export type {
   OrderFulfillmentPackageTrackingParams,
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
-const toDate = (d: Date | string | null | undefined): Date | undefined =>
-  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToFulfillment(row: DbOrderFulfillment): OrderFulfillment {
@@ -86,7 +88,9 @@ export class OrderFulfillmentRepo {
    * Find fulfillment by ID
    */
   async findById(orderFulfillmentId: string): Promise<OrderFulfillment | null> {
-    const row = await queryOne<DbOrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [orderFulfillmentId]);
+    const row = await queryOne<DbOrderFulfillment>(`SELECT * FROM "orderFulfillment" WHERE "orderFulfillmentId" = $1`, [
+      orderFulfillmentId,
+    ]);
     return row ? mapToFulfillment(row) : null;
   }
 
@@ -446,9 +450,10 @@ export class OrderFulfillmentRepo {
     }
 
     if (fields.length === 0) {
-      const row = await queryOne<DbOrderFulfillmentPackage>(`SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`, [
-        orderFulfillmentPackageId,
-      ]);
+      const row = await queryOne<DbOrderFulfillmentPackage>(
+        `SELECT * FROM "orderFulfillmentPackage" WHERE "orderFulfillmentPackageId" = $1`,
+        [orderFulfillmentPackageId],
+      );
       return row ? mapToPackage(row) : null;
     }
 

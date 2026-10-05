@@ -28,10 +28,7 @@ describe('CancelMembershipUseCase', () => {
 
     expect(result.membershipId).toBe('m1');
     expect(result.status).toBe('pending_cancellation');
-    expect(emitMock).toHaveBeenCalledWith(
-      'membership.cancelled',
-      expect.objectContaining({ membershipId: 'm1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('membership.cancelled', expect.objectContaining({ membershipId: 'm1' }));
   });
 
   it('should cancel immediately and flag refund eligibility when requested', async () => {

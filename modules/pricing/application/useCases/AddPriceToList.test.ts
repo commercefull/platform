@@ -62,9 +62,7 @@ describe('AddPriceToListUseCase', () => {
     const port = createPort();
     const useCase = new AddPriceToListUseCase(port);
 
-    await expect(useCase.execute('pl1', createPriceData({ productId: '' }))).rejects.toBeInstanceOf(
-      PricingValidationError,
-    );
+    await expect(useCase.execute('pl1', createPriceData({ productId: '' }))).rejects.toBeInstanceOf(PricingValidationError);
     expect(port.createPrice).not.toHaveBeenCalled();
   });
 });

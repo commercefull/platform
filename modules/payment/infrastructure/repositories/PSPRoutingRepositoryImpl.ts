@@ -11,10 +11,7 @@ import { PSPRoutingRepository } from '../../domain/repositories/PSPRoutingReposi
 import { PSPRoute, PSPRouteConfig } from '../../domain/entities/PSPRoute';
 import { PaymentRepo } from './paymentRepo';
 
-type GatewayRepoSlice = Pick<
-  PaymentRepo,
-  'findAllGateways' | 'findGatewayById' | 'createGateway' | 'updateGateway' | 'deleteGateway'
->;
+type GatewayRepoSlice = Pick<PaymentRepo, 'findAllGateways' | 'findGatewayById' | 'createGateway' | 'updateGateway' | 'deleteGateway'>;
 
 interface GatewayMetadata {
   priority?: number;
@@ -78,7 +75,10 @@ export class PSPRoutingRepositoryImpl implements PSPRoutingRepository {
 
   async findActiveRoutes(organizationId: string): Promise<PSPRoute[]> {
     const rows = await this.gateways.findAllGateways(organizationId);
-    return rows.filter(r => r.isActive).map(toRoute).sort((a, b) => a.priority - b.priority);
+    return rows
+      .filter(r => r.isActive)
+      .map(toRoute)
+      .sort((a, b) => a.priority - b.priority);
   }
 
   async findAllRoutes(organizationId: string): Promise<PSPRoute[]> {

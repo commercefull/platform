@@ -74,11 +74,7 @@ describe('Checkout Pickup & Local Delivery', () => {
 
     it('rejects an unknown pickup location', async () => {
       const checkoutId = await newCheckoutSession();
-      const resp = await client.put(
-        `/customer/checkout/${checkoutId}/pickup-location`,
-        { pickupLocationId: UNKNOWN_ID },
-        auth,
-      );
+      const resp = await client.put(`/customer/checkout/${checkoutId}/pickup-location`, { pickupLocationId: UNKNOWN_ID }, auth);
       expectStatus(resp, 404);
     });
 
@@ -115,11 +111,7 @@ describe('Checkout Pickup & Local Delivery', () => {
 
     it('returns bookable slots once a pickup location is set', async () => {
       const checkoutId = await newCheckoutSession();
-      const set = await client.put(
-        `/customer/checkout/${checkoutId}/pickup-location`,
-        { pickupLocationId: TEST_PICKUP_LOCATION_ID },
-        auth,
-      );
+      const set = await client.put(`/customer/checkout/${checkoutId}/pickup-location`, { pickupLocationId: TEST_PICKUP_LOCATION_ID }, auth);
       expectStatus(set, 200);
 
       const resp = await client.get(`/customer/checkout/${checkoutId}/pickup-slots?days=3`, auth);

@@ -27,21 +27,20 @@ describe('CreateAutomationRuleUseCase', () => {
   });
 
   it('should throw InvalidAutomationRuleError when no actions are provided', async () => {
-    await expect(
-      useCase.execute({ name: 'X', triggerType: 'manual', triggerConfig: {}, actions: [] }),
-    ).rejects.toThrow(InvalidAutomationRuleError);
+    await expect(useCase.execute({ name: 'X', triggerType: 'manual', triggerConfig: {}, actions: [] })).rejects.toThrow(
+      InvalidAutomationRuleError,
+    );
   });
 
   it('should throw InvalidAutomationRuleError when an event trigger lacks eventName', async () => {
-    await expect(
-      useCase.execute({ name: 'X', triggerType: 'event', triggerConfig: {}, actions: [RULE_ACTION] }),
-    ).rejects.toThrow(InvalidAutomationRuleError);
+    await expect(useCase.execute({ name: 'X', triggerType: 'event', triggerConfig: {}, actions: [RULE_ACTION] })).rejects.toThrow(
+      InvalidAutomationRuleError,
+    );
   });
 
   it('should throw InvalidAutomationRuleError when a schedule trigger lacks cronExpression', async () => {
-    await expect(
-      useCase.execute({ name: 'X', triggerType: 'schedule', triggerConfig: {}, actions: [RULE_ACTION] }),
-    ).rejects.toThrow(InvalidAutomationRuleError);
+    await expect(useCase.execute({ name: 'X', triggerType: 'schedule', triggerConfig: {}, actions: [RULE_ACTION] })).rejects.toThrow(
+      InvalidAutomationRuleError,
+    );
   });
 });
-

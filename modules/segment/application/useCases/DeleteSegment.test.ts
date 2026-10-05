@@ -28,4 +28,3 @@ describe('DeleteSegmentUseCase', () => {
     expect(repo.delete).not.toHaveBeenCalled();
   });
 });
-

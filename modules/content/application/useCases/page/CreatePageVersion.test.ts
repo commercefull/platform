@@ -28,7 +28,13 @@ describe('CreatePageVersionUseCase', () => {
 
   it('should snapshot the page and emit the version_created event', async () => {
     mockContentRepo.findPageById.mockResolvedValue(
-      createContentPage({ contentPageId: 'page-1', title: 'Test Page', status: 'published', summary: 'A summary', customFields: { hero: 'x' } }),
+      createContentPage({
+        contentPageId: 'page-1',
+        title: 'Test Page',
+        status: 'published',
+        summary: 'A summary',
+        customFields: { hero: 'x' },
+      }),
     );
     mockVersionRepo.createVersion.mockResolvedValue(versionRecord);
 
@@ -58,9 +64,7 @@ describe('CreatePageVersionUseCase', () => {
 
     await useCase.execute(new CreatePageVersionCommand('page-1'));
 
-    expect(mockVersionRepo.createVersion).toHaveBeenCalledWith(
-      expect.objectContaining({ comment: 'Version snapshot of "Test Page"' }),
-    );
+    expect(mockVersionRepo.createVersion).toHaveBeenCalledWith(expect.objectContaining({ comment: 'Version snapshot of "Test Page"' }));
   });
 
   it('should throw ContentValidationError when pageId is empty', async () => {

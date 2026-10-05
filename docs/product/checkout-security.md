@@ -45,19 +45,19 @@ Customer Browser
 
 ## The Difference
 
-| | Shopify | Commercefull |
-|---|---|---|
-| **Checkout control** | Sandboxed — scripts/pixels stripped on non-Plus (Aug 26, 2026) | Full control — you own the checkout code |
-| **Card data handling** | PSP-hosted iframe (SAQ A-EP) | PSP-hosted iframe (SAQ A-EP) — same standard |
-| **Custom scripts/pixels** | Blocked on non-Plus; requires Plus ($2,000+/mo) | No restrictions — run any script, pixel, or GTM container |
-| **PCI scope** | SAQ A-EP | SAQ A-EP — identical compliance, no extra burden |
-| **PSP choice** | Stripe, Shop Pay, limited others | Stripe, Adyen, PayPal, Klarna, Apple Pay, Affirm — any PSP |
+|                           | Shopify                                                        | Commercefull                                               |
+| ------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Checkout control**      | Sandboxed — scripts/pixels stripped on non-Plus (Aug 26, 2026) | Full control — you own the checkout code                   |
+| **Card data handling**    | PSP-hosted iframe (SAQ A-EP)                                   | PSP-hosted iframe (SAQ A-EP) — same standard               |
+| **Custom scripts/pixels** | Blocked on non-Plus; requires Plus ($2,000+/mo)                | No restrictions — run any script, pixel, or GTM container  |
+| **PCI scope**             | SAQ A-EP                                                       | SAQ A-EP — identical compliance, no extra burden           |
+| **PSP choice**            | Stripe, Shop Pay, limited others                               | Stripe, Adyen, PayPal, Klarna, Apple Pay, Affirm — any PSP |
 
 ---
 
 ## Why This Is Secure Without Sandboxing
 
-Shopify sandboxes checkout to *reduce their PCI scope and control the script surface*. Commercefull achieves the same PCI compliance through tokenisation — the platform never receives, processes, or stores Primary Account Numbers (PAN). The security boundary is at the PSP iframe, not at a checkout sandbox.
+Shopify sandboxes checkout to _reduce their PCI scope and control the script surface_. Commercefull achieves the same PCI compliance through tokenisation — the platform never receives, processes, or stores Primary Account Numbers (PAN). The security boundary is at the PSP iframe, not at a checkout sandbox.
 
 **What the platform handles:** PSP-issued tokens, last 4 digits (display only), card brand, expiry, transaction IDs.
 

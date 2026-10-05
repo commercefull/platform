@@ -47,12 +47,18 @@ describe('SsoLoginUseCase', () => {
 
   it('should issue a token for an existing user after OIDC callback', async () => {
     oidcRepo.findById.mockResolvedValue(createOidcProvider());
-    jest.spyOn(OidcTokenExchange.prototype, 'exchangeCodeForTokens')
+    jest
+      .spyOn(OidcTokenExchange.prototype, 'exchangeCodeForTokens')
       .mockResolvedValue({ accessToken: 'at', idToken: 'it', refreshToken: 'rt', tokenType: 'Bearer', expiresAt: new Date() });
-    jest.spyOn(OidcTokenExchange.prototype, 'fetchUserInfo')
+    jest
+      .spyOn(OidcTokenExchange.prototype, 'fetchUserInfo')
       .mockResolvedValue({ sub: 'sub-1', email: 'u@x.test', firstName: 'U', lastName: 'X', externalId: 'ext-1', rawClaims: {} });
     credentialPort.findByEmail.mockResolvedValue({
-      id: 'user-1', email: 'u@x.test', status: 'active', isActive: true, isVerified: true,
+      id: 'user-1',
+      email: 'u@x.test',
+      status: 'active',
+      isActive: true,
+      isVerified: true,
     });
 
     const result = await useCase.handleOidcCallback('oidc-1', 'code', 'verifier');
@@ -64,13 +70,27 @@ describe('SsoLoginUseCase', () => {
 
   it('should create a new user after SAML callback when the email is unknown', async () => {
     samlRepo.findById.mockResolvedValue(createSamlProvider());
-    jest.spyOn(SamlAssertionParser.prototype, 'parse')
-      .mockReturnValue({ nameId: 'n', nameIdFormat: 'emailAddress', sessionIndex: 's', attributes: {}, issuer: 'idp', notBefore: new Date(), notOnOrAfter: new Date() });
-    jest.spyOn(SamlAssertionParser.prototype, 'mapToUserInfo')
+    jest
+      .spyOn(SamlAssertionParser.prototype, 'parse')
+      .mockReturnValue({
+        nameId: 'n',
+        nameIdFormat: 'emailAddress',
+        sessionIndex: 's',
+        attributes: {},
+        issuer: 'idp',
+        notBefore: new Date(),
+        notOnOrAfter: new Date(),
+      });
+    jest
+      .spyOn(SamlAssertionParser.prototype, 'mapToUserInfo')
       .mockReturnValue({ email: 'new@x.test', firstName: 'N', lastName: 'U', externalId: 'ext-2', rawAttributes: {} });
     credentialPort.findByEmail.mockResolvedValue(null);
     credentialPort.createWithPassword.mockResolvedValue({
-      id: 'user-new', email: 'new@x.test', status: 'active', isActive: true, isVerified: true,
+      id: 'user-new',
+      email: 'new@x.test',
+      status: 'active',
+      isActive: true,
+      isVerified: true,
     });
 
     const result = await useCase.handleSamlCallback('saml-1', 'saml-response');
@@ -122,4 +142,3 @@ describe('SsoLoginUseCase', () => {
     await expect(useCase.handleOidcCallback('oidc-1', 'code')).rejects.toThrow(SsoValidationError);
   });
 });
-

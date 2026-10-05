@@ -10,11 +10,11 @@ describe('ReceiveStoreDispatchUseCase', () => {
   beforeEach(() => {
     mockDispatchRepo = lazyMock<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[0]>();
     mockDispatchRepo.findById.mockResolvedValue(createStoreDispatch({ status: 'in_transit' }));
-    mockDispatchRepo.save.mockImplementation(async (d) => d);
+    mockDispatchRepo.save.mockImplementation(async d => d);
     mockInventoryRepo = lazyMock<ConstructorParameters<typeof ReceiveStoreDispatchUseCase>[1]>();
     mockInventoryRepo.getLocationByStoreId.mockResolvedValue(createLocation({ locationId: 'loc2' }));
     mockInventoryRepo.findByProductAndLocation.mockResolvedValue(null);
-    mockInventoryRepo.save.mockImplementation(async (i) => i);
+    mockInventoryRepo.save.mockImplementation(async i => i);
     mockInventoryRepo.recordMovement.mockResolvedValue(createInventoryMovement());
     useCase = new ReceiveStoreDispatchUseCase(mockDispatchRepo, mockInventoryRepo);
   });

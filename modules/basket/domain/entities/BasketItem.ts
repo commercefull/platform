@@ -156,6 +156,19 @@ export class BasketItem {
     this.props.updatedAt = new Date();
   }
 
+  /**
+   * Re-set the authoritative unit price (e.g. after a requote at checkout).
+   * Per-line discounts survive the change — lineTotal recalculates from the
+   * new gross.
+   */
+  updateUnitPrice(newUnitPrice: Money): void {
+    if (newUnitPrice.cents < 0) {
+      throw new BasketItemQuantityError('Unit price cannot be negative');
+    }
+    this.props.unitPrice = newUnitPrice;
+    this.props.updatedAt = new Date();
+  }
+
   setDiscountAmountCents(amountCents: number): void {
     if (amountCents < 0) throw new BasketItemDiscountError('Discount amount cannot be negative');
     this.props.discountAmountCents = amountCents;

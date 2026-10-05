@@ -51,6 +51,11 @@ export interface LegacyMembershipBenefit {
   benefitType: string;
   discountPercentage?: number;
   discountAmountCents?: number;
+  /** Optional targeting scopes stored in the benefit value payload. */
+  storeIds?: string[];
+  channelIds?: string[];
+  countryCodes?: string[];
+  currencyCodes?: string[];
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -185,8 +190,18 @@ export class MembershipRepo {
     benefitType: 'contentAccess' | 'custom' | 'discount' | 'earlyAccess' | 'freeShipping' | 'gift' | 'prioritySupport' | 'rewardPoints';
     discountPercentage?: number;
     discountAmountCents?: number;
+    storeIds?: string[];
+    channelIds?: string[];
+    countryCodes?: string[];
+    currencyCodes?: string[];
     isActive?: boolean;
   }): Promise<LegacyMembershipBenefit> {
+    const scope = {
+      ...(params.storeIds ? { storeIds: params.storeIds } : {}),
+      ...(params.channelIds ? { channelIds: params.channelIds } : {}),
+      ...(params.countryCodes ? { countryCodes: params.countryCodes } : {}),
+      ...(params.currencyCodes ? { currencyCodes: params.currencyCodes } : {}),
+    };
     const benefit = await membershipBenefitRepo.create({
       name: params.name,
       code: params.name.toUpperCase().replace(/\s+/g, '_'),
@@ -197,10 +212,12 @@ export class MembershipRepo {
       benefitType: params.benefitType,
       valueType: params.discountPercentage ? 'percentage' : 'fixed',
       value: params.discountPercentage
-        ? { percentage: params.discountPercentage }
+        ? { percentage: params.discountPercentage, ...scope }
         : params.discountAmountCents
-          ? { amount: params.discountAmountCents }
-          : null,
+          ? { amount: params.discountAmountCents, ...scope }
+          : Object.keys(scope).length > 0
+            ? scope
+            : null,
       icon: null,
       rules: null,
       createdBy: null,
@@ -231,6 +248,10 @@ export class MembershipRepo {
       benefitType: string;
       discountPercentage: number;
       discountAmountCents: number;
+      storeIds: string[];
+      channelIds: string[];
+      countryCodes: string[];
+      currencyCodes: string[];
       isActive: boolean;
     }>,
   ): Promise<LegacyMembershipBenefit> {
@@ -239,13 +260,33 @@ export class MembershipRepo {
     if (params.description !== undefined) updateData.description = params.description;
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
     if (params.benefitType !== undefined) updateData.benefitType = params.benefitType;
-    if (params.discountPercentage !== undefined) {
-      updateData.value = { percentage: params.discountPercentage };
-      updateData.valueType = 'percentage';
-    }
-    if (params.discountAmountCents !== undefined) {
-      updateData.value = { amount: params.discountAmountCents };
-      updateData.valueType = 'fixed';
+
+    const updatesValue =
+      params.discountPercentage !== undefined ||
+      params.discountAmountCents !== undefined ||
+      params.storeIds !== undefined ||
+      params.channelIds !== undefined ||
+      params.countryCodes !== undefined ||
+      params.currencyCodes !== undefined;
+
+    if (updatesValue) {
+      const existing = await membershipBenefitRepo.findById(id);
+      if (!existing) throw new MembershipBenefitNotFoundError(id);
+      const existingValue = (existing.value || {}) as Record<string, unknown>;
+      const scope = {
+        storeIds: params.storeIds ?? existingValue.storeIds,
+        channelIds: params.channelIds ?? existingValue.channelIds,
+        countryCodes: params.countryCodes ?? existingValue.countryCodes,
+        currencyCodes: params.currencyCodes ?? existingValue.currencyCodes,
+      };
+      updateData.value = {
+        ...existingValue,
+        ...scope,
+        ...(params.discountPercentage !== undefined ? { percentage: params.discountPercentage } : {}),
+        ...(params.discountAmountCents !== undefined ? { amount: params.discountAmountCents } : {}),
+      };
+      if (params.discountPercentage !== undefined) updateData.valueType = 'percentage';
+      if (params.discountAmountCents !== undefined) updateData.valueType = 'fixed';
     }
 
     const benefit = await membershipBenefitRepo.update(id, updateData);
@@ -381,7 +422,14 @@ export class MembershipRepo {
   }
 
   private benefitToLegacy(benefit: DbMembershipBenefit, tierIds: string[] = []): LegacyMembershipBenefit {
-    const value = (benefit.value || {}) as { percentage?: number; amount?: number };
+    const value = (benefit.value || {}) as {
+      percentage?: number;
+      amount?: number;
+      storeIds?: string[];
+      channelIds?: string[];
+      countryCodes?: string[];
+      currencyCodes?: string[];
+    };
     return {
       id: benefit.membershipBenefitId,
       tierIds,
@@ -390,6 +438,10 @@ export class MembershipRepo {
       benefitType: benefit.benefitType,
       discountPercentage: value.percentage,
       discountAmountCents: value.amount,
+      storeIds: value.storeIds,
+      channelIds: value.channelIds,
+      countryCodes: value.countryCodes,
+      currencyCodes: value.currencyCodes,
       isActive: benefit.isActive,
       createdAt: benefit.createdAt.toString(),
       updatedAt: benefit.updatedAt.toString(),

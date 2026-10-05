@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   type CreateCouponInput,
@@ -38,13 +38,13 @@ export const getActiveCoupons = async (req: HttpRequest, res: HttpResponse): Pro
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        data: coupons || [],
-        pagination: {
-          limit: limit ? parseInt(limit as string) : 50,
-          offset: offset ? parseInt(offset as string) : 0,
-        },
-      });
+    success: true,
+    data: coupons || [],
+    pagination: {
+      limit: limit ? parseInt(limit as string) : 50,
+      offset: offset ? parseInt(offset as string) : 0,
+    },
+  });
 };
 
 /**
@@ -105,10 +105,10 @@ export const createCoupon = async (
     const coupon = await createCouponUseCase.execute(couponData);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: coupon,
-            message: 'Coupon created successfully',
-          });
+      success: true,
+      data: coupon,
+      message: 'Coupon created successfully',
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -128,9 +128,9 @@ export const updateCoupon = async (
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Coupon not found',
-          });
+      success: false,
+      message: 'Coupon not found',
+    });
     return;
   }
 
@@ -139,10 +139,10 @@ export const updateCoupon = async (
   const updatedCoupon = await manageCouponsUseCase.update(id, couponData);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: updatedCoupon,
-        message: 'Coupon updated successfully',
-      });
+    success: true,
+    data: updatedCoupon,
+    message: 'Coupon updated successfully',
+  });
 };
 
 /**
@@ -155,18 +155,18 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Coupon not found',
-          });
+      success: false,
+      message: 'Coupon not found',
+    });
     return;
   }
 
   await manageCouponsUseCase.delete(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Coupon deleted successfully',
-      });
+    success: true,
+    message: 'Coupon deleted successfully',
+  });
 };
 
 /**
@@ -188,16 +188,16 @@ export const validateCoupon = async (
 
     if (!result.valid) {
       jsonResponse(res, 400, {
-                success: false,
-                data: result,
-              });
+        success: false,
+        data: result,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: result,
-          });
+      success: true,
+      data: result,
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -213,23 +213,23 @@ export const getCouponUsage = async (req: HttpRequest, res: HttpResponse): Promi
   const existingCoupon = await manageCouponsUseCase.findById(id);
   if (!existingCoupon) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Coupon not found',
-          });
+      success: false,
+      message: 'Coupon not found',
+    });
     return;
   }
 
   const usage = await manageCouponsUseCase.getUsage(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          coupon: existingCoupon,
-          usage,
-          totalUsage: existingCoupon.usageCount,
-          remainingUsage: existingCoupon.maxUsage ? existingCoupon.maxUsage - existingCoupon.usageCount : null,
-        },
-      });
+    success: true,
+    data: {
+      coupon: existingCoupon,
+      usage,
+      totalUsage: existingCoupon.usageCount,
+      remainingUsage: existingCoupon.maxUsage ? existingCoupon.maxUsage - existingCoupon.usageCount : null,
+    },
+  });
 };
 
 /**
@@ -245,9 +245,9 @@ export const calculateCouponDiscount = async (
     const result = await calculateCouponDiscountUseCase.execute({ code, orderTotalCents, organizationId });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: result,
-          });
+      success: true,
+      data: result,
+    });
   } catch (error) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }

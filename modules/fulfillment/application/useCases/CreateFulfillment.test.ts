@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { CreateFulfillmentUseCase } from './CreateFulfillment';
-import {
-  createFulfillmentRepository,
-  withTransactionMock,
-  emitFulfillmentCreatedMock,
-} from '../../tests/testUtils';
+import { createFulfillmentRepository, withTransactionMock, emitFulfillmentCreatedMock } from '../../tests/testUtils';
 
 describe('CreateFulfillmentUseCase', () => {
   const fulfillmentRepository = createFulfillmentRepository();
@@ -28,8 +24,8 @@ describe('CreateFulfillmentUseCase', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
-    fulfillmentRepository.saveItems.mockImplementation(async (items) => items);
+    fulfillmentRepository.save.mockImplementation(async f => f);
+    fulfillmentRepository.saveItems.mockImplementation(async items => items);
   });
 
   it('should create the fulfillment with items inside a transaction', async () => {

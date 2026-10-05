@@ -1,11 +1,11 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Catalog Controller for Admin Panel
- * Handles Categories and Collections management.
+ * Handles Categories management.
  *
- * NOTE: Despite the file name, there is no `assortment` module.
- * Categories are backed by `modules/product/infrastructure/repositories/categoryRepo`.
- * Collections are placeholder — a dedicated module is planned (see gap-analysis-and-roadmap.md).
+ * NOTE: Despite the file name, categories are backed by
+ * `modules/product/infrastructure/repositories/categoryRepo`.
+ * Collections moved to modules/assortment (adminCollectionController).
  */
 
 import { logger } from '../../../../libs/logger';
@@ -180,75 +180,3 @@ export const reorderCategories = async (req: HttpRequest, res: HttpResponse): Pr
 };
 
 // ============================================================================
-// Collections (placeholder - uses simple in-memory structure for now)
-// ============================================================================
-
-// Note: Collections functionality would need a dedicated repository
-// For now, providing placeholder implementations
-
-export const listCollections = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  adminRespond(req, res, 'catalog/collections/index', {
-    pageName: 'Collections',
-    collections: [],
-    pagination: {
-      total: 0,
-      page: 1,
-      pages: 1,
-    },
-    success: req.query.success || null,
-  });
-};
-
-export const createCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  adminRespond(req, res, 'catalog/collections/create', {
-    pageName: 'Create Collection',
-  });
-};
-
-export const createCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    // Placeholder - would need collection repository
-    redirectResponse(res, '/admin/catalog/collections?success=Collection created successfully');
-  } catch (error: unknown) {
-    logger.warn('Error creating collection:', error);
-    adminRespond(req, res, 'catalog/collections/create', {
-      pageName: 'Create Collection',
-      error: (error as Error).message || 'Failed to create collection',
-      formData: req.body as HttpRequestBody,
-    });
-  }
-};
-
-export const viewCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  adminRespond(req, res, 'catalog/collections/view', {
-    pageName: 'Collection Details',
-    collection: null,
-    success: req.query.success || null,
-  });
-};
-
-export const editCollectionForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  adminRespond(req, res, 'catalog/collections/edit', {
-    pageName: 'Edit Collection',
-    collection: null,
-  });
-};
-
-export const updateCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  try {
-    const { collectionId } = req.params;
-    redirectResponse(res, `/admin/catalog/collections/${collectionId}?success=Collection updated successfully`);
-  } catch (error: unknown) {
-    logger.warn('Error updating collection:', error);
-    adminRespond(req, res, 'catalog/collections/edit', {
-      pageName: 'Edit Collection',
-      collection: null,
-      error: (error as Error).message || 'Failed to update collection',
-      formData: req.body as HttpRequestBody,
-    });
-  }
-};
-
-export const deleteCollection = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  jsonResponse(res, 200, { success: true, message: 'Collection deleted successfully' });
-};

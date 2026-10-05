@@ -63,7 +63,12 @@ export function createSupplierCreateRepository(): jest.Mocked<CreateSupplierRepo
   return repository;
 }
 
-export function createPoSupplierRepository(supplier: { status: string; isActive: boolean; minimumOrderValue?: number; leadTimeDays?: number } | null = { status: 'approved', isActive: true }): jest.Mocked<PoSupplierRepoPort> {
+export function createPoSupplierRepository(
+  supplier: { status: string; isActive: boolean; minimumOrderValue?: number; leadTimeDays?: number } | null = {
+    status: 'approved',
+    isActive: true,
+  },
+): jest.Mocked<PoSupplierRepoPort> {
   const repository: jest.Mocked<PoSupplierRepoPort> = {
     findById: jest.fn(),
   };
@@ -88,7 +93,9 @@ export function createPurchaseOrderCreateRepository(): jest.Mocked<PurchaseOrder
   return repository;
 }
 
-export function createPurchaseOrderRepository(purchaseOrder: { status: string; items: { quantity: number }[] } | null = { status: 'submitted', items: [{ quantity: 10 }] }): jest.Mocked<PurchaseOrderRepoPort> {
+export function createPurchaseOrderRepository(
+  purchaseOrder: { status: string; items: { quantity: number }[] } | null = { status: 'submitted', items: [{ quantity: 10 }] },
+): jest.Mocked<PurchaseOrderRepoPort> {
   const repository: jest.Mocked<PurchaseOrderRepoPort> = {
     findById: jest.fn(),
     update: jest.fn(),
@@ -117,28 +124,28 @@ export function createSupplierLookup(supplier: unknown = { supplierId: 'sup-1' }
 
 export function createPoWritePort(): jest.Mocked<SupplierPoWritePort> {
   return {
-    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
-      Promise.resolve({ supplierPurchaseOrderId: 'po-new', ...params }),
-    ),
-    createItem: jest.fn().mockImplementation((params: Record<string, unknown>) =>
-      Promise.resolve({ supplierPurchaseOrderItemId: 'item-new', ...params }),
-    ),
+    create: jest
+      .fn()
+      .mockImplementation((params: Record<string, unknown>) => Promise.resolve({ supplierPurchaseOrderId: 'po-new', ...params })),
+    createItem: jest
+      .fn()
+      .mockImplementation((params: Record<string, unknown>) => Promise.resolve({ supplierPurchaseOrderItemId: 'item-new', ...params })),
   };
 }
 
 export function createReceivingRecordWritePort(): jest.Mocked<ReceivingRecordWritePort> {
   return {
-    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
-      Promise.resolve({ supplierReceivingRecordId: 'rec-new', ...params }),
-    ),
+    create: jest
+      .fn()
+      .mockImplementation((params: Record<string, unknown>) => Promise.resolve({ supplierReceivingRecordId: 'rec-new', ...params })),
   };
 }
 
 export function createReceivingItemWritePort(): jest.Mocked<ReceivingItemWritePort> {
   return {
-    create: jest.fn().mockImplementation((params: Record<string, unknown>) =>
-      Promise.resolve({ supplierReceivingItemId: 'ritem-new', ...params }),
-    ),
+    create: jest
+      .fn()
+      .mockImplementation((params: Record<string, unknown>) => Promise.resolve({ supplierReceivingItemId: 'ritem-new', ...params })),
   };
 }
 

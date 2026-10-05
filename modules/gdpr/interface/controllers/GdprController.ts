@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * GDPR Controller
  * Handles HTTP requests for GDPR-related operations
@@ -179,10 +179,10 @@ export const listDataRequests: AsyncHandler = async (req, res, _next) => {
 
   const result = await manageGdprRequestsUseCase.findAll(filters, pagination);
   jsonResponse(res, 200, {
-        success: true,
-        ...result,
-        data: result.data.map(r => r.toJSON()),
-      });
+    success: true,
+    ...result,
+    data: result.data.map(r => r.toJSON()),
+  });
 };
 
 /**
@@ -216,15 +216,15 @@ export const getGdprStatistics: AsyncHandler = async (req, res, _next) => {
   ]);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          totalRequests: Object.values(byStatus).reduce((a, b) => a + b, 0),
-          pendingRequests: byStatus.pending || 0,
-          byStatus,
-          byType,
-          averageProcessingTimeDays: avgProcessingTime,
-        },
-      });
+    success: true,
+    data: {
+      totalRequests: Object.values(byStatus).reduce((a, b) => a + b, 0),
+      pendingRequests: byStatus.pending || 0,
+      byStatus,
+      byType,
+      averageProcessingTimeDays: avgProcessingTime,
+    },
+  });
 };
 
 /**
@@ -326,15 +326,15 @@ export const acceptAllCookies: AsyncHandler = async (req, res, _next) => {
   const sessionId = body.sessionId || req.sessionID;
   const result = await manageCookieConsentUseCase.acceptAll(sessionId);
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          cookieConsentId: result.gdprCookieConsentId,
-          necessaryCookies: true,
-          analyticsCookies: true,
-          marketingCookies: true,
-          preferenceCookies: true,
-        },
-      });
+    success: true,
+    data: {
+      cookieConsentId: result.gdprCookieConsentId,
+      necessaryCookies: true,
+      analyticsCookies: true,
+      marketingCookies: true,
+      preferenceCookies: true,
+    },
+  });
 };
 
 /**
@@ -345,15 +345,15 @@ export const rejectAllCookies: AsyncHandler = async (req, res, _next) => {
   const sessionId = body.sessionId || req.sessionID;
   const result = await manageCookieConsentUseCase.rejectAll(sessionId);
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          cookieConsentId: result.gdprCookieConsentId,
-          necessaryCookies: true,
-          analyticsCookies: false,
-          marketingCookies: false,
-          preferenceCookies: false,
-        },
-      });
+    success: true,
+    data: {
+      cookieConsentId: result.gdprCookieConsentId,
+      necessaryCookies: true,
+      analyticsCookies: false,
+      marketingCookies: false,
+      preferenceCookies: false,
+    },
+  });
 };
 
 /**
@@ -371,7 +371,10 @@ export const updateCookieConsent: AsyncHandler = async (req, res, _next) => {
  * Get cookie consent statistics (admin)
  */
 export const getCookieConsentStatistics: AsyncHandler = async (req, res, _next) => {
-  const [stats, byCountry] = await Promise.all([manageCookieConsentUseCase.getConsentStatistics(), manageCookieConsentUseCase.getConsentByCountry()]);
+  const [stats, byCountry] = await Promise.all([
+    manageCookieConsentUseCase.getConsentStatistics(),
+    manageCookieConsentUseCase.getConsentByCountry(),
+  ]);
 
   jsonResponse(res, 200, { success: true, data: { totalConsents: stats.total, ...stats, byCountry } });
 };

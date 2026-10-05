@@ -7,7 +7,6 @@ export interface SsoProviderSummary {
   isActive: boolean;
 }
 
-
 export class ListSsoProvidersUseCase {
   constructor(
     private readonly samlRepo: SamlProviderRepository,

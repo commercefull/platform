@@ -9,6 +9,9 @@ exports.up = function (knex) {
       table.uuid('organizationId').references('organizationId').inTable('organization');
       table.date('date').notNullable();
       table.string('channel').defaultTo('all'); // web, mobile, api, pos, all
+      // Structured sales-channel attribution — nullable: org/platform-scoped
+      // rollups and pre-channel events have none.
+      table.uuid('salesChannelId').references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
       table.string('currencyCode', 3).defaultTo('USD').references('code').inTable('currency');
 
       // Order metrics
@@ -43,8 +46,18 @@ exports.up = function (knex) {
       table.timestamp('createdAt').defaultTo(knex.fn.now());
       table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
-      table.unique(['organizationId', 'date', 'channel', 'currencyCode']);
+      table.index('salesChannelId');
     })
+    .then(() =>
+      // Rollup merge key for ON CONFLICT upserts. NULLS NOT DISTINCT:
+      // organizationId is nullable (pre-org events) and standard unique
+      // constraints treat NULLs as distinct, which would defeat merging.
+      knex.raw(`
+        ALTER TABLE "analyticsSalesDaily"
+          ADD CONSTRAINT analyticssalesdaily_organizationid_date_channel_currencycode_un
+          UNIQUE NULLS NOT DISTINCT ("organizationId", "date", "channel", "currencyCode")
+      `),
+    )
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("date")'))
     .then(() => knex.raw('CREATE INDEX ON "analyticsSalesDaily"("organizationId", "date")'));
 };

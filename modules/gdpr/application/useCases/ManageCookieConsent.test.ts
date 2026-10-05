@@ -46,9 +46,9 @@ describe('ManageCookieConsentUseCase', () => {
   it('should throw GdprValidationError when the session id is blank', async () => {
     const repository = createConsentRepository(null);
 
-    await expect(
-      new ManageCookieConsentUseCase(repository).recordConsent(new RecordCookieConsentCommand('  ', {})),
-    ).rejects.toThrow(GdprValidationError);
+    await expect(new ManageCookieConsentUseCase(repository).recordConsent(new RecordCookieConsentCommand('  ', {}))).rejects.toThrow(
+      GdprValidationError,
+    );
     expect(repository.save).not.toHaveBeenCalled();
   });
 

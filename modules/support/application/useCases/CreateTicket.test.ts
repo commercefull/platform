@@ -35,15 +35,12 @@ describe('CreateTicketUseCase', () => {
     );
   });
 
-  it.each(['return_request', 'refund_request'] as const)(
-    'should force high priority when the ticket is a %s',
-    async type => {
-      const result = await useCase.execute({ customerId: 'cust-1', subject: 'S', description: 'D', type, priority: 'low' });
+  it.each(['return_request', 'refund_request'] as const)('should force high priority when the ticket is a %s', async type => {
+    const result = await useCase.execute({ customerId: 'cust-1', subject: 'S', description: 'D', type, priority: 'low' });
 
-      expect(result.priority).toBe('high');
-      expect(supportRepository.createTicket).toHaveBeenCalledWith(expect.objectContaining({ priority: 'high' }));
-    },
-  );
+    expect(result.priority).toBe('high');
+    expect(supportRepository.createTicket).toHaveBeenCalledWith(expect.objectContaining({ priority: 'high' }));
+  });
 
   it('should keep the requested priority when the type has no auto-priority', async () => {
     const result = await useCase.execute({

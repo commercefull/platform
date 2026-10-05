@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Storefront Basket/Cart Controller
  * Handles shopping cart operations for customers
@@ -32,7 +32,13 @@ export const viewBasket = async (req: HttpRequest, res: HttpResponse): Promise<v
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
+  const getCmd = new GetOrCreateBasketCommand(
+    customerId,
+    sessionId,
+    (res.locals.currency as string) || 'USD',
+    (res.locals.storeId as string) || undefined,
+    (res.locals.channelId as string) || undefined,
+  );
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   // Calculate totals with tax
@@ -57,7 +63,13 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
     const sessionId = req.session?.id;
 
     // Get or create basket
-    const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
+    const getCmd = new GetOrCreateBasketCommand(
+      customerId,
+      sessionId,
+      (res.locals.currency as string) || 'USD',
+      (res.locals.storeId as string) || undefined,
+      (res.locals.channelId as string) || undefined,
+    );
     const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
     // Verify product exists and is available
@@ -103,7 +115,13 @@ export const updateBasketItem = async (req: HttpRequest, res: HttpResponse): Pro
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
+  const getCmd = new GetOrCreateBasketCommand(
+    customerId,
+    sessionId,
+    (res.locals.currency as string) || 'USD',
+    (res.locals.storeId as string) || undefined,
+    (res.locals.channelId as string) || undefined,
+  );
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const updCmd = new UpdateItemQuantityCommand(basket.basketId, basketItemId, parseInt(quantity as string));
@@ -126,7 +144,13 @@ export const removeFromBasket = async (req: HttpRequest, res: HttpResponse): Pro
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
+  const getCmd = new GetOrCreateBasketCommand(
+    customerId,
+    sessionId,
+    (res.locals.currency as string) || 'USD',
+    (res.locals.storeId as string) || undefined,
+    (res.locals.channelId as string) || undefined,
+  );
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const remCmd = new RemoveItemCommand(basket.basketId, basketItemId);
@@ -147,7 +171,13 @@ export const clearBasket = async (req: HttpRequest, res: HttpResponse): Promise<
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
 
-  const getCmd = new GetOrCreateBasketCommand(customerId, sessionId, (res.locals.currency as string) || 'USD', (res.locals.storeId as string) || undefined);
+  const getCmd = new GetOrCreateBasketCommand(
+    customerId,
+    sessionId,
+    (res.locals.currency as string) || 'USD',
+    (res.locals.storeId as string) || undefined,
+    (res.locals.channelId as string) || undefined,
+  );
   const basket = await getOrCreateBasketUseCase.execute(getCmd);
 
   const clrCmd = new ClearBasketCommand(basket.basketId);

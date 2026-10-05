@@ -13,6 +13,18 @@ export interface MembershipDiscountBenefit {
   discountPercentage: number;
 }
 
+/**
+ * Pricing context used to scope membership benefits to
+ * store/channel/country/currency targets when configured.
+ */
+export interface MembershipBenefitContext {
+  storeId?: string;
+  channelId?: string;
+  countryCode?: string;
+  currencyCode?: string;
+  regionCode?: string;
+}
+
 export interface MembershipBenefitsPort {
-  getDiscountBenefits(customerId: string): Promise<MembershipDiscountBenefit[]>;
+  getDiscountBenefits(customerId: string, context?: MembershipBenefitContext): Promise<MembershipDiscountBenefit[]>;
 }

@@ -27,9 +27,7 @@ describe('GenerateReportUseCase', () => {
 
   it('should generate a customer report with segment data', async () => {
     queryMock
-      .mockResolvedValueOnce([
-        { date: '2026-01-01', new_customers: '3', returning_customers: '2', orders: '5', revenue: '500' },
-      ])
+      .mockResolvedValueOnce([{ date: '2026-01-01', new_customers: '3', returning_customers: '2', orders: '5', revenue: '500' }])
       .mockResolvedValueOnce([{ segment: 'High Value', customers: '10', revenue: '5000' }]);
 
     const result = await useCase.execute('customers', { period: '7d' });

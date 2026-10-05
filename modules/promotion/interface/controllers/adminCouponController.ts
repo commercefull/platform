@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Coupon Controller
  * Handles coupon management for the Admin Hub
@@ -231,9 +231,9 @@ export const validateCoupon = async (req: HttpRequest, res: HttpResponse): Promi
   const result = await manageCouponsUseCase.validate(code, orderTotalCents, customerId, 'default-organization');
 
   jsonResponse(res, 200, {
-        valid: result.valid,
-        coupon: result.coupon,
-        message: result.message,
-        discountAmountCents: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotalCents) : 0,
-      });
+    valid: result.valid,
+    coupon: result.coupon,
+    message: result.message,
+    discountAmountCents: result.coupon ? manageCouponsUseCase.calculateDiscount(result.coupon, orderTotalCents) : 0,
+  });
 };

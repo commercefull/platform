@@ -1,4 +1,3 @@
- 
 interface ErrorWithCapture {
   captureStackTrace?: (target: object, constructorOpt?: (...args: unknown[]) => unknown) => void;
 }

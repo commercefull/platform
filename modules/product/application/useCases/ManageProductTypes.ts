@@ -1,9 +1,5 @@
 import type { ProductTypeCreateInput, ProductTypePort, ProductTypeUpdateInput } from '../../domain/repositories/ProductCatalogPorts';
-import {
-  ProductTypeNotFoundError,
-  ProductTypeSlugAlreadyExistsError,
-  ProductValidationError,
-} from '../../domain/errors/ProductErrors';
+import { ProductTypeNotFoundError, ProductTypeSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
 
 interface AttributeSetLookupPort {
   findByProductType(productTypeId: string): Promise<unknown[]>;

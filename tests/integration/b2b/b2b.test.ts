@@ -232,11 +232,7 @@ describe('B2B Business API', () => {
     });
 
     it('should convert an accepted quote to an order', async () => {
-      const response = await client.post(
-        `/business/quotes/${quoteId}/convert`,
-        { orderId: randomUUID() },
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/quotes/${quoteId}/convert`, { orderId: randomUUID() }, { headers: authHeaders() });
 
       expectStatus(response, 200);
       expect(response.data.data.status).toBe('converted');

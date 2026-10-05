@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * B2B Admin UI Controller
  * Admin views for B2B companies, users, quotes, and approval workflows

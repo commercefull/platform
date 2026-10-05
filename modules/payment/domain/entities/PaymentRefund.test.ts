@@ -40,7 +40,13 @@ describe('PaymentRefund', () => {
   });
 
   it('should serialize to JSON', () => {
-    const refund = PaymentRefund.create({ refundId: 'r1', transactionId: 't1', amountCents: 50, currency: 'USD', reason: 'Customer request' });
+    const refund = PaymentRefund.create({
+      refundId: 'r1',
+      transactionId: 't1',
+      amountCents: 50,
+      currency: 'USD',
+      reason: 'Customer request',
+    });
     const json = refund.toJSON();
     expect(json.refundId).toBe('r1');
     expect(json.amountCents).toBe(50);

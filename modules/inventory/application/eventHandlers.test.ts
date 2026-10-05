@@ -104,15 +104,18 @@ describe('Inventory event handlers: return.completed', () => {
       createTransaction: jest.fn().mockResolvedValue({}),
       findTransactionTypeByCode: jest
         .fn()
-        .mockImplementation(async (code: string) =>
-          code === 'RETURN' ? ({ inventoryTransactionTypeId: 'tt-return' } as never) : null,
-        ),
+        .mockImplementation(async (code: string) => (code === 'RETURN' ? ({ inventoryTransactionTypeId: 'tt-return' } as never) : null)),
     } as unknown as jest.Mocked<InventoryEventHandlerDeps['stock']>;
     deps = {
       orders,
       returns: returns as unknown as InventoryEventHandlerDeps['returns'],
       stock,
-      reservations: { createAtomic: jest.fn(), releaseByOrder: jest.fn() },
+      reservations: {
+        createAtomic: jest.fn(),
+        releaseByOrder: jest.fn(),
+        findByOrder: jest.fn().mockResolvedValue([]),
+        releaseActiveForOrder: jest.fn().mockResolvedValue({ releasedCount: 0 }),
+      },
     };
     registerInventoryEventHandlers(deps);
   });
@@ -139,9 +142,7 @@ describe('Inventory event handlers: return.completed', () => {
   });
 
   it('should skip items that failed inspection', async () => {
-    returns.findById.mockResolvedValue(
-      makeReturn({ inspectionFailedItems: { 'ret-item-1': { reason: 'damaged beyond repair' } } }),
-    );
+    returns.findById.mockResolvedValue(makeReturn({ inspectionFailedItems: { 'ret-item-1': { reason: 'damaged beyond repair' } } }));
 
     await eventBus.emit('return.completed', { orderReturnId: 'ret-1' });
 
@@ -191,5 +192,100 @@ describe('Inventory event handlers: return.completed', () => {
     await eventBus.emit('return.completed', { orderReturnId: 'ret-1' });
 
     expect(stock.createTransaction).toHaveBeenCalledWith(expect.objectContaining({ typeId: 'tt-adjust' }));
+  });
+});
+
+describe('Inventory event handlers: order lifecycle', () => {
+  let deps: InventoryEventHandlerDeps;
+  let stock: jest.Mocked<InventoryEventHandlerDeps['stock']>;
+  let reservations: jest.Mocked<NonNullable<InventoryEventHandlerDeps['reservations']>>;
+  let orders: { findById: jest.Mock };
+
+  beforeEach(() => {
+    (eventBus as unknown as { handlers: Map<string, unknown> }).handlers.clear();
+    orders = { findById: jest.fn().mockResolvedValue(makeOrder()) };
+    stock = {
+      checkProductAvailability: jest
+        .fn()
+        .mockResolvedValue({ available: true, locations: [{ locationId: 'loc-1', inventoryItemId: 'inv-1' }] }),
+      findLocationsByProductId: jest.fn(),
+      adjustQuantity: jest.fn(),
+      createTransaction: jest.fn(),
+      findTransactionTypeByCode: jest.fn(),
+    } as unknown as jest.Mocked<InventoryEventHandlerDeps['stock']>;
+    reservations = {
+      createAtomic: jest.fn().mockResolvedValue({ inventoryReservationId: 'r-1' }),
+      releaseByOrder: jest.fn().mockResolvedValue(1),
+      findByOrder: jest.fn().mockResolvedValue([]),
+      releaseActiveForOrder: jest.fn().mockResolvedValue({ releasedCount: 0 }),
+    };
+    deps = {
+      orders: orders as unknown as InventoryEventHandlerDeps['orders'],
+      returns: { findById: jest.fn() } as unknown as InventoryEventHandlerDeps['returns'],
+      stock,
+      reservations,
+    };
+    registerInventoryEventHandlers(deps);
+  });
+
+  afterEach(() => {
+    (eventBus as unknown as { handlers: Map<string, unknown> }).handlers.clear();
+  });
+
+  it('should reserve stock for tracked items on order.created', async () => {
+    await eventBus.emit('order.created', { orderId: 'ord-1' });
+
+    expect(reservations.createAtomic).toHaveBeenCalledWith(expect.objectContaining({ orderId: 'ord-1', productId: 'prod-1', quantity: 5 }));
+  });
+
+  it('should skip items already covered by checkout reservations', async () => {
+    reservations.findByOrder.mockResolvedValue([{ productId: 'prod-1', variantId: 'var-1', quantity: 5, status: 'active' }]);
+
+    await eventBus.emit('order.created', { orderId: 'ord-1' });
+
+    expect(reservations.createAtomic).not.toHaveBeenCalled();
+  });
+
+  it('should reserve only the uncovered remainder when partially covered', async () => {
+    reservations.findByOrder.mockResolvedValue([{ productId: 'prod-1', variantId: 'var-1', quantity: 2, status: 'active' }]);
+
+    await eventBus.emit('order.created', { orderId: 'ord-1' });
+
+    expect(reservations.createAtomic).toHaveBeenCalledWith(expect.objectContaining({ quantity: 3 }));
+  });
+
+  it('should skip digital items on order.created', async () => {
+    const order = Order.create({ orderId: 'ord-1', customerEmail: 't@e.com' });
+    order.addItem(
+      OrderItem.create({
+        orderItemId: 'oi-1',
+        orderId: 'ord-1',
+        productId: 'prod-digital',
+        sku: 'DIG-1',
+        name: 'Ebook',
+        quantity: 1,
+        unitPrice: Money.create(500, 'USD'),
+        isDigital: true,
+      }),
+    );
+    orders.findById.mockResolvedValue(order);
+
+    await eventBus.emit('order.created', { orderId: 'ord-1' });
+
+    expect(reservations.createAtomic).not.toHaveBeenCalled();
+  });
+
+  it('should release both reservation ledgers on order.cancelled', async () => {
+    await eventBus.emit('order.cancelled', { orderId: 'ord-1' });
+
+    expect(reservations.releaseByOrder).toHaveBeenCalledWith('ord-1');
+    expect(reservations.releaseActiveForOrder).toHaveBeenCalledWith('ord-1', 'cancelled');
+  });
+
+  it('should release both reservation ledgers on order.payment_failed', async () => {
+    await eventBus.emit('order.payment_failed', { orderId: 'ord-1' });
+
+    expect(reservations.releaseByOrder).toHaveBeenCalledWith('ord-1');
+    expect(reservations.releaseActiveForOrder).toHaveBeenCalledWith('ord-1', 'cancelled');
   });
 });

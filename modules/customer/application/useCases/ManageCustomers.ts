@@ -37,4 +37,3 @@ export class ManageCustomersUseCase {
     return this.customerRepo.recordFailedLogin(customerId);
   }
 }
-

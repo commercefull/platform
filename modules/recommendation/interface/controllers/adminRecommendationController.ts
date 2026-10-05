@@ -1,4 +1,4 @@
-import { redirectResponse, renderResponse } from "libs/apiResponse";
+import { redirectResponse, renderResponse } from 'libs/apiResponse';
 /**
  * Recommendation Controller for Admin Hub
  * Rules, exclusions, stats and per-product suggestions — calls the
@@ -167,7 +167,10 @@ export const acceptProductSuggestion = async (req: HttpRequest, res: HttpRespons
     redirectResponse(res, `/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion accepted'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to accept suggestion'));
+    redirectResponse(
+      res,
+      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to accept suggestion'),
+    );
   }
 };
 
@@ -180,6 +183,9 @@ export const hideProductSuggestion = async (req: HttpRequest, res: HttpResponse)
     redirectResponse(res, `/admin/products/${productId}/edit?success=` + encodeURIComponent('Suggestion hidden'));
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to hide suggestion'));
+    redirectResponse(
+      res,
+      `/admin/products/${productId}/edit?error=` + encodeURIComponent((error as Error).message || 'Failed to hide suggestion'),
+    );
   }
 };

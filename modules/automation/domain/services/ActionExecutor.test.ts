@@ -87,10 +87,7 @@ describe('createActionHandlers', () => {
     const effects = createEffects();
     const handlers = createActionHandlers(effects);
 
-    const result = await handlers.get('emit_event')!(
-      { type: 'emit_event', config: { eventName: 'order.flagged' } },
-      context,
-    );
+    const result = await handlers.get('emit_event')!({ type: 'emit_event', config: { eventName: 'order.flagged' } }, context);
 
     expect(result.success).toBe(true);
     expect(effects.emitEvent).toHaveBeenCalledWith('order.flagged', { orderId: 'o1' }, 'corr-1');
@@ -100,10 +97,7 @@ describe('createActionHandlers', () => {
     const effects = createEffects();
     const handlers = createActionHandlers(effects);
 
-    await handlers.get('send_notification')!(
-      { type: 'send_notification', config: { title: 'Hi', message: 'Hello' } },
-      context,
-    );
+    await handlers.get('send_notification')!({ type: 'send_notification', config: { title: 'Hi', message: 'Hello' } }, context);
 
     expect(effects.scheduleNotification).toHaveBeenCalledWith(
       expect.objectContaining({ userId: 'cust-1', title: 'Hi', message: 'Hello', channels: ['in_app'] }),

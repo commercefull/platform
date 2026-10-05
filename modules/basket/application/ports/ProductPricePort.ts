@@ -22,5 +22,6 @@ export interface ProductPricePort {
     productVariantId?: string,
     currencyCode?: string,
     quantity?: number,
+    context?: { storeId?: string; channelId?: string },
   ): Promise<ResolvedProductPrice | null>;
 }

@@ -33,9 +33,9 @@ describe('CreateOrganizationUseCase', () => {
     const repository = createOrganizationRepository();
     repository.findByEmail.mockResolvedValue({ organizationId: 'existing-org' });
 
-    await expect(
-      new CreateOrganizationUseCase(repository).execute({ name: 'New Corp', email: 'info@acme.com' }),
-    ).rejects.toThrow(OrganizationEmailAlreadyExistsError);
+    await expect(new CreateOrganizationUseCase(repository).execute({ name: 'New Corp', email: 'info@acme.com' })).rejects.toThrow(
+      OrganizationEmailAlreadyExistsError,
+    );
     expect(repository.create).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
   });

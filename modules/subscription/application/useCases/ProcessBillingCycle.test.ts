@@ -33,9 +33,7 @@ describe('ProcessBillingCycleUseCase', () => {
       }),
     );
     expect(port.advanceBillingCycle).toHaveBeenCalledWith('sub-1');
-    expect(port.createSubscriptionOrder.mock.invocationCallOrder[0]).toBeLessThan(
-      port.advanceBillingCycle.mock.invocationCallOrder[0],
-    );
+    expect(port.createSubscriptionOrder.mock.invocationCallOrder[0]).toBeLessThan(port.advanceBillingCycle.mock.invocationCallOrder[0]);
     expect(order).toEqual({ subscriptionOrderId: 'ord-1' });
   });
 

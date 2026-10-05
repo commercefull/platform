@@ -4,11 +4,7 @@
 
 import { lazyMock, createContentPage, createContentCategory, emitMock } from '../../../tests/testUtils';
 import { AssignPageToCategoryUseCase, AssignPageToCategoryCommand } from './AssignPageToCategory';
-import {
-  ContentPageNotFoundError,
-  CategoryNotFoundError,
-  ContentValidationError,
-} from '../../../domain/errors/ContentErrors';
+import { ContentPageNotFoundError, CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
 
 describe('AssignPageToCategoryUseCase', () => {
   let useCase: AssignPageToCategoryUseCase;
@@ -57,18 +53,14 @@ describe('AssignPageToCategoryUseCase', () => {
   it('should throw ContentPageNotFoundError when the page does not exist', async () => {
     mockContentRepo.findPageById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new AssignPageToCategoryCommand('missing', 'cat-1'))).rejects.toThrow(
-      ContentPageNotFoundError,
-    );
+    await expect(useCase.execute(new AssignPageToCategoryCommand('missing', 'cat-1'))).rejects.toThrow(ContentPageNotFoundError);
   });
 
   it('should throw CategoryNotFoundError when the category does not exist', async () => {
     mockContentRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'page-1' }));
     mockCategoryRepo.findCategoryById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new AssignPageToCategoryCommand('page-1', 'missing'))).rejects.toThrow(
-      CategoryNotFoundError,
-    );
+    await expect(useCase.execute(new AssignPageToCategoryCommand('page-1', 'missing'))).rejects.toThrow(CategoryNotFoundError);
     expect(mockCategorizationRepo.createCategorization).not.toHaveBeenCalled();
   });
 });

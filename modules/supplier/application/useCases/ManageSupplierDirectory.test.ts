@@ -36,9 +36,7 @@ describe('ManageSupplierDirectoryUseCase', () => {
 
   describe('createAddress', () => {
     it('should reject when required fields are missing', async () => {
-      await expect(useCase.createAddress({ supplierId: 's-1', name: 'HQ' })).rejects.toBeInstanceOf(
-        SupplierValidationError,
-      );
+      await expect(useCase.createAddress({ supplierId: 's-1', name: 'HQ' })).rejects.toBeInstanceOf(SupplierValidationError);
       expect(port.createSupplierAddress).not.toHaveBeenCalled();
     });
 
@@ -61,9 +59,7 @@ describe('ManageSupplierDirectoryUseCase', () => {
 
   describe('addProduct', () => {
     it('should reject when required fields are missing', async () => {
-      await expect(useCase.addProduct({ supplierId: 's-1', productId: 'p-1' })).rejects.toBeInstanceOf(
-        SupplierValidationError,
-      );
+      await expect(useCase.addProduct({ supplierId: 's-1', productId: 'p-1' })).rejects.toBeInstanceOf(SupplierValidationError);
       expect(port.createSupplierProduct).not.toHaveBeenCalled();
     });
 

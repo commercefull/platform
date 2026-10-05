@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Settings Controller
  * Handles organization settings and store configuration
@@ -7,11 +7,7 @@ import { jsonResponse } from "libs/apiResponse";
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import {
-  manageLanguagesUseCase,
-  manageCurrenciesUseCase,
-  manageCountriesUseCase,
-} from '../../application/wired';
+import { manageLanguagesUseCase, manageCurrenciesUseCase, manageCountriesUseCase } from '../../application/wired';
 
 // ============================================================================
 // Types

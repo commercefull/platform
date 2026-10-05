@@ -577,10 +577,14 @@ describe('Checkout Gap Tests', () => {
     });
     if (methodsResp.status !== 200 || !methodsResp.data.data.length) return;
 
-    const methodId = methodsResp.data.data[0].id;
+    // The first method may legitimately price at 0 (free-shipping threshold),
+    // so pick a priced method for the amount assertion.
+    const pricedMethod = (methodsResp.data.data as Array<{ id: string; priceCents: number }>).find(method => method.priceCents > 0);
+    if (!pricedMethod) return;
+
     const setResp = await client.put(
       `/customer/checkout/${checkoutId}/shipping-method`,
-      { shippingMethodId: methodId },
+      { shippingMethodId: pricedMethod.id },
       { headers: { Authorization: `Bearer ${customerToken}` } },
     );
     if (setResp.status !== 200) return;
@@ -817,7 +821,7 @@ describe('Checkout Gap Tests', () => {
     );
     expect(resp.status).toBe(400);
     const err = resp.data.error;
-    const errMsg = typeof err === 'string' ? err : (err?.message || resp.data.message || JSON.stringify(resp.data));
+    const errMsg = typeof err === 'string' ? err : err?.message || resp.data.message || JSON.stringify(resp.data);
     expect(errMsg).toMatch(/empty basket/i);
   });
 

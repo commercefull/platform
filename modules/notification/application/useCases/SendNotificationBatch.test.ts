@@ -45,13 +45,9 @@ describe('SendNotificationBatchUseCase', () => {
     expect(result.targetCount).toBe(2);
     expect(result.enqueuedCount).toBe(2);
     expect(result.suppressedCount).toBe(0);
-    expect(batchRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Promo blast', channel: 'email', targetCount: 2 }),
-    );
+    expect(batchRepo.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Promo blast', channel: 'email', targetCount: 2 }));
     expect(notifRepo.create).toHaveBeenCalledTimes(2);
-    expect(notifRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: 'u-1', title: 'Sale!', channel: 'email' }),
-    );
+    expect(notifRepo.create).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u-1', title: 'Sale!', channel: 'email' }));
     expect(eventLogRepo.create).not.toHaveBeenCalled();
   });
 

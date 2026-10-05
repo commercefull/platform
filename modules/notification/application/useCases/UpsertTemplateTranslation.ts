@@ -40,9 +40,7 @@ export interface UpsertTemplateTranslationResponse {
 // ============================================================================
 
 export class UpsertTemplateTranslationUseCase {
-  constructor(
-    private readonly translationRepo: NotificationTemplateTranslationRepository,
-  ) {}
+  constructor(private readonly translationRepo: NotificationTemplateTranslationRepository) {}
 
   async execute(command: UpsertTemplateTranslationCommand): Promise<UpsertTemplateTranslationResponse> {
     if (!command.templateId) throw new NotificationValidationError('templateId is required');

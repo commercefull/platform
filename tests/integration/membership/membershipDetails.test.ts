@@ -32,11 +32,7 @@ describe('Membership Detail Endpoints', () => {
 
   describe('Tier/benefit deletes', () => {
     it('POST + DELETE /business/membership/tiers/:id removes a tier', async () => {
-      const create = await client.post(
-        '/business/membership/tiers',
-        { ...testTier, name: `Coverage Tier ${Date.now()}` },
-        auth(),
-      );
+      const create = await client.post('/business/membership/tiers', { ...testTier, name: `Coverage Tier ${Date.now()}` }, auth());
       expectStatus(create, 201);
       const tierId = create.data.data.membershipTierId || create.data.data.id;
 
@@ -48,11 +44,7 @@ describe('Membership Detail Endpoints', () => {
     });
 
     it('POST + DELETE /business/membership/benefits/:id removes a benefit', async () => {
-      const tier = await client.post(
-        '/business/membership/tiers',
-        { ...testTier, name: `Benefit Tier ${Date.now()}` },
-        auth(),
-      );
+      const tier = await client.post('/business/membership/tiers', { ...testTier, name: `Benefit Tier ${Date.now()}` }, auth());
       const tierId = tier.data.data.membershipTierId || tier.data.data.id;
 
       const create = await client.post(

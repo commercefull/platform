@@ -5,7 +5,6 @@
 
 import type { HttpRequest, HttpResponse } from 'libs/http';
 
-
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
 import { manageWarehouseAdminUseCase } from '../../application/wired';
 import { manageInventoryLocationsUseCase } from '../../../inventory/application/wired';

@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Pricing Controller for Admin Hub
  * Handles Price Lists and Pricing Rules management
@@ -18,6 +18,7 @@ import {
 } from '../../domain/pricingRule';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { managePricingAdminUseCase } from '../../application/wired';
+import { findActiveStoresUseCase, manageSalesChannelsUseCase } from '../../../store/application/useCases/wired';
 
 // ============================================================================
 // Price Lists
@@ -118,6 +119,7 @@ export const listPriceRules = async (req: HttpRequest, res: HttpResponse): Promi
 export const createPriceRuleForm = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   adminRespond(req, res, 'catalog/pricing/rules/create', {
     pageName: 'Create Price Rule',
+    ...(await loadTargetingOptions()),
   });
 };
 
@@ -135,8 +137,10 @@ export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       conditions?: unknown;
     };
 
-    // Parse conditions from the condition-builder form
+    // Parse conditions from the condition-builder form + dedicated
+    // store/channel targeting fields.
     const parsedConditions = parsePricingConditionsFromForm(conditions);
+    const targetingConditions = buildTargetingConditions(body);
 
     // Build adjustments from the value
     const adjustments: PricingAdjustment[] = [];
@@ -155,7 +159,7 @@ export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       scope: mapScope(target as string),
       status: status === 'inactive' ? PricingRuleStatus.INACTIVE : PricingRuleStatus.ACTIVE,
       priority: priority ? parseInt(priority as string, 10) : 0,
-      conditions: parsedConditions,
+      conditions: mergeTargetingConditions(parsedConditions, targetingConditions),
       adjustments,
     };
 
@@ -168,6 +172,7 @@ export const createPriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       pageName: 'Create Price Rule',
       error: (error as Error).message || 'Failed to create price rule',
       formData: req.body as HttpRequestBody,
+      ...(await loadTargetingOptions()),
     });
   }
 };
@@ -200,6 +205,7 @@ export const editPriceRuleForm = async (req: HttpRequest, res: HttpResponse): Pr
   adminRespond(req, res, 'catalog/pricing/rules/edit', {
     pageName: 'Edit Price Rule',
     priceRule,
+    ...(await loadTargetingOptions()),
   });
 };
 
@@ -219,6 +225,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
     };
 
     const parsedConditions = parsePricingConditionsFromForm(conditions);
+    const targetingConditions = buildTargetingConditions(body);
 
     const updateProps: PricingRuleUpdateProps = {
       name: name as string,
@@ -226,7 +233,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       scope: mapScope(target as string),
       status: status === 'inactive' ? PricingRuleStatus.INACTIVE : PricingRuleStatus.ACTIVE,
       priority: priority ? parseInt(priority as string, 10) : 0,
-      conditions: parsedConditions,
+      conditions: mergeTargetingConditions(parsedConditions, targetingConditions),
     };
 
     // Rebuild adjustments if value is provided
@@ -250,6 +257,7 @@ export const updatePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
       priceRule: null,
       error: (error as Error).message || 'Failed to update price rule',
       formData: req.body as HttpRequestBody,
+      ...(await loadTargetingOptions()),
     });
   }
 };
@@ -264,6 +272,36 @@ export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
     jsonResponse(res, 500, { success: false, error: (error as Error).message });
   }
 };
+
+async function loadTargetingOptions(): Promise<{ stores: unknown[]; salesChannels: unknown[] }> {
+  const [stores, salesChannels] = await Promise.all([
+    findActiveStoresUseCase.execute().catch(() => []),
+    manageSalesChannelsUseCase.listAll().catch(() => []),
+  ]);
+  return { stores, salesChannels };
+}
+
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (value === undefined || value === null || value === '') return [];
+  return [String(value)];
+}
+
+/** Builds store/channel PricingConditions from dedicated form fields. */
+function buildTargetingConditions(body: HttpRequestBody): PricingCondition[] {
+  const conditions: PricingCondition[] = [];
+  const storeIds = toStringArray((body as Record<string, unknown>).storeIds);
+  const channelIds = toStringArray((body as Record<string, unknown>).channelIds);
+  if (storeIds.length > 0) conditions.push({ type: 'store', parameters: { storeIds } });
+  if (channelIds.length > 0) conditions.push({ type: 'channel', parameters: { channelIds } });
+  return conditions;
+}
+
+/** Dedicated targeting fields replace any builder-authored store/channel conditions. */
+function mergeTargetingConditions(parsed: PricingCondition[], targeting: PricingCondition[]): PricingCondition[] {
+  const builder = parsed.filter(c => c.type !== 'store' && c.type !== 'channel');
+  return [...builder, ...targeting];
+}
 
 // ============================================================================
 // Helpers — parse condition-builder form data + map enums
@@ -296,6 +334,28 @@ function normalizePricingCondition(c: unknown): PricingCondition {
   if (cond.type && cond.parameters) {
     return { type: cond.type, parameters: cond.parameters };
   }
+
+  // Builder attributes that map onto dedicated evaluator parameter shapes
+  if (cond.attribute === 'store' || cond.attribute === 'channel') {
+    const ids = String(cond.value ?? '')
+      .split(',')
+      .map(v => v.trim())
+      .filter(Boolean);
+    return {
+      type: cond.attribute,
+      parameters: cond.attribute === 'store' ? { storeIds: ids } : { channelIds: ids },
+    };
+  }
+
+  const attributeTypeMap: Record<string, string> = {
+    cartTotal: 'cart_total',
+    itemQuantity: 'item_quantity',
+    productCategory: 'category',
+    customerGroup: 'customer_group',
+  };
+  const attribute = cond.attribute || '';
+  const type = attributeTypeMap[attribute] || attribute || cond.type || '';
+
   // Convert from condition-builder shape {attribute, operator, value}
   let value: unknown = cond.value || '';
   if (typeof value === 'string' && !isNaN(Number(value)) && value !== '') {
@@ -305,7 +365,7 @@ function normalizePricingCondition(c: unknown): PricingCondition {
     value = value.split(',').map(v => v.trim());
   }
   return {
-    type: cond.attribute || cond.type || '',
+    type,
     parameters: {
       operator: cond.operator || 'eq',
       value,

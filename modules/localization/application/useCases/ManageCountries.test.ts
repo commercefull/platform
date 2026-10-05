@@ -1,7 +1,4 @@
-import {
-  createCountryRepository,
-  createCountry,
-} from '../../tests/testUtils';
+import { createCountryRepository, createCountry } from '../../tests/testUtils';
 import { ManageCountriesUseCase } from './ManageCountries';
 
 describe('ManageCountriesUseCase', () => {

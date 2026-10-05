@@ -31,16 +31,12 @@ describe('RemoveCouponUseCase', () => {
   it('should throw NoCouponAppliedError when the basket has no coupon', async () => {
     const repository = createBasketRepository(createBasket());
 
-    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID))).rejects.toThrow(
-      NoCouponAppliedError,
-    );
+    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand(BASKET_ID))).rejects.toThrow(NoCouponAppliedError);
   });
 
   it('should throw BasketNotFoundError when the basket does not exist', async () => {
     const repository = createBasketRepository(null);
 
-    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand('missing'))).rejects.toThrow(
-      BasketNotFoundError,
-    );
+    await expect(new RemoveCouponUseCase(repository).execute(new RemoveCouponCommand('missing'))).rejects.toThrow(BasketNotFoundError);
   });
 });

@@ -744,5 +744,14 @@
   "emailPlaceholder": "your@email.com",
   "phonePlaceholder": "Số điện thoại của bạn",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "tháng/năm"
+  "cardExpiryPlaceholder": "tháng/năm",
+  "collections": "Bộ sưu tập",
+  "collectionsHeroDesc": "Khám phá các bộ sưu tập được tuyển chọn của chúng tôi",
+  "viewCollection": "Xem bộ sưu tập",
+  "noCollections": "Chưa có bộ sưu tập nào",
+  "noCollectionsDesc": "Hãy quay lại sớm — chúng tôi đang chuẩn bị các bộ sưu tập mới.",
+  "collectionEmpty": "Bộ sưu tập này chưa có sản phẩm nào",
+  "collectionEmptyDesc": "Hãy quay lại sớm hoặc duyệt toàn bộ danh mục.",
+  "backToCollections": "Quay lại bộ sưu tập",
+  "featured": "Nổi bật"
 }

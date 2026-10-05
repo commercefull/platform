@@ -3,11 +3,7 @@
  * Promotion lifecycle transitions: activate and pause.
  */
 
-import type {
-  PromotionRepository,
-  Promotion,
-  UpdatePromotionInput,
-} from '../../domain/repositories/PromotionRepository';
+import type { PromotionRepository, Promotion, UpdatePromotionInput } from '../../domain/repositories/PromotionRepository';
 import { PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 
 export type ChangePromotionStatusPort = Pick<PromotionRepository, 'findById' | 'update'>;

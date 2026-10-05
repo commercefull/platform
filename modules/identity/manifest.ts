@@ -25,5 +25,7 @@ export const manifest: ModuleManifest = {
       'identity.scim.user_updated',
     ],
   },
-  tables: { names: ['managedAdminUser', 'merchant', 'role', 'identitySamlProvider', 'identityOidcProvider', 'identityScimProvisioningRecord'] },
+  tables: {
+    names: ['managedAdminUser', 'merchant', 'role', 'identitySamlProvider', 'identityOidcProvider', 'identityScimProvisioningRecord'],
+  },
 };

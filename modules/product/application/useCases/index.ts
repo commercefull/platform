@@ -23,9 +23,6 @@ export type { SubmitProductQaResponse } from './SubmitProductQa';
 export { VoteOnReviewCommand, VoteOnReviewUseCase } from './VoteOnReview';
 export type { VoteOnReviewResponse } from './VoteOnReview';
 
-export { ManageProductCollectionCommand, ManageProductCollectionUseCase } from './ManageProductCollection';
-export type { ManageProductCollectionResponse, CollectionMapItem } from './ManageProductCollection';
-
 export { GetProductCatalogEnrichmentCommand, GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
 export type { ProductCatalogEnrichmentResponse, QaWithAnswers } from './GetProductCatalogEnrichment';
 

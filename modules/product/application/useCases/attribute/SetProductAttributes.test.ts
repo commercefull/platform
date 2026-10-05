@@ -41,7 +41,9 @@ describe('SetProductAttributesUseCase', () => {
   });
 
   it('should collect failures for unresolvable attributes and continue', async () => {
-    mockRepo.findAttributeByCode.mockResolvedValueOnce(createAttribute({ productAttributeId: 'a2', code: 'size' })).mockResolvedValueOnce(null);
+    mockRepo.findAttributeByCode
+      .mockResolvedValueOnce(createAttribute({ productAttributeId: 'a2', code: 'size' }))
+      .mockResolvedValueOnce(null);
 
     const result = await useCase.execute({
       productId: 'p1',

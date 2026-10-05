@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import {
   managePaymentGatewaysUseCase,
@@ -10,7 +10,6 @@ import {
 } from '../../application/useCases/wired';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-
 
 // ============================================================================
 // Payment Gateways

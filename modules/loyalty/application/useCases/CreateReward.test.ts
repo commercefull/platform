@@ -37,16 +37,16 @@ describe('CreateRewardUseCase', () => {
   });
 
   it('should throw LoyaltyValidationError when the points cost is not positive', async () => {
-    await expect(
-      useCase.execute({ name: 'Test', description: 'test', type: 'free_product', pointsCost: 0 }),
-    ).rejects.toThrow(LoyaltyValidationError);
+    await expect(useCase.execute({ name: 'Test', description: 'test', type: 'free_product', pointsCost: 0 })).rejects.toThrow(
+      LoyaltyValidationError,
+    );
     expect(loyaltyRepository.createReward).not.toHaveBeenCalled();
   });
 
   it('should throw LoyaltyValidationError when a discount reward has no value', async () => {
-    await expect(
-      useCase.execute({ name: 'Test', description: 'test', type: 'discount', pointsCost: 50 }),
-    ).rejects.toThrow(LoyaltyValidationError);
+    await expect(useCase.execute({ name: 'Test', description: 'test', type: 'discount', pointsCost: 50 })).rejects.toThrow(
+      LoyaltyValidationError,
+    );
     expect(loyaltyRepository.createReward).not.toHaveBeenCalled();
   });
 });

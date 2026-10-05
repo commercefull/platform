@@ -24,4 +24,3 @@ describe('GetCustomerProfileUseCase', () => {
     expect(result).toBeNull();
   });
 });
-

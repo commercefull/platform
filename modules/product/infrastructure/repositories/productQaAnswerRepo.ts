@@ -24,15 +24,7 @@ export class ProductQaAnswerRepo {
     const result = await queryOne<ProductQaAnswer>(
       `INSERT INTO "productQaAnswer" ("questionId", "customerId", "answer", "status", "isVerified", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        params.productQaId,
-        params.customerId || null,
-        params.answer,
-        params.status || 'pending',
-        params.isOfficial ?? false,
-        now,
-        now,
-      ],
+      [params.productQaId, params.customerId || null, params.answer, params.status || 'pending', params.isOfficial ?? false, now, now],
     );
     if (!result) throw new FailedToCreateProductError();
     return result;

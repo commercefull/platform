@@ -251,14 +251,7 @@ router.patch('/products/:productId/qa/:qaId/status', asyncHandler(productControl
 router.get('/products/:productId/reviews/media', asyncHandler(productController.listReviewMedia));
 router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(productController.deleteReviewMedia));
 
-// ============================================================================
-// Collection Routes (Business)
-// ============================================================================
-
-router.get('/collections', asyncHandler(productController.listCollections));
-router.post('/collections', asyncHandler(productController.createCollection));
-router.put('/collections/:collectionId', asyncHandler(productController.updateCollection));
-router.delete('/collections/:collectionId', asyncHandler(productController.deleteCollection));
+// Collection routes moved to modules/assortment (/business/assortment/*)
 
 // ============================================================================
 // Download Routes (Business)

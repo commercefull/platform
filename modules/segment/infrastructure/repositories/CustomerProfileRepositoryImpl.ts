@@ -54,14 +54,18 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async findByTier(tier: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`, [tier]);
+    const rows = await query<ProfileDbRow[]>(
+      `SELECT * FROM "segmentCustomerProfile" WHERE "tier" = $1 ORDER BY "lifetimeValueCents" DESC`,
+      [tier],
+    );
     return (rows || []).map(rowToEntity);
   }
 
   async findByRFM(rfmSegment: string): Promise<CustomerProfile[]> {
-    const rows = await query<ProfileDbRow[]>(`SELECT * FROM "segmentCustomerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`, [
-      rfmSegment,
-    ]);
+    const rows = await query<ProfileDbRow[]>(
+      `SELECT * FROM "segmentCustomerProfile" WHERE "rfmSegment" = $1 ORDER BY "lifetimeValueCents" DESC`,
+      [rfmSegment],
+    );
     return (rows || []).map(rowToEntity);
   }
 
@@ -210,9 +214,10 @@ export class CustomerProfileRepositoryImpl implements CustomerProfileRepository 
   }
 
   async delete(customerId: string): Promise<boolean> {
-    const row = await queryOne<{ customerId: string }>(`DELETE FROM "segmentCustomerProfile" WHERE "customerId" = $1 RETURNING "customerId"`, [
-      customerId,
-    ]);
+    const row = await queryOne<{ customerId: string }>(
+      `DELETE FROM "segmentCustomerProfile" WHERE "customerId" = $1 RETURNING "customerId"`,
+      [customerId],
+    );
     return !!row;
   }
 

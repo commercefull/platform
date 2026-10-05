@@ -24,14 +24,7 @@ import type {
 } from '../../domain/repositories/GiftCardRepository';
 
 // Re-export domain types for backward compatibility
-export type {
-  GiftCardType,
-  GiftCardStatus,
-  DeliveryMethod,
-  TransactionType,
-  PromotionGiftCard,
-  PromotionGiftCardTransaction,
-};
+export type { GiftCardType, GiftCardStatus, DeliveryMethod, TransactionType, PromotionGiftCard, PromotionGiftCardTransaction };
 export type { GiftCard, GiftCardTransaction } from '../../domain/repositories/GiftCardRepository';
 
 // Table name constants

@@ -21,7 +21,7 @@ export type ShippingCarrier = {
   hasApiIntegration: boolean;
   customFields: unknown | null;
   createdBy: string | null;
-}
+};
 
 export type ShippingMethodRecord = {
   shippingMethodId: string;
@@ -48,7 +48,7 @@ export type ShippingMethodRecord = {
   shippingClass: string | null;
   customFields: unknown | null;
   createdBy: string | null;
-}
+};
 
 export type ShippingZoneRecord = {
   shippingZoneId: string;
@@ -62,7 +62,7 @@ export type ShippingZoneRecord = {
   locations: unknown;
   excludedLocations: unknown | null;
   createdBy: string | null;
-}
+};
 
 export type ShippingRateRecord = {
   shippingRateId: string;
@@ -87,7 +87,7 @@ export type ShippingRateRecord = {
   validTo: Date | null;
   conditions: unknown | null;
   createdBy: string | null;
-}
+};
 
 export type ShippingSurchargeRecord = {
   shippingSurchargeId: string;
@@ -99,7 +99,7 @@ export type ShippingSurchargeRecord = {
   value: string;
   conditions: unknown | null;
   isActive: boolean;
-}
+};
 
 export type ShippingPackagingTypeRecord = {
   shippingPackagingTypeId: string;
@@ -123,5 +123,4 @@ export type ShippingPackagingTypeRecord = {
   imageUrl: string | null;
   validCarriers: string[] | null;
   createdBy: string | null;
-}
-
+};

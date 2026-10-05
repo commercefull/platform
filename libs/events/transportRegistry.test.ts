@@ -3,13 +3,7 @@
  * installation, and shutdown ordering.
  */
 
-import {
-  getEventPublisher,
-  setEventDispatch,
-  setEventTransport,
-  startEventSubscriber,
-  stopEventTransport,
-} from './transportRegistry';
+import { getEventPublisher, setEventDispatch, setEventTransport, startEventSubscriber, stopEventTransport } from './transportRegistry';
 import type { EventPayload } from './eventTypes';
 import type { EventTransport } from './eventTransport';
 

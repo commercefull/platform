@@ -10,14 +10,15 @@ import categoryRepo from '../../infrastructure/repositories/categoryRepo';
 import productReviewRepo from '../../infrastructure/repositories/productReviewRepo';
 import productReviewMediaRepo from '../../infrastructure/repositories/productReviewMediaRepo';
 import productReviewVoteRepo from '../../infrastructure/repositories/productReviewVoteRepo';
-import productCollectionRepo from '../../infrastructure/repositories/productCollectionRepo';
-import productCollectionMapRepo from '../../infrastructure/repositories/productCollectionMapRepo';
+
 import { DynamicAttributeRepository } from '../../infrastructure/repositories/DynamicAttributeRepository';
 import { ProductAttributeSetRepository } from '../../infrastructure/repositories/ProductAttributeSetRepository';
 import brandRepo from '../../infrastructure/repositories/brandRepo';
 import productAttributeRepository from '../../infrastructure/repositories/ProductAttributeRepository';
 import type { DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import { ProductPricingAdapter } from '../../infrastructure/acl/ProductPricingAdapter';
+import { InventoryStockAvailabilityAdapter } from '../../infrastructure/acl/InventoryStockAvailabilityAdapter';
+import InventoryRepo from '../../../inventory/infrastructure/repositories/inventoryRepo';
 
 import { ListProductsUseCase } from './ListProducts';
 import { CreateProductUseCase } from './CreateProduct';
@@ -28,6 +29,7 @@ import { UpdateProductStatusUseCase } from './UpdateProductStatus';
 import { ListProductTypesUseCase } from './ListProductTypes';
 import { GetProductVariantsUseCase } from './GetProductVariants';
 import { CreateProductVariantUseCase } from './CreateProductVariant';
+import { UpdateVariantInventoryPolicyUseCase } from './UpdateVariantInventoryPolicy';
 import { ManageProductQaUseCase } from './ManageProductQa';
 import { ManageProductCategoriesUseCase } from './ManageProductCategories';
 import { ManageProductTagsUseCase } from './ManageProductTags';
@@ -40,8 +42,7 @@ import { ManageProductReviewsUseCase } from './ManageProductReviews';
 import { ManageReviewMediaUseCase } from './ManageReviewMedia';
 import { GetReviewStatsUseCase } from './GetReviewStats';
 import { VoteOnReviewUseCase } from './VoteOnReview';
-import { ManageProductCollectionsUseCase } from './ManageProductCollections';
-import { ManageProductCollectionUseCase } from './ManageProductCollection';
+
 import { SubmitProductQaUseCase } from './SubmitProductQa';
 import { GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
 import { GetProductAttributesUseCase } from './GetProductAttributes';
@@ -99,8 +100,13 @@ export const updateProductUseCase = new UpdateProductUseCase(productRepo, produc
 export const deleteProductUseCase = new DeleteProductUseCase(productRepo);
 export const updateProductStatusUseCase = new UpdateProductStatusUseCase(productRepo);
 export const listProductTypesUseCase = new ListProductTypesUseCase(productTypeRepo);
-export const getProductVariantsUseCase = new GetProductVariantsUseCase(productVariantRepo, productPricingPort);
+export const getProductVariantsUseCase = new GetProductVariantsUseCase(
+  productVariantRepo,
+  productPricingPort,
+  new InventoryStockAvailabilityAdapter(InventoryRepo),
+);
 export const createProductVariantUseCase = new CreateProductVariantUseCase(productVariantRepo, productPricingPort);
+export const updateVariantInventoryPolicyUseCase = new UpdateVariantInventoryPolicyUseCase(productVariantRepo);
 export const manageProductQaUseCase = new ManageProductQaUseCase(productQaRepo);
 export const manageProductCategoriesUseCase = new ManageProductCategoriesUseCase(productCategoryRepo);
 export const manageProductTagsUseCase = new ManageProductTagsUseCase(productTagRepo);
@@ -113,8 +119,7 @@ export const manageProductReviewsUseCase = new ManageProductReviewsUseCase(produ
 export const manageReviewMediaUseCase = new ManageReviewMediaUseCase(productReviewRepo, productReviewMediaRepo);
 export const getReviewStatsUseCase = new GetReviewStatsUseCase(productReviewRepo);
 export const voteOnReviewUseCase = new VoteOnReviewUseCase(productReviewVoteRepo);
-export const manageProductCollectionsUseCase = new ManageProductCollectionsUseCase(productCollectionRepo);
-export const manageProductCollectionUseCase = new ManageProductCollectionUseCase(productCollectionRepo, productCollectionMapRepo);
+
 export const submitProductQaUseCase = new SubmitProductQaUseCase(productRepo, productQaRepo);
 export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmentUseCase(
   productRepo,

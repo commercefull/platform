@@ -87,10 +87,7 @@ describe('ExecuteAutomationRuleUseCase', () => {
 
     expect(result.status).toBe('failed');
     expect(result.error).toBe('executor exploded');
-    expect(logRepo.update).toHaveBeenCalledWith(
-      'log-1',
-      expect.objectContaining({ status: 'failed', errorMessage: 'executor exploded' }),
-    );
+    expect(logRepo.update).toHaveBeenCalledWith('log-1', expect.objectContaining({ status: 'failed', errorMessage: 'executor exploded' }));
     expect(ruleRepo.update).toHaveBeenCalledWith(rule);
   });
 });

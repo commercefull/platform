@@ -14,10 +14,9 @@ export type ProductAttributeToGroupCreateParams = Omit<ProductAttributeToGroup, 
 export class ProductAttributeToGroupRepo {
   async findByGroup(attributeGroupId: string): Promise<ProductAttributeToGroup[]> {
     return (
-      (await query<ProductAttributeToGroup[]>(
-        `SELECT * FROM "productAttributeToGroup" WHERE "groupId" = $1 ORDER BY "position" ASC`,
-        [attributeGroupId],
-      )) || []
+      (await query<ProductAttributeToGroup[]>(`SELECT * FROM "productAttributeToGroup" WHERE "groupId" = $1 ORDER BY "position" ASC`, [
+        attributeGroupId,
+      ])) || []
     );
   }
 

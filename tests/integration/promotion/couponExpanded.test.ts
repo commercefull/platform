@@ -4,21 +4,13 @@
  */
 
 import { AxiosInstance } from 'axios';
-import {
-  testCoupon,
-  SEEDED_COUPON_CODE_FIXED,
-  SEEDED_COUPON_CODE_PERCENTAGE,
-  SEEDED_COUPON_CODE_EXPIRED,
-} from './testUtils';
+import { testCoupon, SEEDED_COUPON_CODE_FIXED, SEEDED_COUPON_CODE_PERCENTAGE, SEEDED_COUPON_CODE_EXPIRED } from './testUtils';
 import { createTestClient, loginTestAdmin, loginTestUser, expectStatus } from '../testUtils';
 
 // Seeded single-use baskets ($59.98 each) owned by testcustomer@example.com —
 // sized above TESTPERCENT15's minOrderAmount of 50
 // (seeds/20240805002001_seedIntegrationTestData.js coupon basket pool)
-const SEEDED_BASKET_POOL = Array.from(
-  { length: 8 },
-  (_, i) => `00000000-0000-0000-0000-0000000040${String(i).padStart(2, '0')}`,
-);
+const SEEDED_BASKET_POOL = Array.from({ length: 8 }, (_, i) => `00000000-0000-0000-0000-0000000040${String(i).padStart(2, '0')}`);
 
 describe('Coupon Expanded Tests', () => {
   let client: AxiosInstance;
@@ -112,7 +104,6 @@ describe('Coupon Expanded Tests', () => {
       expect(resp.data.success).toBe(true);
       expect(resp.data.data).toHaveProperty('discountAmountCents');
     });
-
   });
 
   // ============================================================================

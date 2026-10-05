@@ -6,11 +6,7 @@ import {
   RejectRequestCommand,
 } from '../../application/useCases/ProcessDataRequest';
 import { RecordCookieConsentCommand } from '../../application/useCases/ManageCookieConsent';
-import {
-  createDataRequestUseCase,
-  manageCookieConsentUseCase,
-  processDataRequestUseCase,
-} from '../../application/useCases/wired';
+import { createDataRequestUseCase, manageCookieConsentUseCase, processDataRequestUseCase } from '../../application/useCases/wired';
 
 export const gdprResolvers = {
   Mutation: {

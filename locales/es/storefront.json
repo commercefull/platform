@@ -744,5 +744,14 @@
   "emailPlaceholder": "tu@correo electrónico.com",
   "phonePlaceholder": "Tu número de teléfono",
   "cardholderNamePlaceholder": "Juan Pérez",
-  "cardExpiryPlaceholder": "MM/AA"
+  "cardExpiryPlaceholder": "MM/AA",
+  "collections": "Colecciones",
+  "collectionsHeroDesc": "Explora nuestras colecciones seleccionadas",
+  "viewCollection": "Ver colección",
+  "noCollections": "Aún no hay colecciones",
+  "noCollectionsDesc": "Vuelve pronto — estamos seleccionando nuevas colecciones.",
+  "collectionEmpty": "Esta colección aún no tiene productos",
+  "collectionEmptyDesc": "Vuelve pronto o explora el catálogo completo.",
+  "backToCollections": "Volver a las colecciones",
+  "featured": "Destacado"
 }

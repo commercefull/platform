@@ -1,9 +1,5 @@
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
-import type {
-  ProductAttributeUpdateInput,
-  ProductAttribute,
-  AttributeType,
-} from '../../../domain/repositories/ProductCatalogPorts';
+import type { ProductAttributeUpdateInput, ProductAttribute, AttributeType } from '../../../domain/repositories/ProductCatalogPorts';
 
 export interface UpdateAttributeCommand {
   attributeId: string;
@@ -108,4 +104,3 @@ export class UpdateAttributeUseCase {
     }
   }
 }
-

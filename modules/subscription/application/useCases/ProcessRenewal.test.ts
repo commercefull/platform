@@ -57,10 +57,7 @@ describe('ProcessRenewalUseCase', () => {
 
     await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(FailedToProcessRenewalError);
 
-    expect(ports.subscriptionRepo.update).toHaveBeenCalledWith(
-      'sub-1',
-      expect.objectContaining({ status: 'past_due' }),
-    );
+    expect(ports.subscriptionRepo.update).toHaveBeenCalledWith('sub-1', expect.objectContaining({ status: 'past_due' }));
     expect(emitMock).toHaveBeenCalledWith(
       'subscription.payment.failed',
       expect.objectContaining({ subscriptionId: 'sub-1', amountCents: 2999 }),

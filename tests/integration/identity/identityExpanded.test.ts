@@ -13,7 +13,7 @@ describe('Identity Expanded Tests', () => {
   beforeAll(async () => {
     jest.setTimeout(30000);
     client = createTestClient();
-      });
+  });
 
   // ============================================================================
   // Registration Tests

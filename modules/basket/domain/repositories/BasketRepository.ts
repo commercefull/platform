@@ -38,7 +38,7 @@ export interface BasketRepository {
   /**
    * Find active basket for customer or session
    */
-  findActiveBasket(customerId?: string, sessionId?: string): Promise<Basket | null>;
+  findActiveBasket(customerId?: string, sessionId?: string, storeId?: string, channelId?: string): Promise<Basket | null>;
 
   /**
    * List basket summaries (admin)

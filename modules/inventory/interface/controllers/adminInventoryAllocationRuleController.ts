@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Inventory Allocation Rule Controller for Admin Hub
  * Manages inventory allocation rules (Epic J + Epic F follow-up).

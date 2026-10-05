@@ -25,9 +25,7 @@ const costOptimized = (process.env.COST_OPTIMIZED ?? 'true') !== 'false';
 
 // Feature flags
 const enableCloudFront = (process.env.ENABLE_CLOUDFRONT ?? 'true') !== 'false';
-const enableApiGateway = process.env.ENABLE_API_GATEWAY
-  ? process.env.ENABLE_API_GATEWAY === 'true'
-  : costOptimized; // always on in cost-optimized mode
+const enableApiGateway = process.env.ENABLE_API_GATEWAY ? process.env.ENABLE_API_GATEWAY === 'true' : costOptimized; // always on in cost-optimized mode
 const enableRoute53 = (process.env.ENABLE_ROUTE53 ?? 'true') !== 'false';
 
 // Event bus provider — set EVENT_BUS_PROVIDER=aws-sqs to provision the

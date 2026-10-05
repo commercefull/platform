@@ -73,11 +73,17 @@ export class CalculateLineItemTaxUseCase {
     }
 
     if (typeof this.taxCalculation.calculateTaxForLineItem === 'function') {
-      const taxResult = await this.taxCalculation.calculateTaxForLineItem(productId, parsedQuantity, parsedPriceCents, {
-        country: shippingAddress.country,
-        region: shippingAddress.region,
-        postalCode: shippingAddress.postalCode,
-      }, customerId);
+      const taxResult = await this.taxCalculation.calculateTaxForLineItem(
+        productId,
+        parsedQuantity,
+        parsedPriceCents,
+        {
+          country: shippingAddress.country,
+          region: shippingAddress.region,
+          postalCode: shippingAddress.postalCode,
+        },
+        customerId,
+      );
 
       const subtotalCents = taxResult.taxableAmountCents;
       return {

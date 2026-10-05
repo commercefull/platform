@@ -10,13 +10,7 @@
 import { query } from '../../libs/db';
 import { eventBus } from '../../libs/events/eventBus';
 import { logger } from '../../libs/logger';
-import {
-  HOURS,
-  MINUTES,
-  ScheduledJobDefinition,
-  setNotificationCreator,
-  setEmailCreator,
-} from '../../libs/jobs/cronScheduler';
+import { HOURS, MINUTES, ScheduledJobDefinition, setNotificationCreator, setEmailCreator } from '../../libs/jobs/cronScheduler';
 import type { EmailJobData, NotificationJobData } from '../../libs/jobs/cronScheduler';
 import { NotificationRepo } from './infrastructure/repositories/notificationRepo';
 

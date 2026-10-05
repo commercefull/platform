@@ -29,10 +29,7 @@ export class ManageNotificationPreferencesUseCase {
     return this.preferenceRepo.findByUserAndType(userId, userType, type);
   }
 
-  async update(
-    id: string,
-    params: Parameters<NotificationPreferenceRepository['update']>[1],
-  ) {
+  async update(id: string, params: Parameters<NotificationPreferenceRepository['update']>[1]) {
     const updated = await this.preferenceRepo.update(id, params);
     if (!updated) {
       throw new NotificationPreferenceNotFoundError(id);
@@ -48,11 +45,7 @@ export class ManageNotificationPreferencesUseCase {
     return { id };
   }
 
-  async bulkUpsert(
-    userId: string,
-    userType: string,
-    updates: Parameters<NotificationPreferenceRepository['bulkUpsert']>[2],
-  ) {
+  async bulkUpsert(userId: string, userType: string, updates: Parameters<NotificationPreferenceRepository['bulkUpsert']>[2]) {
     return this.preferenceRepo.bulkUpsert(userId, userType, updates);
   }
 

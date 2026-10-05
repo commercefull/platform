@@ -20,6 +20,7 @@ export interface CheckoutLineSnapshot {
   discountAmountCents?: number;
   itemType: string;
   isDigital: boolean;
+  inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable';
   imageUrl?: string;
   taxCategoryId?: string;
   taxable?: boolean;
@@ -27,6 +28,8 @@ export interface CheckoutLineSnapshot {
 
 export interface BasketSnapshot {
   basketId: string;
+  storeId?: string;
+  channelId?: string;
   currency: string;
   isEmpty: boolean;
   itemCount: number;
@@ -36,6 +39,21 @@ export interface BasketSnapshot {
   total: Money;
   couponCode?: string;
   items: CheckoutLineSnapshot[];
+  /**
+   * Products whose price could not be re-resolved during the authoritative
+   * requote — checkout must reject the order when this is non-empty.
+   */
+  unpurchasableProductIds?: string[];
+  /** True when the requote changed at least one line price. */
+  repriced?: boolean;
+  /** Per-line price changes applied by the authoritative requote. */
+  priceChanges?: Array<{
+    basketItemId: string;
+    productId: string;
+    productVariantId?: string;
+    previousUnitPriceCents: number;
+    unitPriceCents: number;
+  }>;
 }
 
 export interface BasketSnapshotPort {

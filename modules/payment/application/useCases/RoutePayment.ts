@@ -38,7 +38,6 @@ export interface RoutePaymentResponse {
   }>;
 }
 
-
 export class RoutePaymentUseCase {
   constructor(
     private readonly routingRepository: PSPRoutingRepository,
@@ -141,4 +140,3 @@ export class RoutePaymentUseCase {
 // ============================================================================
 // Get Provider Health
 // ============================================================================
-

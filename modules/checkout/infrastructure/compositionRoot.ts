@@ -18,6 +18,7 @@ import { PaymentDataRepository as PaymentDataRepo } from '../../payment/infrastr
 const PaymentRepo = PaymentDataRepo.payments;
 
 import { BasketSnapshotPort } from '../application/ports/BasketSnapshotPort';
+import { CouponRedemptionPort } from '../application/ports/CouponRedemptionPort';
 import { DiscountQuotePort } from '../application/ports/DiscountQuotePort';
 import { TaxQuotePort } from '../application/ports/TaxQuotePort';
 import { ShippingQuotePort } from '../application/ports/ShippingQuotePort';
@@ -27,9 +28,12 @@ import { PaymentAuthorizationPort } from '../application/ports/PaymentAuthorizat
 import { FraudScreeningPort } from '../application/ports/FraudScreeningPort';
 import { StoreFulfillmentPort } from '../application/ports/StoreFulfillmentPort';
 import { StockAvailabilityPort } from '../application/ports/StockAvailabilityPort';
+import { InventoryReservationPort } from '../application/ports/InventoryReservationPort';
+import { StoreContextPort } from '../application/ports/StoreContextPort';
 
 import { BasketBasketSnapshotAdapter } from './acl/BasketBasketSnapshotAdapter';
 import { CouponDiscountQuoteAdapter } from './acl/CouponDiscountQuoteAdapter';
+import { CouponRedemptionAdapter } from './acl/CouponRedemptionAdapter';
 import { TaxTaxQuoteAdapter } from './acl/TaxTaxQuoteAdapter';
 import { ShippingShippingQuoteAdapter } from './acl/ShippingShippingQuoteAdapter';
 import { PromotionPromotionQuoteAdapter } from './acl/PromotionPromotionQuoteAdapter';
@@ -38,8 +42,13 @@ import { PaymentPaymentAuthorizationAdapter } from './acl/PaymentPaymentAuthoriz
 import { PaymentFraudScreeningAdapter } from './acl/PaymentFraudScreeningAdapter';
 import { StoreStoreFulfillmentAdapter } from './acl/StoreStoreFulfillmentAdapter';
 import { InventoryStockAvailabilityAdapter } from './acl/InventoryStockAvailabilityAdapter';
+import { InventoryReservationAdapter } from './acl/InventoryReservationAdapter';
+import { StoreStoreContextAdapter } from './acl/StoreStoreContextAdapter';
 
 import { CouponRepository } from '../../coupon/infrastructure';
+import { CouponPromotionGate } from '../../coupon/infrastructure/acl/CouponPromotionGate';
+import promotionRepo from '../../promotion/infrastructure/repositories/promotionRepo';
+import { RedeemCouponUseCase } from '../../coupon/application/useCases/RedeemCoupon';
 import { createOrderUseCase, cancelOrderUseCase } from '../../order/application/useCases/wired';
 import { InitiatePaymentUseCase } from '../../payment/application/useCases/InitiatePayment';
 import { screenForFraudUseCase } from '../../payment/application/wired';
@@ -48,11 +57,19 @@ import { evaluatePromotionsUseCase } from '../../promotion/application/wired';
 import { calculateOrderTaxUseCase } from '../../tax/application/wired';
 import taxSettingsRepo from '../../tax/infrastructure/repositories/taxSettingsRepo';
 import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
+import { getStoreUseCase } from '../../store/application/useCases/wired';
 import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
+import { reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase } from '../../inventory/application/wired';
+import { repriceBasketUseCase } from '../../basket/application/useCases/wired';
+import { LoyaltyLoyaltyAdapter } from './acl/LoyaltyLoyaltyAdapter';
+import LoyaltyDataRepository from '../../loyalty/infrastructure/repositories/LoyaltyDataRepository';
+import { redeemPointsUseCase } from '../../loyalty/application/wired';
+import { LoyaltyQuotePort, LoyaltyRedemptionPort } from '../application/ports/LoyaltyPort';
 
 export interface CheckoutPorts {
   basketSnapshot: BasketSnapshotPort;
+  couponRedemption: CouponRedemptionPort;
   discountQuote: DiscountQuotePort;
   taxQuote: TaxQuotePort;
   shippingQuote: ShippingQuotePort;
@@ -62,6 +79,10 @@ export interface CheckoutPorts {
   fraudScreening: FraudScreeningPort;
   storeFulfillment: StoreFulfillmentPort;
   stockAvailability: StockAvailabilityPort;
+  inventoryReservation: InventoryReservationPort;
+  loyaltyQuote: LoyaltyQuotePort;
+  loyaltyRedemption: LoyaltyRedemptionPort;
+  storeContext: StoreContextPort;
 }
 
 let cachedPorts: CheckoutPorts | null = null;
@@ -70,8 +91,9 @@ export function getCheckoutPorts(): CheckoutPorts {
   if (cachedPorts) return cachedPorts;
 
   cachedPorts = {
-    basketSnapshot: new BasketBasketSnapshotAdapter(BasketRepo),
-    discountQuote: new CouponDiscountQuoteAdapter(CouponRepository),
+    basketSnapshot: new BasketBasketSnapshotAdapter(BasketRepo, repriceBasketUseCase),
+    couponRedemption: new CouponRedemptionAdapter(new RedeemCouponUseCase(CouponRepository)),
+    discountQuote: new CouponDiscountQuoteAdapter(CouponRepository, new CouponPromotionGate(promotionRepo)),
     taxQuote: new TaxTaxQuoteAdapter(calculateOrderTaxUseCase, taxSettingsRepo),
     shippingQuote: new ShippingShippingQuoteAdapter(calculateShippingRatesUseCase),
     promotionQuote: new PromotionPromotionQuoteAdapter(evaluatePromotionsUseCase),
@@ -80,6 +102,12 @@ export function getCheckoutPorts(): CheckoutPorts {
     fraudScreening: new PaymentFraudScreeningAdapter(screenForFraudUseCase),
     storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, pickupLocationRepo),
     stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),
+    inventoryReservation: new InventoryReservationAdapter(reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase),
+    ...(() => {
+      const loyalty = new LoyaltyLoyaltyAdapter(LoyaltyDataRepository.points, redeemPointsUseCase);
+      return { loyaltyQuote: loyalty, loyaltyRedemption: loyalty };
+    })(),
+    storeContext: new StoreStoreContextAdapter(getStoreUseCase),
   };
 
   return cachedPorts;

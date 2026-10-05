@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Webhook Business Controller
  *
@@ -8,12 +8,7 @@ import { jsonResponse } from "libs/apiResponse";
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
-import {
-  listWebhooksUseCase,
-  registerWebhookUseCase,
-  unregisterWebhookUseCase,
-  manageWebhooksUseCase,
-} from '../../application/wired';
+import { listWebhooksUseCase, registerWebhookUseCase, unregisterWebhookUseCase, manageWebhooksUseCase } from '../../application/wired';
 
 interface RegisterWebhookBody {
   name: string;
@@ -164,12 +159,12 @@ export const getDeliveries = async (req: HttpRequest, res: HttpResponse): Promis
  */
 export const getAvailableEvents = async (_req: HttpRequest, res: HttpResponse): Promise<void> => {
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          events: SYNC_RELEVANT_EVENTS,
-          wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
-        },
-      });
+    success: true,
+    data: {
+      events: SYNC_RELEVANT_EVENTS,
+      wildcards: ['*', 'product.*', 'order.*', 'inventory.*', 'customer.*', 'payment.*', 'fulfillment.*'],
+    },
+  });
 };
 
 /**
@@ -219,21 +214,21 @@ export const testWebhook = async (req: HttpRequest, res: HttpResponse): Promise<
     const responseBody = await response.text();
 
     jsonResponse(res, 200, {
-            success: response.ok,
-            data: {
-              statusCode: response.status,
-              durationMs,
-              responseBody: responseBody.substring(0, 1024),
-            },
-          });
+      success: response.ok,
+      data: {
+        statusCode: response.status,
+        durationMs,
+        responseBody: responseBody.substring(0, 1024),
+      },
+    });
   } catch (fetchError: unknown) {
     clearTimeout(timeout);
     jsonResponse(res, 200, {
-            success: false,
-            data: {
-              error: (fetchError as Error).message,
-              durationMs: Date.now() - startTime,
-            },
-          });
+      success: false,
+      data: {
+        error: (fetchError as Error).message,
+        durationMs: Date.now() - startTime,
+      },
+    });
   }
 };

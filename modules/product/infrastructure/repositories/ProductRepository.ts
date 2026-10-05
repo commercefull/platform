@@ -83,9 +83,7 @@ export class ProductRepo implements IProductRepository {
     const total =
       offset === 0 && (rows?.length ?? 0) < limit
         ? (rows?.length ?? 0)
-        : parseInt(
-            (await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params))?.count || '0',
-          );
+        : parseInt((await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params))?.count || '0');
 
     const products: Product[] = [];
     const rowsList = rows || [];
@@ -113,6 +111,10 @@ export class ProductRepo implements IProductRepository {
 
   async save(product: Product): Promise<Product> {
     const now = new Date().toISOString();
+    // The advanced productType relationship is a uuid FK; hydrated legacy
+    // rows expose the kind literal (simple/downloadable/...) in
+    // `productTypeId`, so only persist uuid-shaped values.
+    const persistedProductTypeId = ProductRepo.UUID_PATTERN.test(product.productTypeId || '') ? product.productTypeId : null;
 
     const existing = await queryOne<DbProduct>('SELECT "productId" FROM product WHERE "productId" = $1', [product.productId]);
 
@@ -126,20 +128,21 @@ export class ProductRepo implements IProductRepository {
           weight = $12, "weightUnit" = $13, length = $14, width = $15, height = $16,
           "dimensionUnit" = $17, "metaTitle" = $18, "metaDescription" = $19, "metaKeywords" = $20,
           "isFeatured" = $21, "isNew" = $22, "isBestseller" = $23, "hasVariants" = $24,
-          "organizationId" = $25, "storeId" = $26, "publishedAt" = $27, "updatedAt" = $28
-        WHERE "productId" = $29`,
+          "organizationId" = $25, "storeId" = $26, "publishedAt" = $27, "updatedAt" = $28,
+          "productTypeId" = $29
+        WHERE "productId" = $30`,
         [
           product.name,
           product.description,
           product.shortDescription,
           product.sku,
           product.slug,
-          'simple',
+          product.isDownloadable ? 'downloadable' : product.isVirtual ? 'virtual' : product.isSubscription ? 'subscription' : 'simple',
           product.status,
           product.visibility,
           product.taxClass || 'standard',
           product.isTaxable,
-          true,
+          product.isInventoryManaged,
           product.dimensions.weight,
           product.dimensions.weightUnit,
           product.dimensions.length,
@@ -157,6 +160,7 @@ export class ProductRepo implements IProductRepository {
           product.storeId || null,
           product.publishedAt?.toISOString() || null,
           now,
+          persistedProductTypeId,
           product.productId,
         ],
       );
@@ -169,10 +173,10 @@ export class ProductRepo implements IProductRepository {
           weight, "weightUnit", length, width, height, "dimensionUnit",
           "metaTitle", "metaDescription", "metaKeywords",
           "isFeatured", "isNew", "isBestseller", "hasVariants",
-          "organizationId", "storeId", "publishedAt", "createdAt", "updatedAt"
+          "organizationId", "storeId", "publishedAt", "productTypeId", "createdAt", "updatedAt"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
-          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30
+          $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31
         )`,
         [
           product.productId,
@@ -181,12 +185,12 @@ export class ProductRepo implements IProductRepository {
           product.shortDescription,
           product.sku,
           product.slug,
-          'simple',
+          product.isDownloadable ? 'downloadable' : product.isVirtual ? 'virtual' : product.isSubscription ? 'subscription' : 'simple',
           product.status,
           product.visibility,
           product.taxClass || 'standard',
           product.isTaxable,
-          true,
+          product.isInventoryManaged,
           product.dimensions.weight,
           product.dimensions.weightUnit,
           product.dimensions.length,
@@ -203,14 +207,24 @@ export class ProductRepo implements IProductRepository {
           product.organizationId || null,
           product.storeId || null,
           product.publishedAt?.toISOString() || null,
+          persistedProductTypeId,
           now,
           now,
         ],
       );
     }
 
+    await query(`UPDATE product SET "isVirtual" = $1, "isDownloadable" = $2, "isSubscription" = $3 WHERE "productId" = $4`, [
+      product.isVirtual,
+      product.isDownloadable,
+      product.isSubscription,
+      product.productId,
+    ]);
+
     return product;
   }
+
+  private static readonly UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   async delete(productId: string): Promise<void> {
     const now = new Date().toISOString();
@@ -359,7 +373,7 @@ export class ProductRepo implements IProductRepository {
          COALESCE((SELECT json_agg(x."productCategoryId") FROM (
            SELECT DISTINCT ptc2."productCategoryId" FROM "productToCategory" ptc2
            WHERE ptc2."productId" = p."productId") x), '[]'::json) AS "categoryIds",
-         COALESCE((SELECT json_agg(pcm."productCollectionId") FROM "productCollectionMap" pcm
+         COALESCE((SELECT json_agg(pcm."assortmentCollectionId") FROM "assortmentCollectionMap" pcm
            WHERE pcm."productId" = p."productId"), '[]'::json) AS "collectionIds",
          COALESCE((SELECT json_agg(json_build_object('attributeId', avm."attributeId", 'value', avm."value"))
            FROM "productAttributeValueMap" avm WHERE avm."productId" = p."productId"), '[]'::json) AS "attributeValues",
@@ -467,6 +481,11 @@ export class ProductRepo implements IProductRepository {
         ],
       );
     }
+
+    await query(`UPDATE "productVariant" SET "inventoryPolicy" = $1 WHERE "productVariantId" = $2`, [
+      variant.inventoryPolicy,
+      variant.variantId,
+    ]);
 
     return variant;
   }
@@ -579,6 +598,16 @@ export class ProductRepo implements IProductRepository {
       conditions.push(`"storeId" = $${paramIndex++}`);
       params.push(filters.storeId);
     }
+    if (filters?.productIds && filters.productIds.length > 0) {
+      const placeholders = filters.productIds.map(() => `$${paramIndex++}`).join(', ');
+      conditions.push(`"productId" IN (${placeholders})`);
+      params.push(...filters.productIds);
+    }
+    if (filters?.excludeProductIds && filters.excludeProductIds.length > 0) {
+      const placeholders = filters.excludeProductIds.map(() => `$${paramIndex++}`).join(', ');
+      conditions.push(`"productId" NOT IN (${placeholders})`);
+      params.push(...filters.excludeProductIds);
+    }
     if (filters?.brandId) {
       conditions.push(`"brandId" = $${paramIndex++}`);
       params.push(filters.brandId);
@@ -629,7 +658,7 @@ export class ProductRepo implements IProductRepository {
       shortDescription: row.shortDescription ?? undefined,
       sku: row.sku,
       slug: row.slug,
-      productTypeId: row.type,
+      productTypeId: row.productTypeId ?? row.type,
       categoryId: undefined,
       organizationId: row.organizationId ?? undefined,
       storeId: row.storeId ?? undefined,
@@ -693,6 +722,9 @@ export class ProductRepo implements IProductRepository {
       attributes: [],
       stockQuantity: 0,
       lowStockThreshold: 5,
+      inventoryPolicy:
+        ((row as DbProductVariant & { inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable' }).inventoryPolicy as
+          'tracked' | 'unlimited' | 'backorderable' | undefined) ?? 'tracked',
       isDefault: Boolean(row.isDefault),
       isActive: row.status === 'active',
       position: row.position ?? 0,

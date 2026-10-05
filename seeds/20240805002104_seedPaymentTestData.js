@@ -17,9 +17,7 @@ exports.seed = async function (knex) {
   const OPS_STORED_METHOD_ID = '00000000-0000-0000-0000-000000008001';
   const hasStoredMethod = await knex.schema.hasTable('storedPaymentMethod');
   if (hasStoredMethod) {
-    const testCustomer = await knex('customer')
-      .where({ email: 'testcustomer@example.com' })
-      .first('customerId');
+    const testCustomer = await knex('customer').where({ email: 'testcustomer@example.com' }).first('customerId');
     if (testCustomer) {
       await knex('storedPaymentMethod').where({ storedPaymentMethodId: OPS_STORED_METHOD_ID }).del();
       await knex('storedPaymentMethod').insert({

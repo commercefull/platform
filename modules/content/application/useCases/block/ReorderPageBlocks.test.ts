@@ -9,7 +9,10 @@ describe('ReorderPageBlocksUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof ReorderPageBlocksUseCase>[0]>();
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1' }));
-    mockRepo.findBlocksByPageId.mockResolvedValue([createContentBlock({ contentBlockId: 'b1' }), createContentBlock({ contentBlockId: 'b2' })]);
+    mockRepo.findBlocksByPageId.mockResolvedValue([
+      createContentBlock({ contentBlockId: 'b1' }),
+      createContentBlock({ contentBlockId: 'b2' }),
+    ]);
     mockRepo.reorderBlocks.mockResolvedValue(true);
     useCase = new ReorderPageBlocksUseCase(mockRepo);
   });

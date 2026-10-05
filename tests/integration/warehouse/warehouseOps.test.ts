@@ -101,11 +101,7 @@ describe('Warehouse Operations Tests', () => {
     });
 
     it('should reject bin creation without required fields', async () => {
-      const response = await client.post(
-        `/business/warehouses/${WAREHOUSE_ID}/bins`,
-        { isPickable: true },
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/warehouses/${WAREHOUSE_ID}/bins`, { isPickable: true }, { headers: authHeaders() });
 
       expect(response.status).toBe(400);
     });
@@ -183,10 +179,9 @@ describe('Warehouse Operations Tests', () => {
     });
 
     it('should return 404 for non-existent receiving record', async () => {
-      const response = await client.get(
-        `/business/warehouses/${WAREHOUSE_ID}/receiving/00000000-0000-0000-0000-000000000000`,
-        { headers: authHeaders() },
-      );
+      const response = await client.get(`/business/warehouses/${WAREHOUSE_ID}/receiving/00000000-0000-0000-0000-000000000000`, {
+        headers: authHeaders(),
+      });
 
       expect(response.status).toBe(404);
     });

@@ -31,4 +31,3 @@ export class VoidShippingLabelUseCase {
     return { voided: true, label };
   }
 }
-

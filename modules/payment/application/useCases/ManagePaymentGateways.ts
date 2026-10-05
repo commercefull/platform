@@ -1,6 +1,5 @@
 import { PaymentGatewayRepository, PaymentGatewayCreateParams } from '../../domain/repositories/PaymentGatewayRepository';
 
-
 export class ManagePaymentGatewaysUseCase {
   constructor(private readonly gatewayRepo: PaymentGatewayRepository) {}
 

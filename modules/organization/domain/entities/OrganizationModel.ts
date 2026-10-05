@@ -74,7 +74,7 @@ export type OrganizationRecord = {
   defaultLocale: string | null;
   metadata: Record<string, unknown> | null;
   isActive: boolean | null;
-}
+};
 
 export type OrganizationAddress = {
   organizationAddressId: string;
@@ -99,7 +99,7 @@ export type OrganizationAddress = {
   latitude: string | null;
   longitude: string | null;
   notes: string | null;
-}
+};
 
 export type OrganizationPaymentInfo = {
   organizationPaymentInfoId: string;
@@ -122,5 +122,4 @@ export type OrganizationPaymentInfo = {
   lastPayoutDate: Date | null;
   notes: string | null;
   createdBy: string | null;
-}
-
+};

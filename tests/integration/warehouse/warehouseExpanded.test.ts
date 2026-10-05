@@ -4,7 +4,13 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestWarehouse, createTestZone, SEEDED_WAREHOUSE_IDS, SEEDED_ZONE_IDS as _SEEDED_ZONE_IDS, SEEDED_BIN_IDS } from './testUtils';
+import {
+  createTestWarehouse,
+  createTestZone,
+  SEEDED_WAREHOUSE_IDS,
+  SEEDED_ZONE_IDS as _SEEDED_ZONE_IDS,
+  SEEDED_BIN_IDS,
+} from './testUtils';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Warehouse Expanded Tests', () => {

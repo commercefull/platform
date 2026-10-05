@@ -15,7 +15,6 @@ import { createBuiltInThemes } from '../../domain/builtInThemes';
 import { ThemeNotFoundError, ThemeAlreadyExistsError, BuiltInThemeCannotBeDeletedError } from '../../domain/errors/ThemeErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 
-
 // ============================================================================
 // Manage Themes
 // ============================================================================

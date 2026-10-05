@@ -14,13 +14,7 @@
 import { AxiosInstance } from 'axios';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 import { TEST_CUSTOMER_ID } from '../testConstants';
-import {
-  SEEDED_PROMOTION_ID,
-  SEEDED_CATEGORY_PROMOTION_ID,
-  SEEDED_CART_ID,
-  SEEDED_COUPON_CODE_FIXED,
-  testPromotion,
-} from './testUtils';
+import { SEEDED_PROMOTION_ID, SEEDED_CATEGORY_PROMOTION_ID, SEEDED_CART_ID, SEEDED_COUPON_CODE_FIXED, testPromotion } from './testUtils';
 
 const UNKNOWN_ID = '00000000-0000-0000-0000-000000099999';
 
@@ -82,11 +76,7 @@ describe('Promotion Detail Endpoints', () => {
     });
 
     it('PUT /business/cart-promotions/:id updates the discount amount', async () => {
-      const resp = await client.put(
-        `/business/cart-promotions/${cartPromotionId}`,
-        { discountAmountCents: 1500 },
-        auth(),
-      );
+      const resp = await client.put(`/business/cart-promotions/${cartPromotionId}`, { discountAmountCents: 1500 }, auth());
       expectStatus(resp, 200);
       expect(Number(resp.data.data.discountAmountCents)).toBe(1500);
     });
@@ -131,11 +121,7 @@ describe('Promotion Detail Endpoints', () => {
     });
 
     it('POST /business/gift-cards/:id/assign assigns the card to a customer', async () => {
-      const resp = await client.post(
-        `/business/gift-cards/${giftCardId}/assign`,
-        { customerId: TEST_CUSTOMER_ID },
-        auth(),
-      );
+      const resp = await client.post(`/business/gift-cards/${giftCardId}/assign`, { customerId: TEST_CUSTOMER_ID }, auth());
       expectStatus(resp, 200);
 
       const detail = await client.get(`/business/gift-cards/${giftCardId}`, auth());
@@ -147,11 +133,7 @@ describe('Promotion Detail Endpoints', () => {
       const activate = await client.post(`/business/gift-cards/${giftCardId}/activate`, {}, auth());
       expectStatus(activate, 200);
 
-      const resp = await client.post(
-        `/business/gift-cards/${giftCardId}/refund`,
-        { amountCents: 700, notes: 'Coverage refund' },
-        auth(),
-      );
+      const resp = await client.post(`/business/gift-cards/${giftCardId}/refund`, { amountCents: 700, notes: 'Coverage refund' }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data).toBeTruthy();
 
@@ -163,11 +145,7 @@ describe('Promotion Detail Endpoints', () => {
 
   describe('Coupon calculate', () => {
     it('POST /business/coupons/calculate returns the discount math', async () => {
-      const resp = await client.post(
-        '/business/coupons/calculate',
-        { code: SEEDED_COUPON_CODE_FIXED, orderTotalCents: 5000 },
-        auth(),
-      );
+      const resp = await client.post('/business/coupons/calculate', { code: SEEDED_COUPON_CODE_FIXED, orderTotalCents: 5000 }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data.discountAmountCents).toBe(1000);
       expect(resp.data.data.finalTotalCents).toBe(4000);
@@ -179,11 +157,7 @@ describe('Promotion Detail Endpoints', () => {
     });
 
     it('POST /business/coupons/calculate returns 404 for an unknown code', async () => {
-      const resp = await client.post(
-        '/business/coupons/calculate',
-        { code: 'NO-SUCH-CODE', orderTotalCents: 5000 },
-        auth(),
-      );
+      const resp = await client.post('/business/coupons/calculate', { code: 'NO-SUCH-CODE', orderTotalCents: 5000 }, auth());
       expectStatus(resp, 404);
     });
   });

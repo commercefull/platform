@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * Marketplace Admin UI Controller
  * Admin views for vendors, commission rules, and payouts

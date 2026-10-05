@@ -1,5 +1,13 @@
 import { AxiosInstance } from 'axios';
-import { createTestSupplier, createTestPurchaseOrder, createTestSupplierAddress, SEEDED_SUPPLIER_IDS, SEEDED_SUPPLIER_ADDRESS_IDS as _SEEDED_SUPPLIER_ADDRESS_IDS, SEEDED_PURCHASE_ORDER_IDS, SEEDED_WAREHOUSE_ID } from './testUtils';
+import {
+  createTestSupplier,
+  createTestPurchaseOrder,
+  createTestSupplierAddress,
+  SEEDED_SUPPLIER_IDS,
+  SEEDED_SUPPLIER_ADDRESS_IDS as _SEEDED_SUPPLIER_ADDRESS_IDS,
+  SEEDED_PURCHASE_ORDER_IDS,
+  SEEDED_WAREHOUSE_ID,
+} from './testUtils';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Supplier Feature Tests', () => {

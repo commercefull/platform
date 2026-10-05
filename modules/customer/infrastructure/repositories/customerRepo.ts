@@ -150,10 +150,11 @@ export class CustomerRepo {
 
   async createEmailVerificationToken(customerId: string): Promise<string> {
     const token = crypto.randomBytes(32).toString('hex');
-    await queryOne(
-      'UPDATE customer SET "verificationToken" = $1, "updatedAt" = $2 WHERE "customerId" = $3 RETURNING "customerId"',
-      [token, new Date(), customerId],
-    );
+    await queryOne('UPDATE customer SET "verificationToken" = $1, "updatedAt" = $2 WHERE "customerId" = $3 RETURNING "customerId"', [
+      token,
+      new Date(),
+      customerId,
+    ]);
     return token;
   }
 

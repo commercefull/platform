@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Tracking Business Controller
  * Handles tracking configuration and event processing via /business/tracking routes.

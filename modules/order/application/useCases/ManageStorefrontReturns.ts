@@ -1,6 +1,5 @@
 import { OrderReturnRepository } from '../../domain/repositories/OrderReturnRepository';
 
-
 export class ManageStorefrontReturnsUseCase {
   constructor(private readonly returns: OrderReturnRepository) {}
 

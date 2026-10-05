@@ -12,4 +12,3 @@ describe('RecomputeAllProfilesUseCase', () => {
     expect(result).toBe(42);
   });
 });
-

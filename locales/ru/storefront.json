@@ -744,5 +744,14 @@
   "emailPlaceholder": "ваш@email.com",
   "phonePlaceholder": "Ваш номер телефона",
   "cardholderNamePlaceholder": "Джон Доу",
-  "cardExpiryPlaceholder": "ММ/ГГ"
+  "cardExpiryPlaceholder": "ММ/ГГ",
+  "collections": "Коллекции",
+  "collectionsHeroDesc": "Откройте для себя наши тщательно подобранные коллекции",
+  "viewCollection": "Смотреть коллекцию",
+  "noCollections": "Коллекций пока нет",
+  "noCollectionsDesc": "Загляните позже — мы готовим новые коллекции.",
+  "collectionEmpty": "В этой коллекции пока нет товаров",
+  "collectionEmptyDesc": "Загляните позже или просмотрите весь каталог.",
+  "backToCollections": "Назад к коллекциям",
+  "featured": "Рекомендуемое"
 }

@@ -17,8 +17,12 @@ export interface RedeemCouponRepositoryPort {
     orderId: string;
     customerId?: string;
     discountAmountCents: number;
+    currencyCode?: string;
     redeemedAt: Date;
-  }): Promise<unknown>;
+    /** Resolves true when the row was inserted; false on a concurrent duplicate. */
+  }): Promise<boolean | void>;
+  /** Existing redemption for (coupon, order) — idempotent-retry guard. */
+  findRedemptionByOrder?(couponId: string, orderId: string): Promise<{ redemptionId: string; redeemedAt: Date } | null>;
   incrementUsageCount(couponId: string): Promise<unknown>;
 }
 
@@ -27,6 +31,7 @@ export interface RedeemCouponInput {
   orderId: string;
   customerId?: string;
   discountAmountCents: number;
+  currencyCode?: string;
 }
 
 export interface RedeemCouponOutput {
@@ -45,18 +50,42 @@ export class RedeemCouponUseCase {
       throw new CouponNotFoundError(input.couponCode);
     }
 
+    // Idempotent: a retried checkout completion must not double-count usage.
+    const existing = await this.couponRepository.findRedemptionByOrder?.(coupon.couponId, input.orderId);
+    if (existing) {
+      return {
+        redeemed: true,
+        redemptionId: existing.redemptionId,
+        couponId: coupon.couponId,
+        redeemedAt: existing.redeemedAt.toISOString(),
+      };
+    }
+
     const redemptionId = generateUUID();
     const now = new Date();
 
-    // Create redemption record
-    await this.couponRepository.createRedemption({
+    // Create redemption record; a concurrent retry may already hold the row.
+    const inserted = await this.couponRepository.createRedemption({
       redemptionId,
       couponId: coupon.couponId,
       orderId: input.orderId,
       customerId: input.customerId,
       discountAmountCents: input.discountAmountCents,
+      currencyCode: input.currencyCode,
       redeemedAt: now,
     });
+
+    if (inserted === false) {
+      const winner = await this.couponRepository.findRedemptionByOrder?.(coupon.couponId, input.orderId);
+      if (winner) {
+        return {
+          redeemed: true,
+          redemptionId: winner.redemptionId,
+          couponId: coupon.couponId,
+          redeemedAt: winner.redeemedAt.toISOString(),
+        };
+      }
+    }
 
     // Increment usage count
     await this.couponRepository.incrementUsageCount(coupon.couponId);

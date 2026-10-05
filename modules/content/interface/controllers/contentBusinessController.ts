@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import {
@@ -58,6 +58,7 @@ import { RemovePageFromCategoryCommand } from '../../application/useCases/catego
 import { SetPrimaryCategoryCommand } from '../../application/useCases/categorization/SetPrimaryCategory';
 import { CreateTemplateCommand } from '../../application/useCases/template/CreateTemplate';
 import { DuplicateTemplateCommand } from '../../application/useCases/template/DuplicateTemplate';
+import { manageSalesChannelsUseCase } from '../../../store/application/useCases/wired';
 
 // ============================================================================
 // Request Body Interfaces
@@ -385,14 +386,14 @@ export class ContentController {
     const contentTypes = await this.contentUC.findAllContentTypes(isActive, limit, offset);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: contentTypes,
-            pagination: {
-              limit,
-              offset,
-              total: contentTypes.length, // This should ideally be the total count from DB
-            },
-          });
+      success: true,
+      data: contentTypes,
+      pagination: {
+        limit,
+        offset,
+        total: contentTypes.length, // This should ideally be the total count from DB
+      },
+    });
   };
 
   /**
@@ -404,16 +405,16 @@ export class ContentController {
 
     if (!contentType) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content type with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content type with ID ${id} not found`,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: contentType,
-          });
+      success: true,
+      data: contentType,
+    });
   };
 
   /**
@@ -425,16 +426,16 @@ export class ContentController {
 
     if (!contentType) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content type with slug ${slug} not found`,
-              });
+        success: false,
+        message: `Content type with slug ${slug} not found`,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: contentType,
-          });
+      success: true,
+      data: contentType,
+    });
   };
 
   /**
@@ -460,9 +461,9 @@ export class ContentController {
     // Basic validation
     if (!name || !slug) {
       jsonResponse(res, 400, {
-                success: false,
-                message: 'Name and slug are required',
-              });
+        success: false,
+        message: 'Name and slug are required',
+      });
       return;
     }
 
@@ -480,10 +481,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 201, {
-            success: true,
-            data: contentType,
-            message: 'Content type created successfully',
-          });
+      success: true,
+      data: contentType,
+      message: 'Content type created successfully',
+    });
   };
 
   /**
@@ -500,9 +501,9 @@ export class ContentController {
     const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content type with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content type with ID ${id} not found`,
+      });
       return;
     }
 
@@ -517,10 +518,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedContentType,
-            message: 'Content type updated successfully',
-          });
+      success: true,
+      data: updatedContentType,
+      message: 'Content type updated successfully',
+    });
   };
 
   /**
@@ -533,18 +534,18 @@ export class ContentController {
     const existingContentType = await this.contentUC.findContentTypeById(id);
     if (!existingContentType) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content type with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content type with ID ${id} not found`,
+      });
       return;
     }
 
     await this.contentUC.deleteContentType(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Content type deleted successfully',
-          });
+      success: true,
+      message: 'Content type deleted successfully',
+    });
   };
 
   // Content Page Handlers
@@ -562,14 +563,14 @@ export class ContentController {
     const pages = await this.contentUC.findAllPages(status, contentTypeId, limit, offset, search);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: pages,
-            pagination: {
-              limit,
-              offset,
-              total: pages.length, // This should ideally be the total count from DB
-            },
-          });
+      success: true,
+      data: pages,
+      pagination: {
+        limit,
+        offset,
+        total: pages.length, // This should ideally be the total count from DB
+      },
+    });
   };
 
   /**
@@ -581,16 +582,16 @@ export class ContentController {
 
     if (!page) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Page with ID ${id} not found`,
-              });
+        success: false,
+        message: `Page with ID ${id} not found`,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: page,
-          });
+      success: true,
+      data: page,
+    });
   };
 
   /**
@@ -603,9 +604,9 @@ export class ContentController {
     const page = await this.contentUC.findPageById(id);
     if (!page) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Page with ID ${id} not found`,
-              });
+        success: false,
+        message: `Page with ID ${id} not found`,
+      });
       return;
     }
 
@@ -633,9 +634,9 @@ export class ContentController {
     };
 
     jsonResponse(res, 200, {
-            success: true,
-            data: fullPage,
-          });
+      success: true,
+      data: fullPage,
+    });
   };
 
   /**
@@ -658,9 +659,9 @@ export class ContentController {
     // Basic validation
     if (!title || !slug || !contentTypeId) {
       jsonResponse(res, 400, {
-                success: false,
-                message: 'Title, slug, and contentTypeId are required',
-              });
+        success: false,
+        message: 'Title, slug, and contentTypeId are required',
+      });
       return;
     }
 
@@ -669,9 +670,9 @@ export class ContentController {
       const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
         jsonResponse(res, 400, {
-                    success: false,
-                    message: 'Invalid layout template specified',
-                  });
+          success: false,
+          message: 'Invalid layout template specified',
+        });
         return;
       }
     }
@@ -690,10 +691,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 201, {
-            success: true,
-            data: page,
-            message: 'Page created successfully',
-          });
+      success: true,
+      data: page,
+      message: 'Page created successfully',
+    });
   };
 
   /**
@@ -707,9 +708,9 @@ export class ContentController {
     const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Page with ID ${id} not found`,
-              });
+        success: false,
+        message: `Page with ID ${id} not found`,
+      });
       return;
     }
 
@@ -718,9 +719,9 @@ export class ContentController {
       const template = await this.contentUC.findTemplateById(layout);
       if (!template) {
         jsonResponse(res, 400, {
-                    success: false,
-                    message: 'Invalid layout template specified',
-                  });
+          success: false,
+          message: 'Invalid layout template specified',
+        });
         return;
       }
     }
@@ -737,10 +738,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedPage,
-            message: 'Page updated successfully',
-          });
+      success: true,
+      data: updatedPage,
+      message: 'Page updated successfully',
+    });
   };
 
   /**
@@ -753,18 +754,18 @@ export class ContentController {
     const existingPage = await this.contentUC.findPageById(id);
     if (!existingPage) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Page with ID ${id} not found`,
-              });
+        success: false,
+        message: `Page with ID ${id} not found`,
+      });
       return;
     }
 
     await this.contentUC.deletePage(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Page deleted successfully',
-          });
+      success: true,
+      message: 'Page deleted successfully',
+    });
   };
 
   // Content Block Handlers
@@ -779,18 +780,18 @@ export class ContentController {
     const page = await this.contentUC.findPageById(pageId);
     if (!page) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Page with ID ${pageId} not found`,
-              });
+        success: false,
+        message: `Page with ID ${pageId} not found`,
+      });
       return;
     }
 
     const blocks = await this.contentUC.findBlocksByPageId(pageId);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: blocks,
-          });
+      success: true,
+      data: blocks,
+    });
   };
 
   /**
@@ -802,16 +803,16 @@ export class ContentController {
 
     if (!block) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content block with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content block with ID ${id} not found`,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: block,
-          });
+      success: true,
+      data: block,
+    });
   };
 
   /**
@@ -823,9 +824,9 @@ export class ContentController {
     // Basic validation
     if (!contentPageId || !blockTypeId || sortOrder === undefined || !content) {
       jsonResponse(res, 400, {
-                success: false,
-                message: 'contentPageId, blockTypeId, sortOrder, and content are required',
-              });
+        success: false,
+        message: 'contentPageId, blockTypeId, sortOrder, and content are required',
+      });
       return;
     }
 
@@ -833,9 +834,9 @@ export class ContentController {
     const blockType = await this.contentUC.findBlockTypeById(blockTypeId);
     if (!blockType) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Block type with ID ${blockTypeId} not found`,
-              });
+        success: false,
+        message: `Block type with ID ${blockTypeId} not found`,
+      });
       return;
     }
 
@@ -852,9 +853,9 @@ export class ContentController {
       }
       if (missingFields.length > 0) {
         jsonResponse(res, 400, {
-                    success: false,
-                    message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
-                  });
+          success: false,
+          message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+        });
         return;
       }
     }
@@ -869,10 +870,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 201, {
-            success: true,
-            data: block,
-            message: 'Content block created successfully',
-          });
+      success: true,
+      data: block,
+      message: 'Content block created successfully',
+    });
   };
 
   /**
@@ -886,9 +887,9 @@ export class ContentController {
     const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content block with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content block with ID ${id} not found`,
+      });
       return;
     }
 
@@ -901,9 +902,9 @@ export class ContentController {
       const blockType = await this.contentUC.findBlockTypeById(effectiveBlockTypeId);
       if (!blockType) {
         jsonResponse(res, 404, {
-                    success: false,
-                    message: `Block type with ID ${effectiveBlockTypeId} not found`,
-                  });
+          success: false,
+          message: `Block type with ID ${effectiveBlockTypeId} not found`,
+        });
         return;
       }
 
@@ -920,9 +921,9 @@ export class ContentController {
         }
         if (missingFields.length > 0) {
           jsonResponse(res, 400, {
-                        success: false,
-                        message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
-                      });
+            success: false,
+            message: `Missing required fields for block type "${blockType.name}": ${missingFields.join(', ')}`,
+          });
           return;
         }
       }
@@ -938,10 +939,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedBlock,
-            message: 'Content block updated successfully',
-          });
+      success: true,
+      data: updatedBlock,
+      message: 'Content block updated successfully',
+    });
   };
 
   /**
@@ -954,18 +955,18 @@ export class ContentController {
     const existingBlock = await this.contentUC.findBlockById(id);
     if (!existingBlock) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Content block with ID ${id} not found`,
-              });
+        success: false,
+        message: `Content block with ID ${id} not found`,
+      });
       return;
     }
 
     await this.contentUC.deleteBlock(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Content block deleted successfully',
-          });
+      success: true,
+      message: 'Content block deleted successfully',
+    });
   };
 
   /**
@@ -978,18 +979,18 @@ export class ContentController {
     // Validate input
     if (!Array.isArray(blockOrders) || blockOrders.length === 0) {
       jsonResponse(res, 400, {
-                success: false,
-                message: 'Block orders must be a non-empty array',
-              });
+        success: false,
+        message: 'Block orders must be a non-empty array',
+      });
       return;
     }
 
     for (const order of blockOrders) {
       if (!order.id || order.order === undefined) {
         jsonResponse(res, 400, {
-                    success: false,
-                    message: 'Each block order must have id and order properties',
-                  });
+          success: false,
+          message: 'Each block order must have id and order properties',
+        });
         return;
       }
     }
@@ -997,9 +998,9 @@ export class ContentController {
     try {
       await reorderPageBlocksUseCase.execute(new ReorderPageBlocksCommand(pageId, blockOrders, req.user?.id));
       jsonResponse(res, 200, {
-                success: true,
-                message: 'Content blocks reordered successfully',
-              });
+        success: true,
+        message: 'Content blocks reordered successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1016,14 +1017,14 @@ export class ContentController {
     const templates = await this.contentUC.findAllTemplates(isActive, limit, offset);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: templates,
-            pagination: {
-              limit,
-              offset,
-              total: templates.length, // This should ideally be the total count from DB
-            },
-          });
+      success: true,
+      data: templates,
+      pagination: {
+        limit,
+        offset,
+        total: templates.length, // This should ideally be the total count from DB
+      },
+    });
   };
 
   /**
@@ -1035,16 +1036,16 @@ export class ContentController {
 
     if (!template) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Template with ID ${id} not found`,
-              });
+        success: false,
+        message: `Template with ID ${id} not found`,
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: template,
-          });
+      success: true,
+      data: template,
+    });
   };
 
   /**
@@ -1100,9 +1101,9 @@ export class ContentController {
     const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Template with ID ${id} not found`,
-              });
+        success: false,
+        message: `Template with ID ${id} not found`,
+      });
       return;
     }
 
@@ -1116,10 +1117,10 @@ export class ContentController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedTemplate,
-            message: 'Template updated successfully',
-          });
+      success: true,
+      data: updatedTemplate,
+      message: 'Template updated successfully',
+    });
   };
 
   /**
@@ -1132,18 +1133,18 @@ export class ContentController {
     const existingTemplate = await this.contentUC.findTemplateById(id);
     if (!existingTemplate) {
       jsonResponse(res, 404, {
-                success: false,
-                message: `Template with ID ${id} not found`,
-              });
+        success: false,
+        message: `Template with ID ${id} not found`,
+      });
       return;
     }
 
     await this.contentUC.deleteTemplate(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Template deleted successfully',
-          });
+      success: true,
+      message: 'Template deleted successfully',
+    });
   };
 
   /**
@@ -1224,6 +1225,73 @@ export class ContentController {
     }
   };
 
+  // Page Publication Handlers
+
+  /**
+   * List a page's store/channel/locale publication assignments
+   */
+  getPagePublications = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+    try {
+      const publications = await this.contentUC.findPagePublications(req.params.id);
+      jsonResponse(res, 200, { success: true, data: publications });
+    } catch (error) {
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    }
+  };
+
+  /**
+   * Publish a page to a store, optionally scoped to a channel and/or locale.
+   * The store/channel pair must belong to the caller's organization.
+   */
+  createPagePublication = async (
+    req: HttpRequest<Record<string, string>, unknown, { storeId?: string; channelId?: string; locale?: string }>,
+    res: HttpResponse,
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { storeId, channelId, locale } = req.body;
+      if (!storeId) {
+        jsonResponse(res, 400, { success: false, message: 'storeId is required' });
+        return;
+      }
+      await manageSalesChannelsUseCase.assertStoreChannelAccess({
+        organizationId: req.user?.organizationId,
+        storeId,
+        channelId,
+      });
+      const page = await this.contentUC.findPageById(id);
+      if (!page) {
+        jsonResponse(res, 404, { success: false, message: 'Page not found' });
+        return;
+      }
+      const publication = await this.contentUC.createPagePublication({
+        contentPageId: id,
+        storeId,
+        channelId: channelId ?? null,
+        locale: locale ?? null,
+      });
+      jsonResponse(res, 201, { success: true, data: publication, message: 'Page publication created' });
+    } catch (error) {
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    }
+  };
+
+  /**
+   * Remove a page's publication assignment
+   */
+  deletePagePublication = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+    try {
+      const deleted = await this.contentUC.deletePagePublication(req.params.publicationId);
+      if (!deleted) {
+        jsonResponse(res, 404, { success: false, message: 'Publication not found' });
+        return;
+      }
+      jsonResponse(res, 200, { success: true, message: 'Page publication removed' });
+    } catch (error) {
+      jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
+    }
+  };
+
   // Category Handlers
 
   getCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -1249,7 +1317,11 @@ export class ContentController {
       const result = await createCategoryUseCase.execute(
         new CreateCategoryCommand(name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive),
       );
-      jsonResponse(res, 201, { success: true, data: { ...result, contentCategoryId: result.id }, message: 'Category created successfully' });
+      jsonResponse(res, 201, {
+        success: true,
+        data: { ...result, contentCategoryId: result.id },
+        message: 'Category created successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1314,7 +1386,11 @@ export class ContentController {
 
     try {
       const result = await createNavigationUseCase.execute(new CreateNavigationCommand(name, slug, description, location, isActive));
-      jsonResponse(res, 201, { success: true, data: { ...result, contentNavigationId: result.id }, message: 'Navigation created successfully' });
+      jsonResponse(res, 201, {
+        success: true,
+        data: { ...result, contentNavigationId: result.id },
+        message: 'Navigation created successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1402,7 +1478,11 @@ export class ContentController {
           conditions,
         ),
       );
-      jsonResponse(res, 201, { success: true, data: { ...result, contentNavigationItemId: result.id }, message: 'Navigation item added successfully' });
+      jsonResponse(res, 201, {
+        success: true,
+        data: { ...result, contentNavigationItemId: result.id },
+        message: 'Navigation item added successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1509,10 +1589,10 @@ export class ContentController {
         ),
       );
       jsonResponse(res, 201, {
-                success: true,
-                data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
-                message: 'Media uploaded successfully',
-              });
+        success: true,
+        data: { ...result, contentMediaId: result.id, contentMediaFolderId: folderId || null },
+        message: 'Media uploaded successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1594,7 +1674,11 @@ export class ContentController {
 
     try {
       const result = await organizeMediaFolderUseCase.createFolder(new CreateFolderCommand(name, parentId, req.user?.id));
-      jsonResponse(res, 201, { success: true, data: { ...result, contentMediaFolderId: result.id }, message: 'Folder created successfully' });
+      jsonResponse(res, 201, {
+        success: true,
+        data: { ...result, contentMediaFolderId: result.id },
+        message: 'Folder created successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1643,7 +1727,11 @@ export class ContentController {
           req.user?.id,
         ),
       );
-      jsonResponse(res, 201, { success: true, data: { ...result, contentRedirectId: result.id }, message: 'Redirect created successfully' });
+      jsonResponse(res, 201, {
+        success: true,
+        data: { ...result, contentRedirectId: result.id },
+        message: 'Redirect created successfully',
+      });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
     }
@@ -1972,9 +2060,7 @@ export class ContentController {
     const { mediaId, entityType, entityId, field, sortOrder } = req.body;
 
     try {
-      const result = await trackMediaUsageUseCase.execute(
-        new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder),
-      );
+      const result = await trackMediaUsageUseCase.execute(new TrackMediaUsageCommand(mediaId, entityType, entityId, field, sortOrder));
       jsonResponse(res, 201, { success: true, data: result, message: 'Media usage tracked successfully' });
     } catch (error) {
       jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });

@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
@@ -105,7 +105,7 @@ export const createSchedule = async (req: HttpRequest, res: HttpResponse): Promi
     redirectResponse(res, `/admin/reporting/schedules/${result.reportScheduleId}?success=Scheduled report created successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-      const templates = await getReportTemplatesUseCase.execute().catch(() => ({}));
+    const templates = await getReportTemplatesUseCase.execute().catch(() => ({}));
     adminRespond(req, res, 'reporting/create-schedule', {
       pageName: 'Create Scheduled Report',
       error: (error as Error).message || 'Failed to create schedule',
@@ -169,6 +169,9 @@ export const deleteSchedule = async (req: HttpRequest, res: HttpResponse): Promi
     redirectResponse(res, '/admin/reporting/schedules?success=Scheduled report deleted successfully');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/reporting/schedules?error=${encodeURIComponent((error as Error).message || 'Failed to delete schedule')}`);
+    redirectResponse(
+      res,
+      `/admin/reporting/schedules?error=${encodeURIComponent((error as Error).message || 'Failed to delete schedule')}`,
+    );
   }
 };

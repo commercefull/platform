@@ -34,11 +34,7 @@ describe('Customer Address Operations Tests', () => {
   });
 
   it('POST /customer/me/addresses/:addressId/default sets the default address', async () => {
-    const resp = await client.post(
-      `/customer/me/addresses/${addressId}/default`,
-      { addressType: 'shipping' },
-      { headers: headers() },
-    );
+    const resp = await client.post(`/customer/me/addresses/${addressId}/default`, { addressType: 'shipping' }, { headers: headers() });
     expectStatus(resp, 200);
   });
 

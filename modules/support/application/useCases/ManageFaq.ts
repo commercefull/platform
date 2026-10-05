@@ -43,7 +43,6 @@ export interface FaqPort {
   deleteCategory(faqCategoryId: string): Promise<void>;
 }
 
-
 export class ManageFaqUseCase {
   constructor(private readonly faqRepo: FaqPort) {}
 

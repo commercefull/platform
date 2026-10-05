@@ -1,7 +1,4 @@
-import {
-  createShippingZonePort,
-  createShippingZone,
-} from '../../tests/testUtils';
+import { createShippingZonePort, createShippingZone } from '../../tests/testUtils';
 import { ManageShippingZonesLookupUseCase } from './ManageShippingZonesLookup';
 
 describe('ManageShippingZonesLookupUseCase', () => {

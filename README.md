@@ -2,16 +2,21 @@
 
 > **Own your store. Not just rent it.** — Your data. Your checkout. Your rules. Your exit.
 
-[![Website](https://img.shields.io/badge/Website-commercefull.org-orange.svg)](https://commercefull.org)
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/commercefull/platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/commercefull/platform/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/commercefull/platform)](https://github.com/commercefull/platform/releases)
+[![Docs](https://github.com/commercefull/platform/actions/workflows/docs.yml/badge.svg)](https://github.com/commercefull/platform/actions/workflows/docs.yml)
+[![Last Commit](https://img.shields.io/github/last-commit/commercefull/platform)](https://github.com/commercefull/platform/commits/main)
+[![License](https://img.shields.io/github/license/commercefull/platform)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-22+-green.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue.svg)](https://www.postgresql.org)
 [![Tests](https://img.shields.io/badge/Tests-6%2C500%2B%20passing-brightgreen.svg)](#quality-metrics)
-[![Modules](https://img.shields.io/badge/Modules-43-blue.svg)](#modules)
+[![Modules](https://img.shields.io/badge/Modules-45-blue.svg)](#modules)
 [![ESLint](https://img.shields.io/badge/ESLint-0%20errors-brightgreen.svg)](#quality-metrics)
 
-Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 43 business modules covering the full commerce lifecycle.
+Commercefull is an open-source e-commerce platform built with Node.js, TypeScript, and PostgreSQL. It features **admin** and **storefront** portals, **customer** and **business** REST APIs plus **GraphQL**, and 45 business modules covering the full commerce lifecycle.
+
+Website: [commercefull.org](https://commercefull.org)
 
 ---
 
@@ -69,7 +74,7 @@ Commercefull is an open-source e-commerce platform built with Node.js, TypeScrip
 
 ### Platform
 
-- **Admin Panel** — Full platform management across all 42 modules
+- **Admin Panel** — Full platform management across all 45 modules
 - **Content Management** — Pages, blocks, templates, and media library
 - **Notifications** — Email/push templates with event-driven delivery
 - **Analytics** — Sales, product, customer, and predictive analytics
@@ -91,7 +96,7 @@ Commercefull is an open-source e-commerce platform built with Node.js, TypeScrip
 ### Reliability & Extensibility
 
 - **Durable Event Bus** — Transactional outbox with at-least-once delivery, exponential-backoff retries, dead-letter queue, and event replay
-- **Module Registry** — 37 optional modules toggleable via env vars or a DB-backed feature-flag provider; routes, GraphQL schema, event handlers, and migrations are gated per module
+- **Module Registry** — 39 optional modules toggleable via env vars or a DB-backed feature-flag provider; routes, GraphQL schema, event handlers, and migrations are gated per module
 - **Outbound Webhooks** — HMAC-SHA256-signed deliveries with retry and delivery tracking
 - **Payment Failover** — Multi-PSP routing (Stripe, PayPal, Klarna, Apple Pay, Affirm) with circuit breakers, health checks, and priority routing
 - **GraphQL API** — Merged schema across modules with query depth limiting
@@ -205,7 +210,7 @@ platform/
 │   ├── session/               #   Session management
 │   ├── types/                 #   Shared TypeScript types
 │   └── validation/            #   Input validation helpers
-├── modules/                   # 43 business modules (DDD)
+├── modules/                   # 45 business modules (DDD)
 │   ├── product/               #   Example: Product module
 │   │   ├── application/       #     Use cases
 │   │   ├── domain/            #     Entities, value objects, events
@@ -349,21 +354,22 @@ Commercefull follows **Domain-Driven Design (DDD)** with a layered architecture:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                     web/ (UI Layer)                       │
-│  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────────────┐  │
-│  │  admin/   │ │merchant/ │ │  b2b/  │ │ storefront/  │  │
-│  │ (Tabler)  │ │ (Tabler) │ │(Tabler)│ │ (Tailwind)   │  │
-│  └──────────┘ └──────────┘ └────────┘ └──────────────┘  │
+│                     web/ (UI Layer)                      │
+│        ┌──────────────┐        ┌──────────────┐          │
+│        │    admin/    │        │  storefront/ │          │
+│        │   (Tabler)   │        │  (Tailwind)  │          │
+│        └──────────────┘        └──────────────┘          │
+│   merchant/ and b2b/ portals are planned (not yet built) │
 ├──────────────────────────────────────────────────────────┤
-│                  modules/ (Business Logic)                │
-│  43 bounded contexts with DDD structure                  │
+│                  modules/ (Business Logic)               │
+│  45 bounded contexts with DDD structure                  │
 │  Each: domain → application → infrastructure → interface │
 ├──────────────────────────────────────────────────────────┤
-│                    libs/ (Shared)                         │
+│                    libs/ (Shared)                        │
 │  db, auth, events, logger, validation, session, types    │
 ├──────────────────────────────────────────────────────────┤
-│                 infra/ (Deployment)                       │
-│  Docker, Ansible, Terraform (AWS/GCP/Azure)              │
+│                 infra/ (Deployment)                      │
+│  Docker, Ansible, CDK (AWS), Terraform (GCP/Azure)       │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -391,11 +397,13 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Modules
 
-Commercefull includes 43 business modules:
+Commercefull includes 45 business modules:
 
-| Module          | Description                                                          |
-| --------------- | -------------------------------------------------------------------- |
-| `analytics`     | Sales, product, customer, and predictive analytics                   |
+| Module             | Description                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `agentic-checkout` | AI-agent checkout — ACP sessions, product feeds, idempotent order placement     |
+| `analytics`        | Sales, product, customer, and predictive analytics                              |
+| `assortment`       | Collections and per-store/channel product assortment scoping                    |
 | `audit`         | Immutable, hash-chained audit log                                    |
 | `automation`    | Rule engine — condition/action DSL executed on the event bus         |
 | `b2b`           | B2B companies, quotes, price books, credit terms, approval workflows |
@@ -424,6 +432,7 @@ Commercefull includes 43 business modules:
 | `pricing`       | Price lists, rules, and dynamic pricing                              |
 | `product`       | Product catalog with master/variant architecture                     |
 | `promotion`     | Promotions, discounts, and gift cards                                |
+| `recommendation`| Product recommendations (rules, co-purchase, similarity)             |
 | `reporting`     | Report generation and exports                                        |
 | `returns`       | Returns, exchanges, store credit, and warranty claims                |
 | `segment`       | Customer segmentation (CDP)                                          |
@@ -444,7 +453,7 @@ Commercefull includes 43 business modules:
 
 ### Admin Panel (`/admin`)
 
-Full platform management covering all 42 modules. Built with Tabler (Bootstrap-based) UI framework.
+Full platform management covering all 45 modules. Built with Tabler (Bootstrap-based) UI framework.
 
 **Key sections:** Dashboard, Products, Orders, Customers, Inventory, Promotions, Payments, Shipping, Content, Analytics, Programs (Membership, Subscription, Loyalty), Operations (Warehouses, Fulfillment, Suppliers), Settings, Users & Roles, GDPR, Support.
 
