@@ -1515,9 +1515,7 @@ const FeatureModule = (function () {
 
   async function handleCreate(element) {
     // Extract data from form or element
-    const result = await performCreate({
-      /* data */
-    });
+    const result = await performCreate({/* data */});
     if (result.ok) {
       showSuccess('Item created!');
       location.reload();

@@ -81,7 +81,14 @@ export function createGdprDataRequestRepository(
   };
   repository.findById.mockResolvedValue(request);
   repository.findByCustomerId.mockResolvedValue([]);
-  repository.findAll.mockResolvedValue({ data: request ? [request] : [], total: request ? 1 : 0, limit: 50, offset: 0, hasMore: false, length: request ? 1 : 0 });
+  repository.findAll.mockResolvedValue({
+    data: request ? [request] : [],
+    total: request ? 1 : 0,
+    limit: 50,
+    offset: 0,
+    hasMore: false,
+    length: request ? 1 : 0,
+  });
   repository.save.mockImplementation(r => Promise.resolve(r));
   repository.delete.mockResolvedValue(undefined);
   repository.findPendingRequests.mockResolvedValue({ data: [], total: 0, limit: 50, offset: 0, hasMore: false, length: 0 });

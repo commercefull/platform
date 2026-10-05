@@ -104,9 +104,12 @@ export interface LoyaltyRepository {
     referenceId?: string,
   ): Promise<LoyaltyPoints>;
   checkAndUpdateTier(customerId: string, lifetimePoints: number): Promise<void>;
+  setMemberPoints(loyaltyPointsId: string, currentPoints: number, lifetimePoints?: number): Promise<void>;
 
   // Transactions
   findTransactionById(loyaltyTransactionId: string): Promise<LoyaltyTransaction | null>;
+  findTransactionByOrderAndAction(orderId: string, action: 'credit' | 'debit'): Promise<LoyaltyTransaction | null>;
+  findCreditTransactionByReference(referenceId: string): Promise<LoyaltyTransaction | null>;
   findCustomerTransactions(customerId: string, limit?: number, offset?: number): Promise<LoyaltyTransaction[]>;
   createTransaction(input: CreateLoyaltyTransactionInput): Promise<LoyaltyTransaction>;
 

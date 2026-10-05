@@ -41,9 +41,7 @@ describe('RoutePaymentUseCase', () => {
   it('should throw NoProvidersAvailableError when the organization has no active routes', async () => {
     routingRepo.findActiveRoutes.mockResolvedValue([]);
 
-    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(
-      NoProvidersAvailableError,
-    );
+    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(NoProvidersAvailableError);
     expect(routingEngine.routePayment).not.toHaveBeenCalled();
   });
 
@@ -77,9 +75,7 @@ describe('RoutePaymentUseCase', () => {
     ]);
     getPSPAdapterMock.mockImplementation(provider => (provider === 'stripe' ? adapter : null));
 
-    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(
-      NoProvidersAvailableError,
-    );
+    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(NoProvidersAvailableError);
     expect(routingEngine.routePayment).not.toHaveBeenCalled();
   });
 
@@ -91,9 +87,7 @@ describe('RoutePaymentUseCase', () => {
       attempts: [{ provider: 'stripe', success: false, errorCode: 'card_declined', errorMessage: 'declined', latencyMs: 10 }],
     });
 
-    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(
-      AllProvidersExhaustedError,
-    );
+    await expect(new RoutePaymentUseCase(routingRepo, routingEngine).execute(command)).rejects.toThrow(AllProvidersExhaustedError);
     expect(emitMock).toHaveBeenCalledWith('payment.routed', expect.objectContaining({ provider: 'stripe', success: false }));
   });
 

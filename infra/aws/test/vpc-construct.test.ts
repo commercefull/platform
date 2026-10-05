@@ -64,10 +64,13 @@ describe('VpcConstruct', () => {
   test('throws when createVpc=false and no existingVpcId', () => {
     const app = new cdk.App();
     const stack = new cdk.Stack(app, 'TestStack');
-    expect(() => new VpcConstruct(stack, 'Vpc', {
-      environment: 'prod',
-      createVpc: false,
-    })).toThrow('existingVpcId must be provided');
+    expect(
+      () =>
+        new VpcConstruct(stack, 'Vpc', {
+          environment: 'prod',
+          createVpc: false,
+        }),
+    ).toThrow('existingVpcId must be provided');
   });
 
   test('respects maxAzs option', () => {

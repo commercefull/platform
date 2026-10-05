@@ -146,11 +146,13 @@ task role send/consume, and injects `EVENT_BUS_PROVIDER`,
 `yarn add @aws-sdk/client-sqs`.
 
 # Application Configuration
+
 NODE_ENV=production
 PORT=3000
 DOMAIN=https://yourdomain.com
 API_BASE_URL=https://api.yourdomain.com
-```
+
+````
 
 ### CDK Stack Structure
 
@@ -207,7 +209,7 @@ export class InfrastructureStack extends Stack {
     new CfnOutput(this, 'CloudFrontURL', { value: `https://${distribution.distributionDomainName}` });
   }
 }
-```
+````
 
 ## File Structure
 

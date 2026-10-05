@@ -2,8 +2,6 @@ import { lazyMock, uuidMock } from '../../tests/testUtils';
 import { CreateProductVariantUseCase, CreateProductVariantCommand } from './CreateProductVariant';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
 
-;
-
 describe('CreateProductVariantUseCase', () => {
   let useCase: CreateProductVariantUseCase;
   let mockRepo: jest.Mocked<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>;
@@ -11,7 +9,7 @@ describe('CreateProductVariantUseCase', () => {
   beforeEach(() => {
     uuidMock.mockReturnValue('variant-uuid');
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[0]>();
     mockRepo.save.mockImplementation(async (variant: unknown) => variant);
     const pricingPort = lazyMock<ConstructorParameters<typeof CreateProductVariantUseCase>[1]>();
     useCase = new CreateProductVariantUseCase(mockRepo, pricingPort);
@@ -41,11 +39,7 @@ describe('CreateProductVariantUseCase', () => {
   });
 
   it('should throw ProductValidationError when basePriceCents is negative or fractional', async () => {
-    await expect(
-      useCase.execute(new CreateProductVariantCommand('p1', 'SKU-2', [], -1)),
-    ).rejects.toThrow(ProductValidationError);
-    await expect(
-      useCase.execute(new CreateProductVariantCommand('p1', 'SKU-3', [], 10.5)),
-    ).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductVariantCommand('p1', 'SKU-2', [], -1))).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductVariantCommand('p1', 'SKU-3', [], 10.5))).rejects.toThrow(ProductValidationError);
   });
 });

@@ -132,5 +132,4 @@ describe('Outbound Webhook Integration Tests', () => {
       expect(data).toHaveProperty('durationMs');
     });
   });
-
 });

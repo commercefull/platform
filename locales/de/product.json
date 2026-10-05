@@ -120,7 +120,24 @@
     "save": "Sammlung speichern",
     "create": "Sammlung erstellen",
     "back": "Zurück zu den Sammlungen",
-    "managementComingSoon": "Die Sammlungsverwaltung folgt in Kürze."
+    "managementComingSoon": "Die Sammlungsverwaltung folgt in Kürze.",
+    "details": "Kollektionsdetails",
+    "type": "Typ",
+    "manual": "Manuell",
+    "automated": "Automatisiert",
+    "featured": "Hervorgehoben",
+    "notFound": "Keine Kollektionen gefunden.",
+    "sortOrder": "Sortierreihenfolge",
+    "publishAt": "Veröffentlichen am",
+    "unpublishAt": "Zurückziehen am",
+    "schedule": "Veröffentlichungszeitraum",
+    "conditionsJson": "Bedingungen (JSON)",
+    "conditionsHint": "Nur für automatisierte Kollektionen verwendet. Beispiel: [{\"field\":\"categoryId\",\"operator\":\"equals\",\"value\":\"...\"}]",
+    "banner": "Banner-URL",
+    "sortNewest": "Neueste",
+    "sortPriceAsc": "Preis: aufsteigend",
+    "sortPriceDesc": "Preis: absteigend",
+    "sortNameAsc": "Name A–Z"
   },
   "tag": {
     "addNew": "Neues Tag hinzufügen",
@@ -128,5 +145,15 @@
     "allTags": "Alle Tags",
     "confirmDelete": "Dieses Tag löschen?",
     "noTags": "Noch keine Tags. Fügen Sie eines über das Formular hinzu."
-  }
+  },
+  "linkedProducts": "Verknüpfte Produkte",
+  "linkedProductsHelp": "Manuelle Produktverknüpfungen, die als Storefront-Empfehlungen angezeigt werden (z. B. ähnliche Artikel, Zubehör, Cross-Sells, Up-Sells).",
+  "linkedProduct": "Produkt",
+  "linkType": "Typ",
+  "linkPosition": "Position",
+  "linkAutomated": "Vorgeschlagen",
+  "linkBidirectional": "Bidirektional",
+  "noLinkedProducts": "Noch keine verknüpften Produkte. Unten eines hinzufügen.",
+  "relatedProductIdPlaceholder": "ID des verknüpften Produkts",
+  "addLink": "Verknüpfung hinzufügen"
 }

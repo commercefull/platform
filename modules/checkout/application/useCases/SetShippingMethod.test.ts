@@ -29,7 +29,10 @@ describe('SetShippingMethodUseCase', () => {
     expect(result.shippingMethodName).toBe('Standard');
     expect(result.shippingAmountCents).toBe(999);
     expect(checkoutRepository.save).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'shippingMethod', methodId: 'sm-1' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'shippingMethod', methodId: 'sm-1' }),
+    );
   });
 
   it('should throw NotFoundError when the session does not exist', async () => {

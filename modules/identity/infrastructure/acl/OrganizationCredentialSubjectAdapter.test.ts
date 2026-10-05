@@ -6,7 +6,18 @@ type RepoOrg = NonNullable<Awaited<ReturnType<OrgRepo['findById']>>>;
 
 describe('OrganizationCredentialSubjectAdapter', () => {
   let adapter: OrganizationCredentialSubjectAdapter;
-  let mockOrgRepo: jest.Mocked<Pick<OrgRepo, 'authenticate' | 'findById' | 'findByEmail' | 'createWithPassword' | 'changePassword' | 'createPasswordResetToken' | 'verifyPasswordResetToken'>>;
+  let mockOrgRepo: jest.Mocked<
+    Pick<
+      OrgRepo,
+      | 'authenticate'
+      | 'findById'
+      | 'findByEmail'
+      | 'createWithPassword'
+      | 'changePassword'
+      | 'createPasswordResetToken'
+      | 'verifyPasswordResetToken'
+    >
+  >;
 
   beforeEach(() => {
     mockOrgRepo = {
@@ -38,7 +49,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'active',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     const result = await adapter.authenticate('org@test.com', 'password');
 
@@ -64,7 +75,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'active',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     const result = await adapter.findById('org-1');
 
@@ -89,7 +100,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'org@test.com',
       name: 'Test Org',
       status: 'pending',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     const result = await adapter.findByEmail('org@test.com');
 
@@ -105,7 +116,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'new@test.com',
       name: 'New Org',
       status: 'pending',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     const result = await adapter.createWithPassword({
       email: 'new@test.com',
@@ -124,7 +135,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'new@test.com',
       name: 'Jane Smith',
       status: 'pending',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     await adapter.createWithPassword({
       email: 'new@test.com',
@@ -142,7 +153,7 @@ describe('OrganizationCredentialSubjectAdapter', () => {
       email: 'user@test.com',
       name: 'user',
       status: 'pending',
-  } as unknown as RepoOrg);
+    } as unknown as RepoOrg);
 
     await adapter.createWithPassword({
       email: 'user@test.com',

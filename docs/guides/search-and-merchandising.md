@@ -428,8 +428,8 @@ Register it in `libs/search/init.ts` and set `SEARCH_BACKEND=opensearch`.
 
 ### Merchandising Tables
 
-- **`productMerchandisingRule`** — Boost/bury/pin rules with optional searchTerm and categoryId scoping
-- **`productCategoryManualOrder`** — Per-category product ordering with position
+- **`assortmentMerchandisingRule`** — Boost/bury/pin rules with optional searchTerm and categoryId scoping
+- **`assortmentCategoryManualOrder`** — Per-category product ordering with position
 
 ### Existing Tables Used
 

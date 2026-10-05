@@ -33,12 +33,7 @@ describe('GetAnalyticsDataUseCase', () => {
     const result = await useCase.getTopProducts(new Date('2024-01-01'), new Date('2024-12-31'), 'revenue', 10);
 
     expect(result).toHaveLength(1);
-    expect(analyticsDataPort.getTopProducts).toHaveBeenCalledWith(
-      new Date('2024-01-01'),
-      new Date('2024-12-31'),
-      'revenue',
-      10,
-    );
+    expect(analyticsDataPort.getTopProducts).toHaveBeenCalledWith(new Date('2024-01-01'), new Date('2024-12-31'), 'revenue', 10);
   });
 
   it('should return customer cohorts', async () => {

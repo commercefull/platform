@@ -1,5 +1,11 @@
 import * as subscriptionRepo from '../infrastructure/repositories/subscriptionRepo';
 import type { SubscriptionRepository } from '../domain/repositories/SubscriptionRepository';
+import { TaxSubscriptionTaxAdapter } from '../infrastructure/acl/TaxSubscriptionTaxAdapter';
+import { CustomerSubscriptionAddressAdapter } from '../infrastructure/acl/CustomerSubscriptionAddressAdapter';
+import { StoreSubscriptionStoreContextAdapter } from '../infrastructure/acl/StoreSubscriptionStoreContextAdapter';
+import { calculateOrderTaxUseCase } from '../../tax/application/wired';
+import { getStoreUseCase } from '../../store/application/useCases/wired';
+import customerAddressRepo from '../../customer/infrastructure/repositories/customerAddressRepo';
 import { CreateSubscriptionUseCase } from './useCases/CreateSubscription';
 import { CancelSubscriptionUseCase } from './useCases/CancelSubscription';
 import { ManageAdminSubscriptionsUseCase } from './useCases/ManageAdminSubscriptions';
@@ -38,13 +44,17 @@ import {
 
 export const createSubscriptionUseCase = new CreateSubscriptionUseCase(subscriptionRepo);
 export const cancelSubscriptionUseCase = new CancelSubscriptionUseCase(subscriptionRepo);
-export const manageAdminSubscriptionsUseCase = new ManageAdminSubscriptionsUseCase(
-  subscriptionRepo as unknown as SubscriptionRepository,
-);
+export const manageAdminSubscriptionsUseCase = new ManageAdminSubscriptionsUseCase(subscriptionRepo as unknown as SubscriptionRepository);
 export const manageStorefrontSubscriptionsUseCase = new ManageStorefrontSubscriptionsUseCase(
   subscriptionRepo as unknown as SubscriptionRepository,
 );
-export const manageCustomerSubscriptionsUseCase = new ManageCustomerSubscriptionsUseCase(subscriptionRepo);
+const subscriptionTaxPorts = {
+  taxPort: new TaxSubscriptionTaxAdapter(calculateOrderTaxUseCase),
+  addressPort: new CustomerSubscriptionAddressAdapter(customerAddressRepo),
+  storeContextPort: new StoreSubscriptionStoreContextAdapter(getStoreUseCase),
+};
+
+export const manageCustomerSubscriptionsUseCase = new ManageCustomerSubscriptionsUseCase(subscriptionRepo, subscriptionTaxPorts);
 export const processBillingCycleUseCase = new ProcessBillingCycleUseCase(subscriptionRepo);
 
 // Adapters bridging the record-model subscriptionRepo to the entity-model ports

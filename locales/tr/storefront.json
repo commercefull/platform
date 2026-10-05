@@ -744,5 +744,14 @@
   "emailPlaceholder": "sizin@e-postanız.com",
   "phonePlaceholder": "Telefon numaranız",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "AA/YY"
+  "cardExpiryPlaceholder": "AA/YY",
+  "collections": "Koleksiyonlar",
+  "collectionsHeroDesc": "Özenle hazırlanmış koleksiyonlarımızı keşfedin",
+  "viewCollection": "Koleksiyonu Görüntüle",
+  "noCollections": "Henüz koleksiyon yok",
+  "noCollectionsDesc": "Yakında tekrar kontrol edin — yeni koleksiyonlar hazırlıyoruz.",
+  "collectionEmpty": "Bu koleksiyonda henüz ürün yok",
+  "collectionEmptyDesc": "Yakında tekrar kontrol edin veya tüm kataloğa göz atın.",
+  "backToCollections": "Koleksiyonlara Dön",
+  "featured": "Öne Çıkan"
 }

@@ -22,7 +22,7 @@ function createProduct(): Product {
 function createMockProductRepo(product: Product | null = null): jest.Mocked<ProductRepository> {
   const repo = lazyMock<ProductRepository>();
   repo.findById.mockResolvedValue(product);
-  repo.save.mockImplementation(async (item) => item);
+  repo.save.mockImplementation(async item => item);
   return repo;
 }
 

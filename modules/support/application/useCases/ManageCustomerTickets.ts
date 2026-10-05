@@ -72,10 +72,7 @@ export interface ManageCustomerTicketsPort {
 export class ManageCustomerTicketsUseCase {
   constructor(private readonly support: ManageCustomerTicketsPort) {}
 
-  async getTickets(
-    filters?: { customerId?: string; status?: TicketStatus },
-    pagination?: { limit?: number; offset?: number },
-  ) {
+  async getTickets(filters?: { customerId?: string; status?: TicketStatus }, pagination?: { limit?: number; offset?: number }) {
     return this.support.getTickets(filters, pagination);
   }
 

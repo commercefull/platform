@@ -64,18 +64,14 @@ describe('CompleteReturnRequestUseCase', () => {
   it('should throw ReturnNotFoundError when the return does not exist', async () => {
     returnRepo.findById.mockResolvedValue(null);
 
-    await expect(new CompleteReturnRequestUseCase(returnRepo, storeCreditRepo).execute('missing')).rejects.toThrow(
-      ReturnNotFoundError,
-    );
+    await expect(new CompleteReturnRequestUseCase(returnRepo, storeCreditRepo).execute('missing')).rejects.toThrow(ReturnNotFoundError);
     expect(returnRepo.update).not.toHaveBeenCalled();
   });
 
   it('should throw ReturnNotFoundError when the update does not persist', async () => {
     returnRepo.update.mockResolvedValue(null as unknown as ReturnRequest);
 
-    await expect(new CompleteReturnRequestUseCase(returnRepo, storeCreditRepo).execute('r-1')).rejects.toThrow(
-      ReturnNotFoundError,
-    );
+    await expect(new CompleteReturnRequestUseCase(returnRepo, storeCreditRepo).execute('r-1')).rejects.toThrow(ReturnNotFoundError);
     expect(emitMock).not.toHaveBeenCalled();
     expect(storeCreditRepo.addEntry).not.toHaveBeenCalled();
   });

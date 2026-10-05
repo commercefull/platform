@@ -9,7 +9,7 @@ describe('CreateInventoryPoolUseCase', () => {
   beforeEach(() => {
     uuidMock.mockReturnValue('pool-uuid');
     mockRepo = lazyMock<ConstructorParameters<typeof CreateInventoryPoolUseCase>[0]>();
-    mockRepo.createPool.mockImplementation(async (params) => ({
+    mockRepo.createPool.mockImplementation(async params => ({
       ...params,
       linkedInventoryIds: ['inv1', 'inv2'],
       createdAt: new Date(),

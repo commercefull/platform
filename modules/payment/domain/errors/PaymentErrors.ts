@@ -378,3 +378,9 @@ export class FraudRuleNotFoundError extends AppError {
     super('Rule not found', 404, { code: 'payment.fraud_rule_not_found' });
   }
 }
+
+export class ChargeDelegatedPaymentError extends AppError {
+  constructor(detail: string) {
+    super(`Delegated payment charge failed: ${detail}`, 402, { code: 'payment.delegated_charge_failed' });
+  }
+}

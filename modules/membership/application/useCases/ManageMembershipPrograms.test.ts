@@ -39,4 +39,3 @@ describe('ManageMembershipProgramsUseCase', () => {
     expect(result.totalPointsIssued).toBe(10000);
   });
 });
-

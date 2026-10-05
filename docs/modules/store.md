@@ -4,7 +4,9 @@
 
 The Store feature manages store entities for both marketplace (merchant-owned) and multi-store (organization-owned) scenarios. It supports store hierarchy, BOPIS (Buy Online, Pick Up In Store) configuration, local delivery zones, and store listing with filtering and pagination.
 
-Each store has a `channel` (`physical`, `digital`, or `hybrid`). Supported currencies are store-scoped through the `storeCurrency` membership table — a store sells only in currencies it supports, and exactly one is the default used for storefront/basket resolution. Per-store currency behavior (base/display currency, rounding, exchange-rate updates) is configured in `storeCurrencySettings`.
+Each store has a legacy `channel` field whose values (`physical`, `digital`, or `hybrid`) describe the store's **fulfillment modality**, not a sales channel. Actual sales channels are organization-owned `salesChannel` records (`web`, `marketplace`, `social`, `pos`, `agentic`, `api`, or `other`) assigned many-to-many through `storeSalesChannel`. A store can therefore sell through website, Facebook, Google, POS, and agentic surfaces simultaneously, with one default channel for storefront resolution.
+
+Supported currencies are store-scoped through the `storeCurrency` membership table — a store sells only in currencies it supports, and exactly one is the default used for storefront/basket resolution. Per-store currency behavior (base/display currency, rounding, exchange-rate updates) is configured in `storeCurrencySettings`. Basket, checkout, and order records preserve both `storeId` and `channelId`; channel IDs reference `salesChannel.salesChannelId`.
 
 ---
 
@@ -73,24 +75,31 @@ Each store has a `channel` (`physical`, `digital`, or `hybrid`). Supported curre
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| POST | `/stores` | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store |
-| GET | `/stores` | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination |
-| GET | `/stores` | `async (req: HttpRequest, res: HttpResponse) => {
-  try {
-   ` | — |
-| GET | `/stores/:storeId` | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID |
-| PUT | `/stores/:storeId` | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store |
-| DELETE | `/stores/:storeId` | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store |
-| GET | `/stores/:storeId` | `async (req: HttpRequest, res: HttpResponse) => {
-  try {
-   ` | — |
-| PUT | `/stores/:storeId/local-delivery` | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone |
-| PUT | `/stores/:storeId/pickup` | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS) |
-| GET | `/stores/active` | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |
-| GET | `/stores/business/:organizationId` | `asyncHandler(storeController.getStoresByBusiness.bind(storeC` | Get stores by business |
-| POST | `/stores/hierarchy` | `asyncHandler(storeController.createStoreHierarchy.bind(store` | Create store hierarchy |
-| GET | `/stores/slug/:slug` | `asyncHandler(storeController.getStoreBySlug.bind(storeContro` | Get store by slug |
+| Method | Endpoint                               | Controller                                                     | Description                                                    |
+| ------ | -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------- |
+| POST   | `/stores`                              | `asyncHandler(storeController.createStore.bind(storeControlle` | Create store                                                   |
+| GET    | `/stores`                              | `asyncHandler(storeController.listStores.bind(storeController` | List stores with filtering and pagination                      |
+| GET    | `/stores`                              | `async (req: HttpRequest, res: HttpResponse) => {              |
+| try {  |
+| `      | —                                      |
+| GET    | `/stores/:storeId`                     | `asyncHandler(storeController.getStore.bind(storeController))` | Get store by ID                                                |
+| PUT    | `/stores/:storeId`                     | `asyncHandler(storeController.updateStore.bind(storeControlle` | Update store                                                   |
+| DELETE | `/stores/:storeId`                     | `asyncHandler(storeController.deleteStore.bind(storeControlle` | Delete store                                                   |
+| GET    | `/stores/:storeId`                     | `async (req: HttpRequest, res: HttpResponse) => {              |
+| try {  |
+| `      | —                                      |
+| GET    | `/stores/:storeId/channels`            | `asyncHandler(listStoreSalesChannels)`                         | —                                                              |
+| POST   | `/stores/:storeId/channels`            | `asyncHandler(assignSalesChannel)`                             | —                                                              |
+| DELETE | `/stores/:storeId/channels/:channelId` | `asyncHandler(unassignSalesChannel)`                           | —                                                              |
+| PUT    | `/stores/:storeId/local-delivery`      | `asyncHandler(storeController.setLocalDelivery.bind(storeCont` | Set local delivery zone                                        |
+| PUT    | `/stores/:storeId/pickup`              | `asyncHandler(storeController.configurePickup.bind(storeContr` | Configure store pickup (BOPIS)                                 |
+| GET    | `/stores/active`                       | `asyncHandler(storeController.getActiveStores.bind(storeContr` | Get active stores (must be before :storeId to avoid collision) |
+| GET    | `/stores/business/:organizationId`     | `asyncHandler(storeController.getStoresByBusiness.bind(storeC` | Get stores by business                                         |
+| GET    | `/stores/channels`                     | `asyncHandler(listSalesChannels)`                              | —                                                              |
+| POST   | `/stores/channels`                     | `asyncHandler(createSalesChannel)`                             | —                                                              |
+| PUT    | `/stores/channels/:channelId`          | `asyncHandler(updateSalesChannel)`                             | —                                                              |
+| DELETE | `/stores/channels/:channelId`          | `asyncHandler(deleteSalesChannel)`                             | —                                                              |
+| POST   | `/stores/hierarchy`                    | `asyncHandler(storeController.createStoreHierarchy.bind(store` | Create store hierarchy                                         |
+| GET    | `/stores/slug/:slug`                   | `asyncHandler(storeController.getStoreBySlug.bind(storeContro` | Get store by slug                                              |
 
 <!-- GENERATED:ENDPOINTS:END -->

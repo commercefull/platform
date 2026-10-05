@@ -26,20 +26,20 @@ This guide focuses on Shopify — the most common migration path.
 
 ## What Can Be Migrated
 
-| Entity | Shopify Source | Commercefull Module |
-|---|---|---|
-| Products | Shopify Products API | `product` |
-| Product variants | Shopify Products API (variants) | `product` |
-| Categories/collections | Shopify Custom Collections | `content` |
-| Customers | Shopify Customers API | `customer` |
-| Orders | Shopify Orders API | `order` |
-| Inventory levels | Shopify Inventory API | `inventory` |
-| Coupons/discounts | Shopify Price Rules / Discount Codes | `coupon` |
-| Tax rates | Shopify Tax settings | `tax` |
-| Shipping zones | Shopify Shipping Zones | `shipping` |
-| Reviews | Shopify Product Reviews (metafields) | `product` (reviews subsystem) |
-| Gift cards | Shopify Gift Cards API | `coupon` (gift card subsystem) |
-| CMS pages | Shopify Pages | `content` |
+| Entity                 | Shopify Source                       | Commercefull Module            |
+| ---------------------- | ------------------------------------ | ------------------------------ |
+| Products               | Shopify Products API                 | `product`                      |
+| Product variants       | Shopify Products API (variants)      | `product`                      |
+| Categories/collections | Shopify Custom Collections           | `content`                      |
+| Customers              | Shopify Customers API                | `customer`                     |
+| Orders                 | Shopify Orders API                   | `order`                        |
+| Inventory levels       | Shopify Inventory API                | `inventory`                    |
+| Coupons/discounts      | Shopify Price Rules / Discount Codes | `coupon`                       |
+| Tax rates              | Shopify Tax settings                 | `tax`                          |
+| Shipping zones         | Shopify Shipping Zones               | `shipping`                     |
+| Reviews                | Shopify Product Reviews (metafields) | `product` (reviews subsystem)  |
+| Gift cards             | Shopify Gift Cards API               | `coupon` (gift card subsystem) |
+| CMS pages              | Shopify Pages                        | `content`                      |
 
 ---
 
@@ -200,16 +200,16 @@ The migration module maintains a mapping table (`importMapping`) that links Shop
 
 The same workflow applies to other supported sources. Change the `source` field when creating the import job:
 
-| Source | `source` value | Export method |
-|---|---|---|
-| WooCommerce | `woocommerce` | WooCommerce REST API or WP All Export |
-| Magento | `magento` | Magento REST API or data export |
-| BigCommerce | `bigcommerce` | BigCommerce API |
-| PrestaShop | `prestashop` | PrestaShop CSV export |
-| Shopware | `shopware` | Shopware API |
-| Wix | `wix` | Wix Stores CSV export |
-| Squarespace | `squarespace` | Squarespace CSV export |
-| Custom CSV | `csv` | Any CSV file with mapped columns |
-| Custom API | `api` | Any REST API with a custom connector |
+| Source      | `source` value | Export method                         |
+| ----------- | -------------- | ------------------------------------- |
+| WooCommerce | `woocommerce`  | WooCommerce REST API or WP All Export |
+| Magento     | `magento`      | Magento REST API or data export       |
+| BigCommerce | `bigcommerce`  | BigCommerce API                       |
+| PrestaShop  | `prestashop`   | PrestaShop CSV export                 |
+| Shopware    | `shopware`     | Shopware API                          |
+| Wix         | `wix`          | Wix Stores CSV export                 |
+| Squarespace | `squarespace`  | Squarespace CSV export                |
+| Custom CSV  | `csv`          | Any CSV file with mapped columns      |
+| Custom API  | `api`          | Any REST API with a custom connector  |
 
 See the [migration module reference](../modules/migration.md) for the full API documentation.

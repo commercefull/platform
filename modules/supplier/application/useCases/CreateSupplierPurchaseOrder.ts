@@ -73,7 +73,9 @@ export class CreateSupplierPurchaseOrderUseCase {
     private readonly purchaseOrderRepository: SupplierPurchaseOrderWritePort,
   ) {}
 
-  async execute(input: CreateSupplierPurchaseOrderInput): Promise<{ purchaseOrder: PurchaseOrderRecord; items: PurchaseOrderItemRecord[] }> {
+  async execute(
+    input: CreateSupplierPurchaseOrderInput,
+  ): Promise<{ purchaseOrder: PurchaseOrderRecord; items: PurchaseOrderItemRecord[] }> {
     const errors: string[] = [];
     if (!input.supplierId) errors.push('supplierId is required');
     if (!input.distributionWarehouseId) errors.push('distributionWarehouseId is required');

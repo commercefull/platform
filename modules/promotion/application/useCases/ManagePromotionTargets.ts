@@ -1,8 +1,4 @@
-import type {
-  PromotionCart,
-  PromotionCategory,
-  PromotionProductDiscount,
-} from '../../../../libs/db/types';
+import type { PromotionCart, PromotionCategory, PromotionProductDiscount } from '../../../../libs/db/types';
 
 export type PromotionCartCreateParams = Pick<PromotionCart, 'basketId' | 'promotionId' | 'discountAmountCents' | 'status'> &
   Partial<Pick<PromotionCart, 'promotionCouponId' | 'couponCode' | 'currencyCode' | 'appliedBy'>>;

@@ -20,7 +20,7 @@ export type ContentBlockRecord = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentBlockType = {
   contentBlockTypeId: string;
@@ -38,7 +38,7 @@ export type ContentBlockType = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentPageRecord = {
   contentPageId: string;
@@ -71,7 +71,7 @@ export type ContentPageRecord = {
   createdBy: string | null;
   updatedBy: string | null;
   publishedBy: string | null;
-}
+};
 
 export type ContentTemplate = {
   contentTemplateId: string;
@@ -91,7 +91,7 @@ export type ContentTemplate = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentTypeRecord = {
   contentTypeId: string;
@@ -109,7 +109,7 @@ export type ContentTypeRecord = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentCategory = {
   contentCategoryId: string;
@@ -126,7 +126,7 @@ export type ContentCategory = {
   depth: number;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type ContentNavigation = {
   contentNavigationId: string;
@@ -139,7 +139,7 @@ export type ContentNavigation = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentNavigationItem = {
   contentNavigationItemId: string;
@@ -160,7 +160,7 @@ export type ContentNavigationItem = {
   depth: number;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
 export type ContentMedia = {
   contentMediaId: string;
@@ -187,7 +187,7 @@ export type ContentMedia = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentMediaFolder = {
   contentMediaFolderId: string;
@@ -200,7 +200,7 @@ export type ContentMediaFolder = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
+};
 
 export type ContentRedirect = {
   contentRedirectId: string;
@@ -216,5 +216,4 @@ export type ContentRedirect = {
   updatedAt: Date;
   createdBy: string | null;
   updatedBy: string | null;
-}
-
+};

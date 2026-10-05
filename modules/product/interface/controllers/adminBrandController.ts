@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * Brand Controller for Admin Hub
  * Manages brand CRUD operations using the brand repository directly.

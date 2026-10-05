@@ -13,7 +13,9 @@ describe('CreateTemplateUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof CreateTemplateUseCase>[0]>();
     mockRepo.findContentTypeById.mockResolvedValue(createContentType({ contentTypeId: 'ct-1', name: 'Blog', slug: 'blog' }));
-    mockRepo.createTemplate.mockResolvedValue(createContentTemplate({ contentTemplateId: 't1', name: 'Blog Template', slug: 'blog-template', description: 'A blog template' }));
+    mockRepo.createTemplate.mockResolvedValue(
+      createContentTemplate({ contentTemplateId: 't1', name: 'Blog Template', slug: 'blog-template', description: 'A blog template' }),
+    );
     useCase = new CreateTemplateUseCase(mockRepo);
   });
 

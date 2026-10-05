@@ -33,9 +33,7 @@ describe('EvaluateSegmentUseCase', () => {
   });
 
   it('should match only profiles that satisfy the conditions', async () => {
-    segmentRepo.findById.mockResolvedValue(
-      createSegment({ conditions: [{ field: 'lifetimeValueCents', operator: 'gte', value: 500 }] }),
-    );
+    segmentRepo.findById.mockResolvedValue(createSegment({ conditions: [{ field: 'lifetimeValueCents', operator: 'gte', value: 500 }] }));
 
     const result = await useCase.execute('seg-1');
 
@@ -49,4 +47,3 @@ describe('EvaluateSegmentUseCase', () => {
     await expect(useCase.execute('missing')).rejects.toThrow(SegmentNotFoundError);
   });
 });
-

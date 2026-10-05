@@ -1,4 +1,4 @@
-import { cookieResponse, redirectResponse, setStatus } from "libs/apiResponse";
+import { cookieResponse, redirectResponse, setStatus } from 'libs/apiResponse';
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { compareString } from '../../../../libs/hash';
@@ -116,11 +116,11 @@ export const postAdminLogin = async (req: HttpRequest, res: HttpResponse) => {
 
     // Set session cookie
     cookieResponse(res, SESSION_COOKIE_NAME, sessionId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000,
-            sameSite: 'lax',
-          });
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000,
+      sameSite: 'lax',
+    });
 
     // Update last login
     await adminAuthUseCase.updateLastLogin(admin.adminId);

@@ -10,10 +10,7 @@
 import { CredentialSubjectPort, CredentialSubject, CreateCredentialSubjectData } from '../../application/ports/CredentialSubjectPort';
 import type { CustomerRepo as CustomerRepoType } from '../../../customer/infrastructure/repositories/customerRepo';
 import type { CustomerRepository } from '../../../customer/domain/repositories/CustomerRepository';
-import {
-  RegisterCustomerCommand,
-  RegisterCustomerUseCase,
-} from '../../../customer/application/useCases/RegisterCustomer';
+import { RegisterCustomerCommand, RegisterCustomerUseCase } from '../../../customer/application/useCases/RegisterCustomer';
 
 export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
   constructor(

@@ -1,14 +1,14 @@
 import '../../tests/testUtils';
 import { CreateThemeCommand, ManageThemesUseCase } from './ManageThemes';
-import {
-  ThemeAlreadyExistsError, ThemeNotFoundError, BuiltInThemeCannotBeDeletedError,
-} from '../../domain/errors/ThemeErrors';
+import { ThemeAlreadyExistsError, ThemeNotFoundError, BuiltInThemeCannotBeDeletedError } from '../../domain/errors/ThemeErrors';
 import type { ThemeRepository } from '../../domain/repositories/ThemeRepository';
 import { createTheme, emitMock, lazyMock, uuidMock } from '../../tests/testUtils';
 
 const THEME_INPUT = {
-  slug: 'my-theme', name: 'My Theme',
-  settingsSchema: { groups: [] }, defaultSettings: {},
+  slug: 'my-theme',
+  name: 'My Theme',
+  settingsSchema: { groups: [] },
+  defaultSettings: {},
   layout: { regions: ['header', 'main', 'footer'], pageLayouts: [] },
   components: { components: [] },
 };

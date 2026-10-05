@@ -15,7 +15,9 @@ describe('FormatPriceUseCase', () => {
   });
 
   it('should use the default currency when no code is given', async () => {
-    const catalog = createCurrencyCatalog([createCurrency({ code: 'EUR', symbol: '€', symbolPosition: 'after', decimalSeparator: ',', thousandsSeparator: '.' })]);
+    const catalog = createCurrencyCatalog([
+      createCurrency({ code: 'EUR', symbol: '€', symbolPosition: 'after', decimalSeparator: ',', thousandsSeparator: '.' }),
+    ]);
     const useCase = new FormatPriceUseCase(catalog);
 
     expect(await useCase.execute({ priceCents: 123456 })).toBe('1.234,56€');

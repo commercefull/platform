@@ -70,6 +70,28 @@
           <textarea class="form-control" name="description" rows="2"><%= formData?.description || '' %></textarea>
         </div>
 
+        <!-- Store / channel targeting -->
+        <h5 class="mt-4 mb-3">Store &amp; Channel Targeting</h5>
+        <p class="text-muted small">Restrict this rule to specific stores and/or sales channels. Leave empty to apply everywhere.</p>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Stores</label>
+            <select class="form-select" name="storeIds" multiple size="4">
+              <% (stores || []).forEach(function(store) { %>
+                <option value="<%= store.storeId %>" <%= (formData?.storeIds || []).includes && formData.storeIds.includes(store.storeId) ? 'selected' : '' %>><%= store.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Sales Channels</label>
+            <select class="form-select" name="channelIds" multiple size="4">
+              <% (salesChannels || []).forEach(function(channel) { %>
+                <option value="<%= channel.salesChannelId %>" <%= (formData?.channelIds || []).includes && formData.channelIds.includes(channel.salesChannelId) ? 'selected' : '' %>><%= channel.name %> (<%= channel.code %>)</option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
         <!-- Condition Builder (Epic F) -->
         <h5 class="mt-4 mb-3">Pricing Conditions</h5>
         <p class="text-muted small">Define conditions that must match for this price rule to apply.</p>
@@ -80,9 +102,7 @@
             { value: 'cartTotal', label: 'Cart Total' },
             { value: 'itemQuantity', label: 'Item Quantity' },
             { value: 'productCategory', label: 'Product Category' },
-            { value: 'customerGroup', label: 'Customer Group' },
-            { value: 'customerTier', label: 'Customer Tier' },
-            { value: 'channel', label: 'Sales Channel' }
+            { value: 'customerGroup', label: 'Customer Group' }
           ]
         }) %>
       </div>

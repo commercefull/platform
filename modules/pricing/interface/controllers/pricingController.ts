@@ -1,13 +1,7 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
-import {
-  CustomerPriceList,
-  PricingRuleCreateProps,
-  PricingRuleStatus,
-  PricingRuleUpdateProps,
-  TierPrice,
-} from '../../domain/pricingRule';
+import { CustomerPriceList, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps, TierPrice } from '../../domain/pricingRule';
 import {
   managePricingAdminUseCase,
   createPricingRuleUseCase,
@@ -76,15 +70,15 @@ export const getPricingRules = async (req: HttpRequest, res: HttpResponse): Prom
   const total = await managePricingAdminUseCase.countRules(filters);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: { rules, total },
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          pages: Math.ceil(total / limitNum),
-        },
-      });
+    success: true,
+    data: { rules, total },
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
 };
 
 /**
@@ -96,16 +90,16 @@ export const getPricingRule = async (req: HttpRequest, res: HttpResponse): Promi
 
   if (!rule) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Pricing rule not found',
-          });
+      success: false,
+      message: 'Pricing rule not found',
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: rule,
-      });
+    success: true,
+    data: rule,
+  });
 };
 
 /**
@@ -119,9 +113,9 @@ export const createPricingRule = async (
     const newRule = await createPricingRuleUseCase.execute(req.body as PricingRuleCreateProps);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: newRule,
-          });
+      success: true,
+      data: newRule,
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -140,18 +134,18 @@ export const updatePricingRule = async (
   const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Pricing rule not found',
-          });
+      success: false,
+      message: 'Pricing rule not found',
+    });
     return;
   }
 
   const updatedRule = await managePricingAdminUseCase.updateRule(id, ruleData as PricingRuleUpdateProps);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: updatedRule,
-      });
+    success: true,
+    data: updatedRule,
+  });
 };
 
 /**
@@ -163,18 +157,18 @@ export const deletePricingRule = async (req: HttpRequest, res: HttpResponse): Pr
   const existingRule = await managePricingAdminUseCase.findRuleById(id);
   if (!existingRule) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Pricing rule not found',
-          });
+      success: false,
+      message: 'Pricing rule not found',
+    });
     return;
   }
 
   await managePricingAdminUseCase.deleteRule(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Pricing rule deleted successfully',
-      });
+    success: true,
+    message: 'Pricing rule deleted successfully',
+  });
 };
 
 /**
@@ -195,15 +189,15 @@ export const getTierPrices = async (req: HttpRequest, res: HttpResponse): Promis
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        data: tierPrices,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          pages: Math.ceil(total / limitNum),
-        },
-      });
+    success: true,
+    data: tierPrices,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total,
+      pages: Math.ceil(total / limitNum),
+    },
+  });
 };
 
 /**
@@ -215,16 +209,16 @@ export const getTierPrice = async (req: HttpRequest, res: HttpResponse): Promise
 
   if (!tierPrice) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Tier price not found',
-          });
+      success: false,
+      message: 'Tier price not found',
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: tierPrice,
-      });
+    success: true,
+    data: tierPrice,
+  });
 };
 
 /**
@@ -238,9 +232,9 @@ export const createTierPrice = async (
     const newTierPrice = await createTierPriceUseCase.execute(req.body as TierPriceCreateProps);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: newTierPrice,
-          });
+      success: true,
+      data: newTierPrice,
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -259,9 +253,9 @@ export const updateTierPrice = async (
   const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Tier price not found',
-          });
+      success: false,
+      message: 'Tier price not found',
+    });
     return;
   }
 
@@ -271,9 +265,9 @@ export const updateTierPrice = async (
   );
 
   jsonResponse(res, 200, {
-        success: true,
-        data: updatedTierPrice,
-      });
+    success: true,
+    data: updatedTierPrice,
+  });
 };
 
 /**
@@ -285,18 +279,18 @@ export const deleteTierPrice = async (req: HttpRequest, res: HttpResponse): Prom
   const existingTierPrice = await managePricingAdminUseCase.findTierPriceById(id);
   if (!existingTierPrice) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Tier price not found',
-          });
+      success: false,
+      message: 'Tier price not found',
+    });
     return;
   }
 
   await managePricingAdminUseCase.deleteTierPrice(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Tier price deleted successfully',
-      });
+    success: true,
+    message: 'Tier price deleted successfully',
+  });
 };
 
 /**
@@ -321,15 +315,15 @@ export const getPriceLists = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: priceLists,
-        pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total: priceLists.length,
-          pages: Math.ceil(priceLists.length / limitNum),
-        },
-      });
+    success: true,
+    data: priceLists,
+    pagination: {
+      page: pageNum,
+      limit: limitNum,
+      total: priceLists.length,
+      pages: Math.ceil(priceLists.length / limitNum),
+    },
+  });
 };
 
 /**
@@ -341,9 +335,9 @@ export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise
 
   if (!priceList) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Price list not found',
-          });
+      success: false,
+      message: 'Price list not found',
+    });
     return;
   }
 
@@ -351,12 +345,12 @@ export const getPriceList = async (req: HttpRequest, res: HttpResponse): Promise
   const prices = await managePricingAdminUseCase.findPricesByPriceListId(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          ...priceList,
-          prices,
-        },
-      });
+    success: true,
+    data: {
+      ...priceList,
+      prices,
+    },
+  });
 };
 
 /**
@@ -371,9 +365,9 @@ export const createPriceList = async (
   // Validate required fields
   if (!priceListData.name) {
     jsonResponse(res, 400, {
-            success: false,
-            message: 'Missing required field: name is required',
-          });
+      success: false,
+      message: 'Missing required field: name is required',
+    });
     return;
   }
 
@@ -382,9 +376,9 @@ export const createPriceList = async (
   );
 
   jsonResponse(res, 201, {
-        success: true,
-        data: newPriceList,
-      });
+    success: true,
+    data: newPriceList,
+  });
 };
 
 /**
@@ -400,9 +394,9 @@ export const updatePriceList = async (
   const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Price list not found',
-          });
+      success: false,
+      message: 'Price list not found',
+    });
     return;
   }
 
@@ -412,9 +406,9 @@ export const updatePriceList = async (
   );
 
   jsonResponse(res, 200, {
-        success: true,
-        data: updatedPriceList,
-      });
+    success: true,
+    data: updatedPriceList,
+  });
 };
 
 /**
@@ -426,18 +420,18 @@ export const deletePriceList = async (req: HttpRequest, res: HttpResponse): Prom
   const existingPriceList = await managePricingAdminUseCase.findPriceListById(id);
   if (!existingPriceList) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Price list not found',
-          });
+      success: false,
+      message: 'Price list not found',
+    });
     return;
   }
 
   await managePricingAdminUseCase.deleteCustomerPriceList(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Price list deleted successfully',
-      });
+    success: true,
+    message: 'Price list deleted successfully',
+  });
 };
 
 /**
@@ -447,15 +441,12 @@ export const addPriceToList = async (req: HttpRequest<Record<string, string>, un
   const { priceListId } = req.params;
 
   try {
-    const newPrice = await addPriceToListUseCase.execute(
-      priceListId,
-      req.body as Omit<CustomerPriceCreateProps, 'priceListId'>,
-    );
+    const newPrice = await addPriceToListUseCase.execute(priceListId, req.body as Omit<CustomerPriceCreateProps, 'priceListId'>);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: newPrice,
-          });
+      success: true,
+      data: newPrice,
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }

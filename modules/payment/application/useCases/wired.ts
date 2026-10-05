@@ -9,6 +9,7 @@ import paymentBillingDataRepository from '../../infrastructure/repositories/Paym
 import { PSPRoutingRepositoryImpl } from '../../infrastructure/repositories/PSPRoutingRepositoryImpl';
 import { FailoverRoutingEngine } from '../../infrastructure/services/FailoverRoutingEngine';
 import { RoutePaymentUseCase } from './RoutePayment';
+import { ChargeDelegatedPaymentUseCase } from './ChargeDelegatedPayment';
 import { GetProviderHealthUseCase } from './GetProviderHealth';
 import { ManagePSPRoutesUseCase } from './ManagePSPRoutes';
 import { ProcessPaymentWebhookUseCase } from './ProcessPaymentWebhook';
@@ -141,5 +142,6 @@ export const failoverRoutingEngine = new FailoverRoutingEngine({
 
 const pspRoutingRepo = new PSPRoutingRepositoryImpl(gatewayRepo);
 export const routePaymentUseCase = new RoutePaymentUseCase(pspRoutingRepo, failoverRoutingEngine);
+export const chargeDelegatedPaymentUseCase = new ChargeDelegatedPaymentUseCase(paymentRepo, routePaymentUseCase, orderStatusSyncAdapter);
 export const getProviderHealthUseCase = new GetProviderHealthUseCase(pspRoutingRepo);
 export const managePSPRoutesUseCase = new ManagePSPRoutesUseCase(pspRoutingRepo);

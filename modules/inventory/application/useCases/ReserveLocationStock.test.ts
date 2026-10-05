@@ -22,17 +22,13 @@ describe('ReserveLocationStockUseCase', () => {
   });
 
   it('should reject a non-positive quantity', async () => {
-    await expect(useCase.execute({ inventoryLocationId: 'loc-1', quantity: 0 })).rejects.toBeInstanceOf(
-      InventoryValidationError,
-    );
+    await expect(useCase.execute({ inventoryLocationId: 'loc-1', quantity: 0 })).rejects.toBeInstanceOf(InventoryValidationError);
     expect(port.reserveQuantity).not.toHaveBeenCalled();
   });
 
   it('should throw when the location does not exist', async () => {
     port.findLocationById.mockResolvedValue(null);
-    await expect(useCase.execute({ inventoryLocationId: 'loc-x', quantity: 2 })).rejects.toBeInstanceOf(
-      InventoryLocationNotFoundError,
-    );
+    await expect(useCase.execute({ inventoryLocationId: 'loc-x', quantity: 2 })).rejects.toBeInstanceOf(InventoryLocationNotFoundError);
   });
 
   it('should reserve the quantity and emit inventory.reserved', async () => {

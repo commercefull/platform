@@ -1,8 +1,14 @@
-
-
 import { GetProductCatalogEnrichmentUseCase, GetProductCatalogEnrichmentCommand } from './GetProductCatalogEnrichment';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
-import { createProductCategory, createProductLookup, createProductQa, createProductQaAnswer, createProductTag, createProductToCategory, lazyMock } from '../../tests/testUtils';
+import {
+  createProductCategory,
+  createProductLookup,
+  createProductQa,
+  createProductQaAnswer,
+  createProductTag,
+  createProductToCategory,
+  lazyMock,
+} from '../../tests/testUtils';
 
 describe('GetProductCatalogEnrichmentUseCase', () => {
   let useCase: GetProductCatalogEnrichmentUseCase;
@@ -15,7 +21,7 @@ describe('GetProductCatalogEnrichmentUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo1 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>();
+    mockRepo1 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>();
     mockRepo1.findById.mockResolvedValue(createProductLookup());
     mockRepo2 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[1]>();
     mockRepo2.findByProduct.mockResolvedValue([createProductToCategory({ productCategoryId: 'cat1' })]);

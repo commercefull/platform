@@ -4,13 +4,13 @@
 
 ## `infra/` Directory
 
-| Directory       | Strategy                       | Use Case                      |
-| --------------- | ------------------------------ | ----------------------------- |
-| `vps/`  | Ansible on traditional VPS     | Simple, full control          |
-| `docker/`       | Docker Compose (local/staging) | Development, CI               |
-| `gcp/`   | Terraform + Cloud Run          | Google Cloud deployment       |
-| `azure/` | Terraform + Container Apps     | Azure deployment              |
-| `aws/`      | AWS CDK + ECS Fargate + RDS    | High availability, enterprise |
+| Directory | Strategy                       | Use Case                      |
+| --------- | ------------------------------ | ----------------------------- |
+| `vps/`    | Ansible on traditional VPS     | Simple, full control          |
+| `docker/` | Docker Compose (local/staging) | Development, CI               |
+| `gcp/`    | Terraform + Cloud Run          | Google Cloud deployment       |
+| `azure/`  | Terraform + Container Apps     | Azure deployment              |
+| `aws/`    | AWS CDK + ECS Fargate + RDS    | High availability, enterprise |
 
 ## Docker Development
 

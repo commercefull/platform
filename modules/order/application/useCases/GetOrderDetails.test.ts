@@ -9,7 +9,12 @@ describe('GetOrderDetailsUseCase', () => {
   let mockQueryRepo: jest.Mocked<
     Pick<
       OrderQueryRepository,
-      'findShippingByOrder' | 'findShippingRatesByOrder' | 'findTaxesByOrder' | 'findDiscountsByOrder' | 'findPaymentsByOrder' | 'findRefundsByOrder'
+      | 'findShippingByOrder'
+      | 'findShippingRatesByOrder'
+      | 'findTaxesByOrder'
+      | 'findDiscountsByOrder'
+      | 'findPaymentsByOrder'
+      | 'findRefundsByOrder'
     >
   >;
 
@@ -23,10 +28,7 @@ describe('GetOrderDetailsUseCase', () => {
       findPaymentsByOrder: jest.fn().mockResolvedValue([]),
       findRefundsByOrder: jest.fn().mockResolvedValue([]),
     };
-    useCase = new GetOrderDetailsUseCase(
-      mockOrderRepo as unknown as OrderRepository,
-      mockQueryRepo as unknown as OrderQueryRepository,
-    );
+    useCase = new GetOrderDetailsUseCase(mockOrderRepo as unknown as OrderRepository, mockQueryRepo as unknown as OrderQueryRepository);
   });
 
   it('should get order details (happy path)', async () => {

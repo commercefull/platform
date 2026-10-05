@@ -27,4 +27,3 @@ export class CreateSegmentUseCase {
     return this.segmentRepo.create(segment);
   }
 }
-

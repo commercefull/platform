@@ -72,11 +72,7 @@ describe('Warehouse Receiving + Pick/Pack Details', () => {
     let pickPackId: string;
 
     it('POST /business/warehouses/:id/pick-pack creates a pick/pack record', async () => {
-      const resp = await client.post(
-        `/business/warehouses/${WAREHOUSE_ID}/pick-pack`,
-        { pickPackNumber: `PP-${Date.now()}` },
-        auth(),
-      );
+      const resp = await client.post(`/business/warehouses/${WAREHOUSE_ID}/pick-pack`, { pickPackNumber: `PP-${Date.now()}` }, auth());
       expectStatus(resp, 201);
       pickPackId = resp.data.data.warehousePickPackId || resp.data.data.id;
       expect(pickPackId).toBeTruthy();
@@ -89,11 +85,7 @@ describe('Warehouse Receiving + Pick/Pack Details', () => {
     });
 
     it('POST .../start-picking starts picking', async () => {
-      const resp = await client.post(
-        `/business/warehouses/${WAREHOUSE_ID}/pick-pack/${pickPackId}/start-picking`,
-        {},
-        auth(),
-      );
+      const resp = await client.post(`/business/warehouses/${WAREHOUSE_ID}/pick-pack/${pickPackId}/start-picking`, {}, auth());
       expectStatus(resp, 200);
     });
 
@@ -105,11 +97,7 @@ describe('Warehouse Receiving + Pick/Pack Details', () => {
       );
       expectStatus(completePicking, 200);
 
-      const startPacking = await client.post(
-        `/business/warehouses/${WAREHOUSE_ID}/pick-pack/${pickPackId}/start-packing`,
-        {},
-        auth(),
-      );
+      const startPacking = await client.post(`/business/warehouses/${WAREHOUSE_ID}/pick-pack/${pickPackId}/start-packing`, {}, auth());
       expectStatus(startPacking, 200);
     });
 

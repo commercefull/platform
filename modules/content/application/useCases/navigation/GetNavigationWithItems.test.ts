@@ -16,10 +16,26 @@ describe('GetNavigationWithItemsUseCase', () => {
   });
 
   it('should get navigation by ID with items as tree', async () => {
-    mockRepo.findNavigationById.mockResolvedValue(createContentNavigation({ contentNavigationId: 'n1', name: 'Main', slug: 'main', location: 'header' }));
+    mockRepo.findNavigationById.mockResolvedValue(
+      createContentNavigation({ contentNavigationId: 'n1', name: 'Main', slug: 'main', location: 'header' }),
+    );
     mockRepo.findAllNavigationItems.mockResolvedValue([
-      createContentNavigationItem({ contentNavigationItemId: 'ni1', parentId: null, title: 'Home', url: '/', isActive: true, sortOrder: 0 }),
-      createContentNavigationItem({ contentNavigationItemId: 'ni2', parentId: 'ni1', title: 'About', url: '/about', isActive: true, sortOrder: 0 }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni1',
+        parentId: null,
+        title: 'Home',
+        url: '/',
+        isActive: true,
+        sortOrder: 0,
+      }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni2',
+        parentId: 'ni1',
+        title: 'About',
+        url: '/about',
+        isActive: true,
+        sortOrder: 0,
+      }),
     ]);
 
     const result = await useCase.execute(new GetNavigationWithItemsQuery('n1'));
@@ -45,13 +61,83 @@ describe('GetNavigationWithItemsUseCase', () => {
   it('should filter inactive items by default', async () => {
     mockRepo.findNavigationById.mockResolvedValue(createContentNavigation({ contentNavigationId: 'n1', name: 'Main', slug: 'main' }));
     mockRepo.findAllNavigationItems.mockResolvedValue([
-      createContentNavigationItem({ contentNavigationItemId: 'ni1', parentId: null, title: 'Active', url: '/', isActive: true, sortOrder: 0 }),
-      createContentNavigationItem({ contentNavigationItemId: 'ni2', parentId: null, title: 'Inactive', url: '/hidden', isActive: false, sortOrder: 1 }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni1',
+        parentId: null,
+        title: 'Active',
+        url: '/',
+        isActive: true,
+        sortOrder: 0,
+      }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni2',
+        parentId: null,
+        title: 'Inactive',
+        url: '/hidden',
+        isActive: false,
+        sortOrder: 1,
+      }),
     ]);
 
     const result = await useCase.execute(new GetNavigationWithItemsQuery('n1'));
 
     expect(result!.items).toHaveLength(1);
     expect(result!.items[0].title).toBe('Active');
+  });
+
+  it('should drop items whose conditions do not match the context', async () => {
+    mockRepo.findNavigationById.mockResolvedValue(createContentNavigation({ contentNavigationId: 'n1', name: 'Main', slug: 'main' }));
+    mockRepo.findAllNavigationItems.mockResolvedValue([
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni1',
+        parentId: null,
+        title: 'Global',
+        url: '/',
+        isActive: true,
+        sortOrder: 0,
+      }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni2',
+        parentId: null,
+        title: 'EU Only',
+        url: '/eu',
+        isActive: true,
+        sortOrder: 1,
+        conditions: { channelIds: ['ch-eu'] },
+      }),
+    ]);
+
+    const matching = await useCase.execute(new GetNavigationWithItemsQuery('n1', undefined, undefined, false, { channelId: 'ch-eu' }));
+    expect(matching!.items.map(i => i.title)).toEqual(['Global', 'EU Only']);
+
+    const notMatching = await useCase.execute(new GetNavigationWithItemsQuery('n1', undefined, undefined, false, { channelId: 'ch-us' }));
+    expect(notMatching!.items.map(i => i.title)).toEqual(['Global']);
+  });
+
+  it('should hide children when a scoped-out parent is filtered', async () => {
+    mockRepo.findNavigationById.mockResolvedValue(createContentNavigation({ contentNavigationId: 'n1', name: 'Main', slug: 'main' }));
+    mockRepo.findAllNavigationItems.mockResolvedValue([
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni1',
+        parentId: null,
+        title: 'DE Menu',
+        url: '/de',
+        isActive: true,
+        sortOrder: 0,
+        conditions: { locales: ['de-DE'] },
+      }),
+      createContentNavigationItem({
+        contentNavigationItemId: 'ni2',
+        parentId: 'ni1',
+        title: 'DE Child',
+        url: '/de/kind',
+        isActive: true,
+        sortOrder: 0,
+      }),
+    ]);
+
+    const result = await useCase.execute(new GetNavigationWithItemsQuery('n1', undefined, undefined, false, { locale: 'fr-FR' }));
+
+    expect(result!.items).toHaveLength(0);
   });
 });

@@ -37,6 +37,48 @@ describe('RedeemCouponUseCase', () => {
     );
   });
 
+  it('should return the existing redemption without re-counting usage when the order already redeemed it', async () => {
+    const repository = createCouponRepository(createCoupon());
+    repository.findRedemptionByOrder.mockResolvedValue({
+      redemptionId: 'redemption-existing',
+      redeemedAt: new Date('2026-10-01T12:00:00Z'),
+    });
+
+    const result = await new RedeemCouponUseCase(repository).execute({
+      couponCode: 'SAVE10',
+      orderId: 'order-1',
+      customerId: 'customer-1',
+      discountAmountCents: 10,
+    });
+
+    expect(result.redeemed).toBe(true);
+    expect(result.redemptionId).toBe('redemption-existing');
+    expect(result.redeemedAt).toBe('2026-10-01T12:00:00.000Z');
+    expect(repository.findRedemptionByOrder).toHaveBeenCalledWith(COUPON_ID, 'order-1');
+    expect(repository.createRedemption).not.toHaveBeenCalled();
+    expect(repository.incrementUsageCount).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalledWith('promotion.coupon_redeemed', expect.anything());
+  });
+
+  it('should return the concurrent winner when the insert loses the unique-index race', async () => {
+    const repository = createCouponRepository(createCoupon());
+    repository.findRedemptionByOrder
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ redemptionId: 'redemption-winner', redeemedAt: new Date('2026-10-01T12:00:00Z') });
+    repository.createRedemption.mockResolvedValue(false);
+
+    const result = await new RedeemCouponUseCase(repository).execute({
+      couponCode: 'SAVE10',
+      orderId: 'order-1',
+      customerId: 'customer-1',
+      discountAmountCents: 10,
+    });
+
+    expect(result.redemptionId).toBe('redemption-winner');
+    expect(repository.incrementUsageCount).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalledWith('promotion.coupon_redeemed', expect.anything());
+  });
+
   it('should throw CouponNotFoundError when the coupon does not exist', async () => {
     const repository = createCouponRepository(null);
 

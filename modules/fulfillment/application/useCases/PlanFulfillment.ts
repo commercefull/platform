@@ -73,10 +73,7 @@ export class PlanFulfillmentUseCase {
       return { groups: [], isSplit: false };
     }
 
-    const [stores, fallbackWarehouse] = await Promise.all([
-      this.sources.findFulfillableStores(),
-      this.sources.findDefaultWarehouse(),
-    ]);
+    const [stores, fallbackWarehouse] = await Promise.all([this.sources.findFulfillableStores(), this.sources.findDefaultWarehouse()]);
 
     const groups: FulfillmentGroup[] = [];
     const unassigned: FulfillmentGroupItem[] = [];

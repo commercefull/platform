@@ -39,10 +39,7 @@ describe('CalculateTierStatusUseCase', () => {
     expect(result.changeType).toBe('upgraded');
     expect(result.currentTier.tierName).toBe('Gold');
     expect(loyaltyRepository.updateCustomerTier).toHaveBeenCalledWith('c1', 't2');
-    expect(emitMock).toHaveBeenCalledWith(
-      'loyalty.tier_upgraded',
-      expect.objectContaining({ customerId: 'c1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('loyalty.tier_upgraded', expect.objectContaining({ customerId: 'c1' }));
   });
 
   it('should throw LoyaltyMemberNotFoundError when the customer has no membership', async () => {

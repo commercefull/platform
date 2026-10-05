@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Warehouse Controller
  * Handles warehouse management and fulfillment tracking for the Admin Hub

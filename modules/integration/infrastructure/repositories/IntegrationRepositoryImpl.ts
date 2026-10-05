@@ -55,6 +55,18 @@ export class IntegrationRepositoryImpl implements IntegrationRepository {
     return (rows ?? []).map(r => Integration.reconstitute(this.mapRowToProps(r)));
   }
 
+  async findByProvider(provider: string, filters?: { status?: IntegrationStatus }): Promise<Integration[]> {
+    let sql = `SELECT * FROM "${Table.Integration}" WHERE "provider" = $1`;
+    const params: unknown[] = [provider];
+    if (filters?.status) {
+      params.push(filters.status);
+      sql += ` AND "status" = $${params.length}`;
+    }
+    sql += ` ORDER BY "createdAt" DESC`;
+    const rows = await query<IntegrationDbRow[]>(sql, params as unknown[]);
+    return (rows ?? []).map(r => Integration.reconstitute(this.mapRowToProps(r)));
+  }
+
   async update(integration: Integration): Promise<Integration> {
     const props = integration.toJSON();
     await query(

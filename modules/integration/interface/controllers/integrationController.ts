@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageIntegrations, manageSubscriptions, manageIntegrationLogs } from '../../application/useCases/wired';
 import type { IntegrationProvider } from '../../domain/entities/Integration';

@@ -1,15 +1,37 @@
-import {
-  createBasket,
-  createBasketItem,
-  createBasketRepository,
-  createProductPricePort,
-  emitMock,
-  BASKET_ID,
-} from '../../tests/testUtils';
+import { createBasket, createBasketItem, createBasketRepository, createProductPricePort, emitMock, BASKET_ID } from '../../tests/testUtils';
 import { AddItemCommand, AddItemUseCase } from './AddItem';
 import { BasketNotFoundError, BasketValidationError } from '../../domain/errors/BasketErrors';
+import type { ProductDetailsPort } from '../ports/ProductDetailsPort';
+import type { SellabilityPort } from '../ports/SellabilityPort';
 
 describe('AddItemUseCase', () => {
+  it('should reject a product that is not sellable on the basket store/channel', async () => {
+    const repository = createBasketRepository(createBasket({ storeId: 'store-1', channelId: 'channel-1' }));
+    const sellabilityPort: jest.Mocked<SellabilityPort> = {
+      isSellable: jest.fn().mockResolvedValue(false),
+    };
+
+    await expect(
+      new AddItemUseCase(repository, createProductPricePort(), undefined, sellabilityPort).execute(
+        new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+      ),
+    ).rejects.toThrow(BasketValidationError);
+    expect(sellabilityPort.isSellable).toHaveBeenCalledWith('store-1', 'product-2', 'channel-1');
+    expect(repository.addItem).not.toHaveBeenCalled();
+  });
+
+  it('should add the item when the assortment marks it sellable', async () => {
+    const repository = createBasketRepository(createBasket({ storeId: 'store-1' }));
+    const sellabilityPort: jest.Mocked<SellabilityPort> = {
+      isSellable: jest.fn().mockResolvedValue(true),
+    };
+
+    await new AddItemUseCase(repository, createProductPricePort(), undefined, sellabilityPort).execute(
+      new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+    );
+
+    expect(repository.addItem).toHaveBeenCalled();
+  });
   it('should add a new item to the basket when the product is not already in it', async () => {
     const repository = createBasketRepository(createBasket());
     const pricePort = createProductPricePort({ unitPriceCents: 3000, currency: 'USD' });
@@ -27,15 +49,37 @@ describe('AddItemUseCase', () => {
   });
 
   it('should resolve the unit price through the pricing port, never the client', async () => {
-    const repository = createBasketRepository(createBasket());
+    const repository = createBasketRepository(createBasket({ storeId: 'store-1', channelId: 'channel-1' }));
     const pricePort = createProductPricePort({ unitPriceCents: 4500, currency: 'USD' });
 
-    await new AddItemUseCase(repository, pricePort).execute(
-      new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 2, 'variant-9'),
+    await new AddItemUseCase(repository, pricePort).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 2, 'variant-9'));
+
+    expect(pricePort.getPrice).toHaveBeenCalledWith('product-2', 'variant-9', 'USD', 2, {
+      storeId: 'store-1',
+      channelId: 'channel-1',
+    });
+    expect(repository.addItem.mock.calls[0][1].unitPrice.cents).toBe(4500);
+  });
+
+  it('should use authoritative digital and unlimited inventory details from the product port', async () => {
+    const repository = createBasketRepository(createBasket());
+    const detailsPort: jest.Mocked<ProductDetailsPort> = {
+      findProductDetails: jest.fn().mockResolvedValue({
+        sku: 'DIGITAL-1',
+        name: 'Digital Guide',
+        itemType: 'digital',
+        inventoryPolicy: 'unlimited',
+      }),
+    };
+
+    await new AddItemUseCase(repository, createProductPricePort(), detailsPort).execute(
+      new AddItemCommand(BASKET_ID, 'product-2', 'CLIENT-SKU', 'Client name', 1, undefined, undefined, undefined, 'physical'),
     );
 
-    expect(pricePort.getPrice).toHaveBeenCalledWith('product-2', 'variant-9', 'USD', 2);
-    expect(repository.addItem.mock.calls[0][1].unitPrice.cents).toBe(4500);
+    const item = repository.addItem.mock.calls[0][1];
+    expect(item.sku).toBe('DIGITAL-1');
+    expect(item.itemType).toBe('digital');
+    expect(item.attributes).toEqual(expect.objectContaining({ inventoryPolicy: 'unlimited' }));
   });
 
   it('should increase the quantity when the product is already in the basket', async () => {
@@ -54,9 +98,7 @@ describe('AddItemUseCase', () => {
   });
 
   it('should add a separate item when the same product has a different variant', async () => {
-    const repository = createBasketRepository(
-      createBasket({ items: [createBasketItem({ productVariantId: 'variant-1' })] }),
-    );
+    const repository = createBasketRepository(createBasket({ items: [createBasketItem({ productVariantId: 'variant-1' })] }));
 
     await new AddItemUseCase(repository, createProductPricePort()).execute(
       new AddItemCommand(BASKET_ID, 'product-1', 'SKU-1', 'Widget', 1, 'variant-2'),
@@ -94,9 +136,7 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(createBasket());
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(
-        new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 0),
-      ),
+      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 0)),
     ).rejects.toThrow(BasketValidationError);
     expect(repository.findById).not.toHaveBeenCalled();
     expect(repository.addItem).not.toHaveBeenCalled();
@@ -106,9 +146,7 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(null);
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(
-        new AddItemCommand('missing', 'product-1', 'SKU-1', 'Widget', 1),
-      ),
+      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand('missing', 'product-1', 'SKU-1', 'Widget', 1)),
     ).rejects.toThrow(BasketNotFoundError);
   });
 
@@ -117,9 +155,7 @@ describe('AddItemUseCase', () => {
     repository.findById.mockResolvedValueOnce(createBasket()).mockResolvedValue(null);
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(
-        new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
-      ),
+      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1)),
     ).rejects.toThrow(BasketNotFoundError);
   });
 });

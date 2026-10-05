@@ -30,32 +30,30 @@ describe('ConvertCurrencyUseCase', () => {
   it('should throw LocalizationValidationError when required fields are missing', async () => {
     const repository = createConvertCurrencyRepository();
 
-    await expect(
-      new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: '', toCurrency: 'USD' }),
-    ).rejects.toThrow(LocalizationValidationError);
-    await expect(
-      new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'USD', toCurrency: '' }),
-    ).rejects.toThrow(LocalizationValidationError);
+    await expect(new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: '', toCurrency: 'USD' })).rejects.toThrow(
+      LocalizationValidationError,
+    );
+    await expect(new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'USD', toCurrency: '' })).rejects.toThrow(
+      LocalizationValidationError,
+    );
     expect(repository.findCurrencyByCode).not.toHaveBeenCalled();
   });
 
   it('should throw CurrencyNotFoundError when the source currency does not exist', async () => {
     const repository = createConvertCurrencyRepository();
 
-    await expect(
-      new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'XYZ', toCurrency: 'USD' }),
-    ).rejects.toThrow(CurrencyNotFoundError);
+    await expect(new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'XYZ', toCurrency: 'USD' })).rejects.toThrow(
+      CurrencyNotFoundError,
+    );
     expect(repository.findCurrencyByCode).toHaveBeenCalledTimes(1);
   });
 
   it('should throw CurrencyNotFoundError when the target currency does not exist', async () => {
     const repository = createConvertCurrencyRepository();
-    repository.findCurrencyByCode
-      .mockResolvedValueOnce({ currencyId: 'c1', code: 'USD', exchangeRate: 1 })
-      .mockResolvedValueOnce(null);
+    repository.findCurrencyByCode.mockResolvedValueOnce({ currencyId: 'c1', code: 'USD', exchangeRate: 1 }).mockResolvedValueOnce(null);
 
-    await expect(
-      new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'USD', toCurrency: 'XYZ' }),
-    ).rejects.toThrow(CurrencyNotFoundError);
+    await expect(new ConvertCurrencyUseCase(repository).execute({ amount: 100, fromCurrency: 'USD', toCurrency: 'XYZ' })).rejects.toThrow(
+      CurrencyNotFoundError,
+    );
   });
 });

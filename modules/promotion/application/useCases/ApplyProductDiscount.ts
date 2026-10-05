@@ -1,4 +1,3 @@
- 
 /**
  * Apply Product Discount Use Case
  * Calculates applicable discounts for products

@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Promotion Controller
  * Handles promotion management for the Admin Hub
@@ -223,7 +223,8 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   if (status !== undefined) updates.status = status;
   if (value !== undefined) updates.value = parseFloat(value);
   if (minOrderAmount !== undefined) updates.minOrderAmountCents = minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined;
-  if (maxDiscountAmount !== undefined) updates.maxDiscountAmountCents = maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined;
+  if (maxDiscountAmount !== undefined)
+    updates.maxDiscountAmountCents = maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined;
   if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
   if (usageLimitPerCustomer !== undefined)
     updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
@@ -269,7 +270,14 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
       couponCode,
       currency,
     } = body as {
-      items?: Array<{ productId: string; name: string; quantity: number; unitPriceCents: number; categoryId?: string; isDigital?: boolean }>;
+      items?: Array<{
+        productId: string;
+        name: string;
+        quantity: number;
+        unitPriceCents: number;
+        categoryId?: string;
+        isDigital?: boolean;
+      }>;
       subtotal?: string;
       shippingAmount?: string;
       customerId?: string;
@@ -295,7 +303,14 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
 
     const context: PromotionEvaluationContext = {
       items: items.map(
-        (item: { productId: string; name: string; quantity: number; unitPriceCents: number; categoryId?: string; isDigital?: boolean }) => ({
+        (item: {
+          productId: string;
+          name: string;
+          quantity: number;
+          unitPriceCents: number;
+          categoryId?: string;
+          isDigital?: boolean;
+        }) => ({
           productId: item.productId || 'sample-product',
           name: item.name || 'Sample Product',
           quantity: item.quantity || 1,
@@ -322,16 +337,16 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
     const result = await evaluatePromotionsUseCase.execute(context);
 
     jsonResponse(res, 200, {
-            success: true,
-            totalDiscountAmountCents: result.totalDiscountAmountCents,
-            shippingDiscountAmountCents: result.shippingDiscountAmountCents,
-            freeShipping: result.freeShipping,
-            lineItemDiscounts: result.lineItemDiscounts,
-            freeItems: result.freeItems,
-            appliedPromotions: result.appliedPromotions,
-            message: result.message,
-            finalTotalCents: context.subtotalCents - result.totalDiscountAmountCents,
-          });
+      success: true,
+      totalDiscountAmountCents: result.totalDiscountAmountCents,
+      shippingDiscountAmountCents: result.shippingDiscountAmountCents,
+      freeShipping: result.freeShipping,
+      lineItemDiscounts: result.lineItemDiscounts,
+      freeItems: result.freeItems,
+      appliedPromotions: result.appliedPromotions,
+      message: result.message,
+      finalTotalCents: context.subtotalCents - result.totalDiscountAmountCents,
+    });
   } catch (error: unknown) {
     logger.warn('Error previewing promotion:', error);
     jsonResponse(res, 500, { success: false, error: (error as Error).message });

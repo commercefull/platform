@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Storefront Review Controller
  * Manages product reviews from customers
@@ -28,13 +28,13 @@ export const getProductReviews = async (req: HttpRequest, res: HttpResponse) => 
   const stats = await manageProductReviewsUseCase.getProductStatistics(productId);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          reviews,
-          totalReviews: stats.totalReviews,
-          averageRating: stats.averageRating,
-        },
-      });
+    success: true,
+    data: {
+      reviews,
+      totalReviews: stats.totalReviews,
+      averageRating: stats.averageRating,
+    },
+  });
 };
 
 /**

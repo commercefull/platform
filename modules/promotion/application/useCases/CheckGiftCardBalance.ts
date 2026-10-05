@@ -1,4 +1,3 @@
- 
 /**
  * Check Gift Card Balance Use Case
  * Retrieves gift card balance and status

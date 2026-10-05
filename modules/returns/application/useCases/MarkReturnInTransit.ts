@@ -23,4 +23,3 @@ export class MarkReturnInTransitUseCase {
     return updated;
   }
 }
-

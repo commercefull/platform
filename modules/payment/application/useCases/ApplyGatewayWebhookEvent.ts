@@ -81,12 +81,7 @@ export class ApplyGatewayWebhookEventUseCase {
     const firstNotification = notificationItems?.[0] as Record<string, unknown> | undefined;
     const notificationItem = firstNotification?.NotificationRequestItem as Record<string, unknown> | undefined;
 
-    return (
-      (dataObject?.id as string) ||
-      (rawPayload.externalTransactionId as string) ||
-      (notificationItem?.pspReference as string) ||
-      ''
-    );
+    return (dataObject?.id as string) || (rawPayload.externalTransactionId as string) || (notificationItem?.pspReference as string) || '';
   }
 
   private async handlePaymentSucceeded(event: WebhookEvent, transaction: PaymentTransaction): Promise<void> {

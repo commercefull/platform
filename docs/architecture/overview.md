@@ -76,15 +76,15 @@ Routes are configured in `boot/routes.ts`:
 
 ## Modules (42 bounded contexts)
 
-| Category    | Modules                                                                                                                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Catalog     | `product`, `pricing`                                                                                                                                                                      |
-| Sales       | `order`, `basket`, `checkout`, `payment`, `returns`                                                                                                                                       |
-| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                                                                       |
-| Marketing   | `promotion`, `coupon`, `segment`, `automation`                                                                                                                                            |
-| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                                                                       |
-| Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                                                                                |
-| Commerce    | `marketplace`, `supplier`, `organization`                                                                                                                                                 |
+| Category    | Modules                                                                                                                                                                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catalog     | `product`, `pricing`                                                                                                                                                        |
+| Sales       | `order`, `basket`, `checkout`, `payment`, `returns`                                                                                                                         |
+| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                                                         |
+| Marketing   | `promotion`, `coupon`, `segment`, `automation`                                                                                                                              |
+| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                                                         |
+| Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                                                                  |
+| Commerce    | `marketplace`, `supplier`, `organization`                                                                                                                                   |
 | Platform    | `identity`, `configuration`, `localization`, `store`, `analytics`, `gdpr`, `support`, `tax`, `tracking`, `audit`, `integration`, `webhook`, `reporting`, `migration`, `b2b` |
 
 ## Route Naming Convention

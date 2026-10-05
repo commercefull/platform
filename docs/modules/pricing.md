@@ -19,8 +19,10 @@ pricing-owned `productBasePrice` table (`productId`, nullable `productVariantId`
   internals directly.
 - `CalculatePriceUseCase.execute({ productId, ...context })` resolves the effective
   price: base/sale price → currency conversion → tier pricing → customer price
-  lists → dynamic rules → membership/loyalty discounts. Purchase flows (basket,
-  checkout) must resolve prices through this path — clients never supply prices.
+  lists → dynamic rules → membership/loyalty discounts. Context includes store,
+  sales channel, region, currency, quantity, customer, and customer groups;
+  `store` and `channel` rule conditions provide scoped pricing. Purchase flows
+  (basket, checkout) must resolve prices through this path — clients never supply prices.
 - String formatting (`$49.99`) happens only at view/API boundaries.
 
 ---
@@ -128,39 +130,39 @@ Final Price =
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/pricing/currencies` | `asyncHandler(getAllCurrencies)` | Currency Management Routes |
-| POST | `/pricing/currencies` | `asyncHandler(saveCurrency)` | — |
-| GET | `/pricing/currencies/:code` | `asyncHandler(getCurrencyByCode)` | — |
-| DELETE | `/pricing/currencies/:code` | `asyncHandler(deleteCurrency)` | — |
-| GET | `/pricing/currencies/default` | `asyncHandler(getDefaultCurrency)` | — |
-| POST | `/pricing/currencies/update-exchange-rates` | `asyncHandler(updateExchangeRates)` | — |
-| GET | `/pricing/currency-price-rules` | `asyncHandler(getAllPriceRules)` | Currency Price Rule Routes |
-| POST | `/pricing/currency-price-rules` | `asyncHandler(createPriceRule)` | — |
-| GET | `/pricing/currency-price-rules/:id` | `asyncHandler(getPriceRuleById)` | — |
-| PUT | `/pricing/currency-price-rules/:id` | `asyncHandler(updatePriceRule)` | — |
-| DELETE | `/pricing/currency-price-rules/:id` | `asyncHandler(deletePriceRule)` | — |
-| GET | `/pricing/currency-regions` | `asyncHandler(getAllCurrencyRegions)` | Currency Region Routes |
-| POST | `/pricing/currency-regions` | `asyncHandler(createCurrencyRegion)` | — |
-| GET | `/pricing/currency-regions/:id` | `asyncHandler(getCurrencyRegionById)` | — |
-| PUT | `/pricing/currency-regions/:id` | `asyncHandler(updateCurrencyRegion)` | — |
-| DELETE | `/pricing/currency-regions/:id` | `asyncHandler(deleteCurrencyRegion)` | — |
-| GET | `/pricing/price-lists` | `asyncHandler(getPriceLists)` | Customer Price List Routes |
-| POST | `/pricing/price-lists` | `asyncHandler(createPriceList)` | — |
-| GET | `/pricing/price-lists/:id` | `asyncHandler(getPriceList)` | — |
-| PUT | `/pricing/price-lists/:id` | `asyncHandler(updatePriceList)` | — |
-| DELETE | `/pricing/price-lists/:id` | `asyncHandler(deletePriceList)` | — |
-| POST | `/pricing/price-lists/:priceListId/prices` | `asyncHandler(addPriceToList)` | Customer Prices Routes |
-| GET | `/pricing/rules` | `asyncHandler(getPricingRules)` | Pricing Rules Routes |
-| POST | `/pricing/rules` | `asyncHandler(createPricingRule)` | — |
-| GET | `/pricing/rules/:id` | `asyncHandler(getPricingRule)` | — |
-| PUT | `/pricing/rules/:id` | `asyncHandler(updatePricingRule)` | — |
-| DELETE | `/pricing/rules/:id` | `asyncHandler(deletePricingRule)` | — |
-| GET | `/pricing/tier-prices` | `asyncHandler(getTierPrices)` | Tier Pricing Routes |
-| POST | `/pricing/tier-prices` | `asyncHandler(createTierPrice)` | — |
-| GET | `/pricing/tier-prices/:id` | `asyncHandler(getTierPrice)` | — |
-| PUT | `/pricing/tier-prices/:id` | `asyncHandler(updateTierPrice)` | — |
-| DELETE | `/pricing/tier-prices/:id` | `asyncHandler(deleteTierPrice)` | — |
+| Method | Endpoint                                    | Controller                            | Description                |
+| ------ | ------------------------------------------- | ------------------------------------- | -------------------------- |
+| GET    | `/pricing/currencies`                       | `asyncHandler(getAllCurrencies)`      | Currency Management Routes |
+| POST   | `/pricing/currencies`                       | `asyncHandler(saveCurrency)`          | —                          |
+| GET    | `/pricing/currencies/:code`                 | `asyncHandler(getCurrencyByCode)`     | —                          |
+| DELETE | `/pricing/currencies/:code`                 | `asyncHandler(deleteCurrency)`        | —                          |
+| GET    | `/pricing/currencies/default`               | `asyncHandler(getDefaultCurrency)`    | —                          |
+| POST   | `/pricing/currencies/update-exchange-rates` | `asyncHandler(updateExchangeRates)`   | —                          |
+| GET    | `/pricing/currency-price-rules`             | `asyncHandler(getAllPriceRules)`      | Currency Price Rule Routes |
+| POST   | `/pricing/currency-price-rules`             | `asyncHandler(createPriceRule)`       | —                          |
+| GET    | `/pricing/currency-price-rules/:id`         | `asyncHandler(getPriceRuleById)`      | —                          |
+| PUT    | `/pricing/currency-price-rules/:id`         | `asyncHandler(updatePriceRule)`       | —                          |
+| DELETE | `/pricing/currency-price-rules/:id`         | `asyncHandler(deletePriceRule)`       | —                          |
+| GET    | `/pricing/currency-regions`                 | `asyncHandler(getAllCurrencyRegions)` | Currency Region Routes     |
+| POST   | `/pricing/currency-regions`                 | `asyncHandler(createCurrencyRegion)`  | —                          |
+| GET    | `/pricing/currency-regions/:id`             | `asyncHandler(getCurrencyRegionById)` | —                          |
+| PUT    | `/pricing/currency-regions/:id`             | `asyncHandler(updateCurrencyRegion)`  | —                          |
+| DELETE | `/pricing/currency-regions/:id`             | `asyncHandler(deleteCurrencyRegion)`  | —                          |
+| GET    | `/pricing/price-lists`                      | `asyncHandler(getPriceLists)`         | Customer Price List Routes |
+| POST   | `/pricing/price-lists`                      | `asyncHandler(createPriceList)`       | —                          |
+| GET    | `/pricing/price-lists/:id`                  | `asyncHandler(getPriceList)`          | —                          |
+| PUT    | `/pricing/price-lists/:id`                  | `asyncHandler(updatePriceList)`       | —                          |
+| DELETE | `/pricing/price-lists/:id`                  | `asyncHandler(deletePriceList)`       | —                          |
+| POST   | `/pricing/price-lists/:priceListId/prices`  | `asyncHandler(addPriceToList)`        | Customer Prices Routes     |
+| GET    | `/pricing/rules`                            | `asyncHandler(getPricingRules)`       | Pricing Rules Routes       |
+| POST   | `/pricing/rules`                            | `asyncHandler(createPricingRule)`     | —                          |
+| GET    | `/pricing/rules/:id`                        | `asyncHandler(getPricingRule)`        | —                          |
+| PUT    | `/pricing/rules/:id`                        | `asyncHandler(updatePricingRule)`     | —                          |
+| DELETE | `/pricing/rules/:id`                        | `asyncHandler(deletePricingRule)`     | —                          |
+| GET    | `/pricing/tier-prices`                      | `asyncHandler(getTierPrices)`         | Tier Pricing Routes        |
+| POST   | `/pricing/tier-prices`                      | `asyncHandler(createTierPrice)`       | —                          |
+| GET    | `/pricing/tier-prices/:id`                  | `asyncHandler(getTierPrice)`          | —                          |
+| PUT    | `/pricing/tier-prices/:id`                  | `asyncHandler(updateTierPrice)`       | —                          |
+| DELETE | `/pricing/tier-prices/:id`                  | `asyncHandler(deleteTierPrice)`       | —                          |
 
 <!-- GENERATED:ENDPOINTS:END -->

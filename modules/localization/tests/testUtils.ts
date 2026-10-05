@@ -6,11 +6,7 @@
  */
 
 import type { Currency, Language, Country } from '../../../libs/db/types';
-import type {
-  LanguageRepositoryPort,
-  CurrencyRepositoryPort,
-  CountryRepositoryPort,
-} from '../domain/repositories/LocalizationRepository';
+import type { LanguageRepositoryPort, CurrencyRepositoryPort, CountryRepositoryPort } from '../domain/repositories/LocalizationRepository';
 import type { ConvertCurrencyRepository } from '../application/useCases/ConvertCurrency';
 import type { CreateCurrencyRepository, CreatedCurrency } from '../application/useCases/CreateCurrency';
 import type { CreateLocaleRepository, CreatedLocale } from '../application/useCases/CreateLocale';
@@ -34,7 +30,6 @@ export function createCurrency(overrides: Partial<Currency> = {}): Currency {
     ...overrides,
   } as Currency;
 }
-
 
 export function createCountry(overrides: Partial<Country> = {}): Country {
   return {
@@ -94,7 +89,14 @@ export function createCreateCurrencyRepository(existing: CreatedCurrency | null 
   repository.findCurrencyByCode.mockResolvedValue(existing);
   repository.createCurrency.mockImplementation(data =>
     Promise.resolve(
-      createCreatedCurrency({ currencyId: data.currencyId, code: data.code, name: data.name, symbol: data.symbol, exchangeRate: data.exchangeRate, isDefault: data.isDefault }),
+      createCreatedCurrency({
+        currencyId: data.currencyId,
+        code: data.code,
+        name: data.name,
+        symbol: data.symbol,
+        exchangeRate: data.exchangeRate,
+        isDefault: data.isDefault,
+      }),
     ),
   );
   return repository;
@@ -108,13 +110,21 @@ export function createCreateLocaleRepository(existing: CreatedLocale | null = nu
   repository.findLocaleByCode.mockResolvedValue(existing);
   repository.createLocale.mockImplementation(data =>
     Promise.resolve(
-      createCreatedLocale({ localeId: data.localeId, code: data.code, name: data.name, isDefault: data.isDefault, isActive: data.isActive }),
+      createCreatedLocale({
+        localeId: data.localeId,
+        code: data.code,
+        name: data.name,
+        isDefault: data.isDefault,
+        isActive: data.isActive,
+      }),
     ),
   );
   return repository;
 }
 
-export function createSetExchangeRateRepository(currency: { currencyId: string; exchangeRate: number } | null = null): jest.Mocked<SetExchangeRateRepository> {
+export function createSetExchangeRateRepository(
+  currency: { currencyId: string; exchangeRate: number } | null = null,
+): jest.Mocked<SetExchangeRateRepository> {
   const repository: jest.Mocked<SetExchangeRateRepository> = {
     findCurrencyByCode: jest.fn(),
     updateCurrency: jest.fn(),

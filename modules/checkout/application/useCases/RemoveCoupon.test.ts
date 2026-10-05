@@ -23,7 +23,10 @@ describe('RemoveCouponUseCase', () => {
     expect(session.couponCode).toBeUndefined();
     expect(session.discountAmount.cents).toBe(0);
     expect(checkoutRepository.save).toHaveBeenCalledWith(session);
-    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'coupon', couponCode: null, previousCoupon: 'SAVE10' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'coupon', couponCode: null, previousCoupon: 'SAVE10' }),
+    );
   });
 
   it('should throw NotFoundError when the session does not exist', async () => {

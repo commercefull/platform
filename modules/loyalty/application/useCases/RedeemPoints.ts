@@ -41,8 +41,12 @@ export interface RedeemPointsReward {
 
 export interface RedeemPointsRepository {
   findMemberByCustomerId(customerId: string): Promise<RedeemPointsMember | null>;
-  createTransaction(data: Record<string, unknown>): Promise<void>;
+  createTransaction(data: Record<string, unknown>): Promise<unknown>;
   updateMemberPoints(memberId: string, data: { availablePoints: number }): Promise<void>;
+  findTransactionByOrderAndAction?(
+    orderId: string,
+    action: 'credit' | 'debit',
+  ): Promise<{ loyaltyTransactionId: string; points: number } | null>;
 }
 
 export interface RedeemPointsRewardRepository {
@@ -59,6 +63,20 @@ export class RedeemPointsUseCase {
     const member = await this.loyaltyRepository.findMemberByCustomerId(input.customerId);
     if (!member) {
       throw new LoyaltyMemberNotFoundError(input.customerId);
+    }
+
+    // Idempotency: a retried redemption for the same order returns the
+    // original transaction instead of deducting points a second time.
+    if (input.orderId && this.loyaltyRepository.findTransactionByOrderAndAction) {
+      const existing = await this.loyaltyRepository.findTransactionByOrderAndAction(input.orderId, 'debit');
+      if (existing) {
+        return {
+          transactionId: existing.loyaltyTransactionId,
+          customerId: input.customerId,
+          pointsRedeemed: Math.abs(existing.points),
+          newBalance: member.availablePoints,
+        };
+      }
     }
 
     if (member.availablePoints < input.points) {

@@ -28,10 +28,6 @@ function mapToPickPack(row: DbWarehousePickPack): WarehousePickPack {
   };
 }
 
-
-
-
-
 export async function create(input: CreatePickPackInput): Promise<WarehousePickPack> {
   const id = generateUUID();
   const now = new Date();

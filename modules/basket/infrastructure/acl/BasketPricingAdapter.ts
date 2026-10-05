@@ -18,6 +18,7 @@ export class BasketPricingAdapter implements ProductPricePort {
     productVariantId?: string,
     currencyCode?: string,
     quantity?: number,
+    context?: { storeId?: string; channelId?: string },
   ): Promise<ResolvedProductPrice | null> {
     try {
       const result = await calculatePriceUseCase.execute({
@@ -25,6 +26,8 @@ export class BasketPricingAdapter implements ProductPricePort {
         variantId: productVariantId,
         currencyCode,
         quantity,
+        storeId: context?.storeId,
+        channelId: context?.channelId,
       });
       return { unitPriceCents: result.finalPriceCents, currency: result.currency };
     } catch (error) {

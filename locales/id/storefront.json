@@ -744,5 +744,14 @@
   "emailPlaceholder": "anda@email.com",
   "phonePlaceholder": "Nomor telepon Anda",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "MM/YY"
+  "cardExpiryPlaceholder": "MM/YY",
+  "collections": "Koleksi",
+  "collectionsHeroDesc": "Jelajahi koleksi pilihan kami",
+  "viewCollection": "Lihat Koleksi",
+  "noCollections": "Belum ada koleksi",
+  "noCollectionsDesc": "Kembali lagi segera — kami sedang mengkurasi koleksi baru.",
+  "collectionEmpty": "Koleksi ini belum memiliki produk",
+  "collectionEmptyDesc": "Kembali lagi segera atau jelajahi seluruh katalog.",
+  "backToCollections": "Kembali ke Koleksi",
+  "featured": "Unggulan"
 }

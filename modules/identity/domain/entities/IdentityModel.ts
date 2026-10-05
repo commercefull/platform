@@ -15,7 +15,7 @@ export type IdentityAdminUser = {
   createdAt: Date | null;
   updatedAt: Date | null;
   deletedAt: Date | null;
-}
+};
 
 export type Role = {
   roleId: string;
@@ -25,5 +25,4 @@ export type Role = {
   isSystem: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
-
+};

@@ -128,6 +128,8 @@ export interface CustomerSubscription {
   lastPaymentFailedAt?: Date;
   customizations?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  storeId?: string;
+  salesChannelId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -532,6 +534,14 @@ export async function createCustomerSubscription(subscription: {
   billingAddressId?: string;
   paymentMethodId?: string;
   customizations?: Record<string, unknown>;
+  storeId?: string;
+  salesChannelId?: string;
+  /** Total quoted tax (added + price-included portions), for reporting. */
+  taxAmountCents?: number;
+  /** Portion of tax added on top of the subtotal — 0 for tax-inclusive pricing. */
+  taxAddedCents?: number;
+  currencyCode?: string;
+  metadata?: Record<string, unknown>;
 }): Promise<CustomerSubscription> {
   const now = new Date();
   const plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
@@ -558,8 +568,8 @@ export async function createCustomerSubscription(subscription: {
       "taxAmountCents", "totalPriceCents", "currencyCode", "billingInterval", "billingIntervalCount",
       "trialStartAt", "trialEndAt", "currentPeriodStart", "currentPeriodEnd",
       "nextBillingAt", "contractCyclesRemaining", "shippingAddressId", "billingAddressId",
-      "paymentMethodId", "customizations", "createdAt", "updatedAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
+      "paymentMethodId", "customizations", "storeId", "salesChannelId", "metadata", "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
     RETURNING *`,
     [
       subscriptionNumber,
@@ -571,9 +581,9 @@ export async function createCustomerSubscription(subscription: {
       quantity,
       unitPriceCents,
       discountAmountCents,
-      0,
-      totalPriceCents,
-      plan.currency,
+      subscription.taxAmountCents ?? 0,
+      totalPriceCents + (subscription.taxAddedCents ?? subscription.taxAmountCents ?? 0),
+      subscription.currencyCode ?? plan.currency,
       plan.billingInterval,
       plan.billingIntervalCount,
       trialStartAt?.toISOString(),
@@ -586,6 +596,9 @@ export async function createCustomerSubscription(subscription: {
       subscription.billingAddressId,
       subscription.paymentMethodId,
       subscription.customizations ? JSON.stringify(subscription.customizations) : null,
+      subscription.storeId ?? null,
+      subscription.salesChannelId ?? null,
+      subscription.metadata ? JSON.stringify(subscription.metadata) : null,
       now.toISOString(),
       now.toISOString(),
     ],
@@ -778,7 +791,8 @@ export async function createSubscriptionOrder(order: {
   scheduledAt?: Date;
 }): Promise<SubscriptionOrder> {
   const now = new Date().toISOString();
-  const totalAmountCents = order.subtotalCents - (order.discountAmountCents || 0) + (order.taxAmountCents || 0) + (order.shippingAmountCents || 0);
+  const totalAmountCents =
+    order.subtotalCents - (order.discountAmountCents || 0) + (order.taxAmountCents || 0) + (order.shippingAmountCents || 0);
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "subscriptionOrder" (
@@ -1066,6 +1080,8 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     lastPaymentFailedAt: row.lastPaymentFailedAt ? new Date(row.lastPaymentFailedAt as string) : undefined,
     customizations: row.customizations as Record<string, unknown> | undefined,
     metadata: row.metadata as Record<string, unknown> | undefined,
+    storeId: row.storeId as string | undefined,
+    salesChannelId: row.salesChannelId as string | undefined,
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };

@@ -15,7 +15,16 @@ import type { LoyaltyRepository } from '../domain/repositories/LoyaltyRepository
 
 export interface LoyaltyEventHandlerDeps {
   orders: Pick<OrderRepository, 'findById'>;
-  points: Pick<LoyaltyRepository, 'processOrderPoints' | 'findCustomerPointsWithTier'>;
+  points: Pick<
+    LoyaltyRepository,
+    | 'processOrderPoints'
+    | 'findCustomerPointsWithTier'
+    | 'findTransactionByOrderAndAction'
+    | 'findCustomerPoints'
+    | 'createTransaction'
+    | 'setMemberPoints'
+    | 'findCreditTransactionByReference'
+  >;
 }
 
 export function registerLoyaltyEventHandlers(deps: LoyaltyEventHandlerDeps): void {
@@ -51,6 +60,43 @@ export function registerLoyaltyEventHandlers(deps: LoyaltyEventHandlerDeps): voi
       }
     } catch (err: unknown) {
       logger.error(`order.completed loyalty handler error: ${(err as Error).message}`);
+    }
+  });
+
+  // Order cancelled -> restore points redeemed against the order (idempotent:
+  // skips when a credit transaction already exists for the order)
+  eventBus.registerHandler('order.cancelled', async payload => {
+    const eventData = payload.data as Record<string, unknown>;
+    const orderId = eventData.orderId as string;
+    const customerId = eventData.customerId as string;
+    if (!orderId || !customerId) return;
+
+    try {
+      const debit = await points.findTransactionByOrderAndAction(orderId, 'debit');
+      if (!debit) return;
+
+      // Refund is keyed to the redemption transaction — a pre-existing earn
+      // credit for the same order must not suppress the restore.
+      const refunded = await points.findCreditTransactionByReference(debit.loyaltyTransactionId);
+      if (refunded) return;
+
+      const member = await points.findCustomerPoints(customerId);
+      if (!member) return;
+
+      // Credit transaction + balance restore; lifetimePoints is untouched —
+      // refunded points must not re-count toward tier qualification.
+      await points.createTransaction({
+        customerId,
+        orderId,
+        action: 'refund',
+        points: Math.abs(debit.points),
+        description: `Points restored for cancelled order ${orderId}`,
+        referenceId: debit.loyaltyTransactionId,
+      });
+      await points.setMemberPoints(member.loyaltyPointsId, member.currentPoints + Math.abs(debit.points));
+      logger.info(`order.cancelled: restored ${Math.abs(debit.points)} loyalty points for order ${orderId}`);
+    } catch (err: unknown) {
+      logger.error(`order.cancelled loyalty handler error: ${(err as Error).message}`);
     }
   });
 

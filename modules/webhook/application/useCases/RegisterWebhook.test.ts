@@ -33,27 +33,27 @@ describe('RegisterWebhookUseCase', () => {
   it('should throw WebhookValidationError when the url is not http', async () => {
     const repository = createWebhookRepository();
 
-    await expect(
-      new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'ftp://bad', events: ['e'] }),
-    ).rejects.toThrow(WebhookValidationError);
+    await expect(new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'ftp://bad', events: ['e'] })).rejects.toThrow(
+      WebhookValidationError,
+    );
     expect(repository.createEndpoint).not.toHaveBeenCalled();
   });
 
   it('should throw WebhookValidationError when no events are specified', async () => {
     const repository = createWebhookRepository();
 
-    await expect(
-      new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'https://ok.com', events: [] }),
-    ).rejects.toThrow(WebhookValidationError);
+    await expect(new RegisterWebhookUseCase(repository).execute({ name: 'T', url: 'https://ok.com', events: [] })).rejects.toThrow(
+      WebhookValidationError,
+    );
     expect(repository.createEndpoint).not.toHaveBeenCalled();
   });
 
   it('should throw WebhookValidationError when the name is missing', async () => {
     const repository = createWebhookRepository();
 
-    await expect(
-      new RegisterWebhookUseCase(repository).execute({ name: '', url: 'https://ok.com', events: ['e'] }),
-    ).rejects.toThrow(WebhookValidationError);
+    await expect(new RegisterWebhookUseCase(repository).execute({ name: '', url: 'https://ok.com', events: ['e'] })).rejects.toThrow(
+      WebhookValidationError,
+    );
     expect(repository.createEndpoint).not.toHaveBeenCalled();
   });
 });

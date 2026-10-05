@@ -36,21 +36,21 @@ describe('CreateCurrencyUseCase', () => {
   it('should throw LocalizationValidationError when required fields are missing', async () => {
     const repository = createCreateCurrencyRepository();
 
-    await expect(
-      new CreateCurrencyUseCase(repository).execute({ code: '', name: 'Dollar', symbol: '$' }),
-    ).rejects.toThrow(LocalizationValidationError);
-    await expect(
-      new CreateCurrencyUseCase(repository).execute({ code: 'USD', name: '', symbol: '$' }),
-    ).rejects.toThrow(LocalizationValidationError);
+    await expect(new CreateCurrencyUseCase(repository).execute({ code: '', name: 'Dollar', symbol: '$' })).rejects.toThrow(
+      LocalizationValidationError,
+    );
+    await expect(new CreateCurrencyUseCase(repository).execute({ code: 'USD', name: '', symbol: '$' })).rejects.toThrow(
+      LocalizationValidationError,
+    );
     expect(repository.createCurrency).not.toHaveBeenCalled();
   });
 
   it('should throw CurrencyCodeAlreadyExistsError when the code is taken', async () => {
     const repository = createCreateCurrencyRepository(createCreatedCurrency());
 
-    await expect(
-      new CreateCurrencyUseCase(repository).execute({ code: 'USD', name: 'Dollar', symbol: '$' }),
-    ).rejects.toThrow(CurrencyCodeAlreadyExistsError);
+    await expect(new CreateCurrencyUseCase(repository).execute({ code: 'USD', name: 'Dollar', symbol: '$' })).rejects.toThrow(
+      CurrencyCodeAlreadyExistsError,
+    );
     expect(repository.createCurrency).not.toHaveBeenCalled();
   });
 });

@@ -36,8 +36,6 @@ describe('LogNotificationEventUseCase', () => {
   it('should throw NotificationValidationError when the repository fails to create the entry', async () => {
     eventLogRepo.create.mockResolvedValue(null);
 
-    await expect(useCase.execute(new LogNotificationEventCommand('notification.sent'))).rejects.toThrow(
-      NotificationValidationError,
-    );
+    await expect(useCase.execute(new LogNotificationEventCommand('notification.sent'))).rejects.toThrow(NotificationValidationError);
   });
 });

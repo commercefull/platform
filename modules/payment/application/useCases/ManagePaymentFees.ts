@@ -1,6 +1,5 @@
 import { PaymentBillingRepository } from '../../domain/repositories/PaymentBillingRepository';
 
-
 export class ManagePaymentFeesUseCase {
   constructor(private readonly billingRepo: PaymentBillingRepository) {}
 

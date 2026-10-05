@@ -33,10 +33,7 @@ describe('EarnPointsUseCase', () => {
     expect(result.pointsEarned).toBe(150);
     expect(result.newBalance).toBe(250);
     expect(loyaltyRepository.updateMemberPoints).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith(
-      'loyalty.points_earned',
-      expect.objectContaining({ customerId: 'c1', points: 150 }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('loyalty.points_earned', expect.objectContaining({ customerId: 'c1', points: 150 }));
   });
 
   it('should apply the tier multiplier to fixed points for a non-purchase action', async () => {
@@ -59,9 +56,7 @@ describe('EarnPointsUseCase', () => {
   it('should throw LoyaltyProgramNotFoundError when there is no active program', async () => {
     programRepository.findActive.mockResolvedValue(null);
 
-    await expect(useCase.execute({ customerId: 'c1', actionType: 'bonus', points: 10 })).rejects.toThrow(
-      LoyaltyProgramNotFoundError,
-    );
+    await expect(useCase.execute({ customerId: 'c1', actionType: 'bonus', points: 10 })).rejects.toThrow(LoyaltyProgramNotFoundError);
     expect(emitMock).not.toHaveBeenCalled();
   });
 });

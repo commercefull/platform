@@ -11,11 +11,7 @@ export interface CategorizationRecord {
 }
 
 export interface CategorizationWritePort {
-  createCategorization(params: {
-    contentPageId: string;
-    categoryId: string;
-    isPrimary?: boolean;
-  }): Promise<CategorizationRecord>;
+  createCategorization(params: { contentPageId: string; categoryId: string; isPrimary?: boolean }): Promise<CategorizationRecord>;
   deleteCategorizationByPageAndCategory(pageId: string, categoryId: string): Promise<boolean>;
   setPrimaryCategory(pageId: string, categorizationId: string): Promise<CategorizationRecord>;
 }

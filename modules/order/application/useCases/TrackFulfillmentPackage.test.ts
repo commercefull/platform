@@ -26,7 +26,18 @@ describe('TrackFulfillmentPackageUseCase', () => {
     repo.updateTracking.mockResolvedValue(createOrderFulfillmentPackage({ orderFulfillmentPackageId: 'pk1', trackingNumber: 'TRK456' }));
 
     const result = await useCase.execute(
-      new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK456', undefined, undefined, undefined, undefined, undefined, undefined, 'pk1'),
+      new TrackFulfillmentPackageCommand(
+        'f1',
+        'PKG-001',
+        'TRK456',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'pk1',
+      ),
     );
 
     expect(result.orderFulfillmentPackageId).toBe('pk1');
@@ -39,7 +50,18 @@ describe('TrackFulfillmentPackageUseCase', () => {
 
     await expect(
       useCase.execute(
-        new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK456', undefined, undefined, undefined, undefined, undefined, undefined, 'missing'),
+        new TrackFulfillmentPackageCommand(
+          'f1',
+          'PKG-001',
+          'TRK456',
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          'missing',
+        ),
       ),
     ).rejects.toThrow(FulfillmentPackageNotFoundError);
   });

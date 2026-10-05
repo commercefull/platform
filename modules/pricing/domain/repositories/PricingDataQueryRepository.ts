@@ -17,12 +17,7 @@ export interface PricingDataQueryPort {
   findEffectiveBasePrice(productId: string, variantId?: string, currencyCode?: string): Promise<ProductBasePrice | null>;
 
   /** Tier-price override for the requested quantity (integer cents). */
-  findApplicableTier(
-    productId: string,
-    quantity: number,
-    variantId?: string,
-    customerGroupId?: string,
-  ): Promise<TierPrice | null>;
+  findApplicableTier(productId: string, quantity: number, variantId?: string, customerGroupId?: string): Promise<TierPrice | null>;
 
   /** Price lists applicable to a customer and their groups, priority-ordered. */
   findPriceListsForCustomer(customerId: string, customerGroupIds?: string[]): Promise<CustomerPriceList[]>;

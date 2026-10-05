@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * Automation Controller
  * Handles automation rules management for the Admin Hub

@@ -7,7 +7,6 @@ export class RefreshTokenCommand {
   constructor(public readonly refreshToken: string) {}
 }
 
-
 export class RefreshTokenUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
@@ -35,4 +34,3 @@ export class RefreshTokenUseCase {
     };
   }
 }
-

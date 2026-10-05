@@ -29,10 +29,6 @@ function mapToReceiving(row: DbWarehouseReceiving): WarehouseReceiving {
   };
 }
 
-
-
-
-
 export async function create(input: CreateReceivingInput): Promise<WarehouseReceiving> {
   const id = generateUUID();
   const now = new Date();

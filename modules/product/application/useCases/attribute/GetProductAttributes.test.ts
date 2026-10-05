@@ -16,7 +16,14 @@ describe('GetProductAttributesUseCase', () => {
     mockRepo.getProductAttributes.mockResolvedValue([
       {
         ...createAttributeData({ attributeId: 'a1', value: 'Red' }),
-        attribute: createAttribute({ productAttributeId: 'a1', code: 'color', name: 'Color', type: 'select', isFilterable: true, isSearchable: false }),
+        attribute: createAttribute({
+          productAttributeId: 'a1',
+          code: 'color',
+          name: 'Color',
+          type: 'select',
+          isFilterable: true,
+          isSearchable: false,
+        }),
       },
     ]);
 

@@ -1,8 +1,5 @@
-
 import { ManageProductTagsUseCase } from './ManageProductTags';
 import { createProductTag, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('ManageProductTagsUseCase', () => {
   let useCase: ManageProductTagsUseCase;
@@ -10,7 +7,7 @@ describe('ManageProductTagsUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof ManageProductTagsUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof ManageProductTagsUseCase>[0]>();
     mockRepo.findAll.mockResolvedValue([createProductTag({ name: 'New' })]);
     mockRepo.create.mockResolvedValue(createProductTag({ productTagId: 't2', name: 'Sale' }));
     mockRepo.softDelete.mockResolvedValue(true);

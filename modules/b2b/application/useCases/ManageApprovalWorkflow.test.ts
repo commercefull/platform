@@ -1,7 +1,10 @@
 import '../../tests/testUtils';
 import { ManageApprovalWorkflowUseCase } from './ManageApprovalWorkflow';
 import {
-  B2BValidationError, ApprovalWorkflowNotFoundError, CompanyNotFoundError, UnauthorizedApproverError,
+  B2BValidationError,
+  ApprovalWorkflowNotFoundError,
+  CompanyNotFoundError,
+  UnauthorizedApproverError,
 } from '../../domain/errors/B2BErrors';
 import type { CompanyRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import { createApprovalWorkflow, createCompany, emitMock, lazyMock } from '../../tests/testUtils';
@@ -21,9 +24,14 @@ describe('ManageApprovalWorkflowUseCase', () => {
 
   it('should create a workflow and emit approval.requested when approvers exist', async () => {
     const result = await useCase.create({
-      companyId: 'co-1', organizationId: 'org-1', type: 'purchase_order',
-      referenceId: 'r-1', referenceNumber: 'ORD-1', requestedBy: 'u-1',
-      requestedByEmail: 'u@x.test', amountCents: 500,
+      companyId: 'co-1',
+      organizationId: 'org-1',
+      type: 'purchase_order',
+      referenceId: 'r-1',
+      referenceNumber: 'ORD-1',
+      requestedBy: 'u-1',
+      requestedByEmail: 'u@x.test',
+      amountCents: 500,
       approvers: [{ approverId: 'm-1', approverEmail: 'm@x.test' }],
     });
 
@@ -32,21 +40,37 @@ describe('ManageApprovalWorkflowUseCase', () => {
   });
 
   it('should throw B2BValidationError when no approvers are provided', async () => {
-    await expect(useCase.create({
-      companyId: 'co-1', organizationId: 'org-1', type: 'purchase_order',
-      referenceId: 'r-1', referenceNumber: 'ORD-1', requestedBy: 'u-1',
-      requestedByEmail: 'u@x.test', amountCents: 500, approvers: [],
-    })).rejects.toThrow(B2BValidationError);
+    await expect(
+      useCase.create({
+        companyId: 'co-1',
+        organizationId: 'org-1',
+        type: 'purchase_order',
+        referenceId: 'r-1',
+        referenceNumber: 'ORD-1',
+        requestedBy: 'u-1',
+        requestedByEmail: 'u@x.test',
+        amountCents: 500,
+        approvers: [],
+      }),
+    ).rejects.toThrow(B2BValidationError);
   });
 
   it('should throw CompanyNotFoundError when creating a workflow for a missing company', async () => {
     companyRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.create({
-      companyId: 'missing', organizationId: 'org-1', type: 'purchase_order', referenceId: 'ref-1',
-      referenceNumber: 'ORD-1', requestedBy: 'user-1', requestedByEmail: 'u@x.test', amountCents: 100,
-      approvers: [{ approverId: 'mgr-1', approverEmail: 'm@x.test' }],
-    })).rejects.toThrow(CompanyNotFoundError);
+    await expect(
+      useCase.create({
+        companyId: 'missing',
+        organizationId: 'org-1',
+        type: 'purchase_order',
+        referenceId: 'ref-1',
+        referenceNumber: 'ORD-1',
+        requestedBy: 'user-1',
+        requestedByEmail: 'u@x.test',
+        amountCents: 100,
+        approvers: [{ approverId: 'mgr-1', approverEmail: 'm@x.test' }],
+      }),
+    ).rejects.toThrow(CompanyNotFoundError);
   });
 
   it('should throw ApprovalWorkflowNotFoundError when the workflow does not exist', async () => {

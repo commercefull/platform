@@ -90,11 +90,7 @@ describe('Localization Expanded Tests', () => {
     });
 
     it('should return 404 for lifecycle ops on a missing country', async () => {
-      const response = await client.post(
-        `/business/countries/00000000-0000-0000-0000-000000000000/deactivate`,
-        {},
-        { headers: headers() },
-      );
+      const response = await client.post(`/business/countries/00000000-0000-0000-0000-000000000000/deactivate`, {}, { headers: headers() });
       expectStatus(response, 404);
     });
   });

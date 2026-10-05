@@ -25,18 +25,21 @@ export function createImportJob(overrides: Partial<Parameters<typeof ImportJob.c
   return ImportJob.create({ organizationId: 'org-1', jobType: 'products', source: 'shopify', ...overrides });
 }
 
-export function createImportMapping(
-  overrides: Partial<Parameters<typeof ImportMapping.create>[0]> = {},
-): ImportMapping {
+export function createImportMapping(overrides: Partial<Parameters<typeof ImportMapping.create>[0]> = {}): ImportMapping {
   return ImportMapping.create({
-    importJobId: 'job-1', entityType: 'product', sourceId: 'src-1', platformId: 'plat-1', ...overrides,
+    importJobId: 'job-1',
+    entityType: 'product',
+    sourceId: 'src-1',
+    platformId: 'plat-1',
+    ...overrides,
   });
 }
 
-export function createImportError(
-  overrides: Partial<Parameters<typeof ImportError.create>[0]> = {},
-): ImportError {
+export function createImportError(overrides: Partial<Parameters<typeof ImportError.create>[0]> = {}): ImportError {
   return ImportError.create({
-    importJobId: 'job-1', entityType: 'product', message: 'bad row', ...overrides,
+    importJobId: 'job-1',
+    entityType: 'product',
+    message: 'bad row',
+    ...overrides,
   });
 }

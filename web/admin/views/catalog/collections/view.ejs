@@ -2,14 +2,169 @@
   <div class="page-header d-print-none">
     <div class="row align-items-center">
       <div class="col-auto">
-        <a href="/admin/catalog/collections" class="btn btn-outline-secondary btn-sm mb-2"><%= t('product:collection.back') %></a>
+        <a href="/admin/catalog/collections" class="btn btn-outline-secondary btn-sm mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
+          <%= t('product:collection.back') %>
+        </a>
         <h2 class="page-title"><%= pageName %></h2>
+      </div>
+      <div class="col-auto ms-auto">
+        <a href="/admin/catalog/collections/<%= collection ? collection.assortmentCollectionId : '' %>/edit" class="btn btn-primary"><%= t('common.edit') %></a>
       </div>
     </div>
   </div>
-  <div class="card">
+
+  <% if (typeof success !== 'undefined' && success) { %>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= success %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= error %></div>
+    </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+  </div>
+  <% } %>
+
+  <% if (collection) { %>
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title"><%= collection.name %></h3>
+      <div class="card-options">
+        <% if (collection.isAutomated) { %><span class="badge bg-blue"><%= t('product:collection.automated') %></span><% } %>
+        <% if (collection.isFeatured) { %><span class="badge bg-yellow"><%= t('product:collection.featured') %></span><% } %>
+        <% if (collection.isActive) { %>
+        <span class="badge bg-success"><%= t('common.active') %></span>
+        <% } else { %>
+        <span class="badge bg-secondary"><%= t('common.inactive') %></span>
+        <% } %>
+      </div>
+    </div>
     <div class="card-body">
-      <p class="text-muted"><%= t('shared:common.comingSoon') %></p>
+      <dl class="row">
+        <dt class="col-sm-3"><%= t('shared:common.slug') %></dt>
+        <dd class="col-sm-9"><code><%= collection.slug %></code></dd>
+        <dt class="col-sm-3"><%= t('shared:common.description') %></dt>
+        <dd class="col-sm-9"><%= collection.description || '—' %></dd>
+        <dt class="col-sm-3"><%= t('product:collection.sortOrder') %></dt>
+        <dd class="col-sm-9"><%= collection.sortOrder %></dd>
+        <% if (collection.publishAt || collection.unpublishAt) { %>
+        <dt class="col-sm-3"><%= t('product:collection.schedule') %></dt>
+        <dd class="col-sm-9"><%= collection.publishAt || '—' %> → <%= collection.unpublishAt || '—' %></dd>
+        <% } %>
+        <% if (collection.isAutomated && collection.conditions) { %>
+        <dt class="col-sm-3"><%= t('product:collection.conditionsJson') %></dt>
+        <dd class="col-sm-9"><code><%= JSON.stringify(collection.conditions) %></code></dd>
+        <% } %>
+      </dl>
     </div>
   </div>
+
+  <div class="card mb-3">
+    <div class="card-header">
+      <h3 class="card-title">Store &amp; Channel Publications</h3>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small">
+        Publish this collection to specific stores (optionally scoped to a sales channel).
+        A collection with no publications is visible on every store.
+      </p>
+      <% if (typeof publications !== 'undefined' && publications && publications.length > 0) { %>
+      <div class="table-responsive mb-3">
+        <table class="table table-vcenter">
+          <thead>
+            <tr>
+              <th>Store</th>
+              <th>Channel</th>
+              <th>Sort Order</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% publications.forEach(function(pub) { %>
+            <tr>
+              <td><%= (stores || []).find(function(s) { return s.storeId === pub.storeId; })?.name || pub.storeId %></td>
+              <td><%= pub.channelId ? ((salesChannels || []).find(function(c) { return c.salesChannelId === pub.channelId; })?.name || pub.channelId) : 'All channels' %></td>
+              <td><%= pub.sortOrder ?? 0 %></td>
+              <td class="text-end">
+                <form method="POST" action="/admin/catalog/collections/<%= collection.assortmentCollectionId %>/publications/<%= pub.assortmentCollectionPublicationId %>/remove" style="display:inline">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+                </form>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <% } else { %>
+      <p class="text-muted">No publications — this collection is visible on all stores.</p>
+      <% } %>
+      <form method="POST" action="/admin/catalog/collections/<%= collection.assortmentCollectionId %>/publications" class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Store</label>
+          <select class="form-select" name="storeId" required>
+            <option value="">Select store…</option>
+            <% (stores || []).forEach(function(store) { %>
+            <option value="<%= store.storeId %>"><%= store.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Channel <span class="text-muted">(optional)</span></label>
+          <select class="form-select" name="channelId">
+            <option value="">All channels</option>
+            <% (salesChannels || []).forEach(function(channel) { %>
+            <option value="<%= channel.salesChannelId %>"><%= channel.name %> (<%= channel.code %>)</option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Sort Order</label>
+          <input type="number" class="form-control" name="sortOrder" min="0" value="0">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary">Publish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title"><%= t('shared:common.products') %> (<%= typeof productTotal !== 'undefined' ? productTotal : 0 %>)</h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-vcenter card-table">
+        <thead>
+          <tr>
+            <th><%= t('common.name') %></th>
+            <th><%= t('shared:common.slug') %></th>
+            <th><%= t('shared:common.price') %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
+            <% products.forEach(function(p) { %>
+            <tr>
+              <td><%= p.name %></td>
+              <td class="text-muted"><%= p.slug %></td>
+              <td><%= (p.effectivePriceCents / 100).toFixed(2) %></td>
+            </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="3" class="text-center text-muted"><%= t('shared:common.products') %></td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="card"><div class="card-body text-center text-muted"><%= t('product:collection.notFound') %></div></div>
+  <% } %>
 </div>

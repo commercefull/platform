@@ -106,7 +106,7 @@ describe('Notification Detail Endpoints', () => {
       expect(resp.data.data.isRead).toBe(true);
     });
 
-    it('PUT /business/notifications/:id/read rejects another user\'s notification', async () => {
+    it("PUT /business/notifications/:id/read rejects another user's notification", async () => {
       const other = await createNotification(TEST_CUSTOMER_ID, { userType: 'customer' });
       expectStatus(other, 201);
       const otherId = other.data.data.notificationId;
@@ -206,11 +206,7 @@ describe('Notification Detail Endpoints', () => {
     const deviceToken = `coverage-device-${Date.now()}`;
 
     it('POST /customer/notifications/devices registers a device', async () => {
-      const resp = await client.post(
-        '/customer/notifications/devices',
-        { deviceToken, platform: 'ios' },
-        customerAuth(),
-      );
+      const resp = await client.post('/customer/notifications/devices', { deviceToken, platform: 'ios' }, customerAuth());
       expectStatus(resp, 201);
     });
 

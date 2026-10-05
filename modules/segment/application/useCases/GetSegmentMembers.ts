@@ -16,4 +16,3 @@ export class GetSegmentMembersUseCase {
     return this.profileRepo.findBySegment(segmentId);
   }
 }
-

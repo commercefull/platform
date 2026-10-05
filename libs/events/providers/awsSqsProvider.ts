@@ -64,9 +64,7 @@ export async function createAwsSqsTransport(env: NodeJS.ProcessEnv = process.env
             MessageBody: JSON.stringify(payload),
             MessageAttributes: {
               eventType: { DataType: 'String', StringValue: payload.type },
-              ...(payload.correlationId
-                ? { correlationId: { DataType: 'String', StringValue: payload.correlationId } }
-                : {}),
+              ...(payload.correlationId ? { correlationId: { DataType: 'String', StringValue: payload.correlationId } } : {}),
             },
           },
         });

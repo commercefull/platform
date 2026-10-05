@@ -70,11 +70,7 @@ describe('Supplier Receiving Operations Tests', () => {
   });
 
   it('POST /business/receiving-items/:id/accept returns 404 for unknown item', async () => {
-    const resp = await client.post(
-      '/business/receiving-items/00000000-0000-0000-0000-000000000000/accept',
-      {},
-      { headers: authHeaders() },
-    );
+    const resp = await client.post('/business/receiving-items/00000000-0000-0000-0000-000000000000/accept', {}, { headers: authHeaders() });
     expectStatus(resp, 404);
   });
 

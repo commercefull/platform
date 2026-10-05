@@ -2,12 +2,7 @@
  * Unit Tests for CancelSubscription Use Case
  */
 
-import {
-  emitMock,
-  createCancelSubscriptionRepo,
-  createCustomerSubscription,
-  createSubscriptionProduct,
-} from '../../tests/testUtils';
+import { emitMock, createCancelSubscriptionRepo, createCustomerSubscription, createSubscriptionProduct } from '../../tests/testUtils';
 import { CancelSubscriptionUseCase, CancelSubscriptionCommand } from './CancelSubscription';
 
 describe('CancelSubscriptionUseCase', () => {
@@ -55,9 +50,7 @@ describe('CancelSubscriptionUseCase', () => {
   });
 
   it('should return a failure when the subscription ID is missing', async () => {
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: '', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_id_required');
@@ -66,9 +59,7 @@ describe('CancelSubscriptionUseCase', () => {
   it('should return a failure when the subscription does not exist', async () => {
     subscriptionRepo.getCustomerSubscription.mockResolvedValue(null);
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'missing', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'missing', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('subscription_not_found');
@@ -77,9 +68,7 @@ describe('CancelSubscriptionUseCase', () => {
   it('should return a failure when the subscription is already cancelled', async () => {
     subscriptionRepo.getCustomerSubscription.mockResolvedValue(createCustomerSubscription({ status: 'cancelled' }));
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('already_cancelled');
@@ -92,9 +81,7 @@ describe('CancelSubscriptionUseCase', () => {
     );
     subscriptionRepo.getSubscriptionProduct.mockResolvedValue(createSubscriptionProduct({ allowEarlyCancel: false }));
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'customer' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('early_cancel_not_allowed');
@@ -104,9 +91,7 @@ describe('CancelSubscriptionUseCase', () => {
   it('should return a failure when the repository throws', async () => {
     subscriptionRepo.cancelSubscription.mockRejectedValue(new Error('DB error'));
 
-    const result = await useCase.execute(
-      new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'admin' }),
-    );
+    const result = await useCase.execute(new CancelSubscriptionCommand({ customerSubscriptionId: 'sub-1', cancelledBy: 'admin' }));
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('cancellation_failed');

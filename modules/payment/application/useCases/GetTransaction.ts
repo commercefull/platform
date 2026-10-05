@@ -13,7 +13,6 @@ export class GetTransactionCommand {
   }
 }
 
-
 export interface TransactionDetailResponse {
   transactionId: string;
   orderId: string;
@@ -33,7 +32,6 @@ export interface TransactionDetailResponse {
   createdAt: string;
   updatedAt: string;
 }
-
 
 export class GetTransactionUseCase {
   constructor(private readonly paymentRepository: PaymentRepository) {}
@@ -76,4 +74,3 @@ export class GetTransactionUseCase {
     };
   }
 }
-

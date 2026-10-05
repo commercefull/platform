@@ -1,9 +1,7 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageCategoriesUseCase } from '../../application/useCases/wired';
 import type { CategoryUpdateProps } from '../../domain/repositories/ProductCatalogPorts';
-
-
 
 export const listCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findAll();

@@ -42,6 +42,9 @@ export interface PromotionEvaluationContext {
   shippingMethodId?: string;
   paymentMethodId?: string;
   couponCode?: string;
+  storeId?: string;
+  channelId?: string;
+  countryCode?: string;
   currency: string;
 }
 
@@ -173,6 +176,18 @@ export function promotionRuleMatches(
       const methods = value as string[];
       return methods.includes(context.paymentMethodId);
     }
+
+    case 'store':
+      return Boolean(context.storeId && (value as string[]).includes(context.storeId));
+
+    case 'channel':
+      return Boolean(context.channelId && (value as string[]).includes(context.channelId));
+
+    case 'country':
+      return Boolean(context.countryCode && (value as string[]).includes(context.countryCode));
+
+    case 'currency':
+      return (value as string[]).includes(context.currency);
 
     default:
       return false;

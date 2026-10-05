@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Theme Business Controller
  * Handles theme management, overrides, and assignment via /business/theme routes.
@@ -9,12 +9,7 @@ import { logger } from '../../../../libs/logger';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { CreateThemeCommand, CreateThemeOverrideCommand, AssignThemeToStoreCommand } from '../../application/useCases';
 import { themeRegistry } from '../../domain/services/ThemeRegistry';
-import {
-  manageThemesUseCase,
-  manageOverridesUseCase,
-  assignThemeUseCase,
-  resolveThemeUseCase,
-} from '../../application/wired';
+import { manageThemesUseCase, manageOverridesUseCase, assignThemeUseCase, resolveThemeUseCase } from '../../application/wired';
 
 class ThemeController {
   // ── Theme CRUD ──────────────────────────────────────────────
@@ -262,19 +257,19 @@ class ThemeController {
       }
 
       jsonResponse(res, 200, {
-                success: true,
-                data: {
-                  theme: resolved.theme.toJSON(),
-                  settings: resolved.settings,
-                  cssVariables: resolved.cssVariables,
-                  css: themeRegistry.generateCSS(resolved),
-                  headTags: themeRegistry.generateHeadTags(resolved),
-                  bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
-                  customLogoUrl: resolved.customLogoUrl,
-                  customFaviconUrl: resolved.customFaviconUrl,
-                  customBannerUrl: resolved.customBannerUrl,
-                },
-              });
+        success: true,
+        data: {
+          theme: resolved.theme.toJSON(),
+          settings: resolved.settings,
+          cssVariables: resolved.cssVariables,
+          css: themeRegistry.generateCSS(resolved),
+          headTags: themeRegistry.generateHeadTags(resolved),
+          bodyAttributes: themeRegistry.generateBodyAttributes(resolved),
+          customLogoUrl: resolved.customLogoUrl,
+          customFaviconUrl: resolved.customFaviconUrl,
+          customBannerUrl: resolved.customBannerUrl,
+        },
+      });
     } catch (error) {
       logger.error('Error resolving theme:', error);
       jsonResponse(res, 500, { success: false, message: 'Failed to resolve theme' });

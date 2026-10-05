@@ -120,18 +120,18 @@ The Coupon module manages discount codes and promotional rules. It supports perc
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/coupons` | `asyncHandler(listCoupons)` | — |
-| POST | `/coupons` | `asyncHandler(createCoupon)` | — |
-| GET | `/coupons/:couponId` | `asyncHandler(getCoupon)` | — |
-| DELETE | `/coupons/:couponId` | `asyncHandler(deleteCoupon)` | — |
-| POST | `/coupons/apply` | `asyncHandler(applyCoupon)` | — |
-| POST | `/coupons/apply` | `asyncHandler(applyCoupon)` | — |
-| POST | `/coupons/redeem` | `asyncHandler(redeemCoupon)` | — |
-| POST | `/coupons/validate` | `asyncHandler(validateCoupon)` | — |
-| POST | `/coupons/validate` | `asyncHandler(validateCoupon)` | — |
-| GET | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
-| GET | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | — |
+| Method | Endpoint                  | Controller                     | Description |
+| ------ | ------------------------- | ------------------------------ | ----------- |
+| GET    | `/coupons`                | `asyncHandler(listCoupons)`    | —           |
+| POST   | `/coupons`                | `asyncHandler(createCoupon)`   | —           |
+| GET    | `/coupons/:couponId`      | `asyncHandler(getCoupon)`      | —           |
+| DELETE | `/coupons/:couponId`      | `asyncHandler(deleteCoupon)`   | —           |
+| POST   | `/coupons/apply`          | `asyncHandler(applyCoupon)`    | —           |
+| POST   | `/coupons/apply`          | `asyncHandler(applyCoupon)`    | —           |
+| POST   | `/coupons/redeem`         | `asyncHandler(redeemCoupon)`   | —           |
+| POST   | `/coupons/validate`       | `asyncHandler(validateCoupon)` | —           |
+| POST   | `/coupons/validate`       | `asyncHandler(validateCoupon)` | —           |
+| GET    | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | —           |
+| GET    | `/coupons/validate/:code` | `asyncHandler(validateCoupon)` | —           |
 
 <!-- GENERATED:ENDPOINTS:END -->

@@ -38,4 +38,3 @@ export class GetSearchSuggestionsUseCase {
 }
 
 // ==================== Find Similar Products ====================
-

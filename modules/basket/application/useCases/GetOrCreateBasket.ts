@@ -8,6 +8,7 @@ import { BasketRepository } from '../../domain/repositories/BasketRepository';
 import { Basket } from '../../domain/entities/Basket';
 import { BasketValidationError } from '../../domain/errors/BasketErrors';
 import type { StoreCurrencyPort } from '../ports/StoreCurrencyPort';
+import type { StoreChannelPort } from '../ports/StoreChannelPort';
 import { eventBus } from '../../../../libs/events/eventBus';
 
 // ============================================================================
@@ -20,6 +21,7 @@ export class GetOrCreateBasketCommand {
     public readonly sessionId?: string,
     public readonly currency?: string,
     public readonly storeId?: string,
+    public readonly channelId?: string,
   ) {}
 }
 
@@ -32,6 +34,7 @@ export interface BasketResponse {
   customerId?: string;
   sessionId?: string;
   storeId?: string;
+  channelId?: string;
   status: string;
   currency: string;
   items: Array<{
@@ -58,6 +61,7 @@ function mapBasketToResponse(basket: Basket): BasketResponse {
     customerId: basket.customerId,
     sessionId: basket.sessionId,
     storeId: basket.storeId,
+    channelId: basket.channelId,
     status: basket.status,
     currency: basket.currency,
     items: basket.items.map(item => ({
@@ -87,10 +91,18 @@ export class GetOrCreateBasketUseCase {
   constructor(
     private readonly basketRepository: BasketRepository,
     private readonly storeCurrencyPort?: StoreCurrencyPort,
+    private readonly storeChannelPort?: StoreChannelPort,
   ) {}
 
   async execute(command: GetOrCreateBasketCommand): Promise<BasketResponse> {
-    let basket = await this.basketRepository.findActiveBasket(command.customerId, command.sessionId);
+    if (command.channelId && !command.storeId) {
+      throw new BasketValidationError('A sales channel requires a store context');
+    }
+    if (command.channelId && command.storeId && this.storeChannelPort) {
+      const assigned = await this.storeChannelPort.isAssigned(command.storeId, command.channelId);
+      if (!assigned) throw new BasketValidationError('Sales channel is not active for this store');
+    }
+    let basket = await this.basketRepository.findActiveBasket(command.customerId, command.sessionId, command.storeId, command.channelId);
     let isNew = false;
 
     if (!basket) {
@@ -113,6 +125,7 @@ export class GetOrCreateBasketUseCase {
         customerId: command.customerId,
         sessionId: command.sessionId,
         storeId: command.storeId,
+        channelId: command.channelId,
         currency: currency || 'USD',
       });
 

@@ -1,6 +1,5 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-
 
 import type { CreateAttributeCommand } from '../../application/useCases/attribute/CreateAttribute';
 import type { AddAttributeValueCommand } from '../../application/useCases/attribute/AddAttributeValue';
@@ -38,9 +37,9 @@ class AttributeController {
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: attributes,
-          });
+      success: true,
+      data: attributes,
+    });
   }
 
   /**
@@ -52,9 +51,9 @@ class AttributeController {
     const attributes = await manageAttributesUseCase.list({ groupId });
 
     jsonResponse(res, 200, {
-            success: true,
-            data: attributes,
-          });
+      success: true,
+      data: attributes,
+    });
   }
 
   /**
@@ -67,9 +66,9 @@ class AttributeController {
 
     if (!attribute) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute not found',
-              });
+        success: false,
+        error: 'Attribute not found',
+      });
       return;
     }
 
@@ -81,12 +80,12 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: {
-              ...attribute,
-              values,
-            },
-          });
+      success: true,
+      data: {
+        ...attribute,
+        values,
+      },
+    });
   }
 
   /**
@@ -99,16 +98,16 @@ class AttributeController {
 
     if (!attribute) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute not found',
-              });
+        success: false,
+        error: 'Attribute not found',
+      });
       return;
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            data: attribute,
-          });
+      success: true,
+      data: attribute,
+    });
   }
 
   /**
@@ -164,27 +163,27 @@ class AttributeController {
     const attribute = await manageAttributesUseCase.findById(id);
     if (!attribute) {
       jsonResponse(res, 404, {
-                success: false,
-                error: 'Attribute not found',
-              });
+        success: false,
+        error: 'Attribute not found',
+      });
       return;
     }
 
     // Prevent deleting system attributes
     if (attribute.isSystem) {
       jsonResponse(res, 400, {
-                success: false,
-                error: 'Cannot delete system attributes',
-              });
+        success: false,
+        error: 'Cannot delete system attributes',
+      });
       return;
     }
 
     await manageAttributesUseCase.delete(id);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Attribute deleted successfully',
-          });
+      success: true,
+      message: 'Attribute deleted successfully',
+    });
   }
 
   // ==================== ATTRIBUTE VALUES ====================
@@ -244,9 +243,9 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Attribute value removed successfully',
-          });
+      success: true,
+      message: 'Attribute value removed successfully',
+    });
   }
 
   // ==================== PRODUCT ATTRIBUTES ====================
@@ -331,9 +330,9 @@ class AttributeController {
     }
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Product attribute removed successfully',
-          });
+      success: true,
+      message: 'Product attribute removed successfully',
+    });
   }
 }
 

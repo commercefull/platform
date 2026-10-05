@@ -43,4 +43,3 @@ export class ManageStorefrontNotificationsUseCase {
     return this.storefrontNotifications.upsertPreferences(userId, prefs);
   }
 }
-

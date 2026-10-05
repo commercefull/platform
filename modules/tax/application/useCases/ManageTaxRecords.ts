@@ -1,20 +1,8 @@
-import type {
-  CustomerTaxExemption,
-  TaxCategory,
-  TaxExemptionStatus,
-  TaxRate,
-  TaxZone,
-} from '../../taxTypes';
+import type { CustomerTaxExemption, TaxCategory, TaxExemptionStatus, TaxRate, TaxZone } from '../../taxTypes';
 
 interface TaxQueryPort {
   findTaxRateById(id: string): Promise<TaxRate | null>;
-  findAllTaxRates(
-    status?: boolean,
-    country?: string,
-    region?: string,
-    limit?: number,
-    offset?: number,
-  ): Promise<TaxRate[]>;
+  findAllTaxRates(status?: boolean, country?: string, region?: string, limit?: number, offset?: number): Promise<TaxRate[]>;
   findTaxRatesByCategoryAndZone(categoryId: string, zoneId: string, status?: TaxRate['isActive']): Promise<TaxRate[]>;
   findTaxZoneById(id: string): Promise<TaxZone | null>;
   findTaxZoneForAddress(country: string, state?: string, postalCode?: string, city?: string): Promise<TaxZone | null>;

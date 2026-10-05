@@ -1,10 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  TEST_CONTENT_TYPE_ID,
-  TEST_CONTENT_PAGE_ID,
-  TEST_CONTENT_TEMPLATE_ID,
-  ADMIN_CREDENTIALS,
-} from '../testConstants';
+import { TEST_CONTENT_TYPE_ID, TEST_CONTENT_PAGE_ID, TEST_CONTENT_TEMPLATE_ID, ADMIN_CREDENTIALS } from '../testConstants';
 
 // Create axios client for tests
 const createClient = () =>

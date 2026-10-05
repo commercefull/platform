@@ -97,6 +97,7 @@ export class Product {
     isDownloadable?: boolean;
     isSubscription?: boolean;
     isTaxable?: boolean;
+    isInventoryManaged?: boolean;
     taxClass?: string;
     hasVariants?: boolean;
     variantAttributes?: Record<string, unknown>;
@@ -142,6 +143,7 @@ export class Product {
       isDownloadable: props.isDownloadable || false,
       isSubscription: props.isSubscription || false,
       isTaxable: props.isTaxable !== false,
+      isInventoryManaged: props.isInventoryManaged ?? !(props.isVirtual || props.isDownloadable),
       taxClass: props.taxClass,
       hasVariants: props.hasVariants || false,
       variantAttributes: props.variantAttributes,
@@ -231,8 +233,8 @@ export class Product {
     return this.props.isTaxable;
   }
   /** Whether the product tracks stock (product.isInventoryManaged column). */
-  get isInventoryManaged(): boolean | undefined {
-    return this.props.isInventoryManaged;
+  get isInventoryManaged(): boolean {
+    return this.props.isInventoryManaged ?? true;
   }
   get taxClass(): string | undefined {
     return this.props.taxClass;
@@ -550,6 +552,7 @@ export class Product {
       isDownloadable: this.props.isDownloadable,
       isSubscription: this.props.isSubscription,
       isTaxable: this.props.isTaxable,
+      isInventoryManaged: this.isInventoryManaged,
       taxClass: this.props.taxClass,
       hasVariants: this.props.hasVariants,
       variantAttributes: this.props.variantAttributes,

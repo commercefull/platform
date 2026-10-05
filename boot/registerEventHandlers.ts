@@ -24,6 +24,7 @@ import { TrackingConfigRepositoryImpl } from '../modules/tracking/infrastructure
 
 import { registerOrderPaymentEventHandlers } from '../modules/order/application/eventHandlers';
 import { registerInventoryEventHandlers } from '../modules/inventory/application/eventHandlers';
+import { releaseReservationUseCase } from '../modules/inventory/application/wired';
 import { registerFulfillmentEventHandlers } from '../modules/fulfillment/application/eventHandlers';
 import { registerLoyaltyEventHandlers } from '../modules/loyalty/application/eventHandlers';
 import { registerStoreEventHandlers } from '../modules/store/application/eventHandlers';
@@ -67,7 +68,12 @@ const eventHandlerModules: { module: string; register: () => void }[] = [
         orders: OrderDataRepo.commands,
         returns: new ReturnRequestRepositoryImpl(),
         stock: InventoryDataRepo.stock,
-        reservations: InventoryDataRepo.reservations,
+        reservations: {
+          createAtomic: InventoryDataRepo.reservations.createAtomic,
+          releaseByOrder: InventoryDataRepo.reservations.releaseByOrder,
+          findByOrder: InventoryDataRepo.reservations.findByOrder,
+          releaseActiveForOrder: (orderId, reason) => releaseReservationUseCase.execute({ orderId, reason }),
+        },
       }),
   },
   {

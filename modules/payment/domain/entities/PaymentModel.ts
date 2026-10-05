@@ -24,7 +24,7 @@ export type PaymentGateway = {
   checkoutSettings: unknown | null;
   metadata: unknown | null;
   deletedAt: Date | null;
-}
+};
 
 export type PaymentMethodConfig = {
   paymentMethodConfigId: string;
@@ -46,7 +46,7 @@ export type PaymentMethodConfig = {
   configuration: unknown | null;
   metadata: unknown | null;
   deletedAt: Date | null;
-}
+};
 
 export type PaymentTransactionRecord = {
   paymentTransactionId: string;
@@ -76,7 +76,7 @@ export type PaymentTransactionRecord = {
   authorizedAt: Date | null;
   capturedAt: Date | null;
   deletedAt: Date | null;
-}
+};
 
 export type PaymentRefundRecord = {
   paymentRefundId: string;
@@ -97,5 +97,4 @@ export type PaymentRefundRecord = {
   errorMessage: string | null;
   processedAt: Date | null;
   metadata: unknown | null;
-}
-
+};

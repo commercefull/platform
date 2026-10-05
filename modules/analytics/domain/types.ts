@@ -4,6 +4,7 @@ export interface ProductPerformance {
   productVariantId?: string;
   date: Date;
   channel: string;
+  salesChannelId?: string;
   views: number;
   uniqueViews: number;
   detailViews: number;
@@ -58,6 +59,7 @@ export interface AnalyticsReportEvent {
   sessionId?: string;
   visitorId?: string;
   channel?: string;
+  salesChannelId?: string;
   eventData?: Record<string, unknown>;
   eventValueCents?: number;
   eventQuantity?: number;

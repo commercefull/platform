@@ -36,4 +36,3 @@ describe('AdminAuthUseCase', () => {
     expect(result[0].storeId).toBe('store-1');
   });
 });
-

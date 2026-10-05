@@ -744,5 +744,14 @@
   "emailPlaceholder": "your@email.com",
   "phonePlaceholder": "Numri juaj i telefonit",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "MM/YY"
+  "cardExpiryPlaceholder": "MM/YY",
+  "collections": "Koleksione",
+  "collectionsHeroDesc": "Eksploroni koleksionet tona të përzgjedhura",
+  "viewCollection": "Shiko koleksionin",
+  "noCollections": "Ende nuk ka koleksione",
+  "noCollectionsDesc": "Kontrolloni së shpejti — po përgatisim koleksione të reja.",
+  "collectionEmpty": "Ky koleksion ende nuk ka produkte",
+  "collectionEmptyDesc": "Kontrolloni së shpejti ose shfletoni të gjithë katalogun.",
+  "backToCollections": "Kthehu te koleksionet",
+  "featured": "I veçantë"
 }

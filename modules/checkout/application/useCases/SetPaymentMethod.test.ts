@@ -23,7 +23,10 @@ describe('SetPaymentMethodUseCase', () => {
     expect(result.checkoutId).toBe('ck-1');
     expect(result.paymentMethodId).toBe('pm-card');
     expect(checkoutRepository.save).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'paymentMethod', methodId: 'pm-card' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'paymentMethod', methodId: 'pm-card' }),
+    );
   });
 
   it('should throw NotFoundError when the session does not exist', async () => {

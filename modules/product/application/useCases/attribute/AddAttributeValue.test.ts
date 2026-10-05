@@ -1,4 +1,3 @@
-
 import { AddAttributeValueUseCase } from './AddAttributeValue';
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
 import { createAttribute, createAttributeValue, lazyMock } from '../../../tests/testUtils';
@@ -64,9 +63,7 @@ describe('AddAttributeValueUseCase', () => {
     const result = await useCase.execute({ attributeId: 'a1', value: 'Green' });
 
     expect(result.success).toBe(true);
-    expect(mockRepo.createAttributeValue).toHaveBeenCalledWith(
-      expect.objectContaining({ attributeId: 'a1', value: 'Green', position: 2 }),
-    );
+    expect(mockRepo.createAttributeValue).toHaveBeenCalledWith(expect.objectContaining({ attributeId: 'a1', value: 'Green', position: 2 }));
   });
 
   it('should return failure when the repository throws', async () => {

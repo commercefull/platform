@@ -10,7 +10,6 @@ export interface MembershipAdminProgramsPort {
   findRecentLoyaltyTransactions(limit?: number): Promise<unknown[]>;
 }
 
-
 export class ManageMembershipProgramsUseCase {
   constructor(private readonly adminProgramsRepo: MembershipAdminProgramsPort) {}
 
@@ -42,4 +41,3 @@ export class ManageMembershipProgramsUseCase {
     return this.adminProgramsRepo.findRecentLoyaltyTransactions(limit);
   }
 }
-

@@ -1,7 +1,10 @@
 import '../../tests/testUtils';
 import { ManageCompanyUseCase } from './ManageCompany';
 import {
-  CompanyAlreadyExistsError, CompanyNotFoundError, CompanyStatusError, CreditLimitExceededError,
+  CompanyAlreadyExistsError,
+  CompanyNotFoundError,
+  CompanyStatusError,
+  CreditLimitExceededError,
 } from '../../domain/errors/B2BErrors';
 import type { CompanyRepository } from '../../domain/repositories/B2BRepository';
 import { createCompany, emitMock, lazyMock } from '../../tests/testUtils';

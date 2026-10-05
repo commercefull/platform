@@ -5,10 +5,7 @@
  * controllers and resolvers.
  */
 
-import {
-  IFulfillmentRepository,
-  FulfillmentFilters,
-} from '../../domain/repositories/FulfillmentRepository';
+import { IFulfillmentRepository, FulfillmentFilters } from '../../domain/repositories/FulfillmentRepository';
 import { FulfillmentNotFoundError } from '../../domain/errors/FulfillmentErrors';
 import { SourceType } from '../../domain/entities/Fulfillment';
 import { PaginationOptions } from 'libs/types/pagination';

@@ -1,4 +1,3 @@
-
 import { SearchProductsUseCase } from './SearchProducts';
 import type { ProductSearchServicePort } from './SearchProducts';
 import { createProductSearchRow, lazyMock } from '../../../tests/testUtils';

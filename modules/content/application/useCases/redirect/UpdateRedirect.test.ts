@@ -38,9 +38,7 @@ describe('UpdateRedirectUseCase', () => {
       createContentRedirect({ contentRedirectId: 'red-1', sourceUrl: '/same', targetUrl: '/new' }),
     );
 
-    await expect(useCase.execute(new UpdateRedirectCommand('red-1', { targetUrl: '/same' }))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(useCase.execute(new UpdateRedirectCommand('red-1', { targetUrl: '/same' }))).rejects.toThrow(ContentValidationError);
     expect(mockRepo.updateRedirect).not.toHaveBeenCalled();
   });
 

@@ -1,13 +1,9 @@
- 
 /**
  * Redeem Gift Card Use Case
  * Handles gift card redemption for orders
  */
 
-import type {
-  GiftCardRepository,
-  PromotionGiftCardTransaction,
-} from '../../domain/repositories/GiftCardRepository';
+import type { GiftCardRepository, PromotionGiftCardTransaction } from '../../domain/repositories/GiftCardRepository';
 
 // ============================================================================
 // Command
@@ -39,9 +35,7 @@ export interface RedeemGiftCardResponse {
 // ============================================================================
 
 export class RedeemGiftCardUseCase {
-  constructor(
-    private readonly giftCardRepo: Pick<GiftCardRepository, 'getGiftCardByCode' | 'redeemGiftCard' | 'getGiftCard'>,
-  ) {}
+  constructor(private readonly giftCardRepo: Pick<GiftCardRepository, 'getGiftCardByCode' | 'redeemGiftCard' | 'getGiftCard'>) {}
 
   async execute(command: RedeemGiftCardCommand): Promise<RedeemGiftCardResponse> {
     // Validate input

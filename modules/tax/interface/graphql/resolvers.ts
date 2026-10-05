@@ -2,11 +2,7 @@ import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/g
 import { CalculateOrderTaxCommand, OrderLineItem, TaxAddress } from '../../application/useCases/CalculateOrderTax';
 import type { CreateTaxRateInput } from '../../application/useCases/CreateTaxRate';
 import type { GetTaxRateForAddressInput } from '../../application/useCases/GetTaxRateForAddress';
-import {
-  calculateOrderTaxUseCase,
-  getTaxRateForAddressUseCase,
-  createTaxRateUseCase,
-} from '../../application/wired';
+import { calculateOrderTaxUseCase, getTaxRateForAddressUseCase, createTaxRateUseCase } from '../../application/wired';
 
 export const taxResolvers = {
   Query: {

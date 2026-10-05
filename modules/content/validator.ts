@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 import type { HttpHandler, HttpRequest } from 'libs/http';
 
 type FieldCheck = (value: unknown) => boolean;
@@ -9,7 +9,10 @@ interface ValidatedRequest extends HttpRequest {
 
 const isNonEmpty: FieldCheck = value => typeof value === 'string' && value.trim().length > 0;
 const isEmail: FieldCheck = value => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const minLength = (min: number): FieldCheck => value => typeof value === 'string' && value.length >= min;
+const minLength =
+  (min: number): FieldCheck =>
+  value =>
+    typeof value === 'string' && value.length >= min;
 const isPhone: FieldCheck = value => typeof value === 'string' && /^\+?[0-9\s().-]{5,20}$/.test(value);
 
 /**

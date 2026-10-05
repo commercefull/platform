@@ -9,6 +9,11 @@
 import { TaxQuotePort, TaxQuoteRequest, TaxQuoteResult } from '../../application/ports/TaxQuotePort';
 import type { CalculateOrderTaxUseCase } from '../../../tax/application/useCases/CalculateOrderTax';
 import type taxSettingsRepo from '../../../tax/infrastructure/repositories/taxSettingsRepo';
+import {
+  extractCountryFromVat,
+  formatVatNumber,
+  validateVatNumberFormat,
+} from '../../../tax/infrastructure/repositories/taxVatRegistrationRepo';
 
 export class TaxTaxQuoteAdapter implements TaxQuotePort {
   constructor(
@@ -24,15 +29,25 @@ export class TaxTaxQuoteAdapter implements TaxQuotePort {
         shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
         pricesIncludeTax: request.pricesIncludeTax ?? false,
+        vatNumber: request.vatNumber,
+        organizationId: request.organizationId,
+        originCountry: request.originCountry,
       });
       return {
         success: taxResult.success,
         taxAmountCents: taxResult.success ? taxResult.taxAmountCents : 0,
+        taxAddedCents: taxResult.taxAddedCents,
         taxIncludedInSubtotal: taxResult.taxIncludedInSubtotal,
+        reverseChargeApplied: taxResult.reverseChargeApplied,
       };
     } catch {
       return { success: false, taxAmountCents: 0 };
     }
+  }
+
+  validateVatNumber(vatNumber: string, countryCode?: string): boolean {
+    const country = countryCode ?? extractCountryFromVat(vatNumber) ?? undefined;
+    return validateVatNumberFormat(formatVatNumber(vatNumber, country), country ?? '');
   }
 
   async getTaxSettings(

@@ -7,7 +7,6 @@ import { MetaCAPIAdapter } from '../../domain/services/MetaCAPIAdapter';
 import { TrackingConfigNotFoundError, TrackingEventNotMappedError } from '../../domain/errors/TrackingErrors';
 import { logger } from '../../../../libs/logger';
 
-
 // ============================================================================
 // Process Tracking Event
 // ============================================================================

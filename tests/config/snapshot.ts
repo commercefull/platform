@@ -140,19 +140,7 @@ export const createSnapshot = async (config: DbConfig, dumpDirPath: string): Pro
     // Use host pg_dump directly (CI runner / no Docker container available)
     await execPromise(
       'pg_dump',
-      [
-        '-h',
-        config.host,
-        '-p',
-        config.port.toString(),
-        '-U',
-        config.user,
-        '-Fc',
-        '-d',
-        config.database,
-        '-f',
-        dumpFile,
-      ],
+      ['-h', config.host, '-p', config.port.toString(), '-U', config.user, '-Fc', '-d', config.database, '-f', dumpFile],
       { PGPASSWORD: config.password },
     );
   }

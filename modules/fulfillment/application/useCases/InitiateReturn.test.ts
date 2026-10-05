@@ -9,7 +9,7 @@ describe('InitiateReturnUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
+    fulfillmentRepository.save.mockImplementation(async f => f);
   });
 
   it('should mark a delivered fulfillment as returned', async () => {

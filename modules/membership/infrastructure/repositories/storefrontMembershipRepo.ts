@@ -41,9 +41,7 @@ export async function findActiveMembershipWithPlan(customerId: string): Promise<
 }
 
 export async function findActiveMembershipByCustomerId(customerId: string): Promise<unknown | null> {
-  return await queryOne<unknown>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active'`, [
-    customerId,
-  ]);
+  return await queryOne<unknown>(`SELECT * FROM "membershipSubscription" WHERE "customerId" = $1 AND "status" = 'active'`, [customerId]);
 }
 
 export async function createMembership(customerId: string, planId: string): Promise<void> {

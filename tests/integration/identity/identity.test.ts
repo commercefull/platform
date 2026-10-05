@@ -39,7 +39,7 @@ describe('Identity Feature Tests', () => {
         expect(response.data.customer).toHaveProperty('id');
         expect(response.data.customer).toHaveProperty('email', TEST_CUSTOMER.email);
 
-    customerToken = response.data.accessToken;
+        customerToken = response.data.accessToken;
       });
 
       it('should reject invalid credentials', async () => {

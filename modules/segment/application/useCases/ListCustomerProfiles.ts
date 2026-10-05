@@ -8,4 +8,3 @@ export class ListCustomerProfilesUseCase {
     return this.profileRepo.findAll(limit, offset);
   }
 }
-

@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageOrganizationsUseCase, Organization } from '../../application/wired';
 import type { OrganizationStatus } from '../../domain/entities/Organization';
@@ -84,10 +84,10 @@ export const getOrganizations = async (req: HttpRequest, res: HttpResponse): Pro
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: orgs,
-        pagination: { limit, offset, total: orgs.length },
-      });
+    success: true,
+    data: orgs,
+    pagination: { limit, offset, total: orgs.length },
+  });
 };
 
 export const getOrganizationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -257,19 +257,19 @@ export const updateOrganizationAddress = async (
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          ...existingAddress,
-          addressLine1: addressLine1 || existingAddress.addressLine1,
-          addressLine2: addressLine2 !== undefined ? addressLine2 : existingAddress.addressLine2,
-          city: city || existingAddress.city,
-          state: state || existingAddress.state,
-          postalCode: postalCode || existingAddress.postalCode,
-          country: country || existingAddress.country,
-          isDefault: isDefault !== undefined ? isDefault : existingAddress.isDefault,
-        },
-        message: 'Organization address updated successfully',
-      });
+    success: true,
+    data: {
+      ...existingAddress,
+      addressLine1: addressLine1 || existingAddress.addressLine1,
+      addressLine2: addressLine2 !== undefined ? addressLine2 : existingAddress.addressLine2,
+      city: city || existingAddress.city,
+      state: state || existingAddress.state,
+      postalCode: postalCode || existingAddress.postalCode,
+      country: country || existingAddress.country,
+      isDefault: isDefault !== undefined ? isDefault : existingAddress.isDefault,
+    },
+    message: 'Organization address updated successfully',
+  });
 };
 
 export const getOrganizationPaymentInfo = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -341,21 +341,24 @@ export const updateOrganizationPaymentInfo = async (
 
   const existingPaymentInfo = await repo.findPaymentInfoById(paymentInfoId);
   if (!existingPaymentInfo || existingPaymentInfo.organizationId !== organizationId) {
-    jsonResponse(res, 404, { success: false, message: `Payment info with ID ${paymentInfoId} not found for organization ${organizationId}` });
+    jsonResponse(res, 404, {
+      success: false,
+      message: `Payment info with ID ${paymentInfoId} not found for organization ${organizationId}`,
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          ...existingPaymentInfo,
-          accountHolderName: accountHolderName || existingPaymentInfo.accountHolderName,
-          bankName: bankName !== undefined ? bankName : existingPaymentInfo.bankName,
-          accountNumber: accountNumber !== undefined ? accountNumber : existingPaymentInfo.accountNumber,
-          routingNumber: routingNumber !== undefined ? routingNumber : existingPaymentInfo.routingNumber,
-          paymentType: paymentType || existingPaymentInfo.paymentType,
-          isVerified: isVerified !== undefined ? isVerified : existingPaymentInfo.isVerified,
-        },
-        message: 'Organization payment information updated successfully',
-      });
+    success: true,
+    data: {
+      ...existingPaymentInfo,
+      accountHolderName: accountHolderName || existingPaymentInfo.accountHolderName,
+      bankName: bankName !== undefined ? bankName : existingPaymentInfo.bankName,
+      accountNumber: accountNumber !== undefined ? accountNumber : existingPaymentInfo.accountNumber,
+      routingNumber: routingNumber !== undefined ? routingNumber : existingPaymentInfo.routingNumber,
+      paymentType: paymentType || existingPaymentInfo.paymentType,
+      isVerified: isVerified !== undefined ? isVerified : existingPaymentInfo.isVerified,
+    },
+    message: 'Organization payment information updated successfully',
+  });
 };

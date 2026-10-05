@@ -53,6 +53,8 @@ interface BasketOptions {
   basketId?: string;
   customerId?: string;
   sessionId?: string;
+  storeId?: string;
+  channelId?: string;
   currency?: string;
   expiresAt?: Date;
   items?: BasketItem[];
@@ -63,6 +65,8 @@ export function createBasket(options: BasketOptions = {}): Basket {
     basketId: options.basketId ?? BASKET_ID,
     customerId: options.customerId,
     sessionId: options.sessionId,
+    storeId: options.storeId,
+    channelId: options.channelId,
     currency: options.currency,
     expiresAt: options.expiresAt,
   });

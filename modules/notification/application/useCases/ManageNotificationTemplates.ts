@@ -1,4 +1,7 @@
-import type { NotificationTemplateCreateParams, NotificationTemplateRepository } from '../../domain/repositories/NotificationTemplateRepository';
+import type {
+  NotificationTemplateCreateParams,
+  NotificationTemplateRepository,
+} from '../../domain/repositories/NotificationTemplateRepository';
 import { NotificationTemplateNotFoundError, NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 export class ManageNotificationTemplatesUseCase {

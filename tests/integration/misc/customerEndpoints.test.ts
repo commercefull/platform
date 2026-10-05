@@ -123,11 +123,7 @@ describe('Miscellaneous Endpoint Coverage', () => {
 
   describe('Theme delete', () => {
     it('POST + DELETE /business/theme/:themeId removes a theme', async () => {
-      const create = await client.post(
-        '/business/theme',
-        { name: `Cov Theme ${Date.now()}`, slug: `cov-theme-${Date.now()}` },
-        auth(),
-      );
+      const create = await client.post('/business/theme', { name: `Cov Theme ${Date.now()}`, slug: `cov-theme-${Date.now()}` }, auth());
       expectStatus(create, 201);
       const themeId = create.data.data.themeId || create.data.data.id;
 

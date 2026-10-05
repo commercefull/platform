@@ -128,21 +128,13 @@ describe('Content Detail Endpoints', () => {
       expectStatus(cat, 201);
       const categoryId = cat.data.data.contentCategoryId || cat.data.data.id;
 
-      const resp = await client.post(
-        `/business/content/pages/${pageId}/categories`,
-        { categoryId },
-        auth(),
-      );
+      const resp = await client.post(`/business/content/pages/${pageId}/categories`, { categoryId }, auth());
       expectStatus(resp, 201);
       categorizationId = resp.data.data.categorizationId || resp.data.data.contentCategorizationId;
     });
 
     it('POST /business/content/pages/:pageId/categories/primary sets the primary category', async () => {
-      const resp = await client.post(
-        `/business/content/pages/${pageId}/categories/primary`,
-        { categorizationId },
-        auth(),
-      );
+      const resp = await client.post(`/business/content/pages/${pageId}/categories/primary`, { categorizationId }, auth());
       expectStatus(resp, 200);
     });
 

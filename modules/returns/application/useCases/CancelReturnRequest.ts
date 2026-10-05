@@ -23,4 +23,3 @@ export class CancelReturnRequestUseCase {
     return updated;
   }
 }
-

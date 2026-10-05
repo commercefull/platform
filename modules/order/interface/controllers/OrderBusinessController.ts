@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Order Business Controller
  * HTTP interface for business/admin order operations with content negotiation
@@ -40,6 +40,7 @@ import {
   getOrderHistoryUseCase,
   getStoreSalesSummaryUseCase,
 } from '../../application/useCases/wired';
+import { manageSalesChannelsUseCase } from '../../../store/application/useCases/wired';
 import { isUuid } from '../../../../libs/uuid';
 import { OrderNotFoundError, RefundAmountMustBePositiveError } from '../../domain/errors/OrderErrors';
 
@@ -53,6 +54,25 @@ function respond(req: HttpRequest, res: HttpResponse, data: unknown, statusCode:
 
 function respondError(req: HttpRequest, res: HttpResponse, message: string, statusCode: number = 500): void {
   jsonResponse(res, statusCode, { success: false, error: message });
+}
+
+/**
+ * Rejects storeId/channelId values that do not exist, are inactive, do not
+ * belong to the caller's organization, or are not assigned to each other.
+ * Returns the response error string, or null when valid.
+ */
+async function storeChannelError(req: HttpRequest, storeId: string | undefined, channelId: string | undefined): Promise<string | null> {
+  if (!storeId && !channelId) return null;
+  try {
+    await manageSalesChannelsUseCase.assertStoreChannelAccess({
+      organizationId: req.user?.organizationId,
+      storeId,
+      channelId,
+    });
+    return null;
+  } catch (err: unknown) {
+    return (err as Error).message;
+  }
 }
 
 // ============================================================================
@@ -83,6 +103,12 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
     orderBy,
     orderDirection,
   } = req.query;
+
+  const scopeError = await storeChannelError(req, storeId as string | undefined, channelId as string | undefined);
+  if (scopeError) {
+    respondError(req, res, scopeError, 400);
+    return;
+  }
 
   const filters: OrderFilters = {};
   if (customerId) filters.customerId = customerId as string;
@@ -144,6 +170,12 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
 
   if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
     respondError(req, res, 'Order must contain at least one item', 400);
+    return;
+  }
+
+  const scopeError = await storeChannelError(req, body.storeId, body.channelId);
+  if (scopeError) {
+    respondError(req, res, scopeError, 400);
     return;
   }
 
@@ -276,6 +308,12 @@ export const processRefund = async (req: HttpRequest, res: HttpResponse): Promis
 export const getOrderStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { startDate, endDate, customerId, storeId, channelId, createdByUserId, orderSource } = req.query;
 
+  const scopeError = await storeChannelError(req, storeId as string | undefined, channelId as string | undefined);
+  if (scopeError) {
+    respondError(req, res, scopeError, 400);
+    return;
+  }
+
   const filters: OrderFilters = {};
   if (startDate) filters.startDate = new Date(startDate as string);
   if (endDate) filters.endDate = new Date(endDate as string);
@@ -291,6 +329,12 @@ export const getOrderStats = async (req: HttpRequest, res: HttpResponse): Promis
 };
 
 export const getStoreSalesSummary = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const scopeError = await storeChannelError(req, req.query.storeId as string | undefined, undefined);
+  if (scopeError) {
+    respondError(req, res, scopeError, 400);
+    return;
+  }
+
   const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom as string) : new Date(new Date().setDate(new Date().getDate() - 30));
   const dateTo = req.query.dateTo ? new Date(req.query.dateTo as string) : new Date();
 

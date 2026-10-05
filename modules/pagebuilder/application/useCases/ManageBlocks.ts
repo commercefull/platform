@@ -143,4 +143,3 @@ export class ManageBlocksUseCase {
     return saved;
   }
 }
-

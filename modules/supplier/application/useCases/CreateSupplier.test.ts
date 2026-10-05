@@ -27,9 +27,9 @@ describe('CreateSupplierUseCase', () => {
       createdAt: new Date('2026-01-01'),
     });
 
-    await expect(
-      new CreateSupplierUseCase(repository).execute({ name: 'New', email: 'contact@acme.com' }),
-    ).rejects.toThrow(SupplierValidationError);
+    await expect(new CreateSupplierUseCase(repository).execute({ name: 'New', email: 'contact@acme.com' })).rejects.toThrow(
+      SupplierValidationError,
+    );
     expect(repository.create).not.toHaveBeenCalled();
   });
 

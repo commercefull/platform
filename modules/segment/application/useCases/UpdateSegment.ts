@@ -27,4 +27,3 @@ export class UpdateSegmentUseCase {
     return updated;
   }
 }
-

@@ -1,4 +1,7 @@
-import type { NotificationWebhookCreateParams, NotificationWebhookRepository } from '../../domain/repositories/NotificationWebhookRepository';
+import type {
+  NotificationWebhookCreateParams,
+  NotificationWebhookRepository,
+} from '../../domain/repositories/NotificationWebhookRepository';
 
 export class ManageNotificationWebhooksAdminUseCase {
   constructor(private readonly notificationWebhookRepo: NotificationWebhookRepository) {}

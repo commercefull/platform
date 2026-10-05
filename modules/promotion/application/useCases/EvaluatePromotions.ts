@@ -33,10 +33,7 @@ export type {
 
 export class EvaluatePromotionsUseCase {
   constructor(
-    private readonly promotionRepo: Pick<
-      PromotionRepository,
-      'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'
-    >,
+    private readonly promotionRepo: Pick<PromotionRepository, 'findActive' | 'findRulesByPromotionId' | 'findActionsByPromotionId'>,
   ) {}
 
   /**

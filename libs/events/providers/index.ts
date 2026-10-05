@@ -37,10 +37,7 @@ export function resolveEventBusProvider(env: NodeJS.ProcessEnv = process.env): E
   return 'memory';
 }
 
-async function createEventTransport(
-  dispatch: DispatchFn,
-  env: NodeJS.ProcessEnv = process.env,
-): Promise<EventTransport> {
+async function createEventTransport(dispatch: DispatchFn, env: NodeJS.ProcessEnv = process.env): Promise<EventTransport> {
   const provider = resolveEventBusProvider(env);
 
   switch (provider) {

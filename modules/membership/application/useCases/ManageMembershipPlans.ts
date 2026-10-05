@@ -1,8 +1,4 @@
-import type {
-  MembershipPlan,
-  CreateMembershipPlanInput,
-  UpdateMembershipPlanInput,
-} from '../../domain/repositories/MembershipRepository';
+import type { MembershipPlan, CreateMembershipPlanInput, UpdateMembershipPlanInput } from '../../domain/repositories/MembershipRepository';
 
 export interface MembershipPlansPort {
   findAll(activeOnly?: boolean): Promise<MembershipPlan[]>;
@@ -14,7 +10,6 @@ export interface MembershipPlansPort {
   deactivate(id: string): Promise<MembershipPlan | null>;
   remove(id: string): Promise<boolean>;
 }
-
 
 export class ManageMembershipPlansUseCase {
   constructor(private readonly membershipPlanRepo: MembershipPlansPort) {}
@@ -44,4 +39,3 @@ export class ManageMembershipPlansUseCase {
     return this.membershipPlanRepo.remove(id);
   }
 }
-

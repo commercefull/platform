@@ -15,7 +15,7 @@ describe('AddBlockToPageUseCase', () => {
     mockRepo.findPageById.mockResolvedValue(createContentPage({ contentPageId: 'p1' }));
     mockRepo.findBlockTypeById.mockResolvedValue(createContentBlockType({ contentBlockTypeId: 'bt-1' }));
     mockRepo.findBlocksByPageId.mockResolvedValue([]);
-    mockRepo.createBlock.mockImplementation(async (params) => createContentBlock({ ...params, contentBlockId: 'b1' }));
+    mockRepo.createBlock.mockImplementation(async params => createContentBlock({ ...params, contentBlockId: 'b1' }));
     useCase = new AddBlockToPageUseCase(mockRepo);
   });
 
@@ -27,7 +27,10 @@ describe('AddBlockToPageUseCase', () => {
   });
 
   it('should auto-assign sort order when not provided', async () => {
-    mockRepo.findBlocksByPageId.mockResolvedValue([createContentBlock({ contentBlockId: 'b1' }), createContentBlock({ contentBlockId: 'b2' })]);
+    mockRepo.findBlocksByPageId.mockResolvedValue([
+      createContentBlock({ contentBlockId: 'b1' }),
+      createContentBlock({ contentBlockId: 'b2' }),
+    ]);
     mockRepo.createBlock.mockResolvedValue(createContentBlock({ contentBlockId: 'b3', title: 'Third', sortOrder: 2 }));
 
     const result = await useCase.execute(new AddBlockToPageCommand('p1', 'bt-1', 'Third', {}));

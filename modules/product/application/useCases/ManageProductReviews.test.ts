@@ -1,4 +1,3 @@
-
 import { ManageProductReviewsUseCase } from './ManageProductReviews';
 import { createProductReview, lazyMock } from '../../tests/testUtils';
 
@@ -50,20 +49,20 @@ describe('ManageProductReviewsUseCase', () => {
 
   it('should create review', async () => {
     const result = await useCase.create({
-        productId: 'p1',
-        customerId: 'c1',
-        rating: 5,
-        status: 'pending',
-        isVerifiedPurchase: false,
-        productVariantId: undefined,
-        orderId: undefined,
-        title: undefined,
-        content: undefined,
-        reviewerName: undefined,
-        reviewerEmail: undefined,
-        adminResponse: undefined,
-        adminResponseDate: undefined,
-      });
+      productId: 'p1',
+      customerId: 'c1',
+      rating: 5,
+      status: 'pending',
+      isVerifiedPurchase: false,
+      productVariantId: undefined,
+      orderId: undefined,
+      title: undefined,
+      content: undefined,
+      reviewerName: undefined,
+      reviewerEmail: undefined,
+      adminResponse: undefined,
+      adminResponseDate: undefined,
+    });
     expect(result).toEqual(createProductReview({ productReviewId: 'r2' }));
   });
 

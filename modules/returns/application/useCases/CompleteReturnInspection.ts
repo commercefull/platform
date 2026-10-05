@@ -24,4 +24,3 @@ export class CompleteReturnInspectionUseCase {
     return updated;
   }
 }
-

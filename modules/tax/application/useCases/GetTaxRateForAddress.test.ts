@@ -23,9 +23,7 @@ describe('GetTaxRateForAddressUseCase', () => {
     expect(result.combinedRate).toBe(0.07);
     expect(result.rates).toHaveLength(2);
     expect(result.isExempt).toBe(false);
-    expect(taxRepository.findRatesForAddress).toHaveBeenCalledWith(
-      expect.objectContaining({ country: 'US', state: 'CA' }),
-    );
+    expect(taxRepository.findRatesForAddress).toHaveBeenCalledWith(expect.objectContaining({ country: 'US', state: 'CA' }));
   });
 
   it('should compound taxes on top of prior rates when a rate is compound', async () => {

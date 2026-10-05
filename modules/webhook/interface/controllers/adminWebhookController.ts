@@ -1,16 +1,11 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * Webhook Admin UI Controller
  * Admin views for managing webhook endpoints
  */
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
-import {
-  listWebhooksUseCase,
-  registerWebhookUseCase,
-  unregisterWebhookUseCase,
-  manageWebhooksUseCase,
-} from '../../application/wired';
+import { listWebhooksUseCase, registerWebhookUseCase, unregisterWebhookUseCase, manageWebhooksUseCase } from '../../application/wired';
 import { SYNC_RELEVANT_EVENTS } from '../../domain/valueObjects/WebhookEventType';
 import { DeliveryStatus } from '../../domain/entities/WebhookDelivery';
 import { adminRespond } from '../../../../libs/adminRespond';

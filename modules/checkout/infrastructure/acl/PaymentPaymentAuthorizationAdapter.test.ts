@@ -38,6 +38,38 @@ describe('PaymentPaymentAuthorizationAdapter', () => {
     expect(result.status).toBe('initiated');
   });
 
+  it('should forward a delegated credential into InitiatePayment metadata', async () => {
+    const delegatedCredential = { provider: 'stripe', credentialType: 'spt', token: 'spt_token_123' };
+
+    await adapter.initiatePayment({
+      orderId: 'order-1',
+      amountCents: 4818,
+      currency: 'USD',
+      paymentMethodId: 'delegated:stripe',
+      delegatedCredential,
+    });
+
+    expect(initiatePaymentUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderId: 'order-1',
+        paymentMethodConfigId: 'delegated:stripe',
+        metadata: { delegatedCredential },
+      }),
+    );
+  });
+
+  it('should omit metadata when no delegated credential is present', async () => {
+    await adapter.initiatePayment({
+      orderId: 'order-1',
+      amountCents: 100,
+      currency: 'USD',
+      paymentMethodId: 'pm-1',
+    });
+
+    const command = initiatePaymentUseCase.execute.mock.calls[0][0] as { metadata?: Record<string, unknown> };
+    expect(command.metadata).toBeUndefined();
+  });
+
   it('should throw with cause when payment initiation fails', async () => {
     initiatePaymentUseCase.execute.mockRejectedValue(new Error('Gateway down'));
 

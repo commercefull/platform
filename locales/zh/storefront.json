@@ -744,5 +744,14 @@
   "emailPlaceholder": "你的@email.com",
   "phonePlaceholder": "您的电话号码",
   "cardholderNamePlaceholder": "约翰·多伊",
-  "cardExpiryPlaceholder": "月/年"
+  "cardExpiryPlaceholder": "月/年",
+  "collections": "系列",
+  "collectionsHeroDesc": "探索我们精心策划的系列",
+  "viewCollection": "查看系列",
+  "noCollections": "暂无系列",
+  "noCollectionsDesc": "请稍后再来——我们正在策划新系列。",
+  "collectionEmpty": "此系列还没有商品",
+  "collectionEmptyDesc": "请稍后再来或浏览全部目录。",
+  "backToCollections": "返回系列",
+  "featured": "精选"
 }

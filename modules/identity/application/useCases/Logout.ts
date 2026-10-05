@@ -9,7 +9,6 @@ export class LogoutCommand {
 // Response
 // ============================================================================
 
-
 export class LogoutUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 

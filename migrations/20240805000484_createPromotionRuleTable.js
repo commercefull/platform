@@ -17,6 +17,10 @@ exports.up = function (knex) {
       'dayOfWeek',
       'shippingMethod',
       'paymentMethod',
+      'store',
+      'channel',
+      'country',
+      'currency',
     ]).notNullable();
     t.string('operator', 10).notNullable();
     t.jsonb('value').notNullable();

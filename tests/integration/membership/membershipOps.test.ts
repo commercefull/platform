@@ -43,7 +43,6 @@ describe('Membership Operations Tests', () => {
   // ============================================================================
 
   describe('User Memberships', () => {
-
     it('should list user memberships', async () => {
       const response = await client.get('/business/membership/user-memberships', { headers: adminHeaders() });
       expectStatus(response, 200);

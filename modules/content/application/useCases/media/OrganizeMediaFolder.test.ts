@@ -9,8 +9,10 @@ describe('OrganizeMediaFolderUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof OrganizeMediaFolderUseCase>[0]>();
     mockRepo.findFolderById.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f1', name: 'Parent', path: 'Parent' }));
-    mockRepo.createFolder.mockImplementation(async (input) => createContentMediaFolder({ ...input, contentMediaFolderId: 'f2' }));
-    mockRepo.updateFolder.mockResolvedValue(createContentMediaFolder({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1 }));
+    mockRepo.createFolder.mockImplementation(async input => createContentMediaFolder({ ...input, contentMediaFolderId: 'f2' }));
+    mockRepo.updateFolder.mockResolvedValue(
+      createContentMediaFolder({ contentMediaFolderId: 'f2', name: 'Child', path: 'NewParent/Child', depth: 1 }),
+    );
     mockRepo.findAllFolders.mockResolvedValue([]);
     mockRepo.deleteFolder.mockResolvedValue(true);
     useCase = new OrganizeMediaFolderUseCase(mockRepo);

@@ -53,11 +53,7 @@ describe('OutboxDispatcher module', () => {
       await new Promise(resolve => setTimeout(resolve, 20));
       await stopOutboxDispatcher();
 
-      expect(query).toHaveBeenNthCalledWith(
-        1,
-        expect.stringContaining(`"status" = 'processing'`),
-        [expect.any(String)],
-      );
+      expect(query).toHaveBeenNthCalledWith(1, expect.stringContaining(`"status" = 'processing'`), [expect.any(String)]);
       expect(query).toHaveBeenNthCalledWith(2, expect.stringContaining('FOR UPDATE SKIP LOCKED'), expect.any(Array));
       expect(release).toHaveBeenCalled();
     });

@@ -71,6 +71,12 @@ export interface SubscriptionRepository {
     billingAddressId?: string;
     paymentMethodId?: string;
     customizations?: Record<string, unknown>;
+    storeId?: string;
+    salesChannelId?: string;
+    taxAmountCents?: number;
+    taxAddedCents?: number;
+    currencyCode?: string;
+    metadata?: Record<string, unknown>;
   }): Promise<CustomerSubscription>;
   updateSubscriptionStatus(
     customerSubscriptionId: string,

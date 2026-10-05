@@ -12,7 +12,7 @@ describe('CreateNavigationUseCase', () => {
 
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof CreateNavigationUseCase>[0]>();
-    mockRepo.createNavigation.mockImplementation(async (params) => createContentNavigation({ ...params, contentNavigationId: 'n1' }));
+    mockRepo.createNavigation.mockImplementation(async params => createContentNavigation({ ...params, contentNavigationId: 'n1' }));
     useCase = new CreateNavigationUseCase(mockRepo);
   });
 

@@ -48,11 +48,7 @@ describe('Returns Operations Tests', () => {
     });
 
     it('POST /business/returns/:returnId/in-transit marks return in transit', async () => {
-      const resp = await client.post(
-        `/business/returns/${returnId}/in-transit`,
-        { trackingNumber: 'TRACK-123' },
-        { headers: headers() },
-      );
+      const resp = await client.post(`/business/returns/${returnId}/in-transit`, { trackingNumber: 'TRACK-123' }, { headers: headers() });
       expectStatus(resp, 200);
       expect(resp.data.data?.status).toBe('inTransit');
     });
@@ -93,11 +89,7 @@ describe('Returns Operations Tests', () => {
 
     it('POST /business/store-credit/debit rejects overdraft', async () => {
       if (!customerId) return;
-      const resp = await client.post(
-        '/business/store-credit/debit',
-        { customerId, amountCents: 99999900 },
-        { headers: headers() },
-      );
+      const resp = await client.post('/business/store-credit/debit', { customerId, amountCents: 99999900 }, { headers: headers() });
       expectStatus(resp, 400);
     });
   });

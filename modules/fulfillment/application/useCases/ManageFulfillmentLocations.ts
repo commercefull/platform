@@ -173,7 +173,16 @@ export class ManageFulfillmentLocationsUseCase {
     return partner;
   }
 
-  async createPartner(params: { name?: string; code?: string; type?: string | null; apiConfig?: unknown; address?: unknown; contactEmail?: string | null; contactPhone?: string | null; isActive?: boolean | null }) {
+  async createPartner(params: {
+    name?: string;
+    code?: string;
+    type?: string | null;
+    apiConfig?: unknown;
+    address?: unknown;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    isActive?: boolean | null;
+  }) {
     if (!params.name?.trim()) {
       throw new FulfillmentValidationError('name is required');
     }

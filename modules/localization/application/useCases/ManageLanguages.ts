@@ -22,4 +22,3 @@ export class ManageLanguagesUseCase {
     return this.languageRepo.deleteLanguage(id);
   }
 }
-

@@ -1,7 +1,4 @@
-import {
-  createNotificationDeviceRepository,
-  createNotificationDevice,
-} from '../../tests/testUtils';
+import { createNotificationDeviceRepository, createNotificationDevice } from '../../tests/testUtils';
 import { ManageNotificationDevicesUseCase } from './ManageNotificationDevices';
 
 describe('ManageNotificationDevicesUseCase', () => {

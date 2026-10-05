@@ -70,4 +70,3 @@ describe('ManageAdminGdprUseCase', () => {
     expect(repository.updateStatus).toHaveBeenCalledWith('r1', 'processing');
   });
 });
-

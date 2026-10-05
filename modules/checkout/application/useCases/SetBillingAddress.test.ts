@@ -3,7 +3,20 @@ import { SetBillingAddressUseCase, SetBillingAddressCommand } from './SetBilling
 import { CheckoutSessionNotFoundError } from '../../domain/errors/CheckoutErrors';
 
 const command = (sameAsShipping = false) =>
-  new SetBillingAddressCommand('ck-1', 'Jane', 'Doe', '123 Main St', 'Portland', '97201', 'US', undefined, undefined, 'OR', undefined, sameAsShipping);
+  new SetBillingAddressCommand(
+    'ck-1',
+    'Jane',
+    'Doe',
+    '123 Main St',
+    'Portland',
+    '97201',
+    'US',
+    undefined,
+    undefined,
+    'OR',
+    undefined,
+    sameAsShipping,
+  );
 
 describe('SetBillingAddressUseCase', () => {
   let useCase: SetBillingAddressUseCase;
@@ -23,7 +36,10 @@ describe('SetBillingAddressUseCase', () => {
     expect(result.billingAddress?.city).toBe('Portland');
     expect(result.sameAsShipping).toBe(false);
     expect(checkoutRepository.save).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith('checkout.updated', expect.objectContaining({ checkoutId: 'ck-1', field: 'billingAddress', country: 'US' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.updated',
+      expect.objectContaining({ checkoutId: 'ck-1', field: 'billingAddress', country: 'US' }),
+    );
   });
 
   it('should flag sameAsShipping without overwriting the billing address when requested', async () => {

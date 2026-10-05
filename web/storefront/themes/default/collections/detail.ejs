@@ -1,0 +1,103 @@
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-gray-50">
+  <!-- Collection Hero -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white relative overflow-hidden">
+    <% if (collection.bannerUrl) { %>
+    <img src="<%= collection.bannerUrl %>" alt="<%= collection.name %>" class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <% } %>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4"><%= collection.name %></h1>
+        <% if (collection.description) { %>
+        <p class="text-xl text-blue-100 max-w-3xl mx-auto mb-8"><%= collection.description %></p>
+        <% } %>
+
+        <!-- Breadcrumb -->
+        <nav class="flex justify-center" aria-label="Breadcrumb">
+          <ol class="flex items-center space-x-2">
+            <li>
+              <a href="/" class="text-blue-200 hover:text-white transition-colors"><%= t('storefront:home') %></a>
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-300 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <a href="/collections" class="text-blue-200 hover:text-white transition-colors"><%= t('storefront:collections') %></a>
+            </li>
+            <li class="flex items-center">
+              <svg class="w-4 h-4 text-blue-300 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="text-blue-200"><%= collection.name %></span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Product count -->
+    <div class="flex items-center justify-between mb-8">
+      <p class="text-sm text-gray-600">
+        <%= pagination.totalProducts === 1 ? t('storefront:productFound', { count: pagination.totalProducts }) : t('storefront:productsFound', { count: pagination.totalProducts }) %>
+      </p>
+    </div>
+
+    <% if (products && products.length > 0) { %>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <% products.forEach(function(product) { %>
+      <%- include("../partials/product-card", { product: product }) %>
+      <% }) %>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination.totalPages > 1) { %>
+    <nav class="flex items-center justify-center space-x-2 mt-10" aria-label="Pagination">
+      <% if (pagination.hasPrev) { %>
+      <a href="<%= pagination.baseUrl %>?page=<%= pagination.currentPage - 1 %>&limit=<%= pagination.limit %>"
+         class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+      <% } %>
+
+      <% for (var i = 1; i <= pagination.totalPages; i++) { %>
+      <% if (i === pagination.currentPage) { %>
+      <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg"><%= i %></span>
+      <% } else { %>
+      <a href="<%= pagination.baseUrl %>?page=<%= i %>&limit=<%= pagination.limit %>" class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors"><%= i %></a>
+      <% } %>
+      <% } %>
+
+      <% if (pagination.hasNext) { %>
+      <a href="<%= pagination.baseUrl %>?page=<%= pagination.currentPage + 1 %>&limit=<%= pagination.limit %>"
+         class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-blue-600 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </a>
+      <% } %>
+    </nav>
+    <% } %>
+    <% } else { %>
+    <div class="text-center py-24 bg-white rounded-xl shadow-sm">
+      <svg class="w-16 h-16 text-gray-300 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      </svg>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2"><%= t('storefront:collectionEmpty') %></h2>
+      <p class="text-gray-500 mb-8"><%= t('storefront:collectionEmptyDesc') %></p>
+      <a href="/collections" class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg border border-blue-600 hover:bg-blue-50 transition-colors font-medium mr-3">
+        <%= t('storefront:backToCollections') %>
+      </a>
+      <a href="/products" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+        <%= t('storefront:browseAllProducts') %>
+      </a>
+    </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>

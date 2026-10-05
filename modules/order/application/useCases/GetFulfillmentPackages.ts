@@ -1,6 +1,5 @@
 import { OrderFulfillmentPackageRepository } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
-
 export class GetFulfillmentPackagesUseCase {
   constructor(private readonly packageRepo: OrderFulfillmentPackageRepository) {}
 

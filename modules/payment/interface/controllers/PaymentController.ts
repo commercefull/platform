@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Payment Controller
  */
@@ -7,10 +7,7 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 
 import { InitiatePaymentCommand } from '../../application/useCases/InitiatePayment';
 import { ProcessPaymentRefundCommand } from '../../application/useCases/ProcessRefund';
-import {
-  GetTransactionCommand,
-  ListTransactionsCommand,
-} from '../../application/useCases';
+import { GetTransactionCommand, ListTransactionsCommand } from '../../application/useCases';
 import {
   getTransactionUseCase,
   initiatePaymentUseCase,
@@ -122,7 +119,13 @@ export const getTransaction = async (req: HttpRequest, res: HttpResponse): Promi
 };
 
 export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const body = req.body as { orderId?: string; amountCents?: number; currency?: string; paymentMethodConfigId?: string; customerId?: string };
+  const body = req.body as {
+    orderId?: string;
+    amountCents?: number;
+    currency?: string;
+    paymentMethodConfigId?: string;
+    customerId?: string;
+  };
   const { orderId, amountCents, currency, paymentMethodConfigId, customerId } = body;
 
   if (!orderId || !amountCents || !currency || !paymentMethodConfigId) {

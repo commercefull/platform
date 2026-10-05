@@ -123,7 +123,6 @@ exports.seed = async function (knex) {
     }
   }
 
-
   // Also create store-specific warehouses
   const warehouseTable = 'distributionWarehouse';
   const WAREHOUSE_IDS = {

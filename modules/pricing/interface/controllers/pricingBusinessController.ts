@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { getErrorStatusCode, getErrorMessage } from '../../../../libs/errors';
 import { CurrencyPriceRule, CurrencyPriceRuleCreateProps, CurrencyPriceRuleUpdateProps } from '../../domain/pricingRule';
@@ -39,9 +39,9 @@ export const getAllCurrencies = async (req: HttpRequest, res: HttpResponse): Pro
   const currencies = await managePricingAdminUseCase.getAllCurrencies(showInactive);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: currencies,
-      });
+    success: true,
+    data: currencies,
+  });
 };
 
 /**
@@ -52,16 +52,16 @@ export const getDefaultCurrency = async (req: HttpRequest, res: HttpResponse): P
 
   if (!currency) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'No default currency found',
-          });
+      success: false,
+      message: 'No default currency found',
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: currency,
-      });
+    success: true,
+    data: currency,
+  });
 };
 
 /**
@@ -74,16 +74,16 @@ export const getCurrencyByCode = async (req: HttpRequest, res: HttpResponse): Pr
 
   if (!currency) {
     jsonResponse(res, 404, {
-            success: false,
-            message: `Currency with code ${code} not found`,
-          });
+      success: false,
+      message: `Currency with code ${code} not found`,
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: currency,
-      });
+    success: true,
+    data: currency,
+  });
 };
 
 /**
@@ -94,10 +94,10 @@ export const saveCurrency = async (req: HttpRequest<Record<string, string>, unkn
     const result = await saveCurrencyUseCase.execute(req.body);
 
     jsonResponse(res, result.created ? 201 : 200, {
-            success: true,
-            data: result.currency,
-            message: result.created ? 'Currency created successfully' : 'Currency updated successfully',
-          });
+      success: true,
+      data: result.currency,
+      message: result.created ? 'Currency created successfully' : 'Currency updated successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -113,9 +113,9 @@ export const deleteCurrency = async (req: HttpRequest, res: HttpResponse): Promi
     await deleteCurrencyUseCase.execute(code);
 
     jsonResponse(res, 200, {
-            success: true,
-            message: 'Currency deleted successfully',
-          });
+      success: true,
+      message: 'Currency deleted successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -134,10 +134,10 @@ export const updateExchangeRates = async (
   const result = await managePricingAdminUseCase.updateExchangeRates(source);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: result,
-        message: 'Exchange rates updated successfully',
-      });
+    success: true,
+    data: result,
+    message: 'Exchange rates updated successfully',
+  });
 };
 
 /**
@@ -152,9 +152,9 @@ export const getAllCurrencyRegions = async (req: HttpRequest, res: HttpResponse)
   const regions = await managePricingAdminUseCase.getCurrencyRegions(showInactive);
 
   jsonResponse(res, 200, {
-        success: true,
-        data: regions,
-      });
+    success: true,
+    data: regions,
+  });
 };
 
 /**
@@ -167,16 +167,16 @@ export const getCurrencyRegionById = async (req: HttpRequest, res: HttpResponse)
 
   if (!region) {
     jsonResponse(res, 404, {
-            success: false,
-            message: `Currency region with ID ${id} not found`,
-          });
+      success: false,
+      message: `Currency region with ID ${id} not found`,
+    });
     return;
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        data: region,
-      });
+    success: true,
+    data: region,
+  });
 };
 
 /**
@@ -190,10 +190,10 @@ export const createCurrencyRegion = async (
     const newRegion = await createCurrencyRegionUseCase.execute(req.body);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: newRegion,
-            message: 'Currency region created successfully',
-          });
+      success: true,
+      data: newRegion,
+      message: 'Currency region created successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -212,10 +212,10 @@ export const updateCurrencyRegion = async (
     const updatedRegion = await updateCurrencyRegionUseCase.execute(id, req.body);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedRegion,
-            message: 'Currency region updated successfully',
-          });
+      success: true,
+      data: updatedRegion,
+      message: 'Currency region updated successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -232,18 +232,18 @@ export const deleteCurrencyRegion = async (req: HttpRequest, res: HttpResponse):
 
   if (!existingRegion) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Currency region not found',
-          });
+      success: false,
+      message: 'Currency region not found',
+    });
     return;
   }
 
   await managePricingAdminUseCase.deleteCurrencyRegion(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Currency region deleted successfully',
-      });
+    success: true,
+    message: 'Currency region deleted successfully',
+  });
 };
 
 /**
@@ -253,10 +253,7 @@ export const getAllPriceRules = async (req: HttpRequest, res: HttpResponse): Pro
   const { currencyCode, includeInactive } = req.query;
   const showInactive = includeInactive === 'true';
 
-  const rules: CurrencyPriceRule[] = await managePricingAdminUseCase.getAllPriceRules(
-    currencyCode as string | undefined,
-    showInactive,
-  );
+  const rules: CurrencyPriceRule[] = await managePricingAdminUseCase.getAllPriceRules(currencyCode as string | undefined, showInactive);
 
   jsonResponse(res, 200, { success: true, data: rules });
 };
@@ -287,10 +284,10 @@ export const createPriceRule = async (
     const newRule = await createCurrencyPriceRuleUseCase.execute(req.body as CurrencyPriceRuleCreateProps);
 
     jsonResponse(res, 201, {
-            success: true,
-            data: newRule,
-            message: 'Price rule created successfully',
-          });
+      success: true,
+      data: newRule,
+      message: 'Price rule created successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -309,10 +306,10 @@ export const updatePriceRule = async (
     const updatedRule = await updateCurrencyPriceRuleUseCase.execute(id, req.body as CurrencyPriceRuleUpdateProps);
 
     jsonResponse(res, 200, {
-            success: true,
-            data: updatedRule,
-            message: 'Price rule updated successfully',
-          });
+      success: true,
+      data: updatedRule,
+      message: 'Price rule updated successfully',
+    });
   } catch (error: unknown) {
     jsonResponse(res, getErrorStatusCode(error), { success: false, message: getErrorMessage(error) });
   }
@@ -329,16 +326,16 @@ export const deletePriceRule = async (req: HttpRequest, res: HttpResponse): Prom
 
   if (!existingRule) {
     jsonResponse(res, 404, {
-            success: false,
-            message: `Price rule with ID ${id} not found`,
-          });
+      success: false,
+      message: `Price rule with ID ${id} not found`,
+    });
     return;
   }
 
   await managePricingAdminUseCase.deleteCurrencyPriceRule(id);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Price rule deleted successfully',
-      });
+    success: true,
+    message: 'Price rule deleted successfully',
+  });
 };

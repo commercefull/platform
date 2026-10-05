@@ -36,6 +36,11 @@ export type EventType =
   | 'product.image_added'
   | 'product.category_changed'
   | 'product.viewed'
+  // Assortment events
+  | 'collection.created'
+  | 'collection.updated'
+  | 'collection.deleted'
+  | 'assortment.updated'
   // Review events
   | 'review.created'
   | 'review.approved'
@@ -67,6 +72,9 @@ export type EventType =
   | 'checkout.config.created'
   | 'checkout.config.updated'
   | 'checkout.config.deleted'
+  | 'agenticCheckout.session_created'
+  | 'agenticCheckout.session_completed'
+  | 'agenticCheckout.session_failed'
   // Payment events
   | 'payment.received'
   | 'payment.failed'

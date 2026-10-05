@@ -56,9 +56,7 @@ describe('ManageProductTypesUseCase', () => {
 
   it('should reject duplicate slugs on create', async () => {
     mockTypeRepo.findBySlug.mockResolvedValue(type);
-    await expect(useCase.create({ name: 'Shoes', slug: 'shoes' })).rejects.toThrow(
-      'Product type with slug "shoes" already exists',
-    );
+    await expect(useCase.create({ name: 'Shoes', slug: 'shoes' })).rejects.toThrow('Product type with slug "shoes" already exists');
     expect(mockTypeRepo.create).not.toHaveBeenCalled();
   });
 

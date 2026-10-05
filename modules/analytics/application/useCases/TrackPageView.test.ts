@@ -14,10 +14,7 @@ describe('TrackPageViewUseCase', () => {
 
     expect(result.success).toBe(true);
     expect(result.pageViewId).toBeDefined();
-    expect(emitMock).toHaveBeenCalledWith(
-      'analytics.pageview.tracked',
-      expect.objectContaining({ sessionId: 's1', pageUrl: '/home' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('analytics.pageview.tracked', expect.objectContaining({ sessionId: 's1', pageUrl: '/home' }));
   });
 
   it('should fail without emitting when the session id is missing', async () => {

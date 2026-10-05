@@ -37,8 +37,20 @@ describe('ConfigureVariantUseCase', () => {
 
   it('should return the variant matching all requested options', async () => {
     mockVariantRepo.findByProductId.mockResolvedValue([
-      createVariantRecord({ id: 'var-1', options: [{ name: 'Size', value: 'S' }, { name: 'Color', value: 'Red' }] }),
-      createVariantRecord({ id: 'var-2', options: [{ name: 'Size', value: 'L' }, { name: 'Color', value: 'Blue' }] }),
+      createVariantRecord({
+        id: 'var-1',
+        options: [
+          { name: 'Size', value: 'S' },
+          { name: 'Color', value: 'Red' },
+        ],
+      }),
+      createVariantRecord({
+        id: 'var-2',
+        options: [
+          { name: 'Size', value: 'L' },
+          { name: 'Color', value: 'Blue' },
+        ],
+      }),
     ]);
 
     const result = await useCase.execute('p-1', [

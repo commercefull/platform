@@ -25,14 +25,14 @@ Tailored development produces new modules that follow the same DDD architecture 
 
 ## Ownership Guarantees
 
-| Question | Answer |
-|---|---|
-| Who owns the bespoke code? | **You do.** Work is delivered under your choice of license. |
-| Can the platform revoke access? | **No.** The core platform is Apache-2.0. Bespoke modules are separate works. |
-| Can you take the code to another platform? | **Yes.** It's standard TypeScript + PostgreSQL + Express. No proprietary runtime. |
-| Can you modify the code yourself? | **Yes.** Full source is delivered. No obfuscation, no compiled binaries. |
-| Is there a dependency on Commercefull's servers? | **No.** Self-hosted means self-hosted. No phone-home, no license server, no telemetry requirement. |
-| Can you hire another team to maintain it? | **Yes.** The codebase follows documented DDD conventions (see [AGENTS.md](../../AGENTS.md) and [engineering standards](../guidelines/README.md)). |
+| Question                                         | Answer                                                                                                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Who owns the bespoke code?                       | **You do.** Work is delivered under your choice of license.                                                                                       |
+| Can the platform revoke access?                  | **No.** The core platform is Apache-2.0. Bespoke modules are separate works.                                                                      |
+| Can you take the code to another platform?       | **Yes.** It's standard TypeScript + PostgreSQL + Express. No proprietary runtime.                                                                 |
+| Can you modify the code yourself?                | **Yes.** Full source is delivered. No obfuscation, no compiled binaries.                                                                          |
+| Is there a dependency on Commercefull's servers? | **No.** Self-hosted means self-hosted. No phone-home, no license server, no telemetry requirement.                                                |
+| Can you hire another team to maintain it?        | **Yes.** The codebase follows documented DDD conventions (see [AGENTS.md](../../AGENTS.md) and [engineering standards](../guidelines/README.md)). |
 
 ---
 
@@ -44,15 +44,15 @@ The platform itself is Apache-2.0. You can fork it, audit it, and run it forever
 
 ### 2. Standard technology stack
 
-| Layer | Technology | Proprietary? |
-|---|---|---|
-| Language | TypeScript | No |
-| Framework | Express 5 | No |
-| Database | PostgreSQL 18 | No |
-| Migrations | Knex | No |
-| Build | esbuild | No |
-| Templates | EJS | No |
-| CSS | Tailwind | No |
+| Layer      | Technology    | Proprietary? |
+| ---------- | ------------- | ------------ |
+| Language   | TypeScript    | No           |
+| Framework  | Express 5     | No           |
+| Database   | PostgreSQL 18 | No           |
+| Migrations | Knex          | No           |
+| Build      | esbuild       | No           |
+| Templates  | EJS           | No           |
+| CSS        | Tailwind      | No           |
 
 There is no Commercefull-specific runtime, DSL, or proprietary abstraction layer. A developer who knows Node.js, TypeScript, and PostgreSQL can work with the codebase.
 

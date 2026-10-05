@@ -48,11 +48,7 @@ export interface InventoryLocationOpsPort {
     variantId?: string,
     requiredQuantity?: number,
   ): Promise<{ available: boolean; totalAvailable: number; locations: InventoryLocation[] }>;
-  findAvailableQuantityAtWarehouse(
-    distributionWarehouseId: string,
-    productId: string,
-    variantId?: string,
-  ): Promise<number>;
+  findAvailableQuantityAtWarehouse(distributionWarehouseId: string, productId: string, variantId?: string): Promise<number>;
 }
 
 export class ManageInventoryLocationsUseCase {

@@ -44,8 +44,7 @@ export class SupplierInventoryAdapter {
     const updated = await this.stock.adjustQuantity(location.inventoryLocationId, params.adjustment, params.reason);
 
     const transactionType =
-      (await this.stock.findTransactionTypeByCode('RECEIVED')) ??
-      (await this.stock.findTransactionTypeByCode('ADJUST_UP'));
+      (await this.stock.findTransactionTypeByCode('RECEIVED')) ?? (await this.stock.findTransactionTypeByCode('ADJUST_UP'));
     if (transactionType) {
       await this.stock.createTransaction({
         typeId: transactionType.inventoryTransactionTypeId,

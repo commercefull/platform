@@ -11,4 +11,3 @@ export class ListReturnRequestsUseCase {
     return this.returnRepo.findPending(limit);
   }
 }
-

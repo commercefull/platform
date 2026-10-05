@@ -2,6 +2,7 @@ import { createBasket, createBasketRepository, emitMock, BASKET_ID } from '../..
 import { GetOrCreateBasketCommand, GetOrCreateBasketUseCase } from './GetOrCreateBasket';
 import { BasketValidationError } from '../../domain/errors/BasketErrors';
 import type { StoreCurrencyPort } from '../ports/StoreCurrencyPort';
+import type { StoreChannelPort } from '../ports/StoreChannelPort';
 
 describe('GetOrCreateBasketUseCase', () => {
   it('should return the existing basket when the customer already has an active basket', async () => {
@@ -31,10 +32,7 @@ describe('GetOrCreateBasketUseCase', () => {
 
     await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand('customer-2'));
 
-    expect(emitMock).toHaveBeenCalledWith(
-      'basket.created',
-      expect.objectContaining({ basketId: 'test-uuid', customerId: 'customer-2' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('basket.created', expect.objectContaining({ basketId: 'test-uuid', customerId: 'customer-2' }));
   });
 
   it('should not emit basket.created when an existing basket is returned', async () => {
@@ -48,11 +46,9 @@ describe('GetOrCreateBasketUseCase', () => {
   it('should create a session basket with the requested currency when only a session is provided', async () => {
     const repository = createBasketRepository(null);
 
-    const result = await new GetOrCreateBasketUseCase(repository).execute(
-      new GetOrCreateBasketCommand(undefined, 'session-1', 'EUR'),
-    );
+    const result = await new GetOrCreateBasketUseCase(repository).execute(new GetOrCreateBasketCommand(undefined, 'session-1', 'EUR'));
 
-    expect(repository.findActiveBasket).toHaveBeenCalledWith(undefined, 'session-1');
+    expect(repository.findActiveBasket).toHaveBeenCalledWith(undefined, 'session-1', undefined, undefined);
     expect(result.sessionId).toBe('session-1');
     expect(result.currency).toBe('EUR');
   });
@@ -71,6 +67,30 @@ describe('GetOrCreateBasketUseCase', () => {
     ).rejects.toThrow(BasketValidationError);
     expect(repository.save).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
+  });
+
+  it('should reject a channel that is not assigned to the store', async () => {
+    const repository = createBasketRepository(null);
+    const storeChannelPort: jest.Mocked<StoreChannelPort> = { isAssigned: jest.fn().mockResolvedValue(false) };
+
+    await expect(
+      new GetOrCreateBasketUseCase(repository, undefined, storeChannelPort).execute(
+        new GetOrCreateBasketCommand('customer-1', undefined, 'USD', 'store-1', 'channel-1'),
+      ),
+    ).rejects.toThrow(BasketValidationError);
+    expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('should persist store and channel context when the channel is assigned', async () => {
+    const repository = createBasketRepository(null);
+    const storeChannelPort: jest.Mocked<StoreChannelPort> = { isAssigned: jest.fn().mockResolvedValue(true) };
+
+    const result = await new GetOrCreateBasketUseCase(repository, undefined, storeChannelPort).execute(
+      new GetOrCreateBasketCommand('customer-1', undefined, 'USD', 'store-1', 'channel-1'),
+    );
+
+    expect(result.storeId).toBe('store-1');
+    expect(result.channelId).toBe('channel-1');
   });
 
   it('should fall back to the store default currency when none is requested', async () => {

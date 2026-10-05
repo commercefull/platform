@@ -72,10 +72,7 @@ export function createAdminOperationsRepository(): jest.Mocked<IAdminOperationsR
   return lazyMock();
 }
 
-export function createFulfillment(
-  status: FulfillmentStatus = 'pending',
-  overrides: Partial<FulfillmentProps> = {},
-): Fulfillment {
+export function createFulfillment(status: FulfillmentStatus = 'pending', overrides: Partial<FulfillmentProps> = {}): Fulfillment {
   return Fulfillment.fromPersistence({
     fulfillmentId: 'ful-1',
     orderId: 'ord-1',

@@ -1,12 +1,7 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
-import {
-  ManageCompanyUseCase,
-  ManageB2BUserUseCase,
-  ManageQuoteUseCase,
-  ManageApprovalWorkflowUseCase,
-} from '../../application/useCases';
+import { ManageCompanyUseCase, ManageB2BUserUseCase, ManageQuoteUseCase, ManageApprovalWorkflowUseCase } from '../../application/useCases';
 import { PaymentTerms } from '../../domain/entities/Company';
 import { B2BUserRole } from '../../domain/entities/B2BUser';
 import {

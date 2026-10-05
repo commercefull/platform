@@ -24,10 +24,7 @@ describe('UpdateCategoryUseCase', () => {
 
     expect(result.name).toBe('Renamed');
     expect(mockRepo.updateCategory).toHaveBeenCalledWith('cat-1', { name: 'Renamed' });
-    expect(emitMock).toHaveBeenCalledWith(
-      'content.category.updated',
-      expect.objectContaining({ categoryId: 'cat-1', name: 'Renamed' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('content.category.updated', expect.objectContaining({ categoryId: 'cat-1', name: 'Renamed' }));
   });
 
   it('should throw CategoryNotFoundError when the category does not exist', async () => {

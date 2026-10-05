@@ -10,12 +10,7 @@ import { CurrencyPriceRule, PricingRule } from '../pricingRule';
 
 export interface PricingRuleQueryPort {
   /** Active rules for a product/category/customer, with conditions and adjustments loaded. */
-  findActiveRules(
-    productId?: string,
-    categoryId?: string,
-    customerId?: string,
-    customerGroupIds?: string[],
-  ): Promise<PricingRule[]>;
+  findActiveRules(productId?: string, categoryId?: string, customerId?: string, customerGroupIds?: string[]): Promise<PricingRule[]>;
 
   findById(ruleId: string): Promise<PricingRule | null>;
 }

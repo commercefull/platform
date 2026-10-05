@@ -38,8 +38,8 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       request.shippingAddress,
       request.billingAddress,
       request.basketId,
-      undefined, // storeId
-      undefined, // channelId
+      request.storeId,
+      request.channelId,
       undefined, // createdByUserId
       request.source,
       request.currency,
@@ -54,6 +54,10 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       undefined, // userAgent
       undefined, // referralSource
       request.metadata,
+      undefined, // allowGuestOrder
+      request.taxAmountCents,
+      request.taxAddedCents,
+      request.taxIncludedInSubtotal,
     );
 
     const response = await this.createOrderUseCase.execute(command);
@@ -64,6 +68,11 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       orderNumber: response.orderNumber,
       status: order?.status || OrderStatus.PENDING,
       paymentStatus: order?.paymentStatus || PaymentStatus.PENDING,
+      items: order?.items.map(i => ({
+        orderItemId: i.orderItemId,
+        productId: i.productId,
+        productVariantId: i.productVariantId,
+      })),
     };
   }
 
@@ -75,6 +84,11 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       orderNumber: order.orderNumber,
       status: order.status,
       paymentStatus: order.paymentStatus,
+      items: order.items?.map(i => ({
+        orderItemId: i.orderItemId,
+        productId: i.productId,
+        productVariantId: i.productVariantId,
+      })),
     };
   }
 

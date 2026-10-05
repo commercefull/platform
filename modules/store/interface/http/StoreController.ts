@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Store HTTP Controller
  * Handles store-related HTTP requests
@@ -29,11 +29,11 @@ function handleControllerError(res: HttpResponse, action: string, error: unknown
   const statusCode = getErrorStatusCode(error);
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   jsonResponse(res, statusCode, {
-        success: false,
-        message: action,
-        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-        ...(error instanceof AppError ? { code: error.code } : {}),
-      });
+    success: false,
+    message: action,
+    error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+    ...(error instanceof AppError ? { code: error.code } : {}),
+  });
 }
 
 export class StoreController {
@@ -90,9 +90,9 @@ export class StoreController {
       const result = await this.createStoreUseCase.execute(command);
 
       jsonResponse(res, 201, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to create store', error);
     }
@@ -108,15 +108,15 @@ export class StoreController {
 
       if (!store) {
         return jsonResponse(res, 404, {
-                  success: false,
-                  message: 'Store not found',
-                });
+          success: false,
+          message: 'Store not found',
+        });
       }
 
       jsonResponse(res, 200, {
-                success: true,
-                data: store.toJSON(),
-              });
+        success: true,
+        data: store.toJSON(),
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to get store', error);
     }
@@ -132,15 +132,15 @@ export class StoreController {
 
       if (!store) {
         return jsonResponse(res, 404, {
-                  success: false,
-                  message: 'Store not found',
-                });
+          success: false,
+          message: 'Store not found',
+        });
       }
 
       jsonResponse(res, 200, {
-                success: true,
-                data: store.toJSON(),
-              });
+        success: true,
+        data: store.toJSON(),
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to get store', error);
     }
@@ -155,10 +155,10 @@ export class StoreController {
       const stores = await manageStoresAdminUseCase.findByBusiness(req.params.organizationId);
 
       jsonResponse(res, 200, {
-                success: true,
-                data: stores.map(store => store.toJSON()),
-                count: stores.length,
-              });
+        success: true,
+        data: stores.map(store => store.toJSON()),
+        count: stores.length,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to get stores', error);
     }
@@ -173,10 +173,10 @@ export class StoreController {
       const stores = await manageStoresAdminUseCase.findActive();
 
       jsonResponse(res, 200, {
-                success: true,
-                data: stores.map(store => store.toJSON()),
-                count: stores.length,
-              });
+        success: true,
+        data: stores.map(store => store.toJSON()),
+        count: stores.length,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to get active stores', error);
     }
@@ -192,9 +192,9 @@ export class StoreController {
       const result = await this.updateStoreUseCase.execute(command);
 
       jsonResponse(res, 200, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to update store', error);
     }
@@ -209,9 +209,9 @@ export class StoreController {
       await this.deleteStoreUseCase.execute(req.params.storeId);
 
       jsonResponse(res, 200, {
-                success: true,
-                message: 'Store deleted successfully',
-              });
+        success: true,
+        message: 'Store deleted successfully',
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to delete store', error);
     }
@@ -231,9 +231,9 @@ export class StoreController {
       });
 
       jsonResponse(res, 200, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to configure pickup', error);
     }
@@ -259,9 +259,9 @@ export class StoreController {
       });
 
       jsonResponse(res, 200, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to set local delivery zone', error);
     }
@@ -285,9 +285,9 @@ export class StoreController {
       });
 
       jsonResponse(res, 201, {
-                success: true,
-                data: result,
-              });
+        success: true,
+        data: result,
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to create store hierarchy', error);
     }
@@ -322,15 +322,15 @@ export class StoreController {
       const result = await this.listStoresUseCase.execute(query);
 
       jsonResponse(res, 200, {
-                success: true,
-                data: result.stores,
-                pagination: {
-                  total: result.total,
-                  page: result.page,
-                  limit: result.limit,
-                  totalPages: result.totalPages,
-                },
-              });
+        success: true,
+        data: result.stores,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+        },
+      });
     } catch (error) {
       handleControllerError(res, 'Failed to list stores', error);
     }

@@ -20,7 +20,8 @@ describe('ManageTrackingConfigUseCase', () => {
     repo.findByStoreId.mockResolvedValue(null);
 
     const result = await useCase.create({
-      storeId: 's-1', organizationId: 'org-1',
+      storeId: 's-1',
+      organizationId: 'org-1',
       gtm: { containerId: 'GTM-1', serverContainerUrl: 'https://gtm.test' },
     });
 
@@ -31,14 +32,12 @@ describe('ManageTrackingConfigUseCase', () => {
   it('should throw TrackingConfigAlreadyExistsError when the store already has a config', async () => {
     repo.findByStoreId.mockResolvedValue(createTrackingConfig());
 
-    await expect(useCase.create({ storeId: 's-1', organizationId: 'org-1' }))
-      .rejects.toThrow(TrackingConfigAlreadyExistsError);
+    await expect(useCase.create({ storeId: 's-1', organizationId: 'org-1' })).rejects.toThrow(TrackingConfigAlreadyExistsError);
   });
 
   it('should throw TrackingConfigNotFoundError when updating a missing store', async () => {
     repo.findByStoreId.mockResolvedValue(null);
 
-    await expect(useCase.updateGtm('missing', { containerId: 'x', serverContainerUrl: 'y' }))
-      .rejects.toThrow(TrackingConfigNotFoundError);
+    await expect(useCase.updateGtm('missing', { containerId: 'x', serverContainerUrl: 'y' })).rejects.toThrow(TrackingConfigNotFoundError);
   });
 });

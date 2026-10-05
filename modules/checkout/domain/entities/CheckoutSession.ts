@@ -31,10 +31,24 @@ export interface CheckoutSessionProps {
   taxAmount: Money;
   /** True when taxAmount is embedded in subtotal/shipping (tax-inclusive pricing) and must not be added to the total */
   taxIncludedInSubtotal?: boolean;
+  /**
+   * The portion of taxAmount added on top of subtotal + shipping. Absent
+   * means: all of taxAmount when taxIncludedInSubtotal is false, zero when
+   * true. Explicit value supports mixed quotes (some lines tax-inclusive).
+   */
+  taxAddedAmount?: Money;
   shippingAmount: Money;
   discountAmount: Money;
   total: Money;
   couponCode?: string;
+  /** Loyalty reward applied to this session — points are debited at the payment boundary. */
+  loyaltyRewardId?: string;
+  loyaltyPointsRedeemed?: number;
+  loyaltyDiscountAmount?: Money;
+  /** Customer VAT ID (B2B) — validated during tax quoting. */
+  vatNumber?: string;
+  /** True when the tax quote applied intra-EU B2B reverse charge. */
+  reverseChargeApplied?: boolean;
   fulfillmentType: FulfillmentType;
   notes?: string;
   metadata?: Record<string, unknown>;
@@ -148,6 +162,11 @@ export class CheckoutSession {
     return this.props.taxIncludedInSubtotal ?? false;
   }
 
+  get taxAddedAmount(): Money {
+    if (this.props.taxAddedAmount) return this.props.taxAddedAmount;
+    return this.props.taxIncludedInSubtotal ? Money.zero(this.props.taxAmount.currency) : this.props.taxAmount;
+  }
+
   get shippingAmount(): Money {
     return this.props.shippingAmount;
   }
@@ -162,6 +181,26 @@ export class CheckoutSession {
 
   get couponCode(): string | undefined {
     return this.props.couponCode;
+  }
+
+  get loyaltyRewardId(): string | undefined {
+    return this.props.loyaltyRewardId;
+  }
+
+  get loyaltyPointsRedeemed(): number {
+    return this.props.loyaltyPointsRedeemed ?? 0;
+  }
+
+  get loyaltyDiscountAmount(): Money {
+    return this.props.loyaltyDiscountAmount ?? Money.zero(this.props.subtotal.currency);
+  }
+
+  get vatNumber(): string | undefined {
+    return this.props.vatNumber;
+  }
+
+  get reverseChargeApplied(): boolean {
+    return this.props.reverseChargeApplied ?? false;
   }
 
   get fulfillmentType(): FulfillmentType {
@@ -272,6 +311,14 @@ export class CheckoutSession {
     this.touch();
   }
 
+  // Records the created order early so a retried payment-intent can resume
+  // on it instead of placing a duplicate.
+  attachOrder(orderId: string): void {
+    this.ensureActive();
+    this.props.orderId = orderId;
+    this.touch();
+  }
+
   setGuestEmail(email: string): void {
     this.ensureActive();
     if (!this.props.customerId) {
@@ -296,11 +343,43 @@ export class CheckoutSession {
     this.touch();
   }
 
-  updateAmounts(subtotal: Money, taxAmount: Money, taxIncludedInSubtotal = false): void {
+  applyLoyaltyReward(rewardId: string, points: number, discount: Money): void {
+    this.ensureActive();
+    this.props.loyaltyRewardId = rewardId;
+    this.props.loyaltyPointsRedeemed = points;
+    this.props.loyaltyDiscountAmount = discount;
+    this.recalculateTotal();
+    this.touch();
+  }
+
+  removeLoyaltyReward(): void {
+    this.ensureActive();
+    this.props.loyaltyRewardId = undefined;
+    this.props.loyaltyPointsRedeemed = undefined;
+    this.props.loyaltyDiscountAmount = undefined;
+    this.recalculateTotal();
+    this.touch();
+  }
+
+  setVatNumber(vatNumber: string | undefined): void {
+    this.ensureActive();
+    this.props.vatNumber = vatNumber;
+    if (!vatNumber) this.props.reverseChargeApplied = undefined;
+    this.touch();
+  }
+
+  setReverseChargeApplied(applied: boolean): void {
+    this.ensureActive();
+    this.props.reverseChargeApplied = applied;
+    this.touch();
+  }
+
+  updateAmounts(subtotal: Money, taxAmount: Money, taxIncludedInSubtotal = false, taxAddedAmount?: Money): void {
     this.ensureActive();
     this.props.subtotal = subtotal;
     this.props.taxAmount = taxAmount;
     this.props.taxIncludedInSubtotal = taxIncludedInSubtotal;
+    this.props.taxAddedAmount = taxAddedAmount ?? (taxIncludedInSubtotal ? Money.zero(subtotal.currency) : taxAmount);
     this.recalculateTotal();
     this.touch();
   }
@@ -362,13 +441,11 @@ export class CheckoutSession {
 
   private recalculateTotal(): void {
     const currency = this.props.subtotal.currency;
-    let total = this.props.subtotal.add(this.props.shippingAmount);
-    if (!this.props.taxIncludedInSubtotal) {
-      total = total.add(this.props.taxAmount);
-    }
+    let total = this.props.subtotal.add(this.props.shippingAmount).add(this.taxAddedAmount);
 
-    if (!this.props.discountAmount.isZero()) {
-      total = Money.create(Math.max(0, total.amount - this.props.discountAmount.amount), currency);
+    const totalDiscount = this.props.discountAmount.amount + (this.props.loyaltyDiscountAmount?.amount ?? 0);
+    if (totalDiscount > 0) {
+      total = Money.create(Math.max(0, total.amount - totalDiscount), currency);
     }
 
     this.props.total = total;

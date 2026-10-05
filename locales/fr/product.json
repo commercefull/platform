@@ -120,7 +120,24 @@
     "save": "Enregistrer la collection",
     "create": "Créer une collection",
     "back": "Retour aux collections",
-    "managementComingSoon": "Gestion des collections à venir."
+    "managementComingSoon": "Gestion des collections à venir.",
+    "details": "Détails de la collection",
+    "type": "Type",
+    "manual": "Manuelle",
+    "automated": "Automatisée",
+    "featured": "En vedette",
+    "notFound": "Aucune collection trouvée.",
+    "sortOrder": "Ordre de tri",
+    "publishAt": "Publier le",
+    "unpublishAt": "Dépublier le",
+    "schedule": "Fenêtre de publication",
+    "conditionsJson": "Conditions (JSON)",
+    "conditionsHint": "Utilisé uniquement pour les collections automatisées. Exemple : [{\"field\":\"categoryId\",\"operator\":\"equals\",\"value\":\"...\"}]",
+    "banner": "URL de la bannière",
+    "sortNewest": "Plus récents",
+    "sortPriceAsc": "Prix : croissant",
+    "sortPriceDesc": "Prix : décroissant",
+    "sortNameAsc": "Nom A–Z"
   },
   "tag": {
     "addNew": "Ajouter une nouvelle balise",
@@ -128,5 +145,15 @@
     "allTags": "Toutes les balises",
     "confirmDelete": "Supprimer cette balise ?",
     "noTags": "Pas encore de balises. Ajoutez-en un en utilisant le formulaire."
-  }
+  },
+  "linkedProducts": "Produits liés",
+  "linkedProductsHelp": "Liens produits manuels affichés comme recommandations sur la vitrine (ex. articles similaires, accessoires, ventes croisées, ventes incitatives).",
+  "linkedProduct": "Produit",
+  "linkType": "Type",
+  "linkPosition": "Position",
+  "linkAutomated": "Suggéré",
+  "linkBidirectional": "Bidirectionnel",
+  "noLinkedProducts": "Aucun produit lié pour le moment. Ajoutez-en un ci-dessous.",
+  "relatedProductIdPlaceholder": "ID du produit lié",
+  "addLink": "Ajouter un lien"
 }

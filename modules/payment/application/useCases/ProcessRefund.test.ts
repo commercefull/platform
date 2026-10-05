@@ -10,7 +10,7 @@ import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import type { PaymentRefund } from '../../domain/entities/PaymentRefund';
 
 beforeEach(() => {
-    uuidMock.mockReturnValue('refund-uuid');
+  uuidMock.mockReturnValue('refund-uuid');
   emitMock.mockClear();
 });
 
@@ -69,7 +69,14 @@ describe('ProcessPaymentRefundUseCase', () => {
 
   it('should throw TransactionCannotBeRefundedError when transaction cannot be refunded', async () => {
     mockRepo.findTransactionById.mockResolvedValue(
-      PaymentTransaction.create({ transactionId: 't2', orderId: 'o1', paymentMethodConfigId: 'pm1', gatewayId: 'gw1', amountCents: 100, currency: 'USD' }),
+      PaymentTransaction.create({
+        transactionId: 't2',
+        orderId: 'o1',
+        paymentMethodConfigId: 'pm1',
+        gatewayId: 'gw1',
+        amountCents: 100,
+        currency: 'USD',
+      }),
     );
 
     await expect(useCase.execute(new ProcessPaymentRefundCommand('t1', 50))).rejects.toThrow(TransactionCannotBeRefundedError);

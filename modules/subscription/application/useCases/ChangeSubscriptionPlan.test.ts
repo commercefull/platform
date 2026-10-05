@@ -69,26 +69,20 @@ describe('ChangeSubscriptionPlanUseCase', () => {
   it('should throw SubscriptionNotFoundError when the subscription does not exist', async () => {
     ports.subscriptionRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ subscriptionId: 'missing', newPlanId: 'plan-2' })).rejects.toThrow(
-      SubscriptionNotFoundError,
-    );
+    await expect(useCase.execute({ subscriptionId: 'missing', newPlanId: 'plan-2' })).rejects.toThrow(SubscriptionNotFoundError);
   });
 
   it('should throw SubscriptionPlanNotFoundError when the new plan does not exist', async () => {
     ports.planRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'missing' })).rejects.toThrow(
-      SubscriptionPlanNotFoundError,
-    );
+    await expect(useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'missing' })).rejects.toThrow(SubscriptionPlanNotFoundError);
     expect(ports.subscriptionRepo.update).not.toHaveBeenCalled();
   });
 
   it('should throw SubscriptionValidationError when the subscription is inactive', async () => {
     ports.subscriptionRepo.findById.mockResolvedValue({ ...subscription, status: 'cancelled' });
 
-    await expect(useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'plan-2' })).rejects.toThrow(
-      SubscriptionValidationError,
-    );
+    await expect(useCase.execute({ subscriptionId: 'sub-1', newPlanId: 'plan-2' })).rejects.toThrow(SubscriptionValidationError);
     expect(emitMock).not.toHaveBeenCalled();
   });
 });

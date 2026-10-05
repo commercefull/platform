@@ -1,12 +1,7 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { StoreRole } from '../../domain/entities/UserStoreAssignment';
-import {
-  assignUserToStoreUseCase,
-  getUserStoresUseCase,
-  listStoreUsersUseCase,
-  removeUserFromStoreUseCase,
-} from '../../application/wired';
+import { assignUserToStoreUseCase, getUserStoresUseCase, listStoreUsersUseCase, removeUserFromStoreUseCase } from '../../application/wired';
 
 interface AssignUserBody {
   storeId: string;

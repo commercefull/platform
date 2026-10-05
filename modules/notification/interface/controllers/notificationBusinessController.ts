@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { SendNotificationBatchCommand } from '../../application/useCases/SendNotificationBatch';
 import { ManageNotificationWebhookCommand } from '../../application/useCases/ManageNotificationWebhook';
@@ -86,10 +86,10 @@ export const getAllNotifications = async (req: HttpRequest, res: HttpResponse): 
   const type = req.query.type as string | undefined;
   const notifications = await manageNotificationRecordsUseCase.list(limit, offset, type);
   jsonResponse(res, 200, {
-        success: true,
-        data: notifications,
-        pagination: { limit, offset, total: notifications.length },
-      });
+    success: true,
+    data: notifications,
+    pagination: { limit, offset, total: notifications.length },
+  });
 };
 
 export const getNotificationById = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Shipping Rate Controller
  * Handles shipping rate management for the Admin Hub
@@ -259,9 +259,9 @@ export const calculateShippingRate = async (req: HttpRequest, res: HttpResponse)
   );
 
   jsonResponse(res, 200, {
-        calculatedRate,
-        rateId: rate.shippingRateId,
-        rateType: rate.rateType,
-        currency: rate.currencyCode,
-      });
+    calculatedRate,
+    rateId: rate.shippingRateId,
+    rateType: rate.rateType,
+    currency: rate.currencyCode,
+  });
 };

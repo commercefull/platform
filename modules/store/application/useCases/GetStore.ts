@@ -90,7 +90,7 @@ export class GetStoreUseCase {
       ? await this.storeCurrencyRepository.getSupportedCodes(store.storeId)
       : undefined;
     const defaultCurrency = this.storeCurrencyRepository
-      ? (await this.storeCurrencyRepository.getDefaultCode(store.storeId)) ?? undefined
+      ? ((await this.storeCurrencyRepository.getDefaultCode(store.storeId)) ?? undefined)
       : undefined;
 
     return {

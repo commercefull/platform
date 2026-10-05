@@ -1,6 +1,5 @@
 import { OrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
 
-
 export class GetOrdersByStoreUseCase {
   constructor(private readonly orders: OrderRepository) {}
 

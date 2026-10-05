@@ -12,16 +12,12 @@ import type * as pickupLocationRepo from '../../../store/infrastructure/reposito
 
 // Locations without an assigned store can't be pickup targets.
 type AssignedPickupLocation = pickupLocationRepo.PickupLocation & { storeId: string };
-const isAssignedLocation = <T extends { storeId: string | null }>(loc: T): loc is T & { storeId: string } =>
-  loc.storeId !== null;
+const isAssignedLocation = <T extends { storeId: string | null }>(loc: T): loc is T & { storeId: string } => loc.storeId !== null;
 
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   constructor(
     private readonly storeRepo: Pick<typeof StoreRepo, 'findActive'>,
-    private readonly pickupLocations: Pick<
-      typeof pickupLocationRepo,
-      'getLocations' | 'getLocation' | 'findNearestLocations'
-    >,
+    private readonly pickupLocations: Pick<typeof pickupLocationRepo, 'getLocations' | 'getLocation' | 'findNearestLocations'>,
   ) {}
 
   async checkLocalDeliveryEligibility(address: {
@@ -33,7 +29,6 @@ export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   }): Promise<{ eligible: boolean; options: StoreFulfillmentOption[] }> {
     const stores = await this.storeRepo.findActive();
     const options: StoreFulfillmentOption[] = [];
-
 
     for (const store of stores) {
       const deliverySettings = store.settings?.localDelivery;

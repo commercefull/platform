@@ -4,5 +4,10 @@
  * (sku/name resolution when the client did not supply them).
  */
 export interface ProductDetailsPort {
-  findProductDetails(productId: string): Promise<{ sku: string; name: string } | null>;
+  findProductDetails(productId: string): Promise<{
+    sku: string;
+    name: string;
+    itemType: 'physical' | 'digital' | 'subscription';
+    inventoryPolicy: 'tracked' | 'unlimited';
+  } | null>;
 }

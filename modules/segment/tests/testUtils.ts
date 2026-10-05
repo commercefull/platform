@@ -33,8 +33,6 @@ export function createSegment(overrides: Partial<Parameters<typeof SegmentDefini
   });
 }
 
-export function createCustomerProfile(
-  overrides: Partial<Parameters<typeof CustomerProfile.create>[0]> = {},
-): CustomerProfile {
+export function createCustomerProfile(overrides: Partial<Parameters<typeof CustomerProfile.create>[0]> = {}): CustomerProfile {
   return CustomerProfile.create({ customerId: 'cust-1', ...overrides });
 }

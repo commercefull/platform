@@ -10,4 +10,3 @@ export class DeleteSegmentUseCase {
     return this.segmentRepo.delete(segmentId);
   }
 }
-

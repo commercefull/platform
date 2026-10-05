@@ -2,7 +2,7 @@ import type { ModuleManifest } from '../../libs/moduleRegistry';
 
 export const manifest: ModuleManifest = {
   name: 'store',
-  description: 'Store management, pickup, local delivery',
+  description: 'Store management, sales channels, pickup, local delivery',
   requirement: 'optional',
   dependsOn: ['inventory'],
   routes: [
@@ -14,5 +14,5 @@ export const manifest: ModuleManifest = {
     subscribes: ['store.created', 'store.inventory_linked', 'store.pickup_configured'],
     publishes: ['store.created', 'store.inventory_linked', 'store.pickup_configured'],
   },
-  tables: { names: ['store', 'storeSettings'] },
+  tables: { names: ['store', 'storeSettings', 'salesChannel', 'storeSalesChannel'] },
 };

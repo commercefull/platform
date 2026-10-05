@@ -49,10 +49,38 @@ exports.seed = async function (knex) {
   };
 
   await knex('marketplaceVendor').insert([
-    { ...baseVendor, vendorId: VENDOR_IDS.TERMINATE, name: 'Ops Vendor Terminate', email: 'ops-vendor-terminate@example.com', status: 'approved', approvedAt },
-    { ...baseVendor, vendorId: VENDOR_IDS.PAYOUT_LINE_ITEMS, name: 'Ops Vendor Line Items', email: 'ops-vendor-li@example.com', status: 'approved', approvedAt },
-    { ...baseVendor, vendorId: VENDOR_IDS.PAYOUT_COMPLETE, name: 'Ops Vendor Complete', email: 'ops-vendor-complete@example.com', status: 'approved', approvedAt },
-    { ...baseVendor, vendorId: VENDOR_IDS.PAYOUT_FAIL_RETRY, name: 'Ops Vendor Fail Retry', email: 'ops-vendor-fail@example.com', status: 'approved', approvedAt },
+    {
+      ...baseVendor,
+      vendorId: VENDOR_IDS.TERMINATE,
+      name: 'Ops Vendor Terminate',
+      email: 'ops-vendor-terminate@example.com',
+      status: 'approved',
+      approvedAt,
+    },
+    {
+      ...baseVendor,
+      vendorId: VENDOR_IDS.PAYOUT_LINE_ITEMS,
+      name: 'Ops Vendor Line Items',
+      email: 'ops-vendor-li@example.com',
+      status: 'approved',
+      approvedAt,
+    },
+    {
+      ...baseVendor,
+      vendorId: VENDOR_IDS.PAYOUT_COMPLETE,
+      name: 'Ops Vendor Complete',
+      email: 'ops-vendor-complete@example.com',
+      status: 'approved',
+      approvedAt,
+    },
+    {
+      ...baseVendor,
+      vendorId: VENDOR_IDS.PAYOUT_FAIL_RETRY,
+      name: 'Ops Vendor Fail Retry',
+      email: 'ops-vendor-fail@example.com',
+      status: 'approved',
+      approvedAt,
+    },
   ]);
 
   if (hasPayout) {

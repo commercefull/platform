@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Tax feature manages tax rates, categories, and zones for accurate tax calculation. It supports multiple tax jurisdictions, compound taxes, and product-specific tax categories.
+The Tax feature manages tax rates, categories, and destination zones for accurate tax calculation. It supports multiple tax jurisdictions, compound taxes, product-specific categories, tax-inclusive UK/EU pricing, and tax-exclusive US destination sales tax. The enterprise regional seed provides representative New York, California, Delaware, UK, Germany, and France rules; production rates still require jurisdiction-specific review and updates.
 
 ---
 
@@ -88,29 +88,29 @@ Total Tax = Sum of all item taxes
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| POST | `/tax/calculate` | `asyncHandler(calculateTaxForLineItem)` | Public tax calculation endpoints |
-| POST | `/tax/calculate/basket/:basketId` | `isCustomerLoggedIn` | Protected routes require authentication |
-| GET | `/tax/categories` | `asyncHandler(getAllTaxCategories)` | -------------------- Tax Category Routes -------------------- |
-| POST | `/tax/categories` | `asyncHandler(createTaxCategory)` | — |
-| GET | `/tax/categories/:code` | `asyncHandler(getTaxCategoryByCode)` | — |
-| GET | `/tax/categories/:id` | `asyncHandler(getTaxCategory)` | — |
-| PUT | `/tax/categories/:id` | `asyncHandler(updateTaxCategory)` | — |
-| DELETE | `/tax/categories/:id` | `asyncHandler(deleteTaxCategory)` | — |
-| GET | `/tax/exemption/:customerId` | `isCustomerLoggedIn` | Customer exemption check (requires authentication) |
-| GET | `/tax/rates` | `asyncHandler(getAllTaxRates)` | -------------------- Tax Rate Routes -------------------- |
-| POST | `/tax/rates` | `asyncHandler(createTaxRate)` | — |
-| GET | `/tax/rates` | `asyncHandler(getTaxRates)` | Public tax information endpoints |
-| GET | `/tax/rates/:id` | `asyncHandler(getTaxRate)` | — |
-| PUT | `/tax/rates/:id` | `asyncHandler(updateTaxRate)` | — |
-| DELETE | `/tax/rates/:id` | `asyncHandler(deleteTaxRate)` | — |
-| GET | `/tax/settings/:organizationId` | `asyncHandler(getCustomerTaxSettings)` | NEW: Get public tax settings for storefront |
-| GET | `/tax/zones` | `asyncHandler(getAllTaxZones)` | -------------------- Tax Zone Routes -------------------- |
-| POST | `/tax/zones` | `asyncHandler(createTaxZone)` | — |
-| GET | `/tax/zones/:id` | `asyncHandler(getTaxZoneById)` | — |
-| PUT | `/tax/zones/:id` | `asyncHandler(updateTaxZone)` | — |
-| DELETE | `/tax/zones/:id` | `asyncHandler(deleteTaxZone)` | — |
-| POST | `/tax/zones/find` | `asyncHandler(findTaxZoneForAddress)` | NEW: Tax zone finder endpoint |
+| Method | Endpoint                          | Controller                              | Description                                                   |
+| ------ | --------------------------------- | --------------------------------------- | ------------------------------------------------------------- |
+| POST   | `/tax/calculate`                  | `asyncHandler(calculateTaxForLineItem)` | Public tax calculation endpoints                              |
+| POST   | `/tax/calculate/basket/:basketId` | `isCustomerLoggedIn`                    | Protected routes require authentication                       |
+| GET    | `/tax/categories`                 | `asyncHandler(getAllTaxCategories)`     | -------------------- Tax Category Routes -------------------- |
+| POST   | `/tax/categories`                 | `asyncHandler(createTaxCategory)`       | —                                                             |
+| GET    | `/tax/categories/:code`           | `asyncHandler(getTaxCategoryByCode)`    | —                                                             |
+| GET    | `/tax/categories/:id`             | `asyncHandler(getTaxCategory)`          | —                                                             |
+| PUT    | `/tax/categories/:id`             | `asyncHandler(updateTaxCategory)`       | —                                                             |
+| DELETE | `/tax/categories/:id`             | `asyncHandler(deleteTaxCategory)`       | —                                                             |
+| GET    | `/tax/exemption/:customerId`      | `isCustomerLoggedIn`                    | Customer exemption check (requires authentication)            |
+| GET    | `/tax/rates`                      | `asyncHandler(getAllTaxRates)`          | -------------------- Tax Rate Routes --------------------     |
+| POST   | `/tax/rates`                      | `asyncHandler(createTaxRate)`           | —                                                             |
+| GET    | `/tax/rates`                      | `asyncHandler(getTaxRates)`             | Public tax information endpoints                              |
+| GET    | `/tax/rates/:id`                  | `asyncHandler(getTaxRate)`              | —                                                             |
+| PUT    | `/tax/rates/:id`                  | `asyncHandler(updateTaxRate)`           | —                                                             |
+| DELETE | `/tax/rates/:id`                  | `asyncHandler(deleteTaxRate)`           | —                                                             |
+| GET    | `/tax/settings/:organizationId`   | `asyncHandler(getCustomerTaxSettings)`  | NEW: Get public tax settings for storefront                   |
+| GET    | `/tax/zones`                      | `asyncHandler(getAllTaxZones)`          | -------------------- Tax Zone Routes --------------------     |
+| POST   | `/tax/zones`                      | `asyncHandler(createTaxZone)`           | —                                                             |
+| GET    | `/tax/zones/:id`                  | `asyncHandler(getTaxZoneById)`          | —                                                             |
+| PUT    | `/tax/zones/:id`                  | `asyncHandler(updateTaxZone)`           | —                                                             |
+| DELETE | `/tax/zones/:id`                  | `asyncHandler(deleteTaxZone)`           | —                                                             |
+| POST   | `/tax/zones/find`                 | `asyncHandler(findTaxZoneForAddress)`   | NEW: Tax zone finder endpoint                                 |
 
 <!-- GENERATED:ENDPOINTS:END -->

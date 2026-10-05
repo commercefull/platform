@@ -7,4 +7,3 @@ export class RecomputeAllProfilesUseCase {
     return this.profileRepo.recomputeAll();
   }
 }
-

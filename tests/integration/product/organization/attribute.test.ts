@@ -154,5 +154,4 @@ describe('Attribute Tests', () => {
       expect(getResponse.status).toBe(404);
     });
   });
-
 });

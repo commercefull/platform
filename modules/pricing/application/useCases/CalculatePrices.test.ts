@@ -36,9 +36,7 @@ describe('CalculatePricesUseCase', () => {
     const results = await useCase.execute({ items: [{ productId: 'p1', variantId: 'v9', quantity: 3 }] });
 
     expect(Object.keys(results)).toEqual(['p1:v9']);
-    expect(calculatePrice.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ productId: 'p1', variantId: 'v9', quantity: 3 }),
-    );
+    expect(calculatePrice.execute).toHaveBeenCalledWith(expect.objectContaining({ productId: 'p1', variantId: 'v9', quantity: 3 }));
   });
 
   it('should apply the shared context to every item', async () => {
@@ -48,9 +46,7 @@ describe('CalculatePricesUseCase', () => {
     });
 
     expect(calculatePrice.execute).toHaveBeenCalledTimes(2);
-    expect(calculatePrice.execute).toHaveBeenLastCalledWith(
-      expect.objectContaining({ customerId: 'cust-1', currencyCode: 'EUR' }),
-    );
+    expect(calculatePrice.execute).toHaveBeenLastCalledWith(expect.objectContaining({ customerId: 'cust-1', currencyCode: 'EUR' }));
   });
 
   it('should return an empty map for no items', async () => {

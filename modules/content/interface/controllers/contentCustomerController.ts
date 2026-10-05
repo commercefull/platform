@@ -1,19 +1,30 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
-import { manageContentUseCase } from '../../application/useCases/wired';
+import { manageContentUseCase, getNavigationWithItemsUseCase } from '../../application/useCases/wired';
+import { GetNavigationWithItemsQuery } from '../../application/useCases/navigation/GetNavigationWithItems';
+import { matchesContentScope } from '../../domain/valueObjects/contentScope';
 
 const contentUC = manageContentUseCase;
 
+function publicationContext(res: HttpResponse) {
+  const local = (key: string) => {
+    const value = res.locals[key] as string | undefined;
+    return value || undefined;
+  };
+  return { storeId: local('storeId'), channelId: local('channelId'), locale: local('locale') };
+}
+
 /**
  * Get published pages with optional filtering
- * Only returns published pages, with limited information
+ * Only returns published pages visible to the resolved store/channel/locale,
+ * with limited information
  */
 export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const limit = parseInt(req.query.limit as string) || 50;
   const offset = parseInt(req.query.offset as string) || 0;
 
-  // Only return published pages
-  const pages = await contentUC.findAllPages('published', undefined, limit, offset);
+  // Only return published pages visible in this context
+  const pages = await contentUC.findPublishedPagesForContext(publicationContext(res), limit, offset);
 
   // Remove sensitive information
   const sanitizedPages = pages.map(page => ({
@@ -27,14 +38,14 @@ export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Pr
   }));
 
   jsonResponse(res, 200, {
-        success: true,
-        data: sanitizedPages,
-        pagination: {
-          limit,
-          offset,
-          total: pages.length,
-        },
-      });
+    success: true,
+    data: sanitizedPages,
+    pagination: {
+      limit,
+      offset,
+      total: pages.length,
+    },
+  });
 };
 
 /**
@@ -42,20 +53,22 @@ export const getPublishedPages = async (req: HttpRequest, res: HttpResponse): Pr
  */
 export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { slug } = req.params;
+  const context = publicationContext(res);
 
-  // First get the page by slug
-  const page = await contentUC.findPageBySlug(slug);
+  // First get the page by slug scoped to the resolved store/channel/locale
+  const page = await contentUC.findPublishedPageBySlugForContext(slug, context);
 
   if (!page) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Page not found',
-          });
+      success: false,
+      message: 'Page not found',
+    });
     return;
   }
 
-  // Then get content blocks for the page
-  const blocks = await contentUC.findBlocksByPageId(page.contentPageId);
+  // Then get content blocks for the page — drop blocks whose
+  // store/channel/locale conditions don't match this context
+  const blocks = (await contentUC.findBlocksByPageId(page.contentPageId)).filter(block => matchesContentScope(block.conditions, context));
 
   // Get the template if one is assigned to the page
   const template = page.templateId ? await contentUC.findTemplateById(page.templateId) : undefined;
@@ -82,9 +95,9 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
   // Check if the page is published
   if (pageData.page.status !== 'published') {
     jsonResponse(res, 404, {
-            success: false,
-            message: `Page not found`,
-          });
+      success: false,
+      message: `Page not found`,
+    });
     return;
   }
 
@@ -123,13 +136,32 @@ export const getPublishedPageBySlug = async (req: HttpRequest, res: HttpResponse
   };
 
   jsonResponse(res, 200, {
-        success: true,
-        data: {
-          page: sanitizedPage,
-          blocks: sanitizedBlocks,
-          template: sanitizedTemplate,
-        },
-      });
+    success: true,
+    data: {
+      page: sanitizedPage,
+      blocks: sanitizedBlocks,
+      template: sanitizedTemplate,
+    },
+  });
+};
+
+/**
+ * Get an active navigation with its item tree, scoped to the resolved
+ * store/channel/locale via item `conditions`.
+ */
+export const getNavigationBySlug = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { slug } = req.params;
+
+  const navigation = await getNavigationWithItemsUseCase.execute(
+    new GetNavigationWithItemsQuery(undefined, slug, undefined, false, publicationContext(res)),
+  );
+
+  if (!navigation || !navigation.isActive) {
+    jsonResponse(res, 404, { success: false, message: 'Navigation not found' });
+    return;
+  }
+
+  jsonResponse(res, 200, { success: true, data: navigation });
 };
 
 /**
@@ -147,7 +179,7 @@ export const getActiveContentTypes = async (req: HttpRequest, res: HttpResponse)
   }));
 
   jsonResponse(res, 200, {
-        success: true,
-        data: sanitizedContentTypes,
-      });
+    success: true,
+    data: sanitizedContentTypes,
+  });
 };

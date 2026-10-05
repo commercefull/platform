@@ -61,9 +61,7 @@ describe('CalculateLineItemTaxUseCase', () => {
     const useCase = new CalculateLineItemTaxUseCase(port);
 
     await expect(useCase.execute({ ...command, productId: undefined })).rejects.toBeInstanceOf(TaxValidationError);
-    await expect(useCase.execute({ ...command, shippingAddress: { country: '' } })).rejects.toBeInstanceOf(
-      TaxValidationError,
-    );
+    await expect(useCase.execute({ ...command, shippingAddress: { country: '' } })).rejects.toBeInstanceOf(TaxValidationError);
   });
 
   it('should throw TaxValidationError when quantity is not a positive number', async () => {

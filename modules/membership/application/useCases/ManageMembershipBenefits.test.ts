@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { ManageMembershipBenefitsUseCase } from './ManageMembershipBenefits';
-import {
-  createMembershipBenefitsPorts,
-  createMembershipBenefit,
-  createMembershipPlanBenefit,
-} from '../../tests/testUtils';
+import { createMembershipBenefitsPorts, createMembershipBenefit, createMembershipPlanBenefit } from '../../tests/testUtils';
 
 describe('ManageMembershipBenefitsUseCase', () => {
   const { benefits, planBenefits } = createMembershipBenefitsPorts();
@@ -40,4 +36,3 @@ describe('ManageMembershipBenefitsUseCase', () => {
     expect(result).toHaveLength(1);
   });
 });
-

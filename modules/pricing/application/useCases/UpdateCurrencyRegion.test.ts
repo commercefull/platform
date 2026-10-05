@@ -16,10 +16,7 @@ function createRegion(overrides: Partial<CurrencyRegion> = {}): CurrencyRegion {
   };
 }
 
-function createPort(
-  region: CurrencyRegion | null = createRegion(),
-  currency: Currency | null = createCurrency(),
-): jest.Mocked<Port> {
+function createPort(region: CurrencyRegion | null = createRegion(), currency: Currency | null = createCurrency()): jest.Mocked<Port> {
   const port: jest.Mocked<Port> = {
     getCurrencyRegionById: jest.fn(),
     getCurrencyByCode: jest.fn(),

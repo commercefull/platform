@@ -8,15 +8,15 @@ The Automation module provides a rule-based automation engine — condition/acti
 
 ## Public API (`index.ts`)
 
-| Export                            | Type     | Description                                                          |
-| --------------------------------- | -------- | -------------------------------------------------------------------- |
-| `AutomationRule`                  | Entity   | Rule definition with trigger, conditions, actions                    |
-| `AutomationRepository`            | Port     | Repository interface for rules and execution logs                    |
-| `AutomationErrors`                | Errors   | Domain error classes                                                 |
-| `ConditionEvaluator`              | Service  | Evaluates rule conditions against event context                      |
-| `executeActions`/`createActionHandlers` | Service | Pure action dispatch; side effects via `AutomationActionEffects` port |
-| `ExecuteAutomationRuleUseCase`    | Use Case | Evaluates conditions, executes actions, logs the result              |
-| `TriggerAutomationRuleUseCase`    | Use Case | Manual trigger entry point                                           |
+| Export                                  | Type     | Description                                                           |
+| --------------------------------------- | -------- | --------------------------------------------------------------------- |
+| `AutomationRule`                        | Entity   | Rule definition with trigger, conditions, actions                     |
+| `AutomationRepository`                  | Port     | Repository interface for rules and execution logs                     |
+| `AutomationErrors`                      | Errors   | Domain error classes                                                  |
+| `ConditionEvaluator`                    | Service  | Evaluates rule conditions against event context                       |
+| `executeActions`/`createActionHandlers` | Service  | Pure action dispatch; side effects via `AutomationActionEffects` port |
+| `ExecuteAutomationRuleUseCase`          | Use Case | Evaluates conditions, executes actions, logs the result               |
+| `TriggerAutomationRuleUseCase`          | Use Case | Manual trigger entry point                                            |
 
 ---
 
@@ -58,17 +58,16 @@ The Automation module provides a rule-based automation engine — condition/acti
 | DELETE | `/business/automation/rules/:id`            | Delete automation rule |
 | GET    | `/business/automation/rules/:id/executions` | Get execution history  |
 
-
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/automation` | `isOrganizationLoggedIn` | Rule CRUD |
-| POST | `/automation` | `isOrganizationLoggedIn` | — |
-| GET | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
-| PUT | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
-| DELETE | `/automation/:ruleId` | `isOrganizationLoggedIn` | — |
-| GET | `/automation/:ruleId/logs` | `isOrganizationLoggedIn` | — |
-| POST | `/automation/:ruleId/trigger` | `isOrganizationLoggedIn` | Manual trigger & execution logs |
+| Method | Endpoint                      | Controller               | Description                     |
+| ------ | ----------------------------- | ------------------------ | ------------------------------- |
+| GET    | `/automation`                 | `isOrganizationLoggedIn` | Rule CRUD                       |
+| POST   | `/automation`                 | `isOrganizationLoggedIn` | —                               |
+| GET    | `/automation/:ruleId`         | `isOrganizationLoggedIn` | —                               |
+| PUT    | `/automation/:ruleId`         | `isOrganizationLoggedIn` | —                               |
+| DELETE | `/automation/:ruleId`         | `isOrganizationLoggedIn` | —                               |
+| GET    | `/automation/:ruleId/logs`    | `isOrganizationLoggedIn` | —                               |
+| POST   | `/automation/:ruleId/trigger` | `isOrganizationLoggedIn` | Manual trigger & execution logs |
 
 <!-- GENERATED:ENDPOINTS:END -->

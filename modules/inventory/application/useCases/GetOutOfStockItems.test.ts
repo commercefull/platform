@@ -8,8 +8,24 @@ describe('GetOutOfStockItemsUseCase', () => {
   beforeEach(() => {
     mockRepo = lazyMock<ConstructorParameters<typeof GetOutOfStockItemsUseCase>[0]>();
     mockRepo.findOutOfStock.mockResolvedValue([
-      { inventoryItemId: 'i1', productId: 'p1', sku: 'SKU1', warehouseId: 'w1', reservedQuantity: 5, reorderQuantity: 50, lastStockedAt: '2024-01-01' },
-      { inventoryItemId: 'i2', productId: 'p2', sku: 'SKU2', warehouseId: 'w1', reservedQuantity: 0, reorderQuantity: 20, lastStockedAt: '2024-02-01' },
+      {
+        inventoryItemId: 'i1',
+        productId: 'p1',
+        sku: 'SKU1',
+        warehouseId: 'w1',
+        reservedQuantity: 5,
+        reorderQuantity: 50,
+        lastStockedAt: '2024-01-01',
+      },
+      {
+        inventoryItemId: 'i2',
+        productId: 'p2',
+        sku: 'SKU2',
+        warehouseId: 'w1',
+        reservedQuantity: 0,
+        reorderQuantity: 20,
+        lastStockedAt: '2024-02-01',
+      },
     ]);
     useCase = new GetOutOfStockItemsUseCase(mockRepo);
   });

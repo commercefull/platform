@@ -47,4 +47,3 @@ describe('ManageImportJobsUseCase', () => {
     expect(result.stats.successCount).toBe(1);
   });
 });
-

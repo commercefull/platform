@@ -23,12 +23,6 @@ function mapToZone(row: DbDistributionWarehouseZone): WarehouseZone {
   };
 }
 
-
-
-
-
-
-
 export async function createZone(input: CreateZoneInput): Promise<WarehouseZone> {
   const id = generateUUID();
   const now = new Date();
@@ -60,7 +54,10 @@ export async function createZone(input: CreateZoneInput): Promise<WarehouseZone>
 }
 
 export async function findZoneById(zoneId: string): Promise<WarehouseZone | null> {
-  const row = await queryOne<DbDistributionWarehouseZone>('SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1', [zoneId]);
+  const row = await queryOne<DbDistributionWarehouseZone>(
+    'SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1',
+    [zoneId],
+  );
   return row ? mapToZone(row) : null;
 }
 

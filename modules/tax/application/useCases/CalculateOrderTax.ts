@@ -12,10 +12,31 @@
 import { TaxExemption } from '../../domain/entities/TaxExemption';
 import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemptionStatus } from '../../taxTypes';
 
+export interface TaxRateInfo {
+  rate: number;
+  includeInPrice: boolean;
+}
+
 export interface TaxQueryPort {
   getTaxRateForAddress(address: AddressInput): Promise<number>;
   getTaxRateForAddressAndCategory(address: AddressInput, taxCategoryId?: string): Promise<number>;
+  /**
+   * Optional richer rate lookup — returns the applied rate together with its
+   * `includeInPrice` flag so VAT-inclusive zones (UK/EU) can be quoted
+   * independently of the organization-wide `pricesIncludeTax` setting.
+   */
+  getTaxRateInfoForAddress?(address: AddressInput, taxCategoryId?: string): Promise<TaxRateInfo | null>;
   findCustomerTaxExemptions(customerId: string, status: TaxExemptionStatus): Promise<CustomerTaxExemption[]>;
+  /** Optional — validates a customer VAT number against the destination country. */
+  validateCustomerVatNumber?(vatNumber: string, destinationCountry: string): Promise<boolean>;
+  /** Optional — whether the organization holds an active VAT registration. */
+  hasActiveVatRegistration?(organizationId: string): Promise<boolean>;
+  /**
+   * Optional — nexus coverage for the destination. Null means the org has no
+   * nexus records configured (permissive); false means nexus exists but does
+   * not cover the destination (no tax collection obligation).
+   */
+  hasNexusCoverage?(organizationId: string, address: AddressInput): Promise<boolean | null>;
 }
 
 // ============================================================================
@@ -46,6 +67,12 @@ export class CalculateOrderTaxCommand {
     public readonly shippingAmountCents: number = 0,
     public readonly customerId?: string,
     public readonly pricesIncludeTax: boolean = false,
+    /** Customer VAT ID (B2B) — enables intra-EU reverse-charge quoting. */
+    public readonly vatNumber?: string,
+    /** Seller organization — enables nexus coverage and VAT registration checks. */
+    public readonly organizationId?: string,
+    /** Seller/origin country (store country) — used to detect cross-border EU sales. */
+    public readonly originCountry?: string,
   ) {}
 }
 
@@ -72,8 +99,49 @@ export interface CalculateOrderTaxResponse {
   lineItems: TaxLineItem[];
   /** True when item/shipping prices already include tax — taxAmountCents is the embedded portion, not an additional charge */
   taxIncludedInSubtotal: boolean;
+  /**
+   * Portion of taxAmountCents that must be added on top of the subtotal.
+   * 0 for fully tax-inclusive quotes, equals taxAmountCents for fully
+   * tax-exclusive quotes, between the two for mixed zones.
+   */
+  taxAddedCents?: number;
+  /** True when intra-EU B2B reverse charge applied — customer self-accounts VAT. */
+  reverseChargeApplied?: boolean;
+  /** Echo of the customer VAT number used for the reverse-charge quote. */
+  vatNumber?: string;
   message?: string;
 }
+
+/** EU member states (ISO-2) — used for intra-EU B2B reverse charge detection. */
+const EU_MEMBER_STATES = new Set([
+  'AT',
+  'BE',
+  'BG',
+  'HR',
+  'CY',
+  'CZ',
+  'DK',
+  'EE',
+  'FI',
+  'FR',
+  'DE',
+  'GR',
+  'HU',
+  'IE',
+  'IT',
+  'LV',
+  'LT',
+  'LU',
+  'MT',
+  'NL',
+  'PL',
+  'PT',
+  'RO',
+  'SK',
+  'SI',
+  'ES',
+  'SE',
+]);
 
 // ============================================================================
 // Use Case
@@ -120,8 +188,36 @@ export class CalculateOrderTaxUseCase {
         city: command.shippingAddress.city,
       };
 
+      // B2B reverse charge: valid customer VAT number for an EU destination
+      // different from the seller's origin — the customer self-accounts VAT.
+      const destinationCountry = command.shippingAddress.country.toUpperCase();
+      let reverseChargeApplied = false;
+      if (
+        command.vatNumber &&
+        EU_MEMBER_STATES.has(destinationCountry) &&
+        command.originCountry &&
+        command.originCountry.toUpperCase() !== destinationCountry &&
+        this.taxQuery.validateCustomerVatNumber
+      ) {
+        const vatValid = await this.taxQuery.validateCustomerVatNumber(command.vatNumber, destinationCountry);
+        const sellerRegistered =
+          !command.organizationId || !this.taxQuery.hasActiveVatRegistration
+            ? true
+            : await this.taxQuery.hasActiveVatRegistration(command.organizationId);
+        reverseChargeApplied = vatValid && sellerRegistered;
+      }
+
+      // US-style nexus gating: when the organization maintains nexus
+      // records, tax is only collected where nexus covers the destination.
+      let noNexusObligation = false;
+      if (command.organizationId && this.taxQuery.hasNexusCoverage) {
+        const covered = await this.taxQuery.hasNexusCoverage(command.organizationId, address);
+        noNexusObligation = covered === false;
+      }
+
       // Get the default tax rate for the shipping address (backward compat)
-      const defaultTaxRate = await this.taxQuery.getTaxRateForAddress(address);
+      const defaultTaxRate = reverseChargeApplied || noNexusObligation ? 0 : await this.taxQuery.getTaxRateForAddress(address);
+      const defaultRateInfo = this.taxQuery.getTaxRateInfoForAddress ? await this.taxQuery.getTaxRateInfoForAddress(address) : null;
 
       // Load customer tax exemptions and convert to domain entities
       let exemptions: TaxExemption[] = [];
@@ -136,6 +232,8 @@ export class CalculateOrderTaxUseCase {
       // Calculate tax for each line item
       const lineItems: TaxLineItem[] = [];
       let hasAnyExemption = false;
+      let embeddedTaxCents = 0;
+      let addedTaxCents = 0;
 
       for (const item of command.items) {
         const itemSubtotal = item.quantity * item.unitPriceCents;
@@ -154,13 +252,21 @@ export class CalculateOrderTaxUseCase {
 
         // Get the tax rate for this item's category (per-category lookup, Epic B5)
         let itemTaxRate = defaultTaxRate;
-        if (item.taxCategoryId) {
+        let itemRateInfo = defaultRateInfo;
+        if (item.taxCategoryId && !reverseChargeApplied && !noNexusObligation) {
           const categoryRate = await this.taxQuery.getTaxRateForAddressAndCategory(address, item.taxCategoryId);
           // Only use the category rate if it's non-zero (zero means no specific rate found)
           if (categoryRate > 0) {
             itemTaxRate = categoryRate;
+            itemRateInfo = this.taxQuery.getTaxRateInfoForAddress
+              ? await this.taxQuery.getTaxRateInfoForAddress(address, item.taxCategoryId)
+              : null;
           }
         }
+        // The org-wide setting forces inclusion; otherwise the applied rate's
+        // own includeInPrice flag decides (UK/EU VAT zones are inclusive even
+        // when the org default is tax-exclusive).
+        const lineIncluded = command.pricesIncludeTax || itemRateInfo?.includeInPrice === true;
 
         // Evaluate exemption for this line item (Epic B4)
         let exemptionMultiplier = 1; // 1 = full tax, 0 = fully exempt
@@ -178,15 +284,16 @@ export class CalculateOrderTaxUseCase {
         }
 
         const effectiveRate = itemTaxRate * exemptionMultiplier;
-        const itemTaxAmount = command.pricesIncludeTax
-          ? itemSubtotal - itemSubtotal / (1 + effectiveRate / 100)
-          : (itemSubtotal * effectiveRate) / 100;
+        const itemTaxAmount = lineIncluded ? itemSubtotal - itemSubtotal / (1 + effectiveRate / 100) : (itemSubtotal * effectiveRate) / 100;
+        const roundedItemTax = Math.round(itemTaxAmount);
+        if (lineIncluded) embeddedTaxCents += roundedItemTax;
+        else addedTaxCents += roundedItemTax;
 
         lineItems.push({
           productId: item.productId,
           name: item.name,
           subtotalCents: itemSubtotal,
-          taxAmountCents: Math.round(itemTaxAmount),
+          taxAmountCents: roundedItemTax,
           taxRate: exemptionMultiplier < 1 ? itemTaxRate * exemptionMultiplier : itemTaxRate,
           exemptionVerdict,
         });
@@ -195,19 +302,22 @@ export class CalculateOrderTaxUseCase {
       // Calculate tax on shipping (if applicable and not fully exempt)
       const shippingExemptionMultiplier = this.shippingExemptionMultiplier(exemptions, subtotal);
       const effectiveShippingRate = defaultTaxRate * shippingExemptionMultiplier;
+      const shippingIncluded = command.pricesIncludeTax || defaultRateInfo?.includeInPrice === true;
       const shippingTaxAmountCents = Math.round(
-        command.pricesIncludeTax
+        shippingIncluded
           ? command.shippingAmountCents - command.shippingAmountCents / (1 + effectiveShippingRate / 100)
           : (command.shippingAmountCents * effectiveShippingRate) / 100,
       );
+      if (shippingIncluded) embeddedTaxCents += shippingTaxAmountCents;
+      else addedTaxCents += shippingTaxAmountCents;
 
       // Calculate total tax
-      const totalTaxAmountCents = lineItems.reduce((sum, item) => sum + item.taxAmountCents, 0) + shippingTaxAmountCents;
+      const totalTaxAmountCents = embeddedTaxCents + addedTaxCents;
+      const taxIncludedInSubtotal = addedTaxCents > 0 ? false : command.pricesIncludeTax || embeddedTaxCents > 0;
 
-      // Grand total: with tax-inclusive pricing the tax is already inside subtotal/shipping
-      const totalCents = command.pricesIncludeTax
-        ? subtotal + command.shippingAmountCents
-        : subtotal + command.shippingAmountCents + totalTaxAmountCents;
+      // Grand total: embedded tax is already inside subtotal/shipping; only
+      // the added portion increases the total.
+      const totalCents = subtotal + command.shippingAmountCents + addedTaxCents;
 
       return {
         success: true,
@@ -217,8 +327,17 @@ export class CalculateOrderTaxUseCase {
         totalCents,
         taxRate: defaultTaxRate,
         lineItems,
-        taxIncludedInSubtotal: command.pricesIncludeTax,
-        message: hasAnyExemption ? 'Tax exemption applied' : undefined,
+        taxIncludedInSubtotal,
+        taxAddedCents: addedTaxCents,
+        reverseChargeApplied: reverseChargeApplied || undefined,
+        vatNumber: reverseChargeApplied ? command.vatNumber : undefined,
+        message: reverseChargeApplied
+          ? 'Reverse charge: VAT accounted for by the customer'
+          : noNexusObligation
+            ? 'No tax collection nexus in the destination jurisdiction'
+            : hasAnyExemption
+              ? 'Tax exemption applied'
+              : undefined,
       };
     } catch (error: unknown) {
       // Return a safe fallback with zero tax

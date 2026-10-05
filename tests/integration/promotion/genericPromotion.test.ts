@@ -139,5 +139,4 @@ describe('Generic Promotion API Tests', () => {
 
     expect(getResponse.status).toBe(404);
   });
-
 });

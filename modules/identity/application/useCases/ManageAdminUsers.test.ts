@@ -44,4 +44,3 @@ describe('ManageAdminUsersUseCase', () => {
     expect(repo.deleteManagedAdminUser).toHaveBeenCalledWith('u1');
   });
 });
-

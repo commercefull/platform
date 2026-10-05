@@ -43,9 +43,7 @@ describe('UpdatePageTranslationUseCase', () => {
   it('should throw PageTranslationNotFoundError when the translation does not exist', async () => {
     mockRepo.findTranslationById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdatePageTranslationCommand('missing', {}))).rejects.toThrow(
-      PageTranslationNotFoundError,
-    );
+    await expect(useCase.execute(new UpdatePageTranslationCommand('missing', {}))).rejects.toThrow(PageTranslationNotFoundError);
     expect(mockRepo.updateTranslation).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
   });

@@ -17,6 +17,9 @@ export interface PromotionQuoteRequest {
   subtotalCents: number;
   shippingAmountCents: number;
   customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  countryCode?: string;
   currency: string;
   couponCode?: string;
 }

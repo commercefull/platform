@@ -4,6 +4,7 @@
 
 import type { ProductVariantFilters, ProductVariantPort, ProductVariantRow } from '../../domain/repositories/ProductCatalogPorts';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
+import type { StockAvailabilityPort } from '../ports/StockAvailabilityPort';
 import { toProductPriceDto } from '../dto/productPriceDto';
 
 export class GetProductVariantsCommand {
@@ -51,6 +52,7 @@ export class GetProductVariantsUseCase {
   constructor(
     private readonly variantRepository: ProductVariantPort,
     private readonly pricingPort: ProductPricingPort,
+    private readonly stockAvailabilityPort?: StockAvailabilityPort,
   ) {}
 
   async execute(command: GetProductVariantsCommand): Promise<ProductVariantResponse[]> {
@@ -77,9 +79,38 @@ export class GetProductVariantsUseCase {
       priceRows.filter(p => p.productVariantId != null).map(p => [p.productVariantId as string, p]),
     );
 
+    // Inventory-owned availability: the catalog row carries no real stock
+    // count, so tracked/backorderable variants resolve live quantities
+    // through the inventory port. `unlimited` variants need no lookup.
+    const stockByVariantId = new Map<string, { totalAvailable: number; available: boolean }>();
+    if (this.stockAvailabilityPort) {
+      await Promise.all(
+        result.data.map(async variant => {
+          // Legacy rows have a NULL policy; they behave as tracked.
+          if ((variant.inventoryPolicy ?? 'tracked') === 'unlimited') return;
+          try {
+            const stock = await this.stockAvailabilityPort!.checkAvailability({
+              productId: variant.productId,
+              productVariantId: variant.variantId,
+              quantity: 1,
+            });
+            stockByVariantId.set(variant.variantId, { totalAvailable: stock.totalAvailable, available: stock.available });
+          } catch {
+            // Availability enrichment is best-effort — keep catalog values.
+          }
+        }),
+      );
+    }
+
     return result.data.map((variant: ProductVariantRow) => {
       const priceInfo = priceByVariantId.get(variant.variantId) ?? productLevel;
       const priceDto = toProductPriceDto(priceInfo);
+      const stock = stockByVariantId.get(variant.variantId);
+      const policy = variant.inventoryPolicy ?? 'tracked';
+      const inventoryQuantity = policy === 'unlimited' ? variant.stockQuantity : (stock?.totalAvailable ?? variant.stockQuantity);
+      const isInStock = policy !== 'tracked' || (stock?.available ?? variant.isInStock);
+      const isOutOfStock = policy === 'tracked' && !(stock?.available ?? !variant.isOutOfStock);
+      const isLowStock = isInStock && !isOutOfStock && inventoryQuantity <= (variant.lowStockThreshold ?? 0);
       return {
         variantId: variant.variantId,
         productId: variant.productId,
@@ -99,16 +130,16 @@ export class GetProductVariantsUseCase {
           costCents: priceDto?.costPriceCents ?? undefined,
         },
         compareAtPriceCents: priceDto?.compareAtPriceCents ?? undefined,
-        trackInventory: true, // Always track inventory for variants
-        inventoryQuantity: variant.stockQuantity,
-        allowBackorders: false, // Not supported in existing entity
+        trackInventory: variant.inventoryPolicy !== 'unlimited',
+        inventoryQuantity,
+        allowBackorders: variant.inventoryPolicy === 'backorderable',
         lowStockThreshold: variant.lowStockThreshold,
         isDefault: variant.isDefault,
         isActive: variant.isActive,
         sortOrder: variant.position,
-        isInStock: variant.isInStock,
-        isLowStock: variant.isLowStock,
-        isOutOfStock: variant.isOutOfStock,
+        isInStock,
+        isLowStock,
+        isOutOfStock,
         hasDiscount: priceDto?.isOnSale ?? false,
         discountPercentage: priceDto?.isOnSale ? priceDto.discountPercentage : undefined,
       };

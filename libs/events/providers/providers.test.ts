@@ -190,9 +190,7 @@ describe('aws-sqs provider', () => {
     await t.subscriber!.stop();
 
     expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'order.created' }));
-    expect(sqsSend).toHaveBeenCalledWith(
-      expect.objectContaining({ input: expect.objectContaining({ ReceiptHandle: receipt }) }),
-    );
+    expect(sqsSend).toHaveBeenCalledWith(expect.objectContaining({ input: expect.objectContaining({ ReceiptHandle: receipt }) }));
   });
 });
 

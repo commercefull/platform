@@ -9,11 +9,7 @@
 import StoreRepo from '../../../store/infrastructure/repositories/StoreRepo';
 import WarehouseRepo from '../../../warehouse/infrastructure/repositories/warehouseRepo';
 import type { Store } from '../../../store/domain/entities/Store';
-import {
-  FulfillmentSourcePort,
-  FulfillableStore,
-  FulfillmentWarehouse,
-} from '../../domain/repositories/FulfillmentSourceRepository';
+import { FulfillmentSourcePort, FulfillableStore, FulfillmentWarehouse } from '../../domain/repositories/FulfillmentSourceRepository';
 
 function toFulfillableStore(store: Store): FulfillableStore {
   return {

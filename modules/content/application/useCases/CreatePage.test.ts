@@ -1,4 +1,11 @@
-import { lazyMock, createContentPage, createContentType, createContentBlockType, createContentTemplate, emitMock } from '../../tests/testUtils';
+import {
+  lazyMock,
+  createContentPage,
+  createContentType,
+  createContentBlockType,
+  createContentTemplate,
+  emitMock,
+} from '../../tests/testUtils';
 import { CreatePageUseCase, CreatePageCommand } from './CreatePage';
 import { ContentTypeNotFoundError, ContentTemplateNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
 import type { IContentRepository } from '../../domain/repositories/ContentRepository';
@@ -22,7 +29,7 @@ beforeEach(() => {
 
 describe('CreatePageUseCase', () => {
   it('should create a page successfully', async () => {
-    const repo = makeContentRepo((r) =>
+    const repo = makeContentRepo(r =>
       r.createPage.mockResolvedValue(createContentPage({ contentPageId: 'p1', title: 'About', slug: 'about' })),
     );
     const useCase = new CreatePageUseCase(repo);
@@ -43,14 +50,14 @@ describe('CreatePageUseCase', () => {
   });
 
   it('should throw ContentTypeNotFoundError when content type does not exist', async () => {
-    const repo = makeContentRepo((r) => r.findContentTypeById.mockResolvedValue(null));
+    const repo = makeContentRepo(r => r.findContentTypeById.mockResolvedValue(null));
     const useCase = new CreatePageUseCase(repo);
 
     await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'missing'))).rejects.toThrow(ContentTypeNotFoundError);
   });
 
   it('should throw ContentTemplateNotFoundError when template does not exist', async () => {
-    const repo = makeContentRepo((r) => r.findTemplateById.mockResolvedValue(null));
+    const repo = makeContentRepo(r => r.findTemplateById.mockResolvedValue(null));
     const useCase = new CreatePageUseCase(repo);
 
     await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'ct-1', 'missing-tmpl'))).rejects.toThrow(

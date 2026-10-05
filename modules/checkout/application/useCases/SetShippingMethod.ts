@@ -65,7 +65,11 @@ export class SetShippingMethodUseCase {
       throw new BadRequestError('Invalid shipping method');
     }
 
-    session.setShippingMethod(selectedRate.methodId, selectedRate.methodName, Money.fromCents(selectedRate.amountCents, selectedRate.currency));
+    session.setShippingMethod(
+      selectedRate.methodId,
+      selectedRate.methodName,
+      Money.fromCents(selectedRate.amountCents, selectedRate.currency),
+    );
 
     await this.checkoutRepository.save(session);
 

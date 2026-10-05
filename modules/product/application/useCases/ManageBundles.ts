@@ -62,10 +62,7 @@ interface BundlePort {
 export class ManageBundlesUseCase {
   constructor(private readonly bundleRepo: BundlePort) {}
 
-  async listBundles(
-    filters?: { bundleType?: BundleType; isActive?: boolean },
-    pagination?: { limit?: number; offset?: number },
-  ) {
+  async listBundles(filters?: { bundleType?: BundleType; isActive?: boolean }, pagination?: { limit?: number; offset?: number }) {
     return this.bundleRepo.getBundles(filters, pagination);
   }
 

@@ -9,7 +9,7 @@ describe('MarkDeliveredUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
+    fulfillmentRepository.save.mockImplementation(async f => f);
   });
 
   it('should mark a shipped fulfillment as delivered and emit the delivered event', async () => {

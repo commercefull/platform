@@ -167,6 +167,11 @@ export class ProductVariantRepository {
       );
     }
 
+    await query(`UPDATE "productVariant" SET "inventoryPolicy" = $1 WHERE "productVariantId" = $2`, [
+      variant.inventoryPolicy,
+      variant.variantId,
+    ]);
+
     // Sync attributes
     await this.syncVariantAttributes(variant);
 
@@ -253,6 +258,9 @@ export class ProductVariantRepository {
       attributes,
       stockQuantity: 0,
       lowStockThreshold: 5,
+      inventoryPolicy:
+        ((row as DbProductVariant & { inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable' }).inventoryPolicy as
+          'tracked' | 'unlimited' | 'backorderable' | undefined) ?? 'tracked',
       isDefault: Boolean(row.isDefault),
       isActive: row.status === 'active',
       position: row.position ?? 0,

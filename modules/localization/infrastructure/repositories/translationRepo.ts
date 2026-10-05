@@ -32,7 +32,7 @@ const PK_MAP: Record<TranslatableEntityType, string> = {
 const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
   product: 'productId',
   category: 'productCategoryId',
-  collection: 'productCollectionId',
+  collection: 'assortmentCollectionId',
   contentPage: 'contentPageId',
   notificationTemplate: 'notificationTemplateId',
   attribute: 'productAttributeId',

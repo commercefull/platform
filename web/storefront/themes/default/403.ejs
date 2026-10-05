@@ -52,12 +52,12 @@
       </div>
     </div>
 
-    <!-- Debug Info (only in development) -->
-    <% if (process.env.NODE_ENV === 'development') { %>
+    <!-- Debug Info (only in development, when rendered with an error) -->
+    <% if (process.env.NODE_ENV === 'development' && typeof error !== 'undefined' && error) { %>
     <details class="mt-8 text-left">
       <summary class="cursor-pointer text-sm text-gray-500 hover:text-gray-700"><%= t('storefront:technicalDetails') %></summary>
       <div class="mt-4 p-4 bg-gray-100 rounded-lg text-xs font-mono text-gray-800 overflow-x-auto">
-        <p><strong><%= t('storefront:messageLabel') %></strong> <%= message %></p>
+        <p><strong><%= t('storefront:messageLabel') %></strong> <%= locals.message %></p>
         <p><strong><%= t('storefront:statusLabel') %></strong> <%= error.status %></p>
         <pre class="mt-2 whitespace-pre-wrap"><%= error.stack %></pre>
       </div>

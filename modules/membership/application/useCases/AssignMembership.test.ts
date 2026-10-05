@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { AssignMembershipUseCase } from './AssignMembership';
-import {
-  MembershipPlanNotFoundError,
-  MembershipAlreadyActiveError,
-  MembershipValidationError,
-} from '../../domain/errors/MembershipErrors';
+import { MembershipPlanNotFoundError, MembershipAlreadyActiveError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
 import { createAssignMembershipRepository, emitMock } from '../../tests/testUtils';
 
 describe('AssignMembershipUseCase', () => {
@@ -37,10 +33,7 @@ describe('AssignMembershipUseCase', () => {
     expect(result.membershipId).toBe('m1');
     expect(result.status).toBe('active');
     expect(membershipRepository.createMembership).toHaveBeenCalled();
-    expect(emitMock).toHaveBeenCalledWith(
-      'membership.assigned',
-      expect.objectContaining({ customerId: 'c1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('membership.assigned', expect.objectContaining({ customerId: 'c1' }));
   });
 
   it('should throw MembershipPlanNotFoundError when the tier does not exist', async () => {

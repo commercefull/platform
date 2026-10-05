@@ -7,11 +7,7 @@
 
 import type { CredentialSubjectPort, CredentialSubject } from '../../ports/CredentialSubjectPort';
 import type { TokenRepository } from '../../../domain/repositories/TokenRepository';
-import {
-  RefreshTokenRequiredError,
-  InvalidRefreshTokenError,
-  AccountNotActiveError,
-} from '../../../domain/errors/IdentityErrors';
+import { RefreshTokenRequiredError, InvalidRefreshTokenError, AccountNotActiveError } from '../../../domain/errors/IdentityErrors';
 import { emitCustomerTokenRefreshed, emitOrganizationTokenRefreshed } from '../../../domain/events/emitIdentityEvent';
 import type { JwtTokenPort, TokenSubjectType } from './IssueTokenPair';
 
@@ -67,7 +63,13 @@ export class RenewAccessTokenUseCase {
       throw new AccountNotActiveError();
     }
 
-    const accessToken = this.jwt.sign(subject.id, subject.email, this.config.userType, this.config.jwtSecret, this.config.accessTokenDuration);
+    const accessToken = this.jwt.sign(
+      subject.id,
+      subject.email,
+      this.config.userType,
+      this.config.jwtSecret,
+      this.config.accessTokenDuration,
+    );
 
     await this.tokenRepo.markRefreshTokenUsed(command.refreshToken);
 

@@ -133,11 +133,7 @@ describe('SSO Business API', () => {
     it('should return error for non-existent SAML provider', async () => {
       if (!adminToken) return;
 
-      const response = await client.put(
-        `/business/sso/saml/providers/${randomUUID()}`,
-        { name: 'Nope' },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/sso/saml/providers/${randomUUID()}`, { name: 'Nope' }, { headers: authHeaders() });
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.data.success).toBe(false);
@@ -148,11 +144,7 @@ describe('SSO Business API', () => {
     it('should activate a SAML provider', async () => {
       if (!adminToken || !samlProviderId) return;
 
-      const response = await client.post(
-        `/business/sso/saml/providers/${samlProviderId}/activate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/saml/providers/${samlProviderId}/activate`, {}, { headers: authHeaders() });
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
@@ -161,11 +153,7 @@ describe('SSO Business API', () => {
     it('should return error for non-existent provider', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/sso/saml/providers/${randomUUID()}/activate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/saml/providers/${randomUUID()}/activate`, {}, { headers: authHeaders() });
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.data.success).toBe(false);
@@ -176,11 +164,7 @@ describe('SSO Business API', () => {
     it('should deactivate a SAML provider', async () => {
       if (!adminToken || !samlProviderId) return;
 
-      const response = await client.post(
-        `/business/sso/saml/providers/${samlProviderId}/deactivate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/saml/providers/${samlProviderId}/deactivate`, {}, { headers: authHeaders() });
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
@@ -285,11 +269,7 @@ describe('SSO Business API', () => {
     it('should return error for non-existent OIDC provider', async () => {
       if (!adminToken) return;
 
-      const response = await client.put(
-        `/business/sso/oidc/providers/${randomUUID()}`,
-        { name: 'Nope' },
-        { headers: authHeaders() },
-      );
+      const response = await client.put(`/business/sso/oidc/providers/${randomUUID()}`, { name: 'Nope' }, { headers: authHeaders() });
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.data.success).toBe(false);
@@ -300,11 +280,7 @@ describe('SSO Business API', () => {
     it('should activate an OIDC provider', async () => {
       if (!adminToken || !oidcProviderId) return;
 
-      const response = await client.post(
-        `/business/sso/oidc/providers/${oidcProviderId}/activate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/oidc/providers/${oidcProviderId}/activate`, {}, { headers: authHeaders() });
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
@@ -315,11 +291,7 @@ describe('SSO Business API', () => {
     it('should deactivate an OIDC provider', async () => {
       if (!adminToken || !oidcProviderId) return;
 
-      const response = await client.post(
-        `/business/sso/oidc/providers/${oidcProviderId}/deactivate`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/oidc/providers/${oidcProviderId}/deactivate`, {}, { headers: authHeaders() });
 
       expectStatus(response, 200);
       expect(response.data.success).toBe(true);
@@ -357,11 +329,7 @@ describe('SSO Business API', () => {
     it('should return error for non-existent SAML provider', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/sso/saml/login/${randomUUID()}`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/saml/login/${randomUUID()}`, {}, { headers: authHeaders() });
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.data.success).toBe(false);
@@ -378,11 +346,7 @@ describe('SSO Business API', () => {
     it('should reject callback without SAMLResponse', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/sso/saml/callback/${randomUUID()}`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/saml/callback/${randomUUID()}`, {}, { headers: authHeaders() });
 
       expectStatus(response, 400);
       expect(response.data.success).toBe(false);
@@ -399,11 +363,7 @@ describe('SSO Business API', () => {
     it('should return error for non-existent OIDC provider', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/sso/oidc/login/${randomUUID()}`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/oidc/login/${randomUUID()}`, {}, { headers: authHeaders() });
 
       expect(response.status).toBeGreaterThanOrEqual(400);
       expect(response.data.success).toBe(false);
@@ -420,11 +380,7 @@ describe('SSO Business API', () => {
     it('should reject callback without authorization code', async () => {
       if (!adminToken) return;
 
-      const response = await client.post(
-        `/business/sso/oidc/callback/${randomUUID()}`,
-        {},
-        { headers: authHeaders() },
-      );
+      const response = await client.post(`/business/sso/oidc/callback/${randomUUID()}`, {}, { headers: authHeaders() });
 
       expectStatus(response, 400);
       expect(response.data.success).toBe(false);

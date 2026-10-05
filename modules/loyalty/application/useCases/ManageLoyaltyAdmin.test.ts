@@ -1,11 +1,6 @@
 import '../../tests/testUtils';
 import { ManageLoyaltyAdminUseCase } from './ManageLoyaltyAdmin';
-import {
-  createLoyaltyRepository,
-  createLoyaltyTier,
-  createLoyaltyPoints,
-  createLoyaltyRedemption,
-} from '../../tests/testUtils';
+import { createLoyaltyRepository, createLoyaltyTier, createLoyaltyPoints, createLoyaltyRedemption } from '../../tests/testUtils';
 
 describe('ManageLoyaltyAdminUseCase', () => {
   const loyaltyRepository = createLoyaltyRepository();
@@ -54,4 +49,3 @@ describe('ManageLoyaltyAdminUseCase', () => {
     expect(loyaltyRepository.findCustomerRedemptions).toHaveBeenCalledWith('c1', 10);
   });
 });
-

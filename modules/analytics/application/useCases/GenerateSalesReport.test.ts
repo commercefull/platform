@@ -55,9 +55,6 @@ describe('GenerateSalesReportUseCase', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(emitMock).toHaveBeenCalledWith(
-      'analytics.report.generated',
-      expect.objectContaining({ generatedBy: 'admin1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('analytics.report.generated', expect.objectContaining({ generatedBy: 'admin1' }));
   });
 });

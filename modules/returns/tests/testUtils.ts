@@ -30,9 +30,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
   });
 }
 
-export function createReturnRequest(
-  overrides: Partial<Parameters<typeof ReturnRequest.create>[0]> = {},
-): ReturnRequest {
+export function createReturnRequest(overrides: Partial<Parameters<typeof ReturnRequest.create>[0]> = {}): ReturnRequest {
   return ReturnRequest.create({
     orderId: 'order-1',
     customerId: 'cust-1',

@@ -106,15 +106,15 @@ The reporting module does not currently emit domain events.
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| POST | `/reports/generate` | `asyncHandler(reportingController.generateReport)` | Report generation (on-demand) |
-| GET | `/reports/schedules` | `asyncHandler(reportingController.listSchedules)` | Report schedule CRUD |
-| POST | `/reports/schedules` | `asyncHandler(reportingController.createSchedule)` | — |
-| GET | `/reports/schedules/:scheduleId` | `asyncHandler(reportingController.getSchedule)` | — |
-| PUT | `/reports/schedules/:scheduleId` | `asyncHandler(reportingController.updateSchedule)` | — |
-| DELETE | `/reports/schedules/:scheduleId` | `asyncHandler(reportingController.deleteSchedule)` | — |
-| GET | `/reports/schedules/:scheduleId/executions` | `asyncHandler(reportingController.listExecutions)` | Report executions (history) |
-| GET | `/reports/templates` | `asyncHandler(reportingController.getReportTemplates)` | Report templates |
+| Method | Endpoint                                    | Controller                                             | Description                   |
+| ------ | ------------------------------------------- | ------------------------------------------------------ | ----------------------------- |
+| POST   | `/reports/generate`                         | `asyncHandler(reportingController.generateReport)`     | Report generation (on-demand) |
+| GET    | `/reports/schedules`                        | `asyncHandler(reportingController.listSchedules)`      | Report schedule CRUD          |
+| POST   | `/reports/schedules`                        | `asyncHandler(reportingController.createSchedule)`     | —                             |
+| GET    | `/reports/schedules/:scheduleId`            | `asyncHandler(reportingController.getSchedule)`        | —                             |
+| PUT    | `/reports/schedules/:scheduleId`            | `asyncHandler(reportingController.updateSchedule)`     | —                             |
+| DELETE | `/reports/schedules/:scheduleId`            | `asyncHandler(reportingController.deleteSchedule)`     | —                             |
+| GET    | `/reports/schedules/:scheduleId/executions` | `asyncHandler(reportingController.listExecutions)`     | Report executions (history)   |
+| GET    | `/reports/templates`                        | `asyncHandler(reportingController.getReportTemplates)` | Report templates              |
 
 <!-- GENERATED:ENDPOINTS:END -->

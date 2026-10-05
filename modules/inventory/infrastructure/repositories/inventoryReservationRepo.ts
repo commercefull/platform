@@ -246,8 +246,10 @@ export async function releaseByOrder(orderId: string): Promise<number> {
 }
 
 export async function consumeByOrder(orderId: string): Promise<number> {
+  // Finalize all live holds: 'reserved' (event-path), 'active' (checkout
+  // orchestration), and 'confirmed' (post-payment allocations).
   const result = await query<InventoryReservation[]>(
-    'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "orderId" = $2 AND "status" = \'reserved\' RETURNING *',
+    'UPDATE "inventoryReservation" SET "status" = \'consumed\', "updatedAt" = $1 WHERE "orderId" = $2 AND "status" IN (\'reserved\', \'active\', \'confirmed\') RETURNING *',
     [new Date(), orderId],
   );
   return result?.length ?? 0;
@@ -256,7 +258,7 @@ export async function consumeByOrder(orderId: string): Promise<number> {
 export async function releaseExpired(): Promise<number> {
   const now = new Date();
   const expired = await query<InventoryReservation[]>(
-    'SELECT * FROM "inventoryReservation" WHERE "status" = \'reserved\' AND "expiresAt" IS NOT NULL AND "expiresAt" < $1',
+    'SELECT * FROM "inventoryReservation" WHERE "status" IN (\'reserved\', \'active\') AND "expiresAt" IS NOT NULL AND "expiresAt" < $1',
     [now],
   );
 
@@ -268,13 +270,16 @@ export async function releaseExpired(): Promise<number> {
     await client.query('BEGIN');
 
     for (const r of expired) {
+      // 'active' rows (checkout path) store the inventoryLocationId in
+      // inventoryItemId; 'reserved' rows (event path) store it in locationId.
+      const locationKey = r.status === 'active' ? r.inventoryItemId : r.locationId;
       await client.query(
         `UPDATE "inventoryLocation"
          SET "reservedQuantity" = GREATEST(0, "reservedQuantity" - $2),
              "availableQuantity" = "availableQuantity" + $2,
              "updatedAt" = $3
          WHERE "inventoryLocationId" = $1`,
-        [r.locationId, r.quantity, now],
+        [locationKey, r.quantity, now],
       );
       await client.query(
         'UPDATE "inventoryReservation" SET "status" = \'released\', "updatedAt" = $1 WHERE "inventoryReservationId" = $2',

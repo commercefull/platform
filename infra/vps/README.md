@@ -4,16 +4,16 @@ Hardened Ansible infrastructure for deploying Commercefull to a single VPS.
 
 ## Stack
 
-| Component  | Version | Notes                             |
-| ---------- | ------- | --------------------------------- |
-| Ubuntu     | 22.04+  | Fresh VPS with SSH access         |
-| Node.js    | 22      | Via NodeSource repo               |
-| PostgreSQL | 18      | Via PGDG repo, scram-sha-256 auth |
+| Component  | Version | Notes                                 |
+| ---------- | ------- | ------------------------------------- |
+| Ubuntu     | 22.04+  | Fresh VPS with SSH access             |
+| Node.js    | 22      | Via NodeSource repo                   |
+| PostgreSQL | 18      | Via PGDG repo, scram-sha-256 auth     |
 | Redis      | System  | Shared sessions and application cache |
-| Nginx      | Latest  | TLS 1.2/1.3, HSTS, rate limiting  |
-| PM2        | Latest  | Process manager, auto-restart     |
-| Yarn       | Latest  | Package manager                   |
-| UFW        | -       | Firewall: SSH + HTTP + HTTPS only |
+| Nginx      | Latest  | TLS 1.2/1.3, HSTS, rate limiting      |
+| PM2        | Latest  | Process manager, auto-restart         |
+| Yarn       | Latest  | Package manager                       |
+| UFW        | -       | Firewall: SSH + HTTP + HTTPS only     |
 
 ## Architecture
 

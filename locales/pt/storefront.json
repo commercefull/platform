@@ -744,5 +744,14 @@
   "emailPlaceholder": "seu@email.com",
   "phonePlaceholder": "Seu número de telefone",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "MM/AA"
+  "cardExpiryPlaceholder": "MM/AA",
+  "collections": "Coleções",
+  "collectionsHeroDesc": "Explore as nossas coleções selecionadas",
+  "viewCollection": "Ver coleção",
+  "noCollections": "Ainda não há coleções",
+  "noCollectionsDesc": "Volte em breve — estamos a preparar novas coleções.",
+  "collectionEmpty": "Esta coleção ainda não tem produtos",
+  "collectionEmptyDesc": "Volte em breve ou explore o catálogo completo.",
+  "backToCollections": "Voltar às coleções",
+  "featured": "Em destaque"
 }

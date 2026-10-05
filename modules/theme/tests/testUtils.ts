@@ -42,4 +42,3 @@ export function createTheme(overrides: Partial<Parameters<typeof Theme.create>[0
     ...overrides,
   });
 }
-

@@ -4,7 +4,6 @@ import {
   ProductSkuAlreadyExistsError,
   ProductSlugAlreadyExistsError,
   ProductCategoryNotFoundError,
-  ProductCollectionNotFoundError,
   ProductAttributeNotFoundError,
   ProductImageNotFoundError,
   InvalidProductStatusError,
@@ -28,9 +27,6 @@ describe('ProductErrors', () => {
   });
   it('ProductCategoryNotFoundError', () => {
     expect(new ProductCategoryNotFoundError('c1').statusCode).toBe(404);
-  });
-  it('ProductCollectionNotFoundError', () => {
-    expect(new ProductCollectionNotFoundError('col1').statusCode).toBe(404);
   });
   it('ProductAttributeNotFoundError', () => {
     expect(new ProductAttributeNotFoundError('a1').statusCode).toBe(404);

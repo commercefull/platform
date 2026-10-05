@@ -5,12 +5,7 @@
  */
 
 import { createPromotion, createPromotionRule, createPromotionAction } from '../../tests/testUtils';
-import {
-  promotionRulesPass,
-  promotionRuleMatches,
-  applyPromotionActions,
-  type PromotionEvaluationContext,
-} from './PromotionEvaluator';
+import { promotionRulesPass, promotionRuleMatches, applyPromotionActions, type PromotionEvaluationContext } from './PromotionEvaluator';
 
 const baseContext: PromotionEvaluationContext = {
   items: [
@@ -61,6 +56,15 @@ describe('promotionRuleMatches', () => {
     expect(promotionRuleMatches('itemQuantity', '!=', 3, baseContext)).toBe(false);
   });
 
+  it('should target promotions by store, channel, country, and currency', () => {
+    const context = { ...baseContext, storeId: 'store-1', channelId: 'channel-1', countryCode: 'US' };
+
+    expect(promotionRuleMatches('store', 'in', ['store-1'], context)).toBe(true);
+    expect(promotionRuleMatches('channel', 'in', ['channel-2'], context)).toBe(false);
+    expect(promotionRuleMatches('country', 'in', ['US'], context)).toBe(true);
+    expect(promotionRuleMatches('currency', 'in', ['EUR'], context)).toBe(false);
+  });
+
   it('should match productCategory when any item is in the category list', () => {
     expect(promotionRuleMatches('productCategory', 'in', ['cat2'], baseContext)).toBe(true);
     expect(promotionRuleMatches('productCategory', 'in', ['cat9'], baseContext)).toBe(false);
@@ -90,7 +94,11 @@ describe('applyPromotionActions', () => {
   const promotion = createPromotion({ promotionId: 'promo-1', name: 'Promo' });
 
   it('should apply a cart-level percentage discount', () => {
-    const result = applyPromotionActions(promotion, [createPromotionAction({ actionType: 'discountByPercentage', value: 10 })], baseContext);
+    const result = applyPromotionActions(
+      promotion,
+      [createPromotionAction({ actionType: 'discountByPercentage', value: 10 })],
+      baseContext,
+    );
     expect(result.discountAmountCents).toBe(20);
     expect(result.lineItemDiscounts).toEqual([]);
   });
@@ -109,33 +117,19 @@ describe('applyPromotionActions', () => {
   });
 
   it('should cap a fixed amount discount at the item/subtotal value', () => {
-    const result = applyPromotionActions(
-      promotion,
-      [createPromotionAction({ actionType: 'discountByAmount', value: 999 })],
-      baseContext,
-    );
+    const result = applyPromotionActions(promotion, [createPromotionAction({ actionType: 'discountByAmount', value: 999 })], baseContext);
     expect(result.discountAmountCents).toBe(200);
   });
 
   it('should cap a shipping discount at the shipping amount', () => {
-    const result = applyPromotionActions(
-      promotion,
-      [createPromotionAction({ actionType: 'discountShipping', value: 999 })],
-      baseContext,
-    );
+    const result = applyPromotionActions(promotion, [createPromotionAction({ actionType: 'discountShipping', value: 999 })], baseContext);
     expect(result.shippingDiscountAmountCents).toBe(15);
     expect(result.discountAmountCents).toBe(0);
   });
 
   it('should add a freeItem', () => {
-    const result = applyPromotionActions(
-      promotion,
-      [createPromotionAction({ actionType: 'freeItem', value: 'gift-1' })],
-      baseContext,
-    );
-    expect(result.freeItems).toEqual([
-      { productId: 'gift-1', quantity: 1, promotionId: 'promo-1', promotionName: 'Promo' },
-    ]);
+    const result = applyPromotionActions(promotion, [createPromotionAction({ actionType: 'freeItem', value: 'gift-1' })], baseContext);
+    expect(result.freeItems).toEqual([{ productId: 'gift-1', quantity: 1, promotionId: 'promo-1', promotionName: 'Promo' }]);
   });
 
   it('should add a freeGift only when eligibility thresholds are met', () => {
@@ -166,7 +160,10 @@ describe('applyPromotionActions', () => {
   it('should fall back to subtotal-based tiering when no quantity tier matches', () => {
     const tiered = createPromotionAction({
       actionType: 'discountByTier',
-      value: [{ min: 1000, percentage: 0 }, { min: 150, amount: 30 }],
+      value: [
+        { min: 1000, percentage: 0 },
+        { min: 150, amount: 30 },
+      ],
     });
     // totalQty 3 matches no tier; subtotal 200 matches the 150-min tier → 30 cents capped by subtotal
     const result = applyPromotionActions(promotion, [tiered], baseContext);

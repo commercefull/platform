@@ -40,4 +40,3 @@ describe('RefreshTokenUseCase', () => {
     await expect(useCase.execute(new RefreshTokenCommand('some-token'))).rejects.toThrow(InvalidRefreshTokenError);
   });
 });
-

@@ -9,7 +9,7 @@ describe('CreateStoreDispatchUseCase', () => {
 
   beforeEach(() => {
     mockDispatchRepo = lazyMock<ConstructorParameters<typeof CreateStoreDispatchUseCase>[0]>();
-    mockDispatchRepo.save.mockImplementation(async (d) => d);
+    mockDispatchRepo.save.mockImplementation(async d => d);
     mockInventoryRepo = lazyMock<ConstructorParameters<typeof CreateStoreDispatchUseCase>[1]>();
     mockInventoryRepo.getLocationByStoreId.mockResolvedValue(createLocation({ locationId: 'loc1', storeId: 's1' }));
     mockInventoryRepo.findByProductAndLocation.mockResolvedValue(createInventory({ quantity: 100 }));

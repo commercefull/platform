@@ -33,10 +33,7 @@ describe('UpdateMembershipTierUseCase', () => {
     expect(result.tierId).toBe('t1');
     expect(result.name).toBe('Gold Pro');
     expect(result.priceCents).toBe(60);
-    expect(membershipRepository.updateTier).toHaveBeenCalledWith(
-      't1',
-      expect.objectContaining({ name: 'Gold Pro', priceCents: 60 }),
-    );
+    expect(membershipRepository.updateTier).toHaveBeenCalledWith('t1', expect.objectContaining({ name: 'Gold Pro', priceCents: 60 }));
   });
 
   it('should throw MembershipPlanNotFoundError when the tier does not exist', async () => {

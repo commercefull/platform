@@ -22,9 +22,7 @@ describe('CreateTaxZoneUseCase', () => {
     const result = await useCase.execute(command);
 
     expect(result.id).toBe('tz1');
-    expect(port.createTaxZone).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'US', countries: ['US'], states: [], isActive: true }),
-    );
+    expect(port.createTaxZone).toHaveBeenCalledWith(expect.objectContaining({ name: 'US', countries: ['US'], states: [], isActive: true }));
   });
 
   it('should throw TaxValidationError when countries is empty', async () => {

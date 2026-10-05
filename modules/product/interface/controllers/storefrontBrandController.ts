@@ -7,6 +7,7 @@ import type { HttpRequest, HttpResponse } from 'libs/http';
 import { storefrontRespond } from '../../../../libs/storefrontRespond';
 import { manageBrandsUseCase, listProductsUseCase } from '../../application/useCases/wired';
 import { ListProductsCommand } from '../../application/useCases/ListProducts';
+import { applyAssortmentConstraint, emptyListing } from './storefrontProductController';
 
 // ============================================================================
 // All Brands Listing
@@ -46,7 +47,9 @@ export const getBrand = async (req: HttpRequest, res: HttpResponse): Promise<voi
   }
 
   const featuredCommand = new ListProductsCommand(filters, 8, 0);
-  const featuredResult = await listProductsUseCase.execute(featuredCommand);
+  const featuredResult = applyAssortmentConstraint(res, filters)
+    ? await listProductsUseCase.execute(featuredCommand)
+    : emptyListing(featuredCommand.limit, featuredCommand.offset);
   const products = (featuredResult.products || []).filter(p => p.brandId === brand.brandId).slice(0, 8);
 
   storefrontRespond(req, res, 'brand/show', {
@@ -80,8 +83,9 @@ export const getBrandProducts = async (req: HttpRequest, res: HttpResponse): Pro
     filters.storeId = storeId;
   }
 
+  const assortmentOk = applyAssortmentConstraint(res, filters);
   const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
-  const result = await listProductsUseCase.execute(command);
+  const result = assortmentOk ? await listProductsUseCase.execute(command) : emptyListing(command.limit, command.offset);
   const products = (result.products || []).filter(p => p.brandId === brand.brandId);
 
   storefrontRespond(req, res, 'product/plp', {

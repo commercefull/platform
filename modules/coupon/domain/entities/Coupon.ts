@@ -31,6 +31,10 @@ export interface CouponProps {
   couponId: string;
   code: string;
   name: string;
+  /** Optional promotion whose rules gate eligibility (store/channel/country/currency). */
+  promotionId?: string;
+  /** Owning organization; undefined means the coupon is usable by any organization. */
+  organizationId?: string;
   description?: string;
   type: DiscountType;
   value: number; // Percentage (0-100) or fixed amount in integer cents
@@ -69,6 +73,8 @@ export class Coupon {
     couponId: string;
     code: string;
     name: string;
+    promotionId?: string;
+    organizationId?: string;
     description?: string;
     type: DiscountType;
     value: number;
@@ -116,6 +122,8 @@ export class Coupon {
       couponId: props.couponId,
       code: props.code.toUpperCase().trim(),
       name: props.name,
+      promotionId: props.promotionId,
+      organizationId: props.organizationId,
       description: props.description,
       type: props.type,
       value: props.value,
@@ -155,6 +163,12 @@ export class Coupon {
   }
   get name(): string {
     return this.props.name;
+  }
+  get promotionId(): string | undefined {
+    return this.props.promotionId;
+  }
+  get organizationId(): string | undefined {
+    return this.props.organizationId;
   }
   get description(): string | undefined {
     return this.props.description;
@@ -388,6 +402,8 @@ export class Coupon {
       couponId: this.props.couponId,
       code: this.props.code,
       name: this.props.name,
+      promotionId: this.props.promotionId,
+      organizationId: this.props.organizationId,
       description: this.props.description,
       type: this.props.type,
       value: this.props.value,

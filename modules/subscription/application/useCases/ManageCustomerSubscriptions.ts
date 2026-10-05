@@ -16,6 +16,9 @@ import type {
   SubscriptionRepository,
 } from '../../domain/repositories/SubscriptionRepository';
 import { SubscriptionNotFoundError, SubscriptionValidationError } from '../../domain/errors/SubscriptionErrors';
+import type { SubscriptionTaxPort } from '../ports/SubscriptionTaxPort';
+import type { SubscriptionAddressPort } from '../ports/SubscriptionAddressPort';
+import type { SubscriptionStoreContextPort } from '../ports/SubscriptionStoreContextPort';
 
 export interface CustomerSubscriptionPort {
   getCustomerSubscription(customerSubscriptionId: string): Promise<CustomerSubscription | null>;
@@ -29,11 +32,17 @@ export interface CustomerSubscriptionPort {
   getSubscriptionProductByProductId(productId: string): Promise<SubscriptionProduct | null>;
   getSubscriptionProducts(activeOnly?: boolean): Promise<SubscriptionProduct[]>;
   getSubscriptionOrders(customerSubscriptionId: string): Promise<SubscriptionOrder[]>;
-  createCustomerSubscription(subscription: Parameters<SubscriptionRepository['createCustomerSubscription']>[0]): Promise<CustomerSubscription>;
+  createCustomerSubscription(
+    subscription: Parameters<SubscriptionRepository['createCustomerSubscription']>[0],
+  ): Promise<CustomerSubscription>;
   pauseSubscription(customerSubscriptionId: string, resumeAt?: Date, reason?: string, pausedBy?: string): Promise<SubscriptionPause>;
   resumeSubscription(customerSubscriptionId: string, resumedBy?: string): Promise<void>;
   cancelSubscription(customerSubscriptionId: string, reason?: string, cancelledBy?: string, cancelAtPeriodEnd?: boolean): Promise<void>;
-  updateSubscriptionStatus(customerSubscriptionId: string, status: CustomerSubscription['status'], additionalFields?: Partial<CustomerSubscription>): Promise<void>;
+  updateSubscriptionStatus(
+    customerSubscriptionId: string,
+    status: CustomerSubscription['status'],
+    additionalFields?: Partial<CustomerSubscription>,
+  ): Promise<void>;
   advanceBillingCycle(customerSubscriptionId: string): Promise<void>;
 }
 
@@ -46,10 +55,26 @@ export interface SubscribeCommand {
   billingAddressId?: string;
   paymentMethodId?: string;
   customizations?: Record<string, unknown>;
+  /** Store/channel attribution — matches one-time order attribution. */
+  storeId?: string;
+  salesChannelId?: string;
+  /** B2B VAT ID — enables reverse-charge quoting when the tax port is wired. */
+  vatNumber?: string;
+  /** Override billing currency; defaults to the plan currency. */
+  currencyCode?: string;
+}
+
+export interface SubscriptionTaxPorts {
+  taxPort?: SubscriptionTaxPort;
+  addressPort?: SubscriptionAddressPort;
+  storeContextPort?: SubscriptionStoreContextPort;
 }
 
 export class ManageCustomerSubscriptionsUseCase {
-  constructor(private readonly subscriptionRepo: CustomerSubscriptionPort) {}
+  constructor(
+    private readonly subscriptionRepo: CustomerSubscriptionPort,
+    private readonly taxPorts: SubscriptionTaxPorts = {},
+  ) {}
 
   async getSubscriptionProducts(activeOnly?: boolean) {
     return this.subscriptionRepo.getSubscriptionProducts(activeOnly);
@@ -85,6 +110,8 @@ export class ManageCustomerSubscriptionsUseCase {
       throw new SubscriptionValidationError('Invalid subscription plan');
     }
 
+    const tax = await this.quoteSubscriptionTax(command, plan);
+
     return this.subscriptionRepo.createCustomerSubscription({
       customerId: command.customerId,
       subscriptionPlanId: command.subscriptionPlanId,
@@ -95,7 +122,57 @@ export class ManageCustomerSubscriptionsUseCase {
       billingAddressId: command.billingAddressId,
       paymentMethodId: command.paymentMethodId,
       customizations: command.customizations,
+      storeId: command.storeId,
+      salesChannelId: command.salesChannelId,
+      taxAmountCents: tax?.taxAmountCents,
+      taxAddedCents: tax?.taxAddedCents,
+      currencyCode: command.currencyCode,
+      metadata:
+        tax?.reverseChargeApplied || command.vatNumber
+          ? { vatNumber: command.vatNumber, reverseChargeApplied: tax?.reverseChargeApplied ?? false }
+          : undefined,
     });
+  }
+
+  /**
+   * Quote recurring tax against the subscriber's destination using the
+   * same engine as one-time checkout. Returns undefined when ports or a
+   * destination aren't available — the subscription still creates.
+   */
+  private async quoteSubscriptionTax(
+    command: SubscribeCommand,
+    plan: SubscriptionPlan,
+  ): Promise<{ taxAmountCents: number; taxAddedCents?: number; reverseChargeApplied?: boolean } | undefined> {
+    const { taxPort, addressPort, storeContextPort } = this.taxPorts;
+    if (!taxPort || !addressPort || !command.shippingAddressId) return undefined;
+
+    const destination = await addressPort.resolveDestination(command.shippingAddressId);
+    if (!destination) return undefined;
+
+    const storeContext = command.storeId && storeContextPort ? await storeContextPort.getStoreContext(command.storeId) : null;
+    const product = await this.subscriptionRepo.getSubscriptionProduct(plan.subscriptionProductId);
+
+    const quote = await taxPort.quoteSubscriptionTax({
+      items: [
+        {
+          productId: product?.productId ?? plan.subscriptionProductId,
+          name: plan.name,
+          quantity: command.quantity || 1,
+          unitPriceCents: plan.priceCents,
+        },
+      ],
+      destination,
+      customerId: command.customerId,
+      vatNumber: command.vatNumber,
+      organizationId: storeContext?.organizationId,
+      originCountry: storeContext?.country,
+    });
+    if (!quote.success) return undefined;
+    return {
+      taxAmountCents: quote.taxAmountCents,
+      taxAddedCents: quote.taxAddedCents,
+      reverseChargeApplied: quote.reverseChargeApplied,
+    };
   }
 
   async changePlan(customerId: string, subscriptionId: string, newPlanId: string): Promise<void> {
@@ -147,7 +224,11 @@ export class ManageCustomerSubscriptionsUseCase {
     await this.subscriptionRepo.resumeSubscription(subscriptionId, 'customer');
   }
 
-  async cancel(customerId: string, subscriptionId: string, options: { reason?: string; cancelAtPeriodEnd?: boolean }): Promise<{ cancelAtPeriodEnd: boolean }> {
+  async cancel(
+    customerId: string,
+    subscriptionId: string,
+    options: { reason?: string; cancelAtPeriodEnd?: boolean },
+  ): Promise<{ cancelAtPeriodEnd: boolean }> {
     const subscription = await this.requireOwnedSubscription(customerId, subscriptionId);
 
     if (subscription.status === 'cancelled' || subscription.status === 'expired') {
@@ -158,9 +239,7 @@ export class ManageCustomerSubscriptionsUseCase {
     if (subscription.contractCyclesRemaining && subscription.contractCyclesRemaining > 0) {
       const product = await this.getProduct(subscription);
       if (product && !product.allowEarlyCancel) {
-        throw new SubscriptionValidationError(
-          `Contract requires ${subscription.contractCyclesRemaining} more billing cycles`,
-        );
+        throw new SubscriptionValidationError(`Contract requires ${subscription.contractCyclesRemaining} more billing cycles`);
       }
       // Note: Early termination fee would be handled here
     }
@@ -210,8 +289,6 @@ export class ManageCustomerSubscriptionsUseCase {
   }
 
   private async getProduct(subscription: CustomerSubscription): Promise<SubscriptionProduct | null> {
-    return subscription.subscriptionProductId
-      ? this.subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId)
-      : null;
+    return subscription.subscriptionProductId ? this.subscriptionRepo.getSubscriptionProduct(subscription.subscriptionProductId) : null;
   }
 }

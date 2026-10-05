@@ -15,12 +15,6 @@ const storageService = StorageServiceFactory.create();
 
 export const processImageUseCase = new ProcessImageUseCase(mediaRepository, imageProcessingService, storageService);
 export const downloadImageUseCase = new DownloadImageUseCase(processImageUseCase);
-export const uploadMediaUseCase = new UploadMediaUseCase(
-  mediaRepository as unknown as ConstructorParameters<typeof UploadMediaUseCase>[0],
-);
-export const listMediaUseCase = new ListMediaUseCase(
-  mediaRepository as unknown as ConstructorParameters<typeof ListMediaUseCase>[0],
-);
-export const deleteMediaUseCase = new DeleteMediaUseCase(
-  mediaRepository as unknown as ConstructorParameters<typeof DeleteMediaUseCase>[0],
-);
+export const uploadMediaUseCase = new UploadMediaUseCase(mediaRepository as unknown as ConstructorParameters<typeof UploadMediaUseCase>[0]);
+export const listMediaUseCase = new ListMediaUseCase(mediaRepository as unknown as ConstructorParameters<typeof ListMediaUseCase>[0]);
+export const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepository as unknown as ConstructorParameters<typeof DeleteMediaUseCase>[0]);

@@ -31,6 +31,14 @@ describe('ProductVariant', () => {
     expect(v.attributeString).toBe('Color: Red, Size: M');
   });
 
+  it('should keep an unlimited variant sellable without stock', () => {
+    const variant = ProductVariant.create({ ...baseProps, inventoryPolicy: 'unlimited', stockQuantity: 0 });
+
+    expect(variant.isInStock).toBe(true);
+    expect(variant.isOutOfStock).toBe(false);
+    expect(variant.isLowStock).toBe(false);
+  });
+
   it('should detect low stock', () => {
     const v = ProductVariant.create({ ...baseProps, stockQuantity: 3, lowStockThreshold: 5 });
     expect(v.isLowStock).toBe(true);

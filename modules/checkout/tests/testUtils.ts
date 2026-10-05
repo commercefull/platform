@@ -18,6 +18,7 @@ import type { PromotionQuotePort } from '../application/ports/PromotionQuotePort
 import type { ShippingQuotePort } from '../application/ports/ShippingQuotePort';
 import type { StoreFulfillmentPort } from '../application/ports/StoreFulfillmentPort';
 import type { TaxQuotePort } from '../application/ports/TaxQuotePort';
+import type { LoyaltyQuotePort, LoyaltyRedemptionPort } from '../application/ports/LoyaltyPort';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   eventBus: { emit: jest.fn() },
@@ -52,7 +53,6 @@ export function createCheckoutRepository(): jest.Mocked<CheckoutRepository> {
   return lazyMock<CheckoutRepository>();
 }
 
-
 export function createBasketSnapshotPort(): jest.Mocked<BasketSnapshotPort> {
   return lazyMock<BasketSnapshotPort>();
 }
@@ -63,6 +63,14 @@ export function createDiscountQuotePort(): jest.Mocked<DiscountQuotePort> {
 
 export function createFraudScreeningPort(): jest.Mocked<FraudScreeningPort> {
   return lazyMock<FraudScreeningPort>();
+}
+
+export function createLoyaltyQuotePort(): jest.Mocked<LoyaltyQuotePort> {
+  return lazyMock<LoyaltyQuotePort>();
+}
+
+export function createLoyaltyRedemptionPort(): jest.Mocked<LoyaltyRedemptionPort> {
+  return lazyMock<LoyaltyRedemptionPort>();
 }
 
 export function createOrderPlacementPort(): jest.Mocked<OrderPlacementPort> {
@@ -80,7 +88,6 @@ export function createPromotionQuotePort(): jest.Mocked<PromotionQuotePort> {
 export function createShippingQuotePort(): jest.Mocked<ShippingQuotePort> {
   return lazyMock<ShippingQuotePort>();
 }
-
 
 export function createStoreFulfillmentPort(): jest.Mocked<StoreFulfillmentPort> {
   return lazyMock<StoreFulfillmentPort>();
@@ -126,6 +133,8 @@ export function createAddress(overrides: Record<string, unknown> = {}): Address 
 export function createBasketSnapshot(overrides: Partial<BasketSnapshot> = {}): BasketSnapshot {
   return {
     basketId: 'b-1',
+    storeId: 'store-1',
+    channelId: 'channel-1',
     currency: 'USD',
     isEmpty: false,
     itemCount: 2,

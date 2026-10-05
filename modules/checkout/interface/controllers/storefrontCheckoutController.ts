@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Storefront Checkout Controller
  * Handles checkout process, payment, and order creation
@@ -98,6 +98,7 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     billingAddress: billingAddressStr,
     shippingAddress: shippingAddressStr,
     specialInstructions,
+    vatNumber,
   } = body;
 
   // Parse addresses
@@ -167,6 +168,13 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
     `${shippingAddress.firstName} ${shippingAddress.lastName}`,
     specialInstructions as string | undefined,
     Number(shippingMethod?.costCents || 0),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    vatNumber ? { vatNumber: String(vatNumber).trim() } : undefined,
   );
 
   const orderUseCase = createOrderUseCase;
@@ -180,10 +188,10 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {
     jsonResponse(res, 200, {
-            success: true,
-            orderId: order.orderId,
-            orderNumber: order.orderNumber,
-          });
+      success: true,
+      orderId: order.orderId,
+      orderNumber: order.orderNumber,
+    });
   } else {
     redirectResponse(res, `/order-confirmation/${order.orderId}`);
   }

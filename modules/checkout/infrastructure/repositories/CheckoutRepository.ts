@@ -63,6 +63,8 @@ export class CheckoutRepo implements CheckoutRepository {
     }
     metadata.subtotal = session.subtotal.amount;
     metadata.taxAmount = session.taxAmount.amount;
+    metadata.taxIncludedInSubtotal = session.taxIncludedInSubtotal;
+    metadata.taxAddedAmount = session.taxAddedAmount.amount;
     metadata.shippingAmount = session.shippingAmount.amount;
     metadata.discountAmount = session.discountAmount.amount;
     metadata.total = session.total.amount;
@@ -70,6 +72,25 @@ export class CheckoutRepo implements CheckoutRepository {
     metadata.fulfillmentType = session.fulfillmentType;
     if (session.couponCode) {
       metadata.couponCode = session.couponCode;
+    }
+    if (session.loyaltyRewardId) {
+      metadata.loyaltyRewardId = session.loyaltyRewardId;
+      metadata.loyaltyPointsRedeemed = session.loyaltyPointsRedeemed;
+      metadata.loyaltyDiscountAmount = session.loyaltyDiscountAmount.amount;
+    } else {
+      delete metadata.loyaltyRewardId;
+      delete metadata.loyaltyPointsRedeemed;
+      delete metadata.loyaltyDiscountAmount;
+    }
+    if (session.vatNumber) {
+      metadata.vatNumber = session.vatNumber;
+    } else {
+      delete metadata.vatNumber;
+    }
+    if (session.reverseChargeApplied) {
+      metadata.reverseChargeApplied = true;
+    } else {
+      delete metadata.reverseChargeApplied;
     }
     if (session.shippingMethodId) {
       metadata.shippingMethodId = session.shippingMethodId;
@@ -341,10 +362,17 @@ export class CheckoutRepo implements CheckoutRepository {
       orderId,
       subtotal: Money.create(Number(meta?.subtotal ?? 0), currency),
       taxAmount: Money.create(Number(meta?.taxAmount ?? 0), currency),
+      taxIncludedInSubtotal: meta?.taxIncludedInSubtotal === true,
+      taxAddedAmount: meta?.taxAddedAmount != null ? Money.create(Number(meta.taxAddedAmount), currency) : undefined,
       shippingAmount: Money.create(Number(meta?.shippingAmount ?? 0), currency),
       discountAmount: Money.create(Number(meta?.discountAmount ?? 0), currency),
       total: Money.create(Number(meta?.total ?? 0), currency),
       couponCode: meta?.couponCode as string | undefined,
+      loyaltyRewardId: meta?.loyaltyRewardId as string | undefined,
+      loyaltyPointsRedeemed: meta?.loyaltyPointsRedeemed != null ? Number(meta.loyaltyPointsRedeemed) : undefined,
+      loyaltyDiscountAmount: meta?.loyaltyDiscountAmount != null ? Money.create(Number(meta.loyaltyDiscountAmount), currency) : undefined,
+      vatNumber: meta?.vatNumber as string | undefined,
+      reverseChargeApplied: meta?.reverseChargeApplied === true,
       fulfillmentType: (meta?.fulfillmentType as FulfillmentType) ?? 'shipping',
       notes: row.notes ?? undefined,
       metadata: row.metadata

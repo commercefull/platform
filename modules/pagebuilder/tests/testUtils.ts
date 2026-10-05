@@ -12,7 +12,6 @@ jest.mock('../../../libs/events/eventBus', () => ({
 
 jest.mock('../../../libs/uuid', () => ({ generateUUID: jest.fn() }));
 
-
 export const emitMock = jest.mocked(eventBus.emit);
 
 export function lazyMock<T extends object>(): jest.Mocked<T> {

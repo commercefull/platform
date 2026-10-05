@@ -85,8 +85,6 @@ describe('CalculateBasketTaxUseCase', () => {
     const basketPort = createBasketPort();
     const useCase = new CalculateBasketTaxUseCase(basketPort, calcPort);
 
-    await expect(useCase.execute({ ...command, shippingAddress: { country: '' } })).rejects.toBeInstanceOf(
-      TaxValidationError,
-    );
+    await expect(useCase.execute({ ...command, shippingAddress: { country: '' } })).rejects.toBeInstanceOf(TaxValidationError);
   });
 });

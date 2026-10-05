@@ -13,6 +13,7 @@ export interface IntegrationRepository {
   create(integration: Integration): Promise<Integration>;
   findById(integrationId: string): Promise<Integration | null>;
   findByOrganization(organizationId: string, filters?: IntegrationFilters): Promise<Integration[]>;
+  findByProvider(provider: string, filters?: { status?: IntegrationStatus }): Promise<Integration[]>;
   update(integration: Integration): Promise<Integration>;
   delete(integrationId: string): Promise<boolean>;
 }

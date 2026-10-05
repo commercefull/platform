@@ -28,9 +28,7 @@ exports.seed = async function (knex) {
     // 2. Ensure per-store currency settings exist
     const settings = await knex('storeCurrencySettings').where({ storeId: store.storeId }).first('storeCurrencySettingsId');
     if (!settings) {
-      const defaultMembership = await knex('storeCurrency')
-        .where({ storeId: store.storeId, isDefault: true })
-        .first('currencyId');
+      const defaultMembership = await knex('storeCurrency').where({ storeId: store.storeId, isDefault: true }).first('currencyId');
       if (defaultMembership) {
         await knex('storeCurrencySettings').insert({
           storeId: store.storeId,

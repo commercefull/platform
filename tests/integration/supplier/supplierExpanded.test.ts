@@ -4,7 +4,13 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestSupplier, createTestPurchaseOrder, createTestSupplierAddress, SEEDED_SUPPLIER_IDS, SEEDED_WAREHOUSE_ID } from './testUtils';
+import {
+  createTestSupplier,
+  createTestPurchaseOrder,
+  createTestSupplierAddress,
+  SEEDED_SUPPLIER_IDS,
+  SEEDED_WAREHOUSE_ID,
+} from './testUtils';
 import { expectStatus, createTestClient, loginTestAdmin } from '../testUtils';
 
 describe('Supplier Expanded Tests', () => {

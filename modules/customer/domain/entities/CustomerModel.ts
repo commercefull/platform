@@ -41,7 +41,7 @@ export type CustomerRecord = {
   passwordResetExpires: Date | null;
   verificationToken: string | null;
   agreeToTerms: boolean;
-}
+};
 
 export type CustomerAddressRecord = {
   customerAddressId: string;
@@ -70,5 +70,4 @@ export type CustomerAddressRecord = {
   latitude: string | null;
   longitude: string | null;
   name: string | null;
-}
-
+};

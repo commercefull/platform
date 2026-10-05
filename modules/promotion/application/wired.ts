@@ -1,4 +1,8 @@
-import promotionRuleRepository, { type PromotionCart, type RuleCondition, type ActionType } from '../infrastructure/repositories/PromotionRuleRepository';
+import promotionRuleRepository, {
+  type PromotionCart,
+  type RuleCondition,
+  type ActionType,
+} from '../infrastructure/repositories/PromotionRuleRepository';
 import promotionRepo, {
   CreatePromotionInput,
   PromotionScope,

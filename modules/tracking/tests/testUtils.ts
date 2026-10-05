@@ -28,9 +28,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
   });
 }
 
-export function createTrackingConfig(
-  overrides: Partial<Parameters<typeof TrackingConfig.create>[0]> = {},
-): TrackingConfig {
+export function createTrackingConfig(overrides: Partial<Parameters<typeof TrackingConfig.create>[0]> = {}): TrackingConfig {
   return TrackingConfig.create({
     configId: 'cfg-1',
     storeId: 'store-1',

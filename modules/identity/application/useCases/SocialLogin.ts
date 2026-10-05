@@ -16,7 +16,6 @@ export interface SocialLoginCommand {
   ip?: string;
 }
 
-
 export interface SocialLoginResult {
   isNewUser: boolean;
   userId: string;
@@ -31,7 +30,6 @@ export interface SocialLoginResult {
     avatarUrl?: string;
   };
 }
-
 
 export class SocialLoginUseCase {
   constructor(
@@ -138,4 +136,3 @@ export class SocialLoginUseCase {
     };
   }
 }
-

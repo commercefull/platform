@@ -15,6 +15,8 @@ import type { ModuleManifest } from '../libs/moduleRegistry';
 import { logger } from '../libs/logger';
 
 import { manifest as analyticsManifest } from '../modules/analytics/manifest';
+import { manifest as agenticCheckoutManifest } from '../modules/agentic-checkout/manifest';
+import { manifest as assortmentManifest } from '../modules/assortment/manifest';
 import { manifest as auditManifest } from '../modules/audit/manifest';
 import { manifest as automationManifest } from '../modules/automation/manifest';
 import { manifest as b2bManifest } from '../modules/b2b/manifest';
@@ -68,6 +70,8 @@ const manifests: ModuleManifest[] = [
   organizationManifest,
 
   // ── Commerce (optional) ──────────────────────────────────────
+  assortmentManifest,
+  agenticCheckoutManifest,
   basketManifest,
   checkoutManifest,
   inventoryManifest,

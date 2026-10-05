@@ -30,13 +30,9 @@ describe('ManageCustomerSubscriptionsUseCase', () => {
   describe('subscribe', () => {
     it('should reject when the plan is missing or inactive', async () => {
       port.getSubscriptionPlan.mockResolvedValue(null);
-      await expect(useCase.subscribe({ customerId: 'c', subscriptionPlanId: 'p1' })).rejects.toBeInstanceOf(
-        SubscriptionValidationError,
-      );
+      await expect(useCase.subscribe({ customerId: 'c', subscriptionPlanId: 'p1' })).rejects.toBeInstanceOf(SubscriptionValidationError);
       port.getSubscriptionPlan.mockResolvedValue(createSubscriptionPlan({ isActive: false }));
-      await expect(useCase.subscribe({ customerId: 'c', subscriptionPlanId: 'p1' })).rejects.toBeInstanceOf(
-        SubscriptionValidationError,
-      );
+      await expect(useCase.subscribe({ customerId: 'c', subscriptionPlanId: 'p1' })).rejects.toBeInstanceOf(SubscriptionValidationError);
       expect(port.createCustomerSubscription).not.toHaveBeenCalled();
     });
 
@@ -55,6 +51,78 @@ describe('ManageCustomerSubscriptionsUseCase', () => {
         }),
       );
       expect(result).toBe(subscription);
+    });
+
+    it('should quote tax through the ports when a shipping address and store context resolve', async () => {
+      const plan = createSubscriptionPlan({ subscriptionPlanId: 'p1', subscriptionProductId: 'prod-1', priceCents: 2000 });
+      port.getSubscriptionPlan.mockResolvedValue(plan);
+      port.getSubscriptionProduct.mockResolvedValue(createSubscriptionProduct({ subscriptionProductId: 'prod-1', productId: 'prod-x' }));
+      port.createCustomerSubscription.mockResolvedValue(subscription);
+
+      const taxPort = { quoteSubscriptionTax: jest.fn().mockResolvedValue({ success: true, taxAmountCents: 400, taxAddedCents: 400 }) };
+      const addressPort = { resolveDestination: jest.fn().mockResolvedValue({ country: 'US', region: 'CA' }) };
+      const storeContextPort = { getStoreContext: jest.fn().mockResolvedValue({ organizationId: 'org-1', country: 'US' }) };
+      useCase = new ManageCustomerSubscriptionsUseCase(port, { taxPort, addressPort, storeContextPort });
+
+      await useCase.subscribe({
+        customerId: 'cust-1',
+        subscriptionPlanId: 'p1',
+        shippingAddressId: 'addr-1',
+        storeId: 'store-1',
+        salesChannelId: 'ch-1',
+        vatNumber: 'DE123',
+      });
+
+      expect(addressPort.resolveDestination).toHaveBeenCalledWith('addr-1');
+      expect(storeContextPort.getStoreContext).toHaveBeenCalledWith('store-1');
+      expect(taxPort.quoteSubscriptionTax).toHaveBeenCalledWith(
+        expect.objectContaining({
+          destination: { country: 'US', region: 'CA' },
+          customerId: 'cust-1',
+          vatNumber: 'DE123',
+          organizationId: 'org-1',
+          originCountry: 'US',
+        }),
+      );
+      expect(port.createCustomerSubscription).toHaveBeenCalledWith(
+        expect.objectContaining({
+          storeId: 'store-1',
+          salesChannelId: 'ch-1',
+          taxAmountCents: 400,
+          taxAddedCents: 400,
+          metadata: { vatNumber: 'DE123', reverseChargeApplied: false },
+        }),
+      );
+    });
+
+    it('should create without tax when no shipping address is provided', async () => {
+      const plan = createSubscriptionPlan({ subscriptionPlanId: 'p1', subscriptionProductId: 'prod-1' });
+      port.getSubscriptionPlan.mockResolvedValue(plan);
+      port.createCustomerSubscription.mockResolvedValue(subscription);
+
+      const taxPort = { quoteSubscriptionTax: jest.fn() };
+      useCase = new ManageCustomerSubscriptionsUseCase(port, { taxPort });
+
+      await useCase.subscribe({ customerId: 'cust-1', subscriptionPlanId: 'p1', storeId: 'store-1' });
+
+      expect(taxPort.quoteSubscriptionTax).not.toHaveBeenCalled();
+      expect(port.createCustomerSubscription).toHaveBeenCalledWith(
+        expect.objectContaining({ storeId: 'store-1', taxAmountCents: undefined }),
+      );
+    });
+
+    it('should create without tax when the destination cannot be resolved', async () => {
+      const plan = createSubscriptionPlan({ subscriptionPlanId: 'p1', subscriptionProductId: 'prod-1' });
+      port.getSubscriptionPlan.mockResolvedValue(plan);
+      port.createCustomerSubscription.mockResolvedValue(subscription);
+
+      const taxPort = { quoteSubscriptionTax: jest.fn() };
+      const addressPort = { resolveDestination: jest.fn().mockResolvedValue(null) };
+      useCase = new ManageCustomerSubscriptionsUseCase(port, { taxPort, addressPort });
+
+      await useCase.subscribe({ customerId: 'cust-1', subscriptionPlanId: 'p1', shippingAddressId: 'addr-x' });
+
+      expect(taxPort.quoteSubscriptionTax).not.toHaveBeenCalled();
     });
   });
 
@@ -96,13 +164,9 @@ describe('ManageCustomerSubscriptionsUseCase', () => {
       await expect(useCase.pause('cust-1', 'sub-1', {})).rejects.toBeInstanceOf(SubscriptionValidationError);
 
       port.getCustomerSubscription.mockResolvedValue(subscription);
-      port.getSubscriptionProduct.mockResolvedValue(
-        createSubscriptionProduct({ allowPause: true, maxPauseDays: 30 }),
-      );
+      port.getSubscriptionProduct.mockResolvedValue(createSubscriptionProduct({ allowPause: true, maxPauseDays: 30 }));
       const farFuture = new Date(Date.now() + 100 * 24 * 60 * 60 * 1000);
-      await expect(useCase.pause('cust-1', 'sub-1', { resumeAt: farFuture })).rejects.toBeInstanceOf(
-        SubscriptionValidationError,
-      );
+      await expect(useCase.pause('cust-1', 'sub-1', { resumeAt: farFuture })).rejects.toBeInstanceOf(SubscriptionValidationError);
       expect(port.pauseSubscription).not.toHaveBeenCalled();
     });
 

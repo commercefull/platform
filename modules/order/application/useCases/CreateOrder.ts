@@ -33,6 +33,8 @@ export interface OrderItemInput {
   options?: Record<string, unknown>;
   attributes?: Record<string, unknown>;
   isDigital?: boolean;
+  /** Recurring-purchase metadata carried from the basket line (subscription items). */
+  subscriptionInfo?: Record<string, unknown>;
 }
 
 export interface AddressInput {
@@ -82,6 +84,16 @@ export class CreateOrderCommand {
      * must keep this false.
      */
     public readonly allowGuestOrder?: boolean,
+    /** Authoritative tax total in integer cents (e.g., a checkout tax quote). */
+    public readonly taxTotalCents?: number,
+    /**
+     * Portion of taxTotalCents added on top of the grand total — 0 for fully
+     * tax-inclusive quotes; defaults to the full total (exclusive) or zero
+     * (inclusive) when absent.
+     */
+    public readonly taxAddedToTotalCents?: number,
+    /** True when taxTotalCents is embedded in item prices (tax-inclusive pricing). */
+    public readonly taxIncludedInSubtotal?: boolean,
   ) {}
 }
 
@@ -178,6 +190,7 @@ export class CreateOrderUseCase {
         options: itemInput.options,
         attributes: itemInput.attributes,
         isDigital: itemInput.isDigital,
+        subscriptionInfo: itemInput.subscriptionInfo,
       });
       order.addItem(item);
     }
@@ -185,6 +198,13 @@ export class CreateOrderUseCase {
     // Set shipping total
     if (command.shippingTotalCents) {
       order.setShippingTotal(Money.fromCents(command.shippingTotalCents, currency));
+    }
+
+    // Apply an authoritative tax quote (e.g., destination-based checkout tax)
+    // after items and shipping so the grand total reflects the quoted amount.
+    if (command.taxTotalCents != null) {
+      const addedCents = command.taxAddedToTotalCents ?? (command.taxIncludedInSubtotal === true ? 0 : command.taxTotalCents);
+      order.setTaxTotal(Money.fromCents(command.taxTotalCents, currency), Money.fromCents(addedCents, currency));
     }
 
     // Create shipping address
@@ -232,6 +252,8 @@ export class CreateOrderUseCase {
       shippingTotalCents: savedOrder.shippingTotal.cents,
       itemCount: savedOrder.totalQuantity,
       currency: savedOrder.currencyCode,
+      storeId: savedOrder.storeId,
+      channelId: savedOrder.channelId,
       items: savedOrder.items.map(i => ({
         productId: i.productId,
         productVariantId: i.productVariantId,

@@ -1,5 +1,12 @@
 import { AxiosInstance } from 'axios';
-import { testOrderData, SEEDED_REFUND_ORDER_ID, SEEDED_ORDER_ID, SEEDED_SHIPPED_ORDER_ID, loginTestUser, loginTestUser as loginOrderTestUser } from './testUtils';
+import {
+  testOrderData,
+  SEEDED_REFUND_ORDER_ID,
+  SEEDED_ORDER_ID,
+  SEEDED_SHIPPED_ORDER_ID,
+  loginTestUser,
+  loginTestUser as loginOrderTestUser,
+} from './testUtils';
 import { createTestClient, loginTestAdmin } from '../testUtils';
 
 // Define interfaces for order types
@@ -429,7 +436,7 @@ describe('Order Cancellation Guards', () => {
     );
     expect(response.status).toBe(400);
     const err = response.data.error;
-    const errMsg = typeof err === 'string' ? err : (err?.message || response.data.message || JSON.stringify(response.data));
+    const errMsg = typeof err === 'string' ? err : err?.message || response.data.message || JSON.stringify(response.data);
     expect(errMsg).toMatch(/cannot be cancelled/i);
   });
 

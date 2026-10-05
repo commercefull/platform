@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Loyalty Customer Controller
  *
@@ -154,10 +154,10 @@ export const getMyTransactions = async (req: UserRequest, res: HttpResponse): Pr
   }));
 
   jsonResponse(res, 200, {
-        success: true,
-        data: formattedTransactions,
-        pagination: { limit },
-      });
+    success: true,
+    data: formattedTransactions,
+    pagination: { limit },
+  });
 };
 
 /**

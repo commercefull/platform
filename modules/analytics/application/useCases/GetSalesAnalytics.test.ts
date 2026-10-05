@@ -12,9 +12,7 @@ describe('GetSalesAnalyticsUseCase', () => {
       { date: '2024-01-01', orders: 10, revenue: 1000, units: 20, averageOrderValue: 100 },
       { date: '2024-01-02', orders: 15, revenue: 1500, units: 30, averageOrderValue: 100 },
     ]);
-    analyticsRepo.getSalesBreakdown.mockResolvedValue([
-      { id: 'cat1', name: 'Electronics', orders: 10, revenue: 1000, percentage: 0 },
-    ]);
+    analyticsRepo.getSalesBreakdown.mockResolvedValue([{ id: 'cat1', name: 'Electronics', orders: 10, revenue: 1000, percentage: 0 }]);
     analyticsRepo.getSalesTotals.mockResolvedValue({ orders: 20, revenue: 2000 });
   });
 

@@ -35,4 +35,3 @@ export class ManageImportMappingsUseCase {
     return this.importMappingRepo.deleteByJob(importJobId);
   }
 }
-

@@ -52,17 +52,54 @@
             <textarea class="form-control" name="description" rows="2"><%= priceRule.description || '' %></textarea>
           </div>
 
+          <%
+            const targetingConds = (priceRule.conditions || []);
+            const storeCond = targetingConds.find(function(c) { return c.type === 'store'; });
+            const channelCond = targetingConds.find(function(c) { return c.type === 'channel'; });
+            const selectedStoreIds = (storeCond && storeCond.parameters && storeCond.parameters.storeIds) || [];
+            const selectedChannelIds = (channelCond && channelCond.parameters && channelCond.parameters.channelIds) || [];
+            const builderAttrMap = { cart_total: 'cartTotal', item_quantity: 'itemQuantity', category: 'productCategory', customer_group: 'customerGroup' };
+            const builderConditions = targetingConds
+              .filter(function(c) { return c.type !== 'store' && c.type !== 'channel'; })
+              .map(function(c) {
+                return {
+                  attribute: builderAttrMap[c.type] || c.type,
+                  operator: (c.parameters && c.parameters.operator) || 'eq',
+                  value: Array.isArray(c.parameters && c.parameters.value) ? c.parameters.value.join(',') : (c.parameters && c.parameters.value),
+                };
+              });
+          %>
+
+          <h5 class="mt-4 mb-3">Store &amp; Channel Targeting</h5>
+          <p class="text-muted small">Restrict this rule to specific stores and/or sales channels. Leave empty to apply everywhere.</p>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Stores</label>
+              <select class="form-select" name="storeIds" multiple size="4">
+                <% (stores || []).forEach(function(store) { %>
+                  <option value="<%= store.storeId %>" <%= selectedStoreIds.includes(store.storeId) ? 'selected' : '' %>><%= store.name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Sales Channels</label>
+              <select class="form-select" name="channelIds" multiple size="4">
+                <% (salesChannels || []).forEach(function(channel) { %>
+                  <option value="<%= channel.salesChannelId %>" <%= selectedChannelIds.includes(channel.salesChannelId) ? 'selected' : '' %>><%= channel.name %> (<%= channel.code %>)</option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+
           <h5 class="mt-4 mb-3">Pricing Conditions</h5>
           <%- include('../../../partials/condition-builder', {
             fieldName: 'conditions',
-            conditions: priceRule.conditions || [],
+            conditions: builderConditions,
             attributes: [
               { value: 'cartTotal', label: 'Cart Total' },
               { value: 'itemQuantity', label: 'Item Quantity' },
               { value: 'productCategory', label: 'Product Category' },
-              { value: 'customerGroup', label: 'Customer Group' },
-              { value: 'customerTier', label: 'Customer Tier' },
-              { value: 'channel', label: 'Sales Channel' }
+              { value: 'customerGroup', label: 'Customer Group' }
             ]
           }) %>
         <% } %>

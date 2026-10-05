@@ -83,5 +83,4 @@ describe('Cart Promotion Tests', () => {
       expect(foundPromotion).toBeUndefined();
     }
   });
-
 });

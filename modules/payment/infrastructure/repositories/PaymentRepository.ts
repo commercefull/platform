@@ -146,7 +146,18 @@ export class PaymentRepo implements IPaymentRepository {
             "amountCents", "currencyCode", status, "refundedAmountCents",
             "createdAt", "updatedAt"
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-          [orderPaymentId, transaction.orderId, 'creditCard', 'stripe', transaction.amountCents, transaction.currency, 'pending', 0, now, now],
+          [
+            orderPaymentId,
+            transaction.orderId,
+            'creditCard',
+            'stripe',
+            transaction.amountCents,
+            transaction.currency,
+            'pending',
+            0,
+            now,
+            now,
+          ],
         );
 
         await query(
@@ -483,10 +494,9 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethod>(
-      `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`,
-      [storedPaymentMethodId],
-    );
+    return queryOne<StoredPaymentMethod>(`SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`, [
+      storedPaymentMethodId,
+    ]);
   }
 
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {

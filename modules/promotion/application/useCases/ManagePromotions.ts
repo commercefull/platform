@@ -28,4 +28,3 @@ export class ManagePromotionsUseCase {
     return this.promotionRepo.isValidForOrder(promotionId, orderTotalCents, customerId);
   }
 }
-

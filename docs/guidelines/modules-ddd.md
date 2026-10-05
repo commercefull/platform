@@ -198,12 +198,12 @@ function mapToDiscount(row: DbOrderDiscount): OrderDiscount {
 
 Type-mapping cheatsheet for generated rows:
 
-| Generated type        | Domain contract                    | Conversion                       |
-| --------------------- | ---------------------------------- | -------------------------------- |
-| `Date` (timestamps)   | `Date` (or `Date \| null`)         | passthrough — no `.toISOString()` |
-| `T \| null`           | `T \| undefined` / `?`             | `row.x ?? undefined`             |
-| `string` (numeric)    | `number`                           | `Number(row.x)`                  |
-| `unknown` (json/jsonb)| `Record<string, unknown>`          | cast at the boundary             |
+| Generated type         | Domain contract            | Conversion                        |
+| ---------------------- | -------------------------- | --------------------------------- |
+| `Date` (timestamps)    | `Date` (or `Date \| null`) | passthrough — no `.toISOString()` |
+| `T \| null`            | `T \| undefined` / `?`     | `row.x ?? undefined`              |
+| `string` (numeric)     | `number`                   | `Number(row.x)`                   |
+| `unknown` (json/jsonb) | `Record<string, unknown>`  | cast at the boundary              |
 
 **Timestamps are `Date` everywhere in domain.** `pg` returns `Date` objects for `timestamp`/`timestamptz` (only `bigint` is custom-parsed to `number` in `libs/db/pool.ts`). Domain entities and repository contracts use `Date`; serialization to ISO strings happens at the application DTO boundary via `.toISOString()`. Declaring `createdAt: string` in a domain type is a lie — the runtime value is a `Date`.
 

@@ -77,6 +77,12 @@ router.put('/checkout/:checkoutId/shipping-address', asyncHandler(checkoutContro
 router.put('/checkout/:checkoutId/billing-address', asyncHandler(checkoutController.setBillingAddress));
 
 /**
+ * Set customer VAT ID (B2B reverse charge)
+ * PUT /checkout/:checkoutId/vat-number
+ */
+router.put('/checkout/:checkoutId/vat-number', asyncHandler(checkoutController.setVatNumber));
+
+/**
  * Get available shipping methods
  * GET /checkout/:checkoutId/shipping-methods
  */
@@ -117,6 +123,18 @@ router.post('/checkout/:checkoutId/coupon', asyncHandler(checkoutController.appl
  * DELETE /checkout/:checkoutId/coupon
  */
 router.delete('/checkout/:checkoutId/coupon', asyncHandler(checkoutController.removeCoupon));
+
+/**
+ * Apply loyalty reward
+ * POST /checkout/:checkoutId/loyalty-reward
+ */
+router.post('/checkout/:checkoutId/loyalty-reward', asyncHandler(checkoutController.applyLoyaltyReward));
+
+/**
+ * Remove loyalty reward
+ * DELETE /checkout/:checkoutId/loyalty-reward
+ */
+router.delete('/checkout/:checkoutId/loyalty-reward', asyncHandler(checkoutController.removeLoyaltyReward));
 
 /**
  * Create payment intent and draft order

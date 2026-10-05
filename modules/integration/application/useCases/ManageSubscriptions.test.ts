@@ -1,9 +1,7 @@
 import '../../tests/testUtils';
 import { ManageSubscriptionsUseCase } from './ManageSubscriptions';
 import { IntegrationNotFoundError, SubscriptionNotFoundError } from '../../domain/errors/IntegrationErrors';
-import type {
-  IntegrationRepository, IntegrationSubscriptionRepository,
-} from '../../domain/repositories/IntegrationRepository';
+import type { IntegrationRepository, IntegrationSubscriptionRepository } from '../../domain/repositories/IntegrationRepository';
 import { createIntegration, createSubscription, lazyMock } from '../../tests/testUtils';
 
 describe('ManageSubscriptionsUseCase', () => {
@@ -23,7 +21,9 @@ describe('ManageSubscriptionsUseCase', () => {
     integrationRepo.findById.mockResolvedValue(createIntegration());
 
     const result = await useCase.createSubscription({
-      integrationId: 'int-1', eventType: 'order.created', targetAction: 'https://x.test',
+      integrationId: 'int-1',
+      eventType: 'order.created',
+      targetAction: 'https://x.test',
     });
 
     expect(result.isActive).toBe(true);
@@ -33,9 +33,9 @@ describe('ManageSubscriptionsUseCase', () => {
   it('should throw IntegrationNotFoundError when subscribing a missing integration', async () => {
     integrationRepo.findById.mockResolvedValue(null);
 
-    await expect(
-      useCase.createSubscription({ integrationId: 'missing', eventType: 'x', targetAction: 'y' }),
-    ).rejects.toThrow(IntegrationNotFoundError);
+    await expect(useCase.createSubscription({ integrationId: 'missing', eventType: 'x', targetAction: 'y' })).rejects.toThrow(
+      IntegrationNotFoundError,
+    );
   });
 
   it('should deactivate a subscription when isActive is false', async () => {
@@ -52,4 +52,3 @@ describe('ManageSubscriptionsUseCase', () => {
     await expect(useCase.getSubscription('missing')).rejects.toThrow(SubscriptionNotFoundError);
   });
 });
-

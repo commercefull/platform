@@ -105,6 +105,14 @@ export class StripeAdapter implements PSPAdapter {
       body.append('confirmation_method', 'manual');
     }
 
+    // Delegated/tokenized credentials (e.g. Stripe Shared Payment Tokens from
+    // agentic surfaces) are charged server-side: confirm immediately with the
+    // opaque token as the payment method. Raw PAN data never reaches us.
+    if (request.paymentMethodToken) {
+      body.append('payment_method', request.paymentMethodToken);
+      body.append('confirm', 'true');
+    }
+
     const res = await fetch(`${baseUrl}/payment_intents`, {
       method: 'POST',
       headers: {

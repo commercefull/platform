@@ -17,7 +17,7 @@ describe('CreatePromotionRecordUseCase', () => {
   it('should create a promotion and apply defaults', async () => {
     const promotions = lazyMock<CreatePromotionRecordPort>();
     const promotion = createPromotion();
-    promotions.create.mockImplementation(async (input) => {
+    promotions.create.mockImplementation(async input => {
       expect(input.priority).toBe(10);
       expect(input.isExclusive).toBe(false);
       return promotion;
@@ -31,7 +31,7 @@ describe('CreatePromotionRecordUseCase', () => {
 
   it('should preserve caller-provided defaults', async () => {
     const promotions = lazyMock<CreatePromotionRecordPort>();
-    promotions.create.mockImplementation(async (input) => {
+    promotions.create.mockImplementation(async input => {
       expect(input.priority).toBe(5);
       expect(input.isExclusive).toBe(true);
       return createPromotion();
@@ -45,18 +45,10 @@ describe('CreatePromotionRecordUseCase', () => {
     const promotions = lazyMock<CreatePromotionRecordPort>();
     const useCase = new CreatePromotionRecordUseCase(promotions);
 
-    await expect(useCase.execute(makeInput({ name: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
-    await expect(useCase.execute(makeInput({ status: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
-    await expect(useCase.execute(makeInput({ scope: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
-    await expect(useCase.execute(makeInput({ startDate: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
+    await expect(useCase.execute(makeInput({ name: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute(makeInput({ status: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute(makeInput({ scope: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute(makeInput({ startDate: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
     expect(promotions.create).not.toHaveBeenCalled();
   });
 });

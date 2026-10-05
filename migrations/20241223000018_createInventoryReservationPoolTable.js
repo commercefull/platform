@@ -15,6 +15,10 @@ exports.up = async function (knex) {
     table.string('variantId');
     table.string('sku');
     table.string('orderId');
+    // Links the reservation to the order line it covers — nullable: the
+    // order.created event path does not know line IDs, and basket-hold
+    // reservations have no line yet.
+    table.string('orderItemId', 255);
     table.string('basketId');
     table.string('locationId');
     table.integer('quantity').notNullable();
@@ -26,6 +30,7 @@ exports.up = async function (knex) {
     table.timestamp('updatedAt').defaultTo(knex.fn.now());
 
     table.index(['orderId']);
+    table.index(['orderItemId']);
     table.index(['basketId']);
     table.index(['status']);
     table.index(['expiresAt']);

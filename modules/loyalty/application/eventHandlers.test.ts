@@ -18,8 +18,7 @@ jest.mock('../../../libs/jobs/cronScheduler', () => ({
   JobScheduler: { scheduleNotification: jest.fn(), schedule: jest.fn() },
 }));
 
-const tier = (tierId: string, name: string): LoyaltyTier =>
-  ({ tierId, name }) as unknown as LoyaltyTier;
+const tier = (tierId: string, name: string): LoyaltyTier => ({ tierId, name }) as unknown as LoyaltyTier;
 
 function makeOrder(): Order {
   const order = Order.create({ orderId: 'ord-1', customerId: 'cust-1', customerEmail: 't@e.com' });
@@ -117,9 +116,7 @@ describe('Loyalty event handlers: order.completed', () => {
 
     await eventBus.emit('order.completed', { orderId: 'ord-1', customerId: 'cust-1' });
 
-    expect(emitted).toEqual([
-      expect.objectContaining({ customerId: 'cust-1', previousTier: undefined, newTier: 'Bronze' }),
-    ]);
+    expect(emitted).toEqual([expect.objectContaining({ customerId: 'cust-1', previousTier: undefined, newTier: 'Bronze' })]);
   });
 
   it('should do nothing when the order has no total', async () => {
@@ -128,5 +125,64 @@ describe('Loyalty event handlers: order.completed', () => {
     await eventBus.emit('order.completed', { orderId: 'ord-1', customerId: 'cust-1' });
 
     expect(points.processOrderPoints).not.toHaveBeenCalled();
+  });
+});
+
+describe('Loyalty event handlers: order.cancelled point restore', () => {
+  let points: {
+    findTransactionByOrderAndAction: jest.Mock;
+    findCreditTransactionByReference: jest.Mock;
+    findCustomerPoints: jest.Mock;
+    createTransaction: jest.Mock;
+    setMemberPoints: jest.Mock;
+  };
+  let orders: { findById: jest.Mock };
+
+  beforeEach(() => {
+    (eventBus as unknown as { handlers: Map<string, unknown> }).handlers.clear();
+    orders = { findById: jest.fn() };
+    points = {
+      findTransactionByOrderAndAction: jest.fn().mockResolvedValue(null),
+      findCreditTransactionByReference: jest.fn().mockResolvedValue(null),
+      findCustomerPoints: jest.fn().mockResolvedValue({ loyaltyPointsId: 'lp-1', customerId: 'cust-1', currentPoints: 700 }),
+      createTransaction: jest.fn().mockResolvedValue({}),
+      setMemberPoints: jest.fn().mockResolvedValue(undefined),
+    };
+    registerLoyaltyEventHandlers({
+      orders: orders as unknown as LoyaltyEventHandlerDeps['orders'],
+      points: points as unknown as LoyaltyEventHandlerDeps['points'],
+    });
+  });
+
+  afterEach(() => {
+    (eventBus as unknown as { handlers: Map<string, unknown> }).handlers.clear();
+  });
+
+  it('should restore points when a debit exists for the cancelled order', async () => {
+    points.findTransactionByOrderAndAction.mockResolvedValue({ loyaltyTransactionId: 'lt-1', points: -500 });
+
+    await eventBus.emit('order.cancelled', { orderId: 'ord-1', customerId: 'cust-1' });
+
+    expect(points.createTransaction).toHaveBeenCalledWith(
+      expect.objectContaining({ customerId: 'cust-1', orderId: 'ord-1', points: 500, referenceId: 'lt-1' }),
+    );
+    expect(points.setMemberPoints).toHaveBeenCalledWith('lp-1', 1200);
+  });
+
+  it('should not restore again when the refund transaction already exists', async () => {
+    points.findTransactionByOrderAndAction.mockResolvedValue({ loyaltyTransactionId: 'lt-1', points: -500 });
+    points.findCreditTransactionByReference.mockResolvedValue({ loyaltyTransactionId: 'lt-2' });
+
+    await eventBus.emit('order.cancelled', { orderId: 'ord-1', customerId: 'cust-1' });
+
+    expect(points.createTransaction).not.toHaveBeenCalled();
+    expect(points.setMemberPoints).not.toHaveBeenCalled();
+  });
+
+  it('should do nothing when no points were redeemed for the order', async () => {
+    await eventBus.emit('order.cancelled', { orderId: 'ord-1', customerId: 'cust-1' });
+
+    expect(points.findCreditTransactionByReference).not.toHaveBeenCalled();
+    expect(points.createTransaction).not.toHaveBeenCalled();
   });
 });

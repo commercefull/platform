@@ -108,9 +108,12 @@ describe('ApiGatewayConstruct', () => {
     const stack = new cdk.Stack(app, 'TestStack', { env: { account: '123456789012', region: 'us-east-1' } });
     const vpc = new ec2.Vpc(stack, 'Vpc', { maxAzs: 2 });
 
-    expect(() => new ApiGatewayConstruct(stack, 'Api', {
-      environment: 'prod',
-      vpc,
-    })).toThrow('Either cloudMapService or listener must be provided');
+    expect(
+      () =>
+        new ApiGatewayConstruct(stack, 'Api', {
+          environment: 'prod',
+          vpc,
+        }),
+    ).toThrow('Either cloudMapService or listener must be provided');
   });
 });

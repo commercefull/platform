@@ -1,14 +1,5 @@
 type TransformType =
-  | 'int'
-  | 'float'
-  | 'floatStr'
-  | 'cents'
-  | 'boolTrue'
-  | 'boolNotFalse'
-  | 'json'
-  | 'date'
-  | 'stringOrUndefined'
-  | 'passthrough';
+  'int' | 'float' | 'floatStr' | 'cents' | 'boolTrue' | 'boolNotFalse' | 'json' | 'date' | 'stringOrUndefined' | 'passthrough';
 
 export type FieldConfig = {
   name: string;

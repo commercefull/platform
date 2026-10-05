@@ -26,19 +26,19 @@ describe('ResetCustomerPasswordUseCase', () => {
     mockCustomerRepo.updatePassword.mockResolvedValue(undefined);
     mockPasswordResetRepo = lazyMock<ConstructorParameters<typeof ResetCustomerPasswordUseCase>[1]>();
     mockPasswordResetRepo.create.mockResolvedValue(undefined);
-    mockPasswordResetRepo.findByToken.mockResolvedValue({ customerId: 'c1', token: 'tok123', expiresAt: new Date(Date.now() + 3600000), used: false });
+    mockPasswordResetRepo.findByToken.mockResolvedValue({
+      customerId: 'c1',
+      token: 'tok123',
+      expiresAt: new Date(Date.now() + 3600000),
+      used: false,
+    });
     mockPasswordResetRepo.markAsUsed.mockResolvedValue(undefined);
     mockAuthService = lazyMock<ConstructorParameters<typeof ResetCustomerPasswordUseCase>[2]>();
     mockAuthService.generateResetToken.mockResolvedValue('tok123');
     mockAuthService.hashPassword.mockResolvedValue('hashed-pw');
     mockEmailService = lazyMock<ConstructorParameters<typeof ResetCustomerPasswordUseCase>[3]>();
     mockEmailService.sendPasswordResetEmail.mockResolvedValue(undefined);
-    useCase = new ResetCustomerPasswordUseCase(
-      mockCustomerRepo,
-      mockPasswordResetRepo,
-      mockAuthService,
-      mockEmailService,
-    );
+    useCase = new ResetCustomerPasswordUseCase(mockCustomerRepo, mockPasswordResetRepo, mockAuthService, mockEmailService);
   });
 
   it('should request password reset (happy path)', async () => {

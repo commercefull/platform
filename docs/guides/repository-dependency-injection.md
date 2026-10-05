@@ -29,12 +29,12 @@ This was accepted previously but violates DDD dependency flow: **application →
 
 ### Scope of Violations
 
-| Category | Count | Status |
-|---|---|---|
-| Non-wired useCase files importing from `infrastructure/repositories` | **99** | Violation — must fix |
-| Test files importing from `infrastructure/repositories` | **82** | Violation — must fix |
-| `wired.ts` files importing from `infrastructure/repositories` | **47** | Acceptable — composition root |
-| UseCase files already importing from `domain/repositories` | **143** | Correct — no change needed |
+| Category                                                             | Count   | Status                        |
+| -------------------------------------------------------------------- | ------- | ----------------------------- |
+| Non-wired useCase files importing from `infrastructure/repositories` | **99**  | Violation — must fix          |
+| Test files importing from `infrastructure/repositories`              | **82**  | Violation — must fix          |
+| `wired.ts` files importing from `infrastructure/repositories`        | **47**  | Acceptable — composition root |
+| UseCase files already importing from `domain/repositories`           | **143** | Correct — no change needed    |
 
 ### Modules Affected (22)
 
@@ -49,6 +49,7 @@ This was accepted previously but violates DDD dependency flow: **application →
 ### Two Violation Patterns
 
 **Pattern A — Full violation** (e.g., `CreateCoupon.ts`):
+
 ```ts
 // WRONG: imports concrete class from infrastructure
 import { CouponRepository } from '../../infrastructure/repositories/CouponRepository';
@@ -60,6 +61,7 @@ export class CreateCouponUseCase {
 ```
 
 **Pattern B — Partial violation** (e.g., `GetOrderDetails.ts`):
+
 ```ts
 // CORRECT: imports interface from domain
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
@@ -67,7 +69,7 @@ import { OrderRepository } from '../../domain/repositories/OrderRepository';
 import orderDataRepository from '../../infrastructure/repositories/OrderDataRepository';
 
 export class GetOrderDetailsUseCase {
-  constructor(private orderRepo: OrderRepository) {}  // interface — correct
+  constructor(private orderRepo: OrderRepository) {} // interface — correct
   async execute() {
     // but also calls orderDataRepository directly — wrong
     const data = await orderDataRepository.findSomething();
@@ -160,6 +162,7 @@ CI runs with `--ignore-known` (suppresses existing) until migration is complete.
 These modules have simple violations — useCase imports concrete repo, constructor takes concrete type. Just change the import path and constructor type.
 
 **Modules (estimated 1-2 files each):**
+
 - `coupon` (2 files: CreateCoupon, ValidateCoupon)
 - `fulfillment` (1 file: ManageOperations)
 - `gdpr` (1 file: ManageGdpr)
@@ -169,6 +172,7 @@ These modules have simple violations — useCase imports concrete repo, construc
 - `store` (1 file: ManageStoresAdmin)
 
 **Steps per file:**
+
 1. Change import from `../../infrastructure/repositories/X` to `../../domain/repositories/X`
 2. Change constructor parameter type to the interface
 3. If the interface name differs from the concrete name, rename the import
@@ -179,6 +183,7 @@ These modules have simple violations — useCase imports concrete repo, construc
 ### Phase 2: Migrate high-volume modules (Pattern A)
 
 **Modules with many violating files:**
+
 - `notification` (13 files)
 - `promotion` (11 files)
 - `shipping` (11 files)
@@ -198,6 +203,7 @@ These modules have simple violations — useCase imports concrete repo, construc
 ### Phase 3: Fix Pattern B violations (dual-import files)
 
 23 files import from BOTH `domain/repositories` and `infrastructure/repositories`. These need:
+
 1. Identify what the infrastructure import is used for
 2. If the method exists on the domain interface → change the call to use the injected interface
 3. If the method does NOT exist on the domain interface → add it to the interface, then implement it on the concrete class
@@ -208,6 +214,7 @@ These modules have simple violations — useCase imports concrete repo, construc
 ### Phase 4: Fix test files (82 files)
 
 Tests currently import concrete repos from `infrastructure/repositories`. Change to:
+
 1. Import the domain interface
 2. Create mock implementations that satisfy the interface
 3. Inject the mock into the useCase under test
@@ -225,30 +232,30 @@ Tests currently import concrete repos from `infrastructure/repositories`. Change
 
 Ordered by complexity (lowest first) and risk:
 
-| Priority | Module | Files | Pattern | Notes |
-|---|---|---|---|---|
-| 1 | `coupon` | 2 | A | Domain interface exists, simple |
-| 2 | `fulfillment` | 1 | A | Only ManageOperations (others already correct) |
-| 3 | `gdpr` | 1 | A | Single file |
-| 4 | `loyalty` | 1 | A | Single file |
-| 5 | `localization` | 1 | A | Single file |
-| 6 | `membership` | 2 | A | Two files |
-| 7 | `store` | 1 | A | Single file |
-| 8 | `warehouse` | 2 | A | Two files |
-| 9 | `supplier` | 2 | A | Two files |
-| 10 | `support` | 2 | A | Two files |
-| 11 | `content` | 4 | A | Four files |
-| 12 | `customer` | 3 | A | Three files |
-| 13 | `identity` | 3 | A | Three files |
-| 14 | `inventory` | 2 | A | Two files |
-| 15 | `subscription` | 4 | A | Four files |
-| 16 | `tax` | 5 | A | Five files |
-| 17 | `reporting` | 7 | A | Seven files |
-| 18 | `notification` | 13 | A | Thirteen files — bulk |
-| 19 | `promotion` | 11 | A | Eleven files — bulk |
-| 20 | `shipping` | 11 | A | Eleven files — bulk |
-| 21 | `payment` | 13 | A+B | Mixed patterns — needs interface additions |
-| 22 | `order` | 11 | A+B | Mixed patterns — needs interface additions |
+| Priority | Module         | Files | Pattern | Notes                                          |
+| -------- | -------------- | ----- | ------- | ---------------------------------------------- |
+| 1        | `coupon`       | 2     | A       | Domain interface exists, simple                |
+| 2        | `fulfillment`  | 1     | A       | Only ManageOperations (others already correct) |
+| 3        | `gdpr`         | 1     | A       | Single file                                    |
+| 4        | `loyalty`      | 1     | A       | Single file                                    |
+| 5        | `localization` | 1     | A       | Single file                                    |
+| 6        | `membership`   | 2     | A       | Two files                                      |
+| 7        | `store`        | 1     | A       | Single file                                    |
+| 8        | `warehouse`    | 2     | A       | Two files                                      |
+| 9        | `supplier`     | 2     | A       | Two files                                      |
+| 10       | `support`      | 2     | A       | Two files                                      |
+| 11       | `content`      | 4     | A       | Four files                                     |
+| 12       | `customer`     | 3     | A       | Three files                                    |
+| 13       | `identity`     | 3     | A       | Three files                                    |
+| 14       | `inventory`    | 2     | A       | Two files                                      |
+| 15       | `subscription` | 4     | A       | Four files                                     |
+| 16       | `tax`          | 5     | A       | Five files                                     |
+| 17       | `reporting`    | 7     | A       | Seven files                                    |
+| 18       | `notification` | 13    | A       | Thirteen files — bulk                          |
+| 19       | `promotion`    | 11    | A       | Eleven files — bulk                            |
+| 20       | `shipping`     | 11    | A       | Eleven files — bulk                            |
+| 21       | `payment`      | 13    | A+B     | Mixed patterns — needs interface additions     |
+| 22       | `order`        | 11    | A+B     | Mixed patterns — needs interface additions     |
 
 ---
 
@@ -279,10 +286,11 @@ For each violating useCase file:
 ### Remove the accepted violation
 
 In `.dependency-cruiser.cjs`, the `application-no-infra-interface` rule currently has:
+
 ```js
 pathNot: [
-  'modules/[^/]+/infrastructure/repositories/',  // REMOVE THIS LINE
-]
+  'modules/[^/]+/infrastructure/repositories/', // REMOVE THIS LINE
+];
 ```
 
 ### Add a specific rule for wired.ts exemption
@@ -317,7 +325,7 @@ The `application-no-infra-interface` rule still blocks imports to `infrastructur
 
 Add a section on dependency injection:
 
-```markdown
+````markdown
 ## Repository Dependency Injection
 
 UseCases MUST depend on domain repository interfaces, not concrete implementations.
@@ -338,6 +346,7 @@ export class CreateCouponUseCase {
 import CouponRepo from '../infrastructure/repositories/CouponRepository';
 export const createCoupon = new CreateCouponUseCase(CouponRepo);
 ```
+````
 
 ### Wrong
 
@@ -351,6 +360,7 @@ import { CouponRepository } from '../../infrastructure/repositories/CouponReposi
 
 The dependency-cruiser rule `application-no-infra-repos` enforces this at build time.
 Only `wired.ts` files may import from `infrastructure/repositories/`.
+
 ```
 
 ### docs/guidelines/module-integration.md
@@ -361,8 +371,10 @@ Update to reference the injection pattern for ACL adapters.
 
 Add to working principles:
 ```
+
 - **UseCases depend on domain interfaces only** — never import from infrastructure/repositories in useCase files; injection happens in wired.ts
-```
+
+````
 
 ---
 
@@ -385,9 +397,10 @@ After each phase:
 yarn lint:errors          # ESLint passes
 yarn test:unit            # All unit tests pass
 yarn deps:check           # Dependency-cruiser passes (with baseline)
-```
+````
 
 After Phase 5 (final):
+
 ```bash
 yarn lint                 # Full lint (tsc + eslint + dependency-cruiser)
 yarn test:unit            # All unit tests pass

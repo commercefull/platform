@@ -40,11 +40,6 @@ export {
   JwtTokenPort,
   TokenSubjectType,
 } from './token/IssueTokenPair';
-export {
-  RenewAccessTokenUseCase,
-  RenewAccessTokenCommand,
-  RenewAccessTokenConfig,
-  RenewAccessTokenResult,
-} from './token/RenewAccessToken';
+export { RenewAccessTokenUseCase, RenewAccessTokenCommand, RenewAccessTokenConfig, RenewAccessTokenResult } from './token/RenewAccessToken';
 export { LogoutSessionUseCase, LogoutSessionCommand } from './token/LogoutSession';
 export { CleanupExpiredTokensUseCase, CleanupExpiredTokensResult } from './token/CleanupExpiredTokens';

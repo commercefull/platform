@@ -2,14 +2,125 @@
   <div class="page-header d-print-none">
     <div class="row align-items-center">
       <div class="col-auto">
-        <a href="/admin/catalog/collections" class="btn btn-outline-secondary btn-sm mb-2"><%= t('product:collection.back') %></a>
+        <a href="/admin/catalog/collections" class="btn btn-outline-secondary btn-sm mb-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>
+          <%= t('product:collection.back') %>
+        </a>
         <h2 class="page-title"><%= pageName %></h2>
       </div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-body">
-      <p class="text-muted"><%= t('shared:common.comingSoon') %></p>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger alert-dismissible" role="alert">
+    <div class="d-flex">
+      <div><%= error %></div>
     </div>
+    <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
   </div>
+  <% } %>
+
+  <% var fd = typeof formData !== 'undefined' && formData ? formData : collection || {}; %>
+  <form action="/admin/catalog/collections/<%= collection ? collection.assortmentCollectionId : '' %>" method="POST">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title"><%= t('product:collection.details') %></h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label required"><%= t('common.name') %></label>
+              <input type="text" class="form-control" name="name" required value="<%= fd.name || '' %>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><%= t('shared:common.slug') %></label>
+              <input type="text" class="form-control" name="slug" value="<%= fd.slug || '' %>">
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><%= t('shared:common.description') %></label>
+          <textarea class="form-control" name="description" rows="3"><%= fd.description || '' %></textarea>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><%= t('shared:common.image') %> URL</label>
+              <input type="text" class="form-control" name="imageUrl" value="<%= fd.imageUrl || '' %>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.banner') %></label>
+              <input type="text" class="form-control" name="bannerUrl" value="<%= fd.bannerUrl || '' %>">
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.sortOrder') %></label>
+              <select class="form-select" name="sortOrder">
+                <% ['manual', 'newest', 'price_asc', 'price_desc', 'name_asc'].forEach(function(o) { %>
+                <option value="<%= o %>" <%= (fd.sortOrder || 'manual') === o ? 'selected' : '' %>><%= o %></option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.publishAt') %></label>
+              <input type="datetime-local" class="form-control" name="publishAt" value="<%= fd.publishAt ? String(fd.publishAt).slice(0, 16) : '' %>">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.unpublishAt') %></label>
+              <input type="datetime-local" class="form-control" name="unpublishAt" value="<%= fd.unpublishAt ? String(fd.unpublishAt).slice(0, 16) : '' %>">
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-check form-check-inline">
+            <input type="checkbox" class="form-check-input" name="isActive" <%= fd.isActive ? 'checked' : '' %>>
+            <span class="form-check-label"><%= t('common.active') %></span>
+          </label>
+          <label class="form-check form-check-inline">
+            <input type="checkbox" class="form-check-input" name="isFeatured" <%= fd.isFeatured ? 'checked' : '' %>>
+            <span class="form-check-label"><%= t('product:collection.featured') %></span>
+          </label>
+          <label class="form-check form-check-inline">
+            <input type="checkbox" class="form-check-input" name="isAutomated" <%= fd.isAutomated ? 'checked' : '' %>>
+            <span class="form-check-label"><%= t('product:collection.automated') %></span>
+          </label>
+        </div>
+        <div class="mb-3">
+          <label class="form-label"><%= t('product:collection.conditionsJson') %></label>
+          <textarea class="form-control font-monospace" name="conditionsJson" rows="4"><%= fd.conditionsJson ? fd.conditionsJson : (fd.conditions ? JSON.stringify(fd.conditions) : '') %></textarea>
+          <small class="form-hint"><%= t('product:collection.conditionsHint') %></small>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.metaTitle') %></label>
+              <input type="text" class="form-control" name="metaTitle" value="<%= fd.metaTitle || '' %>">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label"><%= t('product:collection.metaDescription') %></label>
+              <input type="text" class="form-control" name="metaDescription" value="<%= fd.metaDescription || '' %>">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <a href="/admin/catalog/collections" class="btn btn-link"><%= t('common.cancel') %></a>
+        <button type="submit" class="btn btn-primary"><%= t('common.save') %></button>
+      </div>
+    </div>
+  </form>
 </div>

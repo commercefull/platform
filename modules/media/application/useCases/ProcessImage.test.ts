@@ -8,11 +8,10 @@ describe('ProcessImageUseCase', () => {
     const mediaRepository = createMediaRepository();
     const storageService = createStorageService();
 
-    const result = await new ProcessImageUseCase(
-      mediaRepository,
-      createImageProcessingService(),
-      storageService,
-    ).execute({ file: jpegFile, altText: 'Test photo' });
+    const result = await new ProcessImageUseCase(mediaRepository, createImageProcessingService(), storageService).execute({
+      file: jpegFile,
+      altText: 'Test photo',
+    });
 
     expect(result.media.mediaId).toBe('test-uuid');
     expect(result.urls.original).toBe('https://cdn.example.com/media/test-uuid/original.jpg');
@@ -22,11 +21,9 @@ describe('ProcessImageUseCase', () => {
   it('should upload the webp and thumbnail variants when processing generates them', async () => {
     const storageService = createStorageService();
 
-    const result = await new ProcessImageUseCase(
-      createMediaRepository(),
-      createImageProcessingService(),
-      storageService,
-    ).execute({ file: jpegFile });
+    const result = await new ProcessImageUseCase(createMediaRepository(), createImageProcessingService(), storageService).execute({
+      file: jpegFile,
+    });
 
     // original + webp + thumbnail
     expect(storageService.upload).toHaveBeenCalledTimes(3);

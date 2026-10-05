@@ -143,9 +143,7 @@ class PaymentBillingRepo {
   }
 
   async findDisputeById(paymentDisputeId: string): Promise<PaymentDispute | null> {
-    return queryOne<PaymentDispute>(`SELECT ${DISPUTE_COLUMNS} FROM "paymentDispute" WHERE "paymentDisputeId" = $1`, [
-      paymentDisputeId,
-    ]);
+    return queryOne<PaymentDispute>(`SELECT ${DISPUTE_COLUMNS} FROM "paymentDispute" WHERE "paymentDisputeId" = $1`, [paymentDisputeId]);
   }
 
   async createDispute(params: Omit<PaymentDispute, 'paymentDisputeId' | 'createdAt' | 'updatedAt'>): Promise<PaymentDispute | null> {
@@ -188,8 +186,7 @@ class PaymentBillingRepo {
       );
     }
     return (
-      (await query<PaymentDispute[]>(`SELECT ${DISPUTE_COLUMNS} FROM "paymentDispute" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) ||
-      []
+      (await query<PaymentDispute[]>(`SELECT ${DISPUTE_COLUMNS} FROM "paymentDispute" ORDER BY "createdAt" DESC LIMIT $1`, [limit])) || []
     );
   }
 

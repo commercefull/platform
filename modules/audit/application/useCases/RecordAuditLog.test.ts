@@ -22,7 +22,13 @@ describe('RecordAuditLogUseCase', () => {
     repository.getLatestHash.mockResolvedValue('previous-hash-123');
 
     const result = await new RecordAuditLogUseCase(repository).execute(
-      createAuditLogCommand({ actorId: 'user-2', actorType: 'organization', action: 'order.refund', resourceType: 'order', resourceId: 'ord-1' }),
+      createAuditLogCommand({
+        actorId: 'user-2',
+        actorType: 'organization',
+        action: 'order.refund',
+        resourceType: 'order',
+        resourceId: 'ord-1',
+      }),
     );
 
     expect(result.previousHash).toBe('previous-hash-123');
@@ -39,9 +45,7 @@ describe('RecordAuditLogUseCase', () => {
     const repository = createAuditRepository();
     const metadata = { oldValues: { price: 10 }, newValues: { price: 20 } };
 
-    const result = await new RecordAuditLogUseCase(repository).execute(
-      createAuditLogCommand({ action: 'product.update', metadata }),
-    );
+    const result = await new RecordAuditLogUseCase(repository).execute(createAuditLogCommand({ action: 'product.update', metadata }));
 
     expect(result.metadata).toEqual(metadata);
   });

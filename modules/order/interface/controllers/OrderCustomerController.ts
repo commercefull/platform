@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Order Customer Controller
  * HTTP interface for customer-facing order operations with content negotiation
@@ -10,12 +10,8 @@ import { CreateOrderCommand, OrderItemInput, AddressInput } from '../../applicat
 import { GetOrderCommand } from '../../application/useCases/GetOrder';
 import { GetCustomerOrdersCommand } from '../../application/useCases/GetCustomerOrders';
 import { CancelOrderCommand } from '../../application/useCases/CancelOrder';
-import {
-  getCustomerOrdersUseCase,
-  getOrderUseCase,
-  createOrderUseCase,
-  cancelOrderUseCase,
-} from '../../application/useCases/wired';
+import { getCustomerOrdersUseCase, getOrderUseCase, createOrderUseCase, cancelOrderUseCase } from '../../application/useCases/wired';
+import { manageSalesChannelsUseCase } from '../../../store/application/useCases/wired';
 import { isUuid } from '../../../../libs/uuid';
 import { OrderNotFoundError } from '../../domain/errors/OrderErrors';
 
@@ -167,6 +163,20 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
   let resolvedStoreId = storeId || req.user?.storeId;
   let resolvedChannelId = channelId;
   let resolvedOrderSource = orderSource || 'web';
+
+  // A customer may attribute an order to a store/channel, but only to one
+  // that exists, is active, and — when both are given — is assigned.
+  if (resolvedStoreId || resolvedChannelId) {
+    try {
+      await manageSalesChannelsUseCase.assertStoreChannelAccess({
+        storeId: resolvedStoreId,
+        channelId: resolvedChannelId,
+      });
+    } catch (err: unknown) {
+      respondError(req, res, (err as Error).message, 400);
+      return;
+    }
+  }
 
   const command = new CreateOrderCommand(
     customerId,

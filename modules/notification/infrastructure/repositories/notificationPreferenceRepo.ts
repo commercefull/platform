@@ -5,7 +5,10 @@ import type {
   NotificationPreference,
   NotificationPreferenceUpsertParams,
 } from '../../domain/repositories/NotificationPreferenceRepository';
-export type { NotificationPreference, NotificationPreferenceUpsertParams } from '../../domain/repositories/NotificationPreferenceRepository';
+export type {
+  NotificationPreference,
+  NotificationPreferenceUpsertParams,
+} from '../../domain/repositories/NotificationPreferenceRepository';
 
 function mapToPreference(row: DbNotificationPreference): NotificationPreference {
   return {
@@ -41,7 +44,9 @@ export async function findByUserAndType(userId: string, userType: string, type: 
 }
 
 export async function findAll(): Promise<NotificationPreference[]> {
-  return ((await query<DbNotificationPreference[]>(`SELECT * FROM "notificationPreference" ORDER BY "updatedAt" DESC`)) || []).map(mapToPreference);
+  return ((await query<DbNotificationPreference[]>(`SELECT * FROM "notificationPreference" ORDER BY "updatedAt" DESC`)) || []).map(
+    mapToPreference,
+  );
 }
 
 export async function upsert(params: NotificationPreferenceUpsertParams): Promise<NotificationPreference | null> {

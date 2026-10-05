@@ -9,6 +9,8 @@ import type { StoreType } from '../domain/entities/Store';
 import type { StoreRepository } from '../domain/repositories/StoreRepository';
 import type { SystemConfigPort, SystemConfigSummary } from '../application/ports/SystemConfigPort';
 import type { OrganizationLookupPort, OrganizationSummary } from '../application/ports/OrganizationLookupPort';
+import { SalesChannel, type SalesChannelProps } from '../domain/entities/SalesChannel';
+import type { SalesChannelRepository } from '../domain/repositories/SalesChannelRepository';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -37,6 +39,32 @@ export function createStoreRepository(): jest.Mocked<StoreRepository> {
       return fns.get(prop);
     },
   }) as jest.Mocked<StoreRepository>;
+}
+
+export function createSalesChannelRepository(): jest.Mocked<SalesChannelRepository> {
+  const fns = new Map<PropertyKey, jest.Mock>();
+  return new Proxy({} as object, {
+    get: (_target, prop) => {
+      if (!fns.has(prop)) fns.set(prop, jest.fn());
+      return fns.get(prop);
+    },
+  }) as jest.Mocked<SalesChannelRepository>;
+}
+
+export function createSalesChannel(overrides: Partial<SalesChannelProps> = {}): SalesChannel {
+  return SalesChannel.reconstitute({
+    salesChannelId: 'channel-1',
+    organizationId: 'org-1',
+    code: 'website',
+    name: 'Website',
+    type: 'web',
+    status: 'active',
+    config: {},
+    metadata: {},
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
+    ...overrides,
+  });
 }
 
 export function createSystemConfigPort(overrides: Partial<SystemConfigSummary> = {}): jest.Mocked<SystemConfigPort> {

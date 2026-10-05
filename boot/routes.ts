@@ -51,6 +51,8 @@ import * as Supplier from '../modules/supplier';
 import * as Recommendation from '../modules/recommendation';
 import * as Pricing from '../modules/pricing';
 import * as Analytics from '../modules/analytics';
+import * as Assortment from '../modules/assortment';
+import * as AgenticCheckout from '../modules/agentic-checkout';
 
 import { adminRouter } from '../web/admin/adminRouters';
 import { searchCustomerRouter, searchBusinessRouter } from '../libs/search/searchRouter';
@@ -67,6 +69,12 @@ export function configureRoutes(app: HttpApplication): void {
 
   // Gateway webhook — unauthenticated, HMAC-verified, raw body required
   app.post('/payment/webhook', express.raw({ type: 'application/json' }), Payment.gatewayWebhookController.handleGatewayWebhook);
+
+  // Agentic Commerce Protocol — channel-authenticated (Bearer key + optional
+  // Signature HMAC), raw body preserved inside the router for signature checks
+  if (moduleRegistry.shouldMountRoutes('agentic-checkout')) {
+    app.use('/acp', AgenticCheckout.agenticCheckoutRouter);
+  }
 
   // GraphQL endpoint — alongside REST, shares auth via context
   configureGraphQL(app);
@@ -105,6 +113,7 @@ export function configureRoutes(app: HttpApplication): void {
     { module: 'content', router: Content.contentCustomerRouter },
     { module: 'product', router: searchCustomerRouter },
     { module: 'recommendation', router: Recommendation.recommendationCustomerRouter },
+    { module: 'assortment', router: Assortment.assortmentCustomerRouter },
   ];
   const enabledCustomerRouters = customerRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
   app.use(
@@ -166,6 +175,7 @@ export function configureRoutes(app: HttpApplication): void {
     { module: 'identity', router: Identity.scimRouter },
     { module: 'migration', router: Migration.migrationBusinessRouter },
     { module: 'integration', router: Integration.integrationBusinessRouter },
+    { module: 'assortment', router: Assortment.assortmentBusinessRouter },
   ];
   const enabledBusinessRouters = businessRouters.filter(r => moduleRegistry.shouldMountRoutes(r.module)).map(r => r.router);
   app.use('/business', enabledBusinessRouters);

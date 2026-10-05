@@ -84,9 +84,7 @@ describe('Fulfillment event handlers: order.cancelled', () => {
     expect(fulfillments.findById).toHaveBeenCalledWith('ful-1');
     expect(fulfillments.save).toHaveBeenCalledWith(pending);
     expect(pending.status).toBe('cancelled');
-    expect(emitted).toEqual([
-      expect.objectContaining({ fulfillmentId: 'ful-1', orderId: 'ord-1', reason: 'Order cancelled' }),
-    ]);
+    expect(emitted).toEqual([expect.objectContaining({ fulfillmentId: 'ful-1', orderId: 'ord-1', reason: 'Order cancelled' })]);
   });
 
   it('should not attempt to cancel delivered or shipped fulfillments', async () => {

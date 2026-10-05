@@ -22,7 +22,7 @@ export type LocaleRecord = {
   numberFormat: Record<string, unknown> | null;
   fallbackLocaleId: string | null;
   flagIcon: string | null;
-}
+};
 
 export type Country = {
   countryId: string;
@@ -36,7 +36,7 @@ export type Country = {
   isActive: boolean;
   flagIcon: string | null;
   region: string | null;
-}
+};
 
 export type Currency = {
   currencyId: string;
@@ -51,7 +51,7 @@ export type Currency = {
   symbolPosition: string;
   isActive: boolean;
   isDefault: boolean;
-}
+};
 
 export type Language = {
   languageId: string;
@@ -62,5 +62,4 @@ export type Language = {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-}
-
+};

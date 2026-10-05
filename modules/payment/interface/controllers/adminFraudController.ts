@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Fraud Controller for Admin Hub
  * Manages fraud rules, blacklist entries, and fraud checks.
@@ -159,12 +159,12 @@ export const simulateFraudScreening = async (req: HttpRequest, res: HttpResponse
     });
 
     jsonResponse(res, 200, {
-            success: true,
-            decision: result.decision,
-            riskScore: result.riskScore,
-            riskLevel: result.riskLevel,
-            triggeredRules: result.triggeredRules,
-          });
+      success: true,
+      decision: result.decision,
+      riskScore: result.riskScore,
+      riskLevel: result.riskLevel,
+      triggeredRules: result.triggeredRules,
+    });
   } catch (error: unknown) {
     logger.warn('Error simulating fraud screening:', error);
     jsonResponse(res, 500, { success: false, error: (error as Error).message });

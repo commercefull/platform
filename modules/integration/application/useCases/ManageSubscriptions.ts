@@ -1,7 +1,5 @@
 import { randomUUID } from 'crypto';
-import type {
-  IntegrationRepository, IntegrationSubscriptionRepository,
-} from '../../domain/repositories/IntegrationRepository';
+import type { IntegrationRepository, IntegrationSubscriptionRepository } from '../../domain/repositories/IntegrationRepository';
 import { IntegrationEventSubscription } from '../../domain/entities/IntegrationEventSubscription';
 import { IntegrationNotFoundError, SubscriptionNotFoundError } from '../../domain/errors/IntegrationErrors';
 
@@ -69,4 +67,3 @@ export class ManageSubscriptionsUseCase {
     return this.subscriptionRepo.findByEventType(eventType);
   }
 }
-

@@ -26,15 +26,9 @@ describe('CreateCouponUseCase', () => {
     const coupons = lazyMock<CreateCouponPort>();
     const useCase = new CreateCouponUseCase(coupons);
 
-    await expect(useCase.execute(makeInput({ name: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
-    await expect(useCase.execute(makeInput({ code: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
-    await expect(useCase.execute(makeInput({ type: undefined }))).rejects.toBeInstanceOf(
-      PromotionValidationError,
-    );
+    await expect(useCase.execute(makeInput({ name: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute(makeInput({ code: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute(makeInput({ type: undefined }))).rejects.toBeInstanceOf(PromotionValidationError);
     expect(coupons.create).not.toHaveBeenCalled();
   });
 

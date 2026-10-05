@@ -110,10 +110,9 @@ describe('Subscription Expanded Tests', () => {
     });
 
     it('should delete a subscription plan', async () => {
-      const response = await client.delete(
-        `/business/subscriptions/products/${subscriptionProductId}/plans/${SEEDED.PLAN_MUTABLE_ID}`,
-        { headers: adminHeaders() },
-      );
+      const response = await client.delete(`/business/subscriptions/products/${subscriptionProductId}/plans/${SEEDED.PLAN_MUTABLE_ID}`, {
+        headers: adminHeaders(),
+      });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -172,11 +171,7 @@ describe('Subscription Expanded Tests', () => {
     it('should retry a subscription order', async () => {
       if (!adminToken || !subscriptionOrderId) return;
 
-      const response = await client.post(
-        `/business/subscriptions/orders/${subscriptionOrderId}/retry`,
-        {},
-        { headers: adminHeaders() },
-      );
+      const response = await client.post(`/business/subscriptions/orders/${subscriptionOrderId}/retry`, {}, { headers: adminHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -185,11 +180,7 @@ describe('Subscription Expanded Tests', () => {
     it('should skip a subscription order', async () => {
       if (!adminToken || !subscriptionOrderId) return;
 
-      const response = await client.post(
-        `/business/subscriptions/orders/${subscriptionOrderId}/skip`,
-        {},
-        { headers: adminHeaders() },
-      );
+      const response = await client.post(`/business/subscriptions/orders/${subscriptionOrderId}/skip`, {}, { headers: adminHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -215,8 +206,7 @@ describe('Subscription Expanded Tests', () => {
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
 
-      mySubscriptionId =
-        response.data.data?.customerSubscriptionId || response.data.data?.id || response.data.data?.subscriptionId;
+      mySubscriptionId = response.data.data?.customerSubscriptionId || response.data.data?.id || response.data.data?.subscriptionId;
       expect(mySubscriptionId).toBeTruthy();
     });
 
@@ -319,11 +309,7 @@ describe('Subscription Expanded Tests', () => {
     it('should resume my paused subscription', async () => {
       if (!customerToken || !mySubscriptionId) return;
 
-      const response = await client.post(
-        `/customer/subscriptions/mine/${mySubscriptionId}/resume`,
-        {},
-        { headers: customerHeaders() },
-      );
+      const response = await client.post(`/customer/subscriptions/mine/${mySubscriptionId}/resume`, {}, { headers: customerHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -345,11 +331,7 @@ describe('Subscription Expanded Tests', () => {
     it('should reactivate a subscription cancelled at period end', async () => {
       if (!customerToken || !mySubscriptionId) return;
 
-      const response = await client.post(
-        `/customer/subscriptions/mine/${mySubscriptionId}/reactivate`,
-        {},
-        { headers: customerHeaders() },
-      );
+      const response = await client.post(`/customer/subscriptions/mine/${mySubscriptionId}/reactivate`, {}, { headers: customerHeaders() });
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);

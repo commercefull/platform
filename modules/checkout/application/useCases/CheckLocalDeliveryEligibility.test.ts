@@ -22,6 +22,10 @@ describe('CheckLocalDeliveryEligibilityUseCase', () => {
 
     expect(result.eligible).toBe(true);
     expect(result.options).toHaveLength(1);
-    expect(storeFulfillmentPort.checkLocalDeliveryEligibility).toHaveBeenCalledWith({ latitude: 40.7, longitude: -74.0, postalCode: '10001' });
+    expect(storeFulfillmentPort.checkLocalDeliveryEligibility).toHaveBeenCalledWith({
+      latitude: 40.7,
+      longitude: -74.0,
+      postalCode: '10001',
+    });
   });
 });

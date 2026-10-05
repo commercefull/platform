@@ -74,7 +74,14 @@ describe('Customer Profile Operations Tests', () => {
   });
 
   it('POST /customer/me/addresses rejects unauthenticated requests', async () => {
-    const resp = await client.post('/customer/me/addresses', { addressLine1: 'X', city: 'Y', state: 'Z', postalCode: '1', country: 'US', addressType: 'shipping' });
+    const resp = await client.post('/customer/me/addresses', {
+      addressLine1: 'X',
+      city: 'Y',
+      state: 'Z',
+      postalCode: '1',
+      country: 'US',
+      addressType: 'shipping',
+    });
     expectStatus(resp, 401);
   });
 
@@ -107,7 +114,7 @@ describe('Customer Profile Operations Tests', () => {
     expectStatus(resp, 404);
   });
 
-  it('cannot touch another customer\'s address (IDOR guard)', async () => {
+  it("cannot touch another customer's address (IDOR guard)", async () => {
     // Register a second customer and try to delete/update the seeded address
     const reg = await client.post('/customer/identity/register', {
       email: `idor-${Date.now()}@example.com`,

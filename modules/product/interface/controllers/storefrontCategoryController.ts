@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Storefront Category Controller
  * Handles category navigation and category pages for customers
@@ -39,9 +39,9 @@ export const loadCategoriesForNavigation = async (req: HttpRequest, res: HttpRes
 export const getCategoriesForNavigation = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findForMenu();
   jsonResponse(res, 200, {
-        success: true,
-        categories,
-      });
+    success: true,
+    categories,
+  });
 };
 
 // ============================================================================
@@ -51,9 +51,9 @@ export const getCategoriesForNavigation = async (req: HttpRequest, res: HttpResp
 export const getAllCategories = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const categories = await manageCategoriesUseCase.findActive();
   jsonResponse(res, 200, {
-        success: true,
-        categories,
-      });
+    success: true,
+    categories,
+  });
 };
 
 // ============================================================================
@@ -66,9 +66,9 @@ export const getCategoryDetails = async (req: HttpRequest, res: HttpResponse): P
   const category = await manageCategoriesUseCase.findOne(categoryId);
   if (!category) {
     jsonResponse(res, 404, {
-            success: false,
-            message: 'Category not found',
-          });
+      success: false,
+      message: 'Category not found',
+    });
     return;
   }
 
@@ -76,10 +76,10 @@ export const getCategoryDetails = async (req: HttpRequest, res: HttpResponse): P
   const subcategories = await manageCategoriesUseCase.findChildren(categoryId);
 
   jsonResponse(res, 200, {
-        success: true,
-        category,
-        subcategories,
-      });
+    success: true,
+    category,
+    subcategories,
+  });
 };
 
 // ============================================================================

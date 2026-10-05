@@ -79,14 +79,27 @@ describe('PSPRoutingRepositoryImpl', () => {
 
   it('should map gateway rows to routes including config and metadata', async () => {
     repo.findGatewayById.mockResolvedValue(
-      row({ metadata: { priority: 3, merchantAccount: 'acct1', extra: { region: 'eu' }, capabilities: { supportedCurrencies: ['EUR'], supportedCountries: [] } } }),
+      row({
+        metadata: {
+          priority: 3,
+          merchantAccount: 'acct1',
+          extra: { region: 'eu' },
+          capabilities: { supportedCurrencies: ['EUR'], supportedCountries: [] },
+        },
+      }),
     );
 
     const found = await impl.findRouteById('g1');
 
     expect(found?.routeId).toBe('g1');
     expect(found?.priority).toBe(3);
-    expect(found?.config).toMatchObject({ apiKey: 'sk_test', publishableKey: 'pk_test', webhookSecret: 'whsec', testMode: true, merchantAccount: 'acct1' });
+    expect(found?.config).toMatchObject({
+      apiKey: 'sk_test',
+      publishableKey: 'pk_test',
+      webhookSecret: 'whsec',
+      testMode: true,
+      merchantAccount: 'acct1',
+    });
     expect(found?.capabilities?.supportedCurrencies).toEqual(['EUR']);
   });
 

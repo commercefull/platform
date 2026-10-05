@@ -15,19 +15,18 @@ export async function create(
       params.userId || null,
       params.userType || null,
       params.eventType,
-      params.eventData ? JSON.stringify(params.eventData) : (params as Record<string, unknown>).payload ? JSON.stringify((params as Record<string, unknown>).payload) : null,
+      params.eventData
+        ? JSON.stringify(params.eventData)
+        : (params as Record<string, unknown>).payload
+          ? JSON.stringify((params as Record<string, unknown>).payload)
+          : null,
       new Date(),
     ],
   );
 }
 
 export async function findUnprocessed(limit = 100): Promise<NotificationEventLog[]> {
-  return (
-    (await query<NotificationEventLog[]>(
-      `SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`,
-      [limit],
-    )) || []
-  );
+  return (await query<NotificationEventLog[]>(`SELECT * FROM "notificationEventLog" ORDER BY "createdAt" ASC LIMIT $1`, [limit])) || [];
 }
 
 export async function markProcessed(notificationEventLogId: string): Promise<void> {

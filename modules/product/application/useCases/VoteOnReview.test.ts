@@ -1,9 +1,6 @@
-
 import { VoteOnReviewUseCase, VoteOnReviewCommand } from './VoteOnReview';
 import { ProductValidationError } from '../../domain/errors/ProductErrors';
 import { createReviewVote, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('VoteOnReviewUseCase', () => {
   let useCase: VoteOnReviewUseCase;
@@ -11,7 +8,7 @@ describe('VoteOnReviewUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo = lazyMock<ConstructorParameters<typeof VoteOnReviewUseCase>[0]>();
+    mockRepo = lazyMock<ConstructorParameters<typeof VoteOnReviewUseCase>[0]>();
     mockRepo.create.mockResolvedValue(createReviewVote());
     mockRepo.countByReview.mockResolvedValue({ helpful: 5, unhelpful: 2 });
     useCase = new VoteOnReviewUseCase(mockRepo);

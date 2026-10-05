@@ -8,4 +8,3 @@ export class GetCustomerProfileUseCase {
     return this.profileRepo.findByCustomerId(customerId);
   }
 }
-

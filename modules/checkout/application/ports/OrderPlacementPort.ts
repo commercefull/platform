@@ -38,6 +38,9 @@ export interface OrderItemInput {
   taxAmountCents?: number;
   /** Line discount in integer cents. */
   discountAmountCents?: number;
+  isDigital?: boolean;
+  /** Recurring-purchase metadata carried from the basket line (subscription items). */
+  subscriptionInfo?: Record<string, unknown>;
 }
 
 export interface CreateOrderRequest {
@@ -47,12 +50,26 @@ export interface CreateOrderRequest {
   shippingAddress: OrderAddressInput;
   billingAddress: OrderAddressInput;
   basketId: string;
+  storeId?: string;
+  channelId?: string;
   source: string;
   currency: string;
   notes?: string;
   /** Shipping total in integer cents. */
   shippingAmountCents: number;
+  /** Authoritative tax total in integer cents (checkout tax quote, reported total). */
+  taxAmountCents?: number;
+  /** Portion of taxAmountCents added on top of subtotal+shipping (0 = fully tax-inclusive). Defaults per taxIncludedInSubtotal when absent. */
+  taxAddedCents?: number;
+  /** True when taxAmountCents is embedded in item prices (tax-inclusive pricing). */
+  taxIncludedInSubtotal?: boolean;
   metadata?: Record<string, unknown>;
+}
+
+export interface OrderSnapshotItem {
+  orderItemId: string;
+  productId: string;
+  productVariantId?: string;
 }
 
 export interface OrderSnapshot {
@@ -60,6 +77,8 @@ export interface OrderSnapshot {
   orderNumber: string;
   status: string;
   paymentStatus: string;
+  /** Created order lines, in the same order as the request's items. */
+  items?: OrderSnapshotItem[];
 }
 
 export type CheckoutOutcome = 'pending_payment' | 'processing' | 'cancelled' | 'completed';

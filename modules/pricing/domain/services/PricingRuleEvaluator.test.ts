@@ -1,9 +1,4 @@
-import {
-  applyAdjustments,
-  convertAmount,
-  isRuleApplicable,
-  selectCurrencyPriceRule,
-} from './PricingRuleEvaluator';
+import { applyAdjustments, convertAmount, isRuleApplicable, selectCurrencyPriceRule } from './PricingRuleEvaluator';
 import { PricingAdjustmentType, PricingRuleScope, PricingRuleStatus, PricingRuleType } from '../pricingRule';
 import type { CurrencyPriceRule, PricingRule } from '../pricingRule';
 import type { Currency } from '../currency';
@@ -101,9 +96,20 @@ describe('isRuleApplicable', () => {
   it('should return false when a customer_attribute condition is unmet', () => {
     const rule = createRule({ conditions: [{ type: 'customer_attribute', parameters: { attribute: 'vip', value: true } }] });
     expect(isRuleApplicable(rule, {})).toBe(false);
-    expect(
-      isRuleApplicable(rule, { additionalData: { customerAttributes: { vip: true } } }),
-    ).toBe(true);
+    expect(isRuleApplicable(rule, { additionalData: { customerAttributes: { vip: true } } })).toBe(true);
+  });
+
+  it('should apply a rule only to its configured store and channel', () => {
+    const rule = createRule({
+      conditions: [
+        { type: 'store', parameters: { storeIds: ['store-1'] } },
+        { type: 'channel', parameters: { channelIds: ['channel-1'] } },
+      ],
+    });
+
+    expect(isRuleApplicable(rule, { storeId: 'store-1', channelId: 'channel-1' })).toBe(true);
+    expect(isRuleApplicable(rule, { storeId: 'store-1', channelId: 'channel-2' })).toBe(false);
+    expect(isRuleApplicable(rule, { storeId: 'store-2', channelId: 'channel-1' })).toBe(false);
   });
 });
 

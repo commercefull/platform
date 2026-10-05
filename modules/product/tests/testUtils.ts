@@ -50,11 +50,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
 // Domain record factories
 // ============================================================================
 
-import type {
-  ProductAttribute,
-  ProductAttributeValue,
-  ProductAttributeData,
-} from '../domain/repositories/ProductCatalogPorts';
+import type { ProductAttribute, ProductAttributeValue, ProductAttributeData } from '../domain/repositories/ProductCatalogPorts';
 
 export function createAttribute(overrides: Partial<ProductAttribute> = {}): ProductAttribute {
   return {
@@ -73,8 +69,7 @@ export function createAttribute(overrides: Partial<ProductAttribute> = {}): Prod
     isUsedInProductListing: false,
     position: 0,
     ...overrides,
- } as ProductAttribute;
-
+  } as ProductAttribute;
 }
 
 export function createAttributeValue(overrides: Partial<ProductAttributeValue> = {}): ProductAttributeValue {
@@ -97,8 +92,7 @@ export function createAttributeData(overrides: Partial<ProductAttributeData> = {
     attributeId: 'attr-1',
     value: 'Red',
     ...overrides,
- } as ProductAttributeData;
-
+  } as ProductAttributeData;
 }
 
 import type {
@@ -108,8 +102,6 @@ import type {
   ProductTag,
   ProductQa,
   ProductQaAnswer,
-  ProductCollection,
-  ProductCollectionMap,
   ProductTypeRow,
   ProductVariantRow,
 } from '../domain/repositories/ProductCatalogPorts';
@@ -129,8 +121,7 @@ export function createCategoryRow(overrides: Partial<CategoryRow> = {}): Categor
     productCount: 0,
     isGlobal: true,
     ...overrides,
- } as CategoryRow;
-
+  } as CategoryRow;
 }
 
 export function createProductCategory(overrides: Partial<ProductCategoryRow> = {}): ProductCategoryRow {
@@ -187,29 +178,6 @@ export function createProductQaAnswer(overrides: Partial<ProductQaAnswer> = {}):
   };
 }
 
-export function createProductCollection(overrides: Partial<ProductCollection> = {}): ProductCollection {
-  return {
-    productCollectionId: 'col1',
-    createdAt: ISO,
-    updatedAt: ISO,
-    name: 'Summer',
-    slug: 'summer',
-    isActive: true,
-    ...overrides,
-  };
-}
-
-export function createProductCollectionMap(overrides: Partial<ProductCollectionMap> = {}): ProductCollectionMap {
-  return {
-    productCollectionMapId: 'pcm1',
-    createdAt: ISO,
-    productCollectionId: 'col1',
-    productId: 'p1',
-    position: 0,
-    ...overrides,
-  };
-}
-
 export function createProductTypeRow(overrides: Partial<ProductTypeRow> = {}): ProductTypeRow {
   return {
     productTypeId: 'pt1',
@@ -239,12 +207,7 @@ export function createProductVariantRow(overrides: Partial<ProductVariantRow> = 
   };
 }
 
-import type {
-  ProductReview,
-  ProductReviewMedia,
-  ProductReviewVote,
-  ProductLookupPort,
-} from '../domain/repositories/ProductCatalogPorts';
+import type { ProductReview, ProductReviewMedia, ProductReviewVote, ProductLookupPort } from '../domain/repositories/ProductCatalogPorts';
 
 export function createProductReview(overrides: Partial<ProductReview> = {}): ProductReview {
   return {
@@ -310,6 +273,7 @@ export function createProductSearchRow(overrides: Partial<ProductSearchRow> = {}
     slug: 'widget',
     description: 'A test product',
     type: 'simple',
+    productTypeId: null,
     status: 'active',
     visibility: 'visible',
     taxClass: null,

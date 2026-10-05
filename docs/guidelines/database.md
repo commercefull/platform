@@ -41,7 +41,7 @@ t.uuid('customerId').primary().defaultTo(knex.raw('uuidv7()'));
 | Soft delete       | `timestamp`    | `t.timestamp('deletedAt')`                                          |
 | Boolean flags     | `boolean`      | `t.boolean('isActive').notNullable().defaultTo(true)`               |
 | Enum/Status       | `enu`          | `t.enu('status', ['draft', 'active']).defaultTo('draft')`           |
-| Money             | `bigint`       | `t.bigInteger('priceCents')` — integer cents, never floats         |
+| Money             | `bigint`       | `t.bigInteger('priceCents')` — integer cents, never floats          |
 | Flexible data     | `jsonb`        | `t.jsonb('customFields')`                                           |
 | UUID arrays       | `specificType` | `t.specificType('relatedProducts', 'uuid[]')`                       |
 

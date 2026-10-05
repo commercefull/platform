@@ -744,5 +744,14 @@
   "emailPlaceholder": "your@email.com",
   "phonePlaceholder": "आपका फोन नंबर",
   "cardholderNamePlaceholder": "जॉन डो",
-  "cardExpiryPlaceholder": "एमएम/वाईवाई"
+  "cardExpiryPlaceholder": "एमएम/वाईवाई",
+  "collections": "संग्रह",
+  "collectionsHeroDesc": "हमारे क्यूरेटेड संग्रह देखें",
+  "viewCollection": "संग्रह देखें",
+  "noCollections": "अभी कोई संग्रह नहीं",
+  "noCollectionsDesc": "जल्द ही देखें — हम नए संग्रह तैयार कर रहे हैं।",
+  "collectionEmpty": "इस संग्रह में अभी कोई उत्पाद नहीं है",
+  "collectionEmptyDesc": "जल्द ही देखें या पूरा कैटलॉग ब्राउज़ करें।",
+  "backToCollections": "संग्रहों पर वापस",
+  "featured": "विशेष"
 }

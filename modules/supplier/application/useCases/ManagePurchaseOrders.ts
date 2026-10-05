@@ -74,7 +74,12 @@ export class ManagePurchaseOrdersUseCase {
 
   async approvePurchaseOrder(id: string): Promise<unknown> {
     const approved = await this.purchaseOrders.approve(id);
-    const record = approved as { purchaseOrderId?: string; supplierPurchaseOrderId?: string; poNumber?: string; supplierId?: string } | null;
+    const record = approved as {
+      purchaseOrderId?: string;
+      supplierPurchaseOrderId?: string;
+      poNumber?: string;
+      supplierId?: string;
+    } | null;
     if (record) {
       eventBus.emit('purchase_order.approved', {
         purchaseOrderId: record.purchaseOrderId ?? record.supplierPurchaseOrderId ?? id,

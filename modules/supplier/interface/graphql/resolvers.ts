@@ -2,11 +2,7 @@ import { requireBusinessAuth, type GraphQLAuthContext } from '../../../../libs/g
 import { CreateSupplierInput } from '../../application/useCases/CreateSupplier';
 import { CreatePurchaseOrderInput } from '../../application/useCases/CreatePurchaseOrder';
 import { ReceiveGoodsInput } from '../../application/useCases/ReceiveGoods';
-import {
-  createPurchaseOrderUseCase,
-  createSupplierUseCase,
-  receiveGoodsUseCase,
-} from '../../application/wired';
+import { createPurchaseOrderUseCase, createSupplierUseCase, receiveGoodsUseCase } from '../../application/wired';
 
 export const supplierResolvers = {
   Mutation: {

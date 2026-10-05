@@ -1,4 +1,3 @@
-
 /**
  * Test utilities for GDPR integration tests
  */

@@ -274,7 +274,9 @@ export type ProductReviewCreateParams = Omit<
   'productReviewId' | 'createdAt' | 'updatedAt' | 'helpfulCount' | 'unhelpfulCount' | 'reportCount' | 'isHighlighted'
 >;
 
-export type ProductReviewUpdateParams = Partial<Omit<ProductReviewCreateParams, 'productId' | 'customerId'> & Pick<ProductReview, 'isHighlighted'>>;
+export type ProductReviewUpdateParams = Partial<
+  Omit<ProductReviewCreateParams, 'productId' | 'customerId'> & Pick<ProductReview, 'isHighlighted'>
+>;
 
 export interface ReviewFilters {
   productId?: string;
@@ -354,52 +356,7 @@ export interface ProductReviewVotePort {
   countByReview(productReviewId: string): Promise<{ helpful: number; unhelpful: number }>;
 }
 
-// ============================================================================
-// Product Collections
-// ============================================================================
-
-export interface ProductCollection {
-  productCollectionId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  slug: string;
-  description?: string | null;
-  imageUrl?: string | null;
-  isActive: boolean;
-  organizationId?: string | null;
-}
-
-export type ProductCollectionCreateParams = Omit<ProductCollection, 'productCollectionId' | 'createdAt' | 'updatedAt'>;
-export type ProductCollectionUpdateParams = Partial<Omit<ProductCollectionCreateParams, never>>;
-
-export interface ProductCollectionPort {
-  findAll(): Promise<ProductCollection[]>;
-  findById(id: string): Promise<ProductCollection | null>;
-  create(params: ProductCollectionCreateParams): Promise<ProductCollection>;
-  update(id: string, params: ProductCollectionUpdateParams): Promise<ProductCollection | null>;
-  softDelete(id: string): Promise<boolean>;
-}
-
-// ============================================================================
-// Product Collection Maps
-// ============================================================================
-
-export interface ProductCollectionMap {
-  productCollectionMapId: string;
-  createdAt: Date;
-  productCollectionId: string;
-  productId: string;
-  position: number;
-}
-
-export type ProductCollectionMapCreateParams = Omit<ProductCollectionMap, 'productCollectionMapId' | 'createdAt'>;
-
-export interface ProductCollectionMapPort {
-  findByCollection(productCollectionId: string): Promise<ProductCollectionMap[]>;
-  create(params: ProductCollectionMapCreateParams): Promise<ProductCollectionMap>;
-  delete(productCollectionMapId: string): Promise<boolean>;
-}
+// Product collections are owned by modules/assortment (Collection / CollectionMap entities).
 
 // ============================================================================
 // Product Types
@@ -459,6 +416,7 @@ export interface ProductVariantRow {
   }>;
   stockQuantity: number;
   lowStockThreshold?: number;
+  inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable';
   isDefault: boolean;
   isActive: boolean;
   position: number;

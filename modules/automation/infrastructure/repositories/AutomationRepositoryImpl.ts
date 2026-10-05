@@ -1,13 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { AutomationRuleRepository, ExecutionLogRepository } from '../../domain/repositories/AutomationRepository';
 import { AutomationRule } from '../../domain/entities/AutomationRule';
-import type {
-  TriggerType,
-  RuleCondition,
-  ConditionMatchMode,
-  RuleAction,
-  ActionExecutionMode,
-} from '../../domain/entities/AutomationRule';
+import type { TriggerType, RuleCondition, ConditionMatchMode, RuleAction, ActionExecutionMode } from '../../domain/entities/AutomationRule';
 import { AutomationValidationError } from '../../domain/errors/AutomationErrors';
 import type { AutomationRule as DbAutomationRule } from '../../../../libs/db/types';
 

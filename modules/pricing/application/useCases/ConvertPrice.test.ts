@@ -1,9 +1,4 @@
-import {
-  createCurrency,
-  createCurrencyCatalog,
-  createCurrencyPriceRuleQuery,
-  createPricingRule,
-} from '../../tests/testUtils';
+import { createCurrency, createCurrencyCatalog, createCurrencyPriceRuleQuery, createPricingRule } from '../../tests/testUtils';
 import { ConvertPriceUseCase } from './ConvertPrice';
 import { PricingAdjustmentType } from '../../domain/pricingRule';
 import { CurrencyNotFoundError } from '../../domain/errors/PricingErrors';
@@ -39,9 +34,9 @@ describe('ConvertPriceUseCase', () => {
   it('should throw CurrencyNotFoundError when a currency is unknown', async () => {
     const { useCase } = buildUseCase();
 
-    await expect(
-      useCase.execute({ priceCents: 10000, fromCurrencyCode: 'USD', toCurrencyCode: 'XXX' }),
-    ).rejects.toThrow(CurrencyNotFoundError);
+    await expect(useCase.execute({ priceCents: 10000, fromCurrencyCode: 'USD', toCurrencyCode: 'XXX' })).rejects.toThrow(
+      CurrencyNotFoundError,
+    );
   });
 
   it('should apply the matching currency rule and record it in appliedRules', async () => {

@@ -102,52 +102,52 @@ The Warehouse feature manages warehouse operations including receiving, put-away
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/organizations/:organizationId/warehouses` | `asyncHandler(warehouseController.getWarehousesByMerchant)` | Organization warehouses |
-| GET | `/warehouse/:id` | `asyncHandler(warehouseController.getStoreById)` | — |
-| GET | `/warehouse/:id/availability/:productId` | `asyncHandler(warehouseController.checkStoreAvailability)` | — |
-| GET | `/warehouse/city/:city` | `asyncHandler(warehouseController.getStoresByCity)` | — |
-| GET | `/warehouse/country/:country` | `asyncHandler(warehouseController.getStoresByCountry)` | — |
-| GET | `/warehouse/nearest` | `asyncHandler(warehouseController.findNearestStores)` | Store Locator Routes (Public) |
-| GET | `/warehouses` | `asyncHandler(warehouseController.getWarehouses)` | Warehouse listing with various filters |
-| POST | `/warehouses` | `asyncHandler(warehouseController.createWarehouse)` | Warehouse CRUD operations |
-| GET | `/warehouses/:id` | `asyncHandler(warehouseController.getWarehouseById)` | — |
-| PUT | `/warehouses/:id` | `asyncHandler(warehouseController.updateWarehouse)` | — |
-| DELETE | `/warehouses/:id` | `asyncHandler(warehouseController.deleteWarehouse)` | — |
-| POST | `/warehouses/:id/activate` | `asyncHandler(warehouseController.activateWarehouse)` | — |
-| POST | `/warehouses/:id/bins` | `asyncHandler(warehouseController.createBin)` | — |
-| GET | `/warehouses/:id/bins` | `asyncHandler(warehouseController.getBins)` | — |
-| GET | `/warehouses/:id/bins/:binId` | `asyncHandler(warehouseController.getBinById)` | — |
-| PUT | `/warehouses/:id/bins/:binId` | `asyncHandler(warehouseController.updateBin)` | — |
-| DELETE | `/warehouses/:id/bins/:binId` | `asyncHandler(warehouseController.deleteBin)` | — |
-| POST | `/warehouses/:id/deactivate` | `asyncHandler(warehouseController.deactivateWarehouse)` | — |
-| POST | `/warehouses/:id/default` | `asyncHandler(warehouseController.setDefaultWarehouse)` | Warehouse status management |
-| POST | `/warehouses/:id/pick-pack` | `asyncHandler(warehouseController.createPickPack)` | — |
-| GET | `/warehouses/:id/pick-pack` | `asyncHandler(warehouseController.getPickPacks)` | — |
-| GET | `/warehouses/:id/pick-pack/:pickPackId` | `asyncHandler(warehouseController.getPickPackById)` | — |
-| POST | `/warehouses/:id/pick-pack/:pickPackId/assign` | `asyncHandler(warehouseController.assignPickPack)` | — |
-| POST | `/warehouses/:id/pick-pack/:pickPackId/complete-packing` | `asyncHandler(warehouseController.completePacking)` | — |
-| POST | `/warehouses/:id/pick-pack/:pickPackId/complete-picking` | `asyncHandler(warehouseController.completePicking)` | — |
-| POST | `/warehouses/:id/pick-pack/:pickPackId/start-packing` | `asyncHandler(warehouseController.startPacking)` | — |
-| POST | `/warehouses/:id/pick-pack/:pickPackId/start-picking` | `asyncHandler(warehouseController.startPicking)` | — |
-| POST | `/warehouses/:id/receiving` | `asyncHandler(warehouseController.createReceiving)` | — |
-| GET | `/warehouses/:id/receiving` | `asyncHandler(warehouseController.getReceiving)` | — |
-| GET | `/warehouses/:id/receiving/:receivingId` | `asyncHandler(warehouseController.getReceivingById)` | — |
-| POST | `/warehouses/:id/receiving/:receivingId/complete` | `asyncHandler(warehouseController.completeReceiving)` | — |
-| POST | `/warehouses/:id/shipping-methods` | `asyncHandler(warehouseController.addShippingMethod)` | Shipping method management |
-| DELETE | `/warehouses/:id/shipping-methods/:method` | `asyncHandler(warehouseController.removeShippingMethod)` | — |
-| POST | `/warehouses/:id/zones` | `asyncHandler(warehouseController.createZone)` | — |
-| GET | `/warehouses/:id/zones` | `asyncHandler(warehouseController.getZones)` | — |
-| GET | `/warehouses/:id/zones/:zoneId` | `asyncHandler(warehouseController.getZoneById)` | — |
-| PUT | `/warehouses/:id/zones/:zoneId` | `asyncHandler(warehouseController.updateZone)` | — |
-| DELETE | `/warehouses/:id/zones/:zoneId` | `asyncHandler(warehouseController.deleteZone)` | — |
-| GET | `/warehouses/code/:code` | `asyncHandler(warehouseController.getWarehouseByCode)` | — |
-| GET | `/warehouses/country/:country` | `asyncHandler(warehouseController.getWarehousesByCountry)` | — |
-| GET | `/warehouses/default` | `asyncHandler(warehouseController.getDefaultWarehouse)` | — |
-| GET | `/warehouses/fulfillment-centers` | `asyncHandler(warehouseController.getFulfillmentCenters)` | — |
-| GET | `/warehouses/nearest` | `asyncHandler(warehouseController.findNearestWarehouses)` | — |
-| GET | `/warehouses/return-centers` | `asyncHandler(warehouseController.getReturnCenters)` | — |
-| GET | `/warehouses/statistics` | `asyncHandler(warehouseController.getWarehouseStatistics)` | — |
+| Method | Endpoint                                                 | Controller                                                  | Description                            |
+| ------ | -------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------- |
+| GET    | `/organizations/:organizationId/warehouses`              | `asyncHandler(warehouseController.getWarehousesByMerchant)` | Organization warehouses                |
+| GET    | `/warehouse/:id`                                         | `asyncHandler(warehouseController.getStoreById)`            | —                                      |
+| GET    | `/warehouse/:id/availability/:productId`                 | `asyncHandler(warehouseController.checkStoreAvailability)`  | —                                      |
+| GET    | `/warehouse/city/:city`                                  | `asyncHandler(warehouseController.getStoresByCity)`         | —                                      |
+| GET    | `/warehouse/country/:country`                            | `asyncHandler(warehouseController.getStoresByCountry)`      | —                                      |
+| GET    | `/warehouse/nearest`                                     | `asyncHandler(warehouseController.findNearestStores)`       | Store Locator Routes (Public)          |
+| GET    | `/warehouses`                                            | `asyncHandler(warehouseController.getWarehouses)`           | Warehouse listing with various filters |
+| POST   | `/warehouses`                                            | `asyncHandler(warehouseController.createWarehouse)`         | Warehouse CRUD operations              |
+| GET    | `/warehouses/:id`                                        | `asyncHandler(warehouseController.getWarehouseById)`        | —                                      |
+| PUT    | `/warehouses/:id`                                        | `asyncHandler(warehouseController.updateWarehouse)`         | —                                      |
+| DELETE | `/warehouses/:id`                                        | `asyncHandler(warehouseController.deleteWarehouse)`         | —                                      |
+| POST   | `/warehouses/:id/activate`                               | `asyncHandler(warehouseController.activateWarehouse)`       | —                                      |
+| POST   | `/warehouses/:id/bins`                                   | `asyncHandler(warehouseController.createBin)`               | —                                      |
+| GET    | `/warehouses/:id/bins`                                   | `asyncHandler(warehouseController.getBins)`                 | —                                      |
+| GET    | `/warehouses/:id/bins/:binId`                            | `asyncHandler(warehouseController.getBinById)`              | —                                      |
+| PUT    | `/warehouses/:id/bins/:binId`                            | `asyncHandler(warehouseController.updateBin)`               | —                                      |
+| DELETE | `/warehouses/:id/bins/:binId`                            | `asyncHandler(warehouseController.deleteBin)`               | —                                      |
+| POST   | `/warehouses/:id/deactivate`                             | `asyncHandler(warehouseController.deactivateWarehouse)`     | —                                      |
+| POST   | `/warehouses/:id/default`                                | `asyncHandler(warehouseController.setDefaultWarehouse)`     | Warehouse status management            |
+| POST   | `/warehouses/:id/pick-pack`                              | `asyncHandler(warehouseController.createPickPack)`          | —                                      |
+| GET    | `/warehouses/:id/pick-pack`                              | `asyncHandler(warehouseController.getPickPacks)`            | —                                      |
+| GET    | `/warehouses/:id/pick-pack/:pickPackId`                  | `asyncHandler(warehouseController.getPickPackById)`         | —                                      |
+| POST   | `/warehouses/:id/pick-pack/:pickPackId/assign`           | `asyncHandler(warehouseController.assignPickPack)`          | —                                      |
+| POST   | `/warehouses/:id/pick-pack/:pickPackId/complete-packing` | `asyncHandler(warehouseController.completePacking)`         | —                                      |
+| POST   | `/warehouses/:id/pick-pack/:pickPackId/complete-picking` | `asyncHandler(warehouseController.completePicking)`         | —                                      |
+| POST   | `/warehouses/:id/pick-pack/:pickPackId/start-packing`    | `asyncHandler(warehouseController.startPacking)`            | —                                      |
+| POST   | `/warehouses/:id/pick-pack/:pickPackId/start-picking`    | `asyncHandler(warehouseController.startPicking)`            | —                                      |
+| POST   | `/warehouses/:id/receiving`                              | `asyncHandler(warehouseController.createReceiving)`         | —                                      |
+| GET    | `/warehouses/:id/receiving`                              | `asyncHandler(warehouseController.getReceiving)`            | —                                      |
+| GET    | `/warehouses/:id/receiving/:receivingId`                 | `asyncHandler(warehouseController.getReceivingById)`        | —                                      |
+| POST   | `/warehouses/:id/receiving/:receivingId/complete`        | `asyncHandler(warehouseController.completeReceiving)`       | —                                      |
+| POST   | `/warehouses/:id/shipping-methods`                       | `asyncHandler(warehouseController.addShippingMethod)`       | Shipping method management             |
+| DELETE | `/warehouses/:id/shipping-methods/:method`               | `asyncHandler(warehouseController.removeShippingMethod)`    | —                                      |
+| POST   | `/warehouses/:id/zones`                                  | `asyncHandler(warehouseController.createZone)`              | —                                      |
+| GET    | `/warehouses/:id/zones`                                  | `asyncHandler(warehouseController.getZones)`                | —                                      |
+| GET    | `/warehouses/:id/zones/:zoneId`                          | `asyncHandler(warehouseController.getZoneById)`             | —                                      |
+| PUT    | `/warehouses/:id/zones/:zoneId`                          | `asyncHandler(warehouseController.updateZone)`              | —                                      |
+| DELETE | `/warehouses/:id/zones/:zoneId`                          | `asyncHandler(warehouseController.deleteZone)`              | —                                      |
+| GET    | `/warehouses/code/:code`                                 | `asyncHandler(warehouseController.getWarehouseByCode)`      | —                                      |
+| GET    | `/warehouses/country/:country`                           | `asyncHandler(warehouseController.getWarehousesByCountry)`  | —                                      |
+| GET    | `/warehouses/default`                                    | `asyncHandler(warehouseController.getDefaultWarehouse)`     | —                                      |
+| GET    | `/warehouses/fulfillment-centers`                        | `asyncHandler(warehouseController.getFulfillmentCenters)`   | —                                      |
+| GET    | `/warehouses/nearest`                                    | `asyncHandler(warehouseController.findNearestWarehouses)`   | —                                      |
+| GET    | `/warehouses/return-centers`                             | `asyncHandler(warehouseController.getReturnCenters)`        | —                                      |
+| GET    | `/warehouses/statistics`                                 | `asyncHandler(warehouseController.getWarehouseStatistics)`  | —                                      |
 
 <!-- GENERATED:ENDPOINTS:END -->

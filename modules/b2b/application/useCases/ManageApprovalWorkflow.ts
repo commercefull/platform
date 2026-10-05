@@ -1,7 +1,10 @@
 import { ApprovalWorkflow, ApprovalType } from '../../domain/entities/ApprovalWorkflow';
 import { CompanyRepository, ApprovalWorkflowRepository } from '../../domain/repositories/B2BRepository';
 import {
-  CompanyNotFoundError, ApprovalWorkflowNotFoundError, UnauthorizedApproverError, B2BValidationError,
+  CompanyNotFoundError,
+  ApprovalWorkflowNotFoundError,
+  UnauthorizedApproverError,
+  B2BValidationError,
 } from '../../domain/errors/B2BErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 

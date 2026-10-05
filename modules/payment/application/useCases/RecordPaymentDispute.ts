@@ -11,7 +11,6 @@ import { PaymentBillingRepository, PaymentDispute } from '../../domain/repositor
 import { PaymentGatewayRepository } from '../../domain/repositories/PaymentGatewayRepository';
 import { FailedToCreatePaymentDisputeError } from '../../domain/errors/PaymentErrors';
 
-
 // ============================================================================
 // Command
 // ============================================================================

@@ -199,10 +199,13 @@ describe('CloudFrontConstruct', () => {
       validation: acm.CertificateValidation.fromDns(),
     });
 
-    expect(() => new CloudFrontConstruct(stack, 'CloudFront', {
-      domainName: 'example.com',
-      certificate: cert,
-    })).toThrow('Either api or loadBalancer must be provided');
+    expect(
+      () =>
+        new CloudFrontConstruct(stack, 'CloudFront', {
+          domainName: 'example.com',
+          certificate: cert,
+        }),
+    ).toThrow('Either api or loadBalancer must be provided');
   });
 
   test('exposes distribution domain name', () => {

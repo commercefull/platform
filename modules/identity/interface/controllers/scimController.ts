@@ -1,4 +1,4 @@
-import { jsonResponse, sendResponse } from "libs/apiResponse";
+import { jsonResponse, sendResponse } from 'libs/apiResponse';
 /**
  * SCIM 2.0 Controller
  *
@@ -18,10 +18,10 @@ const SCIM_BEARER_TOKEN = process.env.SCIM_BEARER_TOKEN || '';
 
 function scimError(status: number, detail: string, res: HttpResponse): void {
   jsonResponse(res, status, {
-        schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
-        status: status.toString(),
-        detail,
-      });
+    schemas: ['urn:ietf:params:scim:api:messages:2.0:Error'],
+    status: status.toString(),
+    detail,
+  });
 }
 
 function validateScimToken(req: HttpRequest): void {
@@ -77,12 +77,12 @@ export class ScimController {
       );
 
       jsonResponse(res, 200, {
-                schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
-                totalResults: resources.length,
-                Resources: resources,
-                itemsPerPage: resources.length,
-                startIndex: 1,
-              });
+        schemas: ['urn:ietf:params:scim:api:messages:2.0:ListResponse'],
+        totalResults: resources.length,
+        Resources: resources,
+        itemsPerPage: resources.length,
+        startIndex: 1,
+      });
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -104,7 +104,11 @@ export class ScimController {
       const { id } = req.params;
 
       const { record, user } = await this.scimUseCase.getUser(id);
-      jsonResponse(res, 200, this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
+      jsonResponse(
+        res,
+        200,
+        this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+      );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -143,7 +147,11 @@ export class ScimController {
         externalId: body.externalId as string | undefined,
       });
 
-      jsonResponse(res, 201, this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId));
+      jsonResponse(
+        res,
+        201,
+        this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+      );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);
@@ -167,18 +175,19 @@ export class ScimController {
       const { id } = req.params;
       const body = req.body as Record<string, unknown>;
 
-      const { record: updatedRecord, user, active } = await this.scimUseCase.replaceUser(id, {
+      const {
+        record: updatedRecord,
+        user,
+        active,
+      } = await this.scimUseCase.replaceUser(id, {
         active: body.active as boolean | undefined,
       });
 
-      jsonResponse(res, 200, this.toScimUser(
-                  updatedRecord.scimUserId,
-                  user,
-                  active,
-                  updatedRecord.createdAt,
-                  updatedRecord.updatedAt,
-                  updatedRecord.externalId,
-                ));
+      jsonResponse(
+        res,
+        200,
+        this.toScimUser(updatedRecord.scimUserId, user, active, updatedRecord.createdAt, updatedRecord.updatedAt, updatedRecord.externalId),
+      );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
         scimError(401, error.message, res);

@@ -1,7 +1,5 @@
 import { randomUUID } from 'crypto';
-import type {
-  IntegrationRepository, IntegrationCredentialRepository,
-} from '../../domain/repositories/IntegrationRepository';
+import type { IntegrationRepository, IntegrationCredentialRepository } from '../../domain/repositories/IntegrationRepository';
 import { Integration, type IntegrationProvider } from '../../domain/entities/Integration';
 import { IntegrationCredential, type CredentialType } from '../../domain/entities/IntegrationCredential';
 import { IntegrationNotFoundError, CredentialNotFoundError, IntegrationValidationError } from '../../domain/errors/IntegrationErrors';
@@ -128,4 +126,3 @@ export class ManageIntegrationsUseCase {
     return this.credentialRepo.delete(credentialId);
   }
 }
-

@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * System Configuration Admin UI Controller
  * Admin views for managing system configuration

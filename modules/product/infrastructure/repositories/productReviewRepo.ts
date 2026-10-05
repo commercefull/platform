@@ -20,8 +20,7 @@ export type {
   ReviewFilters,
 } from '../../domain/repositories/ProductCatalogPorts';
 
-const toDate = (d: Date | string | null | undefined): Date | undefined =>
-  d == null ? undefined : d instanceof Date ? d : new Date(d);
+const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
 function mapToReview(row: DbProductReview): ProductReview {
@@ -48,12 +47,6 @@ function mapToReview(row: DbProductReview): ProductReview {
     updatedAt: toDateReq(row.updatedAt),
   };
 }
-
-
-
-
-
-
 
 export class ProductReviewRepo {
   /**

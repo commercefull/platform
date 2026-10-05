@@ -1,4 +1,3 @@
-
 import { UpdateAttributeUseCase } from './UpdateAttribute';
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
 import { createAttribute, lazyMock } from '../../../tests/testUtils';

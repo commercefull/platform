@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import type { StoreRole } from '../../../identity/domain/entities/UserStoreAssignment';
 import { logger } from '../../../../libs/logger';
@@ -11,6 +11,8 @@ import {
   updateStoreUseCase,
   organizationLookupAdapter,
   findActiveStoresUseCase,
+  manageStoresAdminUseCase,
+  manageSalesChannelsUseCase,
 } from '../../application/useCases/wired';
 import {
   listStoreUsersUseCase,
@@ -23,8 +25,7 @@ import { ListStoresQuery } from '../../application/useCases/ListStores';
 import { GetStoreQuery } from '../../application/useCases/GetStore';
 import { CreateStoreCommand } from '../../application/useCases/CreateStore';
 import { UpdateStoreCommand } from '../../application/useCases/UpdateStore';
-
-
+import type { SalesChannelType } from '../../domain/entities/SalesChannel';
 
 export const listStores = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const page = parseInt((req.query.page as string) || '1', 10);
@@ -54,7 +55,7 @@ export const viewStore = async (req: HttpRequest, res: HttpResponse): Promise<vo
     return;
   }
 
-  const [users, orders, dispatches] = await Promise.all([
+  const [users, orders, dispatches, channelAssignments, availableChannels] = await Promise.all([
     listStoreUsersUseCase.execute(req.params.storeId).catch(() => []),
     getOrdersByStoreUseCase
       .execute(req.params.storeId, 10, 0)
@@ -63,6 +64,12 @@ export const viewStore = async (req: HttpRequest, res: HttpResponse): Promise<vo
       .execute(req.params.storeId, 10, 0)
       .then(result => result as PaginatedResult<{ toJSON: () => unknown }>)
       .catch((): PaginatedResult<{ toJSON: () => unknown }> => ({ data: [], total: 0, limit: 10, offset: 0, hasMore: false, length: 0 })),
+    storeResult.store.organizationId
+      ? manageSalesChannelsUseCase.listForStore(storeResult.store.organizationId, req.params.storeId).catch(() => [])
+      : [],
+    storeResult.store.organizationId
+      ? manageSalesChannelsUseCase.listForOrganization(storeResult.store.organizationId).catch(() => [])
+      : [],
   ]);
 
   adminRespond(req, res, 'stores/view', {
@@ -71,6 +78,8 @@ export const viewStore = async (req: HttpRequest, res: HttpResponse): Promise<vo
     users,
     recentOrders: orders.data || [],
     recentDispatches: dispatches.data ? dispatches.data.map(dispatch => dispatch.toJSON()) : [],
+    channelAssignments,
+    availableChannels,
   });
 };
 
@@ -231,7 +240,10 @@ export const assignUserToStore = async (req: HttpRequest, res: HttpResponse): Pr
     redirectResponse(res, `/admin/stores/${req.params.storeId}/users?success=User assigned successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`);
+    redirectResponse(
+      res,
+      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to assign user')}`,
+    );
   }
 };
 
@@ -241,6 +253,63 @@ export const removeUserFromStore = async (req: HttpRequest, res: HttpResponse): 
     redirectResponse(res, `/admin/stores/${req.params.storeId}/users?success=User removed successfully`);
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`);
+    redirectResponse(
+      res,
+      `/admin/stores/${req.params.storeId}/users?error=${encodeURIComponent((error as Error).message || 'Failed to remove user')}`,
+    );
+  }
+};
+
+export const createStoreSalesChannel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  try {
+    const store = await manageStoresAdminUseCase.findById(req.params.storeId);
+    if (!store?.organizationId) throw new Error('Store must belong to an organization');
+    const body = req.body as { code: string; name: string; type: SalesChannelType; isDefault?: string };
+    const channel = await manageSalesChannelsUseCase.create({
+      organizationId: store.organizationId,
+      code: body.code,
+      name: body.name,
+      type: body.type,
+    });
+    await manageSalesChannelsUseCase.assignToStore({
+      organizationId: store.organizationId,
+      storeId: store.storeId,
+      salesChannelId: channel.salesChannelId,
+      isDefault: body.isDefault === 'on',
+    });
+    redirectResponse(res, `/admin/stores/${store.storeId}?success=Sales channel created and assigned`);
+  } catch (error: unknown) {
+    logger.warn('Failed to create store sales channel', error);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}?error=${encodeURIComponent((error as Error).message)}`);
+  }
+};
+
+export const assignStoreSalesChannel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  try {
+    const store = await manageStoresAdminUseCase.findById(req.params.storeId);
+    if (!store?.organizationId) throw new Error('Store must belong to an organization');
+    const body = req.body as { salesChannelId: string; isDefault?: string };
+    await manageSalesChannelsUseCase.assignToStore({
+      organizationId: store.organizationId,
+      storeId: store.storeId,
+      salesChannelId: body.salesChannelId,
+      isDefault: body.isDefault === 'on',
+    });
+    redirectResponse(res, `/admin/stores/${store.storeId}?success=Sales channel assigned`);
+  } catch (error: unknown) {
+    logger.warn('Failed to assign store sales channel', error);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}?error=${encodeURIComponent((error as Error).message)}`);
+  }
+};
+
+export const unassignStoreSalesChannel = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  try {
+    const store = await manageStoresAdminUseCase.findById(req.params.storeId);
+    if (!store?.organizationId) throw new Error('Store must belong to an organization');
+    await manageSalesChannelsUseCase.unassignFromStore(store.organizationId, store.storeId, req.params.channelId);
+    redirectResponse(res, `/admin/stores/${store.storeId}?success=Sales channel unassigned`);
+  } catch (error: unknown) {
+    logger.warn('Failed to unassign store sales channel', error);
+    redirectResponse(res, `/admin/stores/${req.params.storeId}?error=${encodeURIComponent((error as Error).message)}`);
   }
 };

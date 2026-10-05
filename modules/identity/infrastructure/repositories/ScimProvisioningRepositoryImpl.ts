@@ -7,7 +7,9 @@ import { ScimProvisioningRecord, ScimProvisioningRepository } from '../../domain
 
 export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepository {
   async findByScimUserId(scimUserId: string): Promise<ScimProvisioningRecord | null> {
-    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "scimUserId" = $1', [scimUserId]);
+    const row = await queryOne<Record<string, unknown>>('SELECT * FROM "identityScimProvisioningRecord" WHERE "scimUserId" = $1', [
+      scimUserId,
+    ]);
     return row ? this.mapToRecord(row) : null;
   }
 
@@ -25,9 +27,10 @@ export class ScimProvisioningRepositoryImpl implements ScimProvisioningRepositor
   }
 
   async save(record: ScimProvisioningRecord): Promise<ScimProvisioningRecord> {
-    const existing = await queryOne<Record<string, unknown>>('SELECT "recordId" FROM "identityScimProvisioningRecord" WHERE "recordId" = $1', [
-      record.recordId,
-    ]);
+    const existing = await queryOne<Record<string, unknown>>(
+      'SELECT "recordId" FROM "identityScimProvisioningRecord" WHERE "recordId" = $1',
+      [record.recordId],
+    );
 
     if (existing) {
       await query(

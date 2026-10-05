@@ -47,9 +47,7 @@ describe('GetCustomerUseCase', () => {
   });
 
   it('should map addresses to the response format', async () => {
-    customerRepository.getAddresses.mockResolvedValue([
-      createCustomerAddressRow({ customerAddressId: 'addr-9', isDefaultShipping: true }),
-    ]);
+    customerRepository.getAddresses.mockResolvedValue([createCustomerAddressRow({ customerAddressId: 'addr-9', isDefaultShipping: true })]);
 
     const result = await useCase.execute(new GetCustomerCommand('cust-1'));
 

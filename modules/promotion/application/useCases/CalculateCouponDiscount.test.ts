@@ -28,21 +28,17 @@ describe('CalculateCouponDiscountUseCase', () => {
     coupons.findByCode.mockResolvedValue(null);
     const useCase = new CalculateCouponDiscountUseCase(coupons);
 
-    await expect(useCase.execute({ code: 'NOPE', orderTotalCents: '100' })).rejects.toBeInstanceOf(
-      CouponNotFoundError,
-    );
+    await expect(useCase.execute({ code: 'NOPE', orderTotalCents: '100' })).rejects.toBeInstanceOf(CouponNotFoundError);
   });
 
   it('should reject when code or order total is missing', async () => {
     const coupons = lazyMock<CalculateCouponDiscountPort>();
     const useCase = new CalculateCouponDiscountUseCase(coupons);
 
-    await expect(useCase.execute({ code: '', orderTotalCents: '100' })).rejects.toBeInstanceOf(
+    await expect(useCase.execute({ code: '', orderTotalCents: '100' })).rejects.toBeInstanceOf(PromotionValidationError);
+    await expect(useCase.execute({ code: 'X', orderTotalCents: undefined as unknown as string })).rejects.toBeInstanceOf(
       PromotionValidationError,
     );
-    await expect(
-      useCase.execute({ code: 'X', orderTotalCents: undefined as unknown as string }),
-    ).rejects.toBeInstanceOf(PromotionValidationError);
     expect(coupons.findByCode).not.toHaveBeenCalled();
   });
 });

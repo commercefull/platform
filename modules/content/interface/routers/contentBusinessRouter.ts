@@ -46,6 +46,11 @@ router.post('/content/pages/:id/unpublish', asyncHandler(contentController.unpub
 router.post('/content/pages/:id/schedule', asyncHandler(contentController.schedulePage));
 router.post('/content/pages/:id/duplicate', asyncHandler(contentController.duplicatePage));
 
+// Page publication assignments (store/channel/locale scoping)
+router.get('/content/pages/:id/publications', asyncHandler(contentController.getPagePublications));
+router.post('/content/pages/:id/publications', asyncHandler(contentController.createPagePublication));
+router.delete('/content/pages/:id/publications/:publicationId', asyncHandler(contentController.deletePagePublication));
+
 // Content Category routes
 router.get('/content/categories', asyncHandler(contentController.getCategories));
 router.get('/content/categories/tree', asyncHandler(contentController.getCategoryTree));

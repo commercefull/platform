@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { TaxRate, TaxCategory } from '../../taxTypes';
 import type { CreateTaxRateRecordCommand } from '../../application/useCases/CreateTaxRateRecord';

@@ -60,9 +60,26 @@ export interface CheckoutResponse {
   totalCents: number;
   currency: string;
   couponCode?: string;
+  /** Loyalty reward applied to the session, when present. */
+  loyaltyRewardId?: string;
+  loyaltyPointsRedeemed?: number;
+  loyaltyDiscountAmountCents?: number;
   fulfillmentType: string;
   notes?: string;
   sameAsShipping: boolean;
+  /** Customer VAT ID supplied for B2B quoting. */
+  vatNumber?: string;
+  /** True when intra-EU B2B reverse charge was applied — customer self-accounts VAT. */
+  reverseChargeApplied?: boolean;
+  /** True when a payment-boundary requote changed line prices — clients should surface a price-change notice. */
+  priceChanged?: boolean;
+  /** Per-line price changes recorded at the payment boundary (previous → new unit price). */
+  priceChanges?: Array<{
+    productId: string;
+    productVariantId?: string;
+    previousUnitPriceCents: number;
+    unitPriceCents: number;
+  }>;
   createdAt: string;
   updatedAt: string;
   expiresAt: string;
@@ -106,9 +123,18 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     totalCents: session.total.cents,
     currency: session.subtotal.currency,
     couponCode: session.couponCode,
+    loyaltyRewardId: session.loyaltyRewardId,
+    loyaltyPointsRedeemed: session.loyaltyRewardId ? session.loyaltyPointsRedeemed : undefined,
+    loyaltyDiscountAmountCents: session.loyaltyRewardId ? session.loyaltyDiscountAmount.cents : undefined,
     fulfillmentType: session.fulfillmentType,
     notes: session.notes,
     sameAsShipping: session.sameAsShipping,
+    vatNumber: session.vatNumber,
+    reverseChargeApplied: session.reverseChargeApplied || undefined,
+    priceChanged: Array.isArray(session.metadata?.priceChanges) && session.metadata.priceChanges.length > 0 ? true : undefined,
+    priceChanges: Array.isArray(session.metadata?.priceChanges)
+      ? (session.metadata.priceChanges as CheckoutResponse['priceChanges'])
+      : undefined,
     createdAt: session.createdAt.toISOString(),
     updatedAt: session.updatedAt.toISOString(),
     expiresAt: session.expiresAt.toISOString(),
@@ -152,6 +178,7 @@ export class InitiateCheckoutUseCase {
     });
 
     session.updateAmounts(basket.subtotal, Money.zero(basket.currency));
+    session.updateMetadata({ storeId: basket.storeId, channelId: basket.channelId });
 
     await this.checkoutRepository.save(session);
 
@@ -159,6 +186,8 @@ export class InitiateCheckoutUseCase {
       checkoutId: session.id,
       basketId: command.basketId,
       customerId: command.customerId,
+      storeId: basket.storeId,
+      channelId: basket.channelId,
       totalCents: session.total.cents,
     });
 

@@ -134,7 +134,9 @@ export class PageDraftRepositoryImpl implements PageDraftRepository {
   }
 
   async delete(draftId: string): Promise<boolean> {
-    const result = await queryOne<{ id: string }>(`DELETE FROM "pagebuilderPageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`, [draftId]);
+    const result = await queryOne<{ id: string }>(`DELETE FROM "pagebuilderPageDraft" WHERE "draftId" = $1 RETURNING "draftId" as id`, [
+      draftId,
+    ]);
     return !!result;
   }
 

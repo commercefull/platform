@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Loyalty Controller
  * Handles loyalty programs, points, rewards, and redemptions for the Admin Hub
@@ -167,17 +167,18 @@ export const createLoyaltyRewardForm = async (req: HttpRequest, res: HttpRespons
 export const createLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt } = body as {
-      name: string;
-      description?: string;
-      pointsCost: string;
-      discountAmountCents?: string;
-      discountPercent?: string;
-      discountCode?: string;
-      freeShipping?: string;
-      productIds?: string;
-      expiresAt?: string;
-    };
+    const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt } =
+      body as {
+        name: string;
+        description?: string;
+        pointsCost: string;
+        discountAmountCents?: string;
+        discountPercent?: string;
+        discountCode?: string;
+        freeShipping?: string;
+        productIds?: string;
+        expiresAt?: string;
+      };
 
     const reward = await manageLoyaltyAdminUseCase.createReward({
       name,
@@ -248,19 +249,29 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
   const updates: Record<string, unknown> = {};
 
   const body = req.body as HttpRequestBody;
-  const { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive } =
-    body as {
-      name?: string;
-      description?: string;
-      pointsCost?: string;
-      discountAmountCents?: string;
-      discountPercent?: string;
-      discountCode?: string;
-      freeShipping?: string;
-      productIds?: string;
-      expiresAt?: string;
-      isActive?: string;
-    };
+  const {
+    name,
+    description,
+    pointsCost,
+    discountAmountCents,
+    discountPercent,
+    discountCode,
+    freeShipping,
+    productIds,
+    expiresAt,
+    isActive,
+  } = body as {
+    name?: string;
+    description?: string;
+    pointsCost?: string;
+    discountAmountCents?: string;
+    discountPercent?: string;
+    discountCode?: string;
+    freeShipping?: string;
+    productIds?: string;
+    expiresAt?: string;
+    isActive?: string;
+  };
 
   if (name !== undefined) updates.name = name;
   if (description !== undefined) updates.description = description || undefined;

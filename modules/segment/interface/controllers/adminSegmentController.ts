@@ -1,4 +1,4 @@
-import { redirectResponse } from "libs/apiResponse";
+import { redirectResponse } from 'libs/apiResponse';
 /**
  * Segment Admin UI Controller
  * Admin views for managing customer segments

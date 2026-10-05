@@ -53,6 +53,7 @@ export interface ProductVariantResponse {
   attributeString: string;
   stockQuantity: number;
   lowStockThreshold: number;
+  inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable';
   isInStock: boolean;
   isLowStock: boolean;
   isDefault: boolean;
@@ -101,6 +102,7 @@ export interface ProductDetailResponse {
   isDownloadable: boolean;
   isSubscription: boolean;
   isTaxable: boolean;
+  isInventoryManaged: boolean;
   taxClass?: string;
   isPurchasable: boolean;
   hasVariants: boolean;
@@ -185,9 +187,7 @@ export class GetProductUseCase {
 
     const priceRows = await pricesPromise;
     const productPrice = priceRows.find(p => p.productVariantId === null) ?? priceRows[0] ?? null;
-    const variantPriceByVariantId = new Map(
-      priceRows.filter(p => p.productVariantId !== null).map(p => [p.productVariantId as string, p]),
-    );
+    const variantPriceByVariantId = new Map(priceRows.filter(p => p.productVariantId !== null).map(p => [p.productVariantId as string, p]));
 
     return this.mapToResponse(product, variants, images, productPrice, variantPriceByVariantId);
   }
@@ -219,6 +219,7 @@ export class GetProductUseCase {
       isDownloadable: product.isDownloadable,
       isSubscription: product.isSubscription,
       isTaxable: product.isTaxable,
+      isInventoryManaged: product.isInventoryManaged,
       taxClass: product.taxClass,
       isPurchasable: product.isPurchasable,
       hasVariants: product.hasVariants || variants.length > 0,
@@ -249,6 +250,7 @@ export class GetProductUseCase {
         attributeString: v.attributeString,
         stockQuantity: v.stockQuantity,
         lowStockThreshold: v.lowStockThreshold,
+        inventoryPolicy: v.inventoryPolicy,
         isInStock: v.isInStock,
         isLowStock: v.isLowStock,
         isDefault: v.isDefault,

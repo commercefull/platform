@@ -111,6 +111,8 @@ export interface CustomerSubscription {
   lastPaymentFailedAt?: Date;
   customizations?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  storeId?: string;
+  salesChannelId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

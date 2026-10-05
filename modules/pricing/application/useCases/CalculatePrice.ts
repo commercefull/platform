@@ -28,9 +28,7 @@ export interface CalculatePriceInput extends PriceContext {
   productId: string;
   /** Explicit price list to apply (merchant quote/preview tooling). */
   priceListId?: string;
-  /** Reserved for channel-scoped pricing (accepted, not yet evaluated). */
   channelId?: string;
-  /** Reserved for store-scoped pricing (accepted, not yet evaluated). */
   storeId?: string;
 }
 
@@ -174,9 +172,9 @@ export class CalculatePriceUseCase {
     }
 
     // Step 5: Apply dynamic pricing rules
-    const applicableRules = (
-      await this.pricingRules.findActiveRules(productId, categoryIds[0], customerId, customerGroupIds)
-    ).filter(rule => !excludeRuleIds.includes(rule.id ?? rule.pricingRuleId ?? ''));
+    const applicableRules = (await this.pricingRules.findActiveRules(productId, categoryIds[0], customerId, customerGroupIds)).filter(
+      rule => !excludeRuleIds.includes(rule.id ?? rule.pricingRuleId ?? ''),
+    );
 
     // Sort rules by priority (descending) to apply highest priority rules first
     const sortedRules = [...applicableRules].sort((a, b) => b.priority - a.priority);
@@ -204,7 +202,12 @@ export class CalculatePriceUseCase {
     // Step 6: Apply membership benefits if applicable
     if (customerId) {
       try {
-        const membershipBenefits = await this.membershipBenefits.getDiscountBenefits(customerId);
+        const membershipBenefits = await this.membershipBenefits.getDiscountBenefits(customerId, {
+          storeId: context.storeId,
+          channelId: context.channelId,
+          currencyCode: context.currencyCode,
+          countryCode: context.regionCode,
+        });
 
         if (membershipBenefits.length > 0) {
           // Apply the best membership discount

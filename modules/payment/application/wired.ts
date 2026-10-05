@@ -31,9 +31,6 @@ export {
 
 export const screenForFraudUseCase = new ScreenForFraudUseCase(FraudRepo);
 
-export const orderStatusSyncAdapter = new CheckoutOrderStatusSyncAdapter(
-  CheckoutRepo,
-  orderDataRepository.commands,
-);
+export const orderStatusSyncAdapter = new CheckoutOrderStatusSyncAdapter(CheckoutRepo, orderDataRepository.commands);
 
 export const gatewayWebhookPort = new GatewayWebhookAdapter();

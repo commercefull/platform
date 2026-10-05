@@ -7,6 +7,7 @@ import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository
 import { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
 import { TaxQuotePort } from '../../application/ports/TaxQuotePort';
 import { PromotionQuotePort } from '../../application/ports/PromotionQuotePort';
+import type { StoreContextPort } from '../../application/ports/StoreContextPort';
 import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../../libs/money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
@@ -43,6 +44,7 @@ export class SetShippingAddressUseCase {
     private readonly basketSnapshotPort?: BasketSnapshotPort,
     private readonly taxQuotePort?: TaxQuotePort,
     private readonly promotionQuotePort?: PromotionQuotePort,
+    private readonly storeContextPort?: StoreContextPort,
   ) {}
 
   async execute(command: SetShippingAddressCommand): Promise<CheckoutResponse> {
@@ -81,6 +83,7 @@ export class SetShippingAddressUseCase {
 
     let taxAmountCents: number;
     let taxIncludedInSubtotal = false;
+    let taxAddedCents: number | undefined;
     try {
       let taxableShippingCents = session.shippingAmount.cents;
       let applyDiscountBeforeTax = false;
@@ -101,6 +104,7 @@ export class SetShippingAddressUseCase {
       }
 
       const items = await this.getTaxLineItems(session);
+      const storeContext = await this.getStoreContext(session);
       if (this.taxQuotePort) {
         const taxResult = await this.taxQuotePort.calculateTax({
           items: items.map(item => ({
@@ -119,9 +123,15 @@ export class SetShippingAddressUseCase {
           shippingAmountCents: taxableShippingCents,
           customerId: session.customerId,
           pricesIncludeTax,
+          vatNumber: session.vatNumber,
+          organizationId: storeContext?.organizationId,
+          originCountry: storeContext?.country,
         });
         taxAmountCents = taxResult.success ? taxResult.taxAmountCents : 0;
         taxIncludedInSubtotal = taxResult.success && taxResult.taxIncludedInSubtotal === true;
+        if (taxResult.success) session.setReverseChargeApplied(taxResult.reverseChargeApplied === true);
+        taxAddedCents =
+          taxResult.success && taxResult.taxAddedCents != null ? taxResult.taxAddedCents : taxIncludedInSubtotal ? 0 : taxAmountCents;
       } else {
         taxAmountCents = 0;
       }
@@ -132,6 +142,7 @@ export class SetShippingAddressUseCase {
       session.subtotal,
       Money.fromCents(taxAmountCents, session.subtotal.currency),
       taxIncludedInSubtotal,
+      taxAddedCents != null ? Money.fromCents(taxAddedCents, session.subtotal.currency) : undefined,
     );
 
     // Evaluate auto-applied promotions
@@ -151,7 +162,9 @@ export class SetShippingAddressUseCase {
 
   private async getTaxLineItems(
     session: CheckoutSessionLike,
-  ): Promise<Array<{ productId: string; name: string; quantity: number; unitPriceCents: number; taxCategoryId?: string; taxable?: boolean }>> {
+  ): Promise<
+    Array<{ productId: string; name: string; quantity: number; unitPriceCents: number; taxCategoryId?: string; taxable?: boolean }>
+  > {
     if (!this.basketSnapshotPort) {
       return [{ productId: '_subtotal', name: 'Subtotal', quantity: 1, unitPriceCents: session.subtotal.cents }];
     }
@@ -173,6 +186,17 @@ export class SetShippingAddressUseCase {
     }
   }
 
+  private async getStoreContext(session: CheckoutSessionLike): Promise<{ organizationId?: string; country?: string } | null> {
+    if (!this.storeContextPort || !this.basketSnapshotPort) return null;
+    try {
+      const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
+      if (!basket?.storeId) return null;
+      return await this.storeContextPort.getStoreContext(basket.storeId);
+    } catch {
+      return null;
+    }
+  }
+
   private async evaluatePromotions(session: CheckoutSessionLike): Promise<void> {
     if (!this.basketSnapshotPort || !this.promotionQuotePort) return;
     try {
@@ -190,6 +214,9 @@ export class SetShippingAddressUseCase {
         subtotalCents: session.subtotal.cents,
         shippingAmountCents: session.shippingAmount?.cents ?? 0,
         customerId: session.customerId,
+        storeId: basket.storeId,
+        channelId: basket.channelId,
+        countryCode: session.shippingAddress?.country,
         currency: session.subtotal.currency ?? 'USD',
         couponCode: session.couponCode,
       });
@@ -208,5 +235,8 @@ interface CheckoutSessionLike {
   shippingAmount?: { cents: number };
   customerId?: string;
   couponCode?: string;
+  vatNumber?: string;
+  shippingAddress?: { country: string };
   applyCoupon(code: string, discount: Money): void;
+  setReverseChargeApplied(applied: boolean): void;
 }

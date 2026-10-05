@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Membership Controller
  * Handles membership plans, tiers, and benefits management for the Admin Hub
@@ -298,10 +298,10 @@ export const bulkMembershipOperations = async (req: HttpRequest, res: HttpRespon
   );
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
-        results,
-      });
+    success: true,
+    message: `Bulk operation completed: ${successCount} successful, ${failureCount} failed`,
+    results,
+  });
 };
 
 export const membershipUpgradeDowngrade = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -321,15 +321,15 @@ export const membershipUpgradeDowngrade = async (req: HttpRequest, res: HttpResp
   });
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `Membership ${change.isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
-        change: {
-          from: change.from,
-          to: change.to,
-          effective: change.effective.toISOString(),
-          prorated: change.prorated,
-        },
-      });
+    success: true,
+    message: `Membership ${change.isUpgrade ? 'upgraded' : 'downgraded'} successfully`,
+    change: {
+      from: change.from,
+      to: change.to,
+      effective: change.effective.toISOString(),
+      prorated: change.prorated,
+    },
+  });
 };
 
 export const membershipAnalytics = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

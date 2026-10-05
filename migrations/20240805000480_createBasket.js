@@ -20,7 +20,7 @@ exports.up = function (knex) {
       t.bigInteger('grandTotalCents').notNullable().defaultTo(0);
       t.jsonb('metadata');
       t.uuid('storeId').nullable().references('storeId').inTable('store').onDelete('SET NULL');
-      t.uuid('channelId').nullable();
+      t.uuid('channelId').nullable().references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
       t.uuid('accountId').nullable();
 
       t.timestamp('expiresAt');

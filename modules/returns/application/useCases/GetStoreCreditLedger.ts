@@ -7,4 +7,3 @@ export class GetStoreCreditLedgerUseCase {
     return this.storeCreditRepo.getLedger(customerId, limit);
   }
 }
-

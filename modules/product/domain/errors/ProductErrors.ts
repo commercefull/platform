@@ -30,12 +30,6 @@ export class ProductCategoryNotFoundError extends AppError {
   }
 }
 
-export class ProductCollectionNotFoundError extends AppError {
-  constructor(collectionId: string) {
-    super(`Product collection not found: ${collectionId}`, 404, { code: 'product.collection_not_found' });
-  }
-}
-
 export class ProductAttributeNotFoundError extends AppError {
   constructor(attributeId: string) {
     super(`Product attribute not found: ${attributeId}`, 404, { code: 'product.attribute_not_found' });

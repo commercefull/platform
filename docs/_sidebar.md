@@ -10,6 +10,7 @@
   - [Adding A Module](guides/adding-a-module.md)
   - [Automation Engine](guides/automation-engine.md)
   - [Configuration](guides/configuration.md)
+  - [Content Setup](guides/content-setup.md)
   - [Contributing](guides/contributing.md)
   - [Database Performance Tuning](guides/database-performance-tuning.md)
   - [Deployment](guides/deployment.md)
@@ -17,8 +18,12 @@
   - [Http Framework Abstraction](guides/http-framework-abstraction.md)
   - [Migrating From Shopify](guides/migrating-from-shopify.md)
   - [Module Registry](guides/module-registry.md)
+  - [Organization Setup](guides/organization-setup.md)
+  - [Product Setup](guides/product-setup.md)
+  - [Regional Commerce Rollout Progress](guides/regional-commerce-rollout-progress.md)
   - [Repository Dependency Injection](guides/repository-dependency-injection.md)
   - [Search And Merchandising](guides/search-and-merchandising.md)
+  - [Shipping And Fulfillment](guides/shipping-and-fulfillment.md)
 
 - **Architecture**
   - [Overview](architecture/overview.md)
@@ -46,7 +51,9 @@
   - [Web Layer](guidelines/web-layer.md)
 
 - **Modules**
+  - [Agentic Checkout](modules/agentic-checkout.md)
   - [Analytics](modules/analytics.md)
+  - [Assortment](modules/assortment.md)
   - [Audit](modules/audit.md)
   - [Automation](modules/automation.md)
   - [B2b](modules/b2b.md)
@@ -94,4 +101,3 @@
   - [Api Reference](generated/api-reference.md)
   - [Configuration](generated/configuration.md)
   - [Route Index](generated/route-index.md)
-

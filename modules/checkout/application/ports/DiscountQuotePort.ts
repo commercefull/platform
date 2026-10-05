@@ -17,6 +17,24 @@ export interface DiscountQuoteResult {
   error?: string;
 }
 
+/**
+ * Contextual eligibility data for scoped coupons — a coupon linked to a
+ * promotion inherits that promotion's store/channel/country/currency rules.
+ */
+export interface DiscountQuoteContext {
+  customerId?: string;
+  organizationId?: string;
+  storeId?: string;
+  channelId?: string;
+  countryCode?: string;
+  items?: Array<{
+    productId: string;
+    categoryId?: string;
+    quantity: number;
+    unitPriceCents: number;
+  }>;
+}
+
 export interface DiscountQuotePort {
-  validateDiscount(code: string, subtotalCents: number, currency: string): Promise<DiscountQuoteResult>;
+  validateDiscount(code: string, subtotalCents: number, currency: string, context?: DiscountQuoteContext): Promise<DiscountQuoteResult>;
 }

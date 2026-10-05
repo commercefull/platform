@@ -1,5 +1,9 @@
 import { ManageTierBenefitsUseCase, type ManageTierBenefitsPort } from './ManageTierBenefits';
-import { MembershipBenefitNotFoundError, MembershipPlanNotFoundError, MembershipValidationError } from '../../domain/errors/MembershipErrors';
+import {
+  MembershipBenefitNotFoundError,
+  MembershipPlanNotFoundError,
+  MembershipValidationError,
+} from '../../domain/errors/MembershipErrors';
 
 const lazyMock = <T extends object>(): jest.Mocked<T> => {
   const fns = new Map<PropertyKey, jest.Mock>();
@@ -31,14 +35,14 @@ describe('ManageTierBenefitsUseCase', () => {
 
     it('should reject when the tier does not exist', async () => {
       port.findTierById.mockResolvedValue(null);
-      await expect(
-        useCase.create({ name: 'B', tierIds: ['tier-x'], benefitType: 'discount' }),
-      ).rejects.toBeInstanceOf(MembershipPlanNotFoundError);
+      await expect(useCase.create({ name: 'B', tierIds: ['tier-x'], benefitType: 'discount' })).rejects.toBeInstanceOf(
+        MembershipPlanNotFoundError,
+      );
     });
 
     it('should create the benefit linked to the first tier', async () => {
       port.findTierById.mockResolvedValue(tier);
-      port.createBenefit.mockImplementation(async (input) => {
+      port.createBenefit.mockImplementation(async input => {
         expect(input.tierIds).toEqual(['tier-1']);
         return benefit;
       });
@@ -57,9 +61,7 @@ describe('ManageTierBenefitsUseCase', () => {
     it('should validate the new tier when it changes', async () => {
       port.findBenefitById.mockResolvedValue(benefit);
       port.findTierById.mockResolvedValue(null);
-      await expect(useCase.update('ben-1', { tierIds: ['tier-x'] })).rejects.toBeInstanceOf(
-        MembershipPlanNotFoundError,
-      );
+      await expect(useCase.update('ben-1', { tierIds: ['tier-x'] })).rejects.toBeInstanceOf(MembershipPlanNotFoundError);
       expect(port.updateBenefit).not.toHaveBeenCalled();
     });
 

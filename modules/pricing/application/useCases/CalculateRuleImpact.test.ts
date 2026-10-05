@@ -65,9 +65,7 @@ describe('CalculateRuleImpactUseCase', () => {
 
     const result = await useCase.execute({ rule, context: { productIds: ['p1'] } });
 
-    expect(calculatePrice.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ productId: 'p1', excludeRuleIds: ['rule-1'] }),
-    );
+    expect(calculatePrice.execute).toHaveBeenCalledWith(expect.objectContaining({ productId: 'p1', excludeRuleIds: ['rule-1'] }));
     expect(result.afterRule.finalPriceCents).toBe(7500);
     expect(result.impact).toBe(2500);
   });

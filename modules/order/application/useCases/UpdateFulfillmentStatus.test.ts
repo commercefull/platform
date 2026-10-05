@@ -41,6 +41,8 @@ describe('UpdateFulfillmentStatusUseCase', () => {
   it('should throw OrderNotFoundError when the order does not exist', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdateFulfillmentStatusCommand('missing', FulfillmentStatus.FULFILLED))).rejects.toThrow(OrderNotFoundError);
+    await expect(useCase.execute(new UpdateFulfillmentStatusCommand('missing', FulfillmentStatus.FULFILLED))).rejects.toThrow(
+      OrderNotFoundError,
+    );
   });
 });

@@ -1,10 +1,6 @@
-
-
 import { SubmitProductQaUseCase, SubmitProductQaCommand } from './SubmitProductQa';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import { createProductLookup, createProductQa, lazyMock } from '../../tests/testUtils';
-
-;
 
 describe('SubmitProductQaUseCase', () => {
   let useCase: SubmitProductQaUseCase;
@@ -13,7 +9,7 @@ describe('SubmitProductQaUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-        mockRepo1 = lazyMock<ConstructorParameters<typeof SubmitProductQaUseCase>[0]>();
+    mockRepo1 = lazyMock<ConstructorParameters<typeof SubmitProductQaUseCase>[0]>();
     mockRepo1.findById.mockResolvedValue(createProductLookup());
     mockRepo2 = lazyMock<ConstructorParameters<typeof SubmitProductQaUseCase>[1]>();
     mockRepo2.create.mockResolvedValue(

@@ -43,10 +43,7 @@ describe('RedeemRewardUseCase', () => {
     expect(result.pointsSpent).toBe(100);
     expect(loyaltyRepository.updatePointsBalance).toHaveBeenCalled();
     expect(loyaltyRepository.decrementRewardQuantity).toHaveBeenCalledWith('rwd1');
-    expect(emitMock).toHaveBeenCalledWith(
-      'loyalty.reward_redeemed',
-      expect.objectContaining({ customerId: 'c1', rewardId: 'rwd1' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('loyalty.reward_redeemed', expect.objectContaining({ customerId: 'c1', rewardId: 'rwd1' }));
   });
 
   it('should throw LoyaltyRewardNotFoundError when the reward does not exist', async () => {
@@ -85,8 +82,16 @@ describe('RedeemRewardUseCase', () => {
 
   it('should throw LoyaltyValidationError when the reward has expired', async () => {
     loyaltyRepository.getRewardById.mockResolvedValue({
-      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
-      isActive: true, totalQuantity: 100, remainingQuantity: 100, maxUsagePerCustomer: null,
+      rewardId: 'rwd1',
+      name: '10% Off',
+      type: 'discount',
+      pointsCost: 100,
+      value: 10,
+      valueType: 'percentage',
+      isActive: true,
+      totalQuantity: 100,
+      remainingQuantity: 100,
+      maxUsagePerCustomer: null,
       validTo: new Date('2020-01-01'),
     });
 
@@ -95,8 +100,16 @@ describe('RedeemRewardUseCase', () => {
 
   it('should throw LoyaltyValidationError when the reward is not yet available', async () => {
     loyaltyRepository.getRewardById.mockResolvedValue({
-      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
-      isActive: true, totalQuantity: 100, remainingQuantity: 100, maxUsagePerCustomer: null,
+      rewardId: 'rwd1',
+      name: '10% Off',
+      type: 'discount',
+      pointsCost: 100,
+      value: 10,
+      valueType: 'percentage',
+      isActive: true,
+      totalQuantity: 100,
+      remainingQuantity: 100,
+      maxUsagePerCustomer: null,
       validFrom: new Date('2999-01-01'),
     });
 
@@ -105,8 +118,16 @@ describe('RedeemRewardUseCase', () => {
 
   it('should throw LoyaltyValidationError when the reward is out of stock', async () => {
     loyaltyRepository.getRewardById.mockResolvedValue({
-      rewardId: 'rwd1', name: '10% Off', type: 'discount', pointsCost: 100, value: 10, valueType: 'percentage',
-      isActive: true, totalQuantity: 5, remainingQuantity: 0, maxUsagePerCustomer: null,
+      rewardId: 'rwd1',
+      name: '10% Off',
+      type: 'discount',
+      pointsCost: 100,
+      value: 10,
+      valueType: 'percentage',
+      isActive: true,
+      totalQuantity: 5,
+      remainingQuantity: 0,
+      maxUsagePerCustomer: null,
     });
 
     await expect(useCase.execute({ customerId: 'c1', rewardId: 'rwd1' })).rejects.toThrow(LoyaltyValidationError);

@@ -27,6 +27,8 @@ exports.up = function (knex) {
         table.string('sessionId');
         table.string('visitorId');
         table.string('channel'); // web, mobile, api, pos
+        // Structured sales-channel attribution — nullable for legacy events.
+        table.uuid('salesChannelId').references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
 
         // Event data
         table.jsonb('eventData'); // Flexible data storage for event-specific info
@@ -44,6 +46,8 @@ exports.up = function (knex) {
         table.string('deviceType'); // desktop, mobile, tablet
         table.string('country');
         table.string('region');
+
+        table.index('salesChannelId');
 
         // Processing status
         table.boolean('isProcessed').defaultTo(false);

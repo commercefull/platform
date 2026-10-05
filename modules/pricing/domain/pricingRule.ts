@@ -101,6 +101,8 @@ export interface PriceContext {
   variantId?: string; // Single variant ID for single product price calculations
   currencyCode?: string; // Requested currency code
   regionCode?: string; // Customer region for region-specific pricing
+  storeId?: string;
+  channelId?: string;
   categoryIds?: string[]; // Product category IDs for category-scoped rules
   additionalData?: Record<string, unknown>;
   excludeRuleIds?: string[]; // IDs of pricing rules to exclude from calculation

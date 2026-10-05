@@ -1,4 +1,10 @@
-import { createBasketSnapshot, createCheckoutRepository, createCheckoutSession, createBasketSnapshotPort, emitMock } from '../../tests/testUtils';
+import {
+  createBasketSnapshot,
+  createCheckoutRepository,
+  createCheckoutSession,
+  createBasketSnapshotPort,
+  emitMock,
+} from '../../tests/testUtils';
 import { InitiateCheckoutUseCase, InitiateCheckoutCommand } from './InitiateCheckout';
 import { CheckoutValidationError, CheckoutBasketNotFoundError } from '../../domain/errors/CheckoutErrors';
 
@@ -26,7 +32,10 @@ describe('InitiateCheckoutUseCase', () => {
     expect(result.status).toBe('active');
     expect(result.subtotalCents).toBe(10000);
     expect(checkoutRepository.save).toHaveBeenCalledWith(expect.objectContaining({ basketId: 'b-1' }));
-    expect(emitMock).toHaveBeenCalledWith('checkout.started', expect.objectContaining({ checkoutId: 'checkout-uuid-123', basketId: 'b-1', customerId: 'cust-1' }));
+    expect(emitMock).toHaveBeenCalledWith(
+      'checkout.started',
+      expect.objectContaining({ checkoutId: 'checkout-uuid-123', basketId: 'b-1', customerId: 'cust-1' }),
+    );
   });
 
   it('should throw CheckoutBasketNotFoundError when the basket does not exist', async () => {

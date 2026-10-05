@@ -23,7 +23,9 @@ describe('CreateReturnRequestUseCase', () => {
 
   it('should create a return request and emit return.created', async () => {
     const result = await useCase.execute({
-      orderId: 'o-1', customerId: 'c-1', returnType: 'refund',
+      orderId: 'o-1',
+      customerId: 'c-1',
+      returnType: 'refund',
       items: [{ orderItemId: 'i-1', quantity: 1, returnReason: 'damaged', condition: 'used' }],
     });
 
@@ -32,15 +34,16 @@ describe('CreateReturnRequestUseCase', () => {
   });
 
   it('should throw InvalidReturnRequestError when no items are provided', async () => {
-    await expect(useCase.execute({ orderId: 'o-1', returnType: 'refund', items: [] }))
-      .rejects.toThrow(InvalidReturnRequestError);
+    await expect(useCase.execute({ orderId: 'o-1', returnType: 'refund', items: [] })).rejects.toThrow(InvalidReturnRequestError);
   });
 
   it('should throw InvalidReturnRequestError when an item has non-positive quantity', async () => {
-    await expect(useCase.execute({
-      orderId: 'o-1', returnType: 'refund',
-      items: [{ orderItemId: 'i-1', quantity: 0, returnReason: 'damaged', condition: 'used' }],
-    })).rejects.toThrow(InvalidReturnRequestError);
+    await expect(
+      useCase.execute({
+        orderId: 'o-1',
+        returnType: 'refund',
+        items: [{ orderItemId: 'i-1', quantity: 0, returnReason: 'damaged', condition: 'used' }],
+      }),
+    ).rejects.toThrow(InvalidReturnRequestError);
   });
 });
-

@@ -24,9 +24,7 @@ describe('UnregisterWebhookUseCase', () => {
     const repository = createWebhookRepository();
     repository.findEndpointById.mockResolvedValue(null);
 
-    await expect(new UnregisterWebhookUseCase(repository).execute('missing')).rejects.toThrow(
-      WebhookEndpointNotFoundError,
-    );
+    await expect(new UnregisterWebhookUseCase(repository).execute('missing')).rejects.toThrow(WebhookEndpointNotFoundError);
     expect(repository.deleteEndpoint).not.toHaveBeenCalled();
   });
 });

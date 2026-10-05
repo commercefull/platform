@@ -17,6 +17,10 @@ export interface ProductFilters {
   categoryId?: string;
   organizationId?: string;
   storeId?: string;
+  /** Restrict results to these product ids (assortment include scoping). */
+  productIds?: string[];
+  /** Drop these product ids from results (assortment exclude/hidden scoping). */
+  excludeProductIds?: string[];
   brandId?: string;
   brandIds?: string[];
   isFeatured?: boolean;

@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManageStorefrontLoyaltyUseCase } from './ManageStorefrontLoyalty';
-import {
-  createLoyaltyRepository,
-  createLoyaltyReward,
-} from '../../tests/testUtils';
+import { createLoyaltyRepository, createLoyaltyReward } from '../../tests/testUtils';
 
 describe('ManageStorefrontLoyaltyUseCase', () => {
   const storefrontLoyaltyRepository = createLoyaltyRepository();

@@ -63,12 +63,10 @@ class PricingRuleRepository {
         return {
           ...rule,
           id: ruleId,
-          conditions: conditions.map(
-            (c): PricingCondition => ({
-              type: c.type,
-              parameters: (c.parameters ?? {}) as Record<string, unknown>,
-            }),
-          ),
+          conditions: conditions.map((c): PricingCondition => ({
+            type: c.type,
+            parameters: (c.parameters ?? {}) as Record<string, unknown>,
+          })),
           adjustments: adjustments.map(a => ({ type: a.type as PricingAdjustmentType, value: Number(a.value) })),
         };
       }),

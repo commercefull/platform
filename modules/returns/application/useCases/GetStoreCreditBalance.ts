@@ -7,4 +7,3 @@ export class GetStoreCreditBalanceUseCase {
     return this.storeCreditRepo.getBalance(customerId);
   }
 }
-

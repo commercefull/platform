@@ -13,6 +13,8 @@ import { SetShippingMethodUseCase } from './SetShippingMethod';
 import { SetPaymentMethodUseCase } from './SetPaymentMethod';
 import { ApplyCouponUseCase } from './ApplyCoupon';
 import { RemoveCouponUseCase } from './RemoveCoupon';
+import { ApplyLoyaltyRewardUseCase } from './ApplyLoyaltyReward';
+import { RemoveLoyaltyRewardUseCase } from './RemoveLoyaltyReward';
 import { CompleteCheckoutUseCase } from './CompleteCheckout';
 import { AbandonCheckoutUseCase } from './AbandonCheckout';
 import { SetBillingAddressUseCase } from './SetBillingAddress';
@@ -20,6 +22,7 @@ import { CreatePaymentIntentUseCase } from './CreatePaymentIntent';
 import { GetPickupSlotsUseCase } from './GetPickupSlots';
 import { ManageCheckoutSessionUseCase } from './ManageCheckoutSession';
 import { SetPickupLocationUseCase } from './SetPickupLocation';
+import { SetVatNumberUseCase } from './SetVatNumber';
 
 const ports = getCheckoutPorts();
 
@@ -30,14 +33,23 @@ export const setShippingAddressUseCase = new SetShippingAddressUseCase(
   ports.basketSnapshot,
   ports.taxQuote,
   ports.promotionQuote,
+  ports.storeContext,
 );
+export const setVatNumberUseCase = new SetVatNumberUseCase(CheckoutRepo, setShippingAddressUseCase, ports.taxQuote);
 export const setFulfillmentMethodUseCase = new SetFulfillmentMethodUseCase(CheckoutRepo);
 export const setShippingMethodUseCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
 export const setPaymentMethodUseCase = new SetPaymentMethodUseCase(CheckoutRepo);
-export const applyCouponUseCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote);
+export const applyCouponUseCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote, ports.basketSnapshot);
 export const removeCouponUseCase = new RemoveCouponUseCase(CheckoutRepo);
-export const completeCheckoutUseCase = new CompleteCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
-export const abandonCheckoutUseCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement);
+export const applyLoyaltyRewardUseCase = new ApplyLoyaltyRewardUseCase(CheckoutRepo, ports.loyaltyQuote);
+export const removeLoyaltyRewardUseCase = new RemoveLoyaltyRewardUseCase(CheckoutRepo);
+export const completeCheckoutUseCase = new CompleteCheckoutUseCase(
+  CheckoutRepo,
+  ports.orderPlacement,
+  ports.couponRedemption,
+  ports.inventoryReservation,
+);
+export const abandonCheckoutUseCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement, ports.inventoryReservation);
 export const setBillingAddressUseCase = new SetBillingAddressUseCase(CheckoutRepo);
 export const createPaymentIntentUseCase = new CreatePaymentIntentUseCase(
   CheckoutRepo,
@@ -45,6 +57,11 @@ export const createPaymentIntentUseCase = new CreatePaymentIntentUseCase(
   ports.orderPlacement,
   ports.paymentAuthorization,
   ports.fraudScreening,
+  ports.inventoryReservation,
+  ports.taxQuote,
+  ports.promotionQuote,
+  ports.loyaltyRedemption,
+  ports.storeContext,
 );
 export const setPickupLocationUseCase = new SetPickupLocationUseCase(
   CheckoutRepo,

@@ -19,7 +19,11 @@ export type RuleCondition =
   | 'timeOfDay'
   | 'dayOfWeek'
   | 'shippingMethod'
-  | 'paymentMethod';
+  | 'paymentMethod'
+  | 'store'
+  | 'channel'
+  | 'country'
+  | 'currency';
 export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
 
 export interface CreateRuleInput {
@@ -97,9 +101,7 @@ export interface PromotionRepository {
   ): Promise<unknown>;
   getUsage(promotionId: string): Promise<unknown[]>;
   getUsageCount(promotionId: string): Promise<number>;
-  getWithDetails(
-    id: string,
-  ): Promise<{
+  getWithDetails(id: string): Promise<{
     promotion: Promotion;
     rules: PromotionRule[];
     actions: PromotionAction[];

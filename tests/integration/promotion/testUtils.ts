@@ -1,4 +1,3 @@
-
 // Seeded promotion test data IDs (from seeds/20240805001500_seedPromotionTestData.js)
 export const SEEDED_PROMOTION_ID = '01935f00-0000-7000-8000-000000000001';
 export const SEEDED_PROMOTION_CART_ID = '01935f00-0000-7000-8000-000000000002';

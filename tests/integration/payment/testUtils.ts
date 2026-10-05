@@ -1,4 +1,3 @@
-
 // Test data
 export const testGatewayData = {
   name: 'Test Payment Gateway',

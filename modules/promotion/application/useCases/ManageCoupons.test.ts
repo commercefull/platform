@@ -1,9 +1,6 @@
 import '../../tests/testUtils';
 import { ManageCouponsUseCase } from './ManageCoupons';
-import {
-  createCouponRepository,
-  createPromotionCoupon,
-} from '../../tests/testUtils';
+import { createCouponRepository, createPromotionCoupon } from '../../tests/testUtils';
 import { CouponType } from '../../domain/repositories/CouponRepository';
 
 describe('ManageCouponsUseCase', () => {
@@ -61,4 +58,3 @@ describe('ManageCouponsUseCase', () => {
     expect(couponRepository.create).toHaveBeenCalledWith(input);
   });
 });
-

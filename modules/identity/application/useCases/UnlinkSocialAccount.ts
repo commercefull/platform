@@ -1,10 +1,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import type { SocialAccountRepository } from '../../domain/repositories/SocialAccountRepository';
 import { SocialProvider, UserType } from '../../domain/entities/SocialAccount';
-import {
-  SocialAccountNotLinkedError,
-  CannotUnlinkOnlyLoginMethodError,
-} from '../../domain/errors/IdentityErrors';
+import { SocialAccountNotLinkedError, CannotUnlinkOnlyLoginMethodError } from '../../domain/errors/IdentityErrors';
 
 export interface UnlinkSocialAccountCommand {
   userId: string;
@@ -15,7 +12,6 @@ export interface UnlinkSocialAccountCommand {
 // ============================================================================
 // Response Types
 // ============================================================================
-
 
 export class UnlinkSocialAccountUseCase {
   constructor(private readonly socialAccountRepo: SocialAccountRepository) {}
@@ -53,4 +49,3 @@ export class UnlinkSocialAccountUseCase {
     });
   }
 }
-

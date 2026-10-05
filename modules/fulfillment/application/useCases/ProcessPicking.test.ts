@@ -1,10 +1,6 @@
 import '../../tests/testUtils';
 import { ProcessPickingUseCase } from './ProcessPicking';
-import {
-  FulfillmentNotFoundError,
-  FulfillmentItemNotFoundError,
-  FulfillmentValidationError,
-} from '../../domain/errors/FulfillmentErrors';
+import { FulfillmentNotFoundError, FulfillmentItemNotFoundError, FulfillmentValidationError } from '../../domain/errors/FulfillmentErrors';
 import {
   createFulfillmentRepository,
   createFulfillment,
@@ -18,8 +14,8 @@ describe('ProcessPickingUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
-    fulfillmentRepository.saveItem.mockImplementation(async (i) => i);
+    fulfillmentRepository.save.mockImplementation(async f => f);
+    fulfillmentRepository.saveItem.mockImplementation(async i => i);
   });
 
   it('should pick the items, transition the fulfillment and emit the picking started event', async () => {

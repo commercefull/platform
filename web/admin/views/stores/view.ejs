@@ -12,8 +12,79 @@
     <%- include('../partials/alerts') %>
     <div class="row">
       <div class="col-md-8">
-        <div class="card mb-3"><div class="card-header"><h3 class="card-title"><%= t('store.details') %></h3></div><div class="card-body"><dl class="row mb-0"><dt class="col-sm-4"><%= t('common.name') %></dt><dd class="col-sm-8"><%= store.name %></dd><dt class="col-sm-4"><%= t('common.type') %></dt><dd class="col-sm-8"><%= store.isHeadquarters ? t('store.headquarters') : t('store.outlet') %></dd><dt class="col-sm-4"><%= t('layout.email') %></dt><dd class="col-sm-8"><%= store.storeEmail || '-' %></dd><dt class="col-sm-4"><%= t('common.phone') %></dt><dd class="col-sm-8"><%= store.storePhone || '-' %></dd><dt class="col-sm-4"><%= t('store.address') %></dt><dd class="col-sm-8"><%= store.address ? [store.address.line1, store.address.city, store.address.state, store.address.postalCode, store.address.country].filter(Boolean).join(', ') : '-' %></dd></dl></div></div>
-        <div class="card mb-3"><div class="card-header"><h3 class="card-title"><%= t('store.linkedUsers') %></h3></div><div class="card-body"><% if ((users || []).length === 0) { %><p class="text-muted mb-0"><%= t('store.noUsers') %></p><% } else { %><ul class="list-group list-group-flush"><% users.forEach(function(user) { %><li class="list-group-item d-flex justify-content-between align-items-center"><span><code><%= user.userId %></code></span><span class="badge bg-info"><%= user.role %></span></li><% }) %></ul><% } %><div class="mt-3"><a href="/admin/stores/<%= store.storeId %>/users" class="btn btn-sm btn-outline-primary"><%= t('store.manageUsers') %></a></div></div></div>
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('store.details') %></h3></div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4"><%= t('common.name') %></dt><dd class="col-sm-8"><%= store.name %></dd>
+              <dt class="col-sm-4"><%= t('common.type') %></dt><dd class="col-sm-8"><%= store.isHeadquarters ? t('store.headquarters') : t('store.outlet') %></dd>
+              <dt class="col-sm-4"><%= t('layout.email') %></dt><dd class="col-sm-8"><%= store.storeEmail || '-' %></dd>
+              <dt class="col-sm-4"><%= t('common.phone') %></dt><dd class="col-sm-8"><%= store.storePhone || '-' %></dd>
+              <dt class="col-sm-4"><%= t('store.address') %></dt><dd class="col-sm-8"><%= store.address ? [store.address.line1, store.address.city, store.address.state, store.address.postalCode, store.address.country].filter(Boolean).join(', ') : '-' %></dd>
+            </dl>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title">Sales channels</h3></div>
+          <div class="card-body">
+            <% if ((channelAssignments || []).length === 0) { %>
+              <p class="text-muted">No sales channels are assigned to this store.</p>
+            <% } else { %>
+              <div class="table-responsive mb-4">
+                <table class="table table-vcenter">
+                  <thead><tr><th>Name</th><th>Code</th><th>Type</th><th>Status</th><th></th></tr></thead>
+                  <tbody>
+                    <% channelAssignments.forEach(function(assignment) { const channel = assignment.channel; %>
+                      <tr>
+                        <td><%= channel?.name || assignment.salesChannelId %> <% if (assignment.isDefault) { %><span class="badge bg-primary-lt">Default</span><% } %></td>
+                        <td><code><%= channel?.code || '-' %></code></td>
+                        <td><%= channel?.type || '-' %></td>
+                        <td><span class="badge <%= assignment.isActive ? 'bg-success-lt' : 'bg-secondary-lt' %>"><%= assignment.isActive ? 'Active' : 'Inactive' %></span></td>
+                        <td class="text-end"><form method="POST" action="/admin/stores/<%= store.storeId %>/channels/<%= assignment.salesChannelId %>/remove"><button class="btn btn-sm btn-outline-danger" type="submit">Remove</button></form></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } %>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <h4>Assign existing channel</h4>
+                <form method="POST" action="/admin/stores/<%= store.storeId %>/channels">
+                  <div class="mb-2"><select class="form-select" name="salesChannelId" required><option value="">Select channel</option><% (availableChannels || []).filter(function(channel) { return !(channelAssignments || []).some(function(assignment) { return assignment.salesChannelId === channel.salesChannelId; }); }).forEach(function(channel) { %><option value="<%= channel.salesChannelId %>"><%= channel.name %> (<%= channel.code %>)</option><% }) %></select></div>
+                  <label class="form-check mb-2"><input class="form-check-input" type="checkbox" name="isDefault"><span class="form-check-label">Default for this store</span></label>
+                  <button class="btn btn-outline-primary" type="submit">Assign channel</button>
+                </form>
+              </div>
+              <div class="col-md-6">
+                <h4>Create and assign channel</h4>
+                <form method="POST" action="/admin/stores/<%= store.storeId %>/channels/create">
+                  <div class="mb-2"><input class="form-control" name="name" placeholder="Channel name" required></div>
+                  <div class="mb-2"><input class="form-control" name="code" placeholder="channel-code" required></div>
+                  <div class="mb-2"><select class="form-select" name="type" required><option value="web">Website</option><option value="marketplace">Marketplace</option><option value="social">Social</option><option value="pos">Point of sale</option><option value="agentic">Agentic</option><option value="api">API</option><option value="other">Other</option></select></div>
+                  <label class="form-check mb-2"><input class="form-check-input" type="checkbox" name="isDefault"><span class="form-check-label">Default for this store</span></label>
+                  <button class="btn btn-primary" type="submit">Create channel</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title">Assortment</h3>
+            <a href="/admin/stores/<%= store.storeId %>/assortment" class="btn btn-sm btn-outline-primary">Manage assortment</a>
+          </div>
+          <div class="card-body">
+            <p class="text-muted mb-0">Configure which products, collections, and categories this store ranges — globally or per sales channel.</p>
+          </div>
+        </div>
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('store.linkedUsers') %></h3></div>
+          <div class="card-body">
+            <% if ((users || []).length === 0) { %><p class="text-muted mb-0"><%= t('store.noUsers') %></p><% } else { %><ul class="list-group list-group-flush"><% users.forEach(function(user) { %><li class="list-group-item d-flex justify-content-between align-items-center"><span><code><%= user.userId %></code></span><span class="badge bg-info"><%= user.role %></span></li><% }) %></ul><% } %>
+            <div class="mt-3"><a href="/admin/stores/<%= store.storeId %>/users" class="btn btn-sm btn-outline-primary"><%= t('store.manageUsers') %></a></div>
+          </div>
+        </div>
       </div>
       <div class="col-md-4">
         <div class="card mb-3"><div class="card-header"><h3 class="card-title"><%= t('store.recentOrders') %></h3></div><div class="card-body"><% if ((recentOrders || []).length === 0) { %><p class="text-muted mb-0"><%= t('store.noRecentOrders') %></p><% } else { %><ul class="list-group list-group-flush"><% recentOrders.forEach(function(order) { %><li class="list-group-item"><a href="/admin/orders/<%= order.orderId %>">#<%= order.orderNumber %></a><br><small class="text-muted"><%= order.orderSource || 'web' %></small></li><% }) %></ul><% } %></div></div>

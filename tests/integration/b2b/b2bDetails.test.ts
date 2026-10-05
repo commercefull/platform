@@ -79,21 +79,13 @@ describe('B2B Detail Endpoints', () => {
     });
 
     it('PUT /business/companies/:id/payment-terms changes terms', async () => {
-      const resp = await client.put(
-        `/business/companies/${SEEDED.COMPANY_OPS}/payment-terms`,
-        { paymentTerms: 'net60' },
-        auth(),
-      );
+      const resp = await client.put(`/business/companies/${SEEDED.COMPANY_OPS}/payment-terms`, { paymentTerms: 'net60' }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data.paymentTerms).toBe('net60');
     });
 
     it('PUT /business/companies/:id/credit-limit sets the limit', async () => {
-      const resp = await client.put(
-        `/business/companies/${SEEDED.COMPANY_OPS}/credit-limit`,
-        { creditLimitCents: 500000 },
-        auth(),
-      );
+      const resp = await client.put(`/business/companies/${SEEDED.COMPANY_OPS}/credit-limit`, { creditLimitCents: 500000 }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data.creditLimitCents).toBe(500000);
     });
@@ -138,11 +130,7 @@ describe('B2B Detail Endpoints', () => {
     });
 
     it('PUT /business/users/:id/profile updates profile fields', async () => {
-      const resp = await client.put(
-        `/business/users/${SEEDED.USER}/profile`,
-        { department: 'Procurement', costCenter: 'CC-100' },
-        auth(),
-      );
+      const resp = await client.put(`/business/users/${SEEDED.USER}/profile`, { department: 'Procurement', costCenter: 'CC-100' }, auth());
       expectStatus(resp, 200);
       expect(resp.data.data.department).toBe('Procurement');
       expect(resp.data.data.costCenter).toBe('CC-100');

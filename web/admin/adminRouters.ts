@@ -22,20 +22,15 @@ import {
   createProduct,
   createProductCategory,
   createProductCategoryForm,
-  createProductCollection,
-  createProductCollectionForm,
   createProductForm,
   createProductTag,
   deleteProduct,
   deleteProductCategory,
-  deleteProductCollection,
   deleteProductTag,
   deleteReviewMedia,
   editProductCategoryForm,
-  editProductCollectionForm,
   editProductForm,
   listProductCategories,
-  listProductCollections,
   listProductPrices,
   listProductQa,
   listProductTags,
@@ -45,8 +40,8 @@ import {
   unpublishProduct,
   updateProduct,
   updateProductCategory,
-  updateProductCollection,
   updateProductStatus,
+  updateVariantInventoryPolicy,
   updateQaStatus,
   upsertProductPrice,
   addProductRelationship,
@@ -54,19 +49,12 @@ import {
   viewProduct,
   createCategory,
   createCategoryForm,
-  createCollection,
-  createCollectionForm,
   deleteCategory,
-  deleteCollection,
   editCategoryForm,
-  editCollectionForm,
   listCategories,
-  listCollections,
   reorderCategories,
   updateCategory,
-  updateCollection,
   viewCategory,
-  viewCollection,
   listAdminBrands,
   viewBrand,
   createBrandForm,
@@ -75,6 +63,7 @@ import {
   updateBrand,
   deleteBrand,
 } from '../../modules/product';
+import { adminCollectionController, adminStoreAssortmentController } from '../../modules/assortment';
 import {
   recommendationsDashboard,
   createRecommendationRule,
@@ -499,13 +488,16 @@ import {
   updateShippingOptionOrder,
 } from '../../modules/checkout';
 import {
+  assignStoreSalesChannel,
   assignUserToStore,
   createStore,
+  createStoreSalesChannel,
   createStoreForm,
   editStoreForm,
   listStores,
   manageStoreUsers,
   removeUserFromStore,
+  unassignStoreSalesChannel,
   updateStore,
   viewStore,
 } from '../../modules/store';
@@ -691,14 +683,23 @@ router.post('/catalog/categories/reorder', asyncHandler(reorderCategories));
 // Catalog - Collections Routes
 // ============================================================================
 
-router.get('/catalog/collections', asyncHandler(listCollections));
-router.get('/catalog/collections/create', asyncHandler(createCollectionForm));
-router.post('/catalog/collections', asyncHandler(createCollection));
-router.get('/catalog/collections/:collectionId', asyncHandler(viewCollection));
-router.get('/catalog/collections/:collectionId/edit', asyncHandler(editCollectionForm));
-router.post('/catalog/collections/:collectionId', asyncHandler(updateCollection));
-router.put('/catalog/collections/:collectionId', asyncHandler(updateCollection));
-router.delete('/catalog/collections/:collectionId', asyncHandler(deleteCollection));
+router.get('/catalog/collections', asyncHandler(adminCollectionController.listCollections));
+router.get('/catalog/collections/create', asyncHandler(adminCollectionController.createCollectionForm));
+router.post('/catalog/collections', asyncHandler(adminCollectionController.createCollection));
+router.get('/catalog/collections/:collectionId', asyncHandler(adminCollectionController.viewCollection));
+router.get('/catalog/collections/:collectionId/edit', asyncHandler(adminCollectionController.editCollectionForm));
+router.post('/catalog/collections/:collectionId', asyncHandler(adminCollectionController.updateCollection));
+router.put('/catalog/collections/:collectionId', asyncHandler(adminCollectionController.updateCollection));
+router.delete('/catalog/collections/:collectionId', asyncHandler(adminCollectionController.deleteCollection));
+router.post('/catalog/collections/:collectionId/publications', asyncHandler(adminCollectionController.upsertCollectionPublication));
+router.post(
+  '/catalog/collections/:collectionId/publications/:publicationId/remove',
+  asyncHandler(adminCollectionController.deleteCollectionPublication),
+);
+router.get('/stores/:storeId/assortment', asyncHandler(adminStoreAssortmentController.viewStoreAssortment));
+router.post('/stores/:storeId/assortment/mode', asyncHandler(adminStoreAssortmentController.setStoreAssortmentMode));
+router.post('/stores/:storeId/assortment/entries', asyncHandler(adminStoreAssortmentController.addStoreAssortmentEntry));
+router.post('/stores/:storeId/assortment/entries/:entryId/remove', asyncHandler(adminStoreAssortmentController.removeStoreAssortmentEntry));
 
 // ============================================================================
 // Catalog - Pricing Routes
@@ -755,20 +756,13 @@ router.get('/products/tags', asyncHandler(listProductTags));
 router.post('/products/tags', asyncHandler(createProductTag));
 router.delete('/products/tags/:tagId', asyncHandler(deleteProductTag));
 
-// Product Collections
-router.get('/products/collections', asyncHandler(listProductCollections));
-router.get('/products/collections/create', asyncHandler(createProductCollectionForm));
-router.post('/products/collections', asyncHandler(createProductCollection));
-router.get('/products/collections/:collectionId/edit', asyncHandler(editProductCollectionForm));
-router.post('/products/collections/:collectionId', asyncHandler(updateProductCollection));
-router.delete('/products/collections/:collectionId', asyncHandler(deleteProductCollection));
-
 router.get('/products/:productId', asyncHandler(viewProduct));
 router.get('/products/:productId/edit', asyncHandler(editProductForm));
 router.post('/products/:productId', asyncHandler(updateProduct)); // Form POST (method override)
 router.put('/products/:productId', asyncHandler(updateProduct)); // API PUT
 router.delete('/products/:productId', asyncHandler(deleteProduct));
 router.post('/products/:productId/status', asyncHandler(updateProductStatus));
+router.post('/products/:productId/variants/:variantId/inventory-policy', asyncHandler(updateVariantInventoryPolicy));
 router.post('/products/:productId/publish', asyncHandler(publishProduct));
 router.post('/products/:productId/unpublish', asyncHandler(unpublishProduct));
 
@@ -829,6 +823,9 @@ router.post('/stores', asyncHandler(createStore));
 router.get('/stores/:storeId', asyncHandler(viewStore));
 router.get('/stores/:storeId/edit', asyncHandler(editStoreForm));
 router.post('/stores/:storeId', asyncHandler(updateStore));
+router.post('/stores/:storeId/channels', asyncHandler(assignStoreSalesChannel));
+router.post('/stores/:storeId/channels/create', asyncHandler(createStoreSalesChannel));
+router.post('/stores/:storeId/channels/:channelId/remove', asyncHandler(unassignStoreSalesChannel));
 router.get('/stores/:storeId/users', asyncHandler(manageStoreUsers));
 router.post('/stores/:storeId/users', asyncHandler(assignUserToStore));
 router.delete('/stores/:storeId/users/:userId', asyncHandler(removeUserFromStore));

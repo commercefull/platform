@@ -1,9 +1,4 @@
-import {
-  createShippingMethodPort,
-  createShippingRatePort,
-  createShippingMethod,
-  createShippingRate,
-} from '../../tests/testUtils';
+import { createShippingMethodPort, createShippingRatePort, createShippingMethod, createShippingRate } from '../../tests/testUtils';
 import { GetShippingMethodDetailsUseCase } from './GetShippingMethodDetails';
 
 describe('GetShippingMethodDetailsUseCase', () => {

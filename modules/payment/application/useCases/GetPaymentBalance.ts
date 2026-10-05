@@ -8,7 +8,6 @@
 
 import { PaymentBillingRepository, PaymentBalance } from '../../domain/repositories/PaymentBillingRepository';
 
-
 // ============================================================================
 // Command
 // ============================================================================

@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Checkout Controller
  * HTTP interface for checkout operations with content negotiation (JSON/HTML)
@@ -15,6 +15,9 @@ import {
   SetFulfillmentMethodCommand,
   ApplyCouponCommand,
   RemoveCouponCommand,
+  ApplyLoyaltyRewardCommand,
+  RemoveLoyaltyRewardCommand,
+  SetVatNumberCommand,
   CompleteCheckoutCommand,
   AbandonCheckoutCommand,
   CreatePaymentIntentCommand,
@@ -29,12 +32,15 @@ import {
   initiateCheckoutUseCase,
   manageCheckoutSessionUseCase,
   removeCouponUseCase,
+  applyLoyaltyRewardUseCase,
+  removeLoyaltyRewardUseCase,
   setBillingAddressUseCase,
   setFulfillmentMethodUseCase,
   setPaymentMethodUseCase,
   setPickupLocationUseCase,
   setShippingAddressUseCase,
   setShippingMethodUseCase,
+  setVatNumberUseCase,
 } from '../../application/useCases/wired';
 
 // ============================================================================
@@ -89,6 +95,10 @@ interface FulfillmentMethodBody {
 
 interface CouponBody {
   couponCode: string;
+}
+
+interface VatNumberBody {
+  vatNumber?: string;
 }
 
 // ============================================================================
@@ -179,6 +189,18 @@ export const setShippingAddress = async (
   );
   const useCase = setShippingAddressUseCase;
   const checkout = await useCase.execute(command);
+
+  respond(req, res, checkout as unknown as unknown, 200);
+};
+
+/**
+ * Set the customer VAT ID (B2B) — triggers a tax requote that applies
+ * intra-EU reverse charge when eligible.
+ * PUT /checkout/:checkoutId/vat-number
+ */
+export const setVatNumber = async (req: HttpRequest<Record<string, string>, unknown, VatNumberBody>, res: HttpResponse): Promise<void> => {
+  const { checkoutId } = req.params;
+  const checkout = await setVatNumberUseCase.execute(new SetVatNumberCommand(checkoutId, req.body?.vatNumber));
 
   respond(req, res, checkout as unknown as unknown, 200);
 };
@@ -398,6 +420,47 @@ export const removeCoupon = async (req: HttpRequest, res: HttpResponse): Promise
 
   const command = new RemoveCouponCommand(checkoutId);
   const useCase = removeCouponUseCase;
+  const checkout = await useCase.execute(command);
+
+  respond(req, res, checkout as unknown as unknown, 200);
+};
+
+interface LoyaltyRewardBody {
+  rewardId?: string;
+}
+
+/**
+ * Apply loyalty reward
+ * POST /checkout/:checkoutId/loyalty-reward
+ */
+export const applyLoyaltyReward = async (
+  req: HttpRequest<Record<string, string>, unknown, LoyaltyRewardBody>,
+  res: HttpResponse,
+): Promise<void> => {
+  const { checkoutId } = req.params;
+  const { rewardId } = req.body;
+
+  if (!rewardId) {
+    respondError(req, res, 'Reward ID is required', 400);
+    return;
+  }
+
+  const command = new ApplyLoyaltyRewardCommand(checkoutId, rewardId);
+  const useCase = applyLoyaltyRewardUseCase;
+  const checkout = await useCase.execute(command);
+
+  respond(req, res, checkout as unknown as unknown, 200);
+};
+
+/**
+ * Remove loyalty reward
+ * DELETE /checkout/:checkoutId/loyalty-reward
+ */
+export const removeLoyaltyReward = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { checkoutId } = req.params;
+
+  const command = new RemoveLoyaltyRewardCommand(checkoutId);
+  const useCase = removeLoyaltyRewardUseCase;
   const checkout = await useCase.execute(command);
 
   respond(req, res, checkout as unknown as unknown, 200);

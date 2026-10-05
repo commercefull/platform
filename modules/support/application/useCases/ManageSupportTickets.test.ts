@@ -57,4 +57,3 @@ describe('ManageSupportTicketsUseCase', () => {
     expect(adminRepo.addTicketMessage).toHaveBeenCalledWith('tkt-1', 'Following up', 'user-1');
   });
 });
-

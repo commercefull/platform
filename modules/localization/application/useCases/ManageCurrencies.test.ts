@@ -1,7 +1,4 @@
-import {
-  createCurrencyRepository,
-  createCurrency,
-} from '../../tests/testUtils';
+import { createCurrencyRepository, createCurrency } from '../../tests/testUtils';
 import { ManageCurrenciesUseCase } from './ManageCurrencies';
 
 describe('ManageCurrenciesUseCase', () => {
@@ -39,4 +36,3 @@ describe('ManageCurrenciesUseCase', () => {
     expect(repository.updateCurrency).toHaveBeenCalledWith('cur-1', { isActive: false });
   });
 });
-

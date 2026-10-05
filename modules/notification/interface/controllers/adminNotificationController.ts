@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Notification Controller
  * Handles notification template management for the Admin Hub
@@ -109,7 +109,10 @@ export const createNotificationTemplate = async (req: HttpRequest, res: HttpResp
       createdBy: 'admin',
     });
 
-    redirectResponse(res, `/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`);
+    redirectResponse(
+      res,
+      `/hub/notifications/templates/${template.notificationTemplateId}?success=Notification template created successfully`,
+    );
   } catch (error: unknown) {
     logger.warn('Error:', error);
 
@@ -264,10 +267,10 @@ export const cloneNotificationTemplate = async (req: HttpRequest, res: HttpRespo
   const clonedTemplate = await manageTemplatesUseCase.clone(templateId, newCode, newName);
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Notification template cloned successfully',
-        template: clonedTemplate,
-      });
+    success: true,
+    message: 'Notification template cloned successfully',
+    template: clonedTemplate,
+  });
 };
 
 export const previewNotificationTemplate = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -277,9 +280,9 @@ export const previewNotificationTemplate = async (req: HttpRequest, res: HttpRes
   const preview = await manageTemplatesUseCase.getPreview(templateId, previewData);
 
   jsonResponse(res, 200, {
-        success: true,
-        preview,
-      });
+    success: true,
+    preview,
+  });
 };
 
 // ============================================================================
@@ -380,7 +383,10 @@ export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Pr
     redirectResponse(res, '/admin/notifications/webhooks?success=Webhook+deactivated');
   } catch (error: unknown) {
     logger.warn('Error:', error);
-    redirectResponse(res, '/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'));
+    redirectResponse(
+      res,
+      '/admin/notifications/webhooks?error=' + encodeURIComponent((error as Error).message || 'Failed to deactivate webhook'),
+    );
   }
 };
 

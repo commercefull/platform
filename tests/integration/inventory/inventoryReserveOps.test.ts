@@ -24,21 +24,13 @@ describe('Inventory Reserve Operations Tests', () => {
   });
 
   it('POST /business/inventory/:inventoryId/reserve reserves stock', async () => {
-    const resp = await client.post(
-      `/business/inventory/${SEEDED_INVENTORY_LOCATION_ID}/reserve`,
-      { quantity: 1 },
-      { headers: headers() },
-    );
+    const resp = await client.post(`/business/inventory/${SEEDED_INVENTORY_LOCATION_ID}/reserve`, { quantity: 1 }, { headers: headers() });
     expectStatus(resp, 200);
     expect(resp.data.success ?? true).toBe(true);
   });
 
   it('POST /business/inventory/:inventoryId/reserve validates quantity', async () => {
-    const resp = await client.post(
-      `/business/inventory/${SEEDED_INVENTORY_LOCATION_ID}/reserve`,
-      { quantity: 0 },
-      { headers: headers() },
-    );
+    const resp = await client.post(`/business/inventory/${SEEDED_INVENTORY_LOCATION_ID}/reserve`, { quantity: 0 }, { headers: headers() });
     expectStatus(resp, 400);
   });
 

@@ -23,11 +23,24 @@ export async function create(
   const mappedChannel = params.channel === 'in_app' ? 'inApp' : params.channel;
   // Map notification types to batch types (orderStatus, promotion, accountAlert)
   const mappedType =
-    params.type === 'order_confirmation' || params.type === 'order_shipped' || params.type === 'order_delivered' || params.type === 'order_cancelled' || params.type === 'return_initiated' || params.type === 'refund_processed'
+    params.type === 'order_confirmation' ||
+    params.type === 'order_shipped' ||
+    params.type === 'order_delivered' ||
+    params.type === 'order_cancelled' ||
+    params.type === 'return_initiated' ||
+    params.type === 'refund_processed'
       ? 'orderStatus'
-      : params.type === 'promotion' || params.type === 'coupon_offer' || params.type === 'back_in_stock' || params.type === 'price_drop' || params.type === 'new_product'
+      : params.type === 'promotion' ||
+          params.type === 'coupon_offer' ||
+          params.type === 'back_in_stock' ||
+          params.type === 'price_drop' ||
+          params.type === 'new_product'
         ? 'promotion'
-        : params.type === 'account_registration' || params.type === 'password_reset' || params.type === 'email_verification' || params.type === 'review_request' || params.type === 'abandoned_cart'
+        : params.type === 'account_registration' ||
+            params.type === 'password_reset' ||
+            params.type === 'email_verification' ||
+            params.type === 'review_request' ||
+            params.type === 'abandoned_cart'
           ? 'accountAlert'
           : params.type;
   return queryOne<NotificationBatch>(

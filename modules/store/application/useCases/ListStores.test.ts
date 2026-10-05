@@ -36,11 +36,7 @@ describe('ListStoresUseCase', () => {
   it('should pass the filters to the repository', async () => {
     await useCase.execute(new ListStoresQuery({ storeType: 'organization_store', isActive: true }));
 
-    expect(storeRepository.findAll).toHaveBeenCalledWith(
-      expect.objectContaining({ storeType: 'organization_store', isActive: true }),
-    );
-    expect(storeRepository.count).toHaveBeenCalledWith(
-      expect.objectContaining({ storeType: 'organization_store', isActive: true }),
-    );
+    expect(storeRepository.findAll).toHaveBeenCalledWith(expect.objectContaining({ storeType: 'organization_store', isActive: true }));
+    expect(storeRepository.count).toHaveBeenCalledWith(expect.objectContaining({ storeType: 'organization_store', isActive: true }));
   });
 });

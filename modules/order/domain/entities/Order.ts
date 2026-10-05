@@ -406,6 +406,24 @@ export class Order {
     this.touch();
   }
 
+  /**
+   * Sets an externally-quoted tax total (e.g., a destination-based checkout
+   * tax quote that cannot be derived from per-item rates). `addedAmount` is
+   * the portion added to the grand total — pass zero when the tax is
+   * embedded in item prices (tax-inclusive), a partial amount for mixed
+   * quotes, or omit it to add the full tax total (tax-exclusive).
+   */
+  setTaxTotal(amount: Money, addedAmount?: Money): void {
+    this.ensureModifiable();
+    this.props.taxTotal = amount;
+    this.props.totalAmount = this.props.subtotal
+      .subtract(this.props.discountTotal)
+      .add(addedAmount ?? amount)
+      .add(this.props.shippingTotal)
+      .add(this.props.handlingFee);
+    this.touch();
+  }
+
   setTaxExempt(exempt: boolean): void {
     this.ensureModifiable();
     this.props.taxExempt = exempt;

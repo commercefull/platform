@@ -1,4 +1,3 @@
-
 import { CreateAttributeUseCase } from './CreateAttribute';
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
 import { createAttribute, createAttributeData, lazyMock } from '../../../tests/testUtils';
@@ -81,17 +80,13 @@ describe('CreateAttributeUseCase', () => {
   it('should default type and inputType to text when not provided', async () => {
     await useCase.execute({ name: 'SKU Note', code: 'sku_note' });
 
-    expect(mockRepo.createAttribute).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'text', inputType: 'text' }),
-    );
+    expect(mockRepo.createAttribute).toHaveBeenCalledWith(expect.objectContaining({ type: 'text', inputType: 'text' }));
   });
 
   it('should default inputType to the attribute type when inputType is not provided', async () => {
     await useCase.execute({ name: 'Size', code: 'size', type: 'select' });
 
-    expect(mockRepo.createAttribute).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'select', inputType: 'select' }),
-    );
+    expect(mockRepo.createAttribute).toHaveBeenCalledWith(expect.objectContaining({ type: 'select', inputType: 'select' }));
   });
 
   it('should return failure when the repository throws', async () => {

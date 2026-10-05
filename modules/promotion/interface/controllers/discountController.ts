@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { managePromotionTargetsUseCase, type CreateProductDiscountInput, type UpdateProductDiscountInput } from '../../application/wired';
 

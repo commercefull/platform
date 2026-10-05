@@ -3,13 +3,13 @@
  * Handles login form interactions and password visibility toggle
  */
 
-window.addEventListener('load', function() {
+window.addEventListener('load', function () {
   // Password visibility toggle
   const toggleButton = document.querySelector('.input-group-text .link-secondary');
   const passwordInput = document.querySelector('input[name="password"]');
 
   if (toggleButton && passwordInput) {
-    toggleButton.addEventListener('click', function(e) {
+    toggleButton.addEventListener('click', function (e) {
       e.preventDefault();
 
       if (passwordInput.type === 'password') {

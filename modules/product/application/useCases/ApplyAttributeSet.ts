@@ -34,7 +34,10 @@ export class ApplyAttributeSetUseCase {
     private readonly dynamicAttributeRepo: Pick<DynamicAttributePort, 'setProductAttributes'>,
   ) {}
 
-  async execute(productId: string, attributeSetId: string): Promise<{ applied: boolean; attributeSetId: string; attributesAssigned: number }> {
+  async execute(
+    productId: string,
+    attributeSetId: string,
+  ): Promise<{ applied: boolean; attributeSetId: string; attributesAssigned: number }> {
     if (!attributeSetId) {
       throw new ProductValidationError('attributeSetId is required');
     }

@@ -132,7 +132,11 @@ describe('Gift Card Business API Tests', () => {
       if (!adminToken) return;
 
       // Create a new gift card to cancel
-      const createResponse = await client.post('/business/gift-cards', { initialBalanceCents: 5000, currency: 'USD' }, { headers: authHeaders() });
+      const createResponse = await client.post(
+        '/business/gift-cards',
+        { initialBalanceCents: 5000, currency: 'USD' },
+        { headers: authHeaders() },
+      );
 
       if (!createResponse.data.success) return;
       const cardId = createResponse.data.data.promotionGiftCardId;

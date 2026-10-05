@@ -5,9 +5,7 @@ import { FraudCheckNotFoundError, FraudRuleNotFoundError, PaymentValidationError
 interface FraudRecordPort {
   getRules(activeOnly?: boolean): Promise<FraudRule[]>;
   getRule(fraudRuleId: string): Promise<FraudRule | null>;
-  saveRule(
-    rule: Partial<FraudRule> & { name: string; ruleType: RuleType; conditions: Record<string, unknown> },
-  ): Promise<FraudRule>;
+  saveRule(rule: Partial<FraudRule> & { name: string; ruleType: RuleType; conditions: Record<string, unknown> }): Promise<FraudRule>;
   deleteRule(fraudRuleId: string): Promise<void>;
   getChecks(
     filters?: { status?: CheckStatus; riskLevel?: RiskLevel; customerId?: string },
@@ -96,10 +94,7 @@ export class ManageFraudRecordsUseCase {
     await this.fraudRepo.reviewCheck(id, decision, reviewedBy, notes);
   }
 
-  async listBlacklist(
-    filters?: { type?: BlacklistType; isActive?: boolean },
-    pagination?: { limit?: number; offset?: number },
-  ) {
+  async listBlacklist(filters?: { type?: BlacklistType; isActive?: boolean }, pagination?: { limit?: number; offset?: number }) {
     return this.fraudRepo.getBlacklist(filters, pagination);
   }
 

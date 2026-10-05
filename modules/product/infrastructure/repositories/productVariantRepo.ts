@@ -31,6 +31,21 @@ export enum InventoryPolicy {
   CONTINUE = 'continue',
 }
 
+const DOMAIN_INVENTORY_POLICIES = new Set(['tracked', 'unlimited', 'backorderable']);
+
+/**
+ * The `productVariant.inventoryPolicy` column stores the domain policy
+ * (tracked | unlimited | backorderable). Legacy Shopify-style callers pass
+ * `deny`/`continue`, which map onto the closest domain semantics.
+ */
+export function normalizeInventoryPolicy(value: unknown): string {
+  const raw = String(value ?? 'tracked');
+  if (DOMAIN_INVENTORY_POLICIES.has(raw)) return raw;
+  if (raw === InventoryPolicy.DENY) return 'tracked';
+  if (raw === InventoryPolicy.CONTINUE) return 'backorderable';
+  throw new ProductValidationError(`Invalid inventoryPolicy: ${raw}`);
+}
+
 export type ProductVariantCreateProps = Omit<ProductVariant, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type ProductVariantUpdateProps = Partial<Omit<ProductVariant, 'id' | 'productId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 
@@ -154,6 +169,9 @@ export class ProductVariantRepo {
       updatedAt: now,
     };
 
+    // inventoryPolicy maps onto the domain-enum column via normalizeInventoryPolicy
+    columnMap['inventoryPolicy'] = normalizeInventoryPolicy(variant.inventoryPolicy);
+
     // Map all properties to their DB column names
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined && !skipFields.has(key)) {
@@ -216,7 +234,7 @@ export class ProductVariantRepo {
     for (const [key, value] of Object.entries(variant)) {
       if (value !== undefined) {
         const dbColumn = this.tsToDb(key);
-        updateData[dbColumn] = value;
+        updateData[dbColumn] = dbColumn === 'inventoryPolicy' ? normalizeInventoryPolicy(value) : value;
       }
     }
 

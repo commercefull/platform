@@ -1,8 +1,5 @@
 import { PromotionPromotionQuoteAdapter } from './PromotionPromotionQuoteAdapter';
-import type {
-  EvaluatePromotionsUseCase,
-  PromotionEvaluationResult,
-} from '../../../promotion/application/useCases/EvaluatePromotions';
+import type { EvaluatePromotionsUseCase, PromotionEvaluationResult } from '../../../promotion/application/useCases/EvaluatePromotions';
 
 describe('PromotionPromotionQuoteAdapter', () => {
   let adapter: PromotionPromotionQuoteAdapter;

@@ -22,6 +22,9 @@ export class PromotionPromotionQuoteAdapter implements PromotionQuotePort {
         subtotalCents: request.subtotalCents,
         shippingAmountCents: request.shippingAmountCents,
         customerId: request.customerId,
+        storeId: request.storeId,
+        channelId: request.channelId,
+        countryCode: request.countryCode,
         currency: request.currency,
         couponCode: request.couponCode,
       });

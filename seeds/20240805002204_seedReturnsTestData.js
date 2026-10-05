@@ -44,9 +44,7 @@ exports.seed = async function (knex) {
   // Seed a store credit balance so the debit test has funds to draw on
   const hasLedger = await knex.schema.hasTable('storeCreditLedger');
   if (hasLedger) {
-    await knex('storeCreditLedger')
-      .where({ referenceType: 'seed', referenceId: '0193c002-0000-7000-8000-000000000001' })
-      .del();
+    await knex('storeCreditLedger').where({ referenceType: 'seed', referenceId: '0193c002-0000-7000-8000-000000000001' }).del();
     await knex('storeCreditLedger').insert({
       customerId,
       entryType: 'credit',

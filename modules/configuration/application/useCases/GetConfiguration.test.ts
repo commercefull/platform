@@ -4,9 +4,7 @@ import { GetConfigurationUseCase } from './GetConfiguration';
 describe('GetConfigurationUseCase', () => {
   it('should return the configuration when it exists at the requested scope', async () => {
     const repository = createConfigurationRepository();
-    repository.findByKey.mockResolvedValue(
-      createConfigurationRecord({ value: 'StoreName', scope: 'store', scopeId: 's1' }),
-    );
+    repository.findByKey.mockResolvedValue(createConfigurationRecord({ value: 'StoreName', scope: 'store', scopeId: 's1' }));
 
     const result = await new GetConfigurationUseCase(repository).execute({ key: 'site.name', scope: 'store', scopeId: 's1' });
 

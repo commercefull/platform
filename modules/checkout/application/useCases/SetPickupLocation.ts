@@ -54,6 +54,7 @@ export class SetPickupLocationUseCase {
       const basket = await this.basketSnapshot.getSnapshot(session.basketId);
       if (basket) {
         for (const item of basket.items) {
+          if (item.isDigital || item.inventoryPolicy === 'unlimited') continue;
           const availability = await this.stockAvailability.checkAvailability({
             productId: item.productId,
             productVariantId: item.productVariantId,

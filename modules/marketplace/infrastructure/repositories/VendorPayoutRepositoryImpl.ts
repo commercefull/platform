@@ -21,10 +21,9 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
   }
 
   async findByVendorId(vendorId: string): Promise<VendorPayout[]> {
-    const rows = await query<VendorPayoutRow[]>(
-      `SELECT * FROM "marketplaceVendorPayout" WHERE "vendorId" = $1 ORDER BY "createdAt" DESC`,
-      [vendorId],
-    );
+    const rows = await query<VendorPayoutRow[]>(`SELECT * FROM "marketplaceVendorPayout" WHERE "vendorId" = $1 ORDER BY "createdAt" DESC`, [
+      vendorId,
+    ]);
     return (rows ?? []).map(r => VendorPayout.reconstitute(toProps(r)));
   }
 

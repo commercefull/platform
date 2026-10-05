@@ -1,7 +1,10 @@
 import { Company, PaymentTerms } from '../../domain/entities/Company';
 import { CompanyRepository } from '../../domain/repositories/B2BRepository';
 import {
-  CompanyNotFoundError, CompanyAlreadyExistsError, CompanyStatusError, CreditLimitExceededError,
+  CompanyNotFoundError,
+  CompanyAlreadyExistsError,
+  CompanyStatusError,
+  CreditLimitExceededError,
 } from '../../domain/errors/B2BErrors';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { logger } from '../../../../libs/logger';
@@ -120,4 +123,3 @@ export class ManageCompanyUseCase {
     return true;
   }
 }
-

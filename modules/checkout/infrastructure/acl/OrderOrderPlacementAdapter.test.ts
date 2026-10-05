@@ -43,6 +43,7 @@ describe('OrderOrderPlacementAdapter', () => {
       orderNumber: 'ORD-001',
       status: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
+      items: [{ orderItemId: 'oi-1', productId: 'p1', productVariantId: 'v1' }],
     } as unknown as Order);
 
     const result = await adapter.createOrder({
@@ -70,6 +71,8 @@ describe('OrderOrderPlacementAdapter', () => {
         countryCode: 'US',
       },
       basketId: 'basket-1',
+      storeId: 'store-1',
+      channelId: 'channel-1',
       source: 'checkout',
       currency: 'USD',
       shippingAmountCents: 10,
@@ -80,12 +83,15 @@ describe('OrderOrderPlacementAdapter', () => {
         customerId: 'cust-1',
         customerEmail: 'test@test.com',
         basketId: 'basket-1',
+        storeId: 'store-1',
+        channelId: 'channel-1',
       }),
     );
     expect(result.orderId).toBe('order-1');
     expect(result.orderNumber).toBe('ORD-001');
     expect(result.status).toBe(OrderStatus.PENDING);
     expect(result.paymentStatus).toBe(PaymentStatus.PENDING);
+    expect(result.items).toEqual([{ orderItemId: 'oi-1', productId: 'p1', productVariantId: 'v1' }]);
   });
 
   it('should find order and return snapshot', async () => {
@@ -134,8 +140,6 @@ describe('OrderOrderPlacementAdapter', () => {
   it('should cancel order via cancel use case', async () => {
     await adapter.cancelOrder('order-1', 'Customer abandoned');
 
-    expect(cancelOrderUseCase.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ orderId: 'order-1', reason: 'Customer abandoned' }),
-    );
+    expect(cancelOrderUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ orderId: 'order-1', reason: 'Customer abandoned' }));
   });
 });

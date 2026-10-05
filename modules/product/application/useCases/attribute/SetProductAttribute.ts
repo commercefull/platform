@@ -1,8 +1,5 @@
 import type { DynamicAttributePort } from '../../../domain/repositories/ProductCatalogPorts';
-import type {
-  ProductAttributeData,
-  ProductAttribute,
-} from '../../../domain/repositories/ProductCatalogPorts';
+import type { ProductAttributeData, ProductAttribute } from '../../../domain/repositories/ProductCatalogPorts';
 
 export interface SetProductAttributeCommand {
   productId: string;
@@ -71,4 +68,3 @@ export class SetProductAttributeUseCase {
 }
 
 // ==================== Set Multiple Product Attributes ====================
-

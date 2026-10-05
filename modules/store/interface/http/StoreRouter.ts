@@ -7,11 +7,28 @@ import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { StoreController } from './StoreController';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
+import {
+  assignSalesChannel,
+  createSalesChannel,
+  deleteSalesChannel,
+  listSalesChannels,
+  listStoreSalesChannels,
+  unassignSalesChannel,
+  updateSalesChannel,
+} from '../controllers/SalesChannelController';
 
 const router = createHttpRouter();
 const storeController = new StoreController();
 
 router.use(isOrganizationLoggedIn);
+
+router.get('/stores/channels', asyncHandler(listSalesChannels));
+router.post('/stores/channels', asyncHandler(createSalesChannel));
+router.put('/stores/channels/:channelId', asyncHandler(updateSalesChannel));
+router.delete('/stores/channels/:channelId', asyncHandler(deleteSalesChannel));
+router.get('/stores/:storeId/channels', asyncHandler(listStoreSalesChannels));
+router.post('/stores/:storeId/channels', asyncHandler(assignSalesChannel));
+router.delete('/stores/:storeId/channels/:channelId', asyncHandler(unassignSalesChannel));
 
 // Create store
 router.post('/stores', asyncHandler(storeController.createStore.bind(storeController)));

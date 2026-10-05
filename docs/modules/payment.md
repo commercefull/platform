@@ -101,55 +101,55 @@ The Payment feature handles all payment processing including transactions, refun
 
 <!-- GENERATED:ENDPOINTS:START -->
 
-| Method | Endpoint | Controller | Description |
-|---|---|---|---|
-| GET | `/fraud/blacklist` | `asyncHandler(fraudController.getBlacklist)` | — |
-| POST | `/fraud/blacklist` | `asyncHandler(fraudController.addToBlacklist)` | — |
-| DELETE | `/fraud/blacklist/:id` | `asyncHandler(fraudController.removeFromBlacklist)` | — |
-| GET | `/fraud/checks` | `asyncHandler(fraudController.getFraudChecks)` | — |
-| GET | `/fraud/checks/:id` | `asyncHandler(fraudController.getFraudCheck)` | — |
-| POST | `/fraud/checks/:id/review` | `asyncHandler(fraudController.reviewFraudCheck)` | — |
-| GET | `/fraud/reviews` | `asyncHandler(fraudController.getPendingReviews)` | — |
-| GET | `/fraud/rules` | `asyncHandler(fraudController.getFraudRules)` | Fraud Prevention routes |
-| POST | `/fraud/rules` | `asyncHandler(fraudController.createFraudRule)` | — |
-| GET | `/fraud/rules/:id` | `asyncHandler(fraudController.getFraudRule)` | — |
-| PUT | `/fraud/rules/:id` | `asyncHandler(fraudController.updateFraudRule)` | — |
-| DELETE | `/fraud/rules/:id` | `asyncHandler(fraudController.deleteFraudRule)` | — |
-| GET | `/gateways` | `asyncHandler(paymentController.listGateways)` | ============================================================================ Gateway Routes ============================================================================ |
-| POST | `/gateways` | `asyncHandler(paymentController.createGateway)` | — |
-| GET | `/gateways/:gatewayId` | `asyncHandler(paymentController.getGateway)` | — |
-| PUT | `/gateways/:gatewayId` | `asyncHandler(paymentController.updateGateway)` | — |
-| DELETE | `/gateways/:gatewayId` | `asyncHandler(paymentController.deleteGateway)` | — |
-| GET | `/method-configs` | `asyncHandler(paymentController.listMethodConfigs)` | ============================================================================ Method Config Routes ============================================================================ |
-| POST | `/method-configs` | `asyncHandler(paymentController.createMethodConfig)` | — |
-| GET | `/method-configs/:methodConfigId` | `asyncHandler(paymentController.getMethodConfig)` | — |
-| PUT | `/method-configs/:methodConfigId` | `asyncHandler(paymentController.updateMethodConfig)` | — |
-| DELETE | `/method-configs/:methodConfigId` | `asyncHandler(paymentController.deleteMethodConfig)` | — |
-| GET | `/payment-methods` | `asyncHandler(paymentCustomerController.listStoredMethods)` | — |
-| POST | `/payment-methods` | `asyncHandler(paymentCustomerController.saveStoredMethod)` | — |
-| DELETE | `/payment-methods/:methodId` | `asyncHandler(paymentCustomerController.deleteStoredMethod)` | — |
-| POST | `/payment-methods/:methodId/default` | `asyncHandler(paymentCustomerController.setDefaultMethod)` | — |
-| GET | `/payment/balance` | `asyncHandler(paymentBusinessController.getBalance)` | ============================================================================ Balance Routes ============================================================================ |
-| GET | `/payment/disputes` | `asyncHandler(paymentBusinessController.listDisputes)` | ============================================================================ Dispute Routes ============================================================================ |
-| POST | `/payment/disputes` | `asyncHandler(paymentBusinessController.listDisputes)` | — |
-| GET | `/payment/disputes/:disputeId` | `asyncHandler(paymentBusinessController.getDispute)` | — |
-| PATCH | `/payment/disputes/:disputeId` | `asyncHandler(paymentBusinessController.updateDisputeStatus)` | — |
-| GET | `/payment/fees` | `asyncHandler(paymentBusinessController.listFees)` | ============================================================================ Fee Routes ============================================================================ |
-| GET | `/payment/methods` | `asyncHandler(paymentController.getPaymentMethods)` | Get available payment methods
-GET /payments/methods |
-| GET | `/payment/orders/:orderId` | `asyncHandler(paymentController.getTransactionByOrder)` | Get transactions for an order
-GET /payments/orders/:orderId |
-| GET | `/payment/reports` | `asyncHandler(paymentBusinessController.listReports)` | ============================================================================ Report Routes ============================================================================ |
-| GET | `/payment/settings` | `asyncHandler(paymentBusinessController.getSettings)` | ============================================================================ Settings Routes ============================================================================ |
-| POST | `/payment/settings` | `asyncHandler(paymentBusinessController.updateSettings)` | — |
-| GET | `/payment/transactions` | `asyncHandler(paymentController.getMyTransactions)` | Get my transactions
-GET /payments/transactions |
-| GET | `/transactions` | `asyncHandler(paymentController.listTransactions)` | ============================================================================ Transaction Routes ============================================================================ |
-| POST | `/transactions` | `asyncHandler(paymentController.initiatePayment)` | — |
-| GET | `/transactions/:transactionId` | `asyncHandler(paymentController.getTransaction)` | — |
-| DELETE | `/transactions/:transactionId` | `asyncHandler(paymentController.deleteTransaction)` | — |
-| POST | `/transactions/:transactionId/refund` | `asyncHandler(paymentController.processRefund)` | — |
-| GET | `/transactions/:transactionId/refunds` | `asyncHandler(paymentController.getRefunds)` | — |
+| Method                        | Endpoint                               | Controller                                                    | Description                                                                                                                                                                    |
+| ----------------------------- | -------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET                           | `/fraud/blacklist`                     | `asyncHandler(fraudController.getBlacklist)`                  | —                                                                                                                                                                              |
+| POST                          | `/fraud/blacklist`                     | `asyncHandler(fraudController.addToBlacklist)`                | —                                                                                                                                                                              |
+| DELETE                        | `/fraud/blacklist/:id`                 | `asyncHandler(fraudController.removeFromBlacklist)`           | —                                                                                                                                                                              |
+| GET                           | `/fraud/checks`                        | `asyncHandler(fraudController.getFraudChecks)`                | —                                                                                                                                                                              |
+| GET                           | `/fraud/checks/:id`                    | `asyncHandler(fraudController.getFraudCheck)`                 | —                                                                                                                                                                              |
+| POST                          | `/fraud/checks/:id/review`             | `asyncHandler(fraudController.reviewFraudCheck)`              | —                                                                                                                                                                              |
+| GET                           | `/fraud/reviews`                       | `asyncHandler(fraudController.getPendingReviews)`             | —                                                                                                                                                                              |
+| GET                           | `/fraud/rules`                         | `asyncHandler(fraudController.getFraudRules)`                 | Fraud Prevention routes                                                                                                                                                        |
+| POST                          | `/fraud/rules`                         | `asyncHandler(fraudController.createFraudRule)`               | —                                                                                                                                                                              |
+| GET                           | `/fraud/rules/:id`                     | `asyncHandler(fraudController.getFraudRule)`                  | —                                                                                                                                                                              |
+| PUT                           | `/fraud/rules/:id`                     | `asyncHandler(fraudController.updateFraudRule)`               | —                                                                                                                                                                              |
+| DELETE                        | `/fraud/rules/:id`                     | `asyncHandler(fraudController.deleteFraudRule)`               | —                                                                                                                                                                              |
+| GET                           | `/gateways`                            | `asyncHandler(paymentController.listGateways)`                | ============================================================================ Gateway Routes ============================================================================       |
+| POST                          | `/gateways`                            | `asyncHandler(paymentController.createGateway)`               | —                                                                                                                                                                              |
+| GET                           | `/gateways/:gatewayId`                 | `asyncHandler(paymentController.getGateway)`                  | —                                                                                                                                                                              |
+| PUT                           | `/gateways/:gatewayId`                 | `asyncHandler(paymentController.updateGateway)`               | —                                                                                                                                                                              |
+| DELETE                        | `/gateways/:gatewayId`                 | `asyncHandler(paymentController.deleteGateway)`               | —                                                                                                                                                                              |
+| GET                           | `/method-configs`                      | `asyncHandler(paymentController.listMethodConfigs)`           | ============================================================================ Method Config Routes ============================================================================ |
+| POST                          | `/method-configs`                      | `asyncHandler(paymentController.createMethodConfig)`          | —                                                                                                                                                                              |
+| GET                           | `/method-configs/:methodConfigId`      | `asyncHandler(paymentController.getMethodConfig)`             | —                                                                                                                                                                              |
+| PUT                           | `/method-configs/:methodConfigId`      | `asyncHandler(paymentController.updateMethodConfig)`          | —                                                                                                                                                                              |
+| DELETE                        | `/method-configs/:methodConfigId`      | `asyncHandler(paymentController.deleteMethodConfig)`          | —                                                                                                                                                                              |
+| GET                           | `/payment-methods`                     | `asyncHandler(paymentCustomerController.listStoredMethods)`   | —                                                                                                                                                                              |
+| POST                          | `/payment-methods`                     | `asyncHandler(paymentCustomerController.saveStoredMethod)`    | —                                                                                                                                                                              |
+| DELETE                        | `/payment-methods/:methodId`           | `asyncHandler(paymentCustomerController.deleteStoredMethod)`  | —                                                                                                                                                                              |
+| POST                          | `/payment-methods/:methodId/default`   | `asyncHandler(paymentCustomerController.setDefaultMethod)`    | —                                                                                                                                                                              |
+| GET                           | `/payment/balance`                     | `asyncHandler(paymentBusinessController.getBalance)`          | ============================================================================ Balance Routes ============================================================================       |
+| GET                           | `/payment/disputes`                    | `asyncHandler(paymentBusinessController.listDisputes)`        | ============================================================================ Dispute Routes ============================================================================       |
+| POST                          | `/payment/disputes`                    | `asyncHandler(paymentBusinessController.listDisputes)`        | —                                                                                                                                                                              |
+| GET                           | `/payment/disputes/:disputeId`         | `asyncHandler(paymentBusinessController.getDispute)`          | —                                                                                                                                                                              |
+| PATCH                         | `/payment/disputes/:disputeId`         | `asyncHandler(paymentBusinessController.updateDisputeStatus)` | —                                                                                                                                                                              |
+| GET                           | `/payment/fees`                        | `asyncHandler(paymentBusinessController.listFees)`            | ============================================================================ Fee Routes ============================================================================           |
+| GET                           | `/payment/methods`                     | `asyncHandler(paymentController.getPaymentMethods)`           | Get available payment methods                                                                                                                                                  |
+| GET /payments/methods         |
+| GET                           | `/payment/orders/:orderId`             | `asyncHandler(paymentController.getTransactionByOrder)`       | Get transactions for an order                                                                                                                                                  |
+| GET /payments/orders/:orderId |
+| GET                           | `/payment/reports`                     | `asyncHandler(paymentBusinessController.listReports)`         | ============================================================================ Report Routes ============================================================================        |
+| GET                           | `/payment/settings`                    | `asyncHandler(paymentBusinessController.getSettings)`         | ============================================================================ Settings Routes ============================================================================      |
+| POST                          | `/payment/settings`                    | `asyncHandler(paymentBusinessController.updateSettings)`      | —                                                                                                                                                                              |
+| GET                           | `/payment/transactions`                | `asyncHandler(paymentController.getMyTransactions)`           | Get my transactions                                                                                                                                                            |
+| GET /payments/transactions    |
+| GET                           | `/transactions`                        | `asyncHandler(paymentController.listTransactions)`            | ============================================================================ Transaction Routes ============================================================================   |
+| POST                          | `/transactions`                        | `asyncHandler(paymentController.initiatePayment)`             | —                                                                                                                                                                              |
+| GET                           | `/transactions/:transactionId`         | `asyncHandler(paymentController.getTransaction)`              | —                                                                                                                                                                              |
+| DELETE                        | `/transactions/:transactionId`         | `asyncHandler(paymentController.deleteTransaction)`           | —                                                                                                                                                                              |
+| POST                          | `/transactions/:transactionId/refund`  | `asyncHandler(paymentController.processRefund)`               | —                                                                                                                                                                              |
+| GET                           | `/transactions/:transactionId/refunds` | `asyncHandler(paymentController.getRefunds)`                  | —                                                                                                                                                                              |
 
 <!-- GENERATED:ENDPOINTS:END -->
 

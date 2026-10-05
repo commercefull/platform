@@ -13,4 +13,3 @@ describe('ComputeCustomerProfileUseCase', () => {
     expect(repo.computeAggregatesFromOrder).toHaveBeenCalledWith('cust-1');
   });
 });
-

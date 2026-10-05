@@ -9,7 +9,7 @@ describe('UpdateTrackingUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    fulfillmentRepository.save.mockImplementation(async (f) => f);
+    fulfillmentRepository.save.mockImplementation(async f => f);
   });
 
   it('should update tracking details and emit fulfillment.tracking_updated', async () => {
@@ -20,18 +20,13 @@ describe('UpdateTrackingUseCase', () => {
     expect(result.fulfillment.fulfillmentId).toBe('ful-1');
     expect(result.fulfillment.trackingNumber).toBe('TRK123');
     expect(result.fulfillment.trackingUrl).toBe('https://track.url');
-    expect(emitMock).toHaveBeenCalledWith(
-      'fulfillment.tracking_updated',
-      expect.objectContaining({ trackingNumber: 'TRK123' }),
-    );
+    expect(emitMock).toHaveBeenCalledWith('fulfillment.tracking_updated', expect.objectContaining({ trackingNumber: 'TRK123' }));
   });
 
   it('should throw FulfillmentNotFoundError when the fulfillment does not exist', async () => {
     fulfillmentRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdateTrackingCommand('missing', 'TRK123'))).rejects.toThrow(
-      FulfillmentNotFoundError,
-    );
+    await expect(useCase.execute(new UpdateTrackingCommand('missing', 'TRK123'))).rejects.toThrow(FulfillmentNotFoundError);
     expect(emitMock).not.toHaveBeenCalled();
   });
 });

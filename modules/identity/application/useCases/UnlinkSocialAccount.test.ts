@@ -1,10 +1,7 @@
 import { createSocialAccountProps, createMockSocialAccountRepo } from '../../tests/testUtils';
 import { UnlinkSocialAccountUseCase } from './UnlinkSocialAccount';
 import { SocialAccount } from '../../domain/entities/SocialAccount';
-import {
-  SocialAccountNotLinkedError,
-  CannotUnlinkOnlyLoginMethodError,
-} from '../../domain/errors/IdentityErrors';
+import { SocialAccountNotLinkedError, CannotUnlinkOnlyLoginMethodError } from '../../domain/errors/IdentityErrors';
 
 describe('UnlinkSocialAccountUseCase', () => {
   it('should unlink social account successfully', async () => {
@@ -52,4 +49,3 @@ describe('UnlinkSocialAccountUseCase', () => {
 // ============================================================================
 // GetLinkedAccountsUseCase
 // ============================================================================
-

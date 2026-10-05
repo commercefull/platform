@@ -1,9 +1,5 @@
 import { AxiosInstance } from 'axios';
-import {
-  TEST_CUSTOMER as testCustomer,
-  TEST_MERCHANT as testOrganization,
-  TEST_MERCHANT as testAdmin,
-} from './testUtils';
+import { TEST_CUSTOMER as testCustomer, TEST_MERCHANT as testOrganization, TEST_MERCHANT as testAdmin } from './testUtils';
 import { createTestClient, loginTestAdmin, loginTestUser } from '../testUtils';
 
 describe('Auth Feature Tests', () => {

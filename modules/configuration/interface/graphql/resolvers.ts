@@ -2,11 +2,7 @@ import { requireBusinessAuth, requireAdminAuth, type GraphQLAuthContext } from '
 import { GetConfigurationInput } from '../../application/useCases/GetConfiguration';
 import { GetFeatureFlagsInput } from '../../application/useCases/GetFeatureFlags';
 import { ToggleFeatureFlagInput } from '../../application/useCases/ToggleFeatureFlag';
-import {
-  getConfigurationUseCase,
-  getFeatureFlagsUseCase,
-  toggleFeatureFlagUseCase,
-} from '../../application/wired';
+import { getConfigurationUseCase, getFeatureFlagsUseCase, toggleFeatureFlagUseCase } from '../../application/wired';
 
 export const configurationResolvers = {
   Query: {

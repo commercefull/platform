@@ -49,11 +49,7 @@ const defaultFieldCosts: Record<string, FieldCost> = {
  * Depth of a selection: each Field level adds 1, fragment spreads and inline
  * fragments resolve to their own selection sets without adding a level.
  */
-function selectionDepth(
-  selection: SelectionNode,
-  fragments: Map<string, FragmentDefinitionNode>,
-  visited: Set<string>,
-): number {
+function selectionDepth(selection: SelectionNode, fragments: Map<string, FragmentDefinitionNode>, visited: Set<string>): number {
   if (selection.kind === Kind.FIELD) {
     return selection.selectionSet ? 1 + selectionSetDepth(selection.selectionSet, fragments, visited) : 0;
   }
@@ -75,11 +71,7 @@ function selectionDepth(
   return depth;
 }
 
-function selectionSetDepth(
-  selectionSet: SelectionSetNode,
-  fragments: Map<string, FragmentDefinitionNode>,
-  visited: Set<string>,
-): number {
+function selectionSetDepth(selectionSet: SelectionSetNode, fragments: Map<string, FragmentDefinitionNode>, visited: Set<string>): number {
   let max = 0;
   for (const selection of selectionSet.selections) {
     const depth = selectionDepth(selection, fragments, visited);

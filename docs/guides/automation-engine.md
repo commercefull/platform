@@ -325,15 +325,13 @@ curl -X POST http://localhost:3000/business/automation/rule-id/trigger \
 ### Executing rules programmatically
 
 ```typescript
-import {
-  executeAutomationRuleUseCase,
-  triggerAutomationRuleUseCase,
-} from '../modules/automation/application/useCases/wired';
+import { executeAutomationRuleUseCase, triggerAutomationRuleUseCase } from '../modules/automation/application/useCases/wired';
 import { AutomationRuleRepositoryImpl } from '../modules/automation/infrastructure';
 
 // Execute all rules matching an event
-const rules = (await new AutomationRuleRepositoryImpl().findByTriggerType('event', true))
-  .filter(r => r.triggerConfig.eventName === 'order.completed');
+const rules = (await new AutomationRuleRepositoryImpl().findByTriggerType('event', true)).filter(
+  r => r.triggerConfig.eventName === 'order.completed',
+);
 for (const rule of rules) {
   await executeAutomationRuleUseCase.execute(
     rule,
@@ -400,8 +398,7 @@ const ruleRepo = new AutomationRuleRepositoryImpl();
 
 export function registerAutomationEventHandlers(): void {
   eventBus.registerHandler('order.completed', async payload => {
-    const rules = (await ruleRepo.findByTriggerType('event', true))
-      .filter(r => r.triggerConfig.eventName === 'order.completed');
+    const rules = (await ruleRepo.findByTriggerType('event', true)).filter(r => r.triggerConfig.eventName === 'order.completed');
     for (const rule of rules) {
       await executeAutomationRuleUseCase.execute(
         rule,

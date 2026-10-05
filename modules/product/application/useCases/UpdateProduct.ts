@@ -124,9 +124,7 @@ export class UpdateProductUseCase {
       const costPriceCents =
         command.updates.costPriceCents !== undefined ? command.updates.costPriceCents : (existing?.costPriceCents ?? null);
       const compareAtPriceCents =
-        command.updates.compareAtPriceCents !== undefined
-          ? command.updates.compareAtPriceCents
-          : (existing?.compareAtPriceCents ?? null);
+        command.updates.compareAtPriceCents !== undefined ? command.updates.compareAtPriceCents : (existing?.compareAtPriceCents ?? null);
       for (const [field, value] of Object.entries({ salePriceCents, costPriceCents, compareAtPriceCents })) {
         if (value !== null && (!Number.isInteger(value) || value < 0)) {
           throw new ProductValidationError(`${field} must be a non-negative integer or null`);

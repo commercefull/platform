@@ -1,8 +1,6 @@
 import '../../tests/testUtils';
 import { PublishDraftUseCase } from './PublishDraft';
-import {
-  DraftAlreadyPublishedError, DraftNotReadyToPublishError, PageDraftNotFoundError,
-} from '../../domain/errors/PageBuilderErrors';
+import { DraftAlreadyPublishedError, DraftNotReadyToPublishError, PageDraftNotFoundError } from '../../domain/errors/PageBuilderErrors';
 import type { PageDraftRepository } from '../../domain/repositories/PageDraftRepository';
 import { createPageDraft, emitMock, lazyMock } from '../../tests/testUtils';
 
@@ -55,4 +53,3 @@ describe('PublishDraftUseCase', () => {
     expect(repo.save).not.toHaveBeenCalled();
   });
 });
-

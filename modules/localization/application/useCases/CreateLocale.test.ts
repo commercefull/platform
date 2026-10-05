@@ -33,20 +33,14 @@ describe('CreateLocaleUseCase', () => {
       isDefault: true,
     });
 
-    expect(repository.createLocale).toHaveBeenCalledWith(
-      expect.objectContaining({ code: 'ar-EG', direction: 'rtl', isDefault: true }),
-    );
+    expect(repository.createLocale).toHaveBeenCalledWith(expect.objectContaining({ code: 'ar-EG', direction: 'rtl', isDefault: true }));
   });
 
   it('should throw LocalizationValidationError when required fields are missing', async () => {
     const repository = createCreateLocaleRepository();
 
-    await expect(new CreateLocaleUseCase(repository).execute({ code: '', name: 'English' })).rejects.toThrow(
-      LocalizationValidationError,
-    );
-    await expect(new CreateLocaleUseCase(repository).execute({ code: 'en-US', name: '' })).rejects.toThrow(
-      LocalizationValidationError,
-    );
+    await expect(new CreateLocaleUseCase(repository).execute({ code: '', name: 'English' })).rejects.toThrow(LocalizationValidationError);
+    await expect(new CreateLocaleUseCase(repository).execute({ code: 'en-US', name: '' })).rejects.toThrow(LocalizationValidationError);
     expect(repository.createLocale).not.toHaveBeenCalled();
   });
 

@@ -22,7 +22,6 @@ export const SEEDED_BIN_IDS = {
   SHIP_01: '0193b002-0000-7000-8000-000000000004',
 };
 
-
 export function createTestClient(): AxiosInstance {
   return axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',

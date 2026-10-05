@@ -14,20 +14,13 @@ describe('UpdateCustomerUseCase', () => {
   });
 
   it('should update firstName and lastName and emit customer.updated', async () => {
-    const result = await useCase.execute(
-      new UpdateCustomerCommand('cust-1', { firstName: 'Janet', lastName: 'Smith' }),
-    );
+    const result = await useCase.execute(new UpdateCustomerCommand('cust-1', { firstName: 'Janet', lastName: 'Smith' }));
 
     expect(result.firstName).toBe('Janet');
     expect(result.lastName).toBe('Smith');
     expect(result.updatedFields).toEqual(expect.arrayContaining(['firstName', 'lastName']));
-    expect(customerRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }),
-    );
-    expect(emitMock).toHaveBeenCalledWith(
-      'customer.updated',
-      expect.objectContaining({ customerId: 'cust-1' }),
-    );
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }));
+    expect(emitMock).toHaveBeenCalledWith('customer.updated', expect.objectContaining({ customerId: 'cust-1' }));
   });
 
   it('should update the phone field', async () => {
@@ -54,9 +47,7 @@ describe('UpdateCustomerUseCase', () => {
   it('should throw CustomerNotFoundError when the customer does not exist', async () => {
     customerRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdateCustomerCommand('missing', { firstName: 'X' }))).rejects.toThrow(
-      CustomerNotFoundError,
-    );
+    await expect(useCase.execute(new UpdateCustomerCommand('missing', { firstName: 'X' }))).rejects.toThrow(CustomerNotFoundError);
     expect(customerRepository.save).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
   });
@@ -64,8 +55,6 @@ describe('UpdateCustomerUseCase', () => {
   it('should trim firstName and lastName', async () => {
     await useCase.execute(new UpdateCustomerCommand('cust-1', { firstName: '  Janet  ', lastName: ' Smith ' }));
 
-    expect(customerRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }),
-    );
+    expect(customerRepository.save).toHaveBeenCalledWith(expect.objectContaining({ firstName: 'Janet', lastName: 'Smith' }));
   });
 });

@@ -112,5 +112,4 @@ describe('Content Block Validation API', () => {
 
     expect(response.status).toBe(404);
   });
-
 });

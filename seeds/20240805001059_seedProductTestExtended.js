@@ -36,12 +36,12 @@ exports.seed = async function (knex) {
   }
 
   // ── Clean up previous run ───────────────────────────────────────────────
-  await knex('productCollectionMap')
-    .where('productCollectionId', SEEDED_COLLECTION_1_ID)
+  await knex('assortmentCollectionMap')
+    .where('assortmentCollectionId', SEEDED_COLLECTION_1_ID)
     .delete()
     .catch(() => {});
-  await knex('productCollection')
-    .where('productCollectionId', SEEDED_COLLECTION_1_ID)
+  await knex('assortmentCollection')
+    .where('assortmentCollectionId', SEEDED_COLLECTION_1_ID)
     .delete()
     .catch(() => {});
   await knex('productBundleItem')
@@ -124,20 +124,20 @@ exports.seed = async function (knex) {
 
   // ── Active collection containing product 1 ──────────────────────────────
   // Required by: collection.test.ts (list collections)
-  await knex('productCollection')
+  await knex('assortmentCollection')
     .insert({
-      productCollectionId: SEEDED_COLLECTION_1_ID,
+      assortmentCollectionId: SEEDED_COLLECTION_1_ID,
       name: 'Seed Test Collection',
       slug: 'seed-test-collection',
       description: 'Seeded collection for integration tests',
       isActive: true,
     })
-    .onConflict('productCollectionId')
+    .onConflict('assortmentCollectionId')
     .merge();
 
-  await knex('productCollectionMap')
+  await knex('assortmentCollectionMap')
     .insert({
-      productCollectionId: SEEDED_COLLECTION_1_ID,
+      assortmentCollectionId: SEEDED_COLLECTION_1_ID,
       productId: TEST_PRODUCT_1_ID,
       position: 0,
     })
@@ -145,14 +145,14 @@ exports.seed = async function (knex) {
     .ignore();
 
   // Second map item with a fixed ID — used by collection.test.ts removeMapIds test
-  await knex('productCollectionMap')
-    .where('productCollectionMapId', SEEDED_COLLECTION_MAP_2_ID)
+  await knex('assortmentCollectionMap')
+    .where('assortmentCollectionMapId', SEEDED_COLLECTION_MAP_2_ID)
     .delete()
     .catch(() => {});
-  await knex('productCollectionMap')
+  await knex('assortmentCollectionMap')
     .insert({
-      productCollectionMapId: SEEDED_COLLECTION_MAP_2_ID,
-      productCollectionId: SEEDED_COLLECTION_1_ID,
+      assortmentCollectionMapId: SEEDED_COLLECTION_MAP_2_ID,
+      assortmentCollectionId: SEEDED_COLLECTION_1_ID,
       productId: TEST_PRODUCT_2_ID,
       position: 1,
     })
@@ -161,12 +161,12 @@ exports.seed = async function (knex) {
 };
 
 exports.down = async function (knex) {
-  await knex('productCollectionMap')
-    .where('productCollectionId', SEEDED_COLLECTION_1_ID)
+  await knex('assortmentCollectionMap')
+    .where('assortmentCollectionId', SEEDED_COLLECTION_1_ID)
     .delete()
     .catch(() => {});
-  await knex('productCollection')
-    .where('productCollectionId', SEEDED_COLLECTION_1_ID)
+  await knex('assortmentCollection')
+    .where('assortmentCollectionId', SEEDED_COLLECTION_1_ID)
     .delete()
     .catch(() => {});
   await knex('productBundleItem')

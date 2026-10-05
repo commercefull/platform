@@ -744,5 +744,14 @@
   "emailPlaceholder": "your@email.com",
   "phonePlaceholder": "Ο αριθμός τηλεφώνου σας",
   "cardholderNamePlaceholder": "John Doe",
-  "cardExpiryPlaceholder": "ΜΜ/ΕΕ"
+  "cardExpiryPlaceholder": "ΜΜ/ΕΕ",
+  "collections": "Συλλογές",
+  "collectionsHeroDesc": "Εξερευνήστε τις επιμελημένες συλλογές μας",
+  "viewCollection": "Προβολή συλλογής",
+  "noCollections": "Δεν υπάρχουν ακόμη συλλογές",
+  "noCollectionsDesc": "Ελέγξτε ξανά σύντομα — επιμελούμαστε νέες συλλογές.",
+  "collectionEmpty": "Αυτή η συλλογή δεν έχει ακόμη προϊόντα",
+  "collectionEmptyDesc": "Ελέγξτε ξανά σύντομα ή περιηγηθείτε σε ολόκληρο τον κατάλογο.",
+  "backToCollections": "Πίσω στις συλλογές",
+  "featured": "Προτεινόμενο"
 }

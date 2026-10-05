@@ -32,4 +32,3 @@ export class GetShippingLabelUseCase {
     return { found: false, label: null };
   }
 }
-

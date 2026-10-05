@@ -6,8 +6,10 @@
 export * from './application/useCases';
 export * from './domain/entities/Store';
 export * from './domain/entities/StoreCurrency';
+export * from './domain/entities/SalesChannel';
 export * from './domain/repositories/StoreRepository';
 export * from './domain/repositories/StoreCurrencyRepository';
+export * from './domain/repositories/SalesChannelRepository';
 export * from './domain/events/StoreEvents';
 export * from './domain/errors/StoreErrors';
 

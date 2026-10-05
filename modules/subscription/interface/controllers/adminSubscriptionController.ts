@@ -1,4 +1,4 @@
-import { jsonResponse, redirectResponse } from "libs/apiResponse";
+import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 /**
  * Subscription Controller
  * Handles subscription plans and customer subscription management for the Admin Hub
@@ -339,10 +339,10 @@ export const processSubscriptionBilling = async (req: HttpRequest, res: HttpResp
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `Billing processed for subscription ${subscriptionId}`,
-        orderId: order.subscriptionOrderId,
-      });
+    success: true,
+    message: `Billing processed for subscription ${subscriptionId}`,
+    orderId: order.subscriptionOrderId,
+  });
 };
 
 export const manageFailedPayments = async (req: HttpRequest, res: HttpResponse): Promise<void> => {

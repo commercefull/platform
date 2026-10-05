@@ -58,4 +58,3 @@ describe('GetTransactionUseCase', () => {
     expect(() => new GetTransactionCommand()).toThrow(TransactionIdOrExternalIdRequiredError);
   });
 });
-

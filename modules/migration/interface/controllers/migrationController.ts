@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import { manageImportJobs, manageImportMappings, manageImportErrors } from '../../application/useCases/wired';
 import type { ImportJobType, ImportSource, ImportJobStatus } from '../../domain/entities/ImportJob';

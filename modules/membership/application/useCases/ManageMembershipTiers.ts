@@ -28,9 +28,15 @@ export interface UpdateTierRecordInput {
 export interface ManageMembershipTiersPort {
   findTierById(tierId: string): Promise<MembershipTierRecord | null>;
   findAllTiers(includeInactive?: boolean): Promise<MembershipTierRecord[]>;
-  createTier(params: Required<Omit<CreateTierRecordInput, 'description' | 'isActive'>> & { description: string; isActive: boolean }): Promise<MembershipTierRecord>;
+  createTier(
+    params: Required<Omit<CreateTierRecordInput, 'description' | 'isActive'>> & { description: string; isActive: boolean },
+  ): Promise<MembershipTierRecord>;
   updateTier(id: string, params: UpdateTierRecordInput): Promise<MembershipTierRecord>;
-  findAllUserMemberships(limit?: number, offset?: number, filter?: { isActive?: boolean; tierId?: string }): Promise<UserMembershipRecord[]>;
+  findAllUserMemberships(
+    limit?: number,
+    offset?: number,
+    filter?: { isActive?: boolean; tierId?: string },
+  ): Promise<UserMembershipRecord[]>;
   deleteTier(id: string): Promise<unknown>;
 }
 
@@ -82,9 +88,7 @@ export class ManageMembershipTiersUseCase {
     // Cannot delete a tier that still has active user memberships
     const activeMembers = await this.memberships.findAllUserMemberships(50, 0, { tierId: id, isActive: true });
     if (activeMembers && activeMembers.length > 0) {
-      throw new MembershipValidationError(
-        `Cannot delete tier: ${activeMembers.length} active user memberships are using this tier`,
-      );
+      throw new MembershipValidationError(`Cannot delete tier: ${activeMembers.length} active user memberships are using this tier`);
     }
 
     await this.memberships.deleteTier(id);

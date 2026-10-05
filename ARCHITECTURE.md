@@ -29,7 +29,7 @@ Commercefull is an e-commerce platform. A single Express application serves two 
 │   admin (Tabler)  ·  storefront (Tailwind)                │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
-│   31 bounded contexts organized as DDD:                   │
+│   44 bounded contexts organized as DDD:                   │
 │   domain → application → infrastructure → interface       │
 ├──────────────────────────────────────────────────────────┤
 │                    libs/ (Shared)                         │
@@ -83,18 +83,18 @@ Routes are configured in `boot/routes.ts`:
 | `/business` | Business / merchant API | `isOrganizationLoggedIn`              |
 | `/health`   | Health check            | None                                  |
 
-## Modules (31 bounded contexts)
+## Modules (45 bounded contexts)
 
-| Category    | Modules                                                                                                                                         |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Catalog     | `product`, `pricing`                                                                                                                            |
-| Sales       | `order`, `basket`, `checkout`, `payment`                                                                                                        |
-| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`                                                                                             |
-| Marketing   | `promotion`, `coupon`                                                                                                                           |
-| Customer    | `customer`, `loyalty`, `membership`, `subscription`                                                                                             |
-| Content     | `content`, `media`, `notification`                                                                                                              |
-| Commerce    | `supplier`                                                                                                                                      |
-| Platform    | `identity`, `configuration`, `localization`, `store`, `organization`, `analytics`, `gdpr`, `support`, `tax`, `reporting`, `webhook`, `tracking` |
+| Category    | Modules                                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Catalog     | `product`, `pricing`, `assortment`                                                                                                   |
+| Sales       | `order`, `basket`, `checkout`, `payment`, `agentic-checkout`                                                                         |
+| Fulfillment | `fulfillment`, `shipping`, `inventory`, `warehouse`, `returns`, `tracking`                                                           |
+| Marketing   | `promotion`, `coupon`, `segment`, `recommendation`, `automation`                                                                     |
+| Customer    | `customer`, `loyalty`, `membership`, `subscription`, `support`                                                                       |
+| Content     | `content`, `media`, `notification`, `pagebuilder`, `theme`                                                                           |
+| Commerce    | `store`, `organization`, `supplier`, `marketplace`, `b2b`                                                                            |
+| Platform    | `identity`, `configuration`, `localization`, `analytics`, `gdpr`, `tax`, `reporting`, `webhook`, `audit`, `integration`, `migration` |
 
 ### Domain Entities as Single Source of Truth
 
@@ -124,11 +124,9 @@ export * from './domain/entities/SupportTicket'; // ← domain entity export
 
 ### Planned modules (not yet implemented)
 
-| Category  | Modules                                                            |
-| --------- | ------------------------------------------------------------------ |
-| Catalog   | `assortment`, `brand`, `segment`                                   |
-| Commerce  | `merchant`, `business`, `channel`                                  |
-| Marketing | `b2b`, `marketplace`, `referral`, `affiliate`, `fraud`, `preorder` |
+| Category  | Modules                             |
+| --------- | ----------------------------------- |
+| Marketing | `referral`, `affiliate`, `preorder` |
 
 ## Route Naming Convention
 

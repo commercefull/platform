@@ -11,4 +11,4 @@ export type {
   HttpRouter,
 } from './types';
 export type { HttpUser } from './user';
-export { createHttpRouter } from './expressAdapter';
+export { createHttpRouter, httpRaw } from './expressAdapter';

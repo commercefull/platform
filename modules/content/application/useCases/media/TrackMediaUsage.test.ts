@@ -38,9 +38,7 @@ describe('TrackMediaUsageUseCase', () => {
   });
 
   it('should throw ContentValidationError when required fields are missing', async () => {
-    await expect(useCase.execute(new TrackMediaUsageCommand('', 'contentPage', 'page-1'))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(useCase.execute(new TrackMediaUsageCommand('', 'contentPage', 'page-1'))).rejects.toThrow(ContentValidationError);
     expect(mockRepo.createUsage).not.toHaveBeenCalled();
   });
 });

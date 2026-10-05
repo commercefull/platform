@@ -1,4 +1,4 @@
-import { jsonResponse } from "libs/apiResponse";
+import { jsonResponse } from 'libs/apiResponse';
 /**
  * Fulfillment Controller
  * Handles order fulfillment tracking and warehouse operations
@@ -104,10 +104,10 @@ export const updateFulfillmentStatus = async (req: HttpRequest, res: HttpRespons
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: `Fulfillment status updated to ${status}`,
-        fulfillment,
-      });
+    success: true,
+    message: `Fulfillment status updated to ${status}`,
+    fulfillment,
+  });
 };
 
 export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -133,10 +133,10 @@ export const markAsShipped = async (req: HttpRequest, res: HttpResponse): Promis
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Fulfillment marked as shipped',
-        fulfillment,
-      });
+    success: true,
+    message: 'Fulfillment marked as shipped',
+    fulfillment,
+  });
 };
 
 export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -149,10 +149,10 @@ export const markAsDelivered = async (req: HttpRequest, res: HttpResponse): Prom
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Fulfillment marked as delivered',
-        fulfillment,
-      });
+    success: true,
+    message: 'Fulfillment marked as delivered',
+    fulfillment,
+  });
 };
 
 export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -167,10 +167,10 @@ export const cancelFulfillment = async (req: HttpRequest, res: HttpResponse): Pr
   }
 
   jsonResponse(res, 200, {
-        success: true,
-        message: 'Fulfillment cancelled',
-        fulfillment,
-      });
+    success: true,
+    message: 'Fulfillment cancelled',
+    fulfillment,
+  });
 };
 
 export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
@@ -179,11 +179,11 @@ export const getFulfillmentStats = async (req: HttpRequest, res: HttpResponse): 
   const shippedToday = await manageOrderFulfillmentsUseCase.findShippedToday();
 
   jsonResponse(res, 200, {
-        success: true,
-        stats,
-        overdueCount: overdue.length,
-        shippedTodayCount: shippedToday.length,
-      });
+    success: true,
+    stats,
+    overdueCount: overdue.length,
+    shippedTodayCount: shippedToday.length,
+  });
 };
 
 // ============================================================================

@@ -1,4 +1,8 @@
-import type { CustomerAddressRepository, CustomerAddressCreateParams, CustomerAddressUpdateParams } from '../../domain/repositories/CustomerAddressRepository';
+import type {
+  CustomerAddressRepository,
+  CustomerAddressCreateParams,
+  CustomerAddressUpdateParams,
+} from '../../domain/repositories/CustomerAddressRepository';
 
 export class ManageStorefrontAddressesUseCase {
   constructor(private readonly customerAddressRepo: CustomerAddressRepository) {}

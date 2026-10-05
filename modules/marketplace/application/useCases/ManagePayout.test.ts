@@ -1,9 +1,7 @@
 import '../../tests/testUtils';
 import { ManagePayoutUseCase } from './ManagePayout';
 import { VendorNotFoundError, VendorStatusError, PayoutNotFoundError } from '../../domain/errors/MarketplaceErrors';
-import type {
-  VendorRepository, VendorPayoutRepository,
-} from '../../domain/repositories/MarketplaceRepository';
+import type { VendorRepository, VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
 import { createPayout, createVendor, emitMock, lazyMock } from '../../tests/testUtils';
 
 describe('ManagePayoutUseCase', () => {
@@ -25,8 +23,11 @@ describe('ManagePayoutUseCase', () => {
     vendorRepo.findById.mockResolvedValue(vendor);
 
     await useCase.create({
-      vendorId: 'v-1', organizationId: 'org-1', method: 'bank_transfer',
-      periodStart: new Date(), periodEnd: new Date(),
+      vendorId: 'v-1',
+      organizationId: 'org-1',
+      method: 'bank_transfer',
+      periodStart: new Date(),
+      periodEnd: new Date(),
     });
 
     expect(payoutRepo.save).toHaveBeenCalled();
@@ -36,19 +37,29 @@ describe('ManagePayoutUseCase', () => {
   it('should throw VendorStatusError when creating a payout for a non-approved vendor', async () => {
     vendorRepo.findById.mockResolvedValue(createVendor());
 
-    await expect(useCase.create({
-      vendorId: 'v-1', organizationId: 'org-1', method: 'bank_transfer',
-      periodStart: new Date(), periodEnd: new Date(),
-    })).rejects.toThrow(VendorStatusError);
+    await expect(
+      useCase.create({
+        vendorId: 'v-1',
+        organizationId: 'org-1',
+        method: 'bank_transfer',
+        periodStart: new Date(),
+        periodEnd: new Date(),
+      }),
+    ).rejects.toThrow(VendorStatusError);
   });
 
   it('should throw VendorNotFoundError when creating a payout for a missing vendor', async () => {
     vendorRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.create({
-      vendorId: 'missing', organizationId: 'org-1', method: 'bank_transfer',
-      periodStart: new Date(), periodEnd: new Date(),
-    })).rejects.toThrow(VendorNotFoundError);
+    await expect(
+      useCase.create({
+        vendorId: 'missing',
+        organizationId: 'org-1',
+        method: 'bank_transfer',
+        periodStart: new Date(),
+        periodEnd: new Date(),
+      }),
+    ).rejects.toThrow(VendorNotFoundError);
   });
 
   it('should throw PayoutNotFoundError when the payout does not exist', async () => {

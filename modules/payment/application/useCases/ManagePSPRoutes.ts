@@ -33,7 +33,6 @@ export class UpdatePSPRouteCommand {
   ) {}
 }
 
-
 export class ManagePSPRoutesUseCase {
   constructor(private readonly routingRepository: PSPRoutingRepository) {}
 
@@ -130,4 +129,3 @@ export class ManagePSPRoutesUseCase {
 // ============================================================================
 // Route Payment via Failover Engine
 // ============================================================================
-

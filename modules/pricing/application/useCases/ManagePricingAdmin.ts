@@ -87,10 +87,7 @@ interface CustomerPricesPort {
   findPriceListById(id: string): Promise<CustomerPriceList | null>;
   findPriceListsForCustomer(customerId: string, customerGroupIds?: string[]): Promise<CustomerPriceList[]>;
   createPriceList(priceList: Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>): Promise<CustomerPriceList>;
-  updatePriceList(
-    id: string,
-    priceList: Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>,
-  ): Promise<CustomerPriceList>;
+  updatePriceList(id: string, priceList: Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>): Promise<CustomerPriceList>;
   deletePriceList(id: string): Promise<boolean>;
   findPricesByPriceListId(priceListId: string): Promise<CustomerPrice[]>;
 }
@@ -209,10 +206,7 @@ export class ManagePricingAdminUseCase {
   async createCustomerPriceList(priceList: Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>) {
     return this.deps.customerPrices.createPriceList(priceList);
   }
-  async updateCustomerPriceList(
-    id: string,
-    priceList: Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>,
-  ) {
+  async updateCustomerPriceList(id: string, priceList: Partial<Omit<CustomerPriceList, 'id' | 'createdAt' | 'updatedAt'>>) {
     return this.deps.customerPrices.updatePriceList(id, priceList);
   }
   async deleteCustomerPriceList(id: string) {

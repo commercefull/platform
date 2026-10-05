@@ -1,11 +1,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { UserRepository } from '../../domain/repositories/UserRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
-import {
-  InvalidCredentialsError,
-  AccountLockedError,
-  AccountNotActiveError,
-} from '../../domain/errors/IdentityErrors';
+import { InvalidCredentialsError, AccountLockedError, AccountNotActiveError } from '../../domain/errors/IdentityErrors';
 
 export class LoginCommand {
   constructor(
@@ -27,7 +23,6 @@ export interface AuthResponse {
 // ============================================================================
 // Use Cases
 // ============================================================================
-
 
 export class LoginUseCase {
   constructor(private readonly userRepository: UserRepository) {}
@@ -72,4 +67,3 @@ export class LoginUseCase {
     };
   }
 }
-

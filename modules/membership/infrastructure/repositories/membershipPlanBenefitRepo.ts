@@ -9,8 +9,6 @@ export type MembershipPlanBenefitUpdateParams = Partial<
   Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>
 >;
 
-
-
 export class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {
     return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [id]);

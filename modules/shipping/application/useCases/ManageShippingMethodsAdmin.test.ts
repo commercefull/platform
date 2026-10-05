@@ -1,7 +1,4 @@
-import {
-  createShippingMethodPort,
-  createShippingMethod,
-} from '../../tests/testUtils';
+import { createShippingMethodPort, createShippingMethod } from '../../tests/testUtils';
 import { ManageShippingMethodsAdminUseCase } from './ManageShippingMethodsAdmin';
 
 describe('ManageShippingMethodsAdminUseCase', () => {

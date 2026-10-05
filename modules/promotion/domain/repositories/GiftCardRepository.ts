@@ -105,12 +105,7 @@ export interface GiftCardRepository {
     customerId?: string,
     performedBy?: string,
   ): Promise<PromotionGiftCardTransaction>;
-  reloadGiftCard(
-    giftCardId: string,
-    amountCents: number,
-    orderId?: string,
-    performedBy?: string,
-  ): Promise<PromotionGiftCardTransaction>;
+  reloadGiftCard(giftCardId: string, amountCents: number, orderId?: string, performedBy?: string): Promise<PromotionGiftCardTransaction>;
   refundToGiftCard(
     giftCardId: string,
     amountCents: number,

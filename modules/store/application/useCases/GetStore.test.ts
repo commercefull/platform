@@ -53,9 +53,7 @@ describe('GetStoreUseCase', () => {
   });
 
   it('should map the entity fields to the response shape', async () => {
-    storeRepository.findById.mockResolvedValue(
-      createStore({ storeId: 'store-7', name: 'Flagship', slug: 'flagship', isVerified: true }),
-    );
+    storeRepository.findById.mockResolvedValue(createStore({ storeId: 'store-7', name: 'Flagship', slug: 'flagship', isVerified: true }));
 
     const result = await useCase.execute(new GetStoreQuery('store-7'));
 

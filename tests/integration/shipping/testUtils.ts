@@ -36,7 +36,6 @@ export const SEEDED_PACKAGING_IDS = {
   ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
 
-
 export function createTestClient(): AxiosInstance {
   return axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3000',

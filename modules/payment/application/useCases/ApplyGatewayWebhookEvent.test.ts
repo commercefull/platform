@@ -49,12 +49,7 @@ describe('ApplyGatewayWebhookEventUseCase', () => {
     payments = lazyMock<PaymentRepository>();
     gatewayWebhooks = lazyMock<GatewayWebhookPort>();
     orderStatusSync = lazyMock<OrderStatusSyncPort>();
-    useCase = new ApplyGatewayWebhookEventUseCase(
-      payments,
-      gatewayWebhooks,
-      orderStatusSync,
-      new ProcessPaymentWebhookUseCase(payments),
-    );
+    useCase = new ApplyGatewayWebhookEventUseCase(payments, gatewayWebhooks, orderStatusSync, new ProcessPaymentWebhookUseCase(payments));
     emitMock.mockClear();
     payments.findWebhookByExternalId.mockResolvedValue(null);
     payments.createWebhook.mockResolvedValue(createPaymentWebhook());

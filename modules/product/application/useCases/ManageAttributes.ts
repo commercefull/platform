@@ -1,8 +1,4 @@
-import type {
-  DynamicAttributePort,
-  ProductAttribute,
-  ProductAttributeValue,
-} from '../../domain/repositories/ProductCatalogPorts';
+import type { DynamicAttributePort, ProductAttribute, ProductAttributeValue } from '../../domain/repositories/ProductCatalogPorts';
 
 export class ManageAttributesUseCase {
   constructor(private readonly attributes: DynamicAttributePort) {}

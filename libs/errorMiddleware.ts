@@ -63,7 +63,11 @@ export function errorMiddleware(err: unknown, req: HttpRequest, res: HttpRespons
 
   // API requests → RFC 7807 problem+json (alongside legacy shape for deprecation window)
   const isApiRequest =
-    req.xhr || req.headers.accept?.includes('application/json') || req.path.startsWith('/customer/') || req.path.startsWith('/business/');
+    req.xhr ||
+    req.headers.accept?.includes('application/json') ||
+    req.path.startsWith('/customer/') ||
+    req.path.startsWith('/business/') ||
+    req.path.startsWith('/acp/');
 
   if (isApiRequest) {
     // RFC 7807 problem details shape

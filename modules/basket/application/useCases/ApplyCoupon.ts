@@ -30,7 +30,17 @@ export class ApplyCouponUseCase {
       throw new BasketValidationError('Discount quote port is required to apply coupons');
     }
 
-    const validation = await this.discountQuotePort.validateDiscount(command.couponCode, basket.subtotal.cents, basket.customerId);
+    const validation = await this.discountQuotePort.validateDiscount(command.couponCode, basket.subtotal.cents, {
+      customerId: basket.customerId,
+      storeId: basket.storeId,
+      channelId: basket.channelId,
+      currency: basket.currency,
+      items: basket.items.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPriceCents: item.unitPrice.cents,
+      })),
+    });
 
     if (!validation.valid || !validation.discount) {
       throw new BasketValidationError(validation.error || `Invalid coupon code: ${command.couponCode}`);
