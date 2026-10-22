@@ -130,7 +130,10 @@ export class CreatePaymentIntentUseCase {
     // Re-validate auto-applied promotions at the payment boundary: an
     // expired or no-longer-eligible promotion must not keep its stale
     // discount. Explicit coupons are managed by the apply/requote paths.
-    if (this.promotionQuotePort && session.couponCode === 'AUTO_PROMOTION') {
+    // `'AUTO_PROMOTION'` remains as a legacy marker for sessions persisted
+    // before structured `appliedPromotions` existed.
+    const hasEnginePromotions = session.appliedPromotions.length > 0 || session.couponCode === 'AUTO_PROMOTION';
+    if (this.promotionQuotePort && hasEnginePromotions) {
       try {
         const promoResult = await this.promotionQuotePort.evaluatePromotions({
           items: basketItems.map(item => ({
@@ -151,10 +154,19 @@ export class CreatePaymentIntentUseCase {
         });
         const evaluatedCents = promoResult.totalDiscountAmountCents;
         if (evaluatedCents !== session.discountAmount.cents) {
+          // Clear the legacy marker first — removeCoupon zeroes discountAmount.
+          if (session.couponCode === 'AUTO_PROMOTION') session.removeCoupon();
           if (evaluatedCents > 0) {
-            session.applyCoupon('AUTO_PROMOTION', Money.fromCents(evaluatedCents, basket.currency));
+            session.applyPromotions(
+              promoResult.appliedPromotions.map(p => ({
+                promotionId: p.id,
+                name: p.name,
+                discountAmountCents: p.amountCents,
+              })),
+              Money.fromCents(evaluatedCents, basket.currency),
+            );
           } else {
-            session.removeCoupon();
+            session.clearPromotions();
           }
           totalsChanged = true;
         }
@@ -335,6 +347,15 @@ export class CreatePaymentIntentUseCase {
       orderResponse = null;
     }
     if (!orderResponse) {
+      const taxDecision = session.metadata?.taxDecision as
+        | {
+            taxRegime?: string;
+            taxPolicyVersion?: string;
+            decisionRecord?: unknown;
+            lineItems?: Array<{ productId: string; name: string; taxAmountCents: number; taxRate: number }>;
+          }
+        | undefined;
+
       orderResponse = await this.orderPlacementPort.createOrder({
         customerId: session.customerId,
         customerEmail,
@@ -351,6 +372,31 @@ export class CreatePaymentIntentUseCase {
         taxAmountCents: session.taxAmount.cents,
         taxAddedCents: session.taxAddedAmount.cents,
         taxIncludedInSubtotal: session.taxIncludedInSubtotal,
+        marketId: session.marketId,
+        localeCode: session.localeCode,
+        catalogCurrencyCode: basket.currency,
+        displayedCurrencyCode: session.total.currency,
+        versionSnapshot: {
+          marketVersion: session.marketId ? String(session.metadata?.marketVersion ?? '') : undefined,
+          taxPolicyVersion: taxDecision?.taxPolicyVersion,
+        },
+        decisionLog: taxDecision?.decisionRecord ? [taxDecision.decisionRecord] : undefined,
+        appliedPromotions: session.appliedPromotions.map(p => ({
+          promotionId: p.promotionId,
+          code: p.promotionCode,
+          name: p.name,
+          discountAmountCents: p.discountAmountCents,
+          targetId: p.targetId,
+          ruleId: p.ruleId,
+          policyVersion: p.policyVersion,
+        })),
+        taxLines: taxDecision?.lineItems?.map(line => ({
+          name: line.name,
+          rate: line.taxRate,
+          amountCents: line.taxAmountCents,
+          taxRegime: taxDecision.taxRegime,
+          policyVersion: taxDecision.taxPolicyVersion,
+        })),
         metadata: {
           ...session.metadata,
           vatNumber: session.vatNumber,

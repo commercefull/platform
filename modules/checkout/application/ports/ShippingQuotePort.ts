@@ -24,6 +24,8 @@ export interface ShippingQuoteRequest {
   };
   totalWeight?: number;
   totalValueCents?: number;
+  /** Ship-from country (fulfillment source) for origin→destination lane rates. */
+  originCountry?: string;
 }
 
 export interface ShippingQuotePort {

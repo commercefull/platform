@@ -13,7 +13,65 @@
  * `Money.fromCents` at the DB/API boundary (columns are bigint cents) and
  * `Money.create` when the source value is in major units (e.g. 49.99).
  * Convert to a display string only at the view layer via format()/formatCents().
+ *
+ * Minor-unit handling is ISO 4217 aware: `Money.create(1500, 'JPY')` stores
+ * 1500 minor units (not 150000), and `Money.create(1.234, 'KWD')` stores 1234.
+ * Never multiply/divide by a hardcoded `100` at call sites — use
+ * `toMinorUnits`/`fromMinorUnits` so 0- and 3-decimal currencies stay correct.
  */
+
+/** ISO 4217 minor-unit exponents for currencies that are not 2-decimal. */
+const CURRENCY_DECIMALS: Record<string, number> = {
+  // 0-decimal currencies
+  BIF: 0,
+  CLP: 0,
+  DJF: 0,
+  GNF: 0,
+  ISK: 0,
+  JPY: 0,
+  KMF: 0,
+  KRW: 0,
+  PYG: 0,
+  RWF: 0,
+  UGX: 0,
+  UYI: 0,
+  VND: 0,
+  VUV: 0,
+  XAF: 0,
+  XOF: 0,
+  XPF: 0,
+  // 3-decimal currencies
+  BHD: 3,
+  IQD: 3,
+  JOD: 3,
+  KWD: 3,
+  LYD: 3,
+  OMR: 3,
+  TND: 3,
+  // 4-decimal currency
+  CLF: 4,
+  UYW: 4,
+};
+
+/**
+ * Number of minor units per major unit for a currency (ISO 4217 exponent).
+ * Defaults to 2 for every currency not listed in `CURRENCY_DECIMALS`.
+ */
+export function getCurrencyDecimals(currency: string): number {
+  return CURRENCY_DECIMALS[currency.toUpperCase()] ?? 2;
+}
+
+/** Convert a major-unit amount (e.g. 49.99) to integer minor units (e.g. 4999). */
+export function toMinorUnits(majorAmount: number, currency: string): number {
+  const factor = 10 ** getCurrencyDecimals(currency);
+  return Math.round(majorAmount * factor);
+}
+
+/** Convert integer minor units (e.g. 4999) to a major-unit amount (e.g. 49.99). */
+export function fromMinorUnits(minorAmount: number, currency: string): number {
+  const factor = 10 ** getCurrencyDecimals(currency);
+  return minorAmount / factor;
+}
 
 export class Money {
   private readonly _cents: number;
@@ -25,7 +83,7 @@ export class Money {
   }
 
   static create(amount: number, currency: string = 'USD'): Money {
-    return new Money(amount * 100, currency);
+    return new Money(toMinorUnits(amount, currency), currency);
   }
 
   static zero(currency: string = 'USD'): Money {
@@ -37,7 +95,7 @@ export class Money {
   }
 
   get amount(): number {
-    return this._cents / 100;
+    return fromMinorUnits(this._cents, this._currency);
   }
 
   get currency(): string {
@@ -146,7 +204,7 @@ export class Money {
   }
 
   toString(): string {
-    return `${this._currency} ${this.amount.toFixed(2)}`;
+    return `${this._currency} ${this.amount.toFixed(getCurrencyDecimals(this._currency))}`;
   }
 
   toJSON(): { cents: number; currency: string } {
@@ -190,7 +248,7 @@ export function formatPrice(amount: number, currency: string = 'USD', locale: st
  *   formatCents(4999, 'USD', 'en-US')  → "$49.99"
  */
 export function formatCents(cents: number, currency: string = 'USD', locale: string = 'en-US'): string {
-  return formatPrice(cents / 100, currency, locale);
+  return formatPrice(fromMinorUnits(cents, currency), currency, locale);
 }
 
 /**
@@ -205,10 +263,11 @@ export function formatPriceWithTax(
   currency: string,
   locale: string,
   priceDisplayMode: 'inclusive_tax' | 'exclusive_tax' = 'exclusive_tax',
+  taxLabel: string = 'incl. VAT',
 ): string {
   const formatted = formatPrice(amount, currency, locale);
   if (priceDisplayMode === 'inclusive_tax') {
-    return `${formatted} (incl. VAT)`;
+    return `${formatted} (${taxLabel})`;
   }
   return formatted;
 }
@@ -225,6 +284,7 @@ export function formatCentsWithTax(
   currency: string,
   locale: string,
   priceDisplayMode: 'inclusive_tax' | 'exclusive_tax' = 'exclusive_tax',
+  taxLabel: string = 'incl. VAT',
 ): string {
-  return formatPriceWithTax(cents / 100, currency, locale, priceDisplayMode);
+  return formatPriceWithTax(fromMinorUnits(cents, currency), currency, locale, priceDisplayMode, taxLabel);
 }

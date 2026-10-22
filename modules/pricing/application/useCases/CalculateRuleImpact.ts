@@ -65,7 +65,7 @@ export class CalculateRuleImpactUseCase {
     });
 
     // Calculate price with only this rule applied
-    const priceAfterRule = applyAdjustments(beforeRule.originalPriceCents, rule.adjustments).priceCents;
+    const priceAfterRule = applyAdjustments(beforeRule.originalPriceCents, rule.adjustments, context.currencyCode ?? 'USD').priceCents;
 
     // Create the afterRule result
     const afterRule: PricingResult = {

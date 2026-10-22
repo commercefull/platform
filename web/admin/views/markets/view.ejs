@@ -1,0 +1,91 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto">
+      <a href="/admin/markets" class="btn btn-outline-secondary"><%= t('common.back') %></a>
+      <a href="/admin/markets/<%= market.marketId %>/edit" class="btn btn-primary"><%= t('market:edit') %></a>
+      <% if (market.status !== 'active') { %>
+      <form method="POST" action="/admin/markets/<%= market.marketId %>/launch" class="d-inline">
+        <button class="btn btn-success" type="submit" <%= readiness && !readiness.launchable ? 'disabled' : '' %>><%= t('market:launch') %></button>
+      </form>
+      <% } %>
+      <% if (market.status === 'active') { %>
+      <form method="POST" action="/admin/markets/<%= market.marketId %>/disable" class="d-inline">
+        <button class="btn btn-warning" type="submit"><%= t('market:disable') %></button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('market:title') %> — <%= market.code %></h3></div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-5"><%= t('market:status') %></dt><dd class="col-7"><span class="badge bg-<%= market.status === 'active' ? 'green' : market.status === 'disabled' ? 'red' : 'secondary' %>"><%= market.status %></span> v<%= market.version %></dd>
+              <dt class="col-5"><%= t('market:countries') %></dt><dd class="col-7"><%= (market.countryCodes || []).join(', ') %></dd>
+              <dt class="col-5"><%= t('market:defaultCurrency') %></dt><dd class="col-7"><%= market.defaultCurrencyCode %> (<%= (market.supportedCurrencyCodes || []).join(', ') %>)</dd>
+              <dt class="col-5"><%= t('market:defaultLocale') %></dt><dd class="col-7"><%= market.defaultLocaleCode %> (<%= (market.supportedLocaleCodes || []).join(', ') %>)</dd>
+              <dt class="col-5"><%= t('market:taxDisplayMode') %></dt><dd class="col-7"><%= market.taxDisplayMode %></dd>
+              <dt class="col-5"><%= t('market:catalogAssortmentId') %></dt><dd class="col-7"><code><%= market.catalogAssortmentId || '—' %></code></dd>
+              <dt class="col-5"><%= t('market:defaultPriceListId') %></dt><dd class="col-7"><code><%= market.defaultPriceListId || '—' %></code></dd>
+              <dt class="col-5"><%= t('market:contractingEntityId') %></dt><dd class="col-7"><code><%= market.contractingEntityId || '—' %></code></dd>
+              <dt class="col-5"><%= t('market:hostnamePatterns') %></dt><dd class="col-7"><%= (market.hostnamePatterns || []).join(', ') || '—' %></dd>
+              <dt class="col-5"><%= t('market:allowedPaymentMethods') %></dt><dd class="col-7"><%= (market.allowedPaymentMethods || []).join(', ') || '—' %></dd>
+              <dt class="col-5"><%= t('market:allowedFulfillmentMethods') %></dt><dd class="col-7"><%= (market.allowedFulfillmentMethods || []).join(', ') || '—' %></dd>
+            </dl>
+          </div>
+        </div>
+        <% if (market.capabilities && Object.keys(market.capabilities).length) { %>
+        <div class="card mb-3">
+          <div class="card-header"><h3 class="card-title"><%= t('market:capabilities') %></h3></div>
+          <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+              <% Object.keys(market.capabilities).forEach(function(cap) { %>
+              <span class="badge bg-<%= market.capabilities[cap] ? 'green-lt' : 'red-lt' %>"><%= cap %></span>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+      <div class="col-md-6">
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title"><%= t('market:readinessChecklist') %></h3>
+            <% if (readiness) { %>
+            <span class="badge bg-<%= readiness.launchable ? 'green' : 'orange' %>"><%= readiness.readinessScorePercent %>%</span>
+            <% } %>
+          </div>
+          <div class="card-body table-responsive p-0">
+            <% if (readiness) { %>
+            <table class="table">
+              <thead>
+                <tr><th><%= t('market:dimension') %></th><th><%= t('market:status') %></th><th><%= t('market:issues') %></th></tr>
+              </thead>
+              <tbody>
+                <% readiness.dimensions.forEach(function(dim) { %>
+                <tr>
+                  <td><%= t('market:' + dim.dimension) %><% if (dim.blocking) { %> <span class="text-danger">*</span><% } %></td>
+                  <td><span class="badge bg-<%= dim.status === 'ready' ? 'green' : dim.status === 'warning' ? 'orange' : 'red' %>"><%= t('market:' + dim.status) %></span></td>
+                  <td><small class="text-secondary"><%= (dim.issues || []).join('; ') || '—' %></small></td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+            <% if (!readiness.launchable) { %>
+            <div class="card-body"><div class="alert alert-warning mb-0"><%= t('market:launchBlocked') %></div></div>
+            <% } %>
+            <% } else { %>
+            <div class="card-body"><p class="text-secondary">—</p></div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

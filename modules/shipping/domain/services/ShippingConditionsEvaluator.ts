@@ -28,6 +28,8 @@ export interface ShippingConditionContext {
   country?: string;
   state?: string;
   postalCode?: string;
+  /** Ship-from country — enables origin→destination lane conditions. */
+  originCountry?: string;
   currency?: string;
   orderDate?: Date;
 }
@@ -98,6 +100,18 @@ export function evaluateConditions(conditions: unknown, ctx: ShippingConditionCo
   if (Array.isArray(cond.excludeCountries) && cond.excludeCountries.length > 0) {
     if (ctx.country && cond.excludeCountries.includes(ctx.country)) {
       return { applicable: false, adjustmentCents: 0, reason: `Country ${ctx.country} is excluded` };
+    }
+  }
+
+  // Origin country restrictions (ship-from → ship-to lanes)
+  if (Array.isArray(cond.originCountries) && cond.originCountries.length > 0) {
+    if (!ctx.originCountry || !cond.originCountries.includes(ctx.originCountry)) {
+      return { applicable: false, adjustmentCents: 0, reason: `Origin country ${ctx.originCountry} not in allowed list` };
+    }
+  }
+  if (Array.isArray(cond.excludeOriginCountries) && cond.excludeOriginCountries.length > 0) {
+    if (ctx.originCountry && cond.excludeOriginCountries.includes(ctx.originCountry)) {
+      return { applicable: false, adjustmentCents: 0, reason: `Origin country ${ctx.originCountry} is excluded` };
     }
   }
 

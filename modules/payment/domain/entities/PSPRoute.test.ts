@@ -149,6 +149,37 @@ describe('PSPRoute', () => {
     expect(route.supportsAmount(50000)).toBe(false); // above max
   });
 
+  it('should check destination-country support', () => {
+    const route = PSPRoute.create(createProps);
+    expect(route.supportsCountry('JP')).toBe(true); // no caps = all countries
+
+    const routeWithCaps = PSPRoute.reconstitute({
+      routeId: 'route_5',
+      organizationId: 'org_1',
+      provider: 'klarna',
+      priority: 1,
+      isActive: true,
+      config: { apiKey: 'key', webhookSecret: 'secret', testMode: true },
+      capabilities: {
+        supportsAuthCapture: true,
+        supportsPartialCapture: true,
+        supportsPartialRefund: true,
+        supportsVoid: true,
+        requiresRedirect: true,
+        supportsTokenization: false,
+        supportsWebhooks: true,
+        supportedCurrencies: [],
+        supportedCountries: ['DE', 'FR', 'US'],
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    expect(routeWithCaps.supportsCountry('DE')).toBe(true);
+    expect(routeWithCaps.supportsCountry('us')).toBe(true); // case-insensitive
+    expect(routeWithCaps.supportsCountry('JP')).toBe(false);
+  });
+
   it('should redact secrets in toJSON', () => {
     const route = PSPRoute.create(createProps);
     const json = route.toJSON() as Record<string, unknown>;

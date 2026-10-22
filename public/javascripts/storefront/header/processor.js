@@ -59,8 +59,20 @@ export function nextSelectedIndex(current, delta, length) {
  * @returns {string} new URL
  */
 export function buildCurrencyUrl(currentHref, currency) {
+  return buildParamUrl(currentHref, 'currency', currency);
+}
+
+/**
+ * Build the URL for switching any storefront context param (market, locale, currency).
+ *
+ * @param {string} currentHref — `window.location.href`
+ * @param {string} param — query param name ('market' | 'locale' | 'currency')
+ * @param {string} value — new value
+ * @returns {string} new URL
+ */
+export function buildParamUrl(currentHref, param, value) {
   const url = new URL(currentHref);
-  url.searchParams.set('currency', currency);
+  url.searchParams.set(param, value);
   return url.toString();
 }
 

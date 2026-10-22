@@ -133,7 +133,11 @@ export class OrderRepo implements IOrderRepository {
           "customerNotes" = $27, "adminNotes" = $28, "estimatedDeliveryDate" = $29,
           "hasGiftWrapping" = $30, "giftMessage" = $31, "isGift" = $32,
           "isSubscriptionOrder" = $33, "parentOrderId" = $34, "tags" = $35,
-          "metadata" = $36, "updatedAt" = $37
+          "metadata" = $36, "updatedAt" = $37,
+          "marketId" = $39, "localeCode" = $40, "contractingEntityId" = $41,
+          "catalogCurrencyCode" = $42, "displayedCurrencyCode" = $43,
+          "settlementCurrencyCode" = $44, "accountingCurrencyCode" = $45,
+          "exchangeRateSnapshot" = $46, "versionSnapshot" = $47, "decisionLog" = $48
         WHERE "orderId" = $38`,
         [
           order.orderNumber,
@@ -174,6 +178,16 @@ export class OrderRepo implements IOrderRepository {
           order.metadata ? JSON.stringify(order.metadata) : null,
           now,
           order.orderId,
+          order.marketId || null,
+          order.localeCode || null,
+          order.contractingEntityId || null,
+          order.catalogCurrencyCode || null,
+          order.displayedCurrencyCode || null,
+          order.settlementCurrencyCode || null,
+          order.accountingCurrencyCode || null,
+          order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
+          JSON.stringify(order.versionSnapshot ?? {}),
+          JSON.stringify(order.decisionLog ?? []),
         ],
       );
     } else {
@@ -185,11 +199,15 @@ export class OrderRepo implements IOrderRepository {
           "taxExempt", "orderDate", "customerEmail", "customerPhone", "customerName",
           "customerNotes", "ipAddress", "userAgent", "referralSource",
           "hasGiftWrapping", "giftMessage", "isGift", "isSubscriptionOrder",
-          "parentOrderId", "tags", "metadata", "createdAt", "updatedAt"
+          "parentOrderId", "tags", "metadata", "createdAt", "updatedAt",
+          "marketId", "localeCode", "contractingEntityId",
+          "catalogCurrencyCode", "displayedCurrencyCode",
+          "settlementCurrencyCode", "accountingCurrencyCode",
+          "exchangeRateSnapshot", "versionSnapshot", "decisionLog"
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
           $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
-          $31, $32, $33, $34, $35, $36, $37, $38
+          $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48
         )`,
         [
           order.orderId,
@@ -230,6 +248,16 @@ export class OrderRepo implements IOrderRepository {
           order.metadata ? JSON.stringify(order.metadata) : null,
           now,
           now,
+          order.marketId || null,
+          order.localeCode || null,
+          order.contractingEntityId || null,
+          order.catalogCurrencyCode || null,
+          order.displayedCurrencyCode || null,
+          order.settlementCurrencyCode || null,
+          order.accountingCurrencyCode || null,
+          order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
+          JSON.stringify(order.versionSnapshot ?? {}),
+          JSON.stringify(order.decisionLog ?? []),
         ],
       );
     }
@@ -375,7 +403,8 @@ export class OrderRepo implements IOrderRepository {
           "firstName" = $1, "lastName" = $2, "company" = $3, "addressLine1" = $4,
           "addressLine2" = $5, "city" = $6, "state" = $7, "postalCode" = $8,
           "country" = $9, "phoneNumber" = $10, "email" = $11,
-          "isDefault" = $12, "additionalInfo" = $13, "updatedAt" = $14
+          "isDefault" = $12, "additionalInfo" = $13, "updatedAt" = $14,
+          "dependentLocality" = $16, "sortingCode" = $17, "addressLines" = $18
         WHERE "orderAddressId" = $15`,
         [
           address.firstName,
@@ -384,8 +413,8 @@ export class OrderRepo implements IOrderRepository {
           address.address1,
           address.address2 || null,
           address.city,
-          address.state,
-          address.postalCode,
+          address.state ?? null,
+          address.postalCode ?? null,
           address.country,
           address.phone || null,
           address.email || null,
@@ -393,6 +422,9 @@ export class OrderRepo implements IOrderRepository {
           address.metadata ? JSON.stringify(address.metadata) : null,
           now,
           address.orderAddressId,
+          address.dependentLocality ?? null,
+          address.sortingCode ?? null,
+          address.addressLines ? JSON.stringify(address.addressLines) : null,
         ],
       );
     } else {
@@ -401,8 +433,9 @@ export class OrderRepo implements IOrderRepository {
           "orderAddressId", "orderId", "addressType", "firstName", "lastName",
           "company", "addressLine1", "addressLine2", "city", "state", "postalCode",
           "country", "phoneNumber", "email", "isDefault", "additionalInfo",
+          "dependentLocality", "sortingCode", "addressLines",
           "createdAt", "updatedAt"
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
         [
           address.orderAddressId,
           address.orderId,
@@ -413,13 +446,16 @@ export class OrderRepo implements IOrderRepository {
           address.address1,
           address.address2 || null,
           address.city,
-          address.state,
-          address.postalCode,
+          address.state ?? null,
+          address.postalCode ?? null,
           address.country,
           address.phone || null,
           address.email || null,
           address.isDefault,
           address.metadata ? JSON.stringify(address.metadata) : null,
+          address.dependentLocality ?? null,
+          address.sortingCode ?? null,
+          address.addressLines ? JSON.stringify(address.addressLines) : null,
           now,
           now,
         ],
@@ -723,6 +759,28 @@ export class OrderRepo implements IOrderRepository {
       metadata: row.metadata
         ? ((typeof row.metadata === 'string' ? JSON.parse(row.metadata as string) : row.metadata) as Record<string, unknown>)
         : undefined,
+      marketId: row.marketId ?? undefined,
+      localeCode: row.localeCode ?? undefined,
+      contractingEntityId: row.contractingEntityId ?? undefined,
+      catalogCurrencyCode: row.catalogCurrencyCode ?? undefined,
+      displayedCurrencyCode: row.displayedCurrencyCode ?? undefined,
+      settlementCurrencyCode: row.settlementCurrencyCode ?? undefined,
+      accountingCurrencyCode: row.accountingCurrencyCode ?? undefined,
+      exchangeRateSnapshot: row.exchangeRateSnapshot
+        ? ((typeof row.exchangeRateSnapshot === 'string'
+            ? JSON.parse(row.exchangeRateSnapshot as string)
+            : row.exchangeRateSnapshot) as Order['exchangeRateSnapshot'])
+        : undefined,
+      versionSnapshot: (row.versionSnapshot
+        ? typeof row.versionSnapshot === 'string'
+          ? JSON.parse(row.versionSnapshot as string)
+          : row.versionSnapshot
+        : {}) as Order['versionSnapshot'],
+      decisionLog: (row.decisionLog
+        ? typeof row.decisionLog === 'string'
+          ? JSON.parse(row.decisionLog as string)
+          : row.decisionLog
+        : []) as Order['decisionLog'],
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt),
       deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
@@ -780,8 +838,11 @@ export class OrderRepo implements IOrderRepository {
       address1: row.addressLine1,
       address2: row.addressLine2 ?? undefined,
       city: row.city,
-      state: row.state,
-      postalCode: row.postalCode,
+      dependentLocality: row.dependentLocality ?? undefined,
+      state: row.state ?? undefined,
+      postalCode: row.postalCode ?? undefined,
+      sortingCode: row.sortingCode ?? undefined,
+      addressLines: Array.isArray(row.addressLines) ? (row.addressLines as string[]) : undefined,
       country: row.country,
       countryCode: row.country, // country is 2-char code
       phone: row.phoneNumber ?? undefined,

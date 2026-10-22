@@ -4,6 +4,8 @@
 
 The Payment feature handles all payment processing including transactions, refunds, and fraud prevention. It integrates with payment providers and manages the complete payment lifecycle.
 
+Payment availability is capability-driven: `PaymentCapabilityService` checks method eligibility against `MarketCapabilities`, destination country, and transaction context instead of scattered boolean flags. `RoutePayment` filters PSP routes through `PSPRoute.supportsCountry()` so a route only serves countries it is configured for. `paymentTransaction` rows track transaction vs. settlement currency and FX conversion data for multi-currency accounting. New PSP protocols integrate as adapters behind the existing gateway port without touching checkout or order code.
+
 ---
 
 ## Use Cases

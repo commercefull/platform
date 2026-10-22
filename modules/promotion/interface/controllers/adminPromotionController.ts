@@ -5,6 +5,7 @@ import { jsonResponse, redirectResponse } from 'libs/apiResponse';
  */
 
 import { logger } from '../../../../libs/logger';
+import { toMinorUnits } from '../../../../libs/money';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { ListPromotionsCommand } from '../../application/useCases/ListPromotions';
 import { CreatePromotionCommand } from '../../application/useCases/CreatePromotion';
@@ -83,13 +84,14 @@ export const createPromotionForm = async (req: HttpRequest, res: HttpResponse): 
 export const createPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const body = req.body as HttpRequestBody;
-    const { code, name, description, type, value, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
+    const { code, name, description, type, value, currency, minOrderAmount, maxDiscountAmount, usageLimit, usageLimitPerCustomer, startsAt, endsAt } =
       body as {
         code?: string;
         name: string;
         description?: string;
         type: 'percentage' | 'fixed_amount' | 'free_shipping';
         value: string;
+        currency?: string;
         minOrderAmount?: string;
         maxDiscountAmount?: string;
         usageLimit?: string;
@@ -98,14 +100,15 @@ export const createPromotion = async (req: HttpRequest, res: HttpResponse): Prom
         endsAt?: string;
       };
 
+    const promotionCurrency = currency || 'USD';
     const command = new CreatePromotionCommand(
       name,
       type,
-      type === 'fixed_amount' ? Math.round(parseFloat(value) * 100) : parseFloat(value),
+      type === 'fixed_amount' ? toMinorUnits(parseFloat(value), promotionCurrency) : parseFloat(value),
       code,
       description,
-      minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined,
-      maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined,
+      minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), promotionCurrency) : undefined,
+      maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), promotionCurrency) : undefined,
       usageLimit ? parseInt(usageLimit) : undefined,
       usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined,
       startsAt ? new Date(startsAt) : undefined,
@@ -199,6 +202,7 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
     value,
     minOrderAmount,
     maxDiscountAmount,
+    currency,
     usageLimit,
     usageLimitPerCustomer,
     startsAt,
@@ -211,6 +215,7 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
     value?: string;
     minOrderAmount?: string;
     maxDiscountAmount?: string;
+    currency?: string;
     usageLimit?: string;
     usageLimitPerCustomer?: string;
     startsAt?: string;
@@ -222,9 +227,10 @@ export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Prom
   if (description !== undefined) updates.description = description;
   if (status !== undefined) updates.status = status;
   if (value !== undefined) updates.value = parseFloat(value);
-  if (minOrderAmount !== undefined) updates.minOrderAmountCents = minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined;
+  const updateCurrency = currency || 'USD';
+  if (minOrderAmount !== undefined) updates.minOrderAmountCents = minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), updateCurrency) : undefined;
   if (maxDiscountAmount !== undefined)
-    updates.maxDiscountAmountCents = maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined;
+    updates.maxDiscountAmountCents = maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), updateCurrency) : undefined;
   if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
   if (usageLimitPerCustomer !== undefined)
     updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
@@ -297,7 +303,7 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
             productId: 'sample-product',
             name: 'Sample Product',
             quantity: parseInt(body.itemQty as string, 10) || 1,
-            unitPriceCents: Math.round((parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100) * 100),
+            unitPriceCents: toMinorUnits(parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100, currency || 'USD'),
           },
         ];
 
@@ -319,12 +325,10 @@ export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Pro
           isDigital: item.isDigital,
         }),
       ),
-      subtotalCents: Math.round(
-        (parseFloat(subtotal as string) ||
-          items.reduce((sum: number, i: { unitPriceCents: number; quantity: number }) => sum + i.unitPriceCents * i.quantity, 0) / 100) *
-          100,
-      ),
-      shippingAmountCents: Math.round((parseFloat(shippingAmount as string) || 0) * 100),
+      subtotalCents: subtotal
+        ? toMinorUnits(parseFloat(subtotal as string), currency || 'USD')
+        : items.reduce((sum: number, i: { unitPriceCents: number; quantity: number }) => sum + i.unitPriceCents * i.quantity, 0),
+      shippingAmountCents: toMinorUnits(parseFloat(shippingAmount as string) || 0, currency || 'USD'),
       customerId: customerId || undefined,
       customerGroup: customerGroup || undefined,
       isFirstOrder: isFirstOrder === 'true',

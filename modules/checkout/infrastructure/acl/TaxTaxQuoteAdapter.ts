@@ -39,6 +39,15 @@ export class TaxTaxQuoteAdapter implements TaxQuotePort {
         taxAddedCents: taxResult.taxAddedCents,
         taxIncludedInSubtotal: taxResult.taxIncludedInSubtotal,
         reverseChargeApplied: taxResult.reverseChargeApplied,
+        taxRegime: taxResult.taxRegime,
+        taxPolicyVersion: taxResult.taxPolicyVersion,
+        decisionRecord: taxResult.decisionRecord,
+        lineItems: taxResult.lineItems?.map(line => ({
+          productId: line.productId,
+          name: line.name,
+          taxAmountCents: line.taxAmountCents,
+          taxRate: line.taxRate,
+        })),
       };
     } catch {
       return { success: false, taxAmountCents: 0 };

@@ -10,6 +10,7 @@ import { PromotionQuotePort } from '../../application/ports/PromotionQuotePort';
 import type { StoreContextPort } from '../../application/ports/StoreContextPort';
 import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../../libs/money';
+import type { AppliedPromotion } from '../../domain/entities/CheckoutSession';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
@@ -25,7 +26,8 @@ export class SetShippingAddressCommand {
     public readonly lastName: string,
     public readonly addressLine1: string,
     public readonly city: string,
-    public readonly postalCode: string,
+    /** Optional for countries without postal codes (e.g. AE, HK). */
+    public readonly postalCode: string | undefined,
     public readonly country: string,
     public readonly company?: string,
     public readonly addressLine2?: string,
@@ -132,6 +134,16 @@ export class SetShippingAddressUseCase {
         if (taxResult.success) session.setReverseChargeApplied(taxResult.reverseChargeApplied === true);
         taxAddedCents =
           taxResult.success && taxResult.taxAddedCents != null ? taxResult.taxAddedCents : taxIncludedInSubtotal ? 0 : taxAmountCents;
+        if (taxResult.success) {
+          session.updateMetadata({
+            taxDecision: {
+              taxRegime: taxResult.taxRegime,
+              taxPolicyVersion: taxResult.taxPolicyVersion,
+              decisionRecord: taxResult.decisionRecord,
+              lineItems: taxResult.lineItems,
+            },
+          });
+        }
       } else {
         taxAmountCents = 0;
       }
@@ -221,7 +233,14 @@ export class SetShippingAddressUseCase {
         couponCode: session.couponCode,
       });
       if (!session.couponCode && promoResult.totalDiscountAmountCents > 0) {
-        session.applyCoupon('AUTO_PROMOTION', Money.fromCents(promoResult.totalDiscountAmountCents, session.subtotal.currency ?? 'USD'));
+        session.applyPromotions(
+          promoResult.appliedPromotions.map(p => ({
+            promotionId: p.id,
+            name: p.name,
+            discountAmountCents: p.amountCents,
+          })),
+          Money.fromCents(promoResult.totalDiscountAmountCents, session.subtotal.currency ?? 'USD'),
+        );
       }
     } catch {
       // Promotion evaluation is best-effort
@@ -237,6 +256,7 @@ interface CheckoutSessionLike {
   couponCode?: string;
   vatNumber?: string;
   shippingAddress?: { country: string };
-  applyCoupon(code: string, discount: Money): void;
+  applyPromotions(promotions: AppliedPromotion[], discountAmount: Money): void;
   setReverseChargeApplied(applied: boolean): void;
+  updateMetadata(metadata: Record<string, unknown>): void;
 }

@@ -136,6 +136,13 @@ export class PSPRoute {
     return caps.supportedCurrencies.includes(currency.toUpperCase());
   }
 
+  supportsCountry(country: string): boolean {
+    const caps = this.props.capabilities;
+    const supported = caps?.supportedCountries ?? [];
+    if (!caps || supported.length === 0) return true;
+    return supported.includes(country.toUpperCase());
+  }
+
   supportsAmount(amountCents: number): boolean {
     const caps = this.props.capabilities;
     if (!caps) return true;

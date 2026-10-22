@@ -95,6 +95,10 @@ function mapToDiscount(row: DbOrderDiscount): OrderDiscount {
     description: row.description ?? undefined,
     type: row.type as DiscountType,
     value: Number(row.value),
+    promotionId: row.promotionId ?? undefined,
+    ruleId: row.ruleId ?? undefined,
+    policyVersion: row.policyVersion ?? undefined,
+    decisionInputs: (row.decisionInputs as Record<string, unknown> | null) ?? undefined,
     createdAt: toDateReq(row.createdAt),
     updatedAt: toDateReq(row.updatedAt),
   };
@@ -136,6 +140,10 @@ function mapToTax(row: DbOrderTax): OrderTax {
     jurisdiction: row.jurisdiction ?? undefined,
     taxProvider: row.taxProvider ?? undefined,
     providerTaxId: row.providerTaxId ?? undefined,
+    taxRuleId: row.taxRuleId ?? undefined,
+    taxRegime: row.taxRegime ?? undefined,
+    policyVersion: row.policyVersion ?? undefined,
+    decisionInputs: (row.decisionInputs as Record<string, unknown> | null) ?? undefined,
     createdAt: toDateReq(row.createdAt),
     updatedAt: toDateReq(row.updatedAt),
   };
@@ -203,8 +211,9 @@ class OrderQueryRepo {
       `INSERT INTO "orderDiscount" (
         "orderId", "orderItemId", "code", "name", "description",
         "type", "value", "discountAmountCents",
+        "promotionId", "ruleId", "policyVersion", "decisionInputs",
         "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *`,
       [
         params.orderId,
@@ -215,6 +224,10 @@ class OrderQueryRepo {
         params.type,
         params.value,
         params.discountAmountCents,
+        params.promotionId || null,
+        params.ruleId || null,
+        params.policyVersion || null,
+        JSON.stringify(params.decisionInputs ?? {}),
         now,
         now,
       ],
@@ -340,8 +353,9 @@ class OrderQueryRepo {
       `INSERT INTO "orderTax" (
         "orderId", "orderItemId", "taxType", "name", "rate", "amountCents",
         "jurisdiction", "taxProvider", "providerTaxId", "isIncludedInPrice",
+        "taxRuleId", "taxRegime", "policyVersion", "decisionInputs",
         "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *`,
       [
         params.orderId,
@@ -354,6 +368,10 @@ class OrderQueryRepo {
         params.taxProvider || null,
         params.providerTaxId || null,
         params.isIncludedInPrice ?? false,
+        params.taxRuleId || null,
+        params.taxRegime || null,
+        params.policyVersion || null,
+        JSON.stringify(params.decisionInputs ?? {}),
         now,
         now,
       ],

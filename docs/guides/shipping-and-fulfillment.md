@@ -125,5 +125,7 @@ Admin UI: `/admin/shipping` and `/admin/operations` (fulfillment/dispatch).
 
 - [Organization Setup](organization-setup.md) — warehouses and inventory
   locations that fulfillment routes through
+- [Market Launch](market-launch.md) — markets declare allowed fulfillment
+  methods; zone `locations` drive the shipping readiness dimension
 - [Regional Commerce Rollout Status](regional-commerce-rollout-progress.md)
   — the seeded shipping configuration (incl. the international rate)

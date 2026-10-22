@@ -55,9 +55,12 @@ export interface OrderAddressResponse {
   company?: string;
   address1: string;
   address2?: string;
+  addressLines?: string[];
   city: string;
-  state: string;
-  postalCode: string;
+  dependentLocality?: string;
+  state?: string;
+  postalCode?: string;
+  sortingCode?: string;
   country: string;
   countryCode: string;
   phone?: string;
@@ -201,9 +204,12 @@ export class GetOrderUseCase {
             company: order.shippingAddress.company,
             address1: order.shippingAddress.address1,
             address2: order.shippingAddress.address2,
+            addressLines: order.shippingAddress.addressLines,
             city: order.shippingAddress.city,
+            dependentLocality: order.shippingAddress.dependentLocality,
             state: order.shippingAddress.state,
             postalCode: order.shippingAddress.postalCode,
+            sortingCode: order.shippingAddress.sortingCode,
             country: order.shippingAddress.country,
             countryCode: order.shippingAddress.countryCode,
             phone: order.shippingAddress.phone,
@@ -221,9 +227,12 @@ export class GetOrderUseCase {
             company: order.billingAddress.company,
             address1: order.billingAddress.address1,
             address2: order.billingAddress.address2,
+            addressLines: order.billingAddress.addressLines,
             city: order.billingAddress.city,
+            dependentLocality: order.billingAddress.dependentLocality,
             state: order.billingAddress.state,
             postalCode: order.billingAddress.postalCode,
+            sortingCode: order.billingAddress.sortingCode,
             country: order.billingAddress.country,
             countryCode: order.billingAddress.countryCode,
             phone: order.billingAddress.phone,

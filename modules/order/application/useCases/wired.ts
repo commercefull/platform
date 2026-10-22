@@ -19,6 +19,7 @@ import { GetOrderForFulfillmentUseCase } from './GetOrderForFulfillment';
 import { ManageOrderNotesUseCase } from './ManageOrderNotes';
 import { ManageOrderItemsUseCase } from './ManageOrderItems';
 import { GetOrderHistoryUseCase } from './GetOrderHistory';
+import { GetOrderExplainabilityUseCase } from './GetOrderExplainability';
 import { ManageOrderReturnsUseCase } from './ManageOrderReturns';
 import { ManageStorefrontReturnsUseCase } from './ManageStorefrontReturns';
 import { TrackFulfillmentPackageUseCase } from './TrackFulfillmentPackage';
@@ -39,7 +40,7 @@ export const updateFulfillmentStatusUseCase = new UpdateFulfillmentStatusUseCase
 export const cancelOrderUseCase = new CancelOrderUseCase(orderRepo);
 export const processRefundUseCase = new ProcessRefundUseCase(orderRepo);
 export const addOrderNoteUseCase = new AddOrderNoteUseCase(orderRepo, orderQueryRepo);
-export const createOrderUseCase = new CreateOrderUseCase(orderRepo);
+export const createOrderUseCase = new CreateOrderUseCase(orderRepo, orderQueryRepo);
 export const createOrderRefundUseCase = new CreateOrderRefundUseCase(orderQueryRepo);
 export const getFulfillmentPackagesUseCase = new GetFulfillmentPackagesUseCase(orderFulfillmentRepo);
 export const getOrderDetailsUseCase = new GetOrderDetailsUseCase(orderRepo, orderQueryRepo);
@@ -50,6 +51,7 @@ export const getOrderForFulfillmentUseCase = new GetOrderForFulfillmentUseCase(o
 export const manageOrderNotesUseCase = new ManageOrderNotesUseCase(orderQueryRepo);
 export const manageOrderItemsUseCase = new ManageOrderItemsUseCase(orderRepo);
 export const getOrderHistoryUseCase = new GetOrderHistoryUseCase(orderRepo);
+export const getOrderExplainabilityUseCase = new GetOrderExplainabilityUseCase(orderRepo, orderQueryRepo);
 export const manageOrderReturnsUseCase = new ManageOrderReturnsUseCase(orderReturnRepo);
 export const manageStorefrontReturnsUseCase = new ManageStorefrontReturnsUseCase(orderReturnRepo);
 export const trackFulfillmentPackageUseCase = new TrackFulfillmentPackageUseCase(orderFulfillmentRepo);

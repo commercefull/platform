@@ -17,8 +17,10 @@ export class AddAddressCommand {
     public readonly customerId: string,
     public readonly addressLine1: string,
     public readonly city: string,
-    public readonly state: string,
-    public readonly postalCode: string,
+    /** Administrative area — optional for countries without states (e.g. BE). */
+    public readonly state: string | undefined,
+    /** Postal code — optional for countries without them (e.g. AE, HK). */
+    public readonly postalCode: string | undefined,
     public readonly country: string,
     public readonly countryCode: string,
     public readonly addressType: AddressType | undefined,
@@ -28,6 +30,12 @@ export class AddAddressCommand {
     public readonly lastName?: string,
     public readonly company?: string,
     public readonly isDefault?: boolean,
+    /** Locality below city level (e.g. Brazilian bairro, JP district). */
+    public readonly dependentLocality?: string,
+    /** Postal sorting code used by some postal systems (e.g. FR cedex). */
+    public readonly sortingCode?: string,
+    /** Canonical multi-line street (country-neutral superset of address1/2). */
+    public readonly addressLines?: string[],
   ) {}
 }
 
@@ -94,8 +102,11 @@ export class ManageAddressesUseCase {
       addressLine1: command.addressLine1,
       addressLine2: command.addressLine2 || null,
       city: command.city,
-      state: command.state,
-      postalCode: command.postalCode,
+      state: command.state ?? null,
+      postalCode: command.postalCode ?? null,
+      dependentLocality: command.dependentLocality ?? null,
+      sortingCode: command.sortingCode ?? null,
+      addressLines: command.addressLines ?? null,
       country: command.country,
       phone: command.phone || null,
       email: null,
@@ -185,7 +196,7 @@ export class ManageAddressesUseCase {
       addressLine2: address.addressLine2 ?? null,
       city: address.city,
       state: address.state || '',
-      postalCode: address.postalCode,
+      postalCode: address.postalCode ?? '',
       country: address.country,
       countryCode: address.country,
       addressType: address.addressType,

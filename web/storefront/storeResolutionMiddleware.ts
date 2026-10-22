@@ -1,6 +1,10 @@
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
-import { getStoreUseCase, manageSalesChannelsUseCase } from '../../modules/store';
+import { getStoreUseCase, manageSalesChannelsUseCase, manageMarketsUseCase, ListMarketsCommand } from '../../modules/store';
+import type { MarketResponse } from '../../modules/store';
 import { createCache } from '../../libs/cache';
+import { languageOf, textDirectionOf } from '../../libs/i18n';
+import { getAddressFieldUiMetadata } from '../../libs/address';
+import type { CommerceContext } from '../../libs/commerceContext';
 
 /**
  * Store Resolution Middleware
@@ -33,6 +37,7 @@ interface StoreSession {
   currency?: string;
   locale?: string;
   region?: string;
+  marketId?: string;
 }
 
 interface ResolvedStore {
@@ -76,6 +81,34 @@ const DEFAULT_REGION = 'US';
 // Store records change rarely — a short TTL removes the per-request
 // `store WHERE slug` lookup while keeping propagation bounded.
 const storeBySlugCache = createCache<ResolvedStore | null>({ namespace: 'storefront:store', ttlMs: 30_000 });
+const marketsCache = createCache<MarketResponse[]>({ namespace: 'storefront:markets', ttlMs: 30_000 });
+
+/** Active markets for the deployment — the market table is the
+ * configuration-driven replacement for HOST_STORE_MAP/REGION_DEFAULTS. */
+async function listActiveMarkets(): Promise<MarketResponse[]> {
+  return marketsCache.getOrSet('active', async () => {
+    const markets = await manageMarketsUseCase.list(new ListMarketsCommand({ status: 'active' }));
+    return markets;
+  });
+}
+
+/** Match a market whose `hostnamePatterns` cover the request host. */
+function marketForHostname(markets: MarketResponse[], host: string): MarketResponse | undefined {
+  const normalized = host.toLowerCase().replace(/^www\./, '');
+  return markets.find(m =>
+    m.hostnamePatterns.some(pattern => {
+      const p = pattern.toLowerCase();
+      if (p === '*') return false; // wildcard '*' is a fallback, not a match
+      return normalized === p || normalized.endsWith(`.${p}`) || normalized.startsWith(`${p}.`);
+    }),
+  );
+}
+
+/** Fallback market covering the geo-IP country. */
+function marketForCountry(markets: MarketResponse[], country: string): MarketResponse | undefined {
+  const upper = country.toUpperCase();
+  return markets.find(m => m.countryCodes.includes(upper));
+}
 
 /**
  * Resolve store slug from hostname.
@@ -193,6 +226,96 @@ function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region
 }
 
 /**
+ * Resolve the active market:
+ * explicit `?market=` (code or id) → session → hostname patterns →
+ * geo-IP country coverage → null (market-less deployments keep store logic).
+ */
+async function resolveMarket(req: HttpRequest, storeId?: string): Promise<MarketResponse | null> {
+  const markets = await listActiveMarkets();
+  if (markets.length === 0) return null;
+
+  const session = (req.session as unknown as { store?: StoreSession } | undefined)?.store;
+  const queryMarket = req.query.market as string | undefined;
+
+  if (queryMarket) {
+    const byKey = markets.find(m => m.marketId === queryMarket || m.code.toLowerCase() === queryMarket.toLowerCase());
+    if (byKey) return byKey;
+  }
+  if (session?.marketId) {
+    const sticky = markets.find(m => m.marketId === session.marketId);
+    if (sticky) return sticky;
+  }
+  const byHost = marketForHostname(markets, req.hostname || '');
+  if (byHost) return byHost;
+  const region = resolveRegionFromHeaders(req);
+  if (region) {
+    const byCountry = marketForCountry(markets, region);
+    if (byCountry) return byCountry;
+  }
+  if (storeId) {
+    const byStore = markets.find(m => m.storeId === storeId);
+    if (byStore) return byStore;
+  }
+  return null;
+}
+
+/**
+ * Build the composite CommerceContext for the request — customer-facing
+ * locale/language preferences layered over the resolved market.
+ */
+function buildCommerceContext(market: MarketResponse | null, locale: string, currency: string, region: string, store: ResolvedStore | null): CommerceContext {
+  return {
+    customer: {
+      locale,
+      language: languageOf(locale),
+      textDirection: textDirectionOf(locale),
+      preferredCurrencyCode: currency,
+    },
+    market: market
+      ? {
+          marketId: market.marketId,
+          marketCode: market.code,
+          marketVersion: market.version,
+          storeId: market.storeId ?? store?.storeId,
+          channelId: store?.defaultSalesChannelId,
+          catalogAssortmentId: market.catalogAssortmentId,
+          defaultPriceListId: market.defaultPriceListId,
+          supportedLocaleCodes: market.supportedLocaleCodes,
+          supportedCurrencyCodes: market.supportedCurrencyCodes,
+          defaultCurrencyCode: market.defaultCurrencyCode,
+          capabilities: market.capabilities as Record<string, boolean>,
+        }
+      : { storeId: store?.storeId, channelId: store?.defaultSalesChannelId },
+    transaction: {
+      browsingCurrencyCode: currency,
+      transactionCurrencyCode: currency,
+      shipToCountry: region,
+    },
+    legal: {
+      contractingEntityId: market?.contractingEntityId,
+    },
+  };
+}
+
+/**
+ * Apply customer-selected currency/locale overrides — validated against the
+ * market's supported sets so a French shopper can browse the EU market in
+ * en-GB paying EUR without forking the market config.
+ */
+function applyMarketOverrides(market: MarketResponse, req: HttpRequest): { locale: string; currency: string } {
+  const session = (req.session as unknown as { store?: StoreSession } | undefined)?.store;
+  let locale = session?.locale && market.supportedLocaleCodes.includes(session.locale) ? session.locale : market.defaultLocaleCode;
+  let currency = session?.currency && market.supportedCurrencyCodes.includes(session.currency) ? session.currency : market.defaultCurrencyCode;
+
+  const queryLocale = req.query.locale as string | undefined;
+  if (queryLocale && market.supportedLocaleCodes.includes(queryLocale)) locale = queryLocale;
+  const queryCurrency = req.query.currency as string | undefined;
+  if (queryCurrency && market.supportedCurrencyCodes.includes(queryCurrency)) currency = queryCurrency;
+
+  return { locale, currency };
+}
+
+/**
  * Set default store context on res.locals (used on error fallback).
  */
 function setDefaultLocals(res: HttpResponse): void {
@@ -203,6 +326,10 @@ function setDefaultLocals(res: HttpResponse): void {
   res.locals.currency = DEFAULT_CURRENCY;
   res.locals.locale = DEFAULT_LOCALE;
   res.locals.region = DEFAULT_REGION;
+  res.locals.market = null;
+  res.locals.commerceContext = buildCommerceContext(null, DEFAULT_LOCALE, DEFAULT_CURRENCY, DEFAULT_REGION, null);
+  res.locals.addressMetadata = getAddressFieldUiMetadata();
+  res.locals.marketCountries = [];
 }
 
 export async function resolveStore(req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> {
@@ -229,7 +356,19 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
       };
     });
 
-    const { region, locale, currency } = resolveStoreLocale(storeSlug, store);
+    const market = await resolveMarket(req, store?.storeId);
+    const resolved = resolveStoreLocale(storeSlug, store);
+    let { region, locale, currency } = resolved;
+
+    // A resolved market owns locale/currency — the market's configured
+    // defaults plus validated customer overrides replace the slug/region
+    // defaults. Without a market, legacy store resolution applies unchanged.
+    if (market) {
+      const marketLocale = applyMarketOverrides(market, req);
+      locale = marketLocale.locale;
+      currency = marketLocale.currency;
+      if (market.countryCodes.length > 0) region = market.countryCodes[0];
+    }
     const storeId = store?.storeId || '';
 
     // Attach to res.locals for controllers and views
@@ -240,13 +379,27 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
     res.locals.currency = currency;
     res.locals.locale = locale;
     res.locals.region = region;
+    res.locals.market = market;
+    res.locals.commerceContext = buildCommerceContext(market, locale, currency, region, store);
+    // Market/locale switchers — only rendered when multiple options exist.
+    res.locals.markets = await listActiveMarkets().catch(() => []);
+    res.locals.marketCurrencies = market ? market.supportedCurrencyCodes : (store?.supportedCurrencies ?? []);
+    res.locals.marketLocales = market ? market.supportedLocaleCodes : [];
+    // Per-country address-field requirements for country-driven address forms.
+    res.locals.addressMetadata = getAddressFieldUiMetadata();
+    res.locals.marketCountries = market ? market.countryCodes : [];
 
-    // Persist to session only for an explicit ?store= choice — hostname/geo/
-    // default resolution is deterministic, so writing it would create a
-    // session row for every anonymous visitor (pure write churn).
+    // Persist to session only for explicit ?store=/?market=/?locale=/?currency=
+    // choices — hostname/geo/default resolution is deterministic, so writing
+    // it would create a session row for every anonymous visitor.
     const session = req.session as unknown as { store?: StoreSession } | undefined;
-    if (session && typeof req.query.store === 'string' && session.store?.storeSlug !== storeSlug) {
-      session.store = { storeId, storeSlug, currency, locale, region };
+    const explicitChoice =
+      typeof req.query.store === 'string' ||
+      typeof req.query.market === 'string' ||
+      typeof req.query.locale === 'string' ||
+      typeof req.query.currency === 'string';
+    if (session && explicitChoice) {
+      session.store = { storeId, storeSlug, currency, locale, region, marketId: market?.marketId };
     }
   } catch {
     // Fall back to defaults on any error — never block the request

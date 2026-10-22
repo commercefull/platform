@@ -349,6 +349,7 @@ i18next
       'salesSegment',
       'auditLog',
       'organization',
+      'market',
       'recommendation',
     ],
     defaultNS: 'shared',

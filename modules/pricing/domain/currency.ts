@@ -3,6 +3,8 @@
  * Currency domain models for the pricing feature
  */
 
+import { formatPrice } from '../../../libs/money';
+
 export interface Currency {
   currencyId?: string; // UUID primary key
   code: string; // ISO 4217 currency code (e.g., USD, EUR, GBP)
@@ -39,26 +41,13 @@ export interface CurrencyRegion {
 }
 
 /**
- * Helper function to format currency amount
+ * Helper function to format currency amount.
+ * Delegates to `Intl.NumberFormat` (CLDR) via `libs/money` — the currency
+ * record's symbol/separator preferences are superseded by the locale's
+ * conventional formatting so output stays correct for every market.
  */
-export function formatCurrency(amount: number, currency: Currency): string {
-  // Clone amount to avoid mutating the original
-  let formattedAmount = amount;
-  const decimals = currency.decimalPlaces ?? currency.decimals ?? 2;
-  const position = currency.symbolPosition ?? currency.position ?? 'before';
-
-  // Round to the appropriate number of decimals
-  formattedAmount = Number(formattedAmount.toFixed(decimals));
-
-  // Format the number with the correct separators
-  const parts = formattedAmount.toString().split('.');
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousandsSeparator);
-
-  // Add decimal part if needed
-  const formatted = parts.length > 1 ? parts[0] + currency.decimalSeparator + parts[1] : parts[0];
-
-  // Apply the symbol in the correct position
-  return position === 'before' ? currency.symbol + formatted : formatted + currency.symbol;
+export function formatCurrency(amount: number, currency: Currency, locale: string = 'en-US'): string {
+  return formatPrice(amount, currency.code, locale);
 }
 
 /**

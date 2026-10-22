@@ -12,6 +12,7 @@ export * from './domain/repositories/PSPRoutingRepository';
 export * from './domain/entities/PSPRoute';
 export * from './domain/entities/FraudRule';
 export * from './domain/services/FraudRuleEvaluator';
+export * from './domain/services/PaymentCapabilityService';
 export * from './domain/events/PaymentEvents';
 export * from './domain/errors/PaymentErrors';
 

@@ -111,8 +111,9 @@ export class CompleteCheckoutUseCase {
       basketId: session.basketId,
       orderId: session.orderId,
       customerId: session.customerId,
-      storeId: session.metadata?.storeId as string | undefined,
-      channelId: session.metadata?.channelId as string | undefined,
+      storeId: session.storeId,
+      channelId: session.channelId,
+      marketId: session.marketId,
       totalCents: session.total.cents,
     });
 

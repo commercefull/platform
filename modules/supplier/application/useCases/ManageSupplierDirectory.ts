@@ -7,6 +7,7 @@
  */
 
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
+import { getCountryAddressMetadata } from '../../../../libs/address';
 
 export interface SupplierDirectoryPort {
   createSupplier(params: Record<string, unknown>): Promise<unknown>;
@@ -124,8 +125,18 @@ export class ManageSupplierDirectoryUseCase {
   }
 
   async createAddress(input: CreateSupplierAddressInput): Promise<unknown> {
-    if (!input.name || !input.addressLine1 || !input.city || !input.state || !input.postalCode || !input.country) {
+    if (!input.name || !input.addressLine1 || !input.city || !input.country) {
       throw new SupplierValidationError('Missing required address fields');
+    }
+
+    // Country-aware optionality: administrative area and postal code are
+    // required only where the country's postal system uses them.
+    const metadata = getCountryAddressMetadata(input.country);
+    if (metadata.requiredFields.includes('administrativeArea') && !input.state) {
+      throw new SupplierValidationError('State/Province is required for this country');
+    }
+    if (metadata.requiredFields.includes('postalCode') && !input.postalCode) {
+      throw new SupplierValidationError('Postal code is required for this country');
     }
 
     return this.suppliers.createSupplierAddress({

@@ -7,6 +7,7 @@ import { jsonResponse } from 'libs/apiResponse';
 import type { HttpNext, HttpRequest, HttpResponse } from 'libs/http';
 import { manageCustomerTicketsUseCase, manageFaqUseCase, manageStockAlertsUseCase } from '../../application/wired';
 import { getErrorMessage, getErrorStatusCode } from '../../../../libs/errors';
+import { toMinorUnits } from '../../../../libs/money';
 import { AlertStatus, NotificationChannel, PriceAlertType, TicketStatus, TicketPriority, TicketCategory } from '../../application/wired';
 
 type AsyncHandler = (req: HttpRequest, res: HttpResponse, _next: HttpNext) => Promise<void>;
@@ -245,7 +246,7 @@ export const createPriceAlert: AsyncHandler = async (req, res, _next) => {
     notificationChannel?: NotificationChannel;
   };
 
-  const toCents = (v?: number) => (v != null ? Math.round(Number(v) * 100) : undefined);
+  const toCents = (v?: number) => (v != null ? toMinorUnits(Number(v), body.currency || 'USD') : undefined);
   const alert = await manageStockAlertsUseCase.createPriceAlert({
     customerId,
     email: body.email,

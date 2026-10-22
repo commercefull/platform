@@ -20,6 +20,13 @@ export class InitiateCheckoutCommand {
     public readonly basketId: string,
     public readonly customerId?: string,
     public readonly guestEmail?: string,
+    /** Resolved market context from the edge (store/market resolution). */
+    public readonly marketContext?: {
+      marketId?: string;
+      storeId?: string;
+      channelId?: string;
+      localeCode?: string;
+    },
   ) {}
 }
 
@@ -39,7 +46,7 @@ export interface CheckoutResponse {
     lastName: string;
     addressLine1: string;
     city: string;
-    postalCode: string;
+    postalCode?: string;
     country: string;
   };
   billingAddress?: {
@@ -47,7 +54,7 @@ export interface CheckoutResponse {
     lastName: string;
     addressLine1: string;
     city: string;
-    postalCode: string;
+    postalCode?: string;
     country: string;
   };
   shippingMethodId?: string;
@@ -67,6 +74,13 @@ export interface CheckoutResponse {
   fulfillmentType: string;
   notes?: string;
   sameAsShipping: boolean;
+  /** Resolved market context for this session. */
+  marketId?: string;
+  storeId?: string;
+  channelId?: string;
+  localeCode?: string;
+  /** Structured promotions applied by the promotion engine. */
+  appliedPromotions?: Array<{ promotionId: string; name?: string; discountAmountCents: number }>;
   /** Customer VAT ID supplied for B2B quoting. */
   vatNumber?: string;
   /** True when intra-EU B2B reverse charge was applied — customer self-accounts VAT. */
@@ -129,6 +143,14 @@ export function mapCheckoutToResponse(session: CheckoutSession): CheckoutRespons
     fulfillmentType: session.fulfillmentType,
     notes: session.notes,
     sameAsShipping: session.sameAsShipping,
+    marketId: session.marketId,
+    storeId: session.storeId,
+    channelId: session.channelId,
+    localeCode: session.localeCode,
+    appliedPromotions:
+      session.appliedPromotions.length > 0
+        ? session.appliedPromotions.map(p => ({ promotionId: p.promotionId, name: p.name, discountAmountCents: p.discountAmountCents }))
+        : undefined,
     vatNumber: session.vatNumber,
     reverseChargeApplied: session.reverseChargeApplied || undefined,
     priceChanged: Array.isArray(session.metadata?.priceChanges) && session.metadata.priceChanges.length > 0 ? true : undefined,
@@ -178,7 +200,12 @@ export class InitiateCheckoutUseCase {
     });
 
     session.updateAmounts(basket.subtotal, Money.zero(basket.currency));
-    session.updateMetadata({ storeId: basket.storeId, channelId: basket.channelId });
+    session.setMarketContext({
+      marketId: command.marketContext?.marketId,
+      storeId: command.marketContext?.storeId ?? basket.storeId,
+      channelId: command.marketContext?.channelId ?? basket.channelId,
+      localeCode: command.marketContext?.localeCode,
+    });
 
     await this.checkoutRepository.save(session);
 

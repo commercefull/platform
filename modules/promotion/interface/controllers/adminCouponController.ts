@@ -7,6 +7,7 @@ import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 import { logger } from '../../../../libs/logger';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { toMinorUnits } from '../../../../libs/money';
 import { manageCouponsUseCase } from '../../application/wired';
 
 // ============================================================================
@@ -80,6 +81,7 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
       maxUsagePerCustomer?: string;
     };
 
+    const couponCurrency = currencyCode || 'USD';
     const coupon = await manageCouponsUseCase.create({
       code,
       name,
@@ -88,11 +90,11 @@ export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise
       discountAmountCents: discountAmount
         ? type === 'percentage'
           ? parseFloat(discountAmount)
-          : Math.round(parseFloat(discountAmount) * 100)
+          : toMinorUnits(parseFloat(discountAmount), couponCurrency)
         : undefined,
-      currencyCode: currencyCode || 'USD',
-      minOrderAmountCents: minOrderAmount ? Math.round(parseFloat(minOrderAmount) * 100) : undefined,
-      maxDiscountAmountCents: maxDiscountAmount ? Math.round(parseFloat(maxDiscountAmount) * 100) : undefined,
+      currencyCode: couponCurrency,
+      minOrderAmountCents: minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), couponCurrency) : undefined,
+      maxDiscountAmountCents: maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), couponCurrency) : undefined,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       isActive: isActive === 'true',

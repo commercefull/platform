@@ -13,4 +13,8 @@ export * from './CreateStoreHierarchy';
 export * from './ConfigureStorePickup';
 export * from './SetLocalDeliveryZone';
 export * from './ManageSalesChannels';
+export * from './ManageMarkets';
+export * from './EvaluateMarketReadiness';
+export * from './LaunchMarket';
+export * from './ResolveMarketContext';
 export * from './wired';

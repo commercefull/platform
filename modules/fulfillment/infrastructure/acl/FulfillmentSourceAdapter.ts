@@ -17,7 +17,7 @@ function toFulfillableStore(store: Store): FulfillableStore {
     name: store.name,
     address: store.address,
     settings: {
-      allowOnlineOrdering: store.settings?.allowGuestCheckout,
+      allowOnlineOrdering: store.settings?.fulfillment?.fulfillOnlineOrders ?? true,
       pickup: store.settings?.pickup ? { enabled: store.settings.pickup.enabled } : undefined,
       localDelivery: store.settings?.localDelivery ? { enabled: store.settings.localDelivery.enabled } : undefined,
     },

@@ -9,7 +9,7 @@ import {
 import { SetShippingAddressUseCase, SetShippingAddressCommand } from './SetShippingAddress';
 import { NotFoundError, BadRequestError } from '../../../../libs/errors';
 
-const command = () => new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US');
+const command = () => new SetShippingAddressCommand('ck-1', 'John', 'Doe', '123 Main St', 'NYC', '10001', 'US', undefined, undefined, 'NY');
 
 describe('SetShippingAddressUseCase', () => {
   let useCase: SetShippingAddressUseCase;

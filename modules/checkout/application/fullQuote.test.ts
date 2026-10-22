@@ -293,7 +293,7 @@ describe('E2E Checkout Full Quote', () => {
     // Step 2: Set shipping address (triggers tax + promo recalc)
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
     const addressResult = await setAddressUseCase.execute(
-      new SetShippingAddressCommand(checkoutId, 'John', 'Doe', '123 Main St', 'New York', '10001', 'US'),
+      new SetShippingAddressCommand(checkoutId, 'John', 'Doe', '123 Main St', 'New York', '10001', 'US', undefined, undefined, 'NY'),
     );
 
     expect(addressResult.shippingAddress).toBeDefined();
@@ -376,7 +376,7 @@ describe('E2E Checkout Full Quote', () => {
     const checkoutId = initiateResult.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
-    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Jane', 'Smith', '456 Oak Ave', 'LA', '90001', 'US'));
+    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Jane', 'Smith', '456 Oak Ave', 'LA', '90001', 'US', undefined, undefined, 'CA'));
 
     const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
@@ -407,7 +407,7 @@ describe('E2E Checkout Full Quote', () => {
     const checkoutId = initiateResult.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
-    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Bob', 'Jones', '789 Pine Rd', 'Chicago', '60601', 'US'));
+    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Bob', 'Jones', '789 Pine Rd', 'Chicago', '60601', 'US', undefined, undefined, 'IL'));
 
     const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
     await setShippingUseCase.execute(new SetShippingMethodCommand(checkoutId, 'standard'));
@@ -431,7 +431,7 @@ describe('E2E Checkout Full Quote', () => {
     const checkoutId = result.checkoutId;
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
-    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Alice', 'Brown', '321 Elm St', 'Seattle', '98101', 'US'));
+    await setAddressUseCase.execute(new SetShippingAddressCommand(checkoutId, 'Alice', 'Brown', '321 Elm St', 'Seattle', '98101', 'US', undefined, undefined, 'WA'));
 
     const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo, discountPort);
     await applyCouponUseCase.execute(new ApplyCouponCommand(checkoutId, 'SAVE18'));

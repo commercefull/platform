@@ -11,6 +11,10 @@ import type { SystemConfigPort, SystemConfigSummary } from '../application/ports
 import type { OrganizationLookupPort, OrganizationSummary } from '../application/ports/OrganizationLookupPort';
 import { SalesChannel, type SalesChannelProps } from '../domain/entities/SalesChannel';
 import type { SalesChannelRepository } from '../domain/repositories/SalesChannelRepository';
+import { Market } from '../domain/entities/Market';
+import type { MarketRepository } from '../domain/repositories/MarketRepository';
+import type { MarketReadinessFactsPort } from '../application/ports/MarketReadinessFactsPort';
+import type { MarketReadinessFacts } from '../domain/services/MarketReadinessEvaluator';
 
 jest.mock('../../../libs/events/eventBus', () => ({
   __esModule: true,
@@ -49,6 +53,64 @@ export function createSalesChannelRepository(): jest.Mocked<SalesChannelReposito
       return fns.get(prop);
     },
   }) as jest.Mocked<SalesChannelRepository>;
+}
+
+export function createMarketRepository(): jest.Mocked<MarketRepository> {
+  const fns = new Map<PropertyKey, jest.Mock>();
+  return new Proxy({} as object, {
+    get: (_target, prop) => {
+      if (!fns.has(prop)) fns.set(prop, jest.fn());
+      return fns.get(prop);
+    },
+  }) as jest.Mocked<MarketRepository>;
+}
+
+export function createMarketReadinessFactsPort(facts: Partial<MarketReadinessFacts> = {}): jest.Mocked<MarketReadinessFactsPort> {
+  return {
+    gatherFacts: jest.fn().mockResolvedValue({
+      localeCoveragePercent: 100,
+      configuredCurrencyCodes: ['EUR', 'GBP'],
+      hasCatalogAssortment: true,
+      catalogItemCount: 10,
+      hasPriceList: true,
+      hasTaxCoverage: true,
+      taxJurisdictionsCovered: ['DE', 'FR'],
+      hasPaymentMethod: true,
+      enabledPaymentMethods: ['creditCard'],
+      hasShippingCoverage: true,
+      hasReturnsPolicy: true,
+      hasContractingEntity: true,
+      termsVersion: 'v1',
+      complianceRulesCovered: 2,
+      hasSupportTemplates: true,
+      hasFraudCoverage: true,
+      ...facts,
+    }),
+  };
+}
+
+/** Real `Market` domain entity. */
+export function createMarket(overrides: Partial<Parameters<typeof Market.create>[0]> = {}): Market {
+  return Market.create({
+    marketId: 'market-1',
+    organizationId: 'org-1',
+    storeId: 'store-1',
+    code: 'EU',
+    name: 'European Union',
+    countryCodes: ['DE', 'FR'],
+    defaultCurrencyCode: 'EUR',
+    supportedCurrencyCodes: ['EUR', 'GBP'],
+    defaultLocaleCode: 'en-GB',
+    supportedLocaleCodes: ['en-GB', 'de-DE'],
+    catalogAssortmentId: 'assort-1',
+    defaultPriceListId: 'pl-1',
+    contractingEntityId: 'ent-1',
+    allowedPaymentMethods: ['creditCard'],
+    allowedFulfillmentMethods: ['shipping'],
+    hostnamePatterns: ['%.eu.example.com'],
+    metadata: { termsVersion: 'v1' },
+    ...overrides,
+  });
 }
 
 export function createSalesChannel(overrides: Partial<SalesChannelProps> = {}): SalesChannel {

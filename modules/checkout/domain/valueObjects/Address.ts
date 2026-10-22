@@ -4,6 +4,7 @@
  */
 
 import { CheckoutValidationError } from '../errors/CheckoutErrors';
+import { getCountryAddressMetadata } from '../../../../libs/address';
 
 export interface AddressProps {
   firstName: string;
@@ -12,8 +13,10 @@ export interface AddressProps {
   addressLine1: string;
   addressLine2?: string;
   city: string;
+  /** Administrative area (state/province/county/emirate) — required only for countries that use one. */
   region?: string;
-  postalCode: string;
+  /** Postal code — required only for countries whose postal system uses one. */
+  postalCode?: string;
   country: string;
   phone?: string;
 }
@@ -35,11 +38,19 @@ export class Address {
     if (!props.city) {
       throw new CheckoutValidationError('City is required');
     }
-    if (!props.postalCode) {
-      throw new CheckoutValidationError('Postal code is required');
-    }
     if (!props.country) {
       throw new CheckoutValidationError('Country is required');
+    }
+
+    // Country-aware optionality: administrative area and postal code are
+    // required only where the country's postal system uses them (drives
+    // UAE/HK postal-code-optional and BE region-optional addresses).
+    const metadata = getCountryAddressMetadata(props.country);
+    if (metadata.requiredFields.includes('administrativeArea') && !props.region) {
+      throw new CheckoutValidationError('Region/state is required for this country');
+    }
+    if (metadata.requiredFields.includes('postalCode') && !props.postalCode) {
+      throw new CheckoutValidationError('Postal code is required for this country');
     }
 
     return new Address(props);
@@ -77,7 +88,7 @@ export class Address {
     return this.props.region;
   }
 
-  get postalCode(): string {
+  get postalCode(): string | undefined {
     return this.props.postalCode;
   }
 
@@ -107,12 +118,13 @@ export class Address {
   }
 
   toString(): string {
+    const localityLine = [this.props.city, this.props.region, this.props.postalCode].filter(Boolean).join(', ');
     const parts = [
       this.fullName,
       this.props.company,
       this.props.addressLine1,
       this.props.addressLine2,
-      `${this.props.city}, ${this.props.region || ''} ${this.props.postalCode}`,
+      localityLine,
       this.props.country,
     ].filter(Boolean);
     return parts.join('\n');

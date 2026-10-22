@@ -25,6 +25,7 @@ exports.up = function (knex) {
     t.timestamp('lockedUntil');
     t.uuid('preferredLocaleId').references('localeId').inTable('locale');
     t.uuid('preferredCurrencyId').references('currencyId').inTable('currency');
+    t.uuid('homeMarketId').references('marketId').inTable('market').onDelete('SET NULL');
     t.string('timezone', 50);
     t.string('referralSource', 100);
     t.string('referralCode', 50);
@@ -48,6 +49,7 @@ exports.up = function (knex) {
     t.index('emailVerified');
     t.index('tags', null, 'gin');
     t.index('externalId');
+    t.index('homeMarketId');
     t.index('createdAt');
     t.index('deletedAt');
   });

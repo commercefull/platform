@@ -11,3 +11,4 @@ export * from './conditions';
 export * from './resolver';
 export * from './stacking';
 export * from './rounding';
+export * from './policyEngine';

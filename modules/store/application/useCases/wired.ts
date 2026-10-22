@@ -12,6 +12,11 @@ import { SetLocalDeliveryZoneUseCase } from './SetLocalDeliveryZone';
 import { CreateStoreHierarchyUseCase } from './CreateStoreHierarchy';
 import { ManageStoresAdminUseCase } from './ManageStoresAdmin';
 import { ManageSalesChannelsUseCase } from './ManageSalesChannels';
+import { ManageMarketsUseCase } from './ManageMarkets';
+import { EvaluateMarketReadinessUseCase } from './EvaluateMarketReadiness';
+import { LaunchMarketUseCase } from './LaunchMarket';
+import { ResolveMarketContextUseCase } from './ResolveMarketContext';
+import marketReadinessAdapter from '../../infrastructure/acl/MarketReadinessAdapter';
 import { SystemConfigAdapter } from '../../infrastructure/acl/SystemConfigAdapter';
 import { OrganizationLookupAdapter } from '../../infrastructure/acl/OrganizationLookupAdapter';
 import systemConfigurationRepo from '../../../configuration/infrastructure/repositories/SystemConfigurationRepo';
@@ -33,6 +38,10 @@ export const setLocalDeliveryZoneUseCase = new SetLocalDeliveryZoneUseCase(store
 export const createStoreHierarchyUseCase = new CreateStoreHierarchyUseCase(storeRepo);
 export const manageStoresAdminUseCase = new ManageStoresAdminUseCase(storeRepo);
 export const manageSalesChannelsUseCase = new ManageSalesChannelsUseCase(storeDataRepository.salesChannels, storeRepo);
+export const manageMarketsUseCase = new ManageMarketsUseCase(storeDataRepository.markets);
+export const evaluateMarketReadinessUseCase = new EvaluateMarketReadinessUseCase(storeDataRepository.markets, marketReadinessAdapter);
+export const launchMarketUseCase = new LaunchMarketUseCase(storeDataRepository.markets, marketReadinessAdapter);
+export const resolveMarketContextUseCase = new ResolveMarketContextUseCase(storeDataRepository.markets);
 
 export class FindActiveStoresUseCase {
   async execute() {

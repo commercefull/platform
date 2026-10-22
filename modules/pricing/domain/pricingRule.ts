@@ -103,6 +103,10 @@ export interface PriceContext {
   regionCode?: string; // Customer region for region-specific pricing
   storeId?: string;
   channelId?: string;
+  marketId?: string; // Resolved selling market
+  marketPriceListId?: string; // Market's default price list (checked before FX)
+  allowDynamicFxConversion?: boolean; // Whether FX fallback is permitted for this market
+  transactionTimestamp?: Date; // When the transaction occurs (historical rates)
   categoryIds?: string[]; // Product category IDs for category-scoped rules
   additionalData?: Record<string, unknown>;
   excludeRuleIds?: string[]; // IDs of pricing rules to exclude from calculation
@@ -128,6 +132,10 @@ export interface PricingResult {
   currency: string;
   exchangeRate?: number; // Added for currency conversion tracking
   originalCurrency?: string; // Original currency code before conversion
+  /** Provenance: which price list resolved the price, if any. */
+  priceListId?: string;
+  /** Version marker for order-time policy snapshots. */
+  pricingVersion?: string;
 }
 
 export interface TierPrice {

@@ -4,6 +4,8 @@
 
 The GDPR (General Data Protection Regulation) feature handles compliance with EU data protection regulations. It manages data subject requests (access, portability, deletion), cookie consent, and data processing records.
 
+Privacy requirements are jurisdiction-driven rather than GDPR-only: `PrivacyPolicyEvaluator` derives consent requirements (opt-in vs. opt-out, consent banners, do-not-sell) from the customer's jurisdiction using `libs/geo` country groups — covering GDPR/EEA, UK GDPR, CCPA/CPRA, LGPD, and APPI-style regimes — so adding a new jurisdiction is a country-group data change, not code.
+
 ---
 
 ## Use Cases

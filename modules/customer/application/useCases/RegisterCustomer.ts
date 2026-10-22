@@ -26,6 +26,8 @@ export class RegisterCustomerCommand {
     public readonly preferredLanguage?: string,
     public readonly metadata?: Record<string, unknown>,
     public readonly flags?: { isActive?: boolean; isVerified?: boolean },
+    /** Home selling market — stamped from the resolved market context at registration. */
+    public readonly homeMarketId?: string,
   ) {}
 }
 
@@ -104,6 +106,7 @@ export class RegisterCustomerUseCase {
       passwordResetExpires: null,
       verificationToken: null,
       agreeToTerms: false,
+      homeMarketId: command.homeMarketId ?? null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,

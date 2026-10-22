@@ -162,14 +162,35 @@
               </form>
             </div>
 
-            <!-- Store / Currency switcher -->
+            <!-- Market / Locale / Currency switcher -->
             <% if (typeof storeSlug !== 'undefined' && storeSlug) { %>
             <div class="hidden md:flex items-center gap-2 text-xs text-gray-500">
-              <span class="uppercase"><%= storeSlug %></span>
+              <% const activeMarket = (typeof market !== 'undefined' && market) ? market : null; %>
+              <% const allMarkets = (typeof markets !== 'undefined' && markets) ? markets : []; %>
+              <% if (allMarkets.length > 1) { %>
+              <select data-action="switch-market" class="bg-transparent border-0 text-xs text-gray-500 cursor-pointer hover:text-ink-900 focus:outline-none focus:ring-0 uppercase" aria-label="Switch market">
+                <% allMarkets.forEach(function(m) { %>
+                <option value="<%= m.code %>" <%= activeMarket && m.marketId === activeMarket.marketId ? 'selected' : '' %>><%= m.code %></option>
+                <% }); %>
+              </select>
               <span class="text-gray-300">·</span>
+              <% } else { %>
+              <span class="uppercase"><%= activeMarket ? activeMarket.code : storeSlug %></span>
+              <span class="text-gray-300">·</span>
+              <% } %>
+              <% const marketLocalesList = (typeof marketLocales !== 'undefined' && marketLocales && marketLocales.length > 1) ? marketLocales : []; %>
+              <% if (marketLocalesList.length > 1) { %>
+              <select data-action="switch-locale" class="bg-transparent border-0 text-xs text-gray-500 cursor-pointer hover:text-ink-900 focus:outline-none focus:ring-0" aria-label="Switch language">
+                <% const currentLocale = (typeof locale !== 'undefined' ? locale : 'en-US') || 'en-US'; %>
+                <% marketLocalesList.forEach(function(loc) { %>
+                <option value="<%= loc %>" <%= loc === currentLocale ? 'selected' : '' %>><%= loc %></option>
+                <% }); %>
+              </select>
+              <span class="text-gray-300">·</span>
+              <% } %>
               <select data-action="switch-currency" class="bg-transparent border-0 text-xs text-gray-500 cursor-pointer hover:text-ink-900 focus:outline-none focus:ring-0" aria-label="Switch currency">
                 <% const currentCurrency = (typeof currency !== 'undefined' ? currency : 'USD') || 'USD'; %>
-                <% const availableCurrencies = (typeof storeCurrencies !== 'undefined' && storeCurrencies) ? storeCurrencies : ['USD', 'GBP', 'EUR']; %>
+                <% const availableCurrencies = (typeof marketCurrencies !== 'undefined' && marketCurrencies && marketCurrencies.length) ? marketCurrencies : ((typeof storeCurrencies !== 'undefined' && storeCurrencies) ? storeCurrencies : ['USD', 'GBP', 'EUR']); %>
                 <% availableCurrencies.forEach(function(cur) { %>
                 <option value="<%= cur %>" <%= cur === currentCurrency ? 'selected' : '' %>><%= cur %></option>
                 <% }); %>

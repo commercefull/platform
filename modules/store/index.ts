@@ -7,9 +7,14 @@ export * from './application/useCases';
 export * from './domain/entities/Store';
 export * from './domain/entities/StoreCurrency';
 export * from './domain/entities/SalesChannel';
+export * from './domain/entities/Market';
+export * from './domain/entities/MarketCapabilities';
+export * from './domain/services/MarketReadinessEvaluator';
 export * from './domain/repositories/StoreRepository';
 export * from './domain/repositories/StoreCurrencyRepository';
 export * from './domain/repositories/SalesChannelRepository';
+export * from './domain/repositories/MarketRepository';
+export * from './application/ports/MarketReadinessFactsPort';
 export * from './domain/events/StoreEvents';
 export * from './domain/errors/StoreErrors';
 

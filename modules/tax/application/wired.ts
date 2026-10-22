@@ -3,6 +3,8 @@ import taxCommandRepository from '../infrastructure/repositories/TaxCommandRepos
 import { BasketTaxableBasketAdapter } from '../infrastructure/acl/BasketTaxableBasketAdapter';
 import { TaxQueryRepository } from '../infrastructure';
 import { CalculateOrderTaxUseCase } from './useCases/CalculateOrderTax';
+import { InternalRuleTaxEngine } from './services/InternalRuleTaxEngine';
+import type { TaxEnginePort } from '../domain/ports/TaxEnginePort';
 import { ApproveTaxExemptionUseCase } from './useCases/ApproveTaxExemption';
 import { RejectTaxExemptionUseCase } from './useCases/RejectTaxExemption';
 import { CreateTaxExemptionUseCase } from './useCases/CreateTaxExemption';
@@ -22,6 +24,7 @@ import basketRepo from '../../basket/infrastructure/repositories/BasketRepositor
 export const taxCommandRepo = taxCommandRepository.commands;
 
 export const calculateOrderTaxUseCase = new CalculateOrderTaxUseCase(taxQueryRepository.query);
+export const taxEngine: TaxEnginePort = new InternalRuleTaxEngine(calculateOrderTaxUseCase);
 export const approveTaxExemptionUseCase = new ApproveTaxExemptionUseCase(taxCommandRepo);
 export const rejectTaxExemptionUseCase = new RejectTaxExemptionUseCase(taxCommandRepo);
 export const createTaxExemptionUseCase = new CreateTaxExemptionUseCase(taxCommandRepo);

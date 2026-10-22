@@ -4,6 +4,8 @@
 
 The Tax feature manages tax rates, categories, and destination zones for accurate tax calculation. It supports multiple tax jurisdictions, compound taxes, product-specific categories, tax-inclusive UK/EU pricing, and tax-exclusive US destination sales tax. The enterprise regional seed provides representative New York, California, Delaware, UK, Germany, and France rules; production rates still require jurisdiction-specific review and updates.
 
+Tax is a dedicated service behind `TaxEnginePort`. `CalculateOrderTax` accepts a `TaxTransactionContext` (seller, buyer, `shipFrom`, `shipTo`, `billTo`, transaction timestamp) and produces a `TaxDecision` — regime (domestic / intra-EU reverse charge / destination VAT / export), line-level amounts, policy version, and an explainable `PolicyDecisionRecord`. Regional membership (EU/EEA/VAT area) resolves through `libs/geo` country groups rather than hardcoded lists. `InternalRuleTaxEngine` adapts the use case behind the port; a third-party tax provider (Avalara, TaxJar) plugs in by implementing the same port. Tax decisions are retained on checkout sessions and persisted as `orderTax` provenance rows for historical replay.
+
 ---
 
 ## Use Cases

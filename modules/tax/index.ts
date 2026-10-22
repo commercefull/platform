@@ -4,6 +4,8 @@
  */
 
 export * from './application/useCases';
+export * from './domain/entities/TaxDecision';
+export * from './domain/ports/TaxEnginePort';
 export * from './domain/repositories/TaxRepository';
 export * from './domain/errors/TaxErrors';
 

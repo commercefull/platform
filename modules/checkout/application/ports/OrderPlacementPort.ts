@@ -14,9 +14,17 @@ export interface OrderAddressInput {
   company?: string;
   address1: string;
   address2?: string;
+  /** Canonical multi-line street (country-neutral superset of address1/2). */
+  addressLines?: string[];
   city: string;
-  state: string;
-  postalCode: string;
+  /** Locality below city level (e.g. Brazilian bairro, JP district). */
+  dependentLocality?: string;
+  /** Administrative area — optional for countries without states (e.g. BE). */
+  state?: string;
+  /** Postal code — optional for countries without them (e.g. AE, HK). */
+  postalCode?: string;
+  /** Postal sorting code used by some postal systems (e.g. FR cedex). */
+  sortingCode?: string;
   country: string;
   countryCode: string;
   phone?: string;
@@ -64,6 +72,46 @@ export interface CreateOrderRequest {
   /** True when taxAmountCents is embedded in item prices (tax-inclusive pricing). */
   taxIncludedInSubtotal?: boolean;
   metadata?: Record<string, unknown>;
+  // ---- Global commerce context resolved at the edge (snapshotted on the order) ----
+  marketId?: string;
+  localeCode?: string;
+  contractingEntityId?: string;
+  catalogCurrencyCode?: string;
+  displayedCurrencyCode?: string;
+  settlementCurrencyCode?: string;
+  accountingCurrencyCode?: string;
+  /** FX quotes applied during checkout — frozen on the order. */
+  exchangeRateSnapshot?: Array<{ fromCurrency: string; toCurrency: string; rate: number; asOf: string }>;
+  /** Named policy/rule versions active at decision time. */
+  versionSnapshot?: Record<string, string | undefined>;
+  /** Explainable decision records (tax, promotions, compliance). */
+  decisionLog?: unknown[];
+  /** Structured promotion-engine discounts → persisted to `orderDiscount`. */
+  appliedPromotions?: Array<{
+    promotionId?: string;
+    code?: string;
+    name?: string;
+    discountAmountCents: number;
+    targetId?: string;
+    ruleId?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
+  /** Tax engine line breakdown → persisted to `orderTax`. */
+  taxLines?: Array<{
+    orderItemId?: string;
+    taxType?: string;
+    name: string;
+    rate: number;
+    amountCents: number;
+    jurisdiction?: string;
+    taxProvider?: string;
+    isIncludedInPrice?: boolean;
+    taxRuleId?: string;
+    taxRegime?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
 }
 
 export interface OrderSnapshotItem {

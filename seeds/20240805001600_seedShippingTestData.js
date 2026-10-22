@@ -23,6 +23,7 @@ const ZONE_IDS = {
   US_DOMESTIC: '01936002-0000-7000-8000-000000000001',
   US_WEST: '01936002-0000-7000-8000-000000000002',
   INTERNATIONAL: '01936002-0000-7000-8000-000000000003',
+  JAPAN: '01936002-0000-7000-8000-000000000004',
 };
 
 const RATE_IDS = {
@@ -30,6 +31,7 @@ const RATE_IDS = {
   UPS_EXPRESS_US: '01936003-0000-7000-8000-000000000002',
   FEDEX_GROUND_US: '01936003-0000-7000-8000-000000000003',
   FREE_SHIPPING_US: '01936003-0000-7000-8000-000000000004',
+  UPS_EXPRESS_JP: '01936003-0000-7000-8000-000000000005',
 };
 
 const PACKAGING_IDS = {
@@ -146,8 +148,17 @@ exports.seed = async function (knex) {
         isActive: true,
         priority: 10,
         locationType: 'country',
-        locations: JSON.stringify(['CA', 'MX', 'GB', 'DE', 'FR', 'AU']),
+        locations: JSON.stringify(['CA', 'MX', 'GB', 'DE', 'FR', 'BE', 'AE', 'AU']),
         excludedLocations: JSON.stringify(['US']),
+      },
+      {
+        shippingZoneId: ZONE_IDS.JAPAN,
+        name: 'Japan',
+        description: 'Japan delivery zone — JPY-denominated rates',
+        isActive: true,
+        priority: 8,
+        locationType: 'country',
+        locations: JSON.stringify(['JP']),
       },
     ])
     .onConflict('shippingZoneId')
@@ -316,6 +327,19 @@ exports.seed = async function (knex) {
         currencyCode: 'USD',
         taxable: false,
         priority: 20,
+      },
+      {
+        shippingRateId: RATE_IDS.UPS_EXPRESS_JP,
+        shippingZoneId: ZONE_IDS.JAPAN,
+        shippingMethodId: METHOD_IDS.UPS_EXPRESS,
+        name: 'UPS Express - Japan',
+        isActive: true,
+        rateType: 'flat',
+        baseRateCents: 800,
+        perItemRateCents: 0,
+        currencyCode: 'JPY',
+        taxable: true,
+        priority: 5,
       },
     ])
     .onConflict('shippingRateId')

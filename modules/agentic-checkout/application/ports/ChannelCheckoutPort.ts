@@ -14,7 +14,7 @@ export interface ChannelAddressInput {
   city: string;
   region?: string;
   country: string;
-  postalCode: string;
+  postalCode?: string;
   phone?: string;
 }
 
@@ -61,7 +61,7 @@ export interface ChannelCheckoutSnapshot {
     lastName: string;
     addressLine1: string;
     city: string;
-    postalCode: string;
+    postalCode?: string;
     country: string;
   };
   shippingMethodId?: string;

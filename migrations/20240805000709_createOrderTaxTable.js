@@ -13,10 +13,15 @@ exports.up = function (knex) {
     t.string('taxProvider', 255);
     t.string('providerTaxId', 255);
     t.boolean('isIncludedInPrice').notNullable().defaultTo(false);
+    t.uuid('taxRuleId');
+    t.string('taxRegime', 50);
+    t.string('policyVersion', 50);
+    t.jsonb('decisionInputs').notNullable().defaultTo('{}');
 
     t.index('orderId');
     t.index('orderItemId');
     t.index('taxType');
+    t.index('taxRegime');
   });
 };
 

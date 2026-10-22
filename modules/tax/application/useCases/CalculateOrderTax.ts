@@ -10,7 +10,10 @@
  */
 
 import { TaxExemption } from '../../domain/entities/TaxExemption';
+import type { TaxRegime } from '../../domain/entities/TaxDecision';
 import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemptionStatus } from '../../taxTypes';
+import type { PolicyDecisionRecord } from '../../../../libs/rules/policyEngine';
+import { isInEuVatArea } from '../../../../libs/geo';
 
 export interface TaxRateInfo {
   rate: number;
@@ -73,6 +76,21 @@ export class CalculateOrderTaxCommand {
     public readonly organizationId?: string,
     /** Seller/origin country (store country) — used to detect cross-border EU sales. */
     public readonly originCountry?: string,
+    /** Buyer type — B2B enables reverse-charge treatment where applicable. */
+    public readonly buyerType?: 'B2C' | 'B2B',
+    /** Richer ship-from address (warehouse); `country` wins over originCountry when both set. */
+    public readonly shipFromAddress?: TaxAddress,
+    /** Billing address — used when no shipping destination exists (digital goods). */
+    public readonly billToAddress?: TaxAddress,
+    /** Incoterms for cross-border duty/tax responsibility (DDP/DDU/…). */
+    public readonly incoterms?: string,
+    /** When the transaction occurs — drives historical rate lookup + versioning. */
+    public readonly transactionTimestamp?: Date,
+    /** Selling market + channel context recorded on the decision. */
+    public readonly marketId?: string,
+    public readonly channelId?: string,
+    /** Transaction currency (minor units below are in this currency). */
+    public readonly currencyCode?: string,
   ) {}
 }
 
@@ -109,39 +127,17 @@ export interface CalculateOrderTaxResponse {
   reverseChargeApplied?: boolean;
   /** Echo of the customer VAT number used for the reverse-charge quote. */
   vatNumber?: string;
+  /** Named tax regime that governed the quote (explainability). */
+  taxRegime?: TaxRegime;
+  /** Version marker for the tax policy/engine that produced the quote. */
+  taxPolicyVersion?: string;
+  /** Explainable decision record — inputs + regime + outcome for order logs. */
+  decisionRecord?: PolicyDecisionRecord;
   message?: string;
 }
 
-/** EU member states (ISO-2) — used for intra-EU B2B reverse charge detection. */
-const EU_MEMBER_STATES = new Set([
-  'AT',
-  'BE',
-  'BG',
-  'HR',
-  'CY',
-  'CZ',
-  'DK',
-  'EE',
-  'FI',
-  'FR',
-  'DE',
-  'GR',
-  'HU',
-  'IE',
-  'IT',
-  'LV',
-  'LT',
-  'LU',
-  'MT',
-  'NL',
-  'PL',
-  'PT',
-  'RO',
-  'SK',
-  'SI',
-  'ES',
-  'SE',
-]);
+/** Version marker for the internal rule-based tax engine. */
+const TAX_POLICY_VERSION = 'internal-rules@1.0.0';
 
 // ============================================================================
 // Use Case
@@ -167,7 +163,12 @@ export class CalculateOrderTaxUseCase {
         };
       }
 
-      if (!command.shippingAddress?.country) {
+      // Digital goods / services have no ship-to: fall back to the billing
+      // address when no shipping destination was supplied.
+      const destinationAddress =
+        command.shippingAddress?.country || !command.billToAddress ? command.shippingAddress : command.billToAddress;
+
+      if (!destinationAddress?.country) {
         return {
           success: false,
           subtotalCents: 0,
@@ -177,26 +178,29 @@ export class CalculateOrderTaxUseCase {
           taxRate: 0,
           lineItems: [],
           taxIncludedInSubtotal: command.pricesIncludeTax,
-          message: 'Shipping address country is required for tax calculation',
+          message: 'A destination (shipping or billing) country is required for tax calculation',
         };
       }
 
       const address = {
-        country: command.shippingAddress.country,
-        region: command.shippingAddress.region || command.shippingAddress.state,
-        postalCode: command.shippingAddress.postalCode,
-        city: command.shippingAddress.city,
+        country: destinationAddress.country,
+        region: destinationAddress.region || destinationAddress.state,
+        postalCode: destinationAddress.postalCode,
+        city: destinationAddress.city,
       };
+
+      // Origin: per-fulfillment ship-from wins over the store-level originCountry.
+      const originCountry = command.shipFromAddress?.country ?? command.originCountry;
 
       // B2B reverse charge: valid customer VAT number for an EU destination
       // different from the seller's origin — the customer self-accounts VAT.
-      const destinationCountry = command.shippingAddress.country.toUpperCase();
+      const destinationCountry = destinationAddress.country.toUpperCase();
       let reverseChargeApplied = false;
       if (
         command.vatNumber &&
-        EU_MEMBER_STATES.has(destinationCountry) &&
-        command.originCountry &&
-        command.originCountry.toUpperCase() !== destinationCountry &&
+        isInEuVatArea(destinationCountry) &&
+        originCountry &&
+        originCountry.toUpperCase() !== destinationCountry &&
         this.taxQuery.validateCustomerVatNumber
       ) {
         const vatValid = await this.taxQuery.validateCustomerVatNumber(command.vatNumber, destinationCountry);
@@ -319,6 +323,23 @@ export class CalculateOrderTaxUseCase {
       // the added portion increases the total.
       const totalCents = subtotal + command.shippingAmountCents + addedTaxCents;
 
+      const taxRegime = this.determineRegime({
+        originCountry,
+        destinationCountry,
+        reverseChargeApplied,
+        noNexusObligation,
+        hasAnyExemption,
+      });
+      const decisionRecord = this.buildDecisionRecord(command, {
+        originCountry,
+        destinationCountry,
+        taxRegime,
+        reverseChargeApplied,
+        noNexusObligation,
+        totalTaxAmountCents,
+        addedTaxCents,
+      });
+
       return {
         success: true,
         subtotalCents: subtotal,
@@ -331,6 +352,9 @@ export class CalculateOrderTaxUseCase {
         taxAddedCents: addedTaxCents,
         reverseChargeApplied: reverseChargeApplied || undefined,
         vatNumber: reverseChargeApplied ? command.vatNumber : undefined,
+        taxRegime,
+        taxPolicyVersion: TAX_POLICY_VERSION,
+        decisionRecord,
         message: reverseChargeApplied
           ? 'Reverse charge: VAT accounted for by the customer'
           : noNexusObligation
@@ -361,6 +385,78 @@ export class CalculateOrderTaxUseCase {
         message: (error as Error).message || 'Failed to calculate tax',
       };
     }
+  }
+
+  /**
+   * Determine the named tax regime governing the quote — the headline
+   * classification persisted on the order's decision log.
+   */
+  private determineRegime(args: {
+    originCountry?: string;
+    destinationCountry: string;
+    reverseChargeApplied: boolean;
+    noNexusObligation: boolean;
+    hasAnyExemption: boolean;
+  }): TaxRegime {
+    const origin = args.originCountry?.toUpperCase();
+    const dest = args.destinationCountry.toUpperCase();
+    if (args.reverseChargeApplied) return 'EU_B2B_REVERSE_CHARGE';
+    if (args.noNexusObligation) return 'US_SALES_TAX_NO_NEXUS';
+    if (args.hasAnyExemption) return 'EXEMPT';
+    if (dest === 'US') return 'US_SALES_TAX';
+    if (dest === 'GB') return 'UK_VAT';
+    if (isInEuVatArea(dest)) {
+      if (origin && isInEuVatArea(origin)) return origin === dest ? 'EU_VAT_DOMESTIC' : 'EU_VAT_CROSS_BORDER_B2C';
+      return 'CROSS_BORDER_IMPORT';
+    }
+    if (origin && origin === dest) return 'DOMESTIC_TAX';
+    return 'CROSS_BORDER_IMPORT';
+  }
+
+  /**
+   * Build the explainable decision record for the order log — the facts in,
+   * the regime out, and the quote summary for audit/replay.
+   */
+  private buildDecisionRecord(
+    command: CalculateOrderTaxCommand,
+    summary: {
+      originCountry?: string;
+      destinationCountry: string;
+      taxRegime: TaxRegime;
+      reverseChargeApplied: boolean;
+      noNexusObligation: boolean;
+      totalTaxAmountCents: number;
+      addedTaxCents: number;
+    },
+  ): PolicyDecisionRecord {
+    return {
+      decisionId: crypto.randomUUID(),
+      domain: 'tax',
+      decision: 'tax_quote',
+      allowed: true,
+      version: TAX_POLICY_VERSION,
+      reasonCode: 'QUOTE_COMPUTED',
+      obligations: [],
+      inputs: {
+        marketId: command.marketId,
+        channelId: command.channelId,
+        buyerType: command.buyerType,
+        originCountry: summary.originCountry,
+        destinationCountry: summary.destinationCountry,
+        incoterms: command.incoterms,
+        currencyCode: command.currencyCode,
+        pricesIncludeTax: command.pricesIncludeTax,
+        hasVatNumber: !!command.vatNumber,
+      },
+      outputs: {
+        taxRegime: summary.taxRegime,
+        reverseChargeApplied: summary.reverseChargeApplied,
+        noNexusObligation: summary.noNexusObligation,
+        totalTaxAmountCents: summary.totalTaxAmountCents,
+        addedTaxCents: summary.addedTaxCents,
+      },
+      evaluatedAt: command.transactionTimestamp ?? new Date(),
+    };
   }
 
   /**

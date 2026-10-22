@@ -36,7 +36,7 @@ const orderRouter = new OrderRouter(
         ? {
             storeId: store.storeId,
             name: store.name,
-            canFulfillOnline: store.settings?.allowGuestCheckout ?? true,
+            canFulfillOnline: store.settings?.fulfillment?.fulfillOnlineOrders ?? true,
             canPickupInStore: store.settings?.pickup?.enabled ?? false,
             localDeliveryEnabled: store.settings?.localDelivery?.enabled ?? false,
           }

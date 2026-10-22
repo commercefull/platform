@@ -57,7 +57,7 @@ const storeDefinitions = [
     line1: '200 North Spring Street',
     timezone: 'America/Los_Angeles',
     defaultCurrency: 'USD',
-    currencies: ['USD', 'EUR'],
+    currencies: ['USD', 'EUR', 'JPY'],
     taxZoneCode: 'enterprise-us-ca',
   },
   {
@@ -336,7 +336,7 @@ exports.seed = async function (knex) {
     }
   }
 
-  const currencies = await knex('currency').whereIn('code', ['USD', 'GBP', 'EUR']);
+  const currencies = await knex('currency').whereIn('code', ['USD', 'GBP', 'EUR', 'JPY']);
   const currencyByCode = new Map(currencies.map(currency => [currency.code, currency.currencyId]));
   for (const store of storeDefinitions) {
     for (const code of store.currencies) {
@@ -492,6 +492,16 @@ exports.seed = async function (knex) {
       targetType: 'cart',
       sortOrder: 0,
     });
+  }
+
+  // Native JPY base price for the shared regional test product — exercises
+  // zero-decimal ISO-4217 pricing without relying on FX conversion.
+  const regionalProduct = await knex('product').where({ productId: '00000000-0000-0000-0000-000000000001' }).first('productId');
+  if (regionalProduct) {
+    await knex('productBasePrice')
+      .insert({ productId: '00000000-0000-0000-0000-000000000001', currencyCode: 'JPY', priceCents: 1499 })
+      .onConflict(['productId', 'productVariantId', 'currencyCode'])
+      .merge();
   }
 };
 

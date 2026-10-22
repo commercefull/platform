@@ -14,9 +14,15 @@ export interface OrderAddressProps {
   company?: string;
   address1: string;
   address2?: string;
+  /** Canonical multi-line street (country-neutral superset of address1/2). */
+  addressLines?: string[];
   city: string;
-  state: string;
-  postalCode: string;
+  /** Locality below city level (e.g. Brazilian bairro, JP district). */
+  dependentLocality?: string;
+  state?: string;
+  postalCode?: string;
+  /** Postal sorting code used by some postal systems (e.g. FR cedex). */
+  sortingCode?: string;
   country: string;
   countryCode: string;
   phone?: string;
@@ -43,9 +49,12 @@ export class OrderAddress {
     company?: string;
     address1: string;
     address2?: string;
+    addressLines?: string[];
     city: string;
-    state: string;
-    postalCode: string;
+    dependentLocality?: string;
+    state?: string;
+    postalCode?: string;
+    sortingCode?: string;
     country: string;
     countryCode: string;
     phone?: string;
@@ -63,9 +72,12 @@ export class OrderAddress {
       company: props.company,
       address1: props.address1,
       address2: props.address2,
+      addressLines: props.addressLines,
       city: props.city,
+      dependentLocality: props.dependentLocality,
       state: props.state,
       postalCode: props.postalCode,
+      sortingCode: props.sortingCode,
       country: props.country,
       countryCode: props.countryCode,
       phone: props.phone,
@@ -106,14 +118,23 @@ export class OrderAddress {
   get address2(): string | undefined {
     return this.props.address2;
   }
+  get addressLines(): string[] | undefined {
+    return this.props.addressLines ? [...this.props.addressLines] : undefined;
+  }
   get city(): string {
     return this.props.city;
   }
-  get state(): string {
+  get dependentLocality(): string | undefined {
+    return this.props.dependentLocality;
+  }
+  get state(): string | undefined {
     return this.props.state;
   }
-  get postalCode(): string {
+  get postalCode(): string | undefined {
     return this.props.postalCode;
+  }
+  get sortingCode(): string | undefined {
+    return this.props.sortingCode;
   }
   get country(): string {
     return this.props.country;
@@ -149,6 +170,7 @@ export class OrderAddress {
     const parts = [
       this.props.address1,
       this.props.address2,
+      this.props.dependentLocality,
       this.props.city,
       this.props.state,
       this.props.postalCode,
@@ -185,9 +207,12 @@ export class OrderAddress {
       company: this.props.company,
       address1: this.props.address1,
       address2: this.props.address2,
+      addressLines: this.props.addressLines,
       city: this.props.city,
+      dependentLocality: this.props.dependentLocality,
       state: this.props.state,
       postalCode: this.props.postalCode,
+      sortingCode: this.props.sortingCode,
       country: this.props.country,
       countryCode: this.props.countryCode,
       phone: this.props.phone,

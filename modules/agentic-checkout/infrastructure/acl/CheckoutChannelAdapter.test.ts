@@ -74,6 +74,7 @@ function makeShippingAddress(): Address {
     lastName: 'Lovelace',
     addressLine1: '1 Main St',
     city: 'Springfield',
+    region: 'IL',
     postalCode: '12345',
     country: 'US',
   });

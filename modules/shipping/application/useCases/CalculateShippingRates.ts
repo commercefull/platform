@@ -30,6 +30,8 @@ export class CalculateShippingRatesCommand {
   constructor(
     public readonly destinationAddress: ShippingAddress,
     public readonly orderDetails: OrderDetails,
+    /** Ship-from country (warehouse/fulfillment source) for lane-aware rates. */
+    public readonly originCountry?: string,
   ) {}
 }
 
@@ -167,6 +169,7 @@ export class CalculateShippingRatesUseCase {
             country: destinationAddress.country,
             state: destinationAddress.state,
             postalCode: destinationAddress.postalCode,
+            originCountry: command.originCountry,
             currency: orderDetails.currency,
             orderDate: new Date(),
           };

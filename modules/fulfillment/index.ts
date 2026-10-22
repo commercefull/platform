@@ -5,6 +5,7 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/FulfillmentRepository';
+export * from './domain/valueObjects/DeliveryPromise';
 export * from './domain/events/FulfillmentEvents';
 export * from './domain/errors/FulfillmentErrors';
 

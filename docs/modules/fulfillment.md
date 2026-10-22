@@ -4,6 +4,8 @@
 
 The Fulfillment feature manages order fulfillment operations including picking, packing, shipping, delivery tracking, and returns. It supports multi-source fulfillment (warehouses, stores, dropship, 3PL partners) and provides a complete fulfillment lifecycle with status tracking.
 
+Online-fulfillment capability is driven by the store's `fulfillment.fulfillOnlineOrders` setting (previously miswired to `allowGuestCheckout`). Cross-border commitments are expressed as `DeliveryPromise` value objects combining lane facts, carrier service levels, and cut-off times.
+
 ---
 
 ## Use Cases

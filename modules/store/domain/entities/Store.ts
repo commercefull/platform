@@ -108,6 +108,10 @@ export interface StoreProps {
       maxDailyOrders: number;
       availableSlots: Array<{ day: string; startTime: string; endTime: string; maxOrders: number }>;
     };
+    fulfillment?: {
+      /** Whether this store location fulfills ship-from online orders. */
+      fulfillOnlineOrders?: boolean;
+    };
   };
 
   metadata?: Record<string, unknown>;

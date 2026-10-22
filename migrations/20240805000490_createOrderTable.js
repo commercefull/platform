@@ -58,6 +58,16 @@ exports.up = function (knex) {
         .notNullable()
         .defaultTo('unfulfilled');
       t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
+      t.string('localeCode', 20);
+      t.uuid('marketId').references('marketId').inTable('market').onDelete('SET NULL');
+      t.uuid('contractingEntityId').references('organizationId').inTable('organization').onDelete('SET NULL');
+      t.string('catalogCurrencyCode', 3);
+      t.string('displayedCurrencyCode', 3);
+      t.string('settlementCurrencyCode', 3);
+      t.string('accountingCurrencyCode', 3);
+      t.jsonb('exchangeRateSnapshot');
+      t.jsonb('versionSnapshot').notNullable().defaultTo('{}');
+      t.jsonb('decisionLog').notNullable().defaultTo('[]');
       t.bigInteger('subtotalCents').notNullable().defaultTo(0);
       t.bigInteger('discountTotalCents').notNullable().defaultTo(0);
       t.bigInteger('taxTotalCents').notNullable().defaultTo(0);
@@ -112,6 +122,8 @@ exports.up = function (knex) {
       t.index('customerEmail');
       t.index('accountId');
       t.index('organizationId');
+      t.index('contractingEntityId');
+      t.index('marketId');
       t.index('isSubscriptionOrder');
       t.index('parentOrderId');
       t.index('tags', null, 'gin');

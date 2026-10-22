@@ -22,6 +22,7 @@ import { MembershipBenefitsPort } from '../ports/MembershipBenefitsPort';
 import { LoyaltyBalancePort } from '../ports/LoyaltyBalancePort';
 import { PricingValidationError } from '../../domain/errors/PricingErrors';
 import { logger } from '../../../../libs/logger';
+import { toMinorUnits } from '../../../../libs/money';
 import { ConvertPriceUseCase } from './ConvertPrice';
 
 export interface CalculatePriceInput extends PriceContext {
@@ -79,8 +80,41 @@ export class CalculatePriceUseCase {
     let originalCurrency: string | undefined;
     const appliedRules: PricingResult['appliedRules'] = [];
 
-    // Handle currency conversion if the requested currency differs
-    if (requestedCurrency !== priceCurrency) {
+    // A market's default price list (or an explicit merchant price list) is
+    // authoritative for the market and is checked BEFORE any dynamic FX
+    // conversion — deterministic precedence: price list > FX.
+    const resolvedPriceListId = priceListId ?? input.marketPriceListId;
+    let resolvedFromPriceList = false;
+
+    if (resolvedPriceListId) {
+      const priceListItem = await this.pricingData.findPriceListItem(resolvedPriceListId, productId, variantId);
+
+      if (priceListItem) {
+        const previousPrice = currentPrice;
+        currentPrice = priceListItem.priceCents;
+        resolvedFromPriceList = true;
+        // Price list prices are expressed in the market's default currency
+        // (or the requested currency for explicit merchant overrides), so the
+        // resolved price is already in the target currency.
+        priceCurrency = requestedCurrency;
+        if (priceCurrency !== basePrice.currencyCode) {
+          originalCurrency = basePrice.currencyCode;
+        }
+
+        appliedRules.push({
+          ruleId: resolvedPriceListId,
+          ruleName: `Price List (${resolvedPriceListId})`,
+          adjustmentType: PricingAdjustmentType.OVERRIDE,
+          adjustmentValue: priceListItem.priceCents,
+          impact: previousPrice - currentPrice,
+        });
+      }
+    }
+
+    // Handle currency conversion only when the market permits dynamic FX and
+    // no price list already resolved the price in the requested currency.
+    const fxAllowed = input.allowDynamicFxConversion !== false;
+    if (!resolvedFromPriceList && requestedCurrency !== priceCurrency && fxAllowed) {
       const { convertedPriceCents, appliedRules: currencyRules } = await this.convertPrice.execute({
         priceCents: currentPrice,
         fromCurrencyCode: priceCurrency,
@@ -92,25 +126,6 @@ export class CalculatePriceUseCase {
       priceCurrency = requestedCurrency;
 
       appliedRules.push(...currencyRules);
-    }
-
-    // Step 2: Apply an explicit price list override when given
-    // (merchant quote tooling — FIXED/OVERRIDE entries are absolute cents)
-    if (priceListId) {
-      const priceListItem = await this.pricingData.findPriceListItem(priceListId, productId, variantId);
-
-      if (priceListItem) {
-        const previousPrice = currentPrice;
-        currentPrice = priceListItem.priceCents;
-
-        appliedRules.push({
-          ruleId: priceListId,
-          ruleName: `Price List (${priceListId})`,
-          adjustmentType: PricingAdjustmentType.OVERRIDE,
-          adjustmentValue: priceListItem.priceCents,
-          impact: previousPrice - currentPrice,
-        });
-      }
     }
 
     // Step 3: Apply tier pricing (quantity discounts)
@@ -148,13 +163,13 @@ export class CalculatePriceUseCase {
           const previousPrice = currentPrice;
 
           // Apply the price adjustment based on its type
-          // (amount operands are stored in major units — convert to cents)
+          // (amount operands are stored in major units — convert to minor units)
           if (customerPrice.adjustmentType === PricingAdjustmentType.FIXED) {
-            currentPrice = Math.round(customerPrice.adjustmentValue * 100);
+            currentPrice = toMinorUnits(customerPrice.adjustmentValue, priceCurrency);
           } else if (customerPrice.adjustmentType === PricingAdjustmentType.PERCENTAGE) {
             currentPrice = Math.round(currentPrice * (1 - customerPrice.adjustmentValue / 100));
           } else if (customerPrice.adjustmentType === PricingAdjustmentType.OVERRIDE) {
-            currentPrice = Math.round(customerPrice.adjustmentValue * 100);
+            currentPrice = toMinorUnits(customerPrice.adjustmentValue, priceCurrency);
           }
 
           // Find the price list name for the rule description
@@ -184,7 +199,7 @@ export class CalculatePriceUseCase {
       // Check if the rule conditions are met
       if (isRuleApplicable(rule, context)) {
         const previousPrice = currentPrice;
-        const { priceCents, applied } = applyAdjustments(currentPrice, rule.adjustments);
+        const { priceCents, applied } = applyAdjustments(currentPrice, rule.adjustments, priceCurrency);
         currentPrice = priceCents;
 
         if (applied) {
@@ -245,7 +260,7 @@ export class CalculatePriceUseCase {
 
         // Make sure customer has enough points
         if (pointsToApply > 0 && pointsToApply <= currentPoints) {
-          const pointsValueCents = Math.round(pointsToApply * pointsToMoneyRatio * 100);
+          const pointsValueCents = toMinorUnits(pointsToApply * pointsToMoneyRatio, priceCurrency);
           const previousPrice = currentPrice;
 
           // Don't go below zero
@@ -277,6 +292,7 @@ export class CalculatePriceUseCase {
       currency: priceCurrency,
       originalCurrency,
       exchangeRate: originalCurrency ? currentPrice / originalPrice : undefined,
+      priceListId: resolvedPriceListId,
     };
   }
 }

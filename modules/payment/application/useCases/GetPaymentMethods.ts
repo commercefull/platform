@@ -2,7 +2,11 @@
  * GetPaymentMethods Use Case
  *
  * Retrieves available payment methods for a customer or checkout.
+ * Method availability is resolved by `PaymentCapabilityService` — currency,
+ * amount, and country eligibility from config capability rows.
  */
+
+import { PaymentCapabilityService } from '../../domain/services/PaymentCapabilityService';
 
 export interface GetPaymentMethodsInput {
   customerId?: string;
@@ -11,6 +15,7 @@ export interface GetPaymentMethodsInput {
   currency?: string;
   amountCents?: number;
   country?: string;
+  marketId?: string;
 }
 
 export interface PaymentMethodInfo {
@@ -75,6 +80,7 @@ export class GetPaymentMethodsUseCase {
   constructor(
     private readonly paymentRepository: PaymentRepositoryPort,
     private readonly paymentConfigRepository: PaymentConfigRepositoryPort,
+    private readonly paymentCapabilityService: PaymentCapabilityService = new PaymentCapabilityService(),
   ) {}
 
   async execute(input: GetPaymentMethodsInput): Promise<GetPaymentMethodsOutput> {
@@ -152,30 +158,12 @@ export class GetPaymentMethodsUseCase {
   }
 
   private checkMethodAvailability(config: PaymentConfig, input: GetPaymentMethodsInput): boolean {
-    // Check currency support
-    if (input.currency && config.supportedCurrencies && config.supportedCurrencies.length > 0) {
-      if (!config.supportedCurrencies.includes(input.currency)) {
-        return false;
-      }
-    }
-
-    // Check amountCents limits
-    if (input.amountCents) {
-      if (config.minAmountCents && input.amountCents < config.minAmountCents) {
-        return false;
-      }
-      if (config.maxAmountCents && input.amountCents > config.maxAmountCents) {
-        return false;
-      }
-    }
-
-    // Check country support
-    if (input.country && config.supportedCountries && config.supportedCountries.length > 0) {
-      if (!config.supportedCountries.includes(input.country)) {
-        return false;
-      }
-    }
-
-    return config.isActive;
+    return this.paymentCapabilityService.checkEligibility(config, {
+      currency: input.currency,
+      amountCents: input.amountCents,
+      country: input.country,
+      marketId: input.marketId,
+      channelId: input.channelId,
+    }).eligible;
   }
 }

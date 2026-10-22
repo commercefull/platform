@@ -4,6 +4,8 @@
 
 The Configuration module manages system-wide configuration settings and feature flags. It supports hierarchical configuration scoping (global, store, organization, channel) with inheritance, system mode management (marketplace, multi-store, single-store), and feature flag toggling with rollout percentage and conditions.
 
+The module owns the `compliancePolicyRule` table — declarative `Facts → Policy → Decision` rules (age restrictions, cross-border embargoes, customs ID requirements) evaluated by `libs/rules/policyEngine` at checkout. Compliance behavior for a new market is configuration, not code.
+
 ---
 
 ## Use Cases

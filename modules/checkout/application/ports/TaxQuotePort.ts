@@ -45,6 +45,19 @@ export interface TaxQuoteResult {
   /** True when intra-EU B2B reverse charge applied — customer self-accounts VAT. */
   reverseChargeApplied?: boolean;
   breakdown?: Array<{ label: string; amountCents: number }>;
+  /** Regime the engine applied (DOMESTIC, EU_B2C_OSS, REVERSE_CHARGE, EXPORT, NO_TAX). */
+  taxRegime?: string;
+  /** Tax policy version used for the quote — snapshot key on the order. */
+  taxPolicyVersion?: string;
+  /** Explainable decision record for the order's decisionLog. */
+  decisionRecord?: unknown;
+  /** Per-line tax breakdown → `orderTax` rows at order creation. */
+  lineItems?: Array<{
+    productId: string;
+    name: string;
+    taxAmountCents: number;
+    taxRate: number;
+  }>;
 }
 
 export interface TaxQuotePort {
