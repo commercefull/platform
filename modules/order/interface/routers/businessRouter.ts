@@ -48,6 +48,12 @@ router.post('/orders', asyncHandler(orderController.createOrder));
 router.get('/orders/number/:orderNumber', asyncHandler(orderController.getOrderByNumber));
 
 /**
+ * Get order explainability — market context, version snapshot, decision log
+ * GET /business/orders/:orderId/decisions
+ */
+router.get('/orders/:orderId/decisions', asyncHandler(orderController.getOrderDecisions));
+
+/**
  * Get order details
  * GET /business/orders/:orderId
  */

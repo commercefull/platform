@@ -32,6 +32,7 @@ export class ShippingShippingQuoteAdapter implements ShippingQuotePort {
           totalWeight: request.totalWeight,
           currency: 'USD',
         },
+        request.originCountry,
       );
       const result = await this.calculateShippingRatesUseCase.execute(command);
 

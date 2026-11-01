@@ -7,8 +7,9 @@ describe('Address', () => {
     lastName: 'Doe',
     addressLine1: '123 Main St',
     city: 'NYC',
+    region: 'NY',
     postalCode: '10001',
-    country: 'USA',
+    country: 'US',
   };
 
   it('should create an address (happy path)', () => {
@@ -34,8 +35,37 @@ describe('Address', () => {
     expect(() => Address.create({ ...validProps, city: '' })).toThrow(CheckoutValidationError);
   });
 
-  it('should throw on missing postal code', () => {
+  it('should throw on missing postal code for a country that requires one', () => {
     expect(() => Address.create({ ...validProps, postalCode: '' })).toThrow(CheckoutValidationError);
+    expect(() => Address.create({ ...validProps, postalCode: undefined })).toThrow(CheckoutValidationError);
+  });
+
+  it('should throw on missing region for a country that requires one', () => {
+    expect(() => Address.create({ ...validProps, region: undefined })).toThrow(CheckoutValidationError);
+  });
+
+  it('should accept a postal-code-free address for a country without postal codes', () => {
+    const ae = Address.create({
+      firstName: 'John',
+      lastName: 'Doe',
+      addressLine1: '1 Sheikh Zayed Rd',
+      city: 'Dubai',
+      region: 'Dubai',
+      country: 'AE',
+    });
+    expect(ae.postalCode).toBeUndefined();
+  });
+
+  it('should accept a region-free address for a country without states', () => {
+    const be = Address.create({
+      firstName: 'John',
+      lastName: 'Doe',
+      addressLine1: '1 Rue de la Loi',
+      city: 'Brussels',
+      postalCode: '1000',
+      country: 'BE',
+    });
+    expect(be.region).toBeUndefined();
   });
 
   it('should throw on missing country', () => {

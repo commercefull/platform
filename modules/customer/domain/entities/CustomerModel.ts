@@ -41,6 +41,7 @@ export type CustomerRecord = {
   passwordResetExpires: Date | null;
   verificationToken: string | null;
   agreeToTerms: boolean;
+  homeMarketId: string | null;
 };
 
 export type CustomerAddressRecord = {
@@ -55,7 +56,10 @@ export type CustomerAddressRecord = {
   addressLine2: string | null;
   city: string;
   state: string | null;
-  postalCode: string;
+  postalCode: string | null;
+  dependentLocality: string | null;
+  sortingCode: string | null;
+  addressLines: unknown | null;
   country: string;
   phone: string | null;
   email: string | null;

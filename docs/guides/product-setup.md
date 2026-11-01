@@ -186,5 +186,7 @@ top for merchandising and per-store/channel sellability — see
 ## Related guides
 
 - [Organization Setup](organization-setup.md) — stores, channels, warehouses
+- [Market Launch](market-launch.md) — bind a `catalogAssortmentId` and
+  `defaultPriceListId` per market for market-scoped assortments/pricing
 - [Advanced Content Setup](content-setup.md) — pages and blocks that feature
   products

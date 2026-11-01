@@ -4,6 +4,7 @@
  */
 
 export * from './application/useCases';
+export * from './domain/services/PrivacyPolicyEvaluator';
 export * from './domain/repositories/GdprRepository';
 export * from './domain/errors/GdprErrors';
 

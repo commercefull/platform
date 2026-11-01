@@ -44,6 +44,8 @@ export interface CustomerProps {
   groupIds: string[];
   preferredCurrency?: string;
   preferredLanguage?: string;
+  /** Home selling market the customer belongs to (defaults locale/currency). */
+  homeMarketId?: string;
   taxExempt: boolean;
   taxExemptionNumber?: string;
   notes?: string;
@@ -71,6 +73,7 @@ export class Customer {
     dateOfBirth?: Date;
     preferredCurrency?: string;
     preferredLanguage?: string;
+    homeMarketId?: string;
     metadata?: Record<string, unknown>;
   }): Customer {
     const now = new Date();
@@ -87,6 +90,7 @@ export class Customer {
       groupIds: [],
       preferredCurrency: props.preferredCurrency || 'USD',
       preferredLanguage: props.preferredLanguage || 'en',
+      homeMarketId: props.homeMarketId,
       taxExempt: false,
       tags: [],
       metadata: props.metadata,
@@ -145,6 +149,9 @@ export class Customer {
   }
   get preferredLanguage(): string | undefined {
     return this.props.preferredLanguage;
+  }
+  get homeMarketId(): string | undefined {
+    return this.props.homeMarketId;
   }
   get taxExempt(): boolean {
     return this.props.taxExempt;

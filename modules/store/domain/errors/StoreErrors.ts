@@ -47,3 +47,39 @@ export class StoreValidationError extends AppError {
     super(message, 400, { code: 'store.validation_error' });
   }
 }
+
+export class MarketNotFoundError extends AppError {
+  constructor(marketId: string) {
+    super(`Market not found: ${marketId}`, 404, { code: 'store.market_not_found' });
+  }
+}
+
+export class MarketValidationError extends AppError {
+  constructor(message: string) {
+    super(message, 400, { code: 'store.market_validation_error' });
+  }
+}
+
+export class MarketCodeAlreadyExistsError extends AppError {
+  constructor(code: string) {
+    super(`Market code already exists: ${code}`, 409, { code: 'store.market_code_already_exists' });
+  }
+}
+
+export class MarketNotReadyForLaunchError extends AppError {
+  constructor(marketId: string, missing: string[]) {
+    super(`Market ${marketId} is not ready for launch. Missing: ${missing.join(', ')}`, 400, {
+      code: 'store.market_not_ready',
+      details: { marketId, missing },
+    });
+  }
+}
+
+export class MarketCapabilityNotSupportedError extends AppError {
+  constructor(capability: string, marketCode: string) {
+    super(`Market ${marketCode} does not support capability: ${capability}`, 400, {
+      code: 'store.market_capability_not_supported',
+      details: { capability, marketCode },
+    });
+  }
+}

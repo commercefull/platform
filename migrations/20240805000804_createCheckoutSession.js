@@ -8,6 +8,10 @@ exports.up = function (knex) {
     t.string('sessionId', 255).notNullable().unique();
     t.uuid('basketId').notNullable().references('basketId').inTable('basket');
     t.uuid('customerId').references('customerId').inTable('customer');
+    t.uuid('storeId').references('storeId').inTable('store').onDelete('SET NULL');
+    t.uuid('channelId').references('salesChannelId').inTable('salesChannel').onDelete('SET NULL');
+    t.uuid('marketId').references('marketId').inTable('market').onDelete('SET NULL');
+    t.string('localeCode', 20);
     t.string('email', 255).notNullable();
     t.string('phoneNumber', 50);
     t.text('status').notNullable().defaultTo('active');
@@ -34,6 +38,8 @@ exports.up = function (knex) {
     t.timestamp('expiresAt');
     t.string('paymentIntentId').nullable();
     t.jsonb('metadata').nullable();
+    t.jsonb('appliedPromotions').notNullable().defaultTo('[]');
+    t.bigInteger('promotionDiscountCents').notNullable().defaultTo(0);
 
     t.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
     t.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
@@ -41,6 +47,9 @@ exports.up = function (knex) {
     t.index('sessionId');
     t.index('basketId');
     t.index('customerId');
+    t.index('storeId');
+    t.index('channelId');
+    t.index('marketId');
     t.index('email');
     t.index('status');
     t.index('step');

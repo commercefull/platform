@@ -5,7 +5,7 @@
 
 import { debounce, onAction } from '../utils.js';
 import { fetchAutocomplete } from './api.js';
-import { buildAutocompleteSuggestions, nextSelectedIndex, buildCurrencyUrl, renderAutocomplete } from './processor.js';
+import { buildAutocompleteSuggestions, nextSelectedIndex, buildCurrencyUrl, buildParamUrl, renderAutocomplete } from './processor.js';
 
 function initMobileMenu() {
   const drawer = document.querySelector('[data-mobile-menu]');
@@ -136,9 +136,19 @@ function initCurrencySwitcher() {
   });
 }
 
+function initContextSwitchers() {
+  ['switch-market', 'switch-locale'].forEach(function (action) {
+    onAction('change', action, function (_event, element) {
+      const param = action === 'switch-market' ? 'market' : 'locale';
+      window.location.href = buildParamUrl(window.location.href, param, element.value);
+    });
+  });
+}
+
 export function initHeader() {
   initMobileMenu();
   initMegaMenu();
   initSearchAutocomplete();
   initCurrencySwitcher();
+  initContextSwitchers();
 }

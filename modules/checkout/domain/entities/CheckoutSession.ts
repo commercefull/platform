@@ -12,11 +12,33 @@ export type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'comp
 export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
 export type FulfillmentType = 'shipping' | 'pickup' | 'local_delivery' | 'digital';
 
+/**
+ * One promotion applied to the session — the structured record that
+ * replaces the opaque `'AUTO_PROMOTION'` coupon string. Persisted on the
+ * session and copied to `orderDiscount` rows at order creation.
+ */
+export interface AppliedPromotion {
+  promotionId: string;
+  promotionCode?: string;
+  name?: string;
+  /** Discount for this promotion in session-currency minor units. */
+  discountAmountCents: number;
+  targetType?: 'order' | 'line_item' | 'shipping';
+  targetId?: string;
+  ruleId?: string;
+  policyVersion?: string;
+}
+
 export interface CheckoutSessionProps {
   id: string;
   customerId?: string;
   guestEmail?: string;
   basketId: string;
+  /** Selling market + store/channel/locale context resolved at session start. */
+  marketId?: string;
+  storeId?: string;
+  channelId?: string;
+  localeCode?: string;
   status: CheckoutStatus;
   paymentStatus: PaymentStatus;
   shippingAddress?: Address;
@@ -41,6 +63,10 @@ export interface CheckoutSessionProps {
   discountAmount: Money;
   total: Money;
   couponCode?: string;
+  /** Structured promotions applied by the promotion engine. */
+  appliedPromotions?: AppliedPromotion[];
+  /** Total promotion discount (overlaps couponCode path until that merges). */
+  promotionDiscountAmount?: Money;
   /** Loyalty reward applied to this session — points are debited at the payment boundary. */
   loyaltyRewardId?: string;
   loyaltyPointsRedeemed?: number;
@@ -65,7 +91,17 @@ export class CheckoutSession {
     this.props = props;
   }
 
-  static create(props: { id: string; basketId: string; customerId?: string; guestEmail?: string; currency?: string }): CheckoutSession {
+  static create(props: {
+    id: string;
+    basketId: string;
+    customerId?: string;
+    guestEmail?: string;
+    currency?: string;
+    marketId?: string;
+    storeId?: string;
+    channelId?: string;
+    localeCode?: string;
+  }): CheckoutSession {
     const now = new Date();
     const currency = props.currency || 'USD';
 
@@ -74,6 +110,10 @@ export class CheckoutSession {
       customerId: props.customerId,
       guestEmail: props.guestEmail,
       basketId: props.basketId,
+      marketId: props.marketId,
+      storeId: props.storeId,
+      channelId: props.channelId,
+      localeCode: props.localeCode,
       status: 'active',
       paymentStatus: 'pending',
       sameAsShipping: true,
@@ -108,6 +148,22 @@ export class CheckoutSession {
 
   get basketId(): string {
     return this.props.basketId;
+  }
+
+  get marketId(): string | undefined {
+    return this.props.marketId;
+  }
+
+  get storeId(): string | undefined {
+    return this.props.storeId;
+  }
+
+  get channelId(): string | undefined {
+    return this.props.channelId;
+  }
+
+  get localeCode(): string | undefined {
+    return this.props.localeCode;
   }
 
   get status(): CheckoutStatus {
@@ -181,6 +237,14 @@ export class CheckoutSession {
 
   get couponCode(): string | undefined {
     return this.props.couponCode;
+  }
+
+  get appliedPromotions(): AppliedPromotion[] {
+    return (this.props.appliedPromotions ?? []).map(p => ({ ...p }));
+  }
+
+  get promotionDiscountAmount(): Money {
+    return this.props.promotionDiscountAmount ?? Money.zero(this.props.subtotal.currency);
   }
 
   get loyaltyRewardId(): string | undefined {
@@ -335,6 +399,44 @@ export class CheckoutSession {
     this.touch();
   }
 
+  /**
+   * Record the resolved market context on the session (host/locale/currency
+   * resolution output — set once at session start).
+   */
+  setMarketContext(context: { marketId?: string; storeId?: string; channelId?: string; localeCode?: string }): void {
+    this.props.marketId = context.marketId ?? this.props.marketId;
+    this.props.storeId = context.storeId ?? this.props.storeId;
+    this.props.channelId = context.channelId ?? this.props.channelId;
+    this.props.localeCode = context.localeCode ?? this.props.localeCode;
+    this.touch();
+  }
+
+  /**
+   * Apply the structured promotion-engine result — replaces the opaque
+   * `'AUTO_PROMOTION'` coupon write with a per-promotion record that can be
+   * persisted to `orderDiscount` rows at order creation.
+   */
+  applyPromotions(promotions: AppliedPromotion[], discountAmount: Money): void {
+    this.ensureActive();
+    this.props.appliedPromotions = promotions.map(p => ({ ...p }));
+    this.props.promotionDiscountAmount = discountAmount;
+    this.props.discountAmount = discountAmount;
+    this.recalculateTotal();
+    this.touch();
+  }
+
+  /** Remove engine-applied promotions (e.g. after a basket change). */
+  clearPromotions(): void {
+    this.ensureActive();
+    this.props.appliedPromotions = undefined;
+    this.props.promotionDiscountAmount = undefined;
+    if (!this.props.couponCode) {
+      this.props.discountAmount = Money.zero(this.props.subtotal.currency);
+    }
+    this.recalculateTotal();
+    this.touch();
+  }
+
   removeCoupon(): void {
     this.ensureActive();
     this.props.couponCode = undefined;
@@ -461,6 +563,10 @@ export class CheckoutSession {
       customerId: this.props.customerId,
       guestEmail: this.props.guestEmail,
       basketId: this.props.basketId,
+      marketId: this.props.marketId,
+      storeId: this.props.storeId,
+      channelId: this.props.channelId,
+      localeCode: this.props.localeCode,
       status: this.props.status,
       paymentStatus: this.props.paymentStatus,
       shippingAddress: this.props.shippingAddress?.toJSON(),
@@ -479,6 +585,8 @@ export class CheckoutSession {
       total: this.props.total.amount,
       currency: this.props.subtotal.currency,
       couponCode: this.props.couponCode,
+      appliedPromotions: this.props.appliedPromotions,
+      promotionDiscountAmount: this.props.promotionDiscountAmount?.amount,
       fulfillmentType: this.props.fulfillmentType,
       notes: this.props.notes,
       metadata: this.props.metadata,

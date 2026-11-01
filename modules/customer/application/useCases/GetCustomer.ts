@@ -31,7 +31,11 @@ export interface CustomerAddressResponse {
   addressLine2?: string;
   city: string;
   state: string;
-  postalCode: string;
+  /** Null for addresses in countries without postal codes. */
+  postalCode: string | null;
+  dependentLocality?: string;
+  sortingCode?: string;
+  addressLines?: string[];
   country: string;
   addressType: string;
   isDefault: boolean;
@@ -110,6 +114,9 @@ export class GetCustomerUseCase {
         city: addr.city,
         state: addr.state || '',
         postalCode: addr.postalCode,
+        dependentLocality: addr.dependentLocality ?? undefined,
+        sortingCode: addr.sortingCode ?? undefined,
+        addressLines: Array.isArray(addr.addressLines) ? (addr.addressLines as string[]) : undefined,
         country: addr.country,
         addressType: addr.addressType,
         isDefault: addr.isDefault,

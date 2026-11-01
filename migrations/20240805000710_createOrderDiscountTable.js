@@ -11,11 +11,16 @@ exports.up = function (knex) {
     t.string('type', 50).notNullable().checkIn(['percentage', 'fixedAmount', 'freeShipping', 'buyXGetY', 'giftCard']);
     t.decimal('value', 15, 2).notNullable();
     t.bigInteger('discountAmountCents').notNullable();
+    t.uuid('promotionId');
+    t.uuid('ruleId');
+    t.string('policyVersion', 50);
+    t.jsonb('decisionInputs').notNullable().defaultTo('{}');
 
     t.index('orderId');
     t.index('orderItemId');
     t.index('code');
     t.index('type');
+    t.index('promotionId');
   });
 };
 

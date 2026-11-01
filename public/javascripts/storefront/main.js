@@ -22,6 +22,7 @@ import { initAccount } from './account.js';
 import { initCheckout } from './checkout/ui.js';
 import { initModals } from './components/modal.js';
 import { initQuickView } from './components/quick-view.js';
+import { initAddressForm } from './address-form.js';
 
 /**
  * Initialize all storefront modules on DOM ready.
@@ -42,6 +43,7 @@ function init() {
   initCheckout();
   initModals();
   initQuickView();
+  initAddressForm();
 }
 
 if (document.readyState === 'loading') {

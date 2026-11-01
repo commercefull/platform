@@ -16,6 +16,16 @@ import {
   unassignSalesChannel,
   updateSalesChannel,
 } from '../controllers/SalesChannelController';
+import {
+  createMarket,
+  deleteMarket,
+  disableMarket,
+  getMarket,
+  getMarketReadiness,
+  launchMarket,
+  listMarkets,
+  updateMarket,
+} from '../controllers/MarketController';
 
 const router = createHttpRouter();
 const storeController = new StoreController();
@@ -62,5 +72,15 @@ router.post('/stores/hierarchy', asyncHandler(storeController.createStoreHierarc
 
 // List stores with filtering and pagination
 router.get('/stores', asyncHandler(storeController.listStores.bind(storeController)));
+
+// Markets — global commerce configuration
+router.get('/markets', asyncHandler(listMarkets));
+router.post('/markets', asyncHandler(createMarket));
+router.get('/markets/:marketId', asyncHandler(getMarket));
+router.put('/markets/:marketId', asyncHandler(updateMarket));
+router.delete('/markets/:marketId', asyncHandler(deleteMarket));
+router.get('/markets/:marketId/readiness', asyncHandler(getMarketReadiness));
+router.post('/markets/:marketId/launch', asyncHandler(launchMarket));
+router.post('/markets/:marketId/disable', asyncHandler(disableMarket));
 
 export { router as storeRouter };

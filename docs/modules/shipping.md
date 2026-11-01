@@ -4,6 +4,8 @@
 
 The Shipping feature manages carrier integrations, rate calculations, and label generation. It works alongside the Distribution feature to provide end-to-end shipping functionality.
 
+Rate calculation is lane-aware: `CalculateShippingRates` evaluates conditions with both `originCountry` (ship-from store/warehouse) and destination facts, so cross-border `shipFrom → shipTo` rules can allow, price, or block lanes declaratively. `ValidateShippingAddress` uses `libs/address` country metadata — administrative area and postal code are required only for countries whose postal systems use them (e.g. `US` requires state + ZIP, `AE` requires an emirate and no postal code, `BE` requires a postcode only).
+
 ---
 
 ## Use Cases

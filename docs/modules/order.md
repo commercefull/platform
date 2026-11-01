@@ -4,23 +4,26 @@
 
 The Order feature manages the complete order lifecycle from creation through fulfillment, including status management, cancellations, and refunds.
 
+Orders persist a global-commerce decision trail for historical explainability: `marketId`, `localeCode`, `contractingEntityId`, `exchangeRateSnapshot`, `versionSnapshot` (market/pricing/promotion/tax/returns/terms versions), and a policy `decisionLog`, plus `orderDiscount`/`orderTax` provenance rows carrying source rule ids, versions, and decision inputs. `GetOrderExplainability` returns the full audit payload used by refunds/returns to replay the rules in effect at purchase time.
+
 ---
 
 ## Use Cases
 
-| ID         | Use Case             | Actor          | Purpose                                                                                                  |
-| ---------- | -------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| UC-ORD-001 | List Orders          | Merchant/Admin | List all orders with optional status/customer/date filtering, sorted newest first                        |
-| UC-ORD-002 | Get Order Details    | Merchant/Admin | Retrieve full order details including items, customer info, addresses, and payment info                  |
-| UC-ORD-003 | Get Order Statistics | Merchant/Admin | Retrieve aggregated order metrics (count, revenue, average order value) with date range filtering        |
-| UC-ORD-004 | Update Order Status  | Merchant/Admin | Transition an order to a new status following the valid state machine, creating a history entry          |
-| UC-ORD-005 | Cancel Order         | Merchant/Admin | Cancel a cancellable order with reason, release inventory, and initiate refund if payment was captured   |
-| UC-ORD-006 | Process Refund       | Merchant/Admin | Process a full or partial refund via the payment provider with a required reason                         |
-| UC-ORD-007 | Get Order History    | Merchant/Admin | Retrieve the chronological history of all status changes and events for an order                         |
-| UC-ORD-008 | Get My Orders        | Customer       | Retrieve a paginated list of the authenticated customer's own orders                                     |
-| UC-ORD-009 | Get Order Details    | Customer       | Retrieve the customer's own order details by order ID or order number                                    |
-| UC-ORD-010 | Create Order         | Customer       | Create a new order from a basket, reserving inventory and processing payment authorization               |
-| UC-ORD-011 | Cancel Order         | Customer       | Cancel the customer's own order if in pending or confirmed status, with automatic refund for paid orders |
+| ID         | Use Case                 | Actor          | Purpose                                                                                                  |
+| ---------- | ------------------------ | -------------- | -------------------------------------------------------------------------------------------------------- |
+| UC-ORD-001 | List Orders              | Merchant/Admin | List all orders with optional status/customer/date filtering, sorted newest first                        |
+| UC-ORD-002 | Get Order Details        | Merchant/Admin | Retrieve full order details including items, customer info, addresses, and payment info                  |
+| UC-ORD-003 | Get Order Statistics     | Merchant/Admin | Retrieve aggregated order metrics (count, revenue, average order value) with date range filtering        |
+| UC-ORD-004 | Update Order Status      | Merchant/Admin | Transition an order to a new status following the valid state machine, creating a history entry          |
+| UC-ORD-005 | Cancel Order             | Merchant/Admin | Cancel a cancellable order with reason, release inventory, and initiate refund if payment was captured   |
+| UC-ORD-006 | Process Refund           | Merchant/Admin | Process a full or partial refund via the payment provider with a required reason                         |
+| UC-ORD-007 | Get Order History        | Merchant/Admin | Retrieve the chronological history of all status changes and events for an order                         |
+| UC-ORD-008 | Get My Orders            | Customer       | Retrieve a paginated list of the authenticated customer's own orders                                     |
+| UC-ORD-009 | Get Order Details        | Customer       | Retrieve the customer's own order details by order ID or order number                                    |
+| UC-ORD-010 | Create Order             | Customer       | Create a new order from a basket, reserving inventory and processing payment authorization               |
+| UC-ORD-011 | Cancel Order             | Customer       | Cancel the customer's own order if in pending or confirmed status, with automatic refund for paid orders |
+| UC-ORD-012 | Get Order Explainability | Merchant/Admin | Retrieve the order's market context, version snapshot, decision log, and discount/tax provenance         |
 
 ### API Endpoints
 
@@ -37,6 +40,7 @@ The Order feature manages the complete order lifecycle from creation through ful
 | UC-ORD-009 | GET    | `/orders/:orderId` or `/orders/number/:orderNumber` |
 | UC-ORD-010 | POST   | `/orders`                                           |
 | UC-ORD-011 | POST   | `/orders/:orderId/cancel`                           |
+| UC-ORD-012 | GET    | `/business/orders/:orderId/decisions`               |
 
 ---
 
@@ -96,6 +100,8 @@ The Order feature manages the complete order lifecycle from creation through ful
 | GET /business/orders/:orderId            |
 | POST                                     | `/orders/:orderId/cancel`                       | `asyncHandler(orderController.cancelOrder)`              | Cancel an order                                                                                                                                                                        |
 | POST /business/orders/:orderId/cancel    |
+| GET                                      | `/orders/:orderId/decisions`                    | `asyncHandler(orderController.getOrderDecisions)`        | Get order explainability — market context, version snapshot, decision log                                                                                                              |
+| GET /business/orders/:orderId/decisions  |
 | GET                                      | `/orders/:orderId/fulfillment-history`          | `asyncHandler(orderController.getFulfillmentHistory)`    | —                                                                                                                                                                                      |
 | PUT                                      | `/orders/:orderId/fulfillment-status`           | `asyncHandler(orderController.updateFulfillmentStatus)`  | —                                                                                                                                                                                      |
 | GET                                      | `/orders/:orderId/history`                      | `asyncHandler(orderController.getOrderHistory)`          | Get order status history                                                                                                                                                               |

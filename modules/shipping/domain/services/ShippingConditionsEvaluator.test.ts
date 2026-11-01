@@ -47,6 +47,17 @@ describe('ShippingConditionsEvaluator', () => {
     expect(evaluateConditions({ excludeCountries: ['CA'] }, { ...baseCtx, country: 'CA' }).applicable).toBe(false);
   });
 
+  it('should check originCountries lane restriction', () => {
+    expect(evaluateConditions({ originCountries: ['DE'] }, { ...baseCtx, originCountry: 'US' }).applicable).toBe(false);
+    expect(evaluateConditions({ originCountries: ['DE'] }, { ...baseCtx, originCountry: 'DE' }).applicable).toBe(true);
+    expect(evaluateConditions({ originCountries: ['DE'] }, baseCtx).applicable).toBe(false);
+  });
+
+  it('should check excludeOriginCountries lane restriction', () => {
+    expect(evaluateConditions({ excludeOriginCountries: ['CN'] }, { ...baseCtx, originCountry: 'CN' }).applicable).toBe(false);
+    expect(evaluateConditions({ excludeOriginCountries: ['CN'] }, { ...baseCtx, originCountry: 'DE' }).applicable).toBe(true);
+  });
+
   it('should check states', () => {
     expect(evaluateConditions({ states: ['NY'] }, { ...baseCtx, state: 'CA' }).applicable).toBe(false);
     expect(evaluateConditions({ states: ['NY'] }, { ...baseCtx, state: 'NY' }).applicable).toBe(true);

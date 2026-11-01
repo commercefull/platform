@@ -32,7 +32,8 @@ beforeAll(async () => {
   const dumpFile = path.join(SNAPSHOT_DIR, `${snapshotDbName}.dump`);
 
   // Generate a unique DB name for this test file
-  const testDbName = `test_${baseConfig.database}_${generateUUID().replace(/-/g, '').slice(0, 12)}`;
+  // UUIDv7 prefix is the timestamp; the tail is random — use it for unique DB names under parallel workers.
+  const testDbName = `test_${baseConfig.database}_${generateUUID().replace(/-/g, '').slice(-12)}`;
   const testConfig: DbConfig = { ...baseConfig, database: testDbName };
 
   console.log(`[Test Setup] Creating isolated test DB '${testDbName}'...`);

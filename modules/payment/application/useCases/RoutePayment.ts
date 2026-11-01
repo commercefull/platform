@@ -20,6 +20,10 @@ export class RoutePaymentCommand {
     public readonly returnUrl: string | undefined,
     public readonly cancelUrl: string | undefined,
     public readonly metadata: Record<string, unknown> | undefined,
+    /** Buyer/destination country (ISO-2) — filters routes by supportedCountries. */
+    public readonly country?: string,
+    /** Selling market — recorded for market-scoped routing decisions. */
+    public readonly marketId?: string,
   ) {}
 }
 
@@ -69,6 +73,12 @@ export class RoutePaymentUseCase {
       // Check amountCents support
       if (!route.supportsAmount(command.amountCents)) {
         logger.warn(`Provider ${route.provider} does not support amountCents ${command.amountCents}, skipping`);
+        continue;
+      }
+
+      // Check destination-country support (routes can be market-scoped)
+      if (command.country && !route.supportsCountry(command.country)) {
+        logger.warn(`Provider ${route.provider} does not support country ${command.country}, skipping`);
         continue;
       }
 

@@ -52,10 +52,26 @@ describe('FulfillmentSourceAdapter', () => {
     expect(result[0].address?.line1).toBe('123 Main');
   });
 
-  it('should map allowOnlineOrdering from the store allowGuestCheckout setting', async () => {
-    storeRepo.findActive.mockResolvedValue([store({ settings: { allowGuestCheckout: false } as Store['settings'] })]);
+  it('should map allowOnlineOrdering from fulfillment.fulfillOnlineOrders, not guest checkout', async () => {
+    storeRepo.findActive.mockResolvedValue([
+      store({ settings: { allowGuestCheckout: false, fulfillment: { fulfillOnlineOrders: false } } as Store['settings'] }),
+    ]);
     const result = await adapter.findFulfillableStores();
     expect(result[0].settings?.allowOnlineOrdering).toBe(false);
+  });
+
+  it('should keep online ordering enabled when guest checkout is disabled', async () => {
+    storeRepo.findActive.mockResolvedValue([
+      store({ settings: { allowGuestCheckout: false, fulfillment: { fulfillOnlineOrders: true } } as Store['settings'] }),
+    ]);
+    const result = await adapter.findFulfillableStores();
+    expect(result[0].settings?.allowOnlineOrdering).toBe(true);
+  });
+
+  it('should default allowOnlineOrdering to true when fulfillment settings are absent', async () => {
+    storeRepo.findActive.mockResolvedValue([store({ settings: { allowGuestCheckout: false } as Store['settings'] })]);
+    const result = await adapter.findFulfillableStores();
+    expect(result[0].settings?.allowOnlineOrdering).toBe(true);
   });
 
   it('should leave pickup/localDelivery undefined when store settings lack them', async () => {

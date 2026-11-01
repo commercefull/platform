@@ -15,7 +15,10 @@ exports.up = function (knex) {
     t.string('addressLine2', 255);
     t.string('city', 100).notNullable();
     t.string('state', 100);
-    t.string('postalCode', 20).notNullable();
+    t.string('postalCode', 20);
+    t.string('dependentLocality', 100);
+    t.string('sortingCode', 50);
+    t.jsonb('addressLines');
     t.string('country', 2).notNullable();
     t.string('phone', 30);
     t.string('email', 255);

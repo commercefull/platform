@@ -368,8 +368,11 @@ export class PaymentRepo {
        ("orderPaymentId", "orderId", "type", "amountCents", "currencyCode", "status",
         "customerId", "paymentMethodId", "paymentGatewayId", "externalTransactionId",
         "paymentMethodDetails", "gatewayResponse", "errorCode", "errorMessage",
-        "refundedAmountCents", "metadata", "customerIp", "capturedAt", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        "refundedAmountCents", "metadata", "customerIp", "capturedAt",
+        "settlementCurrencyCode", "settlementAmountCents",
+        "accountingCurrencyCode", "accountingAmountCents", "fxRate",
+        "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
        RETURNING *`,
       [
         params.orderPaymentId,
@@ -390,6 +393,11 @@ export class PaymentRepo {
         params.metadata || null,
         params.customerIp || null,
         params.capturedAt || null,
+        params.settlementCurrencyCode || null,
+        params.settlementAmountCents || null,
+        params.accountingCurrencyCode || null,
+        params.accountingAmountCents || null,
+        params.fxRate || null,
         now,
         now,
       ],
@@ -564,6 +572,11 @@ export class PaymentRepo {
         paymentMethodId: paymentData.paymentMethodId || null,
         paymentGatewayId: paymentData.paymentGatewayId || null,
         gatewayResponse: { mock: true },
+        settlementCurrencyCode: null,
+        settlementAmountCents: null,
+        accountingCurrencyCode: null,
+        accountingAmountCents: null,
+        fxRate: null,
       });
 
       return { success: true, transactionId: transaction.paymentTransactionId };

@@ -5,6 +5,8 @@
 
 import { CheckoutRepository } from '../../domain/repositories/CheckoutRepository';
 import { ShippingQuotePort } from '../../application/ports/ShippingQuotePort';
+import type { StoreContextPort } from '../../application/ports/StoreContextPort';
+import type { BasketSnapshotPort } from '../../application/ports/BasketSnapshotPort';
 import { Money } from '../../../../libs/money';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
@@ -29,6 +31,8 @@ export class SetShippingMethodUseCase {
   constructor(
     private readonly checkoutRepository: CheckoutRepository,
     private readonly shippingQuotePort?: ShippingQuotePort,
+    private readonly storeContextPort?: StoreContextPort,
+    private readonly basketSnapshotPort?: BasketSnapshotPort,
   ) {}
 
   async execute(command: SetShippingMethodCommand): Promise<CheckoutResponse> {
@@ -54,6 +58,7 @@ export class SetShippingMethodUseCase {
         postalCode: session.shippingAddress.postalCode,
       },
       totalValueCents: session.subtotal.cents,
+      originCountry: await this.resolveOriginCountry(session),
     });
 
     if (shippingOptions.length === 0) {
@@ -82,5 +87,18 @@ export class SetShippingMethodUseCase {
     });
 
     return mapCheckoutToResponse(session);
+  }
+
+  /** Ship-from country for lane-aware rates — the fulfillment source's country. */
+  private async resolveOriginCountry(session: { basketId: string; storeId?: string }): Promise<string | undefined> {
+    if (!this.storeContextPort) return undefined;
+    try {
+      const storeId = session.storeId ?? (await this.basketSnapshotPort?.getSnapshot(session.basketId))?.storeId;
+      if (!storeId) return undefined;
+      const context = await this.storeContextPort.getStoreContext(storeId);
+      return context?.country;
+    } catch {
+      return undefined;
+    }
   }
 }

@@ -4,6 +4,8 @@
 
 The Checkout feature manages the checkout flow, transforming a basket into an order by collecting shipping, billing, and payment information through a multi-step process.
 
+Checkout sessions carry the resolved commerce context: `marketId`/`marketCode`, `localeCode`, `contractingEntityId`, structured `appliedPromotions` (replacing legacy synthetic coupon markers), and the `TaxDecision` record from the active `TaxEnginePort`. Shipping addresses are validated against per-country address metadata (`libs/address`), so region/postal-code optionality follows the destination country rather than a fixed US-centric schema. Session context and provenance flow into order creation for explainability.
+
 ---
 
 ## Use Cases

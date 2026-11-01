@@ -12,6 +12,7 @@
 
 import { CurrencyPriceRule, PriceContext, PricingAdjustment, PricingAdjustmentType, PricingRule, PricingRuleScope } from '../pricingRule';
 import { Currency } from '../currency';
+import { getCurrencyDecimals, toMinorUnits } from '../../../../libs/money';
 
 /**
  * Evaluate whether a pricing rule's conditions are met given the context.
@@ -194,23 +195,28 @@ function toIdList(value: unknown): string[] {
 
 /**
  * Apply a rule's adjustments to a price, in order.
- * FIXED and OVERRIDE set an absolute price (operand in major units);
+ * FIXED and OVERRIDE set an absolute price (operand in major units of
+ * `currencyCode`, converted to minor units via ISO 4217 exponent);
  * PERCENTAGE reduces the current price. Returns the adjusted price and
  * whether any adjustment was applied.
  */
-export function applyAdjustments(priceCents: number, adjustments: PricingAdjustment[]): { priceCents: number; applied: boolean } {
+export function applyAdjustments(
+  priceCents: number,
+  adjustments: PricingAdjustment[],
+  currencyCode: string = 'USD',
+): { priceCents: number; applied: boolean } {
   let current = priceCents;
   let applied = false;
 
   for (const adjustment of adjustments) {
     if (adjustment.type === PricingAdjustmentType.FIXED) {
-      current = Math.round(adjustment.value * 100);
+      current = toMinorUnits(adjustment.value, currencyCode);
       applied = true;
     } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
       current = Math.round(current * (1 - adjustment.value / 100));
       applied = true;
     } else if (adjustment.type === PricingAdjustmentType.OVERRIDE) {
-      current = Math.round(adjustment.value * 100);
+      current = toMinorUnits(adjustment.value, currencyCode);
       applied = true;
     }
   }
@@ -260,18 +266,24 @@ export function convertAmount(
   rule?: CurrencyPriceRule | null,
 ): CurrencyConversion {
   let exchangeRate = (toCurrency.exchangeRate ?? 1) / (fromCurrency.exchangeRate ?? 1);
-  let convertedPrice = priceCents * exchangeRate;
+  // Exchange rates are defined in major units (1 FROM → rate TO). The stored
+  // price is in FROM minor units, so scale by the minor-unit exponent delta
+  // between the two currencies: 10^(dec(to) - dec(from)). Without this a
+  // USD→JPY conversion (2→0 decimals) overcharges 100× and USD→KWD (2→3)
+  // undercharges 10×.
+  const exponentScale = 10 ** (getCurrencyDecimals(toCurrency.code) - getCurrencyDecimals(fromCurrency.code));
+  let convertedPrice = priceCents * exchangeRate * exponentScale;
 
   const adjustment = rule?.adjustments[0];
   if (adjustment) {
     if (adjustment.type === PricingAdjustmentType.FIXED) {
-      convertedPrice += adjustment.value * 100;
+      convertedPrice += toMinorUnits(adjustment.value, toCurrency.code);
     } else if (adjustment.type === PricingAdjustmentType.PERCENTAGE) {
       convertedPrice *= 1 + adjustment.value / 100;
     } else if (adjustment.type === PricingAdjustmentType.EXCHANGE) {
       // Override the exchange rate
       exchangeRate = adjustment.value;
-      convertedPrice = priceCents * exchangeRate;
+      convertedPrice = priceCents * exchangeRate * exponentScale;
     }
   }
 

@@ -58,7 +58,7 @@ export class CustomerRepo implements ICustomerRepository {
           "dateOfBirth" = $5, "isActive" = $6, "isVerified" = $7,
           "emailVerified" = $8, "phoneVerified" = $9, "lastLoginAt" = $10,
           "timezone" = $11, "acceptsMarketing" = $12, "tags" = $13, "note" = $14,
-          "taxExempt" = $15, "updatedAt" = $16
+          "taxExempt" = $15, "updatedAt" = $16, "homeMarketId" = $18
         WHERE "customerId" = $17`,
         [
           customer.email,
@@ -78,6 +78,7 @@ export class CustomerRepo implements ICustomerRepository {
           customer.taxExempt,
           now,
           customer.customerId,
+          customer.homeMarketId || null,
         ],
       );
     } else {
@@ -85,9 +86,9 @@ export class CustomerRepo implements ICustomerRepository {
         `INSERT INTO "customer" (
           "customerId", "email", "firstName", "lastName", "password", "phone",
           "dateOfBirth", "isActive", "isVerified", "emailVerified", "phoneVerified",
-          "timezone", "acceptsMarketing", "tags", "note", "taxExempt",
+          "timezone", "acceptsMarketing", "tags", "note", "taxExempt", "homeMarketId",
           "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
         [
           customer.customerId,
           customer.email,
@@ -105,6 +106,7 @@ export class CustomerRepo implements ICustomerRepository {
           customer.tags ? JSON.stringify(customer.tags) : null,
           customer.note || null,
           customer.taxExempt,
+          customer.homeMarketId || null,
           now,
           now,
         ],

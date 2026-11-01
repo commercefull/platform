@@ -7,6 +7,7 @@ import {
   suggestionTypeLabel,
   nextSelectedIndex,
   buildCurrencyUrl,
+  buildParamUrl,
   escapeHtml,
   renderAutocomplete,
 } from './processor.js';
@@ -106,6 +107,25 @@ describe('Header processor', () => {
       const url = buildCurrencyUrl('http://localhost/products?brand=nike', 'GBP');
       expect(url).toContain('brand=nike');
       expect(url).toContain('currency=GBP');
+    });
+  });
+
+  describe('buildParamUrl — market/locale/currency switching', () => {
+    it('sets the market parameter', () => {
+      const url = buildParamUrl('http://localhost/products', 'market', 'EU-BE');
+      expect(url).toBe('http://localhost/products?market=EU-BE');
+    });
+
+    it('sets the locale parameter', () => {
+      const url = buildParamUrl('http://localhost/products?currency=USD', 'locale', 'en-GB');
+      expect(url).toContain('locale=en-GB');
+      expect(url).toContain('currency=USD');
+    });
+
+    it('replaces an existing market without touching currency', () => {
+      const url = buildParamUrl('http://localhost/products?market=US&currency=USD', 'market', 'JP');
+      expect(url).toContain('market=JP');
+      expect(url).toContain('currency=USD');
     });
   });
 

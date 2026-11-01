@@ -8,7 +8,7 @@
  */
 
 import { AxiosInstance } from 'axios';
-import { createTestClient, loginTestUser, expectStatus } from '../testUtils';
+import { createTestClient, loginTestUser, loginTestAdmin, expectStatus } from '../testUtils';
 
 const PRODUCT_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -29,8 +29,8 @@ describe('Regional Checkout Integration', () => {
 
   const authHeaders = () => ({ Authorization: `Bearer ${customerToken}` });
 
-  const createBasket = async (storeSlug: string): Promise<Record<string, unknown>> => {
-    const response = await client.post(`/customer/basket?store=${storeSlug}`, {}, { headers: authHeaders() });
+  const createBasket = async (storeSlug: string, currency?: string): Promise<Record<string, unknown>> => {
+    const response = await client.post(`/customer/basket?store=${storeSlug}`, currency ? { currency } : {}, { headers: authHeaders() });
     expectStatus(response, 201);
     return response.data.data;
   };
@@ -196,6 +196,110 @@ describe('Regional Checkout Integration', () => {
     expect(Number(order.totalAmountCents)).toBe(
       Number(order.subtotalCents) + Number(order.shippingTotalCents) - Number(order.discountTotalCents),
     );
+  });
+
+  it('should accept a region-optional Belgian address through the full checkout flow', async () => {
+    const basket = await createBasket(DE_STORE.slug);
+
+    // Belgium does not use administrative areas — no `region` field is sent
+    const { orderId } = await checkoutToPaymentIntent(basket.basketId as string, {
+      firstName: 'Marie',
+      lastName: 'Peeters',
+      addressLine1: 'Rue de la Loi 16',
+      city: 'Brussels',
+      postalCode: '1000',
+      country: 'BE',
+    });
+
+    const order = await getOrder(orderId);
+    expect(order.storeId).toBe(DE_STORE.storeId);
+    expect(order.currencyCode).toBe('EUR');
+    // BE has no seeded tax rate — destination tax resolves to zero, but the
+    // region-optional address must still flow through to a completed order.
+    expect(Number(order.totalAmountCents)).toBe(
+      Number(order.subtotalCents) + Number(order.shippingTotalCents) + Number(order.taxTotalCents) - Number(order.discountTotalCents),
+    );
+  });
+
+  it('should accept a postal-code-optional UAE address through the full checkout flow', async () => {
+    const basket = await createBasket(DE_STORE.slug);
+
+    // The UAE has no postal code system — the emirate is the administrative area
+    const { orderId } = await checkoutToPaymentIntent(basket.basketId as string, {
+      firstName: 'Fatima',
+      lastName: 'Al Mansoori',
+      addressLine1: 'Sheikh Zayed Road 1',
+      city: 'Dubai',
+      region: 'Dubai',
+      country: 'AE',
+    });
+
+    const order = await getOrder(orderId);
+    expect(order.storeId).toBe(DE_STORE.storeId);
+    expect(order.currencyCode).toBe('EUR');
+  });
+
+  it('should check out in JPY without multiplying zero-decimal minor units by 100', async () => {
+    // US-CA store sells in JPY; the product has a native ¥1499 base price.
+    const basket = await createBasket(US_STORE.slug, 'JPY');
+    expect(basket.currency).toBe('JPY');
+
+    const { orderId } = await checkoutToPaymentIntent(basket.basketId as string, {
+      firstName: 'Yuki',
+      lastName: 'Tanaka',
+      addressLine1: '1-1 Chiyoda',
+      city: 'Tokyo',
+      region: 'Tokyo',
+      postalCode: '100-0001',
+      country: 'JP',
+    });
+
+    const order = await getOrder(orderId);
+    expect(order.storeId).toBe(US_STORE.storeId);
+    expect(order.currencyCode).toBe('JPY');
+    // ¥1499 must remain 1499 minor units — a *100 assumption would yield 149900
+    expect(Number(order.subtotalCents)).toBe(1499);
+    // ¥800 flat JPY shipping rate from the Japan zone
+    expect(Number(order.shippingTotalCents)).toBe(800);
+    expect(Number(order.totalAmountCents)).toBe(
+      Number(order.subtotalCents) + Number(order.shippingTotalCents) + Number(order.taxTotalCents) - Number(order.discountTotalCents),
+    );
+  });
+
+  it('should expose order explainability with provenance for a taxed order', async () => {
+    const adminToken = await loginTestAdmin(client);
+    const basket = await createBasket(US_STORE.slug);
+
+    const { orderId } = await checkoutToPaymentIntent(basket.basketId as string, {
+      firstName: 'Jane',
+      lastName: 'Doe',
+      addressLine1: '123 Main St',
+      city: 'Los Angeles',
+      region: 'CA',
+      postalCode: '90012',
+      country: 'US',
+    });
+
+    const response = await client.get(`/business/orders/${orderId}/decisions`, {
+      headers: { Authorization: `Bearer ${adminToken}` },
+    });
+    expectStatus(response, 200);
+
+    const decisions = response.data.data as {
+      orderId: string;
+      orderNumber: string;
+      currencyCode: string;
+      decisionLog: unknown[];
+      discounts: unknown[];
+      taxes: Array<{ orderId: string }>;
+    };
+    expect(decisions.orderId).toBe(orderId);
+    expect(decisions.currencyCode).toBe('USD');
+    expect(Array.isArray(decisions.decisionLog)).toBe(true);
+    expect(Array.isArray(decisions.discounts)).toBe(true);
+    // The US destination-tax quote must be recorded as provenance rows
+    expect(decisions.taxes.length).toBeGreaterThan(0);
+    expect(decisions.taxes.every(tax => tax.orderId === orderId)).toBe(true);
   });
 
   it('should reject an invalid VAT number format', async () => {

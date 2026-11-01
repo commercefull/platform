@@ -16,6 +16,7 @@ import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
 import { OrderFilters } from '../../domain/repositories/OrderRepository';
 import { AddOrderNoteCommand } from '../../application/useCases/AddOrderNote';
+import { GetOrderExplainabilityCommand } from '../../application/useCases/GetOrderExplainability';
 import { CreateOrderRefundCommand } from '../../application/useCases/CreateOrderRefund';
 import { TrackFulfillmentPackageCommand } from '../../application/useCases/TrackFulfillmentPackage';
 import { UpdatePaymentStatusCommand } from '../../application/useCases/UpdatePaymentStatus';
@@ -38,6 +39,7 @@ import {
   getFulfillmentPackagesUseCase,
   manageOrderItemsUseCase,
   getOrderHistoryUseCase,
+  getOrderExplainabilityUseCase,
   getStoreSalesSummaryUseCase,
 } from '../../application/useCases/wired';
 import { manageSalesChannelsUseCase } from '../../../store/application/useCases/wired';
@@ -230,6 +232,24 @@ export const getOrder = async (req: HttpRequest, res: HttpResponse): Promise<voi
   }
 
   respond(req, res, order, 200);
+};
+
+/**
+ * Get order explainability — market context, version snapshot, decision log,
+ * FX snapshot, and discount/tax provenance.
+ * GET /orders/:orderId/decisions
+ */
+export const getOrderDecisions = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { orderId } = req.params;
+
+  if (!isUuid(orderId)) {
+    throw new OrderNotFoundError();
+  }
+
+  const command = new GetOrderExplainabilityCommand(orderId);
+  const result = await getOrderExplainabilityUseCase.execute(command);
+
+  respond(req, res, result, 200);
 };
 
 /**

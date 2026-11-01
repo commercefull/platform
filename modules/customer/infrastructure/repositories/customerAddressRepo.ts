@@ -9,7 +9,11 @@ import { FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors'
 export type CustomerAddress = DbCustomerAddress;
 
 // Derived types for create/update operations
-export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'>;
+export type CustomerAddressCreateParams = Omit<CustomerAddress, 'customerAddressId' | 'createdAt' | 'updatedAt'> & {
+  dependentLocality?: string | null;
+  sortingCode?: string | null;
+  addressLines?: unknown | null;
+};
 export type CustomerAddressUpdateParams = Partial<Omit<CustomerAddress, 'customerAddressId' | 'customerId' | 'createdAt' | 'updatedAt'>>;
 
 export class CustomerAddressRepo {
@@ -65,8 +69,9 @@ export class CustomerAddressRepo {
         "customerId", "firstName", "lastName", "company", "addressLine1", "addressLine2",
         "city", "state", "postalCode", "country", "phone", "email", "isDefault",
         "isDefaultBilling", "isDefaultShipping", "addressType", "isVerified", "verifiedAt",
-        "verificationData", "additionalInfo", "latitude", "longitude", "name", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+        "verificationData", "additionalInfo", "latitude", "longitude", "name",
+        "dependentLocality", "sortingCode", "addressLines", "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *`,
       [
         params.customerId,
@@ -92,6 +97,9 @@ export class CustomerAddressRepo {
         params.latitude || null,
         params.longitude || null,
         params.name || null,
+        params.dependentLocality || null,
+        params.sortingCode || null,
+        params.addressLines ? JSON.stringify(params.addressLines) : null,
         now,
         now,
       ],
@@ -122,7 +130,7 @@ export class CustomerAddressRepo {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
         updateFields.push(`"${key}" = $${paramIndex++}`);
-        values.push(key === 'verificationData' && value ? JSON.stringify(value) : value);
+        values.push((key === 'verificationData' || key === 'addressLines') && value ? JSON.stringify(value) : value);
       }
     });
 

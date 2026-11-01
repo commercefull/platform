@@ -58,6 +58,18 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
       request.taxAmountCents,
       request.taxAddedCents,
       request.taxIncludedInSubtotal,
+      request.marketId,
+      request.localeCode,
+      request.contractingEntityId,
+      request.catalogCurrencyCode,
+      request.displayedCurrencyCode,
+      request.settlementCurrencyCode,
+      request.accountingCurrencyCode,
+      request.exchangeRateSnapshot,
+      request.versionSnapshot,
+      request.decisionLog,
+      request.appliedPromotions,
+      request.taxLines,
     );
 
     const response = await this.createOrderUseCase.execute(command);

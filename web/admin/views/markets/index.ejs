@@ -1,0 +1,65 @@
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/markets/create" class="btn btn-primary"><%= t('market:create') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <form method="GET" class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label"><%= t('market:status') %></label>
+            <select class="form-select" name="status">
+              <option value=""><%= t('common.all') %></option>
+              <% ['draft', 'ready', 'active', 'disabled'].forEach(function(s) { %>
+              <option value="<%= s %>" <%= filters.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary me-2" type="submit"><%= t('common.filter') %></button>
+            <a href="/admin/markets" class="btn btn-outline-secondary"><%= t('common.clear') %></a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th><%= t('market:code') %></th>
+              <th><%= t('market:name') %></th>
+              <th><%= t('market:countries') %></th>
+              <th><%= t('market:defaultCurrency') %></th>
+              <th><%= t('market:defaultLocale') %></th>
+              <th><%= t('market:status') %></th>
+              <th><%= t('market:version') %></th>
+              <th><%= t('common.actions') %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (markets || []).forEach(function(market) { %>
+            <tr>
+              <td><a href="/admin/markets/<%= market.marketId %>"><%= market.code %></a></td>
+              <td><%= market.name %></td>
+              <td><%= (market.countryCodes || []).join(', ') %></td>
+              <td><%= market.defaultCurrencyCode %></td>
+              <td><%= market.defaultLocaleCode %></td>
+              <td><span class="badge bg-<%= market.status === 'active' ? 'green' : market.status === 'disabled' ? 'red' : market.status === 'ready' ? 'azure' : 'secondary' %>"><%= market.status %></span></td>
+              <td>v<%= market.version %></td>
+              <td><a href="/admin/markets/<%= market.marketId %>" class="btn btn-sm"><%= t('market:view') %></a></td>
+            </tr>
+            <% }) %>
+            <% if (!(markets || []).length) { %>
+            <tr><td colspan="8" class="text-center text-secondary"><%= t('market:noMarkets') %></td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

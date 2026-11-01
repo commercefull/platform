@@ -7,6 +7,7 @@ import { jsonResponse, redirectResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
+import { toMinorUnits } from '../../../../libs/money';
 import { manageReturnRulesUseCase } from '../../application/wired';
 import type { RefundMethod, ReturnRuleScope } from '../../domain/entities/ReturnRule';
 
@@ -50,6 +51,7 @@ export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
       restockingFeePercent,
       restockingFeeFlat,
       returnShippingCost,
+      currency,
       customerPaysReturnShipping,
       autoApprove,
       requiresManualReview,
@@ -67,6 +69,7 @@ export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
       restockingFeePercent?: string;
       restockingFeeFlat?: string;
       returnShippingCost?: string;
+      currency?: string;
       customerPaysReturnShipping?: string;
       autoApprove?: string;
       requiresManualReview?: string;
@@ -84,8 +87,8 @@ export const createReturnRule = async (req: HttpRequest, res: HttpResponse): Pro
       productId: productId || undefined,
       returnWindowDays: returnWindowDays ? parseInt(returnWindowDays, 10) : undefined,
       restockingFeePercent: restockingFeePercent ? parseFloat(restockingFeePercent) : 0,
-      restockingFeeFlatCents: restockingFeeFlat ? Math.round(parseFloat(restockingFeeFlat) * 100) : 0,
-      returnShippingCostCents: returnShippingCost ? Math.round(parseFloat(returnShippingCost) * 100) : 0,
+      restockingFeeFlatCents: restockingFeeFlat ? toMinorUnits(parseFloat(restockingFeeFlat), currency || 'USD') : 0,
+      returnShippingCostCents: returnShippingCost ? toMinorUnits(parseFloat(returnShippingCost), currency || 'USD') : 0,
       customerPaysReturnShipping: customerPaysReturnShipping === 'true',
       autoApprove: autoApprove === 'true',
       requiresManualReview: requiresManualReview === 'true',

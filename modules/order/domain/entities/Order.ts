@@ -17,6 +17,30 @@ import {
   OrderCannotBeCancelledError,
   OrderCannotBeModifiedError,
 } from '../errors/OrderErrors';
+import type { PolicyDecisionRecord } from '../../../../libs/rules/policyEngine';
+
+/** Named version markers captured at order time for later replay. */
+export interface OrderVersionSnapshot {
+  marketVersion?: string;
+  pricingVersion?: string;
+  promotionVersion?: string;
+  taxPolicyVersion?: string;
+  returnPolicyVersion?: string;
+  termsVersion?: string;
+  consentVersion?: string;
+  [key: string]: string | undefined;
+}
+
+/** One FX quote persisted at order time. */
+export interface OrderExchangeRateQuote {
+  fromCurrency: string;
+  toCurrency: string;
+  rate: number;
+  /** ISO timestamp the rate was quoted at. */
+  asOf: string;
+}
+
+export type OrderExchangeRateSnapshot = OrderExchangeRateQuote[];
 
 export interface OrderProps {
   orderId: string;
@@ -26,11 +50,32 @@ export interface OrderProps {
   storeId?: string;
   channelId?: string;
   createdByUserId?: string;
+  /** Selling market the order was placed in. */
+  marketId?: string;
+  /** Locale the customer checked out in (BCP-47). */
+  localeCode?: string;
+  /** Legal entity that contracted the sale. */
+  contractingEntityId?: string;
   orderSource: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   fulfillmentStatus: FulfillmentStatus;
+  /** Transaction (presentment) currency — what the customer was charged. */
   currencyCode: string;
+  /** Catalog currency the prices were sourced in (pre-conversion). */
+  catalogCurrencyCode?: string;
+  /** Currency the customer browsed in before payment. */
+  displayedCurrencyCode?: string;
+  /** Currency the PSP settles in. */
+  settlementCurrencyCode?: string;
+  /** Organization reporting/accounting currency. */
+  accountingCurrencyCode?: string;
+  /** FX quotes used for any currency conversion, frozen at order time. */
+  exchangeRateSnapshot?: OrderExchangeRateSnapshot;
+  /** Policy/rule versions that governed this order, frozen at order time. */
+  versionSnapshot?: OrderVersionSnapshot;
+  /** Explainable decisions made during checkout (tax, compliance, promos). */
+  decisionLog?: PolicyDecisionRecord[];
   subtotal: Money;
   discountTotal: Money;
   taxTotal: Money;
@@ -83,6 +128,9 @@ export class Order {
     storeId?: string;
     channelId?: string;
     createdByUserId?: string;
+    marketId?: string;
+    localeCode?: string;
+    contractingEntityId?: string;
     orderSource?: string;
     currencyCode?: string;
     customerEmail: string;
@@ -111,6 +159,9 @@ export class Order {
       storeId: props.storeId,
       channelId: props.channelId,
       createdByUserId: props.createdByUserId,
+      marketId: props.marketId,
+      localeCode: props.localeCode,
+      contractingEntityId: props.contractingEntityId,
       orderSource: props.orderSource || 'web',
       status: OrderStatus.PENDING,
       paymentStatus: PaymentStatus.PENDING,
@@ -172,6 +223,15 @@ export class Order {
   get createdByUserId(): string | undefined {
     return this.props.createdByUserId;
   }
+  get marketId(): string | undefined {
+    return this.props.marketId;
+  }
+  get localeCode(): string | undefined {
+    return this.props.localeCode;
+  }
+  get contractingEntityId(): string | undefined {
+    return this.props.contractingEntityId;
+  }
   get orderSource(): string {
     return this.props.orderSource;
   }
@@ -186,6 +246,27 @@ export class Order {
   }
   get currencyCode(): string {
     return this.props.currencyCode;
+  }
+  get catalogCurrencyCode(): string | undefined {
+    return this.props.catalogCurrencyCode;
+  }
+  get displayedCurrencyCode(): string | undefined {
+    return this.props.displayedCurrencyCode;
+  }
+  get settlementCurrencyCode(): string | undefined {
+    return this.props.settlementCurrencyCode;
+  }
+  get accountingCurrencyCode(): string | undefined {
+    return this.props.accountingCurrencyCode;
+  }
+  get exchangeRateSnapshot(): OrderExchangeRateSnapshot | undefined {
+    return this.props.exchangeRateSnapshot?.map(q => ({ ...q }));
+  }
+  get versionSnapshot(): OrderVersionSnapshot {
+    return { ...this.props.versionSnapshot };
+  }
+  get decisionLog(): PolicyDecisionRecord[] {
+    return [...(this.props.decisionLog ?? [])];
   }
   get subtotal(): Money {
     return this.props.subtotal;
@@ -439,6 +520,53 @@ export class Order {
     this.touch();
   }
 
+  /**
+   * Stamp the market/legal context the order was placed under. Called once
+   * at order creation from the checkout session's resolved context.
+   */
+  setMarketContext(context: { marketId?: string; localeCode?: string; contractingEntityId?: string }): void {
+    this.props.marketId = context.marketId ?? this.props.marketId;
+    this.props.localeCode = context.localeCode ?? this.props.localeCode;
+    this.props.contractingEntityId = context.contractingEntityId ?? this.props.contractingEntityId;
+    this.touch();
+  }
+
+  /**
+   * Stamp the currency tiers used by the order. `currencyCode` (the
+   * presentment currency) stays the primary tier; the others record how the
+   * order was priced, settled, and reported.
+   */
+  setCurrencyContext(context: {
+    catalogCurrencyCode?: string;
+    displayedCurrencyCode?: string;
+    settlementCurrencyCode?: string;
+    accountingCurrencyCode?: string;
+  }): void {
+    this.props.catalogCurrencyCode = context.catalogCurrencyCode ?? this.props.catalogCurrencyCode;
+    this.props.displayedCurrencyCode = context.displayedCurrencyCode ?? this.props.displayedCurrencyCode;
+    this.props.settlementCurrencyCode = context.settlementCurrencyCode ?? this.props.settlementCurrencyCode;
+    this.props.accountingCurrencyCode = context.accountingCurrencyCode ?? this.props.accountingCurrencyCode;
+    this.touch();
+  }
+
+  /** Freeze the FX quotes used for any conversion at order time. */
+  setExchangeRateSnapshot(snapshot: OrderExchangeRateSnapshot): void {
+    this.props.exchangeRateSnapshot = snapshot.map(q => ({ ...q }));
+    this.touch();
+  }
+
+  /** Merge named policy/rule versions into the order's version snapshot. */
+  setVersionSnapshot(snapshot: OrderVersionSnapshot): void {
+    this.props.versionSnapshot = { ...this.props.versionSnapshot, ...snapshot };
+    this.touch();
+  }
+
+  /** Append an explainable decision (tax, compliance, promo) to the order log. */
+  recordDecision(record: PolicyDecisionRecord): void {
+    this.props.decisionLog = [...(this.props.decisionLog ?? []), record];
+    this.touch();
+  }
+
   addAdminNote(note: string): void {
     this.props.adminNotes = this.props.adminNotes
       ? `${this.props.adminNotes}\n${new Date().toISOString()}: ${note}`
@@ -538,11 +666,21 @@ export class Order {
       storeId: this.props.storeId,
       channelId: this.props.channelId,
       createdByUserId: this.props.createdByUserId,
+      marketId: this.props.marketId,
+      localeCode: this.props.localeCode,
+      contractingEntityId: this.props.contractingEntityId,
       orderSource: this.props.orderSource,
       status: this.props.status,
       paymentStatus: this.props.paymentStatus,
       fulfillmentStatus: this.props.fulfillmentStatus,
       currencyCode: this.props.currencyCode,
+      catalogCurrencyCode: this.props.catalogCurrencyCode,
+      displayedCurrencyCode: this.props.displayedCurrencyCode,
+      settlementCurrencyCode: this.props.settlementCurrencyCode,
+      accountingCurrencyCode: this.props.accountingCurrencyCode,
+      exchangeRateSnapshot: this.props.exchangeRateSnapshot,
+      versionSnapshot: this.props.versionSnapshot,
+      decisionLog: this.props.decisionLog,
       subtotalCents: this.props.subtotal.cents,
       discountTotalCents: this.props.discountTotal.cents,
       taxTotalCents: this.props.taxTotal.cents,

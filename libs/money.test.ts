@@ -1,4 +1,4 @@
-import { Money } from './money';
+import { Money, formatCents, formatCentsWithTax, formatPriceWithTax, fromMinorUnits, getCurrencyDecimals, toMinorUnits } from './money';
 
 describe('libs/money', () => {
   describe('create / basic accessors', () => {
@@ -123,6 +123,97 @@ describe('libs/money', () => {
 
     it('toJSON', () => {
       expect(Money.create(10, 'USD').toJSON()).toEqual({ cents: 1000, currency: 'USD' });
+    });
+  });
+
+  describe('ISO 4217 minor units', () => {
+    it('should report 0 decimals when currency is JPY, KRW, or VND', () => {
+      expect(getCurrencyDecimals('JPY')).toBe(0);
+      expect(getCurrencyDecimals('KRW')).toBe(0);
+      expect(getCurrencyDecimals('VND')).toBe(0);
+    });
+
+    it('should report 3 decimals when currency is KWD, BHD, or OMR', () => {
+      expect(getCurrencyDecimals('KWD')).toBe(3);
+      expect(getCurrencyDecimals('BHD')).toBe(3);
+      expect(getCurrencyDecimals('OMR')).toBe(3);
+    });
+
+    it('should default to 2 decimals when currency is unlisted', () => {
+      expect(getCurrencyDecimals('USD')).toBe(2);
+      expect(getCurrencyDecimals('EUR')).toBe(2);
+      expect(getCurrencyDecimals('XXX')).toBe(2);
+    });
+
+    it('should be case-insensitive when resolving decimals', () => {
+      expect(getCurrencyDecimals('jpy')).toBe(0);
+    });
+
+    it('should store major units verbatim when creating zero-decimal JPY', () => {
+      const m = Money.create(1500, 'JPY');
+      expect(m.cents).toBe(1500);
+      expect(m.amount).toBe(1500);
+    });
+
+    it('should store 1000 minor units per major unit when creating three-decimal KWD', () => {
+      const m = Money.create(1.234, 'KWD');
+      expect(m.cents).toBe(1234);
+      expect(m.amount).toBe(1.234);
+    });
+
+    it('should round-trip major and minor units when converting JPY', () => {
+      expect(toMinorUnits(1500, 'JPY')).toBe(1500);
+      expect(fromMinorUnits(1500, 'JPY')).toBe(1500);
+    });
+
+    it('should round-trip major and minor units when converting KWD', () => {
+      expect(toMinorUnits(2.5, 'KWD')).toBe(2500);
+      expect(fromMinorUnits(2500, 'KWD')).toBe(2.5);
+    });
+
+    it('should preserve integer minor units through arithmetic when currency is JPY', () => {
+      const total = Money.create(1000, 'JPY').add(Money.create(500, 'JPY')).subtract(Money.create(200, 'JPY'));
+      expect(total.cents).toBe(1300);
+      expect(total.amount).toBe(1300);
+    });
+
+    it('should format without a decimal part when formatting JPY', () => {
+      expect(Money.create(1500, 'JPY').format('ja-JP')).toBe('￥1,500');
+    });
+
+    it('should format minor units without dividing by 100 when formatting JPY cents', () => {
+      expect(formatCents(1500, 'JPY', 'ja-JP')).toBe('￥1,500');
+    });
+
+    it('should format minor units as three decimals when formatting KWD cents', () => {
+      const formatted = formatCents(1234, 'KWD', 'en-KW');
+      expect(formatted).toContain('1.234');
+    });
+
+    it('should render zero decimal places in toString when currency is JPY', () => {
+      expect(Money.create(1500, 'JPY').toString()).toBe('JPY 1500');
+    });
+
+    it('should render three decimal places in toString when currency is KWD', () => {
+      expect(Money.create(1.234, 'KWD').toString()).toBe('KWD 1.234');
+    });
+
+    it('should allocate minor units without drift when splitting JPY', () => {
+      const parts = Money.create(100, 'JPY').allocate([1, 1, 1]);
+      expect(parts.reduce((sum, m) => sum + m.cents, 0)).toBe(100);
+    });
+
+    it('should append the default tax label when priceDisplayMode is inclusive_tax', () => {
+      expect(formatPriceWithTax(49.99, 'GBP', 'en-GB', 'inclusive_tax')).toContain('incl. VAT');
+    });
+
+    it('should append a caller-supplied tax label when priceDisplayMode is inclusive_tax', () => {
+      expect(formatPriceWithTax(49.99, 'JPY', 'ja-JP', 'inclusive_tax', '税込')).toContain('税込');
+    });
+
+    it('should use the custom tax label when formatting cents with tax', () => {
+      const formatted = formatCentsWithTax(1500, 'JPY', 'ja-JP', 'inclusive_tax', '税込');
+      expect(formatted).toContain('税込');
     });
   });
 });

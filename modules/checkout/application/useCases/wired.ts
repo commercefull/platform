@@ -37,7 +37,7 @@ export const setShippingAddressUseCase = new SetShippingAddressUseCase(
 );
 export const setVatNumberUseCase = new SetVatNumberUseCase(CheckoutRepo, setShippingAddressUseCase, ports.taxQuote);
 export const setFulfillmentMethodUseCase = new SetFulfillmentMethodUseCase(CheckoutRepo);
-export const setShippingMethodUseCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote);
+export const setShippingMethodUseCase = new SetShippingMethodUseCase(CheckoutRepo, ports.shippingQuote, ports.storeContext, ports.basketSnapshot);
 export const setPaymentMethodUseCase = new SetPaymentMethodUseCase(CheckoutRepo);
 export const applyCouponUseCase = new ApplyCouponUseCase(CheckoutRepo, ports.discountQuote, ports.basketSnapshot);
 export const removeCouponUseCase = new RemoveCouponUseCase(CheckoutRepo);

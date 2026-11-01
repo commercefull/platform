@@ -8,6 +8,11 @@ exports.up = function (knex) {
     t.string('type', 50).notNullable().checkIn(['authorization', 'capture', 'sale', 'refund', 'void', 'verification']);
     t.bigInteger('amountCents').notNullable();
     t.string('currencyCode', 3).notNullable().defaultTo('USD').references('code').inTable('currency');
+    t.string('settlementCurrencyCode', 3);
+    t.bigInteger('settlementAmountCents');
+    t.string('accountingCurrencyCode', 3);
+    t.bigInteger('accountingAmountCents');
+    t.decimal('fxRate', 18, 8);
     t.string('status', 50).notNullable();
     t.string('transactionId', 255);
     t.string('authorizationCode', 255);

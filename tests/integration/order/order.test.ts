@@ -319,6 +319,48 @@ describe('Order Tests', () => {
     });
   });
 
+  describe('Order Explainability (UC-ORD-012)', () => {
+    it('should return the decision audit payload for an order', async () => {
+      const newOrderData = {
+        ...testOrderData,
+        orderNumber: `TEST-${Date.now()}-XPL`,
+        customerEmail: 'explainability@example.com',
+      };
+
+      const createResp = await client.post('/customer/order', newOrderData, {
+        headers: { Authorization: `Bearer ${customerToken}` },
+      });
+      expect(createResp.status).toBe(201);
+      const orderId = createResp.data.data.orderId;
+
+      const response = await client.get(`/business/orders/${orderId}/decisions`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+
+      expect(response.status).toBe(200);
+      const decisions = response.data.data;
+      expect(decisions.orderId).toBe(orderId);
+      expect(decisions).toHaveProperty('orderNumber');
+      expect(decisions).toHaveProperty('currencyCode');
+      // Provenance surfaces are always arrays (empty when the order predates
+      // market-context resolution, e.g. direct POST /customer/order)
+      expect(Array.isArray(decisions.decisionLog)).toBe(true);
+      expect(Array.isArray(decisions.discounts)).toBe(true);
+      expect(Array.isArray(decisions.taxes)).toBe(true);
+
+      await client.delete(`/business/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+    });
+
+    it('should return 404 for a non-existent order', async () => {
+      const response = await client.get(`/business/orders/00000000-0000-7000-8000-000000000099/decisions`, {
+        headers: { Authorization: `Bearer ${adminToken}` },
+      });
+      expect(response.status).toBe(404);
+    });
+  });
+
   describe('Authorization Tests', () => {
     it('should require authentication for admin order list', async () => {
       const response = await client.get('/business/orders');

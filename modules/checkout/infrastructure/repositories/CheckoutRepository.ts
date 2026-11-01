@@ -14,6 +14,7 @@ import { CheckoutRepository, ShippingMethodData, PaymentMethodData } from '../..
 import { CheckoutSession, CheckoutStatus, PaymentStatus, FulfillmentType } from '../../domain/entities/CheckoutSession';
 import { Address } from '../../domain/valueObjects/Address';
 import { Money } from '../../../../libs/money';
+import { getCountryAddressMetadata } from '../../../../libs/address';
 
 export class CheckoutRepo implements CheckoutRepository {
   async findById(id: string): Promise<CheckoutSession | null> {
@@ -108,7 +109,9 @@ export class CheckoutRepo implements CheckoutRepository {
           "selectedShippingMethodId" = $8, "shippingCalculated" = $9, "taxesCalculated" = $10,
           "agreeToTerms" = $11, "agreeToMarketing" = $12, notes = $13, "updatedAt" = $14,
           "lastActivityAt" = $15, "convertedToOrderId" = $16, "expiresAt" = $17,
-          "paymentIntentId" = $18, "metadata" = $19
+          "paymentIntentId" = $18, "metadata" = $19,
+          "marketId" = $21, "storeId" = $22, "channelId" = $23, "localeCode" = $24,
+          "appliedPromotions" = $25, "promotionDiscountCents" = $26
         WHERE "checkoutSessionId" = $20`,
         [
           session.customerId || null,
@@ -131,6 +134,12 @@ export class CheckoutRepo implements CheckoutRepository {
           session.paymentIntentId || null,
           JSON.stringify(metadata),
           session.id,
+          session.marketId || null,
+          session.storeId || null,
+          session.channelId || null,
+          session.localeCode || null,
+          JSON.stringify(session.appliedPromotions),
+          session.promotionDiscountAmount.cents,
         ],
       );
     } else {
@@ -140,8 +149,9 @@ export class CheckoutRepo implements CheckoutRepository {
           "checkoutSessionId", "sessionId", "basketId", "customerId", email,
           status, step, "sameBillingAsShipping", "shippingCalculated", "taxesCalculated",
           "agreeToTerms", "agreeToMarketing", notes, "createdAt", "updatedAt", "lastActivityAt", "expiresAt",
-          "paymentIntentId", "metadata"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+          "paymentIntentId", "metadata",
+          "marketId", "storeId", "channelId", "localeCode", "appliedPromotions", "promotionDiscountCents"
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
         [
           session.id,
           sessionId,
@@ -162,6 +172,12 @@ export class CheckoutRepo implements CheckoutRepository {
           session.expiresAt.toISOString(),
           session.paymentIntentId || null,
           JSON.stringify(metadata),
+          session.marketId || null,
+          session.storeId || null,
+          session.channelId || null,
+          session.localeCode || null,
+          JSON.stringify(session.appliedPromotions),
+          session.promotionDiscountAmount.cents,
         ],
       );
     }
@@ -280,8 +296,12 @@ export class CheckoutRepo implements CheckoutRepository {
     if (!addr.lastName) errors.push('Last name is required');
     if (!addr.addressLine1) errors.push('Address line 1 is required');
     if (!addr.city) errors.push('City is required');
-    if (!addr.postalCode) errors.push('Postal code is required');
     if (!addr.country) errors.push('Country is required');
+    // Postal-code optionality is country metadata driven (AE/HK have no postal
+    // system); administrative-area checks live in the Address value object.
+    if (addr.country && getCountryAddressMetadata(addr.country as string).requiredFields.includes('postalCode') && !addr.postalCode) {
+      errors.push('Postal code is required');
+    }
     return { valid: errors.length === 0, errors };
   }
 
@@ -374,6 +394,14 @@ export class CheckoutRepo implements CheckoutRepository {
       vatNumber: meta?.vatNumber as string | undefined,
       reverseChargeApplied: meta?.reverseChargeApplied === true,
       fulfillmentType: (meta?.fulfillmentType as FulfillmentType) ?? 'shipping',
+      marketId: row.marketId ?? undefined,
+      storeId: row.storeId ?? undefined,
+      channelId: row.channelId ?? undefined,
+      localeCode: row.localeCode ?? undefined,
+      appliedPromotions: Array.isArray(row.appliedPromotions)
+        ? (row.appliedPromotions as CheckoutSession['appliedPromotions'])
+        : undefined,
+      promotionDiscountAmount: row.promotionDiscountCents != null ? Money.fromCents(Number(row.promotionDiscountCents), currency) : undefined,
       notes: row.notes ?? undefined,
       metadata: row.metadata
         ? typeof row.metadata === 'string'

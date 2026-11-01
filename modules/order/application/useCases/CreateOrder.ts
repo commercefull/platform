@@ -6,6 +6,7 @@
 import { generateUUID } from '../../../../libs/uuid';
 import { withTransaction } from '../../../../libs/db';
 import { OrderRepository } from '../../domain/repositories/OrderRepository';
+import type { OrderQueryRepository } from '../../domain/repositories/OrderQueryRepository';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { OrderAddress } from '../../domain/entities/OrderAddress';
@@ -43,9 +44,17 @@ export interface AddressInput {
   company?: string;
   address1: string;
   address2?: string;
+  /** Canonical multi-line street (country-neutral superset of address1/2). */
+  addressLines?: string[];
   city: string;
-  state: string;
-  postalCode: string;
+  /** Locality below city level (e.g. Brazilian bairro, JP district). */
+  dependentLocality?: string;
+  /** Administrative area — optional for countries without states (e.g. BE). */
+  state?: string;
+  /** Postal code — optional for countries without them (e.g. AE, HK). */
+  postalCode?: string;
+  /** Postal sorting code used by some postal systems (e.g. FR cedex). */
+  sortingCode?: string;
   country: string;
   countryCode: string;
   phone?: string;
@@ -94,6 +103,46 @@ export class CreateOrderCommand {
     public readonly taxAddedToTotalCents?: number,
     /** True when taxTotalCents is embedded in item prices (tax-inclusive pricing). */
     public readonly taxIncludedInSubtotal?: boolean,
+    // ---- Global commerce context (resolved at the edge, snapshotted here) ----
+    public readonly marketId?: string,
+    public readonly localeCode?: string,
+    public readonly contractingEntityId?: string,
+    public readonly catalogCurrencyCode?: string,
+    public readonly displayedCurrencyCode?: string,
+    public readonly settlementCurrencyCode?: string,
+    public readonly accountingCurrencyCode?: string,
+    /** FX quotes applied during checkout — frozen on the order. */
+    public readonly exchangeRateSnapshot?: Array<{ fromCurrency: string; toCurrency: string; rate: number; asOf: string }>,
+    /** Named policy/rule versions active at decision time. */
+    public readonly versionSnapshot?: Record<string, string | undefined>,
+    /** Explainable decision records (tax, promotions, compliance). */
+    public readonly decisionLog?: unknown[],
+    /** Structured promotion-engine discounts → persisted to `orderDiscount`. */
+    public readonly appliedPromotions?: Array<{
+      promotionId?: string;
+      code?: string;
+      name?: string;
+      discountAmountCents: number;
+      targetId?: string;
+      ruleId?: string;
+      policyVersion?: string;
+      decisionInputs?: Record<string, unknown>;
+    }>,
+    /** Tax engine line breakdown → persisted to `orderTax`. */
+    public readonly taxLines?: Array<{
+      orderItemId?: string;
+      taxType?: string;
+      name: string;
+      rate: number;
+      amountCents: number;
+      jurisdiction?: string;
+      taxProvider?: string;
+      isIncludedInPrice?: boolean;
+      taxRuleId?: string;
+      taxRegime?: string;
+      policyVersion?: string;
+      decisionInputs?: Record<string, unknown>;
+    }>,
   ) {}
 }
 
@@ -130,7 +179,10 @@ export interface OrderResponse {
 // ============================================================================
 
 export class CreateOrderUseCase {
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly orderQueryRepository?: Pick<OrderQueryRepository, 'createDiscount' | 'createTax'>,
+  ) {}
 
   async execute(command: CreateOrderCommand): Promise<OrderResponse> {
     // Validate command
@@ -170,6 +222,9 @@ export class CreateOrderUseCase {
       userAgent: command.userAgent,
       referralSource: command.referralSource,
       metadata: command.metadata,
+      marketId: command.marketId,
+      localeCode: command.localeCode,
+      contractingEntityId: command.contractingEntityId,
     });
 
     // Add items
@@ -207,6 +262,19 @@ export class CreateOrderUseCase {
       order.setTaxTotal(Money.fromCents(command.taxTotalCents, currency), Money.fromCents(addedCents, currency));
     }
 
+    // Snapshot the resolved market/currency/policy context for explainability.
+    order.setCurrencyContext({
+      catalogCurrencyCode: command.catalogCurrencyCode,
+      displayedCurrencyCode: command.displayedCurrencyCode,
+      settlementCurrencyCode: command.settlementCurrencyCode,
+      accountingCurrencyCode: command.accountingCurrencyCode,
+    });
+    if (command.exchangeRateSnapshot?.length) order.setExchangeRateSnapshot(command.exchangeRateSnapshot);
+    if (command.versionSnapshot) order.setVersionSnapshot(command.versionSnapshot);
+    for (const record of command.decisionLog ?? []) {
+      order.recordDecision(record as Parameters<Order['recordDecision']>[0]);
+    }
+
     // Create shipping address
     if (command.shippingAddress) {
       const shippingAddress = OrderAddress.create({
@@ -237,6 +305,41 @@ export class CreateOrderUseCase {
       await this.orderRepository.recordStatusChange(saved.orderId, saved.status, 'Initial status', 'pending');
       await this.orderRepository.recordPaymentStatusChange(saved.orderId, saved.paymentStatus);
       await this.orderRepository.recordFulfillmentStatusChange(saved.orderId, saved.fulfillmentStatus);
+
+      // Persist promotion/tax provenance rows inside the same transaction so
+      // refunds and audits can replay the exact order-time decisions.
+      for (const promo of command.appliedPromotions ?? []) {
+        await this.orderQueryRepository?.createDiscount({
+          orderId: saved.orderId,
+          orderItemId: promo.targetId,
+          code: promo.code,
+          name: promo.name ?? 'Promotion',
+          type: 'fixedAmount',
+          value: promo.discountAmountCents,
+          discountAmountCents: promo.discountAmountCents,
+          promotionId: promo.promotionId,
+          ruleId: promo.ruleId,
+          policyVersion: promo.policyVersion,
+          decisionInputs: promo.decisionInputs,
+        });
+      }
+      for (const tax of command.taxLines ?? []) {
+        await this.orderQueryRepository?.createTax({
+          orderId: saved.orderId,
+          orderItemId: tax.orderItemId,
+          taxType: tax.taxType ?? 'sales_tax',
+          name: tax.name,
+          rate: tax.rate,
+          amountCents: tax.amountCents,
+          jurisdiction: tax.jurisdiction,
+          taxProvider: tax.taxProvider,
+          isIncludedInPrice: tax.isIncludedInPrice ?? false,
+          taxRuleId: tax.taxRuleId,
+          taxRegime: tax.taxRegime,
+          policyVersion: tax.policyVersion,
+          decisionInputs: tax.decisionInputs,
+        });
+      }
 
       return saved;
     });

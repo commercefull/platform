@@ -4,6 +4,8 @@
 
 The Pricing feature manages product pricing including pricing rules, tier/volume pricing, customer-specific price lists, and multi-currency support. It enables dynamic pricing strategies and localized pricing.
 
+All monetary math is ISO-4217 minor-unit aware via `libs/money` — 0-decimal (`JPY`, `KRW`), 2-decimal (`USD`, `EUR`), and 3-decimal (`KWD`, `BHD`) currencies convert by scaling exponents, never by `* 100`. When a market binds a `defaultPriceListId`, the market price list takes precedence over dynamic FX conversion; FX fallback only applies when the market's `allowDynamicFxConversion` capability is enabled. Rule evaluations emit `pricingVersion` decision data that orders persist in their `versionSnapshot`.
+
 ## Ownership Model
 
 Pricing is the **sole owner of catalog prices**. The `product` and

@@ -93,6 +93,10 @@ secondary memberships (store currency settings table).
 - Per-store currency settings are managed from the store admin page; the
   seed sets USD for US stores, GBP for UK, EUR for DE/FR.
 - Baskets and orders reject currencies a store doesn't support.
+- Markets layer on top: a `Market` declares its default + supported
+  currencies and a `defaultPriceListId` for market-priced catalogs — FX
+  conversion is the fallback only when `allowDynamicFxConversion` is on.
+  See [Market Launch](market-launch.md).
 
 ## 5. Configure tax
 
@@ -175,5 +179,6 @@ End-to-end sanity check on a seeded or manually created organization:
 ## Related guides
 
 - [Product Setup and Dynamic Fields](product-setup.md) — catalog modeling
+- [Market Launch](market-launch.md) — configure, validate, and launch a selling market
 - [Advanced Content Setup](content-setup.md) — pages, blocks, themes
 - [Regional Commerce Rollout Status](regional-commerce-rollout-progress.md) — capability coverage

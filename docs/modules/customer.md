@@ -4,6 +4,8 @@
 
 The Customer feature manages customer accounts, profiles, and addresses. It handles customer registration, profile management, and address book functionality.
 
+Customer identity is decoupled from market: a customer record carries `preferredLocale`, `preferredCurrency`, `timezone`, and `homeMarketId` independently of where they currently shop. `CustomerAddress` records store canonical global fields (`dependentLocality`, `sortingCode`, plus flexible `addressLines`) and validate against `libs/address` country metadata — state and postal code are required only where the country's postal system uses them.
+
 ---
 
 ## Use Cases

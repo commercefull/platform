@@ -12,6 +12,7 @@ import {
 } from '../../application/wired';
 import { adminRespond } from '../../../../libs/adminRespond';
 import { buildFormObject, FieldConfig } from '../../../../libs/formParsing';
+import { toMinorUnits } from '../../../../libs/money';
 
 // ============================================================================
 // Shipping Rates Management
@@ -88,18 +89,19 @@ export const createShippingRate = async (req: HttpRequest, res: HttpResponse): P
     validTo?: string;
   };
 
+  const currencyCode = currency || 'USD';
   const rate = await manageShippingRatesUseCase.create({
     shippingZoneId,
     shippingMethodId,
     name: name || null,
     description: description || null,
     rateType: rateType as 'flat' | 'weightBased' | 'priceBased' | 'itemBased' | 'dimensional' | 'calculated' | 'free',
-    baseRateCents: Math.round(parseFloat(baseRate) * 100),
-    perItemRateCents: perItemRate ? Math.round(parseFloat(perItemRate) * 100) : null,
-    freeThresholdCents: freeThreshold ? Math.round(parseFloat(freeThreshold) * 100) : null,
-    minRateCents: minRate ? Math.round(parseFloat(minRate) * 100) : null,
-    maxRateCents: maxRate ? Math.round(parseFloat(maxRate) * 100) : null,
-    currencyCode: currency || 'USD',
+    baseRateCents: toMinorUnits(parseFloat(baseRate), currencyCode),
+    perItemRateCents: perItemRate ? toMinorUnits(parseFloat(perItemRate), currencyCode) : null,
+    freeThresholdCents: freeThreshold ? toMinorUnits(parseFloat(freeThreshold), currencyCode) : null,
+    minRateCents: minRate ? toMinorUnits(parseFloat(minRate), currencyCode) : null,
+    maxRateCents: maxRate ? toMinorUnits(parseFloat(maxRate), currencyCode) : null,
+    currencyCode,
     taxable: taxable === 'true',
     priority: priority ? parseInt(priority) : 0,
     validFrom: validFrom ? new Date(validFrom) : null,

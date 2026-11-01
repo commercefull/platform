@@ -33,7 +33,8 @@ export interface Address {
   addressLine2?: string;
   city: string;
   state?: string;
-  postalCode: string;
+  /** Postal code — optional for countries without them (e.g. AE, HK). */
+  postalCode?: string;
   countryCode: string;
   phone?: string;
   email?: string;

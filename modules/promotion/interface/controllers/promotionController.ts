@@ -1,4 +1,5 @@
 import { jsonResponse } from 'libs/apiResponse';
+import { toMinorUnits } from '../../../../libs/money';
 import type { HttpRequest, HttpResponse } from 'libs/http';
 import {
   CreatePromotionInput,
@@ -19,6 +20,7 @@ interface ApplyPromotionBody {
 interface ValidatePromotionBody {
   promotionId: string;
   cartTotal: string;
+  currency?: string;
   customerId?: string;
   items?: unknown[];
 }
@@ -303,7 +305,7 @@ const _validatePromotionForCart = async (
   req: HttpRequest<Record<string, string>, unknown, ValidatePromotionBody>,
   res: HttpResponse,
 ): Promise<void> => {
-  const { promotionId, cartTotal, customerId, items: _items } = req.body;
+  const { promotionId, cartTotal, currency, customerId, items: _items } = req.body;
 
   // Validation
   if (!promotionId || cartTotal === undefined) {
@@ -315,7 +317,7 @@ const _validatePromotionForCart = async (
   }
 
   // Validate the promotion
-  const isValid = await managePromotionsUseCase.isValidForOrder(promotionId, Math.round(parseFloat(cartTotal) * 100), customerId);
+  const isValid = await managePromotionsUseCase.isValidForOrder(promotionId, toMinorUnits(parseFloat(cartTotal), currency || 'USD'), customerId);
 
   if (isValid) {
     jsonResponse(res, 200, {

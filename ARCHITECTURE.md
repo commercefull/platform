@@ -29,7 +29,7 @@ Commercefull is an e-commerce platform. A single Express application serves two 
 │   admin (Tabler)  ·  storefront (Tailwind)                │
 ├──────────────────────────────────────────────────────────┤
 │                  modules/ (Business Logic)                │
-│   44 bounded contexts organized as DDD:                   │
+│   45 bounded contexts organized as DDD:                   │
 │   domain → application → infrastructure → interface       │
 ├──────────────────────────────────────────────────────────┤
 │                    libs/ (Shared)                         │
@@ -136,7 +136,7 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | product       | `/business/products`, `/business/categories`                                                                                        |
 | order         | `/business/orders`                                                                                                                  |
-| store         | `/business/stores`                                                                                                                  |
+| store         | `/business/stores`, `/business/markets`                                                                                             |
 | media         | `/business/media`                                                                                                                   |
 | fulfillment   | `/business/fulfillments`, `/business/fulfillment/locations`, `/business/fulfillment/partners`                                       |
 | configuration | `/business/configuration`                                                                                                           |
@@ -148,6 +148,52 @@ All business routes follow the `/business/{topic}/...` pattern. The topic prefix
 | reporting     | `/business/reports`                                                                                                                 |
 | basket        | `/business/basket`                                                                                                                  |
 | tracking      | `/business/tracking`                                                                                                                |
+
+## Global Commerce
+
+Commercefull is a country-neutral, configuration-driven commerce platform. International expansion is declarative: a new market is configured, validated, and launched — not forked in code. The model is "one commerce platform + global primitives + market configuration + specialist domain services + policy rules where genuinely necessary".
+
+### Commerce Context (`libs/commerceContext`)
+
+Every commerce decision is made against a four-dimensional `CommerceContext`, resolved once per request and propagated through basket → checkout → order:
+
+| Dimension             | Content                                                                        |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `CustomerContext`     | Who is buying — customer id, home market, tax/VAT identifiers, privacy consents |
+| `MarketContext`       | Where the sale happens — market id/code, country, currency, locale, capabilities |
+| `TransactionContext`  | What is being transacted — basket/order facts, channel, store, ship-from/to    |
+| `LegalContext`        | Who contracts — contracting entity, terms/consent versions                     |
+
+Storefront resolution (`web/storefront/storeResolutionMiddleware`) resolves store **and** market (query param → session → market hostname → default) and exposes the combined context to views and downstream modules.
+
+### Markets (`modules/store` — `Market` aggregate)
+
+The `market` table is a first-class aggregate binding: organization/store, code, selling `countries`, `defaultCurrencyCode` + `supportedCurrencyCodes`, `defaultLocaleCode` + `supportedLocaleCodes`, `catalogAssortmentId`, `defaultPriceListId`, `contractingEntityId`, `taxDisplayMode` (`inclusive_tax`/`exclusive_tax`), FX behavior, `MarketCapabilities`, allowed payment/fulfillment methods, and `hostnames` used for storefront resolution. Lifecycle: `draft → ready → active` (and `disabled`).
+
+- **Capabilities** — `MarketCapabilities.supports(capability)` replaces scattered feature booleans (COD, pickup, coupons, guest checkout, dynamic FX, …).
+- **Readiness** — `MarketReadinessEvaluator` audits 12 launch dimensions (locale, currency, catalog, pricing, tax, payments, shipping, returns, legal, compliance, support, fraud) via `MarketReadinessPort`, gathering facts cross-module through `MarketReadinessAdapter` (ACL).
+- **Launch gate** — `LaunchMarketUseCase` refuses activation while any blocking dimension is unmet; `GET /business/markets/:id/readiness` reports the live score.
+
+### Global primitives (`libs/`)
+
+- `libs/money` — ISO-4217 minor-unit aware `Money`/`toMinorUnits`/`fromMinorUnits` (0-, 2-, 3-decimal currencies). Never multiply by 100.
+- `libs/i18n` — CLDR/ICU locale primitives: numbers, dates, currencies, collation, RTL direction, locale negotiation.
+- `libs/address` — `GlobalAddress` + `countryAddressMetadata`: per-country required fields, admin-area/postal labels and patterns, display order. Drives checkout `Address` VO optionality and storefront address forms.
+- `libs/geo` — country-group membership (`EU_MEMBER_STATES`, `EEA_MEMBER_STATES`, `EU_VAT_AREA`, `GDPR_REGIONS`, `isEuMember`, …) — the single source for regional logic.
+- `libs/rules/policyEngine` — `Facts → Policy → Decision` evaluation producing explainable `PolicyDecisionRecord`s (tax, compliance, privacy consent).
+
+### Explainability & provenance
+
+Orders persist an immutable decision trail so historical behavior can be replayed: `marketId`/`localeCode`/`contractingEntityId`, `exchangeRateSnapshot`, `versionSnapshot` (market/pricing/promotion/tax/returns/terms versions), `decisionLog`, plus `orderDiscount` and `orderTax` provenance rows carrying source rule/policy ids, versions, and decision inputs. `GET /business/orders/:orderId/decisions` returns the full audit payload.
+
+### Specialist services
+
+- **Tax** — `TaxEnginePort` returns a `TaxDecision` (regime, lines, policy version, decision record); `InternalRuleTaxEngine` adapts `CalculateOrderTax` using `libs/geo` instead of hardcoded lists.
+- **Payments** — `PaymentCapabilityService` checks method/PSP country + market support; `PSPRoute.supportsCountry()` gates routing.
+- **Fulfillment** — shipping rates evaluate ship-from → ship-to lanes (`originCountry` in the conditions context); `DeliveryPromise` expresses the fulfillment commitment.
+- **Privacy** — `PrivacyPolicyEvaluator` derives jurisdiction-specific consent requirements (GDPR/CCPA/LGPD/APPI) from `libs/geo` country groups.
+
+New external protocols (a local PSP rail, a domestic carrier API) only require a new adapter behind the existing ports — no changes to checkout, order, pricing, or storefront code. See [`docs/guides/global-expansion.md`](./docs/guides/global-expansion.md) for the store → channel → market progression and [`docs/guides/market-launch.md`](./docs/guides/market-launch.md) for the operational launch procedure.
 
 ## Technology Stack (at a glance)
 

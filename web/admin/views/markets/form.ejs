@@ -1,0 +1,53 @@
+<%
+var isEdit = !!(market && market.marketId);
+var action = isEdit ? '/admin/markets/' + market.marketId : '/admin/markets';
+var caps = formData.capabilities || {};
+var capList = Object.keys(caps).map(function(k) { return k + ':' + caps[k]; }).join(', ');
+var metadataStr = formData.metadata ? JSON.stringify(formData.metadata) : '';
+%>
+<div class="page-header d-print-none">
+  <div class="row g-2 align-items-center">
+    <div class="col"><h2 class="page-title"><%= pageName %></h2></div>
+    <div class="col-auto ms-auto"><a href="/admin/markets" class="btn btn-outline-secondary"><%= t('common.back') %></a></div>
+  </div>
+</div>
+<section class="content">
+  <div class="container-fluid">
+    <%- include('../partials/alerts') %>
+    <div class="card">
+      <div class="card-body">
+        <form method="POST" action="<%= action %>">
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:code') %></label><input class="form-control" name="code" value="<%= formData.code || '' %>" required <%= isEdit ? 'readonly' : '' %>></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:name') %></label><input class="form-control" name="name" value="<%= formData.name || '' %>" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:storeId') %></label><input class="form-control" name="storeId" value="<%= formData.storeId || '' %>"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:countryCodes') %></label><input class="form-control" name="countryCodes" value="<%= (formData.countryCodes || []).join(', ') %>" placeholder="DE, FR, BE"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:defaultCurrency') %></label><input class="form-control" name="defaultCurrencyCode" value="<%= formData.defaultCurrencyCode || '' %>" placeholder="EUR" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:supportedCurrencies') %></label><input class="form-control" name="supportedCurrencyCodes" value="<%= (formData.supportedCurrencyCodes || []).join(', ') %>" placeholder="EUR, GBP"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:defaultLocale') %></label><input class="form-control" name="defaultLocaleCode" value="<%= formData.defaultLocaleCode || '' %>" placeholder="de-DE" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:supportedLocales') %></label><input class="form-control" name="supportedLocaleCodes" value="<%= (formData.supportedLocaleCodes || []).join(', ') %>" placeholder="de-DE, en-GB"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:taxDisplayMode') %></label>
+              <select class="form-select" name="taxDisplayMode">
+                <option value="inclusive_tax" <%= formData.taxDisplayMode === 'inclusive_tax' ? 'selected' : '' %>><%= t('market:taxInclusive') %></option>
+                <option value="exclusive_tax" <%= !formData.taxDisplayMode || formData.taxDisplayMode === 'exclusive_tax' ? 'selected' : '' %>><%= t('market:taxExclusive') %></option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:catalogAssortmentId') %></label><input class="form-control" name="catalogAssortmentId" value="<%= formData.catalogAssortmentId || '' %>"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:defaultPriceListId') %></label><input class="form-control" name="defaultPriceListId" value="<%= formData.defaultPriceListId || '' %>"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:contractingEntityId') %></label><input class="form-control" name="contractingEntityId" value="<%= formData.contractingEntityId || '' %>"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:allowedPaymentMethods') %></label><input class="form-control" name="allowedPaymentMethods" value="<%= (formData.allowedPaymentMethods || []).join(', ') %>" placeholder="card, paypal, ideal"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:allowedFulfillmentMethods') %></label><input class="form-control" name="allowedFulfillmentMethods" value="<%= (formData.allowedFulfillmentMethods || []).join(', ') %>" placeholder="shipping, pickup"></div>
+            <div class="col-md-4 mb-3"><label class="form-label"><%= t('market:hostnamePatterns') %></label><input class="form-control" name="hostnamePatterns" value="<%= (formData.hostnamePatterns || []).join(', ') %>" placeholder="shop.example.de"></div>
+            <div class="col-md-6 mb-3"><label class="form-label"><%= t('market:capabilities') %></label><input class="form-control" name="capabilities" value="<%= capList %>" placeholder="supports_pickup:true, supports_gift_cards:true"></div>
+            <div class="col-md-6 mb-3"><label class="form-label"><%= t('market:metadata') %></label><input class="form-control" name="metadata" value='<%= metadataStr %>' placeholder='{"region":"eu"}'></div>
+            <div class="col-md-4 mb-3 form-check ms-2">
+              <input class="form-check-input" type="checkbox" name="allowDynamicFxConversion" id="allowDynamicFxConversion" <%= formData.allowDynamicFxConversion ? 'checked' : '' %>>
+              <label class="form-check-label" for="allowDynamicFxConversion"><%= t('market:allowDynamicFx') %></label>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="submit"><%= isEdit ? t('market:edit') : t('market:create') %></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

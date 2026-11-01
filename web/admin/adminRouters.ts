@@ -500,6 +500,15 @@ import {
   unassignStoreSalesChannel,
   updateStore,
   viewStore,
+  adminListMarkets,
+  adminViewMarket,
+  adminCreateMarketForm,
+  adminEditMarketForm,
+  adminCreateMarket,
+  adminUpdateMarket,
+  adminDeleteMarket,
+  adminLaunchMarket,
+  adminDisableMarket,
 } from '../../modules/store';
 import {
   createSchedule,
@@ -829,6 +838,20 @@ router.post('/stores/:storeId/channels/:channelId/remove', asyncHandler(unassign
 router.get('/stores/:storeId/users', asyncHandler(manageStoreUsers));
 router.post('/stores/:storeId/users', asyncHandler(assignUserToStore));
 router.delete('/stores/:storeId/users/:userId', asyncHandler(removeUserFromStore));
+
+// ============================================================================
+// Market Routes — global commerce configuration & launch
+// ============================================================================
+
+router.get('/markets', asyncHandler(adminListMarkets));
+router.get('/markets/create', asyncHandler(adminCreateMarketForm));
+router.post('/markets', asyncHandler(adminCreateMarket));
+router.get('/markets/:marketId', asyncHandler(adminViewMarket));
+router.get('/markets/:marketId/edit', asyncHandler(adminEditMarketForm));
+router.post('/markets/:marketId', asyncHandler(adminUpdateMarket));
+router.delete('/markets/:marketId', asyncHandler(adminDeleteMarket));
+router.post('/markets/:marketId/launch', asyncHandler(adminLaunchMarket));
+router.post('/markets/:marketId/disable', asyncHandler(adminDisableMarket));
 
 // ============================================================================
 // Organization Routes

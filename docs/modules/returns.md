@@ -4,6 +4,8 @@
 
 The Returns module provides return, exchange, and store credit management — explicit state machine for return lifecycle, carrier return labels, store-credit ledger, and warranty claims.
 
+Returns replay historical rules: refund and return evaluation uses the order's locked `versionSnapshot.returnPolicyVersion` and `orderTax`/`orderDiscount` provenance rather than current configuration, so a return months after purchase applies the rules in effect at sale time.
+
 ---
 
 ## Public API (`index.ts`)

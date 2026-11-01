@@ -146,6 +146,20 @@ describe('applyAdjustments', () => {
     ]);
     expect(result).toEqual({ priceCents: 5000, applied: true });
   });
+
+  it('should treat FIXED operands as whole units when currency is zero-decimal JPY', () => {
+    expect(applyAdjustments(1500, [{ type: PricingAdjustmentType.FIXED, value: 2000 }], 'JPY')).toEqual({
+      priceCents: 2000,
+      applied: true,
+    });
+  });
+
+  it('should treat OVERRIDE operands as thousandths when currency is three-decimal KWD', () => {
+    expect(applyAdjustments(1234, [{ type: PricingAdjustmentType.OVERRIDE, value: 2.5 }], 'KWD')).toEqual({
+      priceCents: 2500,
+      applied: true,
+    });
+  });
 });
 
 describe('selectCurrencyPriceRule', () => {
@@ -205,5 +219,37 @@ describe('convertAmount', () => {
     const result = convertAmount(10000, usd, eur, rule);
     expect(result.convertedPriceCents).toBe(8000);
     expect(result.exchangeRate).toBe(0.8);
+  });
+
+  it('should scale minor-unit exponents when converting USD cents to zero-decimal JPY', () => {
+    // $10.00 (1000 USD cents) at 150 JPY/USD → ¥1,500 (1500 minor units),
+    // not ¥150,000 (the old 100× overcharge bug).
+    const jpy = createCurrency({ code: 'JPY', exchangeRate: 150, decimalPlaces: 0, isDefault: false });
+    const result = convertAmount(1000, usd, jpy);
+    expect(result.convertedPriceCents).toBe(1500);
+  });
+
+  it('should scale minor-unit exponents when converting USD cents to three-decimal KWD', () => {
+    // $10.00 (1000 USD cents) at 0.31 KWD/USD → د.ك3.100 (3100 minor units).
+    const kwd = createCurrency({ code: 'KWD', exchangeRate: 0.31, decimalPlaces: 3, isDefault: false });
+    const result = convertAmount(1000, usd, kwd);
+    expect(result.convertedPriceCents).toBe(3100);
+  });
+
+  it('should apply FIXED adjustments in target minor units when converting to JPY', () => {
+    const jpy = createCurrency({ code: 'JPY', exchangeRate: 150, decimalPlaces: 0, isDefault: false });
+    const rule = { ...createRule(), currencyCode: 'JPY', adjustments: [{ type: PricingAdjustmentType.FIXED, value: 500 }] };
+    // $10 → ¥1500, +¥500 fixed → ¥2000
+    const result = convertAmount(1000, usd, jpy, rule);
+    expect(result.convertedPriceCents).toBe(2000);
+  });
+
+  it('should apply EXCHANGE rate overrides with exponent scaling when converting to JPY', () => {
+    const jpy = createCurrency({ code: 'JPY', exchangeRate: 150, decimalPlaces: 0, isDefault: false });
+    const rule = { ...createRule(), currencyCode: 'JPY', adjustments: [{ type: PricingAdjustmentType.EXCHANGE, value: 160 }] };
+    // $10 (1000 cents) at 160 JPY/USD → ¥1600
+    const result = convertAmount(1000, usd, jpy, rule);
+    expect(result.convertedPriceCents).toBe(1600);
+    expect(result.exchangeRate).toBe(160);
   });
 });

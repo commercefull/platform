@@ -17,7 +17,12 @@
 | `hash.ts`                    | Password hashing (scrypt via `node:crypto`)                                                                                                                                                                                                    |
 | `slug.ts`                    | Slug generation utilities                                                                                                                                                                                                                      |
 | `amount.ts`                  | Money/amount formatting (legacy, unused)                                                                                                                                                                                                       |
-| `money.ts`                   | **Shared Kernel** — `Money` value object                                                                                                                                                                                                       |
+| `money.ts`                   | **Shared Kernel** — `Money` value object; ISO-4217 minor-unit aware (`getCurrencyDecimals`/`toMinorUnits`/`fromMinorUnits` for 0/2/3-decimal currencies — never `* 100`)                                                                         |
+| `i18n/`                      | **Shared Kernel** — CLDR/ICU locale primitives: locale negotiation, number/date/currency formatters, collation, RTL direction                                                                                                                   |
+| `address/`                   | **Shared Kernel** — `GlobalAddress` + `countryAddressMetadata` (per-country required fields, admin-area/postal labels, display order)                                                                                                           |
+| `geo/`                       | Country-group membership — `EU_MEMBER_STATES`, `EEA_MEMBER_STATES`, `EU_VAT_AREA`, `GDPR_REGIONS`, `isEuMember`, … (single source for regional logic)                                                                                           |
+| `commerceContext.ts`         | 4-dimensional `CommerceContext` (`Customer`/`Market`/`Transaction`/`Legal`) resolved per request                                                                                                                                                |
+| `rules/policyEngine.ts`      | `Facts → Policy → Decision` engine producing explainable `PolicyDecisionRecord`s (tax, compliance, privacy)                                                                                                                                     |
 | `date.ts`                    | Date formatting utilities                                                                                                                                                                                                                      |
 | `cache/`                     | Shared cache abstraction — Redis or memory (`CACHE_BACKEND` env)                                                                                                                                                                               |
 | `cookieParser.ts`            | `Cookie` header parsing + `s:`-signed cookie verification (in-house cookie-parser)                                                                                                                                                             |
@@ -78,9 +83,12 @@ The shared kernel (`libs/`) is deliberately tiny. Adding a new shared type requi
 
 Current shared kernel types:
 
-| Type    | File            | Consumers                            | Notes                                                                                                                                           |
-| ------- | --------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Money` | `libs/money.ts` | `basket`, `checkout`, `order`, `tax` | Promoted from `basket/domain/valueObjects/Money` and `order/domain/valueObjects/Money`. Merged API supports both positive and negative amounts. |
+| Type              | File                      | Consumers                                     | Notes                                                                                                                                           |
+| ----------------- | ------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Money`           | `libs/money.ts`           | `basket`, `checkout`, `order`, `tax`          | Promoted from `basket/domain/valueObjects/Money` and `order/domain/valueObjects/Money`. Merged API supports both positive and negative amounts. |
+| `GlobalAddress`   | `libs/address/`           | `checkout`, `customer`, `order`, `shipping`   | Canonical postal address + `countryAddressMetadata` for per-country field rules.                                                                 |
+| `CommerceContext` | `libs/commerceContext.ts` | `web` middleware, `checkout`, `order`, `tax`  | Customer/Market/Transaction/Legal context resolved once per request.                                                                            |
+| `PolicyDecision`  | `libs/rules/policyEngine` | `tax`, `configuration`, `gdpr`, `checkout`    | Explainable `Facts → Policy → Decision` records persisted in order `decisionLog`.                                                               |
 
 ### What does NOT belong in the shared kernel
 
