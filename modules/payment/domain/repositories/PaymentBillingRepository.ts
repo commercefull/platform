@@ -11,10 +11,7 @@ import type { PaymentFee } from './PaymentFeeRepository';
 import type { PaymentReport } from './PaymentReportRepository';
 
 // Re-export types for backward compatibility
-export type { PaymentBalance, BalanceTransaction } from './PaymentBalanceRepository';
-export type { PaymentDispute } from './PaymentDisputeRepository';
-export type { PaymentFee } from './PaymentFeeRepository';
-export type { PaymentReport } from './PaymentReportRepository';
+export type { PaymentBalance } from './PaymentBalanceRepository';
 
 export interface PaymentBillingRepository {
   // Balances

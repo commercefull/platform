@@ -15,4 +15,3 @@ export { basketTypeDefs } from './interface/graphql/typeDefs';
 export { basketResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

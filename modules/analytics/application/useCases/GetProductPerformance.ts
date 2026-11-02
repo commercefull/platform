@@ -14,7 +14,7 @@ export interface GetProductPerformanceInput {
   limit?: number;
 }
 
-export interface ProductPerformanceItem {
+interface ProductPerformanceItem {
   productId: string;
   name: string;
   sku: string;

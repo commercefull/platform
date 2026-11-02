@@ -4,8 +4,6 @@
  * Domain interface for warehouse data access (warehouses, bins, zones, receiving, pick/pack).
  */
 
-import type { Warehouse } from '../entities/Warehouse';
-
 /**
  * Normalized warehouse record as returned by the repository layer
  * (flat `distributionWarehouse` row shape).
@@ -183,43 +181,4 @@ export interface CreatePickPackInput {
   notes?: string;
 }
 
-export interface WarehouseRepository {
-  // Warehouses
-  findById(warehouseId: string): Promise<Warehouse | null>;
-  findByCode(code: string): Promise<Warehouse | null>;
-  findAll(activeOnly?: boolean): Promise<Warehouse[]>;
-  create(params: WarehouseCreateParams): Promise<Warehouse>;
-  update(warehouseId: string, params: WarehouseUpdateParams): Promise<Warehouse | null>;
-  delete(warehouseId: string): Promise<boolean>;
-  setAsDefault(warehouseId: string): Promise<Warehouse | null>;
-  activate(warehouseId: string): Promise<Warehouse | null>;
-  deactivate(warehouseId: string): Promise<Warehouse | null>;
-  getDefault(): Promise<Warehouse | null>;
-  getStatistics(): Promise<Record<string, unknown>>;
 
-  // Bins
-  findBinById(binId: string): Promise<WarehouseBin | null>;
-  findBinsByWarehouseId(warehouseId: string, activeOnly?: boolean): Promise<WarehouseBin[]>;
-  createBin(input: CreateBinInput): Promise<WarehouseBin>;
-  updateBin(binId: string, input: UpdateBinInput): Promise<WarehouseBin | null>;
-  deleteBin(binId: string): Promise<boolean>;
-
-  // Zones
-  findZoneById(zoneId: string): Promise<WarehouseZone | null>;
-  findZonesByWarehouseId(warehouseId: string, activeOnly?: boolean): Promise<WarehouseZone[]>;
-  createZone(input: CreateZoneInput): Promise<WarehouseZone>;
-  updateZone(zoneId: string, input: UpdateZoneInput): Promise<WarehouseZone | null>;
-  deleteZone(zoneId: string): Promise<boolean>;
-
-  // Receiving
-  findReceivingById(receivingId: string): Promise<WarehouseReceiving | null>;
-  findReceivingByWarehouseId(warehouseId: string): Promise<WarehouseReceiving[]>;
-  createReceiving(input: CreateReceivingInput): Promise<WarehouseReceiving>;
-  updateReceivingStatus(receivingId: string, status: string): Promise<WarehouseReceiving | null>;
-
-  // Pick/Pack
-  findPickPackById(pickPackId: string): Promise<WarehousePickPack | null>;
-  findPickPackByWarehouseId(warehouseId: string): Promise<WarehousePickPack[]>;
-  createPickPack(input: CreatePickPackInput): Promise<WarehousePickPack>;
-  updatePickPackStatus(pickPackId: string, status: string): Promise<WarehousePickPack | null>;
-}

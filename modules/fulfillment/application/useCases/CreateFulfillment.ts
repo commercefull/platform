@@ -10,7 +10,7 @@ import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRep
 import { emitFulfillmentCreated } from '../../domain/events/FulfillmentEvents';
 import { withTransaction } from '../../../../libs/db';
 
-export interface CreateFulfillmentItemInput {
+interface CreateFulfillmentItemInput {
   orderItemId: string;
   productId: string;
   variantId?: string;

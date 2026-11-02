@@ -11,12 +11,10 @@ export const TEST_PRODUCT_2_ID = '00000000-0000-0000-0000-000000000002';
 
 // Test Customer
 export const TEST_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
-export const TEST_CUSTOMER_EMAIL = 'testcustomer@example.com';
 
 // Test Baskets
 export const TEST_GUEST_BASKET_ID = '00000000-0000-0000-0000-000000002001';
 export const TEST_CUSTOMER_BASKET_ID = '00000000-0000-0000-0000-000000002002';
-export const TEST_CHECKOUT_BASKET_ID = '00000000-0000-0000-0000-000000002003';
 
 // Test Checkout
 export const TEST_CHECKOUT_ID = '00000000-0000-0000-0000-000000003001';
@@ -41,21 +39,7 @@ export const CUSTOMER_CREDENTIALS = {
   password: 'password123',
 };
 
-// Test Product Data — prices match the seeded productBasePrice rows
-// (integer cents in the DB; effective sale price applies in the basket)
-export const TEST_PRODUCT_1 = {
-  productId: TEST_PRODUCT_1_ID,
-  name: 'Integration Test Product 1',
-  sku: 'TEST-SKU-001',
-  price: 79.99,
-};
 
-export const TEST_PRODUCT_2 = {
-  productId: TEST_PRODUCT_2_ID,
-  name: 'Integration Test Product 2',
-  sku: 'TEST-SKU-002',
-  price: 149.99,
-};
 
 // Test Address Data
 export const TEST_SHIPPING_ADDRESS = {
@@ -80,14 +64,6 @@ export const TEST_BILLING_ADDRESS = {
   phone: '555-123-4567',
 };
 
-// Test Content Type Data
-export const TEST_CONTENT_TYPE = {
-  id: TEST_CONTENT_TYPE_ID,
-  name: 'Integration Test Content Type',
-  slug: 'integration-test-type',
-  description: 'Content type for integration testing',
-  status: 'active',
-};
 
 // Test Content Page Data
 export const TEST_CONTENT_PAGE = {
@@ -104,65 +80,6 @@ export const TEST_CONTENT_PAGE = {
   isHomePage: false,
 };
 
-// Test Content Block Data
-export const TEST_CONTENT_BLOCK = {
-  id: TEST_CONTENT_BLOCK_ID,
-  contentPageId: TEST_CONTENT_PAGE_ID,
-  blockTypeId: TEST_BLOCK_TYPE_ID,
-  title: 'Integration Test Block',
-  sortOrder: 0,
-  content: { text: 'Test content for integration testing' },
-  isVisible: true,
-};
 
-// Test Content Template Data
-export const TEST_CONTENT_TEMPLATE = {
-  id: TEST_CONTENT_TEMPLATE_ID,
-  name: 'Integration Test Template',
-  type: 'layout',
-  description: 'Template for integration testing',
-  structure: { areas: ['main', 'sidebar'] },
-  status: 'active',
-};
 
-// Test Data Objects for API payloads
-export const TEST_DATA = {
-  category: {
-    name: 'Test Category',
-    slug: 'test-category',
-    description: 'Test category description',
-    featuredImage: 'https://example.com/image.jpg',
-    metaTitle: 'Test Category',
-    metaDescription: 'Test category meta description',
-    sortOrder: 0,
-    isActive: true,
-  },
-  navigation: {
-    name: 'Test Navigation',
-    slug: 'test-navigation',
-    description: 'Test navigation description',
-    location: 'header',
-  },
-  navigationItem: {
-    title: 'Home',
-    type: 'url',
-    url: '/',
-    sortOrder: 0,
-  },
-  media: {
-    fileName: 'test-image.jpg',
-    filePath: '/uploads/test-image.jpg',
-    fileType: 'image/jpeg',
-    fileSize: 1024000,
-    url: 'https://example.com/test-image.jpg',
-    title: 'Test Image',
-    altText: 'Test image alt text',
-    caption: 'Test image caption',
-    description: 'Test image description',
-    width: 1920,
-    height: 1080,
-    sortOrder: 0,
-    tags: ['test', 'image'],
-    isExternal: false,
-  },
-};
+

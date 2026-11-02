@@ -5,7 +5,7 @@
  */
 
 import { eventBus } from '../../../../libs/events/eventBus';
-import { FulfillmentStatus, SourceType } from '../entities/Fulfillment';
+import { SourceType } from '../entities/Fulfillment';
 
 // Event payloads
 export interface FulfillmentCreatedEvent {
@@ -16,19 +16,7 @@ export interface FulfillmentCreatedEvent {
   sourceId: string;
 }
 
-export interface FulfillmentAssignedEvent {
-  fulfillmentId: string;
-  orderId: string;
-  sourceType: SourceType;
-  sourceId: string;
-}
 
-export interface FulfillmentStatusChangedEvent {
-  fulfillmentId: string;
-  orderId: string;
-  previousStatus: FulfillmentStatus;
-  newStatus: FulfillmentStatus;
-}
 
 export interface FulfillmentShippedEvent {
   fulfillmentId: string;
@@ -44,28 +32,17 @@ export interface FulfillmentDeliveredEvent {
   deliveredAt: Date;
 }
 
-export interface FulfillmentFailedEvent {
-  fulfillmentId: string;
-  orderId: string;
-  reason: string;
-}
 
 // Event emitters
 export function emitFulfillmentCreated(payload: FulfillmentCreatedEvent): void {
   eventBus.emit('fulfillment.created', payload);
 }
 
-export function emitFulfillmentAssigned(payload: FulfillmentAssignedEvent): void {
-  eventBus.emit('fulfillment.assigned', payload);
-}
 
 export function emitFulfillmentPickingStarted(payload: { fulfillmentId: string; orderId: string }): void {
   eventBus.emit('fulfillment.picking_started', payload);
 }
 
-export function emitFulfillmentPackingCompleted(payload: { fulfillmentId: string; orderId: string }): void {
-  eventBus.emit('fulfillment.packing_completed', payload);
-}
 
 export function emitFulfillmentShipped(payload: FulfillmentShippedEvent): void {
   eventBus.emit('fulfillment.shipped', payload);
@@ -75,10 +52,5 @@ export function emitFulfillmentDelivered(payload: FulfillmentDeliveredEvent): vo
   eventBus.emit('fulfillment.delivered', payload);
 }
 
-export function emitFulfillmentFailed(payload: FulfillmentFailedEvent): void {
-  eventBus.emit('fulfillment.failed', payload);
-}
 
-export function emitFulfillmentReturned(payload: { fulfillmentId: string; orderId: string }): void {
-  eventBus.emit('fulfillment.returned', payload);
-}
+

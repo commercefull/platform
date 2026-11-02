@@ -35,7 +35,7 @@ export type ContentBlockCreateParams = Omit<
 export type ContentBlockUpdateParams = Partial<
   Omit<ContentBlock, 'contentBlockId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
 >;
-export type ContentTemplateCreateParams = Omit<
+type ContentTemplateCreateParams = Omit<
   ContentTemplate,
   'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
 >;

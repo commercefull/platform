@@ -22,7 +22,7 @@ export type PrivacyRegime =
   | 'DEFAULT'; // No specific regime — platform default (notice only)
 
 /** How consent must be captured for non-essential processing. */
-export type ConsentModel = 'opt_in' | 'opt_out' | 'notice_only';
+type ConsentModel = 'opt_in' | 'opt_out' | 'notice_only';
 
 export interface PrivacyRequirements {
   regime: PrivacyRegime;

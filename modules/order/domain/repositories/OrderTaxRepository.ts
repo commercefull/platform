@@ -26,7 +26,4 @@ export interface OrderTax {
 
 export type OrderTaxCreateParams = Omit<OrderTax, 'orderTaxId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderTaxRepository {
-  findByOrder(orderId: string): Promise<OrderTax[]>;
-  create(params: OrderTaxCreateParams): Promise<OrderTax>;
-}
+

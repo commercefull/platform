@@ -12,7 +12,6 @@ export * from './domain/repositories/ContentRedirectRepository';
 export * from './domain/events/ContentEvents';
 export * from './domain/errors/ContentErrors';
 export * from './domain/entities/ContentPage';
-export * from './domain/entities/ContentType';
 
 // Interface exports (routers, GraphQL)
 export { contentCustomerRouter } from './interface/routers/contentCustomerRouter';
@@ -22,4 +21,3 @@ export { contentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 export { userContactUsValidationRules, validateContactUs, userContactFormValidationRules, validateContactForm } from './validator';
 
-export { manifest } from './manifest';

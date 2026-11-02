@@ -16,4 +16,3 @@ export { taxTypeDefs } from './interface/graphql/typeDefs';
 export { taxResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

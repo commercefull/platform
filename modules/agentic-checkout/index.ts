@@ -6,4 +6,3 @@ export * from './domain/repositories/IdempotencyRepository';
 
 export { default as agenticCheckoutRouter } from './interface/routers/agenticCheckoutRouter';
 
-export { manifest } from './manifest';

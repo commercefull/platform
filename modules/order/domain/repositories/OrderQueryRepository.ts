@@ -15,13 +15,9 @@ import type { OrderPayment, OrderPaymentCreateParams } from './OrderPaymentRepos
 import type { OrderPaymentRefund, OrderPaymentRefundCreateParams } from './OrderPaymentRefundRepository';
 
 // Re-export types for backward compatibility
-export type { OrderNote, OrderNoteCreateParams } from './OrderNoteRepository';
-export type { OrderDiscount, OrderDiscountCreateParams, DiscountType } from './OrderDiscountRepository';
-export type { OrderShipping, OrderShippingCreateParams, OrderShippingUpdateParams } from './OrderShippingRepository';
-export type { OrderShippingRate, OrderShippingRateCreateParams, ShippingCarrier } from './OrderShippingRateRepository';
-export type { OrderTax, OrderTaxCreateParams } from './OrderTaxRepository';
-export type { OrderPayment, OrderPaymentCreateParams, OrderPaymentType, OrderPaymentStatus } from './OrderPaymentRepository';
-export type { OrderPaymentRefund, OrderPaymentRefundCreateParams, OrderPaymentRefundStatus } from './OrderPaymentRefundRepository';
+export type { OrderNote } from './OrderNoteRepository';
+export type { OrderPayment } from './OrderPaymentRepository';
+export type { OrderPaymentRefund, OrderPaymentRefundStatus } from './OrderPaymentRefundRepository';
 
 export interface OrderQueryRepository {
   // Notes

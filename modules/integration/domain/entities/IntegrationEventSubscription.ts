@@ -6,7 +6,6 @@
  * to the integration's endpoint.
  */
 
-export type SubscriptionStatus = 'active' | 'inactive' | 'paused';
 
 export interface IntegrationEventSubscriptionProps {
   subscriptionId: string;

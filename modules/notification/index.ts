@@ -5,7 +5,6 @@
 
 export * from './application/useCases';
 export * from './domain/repositories/NotificationRepository';
-export { NotificationDeliveryLogRepository, type NotificationDeliveryLog } from './domain/repositories/NotificationDeliveryLogRepository';
 export * from './domain/errors/NotificationErrors';
 
 // Interface exports (routers, GraphQL)
@@ -15,4 +14,3 @@ export { notificationTypeDefs } from './interface/graphql/typeDefs';
 export { notificationResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

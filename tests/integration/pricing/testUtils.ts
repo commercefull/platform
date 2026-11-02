@@ -1,41 +1,9 @@
-import axios, { AxiosInstance } from 'axios';
 
 /**
  * Test utilities for Pricing integration tests
  */
 
-const adminCredentials = {
-  email: 'merchant@example.com',
-  password: 'password123',
-};
 
-/**
- * Setup function for Pricing integration tests
- */
-export async function setupPricingTests() {
-  const client = axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-
-  // Get admin token
-  const adminLoginResponse = await client.post('/business/auth/login', adminCredentials, { headers: { 'X-Test-Request': 'true' } });
-  const adminToken = adminLoginResponse.data.accessToken;
-
-  if (!adminLoginResponse.data.success || !adminToken) {
-    throw new Error('Failed to get admin token for Pricing tests');
-  }
-
-  return {
-    client,
-    adminToken,
-  };
-}
 
 /**
  * Create test pricing rule data
@@ -129,74 +97,4 @@ export function createTestCurrencyPriceRule(overrides: Partial<unknown> = {}) {
   };
 }
 
-/**
- * Cleanup function for Pricing integration tests
- */
-export async function cleanupPricingTests(
-  client: AxiosInstance,
-  adminToken: string,
-  resources: {
-    ruleIds?: string[];
-    tierIds?: string[];
-    priceListIds?: string[];
-    currencyCodes?: string[];
-    regionIds?: string[];
-    priceRuleIds?: string[];
-  } = {},
-) {
-  const headers = { Authorization: `Bearer ${adminToken}` };
 
-  // Clean up pricing rules
-  for (const id of resources.ruleIds || []) {
-    try {
-      await client.delete(`/business/pricing/rules/${id}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  // Clean up tier prices
-  for (const id of resources.tierIds || []) {
-    try {
-      await client.delete(`/business/pricing/tier-prices/${id}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  // Clean up price lists
-  for (const id of resources.priceListIds || []) {
-    try {
-      await client.delete(`/business/pricing/price-lists/${id}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  // Clean up currencies
-  for (const code of resources.currencyCodes || []) {
-    try {
-      await client.delete(`/business/pricing/currencies/${code}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  // Clean up currency regions
-  for (const id of resources.regionIds || []) {
-    try {
-      await client.delete(`/business/pricing/currency-regions/${id}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  // Clean up currency price rules
-  for (const id of resources.priceRuleIds || []) {
-    try {
-      await client.delete(`/business/pricing/currency-price-rules/${id}`, { headers });
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-}

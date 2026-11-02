@@ -1,4 +1,4 @@
-export type ConditionOperator =
+type ConditionOperator =
   | 'eq'
   | 'neq'
   | 'gt'
@@ -15,7 +15,7 @@ export type ConditionOperator =
   | 'startsWith'
   | 'endsWith';
 
-export type ConditionField =
+type ConditionField =
   | 'lifetimeValueCents'
   | 'totalOrders'
   | 'averageOrderValueCents'
@@ -57,10 +57,6 @@ export interface SegmentCondition {
 
 export type MatchMode = 'all' | 'any';
 
-export interface SegmentRule {
-  conditions: SegmentCondition[];
-  matchMode: MatchMode;
-}
 
 export interface SegmentDefinitionProps {
   segmentId: string;

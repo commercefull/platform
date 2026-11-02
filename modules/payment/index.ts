@@ -24,4 +24,3 @@ export { paymentTypeDefs } from './interface/graphql/typeDefs';
 export { paymentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

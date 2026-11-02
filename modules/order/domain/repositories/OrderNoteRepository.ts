@@ -11,8 +11,4 @@ export interface OrderNote {
 
 export type OrderNoteCreateParams = Omit<OrderNote, 'orderNoteId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 
-export interface OrderNoteRepository {
-  findByOrder(orderId: string): Promise<OrderNote[]>;
-  create(params: OrderNoteCreateParams): Promise<OrderNote>;
-  softDelete(orderNoteId: string): Promise<boolean>;
-}
+

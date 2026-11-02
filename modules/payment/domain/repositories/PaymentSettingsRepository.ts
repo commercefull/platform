@@ -22,8 +22,4 @@ export type PaymentSettingsUpsertParams = { organizationId: string } & Partial<
   Omit<PaymentSettings, 'paymentSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>
 >;
 
-export interface PaymentSettingsRepository {
-  findByMerchant(organizationId: string): Promise<PaymentSettings | null>;
-  upsert(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null>;
-  findAll(): Promise<PaymentSettings[]>;
-}
+

@@ -1,4 +1,4 @@
-export interface OperationsStats {
+interface OperationsStats {
   pendingFulfillments: number;
   activeWarehouses: number;
   abandonedCarts: number;

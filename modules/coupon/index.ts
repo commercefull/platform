@@ -13,4 +13,3 @@ export { couponBusinessRouter } from './interface/routers/couponRouter';
 export { couponTypeDefs } from './interface/graphql/typeDefs';
 export { couponResolvers } from './interface/graphql/resolvers';
 
-export { manifest } from './manifest';

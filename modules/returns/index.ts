@@ -9,4 +9,3 @@ export * from './application/useCases';
 export { returnBusinessRouter } from './interface/routers/returnRouter';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

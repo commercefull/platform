@@ -13,4 +13,3 @@ export { mediaTypeDefs } from './interface/graphql/typeDefs';
 export { mediaResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

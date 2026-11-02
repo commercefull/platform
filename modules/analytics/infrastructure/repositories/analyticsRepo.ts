@@ -31,32 +31,6 @@ export type SalesDaily = AnalyticsSalesDailyRow;
 
 export type SearchQuery = AnalyticsSearchQueryRow;
 
-export interface ChannelAttribution {
-  analyticsChannelAttributionId: string;
-  organizationId?: string;
-  date: Date;
-  channel: string;
-  source?: string;
-  medium?: string;
-  campaign?: string;
-  sessions: number;
-  uniqueVisitors: number;
-  pageViews: number;
-  bounceRate: number;
-  averageSessionDuration: number;
-  conversions: number;
-  conversionRate: number;
-  revenueCents: number;
-  averageOrderValueCents: number;
-  firstTouchRevenue: number;
-  lastTouchRevenue: number;
-  linearRevenue: number;
-  adSpend: number;
-  costPerAcquisition: number;
-  returnOnAdSpend: number;
-  computedAt?: Date;
-  createdAt: Date;
-}
 
 // ============================================================================
 // Table Names

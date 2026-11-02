@@ -10,4 +10,4 @@ const auditRepository = new AuditRepositoryImpl();
 const recordAuditLogUseCase = new RecordAuditLogUseCase(auditRepository);
 const manageAuditLogsUseCase = new ManageAuditLogsUseCase(auditRepository);
 
-export { auditRepository, recordAuditLogUseCase, manageAuditLogsUseCase };
+export { recordAuditLogUseCase, manageAuditLogsUseCase };

@@ -63,23 +63,6 @@ export interface InventoryMovement {
   createdAt: Date;
 }
 
-export interface InventoryTransfer {
-  transferId: string;
-  productId: string;
-  variantId?: string;
-  fromLocationId: string;
-  toLocationId: string;
-  quantity: number;
-  status: 'pending' | 'in_transit' | 'completed' | 'cancelled';
-  requestedBy: string;
-  approvedBy?: string;
-  shippedAt?: Date;
-  receivedAt?: Date;
-  trackingNumber?: string;
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export class Inventory {
   private props: InventoryItem;

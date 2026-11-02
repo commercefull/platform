@@ -6,12 +6,10 @@ export const SEEDED_PRODUCT_1_ID = '00000000-0000-0000-0000-000000000001';
 export const SEEDED_PRODUCT_2_ID = '00000000-0000-0000-0000-000000000002';
 export const SEEDED_PRODUCT_3_ID = '00000000-0000-0000-0000-000000000003';
 export const SEEDED_VARIANT_1_ID = '20000000-0000-0000-0000-000000000001';
-export const SEEDED_VARIANT_2_ID = '20000000-0000-0000-0000-000000000002';
 
 // Dynamic Attribute System - Fixed UUIDs from seed data
 export const SEEDED_PRODUCT_TYPE_SIMPLE_ID = '30000000-0000-0000-0000-000000000001';
 export const SEEDED_PRODUCT_TYPE_CONFIGURABLE_ID = '30000000-0000-0000-0000-000000000002';
-export const SEEDED_PRODUCT_TYPE_VIRTUAL_ID = '30000000-0000-0000-0000-000000000003';
 
 export const SEEDED_ATTRIBUTE_SET_DEFAULT_ID = '40000000-0000-0000-0000-000000000001';
 export const SEEDED_ATTRIBUTE_SET_APPAREL_ID = '40000000-0000-0000-0000-000000000002';
@@ -20,53 +18,25 @@ export const SEEDED_ATTRIBUTE_SET_ELECTRONICS_ID = '40000000-0000-0000-0000-0000
 export const SEEDED_ATTRIBUTE_COLOR_ID = '50000000-0000-0000-0000-000000000001';
 export const SEEDED_ATTRIBUTE_SIZE_ID = '50000000-0000-0000-0000-000000000002';
 export const SEEDED_ATTRIBUTE_MATERIAL_ID = '50000000-0000-0000-0000-000000000003';
-export const SEEDED_ATTRIBUTE_WEIGHT_ID = '50000000-0000-0000-0000-000000000004';
-export const SEEDED_ATTRIBUTE_BRAND_ID = '50000000-0000-0000-0000-000000000005';
-export const SEEDED_ATTRIBUTE_SCREEN_SIZE_ID = '50000000-0000-0000-0000-000000000006';
-export const SEEDED_ATTRIBUTE_RAM_ID = '50000000-0000-0000-0000-000000000007';
-export const SEEDED_ATTRIBUTE_STORAGE_ID = '50000000-0000-0000-0000-000000000008';
 
-export const SEEDED_ATTRIBUTE_VALUE_RED_ID = '60000000-0000-0000-0000-000000000001';
-export const SEEDED_ATTRIBUTE_VALUE_BLUE_ID = '60000000-0000-0000-0000-000000000002';
-export const SEEDED_ATTRIBUTE_VALUE_BLACK_ID = '60000000-0000-0000-0000-000000000003';
-export const SEEDED_ATTRIBUTE_VALUE_SIZE_M_ID = '60000000-0000-0000-0000-000000000012';
+
+
+
+
+
+
+
+
 export const SEEDED_ATTRIBUTE_OPTION_ID = '60000000-0000-0000-0000-000000000020';
 
 export const SEEDED_ATTRIBUTE_GROUP_BASIC_ID = '70000000-0000-0000-0000-000000000001';
-export const SEEDED_ATTRIBUTE_GROUP_PHYSICAL_ID = '70000000-0000-0000-0000-000000000002';
-export const SEEDED_ATTRIBUTE_GROUP_TECH_ID = '70000000-0000-0000-0000-000000000003';
+
 
 // Extended test data — seeds/20240805001059_seedProductTestExtended.js
 export const SEEDED_REVIEW_1_ID = 'a0000000-0000-0000-0000-000000000001';
-export const SEEDED_QA_1_ID = 'b0000000-0000-0000-0000-000000000001';
-export const SEEDED_BUNDLE_1_ID = 'c0000000-0000-0000-0000-000000000001';
-export const SEEDED_COLLECTION_1_ID = 'd0000000-0000-0000-0000-000000000001';
 
-// Common test data for product
-export const testProduct = {
-  name: 'Test Product',
-  description: 'Test product for integration tests',
-  slug: `test-product-${Math.floor(Math.random() * 10000)}`,
-  status: 'active',
-  visibility: 'visible',
-  basePriceCents: 9999,
-  salePriceCents: 7999,
-  costPriceCents: 5000,
-  sku: `TST${Math.floor(Math.random() * 10000)}`,
-  weight: 1.5,
-  weightUnit: 'kg',
-  length: 10,
-  width: 5,
-  height: 2,
-  dimensionUnit: 'cm',
-  isFeatured: true,
-  isVirtual: false,
-  isDownloadable: false,
-  isSubscription: false,
-  isTaxable: true,
-  hasVariants: false,
-  type: 'simple',
-};
+export const SEEDED_BUNDLE_1_ID = 'c0000000-0000-0000-0000-000000000001';
+
 
 // Common test data for attribute group
 export const testAttributeGroup = {
@@ -95,14 +65,30 @@ export const testAttributeOption = {
   sortOrder: 1,
 };
 
-// Common test data for category
-export const testCategory = {
-  name: 'Test Category',
-  description: 'Test category for integration tests',
-  code: `test-category-${Math.floor(Math.random() * 10000)}`,
-  isActive: true,
-  sortOrder: 1,
-  parentId: null,
+
+const testProduct = {
+  name: 'Test Product',
+  description: 'Test product for integration tests',
+  slug: `test-product-${Math.floor(Math.random() * 10000)}`,
+  status: 'active',
+  visibility: 'visible',
+  basePriceCents: 9999,
+  salePriceCents: 7999,
+  costPriceCents: 5000,
+  sku: `TST${Math.floor(Math.random() * 10000)}`,
+  weight: 1.5,
+  weightUnit: 'kg',
+  length: 10,
+  width: 5,
+  height: 2,
+  dimensionUnit: 'cm',
+  isFeatured: true,
+  isVirtual: false,
+  isDownloadable: false,
+  isSubscription: false,
+  isTaxable: true,
+  hasVariants: false,
+  type: 'simple',
 };
 
 // Helper function to create a test product
@@ -122,77 +108,8 @@ export async function createTestProduct(client: AxiosInstance, adminToken: strin
   return null;
 }
 
-// Helper function to create a test product variant
-export async function createTestProductVariant(client: AxiosInstance, adminToken: string, productId: string) {
-  const variantData = {
-    productId,
-    name: 'Test Variant',
-    sku: `VAR-${Math.floor(Math.random() * 10000)}`,
-    priceCents: 8999,
-    inventory: 100,
-    inventoryPolicy: 'deny', // don't allow purchases when out of stock
-    isDefault: true,
-    options: [
-      { name: 'Color', value: 'Blue' },
-      { name: 'Size', value: 'Medium' },
-    ],
-  };
 
-  const response = await client.post(`/business/products/${productId}/variants`, variantData, {
-    headers: { Authorization: `Bearer ${adminToken}` },
-  });
 
-  return response.data.data?.productVariantId || response.data.data?.id;
-}
 
-// Helper function to create a test category
-export async function createTestCategory(client: AxiosInstance, adminToken: string) {
-  const response = await client.post('/business/categories', testCategory, {
-    headers: { Authorization: `Bearer ${adminToken}` },
-  });
 
-  // Handle different response formats
-  if (response.data?.data?.id) return response.data.data.id;
-  if (response.data?.data?.categoryId) return response.data.data.categoryId;
-  if (response.data?.id) return response.data.id;
-  if (response.data?.categoryId) return response.data.categoryId;
 
-  return null;
-}
-
-// Helper function to create a test attribute group
-export async function createTestAttributeGroup(client: AxiosInstance, adminToken: string) {
-  const response = await client.post('/business/attribute-groups', testAttributeGroup, {
-    headers: { Authorization: `Bearer ${adminToken}` },
-  });
-
-  return response.data.data.id;
-}
-
-// Helper function to create a test attribute
-export async function createTestAttribute(client: AxiosInstance, adminToken: string, attributeGroupId: string) {
-  const attributeData = {
-    ...testAttribute,
-    attributeGroupId,
-  };
-
-  const response = await client.post('/business/attributes', attributeData, {
-    headers: { Authorization: `Bearer ${adminToken}` },
-  });
-
-  return response.data.data.id;
-}
-
-// Helper function to create a test attribute option
-export async function createTestAttributeOption(client: AxiosInstance, adminToken: string, attributeId: string) {
-  const optionData = {
-    ...testAttributeOption,
-    attributeId,
-  };
-
-  const response = await client.post('/business/attribute-options', optionData, {
-    headers: { Authorization: `Bearer ${adminToken}` },
-  });
-
-  return response.data.data.id;
-}

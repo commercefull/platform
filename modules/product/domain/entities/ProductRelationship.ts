@@ -18,8 +18,6 @@ export type ProductRelationType = 'related' | 'accessory' | 'bundle' | 'cross_se
 
 export const PRODUCT_RELATION_TYPES: ProductRelationType[] = ['related', 'accessory', 'bundle', 'cross_sell', 'up_sell', 'grouped'];
 
-/** Relation types that drive recommendation placements. */
-export const RECOMMENDATION_RELATION_TYPES: ProductRelationType[] = ['related', 'accessory', 'cross_sell', 'up_sell'];
 
 export interface ProductRelationshipProps {
   productRelatedId: string;
@@ -34,49 +32,4 @@ export interface ProductRelationshipProps {
 
 export type ProductRelationshipCreateProps = Omit<ProductRelationshipProps, 'productRelatedId' | 'createdAt' | 'updatedAt'>;
 
-export class ProductRelationship {
-  private constructor(private readonly props: ProductRelationshipProps) {}
 
-  static create(
-    props: Omit<ProductRelationshipProps, 'productRelatedId' | 'createdAt' | 'updatedAt' | 'position' | 'isAutomated'> &
-      Partial<Pick<ProductRelationshipProps, 'position' | 'isAutomated'>>,
-  ): ProductRelationshipCreateProps {
-    if (props.productId === props.relatedProductId) {
-      throw new Error('Product cannot be related to itself');
-    }
-    return {
-      productId: props.productId,
-      relatedProductId: props.relatedProductId,
-      type: props.type || 'related',
-      position: props.position ?? 0,
-      isAutomated: props.isAutomated ?? false,
-    };
-  }
-
-  static reconstitute(props: ProductRelationshipProps): ProductRelationship {
-    return new ProductRelationship(props);
-  }
-
-  get productRelatedId(): string {
-    return this.props.productRelatedId;
-  }
-  get productId(): string {
-    return this.props.productId;
-  }
-  get relatedProductId(): string {
-    return this.props.relatedProductId;
-  }
-  get type(): ProductRelationType {
-    return this.props.type;
-  }
-  get position(): number {
-    return this.props.position;
-  }
-  get isAutomated(): boolean {
-    return this.props.isAutomated;
-  }
-
-  toJSON(): ProductRelationshipProps {
-    return { ...this.props };
-  }
-}

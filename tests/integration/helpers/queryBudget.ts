@@ -31,12 +31,4 @@ export function expectQueryBudget(res: AxiosResponse, budget: number, label: str
   }
 }
 
-/**
- * Fetch the X-Query-Count header value from a response. Returns NaN if the
- * header is missing (e.g. production mode or server not instrumented).
- */
-export function getQueryCount(res: AxiosResponse): number {
-  const raw = res.headers['x-query-count'];
-  if (raw === undefined || raw === null) return NaN;
-  return parseInt(Array.isArray(raw) ? raw[0] : String(raw), 10);
-}
+

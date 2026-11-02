@@ -5,10 +5,6 @@
  */
 
 // Core product operations
-export { CreateProductCommand } from './CreateProduct';
-export { UpdateProductCommand } from './UpdateProduct';
-export { ListProductsForContextCommand } from './ListProductsForContext';
-
 
 // Query operations - import directly from files if needed
 // export * from './GetProduct';
@@ -17,37 +13,6 @@ export { ListProductsForContextCommand } from './ListProductsForContext';
 // export * from './GetProductVariants';
 
 // Catalog enrichment use cases
-export { SubmitProductQaCommand, SubmitProductQaUseCase } from './SubmitProductQa';
-export type { SubmitProductQaResponse } from './SubmitProductQa';
-
-export { VoteOnReviewCommand, VoteOnReviewUseCase } from './VoteOnReview';
-export type { VoteOnReviewResponse } from './VoteOnReview';
-
-export { GetProductCatalogEnrichmentCommand, GetProductCatalogEnrichmentUseCase } from './GetProductCatalogEnrichment';
-export type { ProductCatalogEnrichmentResponse } from './GetProductCatalogEnrichment';
-
-export { ManageAttributeSetsUseCase } from './ManageAttributeSets';
-export type { AttributeSetCreateInput, AttributeSetUpdateInput } from './ManageAttributeSets';
-
-export { ManageProductTypesUseCase } from './ManageProductTypes';
-export { ManageBundlesUseCase } from './ManageBundles';
-export type { ProductBundleRecord, BundleItemRecord } from './ManageBundles';
-
-export {
-  ManageProductImagesUseCase,
-  ManageProductDownloadsUseCase,
-  ManageProductRelationshipsUseCase,
-  ManageProductVariantsUseCase,
-} from './ManageProductAssets';
-export type { ProductRelationType } from './ManageProductAssets';
-
-export { GetProductCardsCommand, GetProductCardsUseCase } from './GetProductCards';
-export type { ProductCardResponse } from './GetProductCards';
-
-export { ListCatalogFeaturesCommand, ListCatalogFeaturesUseCase } from './ListCatalogFeatures';
-export type { ListCatalogFeaturesResponse } from './ListCatalogFeatures';
-
-export { RecordProductViewCommand, RecordProductViewUseCase } from './RecordProductView';
 
 // Attribute sub-module
 export * from './attribute';

@@ -20,7 +20,7 @@ export function lazyMock<T extends object>(): jest.Mocked<T> {
   });
 }
 
-export const RULE_TRIGGER: { triggerType: TriggerType; triggerConfig: TriggerConfig } = {
+const RULE_TRIGGER: { triggerType: TriggerType; triggerConfig: TriggerConfig } = {
   triggerType: 'event',
   triggerConfig: { eventName: 'order.created' },
 };

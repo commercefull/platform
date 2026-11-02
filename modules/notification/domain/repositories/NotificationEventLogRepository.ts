@@ -4,7 +4,7 @@
  * Domain interface for notification event log data access.
  */
 
-export interface NotificationEventLog {
+interface NotificationEventLog {
   notificationEventLogId: string;
   eventType: string;
   entityId?: string;

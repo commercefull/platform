@@ -7,7 +7,7 @@
 export type TranslatableEntityType =
   'product' | 'category' | 'collection' | 'contentPage' | 'notificationTemplate' | 'attribute' | 'attributeOption';
 
-export interface TranslationProps {
+interface TranslationProps {
   translationId: string;
   entityType: TranslatableEntityType;
   entityId: string;

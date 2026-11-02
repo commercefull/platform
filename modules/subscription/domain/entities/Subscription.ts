@@ -8,7 +8,7 @@
 import { SubscriptionValidationError } from '../errors/SubscriptionErrors';
 
 export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired' | 'trial' | 'past_due';
-export type BillingInterval = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+type BillingInterval = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
 
 export interface SubscriptionProps {
   subscriptionId: string;

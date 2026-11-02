@@ -91,7 +91,7 @@ export interface CouponValidationResult {
   message?: string;
 }
 
-export interface CouponListOptions {
+interface CouponListOptions {
   limit?: number;
   offset?: number;
   orderBy?: string;

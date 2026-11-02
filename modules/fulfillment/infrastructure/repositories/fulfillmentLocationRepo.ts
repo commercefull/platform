@@ -40,7 +40,7 @@ export interface UpdateFulfillmentLocationParams {
   longitude?: number;
 }
 
-export async function create(params: CreateFulfillmentLocationParams): Promise<FulfillmentLocation> {
+async function create(params: CreateFulfillmentLocationParams): Promise<FulfillmentLocation> {
   const locationId = generateUUID();
   const now = new Date();
 
@@ -77,15 +77,15 @@ export async function create(params: CreateFulfillmentLocationParams): Promise<F
   return result[0];
 }
 
-export async function findById(locationId: string): Promise<FulfillmentLocation | null> {
+async function findById(locationId: string): Promise<FulfillmentLocation | null> {
   return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [locationId]);
 }
 
-export async function findByCode(code: string): Promise<FulfillmentLocation | null> {
+async function findByCode(code: string): Promise<FulfillmentLocation | null> {
   return queryOne<FulfillmentLocation>('SELECT * FROM "fulfillmentLocation" WHERE "code" = $1', [code]);
 }
 
-export async function findByOrganization(
+async function findByOrganization(
   organizationId: string,
   options?: { type?: string; isActive?: boolean },
 ): Promise<FulfillmentLocation[]> {
@@ -108,7 +108,7 @@ export async function findByOrganization(
   return result ?? [];
 }
 
-export async function findBySeller(sellerId: string): Promise<FulfillmentLocation[]> {
+async function findBySeller(sellerId: string): Promise<FulfillmentLocation[]> {
   const result = await query<FulfillmentLocation[]>(
     'SELECT * FROM "fulfillmentLocation" WHERE "sellerId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [sellerId],
@@ -116,7 +116,7 @@ export async function findBySeller(sellerId: string): Promise<FulfillmentLocatio
   return result ?? [];
 }
 
-export async function update(locationId: string, params: UpdateFulfillmentLocationParams): Promise<FulfillmentLocation | null> {
+async function update(locationId: string, params: UpdateFulfillmentLocationParams): Promise<FulfillmentLocation | null> {
   const updates: string[] = ['"updatedAt" = $1'];
   const values: unknown[] = [new Date()];
   let paramIndex = 2;
@@ -150,7 +150,7 @@ export async function update(locationId: string, params: UpdateFulfillmentLocati
   return result?.[0] ?? null;
 }
 
-export async function activate(locationId: string): Promise<boolean> {
+async function activate(locationId: string): Promise<boolean> {
   const result = await queryOne<FulfillmentLocation>(
     'UPDATE "fulfillmentLocation" SET "isActive" = true, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
@@ -158,7 +158,7 @@ export async function activate(locationId: string): Promise<boolean> {
   return result !== null;
 }
 
-export async function deactivate(locationId: string): Promise<boolean> {
+async function deactivate(locationId: string): Promise<boolean> {
   const result = await queryOne<FulfillmentLocation>(
     'UPDATE "fulfillmentLocation" SET "isActive" = false, "updatedAt" = $1 WHERE "fulfillmentLocationId" = $2 RETURNING *',
     [new Date(), locationId],
@@ -166,7 +166,7 @@ export async function deactivate(locationId: string): Promise<boolean> {
   return result !== null;
 }
 
-export async function findNearestLocations(
+async function findNearestLocations(
   latitude: number,
   longitude: number,
   options?: { limit?: number; type?: string; organizationId?: string },
@@ -203,7 +203,7 @@ export async function findNearestLocations(
   return result ?? [];
 }
 
-export async function deleteLocation(fulfillmentLocationId: string): Promise<boolean> {
+async function deleteLocation(fulfillmentLocationId: string): Promise<boolean> {
   await query('DELETE FROM "fulfillmentLocation" WHERE "fulfillmentLocationId" = $1', [fulfillmentLocationId]);
   return true;
 }

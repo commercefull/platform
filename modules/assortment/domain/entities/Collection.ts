@@ -11,9 +11,9 @@
 
 export type CollectionSortOrder = 'manual' | 'newest' | 'price_asc' | 'price_desc' | 'name_asc';
 
-export type CollectionConditionField = 'query' | 'categoryId' | 'brandId' | 'tag' | 'priceCents' | 'isFeatured';
+type CollectionConditionField = 'query' | 'categoryId' | 'brandId' | 'tag' | 'priceCents' | 'isFeatured';
 
-export type CollectionConditionOperator = 'equals' | 'notEquals' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains';
+type CollectionConditionOperator = 'equals' | 'notEquals' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains';
 
 export interface CollectionCondition {
   field: CollectionConditionField;

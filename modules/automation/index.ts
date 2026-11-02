@@ -10,4 +10,3 @@ export * from './application/useCases';
 export { automationBusinessRouter } from './interface/routers/automationRouter';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

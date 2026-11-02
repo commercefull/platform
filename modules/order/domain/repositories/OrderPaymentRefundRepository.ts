@@ -17,8 +17,4 @@ export interface OrderPaymentRefund {
 
 export type OrderPaymentRefundCreateParams = Omit<OrderPaymentRefund, 'orderPaymentRefundId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderPaymentRefundRepository {
-  findByOrder(orderId: string): Promise<OrderPaymentRefund[]>;
-  findById(orderPaymentRefundId: string): Promise<OrderPaymentRefund | null>;
-  create(params: OrderPaymentRefundCreateParams): Promise<OrderPaymentRefund>;
-}
+

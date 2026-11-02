@@ -6,10 +6,10 @@
 
 import type { Supplier, SupplierStatus } from '../entities/Supplier';
 
-export type SupplierAddressType = 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
-export type SupplierProductStatus = 'active' | 'inactive' | 'discontinued' | 'pending';
+type SupplierAddressType = 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
+type SupplierProductStatus = 'active' | 'inactive' | 'discontinued' | 'pending';
 
-export interface SupplierAddress {
+interface SupplierAddress {
   supplierAddressId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -30,7 +30,7 @@ export interface SupplierAddress {
   isActive: boolean;
 }
 
-export interface SupplierProduct {
+interface SupplierProduct {
   supplierProductId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -53,22 +53,13 @@ export interface SupplierProduct {
   notes?: string;
 }
 
-export interface SupplierFilters {
-  status?: SupplierStatus;
-  isActive?: boolean;
-  isApproved?: boolean;
-  minRating?: number;
-  category?: string;
-  tag?: string;
-  currency?: string;
-}
 
 export type SupplierCreateParams = Omit<Supplier, 'supplierId' | 'createdAt' | 'updatedAt'>;
 export type SupplierUpdateParams = Partial<Omit<Supplier, 'supplierId' | 'code' | 'createdAt' | 'updatedAt'>>;
-export type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;
-export type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplierAddressId' | 'supplierId' | 'createdAt' | 'updatedAt'>>;
-export type SupplierProductCreateParams = Omit<SupplierProduct, 'supplierProductId' | 'createdAt' | 'updatedAt'>;
-export type SupplierProductUpdateParams = Partial<
+type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;
+type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplierAddressId' | 'supplierId' | 'createdAt' | 'updatedAt'>>;
+type SupplierProductCreateParams = Omit<SupplierProduct, 'supplierProductId' | 'createdAt' | 'updatedAt'>;
+type SupplierProductUpdateParams = Partial<
   Omit<SupplierProduct, 'supplierProductId' | 'supplierId' | 'productId' | 'createdAt' | 'updatedAt'>
 >;
 

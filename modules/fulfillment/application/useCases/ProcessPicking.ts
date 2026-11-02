@@ -10,7 +10,7 @@ import { IFulfillmentRepository } from '../../domain/repositories/FulfillmentRep
 import { FulfillmentNotFoundError, FulfillmentItemNotFoundError, FulfillmentValidationError } from '../../domain/errors/FulfillmentErrors';
 import { emitFulfillmentPickingStarted } from '../../domain/events/FulfillmentEvents';
 
-export interface PickItemInput {
+interface PickItemInput {
   fulfillmentItemId: string;
   quantityPicked: number;
   serialNumbers?: string[];

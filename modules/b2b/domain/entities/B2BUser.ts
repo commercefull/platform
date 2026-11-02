@@ -10,12 +10,6 @@ export interface SpendingLimit {
   annualLimit?: number;
 }
 
-export interface SpendingPeriod {
-  period: 'monthly' | 'quarterly' | 'annual';
-  spent: number;
-  startDate: Date;
-  endDate: Date;
-}
 
 export interface B2BUserProps {
   userId: string;

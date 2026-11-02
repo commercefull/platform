@@ -6,7 +6,7 @@
 
 import { SocialAccount, SocialProvider, UserType } from '../entities/SocialAccount';
 
-export interface CreateSocialAccountInput {
+interface CreateSocialAccountInput {
   userId: string;
   userType: UserType;
   provider: SocialProvider;

@@ -20,15 +20,15 @@ export interface ThemeSettingsSchema {
   groups: ThemeSettingGroup[];
 }
 
-export interface ThemeSettingGroup {
+interface ThemeSettingGroup {
   groupId: string;
   label: string;
   settings: ThemeSettingDefinition[];
 }
 
-export type SettingType = 'color' | 'text' | 'textarea' | 'select' | 'checkbox' | 'number' | 'image' | 'font' | 'range';
+type SettingType = 'color' | 'text' | 'textarea' | 'select' | 'checkbox' | 'number' | 'image' | 'font' | 'range';
 
-export interface ThemeSettingDefinition {
+interface ThemeSettingDefinition {
   key: string;
   label: string;
   type: SettingType;

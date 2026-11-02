@@ -12,4 +12,3 @@ export { reportingTypeDefs } from './interface/graphql/typeDefs';
 export { reportingResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

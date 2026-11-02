@@ -2,7 +2,7 @@
  * Shipping Rate Entity
  */
 
-export type ShippingCalculationType = 'flat' | 'weight' | 'price' | 'quantity' | 'distance';
+type ShippingCalculationType = 'flat' | 'weight' | 'price' | 'quantity' | 'distance';
 
 export interface ShippingRateProps {
   rateId: string;

@@ -15,4 +15,3 @@ export { gdprTypeDefs } from './interface/graphql/typeDefs';
 export { gdprResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

@@ -13,6 +13,15 @@ let customerTokenCacheTime: number = 0;
 const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 /**
+ * Returns the X-Test-Database header for the current test file's isolated DB.
+ * Use this when creating axios clients manually outside of createTestClient.
+ */
+const getTestDbHeaders = (): Record<string, string> => {
+  const testDbName = global.__testDb?.testDatabaseName;
+  return testDbName ? { 'X-Test-Database': testDbName } : {};
+};
+
+/**
  * Create a configured API client for testing
  */
 export const createTestClient = (baseURL: string = 'http://localhost:3000'): AxiosInstance => {
@@ -27,15 +36,6 @@ export const createTestClient = (baseURL: string = 'http://localhost:3000'): Axi
       'X-Test-Request': 'true', // Skip rate limiting for test requests
     },
   });
-};
-
-/**
- * Returns the X-Test-Database header for the current test file's isolated DB.
- * Use this when creating axios clients manually outside of createTestClient.
- */
-export const getTestDbHeaders = (): Record<string, string> => {
-  const testDbName = global.__testDb?.testDatabaseName;
-  return testDbName ? { 'X-Test-Database': testDbName } : {};
 };
 
 /**
@@ -115,15 +115,6 @@ export const loginTestAdmin = async (client: AxiosInstance): Promise<string> => 
   }
 };
 
-/**
- * Clear cached tokens (useful for testing auth flows)
- */
-export const clearTokenCache = (): void => {
-  cachedAdminToken = null;
-  cachedCustomerToken = null;
-  adminTokenCacheTime = 0;
-  customerTokenCacheTime = 0;
-};
 
 /**
  * Assert response status with detailed error logging for traceability.
@@ -143,14 +134,4 @@ export const expectStatus = (
   expect(response.status).toBe(expected);
 };
 
-/**
- * Debug helper to check current token status
- */
-export const debugTokens = (): void => {
-  console.log(
-    `  Admin token: ${cachedAdminToken ? '✅ cached' : '❌ none'} (${cachedAdminToken ? new Date(adminTokenCacheTime).toISOString() : 'never'})`,
-  );
-  console.log(
-    `  Customer token: ${cachedCustomerToken ? '✅ cached' : '❌ none'} (${cachedCustomerToken ? new Date(customerTokenCacheTime).toISOString() : 'never'})`,
-  );
-};
+

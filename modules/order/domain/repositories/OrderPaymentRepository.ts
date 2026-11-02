@@ -29,8 +29,4 @@ export interface OrderPayment {
 
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderPaymentRepository {
-  findByOrder(orderId: string): Promise<OrderPayment[]>;
-  findById(orderPaymentId: string): Promise<OrderPayment | null>;
-  create(params: OrderPaymentCreateParams): Promise<OrderPayment>;
-}
+

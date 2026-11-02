@@ -13,7 +13,7 @@ export type PaymentGatewayUpdateParams = Partial<PaymentGatewayCreateParams>;
 export type PaymentMethodConfigCreateParams = Omit<PaymentMethodConfig, 'paymentMethodConfigId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type PaymentMethodConfigUpdateParams = Partial<PaymentMethodConfigCreateParams>;
 
-export type PaymentTransactionCreateParams = MakeOptional<
+type PaymentTransactionCreateParams = MakeOptional<
   Omit<PaymentTransaction, 'paymentTransactionId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   | 'transactionId'
   | 'authorizationCode'
@@ -34,9 +34,9 @@ export type PaymentTransactionCreateParams = MakeOptional<
   | 'authorizedAt'
   | 'capturedAt'
 >;
-export type PaymentTransactionUpdateParams = Partial<PaymentTransactionCreateParams>;
+type PaymentTransactionUpdateParams = Partial<PaymentTransactionCreateParams>;
 
-export type PaymentRefundCreateParams = MakeOptional<
+type PaymentRefundCreateParams = MakeOptional<
   Omit<PaymentRefund, 'paymentRefundId' | 'createdAt' | 'updatedAt'>,
   | 'transactionId'
   | 'reason'
@@ -50,7 +50,7 @@ export type PaymentRefundCreateParams = MakeOptional<
   | 'processedAt'
   | 'metadata'
 >;
-export type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
+type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
 
 export interface PaymentGatewayRepository {
   // Gateways

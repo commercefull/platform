@@ -17,4 +17,3 @@ export { fulfillmentTypeDefs } from './interface/graphql/typeDefs';
 export { fulfillmentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

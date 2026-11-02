@@ -4,7 +4,7 @@
  */
 
 export * from './application/useCases';
-export { initializeAnalyticsHandlers } from './application/analyticsEventHandler';
+
 export * from './domain/events/AnalyticsEvents';
 export * from './domain/repositories/AnalyticsRepository';
 export * from './domain/errors/AnalyticsErrors';
@@ -15,4 +15,3 @@ export { analyticsTypeDefs } from './interface/graphql/typeDefs';
 export { analyticsResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

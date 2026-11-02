@@ -4,7 +4,7 @@
  * hides a suggestion, or explicitly.
  */
 
-export type ExclusionScope = 'pair' | 'global';
+type ExclusionScope = 'pair' | 'global';
 
 export interface RecommendationExclusionProps {
   recommendationExclusionId: string;

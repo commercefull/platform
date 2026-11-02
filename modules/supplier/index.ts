@@ -13,4 +13,3 @@ export { supplierTypeDefs } from './interface/graphql/typeDefs';
 export { supplierResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

@@ -6,10 +6,10 @@
 
 import type { ContentMedia, ContentMediaFolder } from '../entities/ContentModel';
 
-export type ContentMediaCreateParams = Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>;
-export type ContentMediaUpdateParams = Partial<Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>>;
-export type ContentMediaFolderCreateParams = Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>;
-export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>>;
+type ContentMediaCreateParams = Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>;
+type ContentMediaUpdateParams = Partial<Omit<ContentMedia, 'contentMediaId' | 'createdAt' | 'updatedAt'>>;
+type ContentMediaFolderCreateParams = Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>;
+type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'contentMediaFolderId' | 'createdAt' | 'updatedAt'>>;
 
 export interface IContentMediaRepository {
   // Media methods

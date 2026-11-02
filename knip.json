@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/knip/schema.json",
-  "exclude": ["nsExports", "nsTypes"],
+  "exclude": [
+    "nsExports",
+    "nsTypes"
+  ],
   "entry": [
     "boot/**/*.ts",
     "modules/*/interface/routers/**/*.ts",
@@ -9,33 +12,35 @@
     "modules/*/infrastructure/repositories/*Repository.ts",
     "web/**/*.ts"
   ],
-  "project": ["modules/**/*.ts", "libs/**/*.ts", "boot/**/*.ts", "web/**/*.ts"],
-  "ignore": [
-    "typedoc.json",
-    "modules/*/index.ts",
-    "modules/*/application/useCases/index.ts",
-    "modules/*/application/useCases/*/index.ts",
-    "modules/*/infrastructure/index.ts",
-    "modules/*/infrastructure/repositories/index.ts",
-    "modules/*/infrastructure/services/**",
-    "modules/*/domain/events/**",
-    "modules/*/domain/repositories/**",
-    "modules/*/domain/entities/**",
-    "modules/*/domain/valueObjects/**",
-    "modules/*/domain/*.ts",
-    "modules/*/utils/**",
-    "modules/analytics/**",
-    "modules/audit/**",
-    "modules/automation/**",
-    "modules/b2b/**",
-    "modules/fulfillment/**",
-    "modules/gdpr/**",
-    "libs/rules/index.ts"
+  "project": [
+    "modules/**/*.ts",
+    "libs/**/*.ts",
+    "boot/**/*.ts",
+    "web/**/*.ts",
+    "tests/**/*.ts"
   ],
-  "ignoreDependencies": ["ejs", "@types/ejs", "@types/nodemailer", "@typescript/native"],
-  "ignoreBinaries": ["pm2", "audit", "k6"],
+  "ignore": [
+    "typedoc.json"
+  ],
+  "ignoreDependencies": [
+    "ejs",
+    "@types/ejs",
+    "@types/nodemailer",
+    "@typescript/native"
+  ],
+  "ignoreBinaries": [
+    "pm2",
+    "audit",
+    "k6"
+  ],
   "ignoreIssues": {
-    "libs/db/types.ts": ["exports", "types", "enumMembers"],
-    "infra/aws/**": ["unlisted"]
+    "libs/db/types.ts": [
+      "exports",
+      "types",
+      "enumMembers"
+    ],
+    "infra/aws/**": [
+      "unlisted"
+    ]
   }
 }

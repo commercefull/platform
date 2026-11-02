@@ -26,7 +26,4 @@ export interface OrderDiscount {
 
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderDiscountRepository {
-  findByOrder(orderId: string): Promise<OrderDiscount[]>;
-  create(params: OrderDiscountCreateParams): Promise<OrderDiscount>;
-}
+

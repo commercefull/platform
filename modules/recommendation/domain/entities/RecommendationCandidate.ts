@@ -8,7 +8,6 @@
 
 export type CandidateSource = 'rule' | 'fbt' | 'similar' | 'coView';
 
-export const CANDIDATE_SOURCES: CandidateSource[] = ['rule', 'fbt', 'similar', 'coView'];
 
 /** Relation types a candidate can serve — mirrors product's ProductRelationType minus grouped/bundle. */
 export type RecommendationRelationType = 'related' | 'accessory' | 'cross_sell' | 'up_sell';
@@ -46,33 +45,4 @@ export interface RecommendationCandidateProps {
 
 export type RecommendationCandidateInsert = Omit<RecommendationCandidateProps, 'recommendationCandidateId' | 'createdAt'>;
 
-export class RecommendationCandidate {
-  private constructor(private readonly props: RecommendationCandidateProps) {}
 
-  static reconstitute(props: RecommendationCandidateProps): RecommendationCandidate {
-    return new RecommendationCandidate(props);
-  }
-
-  get productId(): string {
-    return this.props.productId;
-  }
-  get candidateProductId(): string {
-    return this.props.candidateProductId;
-  }
-  get source(): CandidateSource {
-    return this.props.source;
-  }
-  get relationType(): RecommendationRelationType {
-    return this.props.relationType;
-  }
-  get score(): number {
-    return this.props.score;
-  }
-  get reason(): CandidateReason | null {
-    return this.props.reason;
-  }
-
-  toJSON(): RecommendationCandidateProps {
-    return { ...this.props };
-  }
-}
