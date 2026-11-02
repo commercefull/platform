@@ -6,7 +6,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import { withTransaction } from '../../../../libs/db';
 import { Fulfillment as DbFulfillment, FulfillmentItem as DbFulfillmentItem } from '../../../../libs/db/types';
-import { Fulfillment, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
+import { Fulfillment, FulfillmentProps, FulfillmentStatus, SourceType } from '../../domain/entities/Fulfillment';
 import { FulfillmentItem } from '../../domain/entities/FulfillmentItem';
 import { IFulfillmentRepository, FulfillmentFilters } from '../../domain/repositories/FulfillmentRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
@@ -25,8 +25,92 @@ export class FulfillmentRepository implements IFulfillmentRepository {
 
     if (existing) {
       // Update
-      await query(
-        `UPDATE fulfillment SET
+      await this.updateFulfillment(props, now);
+    } else {
+      // Insert
+      await this.insertFulfillment(props, now);
+    }
+
+    const saved = await this.findById(props.fulfillmentId);
+    return saved!;
+  }
+
+  private isoOrNull(value?: Date): string | null {
+    return value?.toISOString() ?? null;
+  }
+
+  private fulfillmentCoreValues(props: FulfillmentProps): Record<string, unknown> {
+    return {
+      orderId: props.orderId,
+      orderNumber: props.orderNumber || null,
+      sourceType: props.sourceType,
+      sourceId: props.sourceId,
+      organizationId: props.organizationId || null,
+      supplierId: props.supplierId || null,
+      storeId: props.storeId || null,
+      channelId: props.channelId || null,
+      status: props.status,
+    };
+  }
+
+  private fulfillmentCarrierValues(props: FulfillmentProps): Record<string, unknown> {
+    return {
+      carrierId: props.carrierId || null,
+      carrierName: props.carrierName || null,
+      shippingMethodId: props.shippingMethodId || null,
+      shippingMethodName: props.shippingMethodName || null,
+      trackingNumber: props.trackingNumber || null,
+      trackingUrl: props.trackingUrl || null,
+    };
+  }
+
+  private fulfillmentShippingValues(props: FulfillmentProps): Record<string, unknown> {
+    return {
+      shipFromAddress: JSON.stringify(props.shipFromAddress),
+      shipToAddress: JSON.stringify(props.shipToAddress),
+      fulfillmentPartnerId: props.fulfillmentPartnerId || null,
+      weightGrams: props.weightGrams || null,
+      lengthCm: props.lengthCm || null,
+      widthCm: props.widthCm || null,
+      heightCm: props.heightCm || null,
+      shippingCostCents: props.shippingCostCents || null,
+      insuranceCostCents: props.insuranceCostCents || null,
+    };
+  }
+
+  private fulfillmentLifecycleValues(props: FulfillmentProps): Record<string, unknown> {
+    return {
+      notes: props.notes || null,
+      internalNotes: props.internalNotes || null,
+      assignedAt: this.isoOrNull(props.assignedAt),
+      pickingStartedAt: this.isoOrNull(props.pickingStartedAt),
+      pickedAt: this.isoOrNull(props.pickedAt),
+      packingStartedAt: this.isoOrNull(props.packingStartedAt),
+      packedAt: this.isoOrNull(props.packedAt),
+      shippedAt: this.isoOrNull(props.shippedAt),
+      deliveredAt: this.isoOrNull(props.deliveredAt),
+      cancelledAt: this.isoOrNull(props.cancelledAt),
+      failedAt: this.isoOrNull(props.failedAt),
+      failureReason: props.failureReason || null,
+    };
+  }
+
+  private fulfillmentRowValues(props: FulfillmentProps, now: string): Record<string, unknown> {
+    return {
+      fulfillmentId: props.fulfillmentId,
+      createdAt: now,
+      updatedAt: now,
+      ...this.fulfillmentCoreValues(props),
+      ...this.fulfillmentCarrierValues(props),
+      ...this.fulfillmentShippingValues(props),
+      ...this.fulfillmentLifecycleValues(props),
+    };
+  }
+
+  private async updateFulfillment(props: FulfillmentProps, now: string): Promise<void> {
+    const v = this.fulfillmentRowValues(props, now);
+    await query(
+      `UPDATE fulfillment SET
           "orderId" = $1,
           "orderNumber" = $2,
           "sourceType" = $3,
@@ -65,51 +149,53 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           "failureReason" = $36,
           "updatedAt" = $37
         WHERE "fulfillmentId" = $38`,
-        [
-          props.orderId,
-          props.orderNumber || null,
-          props.sourceType,
-          props.sourceId,
-          props.organizationId || null,
-          props.supplierId || null,
-          props.storeId || null,
-          props.channelId || null,
-          props.status,
-          props.carrierId || null,
-          props.carrierName || null,
-          props.shippingMethodId || null,
-          props.shippingMethodName || null,
-          props.trackingNumber || null,
-          props.trackingUrl || null,
-          JSON.stringify(props.shipFromAddress),
-          JSON.stringify(props.shipToAddress),
-          props.fulfillmentPartnerId || null,
-          props.weightGrams || null,
-          props.lengthCm || null,
-          props.widthCm || null,
-          props.heightCm || null,
-          props.shippingCostCents || null,
-          props.insuranceCostCents || null,
-          props.notes || null,
-          props.internalNotes || null,
-          props.assignedAt?.toISOString() || null,
-          props.pickingStartedAt?.toISOString() || null,
-          props.pickedAt?.toISOString() || null,
-          props.packingStartedAt?.toISOString() || null,
-          props.packedAt?.toISOString() || null,
-          props.shippedAt?.toISOString() || null,
-          props.deliveredAt?.toISOString() || null,
-          props.cancelledAt?.toISOString() || null,
-          props.failedAt?.toISOString() || null,
-          props.failureReason || null,
-          now,
-          props.fulfillmentId,
-        ],
-      );
-    } else {
-      // Insert
-      await query(
-        `INSERT INTO fulfillment (
+      [
+        v.orderId,
+        v.orderNumber,
+        v.sourceType,
+        v.sourceId,
+        v.organizationId,
+        v.supplierId,
+        v.storeId,
+        v.channelId,
+        v.status,
+        v.carrierId,
+        v.carrierName,
+        v.shippingMethodId,
+        v.shippingMethodName,
+        v.trackingNumber,
+        v.trackingUrl,
+        v.shipFromAddress,
+        v.shipToAddress,
+        v.fulfillmentPartnerId,
+        v.weightGrams,
+        v.lengthCm,
+        v.widthCm,
+        v.heightCm,
+        v.shippingCostCents,
+        v.insuranceCostCents,
+        v.notes,
+        v.internalNotes,
+        v.assignedAt,
+        v.pickingStartedAt,
+        v.pickedAt,
+        v.packingStartedAt,
+        v.packedAt,
+        v.shippedAt,
+        v.deliveredAt,
+        v.cancelledAt,
+        v.failedAt,
+        v.failureReason,
+        v.updatedAt,
+        v.fulfillmentId,
+      ],
+    );
+  }
+
+  private async insertFulfillment(props: FulfillmentProps, now: string): Promise<void> {
+    const v = this.fulfillmentRowValues(props, now);
+    await query(
+      `INSERT INTO fulfillment (
           "fulfillmentId", "orderId", "orderNumber", "sourceType", "sourceId",
           "organizationId", "supplierId", "storeId", "channelId", status,
           "carrierId", "carrierName", "shippingMethodId", "shippingMethodName",
@@ -124,52 +210,48 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,
           $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39
         )`,
-        [
-          props.fulfillmentId,
-          props.orderId,
-          props.orderNumber || null,
-          props.sourceType,
-          props.sourceId,
-          props.organizationId || null,
-          props.supplierId || null,
-          props.storeId || null,
-          props.channelId || null,
-          props.status,
-          props.carrierId || null,
-          props.carrierName || null,
-          props.shippingMethodId || null,
-          props.shippingMethodName || null,
-          props.trackingNumber || null,
-          props.trackingUrl || null,
-          JSON.stringify(props.shipFromAddress),
-          JSON.stringify(props.shipToAddress),
-          props.fulfillmentPartnerId || null,
-          props.weightGrams || null,
-          props.lengthCm || null,
-          props.widthCm || null,
-          props.heightCm || null,
-          props.shippingCostCents || null,
-          props.insuranceCostCents || null,
-          props.notes || null,
-          props.internalNotes || null,
-          props.assignedAt?.toISOString() || null,
-          props.pickingStartedAt?.toISOString() || null,
-          props.pickedAt?.toISOString() || null,
-          props.packingStartedAt?.toISOString() || null,
-          props.packedAt?.toISOString() || null,
-          props.shippedAt?.toISOString() || null,
-          props.deliveredAt?.toISOString() || null,
-          props.cancelledAt?.toISOString() || null,
-          props.failedAt?.toISOString() || null,
-          props.failureReason || null,
-          now,
-          now,
-        ],
-      );
-    }
-
-    const saved = await this.findById(props.fulfillmentId);
-    return saved!;
+      [
+        v.fulfillmentId,
+        v.orderId,
+        v.orderNumber,
+        v.sourceType,
+        v.sourceId,
+        v.organizationId,
+        v.supplierId,
+        v.storeId,
+        v.channelId,
+        v.status,
+        v.carrierId,
+        v.carrierName,
+        v.shippingMethodId,
+        v.shippingMethodName,
+        v.trackingNumber,
+        v.trackingUrl,
+        v.shipFromAddress,
+        v.shipToAddress,
+        v.fulfillmentPartnerId,
+        v.weightGrams,
+        v.lengthCm,
+        v.widthCm,
+        v.heightCm,
+        v.shippingCostCents,
+        v.insuranceCostCents,
+        v.notes,
+        v.internalNotes,
+        v.assignedAt,
+        v.pickingStartedAt,
+        v.pickedAt,
+        v.packingStartedAt,
+        v.packedAt,
+        v.shippedAt,
+        v.deliveredAt,
+        v.cancelledAt,
+        v.failedAt,
+        v.failureReason,
+        v.createdAt,
+        v.updatedAt,
+      ],
+    );
   }
 
   async findById(fulfillmentId: string): Promise<Fulfillment | null> {

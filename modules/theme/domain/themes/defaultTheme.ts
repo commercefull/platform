@@ -1,0 +1,216 @@
+import { Theme, ThemeSettingsSchema } from '../entities/Theme';
+
+const SETTINGS_SCHEMA: ThemeSettingsSchema = {
+  groups: [
+    {
+      groupId: 'colors',
+      label: 'Colors',
+      settings: [
+        { key: 'primaryColor', label: 'Primary Color', type: 'color', defaultValue: '#007bff', cssVariable: '--color-primary' },
+        { key: 'secondaryColor', label: 'Secondary Color', type: 'color', defaultValue: '#6c757d', cssVariable: '--color-secondary' },
+        { key: 'accentColor', label: 'Accent Color', type: 'color', defaultValue: '#28a745', cssVariable: '--color-accent' },
+        { key: 'backgroundColor', label: 'Background Color', type: 'color', defaultValue: '#ffffff', cssVariable: '--color-bg' },
+        { key: 'textColor', label: 'Text Color', type: 'color', defaultValue: '#212529', cssVariable: '--color-text' },
+        { key: 'headerBgColor', label: 'Header Background', type: 'color', defaultValue: '#f8f9fa', cssVariable: '--color-header-bg' },
+        { key: 'footerBgColor', label: 'Footer Background', type: 'color', defaultValue: '#f8f9fa', cssVariable: '--color-footer-bg' },
+      ],
+    },
+    {
+      groupId: 'typography',
+      label: 'Typography',
+      settings: [
+        { key: 'headingFont', label: 'Heading Font', type: 'font', defaultValue: 'Inter, sans-serif', cssVariable: '--font-heading' },
+        { key: 'bodyFont', label: 'Body Font', type: 'font', defaultValue: 'Inter, sans-serif', cssVariable: '--font-body' },
+        {
+          key: 'baseFontSize',
+          label: 'Base Font Size',
+          type: 'range',
+          defaultValue: 16,
+          min: 12,
+          max: 20,
+          step: 1,
+          cssVariable: '--font-size-base',
+        },
+      ],
+    },
+    {
+      groupId: 'layout',
+      label: 'Layout',
+      settings: [
+        {
+          key: 'containerMaxWidth',
+          label: 'Container Max Width',
+          type: 'select',
+          defaultValue: '1280px',
+          options: [
+            { label: '1024px', value: '1024px' },
+            { label: '1280px', value: '1280px' },
+            { label: '1440px', value: '1440px' },
+            { label: 'Full Width', value: '100%' },
+          ],
+          cssVariable: '--container-max-width',
+        },
+        { key: 'showSidebar', label: 'Show Sidebar', type: 'checkbox', defaultValue: true },
+        {
+          key: 'sidebarPosition',
+          label: 'Sidebar Position',
+          type: 'select',
+          defaultValue: 'right',
+          options: [
+            { label: 'Left', value: 'left' },
+            { label: 'Right', value: 'right' },
+          ],
+        },
+        { key: 'productsPerRow', label: 'Products Per Row', type: 'range', defaultValue: 4, min: 2, max: 6, step: 1 },
+      ],
+    },
+    {
+      groupId: 'header',
+      label: 'Header',
+      settings: [
+        { key: 'showSearchBar', label: 'Show Search Bar', type: 'checkbox', defaultValue: true },
+        { key: 'showCategories', label: 'Show Categories Nav', type: 'checkbox', defaultValue: true },
+        { key: 'stickyHeader', label: 'Sticky Header', type: 'checkbox', defaultValue: true },
+        {
+          key: 'headerHeight',
+          label: 'Header Height',
+          type: 'range',
+          defaultValue: 64,
+          min: 48,
+          max: 96,
+          step: 4,
+          cssVariable: '--header-height',
+        },
+      ],
+    },
+    {
+      groupId: 'product',
+      label: 'Product Cards',
+      settings: [
+        { key: 'showQuickView', label: 'Show Quick View Button', type: 'checkbox', defaultValue: true },
+        { key: 'showWishlistButton', label: 'Show Wishlist Button', type: 'checkbox', defaultValue: true },
+        { key: 'showCompareButton', label: 'Show Compare Button', type: 'checkbox', defaultValue: false },
+        { key: 'showRating', label: 'Show Rating', type: 'checkbox', defaultValue: true },
+        { key: 'showBadges', label: 'Show Sale/New Badges', type: 'checkbox', defaultValue: true },
+        {
+          key: 'cardBorderRadius',
+          label: 'Card Border Radius',
+          type: 'range',
+          defaultValue: 8,
+          min: 0,
+          max: 24,
+          step: 2,
+          cssVariable: '--card-border-radius',
+        },
+      ],
+    },
+  ],
+};
+
+export function createDefaultTheme(): Theme {
+  return Theme.create({
+    themeId: '0198b000-0000-7000-8000-000000000001',
+    slug: 'default',
+    name: 'Default',
+    description: 'Clean, modern storefront with full feature support. Great starting point for any store.',
+    version: '1.0.0',
+    type: 'built_in',
+    author: 'Commercefull',
+    screenshotUrl: '/themes/default/screenshot.png',
+    previewUrl: '/themes/default/preview',
+    tags: ['modern', 'clean', 'responsive'],
+    isCustomizable: true,
+    settingsSchema: SETTINGS_SCHEMA,
+    defaultSettings: {
+      primaryColor: '#007bff',
+      secondaryColor: '#6c757d',
+      accentColor: '#28a745',
+      backgroundColor: '#ffffff',
+      textColor: '#212529',
+      headerBgColor: '#f8f9fa',
+      footerBgColor: '#f8f9fa',
+      headingFont: 'Inter, sans-serif',
+      bodyFont: 'Inter, sans-serif',
+      baseFontSize: 16,
+      containerMaxWidth: '1280px',
+      showSidebar: true,
+      sidebarPosition: 'right',
+      productsPerRow: 4,
+      showSearchBar: true,
+      showCategories: true,
+      stickyHeader: true,
+      headerHeight: 64,
+      showQuickView: true,
+      showWishlistButton: true,
+      showCompareButton: false,
+      showRating: true,
+      showBadges: true,
+      cardBorderRadius: 8,
+    },
+    layout: {
+      regions: ['header', 'sidebar', 'main', 'footer'],
+      pageLayouts: [
+        {
+          pageType: 'home',
+          regions: [
+            { region: 'header', component: 'Header' },
+            { region: 'main', component: 'HomePage' },
+            { region: 'footer', component: 'Footer' },
+          ],
+        },
+        {
+          pageType: 'product',
+          regions: [
+            { region: 'header', component: 'Header' },
+            { region: 'sidebar', component: 'ProductFilters' },
+            { region: 'main', component: 'ProductPage' },
+            { region: 'footer', component: 'Footer' },
+          ],
+        },
+        {
+          pageType: 'category',
+          regions: [
+            { region: 'header', component: 'Header' },
+            { region: 'sidebar', component: 'CategoryFilters' },
+            { region: 'main', component: 'CategoryPage' },
+            { region: 'footer', component: 'Footer' },
+          ],
+        },
+        {
+          pageType: 'cart',
+          regions: [
+            { region: 'header', component: 'Header' },
+            { region: 'main', component: 'CartPage' },
+            { region: 'footer', component: 'Footer' },
+          ],
+        },
+        {
+          pageType: 'checkout',
+          regions: [
+            { region: 'header', component: 'CheckoutHeader' },
+            { region: 'main', component: 'CheckoutPage' },
+            { region: 'footer', component: 'CheckoutFooter' },
+          ],
+        },
+      ],
+    },
+    components: {
+      components: [
+        { name: 'Header', path: 'components/Header.tsx' },
+        { name: 'Footer', path: 'components/Footer.tsx' },
+        { name: 'HomePage', path: 'pages/HomePage.tsx' },
+        { name: 'ProductPage', path: 'pages/ProductPage.tsx' },
+        { name: 'CategoryPage', path: 'pages/CategoryPage.tsx' },
+        { name: 'CartPage', path: 'pages/CartPage.tsx' },
+        { name: 'CheckoutPage', path: 'pages/CheckoutPage.tsx' },
+        { name: 'ProductCard', path: 'components/ProductCard.tsx' },
+        { name: 'ProductFilters', path: 'components/ProductFilters.tsx' },
+        { name: 'CategoryFilters', path: 'components/CategoryFilters.tsx' },
+      ],
+    },
+    assets: {
+      cssEntry: 'styles/main.css',
+      jsEntry: 'scripts/main.ts',
+    },
+  });
+}

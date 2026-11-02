@@ -121,8 +121,110 @@ export class OrderRepo implements IOrderRepository {
     const existing = await queryOne<{ orderId: string }>('SELECT "orderId" FROM "order" WHERE "orderId" = $1', [order.orderId]);
 
     if (existing) {
-      await query(
-        `UPDATE "order" SET
+      await this.updateOrder(order, now);
+    } else {
+      await this.insertOrder(order, now);
+    }
+
+    await this.syncItems(order);
+    if (order.shippingAddress) await this.saveOrderAddress(order.shippingAddress);
+    if (order.billingAddress) await this.saveOrderAddress(order.billingAddress);
+
+    return order;
+  }
+
+  private orderRowValues(order: Order, now: string): Record<string, unknown> {
+    return {
+      orderId: order.orderId,
+      orderNumber: order.orderNumber,
+      orderDate: order.orderDate.toISOString(),
+      createdAt: now,
+      updatedAt: now,
+      ...this.orderCoreValues(order),
+      ...this.orderMonetaryValues(order),
+      ...this.orderLifecycleValues(order),
+      ...this.orderContactValues(order),
+      ...this.orderContextValues(order),
+    };
+  }
+
+  private orderCoreValues(order: Order): Record<string, unknown> {
+    return {
+      customerId: order.customerId || null,
+      basketId: order.basketId || null,
+      storeId: order.storeId || null,
+      channelId: order.channelId || null,
+      createdByUserId: order.createdByUserId || null,
+      orderSource: order.orderSource,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      fulfillmentStatus: order.fulfillmentStatus,
+      currencyCode: order.currencyCode,
+    };
+  }
+
+  private orderMonetaryValues(order: Order): Record<string, unknown> {
+    return {
+      subtotalCents: order.subtotal.cents,
+      discountTotalCents: order.discountTotal.cents,
+      taxTotalCents: order.taxTotal.cents,
+      shippingTotalCents: order.shippingTotal.cents,
+      handlingFeeCents: order.handlingFee.cents,
+      totalAmountCents: order.totalAmount.cents,
+      totalItems: order.totalItems,
+      totalQuantity: order.totalQuantity,
+      taxExempt: order.taxExempt,
+    };
+  }
+
+  private orderLifecycleValues(order: Order): Record<string, unknown> {
+    return {
+      completedAt: order.completedAt?.toISOString() || null,
+      cancelledAt: order.cancelledAt?.toISOString() || null,
+      returnedAt: order.returnedAt?.toISOString() || null,
+      estimatedDeliveryDate: order.estimatedDeliveryDate?.toISOString() || null,
+    };
+  }
+
+  private orderContactValues(order: Order): Record<string, unknown> {
+    return {
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone || null,
+      customerName: order.customerName || null,
+      customerNotes: order.customerNotes || null,
+      adminNotes: order.adminNotes || null,
+      ipAddress: order.ipAddress || null,
+      userAgent: order.userAgent || null,
+      referralSource: order.referralSource || null,
+    };
+  }
+
+  private orderContextValues(order: Order): Record<string, unknown> {
+    return {
+      hasGiftWrapping: order.hasGiftWrapping,
+      giftMessage: order.giftMessage || null,
+      isGift: order.isGift,
+      isSubscriptionOrder: order.isSubscriptionOrder,
+      parentOrderId: order.parentOrderId || null,
+      tags: order.tags.length > 0 ? JSON.stringify(order.tags) : null,
+      metadata: order.metadata ? JSON.stringify(order.metadata) : null,
+      marketId: order.marketId || null,
+      localeCode: order.localeCode || null,
+      contractingEntityId: order.contractingEntityId || null,
+      catalogCurrencyCode: order.catalogCurrencyCode || null,
+      displayedCurrencyCode: order.displayedCurrencyCode || null,
+      settlementCurrencyCode: order.settlementCurrencyCode || null,
+      accountingCurrencyCode: order.accountingCurrencyCode || null,
+      exchangeRateSnapshot: order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
+      versionSnapshot: JSON.stringify(order.versionSnapshot ?? {}),
+      decisionLog: JSON.stringify(order.decisionLog ?? []),
+    };
+  }
+
+  private async updateOrder(order: Order, now: string): Promise<void> {
+    const v = this.orderRowValues(order, now);
+    await query(
+      `UPDATE "order" SET
           "orderNumber" = $1, "customerId" = $2, "basketId" = $3, "storeId" = $4,
           "channelId" = $5, "createdByUserId" = $6, "orderSource" = $7, "status" = $8,
           "paymentStatus" = $9, "fulfillmentStatus" = $10, "currencyCode" = $11,
@@ -139,60 +241,63 @@ export class OrderRepo implements IOrderRepository {
           "settlementCurrencyCode" = $44, "accountingCurrencyCode" = $45,
           "exchangeRateSnapshot" = $46, "versionSnapshot" = $47, "decisionLog" = $48
         WHERE "orderId" = $38`,
-        [
-          order.orderNumber,
-          order.customerId || null,
-          order.basketId || null,
-          order.storeId || null,
-          order.channelId || null,
-          order.createdByUserId || null,
-          order.orderSource,
-          order.status,
-          order.paymentStatus,
-          order.fulfillmentStatus,
-          order.currencyCode,
-          order.subtotal.cents,
-          order.discountTotal.cents,
-          order.taxTotal.cents,
-          order.shippingTotal.cents,
-          order.handlingFee.cents,
-          order.totalAmount.cents,
-          order.totalItems,
-          order.totalQuantity,
-          order.taxExempt,
-          order.completedAt?.toISOString() || null,
-          order.cancelledAt?.toISOString() || null,
-          order.returnedAt?.toISOString() || null,
-          order.customerEmail,
-          order.customerPhone || null,
-          order.customerName || null,
-          order.customerNotes || null,
-          order.adminNotes || null,
-          order.estimatedDeliveryDate?.toISOString() || null,
-          order.hasGiftWrapping,
-          order.giftMessage || null,
-          order.isGift,
-          order.isSubscriptionOrder,
-          order.parentOrderId || null,
-          order.tags.length > 0 ? JSON.stringify(order.tags) : null,
-          order.metadata ? JSON.stringify(order.metadata) : null,
-          now,
-          order.orderId,
-          order.marketId || null,
-          order.localeCode || null,
-          order.contractingEntityId || null,
-          order.catalogCurrencyCode || null,
-          order.displayedCurrencyCode || null,
-          order.settlementCurrencyCode || null,
-          order.accountingCurrencyCode || null,
-          order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
-          JSON.stringify(order.versionSnapshot ?? {}),
-          JSON.stringify(order.decisionLog ?? []),
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO "order" (
+      [
+        v.orderNumber,
+        v.customerId,
+        v.basketId,
+        v.storeId,
+        v.channelId,
+        v.createdByUserId,
+        v.orderSource,
+        v.status,
+        v.paymentStatus,
+        v.fulfillmentStatus,
+        v.currencyCode,
+        v.subtotalCents,
+        v.discountTotalCents,
+        v.taxTotalCents,
+        v.shippingTotalCents,
+        v.handlingFeeCents,
+        v.totalAmountCents,
+        v.totalItems,
+        v.totalQuantity,
+        v.taxExempt,
+        v.completedAt,
+        v.cancelledAt,
+        v.returnedAt,
+        v.customerEmail,
+        v.customerPhone,
+        v.customerName,
+        v.customerNotes,
+        v.adminNotes,
+        v.estimatedDeliveryDate,
+        v.hasGiftWrapping,
+        v.giftMessage,
+        v.isGift,
+        v.isSubscriptionOrder,
+        v.parentOrderId,
+        v.tags,
+        v.metadata,
+        v.updatedAt,
+        v.orderId,
+        v.marketId,
+        v.localeCode,
+        v.contractingEntityId,
+        v.catalogCurrencyCode,
+        v.displayedCurrencyCode,
+        v.settlementCurrencyCode,
+        v.accountingCurrencyCode,
+        v.exchangeRateSnapshot,
+        v.versionSnapshot,
+        v.decisionLog,
+      ],
+    );
+  }
+
+  private async insertOrder(order: Order, now: string): Promise<void> {
+    const v = this.orderRowValues(order, now);
+    await query(
+      `INSERT INTO "order" (
           "orderId", "orderNumber", "customerId", "basketId", "storeId", "channelId", "createdByUserId", "orderSource", "status", "paymentStatus",
           "fulfillmentStatus", "currencyCode", "subtotalCents", "discountTotalCents", "taxTotalCents",
           "shippingTotalCents", "handlingFeeCents", "totalAmountCents", "totalItems", "totalQuantity",
@@ -209,64 +314,57 @@ export class OrderRepo implements IOrderRepository {
           $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
           $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48
         )`,
-        [
-          order.orderId,
-          order.orderNumber,
-          order.customerId || null,
-          order.basketId || null,
-          order.storeId || null,
-          order.channelId || null,
-          order.createdByUserId || null,
-          order.orderSource,
-          order.status,
-          order.paymentStatus,
-          order.fulfillmentStatus,
-          order.currencyCode,
-          order.subtotal.cents,
-          order.discountTotal.cents,
-          order.taxTotal.cents,
-          order.shippingTotal.cents,
-          order.handlingFee.cents,
-          order.totalAmount.cents,
-          order.totalItems,
-          order.totalQuantity,
-          order.taxExempt,
-          order.orderDate.toISOString(),
-          order.customerEmail,
-          order.customerPhone || null,
-          order.customerName || null,
-          order.customerNotes || null,
-          order.ipAddress || null,
-          order.userAgent || null,
-          order.referralSource || null,
-          order.hasGiftWrapping,
-          order.giftMessage || null,
-          order.isGift,
-          order.isSubscriptionOrder,
-          order.parentOrderId || null,
-          order.tags.length > 0 ? JSON.stringify(order.tags) : null,
-          order.metadata ? JSON.stringify(order.metadata) : null,
-          now,
-          now,
-          order.marketId || null,
-          order.localeCode || null,
-          order.contractingEntityId || null,
-          order.catalogCurrencyCode || null,
-          order.displayedCurrencyCode || null,
-          order.settlementCurrencyCode || null,
-          order.accountingCurrencyCode || null,
-          order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
-          JSON.stringify(order.versionSnapshot ?? {}),
-          JSON.stringify(order.decisionLog ?? []),
-        ],
-      );
-    }
-
-    await this.syncItems(order);
-    if (order.shippingAddress) await this.saveOrderAddress(order.shippingAddress);
-    if (order.billingAddress) await this.saveOrderAddress(order.billingAddress);
-
-    return order;
+      [
+        v.orderId,
+        v.orderNumber,
+        v.customerId,
+        v.basketId,
+        v.storeId,
+        v.channelId,
+        v.createdByUserId,
+        v.orderSource,
+        v.status,
+        v.paymentStatus,
+        v.fulfillmentStatus,
+        v.currencyCode,
+        v.subtotalCents,
+        v.discountTotalCents,
+        v.taxTotalCents,
+        v.shippingTotalCents,
+        v.handlingFeeCents,
+        v.totalAmountCents,
+        v.totalItems,
+        v.totalQuantity,
+        v.taxExempt,
+        v.orderDate,
+        v.customerEmail,
+        v.customerPhone,
+        v.customerName,
+        v.customerNotes,
+        v.ipAddress,
+        v.userAgent,
+        v.referralSource,
+        v.hasGiftWrapping,
+        v.giftMessage,
+        v.isGift,
+        v.isSubscriptionOrder,
+        v.parentOrderId,
+        v.tags,
+        v.metadata,
+        v.createdAt,
+        v.updatedAt,
+        v.marketId,
+        v.localeCode,
+        v.contractingEntityId,
+        v.catalogCurrencyCode,
+        v.displayedCurrencyCode,
+        v.settlementCurrencyCode,
+        v.accountingCurrencyCode,
+        v.exchangeRateSnapshot,
+        v.versionSnapshot,
+        v.decisionLog,
+      ],
+    );
   }
 
   async delete(orderId: string): Promise<void> {
