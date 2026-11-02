@@ -17,12 +17,14 @@ function rowToEntity(row: SegmentDbRow): SegmentDefinition {
 
 export class SegmentRepositoryImpl implements SegmentRepository {
   async findById(id: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(`SELECT * FROM "segmentDefinition" WHERE "segmentId" = $1 AND "deletedAt" IS NULL`, [id]);
+    const row = await queryOne<DbSegmentDefinition>(`SELECT * FROM "segmentDefinition" WHERE "segmentId" = $1 AND "deletedAt" IS NULL`, [
+      id,
+    ]);
     return row ? rowToEntity(row) : null;
   }
 
   async findByCode(code: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(`SELECT * FROM "segmentDefinition" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
+    const row = await queryOne<DbSegmentDefinition>(`SELECT * FROM "segmentDefinition" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
     return row ? rowToEntity(row) : null;
   }
 
@@ -44,7 +46,7 @@ export class SegmentRepositoryImpl implements SegmentRepository {
 
   async create(segment: SegmentDefinition): Promise<SegmentDefinition> {
     const props = segment.toJSON();
-    const row = await queryOne<SegmentDbRow>(
+    const row = await queryOne<DbSegmentDefinition>(
       `INSERT INTO "segmentDefinition" (
         "name", "code", "description", "conditions", "matchMode",
         "isActive", "isSystem", "color", "icon", "memberCount",
@@ -74,7 +76,7 @@ export class SegmentRepositoryImpl implements SegmentRepository {
 
   async update(segment: SegmentDefinition): Promise<SegmentDefinition | null> {
     const props = segment.toJSON();
-    const row = await queryOne<SegmentDbRow>(
+    const row = await queryOne<DbSegmentDefinition>(
       `UPDATE "segmentDefinition" SET
         "name" = $1, "description" = $2, "conditions" = $3, "matchMode" = $4,
         "isActive" = $5, "color" = $6, "icon" = $7, "memberCount" = $8,
@@ -105,7 +107,7 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async activate(id: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(
+    const row = await queryOne<DbSegmentDefinition>(
       `UPDATE "segmentDefinition" SET "isActive" = true, "updatedAt" = NOW() WHERE "segmentId" = $1 AND "deletedAt" IS NULL RETURNING *`,
       [id],
     );
@@ -113,7 +115,7 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async deactivate(id: string): Promise<SegmentDefinition | null> {
-    const row = await queryOne<SegmentDbRow>(
+    const row = await queryOne<DbSegmentDefinition>(
       `UPDATE "segmentDefinition" SET "isActive" = false, "updatedAt" = NOW() WHERE "segmentId" = $1 AND "deletedAt" IS NULL RETURNING *`,
       [id],
     );

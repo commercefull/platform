@@ -13,29 +13,10 @@ import type { AuditAction, ActorType, ResourceType } from '../../domain/enums/Au
 import { AuditRepository, AuditLogFilters } from '../../domain/repositories/AuditRepository';
 import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/pagination';
 import { AuditLogWriteError } from '../../domain/errors/AuditErrors';
+import type { AuditLog as DbAuditLog } from '../../../../libs/db/types';
 
-interface AuditLogRow {
-  auditLogId: string;
-  createdAt: Date;
-  actorId: string;
-  actorType: string;
-  actorEmail: string | null;
-  actorName: string | null;
-  action: string;
-  resourceType: string;
-  resourceId: string | null;
-  resourceName: string | null;
-  ipAddress: string | null;
-  userAgent: string | null;
-  correlationId: string | null;
-  organizationId: string | null;
-  storeId: string | null;
-  metadata: Record<string, unknown> | null;
-  previousHash: string;
-  hash: string;
-}
 
-function rowToEntity(row: AuditLogRow): AuditLog {
+function rowToEntity(row: DbAuditLog): AuditLog {
   return AuditLog.reconstitute({
     auditLogId: row.auditLogId,
     createdAt: row.createdAt,
@@ -52,7 +33,7 @@ function rowToEntity(row: AuditLogRow): AuditLog {
     correlationId: row.correlationId ?? undefined,
     organizationId: row.organizationId ?? undefined,
     storeId: row.storeId ?? undefined,
-    metadata: row.metadata ?? undefined,
+    metadata: (row.metadata ?? undefined) as Record<string, unknown> | undefined,
     previousHash: row.previousHash,
     hash: row.hash,
   });
@@ -89,7 +70,7 @@ export class AuditRepositoryImpl implements AuditRepository {
       entry.hash,
     ];
 
-    const row = await queryOne<AuditLogRow>(sql, params);
+    const row = await queryOne<DbAuditLog>(sql, params);
     if (!row) {
       throw new AuditLogWriteError('Failed to append audit log entry');
     }
@@ -99,7 +80,7 @@ export class AuditRepositoryImpl implements AuditRepository {
   }
 
   async findById(auditLogId: string): Promise<AuditLog | null> {
-    const row = await queryOne<AuditLogRow>('SELECT * FROM "auditLog" WHERE "auditLogId" = $1', [auditLogId]);
+    const row = await queryOne<DbAuditLog>('SELECT * FROM "auditLog" WHERE "auditLogId" = $1', [auditLogId]);
     return row ? rowToEntity(row) : null;
   }
 
@@ -160,7 +141,7 @@ export class AuditRepositoryImpl implements AuditRepository {
     const total = parseInt(countResult?.total ?? '0', 10);
 
     const dataSql = `SELECT * FROM "auditLog" ${where} ORDER BY "createdAt" DESC LIMIT $${paramIdx} OFFSET $${paramIdx + 1}`;
-    const rows = await query<AuditLogRow[]>(dataSql, [...params, limit, offset]);
+    const rows = await query<DbAuditLog[]>(dataSql, [...params, limit, offset]);
 
     const data = (rows ?? []).map(rowToEntity);
 
@@ -183,9 +164,7 @@ export class AuditRepositoryImpl implements AuditRepository {
   }
 
   async findByCorrelationId(correlationId: string): Promise<AuditLog[]> {
-    const rows = await query<AuditLogRow[]>('SELECT * FROM "auditLog" WHERE "correlationId" = $1 ORDER BY "createdAt" ASC', [
-      correlationId,
-    ]);
+    const rows = await query<DbAuditLog[]>('SELECT * FROM "auditLog" WHERE "correlationId" = $1 ORDER BY "createdAt" ASC', [correlationId]);
     return (rows ?? []).map(rowToEntity);
   }
 
@@ -203,7 +182,7 @@ export class AuditRepositoryImpl implements AuditRepository {
       params.push(fromId);
     }
 
-    const rows = await query<AuditLogRow[]>(sql, params);
+    const rows = await query<DbAuditLog[]>(sql, params);
     if (!rows || rows.length === 0) {
       return { valid: true };
     }

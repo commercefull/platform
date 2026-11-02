@@ -19,6 +19,7 @@ import {
   PaymentRefundNotFoundError,
   FailedToUpdatePaymentRefundError,
 } from '../../domain/errors/PaymentErrors';
+import type { PaymentGateway as DbPaymentGateway, PaymentMethodConfig as DbPaymentMethodConfig, PaymentRefund as DbPaymentRefund, PaymentTransaction as DbPaymentTransaction } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -81,7 +82,7 @@ export class PaymentRepo {
   // ============================================================================
 
   async findAllGateways(organizationId: string): Promise<PaymentGateway[]> {
-    const results = await query<PaymentGateway[]>(
+    const results = await query<DbPaymentGateway[]>(
       `SELECT * FROM "paymentGateway" 
        WHERE "organizationId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "name" ASC`,
@@ -91,7 +92,7 @@ export class PaymentRepo {
   }
 
   async findGatewayById(id: string): Promise<PaymentGateway | null> {
-    return queryOne<PaymentGateway>(
+    return queryOne<DbPaymentGateway>(
       `SELECT * FROM "paymentGateway" 
        WHERE "paymentGatewayId" = $1 AND "deletedAt" IS NULL`,
       [id],
@@ -99,7 +100,7 @@ export class PaymentRepo {
   }
 
   async findDefaultGateway(organizationId: string): Promise<PaymentGateway | null> {
-    return queryOne<PaymentGateway>(
+    return queryOne<DbPaymentGateway>(
       `SELECT * FROM "paymentGateway" 
        WHERE "organizationId" = $1 AND "isDefault" = true AND "deletedAt" IS NULL`,
       [organizationId],
@@ -108,7 +109,7 @@ export class PaymentRepo {
 
   async createGateway(params: PaymentGatewayCreateParams): Promise<PaymentGateway> {
     const now = new Date();
-    const result = await queryOne<PaymentGateway>(
+    const result = await queryOne<DbPaymentGateway>(
       `INSERT INTO "paymentGateway" 
        ("organizationId", "name", "provider", "isActive", "isDefault", "isTestMode",
         "apiKey", "apiSecret", "publicKey", "webhookSecret", "apiEndpoint",
@@ -176,7 +177,7 @@ export class PaymentRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<PaymentGateway>(
+    const result = await queryOne<DbPaymentGateway>(
       `UPDATE "paymentGateway" 
        SET ${updates.join(', ')} 
        WHERE "paymentGatewayId" = $${paramIndex} AND "deletedAt" IS NULL
@@ -219,7 +220,7 @@ export class PaymentRepo {
   // ============================================================================
 
   async findAllMethodConfigs(organizationId: string): Promise<PaymentMethodConfig[]> {
-    const results = await query<PaymentMethodConfig[]>(
+    const results = await query<DbPaymentMethodConfig[]>(
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "organizationId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
@@ -229,7 +230,7 @@ export class PaymentRepo {
   }
 
   async findMethodConfigById(id: string): Promise<PaymentMethodConfig | null> {
-    return queryOne<PaymentMethodConfig>(
+    return queryOne<DbPaymentMethodConfig>(
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "paymentMethodConfigId" = $1 AND "deletedAt" IS NULL`,
       [id],
@@ -237,7 +238,7 @@ export class PaymentRepo {
   }
 
   async findEnabledMethodConfigs(organizationId: string): Promise<PaymentMethodConfig[]> {
-    const results = await query<PaymentMethodConfig[]>(
+    const results = await query<DbPaymentMethodConfig[]>(
       `SELECT * FROM "paymentMethodConfig" 
        WHERE "organizationId" = $1 AND "isEnabled" = true AND "deletedAt" IS NULL 
        ORDER BY "displayOrder" ASC, "displayName" ASC`,
@@ -248,7 +249,7 @@ export class PaymentRepo {
 
   async createMethodConfig(params: PaymentMethodConfigCreateParams): Promise<PaymentMethodConfig> {
     const now = new Date();
-    const result = await queryOne<PaymentMethodConfig>(
+    const result = await queryOne<DbPaymentMethodConfig>(
       `INSERT INTO "paymentMethodConfig" 
        ("organizationId", "paymentMethod", "isEnabled", "displayName", "description",
         "processingFeeCents", "minimumAmountCents", "maximumAmountCents", "displayOrder", "icon",
@@ -304,7 +305,7 @@ export class PaymentRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<PaymentMethodConfig>(
+    const result = await queryOne<DbPaymentMethodConfig>(
       `UPDATE "paymentMethodConfig" 
        SET ${updates.join(', ')} 
        WHERE "paymentMethodConfigId" = $${paramIndex} AND "deletedAt" IS NULL
@@ -333,7 +334,7 @@ export class PaymentRepo {
   // ============================================================================
 
   async findTransactionById(id: string): Promise<PaymentTransaction | null> {
-    return queryOne<PaymentTransaction>(
+    return queryOne<DbPaymentTransaction>(
       `SELECT * FROM "paymentTransaction" 
        WHERE "paymentTransactionId" = $1 AND "deletedAt" IS NULL`,
       [id],
@@ -341,7 +342,7 @@ export class PaymentRepo {
   }
 
   async findTransactionsByOrderId(orderId: string): Promise<PaymentTransaction[]> {
-    const results = await query<PaymentTransaction[]>(
+    const results = await query<DbPaymentTransaction[]>(
       `SELECT * FROM "paymentTransaction" 
        WHERE "orderId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "createdAt" DESC`,
@@ -351,7 +352,7 @@ export class PaymentRepo {
   }
 
   async findTransactionsByCustomerId(customerId: string, limit: number = 10, offset: number = 0): Promise<PaymentTransaction[]> {
-    const results = await query<PaymentTransaction[]>(
+    const results = await query<DbPaymentTransaction[]>(
       `SELECT * FROM "paymentTransaction" 
        WHERE "customerId" = $1 AND "deletedAt" IS NULL 
        ORDER BY "createdAt" DESC
@@ -363,7 +364,7 @@ export class PaymentRepo {
 
   async createTransaction(params: PaymentTransactionCreateParams): Promise<PaymentTransaction> {
     const now = new Date();
-    const result = await queryOne<PaymentTransaction>(
+    const result = await queryOne<DbPaymentTransaction>(
       `INSERT INTO "paymentTransaction" 
        ("orderPaymentId", "orderId", "type", "amountCents", "currencyCode", "status",
         "customerId", "paymentMethodId", "paymentGatewayId", "externalTransactionId",
@@ -431,7 +432,7 @@ export class PaymentRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<PaymentTransaction>(
+    const result = await queryOne<DbPaymentTransaction>(
       `UPDATE "paymentTransaction" 
        SET ${updates.join(', ')} 
        WHERE "paymentTransactionId" = $${paramIndex} AND "deletedAt" IS NULL
@@ -448,7 +449,7 @@ export class PaymentRepo {
   // ============================================================================
 
   async findRefundById(id: string): Promise<PaymentRefund | null> {
-    return queryOne<PaymentRefund>(
+    return queryOne<DbPaymentRefund>(
       `SELECT * FROM "paymentRefund" 
        WHERE "paymentRefundId" = $1`,
       [id],
@@ -456,7 +457,7 @@ export class PaymentRepo {
   }
 
   async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
-    const results = await query<PaymentRefund[]>(
+    const results = await query<DbPaymentRefund[]>(
       `SELECT * FROM "paymentRefund" 
        WHERE "paymentTransactionId" = $1 
        ORDER BY "createdAt" DESC`,
@@ -467,7 +468,7 @@ export class PaymentRepo {
 
   async createRefund(params: PaymentRefundCreateParams): Promise<PaymentRefund> {
     const now = new Date();
-    const result = await queryOne<PaymentRefund>(
+    const result = await queryOne<DbPaymentRefund>(
       `INSERT INTO "paymentRefund" 
        ("orderPaymentId", "orderId", "transactionId", "amountCents", "currencyCode",
         "reason", "status", "paymentTransactionId", "externalRefundId",
@@ -535,7 +536,7 @@ export class PaymentRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<PaymentRefund>(
+    const result = await queryOne<DbPaymentRefund>(
       `UPDATE "paymentRefund" 
        SET ${updates.join(', ')} 
        WHERE "paymentRefundId" = $${paramIndex}

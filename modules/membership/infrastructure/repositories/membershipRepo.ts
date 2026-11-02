@@ -13,14 +13,7 @@
  * - membershipPaymentRepo.ts - Payments
  */
 
-import {
-  MembershipPlan,
-  create,
-  findAll,
-  findById,
-  remove,
-  update,
-} from './membershipPlanRepo';
+import { MembershipPlan, create, findAll, findById, remove, update } from './membershipPlanRepo';
 import membershipBenefitRepo from './membershipBenefitRepo';
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 import membershipSubscriptionRepo from './membershipSubscriptionRepo';

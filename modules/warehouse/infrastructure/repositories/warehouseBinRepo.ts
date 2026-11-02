@@ -9,7 +9,6 @@ import { FailedToCreateWarehouseEntityError } from '../../domain/errors/Warehous
 import type { DistributionWarehouseBin as DbDistributionWarehouseBin } from '../../../../libs/db/types';
 import type { WarehouseBin, CreateBinInput, UpdateBinInput } from '../../domain/repositories/WarehouseRepository';
 
-
 const num = (v: string | number | null | undefined): number | undefined => (v == null ? undefined : Number(v));
 
 function mapToBin(row: DbDistributionWarehouseBin): WarehouseBin {

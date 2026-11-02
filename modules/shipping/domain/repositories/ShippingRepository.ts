@@ -3,8 +3,3 @@
  *
  * Domain interface for shipping data access.
  */
-
-
-
-
-

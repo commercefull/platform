@@ -20,5 +20,3 @@ export type OrderShippingUpdateParams = Partial<
     'shippingMethod' | 'carrier' | 'service' | 'amountCents' | 'taxAmountCents' | 'trackingNumber' | 'trackingUrl' | 'estimatedDeliveryDate'
   >
 >;
-
-

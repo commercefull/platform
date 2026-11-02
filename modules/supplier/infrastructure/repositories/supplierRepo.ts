@@ -38,14 +38,14 @@ class SupplierRepo {
    * Find supplier by ID
    */
   async findById(supplierId: string): Promise<Supplier | null> {
-    return await queryOne<Supplier>(`SELECT * FROM "supplier" WHERE "supplierId" = $1`, [supplierId]);
+    return await queryOne<DbSupplier>(`SELECT * FROM "supplier" WHERE "supplierId" = $1`, [supplierId]);
   }
 
   /**
    * Find supplier by code
    */
   async findByCode(code: string): Promise<Supplier | null> {
-    return await queryOne<Supplier>(`SELECT * FROM "supplier" WHERE "code" = $1`, [code]);
+    return await queryOne<DbSupplier>(`SELECT * FROM "supplier" WHERE "code" = $1`, [code]);
   }
 
   /**
@@ -64,7 +64,7 @@ class SupplierRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Supplier[]>(sql);
+    const results = await query<DbSupplier[]>(sql);
     return results || [];
   }
 
@@ -115,7 +115,7 @@ class SupplierRepo {
 
     params.push(limit, offset);
 
-    const results = await query<Supplier[]>(
+    const results = await query<DbSupplier[]>(
       `SELECT * FROM "supplier" 
        ${whereClause}
        ORDER BY "name" ASC 
@@ -130,7 +130,7 @@ class SupplierRepo {
    * Find suppliers by status
    */
   async findByStatus(status: SupplierStatus): Promise<Supplier[]> {
-    const results = await query<Supplier[]>(`SELECT * FROM "supplier" WHERE "status" = $1 ORDER BY "name" ASC`, [status]);
+    const results = await query<DbSupplier[]>(`SELECT * FROM "supplier" WHERE "status" = $1 ORDER BY "name" ASC`, [status]);
     return results || [];
   }
 
@@ -138,7 +138,7 @@ class SupplierRepo {
    * Find approved suppliers
    */
   async findApproved(): Promise<Supplier[]> {
-    const results = await query<Supplier[]>(
+    const results = await query<DbSupplier[]>(
       `SELECT * FROM "supplier" 
        WHERE "isApproved" = true AND "isActive" = true 
        ORDER BY "name" ASC`,
@@ -151,7 +151,7 @@ class SupplierRepo {
    * Find suppliers by category
    */
   async findByCategory(category: string): Promise<Supplier[]> {
-    const results = await query<Supplier[]>(
+    const results = await query<DbSupplier[]>(
       `SELECT * FROM "supplier" 
        WHERE $1 = ANY("categories") AND "isActive" = true
        ORDER BY "name" ASC`,
@@ -172,7 +172,7 @@ class SupplierRepo {
       throw new SupplierCodeAlreadyExistsError(params.code);
     }
 
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `INSERT INTO "supplier" (
         "name", "code", "description", "website", "email", "phone",
         "isActive", "isApproved", "status", "rating", "taxId",
@@ -240,7 +240,7 @@ class SupplierRepo {
     values.push(unixTimestamp());
     values.push(supplierId);
 
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `UPDATE "supplier" 
        SET ${updateFields.join(', ')}
        WHERE "supplierId" = $${paramIndex}
@@ -308,7 +308,7 @@ class SupplierRepo {
    * Add category to supplier
    */
   async addCategory(supplierId: string, category: string): Promise<Supplier | null> {
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `UPDATE "supplier" 
        SET "categories" = array_append("categories", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
@@ -323,7 +323,7 @@ class SupplierRepo {
    * Remove category from supplier
    */
   async removeCategory(supplierId: string, category: string): Promise<Supplier | null> {
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `UPDATE "supplier" 
        SET "categories" = array_remove("categories", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
@@ -338,7 +338,7 @@ class SupplierRepo {
    * Add tag to supplier
    */
   async addTag(supplierId: string, tag: string): Promise<Supplier | null> {
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `UPDATE "supplier" 
        SET "tags" = array_append("tags", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
@@ -353,7 +353,7 @@ class SupplierRepo {
    * Remove tag from supplier
    */
   async removeTag(supplierId: string, tag: string): Promise<Supplier | null> {
-    const result = await queryOne<Supplier>(
+    const result = await queryOne<DbSupplier>(
       `UPDATE "supplier" 
        SET "tags" = array_remove("tags", $1), "updatedAt" = $2
        WHERE "supplierId" = $3
@@ -429,7 +429,7 @@ class SupplierRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Supplier[]>(sql, params);
+    const results = await query<DbSupplier[]>(sql, params);
     return results || [];
   }
 

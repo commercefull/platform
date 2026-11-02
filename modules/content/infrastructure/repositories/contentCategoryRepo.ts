@@ -12,6 +12,7 @@ import {
   ContentValidationError,
   CategoryNotFoundError,
 } from '../../domain/errors/ContentErrors';
+import type { ContentCategory as DbContentCategory } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -26,11 +27,11 @@ export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'content
 
 export class ContentCategoryRepo {
   async findCategoryById(id: string): Promise<ContentCategory | null> {
-    return queryOne<ContentCategory>('SELECT * FROM "contentCategory" WHERE "contentCategoryId" = $1', [id]);
+    return queryOne<DbContentCategory>('SELECT * FROM "contentCategory" WHERE "contentCategoryId" = $1', [id]);
   }
 
   async findCategoryBySlug(slug: string): Promise<ContentCategory | null> {
-    return queryOne<ContentCategory>('SELECT * FROM "contentCategory" WHERE "slug" = $1', [slug]);
+    return queryOne<DbContentCategory>('SELECT * FROM "contentCategory" WHERE "slug" = $1', [slug]);
   }
 
   async findAllCategories(parentId?: string, isActive?: boolean, limit: number = 100, offset: number = 0): Promise<ContentCategory[]> {
@@ -60,7 +61,7 @@ export class ContentCategoryRepo {
     sql += ` ORDER BY "sortOrder" ASC, "name" ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
-    const results = await query<ContentCategory[]>(sql, params);
+    const results = await query<DbContentCategory[]>(sql, params);
     return results || [];
   }
 
@@ -83,7 +84,7 @@ export class ContentCategoryRepo {
 
     sql += ' ORDER BY "depth" ASC, "sortOrder" ASC, "name" ASC';
 
-    const results = await query<ContentCategory[]>(sql, params);
+    const results = await query<DbContentCategory[]>(sql, params);
     return results || [];
   }
 
@@ -91,7 +92,7 @@ export class ContentCategoryRepo {
     const now = unixTimestamp();
 
     // Check slug uniqueness within parent
-    const existing = await queryOne<ContentCategory>(
+    const existing = await queryOne<DbContentCategory>(
       'SELECT * FROM "contentCategory" WHERE "slug" = $1 AND ("parentId" = $2 OR ($2 IS NULL AND "parentId" IS NULL))',
       [params.slug, params.parentId || null],
     );
@@ -111,7 +112,7 @@ export class ContentCategoryRepo {
       }
     }
 
-    const result = await queryOne<ContentCategory>(
+    const result = await queryOne<DbContentCategory>(
       `INSERT INTO "contentCategory" 
       ("name", "slug", "parentId", "description", "featuredImage", "metaTitle", 
        "metaDescription", "sortOrder", "isActive", "path", "depth", "createdAt", "updatedAt") 
@@ -184,7 +185,7 @@ export class ContentCategoryRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentCategory>(
+    const result = await queryOne<DbContentCategory>(
       `UPDATE "contentCategory" SET ${updateFields.join(', ')} WHERE "contentCategoryId" = $${paramIndex} RETURNING *`,
       values,
     );

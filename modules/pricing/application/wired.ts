@@ -135,8 +135,8 @@ const createPriceListAdapter = {
       description: data.description,
       priority: 0,
       isActive: data.isActive,
-      startDate: data.validFrom?.toISOString(),
-      endDate: data.validTo?.toISOString(),
+      startDate: data.validFrom,
+      endDate: data.validTo,
     });
     return {
       priceListId: result.priceListId,
@@ -144,7 +144,7 @@ const createPriceListAdapter = {
       type: data.type,
       currencyCode: data.currencyCode,
       isDefault: data.isDefault,
-      createdAt: new Date(result.createdAt),
+      createdAt: result.createdAt,
     };
   },
 };

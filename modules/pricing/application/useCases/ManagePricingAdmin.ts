@@ -44,10 +44,10 @@ interface PriceListRecord {
   description?: string;
   priority?: number;
   isActive: boolean;
-  startDate?: string;
-  endDate?: string;
-  createdAt: string;
-  updatedAt: string;
+  startDate?: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type PriceListCreateParams = Omit<PriceListRecord, 'priceListId' | 'createdAt' | 'updatedAt'>;

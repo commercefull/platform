@@ -1,12 +1,16 @@
 import { query, queryOne } from '../../../../libs/db';
+import type { NotificationUnsubscribe as DbNotificationUnsubscribe } from '../../../../libs/db/types';
+import type { NotificationUnsubscribe } from '../../domain/repositories/NotificationUnsubscribeRepository';
 
-interface NotificationUnsubscribe {
-  notificationUnsubscribeId: string;
-  userId: string;
-  category?: string;
-  reason?: string;
-  isGlobal?: boolean;
-  createdAt: Date;
+function rowToUnsubscribe(row: DbNotificationUnsubscribe): NotificationUnsubscribe {
+  return {
+    notificationUnsubscribeId: row.notificationUnsubscribeId,
+    userId: row.userId ?? '',
+    category: row.category ?? undefined,
+    reason: row.reason ?? undefined,
+    isGlobal: row.isGlobal,
+    createdAt: row.createdAt,
+  };
 }
 
 async function isUnsubscribed(userId: string, channel: string, type?: string): Promise<boolean> {
@@ -37,11 +41,11 @@ async function resubscribe(userId: string, channel: string, type?: string): Prom
 }
 
 async function findByUser(userId: string): Promise<NotificationUnsubscribe[]> {
-  return (
-    (await query<NotificationUnsubscribe[]>(`SELECT * FROM "notificationUnsubscribe" WHERE "userId" = $1 ORDER BY "createdAt" DESC`, [
-      userId,
-    ])) || []
+  const rows = await query<DbNotificationUnsubscribe[]>(
+    `SELECT * FROM "notificationUnsubscribe" WHERE "userId" = $1 ORDER BY "createdAt" DESC`,
+    [userId],
   );
+  return (rows || []).map(rowToUnsubscribe);
 }
 
 export default { isUnsubscribed, unsubscribe, resubscribe, findByUser };

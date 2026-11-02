@@ -22,22 +22,63 @@ import { WarehouseCodeAlreadyExistsError, FailedToCreateWarehouseError } from '.
 // ============================================================================
 
 import type { WarehouseRecord, WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
+import type { DistributionWarehouse as DbDistributionWarehouse } from '../../../../libs/db/types';
 export type { WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
 export type Warehouse = WarehouseRecord;
+
+function rowToWarehouse(row: DbDistributionWarehouse): WarehouseRecord {
+  return {
+    distributionWarehouseId: row.distributionWarehouseId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    name: row.name,
+    code: row.code,
+    description: row.description ?? undefined,
+    isActive: row.isActive,
+    isDefault: row.isDefault,
+    isFulfillmentCenter: row.isFulfillmentCenter,
+    isReturnCenter: row.isReturnCenter,
+    isVirtual: row.isVirtual,
+    organizationId: row.organizationId ?? undefined,
+    addressLine1: row.addressLine1,
+    addressLine2: row.addressLine2 ?? undefined,
+    city: row.city,
+    state: row.state,
+    postalCode: row.postalCode,
+    country: row.country,
+    latitude: row.latitude != null ? Number(row.latitude) : undefined,
+    longitude: row.longitude != null ? Number(row.longitude) : undefined,
+    email: row.email ?? undefined,
+    phone: row.phone ?? undefined,
+    contactName: row.contactName ?? undefined,
+    timezone: row.timezone,
+    cutoffTime: row.cutoffTime ?? undefined,
+    processingTime: row.processingTime ?? undefined,
+    operatingHours: (row.operatingHours ?? undefined) as Record<string, unknown> | undefined,
+    capabilities: (row.capabilities ?? undefined) as Record<string, unknown> | undefined,
+    shippingMethods: row.shippingMethods ?? undefined,
+    createdBy: row.createdBy ?? undefined,
+  };
+}
 
 class WarehouseRepo {
   /**
    * Find warehouse by ID
    */
   async findById(warehouseId: string): Promise<Warehouse | null> {
-    return await queryOne<Warehouse>(`SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1`, [warehouseId]);
+    const row = await queryOne<DbDistributionWarehouse>(
+      `SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1`,
+      [warehouseId],
+    );
+    return row ? rowToWarehouse(row) : null;
   }
 
   /**
    * Find warehouse by code
    */
   async findByCode(code: string): Promise<Warehouse | null> {
-    return await queryOne<Warehouse>(`SELECT * FROM "distributionWarehouse" WHERE "code" = $1`, [code]);
+    const row = await queryOne<DbDistributionWarehouse>(`SELECT * FROM "distributionWarehouse" WHERE "code" = $1`, [code]);
+    return row ? rowToWarehouse(row) : null;
   }
 
   /**
@@ -52,15 +93,18 @@ class WarehouseRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Warehouse[]>(sql);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(sql);
+    return (results || []).map(rowToWarehouse);
   }
 
   /**
    * Find default warehouse
    */
   async findDefault(): Promise<Warehouse | null> {
-    return await queryOne<Warehouse>(`SELECT * FROM "distributionWarehouse" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+    const row = await queryOne<DbDistributionWarehouse>(
+      `SELECT * FROM "distributionWarehouse" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`,
+    );
+    return row ? rowToWarehouse(row) : null;
   }
 
   /**
@@ -75,8 +119,8 @@ class WarehouseRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Warehouse[]>(sql);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(sql);
+    return (results || []).map(rowToWarehouse);
   }
 
   /**
@@ -91,18 +135,19 @@ class WarehouseRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Warehouse[]>(sql);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(sql);
+    return (results || []).map(rowToWarehouse);
   }
 
   /**
    * Find warehouses by merchant
    */
   async findByMerchantId(organizationId: string): Promise<Warehouse[]> {
-    const results = await query<Warehouse[]>(`SELECT * FROM "distributionWarehouse" WHERE "organizationId" = $1 ORDER BY "name" ASC`, [
-      organizationId,
-    ]);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(
+      `SELECT * FROM "distributionWarehouse" WHERE "organizationId" = $1 ORDER BY "name" ASC`,
+      [organizationId],
+    );
+    return (results || []).map(rowToWarehouse);
   }
 
   /**
@@ -118,8 +163,8 @@ class WarehouseRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Warehouse[]>(sql, params);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(sql, params);
+    return (results || []).map(rowToWarehouse);
   }
 
   /**
@@ -133,7 +178,7 @@ class WarehouseRepo {
   ): Promise<Array<Warehouse & { distance: number }>> {
     // Postgres-safe approximate distance calculation (degrees -> km ~ 111km/deg)
     const radiusDeg = radiusKm / 111.0;
-    const results = await query<Array<Warehouse & { distance: number }>>(
+    const results = await query<Array<DbDistributionWarehouse & { distance: string }>>(
       `SELECT *,
         sqrt(power(("latitude" - $1), 2) + power(("longitude" - $2), 2)) AS distance
        FROM "distributionWarehouse"
@@ -146,7 +191,7 @@ class WarehouseRepo {
        LIMIT $4`,
       [latitude, longitude, radiusDeg, limit],
     );
-    return results || [];
+    return (results || []).map((row) => ({ ...rowToWarehouse(row), distance: Number(row.distance) }));
   }
 
   /**
@@ -166,7 +211,7 @@ class WarehouseRepo {
       await this.unsetAllDefaults();
     }
 
-    const result = await queryOne<Warehouse>(
+    const result = await queryOne<DbDistributionWarehouse>(
       `INSERT INTO "distributionWarehouse" (
         "name", "code", "description", "isActive", "isDefault",
         "isFulfillmentCenter", "isReturnCenter", "isVirtual", "organizationId",
@@ -217,7 +262,7 @@ class WarehouseRepo {
       throw new FailedToCreateWarehouseError();
     }
 
-    return result;
+    return rowToWarehouse(result);
   }
 
   /**
@@ -249,7 +294,7 @@ class WarehouseRepo {
     values.push(unixTimestamp());
     values.push(warehouseId);
 
-    const result = await queryOne<Warehouse>(
+    const result = await queryOne<DbDistributionWarehouse>(
       `UPDATE "distributionWarehouse" 
        SET ${updateFields.join(', ')}
        WHERE "distributionWarehouseId" = $${paramIndex}
@@ -257,7 +302,7 @@ class WarehouseRepo {
       values,
     );
 
-    return result;
+    return result ? rowToWarehouse(result) : null;
   }
 
   /**
@@ -300,7 +345,7 @@ class WarehouseRepo {
    * Add shipping method
    */
   async addShippingMethod(warehouseId: string, method: string): Promise<Warehouse | null> {
-    const result = await queryOne<Warehouse>(
+    const result = await queryOne<DbDistributionWarehouse>(
       `UPDATE "distributionWarehouse" 
        SET "shippingMethods" = array_append("shippingMethods", $1), "updatedAt" = $2
        WHERE "distributionWarehouseId" = $3
@@ -308,14 +353,14 @@ class WarehouseRepo {
       [method, unixTimestamp(), warehouseId],
     );
 
-    return result;
+    return result ? rowToWarehouse(result) : null;
   }
 
   /**
    * Remove shipping method
    */
   async removeShippingMethod(warehouseId: string, method: string): Promise<Warehouse | null> {
-    const result = await queryOne<Warehouse>(
+    const result = await queryOne<DbDistributionWarehouse>(
       `UPDATE "distributionWarehouse" 
        SET "shippingMethods" = array_remove("shippingMethods", $1), "updatedAt" = $2
        WHERE "distributionWarehouseId" = $3
@@ -323,7 +368,7 @@ class WarehouseRepo {
       [method, unixTimestamp(), warehouseId],
     );
 
-    return result;
+    return result ? rowToWarehouse(result) : null;
   }
 
   /**
@@ -367,8 +412,8 @@ class WarehouseRepo {
 
     sql += ` ORDER BY "name" ASC`;
 
-    const results = await query<Warehouse[]>(sql, params);
-    return results || [];
+    const results = await query<DbDistributionWarehouse[]>(sql, params);
+    return (results || []).map(rowToWarehouse);
   }
 
   /**

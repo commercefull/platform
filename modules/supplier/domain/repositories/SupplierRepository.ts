@@ -53,7 +53,6 @@ interface SupplierProduct {
   notes?: string;
 }
 
-
 export type SupplierCreateParams = Omit<Supplier, 'supplierId' | 'createdAt' | 'updatedAt'>;
 export type SupplierUpdateParams = Partial<Omit<Supplier, 'supplierId' | 'code' | 'createdAt' | 'updatedAt'>>;
 type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;

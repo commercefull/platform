@@ -181,6 +181,7 @@ export class Product {
 
 - Import them aliased: `import type { Product as DbProduct } from '../../../../libs/db/types'`.
 - Type queries with them: `query<DbProduct[]>(...)`, `queryOne<DbProduct>(...)`.
+- `SELECT *` / `RETURNING *` always use `Db{Table}` — never a domain type. Projection queries (explicit columns, joins, `AS` aliases) use `*Row` types, `Pick<DbX, ...>`, or inline `{ ... }` shapes matching the selected columns.
 - Map `DbRow → domain type` in a `mapTo*(row)` function before returning — signatures and returns always use domain types.
 
 ```typescript

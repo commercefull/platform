@@ -9,6 +9,10 @@ import { query, queryOne } from '../../../../libs/db';
 import { IdentityRefreshTokens, IdentityTokenBlacklist } from '../../../../libs/db/types';
 import { TokenRepository, RefreshTokenInfo, TokenBlacklistInfo } from '../../domain/repositories/TokenRepository';
 import { FailedToCreateRefreshTokenError, FailedToCreateBlacklistEntryError } from '../../domain/errors/IdentityErrors';
+import type {
+  IdentityRefreshTokens as DbIdentityRefreshTokens,
+  IdentityTokenBlacklist as DbIdentityTokenBlacklist,
+} from '../../../../libs/db/types';
 
 export class TokenRepositoryImpl implements TokenRepository {
   // ==========================================================================
@@ -24,7 +28,7 @@ export class TokenRepositoryImpl implements TokenRepository {
     ipAddress?: string | null;
   }): Promise<RefreshTokenInfo> {
     const now = new Date();
-    const record = await queryOne<IdentityRefreshTokens>(
+    const record = await queryOne<DbIdentityRefreshTokens>(
       `INSERT INTO "identityRefreshTokens" (
         "token", "userType", "userId", "isRevoked", "expiresAt", "createdAt", "updatedAt", "userAgent", "ipAddress"
       ) VALUES ($1, $2, $3, false, $4, $5, $5, $6, $7)
@@ -40,7 +44,7 @@ export class TokenRepositoryImpl implements TokenRepository {
   }
 
   async findRefreshToken(token: string): Promise<RefreshTokenInfo | null> {
-    const record = await queryOne<IdentityRefreshTokens>(
+    const record = await queryOne<DbIdentityRefreshTokens>(
       `SELECT * FROM "identityRefreshTokens"
        WHERE "token" = $1 AND "isRevoked" = false AND "expiresAt" > $2`,
       [token, new Date()],
@@ -86,7 +90,7 @@ export class TokenRepositoryImpl implements TokenRepository {
       countParams.push(userType);
     }
 
-    const tokens = await query<IdentityRefreshTokens[]>(countQuery, countParams);
+    const tokens = await query<DbIdentityRefreshTokens[]>(countQuery, countParams);
 
     return tokens ? tokens.length : 0;
   }
@@ -105,7 +109,7 @@ export class TokenRepositoryImpl implements TokenRepository {
     const now = new Date();
     const expiresAt = params.expiresAt || new Date(Date.now() + 86400000);
 
-    const record = await queryOne<IdentityTokenBlacklist>(
+    const record = await queryOne<DbIdentityTokenBlacklist>(
       `INSERT INTO "identityTokenBlacklist" (
         "token", "userType", "userId", "expiresAt", "invalidatedAt", "reason", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -121,7 +125,7 @@ export class TokenRepositoryImpl implements TokenRepository {
   }
 
   async isBlacklisted(token: string): Promise<boolean> {
-    const result = await queryOne<IdentityTokenBlacklist>(
+    const result = await queryOne<DbIdentityTokenBlacklist>(
       `SELECT * FROM "identityTokenBlacklist"
        WHERE "token" = $1 AND "expiresAt" > $2`,
       [token, new Date()],
@@ -131,7 +135,7 @@ export class TokenRepositoryImpl implements TokenRepository {
   }
 
   async cleanExpiredBlacklist(): Promise<number> {
-    const result = await query<IdentityTokenBlacklist[]>(
+    const result = await query<DbIdentityTokenBlacklist[]>(
       `DELETE FROM "identityTokenBlacklist"
        WHERE "expiresAt" < $1
        RETURNING "authTokenBlacklistId"`,
@@ -147,7 +151,7 @@ export class TokenRepositoryImpl implements TokenRepository {
 
   async findRefreshTokensForUser(userId: string, userType: string): Promise<IdentityRefreshTokens[]> {
     return (
-      (await query<IdentityRefreshTokens[]>(
+      (await query<DbIdentityRefreshTokens[]>(
         `SELECT * FROM "identityRefreshTokens"
          WHERE "userId" = $1 AND "userType" = $2
          ORDER BY "createdAt" DESC`,
@@ -169,7 +173,7 @@ export class TokenRepositoryImpl implements TokenRepository {
   }
 
   async cleanupExpiredRefreshTokens(now: Date = new Date()): Promise<number> {
-    const result = await query<IdentityRefreshTokens[]>(
+    const result = await query<DbIdentityRefreshTokens[]>(
       `DELETE FROM "identityRefreshTokens"
        WHERE "expiresAt" < $1
        RETURNING "authRefreshTokenId"`,
@@ -181,7 +185,7 @@ export class TokenRepositoryImpl implements TokenRepository {
 
   async findBlacklistForUser(userId: string, userType: string): Promise<IdentityTokenBlacklist[]> {
     return (
-      (await query<IdentityTokenBlacklist[]>(
+      (await query<DbIdentityTokenBlacklist[]>(
         `SELECT * FROM "identityTokenBlacklist"
          WHERE "userId" = $1 AND "userType" = $2
          ORDER BY "invalidatedAt" DESC`,

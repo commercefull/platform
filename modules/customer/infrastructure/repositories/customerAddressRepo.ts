@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { CustomerAddress as DbCustomerAddress } from '../../../../libs/db/types';
+import type { CustomerAddress as DbCustomerAddress } from '../../../../libs/db/types';
 import { FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
@@ -18,12 +18,12 @@ export type CustomerAddressUpdateParams = Partial<Omit<CustomerAddress, 'custome
 
 export class CustomerAddressRepo {
   async findById(id: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1`, [id]);
+    return await queryOne<DbCustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1`, [id]);
   }
 
   async findByCustomerId(customerId: string): Promise<CustomerAddress[]> {
     return (
-      (await query<CustomerAddress[]>(
+      (await query<DbCustomerAddress[]>(
         `SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
         [customerId],
       )) || []
@@ -31,20 +31,20 @@ export class CustomerAddressRepo {
   }
 
   async findDefaultByCustomerId(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefault" = true LIMIT 1`, [
+    return await queryOne<DbCustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefault" = true LIMIT 1`, [
       customerId,
     ]);
   }
 
   async findDefaultBillingByCustomerId(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefaultBilling" = true LIMIT 1`,
       [customerId],
     );
   }
 
   async findDefaultShippingByCustomerId(customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       `SELECT * FROM "customerAddress" WHERE "customerId" = $1 AND "isDefaultShipping" = true LIMIT 1`,
       [customerId],
     );
@@ -64,7 +64,7 @@ export class CustomerAddressRepo {
       await this.unsetDefaultShipping(params.customerId);
     }
 
-    const result = await queryOne<CustomerAddress>(
+    const result = await queryOne<DbCustomerAddress>(
       `INSERT INTO "customerAddress" (
         "customerId", "firstName", "lastName", "company", "addressLine1", "addressLine2",
         "city", "state", "postalCode", "country", "phone", "email", "isDefault",
@@ -139,7 +139,7 @@ export class CustomerAddressRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<CustomerAddress>(
+    return await queryOne<DbCustomerAddress>(
       `UPDATE "customerAddress" SET ${updateFields.join(', ')} WHERE "customerAddressId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -196,7 +196,7 @@ export class CustomerAddressRepo {
 
   async findActiveByCustomerId(customerId: string): Promise<CustomerAddress[]> {
     return (
-      (await query<CustomerAddress[]>(
+      (await query<DbCustomerAddress[]>(
         `SELECT * FROM "customerAddress" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
         [customerId],
       )) || []
@@ -204,7 +204,7 @@ export class CustomerAddressRepo {
   }
 
   async findActiveById(id: string, customerId: string): Promise<CustomerAddress | null> {
-    return await queryOne<CustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2`, [
+    return await queryOne<DbCustomerAddress>(`SELECT * FROM "customerAddress" WHERE "customerAddressId" = $1 AND "customerId" = $2`, [
       id,
       customerId,
     ]);

@@ -10,5 +10,3 @@ export interface OrderNote {
 }
 
 export type OrderNoteCreateParams = Omit<OrderNote, 'orderNoteId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-
-

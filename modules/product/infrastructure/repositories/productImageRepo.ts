@@ -1,9 +1,11 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductImage } from '../../../../libs/db/types';
 import { ProductImageNotFoundError, ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductImage as DbProductImage } from '../../../../libs/db/types';
+
 
 // Use ProductImage type directly from libs/db/types.ts
-export type { };
+export type {};
 
 type CreateProps = Pick<ProductImage, 'productId' | 'url' | 'position' | 'isPrimary'> &
   Partial<Pick<ProductImage, 'productVariantId' | 'alt' | 'title' | 'width' | 'height' | 'size' | 'type' | 'isVisible'>>;
@@ -18,31 +20,31 @@ const FIELD_MAP: Record<string, string> = {
 
 class ProductImageRepo {
   async findById(id: string): Promise<ProductImage | null> {
-    return queryOne<ProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productImageId" = $1`, [id]);
+    return queryOne<DbProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productImageId" = $1`, [id]);
   }
 
   async findByProductId(productId: string): Promise<ProductImage[]> {
     return (
-      (await query<ProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`, [productId])) ||
+      (await query<DbProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`, [productId])) ||
       []
     );
   }
 
   async findByVariantId(variantId: string): Promise<ProductImage[]> {
     return (
-      (await query<ProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productVariantId" = $1 ORDER BY "position" ASC`, [
+      (await query<DbProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productVariantId" = $1 ORDER BY "position" ASC`, [
         variantId,
       ])) || []
     );
   }
 
   async findPrimaryForProduct(productId: string): Promise<ProductImage | null> {
-    return queryOne<ProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 AND "isPrimary" = true`, [productId]);
+    return queryOne<DbProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 AND "isPrimary" = true`, [productId]);
   }
 
   async create(props: CreateProps): Promise<ProductImage> {
     const now = new Date();
-    const row = await queryOne<ProductImage>(
+    const row = await queryOne<DbProductImage>(
       `INSERT INTO "${Table.ProductImage}" 
        ("productId", "productVariantId", "url", "alt", "title", "position", "width", "height", "size", "type", "isPrimary", "isVisible", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
@@ -97,7 +99,7 @@ class ProductImageRepo {
     // WHERE clause
     values.push(id);
 
-    const row = await queryOne<ProductImage>(
+    const row = await queryOne<DbProductImage>(
       `UPDATE "${Table.ProductImage}" 
        SET ${setClauses.join(', ')} 
        WHERE "productImageId" = $${paramIndex} 
@@ -138,7 +140,7 @@ class ProductImageRepo {
     const now = new Date();
     await query(`UPDATE "${Table.ProductImage}" SET "isPrimary" = false, "updatedAt" = $1 WHERE "productId" = $2`, [now, image.productId]);
 
-    const row = await queryOne<ProductImage>(
+    const row = await queryOne<DbProductImage>(
       `UPDATE "${Table.ProductImage}" SET "isPrimary" = true, "updatedAt" = $1 WHERE "productImageId" = $2 RETURNING *`,
       [now, id],
     );

@@ -8,16 +8,7 @@
  * Aggregate: Membership Plan (plans, benefits, plan-benefit mappings, admin programs, storefront)
  */
 
-import {
-  findById,
-  findAll,
-  create,
-  update,
-  remove,
-  getStatistics,
-  activate,
-  deactivate,
-} from './membershipPlanRepo';
+import { findById, findAll, create, update, remove, getStatistics, activate, deactivate } from './membershipPlanRepo';
 import membershipBenefitRepo from './membershipBenefitRepo';
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 import {

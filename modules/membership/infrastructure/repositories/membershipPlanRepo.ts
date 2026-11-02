@@ -250,4 +250,3 @@ export async function getStatistics(): Promise<{
     byCycle: byCycle as Record<BillingCycle, number>,
   };
 }
-

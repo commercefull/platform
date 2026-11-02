@@ -2,6 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 import { MembershipPlanBenefitAlreadyExistsError, FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 import type { MembershipPlanBenefit } from '../../domain/repositories/MembershipRepository';
+import type { MembershipPlanBenefit as DbMembershipPlanBenefit } from '../../../../libs/db/types';
 
 export type { MembershipPlanBenefit };
 type MembershipPlanBenefitCreateParams = Omit<MembershipPlanBenefit, 'membershipPlanBenefitId' | 'createdAt' | 'updatedAt'>;
@@ -9,31 +10,51 @@ type MembershipPlanBenefitUpdateParams = Partial<
   Pick<MembershipPlanBenefit, 'isActive' | 'priority' | 'valueOverride' | 'rulesOverride' | 'notes'>
 >;
 
+function rowToBenefit(row: DbMembershipPlanBenefit): MembershipPlanBenefit {
+  return {
+    membershipPlanBenefitId: row.membershipPlanBenefitId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    planId: row.planId,
+    benefitId: row.benefitId,
+    isActive: row.isActive,
+    priority: row.priority ?? 0,
+    valueOverride: (row.valueOverride ?? undefined) as Record<string, unknown> | undefined,
+    rulesOverride: (row.rulesOverride ?? undefined) as Record<string, unknown> | undefined,
+    notes: row.notes ?? undefined,
+  };
+}
+
 class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {
-    return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [id]);
+    const row = await queryOne<DbMembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [
+      id,
+    ]);
+    return row ? rowToBenefit(row) : null;
   }
 
   async findByPlanId(planId: string, activeOnly = false): Promise<MembershipPlanBenefit[]> {
     let sql = `SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "priority" DESC`;
-    return (await query<MembershipPlanBenefit[]>(sql, [planId])) || [];
+    const rows = await query<DbMembershipPlanBenefit[]>(sql, [planId]);
+    return (rows || []).map(rowToBenefit);
   }
 
   async findByBenefitId(benefitId: string): Promise<MembershipPlanBenefit[]> {
-    return (
-      (await query<MembershipPlanBenefit[]>(`SELECT * FROM "membershipPlanBenefit" WHERE "benefitId" = $1 ORDER BY "priority" DESC`, [
-        benefitId,
-      ])) || []
+    const rows = await query<DbMembershipPlanBenefit[]>(
+      `SELECT * FROM "membershipPlanBenefit" WHERE "benefitId" = $1 ORDER BY "priority" DESC`,
+      [benefitId],
     );
+    return (rows || []).map(rowToBenefit);
   }
 
   async findByPlanAndBenefit(planId: string, benefitId: string): Promise<MembershipPlanBenefit | null> {
-    return await queryOne<MembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`, [
-      planId,
-      benefitId,
-    ]);
+    const row = await queryOne<DbMembershipPlanBenefit>(
+      `SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`,
+      [planId, benefitId],
+    );
+    return row ? rowToBenefit(row) : null;
   }
 
   async create(params: MembershipPlanBenefitCreateParams): Promise<MembershipPlanBenefit> {
@@ -45,7 +66,7 @@ class MembershipPlanBenefitRepo {
       throw new MembershipPlanBenefitAlreadyExistsError();
     }
 
-    const result = await queryOne<MembershipPlanBenefit>(
+    const result = await queryOne<DbMembershipPlanBenefit>(
       `INSERT INTO "membershipPlanBenefit" (
         "planId", "benefitId", "isActive", "priority", "valueOverride", "rulesOverride", "notes",
         "createdAt", "updatedAt"
@@ -64,7 +85,7 @@ class MembershipPlanBenefitRepo {
     );
 
     if (!result) throw new FailedToCreateMembershipError('Failed to create plan benefit');
-    return result;
+    return rowToBenefit(result);
   }
 
   async update(id: string, params: MembershipPlanBenefitUpdateParams): Promise<MembershipPlanBenefit | null> {
@@ -85,10 +106,11 @@ class MembershipPlanBenefitRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<MembershipPlanBenefit>(
+    const row = await queryOne<DbMembershipPlanBenefit>(
       `UPDATE "membershipPlanBenefit" SET ${updateFields.join(', ')} WHERE "membershipPlanBenefitId" = $${paramIndex} RETURNING *`,
       values,
     );
+    return row ? rowToBenefit(row) : null;
   }
 
   async reorder(planId: string, benefitPriorities: Array<{ benefitId: string; priority: number }>): Promise<void> {

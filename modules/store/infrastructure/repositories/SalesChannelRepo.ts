@@ -2,6 +2,7 @@ import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { SalesChannel, type SalesChannelProps, type StoreSalesChannel } from '../../domain/entities/SalesChannel';
 import type { AssignSalesChannelInput, SalesChannelRepository } from '../../domain/repositories/SalesChannelRepository';
 import { StoreValidationError } from '../../domain/errors/StoreErrors';
+import type { SalesChannel as DbSalesChannel, StoreSalesChannel as DbStoreSalesChannel } from '../../../../libs/db/types';
 
 interface SalesChannelRow {
   salesChannelId: string;
@@ -39,12 +40,12 @@ interface StoreSalesChannelRow {
 
 class SalesChannelRepo implements SalesChannelRepository {
   async findById(salesChannelId: string): Promise<SalesChannel | null> {
-    const row = await queryOne<SalesChannelRow>(`SELECT * FROM "salesChannel" WHERE "salesChannelId" = $1`, [salesChannelId]);
+    const row = await queryOne<DbSalesChannel>(`SELECT * FROM "salesChannel" WHERE "salesChannelId" = $1`, [salesChannelId]);
     return row ? this.mapChannel(row) : null;
   }
 
   async findByCode(organizationId: string, code: string): Promise<SalesChannel | null> {
-    const row = await queryOne<SalesChannelRow>(`SELECT * FROM "salesChannel" WHERE "organizationId" = $1 AND code = $2`, [
+    const row = await queryOne<DbSalesChannel>(`SELECT * FROM "salesChannel" WHERE "organizationId" = $1 AND code = $2`, [
       organizationId,
       code,
     ]);
@@ -52,12 +53,12 @@ class SalesChannelRepo implements SalesChannelRepository {
   }
 
   async findByOrganization(organizationId: string): Promise<SalesChannel[]> {
-    const rows = await query<SalesChannelRow[]>(`SELECT * FROM "salesChannel" WHERE "organizationId" = $1 ORDER BY name`, [organizationId]);
+    const rows = await query<DbSalesChannel[]>(`SELECT * FROM "salesChannel" WHERE "organizationId" = $1 ORDER BY name`, [organizationId]);
     return (rows || []).map(row => this.mapChannel(row));
   }
 
   async findAll(): Promise<SalesChannel[]> {
-    const rows = await query<SalesChannelRow[]>(`SELECT * FROM "salesChannel" ORDER BY name`, []);
+    const rows = await query<DbSalesChannel[]>(`SELECT * FROM "salesChannel" ORDER BY name`, []);
     return (rows || []).map(row => this.mapChannel(row));
   }
 
@@ -75,7 +76,7 @@ class SalesChannelRepo implements SalesChannelRepository {
   }
 
   async findAssignment(storeId: string, salesChannelId: string): Promise<StoreSalesChannel | null> {
-    const row = await queryOne<StoreSalesChannelRow>(`SELECT * FROM "storeSalesChannel" WHERE "storeId" = $1 AND "salesChannelId" = $2`, [
+    const row = await queryOne<DbStoreSalesChannel>(`SELECT * FROM "storeSalesChannel" WHERE "storeId" = $1 AND "salesChannelId" = $2`, [
       storeId,
       salesChannelId,
     ]);
@@ -83,7 +84,7 @@ class SalesChannelRepo implements SalesChannelRepository {
   }
 
   async save(channel: SalesChannel): Promise<SalesChannel> {
-    const row = await queryOne<SalesChannelRow>(
+    const row = await queryOne<DbSalesChannel>(
       `INSERT INTO "salesChannel" ("salesChannelId", "organizationId", code, name, type, status, config, metadata, "createdAt", "updatedAt")
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        ON CONFLICT ("salesChannelId") DO UPDATE SET name = EXCLUDED.name, type = EXCLUDED.type,
@@ -115,7 +116,7 @@ class SalesChannelRepo implements SalesChannelRepository {
       if (input.isDefault) {
         await tx.query(`UPDATE "storeSalesChannel" SET "isDefault" = false, "updatedAt" = now() WHERE "storeId" = $1`, [input.storeId]);
       }
-      const row = await tx.queryOne<StoreSalesChannelRow>(
+      const row = await tx.queryOne<DbStoreSalesChannel>(
         `INSERT INTO "storeSalesChannel" ("storeId", "salesChannelId", "isDefault", "isActive", settings)
          VALUES ($1,$2,$3,$4,$5) RETURNING *`,
         [input.storeId, input.salesChannelId, input.isDefault ?? false, input.isActive ?? true, input.settings ?? {}],

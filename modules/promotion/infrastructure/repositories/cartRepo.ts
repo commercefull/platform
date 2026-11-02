@@ -1,6 +1,8 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, PromotionCart } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
+import type { PromotionCart as DbPromotionCart } from '../../../../libs/db/types';
+
 
 // Use PromotionCart type directly from libs/db/types.ts
 export type { PromotionCart };
@@ -12,7 +14,7 @@ type UpdateProps = Partial<Pick<PromotionCart, 'discountAmountCents' | 'status'>
 export class PromotionCartRepo {
   async create(props: CreateProps): Promise<PromotionCart> {
     const now = new Date();
-    const row = await queryOne<PromotionCart>(
+    const row = await queryOne<DbPromotionCart>(
       `INSERT INTO "${Table.PromotionCart}" 
        ("basketId", "promotionId", "promotionCouponId", "couponCode", "discountAmountCents", "currencyCode", "status", "appliedBy", "appliedAt", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
@@ -52,7 +54,7 @@ export class PromotionCartRepo {
     }
 
     values.push(id);
-    const row = await queryOne<PromotionCart>(
+    const row = await queryOne<DbPromotionCart>(
       `UPDATE "${Table.PromotionCart}" 
        SET ${updates.join(', ')} 
        WHERE "cartPromotionId" = $${paramIndex} 
@@ -67,11 +69,11 @@ export class PromotionCartRepo {
   }
 
   async getById(id: string): Promise<PromotionCart | null> {
-    return queryOne<PromotionCart>(`SELECT * FROM "${Table.PromotionCart}" WHERE "cartPromotionId" = $1`, [id]);
+    return queryOne<DbPromotionCart>(`SELECT * FROM "${Table.PromotionCart}" WHERE "cartPromotionId" = $1`, [id]);
   }
 
   async getByBasketId(basketId: string): Promise<PromotionCart[]> {
-    return (await query<PromotionCart[]>(`SELECT * FROM "${Table.PromotionCart}" WHERE "basketId" = $1`, [basketId])) || [];
+    return (await query<DbPromotionCart[]>(`SELECT * FROM "${Table.PromotionCart}" WHERE "basketId" = $1`, [basketId])) || [];
   }
 
   async delete(id: string): Promise<boolean> {

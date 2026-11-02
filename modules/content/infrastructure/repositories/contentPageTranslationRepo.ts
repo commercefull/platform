@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentPageTranslation } from '../../../../libs/db/types';
 import { ContentValidationError, FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentPageTranslation as DbContentPageTranslation } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -41,11 +42,11 @@ export type PageTranslationUpdateParams = Partial<
 
 export class ContentPageTranslationRepo {
   async findTranslationById(id: string): Promise<ContentPageTranslation | null> {
-    return queryOne<ContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageTranslationId" = $1', [id]);
+    return queryOne<DbContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageTranslationId" = $1', [id]);
   }
 
   async findTranslationsByPageId(pageId: string): Promise<ContentPageTranslation[]> {
-    const results = await query<ContentPageTranslation[]>(
+    const results = await query<DbContentPageTranslation[]>(
       'SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 ORDER BY "createdAt" ASC',
       [pageId],
     );
@@ -53,14 +54,14 @@ export class ContentPageTranslationRepo {
   }
 
   async findTranslationByPageAndLocale(pageId: string, localeId: string): Promise<ContentPageTranslation | null> {
-    return queryOne<ContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 AND "localeId" = $2', [
+    return queryOne<DbContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 AND "localeId" = $2', [
       pageId,
       localeId,
     ]);
   }
 
   async findPublishedTranslationsByPageId(pageId: string): Promise<ContentPageTranslation[]> {
-    const results = await query<ContentPageTranslation[]>(
+    const results = await query<DbContentPageTranslation[]>(
       'SELECT * FROM "contentPageTranslation" WHERE "contentPageId" = $1 AND "isPublished" = true',
       [pageId],
     );
@@ -74,7 +75,7 @@ export class ContentPageTranslationRepo {
       throw new ContentValidationError(`Translation for page "${params.contentPageId}" and locale "${params.localeId}" already exists`);
     }
 
-    const result = await queryOne<ContentPageTranslation>(
+    const result = await queryOne<DbContentPageTranslation>(
       `INSERT INTO "contentPageTranslation"
       ("contentPageId", "localeId", "title", "slug", "summary", "content",
        "metaTitle", "metaDescription", "metaKeywords", "openGraphTitle", "openGraphDescription",
@@ -148,7 +149,7 @@ export class ContentPageTranslationRepo {
     values.push(new Date().toISOString());
     values.push(id);
 
-    const result = await queryOne<ContentPageTranslation>(
+    const result = await queryOne<DbContentPageTranslation>(
       `UPDATE "contentPageTranslation" SET ${updateFields.join(', ')} WHERE "contentPageTranslationId" = $${paramIndex} RETURNING *`,
       values,
     );

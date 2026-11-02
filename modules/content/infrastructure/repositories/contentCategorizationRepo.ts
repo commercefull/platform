@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentCategorization } from '../../../../libs/db/types';
 import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentCategorization as DbContentCategorization } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -23,11 +24,11 @@ export type CategorizationCreateParams = {
 
 export class ContentCategorizationRepo {
   async findCategorizationById(id: string): Promise<ContentCategorization | null> {
-    return queryOne<ContentCategorization>('SELECT * FROM "contentCategorization" WHERE "contentCategorizationId" = $1', [id]);
+    return queryOne<DbContentCategorization>('SELECT * FROM "contentCategorization" WHERE "contentCategorizationId" = $1', [id]);
   }
 
   async findCategorizationsByPageId(pageId: string): Promise<ContentCategorization[]> {
-    const results = await query<ContentCategorization[]>(
+    const results = await query<DbContentCategorization[]>(
       'SELECT * FROM "contentCategorization" WHERE "contentPageId" = $1 ORDER BY "isPrimary" DESC, "createdAt" ASC',
       [pageId],
     );
@@ -35,7 +36,7 @@ export class ContentCategorizationRepo {
   }
 
   async findCategorizationsByCategoryId(categoryId: string, limit: number = 50, offset: number = 0): Promise<ContentCategorization[]> {
-    const results = await query<ContentCategorization[]>(
+    const results = await query<DbContentCategorization[]>(
       'SELECT * FROM "contentCategorization" WHERE "categoryId" = $1 ORDER BY "isPrimary" DESC, "createdAt" ASC LIMIT $2 OFFSET $3',
       [categoryId, limit, offset],
     );
@@ -43,7 +44,7 @@ export class ContentCategorizationRepo {
   }
 
   async findPrimaryCategory(pageId: string): Promise<ContentCategorization | null> {
-    return queryOne<ContentCategorization>(
+    return queryOne<DbContentCategorization>(
       'SELECT * FROM "contentCategorization" WHERE "contentPageId" = $1 AND "isPrimary" = true LIMIT 1',
       [pageId],
     );
@@ -55,7 +56,7 @@ export class ContentCategorizationRepo {
       await query('UPDATE "contentCategorization" SET "isPrimary" = false WHERE "contentPageId" = $1', [params.contentPageId]);
     }
 
-    const result = await queryOne<ContentCategorization>(
+    const result = await queryOne<DbContentCategorization>(
       `INSERT INTO "contentCategorization" ("contentPageId", "categoryId", "isPrimary")
       VALUES ($1, $2, $3)
       RETURNING *`,
@@ -73,7 +74,7 @@ export class ContentCategorizationRepo {
     // Clear existing primary
     await query('UPDATE "contentCategorization" SET "isPrimary" = false WHERE "contentPageId" = $1', [pageId]);
 
-    const result = await queryOne<ContentCategorization>(
+    const result = await queryOne<DbContentCategorization>(
       'UPDATE "contentCategorization" SET "isPrimary" = true, "updatedAt" = $1 WHERE "contentCategorizationId" = $2 AND "contentPageId" = $3 RETURNING *',
       [new Date().toISOString(), categorizationId, pageId],
     );

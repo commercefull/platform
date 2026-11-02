@@ -1,27 +1,31 @@
 import { query, queryOne } from '../../../../libs/db';
+import type { NotificationWebhook as DbNotificationWebhook } from '../../../../libs/db/types';
+import type { NotificationWebhook } from '../../domain/repositories/NotificationWebhookRepository';
 
-interface NotificationWebhook {
-  notificationWebhookId: string;
-  organizationId?: string;
-  url: string;
-  secret?: string;
-  events: string[];
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+function rowToWebhook(row: DbNotificationWebhook): NotificationWebhook {
+  return {
+    notificationWebhookId: row.notificationWebhookId,
+    url: row.url,
+    secret: row.secret ?? undefined,
+    events: Array.isArray(row.events) ? (row.events as string[]) : [],
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
 async function findActive(event: string): Promise<NotificationWebhook[]> {
-  return (
-    (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`, [
-      JSON.stringify([event]),
-    ])) || []
+  const rows = await query<DbNotificationWebhook[]>(
+    `SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`,
+    [JSON.stringify([event])],
   );
+  return (rows || []).map(rowToWebhook);
 }
 
 async function findByMerchant(_organizationId?: string): Promise<NotificationWebhook[]> {
   // notificationWebhook has no organizationId column — webhooks are global.
-  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
+  const rows = await query<DbNotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`);
+  return (rows || []).map(rowToWebhook);
 }
 
 async function create(
@@ -34,11 +38,11 @@ async function create(
   } catch {
     /* keep default name */
   }
-  return queryOne<NotificationWebhook>(
+  return queryOne<DbNotificationWebhook>(
     `INSERT INTO "notificationWebhook" (name, url, secret, events, "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [name, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
-  );
+  ).then((row) => (row ? rowToWebhook(row) : null));
 }
 
 async function deactivate(notificationWebhookId: string): Promise<void> {
@@ -49,7 +53,8 @@ async function deactivate(notificationWebhookId: string): Promise<void> {
 }
 
 async function findAll(): Promise<NotificationWebhook[]> {
-  return (await query<NotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`)) || [];
+  const rows = await query<DbNotificationWebhook[]>(`SELECT * FROM "notificationWebhook" ORDER BY "createdAt" DESC`);
+  return (rows || []).map(rowToWebhook);
 }
 
 export default { findActive, findByMerchant, create, deactivate, findAll };

@@ -25,5 +25,3 @@ export interface OrderDiscount {
 }
 
 export type OrderDiscountCreateParams = Omit<OrderDiscount, 'orderDiscountId' | 'createdAt' | 'updatedAt'>;
-
-

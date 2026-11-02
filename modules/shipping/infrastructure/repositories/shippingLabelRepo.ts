@@ -7,6 +7,36 @@ import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import type { ShippingLabel, CreateShippingLabelInput } from '../../domain/repositories/ShippingLabelRepository';
+import type { ShippingLabel as DbShippingLabel } from '../../../../libs/db/types';
+
+function rowToLabel(row: DbShippingLabel): ShippingLabel {
+  return {
+    shippingLabelId: row.shippingLabelId,
+    shippingCarrierId: row.shippingCarrierId,
+    carrierName: row.carrierName ?? undefined,
+    carrierService: row.carrierService ?? undefined,
+    trackingNumber: row.trackingNumber,
+    labelUrl: row.labelUrl ?? undefined,
+    labelFormat: row.labelFormat ?? 'PDF',
+    status: row.status ?? 'created',
+    orderId: row.orderId ?? undefined,
+    fulfillmentId: row.fulfillmentId ?? undefined,
+    shipFromName: row.shipFromName ?? undefined,
+    shipToName: row.shipToName ?? undefined,
+    shipToAddressLine1: row.shipToAddressLine1 ?? undefined,
+    shipToCity: row.shipToCity ?? undefined,
+    shipToState: row.shipToState ?? undefined,
+    shipToPostalCode: row.shipToPostalCode ?? undefined,
+    shipToCountry: row.shipToCountry ?? undefined,
+    weight: row.weight != null ? Number(row.weight) : undefined,
+    dimensions: (row.dimensions ?? undefined) as Record<string, unknown> | undefined,
+    shippingCost: row.shippingCostCents ?? undefined,
+    voidReason: row.voidReason ?? undefined,
+    voidedAt: row.voidedAt ?? undefined,
+    createdAt: row.createdAt as Date,
+    updatedAt: row.updatedAt as Date,
+  };
+}
 
 async function create(input: CreateShippingLabelInput): Promise<ShippingLabel> {
   const id = generateUUID();
@@ -23,7 +53,7 @@ async function create(input: CreateShippingLabelInput): Promise<ShippingLabel> {
     RETURNING *
   `;
 
-  const result = await query<ShippingLabel[]>(sql, [
+  const result = await query<DbShippingLabel[]>(sql, [
     id,
     input.shippingCarrierId,
     input.carrierName || null,
@@ -51,43 +81,46 @@ async function create(input: CreateShippingLabelInput): Promise<ShippingLabel> {
   if (!result || result.length === 0) {
     throw new FailedToCreateShippingEntityError('Failed to create shipping label');
   }
-  return result[0];
+  return rowToLabel(result[0]);
 }
 
 async function findById(shippingLabelId: string): Promise<ShippingLabel | null> {
-  return queryOne<ShippingLabel>('SELECT * FROM "shippingLabel" WHERE "shippingLabelId" = $1', [shippingLabelId]);
+  const row = await queryOne<DbShippingLabel>('SELECT * FROM "shippingLabel" WHERE "shippingLabelId" = $1', [shippingLabelId]);
+  return row ? rowToLabel(row) : null;
 }
 
 async function findByTrackingNumber(trackingNumber: string): Promise<ShippingLabel | null> {
-  return queryOne<ShippingLabel>('SELECT * FROM "shippingLabel" WHERE "trackingNumber" = $1', [trackingNumber]);
+  const row = await queryOne<DbShippingLabel>('SELECT * FROM "shippingLabel" WHERE "trackingNumber" = $1', [trackingNumber]);
+  return row ? rowToLabel(row) : null;
 }
 
 async function findByOrderId(orderId: string): Promise<ShippingLabel[]> {
-  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
-  return result || [];
+  const result = await query<DbShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
+  return (result || []).map(rowToLabel);
 }
 
 async function findByFulfillmentId(fulfillmentId: string): Promise<ShippingLabel[]> {
-  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" DESC', [
+  const result = await query<DbShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" DESC', [
     fulfillmentId,
   ]);
-  return result || [];
+  return (result || []).map(rowToLabel);
 }
 
 async function voidLabel(shippingLabelId: string, reason?: string): Promise<ShippingLabel | null> {
   const now = new Date();
-  return queryOne<ShippingLabel>(
+  const row = await queryOne<DbShippingLabel>(
     `UPDATE "shippingLabel" SET "status" = 'voided', "voidReason" = $1, "voidedAt" = $2, "updatedAt" = $3 WHERE "shippingLabelId" = $4 AND "status" = 'created' RETURNING *`,
     [reason || null, now, now, shippingLabelId],
   );
+  return row ? rowToLabel(row) : null;
 }
 
 async function findAll(limit = 50, offset = 0): Promise<ShippingLabel[]> {
-  const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
+  const result = await query<DbShippingLabel[]>('SELECT * FROM "shippingLabel" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
     limit,
     offset,
   ]);
-  return result || [];
+  return (result || []).map(rowToLabel);
 }
 
 export default { create, findById, findByTrackingNumber, findByOrderId, findByFulfillmentId, voidLabel, findAll };

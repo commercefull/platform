@@ -28,5 +28,3 @@ export interface OrderPayment {
 }
 
 export type OrderPaymentCreateParams = Omit<OrderPayment, 'orderPaymentId' | 'createdAt' | 'updatedAt'>;
-
-

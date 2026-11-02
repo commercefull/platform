@@ -30,18 +30,20 @@ export interface ProductQaPort {
 // Product Q&A Answers
 // ============================================================================
 
-export type ProductQaAnswerStatus = 'pending' | 'approved' | 'rejected';
+export type ProductQaAnswerStatus = 'pending' | 'answered' | 'unanswered';
 
 export interface ProductQaAnswer {
   productQaAnswerId: string;
   createdAt: Date;
   updatedAt: Date;
-  productQaId: string;
+  questionId: string;
   customerId?: string | null;
-  organizationId?: string | null;
+  responderName?: string | null;
   answer: string;
   status: ProductQaAnswerStatus;
-  isOfficial: boolean;
+  isVerified: boolean;
+  helpfulCount: number;
+  unhelpfulCount: number;
 }
 
 export interface ProductQaAnswerPort {
@@ -56,9 +58,8 @@ export interface ProductCategoryRow {
   productCategoryId: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
   name: string;
-  slug: string;
+  slug: string | null;
   description?: string | null;
   parentId?: string | null;
   position: number;
@@ -104,9 +105,8 @@ export interface ProductTag {
   productTagId: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
   name: string;
-  slug: string;
+  slug: string | null;
   description?: string | null;
 }
 
@@ -324,10 +324,13 @@ export interface ProductReviewMedia {
   productReviewMediaId: string;
   createdAt: Date;
   updatedAt: Date;
-  productReviewId: string;
+  reviewId: string;
   url: string;
   type: string;
-  position: number;
+  filename?: string | null;
+  filesize?: number | null;
+  mimeType?: string | null;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 export type ProductReviewMediaCreateParams = Omit<ProductReviewMedia, 'productReviewMediaId' | 'createdAt' | 'updatedAt'>;
@@ -433,7 +436,6 @@ export interface ProductVariantPort {
   delete(variantId: string): Promise<void>;
   findAll(filters: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ProductVariantRow>>;
 }
-
 
 // ============================================================================
 // Dynamic Attributes

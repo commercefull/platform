@@ -17,12 +17,12 @@ type TaxCalculationLineUpdateParams = Partial<
 
 class TaxCalculationLineRepo {
   async findById(id: string): Promise<TaxCalculationLine | null> {
-    return await queryOne<TaxCalculationLine>(`SELECT * FROM "taxCalculationLine" WHERE "taxCalculationLineId" = $1`, [id]);
+    return await queryOne<DbTaxCalculationLine>(`SELECT * FROM "taxCalculationLine" WHERE "taxCalculationLineId" = $1`, [id]);
   }
 
   async findByCalculation(calculationId: string): Promise<TaxCalculationLine[]> {
     return (
-      (await query<TaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "calculationId" = $1 ORDER BY "createdAt" ASC`, [
+      (await query<DbTaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "calculationId" = $1 ORDER BY "createdAt" ASC`, [
         calculationId,
       ])) || []
     );
@@ -30,7 +30,7 @@ class TaxCalculationLineRepo {
 
   async findByLineItem(lineItemId: string): Promise<TaxCalculationLine[]> {
     return (
-      (await query<TaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "lineItemId" = $1 ORDER BY "createdAt" DESC`, [
+      (await query<DbTaxCalculationLine[]>(`SELECT * FROM "taxCalculationLine" WHERE "lineItemId" = $1 ORDER BY "createdAt" DESC`, [
         lineItemId,
       ])) || []
     );
@@ -38,7 +38,7 @@ class TaxCalculationLineRepo {
 
   async create(params: TaxCalculationLineCreateParams): Promise<TaxCalculationLine> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxCalculationLine>(
+    const result = await queryOne<DbTaxCalculationLine>(
       `INSERT INTO "taxCalculationLine" (
         "calculationId", "lineItemId", "lineItemType", "productId", "productVariantId", "sku",
         "name", "quantity", "unitPriceCents", "lineTotalCents", "discountAmountCents", "taxableAmountCents",
@@ -85,7 +85,7 @@ class TaxCalculationLineRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxCalculationLine>(
+    return await queryOne<DbTaxCalculationLine>(
       `UPDATE "taxCalculationLine" SET ${updateFields.join(', ')} WHERE "taxCalculationLineId" = $${paramIndex} RETURNING *`,
       values,
     );

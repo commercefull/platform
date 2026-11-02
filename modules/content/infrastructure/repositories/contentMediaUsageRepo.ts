@@ -6,6 +6,7 @@
 import { queryOne, query } from '../../../../libs/db';
 import { ContentMediaUsage } from '../../../../libs/db/types';
 import { FailedToCreateContentError } from '../../domain/errors/ContentErrors';
+import type { ContentMediaUsage as DbContentMediaUsage } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -25,18 +26,18 @@ export type MediaUsageCreateParams = {
 
 export class ContentMediaUsageRepo {
   async findUsageById(id: string): Promise<ContentMediaUsage | null> {
-    return queryOne<ContentMediaUsage>('SELECT * FROM "contentMediaUsage" WHERE "contentMediaUsageId" = $1', [id]);
+    return queryOne<DbContentMediaUsage>('SELECT * FROM "contentMediaUsage" WHERE "contentMediaUsageId" = $1', [id]);
   }
 
   async findUsageByMediaId(mediaId: string): Promise<ContentMediaUsage[]> {
-    const results = await query<ContentMediaUsage[]>('SELECT * FROM "contentMediaUsage" WHERE "mediaId" = $1 ORDER BY "createdAt" DESC', [
+    const results = await query<DbContentMediaUsage[]>('SELECT * FROM "contentMediaUsage" WHERE "mediaId" = $1 ORDER BY "createdAt" DESC', [
       mediaId,
     ]);
     return results || [];
   }
 
   async findUsageByEntity(entityType: string, entityId: string): Promise<ContentMediaUsage[]> {
-    const results = await query<ContentMediaUsage[]>(
+    const results = await query<DbContentMediaUsage[]>(
       'SELECT * FROM "contentMediaUsage" WHERE "entityType" = $1 AND "entityId" = $2 ORDER BY "sortOrder" ASC, "createdAt" DESC',
       [entityType, entityId],
     );
@@ -44,7 +45,7 @@ export class ContentMediaUsageRepo {
   }
 
   async createUsage(params: MediaUsageCreateParams): Promise<ContentMediaUsage> {
-    const result = await queryOne<ContentMediaUsage>(
+    const result = await queryOne<DbContentMediaUsage>(
       `INSERT INTO "contentMediaUsage" ("mediaId", "entityType", "entityId", "field", "sortOrder")
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT ("mediaId", "entityType", "entityId", "field") DO UPDATE SET "sortOrder" = EXCLUDED."sortOrder"

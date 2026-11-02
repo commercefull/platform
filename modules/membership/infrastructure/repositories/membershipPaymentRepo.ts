@@ -13,12 +13,12 @@ type MembershipPaymentUpdateParams = Partial<Pick<MembershipPayment, 'status' | 
 
 class MembershipPaymentRepo {
   async findById(id: string): Promise<MembershipPayment | null> {
-    return await queryOne<MembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "membershipPaymentId" = $1`, [id]);
+    return await queryOne<DbMembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "membershipPaymentId" = $1`, [id]);
   }
 
   async findBySubscriptionId(subscriptionId: string): Promise<MembershipPayment[]> {
     return (
-      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "subscriptionId" = $1 ORDER BY "paymentDate" DESC`, [
+      (await query<DbMembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "subscriptionId" = $1 ORDER BY "paymentDate" DESC`, [
         subscriptionId,
       ])) || []
     );
@@ -26,16 +26,16 @@ class MembershipPaymentRepo {
 
   async findByCustomerId(customerId: string, limit = 50): Promise<MembershipPayment[]> {
     return (
-      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "customerId" = $1 ORDER BY "paymentDate" DESC LIMIT $2`, [
-        customerId,
-        limit,
-      ])) || []
+      (await query<DbMembershipPayment[]>(
+        `SELECT * FROM "membershipPayment" WHERE "customerId" = $1 ORDER BY "paymentDate" DESC LIMIT $2`,
+        [customerId, limit],
+      )) || []
     );
   }
 
   async findByStatus(status: PaymentStatus, limit = 100): Promise<MembershipPayment[]> {
     return (
-      (await query<MembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "status" = $1 ORDER BY "paymentDate" DESC LIMIT $2`, [
+      (await query<DbMembershipPayment[]>(`SELECT * FROM "membershipPayment" WHERE "status" = $1 ORDER BY "paymentDate" DESC LIMIT $2`, [
         status,
         limit,
       ])) || []
@@ -43,12 +43,12 @@ class MembershipPaymentRepo {
   }
 
   async findByTransactionId(transactionId: string): Promise<MembershipPayment | null> {
-    return await queryOne<MembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "transactionId" = $1`, [transactionId]);
+    return await queryOne<DbMembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "transactionId" = $1`, [transactionId]);
   }
 
   async findByDateRange(startDate: string, endDate: string): Promise<MembershipPayment[]> {
     return (
-      (await query<MembershipPayment[]>(
+      (await query<DbMembershipPayment[]>(
         `SELECT * FROM "membershipPayment" WHERE "paymentDate" BETWEEN $1 AND $2 ORDER BY "paymentDate" DESC`,
         [startDate, endDate],
       )) || []
@@ -58,7 +58,7 @@ class MembershipPaymentRepo {
   async create(params: MembershipPaymentCreateParams): Promise<MembershipPayment> {
     const now = unixTimestamp();
 
-    const result = await queryOne<MembershipPayment>(
+    const result = await queryOne<DbMembershipPayment>(
       `INSERT INTO "membershipPayment" (
         "subscriptionId", "customerId", "amountCents", "currencyCode", "paymentDate", "status", "paymentType",
         "paymentMethod", "transactionId", "billingPeriodStart", "billingPeriodEnd", "notes",
@@ -103,7 +103,7 @@ class MembershipPaymentRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<MembershipPayment>(
+    return await queryOne<DbMembershipPayment>(
       `UPDATE "membershipPayment" SET ${updateFields.join(', ')} WHERE "membershipPaymentId" = $${paramIndex} RETURNING *`,
       values,
     );

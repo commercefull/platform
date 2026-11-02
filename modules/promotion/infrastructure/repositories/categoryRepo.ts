@@ -1,6 +1,8 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, PromotionCategory } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
+import type { PromotionCategory as DbPromotionCategory } from '../../../../libs/db/types';
+
 
 // Use PromotionCategory type directly from libs/db/types.ts
 export type { PromotionCategory };
@@ -17,7 +19,7 @@ type UpdateProps = Partial<Omit<CreateProps, 'productCategoryId' | 'promotionId'
 export class PromotionCategoryRepo {
   async create(props: CreateProps): Promise<PromotionCategory> {
     const now = new Date();
-    const row = await queryOne<PromotionCategory>(
+    const row = await queryOne<DbPromotionCategory>(
       `INSERT INTO "${Table.PromotionCategory}" 
        ("productCategoryId", "promotionId", "displayOrder", "bannerText", "bannerColor", "bannerBackgroundColor", "bannerImageUrl", "isDisplayedOnCategoryPage", "isDisplayedOnProductPage", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
@@ -57,7 +59,7 @@ export class PromotionCategoryRepo {
     }
 
     values.push(id);
-    const row = await queryOne<PromotionCategory>(
+    const row = await queryOne<DbPromotionCategory>(
       `UPDATE "${Table.PromotionCategory}" 
        SET ${updates.join(', ')} 
        WHERE "categoryPromotionId" = $${paramIndex} 
@@ -72,22 +74,22 @@ export class PromotionCategoryRepo {
   }
 
   async getById(id: string): Promise<PromotionCategory | null> {
-    return queryOne<PromotionCategory>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "categoryPromotionId" = $1`, [id]);
+    return queryOne<DbPromotionCategory>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "categoryPromotionId" = $1`, [id]);
   }
 
   async getByCategoryId(categoryId: string): Promise<PromotionCategory[]> {
     return (
-      (await query<PromotionCategory[]>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "productCategoryId" = $1`, [categoryId])) || []
+      (await query<DbPromotionCategory[]>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "productCategoryId" = $1`, [categoryId])) || []
     );
   }
 
   async getByPromotionId(promotionId: string): Promise<PromotionCategory[]> {
-    return (await query<PromotionCategory[]>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "promotionId" = $1`, [promotionId])) || [];
+    return (await query<DbPromotionCategory[]>(`SELECT * FROM "${Table.PromotionCategory}" WHERE "promotionId" = $1`, [promotionId])) || [];
   }
 
   async getActivePromotions(): Promise<PromotionCategory[]> {
     return (
-      (await query<PromotionCategory[]>(
+      (await query<DbPromotionCategory[]>(
         `SELECT cp.* FROM "${Table.PromotionCategory}" cp
        INNER JOIN "${Table.Promotion}" p ON cp."promotionId" = p."promotionId"
        WHERE p."isActive" = true AND p."deletedAt" IS NULL

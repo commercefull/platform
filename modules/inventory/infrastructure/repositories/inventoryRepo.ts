@@ -87,7 +87,7 @@ class InventoryRepo {
 
   async findLocationById(inventoryLocationId: string): Promise<InventoryLocation | null> {
     const sql = `SELECT * FROM "inventoryLocation" WHERE "inventoryLocationId" = $1`;
-    return await queryOne<InventoryLocation>(sql, [inventoryLocationId]);
+    return await queryOne<DbInventoryLocation>(sql, [inventoryLocationId]);
   }
 
   async findLocationBySku(sku: string, distributionWarehouseId?: string): Promise<InventoryLocation | null> {
@@ -100,18 +100,18 @@ class InventoryRepo {
     }
 
     sql += ` LIMIT 1`;
-    return await queryOne<InventoryLocation>(sql, params);
+    return await queryOne<DbInventoryLocation>(sql, params);
   }
 
   async findLocationsByProductId(productId: string): Promise<InventoryLocation[]> {
     const sql = `SELECT * FROM "inventoryLocation" WHERE "productId" = $1 ORDER BY "createdAt" DESC`;
-    const results = await query<InventoryLocation[]>(sql, [productId]);
+    const results = await query<DbInventoryLocation[]>(sql, [productId]);
     return results || [];
   }
 
   async findLocationsByWarehouseId(distributionWarehouseId: string): Promise<InventoryLocation[]> {
     const sql = `SELECT * FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 ORDER BY "sku" ASC`;
-    const results = await query<InventoryLocation[]>(sql, [distributionWarehouseId]);
+    const results = await query<DbInventoryLocation[]>(sql, [distributionWarehouseId]);
     return results || [];
   }
 
@@ -155,7 +155,7 @@ class InventoryRepo {
     sql += ` ORDER BY "updatedAt" DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    const results = await query<InventoryLocation[]>(sql, params);
+    const results = await query<DbInventoryLocation[]>(sql, params);
     return results || [];
   }
 
@@ -165,13 +165,13 @@ class InventoryRepo {
       WHERE "availableQuantity" <= COALESCE("minimumStockLevel", 0)
       ORDER BY "availableQuantity" ASC
     `;
-    const results = await query<InventoryLocation[]>(sql, []);
+    const results = await query<DbInventoryLocation[]>(sql, []);
     return results || [];
   }
 
   async findOutOfStockLocations(): Promise<InventoryLocation[]> {
     const sql = `SELECT * FROM "inventoryLocation" WHERE "availableQuantity" <= 0 ORDER BY "sku" ASC`;
-    const results = await query<InventoryLocation[]>(sql, []);
+    const results = await query<DbInventoryLocation[]>(sql, []);
     return results || [];
   }
 
@@ -188,7 +188,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [
+    const result = await queryOne<DbInventoryLocation>(sql, [
       input.distributionWarehouseId,
       input.distributionWarehouseBinId || null,
       input.productId,
@@ -270,7 +270,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, params);
+    const result = await queryOne<DbInventoryLocation>(sql, params);
     if (!result) {
       throw new InventoryLocationNotFoundError(inventoryLocationId);
     }
@@ -334,7 +334,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantityChange, new Date()]);
+    const result = await queryOne<DbInventoryLocation>(sql, [inventoryLocationId, quantityChange, new Date()]);
 
     if (!result) {
       throw new InventoryLocationNotFoundError(inventoryLocationId);
@@ -354,7 +354,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
+    const result = await queryOne<DbInventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
       throw new InsufficientStockError(inventoryLocationId, quantity, 0);
@@ -374,7 +374,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
+    const result = await queryOne<DbInventoryLocation>(sql, [inventoryLocationId, quantity, new Date()]);
 
     if (!result) {
       throw new InventoryLocationNotFoundError(inventoryLocationId);
@@ -395,7 +395,7 @@ class InventoryRepo {
 
   async findTransactionById(inventoryTransactionId: string): Promise<InventoryTransaction | null> {
     const sql = `SELECT * FROM "inventoryTransaction" WHERE "inventoryTransactionId" = $1`;
-    return await queryOne<InventoryTransaction>(sql, [inventoryTransactionId]);
+    return await queryOne<DbInventoryTransaction>(sql, [inventoryTransactionId]);
   }
 
   async findTransactionsByProductId(productId: string, limit: number = 50): Promise<InventoryTransaction[]> {
@@ -405,7 +405,7 @@ class InventoryRepo {
       ORDER BY "createdAt" DESC 
       LIMIT $2
     `;
-    const results = await query<InventoryTransaction[]>(sql, [productId, limit]);
+    const results = await query<DbInventoryTransaction[]>(sql, [productId, limit]);
     return results || [];
   }
 
@@ -416,7 +416,7 @@ class InventoryRepo {
       ORDER BY "createdAt" DESC 
       LIMIT $2
     `;
-    const results = await query<InventoryTransaction[]>(sql, [distributionWarehouseId, limit]);
+    const results = await query<DbInventoryTransaction[]>(sql, [distributionWarehouseId, limit]);
     return results || [];
   }
 
@@ -434,7 +434,7 @@ class InventoryRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<InventoryTransaction>(sql, [
+    const result = await queryOne<DbInventoryTransaction>(sql, [
       input.typeId,
       input.distributionWarehouseId,
       input.distributionWarehouseBinId || null,
@@ -468,12 +468,12 @@ class InventoryRepo {
 
   async findTransactionTypeByCode(code: string): Promise<InventoryTransactionType | null> {
     const sql = `SELECT * FROM "inventoryTransactionType" WHERE "code" = $1`;
-    return await queryOne<InventoryTransactionType>(sql, [code]);
+    return await queryOne<DbInventoryTransactionType>(sql, [code]);
   }
 
   async findAllTransactionTypes(): Promise<InventoryTransactionType[]> {
     const sql = `SELECT * FROM "inventoryTransactionType" ORDER BY "name" ASC`;
-    const results = await query<InventoryTransactionType[]>(sql, []);
+    const results = await query<DbInventoryTransactionType[]>(sql, []);
     return results || [];
   }
 
@@ -494,7 +494,7 @@ class InventoryRepo {
       params.push(variantId);
     }
 
-    const locations = await query<InventoryLocation[]>(sql, params);
+    const locations = await query<DbInventoryLocation[]>(sql, params);
     const locationList = locations || [];
 
     const totalAvailable = locationList.reduce((sum, loc) => sum + loc.availableQuantity, 0);
@@ -566,7 +566,7 @@ class InventoryRepo {
 
   async findLevelById(inventoryLevelId: string): Promise<InventoryLevel | null> {
     const sql = `SELECT * FROM "inventoryLevel" WHERE "inventoryLevelId" = $1`;
-    return await queryOne<InventoryLevel>(sql, [inventoryLevelId]);
+    return await queryOne<DbInventoryLevel>(sql, [inventoryLevelId]);
   }
 
   async findLevelByProductAndWarehouse(productId: string, distributionWarehouseId: string): Promise<InventoryLevel | null> {
@@ -574,7 +574,7 @@ class InventoryRepo {
       SELECT * FROM "inventoryLevel" 
       WHERE "productId" = $1 AND "distributionWarehouseId" = $2
     `;
-    return await queryOne<InventoryLevel>(sql, [productId, distributionWarehouseId]);
+    return await queryOne<DbInventoryLevel>(sql, [productId, distributionWarehouseId]);
   }
 
   // ==========================================================================

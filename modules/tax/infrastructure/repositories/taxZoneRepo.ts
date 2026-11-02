@@ -23,22 +23,22 @@ type TaxZoneUpdateParams = Partial<Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'up
 
 class TaxZoneRepo {
   async findById(id: string): Promise<TaxZone | null> {
-    return await queryOne<TaxZone>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
+    return await queryOne<DbTaxZone>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
   }
 
   async findByCode(code: string): Promise<TaxZone | null> {
-    return await queryOne<TaxZone>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
+    return await queryOne<DbTaxZone>(`SELECT * FROM "taxZone" WHERE "code" = $1`, [code]);
   }
 
   async findDefault(): Promise<TaxZone | null> {
-    return await queryOne<TaxZone>(`SELECT * FROM "taxZone" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
+    return await queryOne<DbTaxZone>(`SELECT * FROM "taxZone" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
   }
 
   async findAll(activeOnly = false): Promise<TaxZone[]> {
     let sql = `SELECT * FROM "taxZone"`;
     if (activeOnly) sql += ` WHERE "isActive" = true`;
     sql += ` ORDER BY "isDefault" DESC, "name" ASC`;
-    return (await query<TaxZone[]>(sql)) || [];
+    return (await query<DbTaxZone[]>(sql)) || [];
   }
 
   async create(params: TaxZoneCreateParams): Promise<TaxZone> {
@@ -48,7 +48,7 @@ class TaxZoneRepo {
       await query(`UPDATE "taxZone" SET "isDefault" = false, "updatedAt" = $1 WHERE "isDefault" = true`, [now]);
     }
 
-    const result = await queryOne<TaxZone>(
+    const result = await queryOne<DbTaxZone>(
       `INSERT INTO "taxZone" (
         "name", "code", "description", "isDefault", "countries", "states", 
         "postcodes", "cities", "isActive", "createdAt", "updatedAt"
@@ -99,7 +99,7 @@ class TaxZoneRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxZone>(
+    return await queryOne<DbTaxZone>(
       `UPDATE "taxZone" SET ${updateFields.join(', ')} WHERE "taxZoneId" = $${paramIndex} RETURNING *`,
       values,
     );

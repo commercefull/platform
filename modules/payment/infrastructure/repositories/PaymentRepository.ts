@@ -19,10 +19,14 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
+import type { PaymentSettings as DbPaymentSettings, PaymentWebhook as DbPaymentWebhook } from '../../../../libs/db/types';
+
 
 // Maps repository-facing field names onto the actual storedPaymentMethod schema
 // (e.g. "paymentMethod" -> type, "token" -> providerToken).
 const STORED_METHOD_COLUMNS = `"storedPaymentMethodId", "customerId", "paymentMethod" AS type, provider, token AS "providerToken", "lastFour" AS last4, "cardType" AS brand, NULLIF("expiryMonth", '')::int AS "expiryMonth", NULLIF("expiryYear", '')::int AS "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt"`;
+
+type StoredPaymentMethodRow = StoredPaymentMethod;
 
 export class PaymentRepo implements IPaymentRepository {
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
@@ -422,8 +426,34 @@ export class PaymentRepo implements IPaymentRepository {
   // Settings
   // ==========================================================================
 
+  private rowToSettings(row: DbPaymentSettings): PaymentSettings {
+    return {
+      ...row,
+      threeDSecureSettings: (row.threeDSecureSettings ?? undefined) as Record<string, unknown> | undefined,
+      fraudDetectionSettings: (row.fraudDetectionSettings ?? undefined) as Record<string, unknown> | undefined,
+      receiptSettings: (row.receiptSettings ?? undefined) as Record<string, unknown> | undefined,
+      paymentFormCustomization: (row.paymentFormCustomization ?? undefined) as Record<string, unknown> | undefined,
+    };
+  }
+
+  private rowToWebhook(row: DbPaymentWebhook): PaymentWebhook {
+    return {
+      paymentWebhookId: row.paymentWebhookId,
+      externalId: row.externalId as string,
+      provider: row.provider,
+      eventType: row.eventType,
+      payload: (row.payload ?? {}) as Record<string, unknown>,
+      processedAt: row.processedAt ?? undefined,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  }
+
   async findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
-    return queryOne<PaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [organizationId]);
+    const row = await queryOne<DbPaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [
+      organizationId,
+    ]);
+    return row ? this.rowToSettings(row) : null;
   }
 
   async upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
@@ -442,17 +472,19 @@ export class PaymentRepo implements IPaymentRepository {
     ];
     const updateSet = fields.length > 0 ? `${fields.map(f => `"${f}" = EXCLUDED."${f}"`).join(', ')}, ` : '';
 
-    return queryOne<PaymentSettings>(
+    const row = await queryOne<DbPaymentSettings>(
       `INSERT INTO "paymentSettings" (${columns.join(', ')})
        VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
        ON CONFLICT ("organizationId") DO UPDATE SET ${updateSet}"updatedAt" = $${values.length}
        RETURNING *`,
       values,
     );
+    return row ? this.rowToSettings(row) : null;
   }
 
   async findAllSettings(): Promise<PaymentSettings[]> {
-    return (await query<PaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`)) || [];
+    const rows = await query<DbPaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`);
+    return (rows || []).map((r) => this.rowToSettings(r));
   }
 
   // ==========================================================================
@@ -460,24 +492,27 @@ export class PaymentRepo implements IPaymentRepository {
   // ==========================================================================
 
   async findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null> {
-    return queryOne<PaymentWebhook>(`SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`, [externalId]);
+    const row = await queryOne<DbPaymentWebhook>(`SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`, [externalId]);
+    return row ? this.rowToWebhook(row) : null;
   }
 
   async createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null> {
     const now = new Date();
-    return queryOne<PaymentWebhook>(
+    const row = await queryOne<DbPaymentWebhook>(
       `INSERT INTO "paymentWebhook" ("externalId", provider, "eventType", payload, "processedAt", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [params.externalId, params.provider, params.eventType, JSON.stringify(params.payload), params.processedAt || null, now, now],
     );
+    return row ? this.rowToWebhook(row) : null;
   }
 
   async markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null> {
     const now = new Date();
-    return queryOne<PaymentWebhook>(
+    const row = await queryOne<DbPaymentWebhook>(
       `UPDATE "paymentWebhook" SET "processedAt" = $1, "updatedAt" = $1 WHERE "paymentWebhookId" = $2 RETURNING *`,
       [now, paymentWebhookId],
     );
+    return row ? this.rowToWebhook(row) : null;
   }
 
   // ==========================================================================
@@ -486,7 +521,7 @@ export class PaymentRepo implements IPaymentRepository {
 
   async findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
     return (
-      (await query<StoredPaymentMethod[]>(
+      (await query<StoredPaymentMethodRow[]>(
         `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
         [customerId],
       )) || []
@@ -494,14 +529,14 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethod>(`SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`, [
+    return queryOne<StoredPaymentMethodRow>(`SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`, [
       storedPaymentMethodId,
     ]);
   }
 
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
     const now = new Date();
-    return queryOne<StoredPaymentMethod>(
+    return queryOne<StoredPaymentMethodRow>(
       `INSERT INTO "storedPaymentMethod" ("customerId", "paymentMethod", provider, token, "lastFour", "cardType", "expiryMonth", "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10, $11) RETURNING ${STORED_METHOD_COLUMNS}`,
       [
@@ -523,7 +558,7 @@ export class PaymentRepo implements IPaymentRepository {
   async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
     const now = new Date();
     await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2`, [now, customerId]);
-    return queryOne<StoredPaymentMethod>(
+    return queryOne<StoredPaymentMethodRow>(
       `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 AND "customerId" = $3 RETURNING ${STORED_METHOD_COLUMNS}`,
       [now, storedPaymentMethodId, customerId],
     );
@@ -534,7 +569,7 @@ export class PaymentRepo implements IPaymentRepository {
     const sql = customerId
       ? `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "customerId" = $2 RETURNING ${STORED_METHOD_COLUMNS}`
       : `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 RETURNING ${STORED_METHOD_COLUMNS}`;
-    return queryOne<StoredPaymentMethod>(sql, customerId ? [storedPaymentMethodId, customerId] : [storedPaymentMethodId]);
+    return queryOne<StoredPaymentMethodRow>(sql, customerId ? [storedPaymentMethodId, customerId] : [storedPaymentMethodId]);
   }
 
   async deleteTransaction(transactionId: string): Promise<void> {

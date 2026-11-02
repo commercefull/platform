@@ -98,6 +98,3 @@ export interface ProductRepository {
   deleteProductImage(imageId: string): Promise<void>;
   reorderProductImages(productId: string, imageIds: string[]): Promise<void>;
 }
-
-
-

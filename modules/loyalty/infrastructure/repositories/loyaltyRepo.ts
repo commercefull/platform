@@ -119,7 +119,7 @@ export class LoyaltyRepo {
 
   async findTierById(tierId: string): Promise<LoyaltyTier | null> {
     const sql = `SELECT * FROM "loyaltyTier" WHERE "tierId" = $1`;
-    return await queryOne<LoyaltyTier>(sql, [tierId]);
+    return await queryOne<DbLoyaltyTier>(sql, [tierId]);
   }
 
   async findAllTiers(includeInactive: boolean = false): Promise<LoyaltyTier[]> {
@@ -128,7 +128,7 @@ export class LoyaltyRepo {
       sql += ` WHERE "isActive" = true`;
     }
     sql += ` ORDER BY "pointsThreshold" ASC`;
-    const results = await query<LoyaltyTier[]>(sql, []);
+    const results = await query<DbLoyaltyTier[]>(sql, []);
     return results || [];
   }
 
@@ -139,7 +139,7 @@ export class LoyaltyRepo {
       ORDER BY "pointsThreshold" DESC 
       LIMIT 1
     `;
-    return await queryOne<LoyaltyTier>(sql, [points]);
+    return await queryOne<DbLoyaltyTier>(sql, [points]);
   }
 
   async createTier(input: CreateLoyaltyTierInput): Promise<LoyaltyTier> {
@@ -151,7 +151,7 @@ export class LoyaltyRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyTier>(sql, [
+    const result = await queryOne<DbLoyaltyTier>(sql, [
       input.name,
       input.description || null,
       input.level || 1,
@@ -210,7 +210,7 @@ export class LoyaltyRepo {
       WHERE "tierId" = $${paramIndex}
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyTier>(sql, params);
+    const result = await queryOne<DbLoyaltyTier>(sql, params);
     if (!result) throw new LoyaltyTierNotFoundError(tierId);
     return result;
   }
@@ -227,7 +227,7 @@ export class LoyaltyRepo {
 
   async findCustomerPoints(customerId: string): Promise<LoyaltyPoints | null> {
     const sql = `SELECT * FROM "loyaltyPoints" WHERE "customerId" = $1`;
-    return await queryOne<LoyaltyPoints>(sql, [customerId]);
+    return await queryOne<DbLoyaltyPoints>(sql, [customerId]);
   }
 
   async findCustomerPointsWithTier(customerId: string): Promise<{
@@ -255,7 +255,7 @@ export class LoyaltyRepo {
         "updatedAt" = EXCLUDED."updatedAt"
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyPoints>(sql, [customerId, tierId, 0, 0, now, now, now]);
+    const result = await queryOne<DbLoyaltyPoints>(sql, [customerId, tierId, 0, 0, now, now, now]);
     if (!result) throw new FailedToCreateLoyaltyError('Failed to initialize customer points');
     return result;
   }
@@ -289,7 +289,7 @@ export class LoyaltyRepo {
       WHERE "customerId" = $1
       RETURNING *
     `;
-    const updatedPoints = await queryOne<LoyaltyPoints>(updateSql, [customerId, newCurrentPoints, newLifetimePoints, now, now]);
+    const updatedPoints = await queryOne<DbLoyaltyPoints>(updateSql, [customerId, newCurrentPoints, newLifetimePoints, now, now]);
 
     // Record transaction
     await this.createTransaction({
@@ -338,12 +338,12 @@ export class LoyaltyRepo {
 
   async findCreditTransactionByReference(referenceId: string): Promise<LoyaltyTransaction | null> {
     const sql = `SELECT * FROM "loyaltyTransaction" WHERE action = 'credit' AND "referenceId" = $1`;
-    return await queryOne<LoyaltyTransaction>(sql, [referenceId]);
+    return await queryOne<DbLoyaltyTransaction>(sql, [referenceId]);
   }
 
   async findTransactionById(loyaltyTransactionId: string): Promise<LoyaltyTransaction | null> {
     const sql = `SELECT * FROM "loyaltyTransaction" WHERE "loyaltyTransactionId" = $1`;
-    return await queryOne<LoyaltyTransaction>(sql, [loyaltyTransactionId]);
+    return await queryOne<DbLoyaltyTransaction>(sql, [loyaltyTransactionId]);
   }
 
   async findTransactionByOrderAndAction(orderId: string, action: 'credit' | 'debit'): Promise<LoyaltyTransaction | null> {
@@ -353,7 +353,7 @@ export class LoyaltyRepo {
       ORDER BY "createdAt" DESC
       LIMIT 1
     `;
-    return await queryOne<LoyaltyTransaction>(sql, [orderId, action]);
+    return await queryOne<DbLoyaltyTransaction>(sql, [orderId, action]);
   }
 
   async findCustomerTransactions(customerId: string, limit: number = 50): Promise<LoyaltyTransaction[]> {
@@ -363,7 +363,7 @@ export class LoyaltyRepo {
       ORDER BY "createdAt" DESC 
       LIMIT $2
     `;
-    const results = await query<LoyaltyTransaction[]>(sql, [customerId, limit]);
+    const results = await query<DbLoyaltyTransaction[]>(sql, [customerId, limit]);
     return results || [];
   }
 
@@ -378,7 +378,7 @@ export class LoyaltyRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyTransaction>(sql, [
+    const result = await queryOne<DbLoyaltyTransaction>(sql, [
       input.customerId,
       input.orderId || null,
       dbAction,
@@ -394,7 +394,7 @@ export class LoyaltyRepo {
 
   async findRewardById(rewardId: string): Promise<LoyaltyReward | null> {
     const sql = `SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1`;
-    return await queryOne<LoyaltyReward>(sql, [rewardId]);
+    return await queryOne<DbLoyaltyReward>(sql, [rewardId]);
   }
 
   async findAllRewards(includeInactive: boolean = false): Promise<LoyaltyReward[]> {
@@ -403,7 +403,7 @@ export class LoyaltyRepo {
       sql += ` WHERE "isActive" = true`;
     }
     sql += ` ORDER BY "pointsCost" ASC`;
-    const results = await query<LoyaltyReward[]>(sql, []);
+    const results = await query<DbLoyaltyReward[]>(sql, []);
     return results || [];
   }
 
@@ -413,7 +413,7 @@ export class LoyaltyRepo {
       WHERE "isActive" = true AND "pointsCost" <= $1
       ORDER BY "pointsCost" DESC
     `;
-    const results = await query<LoyaltyReward[]>(sql, [currentPoints]);
+    const results = await query<DbLoyaltyReward[]>(sql, [currentPoints]);
     return results || [];
   }
 
@@ -426,7 +426,7 @@ export class LoyaltyRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyReward>(sql, [
+    const result = await queryOne<DbLoyaltyReward>(sql, [
       input.name,
       input.description || null,
       input.type || 'discount',
@@ -473,7 +473,7 @@ export class LoyaltyRepo {
       WHERE "rewardId" = $${paramIndex}
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyReward>(sql, params);
+    const result = await queryOne<DbLoyaltyReward>(sql, params);
     if (!result) throw new LoyaltyRewardNotFoundError(rewardId);
     return result;
   }
@@ -490,12 +490,12 @@ export class LoyaltyRepo {
 
   async findRedemptionById(loyaltyRedemptionId: string): Promise<LoyaltyRedemption | null> {
     const sql = `SELECT * FROM "loyaltyRedemption" WHERE "redemptionId" = $1`;
-    return await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId]);
+    return await queryOne<DbLoyaltyRedemption>(sql, [loyaltyRedemptionId]);
   }
 
   async findRedemptionByCode(redemptionCode: string): Promise<LoyaltyRedemption | null> {
     const sql = `SELECT * FROM "loyaltyRedemption" WHERE "couponCode" = $1`;
-    return await queryOne<LoyaltyRedemption>(sql, [redemptionCode]);
+    return await queryOne<DbLoyaltyRedemption>(sql, [redemptionCode]);
   }
 
   async findCustomerRedemptions(customerId: string, limit: number = 50): Promise<LoyaltyRedemption[]> {
@@ -505,7 +505,7 @@ export class LoyaltyRepo {
       ORDER BY "redeemedAt" DESC 
       LIMIT $2
     `;
-    const results = await query<LoyaltyRedemption[]>(sql, [customerId, limit]);
+    const results = await query<DbLoyaltyRedemption[]>(sql, [customerId, limit]);
     return results || [];
   }
 
@@ -535,7 +535,7 @@ export class LoyaltyRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
-    const redemption = await queryOne<LoyaltyRedemption>(sql, [
+    const redemption = await queryOne<DbLoyaltyRedemption>(sql, [
       customerId,
       rewardId,
       reward.pointsCost,
@@ -573,7 +573,7 @@ export class LoyaltyRepo {
       WHERE "redemptionId" = $1
       RETURNING *
     `;
-    const result = await queryOne<LoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt]);
+    const result = await queryOne<DbLoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt]);
     if (!result) throw new RedemptionNotFoundError(loyaltyRedemptionId);
     return result;
   }

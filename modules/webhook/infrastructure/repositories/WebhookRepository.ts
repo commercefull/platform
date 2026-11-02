@@ -11,6 +11,10 @@ import { WebhookDeliveryProps } from '../../domain/entities/WebhookDelivery';
 import { FailedToCreateWebhookEndpointError, FailedToCreateWebhookDeliveryError } from '../../domain/errors/WebhookErrors';
 import { WebhookRepositoryInterface, WebhookEndpointFilters, WebhookDeliveryFilters } from '../../domain/repositories/WebhookRepository';
 import { PaginationOptions } from 'libs/types/pagination';
+import type { WebhookEndpoint as DbWebhookEndpoint } from '../../../../libs/db/types';
+import type { WebhookDelivery as DbWebhookDelivery } from '../../../../libs/db/types';
+
+
 
 class WebhookRepository implements WebhookRepositoryInterface {
   // =========================================================================
@@ -36,14 +40,14 @@ class WebhookRepository implements WebhookRepositoryInterface {
       props.headers ? JSON.stringify(props.headers) : null,
       JSON.stringify(props.retryPolicy),
     ];
-    const result = await queryOne<WebhookEndpointProps>(sql, values);
+    const result = await queryOne<DbWebhookEndpoint>(sql, values);
     if (!result) throw new FailedToCreateWebhookEndpointError();
     return this.parseEndpoint(result);
   }
 
   async findEndpointById(id: string): Promise<WebhookEndpointProps | null> {
     const sql = `SELECT * FROM "${Table.WebhookEndpoint}" WHERE "webhookEndpointId" = $1`;
-    const result = await queryOne<WebhookEndpointProps>(sql, [id]);
+    const result = await queryOne<DbWebhookEndpoint>(sql, [id]);
     return result ? this.parseEndpoint(result) : null;
   }
 
@@ -61,7 +65,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
         )
       ORDER BY "createdAt" ASC
     `;
-    const results = await query<WebhookEndpointProps[]>(sql, [eventType, wildcardCategory]);
+    const results = await query<DbWebhookEndpoint[]>(sql, [eventType, wildcardCategory]);
     return (results || []).map(r => this.parseEndpoint(r));
   }
 
@@ -98,7 +102,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
       ORDER BY "createdAt" DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
-    const results = await query<WebhookEndpointProps[]>(dataSql, values);
+    const results = await query<DbWebhookEndpoint[]>(dataSql, values);
 
     return {
       data: (results || []).map(r => this.parseEndpoint(r)),
@@ -137,7 +141,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
       WHERE "webhookEndpointId" = $1
       RETURNING *
     `;
-    const result = await queryOne<WebhookEndpointProps>(sql, values);
+    const result = await queryOne<DbWebhookEndpoint>(sql, values);
     return result ? this.parseEndpoint(result) : null;
   }
 
@@ -175,14 +179,15 @@ class WebhookRepository implements WebhookRepositoryInterface {
       props.errorMessage,
       props.duration,
     ];
-    const result = await queryOne<WebhookDeliveryProps>(sql, values);
+    const result = await queryOne<DbWebhookDelivery>(sql, values);
     if (!result) throw new FailedToCreateWebhookDeliveryError();
-    return result;
+    return this.parseDelivery(result);
   }
 
   async findDeliveryById(id: string): Promise<WebhookDeliveryProps | null> {
     const sql = `SELECT * FROM "${Table.WebhookDelivery}" WHERE "webhookDeliveryId" = $1`;
-    return await queryOne<WebhookDeliveryProps>(sql, [id]);
+    const row = await queryOne<DbWebhookDelivery>(sql, [id]);
+    return row ? this.parseDelivery(row) : null;
   }
 
   async findDeliveries(
@@ -222,9 +227,9 @@ class WebhookRepository implements WebhookRepositoryInterface {
       ORDER BY "createdAt" DESC
       LIMIT ${limit} OFFSET ${offset}
     `;
-    const results = await query<WebhookDeliveryProps[]>(dataSql, values);
+    const results = await query<DbWebhookDelivery[]>(dataSql, values);
 
-    return { data: results || [], total };
+    return { data: (results || []).map(r => this.parseDelivery(r)), total };
   }
 
   async updateDelivery(id: string, updates: Partial<WebhookDeliveryProps>): Promise<WebhookDeliveryProps | null> {
@@ -258,7 +263,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
       WHERE "webhookDeliveryId" = $1
       RETURNING *
     `;
-    return await queryOne<WebhookDeliveryProps>(sql, values);
+    return await queryOne<DbWebhookDelivery>(sql, values);
   }
 
   async findPendingRetries(): Promise<WebhookDeliveryProps[]> {
@@ -269,7 +274,8 @@ class WebhookRepository implements WebhookRepositoryInterface {
       ORDER BY "nextRetryAt" ASC
       LIMIT 100
     `;
-    return (await query<WebhookDeliveryProps[]>(sql)) || [];
+    const rows = (await query<DbWebhookDelivery[]>(sql)) || [];
+    return rows.map(r => this.parseDelivery(r));
   }
 
   async claimPendingRetries(nodeId: string, batchSize: number): Promise<WebhookDeliveryProps[]> {
@@ -289,8 +295,8 @@ class WebhookRepository implements WebhookRepositoryInterface {
       )
       RETURNING *
     `;
-    const results = await query<WebhookDeliveryProps[]>(sql, [nodeId, batchSize]);
-    return results || [];
+    const rows = (await query<DbWebhookDelivery[]>(sql, [nodeId, batchSize])) || [];
+    return rows.map(r => this.parseDelivery(r));
   }
 
   async releaseDeliveryLock(id: string): Promise<void> {
@@ -308,15 +314,21 @@ class WebhookRepository implements WebhookRepositoryInterface {
   // Helpers
   // =========================================================================
 
-  private parseEndpoint(row: WebhookEndpointProps): WebhookEndpointProps {
+  private parseDelivery(row: DbWebhookDelivery): WebhookDeliveryProps {
+    const { lockedBy: _lockedBy, lockedAt: _lockedAt, ...rest } = row;
+    return { ...rest, status: row.status as WebhookDeliveryProps['status'] };
+  }
+
+  private parseEndpoint(row: DbWebhookEndpoint): WebhookEndpointProps {
     return {
       ...row,
-      events: typeof row.events === 'string' ? JSON.parse(row.events as string) : row.events || [],
-      headers: typeof row.headers === 'string' ? JSON.parse(row.headers as string) : row.headers,
+      events: typeof row.events === 'string' ? JSON.parse(row.events as string) : (row.events as string[]) || [],
+      headers:
+        typeof row.headers === 'string' ? JSON.parse(row.headers as string) : (row.headers as Record<string, string> | null),
       retryPolicy:
         typeof row.retryPolicy === 'string'
           ? JSON.parse(row.retryPolicy as string)
-          : row.retryPolicy || { maxRetries: 5, retryIntervalMs: 5000, backoffMultiplier: 2 },
+          : (row.retryPolicy as WebhookEndpointProps['retryPolicy']) || { maxRetries: 5, retryIntervalMs: 5000, backoffMultiplier: 2 },
     };
   }
 }

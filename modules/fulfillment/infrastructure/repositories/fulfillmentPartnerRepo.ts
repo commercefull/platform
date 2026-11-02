@@ -1,5 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { FulfillmentPartner } from '../../../../libs/db/types';
+import type { FulfillmentPartner as DbFulfillmentPartner } from '../../../../libs/db/types';
 
 export type { FulfillmentPartner };
 
@@ -7,22 +8,22 @@ async function findAll(activeOnly = true): Promise<FulfillmentPartner[]> {
   const sql = activeOnly
     ? `SELECT * FROM "fulfillmentPartner" WHERE "isActive" = true ORDER BY name ASC`
     : `SELECT * FROM "fulfillmentPartner" ORDER BY name ASC`;
-  return (await query<FulfillmentPartner[]>(sql)) || [];
+  return (await query<DbFulfillmentPartner[]>(sql)) || [];
 }
 
 async function findById(fulfillmentPartnerId: string): Promise<FulfillmentPartner | null> {
-  return queryOne<FulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE "fulfillmentPartnerId" = $1`, [fulfillmentPartnerId]);
+  return queryOne<DbFulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE "fulfillmentPartnerId" = $1`, [fulfillmentPartnerId]);
 }
 
 async function findByCode(code: string): Promise<FulfillmentPartner | null> {
-  return queryOne<FulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE code = $1`, [code]);
+  return queryOne<DbFulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE code = $1`, [code]);
 }
 
 async function create(
   params: Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>,
 ): Promise<FulfillmentPartner | null> {
   const now = new Date();
-  return queryOne<FulfillmentPartner>(
+  return queryOne<DbFulfillmentPartner>(
     `INSERT INTO "fulfillmentPartner" (name, code, type, "isActive", "apiConfig", "address", "contactEmail", "contactPhone", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
     [
@@ -83,7 +84,7 @@ async function update(
   values.push(new Date());
   values.push(fulfillmentPartnerId);
 
-  return queryOne<FulfillmentPartner>(
+  return queryOne<DbFulfillmentPartner>(
     `UPDATE "fulfillmentPartner" SET ${fields.join(', ')} WHERE "fulfillmentPartnerId" = $${idx} RETURNING *`,
     values,
   );

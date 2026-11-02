@@ -77,26 +77,26 @@ function rowToEntity(row: ReturnDbRow, items: ReturnItem[] = []): ReturnRequest 
 
 export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   async findById(id: string): Promise<ReturnRequest | null> {
-    const row = await queryOne<ReturnDbRow>(`SELECT * FROM "orderReturn" WHERE "orderReturnId" = $1`, [id]);
+    const row = await queryOne<DbOrderReturn>(`SELECT * FROM "orderReturn" WHERE "orderReturnId" = $1`, [id]);
     if (!row) return null;
     const items = await this.fetchItems(id);
     return rowToEntity(row, items);
   }
 
   async findByReturnNumber(returnNumber: string): Promise<ReturnRequest | null> {
-    const row = await queryOne<ReturnDbRow>(`SELECT * FROM "orderReturn" WHERE "returnNumber" = $1`, [returnNumber]);
+    const row = await queryOne<DbOrderReturn>(`SELECT * FROM "orderReturn" WHERE "returnNumber" = $1`, [returnNumber]);
     if (!row) return null;
     const items = await this.fetchItems(row.orderReturnId);
     return rowToEntity(row, items);
   }
 
   async findByOrderId(orderId: string): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(`SELECT * FROM "orderReturn" WHERE "orderId" = $1 ORDER BY "requestedAt" DESC`, [orderId]);
+    const rows = await query<DbOrderReturn[]>(`SELECT * FROM "orderReturn" WHERE "orderId" = $1 ORDER BY "requestedAt" DESC`, [orderId]);
     return Promise.all((rows || []).map(async r => rowToEntity(r, await this.fetchItems(r.orderReturnId))));
   }
 
   async findByCustomerId(customerId: string, limit = 50, offset = 0): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
+    const rows = await query<DbOrderReturn[]>(
       `SELECT * FROM "orderReturn" WHERE "customerId" = $1 ORDER BY "requestedAt" DESC LIMIT $2 OFFSET $3`,
       [customerId, limit, offset],
     );
@@ -104,7 +104,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   async findByStatus(status: ReturnStatus, limit = 50, offset = 0): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
+    const rows = await query<DbOrderReturn[]>(
       `SELECT * FROM "orderReturn" WHERE "status" = $1 ORDER BY "requestedAt" DESC LIMIT $2 OFFSET $3`,
       [status, limit, offset],
     );
@@ -112,7 +112,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   async findPending(limit = 50): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
+    const rows = await query<DbOrderReturn[]>(
       `SELECT * FROM "orderReturn" WHERE "status" IN ('requested', 'approved', 'inTransit', 'received', 'inspected') ORDER BY "requestedAt" ASC LIMIT $1`,
       [limit],
     );
@@ -120,7 +120,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   async findInTransit(limit = 50): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
+    const rows = await query<DbOrderReturn[]>(
       `SELECT * FROM "orderReturn" WHERE "status" = 'inTransit' ORDER BY "requestedAt" ASC LIMIT $1`,
       [limit],
     );
@@ -128,7 +128,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   async findNeedingInspection(limit = 50): Promise<ReturnRequest[]> {
-    const rows = await query<ReturnDbRow[]>(
+    const rows = await query<DbOrderReturn[]>(
       `SELECT * FROM "orderReturn" WHERE "status" = 'received' AND "requiresInspection" = true ORDER BY "receivedAt" ASC LIMIT $1`,
       [limit],
     );
@@ -137,7 +137,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
 
   async create(returnRequest: ReturnRequest): Promise<ReturnRequest> {
     const props = returnRequest.toJSON();
-    const row = await queryOne<ReturnDbRow>(
+    const row = await queryOne<DbOrderReturn>(
       `INSERT INTO "orderReturn" (
         "orderId", "returnNumber", "customerId", "status", "returnType",
         "requestedAt", "returnShippingPaid", "returnCarrier",
@@ -197,7 +197,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
 
   async update(returnRequest: ReturnRequest): Promise<ReturnRequest | null> {
     const props = returnRequest.toJSON();
-    const row = await queryOne<ReturnDbRow>(
+    const row = await queryOne<DbOrderReturn>(
       `UPDATE "orderReturn" SET
         "status" = $1, "approvedAt" = $2, "receivedAt" = $3, "completedAt" = $4,
         "rmaNumber" = $5, "paymentRefundId" = $6,
@@ -281,7 +281,7 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
   }
 
   private async fetchItems(returnId: string): Promise<ReturnItem[]> {
-    const rows = await query<ReturnItemDbRow[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
+    const rows = await query<DbOrderReturnItem[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
       returnId,
     ]);
     return (rows || []).map(itemRowToEntity);
@@ -290,21 +290,21 @@ export class ReturnRequestRepositoryImpl implements ReturnRequestRepository {
 
 export class ReturnItemRepositoryImpl implements ReturnItemRepository {
   async findByReturnId(returnId: string): Promise<ReturnItem[]> {
-    const rows = await query<ReturnItemDbRow[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
+    const rows = await query<DbOrderReturnItem[]>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnId" = $1 ORDER BY "createdAt" ASC`, [
       returnId,
     ]);
     return (rows || []).map(itemRowToEntity);
   }
 
   async findById(itemId: string): Promise<ReturnItem | null> {
-    const row = await queryOne<ReturnItemDbRow>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnItemId" = $1`, [itemId]);
+    const row = await queryOne<DbOrderReturnItem>(`SELECT * FROM "orderReturnItem" WHERE "orderReturnItemId" = $1`, [itemId]);
     return row ? itemRowToEntity(row) : null;
   }
 
   async createMany(returnId: string, items: ReturnItem[]): Promise<ReturnItem[]> {
     const created: ReturnItem[] = [];
     for (const item of items) {
-      const row = await queryOne<ReturnItemDbRow>(
+      const row = await queryOne<DbOrderReturnItem>(
         `INSERT INTO "orderReturnItem" (
           "orderReturnId", "orderItemId", "quantity",
           "returnReason", "returnReasonDetail", "condition",
@@ -333,7 +333,7 @@ export class ReturnItemRepositoryImpl implements ReturnItemRepository {
   }
 
   async updateInspection(itemId: string, inspectionNotes: string, condition: string, restockItem: boolean): Promise<ReturnItem | null> {
-    const row = await queryOne<ReturnItemDbRow>(
+    const row = await queryOne<DbOrderReturnItem>(
       `UPDATE "orderReturnItem" SET
         "inspectionNotes" = $1, "condition" = $2, "restockItem" = $3
        WHERE "orderReturnItemId" = $4 RETURNING *`,

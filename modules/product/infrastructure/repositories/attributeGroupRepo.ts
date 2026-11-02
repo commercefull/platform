@@ -1,6 +1,8 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttributeGroup } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductAttributeGroup as DbProductAttributeGroup } from '../../../../libs/db/types';
+
 
 // Use ProductAttributeGroup type directly from libs/db/types.ts
 export type { ProductAttributeGroup };
@@ -10,20 +12,20 @@ type UpdateProps = Partial<CreateProps>;
 
 export class AttributeGroupRepo {
   async findOne(id: string): Promise<ProductAttributeGroup | null> {
-    return queryOne<ProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1`, [id]);
+    return queryOne<DbProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1`, [id]);
   }
 
   async findByCode(code: string): Promise<ProductAttributeGroup | null> {
-    return queryOne<ProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "code" = $1`, [code]);
+    return queryOne<DbProductAttributeGroup>(`SELECT * FROM "${Table.ProductAttributeGroup}" WHERE "code" = $1`, [code]);
   }
 
   async findAll(): Promise<ProductAttributeGroup[]> {
-    return (await query<ProductAttributeGroup[]>(`SELECT * FROM "${Table.ProductAttributeGroup}" ORDER BY "position" ASC`)) || [];
+    return (await query<DbProductAttributeGroup[]>(`SELECT * FROM "${Table.ProductAttributeGroup}" ORDER BY "position" ASC`)) || [];
   }
 
   async create(props: CreateProps): Promise<ProductAttributeGroup> {
     const now = new Date();
-    const row = await queryOne<ProductAttributeGroup>(
+    const row = await queryOne<DbProductAttributeGroup>(
       `INSERT INTO "${Table.ProductAttributeGroup}" 
        ("name", "code", "description", "position", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5, $6) 
@@ -51,7 +53,7 @@ export class AttributeGroupRepo {
     }
 
     values.push(id);
-    return queryOne<ProductAttributeGroup>(
+    return queryOne<DbProductAttributeGroup>(
       `UPDATE "${Table.ProductAttributeGroup}" 
        SET ${updates.join(', ')} 
        WHERE "productAttributeGroupId" = $${paramIndex} 
@@ -61,7 +63,7 @@ export class AttributeGroupRepo {
   }
 
   async delete(id: string): Promise<ProductAttributeGroup | null> {
-    return queryOne<ProductAttributeGroup>(
+    return queryOne<DbProductAttributeGroup>(
       `DELETE FROM "${Table.ProductAttributeGroup}" WHERE "productAttributeGroupId" = $1 RETURNING *`,
       [id],
     );

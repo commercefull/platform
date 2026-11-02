@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { CustomerGroup as DbCustomerGroup } from '../../../../libs/db/types';
+import type { CustomerGroup as DbCustomerGroup } from '../../../../libs/db/types';
 import { FailedToCreateCustomerError, CustomerGroupAlreadyExistsError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
@@ -14,23 +14,23 @@ type CustomerGroupUpdateParams = Partial<Omit<CustomerGroup, 'customerGroupId' |
 
 class CustomerGroupRepo {
   async findById(id: string): Promise<CustomerGroup | null> {
-    return await queryOne<CustomerGroup>(`SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`, [id]);
+    return await queryOne<DbCustomerGroup>(`SELECT * FROM "customerGroup" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`, [id]);
   }
 
   async findByCode(code: string): Promise<CustomerGroup | null> {
-    return await queryOne<CustomerGroup>(`SELECT * FROM "customerGroup" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
+    return await queryOne<DbCustomerGroup>(`SELECT * FROM "customerGroup" WHERE "code" = $1 AND "deletedAt" IS NULL`, [code]);
   }
 
   async findAll(activeOnly = false): Promise<CustomerGroup[]> {
     let sql = `SELECT * FROM "customerGroup" WHERE "deletedAt" IS NULL`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "sortOrder" ASC, "name" ASC`;
-    return (await query<CustomerGroup[]>(sql)) || [];
+    return (await query<DbCustomerGroup[]>(sql)) || [];
   }
 
   async findSystemGroups(): Promise<CustomerGroup[]> {
     return (
-      (await query<CustomerGroup[]>(
+      (await query<DbCustomerGroup[]>(
         `SELECT * FROM "customerGroup" WHERE "isSystem" = true AND "deletedAt" IS NULL ORDER BY "sortOrder" ASC`,
       )) || []
     );
@@ -41,7 +41,7 @@ class CustomerGroupRepo {
     const existing = await this.findByCode(params.code);
     if (existing) throw new CustomerGroupAlreadyExistsError(params.code);
 
-    const result = await queryOne<CustomerGroup>(
+    const result = await queryOne<DbCustomerGroup>(
       `INSERT INTO "customerGroup" (
         "name", "description", "code", "isActive", "isSystem", "sortOrder", "discountPercent",
         "createdBy", "createdAt", "updatedAt"
@@ -81,7 +81,7 @@ class CustomerGroupRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<CustomerGroup>(
+    return await queryOne<DbCustomerGroup>(
       `UPDATE "customerGroup" SET ${updateFields.join(', ')} WHERE "customerGroupId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
       values,
     );

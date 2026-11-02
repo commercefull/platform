@@ -5,16 +5,19 @@
  * Infrastructure implementations must implement this interface.
  */
 
-import type { SubscriptionStatus, SubscriptionOrderStatus, DunningStatus, SubscriptionProduct, SubscriptionPlan, CustomerSubscription, SubscriptionOrder, SubscriptionPause, DunningAttempt } from '../types';
-
-export type {
+import type {
   SubscriptionStatus,
+  SubscriptionOrderStatus,
+  DunningStatus,
   SubscriptionProduct,
   SubscriptionPlan,
   CustomerSubscription,
   SubscriptionOrder,
   SubscriptionPause,
-};
+  DunningAttempt,
+} from '../types';
+
+export type { SubscriptionStatus, SubscriptionProduct, SubscriptionPlan, CustomerSubscription, SubscriptionOrder, SubscriptionPause };
 
 export interface SubscriptionRepository {
   // Subscription Products

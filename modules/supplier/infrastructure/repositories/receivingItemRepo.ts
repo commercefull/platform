@@ -38,12 +38,12 @@ export type SupplierReceivingItemUpdateParams = Partial<
 
 export class SupplierReceivingItemRepo {
   async findById(id: string): Promise<SupplierReceivingItem | null> {
-    return await queryOne<SupplierReceivingItem>(`SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingItemId" = $1`, [id]);
+    return await queryOne<DbSupplierReceivingItem>(`SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingItemId" = $1`, [id]);
   }
 
   async findByReceivingRecordId(supplierReceivingRecordId: string): Promise<SupplierReceivingItem[]> {
     return (
-      (await query<SupplierReceivingItem[]>(
+      (await query<DbSupplierReceivingItem[]>(
         `SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingRecordId" = $1 ORDER BY "createdAt" ASC`,
         [supplierReceivingRecordId],
       )) || []
@@ -52,7 +52,7 @@ export class SupplierReceivingItemRepo {
 
   async findByPurchaseOrderItemId(supplierPurchaseOrderItemId: string): Promise<SupplierReceivingItem[]> {
     return (
-      (await query<SupplierReceivingItem[]>(
+      (await query<DbSupplierReceivingItem[]>(
         `SELECT * FROM "supplierReceivingItem" WHERE "supplierPurchaseOrderItemId" = $1 ORDER BY "createdAt" DESC`,
         [supplierPurchaseOrderItemId],
       )) || []
@@ -69,12 +69,12 @@ export class SupplierReceivingItemRepo {
     }
 
     sql += ` ORDER BY "createdAt" DESC`;
-    return (await query<SupplierReceivingItem[]>(sql, params)) || [];
+    return (await query<DbSupplierReceivingItem[]>(sql, params)) || [];
   }
 
   async findByStatus(status: SupplierReceivingItemStatus, limit = 100): Promise<SupplierReceivingItem[]> {
     return (
-      (await query<SupplierReceivingItem[]>(
+      (await query<DbSupplierReceivingItem[]>(
         `SELECT * FROM "supplierReceivingItem" WHERE "status" = $1 ORDER BY "createdAt" DESC LIMIT $2`,
         [status, limit],
       )) || []
@@ -83,7 +83,7 @@ export class SupplierReceivingItemRepo {
 
   async findBySupplierReceivingAcceptanceStatus(acceptanceStatus: SupplierReceivingAcceptanceStatus): Promise<SupplierReceivingItem[]> {
     return (
-      (await query<SupplierReceivingItem[]>(
+      (await query<DbSupplierReceivingItem[]>(
         `SELECT * FROM "supplierReceivingItem" WHERE "acceptanceStatus" = $1 ORDER BY "createdAt" DESC`,
         [acceptanceStatus],
       )) || []
@@ -92,7 +92,7 @@ export class SupplierReceivingItemRepo {
 
   async findWithDiscrepancies(): Promise<SupplierReceivingItem[]> {
     return (
-      (await query<SupplierReceivingItem[]>(
+      (await query<DbSupplierReceivingItem[]>(
         `SELECT * FROM "supplierReceivingItem" WHERE "discrepancyReason" IS NOT NULL OR "rejectedQuantity" > 0 ORDER BY "createdAt" DESC`,
       )) || []
     );
@@ -102,7 +102,7 @@ export class SupplierReceivingItemRepo {
     const now = unixTimestamp();
     const receivedQuantity = params.receivedQuantity ?? params.expectedQuantity ?? 0;
 
-    const result = await queryOne<SupplierReceivingItem>(
+    const result = await queryOne<DbSupplierReceivingItem>(
       `INSERT INTO "supplierReceivingItem" (
         "supplierReceivingRecordId", "supplierPurchaseOrderItemId", "productId", "productVariantId", "sku", "name",
         "expectedQuantity", "receivedQuantity", "rejectedQuantity", "distributionWarehouseBinId", "lotNumber",
@@ -153,7 +153,7 @@ export class SupplierReceivingItemRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<SupplierReceivingItem>(
+    return await queryOne<DbSupplierReceivingItem>(
       `UPDATE "supplierReceivingItem" SET ${updateFields.join(', ')} WHERE "supplierReceivingItemId" = $${paramIndex} RETURNING *`,
       values,
     );

@@ -14,6 +14,7 @@ import type {
   ReportFrequency,
   ReportFormat,
 } from '../../domain/entities/ReportEntities';
+import type { ReportingReportExecution as DbReportingReportExecution, ReportingReportSchedule as DbReportingReportSchedule } from '../../../../libs/db/types';
 
 export interface CreateReportScheduleParams {
   organizationId?: string;
@@ -36,12 +37,12 @@ export interface UpdateReportScheduleParams {
 }
 
 export async function findScheduleById(id: string): Promise<ReportScheduleProps | null> {
-  const row = await queryOne<ReportingReportSchedule>(`SELECT * FROM "reportingReportSchedule" WHERE "reportScheduleId" = $1`, [id]);
+  const row = await queryOne<DbReportingReportSchedule>(`SELECT * FROM "reportingReportSchedule" WHERE "reportScheduleId" = $1`, [id]);
   return row ? mapScheduleRow(row) : null;
 }
 
 export async function listActiveSchedules(): Promise<ReportScheduleProps[]> {
-  const rows = await query<ReportingReportSchedule[]>(
+  const rows = await query<DbReportingReportSchedule[]>(
     `SELECT * FROM "reportingReportSchedule" WHERE "isActive" = true ORDER BY "nextRunAt" ASC`,
   );
   return (rows || []).map(mapScheduleRow);
@@ -57,7 +58,7 @@ export async function markScheduleRun(id: string, nextRunAt: Date): Promise<void
 }
 
 export async function createExecution(scheduleId: string): Promise<ReportExecutionProps> {
-  const row = await queryOne<ReportingReportExecution>(
+  const row = await queryOne<DbReportingReportExecution>(
     `INSERT INTO "reportingReportExecution" ("reportScheduleId", "status", "startedAt")
      VALUES ($1, 'running', $2) RETURNING *`,
     [scheduleId, new Date()],
@@ -111,7 +112,7 @@ export async function updateExecution(
   if (fields.length === 0) return null;
 
   values.push(id);
-  const row = await queryOne<ReportingReportExecution>(
+  const row = await queryOne<DbReportingReportExecution>(
     `UPDATE "reportingReportExecution" SET ${fields.join(', ')} WHERE "reportExecutionId" = $${idx} RETURNING *`,
     values,
   );
@@ -199,7 +200,7 @@ export async function createSchedule(params: CreateReportScheduleParams): Promis
     RETURNING *
   `;
   const nextRunAt = computeNextRunDate(params.frequency || 'daily', now);
-  const row = await queryOne<ReportingReportSchedule>(sql, [
+  const row = await queryOne<DbReportingReportSchedule>(sql, [
     params.organizationId || null,
     params.name,
     params.reportType,
@@ -226,7 +227,7 @@ export async function listSchedules(organizationId?: string): Promise<ReportSche
     params.push(organizationId);
   }
   sql += ` ORDER BY "createdAt" DESC`;
-  const rows = await query<ReportingReportSchedule[]>(sql, params);
+  const rows = await query<DbReportingReportSchedule[]>(sql, params);
   return (rows || []).map(mapScheduleRow);
 }
 
@@ -266,7 +267,7 @@ export async function updateSchedule(id: string, params: UpdateReportSchedulePar
   values.push(new Date());
   values.push(id);
 
-  const row = await queryOne<ReportingReportSchedule>(
+  const row = await queryOne<DbReportingReportSchedule>(
     `UPDATE "reportingReportSchedule" SET ${fields.join(', ')} WHERE "reportScheduleId" = $${idx} RETURNING *`,
     values,
   );
@@ -274,7 +275,7 @@ export async function updateSchedule(id: string, params: UpdateReportSchedulePar
 }
 
 export async function deleteSchedule(id: string): Promise<boolean> {
-  const result = await queryOne<ReportingReportSchedule>(
+  const result = await queryOne<DbReportingReportSchedule>(
     `DELETE FROM "reportingReportSchedule" WHERE "reportScheduleId" = $1 RETURNING "reportScheduleId"`,
     [id],
   );
@@ -282,7 +283,7 @@ export async function deleteSchedule(id: string): Promise<boolean> {
 }
 
 export async function listExecutions(scheduleId: string, limit: number = 20): Promise<ReportExecutionProps[]> {
-  const rows = await query<ReportingReportExecution[]>(
+  const rows = await query<DbReportingReportExecution[]>(
     `SELECT * FROM "reportingReportExecution" WHERE "reportScheduleId" = $1 ORDER BY "startedAt" DESC LIMIT $2`,
     [scheduleId, limit],
   );
@@ -290,7 +291,7 @@ export async function listExecutions(scheduleId: string, limit: number = 20): Pr
 }
 
 export async function findExecutionById(id: string): Promise<ReportExecutionProps | null> {
-  const row = await queryOne<ReportingReportExecution>(`SELECT * FROM "reportingReportExecution" WHERE "reportExecutionId" = $1`, [id]);
+  const row = await queryOne<DbReportingReportExecution>(`SELECT * FROM "reportingReportExecution" WHERE "reportExecutionId" = $1`, [id]);
   return row ? mapExecutionRow(row) : null;
 }
 

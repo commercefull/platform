@@ -2,7 +2,7 @@ import { query, queryOne } from '../../../../libs/db';
 import { unixTimestamp } from '../../../../libs/date';
 
 // Import types from generated DB types - single source of truth
-import { CustomerGroupMembership as DbCustomerGroupMembership } from '../../../../libs/db/types';
+import type { CustomerGroupMembership as DbCustomerGroupMembership } from '../../../../libs/db/types';
 import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
@@ -17,7 +17,7 @@ type CustomerGroupMembershipUpdateParams = Partial<Pick<CustomerGroupMembership,
 
 class CustomerGroupMembershipRepo {
   async findById(id: string): Promise<CustomerGroupMembership | null> {
-    return await queryOne<CustomerGroupMembership>(
+    return await queryOne<DbCustomerGroupMembership>(
       `SELECT * FROM "customerGroupMembership" WHERE "customerGroupMembershipId" = $1 AND "deletedAt" IS NULL`,
       [id],
     );
@@ -27,18 +27,18 @@ class CustomerGroupMembershipRepo {
     let sql = `SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1 AND "deletedAt" IS NULL`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "createdAt" DESC`;
-    return (await query<CustomerGroupMembership[]>(sql, [customerId])) || [];
+    return (await query<DbCustomerGroupMembership[]>(sql, [customerId])) || [];
   }
 
   async findByGroupId(customerGroupId: string, activeOnly = false): Promise<CustomerGroupMembership[]> {
     let sql = `SELECT * FROM "customerGroupMembership" WHERE "customerGroupId" = $1 AND "deletedAt" IS NULL`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "createdAt" DESC`;
-    return (await query<CustomerGroupMembership[]>(sql, [customerGroupId])) || [];
+    return (await query<DbCustomerGroupMembership[]>(sql, [customerGroupId])) || [];
   }
 
   async findByCustomerAndGroup(customerId: string, customerGroupId: string): Promise<CustomerGroupMembership | null> {
-    return await queryOne<CustomerGroupMembership>(
+    return await queryOne<DbCustomerGroupMembership>(
       `SELECT * FROM "customerGroupMembership" WHERE "customerId" = $1 AND "customerGroupId" = $2 AND "deletedAt" IS NULL`,
       [customerId, customerGroupId],
     );
@@ -63,7 +63,7 @@ class CustomerGroupMembershipRepo {
       throw new CustomerValidationError('Customer is already a member of this group');
     }
 
-    const result = await queryOne<CustomerGroupMembership>(
+    const result = await queryOne<DbCustomerGroupMembership>(
       `INSERT INTO "customerGroupMembership" (
         "customerId", "customerGroupId", "isActive", "expiresAt", "addedBy", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -91,7 +91,7 @@ class CustomerGroupMembershipRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<CustomerGroupMembership>(
+    return await queryOne<DbCustomerGroupMembership>(
       `UPDATE "customerGroupMembership" SET ${updateFields.join(', ')} 
        WHERE "customerGroupMembershipId" = $${paramIndex} AND "deletedAt" IS NULL RETURNING *`,
       values,

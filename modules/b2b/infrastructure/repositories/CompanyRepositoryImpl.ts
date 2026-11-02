@@ -1,31 +1,49 @@
+import type { B2BCompany as DbB2bCompany } from '../../../../libs/db/types';
 import { query, queryOne } from '../../../../libs/db';
 import { Company, CompanyProps } from '../../domain/entities/Company';
 import type { CompanyRepository } from '../../domain/repositories/B2BRepository';
 
+function rowToProps(row: DbB2bCompany): CompanyProps {
+  return {
+    ...row,
+    legalName: row.legalName ?? undefined,
+    taxId: row.taxId ?? undefined,
+    status: row.status as CompanyProps['status'],
+    paymentTerms: row.paymentTerms as CompanyProps['paymentTerms'],
+    creditLimitCents: row.creditLimitCents ?? undefined,
+    billingAddress: (row.billingAddress as CompanyProps['billingAddress']) ?? undefined,
+    shippingAddress: (row.shippingAddress as CompanyProps['shippingAddress']) ?? undefined,
+    contactEmail: row.contactEmail ?? undefined,
+    contactPhone: row.contactPhone ?? undefined,
+    website: row.website ?? undefined,
+    parentId: row.parentId ?? undefined,
+  };
+}
+
 export class CompanyRepositoryImpl implements CompanyRepository {
   async findById(companyId: string): Promise<Company | null> {
-    const row = await queryOne<CompanyProps>(`SELECT * FROM "b2bCompany" WHERE "companyId" = $1`, [companyId]);
-    return row ? Company.reconstitute(row) : null;
+    const row = await queryOne<DbB2bCompany>(`SELECT * FROM "b2bCompany" WHERE "companyId" = $1`, [companyId]);
+    return row ? Company.reconstitute(rowToProps(row)) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<Company[]> {
-    const rows = await query<CompanyProps[]>(`SELECT * FROM "b2bCompany" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
+    const rows = await query<DbB2bCompany[]>(`SELECT * FROM "b2bCompany" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
       organizationId,
     ]);
-    return (rows ?? []).map(r => Company.reconstitute(r));
+    return (rows ?? []).map(r => Company.reconstitute(rowToProps(r)));
   }
 
   async findByName(name: string, organizationId: string): Promise<Company | null> {
-    const row = await queryOne<CompanyProps>(`SELECT * FROM "b2bCompany" WHERE "name" = $1 AND "organizationId" = $2`, [
+    const row = await queryOne<DbB2bCompany>(`SELECT * FROM "b2bCompany" WHERE "name" = $1 AND "organizationId" = $2`, [
       name,
       organizationId,
     ]);
-    return row ? Company.reconstitute(row) : null;
+    return row ? Company.reconstitute(rowToProps(row)) : null;
   }
 
   async findByParentId(parentId: string): Promise<Company[]> {
-    const rows = await query<CompanyProps[]>(`SELECT * FROM "b2bCompany" WHERE "parentId" = $1 ORDER BY "createdAt" DESC`, [parentId]);
-    return (rows ?? []).map(r => Company.reconstitute(r));
+    const rows = await query<DbB2bCompany[]>(`SELECT * FROM "b2bCompany" WHERE "parentId" = $1 ORDER BY "createdAt" DESC`, [parentId]);
+    return (rows ?? []).map(r => Company.reconstitute(rowToProps(r)));
   }
 
   async save(company: Company): Promise<void> {

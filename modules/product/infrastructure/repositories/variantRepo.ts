@@ -1,6 +1,8 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductVariant } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
+import type { ProductVariant as DbProductVariant } from '../../../../libs/db/types';
+
 
 // Use ProductVariant type directly from libs/db/types.ts
 export type { ProductVariant };
@@ -10,23 +12,23 @@ type UpdateProps = Partial<Omit<CreateProps, 'productId'>>;
 
 export class VariantRepo {
   async findOne(id: string): Promise<ProductVariant | null> {
-    return queryOne<ProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
+    return queryOne<DbProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1`, [id]);
   }
 
   async findBySku(sku: string): Promise<ProductVariant | null> {
-    return queryOne<ProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "sku" = $1`, [sku]);
+    return queryOne<DbProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "sku" = $1`, [sku]);
   }
 
   async findByProduct(productId: string): Promise<ProductVariant[]> {
-    return (await query<ProductVariant[]>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productId" = $1`, [productId])) || [];
+    return (await query<DbProductVariant[]>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productId" = $1`, [productId])) || [];
   }
 
   async findDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    return queryOne<ProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true`, [productId]);
+    return queryOne<DbProductVariant>(`SELECT * FROM "${Table.ProductVariant}" WHERE "productId" = $1 AND "isDefault" = true`, [productId]);
   }
 
   async findInStock(_minQuantity = 1): Promise<ProductVariant[]> {
-    return (await query<ProductVariant[]>(`SELECT * FROM "${Table.ProductVariant}" WHERE "status" = 'active'`, [])) || [];
+    return (await query<DbProductVariant[]>(`SELECT * FROM "${Table.ProductVariant}" WHERE "status" = 'active'`, [])) || [];
   }
 
   async create(props: CreateProps): Promise<ProductVariant> {
@@ -39,7 +41,7 @@ export class VariantRepo {
       .join(', ');
     const values = [...Object.values(props), now, now];
 
-    const row = await queryOne<ProductVariant>(
+    const row = await queryOne<DbProductVariant>(
       `INSERT INTO "${Table.ProductVariant}" (${columns}, "createdAt", "updatedAt") 
        VALUES (${placeholders}, $${values.length - 1}, $${values.length}) 
        RETURNING *`,
@@ -66,13 +68,13 @@ export class VariantRepo {
     }
 
     values.push(id);
-    return queryOne<ProductVariant>(
+    return queryOne<DbProductVariant>(
       `UPDATE "${Table.ProductVariant}" SET ${updates.join(', ')} WHERE "productVariantId" = $${paramIndex} RETURNING *`,
       values,
     );
   }
 
   async delete(id: string): Promise<ProductVariant | null> {
-    return queryOne<ProductVariant>(`DELETE FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1 RETURNING *`, [id]);
+    return queryOne<DbProductVariant>(`DELETE FROM "${Table.ProductVariant}" WHERE "productVariantId" = $1 RETURNING *`, [id]);
   }
 }

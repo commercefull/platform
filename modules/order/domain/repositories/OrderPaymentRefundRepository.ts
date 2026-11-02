@@ -16,5 +16,3 @@ export interface OrderPaymentRefund {
 }
 
 export type OrderPaymentRefundCreateParams = Omit<OrderPaymentRefund, 'orderPaymentRefundId' | 'createdAt' | 'updatedAt'>;
-
-

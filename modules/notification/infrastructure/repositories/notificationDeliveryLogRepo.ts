@@ -13,7 +13,7 @@ import type {
   NotificationDeliveryLogCreateParams,
   NotificationDeliveryLogUpdateParams,
 } from '../../domain/repositories/NotificationDeliveryLogRepository';
-export type { } from '../../domain/repositories/NotificationDeliveryLogRepository';
+export type {} from '../../domain/repositories/NotificationDeliveryLogRepository';
 
 const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 

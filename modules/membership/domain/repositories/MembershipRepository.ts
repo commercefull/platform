@@ -2,7 +2,6 @@
  * Membership Repository Interface
  */
 
-
 export type BillingCycle = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'annual' | 'lifetime';
 
 export interface MembershipPlan {
@@ -54,6 +53,3 @@ export interface MembershipPlanBenefit {
   rulesOverride?: Record<string, unknown>;
   notes?: string;
 }
-
-
-

@@ -7,6 +7,12 @@ import {
   PromotionProductDiscountCustomerGroup,
 } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, DiscountNotFoundError } from '../../domain/errors/PromotionErrors';
+import type { PromotionProductDiscount as DbPromotionProductDiscount } from '../../../../libs/db/types';
+import type { PromotionProductDiscountItem as DbPromotionProductDiscountItem } from '../../../../libs/db/types';
+import type { PromotionProductDiscountCustomerGroup as DbPromotionProductDiscountCustomerGroup } from '../../../../libs/db/types';
+
+
+
 
 // Table name constants
 const DISCOUNT_TABLE = Table.PromotionProductDiscount;
@@ -76,7 +82,7 @@ class DiscountRepo {
   async create(input: CreateProductDiscountInput): Promise<PromotionProductDiscount> {
     const now = new Date();
 
-    const discount = await queryOne<PromotionProductDiscount>(
+    const discount = await queryOne<DbPromotionProductDiscount>(
       `INSERT INTO "${DISCOUNT_TABLE}" (
         "promotionId", "name", "description", "discountType", "discountValue",
         "currencyCode", "startDate", "endDate", "isActive", "priority",
@@ -175,7 +181,7 @@ class DiscountRepo {
       return discount;
     }
 
-    const discount = await queryOne<PromotionProductDiscount>(
+    const discount = await queryOne<DbPromotionProductDiscount>(
       `UPDATE "${DISCOUNT_TABLE}" SET ${updateFields.join(', ')} 
        WHERE "promotionProductDiscountId" = $1 RETURNING *`,
       params,
@@ -192,7 +198,7 @@ class DiscountRepo {
    * Find a product discount by ID
    */
   async findById(id: string): Promise<PromotionProductDiscount | null> {
-    return await queryOne<PromotionProductDiscount>(`SELECT * FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
+    return await queryOne<DbPromotionProductDiscount>(`SELECT * FROM "${DISCOUNT_TABLE}" WHERE "promotionProductDiscountId" = $1`, [id]);
   }
 
   /**
@@ -260,7 +266,7 @@ class DiscountRepo {
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
-    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
+    return (await query<DbPromotionProductDiscount[]>(sql, params)) || [];
   }
 
   /**
@@ -309,7 +315,7 @@ class DiscountRepo {
   async addItem(input: CreateDiscountItemInput): Promise<PromotionProductDiscountItem> {
     const now = new Date();
 
-    const item = await queryOne<PromotionProductDiscountItem>(
+    const item = await queryOne<DbPromotionProductDiscountItem>(
       `INSERT INTO "${DISCOUNT_ITEM_TABLE}" (
         "promotionProductDiscountId", "productId", "productVariantId",
         "productCategoryId", "itemType", "createdAt", "updatedAt"
@@ -337,7 +343,7 @@ class DiscountRepo {
    */
   async findItemsByDiscountId(discountId: string): Promise<PromotionProductDiscountItem[]> {
     return (
-      (await query<PromotionProductDiscountItem[]>(`SELECT * FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [
+      (await query<DbPromotionProductDiscountItem[]>(`SELECT * FROM "${DISCOUNT_ITEM_TABLE}" WHERE "promotionProductDiscountId" = $1`, [
         discountId,
       ])) || []
     );
@@ -362,7 +368,7 @@ class DiscountRepo {
   async addCustomerGroup(discountId: string, customerGroupId: string): Promise<PromotionProductDiscountCustomerGroup> {
     const now = new Date();
 
-    const group = await queryOne<PromotionProductDiscountCustomerGroup>(
+    const group = await queryOne<DbPromotionProductDiscountCustomerGroup>(
       `INSERT INTO "${DISCOUNT_CUSTOMER_GROUP_TABLE}" (
         "promotionProductDiscountId", "customerGroupId", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4) RETURNING *`,
@@ -381,7 +387,7 @@ class DiscountRepo {
    */
   async findCustomerGroupsByDiscountId(discountId: string): Promise<PromotionProductDiscountCustomerGroup[]> {
     return (
-      (await query<PromotionProductDiscountCustomerGroup[]>(
+      (await query<DbPromotionProductDiscountCustomerGroup[]>(
         `SELECT * FROM "${DISCOUNT_CUSTOMER_GROUP_TABLE}" WHERE "promotionProductDiscountId" = $1`,
         [discountId],
       )) || []
@@ -429,7 +435,7 @@ class DiscountRepo {
 
     sql += ` ORDER BY d."priority" DESC`;
 
-    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
+    return (await query<DbPromotionProductDiscount[]>(sql, params)) || [];
   }
 
   /**
@@ -460,7 +466,7 @@ class DiscountRepo {
 
     sql += ` ORDER BY d."priority" DESC`;
 
-    return (await query<PromotionProductDiscount[]>(sql, params)) || [];
+    return (await query<DbPromotionProductDiscount[]>(sql, params)) || [];
   }
 
   /**

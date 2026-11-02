@@ -16,7 +16,7 @@ type TaxProviderLogCreateParams = Omit<TaxProviderLog, 'taxProviderLogId' | 'cre
 
 class TaxProviderLogRepo {
   async findById(id: string): Promise<TaxProviderLog | null> {
-    return await queryOne<TaxProviderLog>(`SELECT * FROM "taxProviderLog" WHERE "taxProviderLogId" = $1`, [id]);
+    return await queryOne<DbTaxProviderLog>(`SELECT * FROM "taxProviderLog" WHERE "taxProviderLogId" = $1`, [id]);
   }
 
   async findByMerchant(organizationId: string, provider?: TaxProvider, limit = 100): Promise<TaxProviderLog[]> {
@@ -28,12 +28,12 @@ class TaxProviderLogRepo {
     }
     sql += ` ORDER BY "createdAt" DESC LIMIT $${params.length + 1}`;
     params.push(limit);
-    return (await query<TaxProviderLog[]>(sql, params)) || [];
+    return (await query<DbTaxProviderLog[]>(sql, params)) || [];
   }
 
   async create(params: TaxProviderLogCreateParams): Promise<TaxProviderLog> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxProviderLog>(
+    const result = await queryOne<DbTaxProviderLog>(
       `INSERT INTO "taxProviderLog" (
         "organizationId", "provider", "requestType", "entityType", "entityId", "requestData",
         "responseData", "responseStatus", "isSuccess", "errorCode", "errorMessage",

@@ -6,8 +6,9 @@
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import { Coupon, CouponUsage, DiscountType } from '../../domain/entities/Coupon';
-import { PromotionCoupon, PromotionCouponUsage } from '../../../../libs/db/types';
+import { PromotionCoupon } from '../../../../libs/db/types';
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
+import type { PromotionCoupon as DbPromotionCoupon, PromotionCouponUsage as DbPromotionCouponUsage } from '../../../../libs/db/types';
 
 export interface CouponFilters {
   code?: string;
@@ -21,7 +22,7 @@ export interface CouponFilters {
 
 export class CouponRepository {
   async findById(couponId: string): Promise<Coupon | null> {
-    const row = await queryOne<PromotionCoupon>('SELECT * FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [couponId]);
+    const row = await queryOne<DbPromotionCoupon>('SELECT * FROM "promotionCoupon" WHERE "promotionCouponId" = $1', [couponId]);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -36,7 +37,7 @@ export class CouponRepository {
       sql += ` AND ("organizationId" IS NULL OR "organizationId" = $2)`;
     }
     sql += ' LIMIT 1';
-    const row = await queryOne<PromotionCoupon>(sql, params);
+    const row = await queryOne<DbPromotionCoupon>(sql, params);
 
     if (!row) return null;
     return this.mapToCoupon(row);
@@ -53,7 +54,7 @@ export class CouponRepository {
     const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "promotionCoupon" ${whereClause}`, params);
     const total = parseInt(countResult?.count || '0');
 
-    const rows = await query<PromotionCoupon[]>(
+    const rows = await query<DbPromotionCoupon[]>(
       `SELECT * FROM "promotionCoupon" ${whereClause}
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
        LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
@@ -240,7 +241,7 @@ export class CouponRepository {
   }
 
   async getUsageHistory(couponId: string, limit: number = 50): Promise<CouponUsage[]> {
-    const rows = await query<PromotionCouponUsage[]>(
+    const rows = await query<DbPromotionCouponUsage[]>(
       `SELECT * FROM "promotionCouponUsage" WHERE "promotionCouponId" = $1 ORDER BY "usedAt" DESC LIMIT $2`,
       [couponId, limit],
     );
@@ -265,7 +266,7 @@ export class CouponRepository {
   }
 
   async getActiveCoupons(limit: number = 100): Promise<Coupon[]> {
-    const rows = await query<PromotionCoupon[]>(
+    const rows = await query<DbPromotionCoupon[]>(
       `SELECT * FROM "promotionCoupon"
       WHERE "isActive" = true
       AND ("startDate" IS NULL OR "startDate" <= NOW())

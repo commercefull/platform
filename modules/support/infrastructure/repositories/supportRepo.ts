@@ -16,7 +16,14 @@ import type {
 import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
 import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage } from '../../../../libs/db/types';
 
-export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType, SupportAgent } from '../../domain/repositories/SupportRepository';
+export type {
+  TicketStatus,
+  TicketPriority,
+  TicketCategory,
+  TicketChannel,
+  SenderType,
+  SupportAgent,
+} from '../../domain/repositories/SupportRepository';
 // Types
 // ============================================================================
 
@@ -623,4 +630,3 @@ export async function getAttachments(supportTicketId: string): Promise<SupportAt
   );
   return (rows || []).map(mapToAttachment);
 }
-

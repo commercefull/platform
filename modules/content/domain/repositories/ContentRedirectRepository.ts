@@ -7,9 +7,7 @@
 import type { ContentRedirect } from '../entities/ContentModel';
 
 type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
-type ContentRedirectUpdateParams = Partial<
-  Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>
->;
+type ContentRedirectUpdateParams = Partial<Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>>;
 
 export interface IContentRedirectRepository {
   findRedirectById(id: string): Promise<ContentRedirect | null>;

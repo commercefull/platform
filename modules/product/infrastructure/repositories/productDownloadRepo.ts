@@ -10,7 +10,7 @@ export type ProductDownloadUpdateParams = Partial<Omit<ProductDownload, 'product
 
 class ProductDownloadRepo {
   async findById(id: string): Promise<ProductDownload | null> {
-    return await queryOne<ProductDownload>(`SELECT * FROM "productDownload" WHERE "productDownloadId" = $1`, [id]);
+    return await queryOne<DbProductDownload>(`SELECT * FROM "productDownload" WHERE "productDownloadId" = $1`, [id]);
   }
 
   async findByProductId(productId: string, productVariantId?: string, activeOnly = false): Promise<ProductDownload[]> {
@@ -27,20 +27,20 @@ class ProductDownloadRepo {
     }
 
     sql += ` ORDER BY "sortOrder" ASC, "name" ASC`;
-    return (await query<ProductDownload[]>(sql, params)) || [];
+    return (await query<DbProductDownload[]>(sql, params)) || [];
   }
 
   async findByVariantId(productVariantId: string, activeOnly = false): Promise<ProductDownload[]> {
     let sql = `SELECT * FROM "productDownload" WHERE "productVariantId" = $1`;
     if (activeOnly) sql += ` AND "isActive" = true`;
     sql += ` ORDER BY "sortOrder" ASC`;
-    return (await query<ProductDownload[]>(sql, [productVariantId])) || [];
+    return (await query<DbProductDownload[]>(sql, [productVariantId])) || [];
   }
 
   async create(params: ProductDownloadCreateParams): Promise<ProductDownload> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ProductDownload>(
+    const result = await queryOne<DbProductDownload>(
       `INSERT INTO "productDownload" (
         "productId", "productVariantId", "name", "fileUrl", "filePath", "fileSize", "mimeType",
         "maxDownloads", "daysValid", "isActive", "sampleUrl", "sortOrder", "createdAt", "updatedAt"
@@ -84,7 +84,7 @@ class ProductDownloadRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<ProductDownload>(
+    return await queryOne<DbProductDownload>(
       `UPDATE "productDownload" SET ${updateFields.join(', ')} WHERE "productDownloadId" = $${paramIndex} RETURNING *`,
       values,
     );

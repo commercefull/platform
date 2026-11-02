@@ -7,6 +7,7 @@ import { queryOne, query } from '../../../../libs/db';
 import { ContentMedia, ContentMediaFolder } from '../../../../libs/db/types';
 import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateContentError, ContentValidationError } from '../../domain/errors/ContentErrors';
+import type { ContentMedia as DbContentMedia, ContentMediaFolder as DbContentMediaFolder } from '../../../../libs/db/types';
 
 // ============================================================================
 // Types
@@ -24,7 +25,7 @@ export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'c
 export class ContentMediaRepo {
   // Media methods
   async findMediaById(id: string): Promise<ContentMedia | null> {
-    return queryOne<ContentMedia>('SELECT * FROM "contentMedia" WHERE "contentMediaId" = $1', [id]);
+    return queryOne<DbContentMedia>('SELECT * FROM "contentMedia" WHERE "contentMediaId" = $1', [id]);
   }
 
   async findAllMedia(folderId?: string, fileType?: string, limit: number = 50, offset: number = 0): Promise<ContentMedia[]> {
@@ -50,7 +51,7 @@ export class ContentMediaRepo {
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(limit, offset);
 
-    const results = await query<ContentMedia[]>(sql, params);
+    const results = await query<DbContentMedia[]>(sql, params);
     return results || [];
   }
 
@@ -61,14 +62,14 @@ export class ContentMediaRepo {
       ORDER BY "createdAt" DESC 
       LIMIT $2
     `;
-    const results = await query<ContentMedia[]>(sql, [`%${searchTerm}%`, limit]);
+    const results = await query<DbContentMedia[]>(sql, [`%${searchTerm}%`, limit]);
     return results || [];
   }
 
   async createMedia(params: ContentMediaCreateParams): Promise<ContentMedia> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ContentMedia>(
+    const result = await queryOne<DbContentMedia>(
       `INSERT INTO "contentMedia" 
       ("title", "fileName", "filePath", "fileType", "fileSize", "width", "height", 
        "duration", "altText", "caption", "description", "contentMediaFolderId", 
@@ -149,7 +150,7 @@ export class ContentMediaRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentMedia>(
+    const result = await queryOne<DbContentMedia>(
       `UPDATE "contentMedia" SET ${updateFields.join(', ')} WHERE "contentMediaId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -170,7 +171,7 @@ export class ContentMediaRepo {
 
   // Folder methods
   async findFolderById(id: string): Promise<ContentMediaFolder | null> {
-    return queryOne<ContentMediaFolder>('SELECT * FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1', [id]);
+    return queryOne<DbContentMediaFolder>('SELECT * FROM "contentMediaFolder" WHERE "contentMediaFolderId" = $1', [id]);
   }
 
   async findAllFolders(parentId?: string): Promise<ContentMediaFolder[]> {
@@ -186,14 +187,14 @@ export class ContentMediaRepo {
 
     sql += ' ORDER BY "sortOrder" ASC, "name" ASC';
 
-    const results = await query<ContentMediaFolder[]>(sql, params);
+    const results = await query<DbContentMediaFolder[]>(sql, params);
     return results || [];
   }
 
   async createFolder(params: ContentMediaFolderCreateParams): Promise<ContentMediaFolder> {
     const now = unixTimestamp();
 
-    const result = await queryOne<ContentMediaFolder>(
+    const result = await queryOne<DbContentMediaFolder>(
       `INSERT INTO "contentMediaFolder" 
       ("name", "parentId", "path", "depth", "sortOrder", "createdAt", "updatedAt", "createdBy", "updatedBy") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
@@ -241,7 +242,7 @@ export class ContentMediaRepo {
     values.push(now);
     values.push(id);
 
-    const result = await queryOne<ContentMediaFolder>(
+    const result = await queryOne<DbContentMediaFolder>(
       `UPDATE "contentMediaFolder" SET ${updateFields.join(', ')} WHERE "contentMediaFolderId" = $${paramIndex} RETURNING *`,
       values,
     );

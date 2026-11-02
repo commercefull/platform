@@ -5,8 +5,7 @@ import type {
   NotificationPreference,
   NotificationPreferenceUpsertParams,
 } from '../../domain/repositories/NotificationPreferenceRepository';
-export type {
-  NotificationPreference} from '../../domain/repositories/NotificationPreferenceRepository';
+export type { NotificationPreference } from '../../domain/repositories/NotificationPreferenceRepository';
 
 function mapToPreference(row: DbNotificationPreference): NotificationPreference {
   return {

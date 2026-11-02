@@ -17,7 +17,7 @@ class ProductMediaRepo {
    * Find media by ID
    */
   async findById(productMediaId: string): Promise<ProductMedia | null> {
-    return await queryOne<ProductMedia>(`SELECT * FROM "productMedia" WHERE "productMediaId" = $1`, [productMediaId]);
+    return await queryOne<DbProductMedia>(`SELECT * FROM "productMedia" WHERE "productMediaId" = $1`, [productMediaId]);
   }
 
   /**
@@ -34,7 +34,7 @@ class ProductMediaRepo {
 
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" ASC`;
 
-    const results = await query<ProductMedia[]>(sql, params);
+    const results = await query<DbProductMedia[]>(sql, params);
     return results || [];
   }
 
@@ -52,7 +52,7 @@ class ProductMediaRepo {
 
     sql += ` ORDER BY "sortOrder" ASC, "createdAt" ASC`;
 
-    const results = await query<ProductMedia[]>(sql, params);
+    const results = await query<DbProductMedia[]>(sql, params);
     return results || [];
   }
 
@@ -60,7 +60,7 @@ class ProductMediaRepo {
    * Find primary media for product
    */
   async findPrimaryByProductId(productId: string): Promise<ProductMedia | null> {
-    return await queryOne<ProductMedia>(
+    return await queryOne<DbProductMedia>(
       `SELECT * FROM "productMedia" 
        WHERE "productId" = $1 AND "isPrimary" = true AND "productVariantId" IS NULL`,
       [productId],
@@ -71,7 +71,7 @@ class ProductMediaRepo {
    * Find primary media for variant
    */
   async findPrimaryByVariantId(productVariantId: string): Promise<ProductMedia | null> {
-    return await queryOne<ProductMedia>(
+    return await queryOne<DbProductMedia>(
       `SELECT * FROM "productMedia" 
        WHERE "productVariantId" = $1 AND "isPrimary" = true`,
       [productVariantId],
@@ -82,7 +82,7 @@ class ProductMediaRepo {
    * Find media by type
    */
   async findByType(type: MediaType, limit: number = 50, offset: number = 0): Promise<ProductMedia[]> {
-    const results = await query<ProductMedia[]>(
+    const results = await query<DbProductMedia[]>(
       `SELECT * FROM "productMedia" 
        WHERE "type" = $1 
        ORDER BY "createdAt" DESC 
@@ -107,7 +107,7 @@ class ProductMediaRepo {
       }
     }
 
-    const result = await queryOne<ProductMedia>(
+    const result = await queryOne<DbProductMedia>(
       `INSERT INTO "productMedia" (
         "productId", "productVariantId", "type", "url", "filename",
         "filesize", "mimeType", "altText", "title", "sortOrder",
@@ -177,7 +177,7 @@ class ProductMediaRepo {
     values.push(unixTimestamp());
     values.push(productMediaId);
 
-    const result = await queryOne<ProductMedia>(
+    const result = await queryOne<DbProductMedia>(
       `UPDATE "productMedia" 
        SET ${updateFields.join(', ')}
        WHERE "productMediaId" = $${paramIndex}

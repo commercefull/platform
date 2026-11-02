@@ -1,7 +1,50 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import { PricingRule, PricingRuleCreateProps, PricingRuleStatus, PricingRuleUpdateProps } from '../../domain/pricingRule';
+import {
+  PricingRule,
+  PricingRuleCreateProps,
+  PricingRuleScope,
+  PricingRuleStatus,
+  PricingRuleUpdateProps,
+} from '../../domain/pricingRule';
 import { FailedToCreatePricingError, PricingRuleNotFoundError } from '../../domain/errors/PricingErrors';
+import type { PricingRule as DbPricingRule } from '../../../../libs/db/types';
+
+function rowToPricingRule(row: DbPricingRule): PricingRule {
+  const now = new Date();
+  const status = !row.isActive
+    ? PricingRuleStatus.INACTIVE
+    : row.startDate && row.startDate > now
+      ? PricingRuleStatus.SCHEDULED
+      : row.endDate && row.endDate < now
+        ? PricingRuleStatus.EXPIRED
+        : PricingRuleStatus.ACTIVE;
+  return {
+    id: row.pricingRuleId,
+    pricingRuleId: row.pricingRuleId,
+    name: row.name,
+    description: row.description ?? undefined,
+    ruleType: row.ruleType,
+    scope: row.scope as PricingRuleScope,
+    status,
+    isActive: row.isActive,
+    priority: row.priority ?? 0,
+    conditions: [],
+    adjustments: [],
+    productIds: row.productIds ?? undefined,
+    categoryIds: row.categoryIds ?? undefined,
+    customerIds: row.customerIds ?? undefined,
+    customerGroupIds: row.customerGroupIds ?? undefined,
+    startDate: row.startDate ?? undefined,
+    endDate: row.endDate ?? undefined,
+    minimumQuantity: row.minimumQuantity ?? undefined,
+    maximumQuantity: row.maximumQuantity ?? undefined,
+    minimumOrderAmountCents: row.minimumOrderAmountCents ?? undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
 
 /**
  * Pricing Rule Repository
@@ -21,8 +64,8 @@ class PricingRuleRepo {
       WHERE "pricingRuleId" = $1
     `;
 
-    const result = await queryOne<PricingRule>(sql, [id]);
-    return result;
+    const result = await queryOne<DbPricingRule>(sql, [id]);
+    return result ? rowToPricingRule(result) : null;
   }
 
   /**
@@ -83,8 +126,8 @@ class PricingRuleRepo {
       ORDER BY "priority" DESC, "createdAt" ASC
     `;
 
-    const results = await query<PricingRule[]>(sql, params);
-    return results || [];
+    const results = await query<DbPricingRule[]>(sql, params);
+    return (results || []).map(rowToPricingRule);
   }
 
   /**
@@ -185,8 +228,8 @@ class PricingRuleRepo {
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
 
-    const results = await query<PricingRule[]>(sql, params);
-    return results || [];
+    const results = await query<DbPricingRule[]>(sql, params);
+    return (results || []).map(rowToPricingRule);
   }
 
   /**
@@ -298,13 +341,13 @@ class PricingRuleRepo {
       now,
     ];
 
-    const result = await queryOne<PricingRule>(sql, values);
+    const result = await queryOne<DbPricingRule>(sql, values);
 
     if (!result) {
       throw new FailedToCreatePricingError('Failed to create pricing rule');
     }
 
-    return result;
+    return rowToPricingRule(result);
   }
 
   /**
@@ -354,13 +397,13 @@ class PricingRuleRepo {
       RETURNING *
     `;
 
-    const result = await queryOne<PricingRule>(sql, values);
+    const result = await queryOne<DbPricingRule>(sql, values);
 
     if (!result) {
       throw new PricingRuleNotFoundError(id);
     }
 
-    return result;
+    return rowToPricingRule(result);
   }
 
   /**

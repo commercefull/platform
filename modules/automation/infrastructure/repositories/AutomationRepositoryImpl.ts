@@ -20,7 +20,9 @@ function rowToEntity(row: RuleDbRow): AutomationRule {
 
 export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
   async findById(id: string): Promise<AutomationRule | null> {
-    const row = await queryOne<RuleDbRow>(`SELECT * FROM "automationRule" WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL`, [id]);
+    const row = await queryOne<DbAutomationRule>(`SELECT * FROM "automationRule" WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL`, [
+      id,
+    ]);
     return row ? rowToEntity(row) : null;
   }
 
@@ -50,7 +52,7 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
 
   async create(rule: AutomationRule): Promise<AutomationRule> {
     const props = rule.toJSON();
-    const row = await queryOne<RuleDbRow>(
+    const row = await queryOne<DbAutomationRule>(
       `INSERT INTO "automationRule" (
         "name", "description", "triggerType", "triggerConfig", "conditions",
         "conditionMatchMode", "actions", "actionExecutionMode", "isActive",
@@ -87,7 +89,7 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
 
   async update(rule: AutomationRule): Promise<AutomationRule | null> {
     const props = rule.toJSON();
-    const row = await queryOne<RuleDbRow>(
+    const row = await queryOne<DbAutomationRule>(
       `UPDATE "automationRule" SET
         "name" = $1, "description" = $2, "triggerConfig" = $3, "conditions" = $4,
         "conditionMatchMode" = $5, "actions" = $6, "actionExecutionMode" = $7,
@@ -124,7 +126,7 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
   }
 
   async activate(id: string): Promise<AutomationRule | null> {
-    const row = await queryOne<RuleDbRow>(
+    const row = await queryOne<DbAutomationRule>(
       `UPDATE "automationRule" SET "isActive" = true, "updatedAt" = NOW() WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL RETURNING *`,
       [id],
     );
@@ -132,7 +134,7 @@ export class AutomationRuleRepositoryImpl implements AutomationRuleRepository {
   }
 
   async deactivate(id: string): Promise<AutomationRule | null> {
-    const row = await queryOne<RuleDbRow>(
+    const row = await queryOne<DbAutomationRule>(
       `UPDATE "automationRule" SET "isActive" = false, "updatedAt" = NOW() WHERE "automationRuleId" = $1 AND "deletedAt" IS NULL RETURNING *`,
       [id],
     );

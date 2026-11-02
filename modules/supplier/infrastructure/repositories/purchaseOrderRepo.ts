@@ -99,7 +99,7 @@ export class SupplierPurchaseOrderRepo {
    * Find purchase order by ID
    */
   async findById(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrder | null> {
-    return await queryOne<SupplierPurchaseOrder>(`SELECT * FROM "supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1`, [
+    return await queryOne<DbSupplierPurchaseOrder>(`SELECT * FROM "supplierPurchaseOrder" WHERE "supplierPurchaseOrderId" = $1`, [
       supplierPurchaseOrderId,
     ]);
   }
@@ -108,14 +108,14 @@ export class SupplierPurchaseOrderRepo {
    * Find purchase order by PO number
    */
   async findByPONumber(poNumber: string): Promise<SupplierPurchaseOrder | null> {
-    return await queryOne<SupplierPurchaseOrder>(`SELECT * FROM "supplierPurchaseOrder" WHERE "poNumber" = $1`, [poNumber]);
+    return await queryOne<DbSupplierPurchaseOrder>(`SELECT * FROM "supplierPurchaseOrder" WHERE "poNumber" = $1`, [poNumber]);
   }
 
   /**
    * Find purchase orders by supplier
    */
   async findBySupplierId(supplierId: string, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
-    const results = await query<SupplierPurchaseOrder[]>(
+    const results = await query<DbSupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" 
        WHERE "supplierId" = $1 
        ORDER BY "createdAt" DESC 
@@ -129,7 +129,7 @@ export class SupplierPurchaseOrderRepo {
    * Find purchase orders by warehouse
    */
   async findByWarehouseId(warehouseId: string, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
-    const results = await query<SupplierPurchaseOrder[]>(
+    const results = await query<DbSupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" 
        WHERE "distributionWarehouseId" = $1 
        ORDER BY "createdAt" DESC 
@@ -143,7 +143,7 @@ export class SupplierPurchaseOrderRepo {
    * Find purchase orders by status
    */
   async findByStatus(status: SupplierPurchaseOrderStatus, limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
-    const results = await query<SupplierPurchaseOrder[]>(
+    const results = await query<DbSupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" 
        WHERE "status" = $1 
        ORDER BY "createdAt" DESC 
@@ -157,7 +157,7 @@ export class SupplierPurchaseOrderRepo {
    * Find all purchase orders with pagination
    */
   async findAll(limit: number = 50, offset: number = 0): Promise<SupplierPurchaseOrder[]> {
-    const results = await query<SupplierPurchaseOrder[]>(
+    const results = await query<DbSupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
@@ -169,7 +169,7 @@ export class SupplierPurchaseOrderRepo {
    */
   async findOverdue(): Promise<SupplierPurchaseOrder[]> {
     const now = unixTimestamp();
-    const results = await query<SupplierPurchaseOrder[]>(
+    const results = await query<DbSupplierPurchaseOrder[]>(
       `SELECT * FROM "supplierPurchaseOrder" 
        WHERE "status" NOT IN ('completed', 'cancelled') 
        AND "expectedDeliveryDate" IS NOT NULL 
@@ -187,7 +187,7 @@ export class SupplierPurchaseOrderRepo {
     const now = unixTimestamp();
     const poNumber = await this.generatePONumber();
 
-    const result = await queryOne<SupplierPurchaseOrder>(
+    const result = await queryOne<DbSupplierPurchaseOrder>(
       `INSERT INTO "supplierPurchaseOrder" (
         "poNumber", "supplierId", "distributionWarehouseId", "status", "orderType", "priority",
         "orderDate", "expectedDeliveryDate", "deliveryDate", "shippingMethod",
@@ -257,7 +257,7 @@ export class SupplierPurchaseOrderRepo {
     values.push(unixTimestamp());
     values.push(supplierPurchaseOrderId);
 
-    const result = await queryOne<SupplierPurchaseOrder>(
+    const result = await queryOne<DbSupplierPurchaseOrder>(
       `UPDATE "supplierPurchaseOrder" 
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderId" = $${paramIndex}
@@ -308,7 +308,7 @@ export class SupplierPurchaseOrderRepo {
     values.push(now);
     values.push(supplierPurchaseOrderId);
 
-    const result = await queryOne<SupplierPurchaseOrder>(
+    const result = await queryOne<DbSupplierPurchaseOrder>(
       `UPDATE "supplierPurchaseOrder" 
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderId" = $${paramIndex}
@@ -372,7 +372,7 @@ export class SupplierPurchaseOrderRepo {
    * Find item by ID
    */
   async findItemById(supplierPurchaseOrderItemId: string): Promise<SupplierPurchaseOrderItem | null> {
-    return await queryOne<SupplierPurchaseOrderItem>(`SELECT * FROM "supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`, [
+    return await queryOne<DbSupplierPurchaseOrderItem>(`SELECT * FROM "supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`, [
       supplierPurchaseOrderItemId,
     ]);
   }
@@ -381,7 +381,7 @@ export class SupplierPurchaseOrderRepo {
    * Find all items for purchase order
    */
   async findItemsByOrderId(supplierPurchaseOrderId: string): Promise<SupplierPurchaseOrderItem[]> {
-    const results = await query<SupplierPurchaseOrderItem[]>(
+    const results = await query<DbSupplierPurchaseOrderItem[]>(
       `SELECT * FROM "supplierPurchaseOrderItem" 
        WHERE "supplierPurchaseOrderId" = $1 
        ORDER BY "createdAt" ASC`,
@@ -401,7 +401,7 @@ export class SupplierPurchaseOrderRepo {
     const discountCents = params.discountCents || 0;
     const totalCents = params.totalCents ?? quantity * unitCostCents + taxCents - discountCents;
 
-    const result = await queryOne<SupplierPurchaseOrderItem>(
+    const result = await queryOne<DbSupplierPurchaseOrderItem>(
       `INSERT INTO "supplierPurchaseOrderItem" (
         "supplierPurchaseOrderId", "supplierProductId", "productId", "productVariantId",
         "sku", "supplierSku", "name", "description",
@@ -468,7 +468,7 @@ export class SupplierPurchaseOrderRepo {
     values.push(unixTimestamp());
     values.push(supplierPurchaseOrderItemId);
 
-    const result = await queryOne<SupplierPurchaseOrderItem>(
+    const result = await queryOne<DbSupplierPurchaseOrderItem>(
       `UPDATE "supplierPurchaseOrderItem" 
        SET ${updateFields.join(', ')}
        WHERE "supplierPurchaseOrderItemId" = $${paramIndex}

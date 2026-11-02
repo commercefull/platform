@@ -11,45 +11,73 @@ import type {
   RecommendationRuleCreateProps,
   RecommendationRuleProps,
   RecommendationRuleUpdateProps,
+  RulePriceBand,
+  RuleSourceType,
+  RuleTargetSort,
+  RuleTargetType,
 } from '../../domain/entities/RecommendationRule';
-import type { RecommendationExclusionCreateProps, RecommendationExclusionProps } from '../../domain/entities/RecommendationExclusion';
+import type {
+  ExclusionScope,
+  RecommendationExclusionCreateProps,
+  RecommendationExclusionProps,
+} from '../../domain/entities/RecommendationExclusion';
+import type {
+  RecommendationExclusion as DbRecommendationExclusion,
+  RecommendationRule as DbRecommendationRule,
+} from '../../../../libs/db/types';
+
+function rowToRule(row: DbRecommendationRule): RecommendationRuleProps {
+  return {
+    ...row,
+    sourceType: row.sourceType as RuleSourceType,
+    targetType: row.targetType as RuleTargetType,
+    targetSort: row.targetSort as RuleTargetSort,
+    priceBand: row.priceBand as RulePriceBand,
+  };
+}
+
+function rowToExclusion(row: DbRecommendationExclusion): RecommendationExclusionProps {
+  return { ...row, scope: row.scope as ExclusionScope };
+}
 
 class RecommendationRuleRepository implements RuleRepository {
   async list(organizationId: string): Promise<RecommendationRuleProps[]> {
-    const rows = await query<RecommendationRuleProps[]>(
+    const rows = await query<DbRecommendationRule[]>(
       `SELECT * FROM "recommendationRule" WHERE "organizationId" = $1 ORDER BY priority DESC, "createdAt" ASC`,
       [organizationId],
     );
-    return rows || [];
+    return (rows || []).map(rowToRule);
   }
 
   async findById(recommendationRuleId: string): Promise<RecommendationRuleProps | null> {
-    return queryOne<RecommendationRuleProps>(`SELECT * FROM "recommendationRule" WHERE "recommendationRuleId" = $1`, [
-      recommendationRuleId,
-    ]);
+    const row = await queryOne<DbRecommendationRule>(
+      `SELECT * FROM "recommendationRule" WHERE "recommendationRuleId" = $1`,
+      [recommendationRuleId],
+    );
+    return row ? rowToRule(row) : null;
   }
 
   async listActiveForSource(organizationId: string, sourceType: string, sourceId: string): Promise<RecommendationRuleProps[]> {
-    const rows = await query<RecommendationRuleProps[]>(
+    const rows = await query<DbRecommendationRule[]>(
       `SELECT * FROM "recommendationRule"
        WHERE "organizationId" = $1 AND "sourceType" = $2 AND "sourceId" = $3 AND "isActive" = true
        ORDER BY priority DESC`,
       [organizationId, sourceType, sourceId],
     );
-    return rows || [];
+    return (rows || []).map(rowToRule);
   }
 
   async listActive(organizationId: string): Promise<RecommendationRuleProps[]> {
-    const rows = await query<RecommendationRuleProps[]>(
+    const rows = await query<DbRecommendationRule[]>(
       `SELECT * FROM "recommendationRule" WHERE "organizationId" = $1 AND "isActive" = true ORDER BY priority DESC`,
       [organizationId],
     );
-    return rows || [];
+    return (rows || []).map(rowToRule);
   }
 
   async create(props: RecommendationRuleCreateProps): Promise<RecommendationRuleProps> {
     const now = unixTimestamp();
-    const result = await queryOne<RecommendationRuleProps>(
+    const result = await queryOne<DbRecommendationRule>(
       `INSERT INTO "recommendationRule"
          ("organizationId", "storeId", name, "sourceType", "sourceId", "targetType", "targetId",
           "relationType", "targetSort", "priceBand", "maxItems", priority, "isActive", "createdAt", "updatedAt")
@@ -73,7 +101,7 @@ class RecommendationRuleRepository implements RuleRepository {
       ],
     );
     if (!result) throw new Error('Failed to create recommendation rule');
-    return result;
+    return rowToRule(result);
   }
 
   async update(recommendationRuleId: string, props: RecommendationRuleUpdateProps): Promise<RecommendationRuleProps | null> {
@@ -103,10 +131,11 @@ class RecommendationRuleRepository implements RuleRepository {
     if (fields.length === 0) return this.findById(recommendationRuleId);
     fields.push(`"updatedAt" = $${i++}`);
     values.push(unixTimestamp(), recommendationRuleId);
-    return queryOne<RecommendationRuleProps>(
+    const row = await queryOne<DbRecommendationRule>(
       `UPDATE "recommendationRule" SET ${fields.join(', ')} WHERE "recommendationRuleId" = $${i} RETURNING *`,
       values,
     );
+    return row ? rowToRule(row) : null;
   }
 
   async delete(recommendationRuleId: string): Promise<boolean> {
@@ -120,16 +149,16 @@ class RecommendationRuleRepository implements RuleRepository {
 
 class RecommendationExclusionRepository implements ExclusionRepository {
   async list(organizationId: string): Promise<RecommendationExclusionProps[]> {
-    const rows = await query<RecommendationExclusionProps[]>(
+    const rows = await query<DbRecommendationExclusion[]>(
       `SELECT * FROM "recommendationExclusion" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
       [organizationId],
     );
-    return rows || [];
+    return (rows || []).map(rowToExclusion);
   }
 
   async create(props: RecommendationExclusionCreateProps): Promise<RecommendationExclusionProps> {
     const now = unixTimestamp();
-    const result = await queryOne<RecommendationExclusionProps>(
+    const result = await queryOne<DbRecommendationExclusion>(
       `INSERT INTO "recommendationExclusion"
          ("organizationId", "storeId", "productId", "excludedProductId", scope, reason, "createdAt", "updatedAt")
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -138,7 +167,7 @@ class RecommendationExclusionRepository implements ExclusionRepository {
       [props.organizationId, props.storeId ?? null, props.productId, props.excludedProductId, props.scope, props.reason, now, now],
     );
     if (!result) throw new Error('Failed to create recommendation exclusion');
-    return result;
+    return rowToExclusion(result);
   }
 
   async delete(recommendationExclusionId: string): Promise<boolean> {
@@ -150,12 +179,12 @@ class RecommendationExclusionRepository implements ExclusionRepository {
   }
 
   async listForProducts(scope: SignalScope, productIds: string[]): Promise<RecommendationExclusionProps[]> {
-    const rows = await query<RecommendationExclusionProps[]>(
+    const rows = await query<DbRecommendationExclusion[]>(
       `SELECT * FROM "recommendationExclusion"
        WHERE "organizationId" = $1 AND "storeId" IS NOT DISTINCT FROM $2 AND ("productId" = ANY($3) OR scope = 'global')`,
       [scope.organizationId, scope.storeId ?? null, productIds],
     );
-    return rows || [];
+    return (rows || []).map(rowToExclusion);
   }
 }
 

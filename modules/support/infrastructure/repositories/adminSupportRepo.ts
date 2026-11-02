@@ -130,4 +130,3 @@ export async function addTicketMessage(ticketId: string, message: string, sender
     [ticketId],
   );
 }
-

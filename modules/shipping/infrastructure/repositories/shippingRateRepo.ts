@@ -7,6 +7,8 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingRate } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import { calculateRate } from '../../domain/services/calculateRate';
+import type { ShippingRate as DbShippingRate } from '../../../../libs/db/types';
+
 
 export { ShippingRate };
 
@@ -18,7 +20,7 @@ export type UpdateShippingRateInput = Partial<
 const TABLE = Table.ShippingRate;
 
 async function findById(id: string): Promise<ShippingRate | null> {
-  return queryOne<ShippingRate>(`SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`, [id]);
+  return queryOne<DbShippingRate>(`SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`, [id]);
 }
 
 async function findByZone(zoneId: string, activeOnly = false): Promise<ShippingRate[]> {
@@ -27,7 +29,7 @@ async function findByZone(zoneId: string, activeOnly = false): Promise<ShippingR
     sql += ` AND "isActive" = true AND ("validFrom" IS NULL OR "validFrom" <= NOW()) AND ("validTo" IS NULL OR "validTo" >= NOW())`;
   }
   sql += ` ORDER BY "priority" ASC`;
-  return (await query<ShippingRate[]>(sql, [zoneId])) || [];
+  return (await query<DbShippingRate[]>(sql, [zoneId])) || [];
 }
 
 async function findByMethod(methodId: string, activeOnly = false): Promise<ShippingRate[]> {
@@ -36,11 +38,11 @@ async function findByMethod(methodId: string, activeOnly = false): Promise<Shipp
     sql += ` AND "isActive" = true AND ("validFrom" IS NULL OR "validFrom" <= NOW()) AND ("validTo" IS NULL OR "validTo" >= NOW())`;
   }
   sql += ` ORDER BY "priority" ASC`;
-  return (await query<ShippingRate[]>(sql, [methodId])) || [];
+  return (await query<DbShippingRate[]>(sql, [methodId])) || [];
 }
 
 async function findByZoneAndMethod(zoneId: string, methodId: string): Promise<ShippingRate | null> {
-  return queryOne<ShippingRate>(
+  return queryOne<DbShippingRate>(
     `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1 AND "shippingMethodId" = $2 AND "isActive" = true ORDER BY "priority" ASC LIMIT 1`,
     [zoneId, methodId],
   );
@@ -54,7 +56,7 @@ async function findByZoneAndMethod(zoneId: string, methodId: string): Promise<Sh
 async function findByZonesAndMethods(zoneIds: string[], methodIds: string[]): Promise<ShippingRate[]> {
   if (zoneIds.length === 0 || methodIds.length === 0) return [];
   return (
-    (await query<ShippingRate[]>(
+    (await query<DbShippingRate[]>(
       `SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = ANY($1) AND "shippingMethodId" = ANY($2) AND "isActive" = true ORDER BY "priority" ASC`,
       [zoneIds, methodIds],
     )) || []
@@ -77,11 +79,11 @@ async function findActive(zoneId?: string, methodId?: string): Promise<ShippingR
   sql += ` AND ("validFrom" IS NULL OR "validFrom" <= NOW()) AND ("validTo" IS NULL OR "validTo" >= NOW())`;
   sql += ` ORDER BY "priority" ASC`;
 
-  return (await query<ShippingRate[]>(sql, params)) || [];
+  return (await query<DbShippingRate[]>(sql, params)) || [];
 }
 
 async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
-  const result = await queryOne<ShippingRate>(
+  const result = await queryOne<DbShippingRate>(
     `INSERT INTO "${TABLE}" (
       "shippingZoneId", "shippingMethodId", "name", "description", "isActive", "rateType", "baseRateCents",
       "perItemRateCents", "freeThresholdCents", "rateMatrix", "minRateCents", "maxRateCents", "currencyCode",
@@ -132,7 +134,7 @@ async function update(id: string, input: UpdateShippingRateInput): Promise<Shipp
   updateFields.push(`"updatedAt" = NOW()`);
   values.push(id);
 
-  return queryOne<ShippingRate>(
+  return queryOne<DbShippingRate>(
     `UPDATE "${TABLE}" SET ${updateFields.join(', ')} WHERE "shippingRateId" = $${paramIndex} RETURNING *`,
     values,
   );

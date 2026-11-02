@@ -29,22 +29,22 @@ export class NotificationRepo {
   // ============================================================================
 
   async findById(notificationId: string): Promise<Notification | null> {
-    return await queryOne<Notification>('SELECT * FROM notification WHERE "notificationId" = $1', [notificationId]);
+    return await queryOne<DbNotification>('SELECT * FROM notification WHERE "notificationId" = $1', [notificationId]);
   }
 
   async findAll(limit: number = 50, offset: number = 0, type?: string): Promise<Notification[]> {
     const results = type
-      ? await query<Notification[]>('SELECT * FROM notification WHERE type = $3 ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
+      ? await query<DbNotification[]>('SELECT * FROM notification WHERE type = $3 ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
           limit,
           offset,
           type,
         ])
-      : await query<Notification[]>('SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
+      : await query<DbNotification[]>('SELECT * FROM notification ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByUser(userId: string, limit: number = 50): Promise<Notification[]> {
-    const results = await query<Notification[]>('SELECT * FROM notification WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2', [
+    const results = await query<DbNotification[]>('SELECT * FROM notification WHERE "userId" = $1 ORDER BY "createdAt" DESC LIMIT $2', [
       userId,
       limit,
     ]);
@@ -52,7 +52,7 @@ export class NotificationRepo {
   }
 
   async findUnreadByUser(userId: string): Promise<Notification[]> {
-    const results = await query<Notification[]>(
+    const results = await query<DbNotification[]>(
       'SELECT * FROM notification WHERE "userId" = $1 AND "isRead" = false ORDER BY "createdAt" DESC',
       [userId],
     );
@@ -60,7 +60,7 @@ export class NotificationRepo {
   }
 
   async findByUserAndType(userId: string, type: string): Promise<Notification[]> {
-    const results = await query<Notification[]>('SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC', [
+    const results = await query<DbNotification[]>('SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC', [
       userId,
       type,
     ]);
@@ -70,7 +70,7 @@ export class NotificationRepo {
   async create(params: NotificationCreateParams): Promise<Notification> {
     const now = new Date();
 
-    const result = await queryOne<Notification>(
+    const result = await queryOne<DbNotification>(
       `INSERT INTO notification (
         "userId", "userType", type, title, content, channel, "isRead", priority,
         category, data, metadata, "createdAt", "updatedAt"
@@ -126,7 +126,7 @@ export class NotificationRepo {
 
     values.push(notificationId);
 
-    const result = await queryOne<Notification>(
+    const result = await queryOne<DbNotification>(
       `UPDATE notification SET ${updateFields.join(', ')} WHERE "notificationId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -136,7 +136,7 @@ export class NotificationRepo {
 
   async markAsRead(notificationId: string): Promise<Notification | null> {
     const now = new Date();
-    return await queryOne<Notification>(
+    return await queryOne<DbNotification>(
       'UPDATE notification SET "isRead" = true, "readAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *',
       [now, now, notificationId],
     );
@@ -153,7 +153,7 @@ export class NotificationRepo {
 
   async markAsSent(notificationId: string): Promise<Notification | null> {
     const now = new Date();
-    return await queryOne<Notification>('UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *', [
+    return await queryOne<DbNotification>('UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *', [
       now,
       now,
       notificationId,
@@ -184,7 +184,7 @@ export class NotificationRepo {
   }
 
   async findUnsent(limit: number = 50): Promise<Notification[]> {
-    const results = await query<Notification[]>('SELECT * FROM notification WHERE "sentAt" IS NULL ORDER BY "createdAt" ASC LIMIT $1', [
+    const results = await query<DbNotification[]>('SELECT * FROM notification WHERE "sentAt" IS NULL ORDER BY "createdAt" ASC LIMIT $1', [
       limit,
     ]);
     return results || [];

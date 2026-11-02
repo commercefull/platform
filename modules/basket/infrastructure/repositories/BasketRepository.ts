@@ -77,7 +77,7 @@ export class BasketRepo implements BasketRepository {
   }
 
   async findSummaries(limit: number = 20, offset: number = 0): Promise<BasketSummaryRecord[]> {
-    const rows = await query<BasketSummaryRecord[]>(
+    const rows = await query<DbBasket[]>(
       `SELECT "basketId", status, "currencyCode", "customerId", "sessionId", "createdAt", "updatedAt" FROM basket
        ORDER BY "updatedAt" DESC LIMIT $1 OFFSET $2`,
       [limit, offset],

@@ -1,34 +1,65 @@
 import { query, queryOne } from '../../../../libs/db';
-import { Vendor, VendorProps } from '../../domain/entities/Vendor';
+import { Vendor } from '../../domain/entities/Vendor';
+import type {
+  VendorAddress,
+  VendorBankInfo,
+  VendorProps,
+  VendorStats,
+  VendorStatus,
+  VendorTier,
+} from '../../domain/entities/Vendor';
 import type { VendorRepository } from '../../domain/repositories/MarketplaceRepository';
+import type { MarketplaceVendor as DbMarketplaceVendor } from '../../../../libs/db/types';
+
+function rowToProps(row: DbMarketplaceVendor): VendorProps {
+  return {
+    ...row,
+    legalName: row.legalName ?? undefined,
+    taxId: row.taxId ?? undefined,
+    phone: row.phone ?? undefined,
+    website: row.website ?? undefined,
+    logoUrl: row.logoUrl ?? undefined,
+    description: row.description ?? undefined,
+    status: row.status as VendorStatus,
+    tier: row.tier as VendorTier,
+    commissionRate: Number(row.commissionRate),
+    address: (row.address ?? undefined) as VendorAddress | undefined,
+    bankInfo: (row.bankInfo ?? undefined) as VendorBankInfo | undefined,
+    stats: row.stats as unknown as VendorStats,
+    approvedAt: row.approvedAt ?? undefined,
+    suspendedAt: row.suspendedAt ?? undefined,
+    terminatedAt: row.terminatedAt ?? undefined,
+  };
+}
 
 export class VendorRepositoryImpl implements VendorRepository {
   async findById(vendorId: string): Promise<Vendor | null> {
-    const row = await queryOne<VendorProps>(`SELECT * FROM "marketplaceVendor" WHERE "vendorId" = $1`, [vendorId]);
-    return row ? Vendor.reconstitute(row) : null;
+    const row = await queryOne<DbMarketplaceVendor>(`SELECT * FROM "marketplaceVendor" WHERE "vendorId" = $1`, [vendorId]);
+    return row ? Vendor.reconstitute(rowToProps(row)) : null;
   }
 
   async findByOrganizationId(organizationId: string): Promise<Vendor[]> {
-    const rows = await query<VendorProps[]>(`SELECT * FROM "marketplaceVendor" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`, [
-      organizationId,
-    ]);
-    return (rows ?? []).map(r => Vendor.reconstitute(r));
+    const rows = await query<DbMarketplaceVendor[]>(
+      `SELECT * FROM "marketplaceVendor" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
+      [organizationId],
+    );
+    return (rows ?? []).map(r => Vendor.reconstitute(rowToProps(r)));
   }
 
   async findByEmail(email: string, organizationId: string): Promise<Vendor | null> {
-    const row = await queryOne<VendorProps>(`SELECT * FROM "marketplaceVendor" WHERE "email" = $1 AND "organizationId" = $2`, [
+    const row = await queryOne<DbMarketplaceVendor>(`SELECT * FROM "marketplaceVendor" WHERE "email" = $1 AND "organizationId" = $2`, [
       email,
       organizationId,
     ]);
-    return row ? Vendor.reconstitute(row) : null;
+    return row ? Vendor.reconstitute(rowToProps(row)) : null;
   }
 
   async findByStatus(status: string, organizationId: string): Promise<Vendor[]> {
-    const rows = await query<VendorProps[]>(
+    const rows = await query<DbMarketplaceVendor[]>(
       `SELECT * FROM "marketplaceVendor" WHERE "status" = $1 AND "organizationId" = $2 ORDER BY "createdAt" DESC`,
       [status, organizationId],
     );
-    return (rows ?? []).map(r => Vendor.reconstitute(r));
+    return (rows ?? []).map(r => Vendor.reconstitute(rowToProps(r)));
   }
 
   async save(vendor: Vendor): Promise<void> {

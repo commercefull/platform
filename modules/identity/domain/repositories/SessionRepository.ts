@@ -3,7 +3,3 @@
  *
  * Domain interface for session management (customer + organization sessions).
  */
-
-
-
-

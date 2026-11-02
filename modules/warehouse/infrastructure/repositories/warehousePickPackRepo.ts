@@ -8,7 +8,6 @@ import { FailedToCreateWarehouseEntityError } from '../../domain/errors/Warehous
 import type { WarehousePickPack as DbWarehousePickPack } from '../../../../libs/db/types';
 import type { WarehousePickPack, CreatePickPackInput } from '../../domain/repositories/WarehouseRepository';
 
-
 const optDate = (d: Date | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 
 function mapToPickPack(row: DbWarehousePickPack): WarehousePickPack {

@@ -7,6 +7,7 @@ import { query, queryOne, withTransaction, type TxClient } from '../../../../lib
 import { StoreCurrency, type StoreCurrencyProps } from '../../domain/entities/StoreCurrency';
 import type { StoreCurrencyRepository } from '../../domain/repositories/StoreCurrencyRepository';
 import { StoreValidationError } from '../../domain/errors/StoreErrors';
+import type { StoreCurrency as DbStoreCurrency } from '../../../../libs/db/types';
 
 interface StoreCurrencyRow {
   storeCurrencyId: string;
@@ -75,7 +76,7 @@ class StoreCurrencyRepo implements StoreCurrencyRepository {
 
   async add(storeId: string, currencyCode: string, options?: { isDefault?: boolean }): Promise<StoreCurrency> {
     const currencyId = await this.lookupCurrencyId(currencyCode);
-    const row = await queryOne<StoreCurrencyRow>(
+    const row = await queryOne<DbStoreCurrency>(
       `INSERT INTO "storeCurrency" ("storeId", "currencyId", "isDefault", "isActive")
        VALUES ($1, $2, $3, true)
        ON CONFLICT ("storeId", "currencyId") DO UPDATE SET "isActive" = true, "updatedAt" = now()

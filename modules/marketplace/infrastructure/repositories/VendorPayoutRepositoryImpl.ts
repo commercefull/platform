@@ -1,34 +1,47 @@
 import { query, queryOne } from '../../../../libs/db';
-import { VendorPayout, VendorPayoutProps } from '../../domain/entities/VendorPayout';
+import { VendorPayout } from '../../domain/entities/VendorPayout';
+import type { PayoutLineItem, PayoutMethod, PayoutStatus, VendorPayoutProps } from '../../domain/entities/VendorPayout';
 import type { VendorPayoutRepository } from '../../domain/repositories/MarketplaceRepository';
+import type { MarketplaceVendorPayout as DbMarketplaceVendorPayout } from '../../../../libs/db/types';
 
-type VendorPayoutRow = Omit<VendorPayoutProps, 'currency'> & { currencyCode?: string };
-
-function toProps(row: VendorPayoutRow): VendorPayoutProps {
+function toProps(row: DbMarketplaceVendorPayout): VendorPayoutProps {
   const { currencyCode, ...rest } = row;
-  return { ...rest, currency: currencyCode ?? 'USD' } as VendorPayoutProps;
+  return {
+    ...rest,
+    currency: currencyCode,
+    status: row.status as PayoutStatus,
+    method: row.method as PayoutMethod,
+    lineItems: Array.isArray(row.lineItems) ? (row.lineItems as PayoutLineItem[]) : [],
+    transactionRef: row.transactionRef ?? undefined,
+    failureReason: row.failureReason ?? undefined,
+    processedAt: row.processedAt ?? undefined,
+    completedAt: row.completedAt ?? undefined,
+  };
 }
 
 export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
   async findById(payoutId: string): Promise<VendorPayout | null> {
-    const row = await queryOne<VendorPayoutRow>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutId" = $1`, [payoutId]);
+    const row = await queryOne<DbMarketplaceVendorPayout>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutId" = $1`, [payoutId]);
     return row ? VendorPayout.reconstitute(toProps(row)) : null;
   }
 
   async findByPayoutNumber(payoutNumber: string): Promise<VendorPayout | null> {
-    const row = await queryOne<VendorPayoutRow>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutNumber" = $1`, [payoutNumber]);
+    const row = await queryOne<DbMarketplaceVendorPayout>(`SELECT * FROM "marketplaceVendorPayout" WHERE "payoutNumber" = $1`, [
+      payoutNumber,
+    ]);
     return row ? VendorPayout.reconstitute(toProps(row)) : null;
   }
 
   async findByVendorId(vendorId: string): Promise<VendorPayout[]> {
-    const rows = await query<VendorPayoutRow[]>(`SELECT * FROM "marketplaceVendorPayout" WHERE "vendorId" = $1 ORDER BY "createdAt" DESC`, [
-      vendorId,
-    ]);
+    const rows = await query<DbMarketplaceVendorPayout[]>(
+      `SELECT * FROM "marketplaceVendorPayout" WHERE "vendorId" = $1 ORDER BY "createdAt" DESC`,
+      [vendorId],
+    );
     return (rows ?? []).map(r => VendorPayout.reconstitute(toProps(r)));
   }
 
   async findByOrganizationId(organizationId: string): Promise<VendorPayout[]> {
-    const rows = await query<VendorPayoutRow[]>(
+    const rows = await query<DbMarketplaceVendorPayout[]>(
       `SELECT * FROM "marketplaceVendorPayout" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,
       [organizationId],
     );
@@ -36,7 +49,7 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
   }
 
   async findByStatus(status: string, organizationId: string): Promise<VendorPayout[]> {
-    const rows = await query<VendorPayoutRow[]>(
+    const rows = await query<DbMarketplaceVendorPayout[]>(
       `SELECT * FROM "marketplaceVendorPayout" WHERE "status" = $1 AND "organizationId" = $2 ORDER BY "createdAt" DESC`,
       [status, organizationId],
     );
@@ -44,7 +57,7 @@ export class VendorPayoutRepositoryImpl implements VendorPayoutRepository {
   }
 
   async findPendingByVendorId(vendorId: string): Promise<VendorPayout[]> {
-    const rows = await query<VendorPayoutRow[]>(
+    const rows = await query<DbMarketplaceVendorPayout[]>(
       `SELECT * FROM "marketplaceVendorPayout" WHERE "vendorId" = $1 AND "status" = 'pending' ORDER BY "createdAt" DESC`,
       [vendorId],
     );

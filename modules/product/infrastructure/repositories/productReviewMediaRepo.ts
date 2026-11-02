@@ -2,12 +2,13 @@ import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 import type { ProductReviewMedia, ProductReviewMediaCreateParams } from '../../domain/repositories/ProductCatalogPorts';
+import type { ProductReviewMedia as DbProductReviewMedia } from '../../../../libs/db/types';
 export type { ProductReviewMedia } from '../../domain/repositories/ProductCatalogPorts';
 
 class ProductReviewMediaRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewMedia[]> {
     return (
-      (await query<ProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "reviewId" = $1 ORDER BY "createdAt" ASC`, [
+      (await query<DbProductReviewMedia[]>(`SELECT * FROM "productReviewMedia" WHERE "reviewId" = $1 ORDER BY "createdAt" ASC`, [
         productReviewId,
       ])) || []
     );
@@ -15,10 +16,10 @@ class ProductReviewMediaRepo {
 
   async create(params: ProductReviewMediaCreateParams): Promise<ProductReviewMedia> {
     const now = new Date();
-    const result = await queryOne<ProductReviewMedia>(
+    const result = await queryOne<DbProductReviewMedia>(
       `INSERT INTO "productReviewMedia" ("reviewId", "url", "type", "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [params.productReviewId, params.url, params.type, now, now],
+      [params.reviewId, params.url, params.type, now, now],
     );
     if (!result) throw new FailedToCreateProductError();
     return result;

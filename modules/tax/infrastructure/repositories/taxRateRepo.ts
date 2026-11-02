@@ -19,7 +19,7 @@ type TaxRateUpdateParams = Partial<Omit<TaxRate, 'taxRateId' | 'createdAt' | 'up
 
 class TaxRateRepo {
   async findById(id: string): Promise<TaxRate | null> {
-    return await queryOne<TaxRate>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
+    return await queryOne<DbTaxRate>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
   }
 
   async findByCategory(taxCategoryId: string, activeOnly = false): Promise<TaxRate[]> {
@@ -27,7 +27,7 @@ class TaxRateRepo {
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $2 AND ("endDate" IS NULL OR "endDate" >= $2)`;
     sql += ` ORDER BY "priority" ASC`;
     const params = activeOnly ? [taxCategoryId, unixTimestamp()] : [taxCategoryId];
-    return (await query<TaxRate[]>(sql, params)) || [];
+    return (await query<DbTaxRate[]>(sql, params)) || [];
   }
 
   async findByZone(taxZoneId: string, activeOnly = false): Promise<TaxRate[]> {
@@ -35,7 +35,7 @@ class TaxRateRepo {
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $2 AND ("endDate" IS NULL OR "endDate" >= $2)`;
     sql += ` ORDER BY "priority" ASC`;
     const params = activeOnly ? [taxZoneId, unixTimestamp()] : [taxZoneId];
-    return (await query<TaxRate[]>(sql, params)) || [];
+    return (await query<DbTaxRate[]>(sql, params)) || [];
   }
 
   async findByCategoryAndZone(taxCategoryId: string, taxZoneId: string, activeOnly = false): Promise<TaxRate[]> {
@@ -43,12 +43,12 @@ class TaxRateRepo {
     if (activeOnly) sql += ` AND "isActive" = true AND "startDate" <= $3 AND ("endDate" IS NULL OR "endDate" >= $3)`;
     sql += ` ORDER BY "priority" ASC`;
     const params = activeOnly ? [taxCategoryId, taxZoneId, unixTimestamp()] : [taxCategoryId, taxZoneId];
-    return (await query<TaxRate[]>(sql, params)) || [];
+    return (await query<DbTaxRate[]>(sql, params)) || [];
   }
 
   async create(params: TaxRateCreateParams): Promise<TaxRate> {
     const now = unixTimestamp();
-    const result = await queryOne<TaxRate>(
+    const result = await queryOne<DbTaxRate>(
       `INSERT INTO "taxRate" (
         "taxCategoryId", "taxZoneId", "name", "rate", "type", "priority", "isCompound",
         "includeInPrice", "isShippingTaxable", "fixedAmountCents", "minimumAmountCents", "maximumAmountCents",
@@ -96,7 +96,7 @@ class TaxRateRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<TaxRate>(
+    return await queryOne<DbTaxRate>(
       `UPDATE "taxRate" SET ${updateFields.join(', ')} WHERE "taxRateId" = $${paramIndex} RETURNING *`,
       values,
     );

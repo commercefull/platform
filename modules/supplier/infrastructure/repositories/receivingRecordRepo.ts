@@ -39,16 +39,18 @@ export class SupplierReceivingRecordRepo {
   }
 
   async findById(id: string): Promise<SupplierReceivingRecord | null> {
-    return await queryOne<SupplierReceivingRecord>(`SELECT * FROM "supplierReceivingRecord" WHERE "supplierReceivingRecordId" = $1`, [id]);
+    return await queryOne<DbSupplierReceivingRecord>(`SELECT * FROM "supplierReceivingRecord" WHERE "supplierReceivingRecordId" = $1`, [
+      id,
+    ]);
   }
 
   async findByReceiptNumber(receiptNumber: string): Promise<SupplierReceivingRecord | null> {
-    return await queryOne<SupplierReceivingRecord>(`SELECT * FROM "supplierReceivingRecord" WHERE "receiptNumber" = $1`, [receiptNumber]);
+    return await queryOne<DbSupplierReceivingRecord>(`SELECT * FROM "supplierReceivingRecord" WHERE "receiptNumber" = $1`, [receiptNumber]);
   }
 
   async findByPurchaseOrderId(supplierPurchaseOrderId: string): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
+      (await query<DbSupplierReceivingRecord[]>(
         `SELECT * FROM "supplierReceivingRecord" WHERE "supplierPurchaseOrderId" = $1 ORDER BY "createdAt" DESC`,
         [supplierPurchaseOrderId],
       )) || []
@@ -57,7 +59,7 @@ export class SupplierReceivingRecordRepo {
 
   async findByWarehouseId(warehouseId: string, limit = 50): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
+      (await query<DbSupplierReceivingRecord[]>(
         `SELECT * FROM "supplierReceivingRecord" WHERE "distributionWarehouseId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
         [warehouseId, limit],
       )) || []
@@ -66,7 +68,7 @@ export class SupplierReceivingRecordRepo {
 
   async findBySupplierId(supplierId: string, limit = 50): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
+      (await query<DbSupplierReceivingRecord[]>(
         `SELECT * FROM "supplierReceivingRecord" WHERE "supplierId" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
         [supplierId, limit],
       )) || []
@@ -75,7 +77,7 @@ export class SupplierReceivingRecordRepo {
 
   async findByStatus(status: SupplierReceivingStatus, limit = 100): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
+      (await query<DbSupplierReceivingRecord[]>(
         `SELECT * FROM "supplierReceivingRecord" WHERE "status" = $1 ORDER BY "receivedDate" DESC LIMIT $2`,
         [status, limit],
       )) || []
@@ -84,14 +86,15 @@ export class SupplierReceivingRecordRepo {
 
   async findAll(limit = 100): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(`SELECT * FROM "supplierReceivingRecord" ORDER BY "receivedDate" DESC LIMIT $1`, [limit])) ||
-      []
+      (await query<DbSupplierReceivingRecord[]>(`SELECT * FROM "supplierReceivingRecord" ORDER BY "receivedDate" DESC LIMIT $1`, [
+        limit,
+      ])) || []
     );
   }
 
   async findWithDiscrepancies(): Promise<SupplierReceivingRecord[]> {
     return (
-      (await query<SupplierReceivingRecord[]>(
+      (await query<DbSupplierReceivingRecord[]>(
         `SELECT * FROM "supplierReceivingRecord" WHERE "discrepancies" = true ORDER BY "receivedDate" DESC`,
       )) || []
     );
@@ -101,7 +104,7 @@ export class SupplierReceivingRecordRepo {
     const now = unixTimestamp();
     const receiptNumber = await this.generateReceiptNumber();
 
-    const result = await queryOne<SupplierReceivingRecord>(
+    const result = await queryOne<DbSupplierReceivingRecord>(
       `INSERT INTO "supplierReceivingRecord" (
         "receiptNumber", "supplierPurchaseOrderId", "distributionWarehouseId", "supplierId", "status", "receivedDate",
         "carrierName", "trackingNumber", "packageCount", "notes", "discrepancies", "attachments",
@@ -146,7 +149,7 @@ export class SupplierReceivingRecordRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<SupplierReceivingRecord>(
+    return await queryOne<DbSupplierReceivingRecord>(
       `UPDATE "supplierReceivingRecord" SET ${updateFields.join(', ')} WHERE "supplierReceivingRecordId" = $${paramIndex} RETURNING *`,
       values,
     );

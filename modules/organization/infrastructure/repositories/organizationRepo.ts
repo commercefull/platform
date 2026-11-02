@@ -2,7 +2,7 @@ import { queryOne, query } from '../../../../libs/db';
 import { compareString, hashString } from '../../../../libs/hash';
 import crypto from 'crypto';
 
-import {
+import type {
   Organization as DbOrganization,
   OrganizationAddress as DbOrganizationAddress,
   OrganizationPaymentInfo as DbOrganizationPaymentInfo,
@@ -53,24 +53,24 @@ type OrganizationCreateWithPasswordParams = Omit<OrganizationCreateParams, 'pass
 
 export class OrganizationRepo {
   async findById(organizationId: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM "organization" WHERE "organizationId" = $1', [organizationId]);
+    return await queryOne<DbOrganization>('SELECT * FROM "organization" WHERE "organizationId" = $1', [organizationId]);
   }
 
   async findByEmail(email: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM "organization" WHERE email = $1', [email]);
+    return await queryOne<DbOrganization>('SELECT * FROM "organization" WHERE email = $1', [email]);
   }
 
   async findBySlug(slug: string): Promise<Organization | null> {
-    return await queryOne<Organization>('SELECT * FROM "organization" WHERE slug = $1', [slug]);
+    return await queryOne<DbOrganization>('SELECT * FROM "organization" WHERE slug = $1', [slug]);
   }
 
   async findAll(limit: number = 50, offset: number = 0): Promise<Organization[]> {
-    const results = await query<Organization[]>('SELECT * FROM "organization" ORDER BY name ASC LIMIT $1 OFFSET $2', [limit, offset]);
+    const results = await query<DbOrganization[]>('SELECT * FROM "organization" ORDER BY name ASC LIMIT $1 OFFSET $2', [limit, offset]);
     return results || [];
   }
 
   async findByStatus(status: string, limit: number = 50): Promise<Organization[]> {
-    const results = await query<Organization[]>('SELECT * FROM "organization" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [
+    const results = await query<DbOrganization[]>('SELECT * FROM "organization" WHERE status = $1 ORDER BY "createdAt" DESC LIMIT $2', [
       status,
       limit,
     ]);
@@ -82,7 +82,7 @@ export class OrganizationRepo {
     const hashedPassword = await this.hashPassword(params.password);
     const slug = params.slug || this.generateSlug(params.name);
 
-    const result = await queryOne<Organization>(
+    const result = await queryOne<DbOrganization>(
       `INSERT INTO "organization" (
         name, slug, email, password, phone, website, logo, description, status,
         "businessType", "emailVerified", "createdAt", "updatedAt"
@@ -117,7 +117,7 @@ export class OrganizationRepo {
     const slug = params.slug || this.generateSlug(params.name);
     const hashedPassword = params.password ? await this.hashPassword(params.password) : null;
 
-    const result = await queryOne<Organization>(
+    const result = await queryOne<DbOrganization>(
       `INSERT INTO "organization" (
         name, slug, email, password, phone, website, logo, description, status,
         "businessType", "emailVerified", "createdAt", "updatedAt"
@@ -173,7 +173,7 @@ export class OrganizationRepo {
 
     values.push(organizationId);
 
-    const result = await queryOne<Organization>(
+    const result = await queryOne<DbOrganization>(
       `UPDATE "organization" SET ${updateFields.join(', ')} WHERE "organizationId" = $${paramIndex} RETURNING *`,
       values,
     );
@@ -203,7 +203,7 @@ export class OrganizationRepo {
   // ============================================================================
 
   async findAddressesByOrganizationId(organizationId: string): Promise<OrganizationAddress[]> {
-    const results = await query<OrganizationAddress[]>(
+    const results = await query<DbOrganizationAddress[]>(
       'SELECT * FROM "organizationAddress" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC',
       [organizationId],
     );
@@ -211,7 +211,7 @@ export class OrganizationRepo {
   }
 
   async findAddressById(addressId: string): Promise<OrganizationAddress | null> {
-    return await queryOne<OrganizationAddress>('SELECT * FROM "organizationAddress" WHERE "organizationAddressId" = $1', [addressId]);
+    return await queryOne<DbOrganizationAddress>('SELECT * FROM "organizationAddress" WHERE "organizationAddressId" = $1', [addressId]);
   }
 
   async createAddress(params: OrganizationAddressCreateParams): Promise<OrganizationAddress> {
@@ -224,7 +224,7 @@ export class OrganizationRepo {
       );
     }
 
-    const result = await queryOne<OrganizationAddress>(
+    const result = await queryOne<DbOrganizationAddress>(
       `INSERT INTO "organizationAddress" (
         "organizationId", "addressType", "isDefault", "firstName", "lastName", company,
         "addressLine1", "addressLine2", city, state, "postalCode", country,
@@ -272,7 +272,7 @@ export class OrganizationRepo {
   // ============================================================================
 
   async findPaymentInfoByOrganizationId(organizationId: string): Promise<OrganizationPaymentInfo[]> {
-    const results = await query<OrganizationPaymentInfo[]>(
+    const results = await query<DbOrganizationPaymentInfo[]>(
       'SELECT * FROM "organizationPaymentInfo" WHERE "organizationId" = $1 ORDER BY "isDefault" DESC',
       [organizationId],
     );
@@ -280,7 +280,7 @@ export class OrganizationRepo {
   }
 
   async findPaymentInfoById(paymentInfoId: string): Promise<OrganizationPaymentInfo | null> {
-    return await queryOne<OrganizationPaymentInfo>('SELECT * FROM "organizationPaymentInfo" WHERE "organizationPaymentInfoId" = $1', [
+    return await queryOne<DbOrganizationPaymentInfo>('SELECT * FROM "organizationPaymentInfo" WHERE "organizationPaymentInfoId" = $1', [
       paymentInfoId,
     ]);
   }
@@ -288,7 +288,7 @@ export class OrganizationRepo {
   async createPaymentInfo(params: OrganizationPaymentInfoCreateParams): Promise<OrganizationPaymentInfo> {
     const now = new Date();
 
-    const result = await queryOne<OrganizationPaymentInfo>(
+    const result = await queryOne<DbOrganizationPaymentInfo>(
       `INSERT INTO "organizationPaymentInfo" (
         "organizationId", "paymentType", "isDefault", "accountHolderName", "bankName",
         "accountNumber", "routingNumber", "accountType", "paypalEmail",
@@ -327,7 +327,7 @@ export class OrganizationRepo {
     email: string;
     password: string;
   }): Promise<{ organizationId: string; email: string; name: string; status: string } | null> {
-    const org = await queryOne<Organization>('SELECT * FROM "organization" WHERE email = $1', [credentials.email]);
+    const org = await queryOne<DbOrganization>('SELECT * FROM "organization" WHERE email = $1', [credentials.email]);
 
     if (!org) return null;
 

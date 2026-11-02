@@ -89,7 +89,7 @@ export class GetProductCatalogEnrichmentUseCase {
 
     const qa: QaWithAnswers[] = [];
     for (const question of questions) {
-      const answers = await this.productQaAnswerRepo.findByQuestion(question.productQaId, command.approvedQaOnly ? 'approved' : undefined);
+      const answers = await this.productQaAnswerRepo.findByQuestion(question.productQaId, command.approvedQaOnly ? 'answered' : undefined);
       qa.push({ ...question, answers });
     }
 

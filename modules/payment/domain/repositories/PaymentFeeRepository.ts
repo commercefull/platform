@@ -9,6 +9,3 @@ export interface PaymentFee {
   createdAt: Date;
   updatedAt: Date;
 }
-
-
-

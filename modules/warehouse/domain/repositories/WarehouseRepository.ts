@@ -180,5 +180,3 @@ export interface CreatePickPackInput {
   assignedTo?: string;
   notes?: string;
 }
-
-

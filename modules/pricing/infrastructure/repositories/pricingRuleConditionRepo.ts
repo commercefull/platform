@@ -10,24 +10,27 @@ export type RuleConditionUpdateParams = Partial<Omit<RuleCondition, 'ruleConditi
 
 export class RuleConditionRepo {
   async findById(id: string): Promise<RuleCondition | null> {
-    return await queryOne<RuleCondition>(`SELECT * FROM "pricingRuleCondition" WHERE "ruleConditionId" = $1`, [id]);
+    return await queryOne<DbPricingRuleCondition>(`SELECT * FROM "pricingRuleCondition" WHERE "ruleConditionId" = $1`, [id]);
   }
 
   async findByPricingRule(pricingRuleId: string): Promise<RuleCondition[]> {
     return (
-      (await query<RuleCondition[]>(`SELECT * FROM "pricingRuleCondition" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`, [
+      (await query<DbPricingRuleCondition[]>(`SELECT * FROM "pricingRuleCondition" WHERE "pricingRuleId" = $1 ORDER BY "createdAt" ASC`, [
         pricingRuleId,
       ])) || []
     );
   }
 
   async findByType(type: string): Promise<RuleCondition[]> {
-    return (await query<RuleCondition[]>(`SELECT * FROM "pricingRuleCondition" WHERE "type" = $1 ORDER BY "createdAt" DESC`, [type])) || [];
+    return (
+      (await query<DbPricingRuleCondition[]>(`SELECT * FROM "pricingRuleCondition" WHERE "type" = $1 ORDER BY "createdAt" DESC`, [type])) ||
+      []
+    );
   }
 
   async create(params: RuleConditionCreateParams): Promise<RuleCondition> {
     const now = unixTimestamp();
-    const result = await queryOne<RuleCondition>(
+    const result = await queryOne<DbPricingRuleCondition>(
       `INSERT INTO "pricingRuleCondition" ("pricingRuleId", "type", "parameters", "createdAt", "updatedAt") 
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [params.pricingRuleId, params.type, JSON.stringify(params.parameters), now, now],
@@ -53,7 +56,7 @@ export class RuleConditionRepo {
     updateFields.push(`"updatedAt" = $${paramIndex++}`);
     values.push(unixTimestamp(), id);
 
-    return await queryOne<RuleCondition>(
+    return await queryOne<DbPricingRuleCondition>(
       `UPDATE "pricingRuleCondition" SET ${updateFields.join(', ')} WHERE "ruleConditionId" = $${paramIndex} RETURNING *`,
       values,
     );

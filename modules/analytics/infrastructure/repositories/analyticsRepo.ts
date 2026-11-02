@@ -17,6 +17,11 @@ import {
   AnalyticsSearchQuery as AnalyticsSearchQueryRow,
 } from '../../../../libs/db/types';
 import type { ProductPerformance, CustomerCohort } from '../../domain/types';
+import type {
+  AnalyticsCustomerCohort as DbAnalyticsCustomerCohort,
+  AnalyticsProductPerformance as DbAnalyticsProductPerformance,
+  AnalyticsSearchQuery as DbAnalyticsSearchQuery,
+} from '../../../../libs/db/types';
 
 export type { ProductPerformance, CustomerCohort };
 
@@ -30,7 +35,6 @@ export type { ProductPerformance, CustomerCohort };
 export type SalesDaily = AnalyticsSalesDailyRow;
 
 export type SearchQuery = AnalyticsSearchQueryRow;
-
 
 // ============================================================================
 // Table Names
@@ -258,7 +262,7 @@ export async function getProductPerformance(
   const limit = pagination?.limit || 30;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<AnalyticsProductPerformanceRow[]>(
+  const rows = await query<DbAnalyticsProductPerformance[]>(
     `SELECT * FROM "analyticsProductPerformance" WHERE ${whereClause} 
      ORDER BY "date" DESC, "revenueCents" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -396,7 +400,7 @@ export async function getSearchQueries(
   const limit = pagination?.limit || 50;
   const offset = pagination?.offset || 0;
 
-  const rows = await query<AnalyticsSearchQueryRow[]>(
+  const rows = await query<DbAnalyticsSearchQuery[]>(
     `SELECT * FROM "analyticsSearchQuery" WHERE ${whereClause} 
      ORDER BY "searchCount" DESC LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     [...params, limit, offset],
@@ -467,7 +471,7 @@ export async function getCustomerCohorts(startMonth?: Date, endMonth?: Date): Pr
     params.push(endMonth);
   }
 
-  const rows = await query<AnalyticsCustomerCohortRow[]>(
+  const rows = await query<DbAnalyticsCustomerCohort[]>(
     `SELECT * FROM "analyticsCustomerCohort" WHERE ${whereClause} 
      ORDER BY "cohortMonth" DESC, "monthNumber" ASC`,
     params,
