@@ -55,23 +55,36 @@ export class CreateCatalogVariantUseCase {
   async execute(command: CreateCatalogVariantCommand): Promise<CatalogVariantWithPrice> {
     const variant = await this.variantRepo.create(command.variantFields);
 
-    const hasPriceInput =
-      command.priceCents !== undefined || command.salePriceCents !== undefined || command.compareAtPriceCents !== undefined;
-    if (!hasPriceInput) {
+    if (!this.hasPriceInput(command)) {
       return { ...variant };
     }
 
     const existing = await this.pricingPort.getBasePrice(command.productId, variant.id);
-    const price = await this.pricingPort.setBasePrice({
-      productId: command.productId,
-      productVariantId: variant.id,
-      currencyCode: command.currencyCode ?? existing?.currencyCode ?? 'USD',
-      priceCents: command.priceCents ?? existing?.priceCents ?? 0,
-      salePriceCents: command.salePriceCents ?? existing?.salePriceCents ?? null,
-      compareAtPriceCents: command.compareAtPriceCents ?? existing?.compareAtPriceCents ?? null,
-      costPriceCents: command.costPriceCents ?? existing?.costPriceCents ?? null,
-    });
+    const price = await this.pricingPort.setBasePrice(this.buildPriceParams(command, variant.id, existing));
 
     return { ...variant, priceCents: price.priceCents };
+  }
+
+  private buildPriceParams(
+    command: CreateCatalogVariantCommand,
+    variantId: string,
+    existing: Awaited<ReturnType<ProductPricingPort['getBasePrice']>>,
+  ): Parameters<ProductPricingPort['setBasePrice']>[0] {
+    const pick = <T>(...vals: (T | null | undefined)[]): T => vals.find(v => v !== null && v !== undefined) as T;
+    return {
+      productId: command.productId,
+      productVariantId: variantId,
+      currencyCode: pick(command.currencyCode, existing?.currencyCode, 'USD'),
+      priceCents: pick(command.priceCents, existing?.priceCents, 0),
+      salePriceCents: pick(command.salePriceCents, existing?.salePriceCents, null),
+      compareAtPriceCents: pick(command.compareAtPriceCents, existing?.compareAtPriceCents, null),
+      costPriceCents: pick(command.costPriceCents, existing?.costPriceCents, null),
+    };
+  }
+
+  private hasPriceInput(command: CreateCatalogVariantCommand): boolean {
+    return (
+      command.priceCents !== undefined || command.salePriceCents !== undefined || command.compareAtPriceCents !== undefined
+    );
   }
 }

@@ -25,42 +25,49 @@ function parseList(value: unknown): string[] {
     .filter(Boolean);
 }
 
-function bodyToWriteData(body: HttpRequestBody): MarketWriteData {
+function parseCapabilities(raw: unknown): Record<string, boolean> {
   const capabilities: Record<string, boolean> = {};
-  const rawCapabilities = body['capabilities'];
-  if (typeof rawCapabilities === 'string' && rawCapabilities.trim()) {
-    for (const entry of rawCapabilities.split(',')) {
-      const [key, val] = entry.split(':').map(s => s.trim());
-      if (key) capabilities[key] = val !== 'false';
-    }
+  if (typeof raw !== 'string' || !raw.trim()) return capabilities;
+  for (const entry of raw.split(',')) {
+    const [key, val] = entry.split(':').map(s => s.trim());
+    if (key) capabilities[key] = val !== 'false';
   }
-  let metadata: Record<string, unknown> | undefined;
-  if (typeof body['metadata'] === 'string' && body['metadata'].trim()) {
-    try {
-      metadata = JSON.parse(body['metadata'] as string) as Record<string, unknown>;
-    } catch {
-      metadata = undefined;
-    }
+  return capabilities;
+}
+
+function parseMetadata(raw: unknown): Record<string, unknown> | undefined {
+  if (typeof raw !== 'string' || !raw.trim()) return undefined;
+  try {
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    return undefined;
   }
+}
+
+function optField(body: HttpRequestBody, key: string): string | undefined {
+  return (body[key] as string) || undefined;
+}
+
+function bodyToWriteData(body: HttpRequestBody): MarketWriteData {
   return {
-    storeId: (body['storeId'] as string) || undefined,
+    storeId: optField(body, 'storeId'),
     code: String(body['code'] ?? '').trim(),
     name: String(body['name'] ?? '').trim(),
     countryCodes: parseList(body['countryCodes']).map(c => c.toUpperCase()),
-    defaultCurrencyCode: ((body['defaultCurrencyCode'] as string) || '').toUpperCase() || undefined,
+    defaultCurrencyCode: (optField(body, 'defaultCurrencyCode') || '').toUpperCase() || undefined,
     supportedCurrencyCodes: parseList(body['supportedCurrencyCodes']).map(c => c.toUpperCase()),
-    defaultLocaleCode: (body['defaultLocaleCode'] as string) || undefined,
+    defaultLocaleCode: optField(body, 'defaultLocaleCode'),
     supportedLocaleCodes: parseList(body['supportedLocaleCodes']),
-    catalogAssortmentId: (body['catalogAssortmentId'] as string) || undefined,
-    defaultPriceListId: (body['defaultPriceListId'] as string) || undefined,
-    contractingEntityId: (body['contractingEntityId'] as string) || undefined,
+    catalogAssortmentId: optField(body, 'catalogAssortmentId'),
+    defaultPriceListId: optField(body, 'defaultPriceListId'),
+    contractingEntityId: optField(body, 'contractingEntityId'),
     taxDisplayMode: ((body['taxDisplayMode'] as MarketTaxDisplayMode) || 'exclusive_tax') as MarketTaxDisplayMode,
     allowDynamicFxConversion: body['allowDynamicFxConversion'] === 'true' || body['allowDynamicFxConversion'] === 'on',
-    capabilities,
+    capabilities: parseCapabilities(body['capabilities']),
     allowedPaymentMethods: parseList(body['allowedPaymentMethods']),
     allowedFulfillmentMethods: parseList(body['allowedFulfillmentMethods']),
     hostnamePatterns: parseList(body['hostnamePatterns']).map(h => h.toLowerCase()),
-    metadata,
+    metadata: parseMetadata(body['metadata']),
   };
 }
 

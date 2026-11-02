@@ -9,14 +9,11 @@ import { generateUUID } from '../../../../libs/uuid';
 import {
   LoyaltyTier as DbLoyaltyTier,
   LoyaltyPoints as DbLoyaltyPoints,
-  LoyaltyTransaction as DbLoyaltyTransaction,
-  LoyaltyReward as DbLoyaltyReward,
   LoyaltyRedemption as DbLoyaltyRedemption,
 } from '../../../../libs/db/types';
 import {
   LoyaltyTierNotFoundError,
   LoyaltyRewardNotFoundError,
-  RedemptionNotFoundError,
   InsufficientPointsError,
   FailedToCreateLoyaltyError,
   NoDefaultTierError,
@@ -24,89 +21,55 @@ import {
   LoyaltyAccountNotFoundError,
   FailedToAdjustPointsError,
 } from '../../domain/errors/LoyaltyErrors';
-
-// ============================================================================
-// Re-export types
-// ============================================================================
-
-export type LoyaltyTier = DbLoyaltyTier;
-export type LoyaltyPoints = DbLoyaltyPoints;
-export type LoyaltyTransaction = DbLoyaltyTransaction;
-export type LoyaltyReward = DbLoyaltyReward;
-export type LoyaltyRedemption = DbLoyaltyRedemption;
-
-export enum LoyaltyPointsAction {
-  PURCHASE = 'purchase',
-  REVIEW = 'review',
-  REFERRAL = 'referral',
-  SIGNUP = 'signup',
-  BIRTHDAY = 'birthday',
-  ANNIVERSARY = 'anniversary',
-  MANUAL_ADJUSTMENT = 'manual_adjustment',
-  REDEMPTION = 'redemption',
-  EXPIRATION = 'expiration',
-}
-
-// ============================================================================
-// Input Types
-// ============================================================================
-
-export interface CreateLoyaltyTierInput {
-  name: string;
-  description?: string;
-  type: string;
-  level?: number;
-  pointsThreshold: number;
-  multiplier: number;
-  benefits?: unknown;
-  isActive?: boolean;
-}
-
-export interface UpdateLoyaltyTierInput {
-  name?: string;
-  description?: string;
-  type?: string;
-  pointsThreshold?: number;
-  multiplier?: number;
-  benefits?: unknown;
-  isActive?: boolean;
-}
-
-export interface CreateLoyaltyRewardInput {
-  name: string;
-  description?: string;
-  type?: string;
-  pointsCost: number;
-  discountAmountCents?: number;
-  discountPercent?: number;
-  discountCode?: string;
-  freeShipping?: boolean;
-  productIds?: unknown;
-  expiresAt?: Date;
-  isActive?: boolean;
-}
-
-export interface UpdateLoyaltyRewardInput {
-  name?: string;
-  description?: string;
-  pointsCost?: number;
-  discountAmountCents?: number;
-  discountPercent?: number;
-  discountCode?: string;
-  freeShipping?: boolean;
-  productIds?: unknown;
-  expiresAt?: Date;
-  isActive?: boolean;
-}
-
-export interface CreateLoyaltyTransactionInput {
-  customerId: string;
-  orderId?: string;
-  action: string;
-  points: number;
-  description?: string;
-  referenceId?: string;
-}
+import {
+  LoyaltyTier,
+  LoyaltyPoints,
+  LoyaltyTransaction,
+  LoyaltyReward,
+  LoyaltyRedemption,
+  LoyaltyPointsAction,
+} from './loyaltyRepoTypes';
+import type {
+  CreateLoyaltyTierInput,
+  UpdateLoyaltyTierInput,
+  CreateLoyaltyRewardInput,
+  UpdateLoyaltyRewardInput,
+  CreateLoyaltyTransactionInput,
+} from './loyaltyRepoTypes';
+export {
+  LoyaltyTier,
+  LoyaltyPoints,
+  LoyaltyTransaction,
+  LoyaltyReward,
+  LoyaltyRedemption,
+  LoyaltyPointsAction,
+} from './loyaltyRepoTypes';
+export type {
+  CreateLoyaltyTierInput,
+  UpdateLoyaltyTierInput,
+  CreateLoyaltyRewardInput,
+  UpdateLoyaltyRewardInput,
+  CreateLoyaltyTransactionInput,
+} from './loyaltyRepoTypes';
+import {
+  findAllRewards as qFindAllRewards,
+  findAvailableRewards as qFindAvailableRewards,
+  createReward as qCreateReward,
+  updateReward as qUpdateReward,
+  deleteReward as qDeleteReward,
+  findRewardById as qFindRewardById,
+  findRedemptionById as qFindRedemptionById,
+  findRedemptionByCode as qFindRedemptionByCode,
+  findCustomerRedemptions as qFindCustomerRedemptions,
+  updateRedemptionStatus as qUpdateRedemptionStatus,
+} from './loyaltyRewardQueries';
+import {
+  findCreditTransactionByReference as qFindCreditTransactionByReference,
+  findTransactionById as qFindTransactionById,
+  findTransactionByOrderAndAction as qFindTransactionByOrderAndAction,
+  findCustomerTransactions as qFindCustomerTransactions,
+  createTransaction as qCreateTransaction,
+} from './loyaltyTransactionQueries';
 
 // ============================================================================
 // Repository
@@ -338,151 +301,47 @@ export class LoyaltyRepo {
   // ==========================================================================
 
   async findCreditTransactionByReference(referenceId: string): Promise<LoyaltyTransaction | null> {
-    const sql = `SELECT * FROM "loyaltyTransaction" WHERE action = 'credit' AND "referenceId" = $1`;
-    return await queryOne<DbLoyaltyTransaction>(sql, [referenceId]);
+    return qFindCreditTransactionByReference(referenceId);
   }
 
   async findTransactionById(loyaltyTransactionId: string): Promise<LoyaltyTransaction | null> {
-    const sql = `SELECT * FROM "loyaltyTransaction" WHERE "loyaltyTransactionId" = $1`;
-    return await queryOne<DbLoyaltyTransaction>(sql, [loyaltyTransactionId]);
+    return qFindTransactionById(loyaltyTransactionId);
   }
 
   async findTransactionByOrderAndAction(orderId: string, action: 'credit' | 'debit'): Promise<LoyaltyTransaction | null> {
-    const sql = `
-      SELECT * FROM "loyaltyTransaction"
-      WHERE "orderId" = $1 AND "action" = $2
-      ORDER BY "createdAt" DESC
-      LIMIT 1
-    `;
-    return await queryOne<DbLoyaltyTransaction>(sql, [orderId, action]);
+    return qFindTransactionByOrderAndAction(orderId, action);
   }
 
   async findCustomerTransactions(customerId: string, limit: number = 50): Promise<LoyaltyTransaction[]> {
-    const sql = `
-      SELECT * FROM "loyaltyTransaction" 
-      WHERE "customerId" = $1 
-      ORDER BY "createdAt" DESC 
-      LIMIT $2
-    `;
-    const results = await query<DbLoyaltyTransaction[]>(sql, [customerId, limit]);
-    return results || [];
+    return qFindCustomerTransactions(customerId, limit);
   }
 
   async createTransaction(input: CreateLoyaltyTransactionInput): Promise<LoyaltyTransaction> {
-    const now = new Date();
-    // DB constraint only allows 'credit' or 'debit' — map application-level actions
-    const dbAction = input.points >= 0 ? 'credit' : 'debit';
-    const sql = `
-      INSERT INTO "loyaltyTransaction" (
-        "customerId", "orderId", "action", "points", "description", 
-        "referenceId", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *
-    `;
-    const result = await queryOne<DbLoyaltyTransaction>(sql, [
-      input.customerId,
-      input.orderId || null,
-      dbAction,
-      input.points,
-      input.description || null,
-      input.referenceId || null,
-      now,
-      now,
-    ]);
-    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty transaction');
-    return result;
+    return qCreateTransaction(input);
   }
 
   async findRewardById(rewardId: string): Promise<LoyaltyReward | null> {
-    const sql = `SELECT * FROM "loyaltyReward" WHERE "rewardId" = $1`;
-    return await queryOne<DbLoyaltyReward>(sql, [rewardId]);
+    return qFindRewardById(rewardId);
   }
 
   async findAllRewards(includeInactive: boolean = false): Promise<LoyaltyReward[]> {
-    let sql = `SELECT * FROM "loyaltyReward"`;
-    if (!includeInactive) {
-      sql += ` WHERE "isActive" = true`;
-    }
-    sql += ` ORDER BY "pointsCost" ASC`;
-    const results = await query<DbLoyaltyReward[]>(sql, []);
-    return results || [];
+    return qFindAllRewards(includeInactive);
   }
 
   async findAvailableRewards(currentPoints: number): Promise<LoyaltyReward[]> {
-    const sql = `
-      SELECT * FROM "loyaltyReward" 
-      WHERE "isActive" = true AND "pointsCost" <= $1
-      ORDER BY "pointsCost" DESC
-    `;
-    const results = await query<DbLoyaltyReward[]>(sql, [currentPoints]);
-    return results || [];
+    return qFindAvailableRewards(currentPoints);
   }
 
   async createReward(input: CreateLoyaltyRewardInput): Promise<LoyaltyReward> {
-    const now = new Date();
-    const sql = `
-      INSERT INTO "loyaltyReward" (
-        "name", "description", "type", "pointsCost", "value", "valueType",
-        "isActive", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *
-    `;
-    const result = await queryOne<DbLoyaltyReward>(sql, [
-      input.name,
-      input.description || null,
-      input.type || 'discount',
-      input.pointsCost,
-      input.discountAmountCents ? String(input.discountAmountCents) : null,
-      input.discountPercent ? 'percent' : 'amountCents',
-      input.isActive !== false,
-      now,
-      now,
-    ]);
-    if (!result) throw new FailedToCreateLoyaltyError('Failed to create loyalty reward');
-    return result;
+    return qCreateReward(input);
   }
 
   async updateReward(rewardId: string, input: UpdateLoyaltyRewardInput): Promise<LoyaltyReward> {
-    const updates: string[] = [];
-    const params: unknown[] = [];
-    let paramIndex = 1;
-
-    if (input.name !== undefined) {
-      updates.push(`"name" = $${paramIndex++}`);
-      params.push(input.name);
-    }
-    if (input.description !== undefined) {
-      updates.push(`"description" = $${paramIndex++}`);
-      params.push(input.description);
-    }
-    if (input.pointsCost !== undefined) {
-      updates.push(`"pointsCost" = $${paramIndex++}`);
-      params.push(input.pointsCost);
-    }
-    if (input.isActive !== undefined) {
-      updates.push(`"isActive" = $${paramIndex++}`);
-      params.push(input.isActive);
-    }
-
-    updates.push(`"updatedAt" = $${paramIndex++}`);
-    params.push(new Date());
-    params.push(rewardId);
-
-    const sql = `
-      UPDATE "loyaltyReward" 
-      SET ${updates.join(', ')}
-      WHERE "rewardId" = $${paramIndex}
-      RETURNING *
-    `;
-    const result = await queryOne<DbLoyaltyReward>(sql, params);
-    if (!result) throw new LoyaltyRewardNotFoundError(rewardId);
-    return result;
+    return qUpdateReward(rewardId, input);
   }
 
   async deleteReward(rewardId: string): Promise<boolean> {
-    const sql = `DELETE FROM "loyaltyReward" WHERE "rewardId" = $1`;
-    await query(sql, [rewardId]);
-    return true;
+    return qDeleteReward(rewardId);
   }
 
   // ==========================================================================
@@ -490,24 +349,15 @@ export class LoyaltyRepo {
   // ==========================================================================
 
   async findRedemptionById(loyaltyRedemptionId: string): Promise<LoyaltyRedemption | null> {
-    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "redemptionId" = $1`;
-    return await queryOne<DbLoyaltyRedemption>(sql, [loyaltyRedemptionId]);
+    return qFindRedemptionById(loyaltyRedemptionId);
   }
 
   async findRedemptionByCode(redemptionCode: string): Promise<LoyaltyRedemption | null> {
-    const sql = `SELECT * FROM "loyaltyRedemption" WHERE "couponCode" = $1`;
-    return await queryOne<DbLoyaltyRedemption>(sql, [redemptionCode]);
+    return qFindRedemptionByCode(redemptionCode);
   }
 
   async findCustomerRedemptions(customerId: string, limit: number = 50): Promise<LoyaltyRedemption[]> {
-    const sql = `
-      SELECT * FROM "loyaltyRedemption" 
-      WHERE "customerId" = $1 
-      ORDER BY "redeemedAt" DESC 
-      LIMIT $2
-    `;
-    const results = await query<DbLoyaltyRedemption[]>(sql, [customerId, limit]);
-    return results || [];
+    return qFindCustomerRedemptions(customerId, limit);
   }
 
   async redeemReward(customerId: string, rewardId: string): Promise<LoyaltyRedemption> {
@@ -564,18 +414,7 @@ export class LoyaltyRepo {
     loyaltyRedemptionId: string,
     status: 'pending' | 'used' | 'expired' | 'cancelled',
   ): Promise<LoyaltyRedemption> {
-    const now = new Date();
-    const usedAt = status === 'used' ? now : null;
-
-    const sql = `
-      UPDATE "loyaltyRedemption" 
-      SET "status" = $2, "usedAt" = $3
-      WHERE "redemptionId" = $1
-      RETURNING *
-    `;
-    const result = await queryOne<DbLoyaltyRedemption>(sql, [loyaltyRedemptionId, status, usedAt]);
-    if (!result) throw new RedemptionNotFoundError(loyaltyRedemptionId);
-    return result;
+    return qUpdateRedemptionStatus(loyaltyRedemptionId, status);
   }
 
   // ==========================================================================

@@ -291,6 +291,31 @@ export async function getRelatedArticles(faqArticleId: string, limit: number = 5
   return (rows || []).map(mapToArticle);
 }
 
+// `||`/`?`-style defaulting kept out of the save params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function jsonOpt(value: unknown): string | null {
+  return value ? JSON.stringify(value) : null;
+}
+
+function articleSharedValues(article: Partial<FaqArticle> & { title: string; content: string }, slug: string): unknown[] {
+  return [
+    article.faqCategoryId,
+    article.title,
+    slug,
+    article.content,
+    article.contentHtml,
+    article.excerpt,
+    article.keywords,
+    article.relatedArticleIds,
+    fallback(article.sortOrder, 0),
+    fallback(article.isPublished, false),
+    fallback(article.isFeatured, false),
+    fallback(article.isPinned, false),
+  ];
+}
+
 export async function saveArticle(article: Partial<FaqArticle> & { title: string; content: string }): Promise<FaqArticle> {
   const now = new Date().toISOString();
   const slug =
@@ -309,21 +334,10 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
         "publishedAt" = $13, "lastEditedBy" = $14, "metadata" = $15, "updatedAt" = $16
       WHERE "faqArticleId" = $17`,
       [
-        article.faqCategoryId,
-        article.title,
-        slug,
-        article.content,
-        article.contentHtml,
-        article.excerpt,
-        article.keywords,
-        article.relatedArticleIds,
-        article.sortOrder || 0,
-        article.isPublished || false,
-        article.isFeatured || false,
-        article.isPinned || false,
+        ...articleSharedValues(article, slug),
         article.isPublished && !article.publishedAt ? now : article.publishedAt?.toISOString(),
         article.lastEditedBy,
-        article.metadata ? JSON.stringify(article.metadata) : null,
+        jsonOpt(article.metadata),
         now,
         article.faqArticleId,
       ],
@@ -345,22 +359,11 @@ export async function saveArticle(article: Partial<FaqArticle> & { title: string
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       RETURNING *`,
       [
-        article.faqCategoryId,
-        article.title,
-        slug,
-        article.content,
-        article.contentHtml,
-        article.excerpt,
-        article.keywords,
-        article.relatedArticleIds,
-        article.sortOrder || 0,
-        article.isPublished || false,
-        article.isFeatured || false,
-        article.isPinned || false,
+        ...articleSharedValues(article, slug),
         article.isPublished ? now : null,
         article.authorId,
         article.authorName,
-        article.metadata ? JSON.stringify(article.metadata) : null,
+        jsonOpt(article.metadata),
         now,
         now,
       ],

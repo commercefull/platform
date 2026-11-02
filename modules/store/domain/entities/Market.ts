@@ -44,6 +44,112 @@ export interface MarketProps {
   deletedAt?: Date;
 }
 
+type CreateMarketInput = {
+  marketId: string;
+  organizationId: string;
+  storeId?: string;
+  code: string;
+  name: string;
+  status?: MarketStatus;
+  countryCodes?: string[];
+  defaultCurrencyCode?: string;
+  supportedCurrencyCodes?: string[];
+  defaultLocaleCode?: string;
+  supportedLocaleCodes?: string[];
+  catalogAssortmentId?: string;
+  defaultPriceListId?: string;
+  contractingEntityId?: string;
+  taxDisplayMode?: MarketTaxDisplayMode;
+  allowDynamicFxConversion?: boolean;
+  capabilities?: MarketCapabilityMap;
+  allowedPaymentMethods?: string[];
+  allowedFulfillmentMethods?: string[];
+  hostnamePatterns?: string[];
+  metadata?: Record<string, unknown>;
+};
+
+type MarketConfigurationUpdates = Partial<{
+  name: string;
+  storeId: string;
+  countryCodes: string[];
+  defaultCurrencyCode: string;
+  supportedCurrencyCodes: string[];
+  defaultLocaleCode: string;
+  supportedLocaleCodes: string[];
+  catalogAssortmentId: string;
+  defaultPriceListId: string;
+  contractingEntityId: string;
+  taxDisplayMode: MarketTaxDisplayMode;
+  allowDynamicFxConversion: boolean;
+  capabilities: MarketCapabilityMap;
+  allowedPaymentMethods: string[];
+  allowedFulfillmentMethods: string[];
+  hostnamePatterns: string[];
+  metadata: Record<string, unknown>;
+}>;
+
+// `??`-style defaulting kept out of props assembly to keep complexity low.
+function nvl<T>(value: T | undefined | null, defaultValue: T): T {
+  return value ?? defaultValue;
+}
+
+function resolveMarketCurrencies(props: CreateMarketInput): { defaultCurrencyCode: string; supportedCurrencyCodes: string[] } {
+  const defaultCurrencyCode = nvl(props.defaultCurrencyCode, 'USD').toUpperCase();
+  const supportedCurrencyCodes = normalizeCodes(nvl(props.supportedCurrencyCodes, [defaultCurrencyCode]));
+  if (!supportedCurrencyCodes.includes(defaultCurrencyCode)) {
+    throw new MarketValidationError(`Default currency ${defaultCurrencyCode} must be in supportedCurrencyCodes`);
+  }
+  return { defaultCurrencyCode, supportedCurrencyCodes };
+}
+
+function resolveMarketLocales(props: CreateMarketInput): { defaultLocaleCode: string; supportedLocaleCodes: string[] } {
+  const defaultLocaleCode = nvl(props.defaultLocaleCode, 'en-US');
+  const supportedLocaleCodes = normalizeCodes(nvl(props.supportedLocaleCodes, [defaultLocaleCode]), false);
+  if (!supportedLocaleCodes.includes(defaultLocaleCode)) {
+    throw new MarketValidationError(`Default locale ${defaultLocaleCode} must be in supportedLocaleCodes`);
+  }
+  return { defaultLocaleCode, supportedLocaleCodes };
+}
+
+function marketPropsFromInput(
+  props: CreateMarketInput,
+  resolved: {
+    code: string;
+    defaultCurrencyCode: string;
+    supportedCurrencyCodes: string[];
+    defaultLocaleCode: string;
+    supportedLocaleCodes: string[];
+    now: Date;
+  },
+): MarketProps {
+  return {
+    marketId: props.marketId,
+    organizationId: props.organizationId,
+    storeId: props.storeId,
+    code: resolved.code,
+    name: props.name.trim(),
+    status: nvl(props.status, 'draft'),
+    version: 1,
+    countryCodes: normalizeCodes(nvl(props.countryCodes, [resolved.code])),
+    defaultCurrencyCode: resolved.defaultCurrencyCode,
+    supportedCurrencyCodes: resolved.supportedCurrencyCodes,
+    defaultLocaleCode: resolved.defaultLocaleCode,
+    supportedLocaleCodes: resolved.supportedLocaleCodes,
+    catalogAssortmentId: props.catalogAssortmentId,
+    defaultPriceListId: props.defaultPriceListId,
+    contractingEntityId: props.contractingEntityId,
+    taxDisplayMode: nvl(props.taxDisplayMode, 'exclusive_tax'),
+    allowDynamicFxConversion: nvl(props.allowDynamicFxConversion, false),
+    capabilities: nvl(props.capabilities, {}),
+    allowedPaymentMethods: nvl(props.allowedPaymentMethods, []),
+    allowedFulfillmentMethods: nvl(props.allowedFulfillmentMethods, []),
+    hostnamePatterns: nvl(props.hostnamePatterns, []),
+    metadata: props.metadata,
+    createdAt: resolved.now,
+    updatedAt: resolved.now,
+  };
+}
+
 export class Market {
   private props: MarketProps;
 
@@ -51,29 +157,7 @@ export class Market {
     this.props = props;
   }
 
-  static create(props: {
-    marketId: string;
-    organizationId: string;
-    storeId?: string;
-    code: string;
-    name: string;
-    status?: MarketStatus;
-    countryCodes?: string[];
-    defaultCurrencyCode?: string;
-    supportedCurrencyCodes?: string[];
-    defaultLocaleCode?: string;
-    supportedLocaleCodes?: string[];
-    catalogAssortmentId?: string;
-    defaultPriceListId?: string;
-    contractingEntityId?: string;
-    taxDisplayMode?: MarketTaxDisplayMode;
-    allowDynamicFxConversion?: boolean;
-    capabilities?: MarketCapabilityMap;
-    allowedPaymentMethods?: string[];
-    allowedFulfillmentMethods?: string[];
-    hostnamePatterns?: string[];
-    metadata?: Record<string, unknown>;
-  }): Market {
+  static create(props: CreateMarketInput): Market {
     if (!props.code || props.code.trim().length === 0) {
       throw new MarketValidationError('Market code is required');
     }
@@ -81,43 +165,12 @@ export class Market {
       throw new MarketValidationError('Market name is required');
     }
     const code = props.code.trim().toUpperCase();
-    const defaultCurrencyCode = (props.defaultCurrencyCode ?? 'USD').toUpperCase();
-    const supportedCurrencyCodes = normalizeCodes(props.supportedCurrencyCodes ?? [defaultCurrencyCode]);
-    if (!supportedCurrencyCodes.includes(defaultCurrencyCode)) {
-      throw new MarketValidationError(`Default currency ${defaultCurrencyCode} must be in supportedCurrencyCodes`);
-    }
-    const defaultLocaleCode = props.defaultLocaleCode ?? 'en-US';
-    const supportedLocaleCodes = normalizeCodes(props.supportedLocaleCodes ?? [defaultLocaleCode], false);
-    if (!supportedLocaleCodes.includes(defaultLocaleCode)) {
-      throw new MarketValidationError(`Default locale ${defaultLocaleCode} must be in supportedLocaleCodes`);
-    }
+    const { defaultCurrencyCode, supportedCurrencyCodes } = resolveMarketCurrencies(props);
+    const { defaultLocaleCode, supportedLocaleCodes } = resolveMarketLocales(props);
     const now = new Date();
-    return new Market({
-      marketId: props.marketId,
-      organizationId: props.organizationId,
-      storeId: props.storeId,
-      code,
-      name: props.name.trim(),
-      status: props.status ?? 'draft',
-      version: 1,
-      countryCodes: normalizeCodes(props.countryCodes ?? [code]),
-      defaultCurrencyCode,
-      supportedCurrencyCodes,
-      defaultLocaleCode,
-      supportedLocaleCodes,
-      catalogAssortmentId: props.catalogAssortmentId,
-      defaultPriceListId: props.defaultPriceListId,
-      contractingEntityId: props.contractingEntityId,
-      taxDisplayMode: props.taxDisplayMode ?? 'exclusive_tax',
-      allowDynamicFxConversion: props.allowDynamicFxConversion ?? false,
-      capabilities: props.capabilities ?? {},
-      allowedPaymentMethods: props.allowedPaymentMethods ?? [],
-      allowedFulfillmentMethods: props.allowedFulfillmentMethods ?? [],
-      hostnamePatterns: props.hostnamePatterns ?? [],
-      metadata: props.metadata,
-      createdAt: now,
-      updatedAt: now,
-    });
+    return new Market(
+      marketPropsFromInput(props, { code, defaultCurrencyCode, supportedCurrencyCodes, defaultLocaleCode, supportedLocaleCodes, now }),
+    );
   }
 
   static reconstitute(props: MarketProps): Market {
@@ -222,44 +275,10 @@ export class Market {
     return this.props.status === 'active';
   }
 
-  updateConfiguration(
-    updates: Partial<{
-      name: string;
-      storeId: string;
-      countryCodes: string[];
-      defaultCurrencyCode: string;
-      supportedCurrencyCodes: string[];
-      defaultLocaleCode: string;
-      supportedLocaleCodes: string[];
-      catalogAssortmentId: string;
-      defaultPriceListId: string;
-      contractingEntityId: string;
-      taxDisplayMode: MarketTaxDisplayMode;
-      allowDynamicFxConversion: boolean;
-      capabilities: MarketCapabilityMap;
-      allowedPaymentMethods: string[];
-      allowedFulfillmentMethods: string[];
-      hostnamePatterns: string[];
-      metadata: Record<string, unknown>;
-    }>,
-  ): void {
-    if (updates.name !== undefined) this.props.name = updates.name.trim();
-    if (updates.storeId !== undefined) this.props.storeId = updates.storeId;
-    if (updates.countryCodes !== undefined) this.props.countryCodes = normalizeCodes(updates.countryCodes);
-    if (updates.supportedCurrencyCodes !== undefined) this.props.supportedCurrencyCodes = normalizeCodes(updates.supportedCurrencyCodes);
-    if (updates.supportedLocaleCodes !== undefined) this.props.supportedLocaleCodes = normalizeCodes(updates.supportedLocaleCodes, false);
-    if (updates.defaultCurrencyCode !== undefined) this.props.defaultCurrencyCode = updates.defaultCurrencyCode.toUpperCase();
-    if (updates.defaultLocaleCode !== undefined) this.props.defaultLocaleCode = updates.defaultLocaleCode;
-    if (updates.catalogAssortmentId !== undefined) this.props.catalogAssortmentId = updates.catalogAssortmentId;
-    if (updates.defaultPriceListId !== undefined) this.props.defaultPriceListId = updates.defaultPriceListId;
-    if (updates.contractingEntityId !== undefined) this.props.contractingEntityId = updates.contractingEntityId;
-    if (updates.taxDisplayMode !== undefined) this.props.taxDisplayMode = updates.taxDisplayMode;
-    if (updates.allowDynamicFxConversion !== undefined) this.props.allowDynamicFxConversion = updates.allowDynamicFxConversion;
-    if (updates.capabilities !== undefined) this.props.capabilities = { ...this.props.capabilities, ...updates.capabilities };
-    if (updates.allowedPaymentMethods !== undefined) this.props.allowedPaymentMethods = updates.allowedPaymentMethods;
-    if (updates.allowedFulfillmentMethods !== undefined) this.props.allowedFulfillmentMethods = updates.allowedFulfillmentMethods;
-    if (updates.hostnamePatterns !== undefined) this.props.hostnamePatterns = updates.hostnamePatterns;
-    if (updates.metadata !== undefined) this.props.metadata = { ...this.props.metadata, ...updates.metadata };
+  updateConfiguration(updates: MarketConfigurationUpdates): void {
+    this.applyIdentityUpdates(updates);
+    this.applyCatalogUpdates(updates);
+    this.applyCapabilityUpdates(updates);
 
     // Re-validate consistency after update.
     if (!this.props.supportedCurrencyCodes.includes(this.props.defaultCurrencyCode)) {
@@ -269,6 +288,32 @@ export class Market {
       throw new MarketValidationError(`Default locale ${this.props.defaultLocaleCode} must be in supportedLocaleCodes`);
     }
     this.touch();
+  }
+
+  private applyIdentityUpdates(updates: MarketConfigurationUpdates): void {
+    if (updates.name !== undefined) this.props.name = updates.name.trim();
+    if (updates.storeId !== undefined) this.props.storeId = updates.storeId;
+    if (updates.countryCodes !== undefined) this.props.countryCodes = normalizeCodes(updates.countryCodes);
+    if (updates.supportedCurrencyCodes !== undefined) this.props.supportedCurrencyCodes = normalizeCodes(updates.supportedCurrencyCodes);
+    if (updates.supportedLocaleCodes !== undefined) this.props.supportedLocaleCodes = normalizeCodes(updates.supportedLocaleCodes, false);
+    if (updates.defaultCurrencyCode !== undefined) this.props.defaultCurrencyCode = updates.defaultCurrencyCode.toUpperCase();
+    if (updates.defaultLocaleCode !== undefined) this.props.defaultLocaleCode = updates.defaultLocaleCode;
+  }
+
+  private applyCatalogUpdates(updates: MarketConfigurationUpdates): void {
+    if (updates.catalogAssortmentId !== undefined) this.props.catalogAssortmentId = updates.catalogAssortmentId;
+    if (updates.defaultPriceListId !== undefined) this.props.defaultPriceListId = updates.defaultPriceListId;
+    if (updates.contractingEntityId !== undefined) this.props.contractingEntityId = updates.contractingEntityId;
+    if (updates.taxDisplayMode !== undefined) this.props.taxDisplayMode = updates.taxDisplayMode;
+    if (updates.allowDynamicFxConversion !== undefined) this.props.allowDynamicFxConversion = updates.allowDynamicFxConversion;
+  }
+
+  private applyCapabilityUpdates(updates: MarketConfigurationUpdates): void {
+    if (updates.capabilities !== undefined) this.props.capabilities = { ...this.props.capabilities, ...updates.capabilities };
+    if (updates.allowedPaymentMethods !== undefined) this.props.allowedPaymentMethods = updates.allowedPaymentMethods;
+    if (updates.allowedFulfillmentMethods !== undefined) this.props.allowedFulfillmentMethods = updates.allowedFulfillmentMethods;
+    if (updates.hostnamePatterns !== undefined) this.props.hostnamePatterns = updates.hostnamePatterns;
+    if (updates.metadata !== undefined) this.props.metadata = { ...this.props.metadata, ...updates.metadata };
   }
 
   /** Activate the market (mark sellable). Increments version. */

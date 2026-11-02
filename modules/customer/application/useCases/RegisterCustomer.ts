@@ -94,9 +94,42 @@ export class RegisterCustomerUseCase {
     }
 
     const customerId = generateUUID();
-    const now = new Date();
+    const customer = this.buildCustomer(command, customerId);
 
-    const customer: Customer = {
+    // Hash password before saving so both writes happen in a single transaction.
+    // Passwordless (provisioned) accounts keep an empty password column so
+    // credential comparison can never match — they must sign in via their provider.
+    const passwordHash = command.password ? await hashString(command.password) : null;
+
+    // Save customer + password atomically
+    await withTransaction(async () => {
+      await this.customerRepository.save(customer);
+      if (passwordHash) {
+        await this.customerRepository.updatePassword(customerId, passwordHash);
+      }
+    });
+
+    // Emit event
+    eventBus.emit('customer.registered', {
+      customerId: customer.customerId,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+    });
+
+    return {
+      customerId: customer.customerId,
+      email: customer.email,
+      firstName: command.firstName,
+      lastName: command.lastName,
+      isVerified: customer.isVerified,
+      createdAt: customer.createdAt.toISOString(),
+    };
+  }
+
+  private buildCustomer(command: RegisterCustomerCommand, customerId: string): Customer {
+    const now = new Date();
+    return {
       customerId,
       email: command.email.toLowerCase().trim(),
       firstName: command.firstName?.trim() || '',
@@ -135,36 +168,6 @@ export class RegisterCustomerUseCase {
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
-    };
-
-    // Hash password before saving so both writes happen in a single transaction.
-    // Passwordless (provisioned) accounts keep an empty password column so
-    // credential comparison can never match — they must sign in via their provider.
-    const passwordHash = command.password ? await hashString(command.password) : null;
-
-    // Save customer + password atomically
-    await withTransaction(async () => {
-      await this.customerRepository.save(customer);
-      if (passwordHash) {
-        await this.customerRepository.updatePassword(customerId, passwordHash);
-      }
-    });
-
-    // Emit event
-    eventBus.emit('customer.registered', {
-      customerId: customer.customerId,
-      email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-    });
-
-    return {
-      customerId: customer.customerId,
-      email: customer.email,
-      firstName: command.firstName,
-      lastName: command.lastName,
-      isVerified: customer.isVerified,
-      createdAt: customer.createdAt.toISOString(),
     };
   }
 }

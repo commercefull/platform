@@ -17,6 +17,36 @@ type TaxSettings = DbTaxSettings;
 type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
 type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
+// `||`/`??`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function nvl<T>(value: T | undefined | null, defaultValue: T): T {
+  return value ?? defaultValue;
+}
+
+function taxSettingsInsertValues(params: TaxSettingsCreateParams, now: string): unknown[] {
+  return [
+    params.organizationId,
+    fallback(params.calculationMethod, 'unitBased'),
+    fallback(params.pricesIncludeTax, false),
+    fallback(params.displayPricesWithTax, false),
+    fallback(params.taxBasedOn, 'shippingAddress'),
+    fallback(params.shippingTaxClass, null),
+    fallback(params.displayTaxTotals, 'itemized'),
+    nvl(params.applyTaxToShipping, true),
+    nvl(params.applyDiscountBeforeTax, true),
+    fallback(params.roundTaxAtSubtotal, false),
+    fallback(params.taxDecimalPlaces, 2),
+    fallback(params.defaultTaxCategory, null),
+    fallback(params.defaultTaxZone, null),
+    fallback(params.taxProvider, 'internal'),
+    JSON.stringify(params.taxProviderSettings || {}),
+    now,
+    now,
+  ];
+}
+
 class TaxSettingsRepo {
   async findById(id: string): Promise<TaxSettings | null> {
     return await queryOne<DbTaxSettings>(`SELECT * FROM "taxSettings" WHERE "taxSettingsId" = $1`, [id]);
@@ -35,25 +65,7 @@ class TaxSettingsRepo {
         "roundTaxAtSubtotal", "taxDecimalPlaces", "defaultTaxCategory", "defaultTaxZone",
         "taxProvider", "taxProviderSettings", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
-      [
-        params.organizationId,
-        params.calculationMethod || 'unitBased',
-        params.pricesIncludeTax || false,
-        params.displayPricesWithTax || false,
-        params.taxBasedOn || 'shippingAddress',
-        params.shippingTaxClass || null,
-        params.displayTaxTotals || 'itemized',
-        params.applyTaxToShipping ?? true,
-        params.applyDiscountBeforeTax ?? true,
-        params.roundTaxAtSubtotal || false,
-        params.taxDecimalPlaces || 2,
-        params.defaultTaxCategory || null,
-        params.defaultTaxZone || null,
-        params.taxProvider || 'internal',
-        JSON.stringify(params.taxProviderSettings || {}),
-        now,
-        now,
-      ],
+      taxSettingsInsertValues(params, now),
     );
     if (!result) throw new FailedToCreateTaxError('Failed to create tax settings');
     return result;

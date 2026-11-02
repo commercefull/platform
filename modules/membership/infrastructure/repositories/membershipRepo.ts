@@ -255,37 +255,43 @@ export class MembershipRepo {
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
     if (params.benefitType !== undefined) updateData.benefitType = params.benefitType;
 
-    const updatesValue =
-      params.discountPercentage !== undefined ||
-      params.discountAmountCents !== undefined ||
-      params.storeIds !== undefined ||
-      params.channelIds !== undefined ||
-      params.countryCodes !== undefined ||
-      params.currencyCodes !== undefined;
-
-    if (updatesValue) {
-      const existing = await membershipBenefitRepo.findById(id);
-      if (!existing) throw new MembershipBenefitNotFoundError(id);
-      const existingValue = (existing.value || {}) as Record<string, unknown>;
-      const scope = {
-        storeIds: params.storeIds ?? existingValue.storeIds,
-        channelIds: params.channelIds ?? existingValue.channelIds,
-        countryCodes: params.countryCodes ?? existingValue.countryCodes,
-        currencyCodes: params.currencyCodes ?? existingValue.currencyCodes,
-      };
-      updateData.value = {
-        ...existingValue,
-        ...scope,
-        ...(params.discountPercentage !== undefined ? { percentage: params.discountPercentage } : {}),
-        ...(params.discountAmountCents !== undefined ? { amount: params.discountAmountCents } : {}),
-      };
-      if (params.discountPercentage !== undefined) updateData.valueType = 'percentage';
-      if (params.discountAmountCents !== undefined) updateData.valueType = 'fixed';
+    const valueKeys = ['discountPercentage', 'discountAmountCents', 'storeIds', 'channelIds', 'countryCodes', 'currencyCodes'] as const;
+    if (valueKeys.some(k => params[k] !== undefined)) {
+      await this.mergeBenefitValue(id, params, updateData);
     }
 
     const benefit = await membershipBenefitRepo.update(id, updateData);
     if (!benefit) throw new MembershipBenefitNotFoundError(id);
     return this.benefitToLegacy(benefit);
+  }
+
+  /** Merge scope/discount fields into the benefit's value object and set valueType. */
+  private async mergeBenefitValue(
+    id: string,
+    params: {
+      discountPercentage?: number;
+      discountAmountCents?: number;
+      storeIds?: string[];
+      channelIds?: string[];
+      countryCodes?: string[];
+      currencyCodes?: string[];
+    },
+    updateData: Record<string, unknown>,
+  ): Promise<void> {
+    const existing = await membershipBenefitRepo.findById(id);
+    if (!existing) throw new MembershipBenefitNotFoundError(id);
+    const existingValue = (existing.value || {}) as Record<string, unknown>;
+    updateData.value = {
+      ...existingValue,
+      storeIds: params.storeIds ?? existingValue.storeIds,
+      channelIds: params.channelIds ?? existingValue.channelIds,
+      countryCodes: params.countryCodes ?? existingValue.countryCodes,
+      currencyCodes: params.currencyCodes ?? existingValue.currencyCodes,
+      ...(params.discountPercentage !== undefined ? { percentage: params.discountPercentage } : {}),
+      ...(params.discountAmountCents !== undefined ? { amount: params.discountAmountCents } : {}),
+    };
+    if (params.discountPercentage !== undefined) updateData.valueType = 'percentage';
+    if (params.discountAmountCents !== undefined) updateData.valueType = 'fixed';
   }
 
   async deleteBenefit(id: string): Promise<boolean> {

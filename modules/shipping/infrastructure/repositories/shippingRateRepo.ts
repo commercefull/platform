@@ -81,6 +81,41 @@ async function findActive(zoneId?: string, methodId?: string): Promise<ShippingR
   return (await query<DbShippingRate[]>(sql, params)) || [];
 }
 
+// `||`/`??`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T>(value: T | undefined | null, defaultValue: T): T {
+  return value || defaultValue;
+}
+function nvl<T>(value: T | undefined | null, defaultValue: T): T {
+  return value ?? defaultValue;
+}
+function json(value: unknown): string | null {
+  return value ? JSON.stringify(value) : null;
+}
+
+function rateInsertValues(input: CreateShippingRateInput): unknown[] {
+  return [
+    input.shippingZoneId,
+    input.shippingMethodId,
+    fallback(input.name, null),
+    fallback(input.description, null),
+    nvl(input.isActive, true),
+    input.rateType,
+    input.baseRateCents,
+    fallback(input.perItemRateCents, 0),
+    fallback(input.freeThresholdCents, null),
+    json(input.rateMatrix),
+    fallback(input.minRateCents, null),
+    fallback(input.maxRateCents, null),
+    fallback(input.currencyCode, 'USD'),
+    nvl(input.taxable, true),
+    nvl(input.priority, 0),
+    fallback(input.validFrom, null),
+    fallback(input.validTo, null),
+    json(input.conditions),
+    fallback(input.createdBy, null),
+  ];
+}
+
 async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
   const result = await queryOne<DbShippingRate>(
     `INSERT INTO "${TABLE}" (
@@ -88,27 +123,7 @@ async function create(input: CreateShippingRateInput): Promise<ShippingRate> {
       "perItemRateCents", "freeThresholdCents", "rateMatrix", "minRateCents", "maxRateCents", "currencyCode",
       "taxable", "priority", "validFrom", "validTo", "conditions", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
-    [
-      input.shippingZoneId,
-      input.shippingMethodId,
-      input.name || null,
-      input.description || null,
-      input.isActive ?? true,
-      input.rateType,
-      input.baseRateCents,
-      input.perItemRateCents || 0,
-      input.freeThresholdCents || null,
-      input.rateMatrix ? JSON.stringify(input.rateMatrix) : null,
-      input.minRateCents || null,
-      input.maxRateCents || null,
-      input.currencyCode || 'USD',
-      input.taxable ?? true,
-      input.priority ?? 0,
-      input.validFrom || null,
-      input.validTo || null,
-      input.conditions ? JSON.stringify(input.conditions) : null,
-      input.createdBy || null,
-    ],
+    rateInsertValues(input),
   );
 
   if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping rate');

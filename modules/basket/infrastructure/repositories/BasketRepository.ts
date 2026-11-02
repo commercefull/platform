@@ -86,75 +86,13 @@ export class BasketRepo implements BasketRepository {
   }
 
   async save(basket: Basket): Promise<Basket> {
-    const now = new Date().toISOString();
-
     // Check if basket exists
     const existing = await queryOne<DbBasket>('SELECT "basketId" FROM basket WHERE "basketId" = $1', [basket.basketId]);
 
-    // Merge coupon into metadata so it persists across requests
-    const rawMetadata = basket.metadata ? { ...basket.metadata } : {};
-    const metadataToPersist = basket.coupon
-      ? { ...rawMetadata, coupon: { ...basket.coupon, appliedAt: basket.coupon.appliedAt.toISOString() } }
-      : rawMetadata;
-
     if (existing) {
-      // Update
-      await query(
-        `UPDATE basket SET
-          "customerId" = $1,
-          "sessionId" = $2,
-          "storeId" = $3,
-          "channelId" = $4,
-          status = $5,
-          "currencyCode" = $6,
-          metadata = $7,
-          "expiresAt" = $8,
-          "convertedToOrderId" = $9,
-          "updatedAt" = $10,
-          "lastActivityAt" = $11,
-          "discountAmountCents" = $12
-        WHERE "basketId" = $13`,
-        [
-          basket.customerId || null,
-          basket.sessionId || null,
-          basket.storeId || null,
-          basket.channelId || null,
-          basket.status,
-          basket.currency,
-          Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
-          basket.expiresAt?.toISOString() || null,
-          basket.convertedToOrderId || null,
-          now,
-          basket.lastActivityAt.toISOString(),
-          basket.discountAmountCents,
-          basket.basketId,
-        ],
-      );
+      await this.updateBasketRow(basket);
     } else {
-      // Insert
-      await query(
-        `INSERT INTO basket (
-          "basketId", "customerId", "sessionId", "storeId", "channelId", status, "currencyCode",
-          metadata, "expiresAt", "convertedToOrderId",
-          "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-        [
-          basket.basketId,
-          basket.customerId || null,
-          basket.sessionId || null,
-          basket.storeId || null,
-          basket.channelId || null,
-          basket.status,
-          basket.currency,
-          Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
-          basket.expiresAt?.toISOString() || null,
-          basket.convertedToOrderId || null,
-          now,
-          now,
-          now,
-          basket.discountAmountCents,
-        ],
-      );
+      await this.insertBasketRow(basket);
     }
 
     if (existing || basket.items.length > 0) {
@@ -162,6 +100,73 @@ export class BasketRepo implements BasketRepository {
     }
 
     return basket;
+  }
+
+  /** Shared column values for the basket row (excluding basketId and timestamps). */
+  private basketColumnValues(basket: Basket): unknown[] {
+    // Merge coupon into metadata so it persists across requests
+    const rawMetadata = basket.metadata ? { ...basket.metadata } : {};
+    const metadataToPersist = basket.coupon
+      ? { ...rawMetadata, coupon: { ...basket.coupon, appliedAt: basket.coupon.appliedAt.toISOString() } }
+      : rawMetadata;
+
+    return [
+      basket.customerId || null,
+      basket.sessionId || null,
+      basket.storeId || null,
+      basket.channelId || null,
+      basket.status,
+      basket.currency,
+      Object.keys(metadataToPersist).length > 0 ? JSON.stringify(metadataToPersist) : null,
+      basket.expiresAt?.toISOString() || null,
+      basket.convertedToOrderId || null,
+    ];
+  }
+
+  private async updateBasketRow(basket: Basket): Promise<void> {
+    const now = new Date().toISOString();
+    await query(
+      `UPDATE basket SET
+        "customerId" = $1,
+        "sessionId" = $2,
+        "storeId" = $3,
+        "channelId" = $4,
+        status = $5,
+        "currencyCode" = $6,
+        metadata = $7,
+        "expiresAt" = $8,
+        "convertedToOrderId" = $9,
+        "updatedAt" = $10,
+        "lastActivityAt" = $11,
+        "discountAmountCents" = $12
+      WHERE "basketId" = $13`,
+      [
+        ...this.basketColumnValues(basket),
+        now,
+        basket.lastActivityAt.toISOString(),
+        basket.discountAmountCents,
+        basket.basketId,
+      ],
+    );
+  }
+
+  private async insertBasketRow(basket: Basket): Promise<void> {
+    const now = new Date().toISOString();
+    await query(
+      `INSERT INTO basket (
+        "basketId", "customerId", "sessionId", "storeId", "channelId", status, "currencyCode",
+        metadata, "expiresAt", "convertedToOrderId",
+        "createdAt", "updatedAt", "lastActivityAt", "discountAmountCents"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      [
+        basket.basketId,
+        ...this.basketColumnValues(basket),
+        now,
+        now,
+        now,
+        basket.discountAmountCents,
+      ],
+    );
   }
 
   async delete(basketId: string): Promise<void> {

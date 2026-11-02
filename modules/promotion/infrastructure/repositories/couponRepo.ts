@@ -51,6 +51,39 @@ function mapUsage(row: PromotionCouponUsageRow): PromotionCouponUsage {
   return { ...row, discountAmountCents: Number(row.discountAmountCents) };
 }
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T>(value: T | undefined | null, defaultValue: T): T {
+  return value || defaultValue;
+}
+
+function couponInsertValues(input: CreateCouponInput, now: Date): unknown[] {
+  return [
+    input.code,
+    input.name,
+    fallback(input.description, null),
+    fallback(input.promotionId, null),
+    input.type,
+    fallback(input.discountAmountCents, null),
+    fallback(input.currencyCode, 'USD'),
+    fallback(input.minOrderAmountCents, null),
+    fallback(input.maxDiscountAmountCents, null),
+    fallback(input.startDate, now),
+    fallback(input.endDate, null),
+    input.isActive !== false,
+    fallback(input.isOneTimeUse, false),
+    fallback(input.maxUsage, null),
+    0, // Initial usage count
+    fallback(input.maxUsagePerCustomer, 1),
+    fallback(input.generationMethod, CouponGenerationMethod.MANUAL),
+    fallback(input.isReferral, false),
+    fallback(input.referrerId, null),
+    fallback(input.isPublic, false),
+    fallback(input.organizationId, null),
+    now,
+    now,
+  ];
+}
+
 /**
  * Repository for managing promotion coupons
  */
@@ -71,31 +104,7 @@ class CouponRepo {
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
       ) RETURNING *`,
-      [
-        input.code,
-        input.name,
-        input.description || null,
-        input.promotionId || null,
-        input.type,
-        input.discountAmountCents || null,
-        input.currencyCode || 'USD',
-        input.minOrderAmountCents || null,
-        input.maxDiscountAmountCents || null,
-        input.startDate || now,
-        input.endDate || null,
-        input.isActive !== false,
-        input.isOneTimeUse || false,
-        input.maxUsage || null,
-        0, // Initial usage count
-        input.maxUsagePerCustomer || 1,
-        input.generationMethod || CouponGenerationMethod.MANUAL,
-        input.isReferral || false,
-        input.referrerId || null,
-        input.isPublic || false,
-        input.organizationId || null,
-        now,
-        now,
-      ],
+      couponInsertValues(input, now),
     );
 
     if (!coupon) {

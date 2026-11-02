@@ -201,18 +201,37 @@ export const updateNotificationTemplate = async (req: HttpRequest, res: HttpResp
     isActive?: string;
   };
 
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (supportedChannels !== undefined) updates.supportedChannels = supportedChannels;
-  if (defaultChannel !== undefined) updates.defaultChannel = defaultChannel;
-  if (subject !== undefined) updates.subject = subject || undefined;
-  if (htmlTemplate !== undefined) updates.htmlTemplate = htmlTemplate || undefined;
-  if (textTemplate !== undefined) updates.textTemplate = textTemplate || undefined;
-  if (pushTemplate !== undefined) updates.pushTemplate = pushTemplate || undefined;
-  if (smsTemplate !== undefined) updates.smsTemplate = smsTemplate || undefined;
-  if (parameters !== undefined) updates.parameters = parameters ? JSON.parse(parameters) : undefined;
-  if (categoryCode !== undefined) updates.categoryCode = categoryCode || undefined;
-  if (isActive !== undefined) updates.isActive = isActive === 'true';
+  const transforms: Record<string, (v: unknown) => unknown> = {
+    name: v => v,
+    description: v => v || undefined,
+    supportedChannels: v => v,
+    defaultChannel: v => v,
+    subject: v => v || undefined,
+    htmlTemplate: v => v || undefined,
+    textTemplate: v => v || undefined,
+    pushTemplate: v => v || undefined,
+    smsTemplate: v => v || undefined,
+    parameters: v => (v ? JSON.parse(v as string) : undefined),
+    categoryCode: v => v || undefined,
+    isActive: v => v === 'true',
+  };
+  const fields = {
+    name,
+    description,
+    supportedChannels,
+    defaultChannel,
+    subject,
+    htmlTemplate,
+    textTemplate,
+    pushTemplate,
+    smsTemplate,
+    parameters,
+    categoryCode,
+    isActive,
+  };
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) updates[key] = transforms[key](value);
+  }
 
   const template = await manageTemplatesUseCase.update(templateId, updates);
 

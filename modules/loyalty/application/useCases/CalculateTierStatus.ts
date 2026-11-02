@@ -88,20 +88,13 @@ export class CalculateTierStatusUseCase {
     );
 
     // Determine new tier based on qualifying metrics
-    let newTier = sortedTiers[0]; // Default to lowest tier
-    for (const tier of sortedTiers) {
-      if (qualifyingMetrics.points >= tier.pointsThreshold && qualifyingMetrics.purchases >= (tier.purchasesThreshold || 0)) {
-        newTier = tier;
-      }
-    }
+    const newTier = determineTier(sortedTiers, qualifyingMetrics);
 
     const previousTier = customer.currentTier;
     const tierChanged = previousTier?.tierId !== newTier.tierId;
-    let changeType: 'upgraded' | 'downgraded' | undefined;
+    const changeType = tierChanged ? (newTier.level > (previousTier?.level || 0) ? 'upgraded' : 'downgraded') : undefined;
 
-    if (tierChanged) {
-      changeType = newTier.level > (previousTier?.level || 0) ? 'upgraded' : 'downgraded';
-
+    if (changeType) {
       // Update customer's tier
       await this.loyaltyRepository.updateCustomerTier(customerId, newTier.tierId);
 
@@ -120,36 +113,35 @@ export class CalculateTierStatusUseCase {
     const pointsToNextTier = nextTier ? Math.max(0, nextTier.pointsThreshold - qualifyingMetrics.points) : undefined;
 
     return {
-      currentTier: {
-        tierId: newTier.tierId,
-        tierName: newTier.name,
-        tierLevel: newTier.level,
-        benefits: newTier.benefits || [],
-        pointsMultiplier: newTier.pointsMultiplier || 1,
-      },
-      previousTier: previousTier
-        ? {
-            tierId: previousTier.tierId,
-            tierName: previousTier.name,
-            tierLevel: previousTier.level,
-            benefits: previousTier.benefits || [],
-            pointsMultiplier: previousTier.pointsMultiplier || 1,
-          }
-        : undefined,
+      currentTier: toTierInfo(newTier),
+      previousTier: previousTier ? toTierInfo(previousTier) : undefined,
       tierChanged,
       changeType,
       pointsToNextTier,
-      nextTier: nextTier
-        ? {
-            tierId: nextTier.tierId,
-            tierName: nextTier.name,
-            tierLevel: nextTier.level,
-            benefits: nextTier.benefits || [],
-            pointsMultiplier: nextTier.pointsMultiplier || 1,
-          }
-        : undefined,
+      nextTier: nextTier ? toTierInfo(nextTier) : undefined,
       qualifyingPoints: qualifyingMetrics.points,
       qualifyingPurchases: qualifyingMetrics.purchases,
     };
   }
+}
+
+/** Highest tier whose thresholds the metrics satisfy. */
+function determineTier(sortedTiers: LoyaltyTierData[], metrics: QualifyingMetrics): LoyaltyTierData {
+  let newTier = sortedTiers[0]; // Default to lowest tier
+  for (const tier of sortedTiers) {
+    if (metrics.points >= tier.pointsThreshold && metrics.purchases >= (tier.purchasesThreshold || 0)) {
+      newTier = tier;
+    }
+  }
+  return newTier;
+}
+
+function toTierInfo(tier: LoyaltyTierData): TierInfo {
+  return {
+    tierId: tier.tierId,
+    tierName: tier.name,
+    tierLevel: tier.level,
+    benefits: tier.benefits || [],
+    pointsMultiplier: tier.pointsMultiplier || 1,
+  };
 }

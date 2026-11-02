@@ -58,27 +58,40 @@ export class UpdateCatalogVariantUseCase {
     const variant = await this.variantRepo.update(command.variantId, command.variantFields);
     const productId = command.productId || variant.productId;
 
-    const hasPriceInput =
-      command.priceCents !== undefined ||
-      command.salePriceCents !== undefined ||
-      command.compareAtPriceCents !== undefined ||
-      command.costPriceCents !== undefined;
-    if (!hasPriceInput) {
+    if (!this.hasPriceInput(command)) {
       return { ...variant };
     }
 
     const existing = await this.pricingPort.getBasePrice(productId, command.variantId);
-    const price = await this.pricingPort.setBasePrice({
+    const price = await this.pricingPort.setBasePrice(this.buildPriceParams(command, productId, existing));
+
+    return { ...variant, priceCents: price.priceCents };
+  }
+
+  private hasPriceInput(command: UpdateCatalogVariantCommand): boolean {
+    return (
+      command.priceCents !== undefined ||
+      command.salePriceCents !== undefined ||
+      command.compareAtPriceCents !== undefined ||
+      command.costPriceCents !== undefined
+    );
+  }
+
+  private buildPriceParams(
+    command: UpdateCatalogVariantCommand,
+    productId: string,
+    existing: Awaited<ReturnType<ProductPricingPort['getBasePrice']>>,
+  ): Parameters<ProductPricingPort['setBasePrice']>[0] {
+    const fallback = <T>(commandValue: T | undefined, existingValue: T | null | undefined): T | null =>
+      commandValue !== undefined ? commandValue : (existingValue ?? null);
+    return {
       productId,
       productVariantId: command.variantId,
       currencyCode: command.currencyCode ?? existing?.currencyCode ?? 'USD',
       priceCents: command.priceCents ?? existing?.priceCents ?? 0,
-      salePriceCents: command.salePriceCents !== undefined ? command.salePriceCents : (existing?.salePriceCents ?? null),
-      compareAtPriceCents:
-        command.compareAtPriceCents !== undefined ? command.compareAtPriceCents : (existing?.compareAtPriceCents ?? null),
-      costPriceCents: command.costPriceCents !== undefined ? command.costPriceCents : (existing?.costPriceCents ?? null),
-    });
-
-    return { ...variant, priceCents: price.priceCents };
+      salePriceCents: fallback(command.salePriceCents, existing?.salePriceCents),
+      compareAtPriceCents: fallback(command.compareAtPriceCents, existing?.compareAtPriceCents),
+      costPriceCents: fallback(command.costPriceCents, existing?.costPriceCents),
+    };
   }
 }

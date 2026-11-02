@@ -17,6 +17,14 @@ interface MediaUploadBody {
   metadata?: string;
 }
 
+const CLIENT_ERROR_CODES = new Set(['LIMIT_FILE_SIZE', 'LIMIT_UNEXPECTED_FILE']);
+const CLIENT_ERROR_PATTERNS = ['invalid', 'Invalid', 'Unexpected end', 'unsupported', 'Unsupported', 'JSON'];
+
+/** True when the failure was caused by the uploaded payload rather than the server. */
+function isClientUploadError(error: unknown, message: string): boolean {
+  return CLIENT_ERROR_PATTERNS.some(p => message.includes(p)) || CLIENT_ERROR_CODES.has((error as { code?: string }).code ?? '');
+}
+
 interface MediaDownloadBody {
   url: string;
   altText?: string;
@@ -90,17 +98,7 @@ export class MediaController {
       logger.error('Error:', error);
 
       const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
-      // Map client-side errors to 400
-      const isClientError =
-        errorMessage.includes('invalid') ||
-        errorMessage.includes('Invalid') ||
-        errorMessage.includes('Unexpected end') ||
-        errorMessage.includes('unsupported') ||
-        errorMessage.includes('Unsupported') ||
-        errorMessage.includes('JSON') ||
-        (error as { code?: string }).code === 'LIMIT_FILE_SIZE' ||
-        (error as { code?: string }).code === 'LIMIT_UNEXPECTED_FILE';
-      const status = isClientError ? 400 : 500;
+      const status = isClientUploadError(error, errorMessage) ? 400 : 500;
       jsonResponse(res, status, {
         success: false,
         message: status === 400 ? errorMessage : 'Failed to process image',

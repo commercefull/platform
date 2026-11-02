@@ -66,24 +66,27 @@ export function createSessionStore(config: SessionStoreConfig): SessionStoreResu
  * Uses the shared ioredis connection from libs/redisClient unless explicit
  * connection overrides are passed via config.
  */
-function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreResult {
-  const hasOverrides = !!(config?.host || config?.port || config?.password || config?.db !== undefined || config?.url);
+function hasRedisOverrides(config?: SessionStoreConfig['redis']): boolean {
+  if (!config) return false;
+  return Boolean(config.host || config.port || config.password || config.db !== undefined || config.url);
+}
 
-  let client: Redis;
-  let ownsClient = false;
-
-  if (hasOverrides) {
-    client = createRedisClient({
-      url: config?.url,
-      host: config?.host || 'localhost',
-      port: config?.port || 6379,
-      password: config?.password || undefined,
-      db: config?.db || 0,
-    });
-    ownsClient = true;
-  } else {
-    client = getRedisClient();
+function resolveRedisClient(config: SessionStoreConfig['redis']): { client: Redis; ownsClient: boolean } {
+  if (!hasRedisOverrides(config)) {
+    return { client: getRedisClient(), ownsClient: false };
   }
+  const client = createRedisClient({
+    url: config?.url,
+    host: config?.host || 'localhost',
+    port: config?.port || 6379,
+    password: config?.password || undefined,
+    db: config?.db || 0,
+  });
+  return { client, ownsClient: true };
+}
+
+function createRedisStore(config?: SessionStoreConfig['redis']): SessionStoreResult {
+  const { client, ownsClient } = resolveRedisClient(config);
 
   const store = new RedisStore({
     client,

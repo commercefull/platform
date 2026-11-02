@@ -31,15 +31,18 @@ interface CollectionFormBody {
   unpublishAt?: string;
 }
 
-function parseForm(body: CollectionFormBody) {
-  let conditions: CollectionCondition[] | undefined;
-  if (body.isAutomated === 'on' || body.isAutomated === 'true') {
-    try {
-      conditions = body.conditionsJson ? (JSON.parse(body.conditionsJson) as CollectionCondition[]) : undefined;
-    } catch {
-      throw new Error('Conditions must be valid JSON');
-    }
+function parseConditions(body: CollectionFormBody): CollectionCondition[] | undefined {
+  if (body.isAutomated !== 'on' && body.isAutomated !== 'true') return undefined;
+  try {
+    return body.conditionsJson ? (JSON.parse(body.conditionsJson) as CollectionCondition[]) : undefined;
+  } catch {
+    throw new Error('Conditions must be valid JSON');
   }
+}
+
+const isOn = (v?: string | boolean): boolean => v === 'on' || v === 'true';
+
+function parseForm(body: CollectionFormBody) {
   return {
     name: body.name,
     slug: body.slug || body.name?.toLowerCase().replace(/\s+/g, '-'),
@@ -48,10 +51,10 @@ function parseForm(body: CollectionFormBody) {
     bannerUrl: body.bannerUrl || null,
     metaTitle: body.metaTitle || null,
     metaDescription: body.metaDescription || null,
-    isActive: body.isActive === 'on' || body.isActive === 'true' || body.isActive === true,
-    isFeatured: body.isFeatured === 'on' || body.isFeatured === 'true',
-    isAutomated: body.isAutomated === 'on' || body.isAutomated === 'true',
-    conditions,
+    isActive: isOn(body.isActive) || body.isActive === true,
+    isFeatured: isOn(body.isFeatured),
+    isAutomated: isOn(body.isAutomated),
+    conditions: parseConditions(body),
     sortOrder: body.sortOrder as 'manual' | 'newest' | 'price_asc' | 'price_desc' | 'name_asc' | undefined,
     publishAt: body.publishAt ? new Date(body.publishAt) : null,
     unpublishAt: body.unpublishAt ? new Date(body.unpublishAt) : null,

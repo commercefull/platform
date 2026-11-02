@@ -159,16 +159,22 @@ export const updateLoyaltyReward = async (req: HttpRequest, res: HttpResponse): 
     isActive?: string;
   };
 
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (pointsCost !== undefined) updates.pointsCost = parseInt(pointsCost);
-  if (discountAmountCents !== undefined) updates.discountAmountCents = discountAmountCents ? parseFloat(discountAmountCents) : undefined;
-  if (discountPercent !== undefined) updates.discountPercent = discountPercent ? parseFloat(discountPercent) : undefined;
-  if (discountCode !== undefined) updates.discountCode = discountCode || undefined;
-  if (freeShipping !== undefined) updates.freeShipping = freeShipping === 'true';
-  if (productIds !== undefined) updates.productIds = productIds ? JSON.parse(productIds) : undefined;
-  if (expiresAt !== undefined) updates.expiresAt = expiresAt ? new Date(expiresAt) : undefined;
-  if (isActive !== undefined) updates.isActive = isActive !== 'false';
+  const transforms: Record<string, (v: string | undefined) => unknown> = {
+    name: v => v,
+    description: v => v || undefined,
+    pointsCost: v => parseInt(v as string),
+    discountAmountCents: v => (v ? parseFloat(v) : undefined),
+    discountPercent: v => (v ? parseFloat(v) : undefined),
+    discountCode: v => v || undefined,
+    freeShipping: v => v === 'true',
+    productIds: v => (v ? JSON.parse(v) : undefined),
+    expiresAt: v => (v ? new Date(v) : undefined),
+    isActive: v => v !== 'false',
+  };
+  const fields = { name, description, pointsCost, discountAmountCents, discountPercent, discountCode, freeShipping, productIds, expiresAt, isActive };
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) updates[key] = transforms[key](value);
+  }
 
   const _reward = await manageLoyaltyAdminUseCase.updateReward(rewardId, updates);
 

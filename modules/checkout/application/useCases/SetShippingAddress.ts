@@ -108,78 +108,12 @@ export class SetShippingAddressUseCase {
 
     session.setShippingAddress(address);
 
-    let taxAmountCents: number;
-    let taxIncludedInSubtotal = false;
-    let taxAddedCents: number | undefined;
-    try {
-      let taxableShippingCents = session.shippingAmount.cents;
-      let applyDiscountBeforeTax = false;
-      let pricesIncludeTax = false;
-      try {
-        if (this.taxQuotePort) {
-          const settings = await this.taxQuotePort.getTaxSettings('default');
-          if (settings) {
-            applyDiscountBeforeTax = settings.applyDiscountBeforeTax;
-            pricesIncludeTax = settings.pricesIncludeTax;
-            if (!settings.applyTaxToShipping) {
-              taxableShippingCents = 0;
-            }
-          }
-        }
-      } catch {
-        // Tax settings lookup is best-effort
-      }
-
-      const items = await this.getTaxLineItems(session);
-      const storeContext = await this.getStoreContext(session);
-      if (this.taxQuotePort) {
-        const taxResult = await this.taxQuotePort.calculateTax({
-          items: items.map(item => ({
-            ...item,
-            unitPriceCents:
-              applyDiscountBeforeTax && session.discountAmount.cents > 0
-                ? Math.max(0, Math.round(item.unitPriceCents - session.discountAmount.cents / items.length))
-                : item.unitPriceCents,
-          })),
-          shippingAddress: {
-            country: command.country,
-            region: command.region,
-            postalCode: command.postalCode,
-            city: command.city,
-          },
-          shippingAmountCents: taxableShippingCents,
-          customerId: session.customerId,
-          pricesIncludeTax,
-          vatNumber: session.vatNumber,
-          organizationId: storeContext?.organizationId,
-          originCountry: storeContext?.country,
-        });
-        taxAmountCents = taxResult.success ? taxResult.taxAmountCents : 0;
-        taxIncludedInSubtotal = taxResult.success && taxResult.taxIncludedInSubtotal === true;
-        if (taxResult.success) session.setReverseChargeApplied(taxResult.reverseChargeApplied === true);
-        taxAddedCents =
-          taxResult.success && taxResult.taxAddedCents != null ? taxResult.taxAddedCents : taxIncludedInSubtotal ? 0 : taxAmountCents;
-        if (taxResult.success) {
-          session.updateMetadata({
-            taxDecision: {
-              taxRegime: taxResult.taxRegime,
-              taxPolicyVersion: taxResult.taxPolicyVersion,
-              decisionRecord: taxResult.decisionRecord,
-              lineItems: taxResult.lineItems,
-            },
-          });
-        }
-      } else {
-        taxAmountCents = 0;
-      }
-    } catch {
-      taxAmountCents = 0;
-    }
+    const tax = await this.calculateSessionTax(session, command);
     session.updateAmounts(
       session.subtotal,
-      Money.fromCents(taxAmountCents, session.subtotal.currency),
-      taxIncludedInSubtotal,
-      taxAddedCents != null ? Money.fromCents(taxAddedCents, session.subtotal.currency) : undefined,
+      Money.fromCents(tax.taxAmountCents, session.subtotal.currency),
+      tax.taxIncludedInSubtotal,
+      tax.taxAddedCents != null ? Money.fromCents(tax.taxAddedCents, session.subtotal.currency) : undefined,
     );
 
     // Evaluate auto-applied promotions
@@ -195,6 +129,84 @@ export class SetShippingAddressUseCase {
     });
 
     return mapCheckoutToResponse(session);
+  }
+
+  /** Tax-settings flags that shape the tax calculation (best-effort lookup). */
+  private async getTaxSettingsFlags(defaultShippingCents: number): Promise<{
+    taxableShippingCents: number;
+    applyDiscountBeforeTax: boolean;
+    pricesIncludeTax: boolean;
+  }> {
+    const flags = { taxableShippingCents: defaultShippingCents, applyDiscountBeforeTax: false, pricesIncludeTax: false };
+    try {
+      const settings = this.taxQuotePort ? await this.taxQuotePort.getTaxSettings('default') : null;
+      if (settings) {
+        flags.applyDiscountBeforeTax = settings.applyDiscountBeforeTax;
+        flags.pricesIncludeTax = settings.pricesIncludeTax;
+        if (!settings.applyTaxToShipping) {
+          flags.taxableShippingCents = 0;
+        }
+      }
+    } catch {
+      // Tax settings lookup is best-effort
+    }
+    return flags;
+  }
+
+  /** Recalculate tax for the session; returns zero-tax defaults on any failure. */
+  private async calculateSessionTax(
+    session: CheckoutSessionLike,
+    command: SetShippingAddressCommand,
+  ): Promise<{ taxAmountCents: number; taxIncludedInSubtotal: boolean; taxAddedCents?: number }> {
+    try {
+      const { taxableShippingCents, applyDiscountBeforeTax, pricesIncludeTax } = await this.getTaxSettingsFlags(
+        session.shippingAmount.cents,
+      );
+      if (!this.taxQuotePort) return { taxAmountCents: 0, taxIncludedInSubtotal: false };
+
+      const items = await this.getTaxLineItems(session);
+      const storeContext = await this.getStoreContext(session);
+      const taxResult = await this.taxQuotePort.calculateTax({
+        items: items.map(item => ({
+          ...item,
+          unitPriceCents:
+            applyDiscountBeforeTax && session.discountAmount.cents > 0
+              ? Math.max(0, Math.round(item.unitPriceCents - session.discountAmount.cents / items.length))
+              : item.unitPriceCents,
+        })),
+        shippingAddress: {
+          country: command.country,
+          region: command.region,
+          postalCode: command.postalCode,
+          city: command.city,
+        },
+        shippingAmountCents: taxableShippingCents,
+        customerId: session.customerId,
+        pricesIncludeTax,
+        vatNumber: session.vatNumber,
+        organizationId: storeContext?.organizationId,
+        originCountry: storeContext?.country,
+      });
+
+      const taxIncludedInSubtotal = taxResult.success && taxResult.taxIncludedInSubtotal === true;
+      const taxAmountCents = taxResult.success ? taxResult.taxAmountCents : 0;
+      const taxAddedCents =
+        taxResult.success && taxResult.taxAddedCents != null ? taxResult.taxAddedCents : taxIncludedInSubtotal ? 0 : taxAmountCents;
+      if (taxResult.success) {
+        session.setReverseChargeApplied(taxResult.reverseChargeApplied === true);
+        session.updateMetadata({
+          taxDecision: {
+            taxRegime: taxResult.taxRegime,
+            taxPolicyVersion: taxResult.taxPolicyVersion,
+            decisionRecord: taxResult.decisionRecord,
+            lineItems: taxResult.lineItems,
+          },
+        });
+      }
+      return { taxAmountCents, taxIncludedInSubtotal, taxAddedCents };
+    } catch {
+      return { taxAmountCents: 0, taxIncludedInSubtotal: false };
+    }
   }
 
   private async getTaxLineItems(
@@ -276,7 +288,8 @@ export class SetShippingAddressUseCase {
 interface CheckoutSessionLike {
   basketId: string;
   subtotal: { cents: number; currency?: string };
-  shippingAmount?: { cents: number };
+  shippingAmount: { cents: number };
+  discountAmount: { cents: number };
   customerId?: string;
   couponCode?: string;
   vatNumber?: string;

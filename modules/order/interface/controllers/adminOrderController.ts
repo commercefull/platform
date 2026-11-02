@@ -34,21 +34,39 @@ import { adminRespond } from '../../../../libs/adminRespond';
 // List Orders
 // ============================================================================
 
-export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { status, paymentStatus, fulfillmentStatus, customerId, search, startDate, endDate, limit, offset, orderBy, orderDirection } =
-    req.query;
-
+function buildOrderListFilters(query: HttpRequest['query']): Record<string, unknown> | undefined {
   const filters: Record<string, unknown> = {};
-  if (status) filters.status = status as OrderStatus;
-  if (paymentStatus) filters.paymentStatus = paymentStatus as PaymentStatus;
-  if (fulfillmentStatus) filters.fulfillmentStatus = fulfillmentStatus as FulfillmentStatus;
-  if (customerId) filters.customerId = customerId as string;
-  if (search) filters.search = search as string;
-  if (startDate) filters.startDate = new Date(startDate as string);
-  if (endDate) filters.endDate = new Date(endDate as string);
+  if (query.status) filters.status = query.status as OrderStatus;
+  if (query.paymentStatus) filters.paymentStatus = query.paymentStatus as PaymentStatus;
+  if (query.fulfillmentStatus) filters.fulfillmentStatus = query.fulfillmentStatus as FulfillmentStatus;
+  if (query.customerId) filters.customerId = query.customerId as string;
+  if (query.search) filters.search = query.search as string;
+  if (query.startDate) filters.startDate = new Date(query.startDate as string);
+  if (query.endDate) filters.endDate = new Date(query.endDate as string);
+  return Object.keys(filters).length > 0 ? filters : undefined;
+}
+
+/** Echo the submitted filter values back to the view. */
+function echoedOrderFilters(query: HttpRequest['query']): Record<string, unknown> {
+  const or = (v: unknown, fallback: string = ''): unknown => v || fallback;
+  return {
+    status: or(query.status),
+    paymentStatus: or(query.paymentStatus),
+    fulfillmentStatus: or(query.fulfillmentStatus),
+    customerId: or(query.customerId),
+    search: or(query.search),
+    startDate: or(query.startDate),
+    endDate: or(query.endDate),
+    orderBy: or(query.orderBy, 'createdAt'),
+    orderDirection: or(query.orderDirection, 'desc'),
+  };
+}
+
+export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { limit, offset, orderBy, orderDirection } = req.query;
 
   const command = new ListOrdersCommand(
-    Object.keys(filters).length > 0 ? filters : undefined,
+    buildOrderListFilters(req.query),
     parseInt(limit as string) || 50,
     parseInt(offset as string) || 0,
     (orderBy as string) || 'createdAt',
@@ -72,17 +90,7 @@ export const listOrders = async (req: HttpRequest, res: HttpResponse): Promise<v
       pages,
       hasMore: result.hasMore,
     },
-    filters: {
-      status: status || '',
-      paymentStatus: paymentStatus || '',
-      fulfillmentStatus: fulfillmentStatus || '',
-      customerId: customerId || '',
-      search: search || '',
-      startDate: startDate || '',
-      endDate: endDate || '',
-      orderBy: orderBy || 'createdAt',
-      orderDirection: orderDirection || 'desc',
-    },
+    filters: echoedOrderFilters(req.query),
     // Status options for filters
     orderStatuses: Object.values(OrderStatus),
     paymentStatuses: Object.values(PaymentStatus),

@@ -122,14 +122,7 @@ export class ManageCollectionsUseCase {
     },
   ): Promise<Collection> {
     const collection = await this.getById(assortmentCollectionId);
-
-    if (input.slug && input.slug !== collection.slug) {
-      await this.assertSlugAvailable(input.slug);
-    }
-    const nextAutomated = input.isAutomated ?? collection.isAutomated;
-    const nextConditions = input.conditions !== undefined ? input.conditions : collection.conditions;
-    if (nextAutomated) this.assertAutomated(nextConditions);
-    if (nextConditions?.length) assertValidConditions(nextConditions);
+    await this.assertUpdateRules(collection, input);
 
     collection.update({
       ...input,
@@ -139,6 +132,26 @@ export class ManageCollectionsUseCase {
     const saved = await this.collectionRepo.update(collection);
     if (!saved) throw new CollectionNotFoundError(assortmentCollectionId);
 
+    await this.applyMembershipChanges(assortmentCollectionId, input);
+
+    eventBus.emit('collection.updated', { assortmentCollectionId });
+    return saved;
+  }
+
+  private async assertUpdateRules(collection: Collection, input: CollectionInput): Promise<void> {
+    if (input.slug && input.slug !== collection.slug) {
+      await this.assertSlugAvailable(input.slug);
+    }
+    const nextAutomated = input.isAutomated ?? collection.isAutomated;
+    const nextConditions = input.conditions !== undefined ? input.conditions : collection.conditions;
+    if (nextAutomated) this.assertAutomated(nextConditions);
+    if (nextConditions?.length) assertValidConditions(nextConditions);
+  }
+
+  private async applyMembershipChanges(
+    assortmentCollectionId: string,
+    input: { addProducts?: CollectionMapItemInput[]; removeMapIds?: string[]; removeProductIds?: string[] },
+  ): Promise<void> {
     for (const mapId of input.removeMapIds ?? []) {
       await this.collectionMapRepo.delete(mapId);
     }
@@ -148,9 +161,6 @@ export class ManageCollectionsUseCase {
     for (const item of input.addProducts ?? []) {
       await this.addMember(assortmentCollectionId, item);
     }
-
-    eventBus.emit('collection.updated', { assortmentCollectionId });
-    return saved;
   }
 
   async delete(assortmentCollectionId: string): Promise<void> {

@@ -378,19 +378,25 @@ export class GenerateReportUseCase {
       title: 'Executive Summary Report',
       generatedAt: new Date(),
       period: `${startDate.toISOString().split('T')[0]} to ${endDate.toISOString().split('T')[0]}`,
-      summary: {
-        totalRevenueCents: parseFloat(executiveData?.revenue || '0'),
-        totalOrders: parseInt(executiveData?.orders || '0'),
-        totalCustomers: parseInt(executiveData?.customers || '0'),
-        totalProfitCents: parseFloat(executiveData?.profit || '0'),
-        profitMargin:
-          parseFloat(executiveData?.revenue || '0') > 0
-            ? (parseFloat(executiveData?.profit || '0') / parseFloat(executiveData?.revenue || '0')) * 100
-            : 0,
-      },
+      summary: buildExecutiveSummary(executiveData),
       data: [],
     };
   }
+}
+
+/**
+ * Reduce the executive aggregates row to the report summary shape.
+ */
+function buildExecutiveSummary(row?: { revenue: string; orders: string; customers: string; profit: string } | null) {
+  const revenue = parseFloat(row?.revenue || '0');
+  const profit = parseFloat(row?.profit || '0');
+  return {
+    totalRevenueCents: revenue,
+    totalOrders: parseInt(row?.orders || '0'),
+    totalCustomers: parseInt(row?.customers || '0'),
+    totalProfitCents: profit,
+    profitMargin: revenue > 0 ? (profit / revenue) * 100 : 0,
+  };
 }
 
 export const generateReportUseCase = new GenerateReportUseCase();

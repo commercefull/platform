@@ -16,6 +16,37 @@ type TaxCalculation = DbTaxCalculation;
 type TaxCalculationCreateParams = Omit<TaxCalculation, 'taxCalculationId' | 'createdAt' | 'updatedAt'>;
 type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+
+function taxCalculationInsertValues(params: TaxCalculationCreateParams, now: string): unknown[] {
+  return [
+    params.organizationId,
+    fallback(params.orderId, null),
+    fallback(params.invoiceId, null),
+    fallback(params.basketId, null),
+    fallback(params.customerId, null),
+    fallback(params.calculationMethod, 'unitBased'),
+    fallback(params.status, 'pending'),
+    params.sourceType,
+    fallback(params.sourceId, null),
+    JSON.stringify(params.taxAddress || {}),
+    fallback(params.taxableAmountCents, 0),
+    fallback(params.taxExemptAmountCents, 0),
+    fallback(params.taxAmountCents, 0),
+    fallback(params.totalAmountCents, 0),
+    fallback(params.currencyCode, 'USD'),
+    fallback(params.exchangeRate, 1.0),
+    JSON.stringify(params.taxProviderResponse || {}),
+    fallback(params.taxProviderReference, null),
+    fallback(params.errorMessage, null),
+    now,
+    now,
+  ];
+}
+
 class TaxCalculationRepo {
   async findById(id: string): Promise<TaxCalculation | null> {
     return await queryOne<DbTaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "taxCalculationId" = $1`, [id]);
@@ -63,29 +94,7 @@ class TaxCalculationRepo {
         "taxAmountCents", "totalAmountCents", "currencyCode", "exchangeRate", "taxProviderResponse",
         "taxProviderReference", "errorMessage", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
-      [
-        params.organizationId,
-        params.orderId || null,
-        params.invoiceId || null,
-        params.basketId || null,
-        params.customerId || null,
-        params.calculationMethod || 'unitBased',
-        params.status || 'pending',
-        params.sourceType,
-        params.sourceId || null,
-        JSON.stringify(params.taxAddress || {}),
-        params.taxableAmountCents || 0,
-        params.taxExemptAmountCents || 0,
-        params.taxAmountCents || 0,
-        params.totalAmountCents || 0,
-        params.currencyCode || 'USD',
-        params.exchangeRate || 1.0,
-        JSON.stringify(params.taxProviderResponse || {}),
-        params.taxProviderReference || null,
-        params.errorMessage || null,
-        now,
-        now,
-      ],
+      taxCalculationInsertValues(params, now),
     );
     if (!result) throw new FailedToCreateTaxError('Failed to create tax calculation');
     return result;

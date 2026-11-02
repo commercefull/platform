@@ -6,6 +6,14 @@ import type { Promotion as DbPromotion } from '../../../../libs/db/types';
 import type { PromotionRule as DbPromotionRule } from '../../../../libs/db/types';
 import type { PromotionAction as DbPromotionAction } from '../../../../libs/db/types';
 import type { PromotionUsage as DbPromotionUsage } from '../../../../libs/db/types';
+import {
+  createRule as qCreateRule,
+  findRulesByPromotionId as qFindRulesByPromotionId,
+  deleteRule as qDeleteRule,
+  createAction as qCreateAction,
+  findActionsByPromotionId as qFindActionsByPromotionId,
+  deleteAction as qDeleteAction,
+} from './promotionRuleActionQueries';
 
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
@@ -38,25 +46,9 @@ export type PromotionUsage = {
   updatedAt: Date;
 };
 
-/**
- * Rule condition types
- */
-export type RuleCondition =
-  | 'cartTotal'
-  | 'itemQuantity'
-  | 'productCategory'
-  | 'customerGroup'
-  | 'firstOrder'
-  | 'dateRange'
-  | 'timeOfDay'
-  | 'dayOfWeek'
-  | 'shippingMethod'
-  | 'paymentMethod';
-
-/**
- * Action types
- */
-export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
+import type { CreateRuleInput, CreateActionInput } from './promotionRepoTypes';
+export { CreateRuleInput, CreateActionInput } from './promotionRepoTypes';
+export type { RuleCondition, ActionType } from './promotionRepoTypes';
 
 /**
  * Input for creating a new promotion
@@ -82,28 +74,6 @@ export interface CreatePromotionInput {
   excludedCustomerGroups?: string[];
   rules?: CreateRuleInput[];
   actions?: CreateActionInput[];
-}
-
-/**
- * Input for creating a promotion rule
- */
-export interface CreateRuleInput {
-  name?: string;
-  condition: RuleCondition;
-  operator: string;
-  value: unknown;
-  isActive?: boolean;
-}
-
-/**
- * Input for creating a promotion action
- */
-export interface CreateActionInput {
-  type: ActionType;
-  value: number;
-  targetType?: string;
-  targetId?: string;
-  metadata?: unknown;
 }
 
 /**
@@ -422,86 +392,42 @@ class PromotionRepo {
    * Create a promotion rule
    */
   async createRule(promotionId: string, input: CreateRuleInput): Promise<PromotionRule> {
-    const now = new Date();
-
-    const rule = await queryOne<DbPromotionRule>(
-      `INSERT INTO "${PROMOTION_RULE_TABLE}" (
-        "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [promotionId, input.name || null, input.condition, input.operator, JSON.stringify(input.value), input.isActive !== false, now, now],
-    );
-
-    if (!rule) {
-      throw new FailedToCreatePromotionError('Failed to create promotion rule');
-    }
-
-    return rule;
+    return qCreateRule(promotionId, input);
   }
 
   /**
    * Find rules by promotion ID
    */
   async findRulesByPromotionId(promotionId: string): Promise<PromotionRule[]> {
-    return (await query<DbPromotionRule[]>(`SELECT * FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
+    return qFindRulesByPromotionId(promotionId);
   }
 
   /**
    * Delete a rule
    */
   async deleteRule(ruleId: string): Promise<boolean> {
-    const result = await queryOne<{ promotionRuleId: string }>(
-      `DELETE FROM "${PROMOTION_RULE_TABLE}" WHERE "promotionRuleId" = $1 RETURNING "promotionRuleId"`,
-      [ruleId],
-    );
-    return !!result;
+    return qDeleteRule(ruleId);
   }
-
-  // ACTION METHODS
 
   /**
    * Create a promotion action
    */
   async createAction(promotionId: string, input: CreateActionInput): Promise<PromotionAction> {
-    const now = new Date();
-
-    const action = await queryOne<DbPromotionAction>(
-      `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
-        "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        promotionId,
-        input.type,
-        JSON.stringify(input.value),
-        input.targetType || null,
-        input.targetId ? JSON.stringify([input.targetId]) : null,
-        now,
-        now,
-      ],
-    );
-
-    if (!action) {
-      throw new FailedToCreatePromotionError('Failed to create promotion action');
-    }
-
-    return action;
+    return qCreateAction(promotionId, input);
   }
 
   /**
    * Find actions by promotion ID
    */
   async findActionsByPromotionId(promotionId: string): Promise<PromotionAction[]> {
-    return (await query<DbPromotionAction[]>(`SELECT * FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionId" = $1`, [promotionId])) || [];
+    return qFindActionsByPromotionId(promotionId);
   }
 
   /**
    * Delete an action
    */
   async deleteAction(actionId: string): Promise<boolean> {
-    const result = await queryOne<{ promotionActionId: string }>(
-      `DELETE FROM "${PROMOTION_ACTION_TABLE}" WHERE "promotionActionId" = $1 RETURNING "promotionActionId"`,
-      [actionId],
-    );
-    return !!result;
+    return qDeleteAction(actionId);
   }
 
   // USAGE METHODS

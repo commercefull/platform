@@ -1,40 +1,46 @@
 /**
  * Order Repository Implementation
  * PostgreSQL implementation using camelCase column names (matching migrations)
+ *
+ * Per-aggregate SQL lives in sibling modules (orderItemQueries,
+ * orderAddressQueries, orderStatusHistoryQueries, orderWriteQueries); row
+ * mapping lives in orderRowMappers / orderFromRowProjections.
  */
 
 import { query, queryOne } from '../../../../libs/db';
-import { generateUUID } from '../../../../libs/uuid';
 import { OrderRepository as IOrderRepository, OrderFilters } from '../../domain/repositories/OrderRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { Order } from '../../domain/entities/Order';
 import { OrderItem } from '../../domain/entities/OrderItem';
 import { OrderAddress } from '../../domain/entities/OrderAddress';
-import { Money } from '../../domain/valueObjects/Money';
 import { OrderStatus } from '../../domain/valueObjects/OrderStatus';
 import { PaymentStatus } from '../../domain/valueObjects/PaymentStatus';
 import { FulfillmentStatus } from '../../domain/valueObjects/FulfillmentStatus';
+import { Order as DbOrder, OrderItem as DbOrderItem, OrderAddress as DbOrderAddress } from '../../../../libs/db/types';
 import {
-  Order as DbOrder,
-  OrderItem as DbOrderItem,
-  OrderAddress as DbOrderAddress,
-  OrderStatusHistory as DbOrderStatusHistory,
-} from '../../../../libs/db/types';
-
-// JSONB columns arrive pre-parsed or as JSON strings depending on driver
-// config — normalise both to objects; falsy values map to undefined.
-function fromJson<T>(value: unknown): T | undefined {
-  if (!value) return undefined;
-  return (typeof value === 'string' ? JSON.parse(value) : value) as T;
-}
-
-function toDate(value: string | Date | null | undefined): Date | undefined {
-  return value ? new Date(value) : undefined;
-}
-
-function centsToMoney(value: unknown, currency: string): Money | undefined {
-  return value != null ? Money.fromCents(Number(value), currency) : undefined;
-}
+  getOrderItems as qGetOrderItems,
+  findOrderItemById as qFindOrderItemById,
+  addOrderItem as qAddOrderItem,
+  updateOrderItem as qUpdateOrderItem,
+  removeOrderItem as qRemoveOrderItem,
+} from './orderItemQueries';
+import {
+  getOrderAddresses as qGetOrderAddresses,
+  getShippingAddress as qGetShippingAddress,
+  getBillingAddress as qGetBillingAddress,
+  saveOrderAddress as qSaveOrderAddress,
+} from './orderAddressQueries';
+import {
+  recordStatusChange as qRecordStatusChange,
+  recordPaymentStatusChange as qRecordPaymentStatusChange,
+  recordFulfillmentStatusChange as qRecordFulfillmentStatusChange,
+  getStatusHistory as qGetStatusHistory,
+  getPaymentStatusHistory as qGetPaymentStatusHistory,
+  getFulfillmentStatusHistory as qGetFulfillmentStatusHistory,
+} from './orderStatusHistoryQueries';
+import { insertOrderRow, updateOrderRow } from './orderWriteQueries';
+import { buildOrderWhereClause, mapToOrderAddress, mapToOrderItem } from './orderRowMappers';
+import { mapOrderRow } from './orderFromRowProjections';
 
 export class OrderRepo implements IOrderRepository {
   async findById(orderId: string): Promise<Order | null> {
@@ -45,7 +51,7 @@ export class OrderRepo implements IOrderRepository {
     const shippingAddress = await this.getShippingAddress(orderId);
     const billingAddress = await this.getBillingAddress(orderId);
 
-    return this.mapToOrder(row, items, shippingAddress, billingAddress);
+    return mapOrderRow(row, items, shippingAddress, billingAddress);
   }
 
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
@@ -56,7 +62,7 @@ export class OrderRepo implements IOrderRepository {
     const shippingAddress = await this.getShippingAddress(row.orderId);
     const billingAddress = await this.getBillingAddress(row.orderId);
 
-    return this.mapToOrder(row, items, shippingAddress, billingAddress);
+    return mapOrderRow(row, items, shippingAddress, billingAddress);
   }
 
   async findByCustomerId(customerId: string, pagination?: PaginationOptions): Promise<PaginatedResult<Order>> {
@@ -90,7 +96,7 @@ export class OrderRepo implements IOrderRepository {
     const orderBy = pagination?.orderBy || 'createdAt';
     const orderDir = pagination?.orderDirection || 'desc';
 
-    const { whereClause, params } = this.buildWhereClause(filters);
+    const { whereClause, params } = buildOrderWhereClause(filters);
 
     const rows = await query<DbOrder[]>(
       `SELECT * FROM "order" ${whereClause}
@@ -135,9 +141,9 @@ export class OrderRepo implements IOrderRepository {
     const existing = await queryOne<{ orderId: string }>('SELECT "orderId" FROM "order" WHERE "orderId" = $1', [order.orderId]);
 
     if (existing) {
-      await this.updateOrder(order, now);
+      await updateOrderRow(order, now);
     } else {
-      await this.insertOrder(order, now);
+      await insertOrderRow(order, now);
     }
 
     await this.syncItems(order);
@@ -147,247 +153,13 @@ export class OrderRepo implements IOrderRepository {
     return order;
   }
 
-  private orderRowValues(order: Order, now: string): Record<string, unknown> {
-    return {
-      orderId: order.orderId,
-      orderNumber: order.orderNumber,
-      orderDate: order.orderDate.toISOString(),
-      createdAt: now,
-      updatedAt: now,
-      ...this.orderCoreValues(order),
-      ...this.orderMonetaryValues(order),
-      ...this.orderLifecycleValues(order),
-      ...this.orderContactValues(order),
-      ...this.orderContextValues(order),
-    };
-  }
-
-  private orderCoreValues(order: Order): Record<string, unknown> {
-    return {
-      customerId: order.customerId || null,
-      basketId: order.basketId || null,
-      storeId: order.storeId || null,
-      channelId: order.channelId || null,
-      createdByUserId: order.createdByUserId || null,
-      orderSource: order.orderSource,
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      fulfillmentStatus: order.fulfillmentStatus,
-      currencyCode: order.currencyCode,
-    };
-  }
-
-  private orderMonetaryValues(order: Order): Record<string, unknown> {
-    return {
-      subtotalCents: order.subtotal.cents,
-      discountTotalCents: order.discountTotal.cents,
-      taxTotalCents: order.taxTotal.cents,
-      shippingTotalCents: order.shippingTotal.cents,
-      handlingFeeCents: order.handlingFee.cents,
-      totalAmountCents: order.totalAmount.cents,
-      totalItems: order.totalItems,
-      totalQuantity: order.totalQuantity,
-      taxExempt: order.taxExempt,
-    };
-  }
-
-  private orderLifecycleValues(order: Order): Record<string, unknown> {
-    return {
-      completedAt: order.completedAt?.toISOString() || null,
-      cancelledAt: order.cancelledAt?.toISOString() || null,
-      returnedAt: order.returnedAt?.toISOString() || null,
-      estimatedDeliveryDate: order.estimatedDeliveryDate?.toISOString() || null,
-    };
-  }
-
-  private orderContactValues(order: Order): Record<string, unknown> {
-    return {
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone || null,
-      customerName: order.customerName || null,
-      customerNotes: order.customerNotes || null,
-      adminNotes: order.adminNotes || null,
-      ipAddress: order.ipAddress || null,
-      userAgent: order.userAgent || null,
-      referralSource: order.referralSource || null,
-    };
-  }
-
-  private orderContextValues(order: Order): Record<string, unknown> {
-    return {
-      hasGiftWrapping: order.hasGiftWrapping,
-      giftMessage: order.giftMessage || null,
-      isGift: order.isGift,
-      isSubscriptionOrder: order.isSubscriptionOrder,
-      parentOrderId: order.parentOrderId || null,
-      tags: order.tags.length > 0 ? JSON.stringify(order.tags) : null,
-      metadata: order.metadata ? JSON.stringify(order.metadata) : null,
-      marketId: order.marketId || null,
-      localeCode: order.localeCode || null,
-      contractingEntityId: order.contractingEntityId || null,
-      catalogCurrencyCode: order.catalogCurrencyCode || null,
-      displayedCurrencyCode: order.displayedCurrencyCode || null,
-      settlementCurrencyCode: order.settlementCurrencyCode || null,
-      accountingCurrencyCode: order.accountingCurrencyCode || null,
-      exchangeRateSnapshot: order.exchangeRateSnapshot ? JSON.stringify(order.exchangeRateSnapshot) : null,
-      versionSnapshot: JSON.stringify(order.versionSnapshot ?? {}),
-      decisionLog: JSON.stringify(order.decisionLog ?? []),
-    };
-  }
-
-  private async updateOrder(order: Order, now: string): Promise<void> {
-    const v = this.orderRowValues(order, now);
-    await query(
-      `UPDATE "order" SET
-          "orderNumber" = $1, "customerId" = $2, "basketId" = $3, "storeId" = $4,
-          "channelId" = $5, "createdByUserId" = $6, "orderSource" = $7, "status" = $8,
-          "paymentStatus" = $9, "fulfillmentStatus" = $10, "currencyCode" = $11,
-          "subtotalCents" = $12, "discountTotalCents" = $13, "taxTotalCents" = $14, "shippingTotalCents" = $15,
-          "handlingFeeCents" = $16, "totalAmountCents" = $17, "totalItems" = $18, "totalQuantity" = $19,
-          "taxExempt" = $20, "completedAt" = $21, "cancelledAt" = $22, "returnedAt" = $23,
-          "customerEmail" = $24, "customerPhone" = $25, "customerName" = $26,
-          "customerNotes" = $27, "adminNotes" = $28, "estimatedDeliveryDate" = $29,
-          "hasGiftWrapping" = $30, "giftMessage" = $31, "isGift" = $32,
-          "isSubscriptionOrder" = $33, "parentOrderId" = $34, "tags" = $35,
-          "metadata" = $36, "updatedAt" = $37,
-          "marketId" = $39, "localeCode" = $40, "contractingEntityId" = $41,
-          "catalogCurrencyCode" = $42, "displayedCurrencyCode" = $43,
-          "settlementCurrencyCode" = $44, "accountingCurrencyCode" = $45,
-          "exchangeRateSnapshot" = $46, "versionSnapshot" = $47, "decisionLog" = $48
-        WHERE "orderId" = $38`,
-      [
-        v.orderNumber,
-        v.customerId,
-        v.basketId,
-        v.storeId,
-        v.channelId,
-        v.createdByUserId,
-        v.orderSource,
-        v.status,
-        v.paymentStatus,
-        v.fulfillmentStatus,
-        v.currencyCode,
-        v.subtotalCents,
-        v.discountTotalCents,
-        v.taxTotalCents,
-        v.shippingTotalCents,
-        v.handlingFeeCents,
-        v.totalAmountCents,
-        v.totalItems,
-        v.totalQuantity,
-        v.taxExempt,
-        v.completedAt,
-        v.cancelledAt,
-        v.returnedAt,
-        v.customerEmail,
-        v.customerPhone,
-        v.customerName,
-        v.customerNotes,
-        v.adminNotes,
-        v.estimatedDeliveryDate,
-        v.hasGiftWrapping,
-        v.giftMessage,
-        v.isGift,
-        v.isSubscriptionOrder,
-        v.parentOrderId,
-        v.tags,
-        v.metadata,
-        v.updatedAt,
-        v.orderId,
-        v.marketId,
-        v.localeCode,
-        v.contractingEntityId,
-        v.catalogCurrencyCode,
-        v.displayedCurrencyCode,
-        v.settlementCurrencyCode,
-        v.accountingCurrencyCode,
-        v.exchangeRateSnapshot,
-        v.versionSnapshot,
-        v.decisionLog,
-      ],
-    );
-  }
-
-  private async insertOrder(order: Order, now: string): Promise<void> {
-    const v = this.orderRowValues(order, now);
-    await query(
-      `INSERT INTO "order" (
-          "orderId", "orderNumber", "customerId", "basketId", "storeId", "channelId", "createdByUserId", "orderSource", "status", "paymentStatus",
-          "fulfillmentStatus", "currencyCode", "subtotalCents", "discountTotalCents", "taxTotalCents",
-          "shippingTotalCents", "handlingFeeCents", "totalAmountCents", "totalItems", "totalQuantity",
-          "taxExempt", "orderDate", "customerEmail", "customerPhone", "customerName",
-          "customerNotes", "ipAddress", "userAgent", "referralSource",
-          "hasGiftWrapping", "giftMessage", "isGift", "isSubscriptionOrder",
-          "parentOrderId", "tags", "metadata", "createdAt", "updatedAt",
-          "marketId", "localeCode", "contractingEntityId",
-          "catalogCurrencyCode", "displayedCurrencyCode",
-          "settlementCurrencyCode", "accountingCurrencyCode",
-          "exchangeRateSnapshot", "versionSnapshot", "decisionLog"
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-          $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30,
-          $31, $32, $33, $34, $35, $36, $37, $38, $39, $40, $41, $42, $43, $44, $45, $46, $47, $48
-        )`,
-      [
-        v.orderId,
-        v.orderNumber,
-        v.customerId,
-        v.basketId,
-        v.storeId,
-        v.channelId,
-        v.createdByUserId,
-        v.orderSource,
-        v.status,
-        v.paymentStatus,
-        v.fulfillmentStatus,
-        v.currencyCode,
-        v.subtotalCents,
-        v.discountTotalCents,
-        v.taxTotalCents,
-        v.shippingTotalCents,
-        v.handlingFeeCents,
-        v.totalAmountCents,
-        v.totalItems,
-        v.totalQuantity,
-        v.taxExempt,
-        v.orderDate,
-        v.customerEmail,
-        v.customerPhone,
-        v.customerName,
-        v.customerNotes,
-        v.ipAddress,
-        v.userAgent,
-        v.referralSource,
-        v.hasGiftWrapping,
-        v.giftMessage,
-        v.isGift,
-        v.isSubscriptionOrder,
-        v.parentOrderId,
-        v.tags,
-        v.metadata,
-        v.createdAt,
-        v.updatedAt,
-        v.marketId,
-        v.localeCode,
-        v.contractingEntityId,
-        v.catalogCurrencyCode,
-        v.displayedCurrencyCode,
-        v.settlementCurrencyCode,
-        v.accountingCurrencyCode,
-        v.exchangeRateSnapshot,
-        v.versionSnapshot,
-        v.decisionLog,
-      ],
-    );
-  }
-
   async delete(orderId: string): Promise<void> {
     const now = new Date().toISOString();
     await query('UPDATE "order" SET "deletedAt" = $1, "updatedAt" = $1 WHERE "orderId" = $2', [now, orderId]);
   }
 
   async count(filters?: OrderFilters): Promise<number> {
-    const { whereClause, params } = this.buildWhereClause(filters);
+    const { whereClause, params } = buildOrderWhereClause(filters);
     const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "order" ${whereClause}`, params);
     return parseInt(result?.count || '0');
   }
@@ -408,292 +180,27 @@ export class OrderRepo implements IOrderRepository {
   }
 
   // Order Items
-  async getOrderItems(orderId: string): Promise<OrderItem[]> {
-    const rows = await query<DbOrderItem[]>('SELECT * FROM "orderItem" WHERE "orderId" = $1 ORDER BY "createdAt" ASC', [orderId]);
-    const order = await queryOne<{ currencyCode: string }>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [orderId]);
-    const currency = order?.currencyCode || 'USD';
-    return (rows || []).map(row => this.mapToOrderItem(row, currency));
-  }
-
-  async findOrderItemById(orderItemId: string): Promise<OrderItem | null> {
-    const row = await queryOne<DbOrderItem>('SELECT * FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
-    if (!row) return null;
-    const order = await queryOne<{ currencyCode: string }>('SELECT "currencyCode" FROM "order" WHERE "orderId" = $1', [row.orderId]);
-    return this.mapToOrderItem(row, order?.currencyCode || 'USD');
-  }
-
-  async addOrderItem(orderId: string, item: OrderItem): Promise<OrderItem> {
-    const now = new Date().toISOString();
-    await query(
-      `INSERT INTO "orderItem" (
-        "orderItemId", "orderId", "productId", "productVariantId", "sku", "name",
-        "description", "quantity", "unitPriceCents", "unitCostCents", "discountedUnitPriceCents",
-        "lineTotalCents", "discountTotalCents", "taxTotalCents", "taxRate", "taxExempt",
-        "fulfillmentStatus", "options", "attributes", "giftWrapped", "giftMessage",
-        "weight", "dimensions", "isDigital", "subscriptionInfo", "metadata",
-        "createdAt", "updatedAt"
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)`,
-      [
-        item.orderItemId,
-        orderId,
-        item.productId,
-        item.productVariantId || null,
-        item.sku,
-        item.name,
-        item.description || null,
-        item.quantity,
-        item.unitPrice.cents,
-        item.unitCost?.cents ?? null,
-        item.discountedUnitPrice?.cents ?? null,
-        item.lineTotal.cents,
-        item.discountTotal.cents,
-        item.taxTotal.cents,
-        item.taxRate || null,
-        item.taxExempt,
-        item.fulfillmentStatus,
-        item.options ? JSON.stringify(item.options) : null,
-        item.attributes ? JSON.stringify(item.attributes) : null,
-        item.giftWrapped,
-        item.giftMessage || null,
-        item.weight || null,
-        item.dimensions ? JSON.stringify(item.dimensions) : null,
-        item.isDigital,
-        item.subscriptionInfo ? JSON.stringify(item.subscriptionInfo) : null,
-        item.metadata ? JSON.stringify(item.metadata) : null,
-        now,
-        now,
-      ],
-    );
-    return item;
-  }
-
-  async updateOrderItem(item: OrderItem): Promise<OrderItem> {
-    const now = new Date().toISOString();
-    await query(
-      `UPDATE "orderItem" SET
-        "quantity" = $1, "unitPriceCents" = $2, "discountedUnitPriceCents" = $3,
-        "lineTotalCents" = $4, "discountTotalCents" = $5, "taxTotalCents" = $6,
-        "fulfillmentStatus" = $7, "giftWrapped" = $8, "giftMessage" = $9,
-        "updatedAt" = $10
-      WHERE "orderItemId" = $11`,
-      [
-        item.quantity,
-        item.unitPrice.cents,
-        item.discountedUnitPrice?.cents ?? null,
-        item.lineTotal.cents,
-        item.discountTotal.cents,
-        item.taxTotal.cents,
-        item.fulfillmentStatus,
-        item.giftWrapped,
-        item.giftMessage || null,
-        now,
-        item.orderItemId,
-      ],
-    );
-    return item;
-  }
-
-  async removeOrderItem(orderItemId: string): Promise<void> {
-    await query('DELETE FROM "orderItem" WHERE "orderItemId" = $1', [orderItemId]);
-  }
+  getOrderItems = (orderId: string) => qGetOrderItems(orderId);
+  findOrderItemById = (orderItemId: string) => qFindOrderItemById(orderItemId);
+  addOrderItem = (orderId: string, item: OrderItem) => qAddOrderItem(orderId, item);
+  updateOrderItem = (item: OrderItem) => qUpdateOrderItem(item);
+  removeOrderItem = (orderItemId: string) => qRemoveOrderItem(orderItemId);
 
   // Order Addresses
-  async getOrderAddresses(orderId: string): Promise<OrderAddress[]> {
-    const rows = await query<DbOrderAddress[]>('SELECT * FROM "orderAddress" WHERE "orderId" = $1', [orderId]);
-    return (rows || []).map(row => this.mapToOrderAddress(row));
-  }
-
-  async saveOrderAddress(address: OrderAddress): Promise<OrderAddress> {
-    const existing = await queryOne<{ orderAddressId: string }>('SELECT "orderAddressId" FROM "orderAddress" WHERE "orderAddressId" = $1', [
-      address.orderAddressId,
-    ]);
-
-    if (existing) {
-      await this.updateOrderAddress(address);
-    } else {
-      await this.insertOrderAddress(address);
-    }
-    return address;
-  }
-
-  private orderAddressRowValues(address: OrderAddress): Record<string, unknown> {
-    return {
-      orderAddressId: address.orderAddressId,
-      orderId: address.orderId,
-      addressType: address.addressType,
-      firstName: address.firstName,
-      lastName: address.lastName,
-      company: address.company || null,
-      addressLine1: address.address1,
-      addressLine2: address.address2 || null,
-      city: address.city,
-      state: address.state ?? null,
-      postalCode: address.postalCode ?? null,
-      country: address.country,
-      phoneNumber: address.phone || null,
-      email: address.email || null,
-      isDefault: address.isDefault,
-      additionalInfo: address.metadata ? JSON.stringify(address.metadata) : null,
-      dependentLocality: address.dependentLocality ?? null,
-      sortingCode: address.sortingCode ?? null,
-      addressLines: address.addressLines ? JSON.stringify(address.addressLines) : null,
-    };
-  }
-
-  private async updateOrderAddress(address: OrderAddress): Promise<void> {
-    const now = new Date().toISOString();
-    const v = this.orderAddressRowValues(address);
-    await query(
-      `UPDATE "orderAddress" SET
-          "firstName" = $1, "lastName" = $2, "company" = $3, "addressLine1" = $4,
-          "addressLine2" = $5, "city" = $6, "state" = $7, "postalCode" = $8,
-          "country" = $9, "phoneNumber" = $10, "email" = $11,
-          "isDefault" = $12, "additionalInfo" = $13, "updatedAt" = $14,
-          "dependentLocality" = $16, "sortingCode" = $17, "addressLines" = $18
-        WHERE "orderAddressId" = $15`,
-      [
-        v.firstName,
-        v.lastName,
-        v.company,
-        v.addressLine1,
-        v.addressLine2,
-        v.city,
-        v.state,
-        v.postalCode,
-        v.country,
-        v.phoneNumber,
-        v.email,
-        v.isDefault,
-        v.additionalInfo,
-        now,
-        address.orderAddressId,
-        v.dependentLocality,
-        v.sortingCode,
-        v.addressLines,
-      ],
-    );
-  }
-
-  private async insertOrderAddress(address: OrderAddress): Promise<void> {
-    const now = new Date().toISOString();
-    const v = this.orderAddressRowValues(address);
-    await query(
-      `INSERT INTO "orderAddress" (
-          "orderAddressId", "orderId", "addressType", "firstName", "lastName",
-          "company", "addressLine1", "addressLine2", "city", "state", "postalCode",
-          "country", "phoneNumber", "email", "isDefault", "additionalInfo",
-          "dependentLocality", "sortingCode", "addressLines",
-          "createdAt", "updatedAt"
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
-      [
-        v.orderAddressId,
-        v.orderId,
-        v.addressType,
-        v.firstName,
-        v.lastName,
-        v.company,
-        v.addressLine1,
-        v.addressLine2,
-        v.city,
-        v.state,
-        v.postalCode,
-        v.country,
-        v.phoneNumber,
-        v.email,
-        v.isDefault,
-        v.additionalInfo,
-        v.dependentLocality,
-        v.sortingCode,
-        v.addressLines,
-        now,
-        now,
-      ],
-    );
-  }
-
-  async getShippingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'shipping'`, [
-      orderId,
-    ]);
-    return row ? this.mapToOrderAddress(row) : null;
-  }
-
-  async getBillingAddress(orderId: string): Promise<OrderAddress | null> {
-    const row = await queryOne<DbOrderAddress>(`SELECT * FROM "orderAddress" WHERE "orderId" = $1 AND "addressType" = 'billing'`, [
-      orderId,
-    ]);
-    return row ? this.mapToOrderAddress(row) : null;
-  }
+  getOrderAddresses = (orderId: string) => qGetOrderAddresses(orderId);
+  saveOrderAddress = (address: OrderAddress) => qSaveOrderAddress(address);
+  getShippingAddress = (orderId: string) => qGetShippingAddress(orderId);
+  getBillingAddress = (orderId: string) => qGetBillingAddress(orderId);
 
   // Status History
-  async recordStatusChange(orderId: string, status: OrderStatus, reason?: string, previousStatus?: string): Promise<void> {
-    const now = new Date().toISOString();
-    await query(
-      `INSERT INTO "orderStatusHistory" ("orderStatusHistoryId", "orderId", "status", "previousStatus", "notes", "createdAt")
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [generateUUID(), orderId, status, previousStatus || 'pending', reason || null, now],
-    );
-  }
-
-  async recordPaymentStatusChange(orderId: string, status: PaymentStatus, transactionId?: string): Promise<void> {
-    const now = new Date().toISOString();
-    await query(
-      `INSERT INTO "orderPaymentHistory" ("orderPaymentHistoryId", "orderId", "paymentStatus", "transactionId", "createdAt")
-       VALUES ($1, $2, $3, $4, $5)`,
-      [generateUUID(), orderId, status, transactionId || null, now],
-    );
-  }
-
-  async recordFulfillmentStatusChange(orderId: string, status: FulfillmentStatus): Promise<void> {
-    const now = new Date().toISOString();
-    await query(
-      `INSERT INTO "orderFulfillmentHistory" ("orderFulfillmentHistoryId", "orderId", "fulfillmentStatus", "createdAt")
-       VALUES ($1, $2, $3, $4)`,
-      [generateUUID(), orderId, status, now],
-    );
-  }
-
-  async getStatusHistory(orderId: string): Promise<Array<{ status: OrderStatus; reason?: string; createdAt: Date }>> {
-    const rows = await query<DbOrderStatusHistory[]>(
-      `SELECT "status", "notes", "createdAt" FROM "orderStatusHistory" 
-       WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId],
-    );
-    return (rows || []).map(row => ({
-      status: row.status as OrderStatus,
-      reason: row.notes ?? undefined,
-      createdAt: new Date(row.createdAt),
-    }));
-  }
-
-  async getPaymentStatusHistory(
-    orderId: string,
-  ): Promise<Array<{ orderId: string; paymentStatus: string; transactionId?: string; createdAt: Date }>> {
-    const rows = await query<Array<{ orderId: string; paymentStatus: string; transactionId: string | null; createdAt: string }>>(
-      `SELECT "orderId", "paymentStatus", "transactionId", "createdAt" FROM "orderPaymentHistory"
-       WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId],
-    );
-    return (rows || []).map(row => ({
-      orderId: row.orderId,
-      paymentStatus: row.paymentStatus,
-      transactionId: row.transactionId ?? undefined,
-      createdAt: new Date(row.createdAt),
-    }));
-  }
-
-  async getFulfillmentStatusHistory(orderId: string): Promise<Array<{ orderId: string; fulfillmentStatus: string; createdAt: Date }>> {
-    const rows = await query<Array<{ orderId: string; fulfillmentStatus: string; createdAt: string }>>(
-      `SELECT "orderId", "fulfillmentStatus", "createdAt" FROM "orderFulfillmentHistory"
-       WHERE "orderId" = $1 ORDER BY "createdAt" DESC`,
-      [orderId],
-    );
-    return (rows || []).map(row => ({
-      orderId: row.orderId,
-      fulfillmentStatus: row.fulfillmentStatus,
-      createdAt: new Date(row.createdAt),
-    }));
-  }
+  recordStatusChange = (orderId: string, status: OrderStatus, reason?: string, previousStatus?: string) =>
+    qRecordStatusChange(orderId, status, reason, previousStatus);
+  recordPaymentStatusChange = (orderId: string, status: PaymentStatus, transactionId?: string) =>
+    qRecordPaymentStatusChange(orderId, status, transactionId);
+  recordFulfillmentStatusChange = (orderId: string, status: FulfillmentStatus) => qRecordFulfillmentStatusChange(orderId, status);
+  getStatusHistory = (orderId: string) => qGetStatusHistory(orderId);
+  getPaymentStatusHistory = (orderId: string) => qGetPaymentStatusHistory(orderId);
+  getFulfillmentStatusHistory = (orderId: string) => qGetFulfillmentStatusHistory(orderId);
 
   async getOrderStats(filters?: OrderFilters): Promise<{
     totalOrders: number;
@@ -701,7 +208,7 @@ export class OrderRepo implements IOrderRepository {
     averageOrderValueCents: number;
     ordersByStatus: Record<OrderStatus, number>;
   }> {
-    const { whereClause, params } = this.buildWhereClause(filters);
+    const { whereClause, params } = buildOrderWhereClause(filters);
 
     const statsResult = await queryOne<{ totalOrders: string; totalRevenueCents: string; averageOrderValueCents: string }>(
       `SELECT COUNT(*) as "totalOrders", COALESCE(SUM("totalAmountCents"), 0) as "totalRevenueCents",
@@ -753,59 +260,6 @@ export class OrderRepo implements IOrderRepository {
     }
   }
 
-  private buildWhereClause(filters?: OrderFilters): { whereClause: string; params: unknown[] } {
-    const conditions: string[] = ['"deletedAt" IS NULL'];
-    const params: unknown[] = [];
-    let paramIndex = 1;
-
-    // Simple equality filters — [filter key, column] pairs
-    const equalityFilters: [keyof OrderFilters, string][] = [
-      ['customerId', '"customerId"'],
-      ['storeId', '"storeId"'],
-      ['channelId', '"channelId"'],
-      ['createdByUserId', '"createdByUserId"'],
-      ['orderSource', '"orderSource"'],
-      ['status', '"status"'],
-      ['paymentStatus', '"paymentStatus"'],
-      ['fulfillmentStatus', '"fulfillmentStatus"'],
-    ];
-    for (const [key, column] of equalityFilters) {
-      const value = filters?.[key];
-      if (!value) continue;
-      conditions.push(`${column} = $${paramIndex++}`);
-      params.push(value);
-    }
-
-    // Range and search filters
-    if (filters?.startDate) {
-      conditions.push(`"createdAt" >= $${paramIndex++}`);
-      params.push(filters.startDate.toISOString());
-    }
-    if (filters?.endDate) {
-      conditions.push(`"createdAt" <= $${paramIndex++}`);
-      params.push(filters.endDate.toISOString());
-    }
-    if (filters?.minAmountCents !== undefined) {
-      conditions.push(`"totalAmountCents" >= $${paramIndex++}`);
-      params.push(filters.minAmountCents);
-    }
-    if (filters?.maxAmountCents !== undefined) {
-      conditions.push(`"totalAmountCents" <= $${paramIndex++}`);
-      params.push(filters.maxAmountCents);
-    }
-    if (filters?.search) {
-      conditions.push(
-        `("orderNumber" ILIKE $${paramIndex} OR "customerEmail" ILIKE $${paramIndex} OR "customerName" ILIKE $${paramIndex})`,
-      );
-      params.push(`%${filters.search}%`);
-    }
-
-    return {
-      whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params,
-    };
-  }
-
   private async hydrateOrders(rows: DbOrder[]): Promise<Order[]> {
     if (!rows.length) return [];
 
@@ -823,178 +277,19 @@ export class OrderRepo implements IOrderRepository {
     for (const itemRow of itemRows || []) {
       const currency = currencyByOrderId.get(itemRow.orderId) || 'USD';
       const items = itemsByOrderId.get(itemRow.orderId) || [];
-      items.push(this.mapToOrderItem(itemRow, currency));
+      items.push(mapToOrderItem(itemRow, currency));
       itemsByOrderId.set(itemRow.orderId, items);
     }
 
     for (const addressRow of addressRows || []) {
-      const address = this.mapToOrderAddress(addressRow);
+      const address = mapToOrderAddress(addressRow);
       if (addressRow.addressType === 'shipping') shippingByOrderId.set(addressRow.orderId, address);
       else if (addressRow.addressType === 'billing') billingByOrderId.set(addressRow.orderId, address);
     }
 
     return rows.map(row =>
-      this.mapToOrder(
-        row,
-        itemsByOrderId.get(row.orderId) || [],
-        shippingByOrderId.get(row.orderId) || null,
-        billingByOrderId.get(row.orderId) || null,
-      ),
+      mapOrderRow(row, itemsByOrderId.get(row.orderId) || [], shippingByOrderId.get(row.orderId) || null, billingByOrderId.get(row.orderId) || null),
     );
-  }
-
-  private mapToOrder(row: DbOrder, items: OrderItem[], shippingAddress: OrderAddress | null, billingAddress: OrderAddress | null): Order {
-    const currency = row.currencyCode || 'USD';
-
-    return Order.reconstitute({
-      ...this.orderIdentityFromRow(row),
-      ...this.orderMoneyFromRow(row, currency),
-      ...this.orderLifecycleFromRow(row),
-      ...this.orderContactFromRow(row),
-      ...this.orderContextFromRow(row),
-      shippingAddress: shippingAddress || undefined,
-      billingAddress: billingAddress || undefined,
-      items,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-      deletedAt: toDate(row.deletedAt),
-    });
-  }
-
-  private orderIdentityFromRow(row: DbOrder) {
-    return {
-      orderId: row.orderId,
-      orderNumber: row.orderNumber,
-      customerId: row.customerId ?? undefined,
-      basketId: row.basketId ?? undefined,
-      storeId: row.storeId ?? undefined,
-      channelId: row.channelId ?? undefined,
-      createdByUserId: row.createdByUserId ?? undefined,
-      orderSource: row.orderSource || 'web',
-      status: row.status as OrderStatus,
-      paymentStatus: row.paymentStatus as PaymentStatus,
-      fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,
-      currencyCode: row.currencyCode || 'USD',
-      orderDate: new Date(row.orderDate),
-    };
-  }
-
-  private orderMoneyFromRow(row: DbOrder, currency: string) {
-    return {
-      subtotal: Money.fromCents(Number(row.subtotalCents || '0'), currency),
-      discountTotal: Money.fromCents(Number(row.discountTotalCents || '0'), currency),
-      taxTotal: Money.fromCents(Number(row.taxTotalCents || '0'), currency),
-      shippingTotal: Money.fromCents(Number(row.shippingTotalCents || '0'), currency),
-      handlingFee: Money.fromCents(Number(row.handlingFeeCents || '0'), currency),
-      totalAmount: Money.fromCents(Number(row.totalAmountCents || '0'), currency),
-      totalItems: row.totalItems || 0,
-      totalQuantity: row.totalQuantity || 0,
-      taxExempt: Boolean(row.taxExempt),
-    };
-  }
-
-  private orderLifecycleFromRow(row: DbOrder) {
-    return {
-      completedAt: toDate(row.completedAt),
-      cancelledAt: toDate(row.cancelledAt),
-      returnedAt: toDate(row.returnedAt),
-      estimatedDeliveryDate: toDate(row.estimatedDeliveryDate),
-    };
-  }
-
-  private orderContactFromRow(row: DbOrder) {
-    return {
-      customerEmail: row.customerEmail,
-      customerPhone: row.customerPhone ?? undefined,
-      customerName: row.customerName ?? undefined,
-      customerNotes: row.customerNotes ?? undefined,
-      adminNotes: row.adminNotes ?? undefined,
-      ipAddress: row.ipAddress ?? undefined,
-      userAgent: row.userAgent ?? undefined,
-      referralSource: row.referralSource ?? undefined,
-    };
-  }
-
-  private orderContextFromRow(row: DbOrder) {
-    return {
-      hasGiftWrapping: Boolean(row.hasGiftWrapping),
-      giftMessage: row.giftMessage ?? undefined,
-      isGift: Boolean(row.isGift),
-      isSubscriptionOrder: Boolean(row.isSubscriptionOrder),
-      parentOrderId: row.parentOrderId ?? undefined,
-      tags: fromJson<string[]>(row.tags) ?? [],
-      metadata: fromJson<Record<string, unknown>>(row.metadata),
-      marketId: row.marketId ?? undefined,
-      localeCode: row.localeCode ?? undefined,
-      contractingEntityId: row.contractingEntityId ?? undefined,
-      catalogCurrencyCode: row.catalogCurrencyCode ?? undefined,
-      displayedCurrencyCode: row.displayedCurrencyCode ?? undefined,
-      settlementCurrencyCode: row.settlementCurrencyCode ?? undefined,
-      accountingCurrencyCode: row.accountingCurrencyCode ?? undefined,
-      exchangeRateSnapshot: fromJson<Order['exchangeRateSnapshot']>(row.exchangeRateSnapshot),
-      versionSnapshot: (fromJson(row.versionSnapshot) ?? {}) as Order['versionSnapshot'],
-      decisionLog: (fromJson(row.decisionLog) ?? []) as Order['decisionLog'],
-    };
-  }
-
-  private mapToOrderItem(row: DbOrderItem, currency: string): OrderItem {
-    return OrderItem.reconstitute({
-      orderItemId: row.orderItemId,
-      orderId: row.orderId,
-      productId: row.productId ?? '',
-      productVariantId: row.productVariantId ?? undefined,
-      sku: row.sku,
-      name: row.name,
-      description: row.description ?? undefined,
-      quantity: row.quantity,
-      unitPrice: Money.fromCents(Number(row.unitPriceCents), currency),
-      unitCost: centsToMoney(row.unitCostCents, currency),
-      discountedUnitPrice: centsToMoney(row.discountedUnitPriceCents, currency),
-      lineTotal: Money.fromCents(Number(row.lineTotalCents || '0'), currency),
-      discountTotal: Money.fromCents(Number(row.discountTotalCents || '0'), currency),
-      taxTotal: Money.fromCents(Number(row.taxTotalCents || '0'), currency),
-      taxRate: row.taxRate ? parseFloat(row.taxRate) : undefined,
-      taxExempt: Boolean(row.taxExempt),
-      fulfillmentStatus: row.fulfillmentStatus as FulfillmentStatus,
-      options: fromJson(row.options),
-      attributes: fromJson(row.attributes),
-      giftWrapped: Boolean(row.giftWrapped),
-      giftMessage: row.giftMessage ?? undefined,
-      weight: row.weight ? parseFloat(row.weight) : undefined,
-      dimensions: fromJson(row.dimensions),
-      isDigital: Boolean(row.isDigital),
-      subscriptionInfo: fromJson(row.subscriptionInfo),
-      metadata: fromJson<Record<string, unknown>>(row.metadata),
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-    });
-  }
-
-  private mapToOrderAddress(row: DbOrderAddress): OrderAddress {
-    return OrderAddress.reconstitute({
-      orderAddressId: row.orderAddressId,
-      orderId: row.orderId,
-      addressType: row.addressType as 'shipping' | 'billing',
-      firstName: row.firstName,
-      lastName: row.lastName,
-      company: row.company ?? undefined,
-      address1: row.addressLine1,
-      address2: row.addressLine2 ?? undefined,
-      city: row.city,
-      dependentLocality: row.dependentLocality ?? undefined,
-      state: row.state ?? undefined,
-      postalCode: row.postalCode ?? undefined,
-      sortingCode: row.sortingCode ?? undefined,
-      addressLines: Array.isArray(row.addressLines) ? (row.addressLines as string[]) : undefined,
-      country: row.country,
-      countryCode: row.country, // country is 2-char code
-      phone: row.phoneNumber ?? undefined,
-      email: row.email ?? undefined,
-      isDefault: Boolean(row.isDefault),
-      metadata: row.additionalInfo ? (typeof row.additionalInfo === 'string' ? JSON.parse(row.additionalInfo) : undefined) : undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-    });
   }
 }
 

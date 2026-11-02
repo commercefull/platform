@@ -7,82 +7,16 @@ import { Address } from '../valueObjects/Address';
 import { Money } from '../../../../libs/money';
 import { BadRequestError } from '../../../../libs/errors';
 import { InvalidCheckoutStateError } from '../errors/CheckoutErrors';
+import {
+  AppliedPromotion,
+  CheckoutSessionProps,
+  CheckoutStatus,
+  FulfillmentType,
+  PaymentStatus,
+  checkoutSessionToJSON,
+} from './checkoutSessionTypes';
 
-export type CheckoutStatus = 'active' | 'pending_payment' | 'processing' | 'completed' | 'abandoned' | 'expired' | 'failed';
-export type PaymentStatus = 'pending' | 'authorized' | 'captured' | 'failed' | 'refunded';
-export type FulfillmentType = 'shipping' | 'pickup' | 'local_delivery' | 'digital';
-
-/**
- * One promotion applied to the session — the structured record that
- * replaces the opaque `'AUTO_PROMOTION'` coupon string. Persisted on the
- * session and copied to `orderDiscount` rows at order creation.
- */
-export interface AppliedPromotion {
-  promotionId: string;
-  promotionCode?: string;
-  name?: string;
-  /** Discount for this promotion in session-currency minor units. */
-  discountAmountCents: number;
-  targetType?: 'order' | 'line_item' | 'shipping';
-  targetId?: string;
-  ruleId?: string;
-  policyVersion?: string;
-}
-
-export interface CheckoutSessionProps {
-  id: string;
-  customerId?: string;
-  guestEmail?: string;
-  basketId: string;
-  /** Selling market + store/channel/locale context resolved at session start. */
-  marketId?: string;
-  storeId?: string;
-  channelId?: string;
-  localeCode?: string;
-  status: CheckoutStatus;
-  paymentStatus: PaymentStatus;
-  shippingAddress?: Address;
-  billingAddress?: Address;
-  sameAsShipping: boolean;
-  shippingMethodId?: string;
-  shippingMethodName?: string;
-  paymentMethodId?: string;
-  paymentIntentId?: string;
-  orderId?: string;
-  subtotal: Money;
-  taxAmount: Money;
-  /** True when taxAmount is embedded in subtotal/shipping (tax-inclusive pricing) and must not be added to the total */
-  taxIncludedInSubtotal?: boolean;
-  /**
-   * The portion of taxAmount added on top of subtotal + shipping. Absent
-   * means: all of taxAmount when taxIncludedInSubtotal is false, zero when
-   * true. Explicit value supports mixed quotes (some lines tax-inclusive).
-   */
-  taxAddedAmount?: Money;
-  shippingAmount: Money;
-  discountAmount: Money;
-  total: Money;
-  couponCode?: string;
-  /** Structured promotions applied by the promotion engine. */
-  appliedPromotions?: AppliedPromotion[];
-  /** Total promotion discount (overlaps couponCode path until that merges). */
-  promotionDiscountAmount?: Money;
-  /** Loyalty reward applied to this session — points are debited at the payment boundary. */
-  loyaltyRewardId?: string;
-  loyaltyPointsRedeemed?: number;
-  loyaltyDiscountAmount?: Money;
-  /** Customer VAT ID (B2B) — validated during tax quoting. */
-  vatNumber?: string;
-  /** True when the tax quote applied intra-EU B2B reverse charge. */
-  reverseChargeApplied?: boolean;
-  fulfillmentType: FulfillmentType;
-  notes?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-  completedAt?: Date;
-  expiresAt: Date;
-}
+export type { AppliedPromotion, CheckoutSessionProps, CheckoutStatus, FulfillmentType, PaymentStatus } from './checkoutSessionTypes';
 
 export class CheckoutSession {
   private props: CheckoutSessionProps;
@@ -558,43 +492,6 @@ export class CheckoutSession {
   }
 
   toJSON(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      customerId: this.props.customerId,
-      guestEmail: this.props.guestEmail,
-      basketId: this.props.basketId,
-      marketId: this.props.marketId,
-      storeId: this.props.storeId,
-      channelId: this.props.channelId,
-      localeCode: this.props.localeCode,
-      status: this.props.status,
-      paymentStatus: this.props.paymentStatus,
-      shippingAddress: this.props.shippingAddress?.toJSON(),
-      billingAddress: this.billingAddress?.toJSON(),
-      sameAsShipping: this.props.sameAsShipping,
-      shippingMethodId: this.props.shippingMethodId,
-      shippingMethodName: this.props.shippingMethodName,
-      paymentMethodId: this.props.paymentMethodId,
-      paymentIntentId: this.props.paymentIntentId,
-      orderId: this.props.orderId,
-      subtotal: this.props.subtotal.amount,
-      taxAmount: this.props.taxAmount.amount,
-      taxIncludedInSubtotal: this.props.taxIncludedInSubtotal ?? false,
-      shippingAmount: this.props.shippingAmount.amount,
-      discountAmount: this.props.discountAmount.amount,
-      total: this.props.total.amount,
-      currency: this.props.subtotal.currency,
-      couponCode: this.props.couponCode,
-      appliedPromotions: this.props.appliedPromotions,
-      promotionDiscountAmount: this.props.promotionDiscountAmount?.amount,
-      fulfillmentType: this.props.fulfillmentType,
-      notes: this.props.notes,
-      metadata: this.props.metadata,
-      isReadyForPayment: this.isReadyForPayment,
-      createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString(),
-      completedAt: this.props.completedAt?.toISOString(),
-      expiresAt: this.props.expiresAt.toISOString(),
-    };
+    return checkoutSessionToJSON(this.props, this.billingAddress, this.isReadyForPayment);
   }
 }

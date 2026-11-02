@@ -38,6 +38,9 @@ export interface RevenueByDay {
   orders: number;
 }
 
+const countOf = (row?: { count: string } | null): number => parseInt(row?.count || '0', 10);
+const totalOf = (row?: { total: string } | null): number => parseFloat(row?.total || '0');
+
 class DashboardQueryRepositoryClass {
   /**
    * Get overall platform dashboard stats (for admin)
@@ -66,14 +69,14 @@ class DashboardQueryRepositoryClass {
     ]);
 
     return {
-      totalOrders: parseInt(ordersResult?.count || '0'),
-      totalRevenueCents: parseFloat(revenueResult?.total || '0'),
-      totalCustomers: parseInt(customersResult?.count || '0'),
-      totalProducts: parseInt(productsResult?.count || '0'),
-      pendingOrders: parseInt(pendingResult?.count || '0'),
-      lowStockProducts: parseInt(lowStockResult?.count || '0'),
-      todayOrders: parseInt(todayResult?.count || '0'),
-      todayRevenueCents: parseFloat(todayResult?.total || '0'),
+      totalOrders: countOf(ordersResult),
+      totalRevenueCents: totalOf(revenueResult),
+      totalCustomers: countOf(customersResult),
+      totalProducts: countOf(productsResult),
+      pendingOrders: countOf(pendingResult),
+      lowStockProducts: countOf(lowStockResult),
+      todayOrders: countOf(todayResult),
+      todayRevenueCents: totalOf(todayResult),
     };
   }
 

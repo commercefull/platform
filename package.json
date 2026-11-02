@@ -152,6 +152,7 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "resolutions": {
+    "minimatch": "11.0.3",
     "qs": "^6.16.1",
     "**/test-exclude/glob": "^13.0.6",
     "follow-redirects": "^1.16.2",

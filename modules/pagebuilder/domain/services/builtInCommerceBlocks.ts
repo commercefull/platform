@@ -1,0 +1,167 @@
+/**
+ * Built-in Commerce Block Type Definitions (product/category blocks).
+ */
+
+import type { BlockTypeDefinition } from './blockTypes';
+
+export const BUILT_IN_COMMERCE_BLOCKS = {
+  productGrid: {
+    typeId: 'product-grid',
+    name: 'Product Grid',
+    description: 'Grid of products from a collection, category, or manual selection',
+    icon: 'ti ti-grid-dots',
+    category: 'commerce' as const,
+    fields: [
+      {
+        key: 'source',
+        label: 'Product Source',
+        type: 'select' as const,
+        defaultValue: 'collection',
+        options: [
+          { label: 'Collection', value: 'collection' },
+          { label: 'Category', value: 'category' },
+          { label: 'Manual Selection', value: 'manual' },
+          { label: 'Best Sellers', value: 'best-sellers' },
+          { label: 'New Arrivals', value: 'new-arrivals' },
+          { label: 'On Sale', value: 'on-sale' },
+        ],
+        group: 'Content',
+      },
+      {
+        key: 'collectionId',
+        label: 'Collection',
+        type: 'collection-ref' as const,
+        helpText: 'Select a product collection',
+        group: 'Content',
+      },
+      { key: 'categoryId', label: 'Category', type: 'category-ref' as const, helpText: 'Select a category', group: 'Content' },
+      {
+        key: 'productIds',
+        label: 'Products',
+        type: 'product-ref' as const,
+        multiple: true,
+        helpText: 'Select specific products',
+        group: 'Content',
+      },
+      {
+        key: 'columns',
+        label: 'Columns',
+        type: 'select' as const,
+        defaultValue: '4',
+        options: [
+          { label: '2 Columns', value: '2' },
+          { label: '3 Columns', value: '3' },
+          { label: '4 Columns', value: '4' },
+          { label: '5 Columns', value: '5' },
+          { label: '6 Columns', value: '6' },
+        ],
+        group: 'Layout',
+      },
+      { key: 'limit', label: 'Max Products', type: 'number' as const, defaultValue: 8, min: 1, max: 50, group: 'Layout' },
+      { key: 'showTitle', label: 'Show Section Title', type: 'checkbox' as const, defaultValue: true, group: 'Layout' },
+      { key: 'title', label: 'Section Title', type: 'text' as const, placeholder: 'Featured Products', group: 'Layout' },
+    ],
+    defaultContent: {
+      source: 'collection',
+      collectionId: '',
+      categoryId: '',
+      productIds: [],
+      columns: '4',
+      limit: 8,
+      showTitle: true,
+      title: '',
+    },
+    defaultSettings: { marginTop: 0, marginBottom: 24 },
+    styleFields: [
+      { key: 'marginTop', label: 'Margin Top (px)', type: 'number' as const, defaultValue: 0, min: 0, max: 200, group: 'Spacing' },
+      { key: 'marginBottom', label: 'Margin Bottom (px)', type: 'number' as const, defaultValue: 24, min: 0, max: 200, group: 'Spacing' },
+    ],
+    isBuiltIn: true,
+  },
+
+  productCarousel: {
+    typeId: 'product-carousel',
+    name: 'Product Carousel',
+    description: 'Scrollable carousel of products',
+    icon: 'ti ti-carousel-horizontal',
+    category: 'commerce' as const,
+    fields: [
+      {
+        key: 'source',
+        label: 'Product Source',
+        type: 'select' as const,
+        defaultValue: 'best-sellers',
+        options: [
+          { label: 'Collection', value: 'collection' },
+          { label: 'Category', value: 'category' },
+          { label: 'Best Sellers', value: 'best-sellers' },
+          { label: 'New Arrivals', value: 'new-arrivals' },
+          { label: 'On Sale', value: 'on-sale' },
+        ],
+        group: 'Content',
+      },
+      { key: 'collectionId', label: 'Collection', type: 'collection-ref' as const, group: 'Content' },
+      { key: 'categoryId', label: 'Category', type: 'category-ref' as const, group: 'Content' },
+      { key: 'limit', label: 'Max Products', type: 'number' as const, defaultValue: 10, min: 1, max: 30, group: 'Layout' },
+      { key: 'showArrows', label: 'Show Navigation Arrows', type: 'checkbox' as const, defaultValue: true, group: 'Layout' },
+      { key: 'autoplay', label: 'Autoplay', type: 'checkbox' as const, defaultValue: false, group: 'Layout' },
+      { key: 'title', label: 'Section Title', type: 'text' as const, placeholder: 'Trending Now', group: 'Layout' },
+    ],
+    defaultContent: {
+      source: 'best-sellers',
+      collectionId: '',
+      categoryId: '',
+      limit: 10,
+      showArrows: true,
+      autoplay: false,
+      title: '',
+    },
+    defaultSettings: { marginTop: 0, marginBottom: 24 },
+    styleFields: [
+      { key: 'marginTop', label: 'Margin Top (px)', type: 'number' as const, defaultValue: 0, min: 0, max: 200, group: 'Spacing' },
+      { key: 'marginBottom', label: 'Margin Bottom (px)', type: 'number' as const, defaultValue: 24, min: 0, max: 200, group: 'Spacing' },
+    ],
+    isBuiltIn: true,
+  },
+
+  categoryGrid: {
+    typeId: 'category-grid',
+    name: 'Category Grid',
+    description: 'Grid of category cards with images',
+    icon: 'ti ti-categories',
+    category: 'commerce' as const,
+    fields: [
+      { key: 'categoryIds', label: 'Categories', type: 'category-ref' as const, multiple: true, required: true, group: 'Content' },
+      {
+        key: 'columns',
+        label: 'Columns',
+        type: 'select' as const,
+        defaultValue: '4',
+        options: [
+          { label: '2 Columns', value: '2' },
+          { label: '3 Columns', value: '3' },
+          { label: '4 Columns', value: '4' },
+          { label: '5 Columns', value: '5' },
+        ],
+        group: 'Layout',
+      },
+      { key: 'showImage', label: 'Show Category Image', type: 'checkbox' as const, defaultValue: true, group: 'Layout' },
+      { key: 'showProductCount', label: 'Show Product Count', type: 'checkbox' as const, defaultValue: false, group: 'Layout' },
+      { key: 'title', label: 'Section Title', type: 'text' as const, placeholder: 'Shop by Category', group: 'Layout' },
+    ],
+    defaultContent: {
+      categoryIds: [],
+      columns: '4',
+      showImage: true,
+      showProductCount: false,
+      title: '',
+    },
+    defaultSettings: { marginTop: 0, marginBottom: 24 },
+    styleFields: [
+      { key: 'marginTop', label: 'Margin Top (px)', type: 'number' as const, defaultValue: 0, min: 0, max: 200, group: 'Spacing' },
+      { key: 'marginBottom', label: 'Margin Bottom (px)', type: 'number' as const, defaultValue: 24, min: 0, max: 200, group: 'Spacing' },
+    ],
+    isBuiltIn: true,
+  },
+
+} satisfies Record<string, BlockTypeDefinition>;

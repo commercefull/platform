@@ -19,99 +19,11 @@ import {
 } from '../errors/OrderErrors';
 import type { PolicyDecisionRecord } from '../../../../libs/rules/policyEngine';
 
-/** Named version markers captured at order time for later replay. */
-export interface OrderVersionSnapshot {
-  marketVersion?: string;
-  pricingVersion?: string;
-  promotionVersion?: string;
-  taxPolicyVersion?: string;
-  returnPolicyVersion?: string;
-  termsVersion?: string;
-  consentVersion?: string;
-  [key: string]: string | undefined;
-}
+import { initialOrderProps, generateOrderNumber } from './orderFactory';
+import { orderToJSON } from './orderJson';
+import type { CreateOrderInput, OrderExchangeRateSnapshot, OrderProps, OrderVersionSnapshot } from './orderTypes';
 
-/** One FX quote persisted at order time. */
-export interface OrderExchangeRateQuote {
-  fromCurrency: string;
-  toCurrency: string;
-  rate: number;
-  /** ISO timestamp the rate was quoted at. */
-  asOf: string;
-}
-
-export type OrderExchangeRateSnapshot = OrderExchangeRateQuote[];
-
-export interface OrderProps {
-  orderId: string;
-  orderNumber: string;
-  customerId?: string;
-  basketId?: string;
-  storeId?: string;
-  channelId?: string;
-  createdByUserId?: string;
-  /** Selling market the order was placed in. */
-  marketId?: string;
-  /** Locale the customer checked out in (BCP-47). */
-  localeCode?: string;
-  /** Legal entity that contracted the sale. */
-  contractingEntityId?: string;
-  orderSource: string;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  fulfillmentStatus: FulfillmentStatus;
-  /** Transaction (presentment) currency — what the customer was charged. */
-  currencyCode: string;
-  /** Catalog currency the prices were sourced in (pre-conversion). */
-  catalogCurrencyCode?: string;
-  /** Currency the customer browsed in before payment. */
-  displayedCurrencyCode?: string;
-  /** Currency the PSP settles in. */
-  settlementCurrencyCode?: string;
-  /** Organization reporting/accounting currency. */
-  accountingCurrencyCode?: string;
-  /** FX quotes used for any currency conversion, frozen at order time. */
-  exchangeRateSnapshot?: OrderExchangeRateSnapshot;
-  /** Policy/rule versions that governed this order, frozen at order time. */
-  versionSnapshot?: OrderVersionSnapshot;
-  /** Explainable decisions made during checkout (tax, compliance, promos). */
-  decisionLog?: PolicyDecisionRecord[];
-  subtotal: Money;
-  discountTotal: Money;
-  taxTotal: Money;
-  shippingTotal: Money;
-  handlingFee: Money;
-  totalAmount: Money;
-  totalItems: number;
-  totalQuantity: number;
-  taxExempt: boolean;
-  orderDate: Date;
-  completedAt?: Date;
-  cancelledAt?: Date;
-  returnedAt?: Date;
-  shippingAddress?: OrderAddress;
-  billingAddress?: OrderAddress;
-  customerEmail: string;
-  customerPhone?: string;
-  customerName?: string;
-  customerNotes?: string;
-  adminNotes?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  referralSource?: string;
-  estimatedDeliveryDate?: Date;
-  hasGiftWrapping: boolean;
-  giftMessage?: string;
-  isGift: boolean;
-  isSubscriptionOrder: boolean;
-  parentOrderId?: string;
-  items: OrderItem[];
-  tags?: string[];
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
-}
+export type { CreateOrderInput, OrderExchangeRateQuote, OrderExchangeRateSnapshot, OrderProps, OrderVersionSnapshot } from './orderTypes';
 
 export class Order {
   private props: OrderProps;
@@ -120,81 +32,8 @@ export class Order {
     this.props = props;
   }
 
-  static create(props: {
-    orderId: string;
-    orderNumber?: string;
-    customerId?: string;
-    basketId?: string;
-    storeId?: string;
-    channelId?: string;
-    createdByUserId?: string;
-    marketId?: string;
-    localeCode?: string;
-    contractingEntityId?: string;
-    orderSource?: string;
-    currencyCode?: string;
-    customerEmail: string;
-    customerPhone?: string;
-    customerName?: string;
-    customerNotes?: string;
-    ipAddress?: string;
-    userAgent?: string;
-    referralSource?: string;
-    hasGiftWrapping?: boolean;
-    giftMessage?: string;
-    isGift?: boolean;
-    isSubscriptionOrder?: boolean;
-    parentOrderId?: string;
-    tags?: string[];
-    metadata?: Record<string, unknown>;
-  }): Order {
-    const now = new Date();
-    const currency = props.currencyCode || 'USD';
-
-    return new Order({
-      orderId: props.orderId,
-      orderNumber: props.orderNumber || Order.generateOrderNumber(),
-      customerId: props.customerId,
-      basketId: props.basketId,
-      storeId: props.storeId,
-      channelId: props.channelId,
-      createdByUserId: props.createdByUserId,
-      marketId: props.marketId,
-      localeCode: props.localeCode,
-      contractingEntityId: props.contractingEntityId,
-      orderSource: props.orderSource || 'web',
-      status: OrderStatus.PENDING,
-      paymentStatus: PaymentStatus.PENDING,
-      fulfillmentStatus: FulfillmentStatus.UNFULFILLED,
-      currencyCode: currency,
-      subtotal: Money.zero(currency),
-      discountTotal: Money.zero(currency),
-      taxTotal: Money.zero(currency),
-      shippingTotal: Money.zero(currency),
-      handlingFee: Money.zero(currency),
-      totalAmount: Money.zero(currency),
-      totalItems: 0,
-      totalQuantity: 0,
-      taxExempt: false,
-      orderDate: now,
-      customerEmail: props.customerEmail,
-      customerPhone: props.customerPhone,
-      customerName: props.customerName,
-      customerNotes: props.customerNotes,
-      ipAddress: props.ipAddress,
-      userAgent: props.userAgent,
-      referralSource: props.referralSource,
-      hasGiftWrapping: props.hasGiftWrapping || false,
-      giftMessage: props.giftMessage,
-      isGift: props.isGift || false,
-      isSubscriptionOrder: props.isSubscriptionOrder || false,
-      parentOrderId: props.parentOrderId,
-      items: [],
-      tags: props.tags || [],
-      metadata: props.metadata,
-      createdAt: now,
-      updatedAt: now,
-    });
+  static create(props: CreateOrderInput): Order {
+    return new Order(initialOrderProps(props));
   }
 
   static reconstitute(props: OrderProps): Order {
@@ -652,67 +491,10 @@ export class Order {
   }
 
   static generateOrderNumber(): string {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return `ORD-${timestamp}-${random}`;
+    return generateOrderNumber();
   }
 
   toJSON(): Record<string, unknown> {
-    return {
-      orderId: this.props.orderId,
-      orderNumber: this.props.orderNumber,
-      customerId: this.props.customerId,
-      basketId: this.props.basketId,
-      storeId: this.props.storeId,
-      channelId: this.props.channelId,
-      createdByUserId: this.props.createdByUserId,
-      marketId: this.props.marketId,
-      localeCode: this.props.localeCode,
-      contractingEntityId: this.props.contractingEntityId,
-      orderSource: this.props.orderSource,
-      status: this.props.status,
-      paymentStatus: this.props.paymentStatus,
-      fulfillmentStatus: this.props.fulfillmentStatus,
-      currencyCode: this.props.currencyCode,
-      catalogCurrencyCode: this.props.catalogCurrencyCode,
-      displayedCurrencyCode: this.props.displayedCurrencyCode,
-      settlementCurrencyCode: this.props.settlementCurrencyCode,
-      accountingCurrencyCode: this.props.accountingCurrencyCode,
-      exchangeRateSnapshot: this.props.exchangeRateSnapshot,
-      versionSnapshot: this.props.versionSnapshot,
-      decisionLog: this.props.decisionLog,
-      subtotalCents: this.props.subtotal.cents,
-      discountTotalCents: this.props.discountTotal.cents,
-      taxTotalCents: this.props.taxTotal.cents,
-      shippingTotalCents: this.props.shippingTotal.cents,
-      handlingFeeCents: this.props.handlingFee.cents,
-      totalAmountCents: this.props.totalAmount.cents,
-      totalItems: this.props.totalItems,
-      totalQuantity: this.props.totalQuantity,
-      taxExempt: this.props.taxExempt,
-      orderDate: this.props.orderDate.toISOString(),
-      completedAt: this.props.completedAt?.toISOString(),
-      cancelledAt: this.props.cancelledAt?.toISOString(),
-      returnedAt: this.props.returnedAt?.toISOString(),
-      shippingAddress: this.props.shippingAddress?.toJSON(),
-      billingAddress: this.props.billingAddress?.toJSON(),
-      customerEmail: this.props.customerEmail,
-      customerPhone: this.props.customerPhone,
-      customerName: this.props.customerName,
-      customerNotes: this.props.customerNotes,
-      adminNotes: this.props.adminNotes,
-      estimatedDeliveryDate: this.props.estimatedDeliveryDate?.toISOString(),
-      hasGiftWrapping: this.props.hasGiftWrapping,
-      giftMessage: this.props.giftMessage,
-      isGift: this.props.isGift,
-      isSubscriptionOrder: this.props.isSubscriptionOrder,
-      parentOrderId: this.props.parentOrderId,
-      items: this.props.items.map(item => item.toJSON()),
-      tags: this.props.tags,
-      metadata: this.props.metadata,
-      createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString(),
-      deletedAt: this.props.deletedAt?.toISOString(),
-    };
+    return orderToJSON(this.props);
   }
 }

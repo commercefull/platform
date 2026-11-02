@@ -67,71 +67,66 @@ class CurrencyRepo {
   async saveCurrency(currency: Currency): Promise<Currency> {
     const existingCurrency = await this.getCurrencyByCode(currency.code);
 
-    if (existingCurrency) {
-      // Update existing currency
-      const sql = `
-        UPDATE "${this.currencyTable}"
-        SET
-          "name" = $1,
-          "symbol" = $2,
-          "decimalPlaces" = $3,
-          "isDefault" = $4,
-          "isActive" = $5,
-          "symbolPosition" = $6,
-          "thousandsSeparator" = $7,
-          "decimalSeparator" = $8,
-          "updatedAt" = now()
-        WHERE "code" = $9
-        RETURNING *
-      `;
+    const result = existingCurrency ? await this.updateCurrency(currency) : await this.insertCurrency(currency);
 
-      const result = await queryOne<DbCurrency>(sql, [
-        currency.name,
-        currency.symbol,
-        currency.decimalPlaces || currency.decimals || 2,
-        currency.isDefault,
-        currency.isActive,
-        currency.symbolPosition || currency.position || 'before',
-        currency.thousandsSeparator || ',',
-        currency.decimalSeparator || '.',
-        currency.code,
-      ]);
-
-      // If this is now the default currency, clear other defaults
-      if (currency.isDefault) {
-        await this.clearOtherDefaultCurrencies(currency.code);
-      }
-
-      return result || currency;
-    } else {
-      // Create new currency
-      const sql = `
-        INSERT INTO "${this.currencyTable}" (
-          "code", "name", "symbol", "decimalPlaces", "isDefault", "isActive",
-          "symbolPosition", "thousandsSeparator", "decimalSeparator"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING *
-      `;
-
-      const result = await queryOne<DbCurrency>(sql, [
-        currency.code,
-        currency.name,
-        currency.symbol,
-        currency.decimalPlaces || currency.decimals || 2,
-        currency.isDefault || false,
-        currency.isActive !== false,
-        currency.symbolPosition || currency.position || 'before',
-        currency.thousandsSeparator || ',',
-        currency.decimalSeparator || '.',
-      ]);
-
-      // If this is now the default currency, clear other defaults
-      if (currency.isDefault) {
-        await this.clearOtherDefaultCurrencies(currency.code);
-      }
-
-      return result || currency;
+    // If this is now the default currency, clear other defaults
+    if (currency.isDefault) {
+      await this.clearOtherDefaultCurrencies(currency.code);
     }
+
+    return result || currency;
+  }
+
+  private async updateCurrency(currency: Currency): Promise<DbCurrency | null> {
+    const sql = `
+      UPDATE "${this.currencyTable}"
+      SET
+        "name" = $1,
+        "symbol" = $2,
+        "decimalPlaces" = $3,
+        "isDefault" = $4,
+        "isActive" = $5,
+        "symbolPosition" = $6,
+        "thousandsSeparator" = $7,
+        "decimalSeparator" = $8,
+        "updatedAt" = now()
+      WHERE "code" = $9
+      RETURNING *
+    `;
+
+    return queryOne<DbCurrency>(sql, [
+      currency.name,
+      currency.symbol,
+      currency.decimalPlaces || currency.decimals || 2,
+      currency.isDefault,
+      currency.isActive,
+      currency.symbolPosition || currency.position || 'before',
+      currency.thousandsSeparator || ',',
+      currency.decimalSeparator || '.',
+      currency.code,
+    ]);
+  }
+
+  private async insertCurrency(currency: Currency): Promise<DbCurrency | null> {
+    const sql = `
+      INSERT INTO "${this.currencyTable}" (
+        "code", "name", "symbol", "decimalPlaces", "isDefault", "isActive",
+        "symbolPosition", "thousandsSeparator", "decimalSeparator"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `;
+
+    return queryOne<DbCurrency>(sql, [
+      currency.code,
+      currency.name,
+      currency.symbol,
+      currency.decimalPlaces || currency.decimals || 2,
+      currency.isDefault || false,
+      currency.isActive !== false,
+      currency.symbolPosition || currency.position || 'before',
+      currency.thousandsSeparator || ',',
+      currency.decimalSeparator || '.',
+    ]);
   }
 
   /**

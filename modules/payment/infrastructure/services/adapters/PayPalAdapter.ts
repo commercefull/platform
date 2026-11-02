@@ -22,6 +22,39 @@ import {
   HealthCheckResult,
 } from '../GatewayAdapter';
 
+function buildOrderRequestBody(request: PaymentRequest): Record<string, unknown> {
+  return {
+    intent: 'AUTHORIZE',
+    purchase_units: [
+      {
+        reference_id: request.orderId,
+        amountCents: {
+          currency_code: request.currency.toUpperCase(),
+          value: request.amountCents.toFixed(2),
+        },
+        description: request.description,
+      },
+    ],
+    payer: request.customerEmail ? { email_address: request.customerEmail } : undefined,
+    application_context: {
+      return_url: request.returnUrl || '',
+      cancel_url: request.cancelUrl || '',
+    },
+  };
+}
+
+function paypalErrorResponse(data: Record<string, unknown>): PaymentResponse {
+  const err = (data.error_details as Array<Record<string, unknown>> | undefined)?.[0];
+  return {
+    success: false,
+    externalTransactionId: (data.id as string) || '',
+    status: 'failed',
+    gatewayResponse: data,
+    errorCode: (err?.issue as string) || 'paypal_error',
+    errorMessage: (err?.description as string) || 'PayPal API error',
+  };
+}
+
 const PAYPAL_CAPABILITIES: PSPCapabilities = {
   supportsAuthCapture: true,
   supportsPartialCapture: true,
@@ -107,46 +140,19 @@ export class PayPalAdapter implements PSPAdapter {
     const token = await this.getAccessToken(config);
     const baseUrl = this.getBaseUrl(config);
 
-    const body = {
-      intent: 'AUTHORIZE',
-      purchase_units: [
-        {
-          reference_id: request.orderId,
-          amountCents: {
-            currency_code: request.currency.toUpperCase(),
-            value: request.amountCents.toFixed(2),
-          },
-          description: request.description,
-        },
-      ],
-      payer: request.customerEmail ? { email_address: request.customerEmail } : undefined,
-      application_context: {
-        return_url: request.returnUrl || '',
-        cancel_url: request.cancelUrl || '',
-      },
-    };
-
     const res = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(buildOrderRequestBody(request)),
     });
 
     const data = (await res.json()) as Record<string, unknown>;
 
     if (!res.ok) {
-      const err = (data.error_details as Array<Record<string, unknown>> | undefined)?.[0];
-      return {
-        success: false,
-        externalTransactionId: (data.id as string) || '',
-        status: 'failed',
-        gatewayResponse: data,
-        errorCode: (err?.issue as string) || 'paypal_error',
-        errorMessage: (err?.description as string) || 'PayPal API error',
-      };
+      return paypalErrorResponse(data);
     }
 
     const status = data.status as string;

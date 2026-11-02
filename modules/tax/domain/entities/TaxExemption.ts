@@ -67,41 +67,49 @@ export class TaxExemption {
    * - `'pending'`         — exemption exists but is not yet approved/verified
    */
   evaluate(context: ExemptionEvaluationContext): ExemptionVerdict {
-    // Pending exemptions don't apply yet
-    if (this.props.status === 'pending') return 'pending';
-    if (this.props.status === 'rejected' || this.props.status === 'revoked') return 'notExempt';
-
-    // Only approved/active exemptions apply
-    if (this.props.status !== 'approved' && this.props.status !== 'active') return 'notExempt';
-
-    // Check expiry
-    const now = context.now ?? new Date();
-    if (this.props.expiryDate) {
-      const expiry = this.props.expiryDate instanceof Date ? this.props.expiryDate : new Date(this.props.expiryDate);
-      if (now > expiry) return 'notExempt';
-    }
-
-    // Check category applicability
-    if (this.applicableTaxCategoryIds !== null && this.applicableTaxCategoryIds !== undefined) {
-      if (context.taxCategoryId && !this.applicableTaxCategoryIds.includes(context.taxCategoryId)) {
-        return 'notExempt';
-      }
-    }
-
-    // Check order amount bounds
-    const orderSubtotal = context.orderSubtotalCents;
-    if (this.props.minOrderAmountCents !== null && this.props.minOrderAmountCents !== undefined) {
-      if (orderSubtotal < Number(this.props.minOrderAmountCents)) return 'notExempt';
-    }
-    if (this.props.maxOrderAmountCents !== null && this.props.maxOrderAmountCents !== undefined) {
-      if (orderSubtotal > Number(this.props.maxOrderAmountCents)) return 'notExempt';
-    }
+    const statusVerdict = this.statusVerdict();
+    if (statusVerdict) return statusVerdict;
+    if (this.isExpired(context.now ?? new Date())) return 'notExempt';
+    if (!this.categoryApplies(context.taxCategoryId)) return 'notExempt';
+    if (!this.withinAmountBounds(context.orderSubtotalCents)) return 'notExempt';
 
     // Determine verdict based on exemption percent
     const percent = this.exemptionPercent;
     if (percent >= 100) return 'exempt';
     if (percent > 0) return 'partiallyExempt';
     return 'notExempt';
+  }
+
+  /** Pending → 'pending'; only approved/active exemptions may apply. */
+  private statusVerdict(): ExemptionVerdict | null {
+    if (this.props.status === 'pending') return 'pending';
+    if (this.props.status === 'rejected' || this.props.status === 'revoked') return 'notExempt';
+    if (this.props.status !== 'approved' && this.props.status !== 'active') return 'notExempt';
+    return null;
+  }
+
+  private isExpired(now: Date): boolean {
+    if (!this.props.expiryDate) return false;
+    const expiry = this.props.expiryDate instanceof Date ? this.props.expiryDate : new Date(this.props.expiryDate);
+    return now > expiry;
+  }
+
+  private categoryApplies(taxCategoryId?: string): boolean {
+    const ids = this.applicableTaxCategoryIds;
+    if (ids === null || ids === undefined) return true;
+    if (!taxCategoryId) return true;
+    return ids.includes(taxCategoryId);
+  }
+
+  private withinAmountBounds(orderSubtotal: number): boolean {
+    const { minOrderAmountCents, maxOrderAmountCents } = this.props;
+    if (minOrderAmountCents !== null && minOrderAmountCents !== undefined && orderSubtotal < Number(minOrderAmountCents)) {
+      return false;
+    }
+    if (maxOrderAmountCents !== null && maxOrderAmountCents !== undefined && orderSubtotal > Number(maxOrderAmountCents)) {
+      return false;
+    }
+    return true;
   }
 
   /**

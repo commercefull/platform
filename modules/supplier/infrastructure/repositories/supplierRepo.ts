@@ -33,6 +33,41 @@ export interface SupplierFilters {
   currency?: string;
 }
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function nvl<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value ?? defaultValue;
+}
+
+function supplierInsertValues(params: SupplierCreateParams, now: string): unknown[] {
+  return [
+    params.name,
+    params.code,
+    fallback(params.description, null),
+    fallback(params.website, null),
+    fallback(params.email, null),
+    fallback(params.phone, null),
+    nvl(params.isActive, true),
+    nvl(params.isApproved, false),
+    fallback(params.status, 'pending'),
+    fallback(params.rating, null),
+    fallback(params.taxId, null),
+    fallback(params.paymentTerms, null),
+    fallback(params.paymentMethod, null),
+    fallback(params.currencyCode, 'USD'),
+    fallback(params.minOrderValueCents, null),
+    fallback(params.leadTime, null),
+    fallback(params.notes, null),
+    fallback(params.categories, null),
+    fallback(params.tags, null),
+    params.customFields ? JSON.stringify(params.customFields) : null,
+    now,
+    now,
+  ];
+}
+
 class SupplierRepo {
   /**
    * Find supplier by ID
@@ -183,30 +218,7 @@ class SupplierRepo {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
       )
       RETURNING *`,
-      [
-        params.name,
-        params.code,
-        params.description || null,
-        params.website || null,
-        params.email || null,
-        params.phone || null,
-        params.isActive !== undefined ? params.isActive : true,
-        params.isApproved !== undefined ? params.isApproved : false,
-        params.status || 'pending',
-        params.rating || null,
-        params.taxId || null,
-        params.paymentTerms || null,
-        params.paymentMethod || null,
-        params.currencyCode || 'USD',
-        params.minOrderValueCents || null,
-        params.leadTime || null,
-        params.notes || null,
-        params.categories || null,
-        params.tags || null,
-        params.customFields ? JSON.stringify(params.customFields) : null,
-        now,
-        now,
-      ],
+      supplierInsertValues(params, now),
     );
 
     if (!result) {

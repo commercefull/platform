@@ -4,15 +4,15 @@ import { PricingRule, PricingRuleCreateProps, PricingRuleScope, PricingRuleStatu
 import { FailedToCreatePricingError, PricingRuleNotFoundError } from '../../domain/errors/PricingErrors';
 import type { PricingRule as DbPricingRule } from '../../../../libs/db/types';
 
+function resolveRuleStatus(row: DbPricingRule, now: Date): PricingRuleStatus {
+  if (!row.isActive) return PricingRuleStatus.INACTIVE;
+  if (row.startDate && row.startDate > now) return PricingRuleStatus.SCHEDULED;
+  if (row.endDate && row.endDate < now) return PricingRuleStatus.EXPIRED;
+  return PricingRuleStatus.ACTIVE;
+}
+
 function rowToPricingRule(row: DbPricingRule): PricingRule {
-  const now = new Date();
-  const status = !row.isActive
-    ? PricingRuleStatus.INACTIVE
-    : row.startDate && row.startDate > now
-      ? PricingRuleStatus.SCHEDULED
-      : row.endDate && row.endDate < now
-        ? PricingRuleStatus.EXPIRED
-        : PricingRuleStatus.ACTIVE;
+  const status = resolveRuleStatus(row, new Date());
   return {
     id: row.pricingRuleId,
     pricingRuleId: row.pricingRuleId,
@@ -25,6 +25,101 @@ function rowToPricingRule(row: DbPricingRule): PricingRule {
     priority: row.priority ?? 0,
     conditions: [],
     adjustments: [],
+    ...optionalRuleFields(row),
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+interface RuleFilterSet {
+  type?: string | string[];
+  scope?: string | string[];
+  productId?: string;
+  categoryId?: string;
+  customerId?: string;
+  customerGroupId?: string;
+  activeOnly?: boolean;
+}
+
+function addInFilter(conditions: string[], params: unknown[], column: string, value: string | string[]): void {
+  if (Array.isArray(value)) {
+    const placeholders = value.map((_, i) => `$${params.length + i + 1}`).join(', ');
+    params.push(...value);
+    conditions.push(`"${column}" IN (${placeholders})`);
+  } else {
+    params.push(value);
+    conditions.push(`"${column}" = $${params.length}`);
+  }
+}
+
+function addArrayContainsFilter(conditions: string[], params: unknown[], column: string, value: string | undefined): void {
+  if (value) {
+    params.push(value);
+    conditions.push(`"${column}" @> ARRAY[$${params.length}]::uuid[]`);
+  }
+}
+
+function buildRuleConditions(filters: RuleFilterSet, includeMembership: boolean): { conditions: string[]; params: unknown[] } {
+  const params: unknown[] = [];
+  const conditions: string[] = [];
+
+  if (filters.activeOnly) {
+    params.push(new Date());
+    conditions.push(`
+      "isActive" = true AND
+      ("startDate" IS NULL OR "startDate" <= $${params.length}) AND
+      ("endDate" IS NULL OR "endDate" >= $${params.length})
+    `);
+  }
+
+  if (filters.type) addInFilter(conditions, params, 'ruleType', filters.type);
+  if (filters.scope) addInFilter(conditions, params, 'scope', filters.scope);
+
+  if (includeMembership) {
+    addArrayContainsFilter(conditions, params, 'productIds', filters.productId);
+    addArrayContainsFilter(conditions, params, 'categoryIds', filters.categoryId);
+    addArrayContainsFilter(conditions, params, 'customerIds', filters.customerId);
+    addArrayContainsFilter(conditions, params, 'customerGroupIds', filters.customerGroupId);
+  }
+
+  return { conditions, params };
+}
+
+/** Falsy → fallback (nullable column default). */
+const nullable = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+
+function buildCreateValues(data: PricingRuleCreateProps, now: Date): unknown[] {
+  const extra = data as PricingRuleCreateProps & {
+    metadata?: Record<string, unknown>;
+    currencyCode?: string;
+    regionCode?: string;
+  };
+  return [
+    data.name,
+    nullable(data.description),
+    data.ruleType || 'percentage',
+    data.scope || 'global',
+    nullable(data.productIds),
+    nullable(data.categoryIds),
+    nullable(data.customerIds),
+    nullable(data.customerGroupIds),
+    nullable(data.minimumQuantity),
+    nullable(data.maximumQuantity),
+    nullable(data.minimumOrderAmountCents),
+    nullable(data.startDate),
+    nullable(data.endDate),
+    data.priority || 0,
+    data.isActive !== false,
+    extra.metadata ? JSON.stringify(extra.metadata) : null,
+    nullable(extra.currencyCode),
+    nullable(extra.regionCode),
+    now,
+    now,
+  ];
+}
+
+function optionalRuleFields(row: DbPricingRule) {
+  return {
     productIds: row.productIds ?? undefined,
     categoryIds: row.categoryIds ?? undefined,
     customerIds: row.customerIds ?? undefined,
@@ -35,8 +130,6 @@ function rowToPricingRule(row: DbPricingRule): PricingRule {
     maximumQuantity: row.maximumQuantity ?? undefined,
     minimumOrderAmountCents: row.minimumOrderAmountCents ?? undefined,
     metadata: (row.metadata as PricingRule['metadata']) ?? undefined,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
   };
 }
 
@@ -148,67 +241,7 @@ class PricingRuleRepo {
   ): Promise<PricingRule[]> {
     const { limit = 50, offset = 0, orderBy = 'priority', direction = 'DESC' } = pagination;
 
-    const params: unknown[] = [];
-    const conditions: string[] = [];
-
-    // Add filter for active rules only
-    if (filters.activeOnly) {
-      const now = new Date();
-      params.push(now);
-      conditions.push(`
-        "isActive" = true AND
-        ("startDate" IS NULL OR "startDate" <= $${params.length}) AND
-        ("endDate" IS NULL OR "endDate" >= $${params.length})
-      `);
-    }
-
-    // Add filter for type
-    if (filters.type) {
-      if (Array.isArray(filters.type)) {
-        const placeholders = filters.type.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.type);
-        conditions.push(`"ruleType" IN (${placeholders})`);
-      } else {
-        params.push(filters.type);
-        conditions.push(`"ruleType" = $${params.length}`);
-      }
-    }
-
-    // Add filter for scope
-    if (filters.scope) {
-      if (Array.isArray(filters.scope)) {
-        const placeholders = filters.scope.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.scope);
-        conditions.push(`"scope" IN (${placeholders})`);
-      } else {
-        params.push(filters.scope);
-        conditions.push(`"scope" = $${params.length}`);
-      }
-    }
-
-    // Add filter for product
-    if (filters.productId) {
-      params.push(filters.productId);
-      conditions.push(`"productIds" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-
-    // Add filter for category
-    if (filters.categoryId) {
-      params.push(filters.categoryId);
-      conditions.push(`"categoryIds" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-
-    // Add filter for customer
-    if (filters.customerId) {
-      params.push(filters.customerId);
-      conditions.push(`"customerIds" @> ARRAY[$${params.length}]::uuid[]`);
-    }
-
-    // Add filter for customer group
-    if (filters.customerGroupId) {
-      params.push(filters.customerGroupId);
-      conditions.push(`"customerGroupIds" @> ARRAY[$${params.length}]::uuid[]`);
-    }
+    const { conditions, params } = buildRuleConditions(filters, true);
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
@@ -240,43 +273,7 @@ class PricingRuleRepo {
       activeOnly?: boolean;
     } = {},
   ): Promise<number> {
-    const params: unknown[] = [];
-    const conditions: string[] = [];
-
-    // Add filter for active rules only
-    if (filters.activeOnly) {
-      const now = new Date();
-      params.push(now);
-      conditions.push(`
-        "isActive" = true AND
-        ("startDate" IS NULL OR "startDate" <= $${params.length}) AND
-        ("endDate" IS NULL OR "endDate" >= $${params.length})
-      `);
-    }
-
-    // Add filter for type
-    if (filters.type) {
-      if (Array.isArray(filters.type)) {
-        const placeholders = filters.type.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.type);
-        conditions.push(`"ruleType" IN (${placeholders})`);
-      } else {
-        params.push(filters.type);
-        conditions.push(`"ruleType" = $${params.length}`);
-      }
-    }
-
-    // Add filter for scope
-    if (filters.scope) {
-      if (Array.isArray(filters.scope)) {
-        const placeholders = filters.scope.map((_, i) => `$${params.length + i + 1}`).join(', ');
-        params.push(...filters.scope);
-        conditions.push(`"scope" IN (${placeholders})`);
-      } else {
-        params.push(filters.scope);
-        conditions.push(`"scope" = $${params.length}`);
-      }
-    }
+    const { conditions, params } = buildRuleConditions(filters, false);
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
@@ -310,30 +307,7 @@ class PricingRuleRepo {
       RETURNING *
     `;
 
-    const values = [
-      data.name,
-      data.description || null,
-      data.ruleType || 'percentage',
-      data.scope || 'global',
-      data.productIds || null,
-      data.categoryIds || null,
-      data.customerIds || null,
-      data.customerGroupIds || null,
-      data.minimumQuantity || null,
-      data.maximumQuantity || null,
-      data.minimumOrderAmountCents || null,
-      data.startDate || null,
-      data.endDate || null,
-      data.priority || 0,
-      data.isActive !== false,
-      (data as PricingRuleCreateProps & { metadata?: Record<string, unknown>; currencyCode?: string; regionCode?: string }).metadata
-        ? JSON.stringify((data as PricingRuleCreateProps & { metadata?: Record<string, unknown> }).metadata)
-        : null,
-      (data as PricingRuleCreateProps & { currencyCode?: string }).currencyCode || null,
-      (data as PricingRuleCreateProps & { regionCode?: string }).regionCode || null,
-      now,
-      now,
-    ];
+    const values = buildCreateValues(data, now);
 
     const result = await queryOne<DbPricingRule>(sql, values);
 

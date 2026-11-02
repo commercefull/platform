@@ -76,52 +76,9 @@ export class AddItemUseCase {
       throw new BasketNotFoundError(command.basketId);
     }
 
-    // Assortment enforcement — the product must be sellable on the basket's
-    // store and channel before it can be added.
-    if (this.sellabilityPort && basket.storeId) {
-      const sellable = await this.sellabilityPort.isSellable(basket.storeId, command.productId, basket.channelId);
-      if (!sellable) {
-        throw new BasketValidationError(`Product ${command.productId} is not sellable on this store or channel`);
-      }
-    }
+    await this.assertSellable(command, basket);
 
-    const productDetails = await this.productDetailsPort?.findProductDetails(command.productId);
-    const existingItem = basket.findItemByProduct(command.productId, command.productVariantId);
-    let unitPriceCents: number | undefined;
-
-    if (existingItem) {
-      existingItem.incrementQuantity(command.quantity);
-      unitPriceCents = existingItem.unitPrice.cents;
-      await this.basketRepository.updateItem(existingItem);
-    } else {
-      // The sellable price comes from the pricing module — never from the client
-      const price = await this.productPricePort.getPrice(command.productId, command.productVariantId, basket.currency, command.quantity, {
-        storeId: basket.storeId,
-        channelId: basket.channelId,
-      });
-      if (!price) {
-        throw new BasketValidationError(`Product ${command.productId} has no price and cannot be purchased`);
-      }
-
-      unitPriceCents = price.unitPriceCents;
-      const newItem = BasketItem.create({
-        basketItemId: generateUUID(),
-        basketId: command.basketId,
-        productId: command.productId,
-        productVariantId: command.productVariantId,
-        sku: productDetails?.sku || command.sku,
-        name: productDetails?.name || command.name,
-        quantity: command.quantity,
-        unitPrice: Money.fromCents(price.unitPriceCents, price.currency),
-        imageUrl: command.imageUrl,
-        attributes: { ...command.attributes, inventoryPolicy: productDetails?.inventoryPolicy ?? 'tracked' },
-        itemType: productDetails?.itemType ?? command.itemType,
-        isGift: false,
-      });
-
-      basket.addItem(newItem);
-      await this.basketRepository.addItem(command.basketId, newItem);
-    }
+    const unitPriceCents = await this.addOrUpdateItem(command, basket);
 
     eventBus.emit('basket.item_added', {
       basketId: command.basketId,
@@ -138,6 +95,58 @@ export class AddItemUseCase {
       throw new BasketNotFoundError(command.basketId);
     }
     return this.mapToResponse(updatedBasket);
+  }
+
+  /**
+   * Assortment enforcement — the product must be sellable on the basket's
+   * store and channel before it can be added.
+   */
+  private async assertSellable(command: AddItemCommand, basket: Basket): Promise<void> {
+    if (!this.sellabilityPort || !basket.storeId) return;
+    const sellable = await this.sellabilityPort.isSellable(basket.storeId, command.productId, basket.channelId);
+    if (!sellable) {
+      throw new BasketValidationError(`Product ${command.productId} is not sellable on this store or channel`);
+    }
+  }
+
+  /** Increment an existing line or add a new one; returns the applied unit price. */
+  private async addOrUpdateItem(command: AddItemCommand, basket: Basket): Promise<number | undefined> {
+    const productDetails = await this.productDetailsPort?.findProductDetails(command.productId);
+    const existingItem = basket.findItemByProduct(command.productId, command.productVariantId);
+
+    if (existingItem) {
+      existingItem.incrementQuantity(command.quantity);
+      await this.basketRepository.updateItem(existingItem);
+      return existingItem.unitPrice.cents;
+    }
+
+    // The sellable price comes from the pricing module — never from the client
+    const price = await this.productPricePort.getPrice(command.productId, command.productVariantId, basket.currency, command.quantity, {
+      storeId: basket.storeId,
+      channelId: basket.channelId,
+    });
+    if (!price) {
+      throw new BasketValidationError(`Product ${command.productId} has no price and cannot be purchased`);
+    }
+
+    const newItem = BasketItem.create({
+      basketItemId: generateUUID(),
+      basketId: command.basketId,
+      productId: command.productId,
+      productVariantId: command.productVariantId,
+      sku: productDetails?.sku || command.sku,
+      name: productDetails?.name || command.name,
+      quantity: command.quantity,
+      unitPrice: Money.fromCents(price.unitPriceCents, price.currency),
+      imageUrl: command.imageUrl,
+      attributes: { ...command.attributes, inventoryPolicy: productDetails?.inventoryPolicy ?? 'tracked' },
+      itemType: productDetails?.itemType ?? command.itemType,
+      isGift: false,
+    });
+
+    basket.addItem(newItem);
+    await this.basketRepository.addItem(command.basketId, newItem);
+    return price.unitPriceCents;
   }
 
   private mapToResponse(basket: Basket): BasketResponse {

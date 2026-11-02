@@ -85,21 +85,21 @@ export class ManageRecommendationRulesUseCase {
     if (!input.name?.trim()) throw new RecommendationValidationError('name is required');
     if (!input.sourceId) throw new RecommendationValidationError('sourceId is required');
     if (!input.targetId) throw new RecommendationValidationError('targetId is required');
-    if (input.sourceType && !RULE_SOURCE_TYPES.includes(input.sourceType)) {
-      throw new RecommendationValidationError(`sourceType must be one of ${RULE_SOURCE_TYPES.join(', ')}`);
+
+    const enumChecks: Array<[keyof RecommendationRuleProps, readonly string[]]> = [
+      ['sourceType', RULE_SOURCE_TYPES],
+      ['targetType', RULE_TARGET_TYPES],
+      ['relationType', RELATION_TYPES],
+      ['targetSort', RULE_TARGET_SORTS],
+      ['priceBand', RULE_PRICE_BANDS],
+    ];
+    for (const [field, allowed] of enumChecks) {
+      const value = input[field];
+      if (value && !allowed.includes(value as string)) {
+        throw new RecommendationValidationError(`${field} must be one of ${allowed.join(', ')}`);
+      }
     }
-    if (input.targetType && !RULE_TARGET_TYPES.includes(input.targetType)) {
-      throw new RecommendationValidationError(`targetType must be one of ${RULE_TARGET_TYPES.join(', ')}`);
-    }
-    if (input.relationType && !RELATION_TYPES.includes(input.relationType)) {
-      throw new RecommendationValidationError(`relationType must be one of ${RELATION_TYPES.join(', ')}`);
-    }
-    if (input.targetSort && !RULE_TARGET_SORTS.includes(input.targetSort)) {
-      throw new RecommendationValidationError(`targetSort must be one of ${RULE_TARGET_SORTS.join(', ')}`);
-    }
-    if (input.priceBand && !RULE_PRICE_BANDS.includes(input.priceBand)) {
-      throw new RecommendationValidationError(`priceBand must be one of ${RULE_PRICE_BANDS.join(', ')}`);
-    }
+
     if (input.maxItems !== undefined && (input.maxItems < 1 || input.maxItems > 50)) {
       throw new RecommendationValidationError('maxItems must be between 1 and 50');
     }

@@ -13,23 +13,25 @@ import {
   createPaymentIntent,
   getCheckout,
   getCheckoutSummary,
-  getFulfillmentOptions,
-  getLocalDeliveryOptions,
   getPaymentMethods,
-  getPickupLocations,
-  getPickupSlots,
-  getShippingMethods,
   initiateCheckout,
   removeCoupon,
   removeLoyaltyReward,
   setBillingAddress,
   setFulfillmentMethod,
   setPaymentMethod,
-  setPickupLocation,
   setShippingAddress,
   setShippingMethod,
   setVatNumber,
 } from '../controllers/CheckoutController';
+import {
+  getFulfillmentOptions,
+  getLocalDeliveryOptions,
+  getPickupLocations,
+  getPickupSlots,
+  getShippingMethods,
+  setPickupLocation,
+} from '../controllers/checkoutFulfillmentController';
 import { optionalCustomerAuth } from '../../../../libs/auth';
 
 const router = createHttpRouter();

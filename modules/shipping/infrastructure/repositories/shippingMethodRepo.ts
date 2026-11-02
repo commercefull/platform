@@ -42,6 +42,43 @@ async function findDefault(): Promise<ShippingMethod | null> {
   return queryOne<DbShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
+// `||`/`??`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T>(value: T | undefined | null, defaultValue: T): T {
+  return value || defaultValue;
+}
+function nvl<T>(value: T | undefined | null, defaultValue: T): T {
+  return value ?? defaultValue;
+}
+function json(value: unknown): string | null {
+  return value ? JSON.stringify(value) : null;
+}
+
+function methodInsertValues(input: CreateShippingMethodInput): unknown[] {
+  return [
+    fallback(input.shippingCarrierId, null),
+    input.name,
+    input.code,
+    fallback(input.description, null),
+    nvl(input.isActive, true),
+    nvl(input.isDefault, false),
+    fallback(input.serviceCode, null),
+    fallback(input.domesticInternational, 'both'),
+    json(input.estimatedDeliveryDays),
+    nvl(input.handlingDays, 1),
+    nvl(input.priority, 0),
+    nvl(input.displayOnFrontend, true),
+    nvl(input.allowFreeShipping, true),
+    fallback(input.minWeight, null),
+    fallback(input.maxWeight, null),
+    fallback(input.minOrderValueCents, null),
+    fallback(input.maxOrderValueCents, null),
+    json(input.dimensionRestrictions),
+    fallback(input.shippingClass, null),
+    json(input.customFields),
+    fallback(input.createdBy, null),
+  ];
+}
+
 async function create(input: CreateShippingMethodInput): Promise<ShippingMethod> {
   if (input.isDefault) {
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
@@ -54,29 +91,7 @@ async function create(input: CreateShippingMethodInput): Promise<ShippingMethod>
       "displayOnFrontend", "allowFreeShipping", "minWeight", "maxWeight", "minOrderValueCents",
       "maxOrderValueCents", "dimensionRestrictions", "shippingClass", "customFields", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *`,
-    [
-      input.shippingCarrierId || null,
-      input.name,
-      input.code,
-      input.description || null,
-      input.isActive ?? true,
-      input.isDefault ?? false,
-      input.serviceCode || null,
-      input.domesticInternational || 'both',
-      input.estimatedDeliveryDays ? JSON.stringify(input.estimatedDeliveryDays) : null,
-      input.handlingDays ?? 1,
-      input.priority ?? 0,
-      input.displayOnFrontend ?? true,
-      input.allowFreeShipping ?? true,
-      input.minWeight || null,
-      input.maxWeight || null,
-      input.minOrderValueCents || null,
-      input.maxOrderValueCents || null,
-      input.dimensionRestrictions ? JSON.stringify(input.dimensionRestrictions) : null,
-      input.shippingClass || null,
-      input.customFields ? JSON.stringify(input.customFields) : null,
-      input.createdBy || null,
-    ],
+    methodInsertValues(input),
   );
 
   if (!result) throw new FailedToCreateShippingEntityError('Failed to create shipping method');

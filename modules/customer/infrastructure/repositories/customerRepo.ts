@@ -17,8 +17,9 @@ import {
   CustomerNotFoundError,
   CustomerAddressNotFoundError,
   CustomerGroupNotFoundError,
-  CustomerWishlistNotFoundError,
 } from '../../domain/errors/CustomerErrors';
+import { CustomerWishlistRepo } from './customerWishlistRepo';
+import { CustomerStatsRepo } from './customerStatsRepo';
 
 // Re-export DB types for use in this feature
 export type Customer = DbCustomer;
@@ -421,157 +422,25 @@ export class CustomerRepo {
     return result ? parseInt(result.count) > 0 : false;
   }
 
+  private readonly wishlistRepo = new CustomerWishlistRepo();
+  private readonly statsRepo = new CustomerStatsRepo();
+
   // Customer Wishlist methods
-  async findCustomerWishlists(customerId: string): Promise<CustomerWishlist[]> {
-    const wishlists = await query<DbCustomerWishlist[]>(
-      'SELECT * FROM "customerWishlist" WHERE "customerId" = $1 ORDER BY "createdAt" DESC',
-      [customerId],
-    );
-    return wishlists || [];
-  }
-
-  async findCustomerWishlistById(wishlistId: string): Promise<CustomerWishlist | null> {
-    return await queryOne<DbCustomerWishlist>('SELECT * FROM "customerWishlist" WHERE "customerWishlistId" = $1', [wishlistId]);
-  }
-
-  async createCustomerWishlist(
-    wishlist: Omit<CustomerWishlist, 'customerWishlistId' | 'createdAt' | 'updatedAt'>,
-  ): Promise<CustomerWishlist> {
-    const now = new Date();
-    const result = await queryOne<DbCustomerWishlist>(
-      `INSERT INTO "customerWishlist" ("customerId", "wishlistName", "isPublic", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [wishlist.customerId, wishlist.wishlistName, wishlist.isPublic, now, now],
-    );
-    if (!result) throw new FailedToCreateCustomerError('Failed to create wishlist');
-    return result;
-  }
-
-  async updateCustomerWishlist(wishlistId: string, updates: Partial<CustomerWishlist>): Promise<CustomerWishlist> {
-    const existing = await this.findCustomerWishlistById(wishlistId);
-    if (!existing) throw new CustomerWishlistNotFoundError(wishlistId);
-
-    const fields = ['wishlistName', 'isPublic'];
-    const setClauses: string[] = [];
-    const values: unknown[] = [];
-    let paramIndex = 1;
-
-    for (const field of fields) {
-      if (updates[field as keyof CustomerWishlist] !== undefined) {
-        setClauses.push(`"${field}" = $${paramIndex++}`);
-        values.push(updates[field as keyof CustomerWishlist]);
-      }
-    }
-
-    if (setClauses.length === 0) return existing;
-
-    setClauses.push(`"updatedAt" = $${paramIndex++}`);
-    values.push(new Date());
-    values.push(wishlistId);
-
-    const result = await queryOne<DbCustomerWishlist>(
-      `UPDATE "customerWishlist" SET ${setClauses.join(', ')} WHERE "customerWishlistId" = $${paramIndex} RETURNING *`,
-      values,
-    );
-
-    if (!result) throw new FailedToCreateCustomerError(`Failed to update wishlist ${wishlistId}`);
-    return result;
-  }
-
-  async deleteCustomerWishlist(wishlistId: string): Promise<boolean> {
-    const result = await queryOne<{ count: string }>(
-      `WITH deleted AS (DELETE FROM "customerWishlist" WHERE "customerWishlistId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [wishlistId],
-    );
-    return result ? parseInt(result.count) > 0 : false;
-  }
-
-  // Customer Wishlist Item methods
-  async findWishlistItems(wishlistId: string): Promise<CustomerWishlistItem[]> {
-    const items = await query<DbCustomerWishlistItem[]>(
-      'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 ORDER BY "createdAt" DESC',
-      [wishlistId],
-    );
-    return items || [];
-  }
-
-  async findWishlistItemById(itemId: string): Promise<CustomerWishlistItem | null> {
-    return await queryOne<DbCustomerWishlistItem>('SELECT * FROM "customerWishlistItem" WHERE "customerWishlistItemId" = $1', [itemId]);
-  }
-
-  async addItemToWishlist(item: Omit<CustomerWishlistItem, 'customerWishlistItemId'>): Promise<CustomerWishlistItem> {
-    const existing = await queryOne<DbCustomerWishlistItem>(
-      'SELECT * FROM "customerWishlistItem" WHERE "customerWishlistId" = $1 AND "productId" = $2 AND "productVariantId" IS NOT DISTINCT FROM $3',
-      [item.customerWishlistId, item.productId, item.productVariantId],
-    );
-
-    if (existing) {
-      if (item.note !== existing.note) {
-        const updated = await queryOne<DbCustomerWishlistItem>(
-          'UPDATE "customerWishlistItem" SET "note" = $1, "updatedAt" = $2 WHERE "customerWishlistItemId" = $3 RETURNING *',
-          [item.note, new Date(), existing.customerWishlistItemId],
-        );
-        return updated || existing;
-      }
-      return existing;
-    }
-
-    const result = await queryOne<DbCustomerWishlistItem>(
-      `INSERT INTO "customerWishlistItem" ("customerWishlistId", "productId", "productVariantId", "note", "createdAt", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [item.customerWishlistId, item.productId, item.productVariantId, item.note, new Date(), new Date()],
-    );
-    if (!result) throw new FailedToCreateCustomerError('Failed to add item to wishlist');
-    return result;
-  }
-
-  async removeItemFromWishlist(itemId: string): Promise<boolean> {
-    const result = await queryOne<{ count: string }>(
-      `WITH deleted AS (DELETE FROM "customerWishlistItem" WHERE "customerWishlistItemId" = $1 RETURNING *) SELECT COUNT(*) as count FROM deleted`,
-      [itemId],
-    );
-    return result ? parseInt(result.count) > 0 : false;
-  }
-
-  async updateWishlistItemNote(itemId: string, note: string): Promise<CustomerWishlistItem> {
-    const result = await queryOne<DbCustomerWishlistItem>(
-      'UPDATE "customerWishlistItem" SET "note" = $1 WHERE "customerWishlistItemId" = $2 RETURNING *',
-      [note, itemId],
-    );
-    if (!result) throw new FailedToCreateCustomerError(`Failed to update wishlist item ${itemId}`);
-    return result;
-  }
+  findCustomerWishlists = (customerId: string) => this.wishlistRepo.findCustomerWishlists(customerId);
+  findCustomerWishlistById = (wishlistId: string) => this.wishlistRepo.findCustomerWishlistById(wishlistId);
+  createCustomerWishlist = (wishlist: Omit<CustomerWishlist, 'customerWishlistId' | 'createdAt' | 'updatedAt'>) =>
+    this.wishlistRepo.createCustomerWishlist(wishlist);
+  updateCustomerWishlist = (wishlistId: string, updates: Partial<CustomerWishlist>) =>
+    this.wishlistRepo.updateCustomerWishlist(wishlistId, updates);
+  deleteCustomerWishlist = (wishlistId: string) => this.wishlistRepo.deleteCustomerWishlist(wishlistId);
+  findWishlistItems = (wishlistId: string) => this.wishlistRepo.findWishlistItems(wishlistId);
+  findWishlistItemById = (itemId: string) => this.wishlistRepo.findWishlistItemById(itemId);
+  addItemToWishlist = (item: Omit<CustomerWishlistItem, 'customerWishlistItemId'>) => this.wishlistRepo.addItemToWishlist(item);
+  removeItemFromWishlist = (itemId: string) => this.wishlistRepo.removeItemFromWishlist(itemId);
+  updateWishlistItemNote = (itemId: string, note: string) => this.wishlistRepo.updateWishlistItemNote(itemId, note);
 
   // Advanced customer queries
-  async getCustomerStats(
-    customerId: string,
-  ): Promise<{ orderCount: number; totalSpent: number; averageOrderValue: number; lastOrderDate: Date | null }> {
-    const stats = await queryOne<{ orderCount: string; totalSpent: string; averageOrderValue: string; lastOrderDate: Date | null }>(
-      `SELECT COUNT(*) as "orderCount", COALESCE(SUM("totalAmountCents"), 0) as "totalSpent", COALESCE(AVG("totalAmountCents"), 0) as "averageOrderValue", MAX("createdAt") as "lastOrderDate"
-       FROM "order" WHERE "customerId" = $1`,
-      [customerId],
-    );
-
-    return {
-      orderCount: parseInt(stats?.orderCount || '0'),
-      totalSpent: parseFloat(stats?.totalSpent || '0'),
-      averageOrderValue: parseFloat(stats?.averageOrderValue || '0'),
-      lastOrderDate: stats?.lastOrderDate || null,
-    };
-  }
-
-  async getNewCustomersCount(days: number = 30): Promise<number> {
-    const result = await queryOne<{ count: string }>(
-      `SELECT COUNT(*) as count FROM "customer" WHERE "createdAt" >= NOW() - INTERVAL '${days} days'`,
-    );
-    return parseInt(result?.count || '0');
-  }
-
-  async getTopCustomers(limit: number = 10): Promise<(Customer & { totalSpent: number; orderCount: number })[]> {
-    const customers = await query<(Customer & { totalSpent: number; orderCount: number })[]>(
-      `SELECT c.*, COALESCE(SUM(o."totalAmountCents"), 0) as "totalSpent", COUNT(o."orderId") as "orderCount"
-       FROM "customer" c LEFT JOIN "order" o ON c."customerId" = o."customerId"
-       GROUP BY c."customerId" ORDER BY "totalSpent" DESC LIMIT $1`,
-      [limit],
-    );
-    return customers || [];
-  }
+  getCustomerStats = (customerId: string) => this.statsRepo.getCustomerStats(customerId);
+  getNewCustomersCount = (days?: number) => this.statsRepo.getNewCustomersCount(days);
+  getTopCustomers = (limit?: number) => this.statsRepo.getTopCustomers(limit);
 }

@@ -40,6 +40,29 @@ export type PageTranslationUpdateParams = Partial<
 // Repository
 // ============================================================================
 
+/** Positional insert values for a contentPageTranslation row. */
+function translationInsertValues(params: PageTranslationCreateParams): unknown[] {
+  return [
+    params.contentPageId,
+    params.localeId,
+    params.title,
+    params.slug || null,
+    params.summary || null,
+    params.content ? JSON.stringify(params.content) : null,
+    params.metaTitle || null,
+    params.metaDescription || null,
+    params.metaKeywords || null,
+    params.openGraphTitle || null,
+    params.openGraphDescription || null,
+    params.featuredImage || null,
+    params.isAutoTranslated || false,
+    params.translationSource || null,
+    params.isApproved || false,
+    params.isPublished || false,
+    params.publishedAt || null,
+  ];
+}
+
 export class ContentPageTranslationRepo {
   async findTranslationById(id: string): Promise<ContentPageTranslation | null> {
     return queryOne<DbContentPageTranslation>('SELECT * FROM "contentPageTranslation" WHERE "contentPageTranslationId" = $1', [id]);
@@ -82,25 +105,7 @@ export class ContentPageTranslationRepo {
        "featuredImage", "isAutoTranslated", "translationSource", "isApproved", "isPublished", "publishedAt")
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING *`,
-      [
-        params.contentPageId,
-        params.localeId,
-        params.title,
-        params.slug || null,
-        params.summary || null,
-        params.content ? JSON.stringify(params.content) : null,
-        params.metaTitle || null,
-        params.metaDescription || null,
-        params.metaKeywords || null,
-        params.openGraphTitle || null,
-        params.openGraphDescription || null,
-        params.featuredImage || null,
-        params.isAutoTranslated || false,
-        params.translationSource || null,
-        params.isApproved || false,
-        params.isPublished || false,
-        params.publishedAt || null,
-      ],
+      translationInsertValues(params),
     );
 
     if (!result) {

@@ -36,19 +36,8 @@ export class ListPromotionsUseCase {
   constructor(private readonly promotionRepo: PromotionRepository) {}
 
   async execute(command: ListPromotionsCommand): Promise<ListPromotionsResponse> {
-    const promotions = await this.promotionRepo.findAll(
-      {
-        status: command.filters?.status as PromotionStatus[] | PromotionStatus | undefined,
-        isActive: command.filters?.isActive,
-        organizationId: command.filters?.organizationId,
-      },
-      {
-        limit: command.pagination?.limit || 50,
-        offset: command.pagination?.offset || 0,
-        orderBy: command.pagination?.orderBy || 'createdAt',
-        direction: command.pagination?.direction || 'DESC',
-      },
-    );
+    const pagination = this.resolvePagination(command);
+    const promotions = await this.promotionRepo.findAll(this.resolveFilters(command), pagination);
 
     // Calculate total (approximate for now)
     const total = promotions.length; // This is a simplified version
@@ -56,9 +45,36 @@ export class ListPromotionsUseCase {
     return {
       data: promotions,
       total,
-      limit: command.pagination?.limit || 50,
-      offset: command.pagination?.offset || 0,
-      hasMore: promotions.length === (command.pagination?.limit || 50),
+      limit: pagination.limit,
+      offset: pagination.offset,
+      hasMore: promotions.length === pagination.limit,
+    };
+  }
+
+  private resolveFilters(command: ListPromotionsCommand): {
+    status?: PromotionStatus[] | PromotionStatus;
+    isActive?: boolean;
+    organizationId?: string;
+  } {
+    return {
+      status: command.filters?.status as PromotionStatus[] | PromotionStatus | undefined,
+      isActive: command.filters?.isActive,
+      organizationId: command.filters?.organizationId,
+    };
+  }
+
+  private resolvePagination(command: ListPromotionsCommand): {
+    limit: number;
+    offset: number;
+    orderBy: string;
+    direction: 'ASC' | 'DESC';
+  } {
+    const p = command.pagination;
+    return {
+      limit: p?.limit || 50,
+      offset: p?.offset || 0,
+      orderBy: p?.orderBy || 'createdAt',
+      direction: p?.direction || 'DESC',
     };
   }
 }

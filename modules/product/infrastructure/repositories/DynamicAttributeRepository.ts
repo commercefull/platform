@@ -69,6 +69,35 @@ function mapToAttributeValue(row: DbProductAttributeValue): ProductAttributeValu
   };
 }
 
+/** Falsy → fallback (nullable column default). */
+const nullable = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+
+function createAttributeValues(input: ProductAttributeCreateInput): unknown[] {
+  return [
+    input.name,
+    input.code,
+    nullable(input.description),
+    nullable(input.groupId),
+    input.type || 'text',
+    input.inputType || input.type || 'text',
+    input.isRequired || false,
+    input.isUnique || false,
+    input.isSearchable !== false,
+    input.isFilterable !== false,
+    input.isComparable !== false,
+    input.isVisibleOnFront !== false,
+    input.isUsedInProductListing || false,
+    input.useForVariants || false,
+    input.useForConfigurations || false,
+    input.position || 0,
+    nullable(input.defaultValue),
+    input.validationRules ? JSON.stringify(input.validationRules) : null,
+    input.options ? JSON.stringify(input.options) : null,
+    nullable(input.organizationId),
+    input.isGlobal !== false,
+  ];
+}
+
 function mapToAttributeData(row: ProductAttributeValueMap): ProductAttributeData {
   return {
     productAttributeValueMapId: row.productAttributeValueMapId,
@@ -198,29 +227,7 @@ export class DynamicAttributeRepository {
       RETURNING *
     `;
 
-    const result = await queryOne<DbProductAttribute>(sql, [
-      input.name,
-      input.code,
-      input.description || null,
-      input.groupId || null,
-      input.type || 'text',
-      input.inputType || input.type || 'text',
-      input.isRequired || false,
-      input.isUnique || false,
-      input.isSearchable !== false,
-      input.isFilterable !== false,
-      input.isComparable !== false,
-      input.isVisibleOnFront !== false,
-      input.isUsedInProductListing || false,
-      input.useForVariants || false,
-      input.useForConfigurations || false,
-      input.position || 0,
-      input.defaultValue || null,
-      input.validationRules ? JSON.stringify(input.validationRules) : null,
-      input.options ? JSON.stringify(input.options) : null,
-      input.organizationId || null,
-      input.isGlobal !== false,
-    ]);
+    const result = await queryOne<DbProductAttribute>(sql, createAttributeValues(input));
 
     if (!result) {
       throw new FailedToCreateProductError();

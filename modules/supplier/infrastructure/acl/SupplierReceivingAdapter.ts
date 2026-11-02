@@ -45,7 +45,22 @@ export class SupplierReceivingAdapter {
     const poItems: SupplierPurchaseOrderItem[] = po ? await purchaseOrders.findItemsByOrderId(data.purchaseOrderId) : [];
 
     const hasDamage = data.items.some(i => (i.quantityDamaged ?? 0) > 0);
-    const record = await receivingRecords.create({
+    const record = await receivingRecords.create(this.buildRecordInput(data, po, hasDamage));
+
+    for (const item of data.items) {
+      const poItem = poItems.find(
+        p => p.productId === item.productId && (item.variantId === undefined || p.productVariantId === item.variantId),
+      );
+      await receivingItems.create(this.buildItemInput(record.supplierReceivingRecordId, item, poItem, data));
+    }
+  }
+
+  private buildRecordInput(
+    data: ReceivingCreateData,
+    po: Awaited<ReturnType<Pick<SupplierPurchaseOrderRepo, 'findById'>['findById']>>,
+    hasDamage: boolean,
+  ): Parameters<Pick<SupplierReceivingRecordRepo, 'create'>['create']>[0] {
+    return {
       supplierPurchaseOrderId: data.purchaseOrderId,
       distributionWarehouseId: po?.distributionWarehouseId ?? data.warehouseId,
       supplierId: po?.supplierId ?? 'unknown',
@@ -58,34 +73,36 @@ export class SupplierReceivingAdapter {
       discrepancies: hasDamage,
       attachments: null,
       completedAt: data.receivedAt,
-    });
+    };
+  }
 
-    for (const item of data.items) {
-      const poItem = poItems.find(
-        p => p.productId === item.productId && (item.variantId === undefined || p.productVariantId === item.variantId),
-      );
-      const damaged = item.quantityDamaged ?? 0;
-      await receivingItems.create({
-        supplierReceivingRecordId: record.supplierReceivingRecordId,
-        supplierPurchaseOrderItemId: poItem?.supplierPurchaseOrderItemId ?? null,
-        productId: item.productId,
-        productVariantId: item.variantId ?? null,
-        sku: poItem?.sku ?? '',
-        name: poItem?.name ?? item.productId,
-        expectedQuantity: poItem?.quantity ?? null,
-        receivedQuantity: item.quantityReceived - damaged,
-        rejectedQuantity: damaged,
-        status: damaged > 0 && damaged < item.quantityReceived ? 'partial' : damaged >= item.quantityReceived ? 'rejected' : 'received',
-        distributionWarehouseBinId: null,
-        lotNumber: null,
-        serialNumbers: null,
-        expiryDate: null,
-        acceptanceStatus: null,
-        inspectionNotes: item.notes ?? null,
-        discrepancyReason: null,
-        processedBy: data.receivedBy,
-        processedAt: data.receivedAt,
-      });
-    }
+  private buildItemInput(
+    recordId: string,
+    item: ReceivingCreateData['items'][number],
+    poItem: SupplierPurchaseOrderItem | undefined,
+    data: ReceivingCreateData,
+  ): Parameters<Pick<SupplierReceivingItemRepo, 'create'>['create']>[0] {
+    const damaged = item.quantityDamaged ?? 0;
+    return {
+      supplierReceivingRecordId: recordId,
+      supplierPurchaseOrderItemId: poItem?.supplierPurchaseOrderItemId ?? null,
+      productId: item.productId,
+      productVariantId: item.variantId ?? null,
+      sku: poItem?.sku ?? '',
+      name: poItem?.name ?? item.productId,
+      expectedQuantity: poItem?.quantity ?? null,
+      receivedQuantity: item.quantityReceived - damaged,
+      rejectedQuantity: damaged,
+      status: damaged > 0 && damaged < item.quantityReceived ? 'partial' : damaged >= item.quantityReceived ? 'rejected' : 'received',
+      distributionWarehouseBinId: null,
+      lotNumber: null,
+      serialNumbers: null,
+      expiryDate: null,
+      acceptanceStatus: null,
+      inspectionNotes: item.notes ?? null,
+      discrepancyReason: null,
+      processedBy: data.receivedBy,
+      processedAt: data.receivedAt,
+    };
   }
 }

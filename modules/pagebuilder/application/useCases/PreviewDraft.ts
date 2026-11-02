@@ -32,29 +32,38 @@ export class PreviewDraftUseCase {
 
     const resolved = draft.storeId ? await themeRegistry.resolveThemeForStore(draft.storeId, this.themeRepo) : null;
 
-    const blockTypes = new Map<string, { name: string; icon: string; category: string }>();
-    for (const block of draft.blocks) {
-      if (!blockTypes.has(block.typeId)) {
-        const def = blockSchemaRegistry.get(block.typeId);
-        if (def) {
-          blockTypes.set(block.typeId, { name: def.name, icon: def.icon, category: def.category });
-        }
-      }
-    }
-
     return {
       draft,
-      theme: {
-        themeId: resolved?.theme.themeId || draft.themeId || '',
-        slug: resolved?.theme.slug || '',
-        name: resolved?.theme.name || 'Unknown',
-        cssVariables: resolved?.cssVariables || {},
-        customCss: resolved?.customCss,
-        headTags: resolved ? themeRegistry.generateHeadTags(resolved) : [],
-        bodyAttributes: resolved ? themeRegistry.generateBodyAttributes(resolved) : {},
-      },
+      theme: buildThemeData(draft, resolved),
       blocks: draft.blocks,
-      blockTypes,
+      blockTypes: collectBlockTypes(draft),
     };
   }
+}
+
+type ResolvedTheme = Awaited<ReturnType<typeof themeRegistry.resolveThemeForStore>>;
+
+function collectBlockTypes(draft: PageDraft): Map<string, { name: string; icon: string; category: string }> {
+  const blockTypes = new Map<string, { name: string; icon: string; category: string }>();
+  for (const block of draft.blocks) {
+    if (!blockTypes.has(block.typeId)) {
+      const def = blockSchemaRegistry.get(block.typeId);
+      if (def) {
+        blockTypes.set(block.typeId, { name: def.name, icon: def.icon, category: def.category });
+      }
+    }
+  }
+  return blockTypes;
+}
+
+function buildThemeData(draft: PageDraft, resolved: ResolvedTheme): PreviewData['theme'] {
+  return {
+    themeId: resolved?.theme.themeId || draft.themeId || '',
+    slug: resolved?.theme.slug || '',
+    name: resolved?.theme.name || 'Unknown',
+    cssVariables: resolved?.cssVariables || {},
+    customCss: resolved?.customCss,
+    headTags: resolved ? themeRegistry.generateHeadTags(resolved) : [],
+    bodyAttributes: resolved ? themeRegistry.generateBodyAttributes(resolved) : {},
+  };
 }

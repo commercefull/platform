@@ -110,6 +110,40 @@ export const viewAutomationRule = async (req: HttpRequest, res: HttpResponse): P
   });
 };
 
+/**
+ * Build triggerConfig update payload — only when at least one trigger
+ * field was submitted.
+ */
+function buildTriggerConfigUpdate(body: HttpRequestBody): Record<string, unknown> | undefined {
+  const { eventName, cronExpression, segmentId } = body;
+  if (eventName === undefined && cronExpression === undefined && segmentId === undefined) return undefined;
+  const triggerConfig: Record<string, unknown> = {};
+  if (eventName) triggerConfig.eventName = eventName;
+  if (cronExpression) triggerConfig.cronExpression = cronExpression;
+  if (segmentId) triggerConfig.segmentId = segmentId;
+  return triggerConfig;
+}
+
+const maybeJson = (v: unknown): unknown => (typeof v === 'string' ? JSON.parse(v) : v);
+
+/**
+ * Translate the edit form body into a sparse update payload.
+ */
+function buildRuleUpdates(body: HttpRequestBody): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+  if (body.name !== undefined) updates.name = body.name;
+  if (body.description !== undefined) updates.description = body.description || undefined;
+  const triggerConfig = buildTriggerConfigUpdate(body);
+  if (triggerConfig) updates.triggerConfig = triggerConfig;
+  if (body.conditions !== undefined) updates.conditions = maybeJson(body.conditions);
+  if (body.conditionMatchMode !== undefined) updates.conditionMatchMode = body.conditionMatchMode;
+  if (body.actions !== undefined) updates.actions = maybeJson(body.actions);
+  if (body.actionExecutionMode !== undefined) updates.actionExecutionMode = body.actionExecutionMode;
+  if (body.isActive !== undefined) updates.isActive = body.isActive !== 'false';
+  if (body.priority !== undefined) updates.priority = parseInt(body.priority as string, 10);
+  return updates;
+}
+
 // ============================================================================
 // Edit Rule
 // ============================================================================
@@ -135,38 +169,7 @@ export const editAutomationRuleForm = async (req: HttpRequest, res: HttpResponse
 export const updateAutomationRule = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
     const { ruleId } = req.params;
-    const body = req.body as HttpRequestBody;
-    const {
-      name,
-      description,
-      eventName,
-      cronExpression,
-      segmentId,
-      conditions,
-      conditionMatchMode,
-      actions,
-      actionExecutionMode,
-      isActive,
-      priority,
-    } = body;
-
-    const updates: Record<string, unknown> = {};
-    if (name !== undefined) updates.name = name;
-    if (description !== undefined) updates.description = description || undefined;
-    if (eventName !== undefined || cronExpression !== undefined || segmentId !== undefined) {
-      const triggerConfig: Record<string, unknown> = {};
-      if (eventName) triggerConfig.eventName = eventName;
-      if (cronExpression) triggerConfig.cronExpression = cronExpression;
-      if (segmentId) triggerConfig.segmentId = segmentId;
-      updates.triggerConfig = triggerConfig;
-    }
-    if (conditions !== undefined) updates.conditions = typeof conditions === 'string' ? JSON.parse(conditions) : conditions;
-    if (conditionMatchMode !== undefined) updates.conditionMatchMode = conditionMatchMode;
-    if (actions !== undefined) updates.actions = typeof actions === 'string' ? JSON.parse(actions) : actions;
-    if (actionExecutionMode !== undefined) updates.actionExecutionMode = actionExecutionMode;
-    if (isActive !== undefined) updates.isActive = isActive !== 'false';
-    if (priority !== undefined) updates.priority = parseInt(priority as string, 10);
-
+    const updates = buildRuleUpdates(req.body as HttpRequestBody);
     const rule = await updateAutomationRuleUseCase.execute(ruleId, updates as never);
     redirectResponse(res, `/admin/automation/${rule.automationRuleId}?success=Automation rule updated successfully`);
   } catch (error: unknown) {

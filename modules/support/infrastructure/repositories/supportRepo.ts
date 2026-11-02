@@ -10,11 +10,9 @@ import type {
   TicketPriority,
   TicketCategory,
   TicketChannel,
-  SenderType,
-  SupportTicketProps as SupportTicketProps,
 } from '../../domain/entities/SupportTicket';
 import type { SupportAgent, AgentRole } from '../../domain/repositories/SupportRepository';
-import type { SupportAttachment as DbSupportAttachment, SupportMessage as DbSupportMessage } from '../../../../libs/db/types';
+
 
 export type {
   TicketStatus,
@@ -27,11 +25,10 @@ export type {
 // Types
 // ============================================================================
 
-export type SupportTicket = SupportTicketProps;
+export type { SupportTicket } from './supportTicketOpsQueries';
+import type { SupportTicket } from './supportTicketOpsQueries';
 
-type SupportMessage = DbSupportMessage;
-
-type SupportAttachment = DbSupportAttachment;
+import { getTicket, mapToTicket, updateAgentTicketCount } from './supportTicketOpsQueries';
 
 // ============================================================================
 // Support Agents
@@ -53,22 +50,10 @@ async function getAvailableAgent(_category?: string): Promise<SupportAgent | nul
   return row ? mapToAgent(row) : null;
 }
 
-async function updateAgentTicketCount(supportAgentId: string, delta: number): Promise<void> {
-  await query(
-    `UPDATE "supportAgent" SET "currentTickets" = GREATEST(0, "currentTickets" + $1), "updatedAt" = $2
-     WHERE "supportAgentId" = $3`,
-    [delta, new Date().toISOString(), supportAgentId],
-  );
-}
 
 // ============================================================================
 // Support Tickets
 // ============================================================================
-
-export async function getTicket(supportTicketId: string): Promise<SupportTicket | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportTicket" WHERE "supportTicketId" = $1', [supportTicketId]);
-  return row ? mapToTicket(row) : null;
-}
 
 // ============================================================================
 // Helpers
@@ -83,124 +68,56 @@ async function generateTicketNumber(): Promise<string> {
   return `TKT${year}-${count.toString().padStart(6, '0')}`;
 }
 
+// Coercion helpers kept out of row mapping to keep complexity low.
+function opt<T>(value: T | null | undefined): T | undefined {
+  return value ?? undefined;
+}
+function intOr(value: unknown, fallbackValue: number): number {
+  return parseInt(value as string) || fallbackValue;
+}
+function intOpt(value: unknown): number | undefined {
+  return value ? parseInt(value as string) : undefined;
+}
+function numOpt(value: unknown): number | undefined {
+  return value ? parseFloat(value as string) : undefined;
+}
+function dateOpt(value: unknown): Date | undefined {
+  return value ? new Date(value as string) : undefined;
+}
+
 function mapToAgent(row: Record<string, unknown>): SupportAgent {
   return {
     supportAgentId: row.supportAgentId as string,
     email: row.email as string,
     firstName: row.firstName as string,
     lastName: row.lastName as string,
-    displayName: (row.displayName as string | null) ?? undefined,
-    avatarUrl: (row.avatarUrl as string | null) ?? undefined,
+    displayName: opt(row.displayName as string | null),
+    avatarUrl: opt(row.avatarUrl as string | null),
     role: row.role as AgentRole,
-    department: (row.department as string | null) ?? undefined,
-    skills: (row.skills as string[] | null) ?? undefined,
-    languages: (row.languages as string[] | null) ?? undefined,
+    department: opt(row.department as string | null),
+    skills: opt(row.skills as string[] | null),
+    languages: opt(row.languages as string[] | null),
     isActive: Boolean(row.isActive),
     isAvailable: Boolean(row.isAvailable),
-    maxTickets: parseInt(row.maxTickets as string) || 20,
-    currentTickets: parseInt(row.currentTickets as string) || 0,
-    totalTicketsHandled: parseInt(row.totalTicketsHandled as string) || 0,
-    averageResponseTimeMinutes: row.averageResponseTimeMinutes ? parseInt(row.averageResponseTimeMinutes as string) : undefined,
-    averageResolutionTimeMinutes: row.averageResolutionTimeMinutes ? parseInt(row.averageResolutionTimeMinutes as string) : undefined,
-    satisfactionScore: row.satisfactionScore ? parseFloat(row.satisfactionScore as string) : undefined,
-    satisfactionCount: parseInt(row.satisfactionCount as string) || 0,
+    maxTickets: intOr(row.maxTickets, 20),
+    currentTickets: intOr(row.currentTickets, 0),
+    totalTicketsHandled: intOr(row.totalTicketsHandled, 0),
+    averageResponseTimeMinutes: intOpt(row.averageResponseTimeMinutes),
+    averageResolutionTimeMinutes: intOpt(row.averageResolutionTimeMinutes),
+    satisfactionScore: numOpt(row.satisfactionScore),
+    satisfactionCount: intOr(row.satisfactionCount, 0),
     timezone: (row.timezone as string) || 'UTC',
-    workingHours: (row.workingHours as Record<string, unknown> | null) ?? undefined,
-    notificationPreferences: (row.notificationPreferences as Record<string, unknown> | null) ?? undefined,
-    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
-    lastActiveAt: row.lastActiveAt ? new Date(row.lastActiveAt as string) : undefined,
+    workingHours: opt(row.workingHours as Record<string, unknown> | null),
+    notificationPreferences: opt(row.notificationPreferences as Record<string, unknown> | null),
+    metadata: opt(row.metadata as Record<string, unknown> | null),
+    lastActiveAt: dateOpt(row.lastActiveAt),
     createdAt: new Date(row.createdAt as string),
     updatedAt: new Date(row.updatedAt as string),
   };
 }
 
-function mapToTicket(row: Record<string, unknown>): SupportTicket {
-  return {
-    supportTicketId: row.supportTicketId as string,
-    ticketNumber: row.ticketNumber as string,
-    customerId: row.customerId as string | undefined,
-    orderId: row.orderId as string | undefined,
-    email: row.email as string,
-    name: row.name as string | undefined,
-    phone: row.phone as string | undefined,
-    subject: row.subject as string,
-    description: row.description as string | undefined,
-    status: row.status as TicketStatus,
-    priority: row.priority as TicketPriority,
-    category: row.category as TicketCategory,
-    subcategory: row.subcategory as string | undefined,
-    channel: row.channel as TicketChannel,
-    assignedAgentId: row.assignedAgentId as string | undefined,
-    lastMessageBy: row.lastMessageBy as string | undefined,
-    lastMessageByType: row.lastMessageByType as SenderType | undefined,
-    lastMessageAt: row.lastMessageAt ? new Date(row.lastMessageAt as string) : undefined,
-    firstResponseAt: row.firstResponseAt ? new Date(row.firstResponseAt as string) : undefined,
-    responseTimeMinutes: row.responseTimeMinutes ? parseInt(row.responseTimeMinutes as string) : undefined,
-    resolvedAt: row.resolvedAt ? new Date(row.resolvedAt as string) : undefined,
-    resolutionTimeMinutes: row.resolutionTimeMinutes ? parseInt(row.resolutionTimeMinutes as string) : undefined,
-    resolutionType: row.resolutionType as string | undefined,
-    resolutionNotes: row.resolutionNotes as string | undefined,
-    customerSatisfaction: row.customerSatisfaction ? parseInt(row.customerSatisfaction as string) : undefined,
-    customerFeedback: row.customerFeedback as string | undefined,
-    feedbackRequested: Boolean(row.feedbackRequested),
-    feedbackRequestedAt: row.feedbackRequestedAt ? new Date(row.feedbackRequestedAt as string) : undefined,
-    tags: row.tags as string[] | undefined,
-    isEscalated: Boolean(row.isEscalated),
-    escalatedTo: row.escalatedTo as string | undefined,
-    escalatedAt: row.escalatedAt ? new Date(row.escalatedAt as string) : undefined,
-    escalationReason: row.escalationReason as string | undefined,
-    isSpam: Boolean(row.isSpam),
-    reopenCount: parseInt(row.reopenCount as string) || 0,
-    customFields: row.customFields as Record<string, unknown> | undefined,
-    metadata: row.metadata as Record<string, unknown> | undefined,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
-    closedAt: row.closedAt ? new Date(row.closedAt as string) : undefined,
-    dueAt: row.dueAt ? new Date(row.dueAt as string) : undefined,
-  };
-}
 
-function mapToMessage(row: Record<string, unknown>): SupportMessage {
-  return {
-    supportMessageId: row.supportMessageId as string,
-    supportTicketId: row.supportTicketId as string,
-    senderId: row.senderId as string,
-    senderType: row.senderType as SenderType,
-    senderName: row.senderName as string,
-    senderEmail: row.senderEmail as string,
-    message: row.message as string,
-    messageHtml: row.messageHtml as string | null,
-    messageType: row.messageType as string,
-    isInternal: Boolean(row.isInternal),
-    isAutoReply: Boolean(row.isAutoReply),
-    isRead: Boolean(row.isRead),
-    readAt: row.readAt ? new Date(row.readAt as string) : null,
-    readBy: row.readBy as string | null,
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-  };
-}
 
-function mapToAttachment(row: Record<string, unknown>): SupportAttachment {
-  return {
-    supportAttachmentId: row.supportAttachmentId as string,
-    supportTicketId: row.supportTicketId as string,
-    supportMessageId: row.supportMessageId as string | null,
-    fileName: row.fileName as string,
-    originalName: row.originalName as string,
-    mimeType: row.mimeType as string,
-    fileSize: parseInt(row.fileSize as string) || 0,
-    storageUrl: row.storageUrl as string,
-    thumbnailUrl: row.thumbnailUrl as string | null,
-    uploadedBy: row.uploadedBy as string | null,
-    uploadedByType: row.uploadedByType as string | null,
-    isPublic: Boolean(row.isPublic),
-    isScanned: Boolean(row.isScanned),
-    isSafe: Boolean(row.isSafe),
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-  };
-}
 export async function getAgentByEmail(email: string): Promise<SupportAgent | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportAgent" WHERE "email" = $1', [email]);
   return row ? mapToAgent(row) : null;
@@ -311,34 +228,7 @@ export async function getTickets(
   },
   pagination?: { limit?: number; offset?: number },
 ): Promise<{ data: SupportTicket[]; total: number }> {
-  let whereClause = '1=1';
-  const params: unknown[] = [];
-  let paramIndex = 1;
-
-  if (filters?.customerId) {
-    whereClause += ` AND "customerId" = $${paramIndex++}`;
-    params.push(filters.customerId);
-  }
-  if (filters?.assignedAgentId) {
-    whereClause += ` AND "assignedAgentId" = $${paramIndex++}`;
-    params.push(filters.assignedAgentId);
-  }
-  if (filters?.status) {
-    whereClause += ` AND "status" = $${paramIndex++}`;
-    params.push(filters.status);
-  }
-  if (filters?.priority) {
-    whereClause += ` AND "priority" = $${paramIndex++}`;
-    params.push(filters.priority);
-  }
-  if (filters?.category) {
-    whereClause += ` AND "category" = $${paramIndex++}`;
-    params.push(filters.category);
-  }
-  if (filters?.isEscalated !== undefined) {
-    whereClause += ` AND "isEscalated" = $${paramIndex++}`;
-    params.push(filters.isEscalated);
-  }
+  const { whereClause, params } = buildTicketFilters(filters);
 
   const countResult = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "supportTicket" WHERE ${whereClause}`, params);
 
@@ -346,11 +236,11 @@ export async function getTickets(
   const offset = pagination?.offset || 0;
 
   const rows = await query<Record<string, unknown>[]>(
-    `SELECT * FROM "supportTicket" WHERE ${whereClause} 
-     ORDER BY 
+    `SELECT * FROM "supportTicket" WHERE ${whereClause}
+     ORDER BY
        CASE "priority" WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
        "createdAt" DESC
-     LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+     LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
     [...params, limit, offset],
   );
 
@@ -358,6 +248,38 @@ export async function getTickets(
     data: (rows || []).map(mapToTicket),
     total: parseInt(countResult?.count || '0'),
   };
+}
+
+interface TicketFilters {
+  customerId?: string;
+  assignedAgentId?: string;
+  status?: TicketStatus;
+  priority?: TicketPriority;
+  category?: TicketCategory;
+  isEscalated?: boolean;
+}
+
+function buildTicketFilters(filters?: TicketFilters): { whereClause: string; params: unknown[] } {
+  let whereClause = '1=1';
+  const params: unknown[] = [];
+
+  const clauses: Array<[keyof TicketFilters, string]> = [
+    ['customerId', '"customerId"'],
+    ['assignedAgentId', '"assignedAgentId"'],
+    ['status', '"status"'],
+    ['priority', '"priority"'],
+    ['category', '"category"'],
+    ['isEscalated', '"isEscalated"'],
+  ];
+  for (const [field, column] of clauses) {
+    const value = filters?.[field];
+    if (value !== undefined && value !== null && value !== '') {
+      whereClause += ` AND ${column} = $${params.length + 1}`;
+      params.push(value);
+    }
+  }
+
+  return { whereClause, params };
 }
 
 export async function createTicket(ticket: {
@@ -439,194 +361,14 @@ export async function updateTicket(supportTicketId: string, updates: Partial<Sup
   return (await getTicket(supportTicketId))!;
 }
 
-export async function resolveTicket(supportTicketId: string, resolutionType: string, resolutionNotes?: string): Promise<void> {
-  const now = new Date();
-  const ticket = await getTicket(supportTicketId);
-  if (!ticket) throw new SupportTicketNotFoundError(supportTicketId);
-
-  const resolutionTimeMinutes = Math.floor((now.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
-
-  await query(
-    `UPDATE "supportTicket" SET 
-      "status" = 'resolved', "resolvedAt" = $1, "resolutionTimeMinutes" = $2,
-      "resolutionType" = $3, "resolutionNotes" = $4, "updatedAt" = $1
-     WHERE "supportTicketId" = $5`,
-    [now.toISOString(), resolutionTimeMinutes, resolutionType, resolutionNotes, supportTicketId],
-  );
-
-  // Update agent stats
-  if (ticket.assignedAgentId) {
-    await updateAgentTicketCount(ticket.assignedAgentId, -1);
-    await query(
-      `UPDATE "supportAgent" SET 
-        "totalTicketsHandled" = "totalTicketsHandled" + 1,
-        "updatedAt" = $1
-       WHERE "supportAgentId" = $2`,
-      [now.toISOString(), ticket.assignedAgentId],
-    );
-  }
-}
-
-export async function closeTicket(supportTicketId: string): Promise<void> {
-  const now = new Date().toISOString();
-  await query(
-    `UPDATE "supportTicket" SET "status" = 'closed', "closedAt" = $1, "updatedAt" = $1
-     WHERE "supportTicketId" = $2`,
-    [now, supportTicketId],
-  );
-}
-
-export async function escalateTicket(supportTicketId: string, escalatedTo: string, reason: string): Promise<void> {
-  const now = new Date().toISOString();
-  await query(
-    `UPDATE "supportTicket" SET 
-      "isEscalated" = true, "escalatedTo" = $1, "escalatedAt" = $2,
-      "escalationReason" = $3, "priority" = 'urgent', "updatedAt" = $2
-     WHERE "supportTicketId" = $4`,
-    [escalatedTo, now, reason, supportTicketId],
-  );
-}
-
-export async function submitFeedback(supportTicketId: string, satisfaction: number, feedback?: string): Promise<void> {
-  const now = new Date().toISOString();
-  const ticket = await getTicket(supportTicketId);
-
-  await query(
-    `UPDATE "supportTicket" SET 
-      "customerSatisfaction" = $1, "customerFeedback" = $2, "updatedAt" = $3
-     WHERE "supportTicketId" = $4`,
-    [satisfaction, feedback, now, supportTicketId],
-  );
-
-  // Update agent satisfaction score
-  if (ticket?.assignedAgentId) {
-    await query(
-      `UPDATE "supportAgent" SET 
-        "satisfactionScore" = (
-          COALESCE("satisfactionScore" * "satisfactionCount", 0) + $1
-        ) / ("satisfactionCount" + 1),
-        "satisfactionCount" = "satisfactionCount" + 1,
-        "updatedAt" = $2
-       WHERE "supportAgentId" = $3`,
-      [satisfaction, now, ticket.assignedAgentId],
-    );
-  }
-}
-
-export async function getMessages(supportTicketId: string, includeInternal: boolean = false): Promise<SupportMessage[]> {
-  let whereClause = '"supportTicketId" = $1';
-  if (!includeInternal) {
-    whereClause += ' AND "isInternal" = false';
-  }
-
-  const rows = await query<Record<string, unknown>[]>(`SELECT * FROM "supportMessage" WHERE ${whereClause} ORDER BY "createdAt" ASC`, [
-    supportTicketId,
-  ]);
-  return (rows || []).map(mapToMessage);
-}
-
-export async function addMessage(message: {
-  supportTicketId: string;
-  senderId?: string;
-  senderType: SenderType;
-  senderName?: string;
-  senderEmail?: string;
-  message: string;
-  messageHtml?: string;
-  messageType?: string;
-  isInternal?: boolean;
-  isAutoReply?: boolean;
-}): Promise<SupportMessage> {
-  const now = new Date();
-  const ticket = await getTicket(message.supportTicketId);
-  if (!ticket) throw new SupportTicketNotFoundError(message.supportTicketId);
-
-  const result = await queryOne<Record<string, unknown>>(
-    `INSERT INTO "supportMessage" (
-      "supportTicketId", "senderId", "senderType", "senderName", "senderEmail",
-      "message", "messageHtml", "messageType", "isInternal", "isAutoReply", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-    RETURNING *`,
-    [
-      message.supportTicketId,
-      message.senderId,
-      message.senderType,
-      message.senderName,
-      message.senderEmail,
-      message.message,
-      message.messageHtml,
-      message.messageType || 'reply',
-      message.isInternal || false,
-      message.isAutoReply || false,
-      now.toISOString(),
-    ],
-  );
-
-  // Update ticket
-  const updateFields: {
-    lastMessageBy: string | undefined;
-    lastMessageByType: string | undefined;
-    lastMessageAt: string;
-    updatedAt: string;
-    firstResponseAt?: string;
-    responseTimeMinutes?: number;
-    status?: string;
-  } = {
-    lastMessageBy: message.senderId,
-    lastMessageByType: message.senderType,
-    lastMessageAt: now.toISOString(),
-    updatedAt: now.toISOString(),
-  };
-
-  // Track first response time for agent replies
-  if (message.senderType === 'agent' && !ticket.firstResponseAt) {
-    const responseTimeMinutes = Math.floor((now.getTime() - ticket.createdAt.getTime()) / (1000 * 60));
-    updateFields.firstResponseAt = now.toISOString();
-    updateFields.responseTimeMinutes = responseTimeMinutes;
-  }
-
-  // Update status based on sender
-  if (message.senderType === 'agent' && ticket.status === 'open') {
-    updateFields.status = 'in_progress';
-  } else if (message.senderType === 'customer' && ticket.status === 'waiting_customer') {
-    updateFields.status = 'open';
-  }
-
-  await query(
-    `UPDATE "supportTicket" SET 
-      "lastMessageBy" = $1, "lastMessageByType" = $2, "lastMessageAt" = $3,
-      "firstResponseAt" = COALESCE($4, "firstResponseAt"),
-      "responseTimeMinutes" = COALESCE($5, "responseTimeMinutes"),
-      "status" = COALESCE($6, "status"), "updatedAt" = $7
-     WHERE "supportTicketId" = $8`,
-    [
-      updateFields.lastMessageBy,
-      updateFields.lastMessageByType,
-      updateFields.lastMessageAt,
-      updateFields.firstResponseAt,
-      updateFields.responseTimeMinutes,
-      updateFields.status,
-      updateFields.updatedAt,
-      message.supportTicketId,
-    ],
-  );
-
-  return mapToMessage(result!);
-}
-
-export async function markMessagesRead(supportTicketId: string, readBy: string): Promise<void> {
-  const now = new Date().toISOString();
-  await query(
-    `UPDATE "supportMessage" SET "isRead" = true, "readAt" = $1, "readBy" = $2
-     WHERE "supportTicketId" = $3 AND "isRead" = false`,
-    [now, readBy, supportTicketId],
-  );
-}
-
-export async function getAttachments(supportTicketId: string): Promise<SupportAttachment[]> {
-  const rows = await query<Record<string, unknown>[]>(
-    'SELECT * FROM "supportAttachment" WHERE "supportTicketId" = $1 ORDER BY "createdAt" ASC',
-    [supportTicketId],
-  );
-  return (rows || []).map(mapToAttachment);
-}
+export {
+  getTicket,
+  resolveTicket,
+  closeTicket,
+  escalateTicket,
+  submitFeedback,
+  getMessages,
+  addMessage,
+  markMessagesRead,
+  getAttachments,
+} from './supportTicketOpsQueries';

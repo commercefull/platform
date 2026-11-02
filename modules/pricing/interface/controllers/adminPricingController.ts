@@ -328,47 +328,64 @@ function parsePricingConditionsFromForm(conditions: unknown): PricingCondition[]
   return [];
 }
 
+interface ConditionFormShape {
+  attribute?: string;
+  operator?: string;
+  value?: string;
+  type?: string;
+  parameters?: Record<string, unknown>;
+}
+
+const ATTRIBUTE_TYPE_MAP: Record<string, string> = {
+  cartTotal: 'cart_total',
+  itemQuantity: 'item_quantity',
+  productCategory: 'category',
+  customerGroup: 'customer_group',
+};
+
+// Builder attributes that map onto dedicated evaluator parameter shapes
+function normalizeMembershipCondition(cond: ConditionFormShape): PricingCondition {
+  const ids = String(cond.value ?? '')
+    .split(',')
+    .map(v => v.trim())
+    .filter(Boolean);
+  return {
+    type: cond.attribute as string,
+    parameters: cond.attribute === 'store' ? { storeIds: ids } : { channelIds: ids },
+  };
+}
+
+function normalizeOperatorValue(operator: string | undefined, raw: string | undefined): unknown {
+  let value: unknown = raw || '';
+  if (typeof value === 'string' && !isNaN(Number(value)) && value !== '') {
+    value = Number(value);
+  }
+  if (operator === 'in' && typeof value === 'string') {
+    value = value.split(',').map(v => v.trim());
+  }
+  return value;
+}
+
 function normalizePricingCondition(c: unknown): PricingCondition {
-  const cond = c as { attribute?: string; operator?: string; value?: string; type?: string; parameters?: Record<string, unknown> };
+  const cond = c as ConditionFormShape;
   // Already in PricingCondition shape
   if (cond.type && cond.parameters) {
     return { type: cond.type, parameters: cond.parameters };
   }
 
-  // Builder attributes that map onto dedicated evaluator parameter shapes
   if (cond.attribute === 'store' || cond.attribute === 'channel') {
-    const ids = String(cond.value ?? '')
-      .split(',')
-      .map(v => v.trim())
-      .filter(Boolean);
-    return {
-      type: cond.attribute,
-      parameters: cond.attribute === 'store' ? { storeIds: ids } : { channelIds: ids },
-    };
+    return normalizeMembershipCondition(cond);
   }
 
-  const attributeTypeMap: Record<string, string> = {
-    cartTotal: 'cart_total',
-    itemQuantity: 'item_quantity',
-    productCategory: 'category',
-    customerGroup: 'customer_group',
-  };
   const attribute = cond.attribute || '';
-  const type = attributeTypeMap[attribute] || attribute || cond.type || '';
+  const type = ATTRIBUTE_TYPE_MAP[attribute] || attribute || cond.type || '';
 
   // Convert from condition-builder shape {attribute, operator, value}
-  let value: unknown = cond.value || '';
-  if (typeof value === 'string' && !isNaN(Number(value)) && value !== '') {
-    value = Number(value);
-  }
-  if (cond.operator === 'in' && typeof value === 'string') {
-    value = value.split(',').map(v => v.trim());
-  }
   return {
     type,
     parameters: {
       operator: cond.operator || 'eq',
-      value,
+      value: normalizeOperatorValue(cond.operator, cond.value),
     },
   };
 }

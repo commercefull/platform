@@ -6,6 +6,19 @@
 import { query, queryOne, withTransaction } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
 import {
+  findSettingsByMerchant as qFindSettingsByMerchant,
+  upsertSettings as qUpsertSettings,
+  findAllSettings as qFindAllSettings,
+  findWebhookByExternalId as qFindWebhookByExternalId,
+  createWebhook as qCreateWebhook,
+  markWebhookProcessed as qMarkWebhookProcessed,
+  findStoredMethodsByCustomer as qFindStoredMethodsByCustomer,
+  findStoredMethodById as qFindStoredMethodById,
+  createStoredMethod as qCreateStoredMethod,
+  setDefaultStoredMethod as qSetDefaultStoredMethod,
+  softDeleteStoredMethod as qSoftDeleteStoredMethod,
+} from './paymentSettingsQueries';
+import {
   PaymentRepository as IPaymentRepository,
   PaymentFilters,
   PaymentSettings,
@@ -19,13 +32,18 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
-import type { PaymentSettings as DbPaymentSettings, PaymentWebhook as DbPaymentWebhook } from '../../../../libs/db/types';
 
-// Maps repository-facing field names onto the actual storedPaymentMethod schema
-// (e.g. "paymentMethod" -> type, "token" -> providerToken).
-const STORED_METHOD_COLUMNS = `"storedPaymentMethodId", "customerId", "paymentMethod" AS type, provider, token AS "providerToken", "lastFour" AS last4, "cardType" AS brand, NULLIF("expiryMonth", '')::int AS "expiryMonth", NULLIF("expiryYear", '')::int AS "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt"`;
-
-type StoredPaymentMethodRow = StoredPaymentMethod;
+function paginatedResult<T>(rows: Record<string, unknown>[] | null | undefined, total: number, limit: number, offset: number, map: (row: Record<string, unknown>) => T): PaginatedResult<T> {
+  const length = rows?.length || 0;
+  return {
+    data: (rows || []).map(map),
+    total,
+    limit,
+    offset,
+    hasMore: offset + length < total,
+    length,
+  };
+}
 
 export class PaymentRepo implements IPaymentRepository {
   async findTransactionById(transactionId: string): Promise<PaymentTransaction | null> {
@@ -68,14 +86,7 @@ export class PaymentRepo implements IPaymentRepository {
       [customerId, limit, offset],
     );
 
-    return {
-      data: (rows || []).map(row => this.mapToTransaction(row)),
-      total,
-      limit,
-      offset,
-      hasMore: offset + (rows?.length || 0) < total,
-      length: rows?.length || 0,
-    };
+    return paginatedResult(rows, total, limit, offset, row => this.mapToTransaction(row));
   }
 
   async findAllTransactions(filters?: PaymentFilters, pagination?: PaginationOptions): Promise<PaginatedResult<PaymentTransaction>> {
@@ -96,14 +107,7 @@ export class PaymentRepo implements IPaymentRepository {
       [...params, limit, offset],
     );
 
-    return {
-      data: (rows || []).map(row => this.mapToTransaction(row)),
-      total,
-      limit,
-      offset,
-      hasMore: offset + (rows?.length || 0) < total,
-      length: rows?.length || 0,
-    };
+    return paginatedResult(rows, total, limit, offset, row => this.mapToTransaction(row));
   }
 
   async saveTransaction(transaction: PaymentTransaction): Promise<PaymentTransaction> {
@@ -422,152 +426,51 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   // ==========================================================================
-  // Settings
+  // Settings / Webhooks / Stored Methods
   // ==========================================================================
 
-  private rowToSettings(row: DbPaymentSettings): PaymentSettings {
-    return {
-      ...row,
-      threeDSecureSettings: (row.threeDSecureSettings ?? undefined) as Record<string, unknown> | undefined,
-      fraudDetectionSettings: (row.fraudDetectionSettings ?? undefined) as Record<string, unknown> | undefined,
-      receiptSettings: (row.receiptSettings ?? undefined) as Record<string, unknown> | undefined,
-      paymentFormCustomization: (row.paymentFormCustomization ?? undefined) as Record<string, unknown> | undefined,
-    };
+  findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
+    return qFindSettingsByMerchant(organizationId);
   }
 
-  private rowToWebhook(row: DbPaymentWebhook): PaymentWebhook {
-    return {
-      paymentWebhookId: row.paymentWebhookId,
-      externalId: row.externalId as string,
-      provider: row.provider,
-      eventType: row.eventType,
-      payload: (row.payload ?? {}) as Record<string, unknown>,
-      processedAt: row.processedAt ?? undefined,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-    };
+  upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
+    return qUpsertSettings(params);
   }
 
-  async findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
-    const row = await queryOne<DbPaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [organizationId]);
-    return row ? this.rowToSettings(row) : null;
+  findAllSettings(): Promise<PaymentSettings[]> {
+    return qFindAllSettings();
   }
 
-  async upsertSettings(params: PaymentSettingsUpsertParams): Promise<PaymentSettings | null> {
-    const now = new Date();
-    const jsonbFields = new Set(['threeDSecureSettings', 'fraudDetectionSettings', 'receiptSettings', 'paymentFormCustomization']);
-    const fields = (Object.keys(params) as (keyof PaymentSettingsUpsertParams)[]).filter(
-      key => key !== 'organizationId' && params[key] !== undefined,
-    );
-
-    const columns = ['"organizationId"', ...fields.map(f => `"${f}"`), '"createdAt"', '"updatedAt"'];
-    const values: unknown[] = [
-      params.organizationId,
-      ...fields.map(f => (jsonbFields.has(f) ? JSON.stringify(params[f]) : params[f])),
-      now,
-      now,
-    ];
-    const updateSet = fields.length > 0 ? `${fields.map(f => `"${f}" = EXCLUDED."${f}"`).join(', ')}, ` : '';
-
-    const row = await queryOne<DbPaymentSettings>(
-      `INSERT INTO "paymentSettings" (${columns.join(', ')})
-       VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
-       ON CONFLICT ("organizationId") DO UPDATE SET ${updateSet}"updatedAt" = $${values.length}
-       RETURNING *`,
-      values,
-    );
-    return row ? this.rowToSettings(row) : null;
+  findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null> {
+    return qFindWebhookByExternalId(externalId);
   }
 
-  async findAllSettings(): Promise<PaymentSettings[]> {
-    const rows = await query<DbPaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`);
-    return (rows || []).map(r => this.rowToSettings(r));
+  createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null> {
+    return qCreateWebhook(params);
   }
 
-  // ==========================================================================
-  // Webhooks
-  // ==========================================================================
-
-  async findWebhookByExternalId(externalId: string): Promise<PaymentWebhook | null> {
-    const row = await queryOne<DbPaymentWebhook>(`SELECT * FROM "paymentWebhook" WHERE "externalId" = $1`, [externalId]);
-    return row ? this.rowToWebhook(row) : null;
+  markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null> {
+    return qMarkWebhookProcessed(paymentWebhookId);
   }
 
-  async createWebhook(params: PaymentWebhookCreateParams): Promise<PaymentWebhook | null> {
-    const now = new Date();
-    const row = await queryOne<DbPaymentWebhook>(
-      `INSERT INTO "paymentWebhook" ("externalId", provider, "eventType", payload, "processedAt", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [params.externalId, params.provider, params.eventType, JSON.stringify(params.payload), params.processedAt || null, now, now],
-    );
-    return row ? this.rowToWebhook(row) : null;
+  findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
+    return qFindStoredMethodsByCustomer(customerId);
   }
 
-  async markWebhookProcessed(paymentWebhookId: string): Promise<PaymentWebhook | null> {
-    const now = new Date();
-    const row = await queryOne<DbPaymentWebhook>(
-      `UPDATE "paymentWebhook" SET "processedAt" = $1, "updatedAt" = $1 WHERE "paymentWebhookId" = $2 RETURNING *`,
-      [now, paymentWebhookId],
-    );
-    return row ? this.rowToWebhook(row) : null;
+  findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
+    return qFindStoredMethodById(storedPaymentMethodId);
   }
 
-  // ==========================================================================
-  // Stored Payment Methods
-  // ==========================================================================
-
-  async findStoredMethodsByCustomer(customerId: string): Promise<StoredPaymentMethod[]> {
-    return (
-      (await query<StoredPaymentMethodRow[]>(
-        `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "customerId" = $1 ORDER BY "isDefault" DESC, "createdAt" DESC`,
-        [customerId],
-      )) || []
-    );
+  createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
+    return qCreateStoredMethod(params);
   }
 
-  async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethodRow>(
-      `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`,
-      [storedPaymentMethodId],
-    );
+  setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
+    return qSetDefaultStoredMethod(storedPaymentMethodId, customerId);
   }
 
-  async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {
-    const now = new Date();
-    return queryOne<StoredPaymentMethodRow>(
-      `INSERT INTO "storedPaymentMethod" ("customerId", "paymentMethod", provider, token, "lastFour", "cardType", "expiryMonth", "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10, $11) RETURNING ${STORED_METHOD_COLUMNS}`,
-      [
-        params.customerId,
-        params.type,
-        params.provider,
-        params.providerToken,
-        params.last4 || null,
-        params.brand || null,
-        params.expiryMonth != null ? String(params.expiryMonth).padStart(2, '0') : null,
-        params.expiryYear != null ? String(params.expiryYear) : null,
-        params.isDefault,
-        now,
-        now,
-      ],
-    );
-  }
-
-  async setDefaultStoredMethod(storedPaymentMethodId: string, customerId: string): Promise<StoredPaymentMethod | null> {
-    const now = new Date();
-    await query(`UPDATE "storedPaymentMethod" SET "isDefault" = false, "updatedAt" = $1 WHERE "customerId" = $2`, [now, customerId]);
-    return queryOne<StoredPaymentMethodRow>(
-      `UPDATE "storedPaymentMethod" SET "isDefault" = true, "updatedAt" = $1 WHERE "storedPaymentMethodId" = $2 AND "customerId" = $3 RETURNING ${STORED_METHOD_COLUMNS}`,
-      [now, storedPaymentMethodId, customerId],
-    );
-  }
-
-  async softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null> {
-    // The table has no deletedAt column — a "soft" delete is a hard delete.
-    const sql = customerId
-      ? `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 AND "customerId" = $2 RETURNING ${STORED_METHOD_COLUMNS}`
-      : `DELETE FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1 RETURNING ${STORED_METHOD_COLUMNS}`;
-    return queryOne<StoredPaymentMethodRow>(sql, customerId ? [storedPaymentMethodId, customerId] : [storedPaymentMethodId]);
+  softDeleteStoredMethod(storedPaymentMethodId: string, customerId?: string): Promise<StoredPaymentMethod | null> {
+    return qSoftDeleteStoredMethod(storedPaymentMethodId, customerId);
   }
 
   async deleteTransaction(transactionId: string): Promise<void> {

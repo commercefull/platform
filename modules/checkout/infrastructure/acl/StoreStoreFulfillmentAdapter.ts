@@ -25,61 +25,68 @@ type PickupLocationRepoPort = {
 type AssignedPickupLocation = PickupLocationRecord & { storeId: string };
 const isAssignedLocation = <T extends { storeId: string | null }>(loc: T): loc is T & { storeId: string } => loc.storeId !== null;
 
+type ActiveStore = Awaited<ReturnType<typeof StoreRepo.findActive>>[number];
+type LocalDeliverySettings = NonNullable<NonNullable<ActiveStore['settings']>['localDelivery']>;
+
+type DeliveryAddress = {
+  latitude?: number;
+  longitude?: number;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+};
+
 export class StoreStoreFulfillmentAdapter implements StoreFulfillmentPort {
   constructor(
     private readonly storeRepo: Pick<typeof StoreRepo, 'findActive'>,
     private readonly pickupLocations: PickupLocationRepoPort,
   ) {}
 
-  async checkLocalDeliveryEligibility(address: {
-    latitude?: number;
-    longitude?: number;
-    postalCode?: string;
-    city?: string;
-    country?: string;
-  }): Promise<{ eligible: boolean; options: StoreFulfillmentOption[] }> {
+  async checkLocalDeliveryEligibility(address: DeliveryAddress): Promise<{ eligible: boolean; options: StoreFulfillmentOption[] }> {
     const stores = await this.storeRepo.findActive();
     const options: StoreFulfillmentOption[] = [];
 
     for (const store of stores) {
-      const deliverySettings = store.settings?.localDelivery;
-      if (!deliverySettings?.enabled) continue;
-
-      let isEligible = false;
-
-      if (deliverySettings.postalCodes && deliverySettings.postalCodes.length > 0) {
-        if (address.postalCode && deliverySettings.postalCodes.includes(address.postalCode)) {
-          isEligible = true;
-        }
-      }
-
-      if (
-        !isEligible &&
-        deliverySettings.radiusKm &&
-        address.latitude &&
-        address.longitude &&
-        store.address?.latitude &&
-        store.address?.longitude
-      ) {
-        const distance = this.calculateDistance(address.latitude, address.longitude, store.address.latitude, store.address.longitude);
-        if (distance <= deliverySettings.radiusKm) {
-          isEligible = true;
-        }
-      }
-
-      if (isEligible) {
-        options.push({
-          storeId: store.storeId,
-          storeName: store.name,
-          deliveryFee: deliverySettings.deliveryFee || 0,
-          estimatedDeliveryMinutes: deliverySettings.estimatedDeliveryMinutes || 60,
-          freeDeliveryThreshold: deliverySettings.freeDeliveryThreshold,
-          radiusKm: deliverySettings.radiusKm,
-        });
-      }
+      const option = this.deliveryOptionFor(store, address);
+      if (option) options.push(option);
     }
 
     return { eligible: options.length > 0, options };
+  }
+
+  /** Build the fulfillment option when the address is eligible for this store's local delivery. */
+  private deliveryOptionFor(store: ActiveStore, address: DeliveryAddress): StoreFulfillmentOption | null {
+    const deliverySettings = store.settings?.localDelivery;
+    if (!deliverySettings?.enabled || !this.isEligibleForStore(store, deliverySettings, address)) return null;
+    return {
+      storeId: store.storeId,
+      storeName: store.name,
+      deliveryFee: deliverySettings.deliveryFee || 0,
+      estimatedDeliveryMinutes: deliverySettings.estimatedDeliveryMinutes || 60,
+      freeDeliveryThreshold: deliverySettings.freeDeliveryThreshold,
+      radiusKm: deliverySettings.radiusKm,
+    };
+  }
+
+  private isEligibleForStore(store: ActiveStore, deliverySettings: LocalDeliverySettings, address: DeliveryAddress): boolean {
+    if (deliverySettings.postalCodes?.length && address.postalCode && deliverySettings.postalCodes.includes(address.postalCode)) {
+      return true;
+    }
+    return this.isWithinRadius(store, deliverySettings, address);
+  }
+
+  private isWithinRadius(store: ActiveStore, deliverySettings: LocalDeliverySettings, address: DeliveryAddress): boolean {
+    if (
+      !deliverySettings.radiusKm ||
+      !address.latitude ||
+      !address.longitude ||
+      !store.address?.latitude ||
+      !store.address?.longitude
+    ) {
+      return false;
+    }
+    const distance = this.calculateDistance(address.latitude, address.longitude, store.address.latitude, store.address.longitude);
+    return distance <= deliverySettings.radiusKm;
   }
 
   async getAllPickupLocations(): Promise<PickupLocation[]> {

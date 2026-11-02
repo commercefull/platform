@@ -12,6 +12,8 @@ import {
   InventoryTransactionType as DbInventoryTransactionType,
 } from '../../../../libs/db/types';
 import { InventoryLocationNotFoundError, FailedToCreateInventoryError, InsufficientStockError } from '../../domain/errors/InventoryErrors';
+import { InventoryAvailabilityRepo } from './inventoryAvailabilityRepo';
+import { InventoryReservationRepo } from './inventoryReservationQueries';
 
 // ============================================================================
 // Re-export types for external use
@@ -67,6 +69,26 @@ interface CreateInventoryTransactionInput {
   reason?: string;
 }
 
+/** AND-joined filter clauses for `findLocations`, with positional params. */
+function locationFilterClauses(filter?: InventoryLocationFilter): { clause: string; params: unknown[] } {
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+  const addEquality = (column: string, value?: string) => {
+    if (!value) return;
+    conditions.push(` AND ${column} = $${params.length + 1}`);
+    params.push(value);
+  };
+
+  addEquality('"distributionWarehouseId"', filter?.distributionWarehouseId);
+  addEquality('"productId"', filter?.productId);
+  addEquality('"sku"', filter?.sku);
+  addEquality('"status"', filter?.status);
+  if (filter?.lowStock) conditions.push(` AND "availableQuantity" <= "minimumStockLevel"`);
+  if (filter?.outOfStock) conditions.push(` AND "availableQuantity" <= 0`);
+
+  return { clause: conditions.join(''), params };
+}
+
 interface InventoryLocationFilter {
   distributionWarehouseId?: string;
   productId?: string;
@@ -81,6 +103,9 @@ interface InventoryLocationFilter {
 // ============================================================================
 
 class InventoryRepo {
+  private readonly availability = new InventoryAvailabilityRepo();
+  private readonly reservations = new InventoryReservationRepo();
+
   // ==========================================================================
   // Inventory Location Methods (Stock at specific warehouse locations)
   // ==========================================================================
@@ -116,43 +141,11 @@ class InventoryRepo {
   }
 
   async findLocations(filter?: InventoryLocationFilter, limit: number = 50, offset: number = 0): Promise<InventoryLocation[]> {
-    let sql = `SELECT * FROM "inventoryLocation" WHERE 1=1`;
-    const params: unknown[] = [];
-    let paramIndex = 1;
+    const { clause, params } = locationFilterClauses(filter);
 
-    if (filter?.distributionWarehouseId) {
-      sql += ` AND "distributionWarehouseId" = $${paramIndex}`;
-      params.push(filter.distributionWarehouseId);
-      paramIndex++;
-    }
-
-    if (filter?.productId) {
-      sql += ` AND "productId" = $${paramIndex}`;
-      params.push(filter.productId);
-      paramIndex++;
-    }
-
-    if (filter?.sku) {
-      sql += ` AND "sku" = $${paramIndex}`;
-      params.push(filter.sku);
-      paramIndex++;
-    }
-
-    if (filter?.status) {
-      sql += ` AND "status" = $${paramIndex}`;
-      params.push(filter.status);
-      paramIndex++;
-    }
-
-    if (filter?.lowStock) {
-      sql += ` AND "availableQuantity" <= "minimumStockLevel"`;
-    }
-
-    if (filter?.outOfStock) {
-      sql += ` AND "availableQuantity" <= 0`;
-    }
-
-    sql += ` ORDER BY "updatedAt" DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    const sql =
+      `SELECT * FROM "inventoryLocation" WHERE 1=1${clause}` +
+      ` ORDER BY "updatedAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
     const results = await query<DbInventoryLocation[]>(sql, params);
@@ -481,84 +474,13 @@ class InventoryRepo {
   // Product Availability Methods
   // ==========================================================================
 
-  async checkProductAvailability(
-    productId: string,
-    variantId?: string,
-    requiredQuantity: number = 1,
-  ): Promise<{ available: boolean; totalAvailable: number; locations: InventoryLocation[] }> {
-    let sql = `SELECT * FROM "inventoryLocation" WHERE "productId" = $1 AND "status" = 'available'`;
-    const params: unknown[] = [productId];
-
-    if (variantId) {
-      sql += ` AND "productVariantId" = $2`;
-      params.push(variantId);
-    }
-
-    const locations = await query<DbInventoryLocation[]>(sql, params);
-    const locationList = locations || [];
-
-    const totalAvailable = locationList.reduce((sum, loc) => sum + loc.availableQuantity, 0);
-
-    return {
-      available: totalAvailable >= requiredQuantity,
-      totalAvailable,
-      locations: locationList,
-    };
-  }
-
-  async findAvailableQuantityAtWarehouse(distributionWarehouseId: string, productId: string, variantId?: string): Promise<number> {
-    const row = await queryOne<{ availableQuantity: number }>(
-      `SELECT "availableQuantity" FROM "inventoryLocation" WHERE "distributionWarehouseId" = $1 AND "productId" = $2${variantId ? ' AND "productVariantId" = $3' : ''} LIMIT 1`,
-      variantId ? [distributionWarehouseId, productId, variantId] : [distributionWarehouseId, productId],
-    );
-    return row?.availableQuantity ?? 0;
-  }
-
-  /**
-   * Stock locations for a product across the warehouses linked to a store,
-   * ordered by most available first — used for reservation routing.
-   */
-  async findLocationsByStoreProduct(
-    storeId: string,
-    productId: string,
-    variantId?: string,
-  ): Promise<
-    Array<{
-      inventoryLocationId: string;
-      distributionWarehouseId: string;
-      quantity: number;
-      reservedQuantity: number;
-      availableQuantity: number;
-    }>
-  > {
-    const rows = await query<
-      Array<{
-        inventoryLocationId: string;
-        distributionWarehouseId: string;
-        quantity: number;
-        reservedQuantity: number;
-        availableQuantity: number;
-      }>
-    >(
-      `SELECT il."inventoryLocationId", il."distributionWarehouseId", il.quantity, il."reservedQuantity", il."availableQuantity"
-       FROM "inventoryLocation" il
-       JOIN "distributionWarehouse" dw ON dw."distributionWarehouseId" = il."distributionWarehouseId"
-       WHERE dw."storeId" = $1 AND il."productId" = $2${variantId ? ' AND il."productVariantId" = $3' : ''} AND il.status = 'available'
-       ORDER BY il."availableQuantity" DESC`,
-      variantId ? [storeId, productId, variantId] : [storeId, productId],
-    );
-    return rows || [];
-  }
-
-  async getTotalStockForProduct(productId: string): Promise<number> {
-    const sql = `
-      SELECT COALESCE(SUM("availableQuantity"), 0) as total 
-      FROM "inventoryLocation" 
-      WHERE "productId" = $1 AND "status" = 'available'
-    `;
-    const result = await queryOne<{ total: string }>(sql, [productId]);
-    return parseInt(result?.total || '0', 10);
-  }
+  checkProductAvailability = (productId: string, variantId?: string, requiredQuantity: number = 1) =>
+    this.availability.checkProductAvailability(productId, variantId, requiredQuantity);
+  findAvailableQuantityAtWarehouse = (distributionWarehouseId: string, productId: string, variantId?: string) =>
+    this.availability.findAvailableQuantityAtWarehouse(distributionWarehouseId, productId, variantId);
+  findLocationsByStoreProduct = (storeId: string, productId: string, variantId?: string) =>
+    this.availability.findLocationsByStoreProduct(storeId, productId, variantId);
+  getTotalStockForProduct = (productId: string) => this.availability.getTotalStockForProduct(productId);
 
   // ==========================================================================
   // Inventory Level Methods (Aggregate stock levels)
@@ -581,155 +503,13 @@ class InventoryRepo {
   // Reservation Methods
   // ==========================================================================
 
-  async createReservation(input: {
-    reservationId: string;
-    orderId: string;
-    inventoryItemId: string;
-    productId: string;
-    variantId?: string;
-    sku?: string;
-    quantity: number;
-    locationId?: string;
-    orderItemId?: string;
-    expiresAt: Date;
-    status: string;
-  }): Promise<void> {
-    await query(
-      `INSERT INTO "inventoryReservation" (
-        "inventoryReservationId", "inventoryItemId", "productId", "variantId", "sku",
-        "orderId", "locationId", "quantity", "orderItemId", "status", "expiresAt", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-      [
-        input.reservationId,
-        input.inventoryItemId,
-        input.productId,
-        input.variantId ?? null,
-        input.sku ?? null,
-        input.orderId,
-        input.locationId ?? null,
-        input.quantity,
-        input.orderItemId ?? null,
-        input.status,
-        input.expiresAt,
-        new Date(),
-        new Date(),
-      ],
-    );
-  }
-
-  async findReservationById(reservationId: string): Promise<{
-    reservationId: string;
-    inventoryItemId: string;
-    orderId: string;
-    status: string;
-    productId: string;
-    variantId?: string;
-    sku?: string;
-    quantity: number;
-    locationId?: string;
-    orderItemId?: string;
-  } | null> {
-    const sql = `SELECT * FROM "inventoryReservation" WHERE "inventoryReservationId" = $1`;
-    const row = await queryOne<{
-      inventoryReservationId: string;
-      inventoryItemId: string;
-      orderId: string;
-      status: string;
-      productId: string;
-      variantId: string | null;
-      sku: string | null;
-      quantity: number;
-      locationId: string | null;
-      orderItemId: string | null;
-    }>(sql, [reservationId]);
-    if (!row) return null;
-    return {
-      reservationId: row.inventoryReservationId,
-      inventoryItemId: row.inventoryItemId,
-      orderId: row.orderId,
-      status: row.status,
-      productId: row.productId,
-      variantId: row.variantId ?? undefined,
-      sku: row.sku ?? undefined,
-      quantity: row.quantity,
-      locationId: row.locationId ?? undefined,
-      orderItemId: row.orderItemId ?? undefined,
-    };
-  }
-
-  async findReservationsByOrderId(orderId: string): Promise<
-    Array<{
-      reservationId: string;
-      inventoryItemId: string;
-      orderId: string;
-      status: string;
-      productId: string;
-      variantId?: string;
-      sku?: string;
-      quantity: number;
-      locationId?: string;
-      orderItemId?: string;
-    }>
-  > {
-    const sql = `SELECT * FROM "inventoryReservation" WHERE "orderId" = $1`;
-    const rows = await query<
-      Array<{
-        inventoryReservationId: string;
-        inventoryItemId: string;
-        orderId: string;
-        status: string;
-        productId: string;
-        variantId: string | null;
-        sku: string | null;
-        quantity: number;
-        locationId: string | null;
-        orderItemId: string | null;
-      }>
-    >(sql, [orderId]);
-    return (rows || []).map(row => ({
-      reservationId: row.inventoryReservationId,
-      inventoryItemId: row.inventoryItemId,
-      orderId: row.orderId,
-      status: row.status,
-      productId: row.productId,
-      variantId: row.variantId ?? undefined,
-      sku: row.sku ?? undefined,
-      quantity: row.quantity,
-      locationId: row.locationId ?? undefined,
-      orderItemId: row.orderItemId ?? undefined,
-    }));
-  }
-
-  async attachReservationsToOrderItem(
-    orderId: string,
-    productId: string,
-    variantId: string | undefined,
-    orderItemId: string,
-  ): Promise<void> {
-    await query(
-      `UPDATE "inventoryReservation"
-       SET "orderItemId" = $1, "updatedAt" = $2
-       WHERE "orderId" = $3 AND "productId" = $4 AND "variantId" IS NOT DISTINCT FROM $5
-         AND "orderItemId" IS NULL AND status IN ('active', 'reserved')`,
-      [orderItemId, new Date(), orderId, productId, variantId ?? null],
-    );
-  }
-
-  async updateReservationStatus(reservationId: string, status: string, reason?: string): Promise<void> {
-    const now = new Date();
-    if (status === 'released' || status === 'expired') {
-      await query(
-        `UPDATE "inventoryReservation" SET "status" = $1, "releasedReason" = $2, "releasedAt" = $3, "updatedAt" = $4 WHERE "inventoryReservationId" = $5`,
-        [status, reason || null, now, now, reservationId],
-      );
-    } else {
-      await query(`UPDATE "inventoryReservation" SET "status" = $1, "updatedAt" = $2 WHERE "inventoryReservationId" = $3`, [
-        status,
-        now,
-        reservationId,
-      ]);
-    }
-  }
+  createReservation = (input: Parameters<InventoryReservationRepo['createReservation']>[0]) => this.reservations.createReservation(input);
+  findReservationById = (reservationId: string) => this.reservations.findReservationById(reservationId);
+  findReservationsByOrderId = (orderId: string) => this.reservations.findReservationsByOrderId(orderId);
+  attachReservationsToOrderItem = (orderId: string, productId: string, variantId: string | undefined, orderItemId: string) =>
+    this.reservations.attachReservationsToOrderItem(orderId, productId, variantId, orderItemId);
+  updateReservationStatus = (reservationId: string, status: string, reason?: string) =>
+    this.reservations.updateReservationStatus(reservationId, status, reason);
 
   // ==========================================================================
   // Reorder Point / Threshold Methods
