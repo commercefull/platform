@@ -18,7 +18,7 @@ export interface FulfillmentGroupItem {
   quantity: number;
 }
 
-export interface FulfillmentGroup {
+interface FulfillmentGroup {
   sourceType: 'warehouse' | 'store';
   sourceId: string;
   sourceName: string;

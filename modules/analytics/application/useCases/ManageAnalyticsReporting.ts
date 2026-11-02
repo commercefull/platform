@@ -7,11 +7,11 @@ import type {
 } from '../../domain/types';
 import type { AnalyticsSalesDaily, AnalyticsSearchQuery } from '../../../../libs/db/types';
 
-export type AnalyticsSalesDailyRecord = AnalyticsSalesDaily;
+type AnalyticsSalesDailyRecord = AnalyticsSalesDaily;
 
-export type AnalyticsSearchQueryRecord = AnalyticsSearchQuery;
+type AnalyticsSearchQueryRecord = AnalyticsSearchQuery;
 
-export interface SalesSummaryRecord {
+interface SalesSummaryRecord {
   totalRevenueCents: number;
   totalOrders: number;
   averageOrderValueCents: number;
@@ -19,7 +19,7 @@ export interface SalesSummaryRecord {
   conversionRate: number;
 }
 
-export interface RealTimeMetrics {
+interface RealTimeMetrics {
   activeVisitors: number;
   ordersLastHour: number;
   revenueLastHour: number;

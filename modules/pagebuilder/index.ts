@@ -9,4 +9,3 @@ export * from './application/wired';
 export { pageBuilderBusinessRouter } from './interface/routers/pageBuilderRouter';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

@@ -7,12 +7,6 @@ export class IntegrationNotFoundError extends AppError {
   }
 }
 
-export class IntegrationAlreadyExistsError extends AppError {
-  constructor(name: string) {
-    super(`Integration with name "${name}" already exists`, 409, { code: 'INTEGRATION_ALREADY_EXISTS' });
-    this.name = 'IntegrationAlreadyExistsError';
-  }
-}
 
 export class IntegrationValidationError extends AppError {
   constructor(message: string) {
@@ -35,12 +29,6 @@ export class SubscriptionNotFoundError extends AppError {
   }
 }
 
-export class IntegrationError extends AppError {
-  constructor(message: string) {
-    super(message, 500, { code: 'INTEGRATION_ERROR' });
-    this.name = 'IntegrationError';
-  }
-}
 
 export class CredentialEncryptionError extends AppError {
   constructor(message: string) {

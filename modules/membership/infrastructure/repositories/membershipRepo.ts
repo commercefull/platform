@@ -13,7 +13,14 @@
  * - membershipPaymentRepo.ts - Payments
  */
 
-import * as planRepo from './membershipPlanRepo';
+import {
+  MembershipPlan,
+  create,
+  findAll,
+  findById,
+  remove,
+  update,
+} from './membershipPlanRepo';
 import membershipBenefitRepo from './membershipBenefitRepo';
 import membershipPlanBenefitRepo from './membershipPlanBenefitRepo';
 import membershipSubscriptionRepo from './membershipSubscriptionRepo';
@@ -23,12 +30,6 @@ import {
   MembershipBenefitNotFoundError,
   UserMembershipNotFoundError,
 } from '../../domain/errors/MembershipErrors';
-
-// Re-export types
-export { MembershipPlan, BillingCycle } from './membershipPlanRepo';
-export { MembershipBenefit, BenefitType, ValueType } from './membershipBenefitRepo';
-export { MembershipSubscription, SubscriptionStatus } from './membershipSubscriptionRepo';
-export { MembershipPlanBenefit } from './membershipPlanBenefitRepo';
 
 // Legacy types for backward compatibility with controllers
 export interface MembershipTier {
@@ -93,18 +94,18 @@ export class MembershipRepo {
   // ============================================================================
 
   async findTierById(id: string): Promise<MembershipTier | null> {
-    const plan = await planRepo.findById(id);
+    const plan = await findById(id);
     if (!plan) return null;
     return this.planToTier(plan);
   }
 
   async findAllTiers(includeInactive = false): Promise<MembershipTier[]> {
-    const plans = await planRepo.findAll(!includeInactive);
+    const plans = await findAll(!includeInactive);
     return plans.map(p => this.planToTier(p));
   }
 
   async createTier(params: Omit<MembershipTier, 'id' | 'createdAt' | 'updatedAt'>): Promise<MembershipTier> {
-    const plan = await planRepo.create({
+    const plan = await create({
       name: params.name,
       code: params.name.toUpperCase().replace(/\s+/g, '_'),
       description: params.description,
@@ -145,13 +146,13 @@ export class MembershipRepo {
     if (params.level !== undefined) updateData.level = params.level;
     if (params.isActive !== undefined) updateData.isActive = params.isActive;
 
-    const plan = await planRepo.update(id, updateData);
+    const plan = await update(id, updateData);
     if (!plan) throw new MembershipPlanNotFoundError(id);
     return this.planToTier(plan);
   }
 
   async deleteTier(id: string): Promise<boolean> {
-    return planRepo.remove(id);
+    return remove(id);
   }
 
   // ============================================================================
@@ -312,7 +313,7 @@ export class MembershipRepo {
     const sub = await membershipSubscriptionRepo.findById(id);
     if (!sub) return null;
 
-    const plan = await planRepo.findById(sub.membershipPlanId);
+    const plan = await findById(sub.membershipPlanId);
     if (!plan) return null;
 
     const membership = this.subscriptionToUserMembership(sub);
@@ -330,7 +331,7 @@ export class MembershipRepo {
     if (!subs.length) return null;
 
     const sub = subs[0];
-    const plan = await planRepo.findById(sub.membershipPlanId);
+    const plan = await findById(sub.membershipPlanId);
     if (!plan) return null;
 
     const membership = this.subscriptionToUserMembership(sub);
@@ -407,7 +408,7 @@ export class MembershipRepo {
   // Helper Methods
   // ============================================================================
 
-  private planToTier(plan: planRepo.MembershipPlan): MembershipTier {
+  private planToTier(plan: MembershipPlan): MembershipTier {
     return {
       id: plan.membershipPlanId,
       name: plan.name,

@@ -8,16 +8,15 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 import type { TaxCalculation as DbTaxCalculation } from '../../../../libs/db/types';
 
-export type TaxCalculationMethod = 'unitBased' | 'itemBased';
-export type TaxCalculationStatus = 'pending' | 'completed' | 'failed';
-export type TaxCalculationSourceType = 'order' | 'invoice' | 'basket';
+type TaxCalculationStatus = 'pending' | 'completed' | 'failed';
+type TaxCalculationSourceType = 'order' | 'invoice' | 'basket';
 
-export type TaxCalculation = DbTaxCalculation;
+type TaxCalculation = DbTaxCalculation;
 
-export type TaxCalculationCreateParams = Omit<TaxCalculation, 'taxCalculationId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
+type TaxCalculationCreateParams = Omit<TaxCalculation, 'taxCalculationId' | 'createdAt' | 'updatedAt'>;
+type TaxCalculationUpdateParams = Partial<Omit<TaxCalculation, 'taxCalculationId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
-export class TaxCalculationRepo {
+class TaxCalculationRepo {
   async findById(id: string): Promise<TaxCalculation | null> {
     return await queryOne<TaxCalculation>(`SELECT * FROM "taxCalculation" WHERE "taxCalculationId" = $1`, [id]);
   }

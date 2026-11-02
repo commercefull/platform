@@ -9,7 +9,7 @@ import { FailedToCreatePricingError, PricingRuleNotFoundError } from '../../doma
  * Uses camelCase for table and column names as per platform convention.
  * Table: pricingRule (from db/types.ts)
  */
-export class PricingRuleRepo {
+class PricingRuleRepo {
   private readonly tableName = Table.PricingRule;
 
   /**

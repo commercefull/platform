@@ -51,12 +51,3 @@ export async function createMembership(customerId: string, planId: string): Prom
     [uuidv4(), customerId, planId],
   );
 }
-
-export default {
-  findActivePlansWithBenefitCount,
-  findPlanById,
-  findBenefitsByPlanId,
-  findActiveMembershipWithPlan,
-  findActiveMembershipByCustomerId,
-  createMembership,
-};

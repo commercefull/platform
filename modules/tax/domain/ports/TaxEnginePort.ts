@@ -10,7 +10,7 @@
 import type { TaxDecision } from '../entities/TaxDecision';
 
 /** An address carrying at minimum a country for jurisdiction resolution. */
-export interface TaxPartyAddress {
+interface TaxPartyAddress {
   country: string;
   region?: string;
   state?: string;
@@ -19,7 +19,7 @@ export interface TaxPartyAddress {
 }
 
 /** A taxable line — the facts the engine prices tax on. */
-export interface TaxTransactionLine {
+interface TaxTransactionLine {
   productId: string;
   name: string;
   quantity: number;

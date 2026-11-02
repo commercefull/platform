@@ -3,21 +3,17 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateNotificationDeliveryLogError } from '../../domain/errors/NotificationErrors';
 import type { NotificationDeliveryLog as DbNotificationDeliveryLog } from '../../../../libs/db/types';
 
-export type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
-export type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
-export type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
-export type UserType = 'customer' | 'organization' | 'admin';
+type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
+type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
+type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
+type UserType = 'customer' | 'organization' | 'admin';
 
 import type {
   NotificationDeliveryLog,
   NotificationDeliveryLogCreateParams,
   NotificationDeliveryLogUpdateParams,
 } from '../../domain/repositories/NotificationDeliveryLogRepository';
-export type {
-  NotificationDeliveryLog,
-  NotificationDeliveryLogCreateParams,
-  NotificationDeliveryLogUpdateParams,
-} from '../../domain/repositories/NotificationDeliveryLogRepository';
+export type { } from '../../domain/repositories/NotificationDeliveryLogRepository';
 
 const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 
@@ -44,7 +40,7 @@ function mapToDeliveryLog(row: DbNotificationDeliveryLog): NotificationDeliveryL
   };
 }
 
-export class NotificationDeliveryLogRepo {
+class NotificationDeliveryLogRepo {
   /**
    * Find delivery log by ID
    */

@@ -19,7 +19,7 @@ export interface LoginCustomerOutput {
   expiresIn: number;
 }
 
-export interface CustomerRecord {
+interface CustomerRecord {
   customerId: string;
   email: string;
   passwordHash: string;

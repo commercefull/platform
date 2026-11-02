@@ -8,8 +8,22 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
-import * as controller from '../controllers/AssortmentBusinessController';
-
+import {
+  addStoreAssortmentEntry,
+  createCollection,
+  deleteCollection,
+  deleteCollectionPublication,
+  getCollection,
+  getCollectionProducts,
+  getStoreAssortment,
+  getStoreCatalog,
+  listCollectionPublications,
+  listCollections,
+  removeStoreAssortmentEntry,
+  setCollectionPublication,
+  setStoreAssortmentMode,
+  updateCollection,
+} from '../controllers/AssortmentBusinessController';
 const router = createHttpRouter();
 
 // ============================================================================
@@ -20,37 +34,37 @@ const router = createHttpRouter();
  * List collections
  * GET /business/assortment/collections
  */
-router.get('/assortment/collections', isOrganizationLoggedIn, asyncHandler(controller.listCollections));
+router.get('/assortment/collections', isOrganizationLoggedIn, asyncHandler(listCollections));
 
 /**
  * Create collection
  * POST /business/assortment/collections
  */
-router.post('/assortment/collections', isOrganizationLoggedIn, asyncHandler(controller.createCollection));
+router.post('/assortment/collections', isOrganizationLoggedIn, asyncHandler(createCollection));
 
 /**
  * Get collection (with members)
  * GET /business/assortment/collections/:collectionId
  */
-router.get('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(controller.getCollection));
+router.get('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(getCollection));
 
 /**
  * Resolve collection products (manual or smart)
  * GET /business/assortment/collections/:collectionId/products
  */
-router.get('/assortment/collections/:collectionId/products', isOrganizationLoggedIn, asyncHandler(controller.getCollectionProducts));
+router.get('/assortment/collections/:collectionId/products', isOrganizationLoggedIn, asyncHandler(getCollectionProducts));
 
 /**
  * Update collection
  * PUT /business/assortment/collections/:collectionId
  */
-router.put('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(controller.updateCollection));
+router.put('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(updateCollection));
 
 /**
  * Delete collection (soft)
  * DELETE /business/assortment/collections/:collectionId
  */
-router.delete('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(controller.deleteCollection));
+router.delete('/assortment/collections/:collectionId', isOrganizationLoggedIn, asyncHandler(deleteCollection));
 
 /**
  * List collection visibility publications (store/channel scoping)
@@ -59,7 +73,7 @@ router.delete('/assortment/collections/:collectionId', isOrganizationLoggedIn, a
 router.get(
   '/assortment/collections/:collectionId/publications',
   isOrganizationLoggedIn,
-  asyncHandler(controller.listCollectionPublications),
+  asyncHandler(listCollectionPublications),
 );
 
 /**
@@ -69,7 +83,7 @@ router.get(
 router.post(
   '/assortment/collections/:collectionId/publications',
   isOrganizationLoggedIn,
-  asyncHandler(controller.setCollectionPublication),
+  asyncHandler(setCollectionPublication),
 );
 
 /**
@@ -79,7 +93,7 @@ router.post(
 router.delete(
   '/assortment/collections/:collectionId/publications/:publicationId',
   isOrganizationLoggedIn,
-  asyncHandler(controller.deleteCollectionPublication),
+  asyncHandler(deleteCollectionPublication),
 );
 
 // ============================================================================
@@ -90,30 +104,30 @@ router.delete(
  * Get store assortment config + entries
  * GET /business/assortment/stores/:storeId
  */
-router.get('/assortment/stores/:storeId', isOrganizationLoggedIn, asyncHandler(controller.getStoreAssortment));
+router.get('/assortment/stores/:storeId', isOrganizationLoggedIn, asyncHandler(getStoreAssortment));
 
 /**
  * Set assortment mode (all | include | exclude)
  * PUT /business/assortment/stores/:storeId
  */
-router.put('/assortment/stores/:storeId', isOrganizationLoggedIn, asyncHandler(controller.setStoreAssortmentMode));
+router.put('/assortment/stores/:storeId', isOrganizationLoggedIn, asyncHandler(setStoreAssortmentMode));
 
 /**
  * Add assortment entry (product | collection | category)
  * POST /business/assortment/stores/:storeId/entries
  */
-router.post('/assortment/stores/:storeId/entries', isOrganizationLoggedIn, asyncHandler(controller.addStoreAssortmentEntry));
+router.post('/assortment/stores/:storeId/entries', isOrganizationLoggedIn, asyncHandler(addStoreAssortmentEntry));
 
 /**
  * Remove assortment entry
  * DELETE /business/assortment/stores/:storeId/entries/:entryId
  */
-router.delete('/assortment/stores/:storeId/entries/:entryId', isOrganizationLoggedIn, asyncHandler(controller.removeStoreAssortmentEntry));
+router.delete('/assortment/stores/:storeId/entries/:entryId', isOrganizationLoggedIn, asyncHandler(removeStoreAssortmentEntry));
 
 /**
  * Resolve effective store catalog
  * GET /business/assortment/stores/:storeId/catalog
  */
-router.get('/assortment/stores/:storeId/catalog', isOrganizationLoggedIn, asyncHandler(controller.getStoreCatalog));
+router.get('/assortment/stores/:storeId/catalog', isOrganizationLoggedIn, asyncHandler(getStoreCatalog));
 
 export const assortmentBusinessRouter = router;

@@ -12,7 +12,7 @@ import { generateUUID } from '../../../../libs/uuid';
 // Types
 // ============================================================================
 
-export interface AdminTaxRate {
+interface AdminTaxRate {
   taxRateId: string;
   name: string;
   rate: number;
@@ -25,7 +25,7 @@ export interface AdminTaxRate {
   deletedAt?: Date;
 }
 
-export interface AdminTaxZone {
+interface AdminTaxZone {
   taxZoneId: string;
   name: string;
   description?: string;
@@ -36,7 +36,7 @@ export interface AdminTaxZone {
   deletedAt?: Date;
 }
 
-export interface AdminTaxClass {
+interface AdminTaxClass {
   taxClassId: string;
   name: string;
   description?: string;
@@ -214,17 +214,3 @@ export async function softDeleteTaxClass(taxClassId: string): Promise<void> {
   await query(`UPDATE "taxCategory" SET "isActive" = false, "updatedAt" = NOW() WHERE "taxCategoryId" = $1`, [taxClassId]);
 }
 
-export default {
-  findAllTaxRates,
-  createTaxRate,
-  updateTaxRate,
-  softDeleteTaxRate,
-  findAllTaxZones,
-  createTaxZone,
-  updateTaxZone,
-  softDeleteTaxZone,
-  findAllTaxClasses,
-  createTaxClass,
-  updateTaxClass,
-  softDeleteTaxClass,
-};

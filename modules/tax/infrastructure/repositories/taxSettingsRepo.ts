@@ -12,21 +12,12 @@ import type { TaxSettings as DbTaxSettings } from '../../../../libs/db/types';
 // Table Constants
 // ============================================================================
 
-// ============================================================================
-// Types
-// ============================================================================
+type TaxSettings = DbTaxSettings;
 
-export type TaxCalculationMethod = 'unitBased' | 'itemBased';
-export type TaxBasedOn = 'shippingAddress' | 'billingAddress';
-export type TaxDisplayTotals = 'itemized' | 'summary';
-export type TaxProvider = 'internal' | 'external';
+type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
+type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
 
-export type TaxSettings = DbTaxSettings;
-
-export type TaxSettingsCreateParams = Omit<TaxSettings, 'taxSettingsId' | 'createdAt' | 'updatedAt'>;
-export type TaxSettingsUpdateParams = Partial<Omit<TaxSettings, 'taxSettingsId' | 'organizationId' | 'createdAt' | 'updatedAt'>>;
-
-export class TaxSettingsRepo {
+class TaxSettingsRepo {
   async findById(id: string): Promise<TaxSettings | null> {
     return await queryOne<TaxSettings>(`SELECT * FROM "taxSettings" WHERE "taxSettingsId" = $1`, [id]);
   }

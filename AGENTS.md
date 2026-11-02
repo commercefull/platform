@@ -111,6 +111,7 @@ yarn job:new:organization   # Create a new organization
 - **Unit tests follow the basket pattern** — co-located `*.test.ts` files, shared `modules/<module>/tests/testUtils.ts` (boundary mocks + domain factories + typed port mocks), real domain entities, `it('should … when …')` naming. Reference: `modules/basket/`; see [guidelines/testing.md](./docs/guidelines/testing.md).
 - **Direct use-case imports in `web/`** — portals call module use cases directly; no HTTP overhead.
 - **No `require()` in TypeScript files** — ES `import` only, always at the top of the file.
+- **No `import * as` / `export * as` on internal modules** — namespace facades hide per-export usage from knip. Use named imports; pass explicit object literals when a whole-module object is needed. Node builtins and external packages are exempt. Enforced by `no-restricted-syntax` in `eslint.config.mjs`.
 - **camelCase everywhere in the database** — tables, columns, JSON fields, and FK columns all use camelCase with double-quoted PostgreSQL identifiers.
 - **Parameterized SQL only** — never interpolate user input into query strings.
 - **Always use `libs/logger`** in production code — never `console.log`.

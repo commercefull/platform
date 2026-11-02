@@ -19,7 +19,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { generateUUID } from '../../../../libs/uuid';
 
-export interface ReserveStockItemInput {
+interface ReserveStockItemInput {
   productId: string;
   variantId?: string;
   sku?: string;
@@ -38,7 +38,7 @@ export interface ReserveStockInput {
   storeId?: string;
 }
 
-export interface ReservationResult {
+interface ReservationResult {
   productId: string;
   variantId?: string;
   sku?: string;

@@ -5,7 +5,13 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import * as orderController from '../controllers/OrderCustomerController';
+import {
+  cancelOrder,
+  createOrder,
+  getMyOrders,
+  getOrder,
+  getOrderByNumber,
+} from '../controllers/OrderCustomerController';
 import { isCustomerLoggedIn } from '../../../../libs/auth';
 
 const router = createHttpRouter();
@@ -21,30 +27,30 @@ router.use('/order', isCustomerLoggedIn);
  * Get customer's orders
  * GET /orders
  */
-router.get('/order', asyncHandler(orderController.getMyOrders));
+router.get('/order', asyncHandler(getMyOrders));
 
 /**
  * Get order by order number
  * GET /orders/number/:orderNumber
  */
-router.get('/order/number/:orderNumber', asyncHandler(orderController.getOrderByNumber));
+router.get('/order/number/:orderNumber', asyncHandler(getOrderByNumber));
 
 /**
  * Get order by ID
  * GET /orders/:orderId
  */
-router.get('/order/:orderId', asyncHandler(orderController.getOrder));
+router.get('/order/:orderId', asyncHandler(getOrder));
 
 /**
  * Create a new order
  * POST /orders
  */
-router.post('/order', asyncHandler(orderController.createOrder));
+router.post('/order', asyncHandler(createOrder));
 
 /**
  * Cancel an order
  * POST /orders/:orderId/cancel
  */
-router.post('/order/:orderId/cancel', asyncHandler(orderController.cancelOrder));
+router.post('/order/:orderId/cancel', asyncHandler(cancelOrder));
 
 export const orderCustomerRouter = router;

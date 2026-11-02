@@ -37,7 +37,7 @@ interface StoreSalesChannelRow {
   channelUpdatedAt?: Date;
 }
 
-export class SalesChannelRepo implements SalesChannelRepository {
+class SalesChannelRepo implements SalesChannelRepository {
   async findById(salesChannelId: string): Promise<SalesChannel | null> {
     const row = await queryOne<SalesChannelRow>(`SELECT * FROM "salesChannel" WHERE "salesChannelId" = $1`, [salesChannelId]);
     return row ? this.mapChannel(row) : null;

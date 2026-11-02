@@ -15,7 +15,7 @@ import type { ModuleManifest } from './types';
 import { logger } from '../logger';
 
 /** Feature flag provider — returns true if the flag is enabled. */
-export type FeatureFlagProvider = (key: string) => Promise<boolean>;
+type FeatureFlagProvider = (key: string) => Promise<boolean>;
 
 class ModuleRegistryClass {
   private manifests = new Map<string, ModuleManifest>();

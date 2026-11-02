@@ -33,7 +33,7 @@ export interface PickupLocation {
   updatedAt: Date;
 }
 
-export interface CreatePickupLocationParams {
+interface CreatePickupLocationParams {
   storeId: string | null;
   name: string;
   address: PickupLocation['address'];
@@ -47,7 +47,7 @@ export interface CreatePickupLocationParams {
   prepareTimeMinutes?: number;
 }
 
-export interface UpdatePickupLocationParams {
+interface UpdatePickupLocationParams {
   name?: string;
   address?: Partial<PickupLocation['address']>;
   latitude?: number;
@@ -190,7 +190,7 @@ export async function deleteLocation(pickupLocationId: string): Promise<boolean>
 /**
  * Get active pickup locations for a store
  */
-export async function getActiveLocations(storeId: string): Promise<PickupLocation[]> {
+async function getActiveLocations(storeId: string): Promise<PickupLocation[]> {
   const result = await query<Record<string, unknown>[]>(
     'SELECT * FROM "storePickupLocation" WHERE "storeId" = $1 AND "isActive" = true ORDER BY "name" ASC',
     [storeId],

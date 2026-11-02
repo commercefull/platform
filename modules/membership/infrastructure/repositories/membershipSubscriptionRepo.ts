@@ -9,14 +9,14 @@ import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErr
 export type MembershipSubscription = DbMembershipSubscription;
 
 // Type alias for subscription status (used in application logic)
-export type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'paused' | 'trial' | 'pending' | 'pastDue';
+type SubscriptionStatus = 'active' | 'cancelled' | 'expired' | 'paused' | 'trial' | 'pending' | 'pastDue';
 
 // Derived types for create/update operations
-export type MembershipSubscriptionCreateParams = Omit<
+type MembershipSubscriptionCreateParams = Omit<
   MembershipSubscription,
   'membershipSubscriptionId' | 'createdAt' | 'updatedAt' | 'membershipNumber'
 >;
-export type MembershipSubscriptionUpdateParams = Partial<
+type MembershipSubscriptionUpdateParams = Partial<
   Pick<
     MembershipSubscription,
     | 'status'
@@ -32,7 +32,7 @@ export type MembershipSubscriptionUpdateParams = Partial<
   >
 >;
 
-export class MembershipSubscriptionRepo {
+class MembershipSubscriptionRepo {
   private async generateMembershipNumber(): Promise<string> {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();

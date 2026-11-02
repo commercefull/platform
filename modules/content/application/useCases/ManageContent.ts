@@ -17,23 +17,23 @@ import type { IContentMediaRepository } from '../../domain/repositories/ContentM
 import type { IContentRedirectRepository } from '../../domain/repositories/ContentRedirectRepository';
 import type { ContentPageVersion, ContentPageTranslation, ContentCategorization, ContentMediaUsage } from '../../../../libs/db/types';
 
-export interface ContentVersionReadPort {
+interface ContentVersionReadPort {
   findVersionsByPageId(pageId: string, limit?: number, offset?: number): Promise<ContentPageVersion[]>;
   findVersionById(id: string): Promise<ContentPageVersion | null>;
   deleteVersion(id: string): Promise<boolean>;
 }
 
-export interface ContentTranslationReadPort {
+interface ContentTranslationReadPort {
   findTranslationsByPageId(pageId: string): Promise<ContentPageTranslation[]>;
   findTranslationByPageAndLocale(pageId: string, localeId: string): Promise<ContentPageTranslation | null>;
 }
 
-export interface ContentCategorizationReadPort {
+interface ContentCategorizationReadPort {
   findCategorizationsByPageId(pageId: string): Promise<ContentCategorization[]>;
   findCategorizationsByCategoryId(categoryId: string, limit?: number, offset?: number): Promise<ContentCategorization[]>;
 }
 
-export interface ContentMediaUsageReadPort {
+interface ContentMediaUsageReadPort {
   getUsageCount(mediaId: string): Promise<number>;
   findUsageByMediaId(mediaId: string): Promise<ContentMediaUsage[]>;
   findUsageByEntity(entityType: string, entityId: string): Promise<ContentMediaUsage[]>;

@@ -10,11 +10,11 @@ import type { ProductRelationshipRepository } from '../../domain/repositories/Pr
 // Backward-compatible aliases — the canonical types live in
 // domain/entities/ProductRelationship.ts
 export type RelationType = ProductRelationType;
-export type ProductRelationship = ProductRelationshipProps;
-export type ProductRelationshipCreateParams = Omit<ProductRelationship, 'productRelatedId' | 'createdAt' | 'updatedAt'>;
-export type ProductRelationshipUpdateParams = Partial<Pick<ProductRelationship, 'type' | 'position' | 'isAutomated'>>;
+type ProductRelationship = ProductRelationshipProps;
+type ProductRelationshipCreateParams = Omit<ProductRelationship, 'productRelatedId' | 'createdAt' | 'updatedAt'>;
+type ProductRelationshipUpdateParams = Partial<Pick<ProductRelationship, 'type' | 'position' | 'isAutomated'>>;
 
-export class ProductRelationshipRepo implements ProductRelationshipRepository {
+class ProductRelationshipRepo implements ProductRelationshipRepository {
   /**
    * Find relationship by ID
    */

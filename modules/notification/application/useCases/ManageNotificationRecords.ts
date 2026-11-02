@@ -6,7 +6,7 @@ interface NotificationRecord {
   [key: string]: unknown;
 }
 
-export interface CreateNotificationRecordParams {
+interface CreateNotificationRecordParams {
   userId: string;
   userType: 'customer' | 'organization' | 'admin';
   type: string;

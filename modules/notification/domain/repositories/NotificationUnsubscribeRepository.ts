@@ -4,7 +4,7 @@
  * Domain interface for notification unsubscribe data access.
  */
 
-export interface NotificationUnsubscribe {
+interface NotificationUnsubscribe {
   notificationUnsubscribeId: string;
   userId: string;
   category?: string;

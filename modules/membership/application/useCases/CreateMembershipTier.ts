@@ -4,7 +4,7 @@
 
 import { MembershipValidationError } from '../../domain/errors/MembershipErrors';
 
-export interface TierBenefit {
+interface TierBenefit {
   type: 'discount' | 'free_shipping' | 'early_access' | 'points_multiplier' | 'exclusive_products' | 'custom';
   value: number | string;
   description?: string;

@@ -3,7 +3,7 @@ import { logger } from '../logger';
 import { getCorrelationId } from '../correlationId';
 import { getEventPublisher, setEventDispatch } from './transportRegistry';
 
-export type { EventType, PlannedEventType, EventPayload, EventHandler } from './eventTypes';
+export type { EventType, EventPayload } from './eventTypes';
 import type { EventType, EventPayload, EventHandler } from './eventTypes';
 
 class EventBus {

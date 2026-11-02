@@ -11,26 +11,19 @@
  */
 
 /** Which `GlobalAddress` fields a country requires. */
-export type AddressFieldKey =
-  | 'addressLines'
-  | 'locality'
-  | 'dependentLocality'
-  | 'administrativeArea'
-  | 'postalCode'
-  | 'sortingCode'
-  | 'organization'
-  | 'recipient';
+type AddressFieldKey =
+  'addressLines' | 'locality' | 'dependentLocality' | 'administrativeArea' | 'postalCode' | 'sortingCode' | 'organization' | 'recipient';
 
 /** Label vocabulary for `administrativeArea` — varies per country. */
-export type AdminAreaLabel = 'state' | 'province' | 'county' | 'prefecture' | 'region' | 'emirate' | 'territory';
+type AdminAreaLabel = 'state' | 'province' | 'county' | 'prefecture' | 'region' | 'emirate' | 'territory';
 
 /** Label vocabulary for `postalCode` — varies per country. */
-export type PostalCodeLabel = 'zipCode' | 'postcode' | 'postalCode' | 'eircode' | 'pinCode';
+type PostalCodeLabel = 'zipCode' | 'postcode' | 'postalCode' | 'eircode' | 'pinCode';
 
 /** Display ordering: Western `small_to_big` vs East Asian `big_to_small`. */
-export type AddressDisplayOrder = 'small_to_big' | 'big_to_small';
+type AddressDisplayOrder = 'small_to_big' | 'big_to_small';
 
-export interface CountryAddressMetadata {
+interface CountryAddressMetadata {
   /** ISO 3166-1 alpha-2 code this metadata describes. */
   countryCode: string;
   /** Fields that must be present/non-empty for a valid address. */
@@ -54,7 +47,7 @@ export interface CountryAddressMetadata {
  * locality, and country are required; `administrativeArea`/`postalCode` are
  * optional so addresses for uncovered countries are not rejected outright.
  */
-export const DEFAULT_ADDRESS_METADATA: CountryAddressMetadata = {
+const DEFAULT_ADDRESS_METADATA: CountryAddressMetadata = {
   countryCode: 'ZZ',
   requiredFields: ['addressLines', 'locality'],
   adminAreaLabel: 'region',
@@ -259,7 +252,7 @@ export function getCountryAddressMetadata(countryCode: string | undefined | null
  * into the page so client JS can toggle required/labels per country without
  * duplicating the table.
  */
-export interface AddressFieldUiMetadata {
+interface AddressFieldUiMetadata {
   adminRequired: boolean;
   postalRequired: boolean;
   adminLabel: AdminAreaLabel;

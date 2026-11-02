@@ -13,7 +13,7 @@ const TABLE = Table.ShippingSurcharge;
 /**
  * Find all active surcharges for a given shipping rate.
  */
-export async function findByRateId(shippingRateId: string, activeOnly = true): Promise<ShippingSurcharge[]> {
+async function findByRateId(shippingRateId: string, activeOnly = true): Promise<ShippingSurcharge[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "shippingRateId" = $1`;
   const params: unknown[] = [shippingRateId];
   if (activeOnly) {
@@ -26,7 +26,7 @@ export async function findByRateId(shippingRateId: string, activeOnly = true): P
 /**
  * Find surcharges by type for a given shipping rate.
  */
-export async function findByRateIdAndType(
+async function findByRateIdAndType(
   shippingRateId: string,
   type: ShippingSurcharge['type'],
   activeOnly = true,
@@ -42,7 +42,7 @@ export async function findByRateIdAndType(
 /**
  * Find a single surcharge by id.
  */
-export async function findById(shippingSurchargeId: string): Promise<ShippingSurcharge | null> {
+async function findById(shippingSurchargeId: string): Promise<ShippingSurcharge | null> {
   return queryOne<ShippingSurcharge>(`SELECT * FROM "${TABLE}" WHERE "shippingSurchargeId" = $1`, [shippingSurchargeId]);
 }
 
@@ -51,7 +51,7 @@ export async function findById(shippingSurchargeId: string): Promise<ShippingSur
  */
 export type CreateShippingSurchargeInput = Omit<ShippingSurcharge, 'shippingSurchargeId' | 'createdAt' | 'updatedAt'>;
 
-export async function create(input: CreateShippingSurchargeInput): Promise<ShippingSurcharge> {
+async function create(input: CreateShippingSurchargeInput): Promise<ShippingSurcharge> {
   const result = await queryOne<ShippingSurcharge>(
     `INSERT INTO "${TABLE}" (
       "shippingRateId", "type", "calculationType", "value", "conditions", "isActive"
@@ -74,7 +74,7 @@ export async function create(input: CreateShippingSurchargeInput): Promise<Shipp
  */
 export type UpdateShippingSurchargeInput = Partial<Omit<ShippingSurcharge, 'shippingSurchargeId' | 'createdAt' | 'updatedAt'>>;
 
-export async function update(shippingSurchargeId: string, input: UpdateShippingSurchargeInput): Promise<ShippingSurcharge | null> {
+async function update(shippingSurchargeId: string, input: UpdateShippingSurchargeInput): Promise<ShippingSurcharge | null> {
   const sets: string[] = [];
   const params: unknown[] = [shippingSurchargeId];
   let paramIndex = 2;
@@ -110,7 +110,7 @@ export async function update(shippingSurchargeId: string, input: UpdateShippingS
 /**
  * Delete a surcharge.
  */
-export async function remove(shippingSurchargeId: string): Promise<boolean> {
+async function remove(shippingSurchargeId: string): Promise<boolean> {
   const result = await queryOne<{ count: string }>(`DELETE FROM "${TABLE}" WHERE "shippingSurchargeId" = $1 RETURNING 1 AS count`, [
     shippingSurchargeId,
   ]);

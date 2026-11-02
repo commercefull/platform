@@ -3,7 +3,7 @@
  * Implementation of MediaRepository for PostgreSQL
  */
 
-import { pool } from '../../../../libs/db/pool';
+import { query, queryOne } from '../../../../libs/db';
 import { Media, MediaFile } from '../../domain/entities/Media';
 import { MediaRepository, MediaFilters } from '../../domain/repositories/MediaRepository';
 import { Media as DbMedia } from '../../../../libs/db/types';
@@ -12,7 +12,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
   async save(media: Media): Promise<void> {
     const data = media.toJSON();
 
-    await pool.query(
+    await query(
       `
       INSERT INTO media (
         "mediaId", "originalName", "mimeType", size, "originalUrl",
@@ -49,18 +49,14 @@ export class PostgreSQLMediaRepository implements MediaRepository {
   }
 
   async findById(mediaId: string): Promise<Media | null> {
-    const result = await pool.query(
+    const row = await queryOne<DbMedia>(
       `
       SELECT * FROM media WHERE "mediaId" = $1
     `,
       [mediaId],
     );
 
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    return this.mapToMedia(result.rows[0]);
+    return row ? this.mapToMedia(row) : null;
   }
 
   async findByIds(mediaIds: string[]): Promise<Media[]> {
@@ -68,7 +64,7 @@ export class PostgreSQLMediaRepository implements MediaRepository {
       return [];
     }
 
-    const result = await pool.query(
+    const rows = await query<DbMedia[]>(
       `
       SELECT * FROM media WHERE "mediaId" = ANY($1)
       ORDER BY "createdAt" DESC
@@ -76,125 +72,125 @@ export class PostgreSQLMediaRepository implements MediaRepository {
       [mediaIds],
     );
 
-    return result.rows.map(row => this.mapToMedia(row));
+    return (rows ?? []).map(row => this.mapToMedia(row));
   }
 
   async findAll(filters: MediaFilters = {}): Promise<Media[]> {
-    let query = 'SELECT * FROM media WHERE 1=1';
+    let sql = 'SELECT * FROM media WHERE 1=1';
     const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.mediaId) {
-      query += ` AND "mediaId" = $${paramIndex}`;
+      sql += ` AND "mediaId" = $${paramIndex}`;
       params.push(filters.mediaId);
       paramIndex++;
     }
 
     if (filters.mimeType) {
-      query += ` AND "mimeType" = $${paramIndex}`;
+      sql += ` AND "mimeType" = $${paramIndex}`;
       params.push(filters.mimeType);
       paramIndex++;
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      query += ` AND tags && $${paramIndex}`;
+      sql += ` AND tags && $${paramIndex}`;
       params.push(filters.tags);
       paramIndex++;
     }
 
     if (filters.createdAfter) {
-      query += ` AND "createdAt" >= $${paramIndex}`;
+      sql += ` AND "createdAt" >= $${paramIndex}`;
       params.push(filters.createdAfter);
       paramIndex++;
     }
 
     if (filters.createdBefore) {
-      query += ` AND "createdAt" <= $${paramIndex}`;
+      sql += ` AND "createdAt" <= $${paramIndex}`;
       params.push(filters.createdBefore);
       paramIndex++;
     }
 
     if (filters.size?.min) {
-      query += ` AND size >= $${paramIndex}`;
+      sql += ` AND size >= $${paramIndex}`;
       params.push(filters.size.min);
       paramIndex++;
     }
 
     if (filters.size?.max) {
-      query += ` AND size <= $${paramIndex}`;
+      sql += ` AND size <= $${paramIndex}`;
       params.push(filters.size.max);
       paramIndex++;
     }
 
-    query += ' ORDER BY "createdAt" DESC';
+    sql += ' ORDER BY "createdAt" DESC';
 
     if (filters.limit) {
-      query += ` LIMIT $${paramIndex}`;
+      sql += ` LIMIT $${paramIndex}`;
       params.push(filters.limit);
       paramIndex++;
     }
 
     if (filters.offset) {
-      query += ` OFFSET $${paramIndex}`;
+      sql += ` OFFSET $${paramIndex}`;
       params.push(filters.offset);
     }
 
-    const result = await pool.query(query, params);
-    return result.rows.map(row => this.mapToMedia(row));
+    const rows = await query<DbMedia[]>(sql, params);
+    return (rows ?? []).map(row => this.mapToMedia(row));
   }
 
   async delete(mediaId: string): Promise<void> {
-    await pool.query('DELETE FROM media WHERE "mediaId" = $1', [mediaId]);
+    await query('DELETE FROM media WHERE "mediaId" = $1', [mediaId]);
   }
 
   async count(filters: Omit<MediaFilters, 'limit' | 'offset'> = {}): Promise<number> {
-    let query = 'SELECT COUNT(*) as count FROM media WHERE 1=1';
+    let sql = 'SELECT COUNT(*) as count FROM media WHERE 1=1';
     const params: unknown[] = [];
     let paramIndex = 1;
 
     if (filters.mediaId) {
-      query += ` AND "mediaId" = $${paramIndex}`;
+      sql += ` AND "mediaId" = $${paramIndex}`;
       params.push(filters.mediaId);
       paramIndex++;
     }
 
     if (filters.mimeType) {
-      query += ` AND "mimeType" = $${paramIndex}`;
+      sql += ` AND "mimeType" = $${paramIndex}`;
       params.push(filters.mimeType);
       paramIndex++;
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      query += ` AND tags && $${paramIndex}`;
+      sql += ` AND tags && $${paramIndex}`;
       params.push(filters.tags);
       paramIndex++;
     }
 
     if (filters.createdAfter) {
-      query += ` AND "createdAt" >= $${paramIndex}`;
+      sql += ` AND "createdAt" >= $${paramIndex}`;
       params.push(filters.createdAfter);
       paramIndex++;
     }
 
     if (filters.createdBefore) {
-      query += ` AND "createdAt" <= $${paramIndex}`;
+      sql += ` AND "createdAt" <= $${paramIndex}`;
       params.push(filters.createdBefore);
       paramIndex++;
     }
 
     if (filters.size?.min) {
-      query += ` AND size >= $${paramIndex}`;
+      sql += ` AND size >= $${paramIndex}`;
       params.push(filters.size.min);
       paramIndex++;
     }
 
     if (filters.size?.max) {
-      query += ` AND size <= $${paramIndex}`;
+      sql += ` AND size <= $${paramIndex}`;
       params.push(filters.size.max);
     }
 
-    const result = await pool.query(query, params);
-    return parseInt(result.rows[0].count);
+    const row = await queryOne<{ count: string }>(sql, params);
+    return parseInt(row?.count ?? '0', 10);
   }
 
   private mapToMedia(row: DbMedia): Media {

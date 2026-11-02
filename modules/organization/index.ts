@@ -14,4 +14,3 @@ export { organizationTypeDefs } from './interface/graphql/typeDefs';
 export { organizationResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

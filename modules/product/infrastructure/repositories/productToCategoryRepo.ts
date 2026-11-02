@@ -5,7 +5,7 @@ import type { ProductToCategory } from '../../domain/repositories/ProductCatalog
 export type { ProductToCategory } from '../../domain/repositories/ProductCatalogPorts';
 export type ProductToCategoryCreateParams = Omit<ProductToCategory, 'productToCategoryId' | 'createdAt'>;
 
-export class ProductToCategoryRepo {
+class ProductToCategoryRepo {
   async findByProduct(productId: string): Promise<ProductToCategory[]> {
     return (
       (await query<ProductToCategory[]>(

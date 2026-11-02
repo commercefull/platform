@@ -107,7 +107,7 @@ export type UpdatePromotionInput = Partial<Omit<CreatePromotionInput, 'rules' | 
 /**
  * Repository for managing promotions
  */
-export class PromotionRepo {
+class PromotionRepo {
   /**
    * Find a promotion by ID
    */

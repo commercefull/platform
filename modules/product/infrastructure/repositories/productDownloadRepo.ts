@@ -8,7 +8,7 @@ export type ProductDownload = DbProductDownload;
 export type ProductDownloadCreateParams = Omit<ProductDownload, 'productDownloadId' | 'createdAt' | 'updatedAt'>;
 export type ProductDownloadUpdateParams = Partial<Omit<ProductDownload, 'productDownloadId' | 'productId' | 'createdAt' | 'updatedAt'>>;
 
-export class ProductDownloadRepo {
+class ProductDownloadRepo {
   async findById(id: string): Promise<ProductDownload | null> {
     return await queryOne<ProductDownload>(`SELECT * FROM "productDownload" WHERE "productDownloadId" = $1`, [id]);
   }

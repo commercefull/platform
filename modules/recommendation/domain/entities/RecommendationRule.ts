@@ -37,33 +37,4 @@ export interface RecommendationRuleProps {
 export type RecommendationRuleCreateProps = Omit<RecommendationRuleProps, 'recommendationRuleId' | 'createdAt' | 'updatedAt'>;
 export type RecommendationRuleUpdateProps = Partial<Omit<RecommendationRuleCreateProps, 'organizationId'>>;
 
-export class RecommendationRule {
-  private constructor(private readonly props: RecommendationRuleProps) {}
 
-  static reconstitute(props: RecommendationRuleProps): RecommendationRule {
-    return new RecommendationRule(props);
-  }
-
-  get recommendationRuleId(): string {
-    return this.props.recommendationRuleId;
-  }
-  get organizationId(): string {
-    return this.props.organizationId;
-  }
-  get sourceType(): RuleSourceType {
-    return this.props.sourceType;
-  }
-  get sourceId(): string {
-    return this.props.sourceId;
-  }
-  get relationType(): string {
-    return this.props.relationType;
-  }
-  get isActive(): boolean {
-    return this.props.isActive;
-  }
-
-  toJSON(): RecommendationRuleProps {
-    return { ...this.props };
-  }
-}

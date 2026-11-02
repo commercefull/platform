@@ -14,29 +14,29 @@ export type UpdateShippingZoneInput = Partial<Omit<ShippingZone, 'shippingZoneId
 
 const TABLE = Table.ShippingZone;
 
-export async function findById(id: string): Promise<ShippingZone | null> {
+async function findById(id: string): Promise<ShippingZone | null> {
   return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "shippingZoneId" = $1`, [id]);
 }
 
-export async function findByName(name: string): Promise<ShippingZone | null> {
+async function findByName(name: string): Promise<ShippingZone | null> {
   return queryOne<ShippingZone>(`SELECT * FROM "${TABLE}" WHERE "name" = $1`, [name]);
 }
 
-export async function findAll(activeOnly = false): Promise<ShippingZone[]> {
+async function findAll(activeOnly = false): Promise<ShippingZone[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "priority" ASC, "name" ASC`;
   return (await query<ShippingZone[]>(sql)) || [];
 }
 
-export async function findByLocationType(locationType: ShippingZone['locationType'], activeOnly = false): Promise<ShippingZone[]> {
+async function findByLocationType(locationType: ShippingZone['locationType'], activeOnly = false): Promise<ShippingZone[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "locationType" = $1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   sql += ` ORDER BY "priority" ASC`;
   return (await query<ShippingZone[]>(sql, [locationType])) || [];
 }
 
-export async function findByLocation(country: string, state?: string): Promise<ShippingZone[]> {
+async function findByLocation(country: string, state?: string): Promise<ShippingZone[]> {
   if (state) {
     const sql = `
       SELECT * FROM "${TABLE}" 
@@ -57,7 +57,7 @@ export async function findByLocation(country: string, state?: string): Promise<S
   return (await query<ShippingZone[]>(sql, [JSON.stringify([country])])) || [];
 }
 
-export async function create(input: CreateShippingZoneInput): Promise<ShippingZone> {
+async function create(input: CreateShippingZoneInput): Promise<ShippingZone> {
   const result = await queryOne<ShippingZone>(
     `INSERT INTO "${TABLE}" (
       "name", "description", "isActive", "priority", "locationType", "locations",
@@ -79,7 +79,7 @@ export async function create(input: CreateShippingZoneInput): Promise<ShippingZo
   return result;
 }
 
-export async function update(id: string, input: UpdateShippingZoneInput): Promise<ShippingZone | null> {
+async function update(id: string, input: UpdateShippingZoneInput): Promise<ShippingZone | null> {
   const updateFields: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -103,15 +103,15 @@ export async function update(id: string, input: UpdateShippingZoneInput): Promis
   );
 }
 
-export async function activate(id: string): Promise<ShippingZone | null> {
+async function activate(id: string): Promise<ShippingZone | null> {
   return update(id, { isActive: true });
 }
 
-export async function deactivate(id: string): Promise<ShippingZone | null> {
+async function deactivate(id: string): Promise<ShippingZone | null> {
   return update(id, { isActive: false });
 }
 
-export async function deleteZone(id: string): Promise<boolean> {
+async function deleteZone(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingZoneId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingZoneId" = $1 RETURNING "shippingZoneId"`,
     [id],
@@ -119,7 +119,7 @@ export async function deleteZone(id: string): Promise<boolean> {
   return !!result;
 }
 
-export async function count(activeOnly = false): Promise<number> {
+async function count(activeOnly = false): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   const result = await queryOne<{ count: string }>(sql);

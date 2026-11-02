@@ -6,7 +6,7 @@
 import { Product } from '../entities/Product';
 import { CatalogFeature } from '../entities/CatalogFeature';
 import { ProductVariant } from '../entities/ProductVariant';
-import { ProductCategory } from '../entities/ProductCategory';
+
 import { ProductStatus } from '../valueObjects/ProductStatus';
 import { ProductVisibility } from '../valueObjects/ProductVisibility';
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
@@ -99,41 +99,5 @@ export interface ProductRepository {
   reorderProductImages(productId: string, imageIds: string[]): Promise<void>;
 }
 
-export interface CategoryRepository {
-  // Category CRUD
-  findById(categoryId: string): Promise<ProductCategory | null>;
-  findBySlug(slug: string): Promise<ProductCategory | null>;
-  findAll(pagination?: PaginationOptions): Promise<PaginatedResult<ProductCategory>>;
-  findRootCategories(pagination?: PaginationOptions): Promise<PaginatedResult<ProductCategory>>;
-  findChildren(parentId: string, pagination?: PaginationOptions): Promise<PaginatedResult<ProductCategory>>;
-  findAncestors(categoryId: string): Promise<ProductCategory[]>;
-  findDescendants(categoryId: string): Promise<ProductCategory[]>;
-  save(category: ProductCategory): Promise<ProductCategory>;
-  delete(categoryId: string): Promise<void>;
-  count(): Promise<number>;
 
-  // Category tree
-  getFullTree(): Promise<ProductCategory[]>;
-  getBreadcrumb(categoryId: string): Promise<ProductCategory[]>;
-  moveCategory(categoryId: string, newParentId: string | null): Promise<void>;
-  reorderCategories(parentId: string | null, categoryIds: string[]): Promise<void>;
 
-  // Product counts
-  updateProductCount(categoryId: string): Promise<void>;
-  recalculateAllProductCounts(): Promise<void>;
-}
-
-export interface VariantRepository {
-  findById(variantId: string): Promise<ProductVariant | null>;
-  findBySku(sku: string): Promise<ProductVariant | null>;
-  findByProductId(productId: string): Promise<ProductVariant[]>;
-  save(variant: ProductVariant): Promise<ProductVariant>;
-  delete(variantId: string): Promise<void>;
-
-  // Stock management
-  updateStock(variantId: string, quantity: number): Promise<void>;
-  incrementStock(variantId: string, amount: number): Promise<void>;
-  decrementStock(variantId: string, amount: number): Promise<void>;
-  findLowStock(threshold?: number): Promise<ProductVariant[]>;
-  findOutOfStock(): Promise<ProductVariant[]>;
-}

@@ -60,12 +60,20 @@
 - **Always use ES module `import` syntax** — never use `require()` in any `.ts` file.
 - **All imports must appear at the top of the file**, before any other code.
 - **Dynamic `import()` inside function bodies is forbidden**; move it to the top.
+- **No `import * as ns` on internal modules** (relative paths or `libs/`, `modules/`, `boot/`, `web/`, `features/`, `tests/` aliases) — namespace imports hide which exports are actually used, so knip reports false dead-code findings. `import * as` on Node builtins (`crypto`, `fs`, `path`, …) and external packages is fine.
+- **No `export * as ns`** — same problem on the export side. Use `export *` or `export { … }`.
+- **No `Pick<typeof ns, …>` port typing** — it re-hides which members a port needs. Type each port member individually (e.g. `getById: typeof getById`) or declare the port interface in domain.
+- When a whole module must be passed as a port/repository object, build an **explicit object literal** from named imports containing only the required members — identical runtime shape, but every member is traceable.
 
 ```typescript
 // ✅ CORRECT — top-level ES imports
 import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
 import { successResponse, errorResponse } from '../../../../libs/apiResponse';
+
+// ✅ CORRECT — explicit port object built from named imports
+import { getById, save, remove } from './repositories/orderRepo';
+const orderRepository = { getById, save, remove };
 
 export const myHandler = async (req, res) => { ... };
 
@@ -76,6 +84,13 @@ const { query } = require('../../../../libs/db');
 export const myHandler = async (req, res) => {
   const { query } = await import('../../../../libs/db');
 };
+
+// ❌ WRONG — namespace facade on an internal module
+import * as orderRepo from './repositories/orderRepo';
+const orderRepository = orderRepo; // knip can't see which members are used
+
+// ❌ WRONG — namespace re-export hides members from knip
+export * as adminCollectionController from './controllers/adminCollectionController';
 ```
 
 > Migration and seed files are plain JavaScript (`.js`) and use `exports.up` / `exports.seed` — `require()` is acceptable in those `.js` files only.

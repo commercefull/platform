@@ -7,7 +7,7 @@
 
 import { SupplierNotFoundError, SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
-export interface SupplierPurchaseOrderItemInput {
+interface SupplierPurchaseOrderItemInput {
   productId: string;
   quantity: number;
   unitCostCents: number;

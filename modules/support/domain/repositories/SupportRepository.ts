@@ -12,7 +12,7 @@ import type {
   TicketChannel,
   SenderType,
 } from '../entities/SupportTicket';
-import type { SupportMessage } from '../entities/SupportModel';
+
 
 export type { TicketStatus, TicketPriority, TicketCategory, TicketChannel, SenderType };
 type SupportTicket = SupportTicketProps;
@@ -52,43 +52,4 @@ export interface SupportTicketWithCustomer extends SupportTicket {
   customerName?: string;
 }
 
-export interface SupportRepository {
-  // Tickets
-  createTicket(params: Partial<SupportTicket> & { subject: string; email: string }): Promise<SupportTicket>;
-  findTicketById(ticketId: string): Promise<SupportTicket | null>;
-  findTicketByNumber(ticketNumber: string): Promise<SupportTicket | null>;
-  listTickets(filters?: {
-    status?: TicketStatus;
-    priority?: TicketPriority;
-    category?: TicketCategory;
-    assignedAgentId?: string;
-  }): Promise<SupportTicket[]>;
-  updateTicket(ticketId: string, updates: Partial<SupportTicket>): Promise<SupportTicket | null>;
-  assignTicket(ticketId: string, agentId: string): Promise<SupportTicket | null>;
-  updateTicketStatus(ticketId: string, status: TicketStatus): Promise<SupportTicket | null>;
-  updateTicketPriority(ticketId: string, priority: TicketPriority): Promise<SupportTicket | null>;
-  deleteTicket(ticketId: string): Promise<boolean>;
 
-  // Messages
-  createMessage(params: {
-    supportTicketId: string;
-    senderType: SenderType;
-    senderId?: string;
-    message: string;
-    attachments?: unknown[];
-  }): Promise<SupportMessage>;
-  findMessagesByTicketId(ticketId: string): Promise<SupportMessage[]>;
-
-  // Agents
-  createAgent(params: Partial<SupportAgent> & { email: string; firstName: string; lastName: string }): Promise<SupportAgent>;
-  findAgentById(agentId: string): Promise<SupportAgent | null>;
-  findAgentByEmail(email: string): Promise<SupportAgent | null>;
-  listAgents(activeOnly?: boolean): Promise<SupportAgent[]>;
-  updateAgent(agentId: string, updates: Partial<SupportAgent>): Promise<SupportAgent | null>;
-  setAgentAvailability(agentId: string, isAvailable: boolean): Promise<SupportAgent | null>;
-  deleteAgent(agentId: string): Promise<boolean>;
-
-  // Admin
-  getSupportStats(): Promise<{ openTickets: number; resolvedToday: number; avgResponseTime: number }>;
-  listRecentTickets(limit?: number): Promise<SupportTicketWithCustomer[]>;
-}

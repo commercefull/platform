@@ -1,7 +1,11 @@
 import { StoreStoreFulfillmentAdapter } from './StoreStoreFulfillmentAdapter';
 import { Store } from '../../../store/domain/entities/Store';
 import type StoreRepoType from '../../../store/infrastructure/repositories/StoreRepo';
-import type * as pickupLocationRepoModule from '../../../store/infrastructure/repositories/pickupLocationRepo';
+import type {
+  getLocations,
+  getLocation,
+  findNearestLocations,
+} from '../../../store/infrastructure/repositories/pickupLocationRepo';
 
 type CreateStoreProps = Parameters<typeof Store.create>[0];
 type LocalDelivery = NonNullable<NonNullable<CreateStoreProps['settings']>['localDelivery']>;
@@ -35,7 +39,11 @@ const createStore = (
 describe('StoreStoreFulfillmentAdapter', () => {
   let adapter: StoreStoreFulfillmentAdapter;
   let StoreRepo: jest.Mocked<Pick<typeof StoreRepoType, 'findActive'>>;
-  let pickupLocationRepo: jest.Mocked<Pick<typeof pickupLocationRepoModule, 'getLocations' | 'getLocation' | 'findNearestLocations'>>;
+  let pickupLocationRepo: jest.Mocked<{
+    getLocations: typeof getLocations;
+    getLocation: typeof getLocation;
+    findNearestLocations: typeof findNearestLocations;
+  }>;
 
   beforeEach(() => {
     StoreRepo = { findActive: jest.fn() };

@@ -20,31 +20,32 @@ const context = (overrides: Partial<TaxTransactionContext> = {}): TaxTransaction
   ...overrides,
 });
 
-const response = (overrides: Partial<CalculateOrderTaxResponse> = {}): CalculateOrderTaxResponse => ({
-  subtotalCents: 2000,
-  taxAmountCents: 0,
-  totalCents: 2000,
-  lineItems: [
-    { productId: 'p1', name: 'Widget', subtotalCents: 2000, taxAmountCents: 0, taxRate: 0 },
-    { productId: 'p2', name: 'Gadget', subtotalCents: 500, taxAmountCents: 0, taxRate: 0, exemptionVerdict: 'non-taxable' },
-  ],
-  taxRegime: 'EU_B2B_REVERSE_CHARGE',
-  taxPolicyVersion: 'tax-policy:2026-10',
-  reverseChargeApplied: true,
-  vatNumber: 'DE123456789',
-  taxAddedCents: 0,
-  taxIncludedInSubtotal: 0,
-  decisionRecord: {
-    policyCode: 'tax-calculation',
-    policyVersion: 'tax-policy:2026-10',
-    effect: 'allow',
-    reasonCode: 'EU_B2B_REVERSE_CHARGE',
-    obligations: [],
-    facts: { destinationCountry: 'DE' },
-    matchedRuleIndex: 0,
-  },
-  ...overrides,
-} as CalculateOrderTaxResponse);
+const response = (overrides: Partial<CalculateOrderTaxResponse> = {}): CalculateOrderTaxResponse =>
+  ({
+    subtotalCents: 2000,
+    taxAmountCents: 0,
+    totalCents: 2000,
+    lineItems: [
+      { productId: 'p1', name: 'Widget', subtotalCents: 2000, taxAmountCents: 0, taxRate: 0 },
+      { productId: 'p2', name: 'Gadget', subtotalCents: 500, taxAmountCents: 0, taxRate: 0, exemptionVerdict: 'non-taxable' },
+    ],
+    taxRegime: 'EU_B2B_REVERSE_CHARGE',
+    taxPolicyVersion: 'tax-policy:2026-10',
+    reverseChargeApplied: true,
+    vatNumber: 'DE123456789',
+    taxAddedCents: 0,
+    taxIncludedInSubtotal: 0,
+    decisionRecord: {
+      policyCode: 'tax-calculation',
+      policyVersion: 'tax-policy:2026-10',
+      effect: 'allow',
+      reasonCode: 'EU_B2B_REVERSE_CHARGE',
+      obligations: [],
+      facts: { destinationCountry: 'DE' },
+      matchedRuleIndex: 0,
+    },
+    ...overrides,
+  }) as CalculateOrderTaxResponse;
 
 describe('InternalRuleTaxEngine', () => {
   it('should map the use-case quote onto a TaxDecision', async () => {

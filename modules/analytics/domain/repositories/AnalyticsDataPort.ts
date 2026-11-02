@@ -15,20 +15,20 @@ export interface SalesSummary {
   conversionRate: number;
 }
 
-export interface RevenueData {
+interface RevenueData {
   revenueCents: number;
   orders: number;
   averageOrderCents: number;
   customers: number;
 }
 
-export interface CustomerData {
+interface CustomerData {
   total: number;
   active: number;
   ltvCents: number;
 }
 
-export interface InventoryData {
+interface InventoryData {
   turnover: number;
   stockouts: number;
   valueCents: number;

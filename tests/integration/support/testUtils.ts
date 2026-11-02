@@ -1,51 +1,10 @@
-import axios, { AxiosInstance } from 'axios';
 
-// Seeded test data IDs from seeds/20240805001900_seedSupportTestData.js
-export const SEEDED_SUPPORT_AGENT_IDS = {
-  AGENT_JOHN: '01939000-0000-7000-8000-000000000001',
-  AGENT_JANE: '01939000-0000-7000-8000-000000000002',
-  SUPERVISOR_BOB: '01939000-0000-7000-8000-000000000003',
-};
 
-export const SEEDED_SUPPORT_TICKET_IDS = {
-  TICKET_OPEN: '01939001-0000-7000-8000-000000000001',
-  TICKET_IN_PROGRESS: '01939001-0000-7000-8000-000000000002',
-  TICKET_RESOLVED: '01939001-0000-7000-8000-000000000003',
-};
 
-export const SEEDED_FAQ_CATEGORY_IDS = {
-  ORDERS: '01939003-0000-7000-8000-000000000001',
-  SHIPPING: '01939003-0000-7000-8000-000000000002',
-  RETURNS: '01939003-0000-7000-8000-000000000003',
-};
 
-export const SEEDED_FAQ_ARTICLE_IDS = {
-  HOW_TO_ORDER: '01939004-0000-7000-8000-000000000001',
-  SHIPPING_TIMES: '01939004-0000-7000-8000-000000000002',
-  RETURN_POLICY: '01939004-0000-7000-8000-000000000003',
-};
 
-export const SEEDED_STOCK_ALERT_IDS = {
-  ALERT_1: '01939005-0000-7000-8000-000000000001',
-  ALERT_2: '01939005-0000-7000-8000-000000000002',
-};
 
-export const SEEDED_PRICE_ALERT_IDS = {
-  ALERT_1: '01939006-0000-7000-8000-000000000001',
-  ALERT_2: '01939006-0000-7000-8000-000000000002',
-};
 
-export function createTestClient(): AxiosInstance {
-  return axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-}
 
 export function createTestTicket(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();

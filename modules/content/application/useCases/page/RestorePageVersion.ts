@@ -13,7 +13,7 @@ import { NotFoundError } from '../../../../../libs/errors';
 // Ports
 // ============================================================================
 
-export interface PageVersionSnapshot {
+interface PageVersionSnapshot {
   contentPageVersionId: string;
   contentPageId: string;
   version: number;

@@ -6,8 +6,8 @@
 
 import type { ContentCategory } from '../entities/ContentModel';
 
-export type ContentCategoryCreateParams = Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>;
-export type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>>;
+type ContentCategoryCreateParams = Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>;
+type ContentCategoryUpdateParams = Partial<Omit<ContentCategory, 'contentCategoryId' | 'createdAt' | 'updatedAt'>>;
 
 export interface IContentCategoryRepository {
   findCategoryById(id: string): Promise<ContentCategory | null>;

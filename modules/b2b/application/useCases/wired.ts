@@ -14,9 +14,9 @@ const quoteRepo = new QuoteRepositoryImpl();
 const approvalRepo = new ApprovalWorkflowRepositoryImpl();
 
 export const manageCompanyUseCase = new ManageCompanyUseCase(companyRepo);
-export const manageB2BUserUseCase = new ManageB2BUserUseCase(userRepo, companyRepo);
+const manageB2BUserUseCase = new ManageB2BUserUseCase(userRepo, companyRepo);
 export const manageQuoteUseCase = new ManageQuoteUseCase(quoteRepo);
-export const manageApprovalWorkflowUseCase = new ManageApprovalWorkflowUseCase(approvalRepo, companyRepo);
+const manageApprovalWorkflowUseCase = new ManageApprovalWorkflowUseCase(approvalRepo, companyRepo);
 
 export const b2bController = new B2BController(
   manageCompanyUseCase,
@@ -25,6 +25,3 @@ export const b2bController = new B2BController(
   manageApprovalWorkflowUseCase,
 );
 
-export { ManageCompanyUseCase, ManageB2BUserUseCase, ManageQuoteUseCase, ManageApprovalWorkflowUseCase };
-
-export { CompanyRepositoryImpl, B2BUserRepositoryImpl, QuoteRepositoryImpl, ApprovalWorkflowRepositoryImpl } from '../../infrastructure';

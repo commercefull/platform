@@ -4,10 +4,10 @@
  * Domain interface for notification delivery log data access.
  */
 
-export type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
-export type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
-export type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
-export type UserType = 'customer' | 'organization' | 'admin';
+type NotificationChannel = 'email' | 'sms' | 'in_app' | 'push';
+type NotificationType = 'orderStatus' | 'promotion' | 'accountAlert';
+type DeliveryStatus = 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced' | 'blocked';
+type UserType = 'customer' | 'organization' | 'admin';
 
 export interface NotificationDeliveryLog {
   notificationDeliveryLogId: string;

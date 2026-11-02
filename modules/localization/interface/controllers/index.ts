@@ -4,7 +4,6 @@ export {
   updateStoreSettings,
   businessInfo,
   updateBusinessInfo,
-  localizationSettings as adminLocalizationSettings,
   createLanguage as createLanguageSetting,
   updateLanguage as updateLanguageSetting,
   deleteLanguage as deleteLanguageSetting,

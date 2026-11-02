@@ -39,14 +39,9 @@ const ENTITY_ID_MAP: Record<TranslatableEntityType, string> = {
   attributeOption: 'productAttributeOptionId',
 };
 
-export interface TranslationFilters {
-  entityType?: TranslatableEntityType;
-  entityId?: string;
-  localeId?: string;
-  localeCode?: string;
-  isApproved?: boolean;
-  isAutoTranslated?: boolean;
-}
+// ============================================================================
+// Generic Translation Functions
+// ============================================================================
 
 // ============================================================================
 // Product Translation Repository
@@ -281,10 +276,6 @@ export async function saveCategoryTranslation(data: {
   }
 }
 
-// ============================================================================
-// Generic Translation Functions
-// ============================================================================
-
 /**
  * Get all translations for an entity
  */
@@ -406,3 +397,4 @@ export async function bulkApproveTranslations(
 
   return (result as { rowCount?: number } | null)?.rowCount || 0;
 }
+

@@ -9,9 +9,9 @@ import type { ProductRepository } from '../../domain/repositories/ProductReposit
 // Ports
 // ============================================================================
 
-export type GroupedRelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
+type GroupedRelationType = 'related' | 'accessory' | 'bundle' | 'cross_sell' | 'up_sell' | 'grouped';
 
-export interface ProductRelationshipRecord {
+interface ProductRelationshipRecord {
   productRelatedId: string;
   productId: string;
   relatedProductId: string;

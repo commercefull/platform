@@ -49,7 +49,7 @@ export function normalizeInventoryPolicy(value: unknown): string {
 export type ProductVariantCreateProps = Omit<ProductVariant, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type ProductVariantUpdateProps = Partial<Omit<ProductVariant, 'id' | 'productId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 
-export type VariantOption = {
+type VariantOption = {
   name: string;
   value: string;
 };
@@ -98,7 +98,7 @@ function parseVariantRow(row: Record<string, unknown> | null): Record<string, un
   };
 }
 
-export class ProductVariantRepo {
+class ProductVariantRepo {
   /**
    * Convert camelCase property name to snake_case column name
    */

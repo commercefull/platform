@@ -26,7 +26,7 @@ export type RuleCondition =
   | 'currency';
 export type ActionType = 'discountByPercentage' | 'discountByAmount' | 'discountShipping' | 'freeItem' | 'discountByTier' | 'freeGift';
 
-export interface CreateRuleInput {
+interface CreateRuleInput {
   name?: string;
   condition: RuleCondition;
   operator: string;
@@ -34,7 +34,7 @@ export interface CreateRuleInput {
   isActive?: boolean;
 }
 
-export interface CreateActionInput {
+interface CreateActionInput {
   type: ActionType;
   value: number;
   targetType?: string;

@@ -4,9 +4,9 @@
  * Domain entities for automated reporting and analytics predictions.
  */
 
-export type ReportType = 'sales' | 'customers' | 'products' | 'inventory' | 'executive';
-export type ReportFormat = 'pdf' | 'excel' | 'csv' | 'html';
-export type ReportScheduleType = 'daily' | 'weekly' | 'monthly' | 'quarterly';
+type ReportType = 'sales' | 'customers' | 'products' | 'inventory' | 'executive';
+type ReportFormat = 'pdf' | 'excel' | 'csv' | 'html';
+type ReportScheduleType = 'daily' | 'weekly' | 'monthly' | 'quarterly';
 
 export interface ReportSchedule {
   reportScheduleId: string;

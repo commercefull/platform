@@ -21,7 +21,7 @@ export interface EarnPointsOutput {
   newBalance: number;
 }
 
-export interface EarnPointsMember {
+interface EarnPointsMember {
   memberId: string;
   tierId: string;
   availablePoints: number;
@@ -31,7 +31,7 @@ export interface EarnPointsMember {
   };
 }
 
-export interface EarnPointsProgram {
+interface EarnPointsProgram {
   programId: string;
   defaultTierId: string;
   baseEarnRate?: number;

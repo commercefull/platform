@@ -18,19 +18,6 @@ import type {
   OrderFulfillmentPackageCreateParams,
   OrderFulfillmentPackageTrackingParams,
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
-export type {
-  FulfillmentType,
-  FulfillmentStatus,
-  OrderFulfillment,
-  OrderFulfillmentCreateParams,
-  OrderFulfillmentUpdateParams,
-} from '../../domain/repositories/OrderFulfillmentRepository';
-export type {
-  OrderFulfillmentPackage,
-  OrderFulfillmentPackageCreateParams,
-  OrderFulfillmentPackageTrackingParams,
-} from '../../domain/repositories/OrderFulfillmentPackageRepository';
-
 const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
@@ -74,7 +61,7 @@ function mapToPackage(row: DbOrderFulfillmentPackage): OrderFulfillmentPackage {
   };
 }
 
-export class OrderFulfillmentRepo {
+class OrderFulfillmentRepo {
   /**
    * Generate unique fulfillment number
    */

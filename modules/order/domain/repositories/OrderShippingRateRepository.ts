@@ -21,7 +21,4 @@ export interface OrderShippingRate {
 
 export type OrderShippingRateCreateParams = Omit<OrderShippingRate, 'orderShippingRateId' | 'createdAt' | 'updatedAt'>;
 
-export interface OrderShippingRateRepository {
-  findByOrder(orderId: string): Promise<OrderShippingRate[]>;
-  create(params: OrderShippingRateCreateParams): Promise<OrderShippingRate>;
-}
+

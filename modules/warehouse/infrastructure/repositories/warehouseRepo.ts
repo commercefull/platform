@@ -22,10 +22,10 @@ import { WarehouseCodeAlreadyExistsError, FailedToCreateWarehouseError } from '.
 // ============================================================================
 
 import type { WarehouseRecord, WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
-export type { WarehouseRecord, WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
+export type { WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
 export type Warehouse = WarehouseRecord;
 
-export class WarehouseRepo {
+class WarehouseRepo {
   /**
    * Find warehouse by ID
    */

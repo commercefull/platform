@@ -16,7 +16,7 @@ export interface ListWarehousesInput {
   };
 }
 
-export interface WarehouseSummary {
+interface WarehouseSummary {
   warehouseId: string;
   name: string;
   code: string;

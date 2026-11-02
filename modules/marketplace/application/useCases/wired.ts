@@ -16,6 +16,3 @@ export const managePayoutUseCase = new ManagePayoutUseCase(payoutRepo, vendorRep
 
 export const marketplaceController = new MarketplaceController(manageVendorUseCase, manageCommissionRuleUseCase, managePayoutUseCase);
 
-export { ManageVendorUseCase, ManageCommissionRuleUseCase, ManagePayoutUseCase };
-
-export { VendorRepositoryImpl, CommissionRuleRepositoryImpl, VendorPayoutRepositoryImpl } from '../../infrastructure';

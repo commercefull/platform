@@ -14,22 +14,22 @@ export type UpdateShippingMethodInput = Partial<Omit<ShippingMethod, 'shippingMe
 
 const TABLE = Table.ShippingMethod;
 
-export async function findById(id: string): Promise<ShippingMethod | null> {
+async function findById(id: string): Promise<ShippingMethod | null> {
   return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "shippingMethodId" = $1`, [id]);
 }
 
-export async function findByCode(code: string): Promise<ShippingMethod | null> {
+async function findByCode(code: string): Promise<ShippingMethod | null> {
   return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
-export async function findByCarrier(carrierId: string, activeOnly = false): Promise<ShippingMethod[]> {
+async function findByCarrier(carrierId: string, activeOnly = false): Promise<ShippingMethod[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE "shippingCarrierId" = $1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   sql += ` ORDER BY "priority" ASC`;
   return (await query<ShippingMethod[]>(sql, [carrierId])) || [];
 }
 
-export async function findAll(activeOnly = false, displayOnFrontend = false): Promise<ShippingMethod[]> {
+async function findAll(activeOnly = false, displayOnFrontend = false): Promise<ShippingMethod[]> {
   let sql = `SELECT * FROM "${TABLE}" WHERE 1=1`;
   if (activeOnly) sql += ` AND "isActive" = true`;
   if (displayOnFrontend) sql += ` AND "displayOnFrontend" = true`;
@@ -37,11 +37,11 @@ export async function findAll(activeOnly = false, displayOnFrontend = false): Pr
   return (await query<ShippingMethod[]>(sql)) || [];
 }
 
-export async function findDefault(): Promise<ShippingMethod | null> {
+async function findDefault(): Promise<ShippingMethod | null> {
   return queryOne<ShippingMethod>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
-export async function create(input: CreateShippingMethodInput): Promise<ShippingMethod> {
+async function create(input: CreateShippingMethodInput): Promise<ShippingMethod> {
   if (input.isDefault) {
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
   }
@@ -82,7 +82,7 @@ export async function create(input: CreateShippingMethodInput): Promise<Shipping
   return result;
 }
 
-export async function update(id: string, input: UpdateShippingMethodInput): Promise<ShippingMethod | null> {
+async function update(id: string, input: UpdateShippingMethodInput): Promise<ShippingMethod | null> {
   if (input.isDefault === true) {
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingMethodId" != $1`, [
       id,
@@ -112,15 +112,15 @@ export async function update(id: string, input: UpdateShippingMethodInput): Prom
   );
 }
 
-export async function activate(id: string): Promise<ShippingMethod | null> {
+async function activate(id: string): Promise<ShippingMethod | null> {
   return update(id, { isActive: true });
 }
 
-export async function deactivate(id: string): Promise<ShippingMethod | null> {
+async function deactivate(id: string): Promise<ShippingMethod | null> {
   return update(id, { isActive: false });
 }
 
-export async function deleteMethod(id: string): Promise<boolean> {
+async function deleteMethod(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingMethodId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingMethodId" = $1 RETURNING "shippingMethodId"`,
     [id],
@@ -128,7 +128,7 @@ export async function deleteMethod(id: string): Promise<boolean> {
   return !!result;
 }
 
-export async function count(activeOnly = false): Promise<number> {
+async function count(activeOnly = false): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   const result = await queryOne<{ count: string }>(sql);

@@ -14,7 +14,35 @@ import taxRuleRepo from './taxRuleRepo';
 import taxSettingsRepo from './taxSettingsRepo';
 import taxNexusRepo from './taxNexusRepo';
 import taxReportRepo from './taxReportRepo';
-import * as adminTaxRepo from './adminTaxRepo';
+import {
+  findAllTaxRates,
+  createTaxRate,
+  updateTaxRate,
+  softDeleteTaxRate,
+  findAllTaxZones,
+  createTaxZone,
+  updateTaxZone,
+  softDeleteTaxZone,
+  findAllTaxClasses,
+  createTaxClass,
+  updateTaxClass,
+  softDeleteTaxClass,
+} from './adminTaxRepo';
+
+const adminTaxRepo = {
+  findAllTaxRates,
+  createTaxRate,
+  updateTaxRate,
+  softDeleteTaxRate,
+  findAllTaxZones,
+  createTaxZone,
+  updateTaxZone,
+  softDeleteTaxZone,
+  findAllTaxClasses,
+  createTaxClass,
+  updateTaxClass,
+  softDeleteTaxClass,
+};
 
 class TaxQueryRepository {
   readonly query = taxQueryRepo;

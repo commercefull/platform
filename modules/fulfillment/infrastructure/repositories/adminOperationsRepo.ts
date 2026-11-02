@@ -9,7 +9,7 @@ import { query, queryOne } from '../../../../libs/db';
 // Types
 // ============================================================================
 
-export interface OperationsStats {
+interface OperationsStats {
   pendingFulfillments: number;
   activeWarehouses: number;
   abandonedCarts: number;
@@ -22,7 +22,7 @@ export interface OperationsStats {
 // Functions
 // ============================================================================
 
-export async function getOperationsStats(): Promise<OperationsStats> {
+async function getOperationsStats(): Promise<OperationsStats> {
   const [fulfillmentStats, warehouseStats, basketStats, inventoryStats, supplierStats] = await Promise.all([
     queryOne<{ pendingFulfillments: string }>(
       `SELECT COUNT(*) as "pendingFulfillments"
@@ -63,7 +63,7 @@ export async function getOperationsStats(): Promise<OperationsStats> {
   };
 }
 
-export async function findRecentFulfillments(limit: number = 10): Promise<unknown[]> {
+async function findRecentFulfillments(limit: number = 10): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
       `SELECT f.*, o."orderNumber"
@@ -76,7 +76,7 @@ export async function findRecentFulfillments(limit: number = 10): Promise<unknow
   );
 }
 
-export async function findWarehousesWithCounts(): Promise<unknown[]> {
+async function findWarehousesWithCounts(): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
       `SELECT w.*, COUNT(il."inventoryLevelId") as "productCount"

@@ -37,12 +37,7 @@ export interface PaymentEligibilityResult {
   eligible: boolean;
   /** Machine-readable failure reason for decision logs. */
   reasonCode?:
-    | 'ELIGIBLE'
-    | 'INACTIVE'
-    | 'CURRENCY_NOT_SUPPORTED'
-    | 'AMOUNT_BELOW_MINIMUM'
-    | 'AMOUNT_ABOVE_MAXIMUM'
-    | 'COUNTRY_NOT_SUPPORTED';
+    'ELIGIBLE' | 'INACTIVE' | 'CURRENCY_NOT_SUPPORTED' | 'AMOUNT_BELOW_MINIMUM' | 'AMOUNT_ABOVE_MAXIMUM' | 'COUNTRY_NOT_SUPPORTED';
 }
 
 export class PaymentCapabilityService {

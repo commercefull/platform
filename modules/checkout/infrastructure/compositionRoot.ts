@@ -58,7 +58,11 @@ import { calculateOrderTaxUseCase } from '../../tax/application/wired';
 import taxSettingsRepo from '../../tax/infrastructure/repositories/taxSettingsRepo';
 import StoreRepo from '../../store/infrastructure/repositories/StoreRepo';
 import { getStoreUseCase } from '../../store/application/useCases/wired';
-import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
+import {
+  getLocations,
+  getLocation,
+  findNearestLocations,
+} from '../../store/infrastructure/repositories/pickupLocationRepo';
 import InventoryRepo from '../../inventory/infrastructure/repositories/inventoryRepo';
 import { reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase } from '../../inventory/application/wired';
 import { repriceBasketUseCase } from '../../basket/application/useCases/wired';
@@ -100,7 +104,7 @@ export function getCheckoutPorts(): CheckoutPorts {
     orderPlacement: new OrderOrderPlacementAdapter(OrderRepo, createOrderUseCase, cancelOrderUseCase),
     paymentAuthorization: new PaymentPaymentAuthorizationAdapter(new InitiatePaymentUseCase(PaymentRepo)),
     fraudScreening: new PaymentFraudScreeningAdapter(screenForFraudUseCase),
-    storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, pickupLocationRepo),
+    storeFulfillment: new StoreStoreFulfillmentAdapter(StoreRepo, { getLocations, getLocation, findNearestLocations }),
     stockAvailability: new InventoryStockAvailabilityAdapter(InventoryRepo),
     inventoryReservation: new InventoryReservationAdapter(reserveStockUseCase, releaseReservationUseCase, confirmReservationUseCase),
     ...(() => {

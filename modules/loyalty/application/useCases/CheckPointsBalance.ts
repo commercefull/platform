@@ -17,7 +17,7 @@ export interface CheckPointsBalanceOutput {
   pointsToNextTier?: number;
 }
 
-export interface LoyaltyMember {
+interface LoyaltyMember {
   availablePoints: number;
   pendingPoints?: number;
   lifetimePoints: number;
@@ -28,7 +28,7 @@ export interface LoyaltyMember {
   };
 }
 
-export interface NextTierInfo {
+interface NextTierInfo {
   name: string;
   requiredPoints: number;
 }

@@ -52,7 +52,7 @@ export interface SearchQuery {
   includeFacets?: boolean;
 }
 
-export interface SearchAttributeFilter {
+interface SearchAttributeFilter {
   attributeId?: string;
   attributeCode?: string;
   value?: string;
@@ -89,7 +89,7 @@ export interface ManualOrderingContext {
   productIds: string[];
 }
 
-export type SearchSortField = 'name' | 'price' | 'createdAt' | 'popularity' | 'rating' | 'relevance' | 'manual';
+type SearchSortField = 'name' | 'price' | 'createdAt' | 'popularity' | 'rating' | 'relevance' | 'manual';
 
 export interface SearchResult {
   products: SearchProductItem[];

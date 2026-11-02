@@ -13,7 +13,7 @@ import type {
   ReportFormat,
 } from '../entities/ReportEntities';
 
-export interface CreateReportScheduleParams {
+interface CreateReportScheduleParams {
   organizationId?: string;
   name: string;
   reportType: ReportType;

@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios';
 
 // Seeded test data IDs from seeds/20240805001600_seedShippingTestData.js
 export const SEEDED_CARRIER_IDS = {
@@ -36,17 +35,6 @@ export const SEEDED_PACKAGING_IDS = {
   ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
 
-export function createTestClient(): AxiosInstance {
-  return axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-}
 
 export function createTestCarrier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();

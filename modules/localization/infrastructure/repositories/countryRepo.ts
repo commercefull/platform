@@ -4,13 +4,13 @@ import { unixTimestamp } from '../../../../libs/date';
 import { CountryCodeAlreadyExistsError, FailedToCreateCountryError } from '../../domain/errors/LocalizationErrors';
 
 // Use Country type directly from libs/db/types.ts
-export type { Country };
+export type { };
 
 // Derived types for create/update operations
 export type CountryCreateParams = Omit<Country, 'countryId' | 'createdAt' | 'updatedAt'>;
 export type CountryUpdateParams = Partial<Omit<Country, 'countryId' | 'code' | 'createdAt' | 'updatedAt'>>;
 
-export class CountryRepo {
+class CountryRepo {
   /**
    * Find country by ID
    */

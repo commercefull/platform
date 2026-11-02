@@ -8,14 +8,14 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 import type { TaxCalculationLine as DbTaxCalculationLine } from '../../../../libs/db/types';
 
-export type TaxCalculationLine = DbTaxCalculationLine;
+type TaxCalculationLine = DbTaxCalculationLine;
 
-export type TaxCalculationLineCreateParams = Omit<TaxCalculationLine, 'taxCalculationLineId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationLineUpdateParams = Partial<
+type TaxCalculationLineCreateParams = Omit<TaxCalculationLine, 'taxCalculationLineId' | 'createdAt' | 'updatedAt'>;
+type TaxCalculationLineUpdateParams = Partial<
   Omit<TaxCalculationLine, 'taxCalculationLineId' | 'calculationId' | 'createdAt' | 'updatedAt'>
 >;
 
-export class TaxCalculationLineRepo {
+class TaxCalculationLineRepo {
   async findById(id: string): Promise<TaxCalculationLine | null> {
     return await queryOne<TaxCalculationLine>(`SELECT * FROM "taxCalculationLine" WHERE "taxCalculationLineId" = $1`, [id]);
   }

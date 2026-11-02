@@ -18,8 +18,18 @@ const TEST_MERCHANT = {
 };
 
 const READINESS_DIMENSIONS = [
-  'locale', 'currency', 'catalog', 'pricing', 'tax', 'payments',
-  'shipping', 'returns', 'legal', 'compliance', 'support', 'fraud',
+  'locale',
+  'currency',
+  'catalog',
+  'pricing',
+  'tax',
+  'payments',
+  'shipping',
+  'returns',
+  'legal',
+  'compliance',
+  'support',
+  'fraud',
 ];
 
 const marketBody = (code: string) => ({

@@ -6,8 +6,44 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { isOrganizationLoggedIn } from '../../../../libs/auth';
-import * as shippingController from '../controllers/shippingController';
-
+import {
+  calculateRates,
+  createCarrier,
+  createLabel,
+  createMethod,
+  createPackagingType,
+  createRate,
+  createSurcharge,
+  createZone,
+  deleteCarrier,
+  deleteMethod,
+  deletePackagingType,
+  deleteRate,
+  deleteSurcharge,
+  deleteZone,
+  getCarrierById,
+  getCarriers,
+  getLabel,
+  getLabelsByOrder,
+  getMethodById,
+  getMethods,
+  getPackagingTypeById,
+  getPackagingTypes,
+  getRateById,
+  getRates,
+  getSurchargeById,
+  getSurchargesByRate,
+  getZoneById,
+  getZones,
+  trackShipment,
+  updateCarrier,
+  updateMethod,
+  updatePackagingType,
+  updateRate,
+  updateSurcharge,
+  updateZone,
+  voidLabel,
+} from '../controllers/shippingController';
 const router = createHttpRouter();
 
 router.use(isOrganizationLoggedIn);
@@ -16,82 +52,82 @@ router.use(isOrganizationLoggedIn);
 // Carriers
 // ============================================================================
 
-router.get('/carriers', asyncHandler(shippingController.getCarriers));
-router.get('/carriers/:id', asyncHandler(shippingController.getCarrierById));
-router.post('/carriers', asyncHandler(shippingController.createCarrier));
-router.put('/carriers/:id', asyncHandler(shippingController.updateCarrier));
-router.delete('/carriers/:id', asyncHandler(shippingController.deleteCarrier));
+router.get('/carriers', asyncHandler(getCarriers));
+router.get('/carriers/:id', asyncHandler(getCarrierById));
+router.post('/carriers', asyncHandler(createCarrier));
+router.put('/carriers/:id', asyncHandler(updateCarrier));
+router.delete('/carriers/:id', asyncHandler(deleteCarrier));
 
 // ============================================================================
 // Methods
 // ============================================================================
 
-router.get('/methods', asyncHandler(shippingController.getMethods));
-router.get('/methods/:id', asyncHandler(shippingController.getMethodById));
-router.post('/methods', asyncHandler(shippingController.createMethod));
-router.put('/methods/:id', asyncHandler(shippingController.updateMethod));
-router.delete('/methods/:id', asyncHandler(shippingController.deleteMethod));
+router.get('/methods', asyncHandler(getMethods));
+router.get('/methods/:id', asyncHandler(getMethodById));
+router.post('/methods', asyncHandler(createMethod));
+router.put('/methods/:id', asyncHandler(updateMethod));
+router.delete('/methods/:id', asyncHandler(deleteMethod));
 
 // ============================================================================
 // Zones
 // ============================================================================
 
-router.get('/zones', asyncHandler(shippingController.getZones));
-router.get('/zones/:id', asyncHandler(shippingController.getZoneById));
-router.post('/zones', asyncHandler(shippingController.createZone));
-router.put('/zones/:id', asyncHandler(shippingController.updateZone));
-router.delete('/zones/:id', asyncHandler(shippingController.deleteZone));
+router.get('/zones', asyncHandler(getZones));
+router.get('/zones/:id', asyncHandler(getZoneById));
+router.post('/zones', asyncHandler(createZone));
+router.put('/zones/:id', asyncHandler(updateZone));
+router.delete('/zones/:id', asyncHandler(deleteZone));
 
 // ============================================================================
 // Rates
 // ============================================================================
 
-router.get('/rates', asyncHandler(shippingController.getRates));
-router.get('/rates/:id', asyncHandler(shippingController.getRateById));
-router.post('/rates', asyncHandler(shippingController.createRate));
-router.put('/rates/:id', asyncHandler(shippingController.updateRate));
-router.delete('/rates/:id', asyncHandler(shippingController.deleteRate));
+router.get('/rates', asyncHandler(getRates));
+router.get('/rates/:id', asyncHandler(getRateById));
+router.post('/rates', asyncHandler(createRate));
+router.put('/rates/:id', asyncHandler(updateRate));
+router.delete('/rates/:id', asyncHandler(deleteRate));
 
 // ============================================================================
 // Packaging Types
 // ============================================================================
 
-router.get('/packaging-types', asyncHandler(shippingController.getPackagingTypes));
-router.get('/packaging-types/:id', asyncHandler(shippingController.getPackagingTypeById));
-router.post('/packaging-types', asyncHandler(shippingController.createPackagingType));
-router.put('/packaging-types/:id', asyncHandler(shippingController.updatePackagingType));
-router.delete('/packaging-types/:id', asyncHandler(shippingController.deletePackagingType));
+router.get('/packaging-types', asyncHandler(getPackagingTypes));
+router.get('/packaging-types/:id', asyncHandler(getPackagingTypeById));
+router.post('/packaging-types', asyncHandler(createPackagingType));
+router.put('/packaging-types/:id', asyncHandler(updatePackagingType));
+router.delete('/packaging-types/:id', asyncHandler(deletePackagingType));
 
 // ============================================================================
 // Rate Calculation
 // ============================================================================
 
-router.post('/calculate-rates', asyncHandler(shippingController.calculateRates));
+router.post('/calculate-rates', asyncHandler(calculateRates));
 
 // ============================================================================
 // Shipping Labels
 // ============================================================================
 
-router.post('/labels', asyncHandler(shippingController.createLabel));
-router.get('/labels/:id', asyncHandler(shippingController.getLabel));
-router.get('/labels/order/:orderId', asyncHandler(shippingController.getLabelsByOrder));
-router.post('/labels/:id/void', asyncHandler(shippingController.voidLabel));
+router.post('/labels', asyncHandler(createLabel));
+router.get('/labels/:id', asyncHandler(getLabel));
+router.get('/labels/order/:orderId', asyncHandler(getLabelsByOrder));
+router.post('/labels/:id/void', asyncHandler(voidLabel));
 
 // ============================================================================
 // Tracking
 // ============================================================================
 
-router.get('/track/:id', asyncHandler(shippingController.trackShipment));
-router.get('/track', asyncHandler(shippingController.trackShipment));
+router.get('/track/:id', asyncHandler(trackShipment));
+router.get('/track', asyncHandler(trackShipment));
 
 // ============================================================================
 // Surcharges
 // ============================================================================
 
-router.get('/rates/:rateId/surcharges', asyncHandler(shippingController.getSurchargesByRate));
-router.get('/surcharges/:id', asyncHandler(shippingController.getSurchargeById));
-router.post('/surcharges', asyncHandler(shippingController.createSurcharge));
-router.put('/surcharges/:id', asyncHandler(shippingController.updateSurcharge));
-router.delete('/surcharges/:id', asyncHandler(shippingController.deleteSurcharge));
+router.get('/rates/:rateId/surcharges', asyncHandler(getSurchargesByRate));
+router.get('/surcharges/:id', asyncHandler(getSurchargeById));
+router.post('/surcharges', asyncHandler(createSurcharge));
+router.put('/surcharges/:id', asyncHandler(updateSurcharge));
+router.delete('/surcharges/:id', asyncHandler(deleteSurcharge));
 
 export const shippingBusinessRouter = router;

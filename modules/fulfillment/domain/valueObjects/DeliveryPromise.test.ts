@@ -29,9 +29,9 @@ describe('DeliveryPromise', () => {
   });
 
   it('should reject a latestDate before earliestDate', () => {
-    expect(() =>
-      DeliveryPromise.create({ ...baseProps, latestDate: new Date('2026-10-01T00:00:00Z') }),
-    ).toThrow('latestDate must be on or after earliestDate');
+    expect(() => DeliveryPromise.create({ ...baseProps, latestDate: new Date('2026-10-01T00:00:00Z') })).toThrow(
+      'latestDate must be on or after earliestDate',
+    );
   });
 
   it('should report lateness against the latest date', () => {

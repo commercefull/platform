@@ -21,4 +21,3 @@ export { orderTypeDefs } from './interface/graphql/typeDefs';
 export { orderResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

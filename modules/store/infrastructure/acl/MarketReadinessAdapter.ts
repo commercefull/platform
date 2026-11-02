@@ -14,7 +14,7 @@ import type { MarketReadinessFacts } from '../../domain/services/MarketReadiness
 import type { MarketReadinessFactsPort } from '../../application/ports/MarketReadinessFactsPort';
 import { logger } from '../../../../libs/logger';
 
-export class MarketReadinessAdapter implements MarketReadinessFactsPort {
+class MarketReadinessAdapter implements MarketReadinessFactsPort {
   async gatherFacts(market: Market): Promise<MarketReadinessFacts> {
     const safe = async <T>(label: string, fallback: T, fn: () => Promise<T>): Promise<T> => {
       try {
@@ -74,10 +74,9 @@ export class MarketReadinessAdapter implements MarketReadinessFactsPort {
   /** Share of the market's supported locales that exist as active locales. */
   private async localeCoverage(market: Market): Promise<number> {
     if (market.supportedLocaleCodes.length === 0) return 0;
-    const row = await queryOne<{ count: string }>(
-      `SELECT COUNT(*)::text AS count FROM locale WHERE "isActive" = true AND code = ANY($1)`,
-      [market.supportedLocaleCodes],
-    );
+    const row = await queryOne<{ count: string }>(`SELECT COUNT(*)::text AS count FROM locale WHERE "isActive" = true AND code = ANY($1)`, [
+      market.supportedLocaleCodes,
+    ]);
     const active = Number(row?.count ?? 0);
     return Math.round((active / market.supportedLocaleCodes.length) * 100);
   }

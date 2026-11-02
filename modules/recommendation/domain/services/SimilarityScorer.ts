@@ -27,7 +27,7 @@ export interface SimilarityWeights {
   similarPriceBonus: number;
 }
 
-export const DEFAULT_SIMILARITY_WEIGHTS: SimilarityWeights = {
+const DEFAULT_SIMILARITY_WEIGHTS: SimilarityWeights = {
   samePrimaryCategory: 10,
   perSharedSecondaryCategory: 3,
   maxSecondaryCategoryBonus: 6,
@@ -40,12 +40,12 @@ export const DEFAULT_SIMILARITY_WEIGHTS: SimilarityWeights = {
 };
 
 /** Products whose prices differ by at most this fraction count as "similar price". */
-export function similarPriceBand(basePriceCents: number, bandPct: number): { min: number; max: number } {
+function similarPriceBand(basePriceCents: number, bandPct: number): { min: number; max: number } {
   const band = basePriceCents * (bandPct / 100);
   return { min: basePriceCents - band, max: basePriceCents + band };
 }
 
-export function similarityScore(
+function similarityScore(
   a: SimilarityFeatures,
   b: SimilarityFeatures,
   weights: SimilarityWeights = DEFAULT_SIMILARITY_WEIGHTS,

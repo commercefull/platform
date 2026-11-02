@@ -6,7 +6,7 @@
 
 import type { LoyaltyTier, LoyaltyPoints, LoyaltyTransaction, LoyaltyReward, LoyaltyRedemption } from '../entities/LoyaltyModel';
 
-export interface CreateLoyaltyTierInput {
+interface CreateLoyaltyTierInput {
   name: string;
   description?: string;
   type: string;
@@ -17,7 +17,7 @@ export interface CreateLoyaltyTierInput {
   isActive?: boolean;
 }
 
-export interface UpdateLoyaltyTierInput {
+interface UpdateLoyaltyTierInput {
   name?: string;
   description?: string;
   type?: string;
@@ -27,7 +27,7 @@ export interface UpdateLoyaltyTierInput {
   isActive?: boolean;
 }
 
-export interface CreateLoyaltyRewardInput {
+interface CreateLoyaltyRewardInput {
   name: string;
   description?: string;
   type?: string;
@@ -41,7 +41,7 @@ export interface CreateLoyaltyRewardInput {
   isActive?: boolean;
 }
 
-export interface UpdateLoyaltyRewardInput {
+interface UpdateLoyaltyRewardInput {
   name?: string;
   description?: string;
   pointsCost?: number;
@@ -54,7 +54,7 @@ export interface UpdateLoyaltyRewardInput {
   isActive?: boolean;
 }
 
-export interface CreateLoyaltyTransactionInput {
+interface CreateLoyaltyTransactionInput {
   customerId: string;
   orderId?: string;
   action: string;
@@ -63,9 +63,9 @@ export interface CreateLoyaltyTransactionInput {
   referenceId?: string;
 }
 
-export type TransactionType = 'earn' | 'redeem' | 'expire' | 'adjust' | 'bonus' | 'refund';
+type TransactionType = 'earn' | 'redeem' | 'expire' | 'adjust' | 'bonus' | 'refund';
 
-export interface CustomerLoyaltyTransaction {
+interface CustomerLoyaltyTransaction {
   customerLoyaltyTransactionId: string;
   createdAt: Date;
   customerId: string;
@@ -80,7 +80,7 @@ export interface CustomerLoyaltyTransaction {
   createdBy?: string;
 }
 
-export type CustomerLoyaltyTransactionCreateParams = Omit<CustomerLoyaltyTransaction, 'customerLoyaltyTransactionId' | 'createdAt'>;
+type CustomerLoyaltyTransactionCreateParams = Omit<CustomerLoyaltyTransaction, 'customerLoyaltyTransactionId' | 'createdAt'>;
 
 export interface LoyaltyRepository {
   // Tier Management

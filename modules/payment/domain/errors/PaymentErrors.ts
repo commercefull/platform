@@ -355,18 +355,6 @@ export class NoProvidersAvailableError extends AppError {
   }
 }
 
-export class ProviderNotSupportedError extends AppError {
-  constructor(provider: string) {
-    super(`Payment provider '${provider}' is not supported`, 400, { code: 'payment.provider_not_supported' });
-  }
-}
-
-export class CurrencyNotSupportedByProviderError extends AppError {
-  constructor(currency: string, provider: string) {
-    super(`Currency '${currency}' is not supported by provider '${provider}'`, 400, { code: 'payment.currency_not_supported_by_provider' });
-  }
-}
-
 export class PaymentValidationError extends AppError {
   constructor(message: string) {
     super(message, 400, { code: 'payment.validation_error' });

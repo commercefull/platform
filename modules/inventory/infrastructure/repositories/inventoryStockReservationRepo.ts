@@ -6,16 +6,13 @@ import { InventoryStockReservation as DbStockReservation } from '../../../../lib
 import { FailedToCreateInventoryError } from '../../domain/errors/InventoryErrors';
 
 // Re-export DB type
-export type StockReservation = DbStockReservation;
-
-// Type alias for reservation type (used in application logic)
-export type StockReservationType = 'cart' | 'order' | 'pending' | 'custom';
+type StockReservation = DbStockReservation;
 
 // Derived types for create/update operations
-export type StockReservationCreateParams = Omit<StockReservation, 'stockReservationId' | 'createdAt' | 'updatedAt'>;
-export type StockReservationUpdateParams = Partial<Omit<StockReservation, 'stockReservationId' | 'productId' | 'createdAt' | 'updatedAt'>>;
+type StockReservationCreateParams = Omit<StockReservation, 'stockReservationId' | 'createdAt' | 'updatedAt'>;
+type StockReservationUpdateParams = Partial<Omit<StockReservation, 'stockReservationId' | 'productId' | 'createdAt' | 'updatedAt'>>;
 
-export class StockReservationRepo {
+class StockReservationRepo {
   async findById(id: string): Promise<StockReservation | null> {
     return await queryOne<StockReservation>(`SELECT * FROM "inventoryStockReservation" WHERE "stockReservationId" = $1`, [id]);
   }

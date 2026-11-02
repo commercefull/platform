@@ -25,7 +25,7 @@ export class GetCustomerCommand {
 // Response
 // ============================================================================
 
-export interface CustomerAddressResponse {
+interface CustomerAddressResponse {
   addressId: string;
   addressLine1: string;
   addressLine2?: string;

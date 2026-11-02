@@ -41,7 +41,7 @@ export interface CreateTicketRecordParams {
   channel?: TicketChannel;
 }
 
-export interface AddMessageRecordParams {
+interface AddMessageRecordParams {
   supportTicketId: string;
   senderId?: string;
   senderType: SenderType;

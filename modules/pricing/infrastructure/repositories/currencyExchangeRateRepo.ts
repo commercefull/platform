@@ -12,7 +12,7 @@ export type CurrencyExchangeRateUpdateParams = Partial<
   Pick<CurrencyExchangeRate, 'rate' | 'provider' | 'providerReference' | 'effectiveFrom' | 'effectiveTo' | 'isActive' | 'updatedBy'>
 >;
 
-export class CurrencyExchangeRateRepo {
+class CurrencyExchangeRateRepo {
   /**
    * Find exchange rate by ID
    */

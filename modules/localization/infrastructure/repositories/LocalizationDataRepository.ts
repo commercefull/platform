@@ -8,13 +8,75 @@
  */
 
 import countryRepo from './countryRepo';
-import * as currencyRepo from './currencyRepo';
-import * as languageRepo from './languageRepo';
+import {
+  listCurrencies,
+  listActiveCurrencyCodes,
+  findCurrencyById,
+  createCurrency,
+  updateCurrency,
+  createExchangeRateHistory,
+  deleteCurrency,
+} from './currencyRepo';
+import {
+  listLanguages,
+  findLanguageById,
+  createLanguage,
+  updateLanguage,
+  deleteLanguage,
+} from './languageRepo';
 import localeRepo from './localeRepo';
-import * as translationRepo from './translationRepo';
+import {
+  getProductTranslation,
+  getProductTranslations,
+  saveProductTranslation,
+  deleteProductTranslation,
+  approveProductTranslation,
+  getCategoryTranslation,
+  getCategoryTranslations,
+  saveCategoryTranslation,
+  getEntityTranslations,
+  getEntityTranslation,
+  getMissingTranslations,
+  getTranslationStatistics,
+  bulkApproveTranslations,
+} from './translationRepo';
 
 // Re-export types for backward compatibility
 export type { CountryCreateParams, CountryUpdateParams } from './countryRepo';
+
+const currencyRepo = {
+  listCurrencies,
+  listActiveCurrencyCodes,
+  findCurrencyById,
+  createCurrency,
+  updateCurrency,
+  createExchangeRateHistory,
+  deleteCurrency,
+};
+
+const languageRepo = {
+  listLanguages,
+  findLanguageById,
+  createLanguage,
+  updateLanguage,
+  deleteLanguage,
+};
+
+const translationRepo = {
+  getProductTranslation,
+  getProductTranslations,
+  saveProductTranslation,
+  deleteProductTranslation,
+  approveProductTranslation,
+  getCategoryTranslation,
+  getCategoryTranslations,
+  saveCategoryTranslation,
+  getEntityTranslations,
+  getEntityTranslation,
+  getMissingTranslations,
+  getTranslationStatistics,
+  bulkApproveTranslations,
+};
 
 class LocalizationDataRepository {
   readonly countries = countryRepo;

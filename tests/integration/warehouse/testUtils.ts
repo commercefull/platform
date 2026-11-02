@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios';
 
 // Seeded test data IDs from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_IDS = {
@@ -22,17 +21,6 @@ export const SEEDED_BIN_IDS = {
   SHIP_01: '0193b002-0000-7000-8000-000000000004',
 };
 
-export function createTestClient(): AxiosInstance {
-  return axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-}
 
 export function createTestWarehouse(overrides: Partial<unknown> = {}) {
   return {

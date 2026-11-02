@@ -16,4 +16,3 @@ export * from './domain/builtInThemes';
 export { themeBusinessRouter } from './interface/routers/themeRouter';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

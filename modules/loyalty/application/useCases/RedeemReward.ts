@@ -33,7 +33,7 @@ export interface RedeemRewardOutput {
   expiresAt?: string;
 }
 
-export interface RedeemRewardData {
+interface RedeemRewardData {
   rewardId: string;
   name: string;
   type: string;
@@ -50,11 +50,11 @@ export interface RedeemRewardData {
   redemptionExpiryDays?: number | null;
 }
 
-export interface RedeemRewardCustomerData {
+interface RedeemRewardCustomerData {
   pointsBalance: number;
 }
 
-export interface RedeemRewardRedemption {
+interface RedeemRewardRedemption {
   redemptionId: string;
   expiresAt?: Date;
 }

@@ -13,8 +13,6 @@ import { RegisterCustomerUseCase } from './RegisterCustomer';
 import { ChangePasswordUseCase } from './ChangePassword';
 import { DeleteCustomerUseCase } from './DeleteCustomer';
 import { ManageCustomersUseCase } from './ManageCustomers';
-import { ManageCustomerAddressesUseCase } from './ManageCustomerAddresses';
-import { ManageWishlistUseCase } from './ManageWishlist';
 import { ManageStorefrontAddressesUseCase } from './ManageStorefrontAddresses';
 import { ManageStorefrontWishlistUseCase } from './ManageStorefrontWishlist';
 import { ManageCustomerGroupsUseCase } from './ManageCustomerGroups';
@@ -25,8 +23,7 @@ export const manageCustomerGroupsUseCase = new ManageCustomerGroupsUseCase(
   customerGroupDataRepository.memberships,
   customerDataRepository.customers,
 );
-export const manageCustomerAddressesUseCase = new ManageCustomerAddressesUseCase(customerDataRepository.addresses);
-export const manageWishlistUseCase = new ManageWishlistUseCase(customerDataRepository.wishlist);
+
 export const manageStorefrontAddressesUseCase = new ManageStorefrontAddressesUseCase(customerDataRepository.addresses);
 export const manageStorefrontWishlistUseCase = new ManageStorefrontWishlistUseCase(customerDataRepository.wishlist);
 
@@ -40,3 +37,4 @@ export const manageAddressesUseCase = new ManageAddressesUseCase(customerRepo);
 export const authenticateCustomerUseCase = new AuthenticateCustomerUseCase(customerRepo);
 export const registerCustomerUseCase = new RegisterCustomerUseCase(customerRepo);
 export const changePasswordUseCase = new ChangePasswordUseCase(customerRepo);
+

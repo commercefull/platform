@@ -19,9 +19,21 @@ import { GetLowStockItemsUseCase } from './useCases/GetLowStockItems';
 import { GetOutOfStockItemsUseCase } from './useCases/GetOutOfStockItems';
 import { ReserveStockUseCase } from './useCases/ReserveStock';
 import { ReleaseReservationUseCase } from './useCases/ReleaseReservation';
-import * as pickupLocationRepo from '../../store/infrastructure/repositories/pickupLocationRepo';
+import {
+  saveLocation,
+  getLocation,
+  getLocations,
+  updateLocation,
+  deleteLocation,
+} from '../../store/infrastructure/repositories/pickupLocationRepo';
 
-export const pickupLocationAdapter = new StorePickupLocationAdapter(pickupLocationRepo);
+export const pickupLocationAdapter = new StorePickupLocationAdapter({
+  saveLocation,
+  getLocation,
+  getLocations,
+  updateLocation,
+  deleteLocation,
+});
 export const adjustStockUseCase = new AdjustStockUseCase(inventoryDataRepository.stock);
 export const reserveLocationStockUseCase = new ReserveLocationStockUseCase(inventoryDataRepository.stock);
 export const releaseLocationReservationUseCase = new ReleaseLocationReservationUseCase(inventoryDataRepository.stock);

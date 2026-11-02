@@ -9,7 +9,7 @@ import { FailedToCreatePricingError, PriceListNotFoundError, PriceNotFoundError 
  * Uses camelCase for table and column names as per platform convention.
  * Tables: priceList, customerPriceList, customerPrice (from db/types.ts)
  */
-export class CustomerPriceRepo {
+class CustomerPriceRepo {
   private readonly priceListTable = Table.PricingPriceList;
   private readonly customerPriceListTable = Table.CustomerPriceList;
   private readonly customerPriceTable = Table.CustomerPrice;

@@ -3,7 +3,7 @@ import { Table, ProductImage } from '../../../../libs/db/types';
 import { ProductImageNotFoundError, ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 // Use ProductImage type directly from libs/db/types.ts
-export type { ProductImage };
+export type { };
 
 type CreateProps = Pick<ProductImage, 'productId' | 'url' | 'position' | 'isPrimary'> &
   Partial<Pick<ProductImage, 'productVariantId' | 'alt' | 'title' | 'width' | 'height' | 'size' | 'type' | 'isVisible'>>;
@@ -16,7 +16,7 @@ const FIELD_MAP: Record<string, string> = {
   altText: 'alt',
 };
 
-export class ProductImageRepo {
+class ProductImageRepo {
   async findById(id: string): Promise<ProductImage | null> {
     return queryOne<ProductImage>(`SELECT * FROM "${Table.ProductImage}" WHERE "productImageId" = $1`, [id]);
   }

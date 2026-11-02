@@ -5,7 +5,7 @@
  * a quote in checkout's vocabulary — not a coupon entity.
  */
 
-export interface DiscountQuote {
+interface DiscountQuote {
   code: string;
   discountAmountCents: number;
   reason?: string;

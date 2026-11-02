@@ -14,12 +14,12 @@ export interface AlertListFilters {
   status?: string;
 }
 
-export interface StockAlertRecord {
+interface StockAlertRecord {
   stockAlertId: string;
   customerId?: string | null;
 }
 
-export interface PriceAlertRecord {
+interface PriceAlertRecord {
   priceAlertId: string;
   customerId?: string | null;
 }

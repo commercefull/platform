@@ -21,5 +21,5 @@ export const listExecutionLogsUseCase = new ListExecutionLogsUseCase(logRepo);
 
 const actionHandlers = createActionHandlers(new AutomationActionEffectsImpl());
 
-export const executeAutomationRuleUseCase = new ExecuteAutomationRuleUseCase(ruleRepo, logRepo, actionHandlers);
+const executeAutomationRuleUseCase = new ExecuteAutomationRuleUseCase(ruleRepo, logRepo, actionHandlers);
 export const triggerAutomationRuleUseCase = new TriggerAutomationRuleUseCase(ruleRepo, executeAutomationRuleUseCase);

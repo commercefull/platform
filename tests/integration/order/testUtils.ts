@@ -18,23 +18,6 @@ export const loginTestUser = async (
   }
 };
 
-// Export loginTestOrganization function (organization/admin login)
-export const loginTestOrganization = async (
-  client: AxiosInstance,
-  email: string = 'merchant@example.com',
-  password: string = 'password123',
-): Promise<string> => {
-  try {
-    const response = await client.post('/business/auth/login', {
-      email,
-      password,
-    });
-
-    return response.data?.accessToken || '';
-  } catch {
-    return '';
-  }
-};
 
 // Test data for order items (used in order creation)
 export const testOrderItemData = {

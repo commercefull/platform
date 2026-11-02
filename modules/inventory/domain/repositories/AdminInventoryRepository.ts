@@ -4,7 +4,7 @@
  * with product joins, inventoryLocation, and inventoryTransaction tables
  */
 
-export interface InventoryLevelWithProduct {
+interface InventoryLevelWithProduct {
   inventoryLevelId: string;
   productId: string;
   productVariantId?: string;
@@ -18,7 +18,7 @@ export interface InventoryLevelWithProduct {
   locationName?: string;
 }
 
-export interface InventoryStats {
+interface InventoryStats {
   totalProducts: number;
   inStock: number;
   lowStock: number;

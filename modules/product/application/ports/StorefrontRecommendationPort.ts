@@ -38,9 +38,3 @@ export interface StorefrontRecommendationPort {
   ): Promise<StorefrontRecommendationItem[]>;
 }
 
-/** Default when no recommendation provider is wired. */
-export class NullStorefrontRecommendationPort implements StorefrontRecommendationPort {
-  async getForPlacement(): Promise<StorefrontRecommendationItem[]> {
-    return [];
-  }
-}

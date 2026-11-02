@@ -2,10 +2,9 @@ import { query, queryOne } from '../../../../libs/db';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
 import type { ProductQaAnswerStatus, ProductQaAnswer } from '../../domain/repositories/ProductCatalogPorts';
-export type { ProductQaAnswerStatus, ProductQaAnswer } from '../../domain/repositories/ProductCatalogPorts';
-export type ProductQaAnswerCreateParams = Omit<ProductQaAnswer, 'productQaAnswerId' | 'createdAt' | 'updatedAt'>;
+type ProductQaAnswerCreateParams = Omit<ProductQaAnswer, 'productQaAnswerId' | 'createdAt' | 'updatedAt'>;
 
-export class ProductQaAnswerRepo {
+class ProductQaAnswerRepo {
   async findByQuestion(productQaId: string, status?: ProductQaAnswerStatus): Promise<ProductQaAnswer[]> {
     let sql = `SELECT * FROM "productQaAnswer" WHERE "questionId" = $1`;
     const params: unknown[] = [productQaId];

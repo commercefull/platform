@@ -14,13 +14,7 @@ import type {
   NotificationTemplateCreateParams,
   NotificationTemplateUpdateParams,
 } from '../../domain/repositories/NotificationTemplateRepository';
-export type {
-  NotificationType,
-  NotificationChannel,
-  NotificationTemplate,
-  NotificationTemplateCreateParams,
-  NotificationTemplateUpdateParams,
-} from '../../domain/repositories/NotificationTemplateRepository';
+export type { NotificationTemplate } from '../../domain/repositories/NotificationTemplateRepository';
 
 function mapToTemplate(row: DbNotificationTemplate): NotificationTemplate {
   return {
@@ -41,7 +35,7 @@ function mapToTemplate(row: DbNotificationTemplate): NotificationTemplate {
   };
 }
 
-export class NotificationTemplateRepo {
+class NotificationTemplateRepo {
   /**
    * Find template by ID
    */

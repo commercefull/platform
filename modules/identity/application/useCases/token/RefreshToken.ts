@@ -21,7 +21,7 @@ export interface RefreshTokenOutput {
   expiresIn: number;
 }
 
-export interface RefreshTokenRecord {
+interface RefreshTokenRecord {
   token: string;
   customerId?: string;
   organizationId?: string;
@@ -39,13 +39,13 @@ export interface TokenService {
   generateRefreshToken(payload: Record<string, unknown>): Promise<string>;
 }
 
-export interface CustomerRecord {
+interface CustomerRecord {
   customerId: string;
   email: string;
   status: string;
 }
 
-export interface OrganizationRecord {
+interface OrganizationRecord {
   organizationId: string;
   email: string;
   status: string;

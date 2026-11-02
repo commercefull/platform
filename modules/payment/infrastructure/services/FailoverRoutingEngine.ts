@@ -29,7 +29,7 @@ export interface RoutingResult {
   attempts: AttemptRecord[];
 }
 
-export interface AttemptRecord {
+interface AttemptRecord {
   provider: string;
   success: boolean;
   errorCode?: string;

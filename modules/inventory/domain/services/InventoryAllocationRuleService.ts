@@ -80,4 +80,3 @@ export class InventoryAllocationRuleService {
   }
 }
 
-export const inventoryAllocationRuleService = new InventoryAllocationRuleService();

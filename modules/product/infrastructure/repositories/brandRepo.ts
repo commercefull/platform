@@ -9,7 +9,7 @@ import { BrandRepository as IBrandRepository, BrandFilters } from '../../domain/
 import { Brand, BrandStatus } from '../../domain/entities/Brand';
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
-export class BrandRepo implements IBrandRepository {
+class BrandRepo implements IBrandRepository {
   async findById(brandId: string): Promise<Brand | null> {
     const row = await queryOne<DbBrand>('SELECT * FROM brand WHERE "brandId" = $1 AND "deletedAt" IS NULL', [brandId]);
     if (!row) return null;

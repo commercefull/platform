@@ -18,7 +18,7 @@ export enum ProductVisibility {
   SEARCH = 'search',
 }
 
-export enum ProductType {
+enum ProductType {
   SIMPLE = 'simple',
   CONFIGURABLE = 'configurable',
   GROUPED = 'grouped',
@@ -90,17 +90,13 @@ export interface Product {
   updatedBy?: string;
 }
 
-// Alias for backward compatibility
-export type ProductListItem = Pick<
-  Product,
-  'productId' | 'name' | 'sku' | 'status' | 'visibility' | 'isFeatured' | 'hasVariants' | 'createdAt' | 'updatedAt'
-> & { id?: string }; // Include id alias for compatibility
+ // Include id alias for compatibility
 
-export type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
+type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
 
-export type ProductUpdateProps = Partial<Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>>;
+type ProductUpdateProps = Partial<Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>>;
 
-export interface ProductFilterOptions {
+interface ProductFilterOptions {
   status?: ProductStatus | ProductStatus[];
   visibility?: ProductVisibility | ProductVisibility[];
   type?: ProductType | ProductType[];
@@ -118,7 +114,7 @@ export interface ProductFilterOptions {
   orderDirection?: 'ASC' | 'DESC';
 }
 
-export class ProductRepo {
+class ProductRepo {
   private readonly tableName = Table.Product;
 
   /**
@@ -734,5 +730,6 @@ export class ProductRepo {
     return this.update(id, { status: ProductStatus.DRAFT });
   }
 }
+
 
 export default new ProductRepo();

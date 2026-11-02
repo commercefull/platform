@@ -16,12 +16,12 @@ import type { TaxZone as DbTaxZone } from '../../../../libs/db/types';
 // Types
 // ============================================================================
 
-export type TaxZone = DbTaxZone;
+type TaxZone = DbTaxZone;
 
-export type TaxZoneCreateParams = Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>;
-export type TaxZoneUpdateParams = Partial<Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>>;
+type TaxZoneCreateParams = Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>;
+type TaxZoneUpdateParams = Partial<Omit<TaxZone, 'taxZoneId' | 'createdAt' | 'updatedAt'>>;
 
-export class TaxZoneRepo {
+class TaxZoneRepo {
   async findById(id: string): Promise<TaxZone | null> {
     return await queryOne<TaxZone>(`SELECT * FROM "taxZone" WHERE "taxZoneId" = $1`, [id]);
   }

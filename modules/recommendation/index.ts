@@ -18,15 +18,5 @@ export * from './domain/errors/RecommendationErrors';
 
 export { recommendationCustomerRouter } from './interface/routers/recommendationCustomerRouter';
 export { recommendationBusinessRouter } from './interface/routers/recommendationBusinessRouter';
-export {
-  recommendationsDashboard,
-  createRecommendationRule,
-  deleteRecommendationRule,
-  createRecommendationExclusion,
-  deleteRecommendationExclusion,
-  productSuggestionsPartial,
-  acceptProductSuggestion,
-  hideProductSuggestion,
-} from './interface/controllers/adminRecommendationController';
+export { recommendationsDashboard, createRecommendationRule, deleteRecommendationRule, createRecommendationExclusion, deleteRecommendationExclusion, productSuggestionsPartial, acceptProductSuggestion, hideProductSuggestion } from './interface/controllers/adminRecommendationController';
 
-export { manifest } from './manifest';

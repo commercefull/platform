@@ -3,16 +3,16 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductMedia as DbProductMedia } from '../../../../libs/db/types';
 
-export type MediaType = 'image' | 'video' | 'document' | '3d_model' | 'audio';
+type MediaType = 'image' | 'video' | 'document' | '3d_model' | 'audio';
 
-export type ProductMedia = DbProductMedia;
+type ProductMedia = DbProductMedia;
 
-export type ProductMediaCreateParams = Omit<ProductMedia, 'productMediaId' | 'createdAt' | 'updatedAt'>;
-export type ProductMediaUpdateParams = Partial<
+type ProductMediaCreateParams = Omit<ProductMedia, 'productMediaId' | 'createdAt' | 'updatedAt'>;
+type ProductMediaUpdateParams = Partial<
   Pick<ProductMedia, 'url' | 'filename' | 'altText' | 'title' | 'sortOrder' | 'isPrimary' | 'width' | 'height' | 'duration'>
 >;
 
-export class ProductMediaRepo {
+class ProductMediaRepo {
   /**
    * Find media by ID
    */

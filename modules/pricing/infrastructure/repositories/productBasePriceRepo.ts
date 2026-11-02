@@ -28,7 +28,7 @@ function mapRow(row: DbProductBasePrice): ProductBasePrice {
   };
 }
 
-export class ProductBasePriceRepo {
+class ProductBasePriceRepo {
   private readonly tableName = Table.ProductBasePrice;
 
   /**

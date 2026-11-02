@@ -69,7 +69,7 @@ export interface CreateDiscountItemInput {
 /**
  * Repository for managing product discounts
  */
-export class DiscountRepo {
+class DiscountRepo {
   /**
    * Create a new product discount
    */

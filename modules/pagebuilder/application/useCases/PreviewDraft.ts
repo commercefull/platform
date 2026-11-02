@@ -5,10 +5,6 @@ import { themeRegistry } from '../../../theme/domain/services/ThemeRegistry';
 import { ThemeRepository } from '../../../theme/domain/repositories/ThemeRepository';
 import { PageDraftNotFoundError } from '../../domain/errors/PageBuilderErrors';
 
-export interface PreviewDraftCommand {
-  draftId: string;
-}
-
 export interface PreviewData {
   draft: PageDraft;
   theme: {

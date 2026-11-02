@@ -454,63 +454,6 @@ export type EventType =
   | 'recommendation.rule_updated'
   | 'recommendation.rule_deleted';
 
-/**
- * Planned event types for modules not yet implemented.
- * These are NOT emitted by any code today. When a module is built,
- * move its events into `EventType` above.
- * See docs/architecture/gap-analysis-and-roadmap.md for the roadmap.
- */
-export type PlannedEventType =
-  // Marketing events (no marketing module)
-  | 'campaign.created'
-  | 'campaign.scheduled'
-  | 'campaign.sent'
-  | 'campaign.email.opened'
-  | 'campaign.email.clicked'
-  | 'abandoned_cart.detected'
-  | 'abandoned_cart.email_sent'
-  | 'abandoned_cart.recovered'
-  | 'affiliate.applied'
-  | 'affiliate.approved'
-  | 'affiliate.commission.created'
-  | 'affiliate.commission.paid'
-  | 'referral.created'
-  | 'referral.converted'
-  | 'referral.rewarded'
-  // Gift Card events (no giftcard module)
-  | 'giftcard.created'
-  | 'giftcard.activated'
-  | 'giftcard.redeemed'
-  | 'giftcard.reloaded'
-  | 'giftcard.expired'
-  // Bundle events (no bundle module)
-  | 'bundle.created'
-  | 'bundle.purchased'
-  // Pre-Order events (no preorder module)
-  | 'preorder.created'
-  | 'preorder.reserved'
-  | 'preorder.fulfilled'
-  | 'preorder.cancelled'
-  // Pickup events (no pickup module)
-  | 'pickup.created'
-  | 'pickup.ready'
-  | 'pickup.notified'
-  | 'pickup.completed'
-  | 'pickup.expired'
-  // Fraud events (no fraud module)
-  | 'fraud.check.created'
-  | 'fraud.check.flagged'
-  | 'fraud.check.blocked'
-  | 'fraud.check.reviewed'
-  | 'fraud.blacklist.added'
-  // Channel events (no channel module)
-  | 'channel.created'
-  | 'channel.updated'
-  | 'channel.activated'
-  | 'channel.deactivated'
-  | 'channel.products_assigned'
-  | 'channel.warehouse_assigned';
-
 export interface EventPayload {
   type: EventType;
   data: unknown;

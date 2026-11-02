@@ -6,7 +6,7 @@
 
 import { SupplierValidationError } from '../../domain/errors/SupplierErrors';
 
-export interface ReceivingItemInput {
+interface ReceivingItemInput {
   productId: string;
   sku: string;
   name: string;

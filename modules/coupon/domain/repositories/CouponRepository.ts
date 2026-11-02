@@ -7,7 +7,7 @@
 import { Coupon, CouponUsage } from '../entities/Coupon';
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
-export interface CouponFilters {
+interface CouponFilters {
   code?: string;
   isActive?: boolean;
   type?: string;

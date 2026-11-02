@@ -21,7 +21,7 @@ import type { Promotion, PromotionAction, PromotionRule } from '../entities/Prom
 // Context
 // ============================================================================
 
-export interface PromotionItemContext {
+interface PromotionItemContext {
   productId: string;
   productVariantId?: string;
   name: string;
@@ -52,14 +52,14 @@ export interface PromotionEvaluationContext {
 // Result
 // ============================================================================
 
-export interface LineItemDiscount {
+interface LineItemDiscount {
   productId: string;
   discountAmountCents: number;
   promotionId: string;
   promotionName: string;
 }
 
-export interface FreeItemAction {
+interface FreeItemAction {
   productId: string;
   quantity: number;
   promotionId: string;

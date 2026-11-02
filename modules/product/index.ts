@@ -16,7 +16,6 @@ export * from './domain/entities/CatalogFeature';
 export * from './domain/entities/Brand';
 
 // Infrastructure exports (repository singletons)
-export { brandRepo } from './infrastructure';
 
 // Interface exports (routers, GraphQL)
 export { productCustomerRouter } from './interface/routers/productCustomerRouter';
@@ -27,4 +26,3 @@ export { productTypeDefs } from './interface/graphql/typeDefs';
 export { productResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

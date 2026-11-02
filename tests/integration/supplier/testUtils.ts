@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios';
 
 // Seeded test data IDs from seeds/20240805001800_seedSupplierTestData.js
 export const SEEDED_SUPPLIER_IDS = {
@@ -13,11 +12,6 @@ export const SEEDED_SUPPLIER_ADDRESS_IDS = {
   GLOBAL_HQ: '01938001-0000-7000-8000-000000000003',
 };
 
-export const SEEDED_SUPPLIER_PRODUCT_IDS = {
-  WIDGET_A: '01938002-0000-7000-8000-000000000001',
-  WIDGET_B: '01938002-0000-7000-8000-000000000002',
-  GADGET_X: '01938002-0000-7000-8000-000000000003',
-};
 
 export const SEEDED_PURCHASE_ORDER_IDS = {
   PO_001: '01938003-0000-7000-8000-000000000001',
@@ -27,17 +21,6 @@ export const SEEDED_PURCHASE_ORDER_IDS = {
 // Warehouse ID from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_ID = '0193b000-0000-7000-8000-000000000001';
 
-export function createTestClient(): AxiosInstance {
-  return axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-}
 
 export function createTestSupplier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();

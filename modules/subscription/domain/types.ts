@@ -5,11 +5,11 @@
  * Infrastructure imports these — never the reverse.
  */
 
-export type BillingInterval = 'day' | 'week' | 'month' | 'year';
-export type BillingAnchor = 'subscription_start' | 'month_start' | 'specific_day';
+type BillingInterval = 'day' | 'week' | 'month' | 'year';
+type BillingAnchor = 'subscription_start' | 'month_start' | 'specific_day';
 export type SubscriptionStatus = 'pending' | 'trialing' | 'active' | 'paused' | 'past_due' | 'cancelled' | 'expired';
 export type SubscriptionOrderStatus = 'pending' | 'processing' | 'paid' | 'failed' | 'refunded' | 'skipped';
-export type PauseStatus = 'active' | 'resumed' | 'expired' | 'cancelled';
+type PauseStatus = 'active' | 'resumed' | 'expired' | 'cancelled';
 export type DunningStatus = 'pending' | 'processing' | 'success' | 'failed' | 'skipped';
 
 export interface SubscriptionProduct {

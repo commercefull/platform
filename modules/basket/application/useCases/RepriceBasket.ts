@@ -16,7 +16,7 @@ import { BasketNotFoundError } from '../../domain/errors/BasketErrors';
 import type { ProductPricePort } from '../ports/ProductPricePort';
 import { Money } from '../../../../libs/money';
 
-export interface RepriceChange {
+interface RepriceChange {
   basketItemId: string;
   productId: string;
   productVariantId?: string;

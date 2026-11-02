@@ -33,7 +33,7 @@ interface FindAllOptions {
  * Uses camelCase for table and column names as per platform convention.
  * Table: tierPrice (from db/types.ts)
  */
-export class TierPriceRepo {
+class TierPriceRepo {
   private readonly tableName = Table.ProductTierPrice;
 
   /**

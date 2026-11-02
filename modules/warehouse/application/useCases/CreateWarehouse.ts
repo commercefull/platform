@@ -7,7 +7,7 @@
 import { eventBus } from '../../../../libs/events/eventBus';
 import { WarehouseCodeAlreadyExistsError } from '../../domain/errors/WarehouseErrors';
 
-export type WarehouseType = 'warehouse' | 'store' | 'fulfillment_center' | 'distribution_center';
+type WarehouseType = 'warehouse' | 'store' | 'fulfillment_center' | 'distribution_center';
 
 export interface CreateWarehouseInput {
   name: string;

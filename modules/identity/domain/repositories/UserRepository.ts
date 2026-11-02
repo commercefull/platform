@@ -5,7 +5,7 @@
 import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 import { User, UserType, UserStatus } from '../entities/User';
 
-export interface UserFilters {
+interface UserFilters {
   userType?: UserType;
   status?: UserStatus;
   emailVerified?: boolean;

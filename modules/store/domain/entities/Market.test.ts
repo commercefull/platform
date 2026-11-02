@@ -26,15 +26,11 @@ describe('store/domain/Market', () => {
   });
 
   it('should throw when default currency is not in supported list', () => {
-    expect(() =>
-      Market.create({ ...base, defaultCurrencyCode: 'EUR', supportedCurrencyCodes: ['GBP'] }),
-    ).toThrow(MarketValidationError);
+    expect(() => Market.create({ ...base, defaultCurrencyCode: 'EUR', supportedCurrencyCodes: ['GBP'] })).toThrow(MarketValidationError);
   });
 
   it('should throw when default locale is not in supported list', () => {
-    expect(() =>
-      Market.create({ ...base, defaultLocaleCode: 'fr-FR', supportedLocaleCodes: ['de-DE'] }),
-    ).toThrow(MarketValidationError);
+    expect(() => Market.create({ ...base, defaultLocaleCode: 'fr-FR', supportedLocaleCodes: ['de-DE'] })).toThrow(MarketValidationError);
   });
 
   it('should report country/currency/locale support case-insensitively where appropriate', () => {

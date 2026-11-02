@@ -8,7 +8,7 @@
 import { query, queryOne } from '../../../../libs/db';
 import type { Currency as DbCurrency } from 'libs/db/types';
 
-export type CurrencyRecord = DbCurrency & { exchangeRate?: number };
+type CurrencyRecord = DbCurrency & { exchangeRate?: number };
 
 // Latest active rate vs the base (default) currency
 const LATEST_RATE = `(
@@ -37,6 +37,10 @@ async function writeExchangeRate(targetCurrencyId: string, rate: number, effecti
   );
 }
 
+async function findCurrencyByCode(code: string): Promise<CurrencyRecord | null> {
+  return queryOne<CurrencyRecord>(`SELECT c.*, ${LATEST_RATE} FROM "currency" c WHERE c."code" = $1`, [code.toUpperCase()]);
+}
+
 export async function listCurrencies(): Promise<CurrencyRecord[]> {
   const rows = await query<CurrencyRecord[]>(`SELECT c.*, ${LATEST_RATE} FROM "currency" c ORDER BY c."name"`);
   return rows || [];
@@ -51,10 +55,6 @@ export async function listActiveCurrencyCodes(): Promise<{ code: string; name: s
 
 export async function findCurrencyById(currencyId: string): Promise<CurrencyRecord | null> {
   return queryOne<CurrencyRecord>(`SELECT c.*, ${LATEST_RATE} FROM "currency" c WHERE c."currencyId" = $1`, [currencyId]);
-}
-
-export async function findCurrencyByCode(code: string): Promise<CurrencyRecord | null> {
-  return queryOne<CurrencyRecord>(`SELECT c.*, ${LATEST_RATE} FROM "currency" c WHERE c."code" = $1`, [code.toUpperCase()]);
 }
 
 export async function createCurrency(params: {
@@ -127,3 +127,4 @@ export async function createExchangeRateHistory(data: {
 export async function deleteCurrency(currencyId: string): Promise<void> {
   await query(`DELETE FROM "currency" WHERE "currencyId" = $1`, [currencyId]);
 }
+

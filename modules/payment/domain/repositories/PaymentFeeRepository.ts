@@ -10,11 +10,5 @@ export interface PaymentFee {
   updatedAt: Date;
 }
 
-export type PaymentFeeCreateParams = Omit<PaymentFee, 'paymentFeeId' | 'createdAt' | 'updatedAt'>;
 
-export interface PaymentFeeRepository {
-  findByTransaction(transactionId: string): Promise<PaymentFee[]>;
-  create(params: PaymentFeeCreateParams): Promise<PaymentFee | null>;
-  sumByMerchant(organizationId: string, currency: string): Promise<number>;
-  findAll(limit?: number): Promise<PaymentFee[]>;
-}
+

@@ -19,7 +19,7 @@ export interface ConvertCurrencyOutput {
   convertedAt: string;
 }
 
-export interface CurrencyWithRate {
+interface CurrencyWithRate {
   currencyId: string;
   code: string;
   exchangeRate: number;

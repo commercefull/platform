@@ -7,7 +7,7 @@
  * `ListCatalogFeaturesUseCase`. Prices are integer cents.
  */
 
-export interface CatalogFeatureAttributeValue {
+interface CatalogFeatureAttributeValue {
   attributeId: string;
   value: string;
 }

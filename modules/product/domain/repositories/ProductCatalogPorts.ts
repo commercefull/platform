@@ -393,7 +393,7 @@ export interface ProductTypePort {
 // Product Variants (infra-typed port for variant repo)
 // ============================================================================
 
-export interface ProductVariantFilters {
+interface ProductVariantFilters {
   productId?: string;
   sku?: string;
   isActive?: boolean;
@@ -402,7 +402,7 @@ export interface ProductVariantFilters {
   attributes?: Record<string, string>;
 }
 
-export interface ProductVariantRow {
+interface ProductVariantRow {
   variantId: string;
   productId: string;
   sku: string;
@@ -434,15 +434,6 @@ export interface ProductVariantPort {
   findAll(filters: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<ProductVariantRow>>;
 }
 
-// Fallback for infra repos that return domain entities
-export interface ProductVariantSavePort {
-  findById(variantId: string): Promise<unknown>;
-  findBySku(sku: string): Promise<unknown>;
-  findByProductId(productId: string): Promise<unknown[]>;
-  save(variant: unknown): Promise<unknown>;
-  delete(variantId: string): Promise<void>;
-  findAll(filters: ProductVariantFilters, pagination?: PaginationOptions): Promise<PaginatedResult<unknown>>;
-}
 
 // ============================================================================
 // Dynamic Attributes
@@ -506,12 +497,12 @@ export interface ProductAttributeData {
   valueDate?: Date;
 }
 
-export interface SetProductAttributeInput {
+interface SetProductAttributeInput {
   attributeId: string;
   value: string;
 }
 
-export interface SetProductAttributeSingleInput {
+interface SetProductAttributeSingleInput {
   productId: string;
   attributeId: string;
   value: string;

@@ -42,4 +42,4 @@ export const cancelChannelSessionUseCase = new CancelChannelSessionUseCase(chann
 
 export const generateProductFeedUseCase = new GenerateProductFeedUseCase(ports.channelCatalog);
 
-export { channelSessionRepository, idempotencyRepository, ports as agenticCheckoutPorts };
+export { idempotencyRepository, ports as agenticCheckoutPorts };

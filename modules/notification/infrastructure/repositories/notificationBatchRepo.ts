@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export interface NotificationBatch {
+interface NotificationBatch {
   notificationBatchId: string;
   name: string;
   type: string;
@@ -16,7 +16,7 @@ export interface NotificationBatch {
   updatedAt: Date;
 }
 
-export async function create(
+async function create(
   params: Pick<NotificationBatch, 'name' | 'type' | 'channel' | 'targetCount' | 'scheduledAt'>,
 ): Promise<NotificationBatch | null> {
   const now = new Date();
@@ -50,11 +50,11 @@ export async function create(
   );
 }
 
-export async function findById(notificationBatchId: string): Promise<NotificationBatch | null> {
+async function findById(notificationBatchId: string): Promise<NotificationBatch | null> {
   return queryOne<NotificationBatch>(`SELECT * FROM "notificationBatch" WHERE "notificationBatchId" = $1`, [notificationBatchId]);
 }
 
-export async function updateProgress(notificationBatchId: string, sentCount: number, failedCount: number): Promise<void> {
+async function updateProgress(notificationBatchId: string, sentCount: number, failedCount: number): Promise<void> {
   await query(`UPDATE "notificationBatch" SET "sentCount" = $1, "failedCount" = $2, "updatedAt" = $3 WHERE "notificationBatchId" = $4`, [
     sentCount,
     failedCount,
@@ -63,7 +63,7 @@ export async function updateProgress(notificationBatchId: string, sentCount: num
   ]);
 }
 
-export async function complete(notificationBatchId: string): Promise<void> {
+async function complete(notificationBatchId: string): Promise<void> {
   const now = new Date();
   await query(
     `UPDATE "notificationBatch" SET status = 'completed', "completedAt" = $1, "updatedAt" = $2 WHERE "notificationBatchId" = $3`,
@@ -71,14 +71,14 @@ export async function complete(notificationBatchId: string): Promise<void> {
   );
 }
 
-export async function findAll(limit: number = 50, offset: number = 0): Promise<NotificationBatch[]> {
+async function findAll(limit: number = 50, offset: number = 0): Promise<NotificationBatch[]> {
   return (
     (await query<NotificationBatch[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset])) ||
     []
   );
 }
 
-export async function count(): Promise<number> {
+async function count(): Promise<number> {
   const result = await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM "notificationBatch"`);
   return result ? parseInt(result.count, 10) : 0;
 }

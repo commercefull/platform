@@ -21,8 +21,4 @@ export type OrderShippingUpdateParams = Partial<
   >
 >;
 
-export interface OrderShippingRepository {
-  findByOrder(orderId: string): Promise<OrderShipping[]>;
-  create(params: OrderShippingCreateParams): Promise<OrderShipping>;
-  update(orderShippingId: string, params: OrderShippingUpdateParams): Promise<OrderShipping | null>;
-}
+

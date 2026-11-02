@@ -6,10 +6,10 @@
 
 import type { ContentNavigation, ContentNavigationItem } from '../entities/ContentModel';
 
-export type ContentNavigationCreateParams = Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>;
-export type ContentNavigationUpdateParams = Partial<Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>>;
-export type ContentNavigationItemCreateParams = Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>;
-export type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>>;
+type ContentNavigationCreateParams = Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>;
+type ContentNavigationUpdateParams = Partial<Omit<ContentNavigation, 'contentNavigationId' | 'createdAt' | 'updatedAt'>>;
+type ContentNavigationItemCreateParams = Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>;
+type ContentNavigationItemUpdateParams = Partial<Omit<ContentNavigationItem, 'contentNavigationItemId' | 'createdAt' | 'updatedAt'>>;
 
 export interface IContentNavigationRepository {
   // Navigation methods

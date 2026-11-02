@@ -4,7 +4,6 @@
  */
 
 export * from './application/useCases';
-export { getCheckoutPorts, type CheckoutPorts } from './infrastructure/compositionRoot';
 export * from './domain/repositories/CheckoutRepository';
 
 export * from './domain/events/CheckoutEvents';
@@ -16,4 +15,3 @@ export { checkoutTypeDefs } from './interface/graphql/typeDefs';
 export { checkoutResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

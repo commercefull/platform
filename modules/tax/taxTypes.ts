@@ -1,5 +1,5 @@
 // Tax Types
-export type TaxCalculationMethod = 'unit_based' | 'row_based' | 'total_based';
+type TaxCalculationMethod = 'unit_based' | 'row_based' | 'total_based';
 export type TaxRateType = 'percentage' | 'fixed';
 export type TaxExemptionStatus = 'pending' | 'approved' | 'active' | 'expired' | 'revoked' | 'rejected';
 export type TaxExemptionType =
@@ -120,7 +120,7 @@ export type TaxSettings = {
   updatedAt: number;
 };
 
-export type TaxBreakdownItem = {
+type TaxBreakdownItem = {
   rateId: string;
   rateName: string;
   rateValue: number;

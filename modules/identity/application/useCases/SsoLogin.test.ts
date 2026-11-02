@@ -70,17 +70,15 @@ describe('SsoLoginUseCase', () => {
 
   it('should create a new user after SAML callback when the email is unknown', async () => {
     samlRepo.findById.mockResolvedValue(createSamlProvider());
-    jest
-      .spyOn(SamlAssertionParser.prototype, 'parse')
-      .mockReturnValue({
-        nameId: 'n',
-        nameIdFormat: 'emailAddress',
-        sessionIndex: 's',
-        attributes: {},
-        issuer: 'idp',
-        notBefore: new Date(),
-        notOnOrAfter: new Date(),
-      });
+    jest.spyOn(SamlAssertionParser.prototype, 'parse').mockReturnValue({
+      nameId: 'n',
+      nameIdFormat: 'emailAddress',
+      sessionIndex: 's',
+      attributes: {},
+      issuer: 'idp',
+      notBefore: new Date(),
+      notOnOrAfter: new Date(),
+    });
     jest
       .spyOn(SamlAssertionParser.prototype, 'mapToUserInfo')
       .mockReturnValue({ email: 'new@x.test', firstName: 'N', lastName: 'U', externalId: 'ext-2', rawAttributes: {} });

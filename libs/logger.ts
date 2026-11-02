@@ -7,7 +7,7 @@ import { stringify } from './strings';
 import { getCorrelationId } from './correlationId';
 
 // Custom TransformableInfo interface
-export interface TransformableInfo {
+interface TransformableInfo {
   level: string;
   message: unknown;
   [key: string | symbol]: unknown;

@@ -18,7 +18,7 @@ import type { Supplier as DbSupplier } from '../../../../libs/db/types';
 
 export type SupplierStatus = 'active' | 'inactive' | 'pending' | 'suspended' | 'blacklisted';
 
-export type Supplier = DbSupplier;
+type Supplier = DbSupplier;
 
 export type SupplierCreateParams = Omit<Supplier, 'supplierId' | 'createdAt' | 'updatedAt'>;
 export type SupplierUpdateParams = Partial<Omit<Supplier, 'supplierId' | 'code' | 'createdAt' | 'updatedAt'>>;
@@ -33,7 +33,7 @@ export interface SupplierFilters {
   currency?: string;
 }
 
-export class SupplierRepo {
+class SupplierRepo {
   /**
    * Find supplier by ID
    */

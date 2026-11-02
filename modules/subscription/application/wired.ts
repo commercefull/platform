@@ -1,4 +1,77 @@
-import * as subscriptionRepo from '../infrastructure/repositories/subscriptionRepo';
+import {
+  advanceBillingCycle as subscriptionRepo_advanceBillingCycle,
+  cancelSubscription as subscriptionRepo_cancelSubscription,
+  cancelSubscriptionStorefront,
+  createCustomerSubscription,
+  createDunningAttempt,
+  createSubscriptionOrder as subscriptionRepo_createSubscriptionOrder,
+  deleteSubscriptionPlan,
+  deleteSubscriptionProduct,
+  findActiveByCustomerId,
+  findActivePlansWithProduct,
+  findBillingHistory,
+  findByCustomerIdWithPlan,
+  findByIdWithPlan,
+  getCustomerSubscription,
+  getCustomerSubscriptionByNumber,
+  getCustomerSubscriptions,
+  getDunningAttempts,
+  getFailedSubscriptionPayments,
+  getPendingDunningAttempts as subscriptionRepo_getPendingDunningAttempts,
+  getSubscriptionOrder,
+  getSubscriptionOrders,
+  getSubscriptionOrdersPending,
+  getSubscriptionPlan,
+  getSubscriptionPlans,
+  getSubscriptionProduct,
+  getSubscriptionProductByProductId,
+  getSubscriptionProducts,
+  getSubscriptionsDueBilling,
+  pauseSubscription as subscriptionRepo_pauseSubscription,
+  resumeSubscription as subscriptionRepo_resumeSubscription,
+  saveSubscriptionPlan as subscriptionRepo_saveSubscriptionPlan,
+  saveSubscriptionProduct as subscriptionRepo_saveSubscriptionProduct,
+  updateDunningAttempt,
+  updateSubscriptionOrderStatus as subscriptionRepo_updateSubscriptionOrderStatus,
+  updateSubscriptionStatus,
+} from '../infrastructure/repositories/subscriptionRepo';
+const subscriptionRepo = {
+  advanceBillingCycle: subscriptionRepo_advanceBillingCycle,
+  cancelSubscription: subscriptionRepo_cancelSubscription,
+  cancelSubscriptionStorefront,
+  createCustomerSubscription,
+  createDunningAttempt,
+  createSubscriptionOrder: subscriptionRepo_createSubscriptionOrder,
+  deleteSubscriptionPlan,
+  deleteSubscriptionProduct,
+  findActiveByCustomerId,
+  findActivePlansWithProduct,
+  findBillingHistory,
+  findByCustomerIdWithPlan,
+  findByIdWithPlan,
+  getCustomerSubscription,
+  getCustomerSubscriptionByNumber,
+  getCustomerSubscriptions,
+  getDunningAttempts,
+  getFailedSubscriptionPayments,
+  getPendingDunningAttempts: subscriptionRepo_getPendingDunningAttempts,
+  getSubscriptionOrder,
+  getSubscriptionOrders,
+  getSubscriptionOrdersPending,
+  getSubscriptionPlan,
+  getSubscriptionPlans,
+  getSubscriptionProduct,
+  getSubscriptionProductByProductId,
+  getSubscriptionProducts,
+  getSubscriptionsDueBilling,
+  pauseSubscription: subscriptionRepo_pauseSubscription,
+  resumeSubscription: subscriptionRepo_resumeSubscription,
+  saveSubscriptionPlan: subscriptionRepo_saveSubscriptionPlan,
+  saveSubscriptionProduct: subscriptionRepo_saveSubscriptionProduct,
+  updateDunningAttempt,
+  updateSubscriptionOrderStatus: subscriptionRepo_updateSubscriptionOrderStatus,
+  updateSubscriptionStatus,
+};
 import type { SubscriptionRepository } from '../domain/repositories/SubscriptionRepository';
 import { TaxSubscriptionTaxAdapter } from '../infrastructure/acl/TaxSubscriptionTaxAdapter';
 import { CustomerSubscriptionAddressAdapter } from '../infrastructure/acl/CustomerSubscriptionAddressAdapter';
@@ -61,7 +134,7 @@ export const processBillingCycleUseCase = new ProcessBillingCycleUseCase(subscri
 // expected by the lifecycle use cases.
 const subscriptionRecordAdapter = {
   async findById(id: string) {
-    const sub = await subscriptionRepo.getCustomerSubscription(id);
+    const sub = await getCustomerSubscription(id);
     if (!sub) return null;
     return {
       status: sub.status,
@@ -75,13 +148,13 @@ const subscriptionRecordAdapter = {
     };
   },
   async update(id: string, data: Record<string, unknown>) {
-    await subscriptionRepo.updateSubscriptionStatus(id, (data.status as SubscriptionStatus) ?? 'active');
+    await updateSubscriptionStatus(id, (data.status as SubscriptionStatus) ?? 'active');
   },
 };
 
 const planRecordAdapter = {
   async findById(id: string) {
-    const plan = await subscriptionRepo.getSubscriptionPlan(id);
+    const plan = await getSubscriptionPlan(id);
     if (!plan) return null;
     return { priceCents: plan.priceCents };
   },

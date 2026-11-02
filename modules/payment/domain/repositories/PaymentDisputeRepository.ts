@@ -14,12 +14,5 @@ export interface PaymentDispute {
   updatedAt: Date;
 }
 
-export type PaymentDisputeCreateParams = Omit<PaymentDispute, 'paymentDisputeId' | 'createdAt' | 'updatedAt'>;
 
-export interface PaymentDisputeRepository {
-  findByPayment(paymentId: string): Promise<PaymentDispute[]>;
-  findById(paymentDisputeId: string): Promise<PaymentDispute | null>;
-  create(params: PaymentDisputeCreateParams): Promise<PaymentDispute | null>;
-  updateStatus(paymentDisputeId: string, status: string, resolvedAt?: Date): Promise<PaymentDispute | null>;
-  findAll(status?: string, limit?: number): Promise<PaymentDispute[]>;
-}
+

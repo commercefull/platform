@@ -11,7 +11,7 @@ export interface GetDashboardMetricsInput {
   compareWithPrevious?: boolean;
 }
 
-export interface DashboardMetrics {
+interface DashboardMetrics {
   totalOrders: number;
   totalRevenueCents: number;
   averageOrderValueCents: number;

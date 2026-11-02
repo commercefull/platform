@@ -2,7 +2,6 @@
  * Inventory Item Aggregate Root
  */
 
-export type TransactionType = 'restock' | 'sale' | 'return' | 'adjustment' | 'transfer' | 'reservation' | 'release';
 
 import { InventoryValidationError, InvalidStockQuantityError, InsufficientStockError } from '../errors/InventoryErrors';
 

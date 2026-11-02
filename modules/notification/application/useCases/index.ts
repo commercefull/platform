@@ -8,8 +8,7 @@ export * from './MarkAsRead';
 export * from './ManageNotificationPreference';
 export * from './RegisterNotificationDevice';
 export * from './SendNotificationBatch';
-export * from './UnsubscribeNotification';
-export * from './LogNotificationEvent';
+
 export * from './ManageNotificationWebhook';
 export * from './UpsertTemplateTranslation';
 export * from './ManageNotificationPreferences';

@@ -5,9 +5,72 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import * as productController from '../controllers/ProductBusinessController';
-import * as bundleController from '../controllers/BundleController';
-import * as categoryController from '../controllers/CategoryBusinessController';
+import {
+  addProductImage,
+  applyAttributeSet,
+  approveReview,
+  configureVariant,
+  createDownload,
+  createProduct,
+  createProductVariant,
+  createRelationship,
+  deleteDownload,
+  deleteProduct,
+  deleteProductImage,
+  deleteProductVariant,
+  deleteRelationship,
+  deleteReview,
+  deleteReviewMedia,
+  findByBarcode,
+  getProduct,
+  getProductImages,
+  getProductStoreAvailability,
+  getProductVariant,
+  getProductVariants,
+  getReview,
+  getVariantMatrix,
+  listDownloads,
+  listGroupedChildren,
+  listProductQa,
+  listProducts,
+  listRelationships,
+  listReviewMedia,
+  listReviews,
+  publishProduct,
+  rejectReview,
+  reorderProductImages,
+  reorderRelationships,
+  respondToReview,
+  unpublishProduct,
+  updateDownload,
+  updateProduct,
+  updateProductImage,
+  updateProductStatus,
+  updateProductVariant,
+  updateProductVisibility,
+  updateQaStatus,
+  updateVariantInventory,
+} from '../controllers/ProductBusinessController';
+import {
+  addBundleItem,
+  createBundle,
+  deleteBundle,
+  deleteBundleItem,
+  getBundle,
+  getBundles,
+  updateBundle,
+  updateBundleItem,
+} from '../controllers/BundleController';
+import {
+  createCategory,
+  deleteCategory,
+  getCategory,
+  getCategoryBySlug,
+  getCategoryChildren,
+  getRootCategories,
+  listCategories,
+  updateCategory,
+} from '../controllers/CategoryBusinessController';
 import attributeController from '../controllers/AttributeController';
 import attributeGroupController from '../controllers/AttributeGroupController';
 import attributeOptionController from '../controllers/AttributeOptionController';
@@ -24,14 +87,14 @@ router.use(isOrganizationLoggedIn);
 // Category Routes (Business)
 // ============================================================================
 
-router.get('/categories/root', asyncHandler(categoryController.getRootCategories));
-router.get('/categories', asyncHandler(categoryController.listCategories));
-router.post('/categories', asyncHandler(categoryController.createCategory));
-router.get('/categories/:id/children', asyncHandler(categoryController.getCategoryChildren));
-router.get('/categories/slug/:slug', asyncHandler(categoryController.getCategoryBySlug));
-router.get('/categories/:id', asyncHandler(categoryController.getCategory));
-router.put('/categories/:id', asyncHandler(categoryController.updateCategory));
-router.delete('/categories/:id', asyncHandler(categoryController.deleteCategory));
+router.get('/categories/root', asyncHandler(getRootCategories));
+router.get('/categories', asyncHandler(listCategories));
+router.post('/categories', asyncHandler(createCategory));
+router.get('/categories/:id/children', asyncHandler(getCategoryChildren));
+router.get('/categories/slug/:slug', asyncHandler(getCategoryBySlug));
+router.get('/categories/:id', asyncHandler(getCategory));
+router.put('/categories/:id', asyncHandler(updateCategory));
+router.delete('/categories/:id', asyncHandler(deleteCategory));
 
 // ============================================================================
 // Business/Admin Product Routes
@@ -41,119 +104,119 @@ router.delete('/categories/:id', asyncHandler(categoryController.deleteCategory)
  * List all products
  * GET /business/products
  */
-router.get('/products', asyncHandler(productController.listProducts));
+router.get('/products', asyncHandler(listProducts));
 
 /**
  * Create a new product
  * POST /business/products
  */
-router.post('/products', asyncHandler(productController.createProduct));
+router.post('/products', asyncHandler(createProduct));
 
 /**
  * Get product store availability
  * GET /business/products/:productId/store-availability
  */
-router.get('/products/:productId/store-availability', asyncHandler(productController.getProductStoreAvailability));
+router.get('/products/:productId/store-availability', asyncHandler(getProductStoreAvailability));
 
 /**
  * Find product by variant barcode
  * GET /business/products/barcode/:barcode
  */
-router.get('/products/barcode/:barcode', asyncHandler(productController.findByBarcode));
+router.get('/products/barcode/:barcode', asyncHandler(findByBarcode));
 
 /**
  * Flat variant routes — must be before /:productId to avoid collision
  */
-router.get('/products/variants/:variantId', asyncHandler(productController.getProductVariant));
-router.put('/products/variants/:variantId', asyncHandler(productController.updateProductVariant));
-router.patch('/products/variants/:variantId/inventory', asyncHandler(productController.updateVariantInventory));
-router.delete('/products/variants/:variantId', asyncHandler(productController.deleteProductVariant));
+router.get('/products/variants/:variantId', asyncHandler(getProductVariant));
+router.put('/products/variants/:variantId', asyncHandler(updateProductVariant));
+router.patch('/products/variants/:variantId/inventory', asyncHandler(updateVariantInventory));
+router.delete('/products/variants/:variantId', asyncHandler(deleteProductVariant));
 
 /**
  * Get product details
  * GET /business/products/:productId
  */
-router.get('/products/:productId', asyncHandler(productController.getProduct));
+router.get('/products/:productId', asyncHandler(getProduct));
 
 /**
  * Update a product
  * PUT /business/products/:productId
  */
-router.put('/products/:productId', asyncHandler(productController.updateProduct));
+router.put('/products/:productId', asyncHandler(updateProduct));
 
 /**
  * Update product status
  * PUT /business/products/:productId/status
  */
-router.put('/products/:productId/status', asyncHandler(productController.updateProductStatus));
+router.put('/products/:productId/status', asyncHandler(updateProductStatus));
 
 /**
  * Update product visibility
  * PUT /business/products/:productId/visibility
  */
-router.put('/products/:productId/visibility', asyncHandler(productController.updateProductVisibility));
+router.put('/products/:productId/visibility', asyncHandler(updateProductVisibility));
 
 /**
  * Publish a product
  * POST /business/products/:productId/publish
  */
-router.post('/products/:productId/publish', asyncHandler(productController.publishProduct));
+router.post('/products/:productId/publish', asyncHandler(publishProduct));
 
 /**
  * Unpublish a product
  * POST /business/products/:productId/unpublish
  */
-router.post('/products/:productId/unpublish', asyncHandler(productController.unpublishProduct));
+router.post('/products/:productId/unpublish', asyncHandler(unpublishProduct));
 
 /**
  * Delete a product
  * DELETE /business/products/:productId
  */
-router.delete('/products/:productId', asyncHandler(productController.deleteProduct));
+router.delete('/products/:productId', asyncHandler(deleteProduct));
 
 // ============================================================================
 // Variant Routes
 // ============================================================================
 
-router.get('/products/:productId/variants', asyncHandler(productController.getProductVariants));
-router.post('/products/:productId/variants', asyncHandler(productController.createProductVariant));
-router.get('/products/:productId/variants/:variantId', asyncHandler(productController.getProductVariant));
-router.put('/products/:productId/variants/:variantId', asyncHandler(productController.updateProductVariant));
-router.delete('/products/:productId/variants/:variantId', asyncHandler(productController.deleteProductVariant));
+router.get('/products/:productId/variants', asyncHandler(getProductVariants));
+router.post('/products/:productId/variants', asyncHandler(createProductVariant));
+router.get('/products/:productId/variants/:variantId', asyncHandler(getProductVariant));
+router.put('/products/:productId/variants/:variantId', asyncHandler(updateProductVariant));
+router.delete('/products/:productId/variants/:variantId', asyncHandler(deleteProductVariant));
 
 // ============================================================================
 // Image/Media Routes
 // ============================================================================
 
-router.get('/products/:productId/images', asyncHandler(productController.getProductImages));
-router.post('/products/:productId/images', asyncHandler(productController.addProductImage));
-router.put('/products/:productId/images/:imageId', asyncHandler(productController.updateProductImage));
-router.delete('/products/:productId/images/:imageId', asyncHandler(productController.deleteProductImage));
-router.post('/products/:productId/images/reorder', asyncHandler(productController.reorderProductImages));
+router.get('/products/:productId/images', asyncHandler(getProductImages));
+router.post('/products/:productId/images', asyncHandler(addProductImage));
+router.put('/products/:productId/images/:imageId', asyncHandler(updateProductImage));
+router.delete('/products/:productId/images/:imageId', asyncHandler(deleteProductImage));
+router.post('/products/:productId/images/reorder', asyncHandler(reorderProductImages));
 
 // ============================================================================
 // Review Management Routes (Admin)
 // ============================================================================
 
-router.get('/reviews', asyncHandler(productController.listReviews));
-router.get('/reviews/:reviewId', asyncHandler(productController.getReview));
-router.put('/reviews/:reviewId/approve', asyncHandler(productController.approveReview));
-router.put('/reviews/:reviewId/reject', asyncHandler(productController.rejectReview));
-router.post('/reviews/:reviewId/respond', asyncHandler(productController.respondToReview));
-router.delete('/reviews/:reviewId', asyncHandler(productController.deleteReview));
+router.get('/reviews', asyncHandler(listReviews));
+router.get('/reviews/:reviewId', asyncHandler(getReview));
+router.put('/reviews/:reviewId/approve', asyncHandler(approveReview));
+router.put('/reviews/:reviewId/reject', asyncHandler(rejectReview));
+router.post('/reviews/:reviewId/respond', asyncHandler(respondToReview));
+router.delete('/reviews/:reviewId', asyncHandler(deleteReview));
 
 // ============================================================================
 // Bundle Routes
 // ============================================================================
 
-router.get('/bundles', asyncHandler(bundleController.getBundles));
-router.get('/bundles/:id', asyncHandler(bundleController.getBundle));
-router.post('/bundles', asyncHandler(bundleController.createBundle));
-router.put('/bundles/:id', asyncHandler(bundleController.updateBundle));
-router.delete('/bundles/:id', asyncHandler(bundleController.deleteBundle));
-router.post('/bundles/:id/items', asyncHandler(bundleController.addBundleItem));
-router.put('/bundles/:id/items/:itemId', asyncHandler(bundleController.updateBundleItem));
-router.delete('/bundles/:id/items/:itemId', asyncHandler(bundleController.deleteBundleItem));
+router.get('/bundles', asyncHandler(getBundles));
+router.get('/bundles/:id', asyncHandler(getBundle));
+router.post('/bundles', asyncHandler(createBundle));
+router.put('/bundles/:id', asyncHandler(updateBundle));
+router.delete('/bundles/:id', asyncHandler(deleteBundle));
+router.post('/bundles/:id/items', asyncHandler(addBundleItem));
+router.put('/bundles/:id/items/:itemId', asyncHandler(updateBundleItem));
+router.delete('/bundles/:id/items/:itemId', asyncHandler(deleteBundleItem));
 
 // ============================================================================
 // Product Type Routes
@@ -241,15 +304,15 @@ router.delete('/attribute-options/:id', asyncHandler(attributeOptionController.d
 // Q&A Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/qa', asyncHandler(productController.listProductQa));
-router.patch('/products/:productId/qa/:qaId/status', asyncHandler(productController.updateQaStatus));
+router.get('/products/:productId/qa', asyncHandler(listProductQa));
+router.patch('/products/:productId/qa/:qaId/status', asyncHandler(updateQaStatus));
 
 // ============================================================================
 // Review Media Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/reviews/media', asyncHandler(productController.listReviewMedia));
-router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(productController.deleteReviewMedia));
+router.get('/products/:productId/reviews/media', asyncHandler(listReviewMedia));
+router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(deleteReviewMedia));
 
 // Collection routes moved to modules/assortment (/business/assortment/*)
 
@@ -257,38 +320,38 @@ router.delete('/products/:productId/reviews/media/:mediaId', asyncHandler(produc
 // Download Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/downloads', asyncHandler(productController.listDownloads));
-router.post('/products/:productId/downloads', asyncHandler(productController.createDownload));
-router.put('/downloads/:downloadId', asyncHandler(productController.updateDownload));
-router.delete('/downloads/:downloadId', asyncHandler(productController.deleteDownload));
+router.get('/products/:productId/downloads', asyncHandler(listDownloads));
+router.post('/products/:productId/downloads', asyncHandler(createDownload));
+router.put('/downloads/:downloadId', asyncHandler(updateDownload));
+router.delete('/downloads/:downloadId', asyncHandler(deleteDownload));
 
 // ============================================================================
 // Product Relationship Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/relationships', asyncHandler(productController.listRelationships));
-router.post('/products/:productId/relationships', asyncHandler(productController.createRelationship));
-router.put('/products/:productId/relationships/reorder', asyncHandler(productController.reorderRelationships));
+router.get('/products/:productId/relationships', asyncHandler(listRelationships));
+router.post('/products/:productId/relationships', asyncHandler(createRelationship));
+router.put('/products/:productId/relationships/reorder', asyncHandler(reorderRelationships));
 // G6: kept under the /products topic prefix (was /business/relationships/:id)
-router.delete('/products/relationships/:relationshipId', asyncHandler(productController.deleteRelationship));
+router.delete('/products/relationships/:relationshipId', asyncHandler(deleteRelationship));
 
 // ============================================================================
 // Configurable Product Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/variant-matrix', asyncHandler(productController.getVariantMatrix));
-router.post('/products/:productId/configure', asyncHandler(productController.configureVariant));
+router.get('/products/:productId/variant-matrix', asyncHandler(getVariantMatrix));
+router.post('/products/:productId/configure', asyncHandler(configureVariant));
 
 // ============================================================================
 // Grouped Product Routes (Business)
 // ============================================================================
 
-router.get('/products/:productId/grouped-children', asyncHandler(productController.listGroupedChildren));
+router.get('/products/:productId/grouped-children', asyncHandler(listGroupedChildren));
 
 // ============================================================================
 // Attribute Set Application Route (Business)
 // ============================================================================
 
-router.post('/products/:productId/apply-attribute-set', asyncHandler(productController.applyAttributeSet));
+router.post('/products/:productId/apply-attribute-set', asyncHandler(applyAttributeSet));
 
 export const productBusinessRouter = router;

@@ -110,20 +110,3 @@ export class ProductRelationshipNotFoundError extends AppError {
   }
 }
 
-export class ProductReviewNotFoundError extends AppError {
-  constructor(reviewId: string) {
-    super(`Review not found: ${reviewId}`, 404, { code: 'product.review_not_found' });
-  }
-}
-
-export class ProductQaNotFoundError extends AppError {
-  constructor(qaId: string) {
-    super(`Q&A not found: ${qaId}`, 404, { code: 'product.qa_not_found' });
-  }
-}
-
-export class ProductReviewMediaNotFoundError extends AppError {
-  constructor(mediaId: string) {
-    super(`Review media not found: ${mediaId}`, 404, { code: 'product.review_media_not_found' });
-  }
-}

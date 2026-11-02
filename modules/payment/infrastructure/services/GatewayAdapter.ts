@@ -14,7 +14,7 @@
 // Canonical event — provider-agnostic
 // ============================================================================
 
-export type WebhookEventType = 'payment_succeeded' | 'payment_failed' | 'refund_completed' | 'unknown';
+type WebhookEventType = 'payment_succeeded' | 'payment_failed' | 'refund_completed' | 'unknown';
 
 export interface WebhookEvent {
   /** Normalized event type understood by the core handler */

@@ -9,9 +9,9 @@
 import { AppError } from '../../../../libs/errors';
 import type { AdminUser } from '../../domain/repositories/AdminIdentityPorts';
 
-export type AdminRole = 'super_admin' | 'admin' | 'support' | 'operations';
+type AdminRole = 'super_admin' | 'admin' | 'support' | 'operations';
 
-export const ADMIN_ROLES: AdminRole[] = ['super_admin', 'admin', 'support', 'operations'];
+const ADMIN_ROLES: AdminRole[] = ['super_admin', 'admin', 'support', 'operations'];
 
 const ROLE_PERMISSIONS: Record<AdminRole, string[]> = {
   super_admin: ['*'],
@@ -20,13 +20,13 @@ const ROLE_PERMISSIONS: Record<AdminRole, string[]> = {
   operations: ['orders:read', 'orders:write', 'inventory:read', 'inventory:write', 'fulfillment:read', 'fulfillment:write'],
 };
 
-export class AdminAlreadyExistsError extends AppError {
+class AdminAlreadyExistsError extends AppError {
   constructor(email: string) {
     super(`Admin user with email "${email}" already exists`, 409, { code: 'identity.admin_exists' });
   }
 }
 
-export class InvalidAdminRoleError extends AppError {
+class InvalidAdminRoleError extends AppError {
   constructor(role: string) {
     super(`Invalid role "${role}". Valid roles: ${ADMIN_ROLES.join(', ')}`, 400, {
       code: 'identity.invalid_admin_role',

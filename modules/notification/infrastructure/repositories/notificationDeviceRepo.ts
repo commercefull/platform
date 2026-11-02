@@ -1,6 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 
-export interface NotificationDevice {
+interface NotificationDevice {
   notificationDeviceId: string;
   userId: string;
   userType: string;
@@ -11,7 +11,7 @@ export interface NotificationDevice {
   updatedAt: Date;
 }
 
-export async function findByUser(userId: string): Promise<NotificationDevice[]> {
+async function findByUser(userId: string): Promise<NotificationDevice[]> {
   return (
     (await query<NotificationDevice[]>(
       `SELECT "notificationDeviceId", "userId", "userType", "deviceToken", "deviceType" AS platform, "isActive", "createdAt", "updatedAt"
@@ -21,7 +21,7 @@ export async function findByUser(userId: string): Promise<NotificationDevice[]> 
   );
 }
 
-export async function upsert(
+async function upsert(
   params: Omit<NotificationDevice, 'notificationDeviceId' | 'createdAt' | 'updatedAt'>,
 ): Promise<NotificationDevice | null> {
   const now = new Date();
@@ -34,11 +34,11 @@ export async function upsert(
   );
 }
 
-export async function deactivate(deviceToken: string): Promise<void> {
+async function deactivate(deviceToken: string): Promise<void> {
   await query(`UPDATE "notificationDevice" SET "isActive" = false, "updatedAt" = $1 WHERE "deviceToken" = $2`, [new Date(), deviceToken]);
 }
 
-export async function deleteByUser(userId: string): Promise<void> {
+async function deleteByUser(userId: string): Promise<void> {
   await query(`DELETE FROM "notificationDevice" WHERE "userId" = $1`, [userId]);
 }
 

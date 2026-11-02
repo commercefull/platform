@@ -207,7 +207,7 @@ export async function flushAnalyticsWrites(): Promise<void> {
 // analyticsRepo.upsertSalesDaily / upsertProductPerformance in event handlers.
 // ============================================================================
 
-export async function trackEvent(event: TrackEventInput): Promise<void> {
+async function trackEvent(event: TrackEventInput): Promise<void> {
   eventBuffer.push(event);
   if (eventBuffer.length >= BATCH_SIZE) {
     await flushEvents().catch(err => logger.error('[ANALYTICS] Event batch insert failed', { error: (err as Error).message }));
@@ -216,7 +216,7 @@ export async function trackEvent(event: TrackEventInput): Promise<void> {
   scheduleFlush();
 }
 
-export async function bufferSalesDaily(data: SalesDailyDelta): Promise<void> {
+async function bufferSalesDaily(data: SalesDailyDelta): Promise<void> {
   const key = salesDailyKey(data);
   const acc = salesDailyBuffer.get(key);
   if (acc) {
@@ -227,7 +227,7 @@ export async function bufferSalesDaily(data: SalesDailyDelta): Promise<void> {
   scheduleFlush();
 }
 
-export async function bufferProductPerformance(data: ProductPerformanceDelta): Promise<void> {
+async function bufferProductPerformance(data: ProductPerformanceDelta): Promise<void> {
   const key = productPerformanceKey(data);
   const acc = productPerformanceBuffer.get(key);
   if (acc) {

@@ -5,8 +5,11 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import * as categoryController from '../controllers/CategoryCustomerController';
-
+import {
+  getCategory,
+  getCategoryChildren,
+  listCategories,
+} from '../controllers/CategoryCustomerController';
 const router = createHttpRouter();
 
 /**
@@ -14,18 +17,18 @@ const router = createHttpRouter();
  * GET /customer/categories
  * Query params: ?featured=true | ?menu=true | ?root=true
  */
-router.get('/categories', asyncHandler(categoryController.listCategories));
+router.get('/categories', asyncHandler(listCategories));
 
 /**
  * Get subcategories of a parent category
  * GET /customer/categories/:categoryId/children
  */
-router.get('/categories/:categoryId/children', asyncHandler(categoryController.getCategoryChildren));
+router.get('/categories/:categoryId/children', asyncHandler(getCategoryChildren));
 
 /**
  * Get category by ID or slug
  * GET /customer/categories/:identifier
  */
-router.get('/categories/:identifier', asyncHandler(categoryController.getCategory));
+router.get('/categories/:identifier', asyncHandler(getCategory));
 
 export const categoryCustomerRouter = router;

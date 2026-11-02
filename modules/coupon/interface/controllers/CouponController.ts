@@ -165,12 +165,3 @@ export const deleteCoupon = async (req: HttpRequest, res: HttpResponse): Promise
   jsonResponse(res, 200, { success: true, message: 'Coupon deleted' });
 };
 
-export default {
-  createCoupon,
-  validateCoupon,
-  applyCoupon,
-  redeemCoupon,
-  getCoupon,
-  listCoupons,
-  deleteCoupon,
-};

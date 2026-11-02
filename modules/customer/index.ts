@@ -15,4 +15,3 @@ export { customerTypeDefs } from './interface/graphql/typeDefs';
 export { customerResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

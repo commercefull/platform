@@ -6,7 +6,7 @@ export interface GetMembershipBenefitsInput {
   customerId: string;
 }
 
-export interface BenefitItem {
+interface BenefitItem {
   type: string;
   value: number | string;
   description?: string;

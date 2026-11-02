@@ -21,7 +21,7 @@ export type UpdateShippingMethodInput = Partial<Omit<ShippingMethod, 'shippingMe
 export type CreateShippingZoneInput = Omit<ShippingZone, 'shippingZoneId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingZoneInput = Partial<Omit<ShippingZone, 'shippingZoneId' | 'createdAt' | 'updatedAt'>>;
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;
-export type UpdateShippingRateInput = Partial<Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>>;
+
 export type CreateShippingPackagingTypeInput = Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>;
 export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>>;
 

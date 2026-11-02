@@ -3,14 +3,14 @@
  * Defines options for image processing operations
  */
 
-export interface ResizeOptions {
+interface ResizeOptions {
   width?: number;
   height?: number;
   fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
   withoutEnlargement?: boolean;
 }
 
-export interface CompressionOptions {
+interface CompressionOptions {
   quality?: number; // 1-100
   progressive?: boolean;
   effort?: number; // 0-6 for WebP, 0-9 for others

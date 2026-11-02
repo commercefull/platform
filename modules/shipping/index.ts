@@ -15,4 +15,3 @@ export { shippingTypeDefs } from './interface/graphql/typeDefs';
 export { shippingResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

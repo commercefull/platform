@@ -8,7 +8,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 import type { DistributionWarehouseBin as DbDistributionWarehouseBin } from '../../../../libs/db/types';
 import type { WarehouseBin, CreateBinInput, UpdateBinInput } from '../../domain/repositories/WarehouseRepository';
-export type { WarehouseBin, CreateBinInput, UpdateBinInput } from '../../domain/repositories/WarehouseRepository';
+
 
 const num = (v: string | number | null | undefined): number | undefined => (v == null ? undefined : Number(v));
 
@@ -26,7 +26,7 @@ function mapToBin(row: DbDistributionWarehouseBin): WarehouseBin {
   };
 }
 
-export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
+async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
   const id = generateUUID();
   const now = new Date();
 
@@ -62,7 +62,7 @@ export async function createBin(input: CreateBinInput): Promise<WarehouseBin> {
   return result ? mapToBin(result) : result;
 }
 
-export async function findBinById(binId: string): Promise<WarehouseBin | null> {
+async function findBinById(binId: string): Promise<WarehouseBin | null> {
   const row = await queryOne<DbDistributionWarehouseBin>(
     'SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1',
     [binId],
@@ -70,7 +70,7 @@ export async function findBinById(binId: string): Promise<WarehouseBin | null> {
   return row ? mapToBin(row) : null;
 }
 
-export async function findBinsByWarehouse(warehouseId: string): Promise<WarehouseBin[]> {
+async function findBinsByWarehouse(warehouseId: string): Promise<WarehouseBin[]> {
   const result = await query<DbDistributionWarehouseBin[]>(
     'SELECT * FROM "distributionWarehouseBin" WHERE "distributionWarehouseId" = $1 ORDER BY "priority" ASC, "locationCode" ASC',
     [warehouseId],
@@ -78,7 +78,7 @@ export async function findBinsByWarehouse(warehouseId: string): Promise<Warehous
   return (result || []).map(mapToBin);
 }
 
-export async function updateBin(binId: string, input: UpdateBinInput): Promise<WarehouseBin | null> {
+async function updateBin(binId: string, input: UpdateBinInput): Promise<WarehouseBin | null> {
   const fields: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -139,7 +139,7 @@ export async function updateBin(binId: string, input: UpdateBinInput): Promise<W
   return row ? mapToBin(row) : null;
 }
 
-export async function deleteBin(binId: string): Promise<boolean> {
+async function deleteBin(binId: string): Promise<boolean> {
   await query('DELETE FROM "distributionWarehouseBin" WHERE "distributionWarehouseBinId" = $1', [binId]);
   return true;
 }

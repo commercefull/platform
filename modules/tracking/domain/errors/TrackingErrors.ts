@@ -1,6 +1,6 @@
 import { AppError } from '../../../../libs/errors';
 
-export class TrackingError extends AppError {
+class TrackingError extends AppError {
   constructor(message: string, statusCode = 500, code = 'tracking_error') {
     super(message, statusCode, { code });
   }
@@ -27,19 +27,7 @@ export class TrackingConfigAlreadyExistsError extends TrackingError {
   }
 }
 
-export class TrackingProviderError extends TrackingError {
-  constructor(provider: string, message: string) {
-    super(`Tracking provider '${provider}' error: ${message}`, 500, 'tracking.provider_error');
-    this.name = 'TrackingProviderError';
-  }
-}
 
-export class TrackingConsentNotGrantedError extends TrackingError {
-  constructor(event: string, category: string) {
-    super(`Consent not granted for event '${event}' (category: ${category})`, 400, 'tracking.consent_not_granted');
-    this.name = 'TrackingConsentNotGrantedError';
-  }
-}
 
 export class TrackingEventNotMappedError extends TrackingError {
   constructor(sourceEvent: string) {

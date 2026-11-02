@@ -13,7 +13,7 @@
 
 import type { ContentPublicationContext } from '../repositories/ContentRepository';
 
-export type ContentScopeConditions = {
+type ContentScopeConditions = {
   storeIds?: string[];
   channelIds?: string[];
   locales?: string[];

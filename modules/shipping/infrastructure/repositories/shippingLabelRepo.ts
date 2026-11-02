@@ -8,9 +8,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import type { ShippingLabel, CreateShippingLabelInput } from '../../domain/repositories/ShippingLabelRepository';
 
-export type { ShippingLabel, CreateShippingLabelInput };
-
-export async function create(input: CreateShippingLabelInput): Promise<ShippingLabel> {
+async function create(input: CreateShippingLabelInput): Promise<ShippingLabel> {
   const id = generateUUID();
   const now = new Date();
 
@@ -56,27 +54,27 @@ export async function create(input: CreateShippingLabelInput): Promise<ShippingL
   return result[0];
 }
 
-export async function findById(shippingLabelId: string): Promise<ShippingLabel | null> {
+async function findById(shippingLabelId: string): Promise<ShippingLabel | null> {
   return queryOne<ShippingLabel>('SELECT * FROM "shippingLabel" WHERE "shippingLabelId" = $1', [shippingLabelId]);
 }
 
-export async function findByTrackingNumber(trackingNumber: string): Promise<ShippingLabel | null> {
+async function findByTrackingNumber(trackingNumber: string): Promise<ShippingLabel | null> {
   return queryOne<ShippingLabel>('SELECT * FROM "shippingLabel" WHERE "trackingNumber" = $1', [trackingNumber]);
 }
 
-export async function findByOrderId(orderId: string): Promise<ShippingLabel[]> {
+async function findByOrderId(orderId: string): Promise<ShippingLabel[]> {
   const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "orderId" = $1 ORDER BY "createdAt" DESC', [orderId]);
   return result || [];
 }
 
-export async function findByFulfillmentId(fulfillmentId: string): Promise<ShippingLabel[]> {
+async function findByFulfillmentId(fulfillmentId: string): Promise<ShippingLabel[]> {
   const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" WHERE "fulfillmentId" = $1 ORDER BY "createdAt" DESC', [
     fulfillmentId,
   ]);
   return result || [];
 }
 
-export async function voidLabel(shippingLabelId: string, reason?: string): Promise<ShippingLabel | null> {
+async function voidLabel(shippingLabelId: string, reason?: string): Promise<ShippingLabel | null> {
   const now = new Date();
   return queryOne<ShippingLabel>(
     `UPDATE "shippingLabel" SET "status" = 'voided', "voidReason" = $1, "voidedAt" = $2, "updatedAt" = $3 WHERE "shippingLabelId" = $4 AND "status" = 'created' RETURNING *`,
@@ -84,7 +82,7 @@ export async function voidLabel(shippingLabelId: string, reason?: string): Promi
   );
 }
 
-export async function findAll(limit = 50, offset = 0): Promise<ShippingLabel[]> {
+async function findAll(limit = 50, offset = 0): Promise<ShippingLabel[]> {
   const result = await query<ShippingLabel[]>('SELECT * FROM "shippingLabel" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [
     limit,
     offset,

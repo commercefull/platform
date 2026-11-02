@@ -14,16 +14,7 @@ import {
   ProductSearchServicePort,
 } from '../../application/ports/ProductSearchPort';
 
-export type {
-  ProductSearchFilters,
-  AttributeFilter,
-  ProductSearchResult,
-  ProductSearchRow,
-  SearchFacets,
-  FacetValue,
-  PriceRangeFacet,
-  AttributeFacet,
-} from '../../application/ports/ProductSearchPort';
+export type { ProductSearchRow } from '../../application/ports/ProductSearchPort';
 
 const PRICE_COLUMNS_SQL = `
   bp."priceCents" AS "priceCents",

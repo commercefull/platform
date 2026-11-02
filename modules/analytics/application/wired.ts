@@ -5,8 +5,20 @@
  * Controllers import from this file — never from infrastructure/.
  */
 
-import * as analyticsRepo from '../infrastructure/repositories/analyticsRepo';
-import * as adminAnalyticsRepo from '../infrastructure/repositories/adminAnalyticsRepo';
+import {
+  getCustomerCohorts,
+  getSalesSummary,
+  getTopProducts,
+} from '../infrastructure/repositories/analyticsRepo';
+import {
+  findCustomerPurchaseHistory,
+  findRecentCustomerId,
+  findRecentCustomerIds,
+  getCustomerData,
+  getInventoryData,
+  getRealTimeMetrics,
+  getRevenueData,
+} from '../infrastructure/repositories/adminAnalyticsRepo';
 import { GetAnalyticsDataUseCase } from './useCases/GetAnalyticsData';
 import { GenerateSalesReportUseCase } from './useCases/GenerateSalesReport';
 import { ManageAnalyticsReportingUseCase } from './useCases/ManageAnalyticsReporting';
@@ -14,16 +26,16 @@ import analyticsDataRepository from '../infrastructure/repositories/AnalyticsDat
 import dashboardQueryRepository from '../infrastructure/repositories/DashboardQueryRepository';
 
 const analyticsDataPort = {
-  getSalesSummary: analyticsRepo.getSalesSummary,
-  getTopProducts: analyticsRepo.getTopProducts,
-  getCustomerCohorts: analyticsRepo.getCustomerCohorts,
-  findRecentCustomerIds: adminAnalyticsRepo.findRecentCustomerIds,
-  findCustomerPurchaseHistory: adminAnalyticsRepo.findCustomerPurchaseHistory,
-  findRecentCustomerId: adminAnalyticsRepo.findRecentCustomerId,
-  getRevenueData: adminAnalyticsRepo.getRevenueData,
-  getCustomerData: adminAnalyticsRepo.getCustomerData,
-  getInventoryData: adminAnalyticsRepo.getInventoryData,
-  getRealTimeMetrics: adminAnalyticsRepo.getRealTimeMetrics,
+  getSalesSummary: getSalesSummary,
+  getTopProducts: getTopProducts,
+  getCustomerCohorts: getCustomerCohorts,
+  findRecentCustomerIds: findRecentCustomerIds,
+  findCustomerPurchaseHistory: findCustomerPurchaseHistory,
+  findRecentCustomerId: findRecentCustomerId,
+  getRevenueData: getRevenueData,
+  getCustomerData: getCustomerData,
+  getInventoryData: getInventoryData,
+  getRealTimeMetrics: getRealTimeMetrics,
 };
 
 import { predictiveAnalyticsUseCase } from './useCases/PredictiveAnalytics';

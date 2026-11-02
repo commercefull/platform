@@ -222,25 +222,27 @@ export class Market {
     return this.props.status === 'active';
   }
 
-  updateConfiguration(updates: Partial<{
-    name: string;
-    storeId: string;
-    countryCodes: string[];
-    defaultCurrencyCode: string;
-    supportedCurrencyCodes: string[];
-    defaultLocaleCode: string;
-    supportedLocaleCodes: string[];
-    catalogAssortmentId: string;
-    defaultPriceListId: string;
-    contractingEntityId: string;
-    taxDisplayMode: MarketTaxDisplayMode;
-    allowDynamicFxConversion: boolean;
-    capabilities: MarketCapabilityMap;
-    allowedPaymentMethods: string[];
-    allowedFulfillmentMethods: string[];
-    hostnamePatterns: string[];
-    metadata: Record<string, unknown>;
-  }>): void {
+  updateConfiguration(
+    updates: Partial<{
+      name: string;
+      storeId: string;
+      countryCodes: string[];
+      defaultCurrencyCode: string;
+      supportedCurrencyCodes: string[];
+      defaultLocaleCode: string;
+      supportedLocaleCodes: string[];
+      catalogAssortmentId: string;
+      defaultPriceListId: string;
+      contractingEntityId: string;
+      taxDisplayMode: MarketTaxDisplayMode;
+      allowDynamicFxConversion: boolean;
+      capabilities: MarketCapabilityMap;
+      allowedPaymentMethods: string[];
+      allowedFulfillmentMethods: string[];
+      hostnamePatterns: string[];
+      metadata: Record<string, unknown>;
+    }>,
+  ): void {
     if (updates.name !== undefined) this.props.name = updates.name.trim();
     if (updates.storeId !== undefined) this.props.storeId = updates.storeId;
     if (updates.countryCodes !== undefined) this.props.countryCodes = normalizeCodes(updates.countryCodes);

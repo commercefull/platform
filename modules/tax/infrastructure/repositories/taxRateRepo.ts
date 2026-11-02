@@ -12,18 +12,12 @@ import type { TaxRate as DbTaxRate } from '../../../../libs/db/types';
 // Table Constants
 // ============================================================================
 
-// ============================================================================
-// Types
-// ============================================================================
+type TaxRate = DbTaxRate;
 
-export type TaxRateType = 'percentage' | 'fixed';
+type TaxRateCreateParams = Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>;
+type TaxRateUpdateParams = Partial<Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>>;
 
-export type TaxRate = DbTaxRate;
-
-export type TaxRateCreateParams = Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>;
-export type TaxRateUpdateParams = Partial<Omit<TaxRate, 'taxRateId' | 'createdAt' | 'updatedAt'>>;
-
-export class TaxRateRepo {
+class TaxRateRepo {
   async findById(id: string): Promise<TaxRate | null> {
     return await queryOne<TaxRate>(`SELECT * FROM "taxRate" WHERE "taxRateId" = $1`, [id]);
   }

@@ -1,6 +1,6 @@
 import type { SupportTicketWithCustomer } from '../../domain/repositories/SupportRepository';
 
-export interface SupportStats {
+interface SupportStats {
   openTickets: number;
   resolvedToday: number;
   avgResponseTime: number;

@@ -761,5 +761,3 @@ export class TaxCommandRepo {
     return !!result;
   }
 }
-
-export default new TaxCommandRepo();

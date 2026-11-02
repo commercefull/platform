@@ -15,7 +15,7 @@ import type { AddressInput, CustomerTaxExemption, ExemptionVerdict, TaxExemption
 import type { PolicyDecisionRecord } from '../../../../libs/rules/policyEngine';
 import { isInEuVatArea } from '../../../../libs/geo';
 
-export interface TaxRateInfo {
+interface TaxRateInfo {
   rate: number;
   includeInPrice: boolean;
 }
@@ -98,7 +98,7 @@ export class CalculateOrderTaxCommand {
 // Response
 // ============================================================================
 
-export interface TaxLineItem {
+interface TaxLineItem {
   productId: string;
   name: string;
   subtotalCents: number;

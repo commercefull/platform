@@ -66,7 +66,7 @@ export interface PromotionGiftCardTransaction {
 
 export type GiftCardTransaction = PromotionGiftCardTransaction;
 
-export interface CreateGiftCardInput {
+interface CreateGiftCardInput {
   type?: GiftCardType;
   initialBalanceCents: number;
   currency?: string;
@@ -82,7 +82,7 @@ export interface CreateGiftCardInput {
   restrictions?: Record<string, unknown>;
 }
 
-export interface GiftCardListFilters {
+interface GiftCardListFilters {
   status?: GiftCardStatus;
   purchasedBy?: string;
   assignedTo?: string;

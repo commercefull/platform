@@ -13,7 +13,7 @@ export interface GetPointsHistoryInput {
   endDate?: Date;
 }
 
-export interface PointsTransaction {
+interface PointsTransaction {
   transactionId: string;
   type: 'earned' | 'redeemed' | 'expired' | 'adjusted';
   points: number;
@@ -38,7 +38,7 @@ export interface GetPointsHistoryOutput {
   };
 }
 
-export interface PointsTransactionRecord {
+interface PointsTransactionRecord {
   transactionId: string;
   type: 'earned' | 'redeemed' | 'expired' | 'adjusted';
   points: number;
@@ -50,7 +50,7 @@ export interface PointsTransactionRecord {
   expiresAt?: Date;
 }
 
-export interface PointsSummary {
+interface PointsSummary {
   totalEarned: number;
   totalRedeemed: number;
   totalExpired: number;

@@ -4,7 +4,7 @@ export interface GetProductAttributesQuery {
   productId: string;
 }
 
-export interface ProductAttributeWithValue {
+interface ProductAttributeWithValue {
   attributeId: string;
   attributeCode: string;
   attributeName: string;

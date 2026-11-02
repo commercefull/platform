@@ -13,7 +13,7 @@ export interface ListMediaInput {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface MediaItem {
+interface MediaItem {
   mediaId: string;
   fileName: string;
   mimeType: string;

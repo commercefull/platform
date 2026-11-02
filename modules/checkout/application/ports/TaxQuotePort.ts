@@ -6,7 +6,7 @@
  * in checkout's vocabulary.
  */
 
-export interface TaxLineItem {
+interface TaxLineItem {
   productId: string;
   name: string;
   quantity: number;

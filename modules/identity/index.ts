@@ -29,4 +29,3 @@ export { identityTypeDefs } from './interface/graphql/typeDefs';
 export { identityResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

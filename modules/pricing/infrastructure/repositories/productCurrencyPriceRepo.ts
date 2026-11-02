@@ -429,5 +429,3 @@ export class ProductCurrencyPriceRepo {
     };
   }
 }
-
-export default new ProductCurrencyPriceRepo();

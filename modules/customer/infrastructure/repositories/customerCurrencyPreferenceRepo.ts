@@ -6,16 +6,16 @@ import { CustomerCurrencyPreference as DbCustomerCurrencyPreference } from '../.
 import { CustomerValidationError, FailedToCreateCustomerError } from '../../domain/errors/CustomerErrors';
 
 // Re-export DB type
-export type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
+type CustomerCurrencyPreference = DbCustomerCurrencyPreference;
 
 // Derived types for create/update operations
-export type CustomerCurrencyPreferenceCreateParams = Omit<
+type CustomerCurrencyPreferenceCreateParams = Omit<
   CustomerCurrencyPreference,
   'customerCurrencyPreferenceId' | 'createdAt' | 'updatedAt'
 >;
-export type CustomerCurrencyPreferenceUpdateParams = Partial<Pick<CustomerCurrencyPreference, 'currencyId' | 'automaticDetection'>>;
+type CustomerCurrencyPreferenceUpdateParams = Partial<Pick<CustomerCurrencyPreference, 'currencyId' | 'automaticDetection'>>;
 
-export class CustomerCurrencyPreferenceRepo {
+class CustomerCurrencyPreferenceRepo {
   async findById(id: string): Promise<CustomerCurrencyPreference | null> {
     return await queryOne<CustomerCurrencyPreference>(
       `SELECT * FROM "customerCurrencyPreference" WHERE "customerCurrencyPreferenceId" = $1`,

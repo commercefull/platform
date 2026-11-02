@@ -5,12 +5,12 @@ import type { SupplierAddress as DbSupplierAddress } from '../../../../libs/db/t
 
 export type SupplierAddressType = 'headquarters' | 'billing' | 'warehouse' | 'returns' | 'manufacturing';
 
-export type SupplierAddress = DbSupplierAddress;
+type SupplierAddress = DbSupplierAddress;
 
 export type SupplierAddressCreateParams = Omit<SupplierAddress, 'supplierAddressId' | 'createdAt' | 'updatedAt'>;
 export type SupplierAddressUpdateParams = Partial<Omit<SupplierAddress, 'supplierAddressId' | 'supplierId' | 'createdAt' | 'updatedAt'>>;
 
-export class SupplierAddressRepo {
+class SupplierAddressRepo {
   async findById(id: string): Promise<SupplierAddress | null> {
     return await queryOne<SupplierAddress>(`SELECT * FROM "supplierAddress" WHERE "supplierAddressId" = $1`, [id]);
   }

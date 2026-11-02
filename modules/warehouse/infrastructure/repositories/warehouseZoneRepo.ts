@@ -8,7 +8,7 @@ import { generateUUID } from '../../../../libs/uuid';
 import { FailedToCreateWarehouseEntityError } from '../../domain/errors/WarehouseErrors';
 import type { DistributionWarehouseZone as DbDistributionWarehouseZone } from '../../../../libs/db/types';
 import type { WarehouseZone, CreateZoneInput, UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
-export type { WarehouseZone, CreateZoneInput, UpdateZoneInput } from '../../domain/repositories/WarehouseRepository';
+
 
 const rec = (v: unknown): Record<string, unknown> | undefined => (v as Record<string, unknown> | null) ?? undefined;
 
@@ -23,7 +23,7 @@ function mapToZone(row: DbDistributionWarehouseZone): WarehouseZone {
   };
 }
 
-export async function createZone(input: CreateZoneInput): Promise<WarehouseZone> {
+async function createZone(input: CreateZoneInput): Promise<WarehouseZone> {
   const id = generateUUID();
   const now = new Date();
 
@@ -53,7 +53,7 @@ export async function createZone(input: CreateZoneInput): Promise<WarehouseZone>
   return result ? mapToZone(result) : result;
 }
 
-export async function findZoneById(zoneId: string): Promise<WarehouseZone | null> {
+async function findZoneById(zoneId: string): Promise<WarehouseZone | null> {
   const row = await queryOne<DbDistributionWarehouseZone>(
     'SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1',
     [zoneId],
@@ -61,7 +61,7 @@ export async function findZoneById(zoneId: string): Promise<WarehouseZone | null
   return row ? mapToZone(row) : null;
 }
 
-export async function findZonesByWarehouse(warehouseId: string): Promise<WarehouseZone[]> {
+async function findZonesByWarehouse(warehouseId: string): Promise<WarehouseZone[]> {
   const result = await query<DbDistributionWarehouseZone[]>(
     'SELECT * FROM "distributionWarehouseZone" WHERE "distributionWarehouseId" = $1 ORDER BY "sortOrder" ASC, "name" ASC',
     [warehouseId],
@@ -69,7 +69,7 @@ export async function findZonesByWarehouse(warehouseId: string): Promise<Warehou
   return (result || []).map(mapToZone);
 }
 
-export async function updateZone(zoneId: string, input: UpdateZoneInput): Promise<WarehouseZone | null> {
+async function updateZone(zoneId: string, input: UpdateZoneInput): Promise<WarehouseZone | null> {
   const fields: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -110,7 +110,7 @@ export async function updateZone(zoneId: string, input: UpdateZoneInput): Promis
   return row ? mapToZone(row) : null;
 }
 
-export async function deleteZone(zoneId: string): Promise<boolean> {
+async function deleteZone(zoneId: string): Promise<boolean> {
   await query('DELETE FROM "distributionWarehouseZone" WHERE "distributionWarehouseZoneId" = $1', [zoneId]);
   return true;
 }

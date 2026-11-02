@@ -12,7 +12,7 @@ export interface GetNotificationsInput {
   limit?: number;
 }
 
-export interface NotificationItem {
+interface NotificationItem {
   notificationId: string;
   channel: string;
   subject?: string;
@@ -31,7 +31,7 @@ export interface GetNotificationsOutput {
   limit: number;
 }
 
-export interface NotificationRecord {
+interface NotificationRecord {
   notificationId: string;
   channel: string;
   subject?: string;

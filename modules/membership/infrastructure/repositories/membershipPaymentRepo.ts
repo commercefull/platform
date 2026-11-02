@@ -3,15 +3,15 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateMembershipError } from '../../domain/errors/MembershipErrors';
 import type { MembershipPayment as DbMembershipPayment } from '../../../../libs/db/types';
 
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded';
-export type PaymentType = 'subscription' | 'setupFee' | 'manual' | 'refund';
+type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'partiallyRefunded';
+type PaymentType = 'subscription' | 'setupFee' | 'manual' | 'refund';
 
-export type MembershipPayment = DbMembershipPayment;
+type MembershipPayment = DbMembershipPayment;
 
-export type MembershipPaymentCreateParams = Omit<MembershipPayment, 'membershipPaymentId' | 'createdAt' | 'updatedAt'>;
-export type MembershipPaymentUpdateParams = Partial<Pick<MembershipPayment, 'status' | 'transactionId' | 'notes'>>;
+type MembershipPaymentCreateParams = Omit<MembershipPayment, 'membershipPaymentId' | 'createdAt' | 'updatedAt'>;
+type MembershipPaymentUpdateParams = Partial<Pick<MembershipPayment, 'status' | 'transactionId' | 'notes'>>;
 
-export class MembershipPaymentRepo {
+class MembershipPaymentRepo {
   async findById(id: string): Promise<MembershipPayment | null> {
     return await queryOne<MembershipPayment>(`SELECT * FROM "membershipPayment" WHERE "membershipPaymentId" = $1`, [id]);
   }

@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from 'axios';
 
 // Seeded test data IDs from seeds/20240805001700_seedSubscriptionTestData.js
 export const SEEDED_SUBSCRIPTION_PRODUCT_IDS = {
@@ -21,17 +20,6 @@ export const SEEDED_CUSTOMER_SUBSCRIPTION_IDS = {
   CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
 
-export function createTestClient(): AxiosInstance {
-  return axios.create({
-    baseURL: process.env.API_URL || 'http://localhost:3000',
-    validateStatus: () => true,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      'X-Test-Request': 'true',
-    },
-  });
-}
 
 export function createTestSubscriptionProduct(productId: string, overrides: Partial<unknown> = {}) {
   return {
@@ -81,24 +69,4 @@ export function createTestSubscriptionPlan(subscriptionProductId: string, overri
   };
 }
 
-export function createTestCustomerSubscription(
-  customerId: string,
-  subscriptionPlanId: string,
-  subscriptionProductId: string,
-  overrides: Partial<unknown> = {},
-) {
-  return {
-    customerId,
-    subscriptionPlanId,
-    subscriptionProductId,
-    quantity: 1,
-    unitPriceCents: 2999,
-    discountAmountCents: 0,
-    taxAmountCents: 240,
-    totalPriceCents: 3239,
-    currency: 'USD',
-    billingInterval: 'month',
-    billingIntervalCount: 1,
-    ...overrides,
-  };
-}
+

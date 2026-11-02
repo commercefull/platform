@@ -32,6 +32,81 @@ export async function getCategory(faqCategoryId: string): Promise<FaqCategory | 
   return row ? mapToCategory(row) : null;
 }
 
+// ============================================================================
+// FAQ Articles
+// ============================================================================
+
+export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
+  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
+  return row ? mapToArticle(row) : null;
+}
+
+async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> {
+  await query(
+    `UPDATE "supportFaqCategory" SET 
+      "articleCount" = (
+        SELECT COUNT(*) FROM "supportFaqArticle" 
+        WHERE "faqCategoryId" = $1 AND "isPublished" = true
+      ),
+      "updatedAt" = $2
+     WHERE "faqCategoryId" = $1`,
+    [faqCategoryId, new Date().toISOString()],
+  );
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function mapToCategory(row: Record<string, unknown>): FaqCategory {
+  return {
+    faqCategoryId: row.faqCategoryId as string,
+    parentCategoryId: row.parentCategoryId as string | null,
+    name: row.name as string,
+    slug: row.slug as string | null,
+    description: row.description as string | null,
+    icon: row.icon as string | null,
+    color: row.color as string | null,
+    imageUrl: row.imageUrl as string | null,
+    sortOrder: parseInt(row.sortOrder as string) || 0,
+    articleCount: parseInt(row.articleCount as string) || 0,
+    isActive: Boolean(row.isActive),
+    isFeatured: Boolean(row.isFeatured),
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  };
+}
+
+function mapToArticle(row: Record<string, unknown>): FaqArticle {
+  return {
+    faqArticleId: row.faqArticleId as string,
+    faqCategoryId: row.faqCategoryId as string | null,
+    title: row.title as string,
+    slug: row.slug as string | null,
+    content: row.content as string,
+    contentHtml: row.contentHtml as string | null,
+    excerpt: row.excerpt as string | null,
+    keywords: row.keywords as string[] | null,
+    relatedArticleIds: row.relatedArticleIds as string[] | null,
+    views: parseInt(row.views as string) || 0,
+    uniqueViews: parseInt(row.uniqueViews as string) || 0,
+    helpfulYes: parseInt(row.helpfulYes as string) || 0,
+    helpfulNo: parseInt(row.helpfulNo as string) || 0,
+    helpfulScore: row.helpfulScore as string | null,
+    sortOrder: parseInt(row.sortOrder as string) || 0,
+    isPublished: Boolean(row.isPublished),
+    isFeatured: Boolean(row.isFeatured),
+    isPinned: Boolean(row.isPinned),
+    publishedAt: row.publishedAt ? new Date(row.publishedAt as string) : null,
+    authorId: row.authorId as string | null,
+    authorName: row.authorName as string | null,
+    lastEditedBy: row.lastEditedBy as string | null,
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  };
+}
 export async function getCategoryBySlug(slug: string): Promise<FaqCategory | null> {
   const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqCategory" WHERE "slug" = $1', [slug]);
   return row ? mapToCategory(row) : null;
@@ -122,15 +197,6 @@ export async function deleteCategory(faqCategoryId: string): Promise<void> {
   // Move articles to uncategorized
   await query('UPDATE "supportFaqArticle" SET "faqCategoryId" = NULL WHERE "faqCategoryId" = $1', [faqCategoryId]);
   await query('DELETE FROM "supportFaqCategory" WHERE "faqCategoryId" = $1', [faqCategoryId]);
-}
-
-// ============================================================================
-// FAQ Articles
-// ============================================================================
-
-export async function getArticle(faqArticleId: string): Promise<FaqArticle | null> {
-  const row = await queryOne<Record<string, unknown>>('SELECT * FROM "supportFaqArticle" WHERE "faqArticleId" = $1', [faqArticleId]);
-  return row ? mapToArticle(row) : null;
 }
 
 export async function getArticleBySlug(slug: string): Promise<FaqArticle | null> {
@@ -379,69 +445,3 @@ export async function submitHelpfulVote(faqArticleId: string, isHelpful: boolean
   }
 }
 
-async function updateCategoryArticleCount(faqCategoryId: string): Promise<void> {
-  await query(
-    `UPDATE "supportFaqCategory" SET 
-      "articleCount" = (
-        SELECT COUNT(*) FROM "supportFaqArticle" 
-        WHERE "faqCategoryId" = $1 AND "isPublished" = true
-      ),
-      "updatedAt" = $2
-     WHERE "faqCategoryId" = $1`,
-    [faqCategoryId, new Date().toISOString()],
-  );
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function mapToCategory(row: Record<string, unknown>): FaqCategory {
-  return {
-    faqCategoryId: row.faqCategoryId as string,
-    parentCategoryId: row.parentCategoryId as string | null,
-    name: row.name as string,
-    slug: row.slug as string | null,
-    description: row.description as string | null,
-    icon: row.icon as string | null,
-    color: row.color as string | null,
-    imageUrl: row.imageUrl as string | null,
-    sortOrder: parseInt(row.sortOrder as string) || 0,
-    articleCount: parseInt(row.articleCount as string) || 0,
-    isActive: Boolean(row.isActive),
-    isFeatured: Boolean(row.isFeatured),
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
-  };
-}
-
-function mapToArticle(row: Record<string, unknown>): FaqArticle {
-  return {
-    faqArticleId: row.faqArticleId as string,
-    faqCategoryId: row.faqCategoryId as string | null,
-    title: row.title as string,
-    slug: row.slug as string | null,
-    content: row.content as string,
-    contentHtml: row.contentHtml as string | null,
-    excerpt: row.excerpt as string | null,
-    keywords: row.keywords as string[] | null,
-    relatedArticleIds: row.relatedArticleIds as string[] | null,
-    views: parseInt(row.views as string) || 0,
-    uniqueViews: parseInt(row.uniqueViews as string) || 0,
-    helpfulYes: parseInt(row.helpfulYes as string) || 0,
-    helpfulNo: parseInt(row.helpfulNo as string) || 0,
-    helpfulScore: row.helpfulScore as string | null,
-    sortOrder: parseInt(row.sortOrder as string) || 0,
-    isPublished: Boolean(row.isPublished),
-    isFeatured: Boolean(row.isFeatured),
-    isPinned: Boolean(row.isPinned),
-    publishedAt: row.publishedAt ? new Date(row.publishedAt as string) : null,
-    authorId: row.authorId as string | null,
-    authorName: row.authorName as string | null,
-    lastEditedBy: row.lastEditedBy as string | null,
-    metadata: row.metadata as Record<string, unknown> | null,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
-  };
-}

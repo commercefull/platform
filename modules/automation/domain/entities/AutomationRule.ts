@@ -1,6 +1,6 @@
 export type TriggerType = 'event' | 'schedule' | 'manual' | 'segment_membership_added' | 'segment_membership_removed';
 
-export type ConditionOperator =
+type ConditionOperator =
   | 'eq'
   | 'neq'
   | 'gt'
@@ -17,22 +17,6 @@ export type ConditionOperator =
   | 'isNull'
   | 'regex';
 
-export type ConditionField =
-  | 'event.data.*'
-  | 'event.type'
-  | 'customer.tier'
-  | 'customer.lifetimeValue'
-  | 'customer.totalOrders'
-  | 'customer.daysSinceLastOrder'
-  | 'customer.rfmSegment'
-  | 'customer.tags'
-  | 'order.totalAmount'
-  | 'order.itemCount'
-  | 'order.status'
-  | 'product.price'
-  | 'product.categoryId'
-  | 'product.status'
-  | 'custom';
 
 export interface TriggerConfig {
   eventName?: string;
@@ -72,7 +56,6 @@ export interface RuleAction {
 
 export type ActionExecutionMode = 'sequential' | 'parallel';
 
-export type ExecutionStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped' | 'partial';
 
 export interface AutomationRuleProps {
   automationRuleId: string;

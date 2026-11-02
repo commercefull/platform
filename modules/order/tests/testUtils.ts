@@ -11,7 +11,7 @@ import { OrderItem } from '../domain/entities/OrderItem';
 import { Money } from '../domain/valueObjects/Money';
 import type { OrderFulfillment } from '../domain/repositories/OrderFulfillmentRepository';
 import type { OrderFulfillmentPackage } from '../domain/repositories/OrderFulfillmentPackageRepository';
-import type { OrderReturn, OrderReturnCreateParams } from '../domain/repositories/OrderReturnRepository';
+import type { OrderReturn } from '../domain/repositories/OrderReturnRepository';
 import type { OrderNote } from '../domain/repositories/OrderNoteRepository';
 import type { OrderPaymentRefund } from '../domain/repositories/OrderPaymentRefundRepository';
 
@@ -122,18 +122,6 @@ export function createOrderReturn(overrides: Partial<OrderReturn> = {}): OrderRe
   } as OrderReturn;
 }
 
-export function createOrderReturnParams(overrides: Partial<OrderReturn> = {}): OrderReturnCreateParams {
-  const record: Partial<OrderReturn> = createOrderReturn(overrides);
-  delete record.orderReturnId;
-  delete record.createdAt;
-  delete record.updatedAt;
-  delete record.returnNumber;
-  delete record.requestedAt;
-  delete record.approvedAt;
-  delete record.receivedAt;
-  delete record.completedAt;
-  return record as OrderReturnCreateParams;
-}
 
 export function createOrderNote(overrides: Partial<OrderNote> = {}): OrderNote {
   return {

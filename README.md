@@ -399,53 +399,53 @@ For a detailed architecture guide, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 Commercefull includes 45 business modules:
 
-| Module             | Description                                                                     |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `agentic-checkout` | AI-agent checkout — ACP sessions, product feeds, idempotent order placement     |
-| `analytics`        | Sales, product, customer, and predictive analytics                              |
-| `assortment`       | Collections and per-store/channel product assortment scoping                    |
-| `audit`         | Immutable, hash-chained audit log                                    |
-| `automation`    | Rule engine — condition/action DSL executed on the event bus         |
-| `b2b`           | B2B companies, quotes, price books, credit terms, approval workflows |
-| `basket`        | Shopping cart management                                             |
-| `checkout`      | Checkout sessions, configurable steps, payment capture flow          |
-| `configuration` | System-wide configuration and feature flags                          |
-| `content`       | CMS pages, blocks, and templates                                     |
-| `coupon`        | Coupon codes and validation                                          |
-| `customer`      | Customer profiles and groups                                         |
-| `fulfillment`   | Order fulfillment, packing, and shipping labels                      |
-| `gdpr`          | GDPR compliance and data requests                                    |
-| `identity`      | Authentication and authorization (IAM), SSO (SAML/OIDC), SCIM 2.0    |
-| `integration`   | Third-party integrations with encrypted credentials                  |
-| `inventory`     | Stock levels, reservations, and lot tracking                         |
-| `localization`  | Countries, currencies, and locales                                   |
-| `loyalty`       | Loyalty programs, points, and tiers                                  |
-| `marketplace`   | Multi-vendor marketplace — commissions, payouts, order splitting     |
-| `media`         | File and media management (S3/local)                                 |
-| `membership`    | Membership plans and subscriptions                                   |
-| `migration`     | External platform migration — import jobs and ID mappings            |
-| `notification`  | Email/push notification templates                                    |
-| `order`         | Order lifecycle management                                           |
-| `organization`  | Organization hierarchy                                               |
-| `pagebuilder`   | Drag-and-drop page builder with block schema and theme integration   |
-| `payment`       | Multi-PSP payment processing with failover routing                   |
-| `pricing`       | Price lists, rules, and dynamic pricing                              |
-| `product`       | Product catalog with master/variant architecture                     |
-| `promotion`     | Promotions, discounts, and gift cards                                |
-| `recommendation`| Product recommendations (rules, co-purchase, similarity)             |
-| `reporting`     | Report generation and exports                                        |
-| `returns`       | Returns, exchanges, store credit, and warranty claims                |
-| `segment`       | Customer segmentation (CDP)                                          |
-| `shipping`      | Shipping methods, zones, and rates                                   |
-| `store`         | Store management, pickup, and local delivery                         |
-| `subscription`  | Recurring subscription billing                                       |
-| `supplier`      | Supplier and purchase order management                               |
-| `support`       | Support tickets and FAQ                                              |
-| `tax`           | Tax calculation, zones, and classes                                  |
-| `theme`         | Theme engine — registry, per-store overrides, CSS variables          |
-| `tracking`      | Consent-gated server-side tracking (GTM Server + Meta CAPI)          |
-| `warehouse`     | Warehouse and distribution management                                |
-| `webhook`       | Outbound webhook delivery with HMAC signatures                       |
+| Module             | Description                                                                 |
+| ------------------ | --------------------------------------------------------------------------- |
+| `agentic-checkout` | AI-agent checkout — ACP sessions, product feeds, idempotent order placement |
+| `analytics`        | Sales, product, customer, and predictive analytics                          |
+| `assortment`       | Collections and per-store/channel product assortment scoping                |
+| `audit`            | Immutable, hash-chained audit log                                           |
+| `automation`       | Rule engine — condition/action DSL executed on the event bus                |
+| `b2b`              | B2B companies, quotes, price books, credit terms, approval workflows        |
+| `basket`           | Shopping cart management                                                    |
+| `checkout`         | Checkout sessions, configurable steps, payment capture flow                 |
+| `configuration`    | System-wide configuration and feature flags                                 |
+| `content`          | CMS pages, blocks, and templates                                            |
+| `coupon`           | Coupon codes and validation                                                 |
+| `customer`         | Customer profiles and groups                                                |
+| `fulfillment`      | Order fulfillment, packing, and shipping labels                             |
+| `gdpr`             | GDPR compliance and data requests                                           |
+| `identity`         | Authentication and authorization (IAM), SSO (SAML/OIDC), SCIM 2.0           |
+| `integration`      | Third-party integrations with encrypted credentials                         |
+| `inventory`        | Stock levels, reservations, and lot tracking                                |
+| `localization`     | Countries, currencies, and locales                                          |
+| `loyalty`          | Loyalty programs, points, and tiers                                         |
+| `marketplace`      | Multi-vendor marketplace — commissions, payouts, order splitting            |
+| `media`            | File and media management (S3/local)                                        |
+| `membership`       | Membership plans and subscriptions                                          |
+| `migration`        | External platform migration — import jobs and ID mappings                   |
+| `notification`     | Email/push notification templates                                           |
+| `order`            | Order lifecycle management                                                  |
+| `organization`     | Organization hierarchy                                                      |
+| `pagebuilder`      | Drag-and-drop page builder with block schema and theme integration          |
+| `payment`          | Multi-PSP payment processing with failover routing                          |
+| `pricing`          | Price lists, rules, and dynamic pricing                                     |
+| `product`          | Product catalog with master/variant architecture                            |
+| `promotion`        | Promotions, discounts, and gift cards                                       |
+| `recommendation`   | Product recommendations (rules, co-purchase, similarity)                    |
+| `reporting`        | Report generation and exports                                               |
+| `returns`          | Returns, exchanges, store credit, and warranty claims                       |
+| `segment`          | Customer segmentation (CDP)                                                 |
+| `shipping`         | Shipping methods, zones, and rates                                          |
+| `store`            | Store management, pickup, and local delivery                                |
+| `subscription`     | Recurring subscription billing                                              |
+| `supplier`         | Supplier and purchase order management                                      |
+| `support`          | Support tickets and FAQ                                                     |
+| `tax`              | Tax calculation, zones, and classes                                         |
+| `theme`            | Theme engine — registry, per-store overrides, CSS variables                 |
+| `tracking`         | Consent-gated server-side tracking (GTM Server + Meta CAPI)                 |
+| `warehouse`        | Warehouse and distribution management                                       |
+| `webhook`          | Outbound webhook delivery with HMAC signatures                              |
 
 ---
 

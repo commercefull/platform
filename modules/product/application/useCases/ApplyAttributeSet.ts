@@ -12,7 +12,7 @@ import { ProductNotFoundError, AttributeSetNotFoundError, ProductValidationError
 // Ports
 // ============================================================================
 
-export interface AttributeSetWithDefaults {
+interface AttributeSetWithDefaults {
   attributes: Array<{
     productAttributeId: string;
     defaultValue?: string | null;

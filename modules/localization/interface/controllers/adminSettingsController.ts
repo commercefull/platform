@@ -7,7 +7,7 @@ import { jsonResponse } from 'libs/apiResponse';
 
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { adminRespond } from '../../../../libs/adminRespond';
-import { manageLanguagesUseCase, manageCurrenciesUseCase, manageCountriesUseCase } from '../../application/wired';
+import { manageLanguagesUseCase, manageCurrenciesUseCase } from '../../application/wired';
 
 // ============================================================================
 // Types
@@ -90,28 +90,6 @@ export const updateBusinessInfo = async (req: HttpRequest, res: HttpResponse): P
   void { legalName, taxId, registrationNumber };
 
   jsonResponse(res, 200, { success: true });
-};
-
-// ============================================================================
-// Localization Settings
-// ============================================================================
-
-export const localizationSettings = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  // Get languages
-  const languages = await manageLanguagesUseCase.listLanguages();
-
-  // Get currencies
-  const currencies = await manageCurrenciesUseCase.listCurrencies();
-
-  // Get countries
-  const countries = await manageCountriesUseCase.findAll();
-
-  adminRespond(req, res, 'settings/localization', {
-    pageName: 'Localization',
-    languages,
-    currencies,
-    countries,
-  });
 };
 
 // ============================================================================

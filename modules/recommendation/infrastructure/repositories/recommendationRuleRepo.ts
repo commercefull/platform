@@ -14,7 +14,7 @@ import type {
 } from '../../domain/entities/RecommendationRule';
 import type { RecommendationExclusionCreateProps, RecommendationExclusionProps } from '../../domain/entities/RecommendationExclusion';
 
-export class RecommendationRuleRepository implements RuleRepository {
+class RecommendationRuleRepository implements RuleRepository {
   async list(organizationId: string): Promise<RecommendationRuleProps[]> {
     const rows = await query<RecommendationRuleProps[]>(
       `SELECT * FROM "recommendationRule" WHERE "organizationId" = $1 ORDER BY priority DESC, "createdAt" ASC`,
@@ -118,7 +118,7 @@ export class RecommendationRuleRepository implements RuleRepository {
   }
 }
 
-export class RecommendationExclusionRepository implements ExclusionRepository {
+class RecommendationExclusionRepository implements ExclusionRepository {
   async list(organizationId: string): Promise<RecommendationExclusionProps[]> {
     const rows = await query<RecommendationExclusionProps[]>(
       `SELECT * FROM "recommendationExclusion" WHERE "organizationId" = $1 ORDER BY "createdAt" DESC`,

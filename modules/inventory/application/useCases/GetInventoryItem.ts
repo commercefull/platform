@@ -12,7 +12,7 @@ export interface GetInventoryItemInput {
   warehouseId?: string;
 }
 
-export interface InventoryItemDetails {
+interface InventoryItemDetails {
   inventoryItemId: string;
   productId: string;
   variantId?: string;

@@ -6,8 +6,8 @@
 
 import type { ContentRedirect } from '../entities/ContentModel';
 
-export type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
-export type ContentRedirectUpdateParams = Partial<
+type ContentRedirectCreateParams = Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>;
+type ContentRedirectUpdateParams = Partial<
   Omit<ContentRedirect, 'contentRedirectId' | 'hits' | 'lastUsed' | 'createdAt' | 'updatedAt'>
 >;
 

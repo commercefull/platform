@@ -8,14 +8,13 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 import type { TaxProviderLog as DbTaxProviderLog } from '../../../../libs/db/types';
 
-export type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
-export type TaxProviderRequestType = 'calculation' | 'verification' | 'filing' | 'refund' | 'adjustment' | 'validation';
+type TaxProvider = 'internal' | 'avalara' | 'taxjar' | 'external';
 
-export type TaxProviderLog = DbTaxProviderLog;
+type TaxProviderLog = DbTaxProviderLog;
 
-export type TaxProviderLogCreateParams = Omit<TaxProviderLog, 'taxProviderLogId' | 'createdAt' | 'updatedAt'>;
+type TaxProviderLogCreateParams = Omit<TaxProviderLog, 'taxProviderLogId' | 'createdAt' | 'updatedAt'>;
 
-export class TaxProviderLogRepo {
+class TaxProviderLogRepo {
   async findById(id: string): Promise<TaxProviderLog | null> {
     return await queryOne<TaxProviderLog>(`SELECT * FROM "taxProviderLog" WHERE "taxProviderLogId" = $1`, [id]);
   }

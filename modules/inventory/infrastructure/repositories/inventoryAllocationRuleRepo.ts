@@ -14,7 +14,7 @@ import {
 import type { AttributeCondition } from '../../../../libs/rules/conditions';
 import type { InventoryAllocationRule as DbInventoryAllocationRule } from '../../../../libs/db/types';
 
-export type InventoryAllocationRuleRow = DbInventoryAllocationRule;
+type InventoryAllocationRuleRow = DbInventoryAllocationRule;
 
 function mapToEntity(row: InventoryAllocationRuleRow): InventoryAllocationRule {
   return new InventoryAllocationRule({
@@ -38,14 +38,14 @@ function mapToEntity(row: InventoryAllocationRuleRow): InventoryAllocationRule {
   });
 }
 
-export async function findActiveRules(): Promise<InventoryAllocationRule[]> {
+async function findActiveRules(): Promise<InventoryAllocationRule[]> {
   const rows = await query<InventoryAllocationRuleRow[]>(
     `SELECT * FROM "inventoryAllocationRule" WHERE "isActive" = true ORDER BY "priority" DESC`,
   );
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByScope(scope: AllocationRuleScope, activeOnly = true): Promise<InventoryAllocationRule[]> {
+async function findByScope(scope: AllocationRuleScope, activeOnly = true): Promise<InventoryAllocationRule[]> {
   let sql = `SELECT * FROM "inventoryAllocationRule" WHERE "scope" = $1`;
   const params: unknown[] = [scope];
   if (activeOnly) {
@@ -56,7 +56,7 @@ export async function findByScope(scope: AllocationRuleScope, activeOnly = true)
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByPool(poolId: string, activeOnly = true): Promise<InventoryAllocationRule[]> {
+async function findByPool(poolId: string, activeOnly = true): Promise<InventoryAllocationRule[]> {
   let sql = `SELECT * FROM "inventoryAllocationRule" WHERE "scope" = 'pool' AND "poolId" = $1`;
   const params: unknown[] = [poolId];
   if (activeOnly) {
@@ -66,7 +66,7 @@ export async function findByPool(poolId: string, activeOnly = true): Promise<Inv
   return (rows || []).map(mapToEntity);
 }
 
-export async function findByProduct(productId: string, activeOnly = true): Promise<InventoryAllocationRule[]> {
+async function findByProduct(productId: string, activeOnly = true): Promise<InventoryAllocationRule[]> {
   let sql = `SELECT * FROM "inventoryAllocationRule" WHERE "scope" = 'product' AND "productId" = $1`;
   const params: unknown[] = [productId];
   if (activeOnly) {
@@ -76,16 +76,16 @@ export async function findByProduct(productId: string, activeOnly = true): Promi
   return (rows || []).map(mapToEntity);
 }
 
-export async function findById(inventoryAllocationRuleId: string): Promise<InventoryAllocationRule | null> {
+async function findById(inventoryAllocationRuleId: string): Promise<InventoryAllocationRule | null> {
   const row = await queryOne<InventoryAllocationRuleRow>(`SELECT * FROM "inventoryAllocationRule" WHERE "inventoryAllocationRuleId" = $1`, [
     inventoryAllocationRuleId,
   ]);
   return row ? mapToEntity(row) : null;
 }
 
-export type CreateInventoryAllocationRuleInput = Omit<InventoryAllocationRuleProps, 'inventoryAllocationRuleId'>;
+type CreateInventoryAllocationRuleInput = Omit<InventoryAllocationRuleProps, 'inventoryAllocationRuleId'>;
 
-export async function create(input: CreateInventoryAllocationRuleInput): Promise<InventoryAllocationRule> {
+async function create(input: CreateInventoryAllocationRuleInput): Promise<InventoryAllocationRule> {
   const row = await queryOne<InventoryAllocationRuleRow>(
     `INSERT INTO "inventoryAllocationRule" (
       "name", "description", "scope", "poolId", "categoryId", "productId",

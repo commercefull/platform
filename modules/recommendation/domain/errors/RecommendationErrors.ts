@@ -4,7 +4,7 @@
 
 import { AppError } from '../../../../libs/errors';
 
-export class RecommendationError extends AppError {
+class RecommendationError extends AppError {
   constructor(code: string, message: string, statusCode: number = 400) {
     super(message, statusCode, { code });
     this.name = 'RecommendationError';

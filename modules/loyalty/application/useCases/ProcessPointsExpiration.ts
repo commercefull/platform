@@ -13,7 +13,7 @@ export interface ProcessPointsExpirationInput {
   notifyCustomers?: boolean;
 }
 
-export interface ExpirationResult {
+interface ExpirationResult {
   customerId: string;
   pointsExpired: number;
   newBalance: number;
@@ -27,12 +27,12 @@ export interface ProcessPointsExpirationOutput {
   dryRun: boolean;
 }
 
-export interface ExpiringPointsBatch {
+interface ExpiringPointsBatch {
   customerId: string;
   points: number;
 }
 
-export interface CustomerLoyaltyInfo {
+interface CustomerLoyaltyInfo {
   pointsBalance: number;
 }
 

@@ -3,22 +3,22 @@ import { FulfillmentPartner } from '../../../../libs/db/types';
 
 export type { FulfillmentPartner };
 
-export async function findAll(activeOnly = true): Promise<FulfillmentPartner[]> {
+async function findAll(activeOnly = true): Promise<FulfillmentPartner[]> {
   const sql = activeOnly
     ? `SELECT * FROM "fulfillmentPartner" WHERE "isActive" = true ORDER BY name ASC`
     : `SELECT * FROM "fulfillmentPartner" ORDER BY name ASC`;
   return (await query<FulfillmentPartner[]>(sql)) || [];
 }
 
-export async function findById(fulfillmentPartnerId: string): Promise<FulfillmentPartner | null> {
+async function findById(fulfillmentPartnerId: string): Promise<FulfillmentPartner | null> {
   return queryOne<FulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE "fulfillmentPartnerId" = $1`, [fulfillmentPartnerId]);
 }
 
-export async function findByCode(code: string): Promise<FulfillmentPartner | null> {
+async function findByCode(code: string): Promise<FulfillmentPartner | null> {
   return queryOne<FulfillmentPartner>(`SELECT * FROM "fulfillmentPartner" WHERE code = $1`, [code]);
 }
 
-export async function create(
+async function create(
   params: Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'createdAt' | 'updatedAt'>,
 ): Promise<FulfillmentPartner | null> {
   const now = new Date();
@@ -40,7 +40,7 @@ export async function create(
   );
 }
 
-export async function update(
+async function update(
   fulfillmentPartnerId: string,
   params: Partial<Omit<FulfillmentPartner, 'fulfillmentPartnerId' | 'code' | 'createdAt' | 'updatedAt'>>,
 ): Promise<FulfillmentPartner | null> {
@@ -89,7 +89,7 @@ export async function update(
   );
 }
 
-export async function remove(fulfillmentPartnerId: string): Promise<boolean> {
+async function remove(fulfillmentPartnerId: string): Promise<boolean> {
   await query('DELETE FROM "fulfillmentPartner" WHERE "fulfillmentPartnerId" = $1', [fulfillmentPartnerId]);
   return true;
 }

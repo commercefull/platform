@@ -21,6 +21,6 @@ export * from './application/useCases';
 // Interface (routers + controllers)
 export { assortmentBusinessRouter } from './interface/routers/assortmentBusinessRouter';
 export { assortmentCustomerRouter } from './interface/routers/assortmentCustomerRouter';
-export * as adminCollectionController from './interface/controllers/adminCollectionController';
-export * as adminStoreAssortmentController from './interface/controllers/adminStoreAssortmentController';
+export * from './interface/controllers/adminCollectionController';
+export * from './interface/controllers/adminStoreAssortmentController';
 export { listCollectionsPage, getCollectionPage } from './interface/controllers/storefrontCollectionController';

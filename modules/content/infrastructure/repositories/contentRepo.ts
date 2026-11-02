@@ -32,10 +32,6 @@ const TABLES = {
   CONTENT_PAGE_TRANSLATION: Table.ContentPageTranslation,
 };
 
-// Re-export generated types for convenience
-export type { ContentType, ContentPage, ContentBlock, ContentTemplate };
-
-// Create / Update params derived from generated types
 type ContentTypeCreateParams = Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
 type ContentTypeUpdateParams = Partial<Omit<ContentType, 'contentTypeId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
 
@@ -66,7 +62,7 @@ type ContentTemplateUpdateParams = Partial<
   Omit<ContentTemplate, 'contentTemplateId' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
 >;
 
-export class ContentRepo {
+class ContentRepo {
   // Content Block Type methods
   async findBlockTypeById(id: string): Promise<ContentBlockType | null> {
     return queryOne<ContentBlockType>(`SELECT * FROM "${TABLES.CONTENT_BLOCK_TYPE}" WHERE "contentBlockTypeId" = $1`, [id]);

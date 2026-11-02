@@ -86,5 +86,3 @@ export class RuleConditionRepo {
     return result ? parseInt(result.count, 10) : 0;
   }
 }
-
-export default new RuleConditionRepo();

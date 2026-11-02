@@ -13,7 +13,6 @@ import { ProductPricingAdapter } from '../acl/ProductPricingAdapter';
 // ============================================================================
 
 export type BundleType = 'fixed' | 'customizable' | 'mix_and_match';
-export type PricingType = 'fixed' | 'calculated' | 'percentage_discount';
 
 export type ProductBundle = DbProductBundle;
 
@@ -26,6 +25,53 @@ export type BundleItem = DbProductBundleItem;
 export async function getBundle(productBundleId: string): Promise<ProductBundle | null> {
   const row = await queryOne<DbProductBundle>('SELECT * FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
   return row ? mapToBundle(row) : null;
+}
+
+// ============================================================================
+// Bundle Items
+// ============================================================================
+
+export async function getBundleItem(bundleItemId: string): Promise<BundleItem | null> {
+  const row = await queryOne<DbProductBundleItem>('SELECT * FROM "productBundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
+  return row ? mapToBundleItem(row) : null;
+}
+
+export async function getBundleItems(productBundleId: string): Promise<BundleItem[]> {
+  const rows = await query<DbProductBundleItem[]>(
+    'SELECT * FROM "productBundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC',
+    [productBundleId],
+  );
+  return (rows || []).map(mapToBundleItem);
+}
+
+// ============================================================================
+// Bundle Pricing
+// ============================================================================
+
+const productPricingPort = new ProductPricingAdapter();
+
+/** Effective catalog price in integer cents, resolved from the pricing-owned store. */
+async function getProductPriceCents(productId: string, productVariantId?: string): Promise<number> {
+  const price = await productPricingPort.getBasePrice(productId, productVariantId);
+  if (!price) return 0;
+  return price.salePriceCents ?? price.priceCents;
+}
+
+/** Legacy decimal (major-unit) columns on bundle tables, converted to cents at the boundary. */
+function toCents(amount: number | null | undefined): number {
+  return amount ? Math.round(amount * 100) : 0;
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function mapToBundle(row: DbProductBundle): ProductBundle {
+  return row;
+}
+
+function mapToBundleItem(row: DbProductBundleItem): BundleItem {
+  return row;
 }
 
 export async function getBundleByProductId(productId: string): Promise<ProductBundle | null> {
@@ -186,23 +232,6 @@ export async function deleteBundle(productBundleId: string): Promise<void> {
   await query('DELETE FROM "productBundle" WHERE "productBundleId" = $1', [productBundleId]);
 }
 
-// ============================================================================
-// Bundle Items
-// ============================================================================
-
-export async function getBundleItem(bundleItemId: string): Promise<BundleItem | null> {
-  const row = await queryOne<DbProductBundleItem>('SELECT * FROM "productBundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
-  return row ? mapToBundleItem(row) : null;
-}
-
-export async function getBundleItems(productBundleId: string): Promise<BundleItem[]> {
-  const rows = await query<DbProductBundleItem[]>(
-    'SELECT * FROM "productBundleItem" WHERE "productBundleId" = $1 ORDER BY "sortOrder" ASC',
-    [productBundleId],
-  );
-  return (rows || []).map(mapToBundleItem);
-}
-
 export async function saveBundleItem(
   item: Partial<BundleItem> & {
     productBundleId: string;
@@ -272,24 +301,6 @@ export async function deleteBundleItem(bundleItemId: string): Promise<void> {
   await query('DELETE FROM "productBundleItem" WHERE "bundleItemId" = $1', [bundleItemId]);
 }
 
-// ============================================================================
-// Bundle Pricing
-// ============================================================================
-
-const productPricingPort = new ProductPricingAdapter();
-
-/** Effective catalog price in integer cents, resolved from the pricing-owned store. */
-async function getProductPriceCents(productId: string, productVariantId?: string): Promise<number> {
-  const price = await productPricingPort.getBasePrice(productId, productVariantId);
-  if (!price) return 0;
-  return price.salePriceCents ?? price.priceCents;
-}
-
-/** Legacy decimal (major-unit) columns on bundle tables, converted to cents at the boundary. */
-function toCents(amount: number | null | undefined): number {
-  return amount ? Math.round(amount * 100) : 0;
-}
-
 export async function calculateBundlePrice(
   productBundleId: string,
   selectedItems?: { productId: string; productVariantId?: string; quantity: number }[],
@@ -345,14 +356,3 @@ export async function calculateBundlePrice(
   };
 }
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function mapToBundle(row: DbProductBundle): ProductBundle {
-  return row;
-}
-
-function mapToBundleItem(row: DbProductBundleItem): BundleItem {
-  return row;
-}

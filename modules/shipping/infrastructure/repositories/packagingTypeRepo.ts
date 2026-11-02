@@ -14,26 +14,26 @@ export type UpdateShippingPackagingTypeInput = Partial<Omit<ShippingPackagingTyp
 
 const TABLE = Table.ShippingPackagingType;
 
-export async function findById(id: string): Promise<ShippingPackagingType | null> {
+async function findById(id: string): Promise<ShippingPackagingType | null> {
   return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1`, [id]);
 }
 
-export async function findByCode(code: string): Promise<ShippingPackagingType | null> {
+async function findByCode(code: string): Promise<ShippingPackagingType | null> {
   return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "code" = $1`, [code]);
 }
 
-export async function findAll(activeOnly = false): Promise<ShippingPackagingType[]> {
+async function findAll(activeOnly = false): Promise<ShippingPackagingType[]> {
   let sql = `SELECT * FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   sql += ` ORDER BY "volume" ASC`;
   return (await query<ShippingPackagingType[]>(sql)) || [];
 }
 
-export async function findDefault(): Promise<ShippingPackagingType | null> {
+async function findDefault(): Promise<ShippingPackagingType | null> {
   return queryOne<ShippingPackagingType>(`SELECT * FROM "${TABLE}" WHERE "isDefault" = true AND "isActive" = true LIMIT 1`);
 }
 
-export async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]> {
+async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]> {
   return (
     (await query<ShippingPackagingType[]>(
       `SELECT * FROM "${TABLE}" WHERE "isActive" = true AND ("maxWeight" IS NULL OR "maxWeight" >= $1) ORDER BY "volume" ASC`,
@@ -42,7 +42,7 @@ export async function findByMaxWeight(weight: number): Promise<ShippingPackaging
   );
 }
 
-export async function create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType> {
+async function create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType> {
   if (input.isDefault) {
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
   }
@@ -79,7 +79,7 @@ export async function create(input: CreateShippingPackagingTypeInput): Promise<S
   return result;
 }
 
-export async function update(id: string, input: UpdateShippingPackagingTypeInput): Promise<ShippingPackagingType | null> {
+async function update(id: string, input: UpdateShippingPackagingTypeInput): Promise<ShippingPackagingType | null> {
   if (input.isDefault === true) {
     await query(
       `UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true AND "shippingPackagingTypeId" != $1`,
@@ -109,15 +109,15 @@ export async function update(id: string, input: UpdateShippingPackagingTypeInput
   );
 }
 
-export async function activate(id: string): Promise<ShippingPackagingType | null> {
+async function activate(id: string): Promise<ShippingPackagingType | null> {
   return update(id, { isActive: true });
 }
 
-export async function deactivate(id: string): Promise<ShippingPackagingType | null> {
+async function deactivate(id: string): Promise<ShippingPackagingType | null> {
   return update(id, { isActive: false });
 }
 
-export async function deletePackagingType(id: string): Promise<boolean> {
+async function deletePackagingType(id: string): Promise<boolean> {
   const result = await queryOne<{ shippingPackagingTypeId: string }>(
     `DELETE FROM "${TABLE}" WHERE "shippingPackagingTypeId" = $1 RETURNING "shippingPackagingTypeId"`,
     [id],
@@ -125,7 +125,7 @@ export async function deletePackagingType(id: string): Promise<boolean> {
   return !!result;
 }
 
-export async function count(activeOnly = false): Promise<number> {
+async function count(activeOnly = false): Promise<number> {
   let sql = `SELECT COUNT(*) as count FROM "${TABLE}"`;
   if (activeOnly) sql += ` WHERE "isActive" = true`;
   const result = await queryOne<{ count: string }>(sql);

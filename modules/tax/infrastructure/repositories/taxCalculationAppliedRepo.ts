@@ -8,16 +8,16 @@ import { unixTimestamp } from '../../../../libs/date';
 import { FailedToCreateTaxError } from '../../domain/errors/TaxErrors';
 import type { TaxCalculationApplied as DbTaxCalculationApplied } from '../../../../libs/db/types';
 
-export type TaxJurisdictionLevel = 'country' | 'state' | 'county' | 'city' | 'district' | 'special';
+type TaxJurisdictionLevel = 'country' | 'state' | 'county' | 'city' | 'district' | 'special';
 
-export type TaxCalculationApplied = DbTaxCalculationApplied;
+type TaxCalculationApplied = DbTaxCalculationApplied;
 
-export type TaxCalculationAppliedCreateParams = Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'createdAt' | 'updatedAt'>;
-export type TaxCalculationAppliedUpdateParams = Partial<
+type TaxCalculationAppliedCreateParams = Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'createdAt' | 'updatedAt'>;
+type TaxCalculationAppliedUpdateParams = Partial<
   Omit<TaxCalculationApplied, 'taxCalculationAppliedId' | 'calculationId' | 'createdAt' | 'updatedAt'>
 >;
 
-export class TaxCalculationAppliedRepo {
+class TaxCalculationAppliedRepo {
   async findById(id: string): Promise<TaxCalculationApplied | null> {
     return await queryOne<TaxCalculationApplied>(`SELECT * FROM "taxCalculationApplied" WHERE "taxCalculationAppliedId" = $1`, [id]);
   }

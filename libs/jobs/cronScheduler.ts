@@ -12,7 +12,7 @@ import { eventBus } from '../events/eventBus';
 import { logger } from '../logger';
 import { observeScheduledJob } from '../runtimeMetrics';
 
-export interface ScheduledJob {
+interface ScheduledJob {
   id: string;
   name: string;
   handler: () => Promise<void>;
@@ -25,7 +25,7 @@ export interface ScheduledJob {
   enabled: boolean;
 }
 
-export interface JobResult {
+interface JobResult {
   jobId: string;
   success: boolean;
   duration: number;

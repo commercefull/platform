@@ -54,7 +54,7 @@ function mapUsage(row: PromotionCouponUsageRow): PromotionCouponUsage {
 /**
  * Repository for managing promotion coupons
  */
-export class CouponRepo {
+class CouponRepo {
   /**
    * Create a new coupon
    */

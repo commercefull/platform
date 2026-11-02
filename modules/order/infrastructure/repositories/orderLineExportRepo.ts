@@ -7,7 +7,7 @@
 import { query } from '../../../../libs/db';
 import type { OrderLineExportRepository as OrderLineExportPort, OrderLineRef } from '../../domain/repositories/OrderLineExportRepository';
 
-export class OrderLineExportRepository implements OrderLineExportPort {
+class OrderLineExportRepository implements OrderLineExportPort {
   async getLineRefs(orderId: string): Promise<OrderLineRef[]> {
     const rows = await query<OrderLineRef[]>(
       `SELECT oi."orderId", oi."productId", o."organizationId", o."storeId"

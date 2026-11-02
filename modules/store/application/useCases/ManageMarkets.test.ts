@@ -1,4 +1,12 @@
-import { ManageMarketsUseCase, CreateMarketCommand, UpdateMarketCommand, GetMarketCommand, ListMarketsCommand, DeleteMarketCommand, SetMarketStatusCommand } from './ManageMarkets';
+import {
+  ManageMarketsUseCase,
+  CreateMarketCommand,
+  UpdateMarketCommand,
+  GetMarketCommand,
+  ListMarketsCommand,
+  DeleteMarketCommand,
+  SetMarketStatusCommand,
+} from './ManageMarkets';
 import { MarketCodeAlreadyExistsError, MarketNotFoundError, MarketValidationError } from '../../domain/errors/StoreErrors';
 import { createMarketRepository, createMarket } from '../../tests/testUtils';
 
@@ -36,9 +44,9 @@ describe('ManageMarketsUseCase', () => {
     it('should reject duplicate codes within the organization', async () => {
       marketRepository.findByCode.mockResolvedValue(createMarket());
 
-      await expect(
-        useCase.create(new CreateMarketCommand('org-1', { code: 'EU', name: 'Dupe' })),
-      ).rejects.toThrow(MarketCodeAlreadyExistsError);
+      await expect(useCase.create(new CreateMarketCommand('org-1', { code: 'EU', name: 'Dupe' }))).rejects.toThrow(
+        MarketCodeAlreadyExistsError,
+      );
     });
 
     it('should reject a blank market code', async () => {
@@ -72,9 +80,7 @@ describe('ManageMarketsUseCase', () => {
       marketRepository.findById.mockResolvedValue(createMarket());
       marketRepository.findByCode.mockResolvedValue(createMarket({ marketId: 'other-market' }));
 
-      await expect(useCase.update(new UpdateMarketCommand('market-1', { code: 'US' }))).rejects.toThrow(
-        MarketCodeAlreadyExistsError,
-      );
+      await expect(useCase.update(new UpdateMarketCommand('market-1', { code: 'US' }))).rejects.toThrow(MarketCodeAlreadyExistsError);
     });
   });
 

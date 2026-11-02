@@ -2,69 +2,8 @@
  * Inventory Repository Interface
  */
 
-import { InventoryItem } from '../entities/InventoryItem';
-import { InventoryLocation } from '../entities/Inventory';
-import { PaginatedResult, PaginationOptions } from 'libs/types/pagination';
 
-export interface InventoryFilters {
-  productId?: string;
-  locationId?: string;
-  sku?: string;
-  isLowStock?: boolean;
-  needsReorder?: boolean;
-}
 
-export interface InventoryRepository {
-  findById(inventoryId: string): Promise<InventoryItem | null>;
-  findByProductId(productId: string): Promise<InventoryItem[]>;
-  findByStoreId(storeId: string): Promise<InventoryItem[]>;
-  findBySku(sku: string, locationId?: string): Promise<InventoryItem | null>;
-  findByLocation(locationId: string, pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
-  findAll(filters?: InventoryFilters, pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
-  findLowStock(pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
-  findNeedsReorder(pagination?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
-  save(item: InventoryItem): Promise<InventoryItem>;
-  delete(inventoryId: string): Promise<void>;
-  count(filters?: InventoryFilters): Promise<number>;
 
-  // Transactions
-  recordTransaction(transaction: {
-    inventoryId: string;
-    type: string;
-    quantity: number;
-    reference?: string;
-    notes?: string;
-    createdBy: string;
-  }): Promise<void>;
-  getTransactionHistory(
-    inventoryId: string,
-    limit?: number,
-  ): Promise<
-    Array<{
-      transactionId: string;
-      type: string;
-      quantity: number;
-      reference?: string;
-      notes?: string;
-      createdBy: string;
-      createdAt: Date;
-    }>
-  >;
 
-  // Reservations
-  createReservation(reservation: {
-    reservationId: string;
-    inventoryId: string;
-    quantity: number;
-    orderId?: string;
-    basketId?: string;
-    expiresAt: Date;
-  }): Promise<void>;
-  releaseReservation(reservationId: string): Promise<void>;
-  fulfillReservation(reservationId: string): Promise<void>;
-  expireReservations(): Promise<number>;
 
-  getLocations(): Promise<InventoryLocation[]>;
-  getLocationById(locationId: string): Promise<InventoryLocation | null>;
-  getLocationByStoreId(storeId: string): Promise<InventoryLocation | null>;
-}

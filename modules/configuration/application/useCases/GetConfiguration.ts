@@ -2,7 +2,7 @@
  * GetConfiguration Use Case
  */
 
-export type ConfigurationScope = 'global' | 'store' | 'organization' | 'channel';
+type ConfigurationScope = 'global' | 'store' | 'organization' | 'channel';
 
 export interface GetConfigurationInput {
   key: string;
@@ -10,7 +10,7 @@ export interface GetConfigurationInput {
   scopeId?: string;
 }
 
-export interface ConfigurationValue {
+interface ConfigurationValue {
   key: string;
   value: unknown;
   scope: ConfigurationScope;

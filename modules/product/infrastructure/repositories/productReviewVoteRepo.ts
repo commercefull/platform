@@ -1,9 +1,7 @@
 import { query, queryOne } from '../../../../libs/db';
-
 import type { ProductReviewVote, ProductReviewVoteCreateParams } from '../../domain/repositories/ProductCatalogPorts';
-export type { ProductReviewVote, ProductReviewVoteCreateParams } from '../../domain/repositories/ProductCatalogPorts';
 
-export class ProductReviewVoteRepo {
+class ProductReviewVoteRepo {
   async findByReview(productReviewId: string): Promise<ProductReviewVote[]> {
     return (
       (await query<ProductReviewVote[]>(

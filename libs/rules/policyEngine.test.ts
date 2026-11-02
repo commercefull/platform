@@ -135,7 +135,9 @@ describe('libs/rules/policyEngine', () => {
       decision: 'privacy_check',
       domain: 'privacy',
       facts: { region: 'EU' },
-      rules: [rule({ domain: 'compliance', policyCode: 'OTHER_DOMAIN', conditions: [{ attribute: 'region', operator: 'eq', value: 'EU' }] })],
+      rules: [
+        rule({ domain: 'compliance', policyCode: 'OTHER_DOMAIN', conditions: [{ attribute: 'region', operator: 'eq', value: 'EU' }] }),
+      ],
       now,
     });
     expect(d.allowed).toBe(true);

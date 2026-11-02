@@ -28,7 +28,7 @@ export interface RegisterAdminOutput {
   createdAt: Date;
 }
 
-export interface AdminRecord {
+interface AdminRecord {
   adminId: string;
   email: string;
   name: string;

@@ -11,28 +11,14 @@ import { generateUUID } from '../../../../libs/uuid';
 // Types
 // ============================================================================
 
-export interface AdminGdprRequest {
-  requestId: string;
-  customerId?: string;
-  requestType: string;
-  status: string;
-  description?: string;
-  customerEmail?: string;
-  customerName?: string;
-  dueDate?: Date;
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
-}
 
-export interface GdprStats {
+interface GdprStats {
   pendingRequests: number;
   completedRequests: number;
   avgProcessingDays: number;
 }
 
-export interface ConsentStats {
+interface ConsentStats {
   marketingConsent: number;
   marketingConsentRate: number;
   analyticsConsent: number;
@@ -43,7 +29,7 @@ export interface ConsentStats {
 // Functions
 // ============================================================================
 
-export async function getGdprStats(): Promise<GdprStats> {
+async function getGdprStats(): Promise<GdprStats> {
   const result = await queryOne<{ pendingRequests: string; completedRequests: string; avgProcessingDays: string }>(
     `SELECT
       COUNT(CASE WHEN "status" = 'pending' THEN 1 END) as "pendingRequests",
@@ -59,7 +45,7 @@ export async function getGdprStats(): Promise<GdprStats> {
   };
 }
 
-export async function getConsentStats(): Promise<ConsentStats> {
+async function getConsentStats(): Promise<ConsentStats> {
   const result = await queryOne<{
     marketingConsent: string;
     marketingConsentRate: string;
@@ -82,7 +68,7 @@ export async function getConsentStats(): Promise<ConsentStats> {
   };
 }
 
-export async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
+async function findRecentRequests(limit: number = 20): Promise<unknown[]> {
   return (
     (await query<unknown[]>(
       `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
@@ -96,7 +82,7 @@ export async function findRecentRequests(limit: number = 20): Promise<unknown[]>
   );
 }
 
-export async function findRequestById(requestId: string): Promise<unknown | null> {
+async function findRequestById(requestId: string): Promise<unknown | null> {
   return queryOne<unknown>(
     `SELECT gr.*, c."firstName" || ' ' || c."lastName" as "customerName", c."email" as "customerEmail"
      FROM "gdprRequest" gr
@@ -106,14 +92,14 @@ export async function findRequestById(requestId: string): Promise<unknown | null
   );
 }
 
-export async function findCustomerIdByEmail(email: string): Promise<string | null> {
+async function findCustomerIdByEmail(email: string): Promise<string | null> {
   const result = await queryOne<{ customerId: string }>(`SELECT "customerId" FROM "customer" WHERE "email" = $1 AND "deletedAt" IS NULL`, [
     email,
   ]);
   return result?.customerId || null;
 }
 
-export async function createRequest(params: {
+async function createRequest(params: {
   customerId?: string | null;
   requestType: string;
   description?: string;
@@ -137,11 +123,11 @@ export async function createRequest(params: {
   );
 }
 
-export async function updateStatus(requestId: string, status: string): Promise<void> {
+async function updateStatus(requestId: string, status: string): Promise<void> {
   await query(`UPDATE "gdprRequest" SET "status" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [status, requestId]);
 }
 
-export async function completeRequest(requestId: string, notes?: string): Promise<void> {
+async function completeRequest(requestId: string, notes?: string): Promise<void> {
   await query(`UPDATE "gdprRequest" SET "status" = 'completed', "notes" = $1, "updatedAt" = NOW() WHERE "requestId" = $2`, [
     notes,
     requestId,

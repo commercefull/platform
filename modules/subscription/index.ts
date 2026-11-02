@@ -14,4 +14,3 @@ export { subscriptionTypeDefs } from './interface/graphql/typeDefs';
 export { subscriptionResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
 
-export { manifest } from './manifest';

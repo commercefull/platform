@@ -9,7 +9,7 @@ export type PriceDisplayFormat = 'symbol' | 'code' | 'symbol_code' | 'name';
 export type StoreCurrencySettingsCreateParams = Omit<StoreCurrencySettings, 'storeCurrencySettingsId' | 'createdAt' | 'updatedAt'>;
 export type StoreCurrencySettingsUpdateParams = Partial<Omit<StoreCurrencySettings, 'storeCurrencySettingsId' | 'createdAt' | 'updatedAt'>>;
 
-export class StoreCurrencySettingsRepo {
+class StoreCurrencySettingsRepo {
   /**
    * Find settings by ID
    */

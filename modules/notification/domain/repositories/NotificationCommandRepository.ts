@@ -6,7 +6,7 @@
 
 import { NotificationRecord as Notification } from '../entities/NotificationModel';
 
-export type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>> & {
+type NotificationCreateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>> & {
   userId: string;
   userType: string;
   type: string;
@@ -15,7 +15,7 @@ export type NotificationCreateParams = Partial<Omit<Notification, 'notificationI
   channel: string;
 };
 
-export type NotificationUpdateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>>;
+type NotificationUpdateParams = Partial<Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt'>>;
 
 export interface NotificationCommandRepository {
   findById(notificationId: string): Promise<Notification | null>;

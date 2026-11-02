@@ -2,11 +2,7 @@ import { redirectResponse } from 'libs/apiResponse';
 import type { HttpRequest, HttpRequestBody, HttpResponse } from 'libs/http';
 import { logger } from '../../../../libs/logger';
 import { adminRespond } from '../../../../libs/adminRespond';
-import {
-  evaluateMarketReadinessUseCase,
-  launchMarketUseCase,
-  manageMarketsUseCase,
-} from '../../application/useCases/wired';
+import { evaluateMarketReadinessUseCase, launchMarketUseCase, manageMarketsUseCase } from '../../application/useCases/wired';
 import {
   CreateMarketCommand,
   DeleteMarketCommand,
@@ -74,9 +70,7 @@ function organizationId(req: HttpRequest): string {
 
 export const adminListMarkets = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const status = req.query.status as MarketStatus | undefined;
-  const markets = await manageMarketsUseCase.list(
-    new ListMarketsCommand({ status, organizationId: organizationId(req) || undefined }),
-  );
+  const markets = await manageMarketsUseCase.list(new ListMarketsCommand({ status, organizationId: organizationId(req) || undefined }));
   adminRespond(req, res, 'markets/index', {
     pageName: 'Markets',
     markets,
@@ -128,9 +122,7 @@ export const adminEditMarketForm = async (req: HttpRequest, res: HttpResponse): 
 export const adminCreateMarket = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as HttpRequestBody;
   try {
-    const market = await manageMarketsUseCase.create(
-      new CreateMarketCommand(organizationId(req), bodyToWriteData(body)),
-    );
+    const market = await manageMarketsUseCase.create(new CreateMarketCommand(organizationId(req), bodyToWriteData(body)));
     redirectResponse(res, `/admin/markets/${market.marketId}?success=Market created successfully`);
   } catch (error) {
     logger.error('Failed to create market', error);
@@ -177,7 +169,10 @@ export const adminLaunchMarket = async (req: HttpRequest, res: HttpResponse): Pr
     redirectResponse(res, `/admin/markets/${marketId}?success=Market launched`);
   } catch (error) {
     logger.error('Failed to launch market', error);
-    redirectResponse(res, `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Launch failed')}`);
+    redirectResponse(
+      res,
+      `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Launch failed')}`,
+    );
   }
 };
 
@@ -188,6 +183,9 @@ export const adminDisableMarket = async (req: HttpRequest, res: HttpResponse): P
     redirectResponse(res, `/admin/markets/${marketId}?success=Market disabled`);
   } catch (error) {
     logger.error('Failed to disable market', error);
-    redirectResponse(res, `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Disable failed')}`);
+    redirectResponse(
+      res,
+      `/admin/markets/${marketId}?error=${encodeURIComponent(error instanceof Error ? error.message : 'Disable failed')}`,
+    );
   }
 };

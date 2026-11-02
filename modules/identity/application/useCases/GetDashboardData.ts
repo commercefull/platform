@@ -1,4 +1,4 @@
-export interface DashboardStats {
+interface DashboardStats {
   totalOrders: number;
   totalRevenueCents: number;
   totalCustomers: number;
@@ -9,7 +9,7 @@ export interface DashboardStats {
   todayRevenueCents: number;
 }
 
-export interface RecentOrder {
+interface RecentOrder {
   orderId: string;
   orderNumber: string;
   customerName: string;
@@ -18,14 +18,14 @@ export interface RecentOrder {
   createdAt: Date;
 }
 
-export interface TopProduct {
+interface TopProduct {
   productId: string;
   name: string;
   totalSold: number;
   revenueCents: number;
 }
 
-export interface RevenueByDay {
+interface RevenueByDay {
   date: string;
   revenueCents: number;
   orders: number;

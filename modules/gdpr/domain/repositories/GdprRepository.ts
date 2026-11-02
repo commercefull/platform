@@ -109,13 +109,13 @@ export interface GdprService {
 // Admin GDPR Repository
 // ============================================================================
 
-export interface AdminGdprStats {
+interface AdminGdprStats {
   pendingRequests: number;
   completedRequests: number;
   avgProcessingDays: number;
 }
 
-export interface AdminConsentStats {
+interface AdminConsentStats {
   marketingConsent: number;
   marketingConsentRate: number;
   analyticsConsent: number;
