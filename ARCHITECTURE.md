@@ -157,12 +157,12 @@ Commercefull is a country-neutral, configuration-driven commerce platform. Inter
 
 Every commerce decision is made against a four-dimensional `CommerceContext`, resolved once per request and propagated through basket → checkout → order:
 
-| Dimension             | Content                                                                        |
-| --------------------- | ------------------------------------------------------------------------------ |
-| `CustomerContext`     | Who is buying — customer id, home market, tax/VAT identifiers, privacy consents |
-| `MarketContext`       | Where the sale happens — market id/code, country, currency, locale, capabilities |
-| `TransactionContext`  | What is being transacted — basket/order facts, channel, store, ship-from/to    |
-| `LegalContext`        | Who contracts — contracting entity, terms/consent versions                     |
+| Dimension            | Content                                                                          |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `CustomerContext`    | Who is buying — customer id, home market, tax/VAT identifiers, privacy consents  |
+| `MarketContext`      | Where the sale happens — market id/code, country, currency, locale, capabilities |
+| `TransactionContext` | What is being transacted — basket/order facts, channel, store, ship-from/to      |
+| `LegalContext`       | Who contracts — contracting entity, terms/consent versions                       |
 
 Storefront resolution (`web/storefront/storeResolutionMiddleware`) resolves store **and** market (query param → session → market hostname → default) and exposes the combined context to views and downstream modules.
 
