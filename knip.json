@@ -11,7 +11,7 @@
   ],
   "project": ["modules/**/*.ts", "libs/**/*.ts", "boot/**/*.ts", "web/**/*.ts", "tests/**/*.ts"],
   "ignore": ["typedoc.json"],
-  "ignoreDependencies": ["ejs", "@types/ejs", "@types/nodemailer", "@typescript/native"],
+  "ignoreDependencies": ["ejs", "@types/ejs", "@types/nodemailer", "tsgo"],
   "ignoreBinaries": ["pm2", "audit", "k6"],
   "ignoreIssues": {
     "libs/db/types.ts": ["exports", "types", "enumMembers"],
