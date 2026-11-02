@@ -443,45 +443,48 @@ export async function expireBlacklistEntries(): Promise<number> {
 // Helpers
 // ============================================================================
 
+type LegacyRuleConditions = Record<string, unknown>;
+
+// One predicate per rule type — returns true when the rule triggers.
+const RULE_CHECKS: Record<string, (conditions: LegacyRuleConditions, check: FraudCheck) => boolean> = {
+  amount: (conditions, check) => {
+    if (conditions.minAmount && (check.orderAmountCents || 0) < (conditions.minAmount as number)) return false;
+    if (conditions.maxAmount && (check.orderAmountCents || 0) > (conditions.maxAmount as number)) return true;
+    return false;
+  },
+
+  location: (conditions, check) => {
+    if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.billingCountry || '')) return true;
+    if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.shippingCountry || '')) return true;
+    if (conditions.requireAddressMatch && check.addressMismatch) return true;
+    return false;
+  },
+
+  velocity: (conditions, check) => !!(conditions.maxOrdersPerDay && check.previousOrders >= (conditions.maxOrdersPerDay as number)),
+
+  pattern: (conditions, check) => {
+    if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmountCents || 0) > ((conditions.threshold as number) || 500))
+      return true;
+    if (
+      conditions.guestCheckoutHighValue &&
+      check.isGuestCheckout &&
+      (check.orderAmountCents || 0) > ((conditions.threshold as number) || 300)
+    )
+      return true;
+    return false;
+  },
+
+  device: (conditions, check) => {
+    if (conditions.blockProxy && check.ipIsProxy) return true;
+    if (conditions.blockVpn && check.ipIsVpn) return true;
+    if (conditions.blockTor && check.ipIsTor) return true;
+    return false;
+  },
+};
+
 function evaluateRule(rule: FraudRule, check: FraudCheck): boolean {
-  const conditions = rule.conditions;
-
-  switch (rule.ruleType) {
-    case 'amount':
-      if (conditions.minAmount && (check.orderAmountCents || 0) < (conditions.minAmount as number)) return false;
-      if (conditions.maxAmount && (check.orderAmountCents || 0) > (conditions.maxAmount as number)) return true;
-      return false;
-
-    case 'location':
-      if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.billingCountry || '')) return true;
-      if ((conditions.highRiskCountries as string[] | undefined)?.includes(check.shippingCountry || '')) return true;
-      if (conditions.requireAddressMatch && check.addressMismatch) return true;
-      return false;
-
-    case 'velocity':
-      if (conditions.maxOrdersPerDay && check.previousOrders >= (conditions.maxOrdersPerDay as number)) return true;
-      return false;
-
-    case 'pattern':
-      if (conditions.firstOrderHighValue && check.isFirstOrder && (check.orderAmountCents || 0) > ((conditions.threshold as number) || 500))
-        return true;
-      if (
-        conditions.guestCheckoutHighValue &&
-        check.isGuestCheckout &&
-        (check.orderAmountCents || 0) > ((conditions.threshold as number) || 300)
-      )
-        return true;
-      return false;
-
-    case 'device':
-      if (conditions.blockProxy && check.ipIsProxy) return true;
-      if (conditions.blockVpn && check.ipIsVpn) return true;
-      if (conditions.blockTor && check.ipIsTor) return true;
-      return false;
-
-    default:
-      return false;
-  }
+  const ruleCheck = RULE_CHECKS[rule.ruleType];
+  return ruleCheck ? ruleCheck(rule.conditions, check) : false;
 }
 
 function actionPriority(action: RuleAction): number {

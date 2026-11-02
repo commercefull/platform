@@ -61,16 +61,7 @@ export class ProductRepo implements IProductRepository {
 
     const { whereClause, params } = this.buildWhereClause(filters);
 
-    // Price sorting resolves against the pricing-owned productBasePrice table
-    // (product-level rows only); all other columns sort on the product table.
-    // orderBy comes from the query string — restrict to known product columns.
-    const sortableColumns = new Set(['createdAt', 'updatedAt', 'name', 'sku', 'status', 'visibility', 'type', 'publishedAt', 'isFeatured']);
-    const orderExpr =
-      orderBy === 'priceCents' || orderBy === 'basePrice'
-        ? `(SELECT bp."priceCents" FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL LIMIT 1)`
-        : sortableColumns.has(orderBy)
-          ? `"${orderBy}"`
-          : '"createdAt"';
+    const orderExpr = this.resolveOrderExpr(orderBy);
 
     const rows = await query<DbProduct[]>(
       `SELECT * FROM product ${whereClause}
@@ -80,37 +71,51 @@ export class ProductRepo implements IProductRepository {
     );
 
     // A short first page is already an exact total — skip the COUNT(*) scan.
-    const total =
-      offset === 0 && (rows?.length ?? 0) < limit
-        ? (rows?.length ?? 0)
-        : parseInt((await queryOne<{ count: string }>(`SELECT COUNT(*) as count FROM product ${whereClause}`, params))?.count || '0');
+    const total = await this.pagedTotal(rows?.length ?? 0, limit, offset, `SELECT COUNT(*) as count FROM product ${whereClause}`, params);
 
-    const products: Product[] = [];
-    const rowsList = rows || [];
-    if (rowsList.length > 0) {
-      // Batch load all images in a single query to avoid N+1
-      const productIds = rowsList.map(r => r.productId);
-      const allImages = await query<Array<{ productId: string } & Record<string, unknown>>>(
-        `SELECT * FROM "productImage" WHERE "productId" = ANY($1) ORDER BY "productId", "position" ASC`,
-        [productIds],
-      );
-      const imagesByProduct = new Map<string, Array<Record<string, unknown>>>();
-      for (const img of allImages || []) {
-        const arr = imagesByProduct.get(img.productId) || [];
-        arr.push(img);
-        imagesByProduct.set(img.productId, arr);
-      }
-      for (const row of rowsList) {
-        const images = imagesByProduct.get(row.productId) || [];
-        products.push(this.mapToProduct(row, images as never));
-      }
-    }
+    const products = await this.hydrateProducts(rows || []);
 
     return { data: products, total, limit, offset, hasMore: offset + products.length < total, length: products.length };
   }
 
+  // Price sorting resolves against the pricing-owned productBasePrice table
+  // (product-level rows only); all other columns sort on the product table.
+  // orderBy comes from the query string — restrict to known product columns.
+  private resolveOrderExpr(orderBy: string): string {
+    if (orderBy === 'priceCents' || orderBy === 'basePrice') {
+      return `(SELECT bp."priceCents" FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL LIMIT 1)`;
+    }
+    const sortableColumns = new Set(['createdAt', 'updatedAt', 'name', 'sku', 'status', 'visibility', 'type', 'publishedAt', 'isFeatured']);
+    return sortableColumns.has(orderBy) ? `"${orderBy}"` : '"createdAt"';
+  }
+
+  // A short first page is already an exact total — skip the COUNT(*) scan.
+  private async pagedTotal(rowCount: number, limit: number, offset: number, countSql: string, params: unknown[]): Promise<number> {
+    if (offset === 0 && rowCount < limit) return rowCount;
+    const result = await queryOne<{ count: string }>(countSql, params);
+    return parseInt(result?.count || '0');
+  }
+
+  // Batch load all images in a single query to avoid N+1
+  private async hydrateProducts(rowsList: DbProduct[]): Promise<Product[]> {
+    if (rowsList.length === 0) return [];
+
+    const productIds = rowsList.map(r => r.productId);
+    const allImages = await query<Array<{ productId: string } & Record<string, unknown>>>(
+      `SELECT * FROM "productImage" WHERE "productId" = ANY($1) ORDER BY "productId", "position" ASC`,
+      [productIds],
+    );
+    const imagesByProduct = new Map<string, Array<Record<string, unknown>>>();
+    for (const img of allImages || []) {
+      const arr = imagesByProduct.get(img.productId) || [];
+      arr.push(img);
+      imagesByProduct.set(img.productId, arr);
+    }
+
+    return rowsList.map(row => this.mapToProduct(row, (imagesByProduct.get(row.productId) || []) as never));
+  }
+
   async save(product: Product): Promise<Product> {
-    const now = new Date().toISOString();
     // The advanced productType relationship is a uuid FK; hydrated legacy
     // rows expose the kind literal (simple/downloadable/...) in
     // `productTypeId`, so only persist uuid-shaped values.
@@ -119,8 +124,64 @@ export class ProductRepo implements IProductRepository {
     const existing = await queryOne<DbProduct>('SELECT "productId" FROM product WHERE "productId" = $1', [product.productId]);
 
     if (existing) {
-      await query(
-        `UPDATE product SET
+      await this.updateProduct(product, persistedProductTypeId);
+    } else {
+      await this.insertProduct(product, persistedProductTypeId);
+    }
+
+    await query(`UPDATE product SET "isVirtual" = $1, "isDownloadable" = $2, "isSubscription" = $3 WHERE "productId" = $4`, [
+      product.isVirtual,
+      product.isDownloadable,
+      product.isSubscription,
+      product.productId,
+    ]);
+
+    return product;
+  }
+
+  private productTypeLiteral(product: Product): string {
+    if (product.isDownloadable) return 'downloadable';
+    if (product.isVirtual) return 'virtual';
+    if (product.isSubscription) return 'subscription';
+    return 'simple';
+  }
+
+  private productRowValues(product: Product, persistedProductTypeId: string | null) {
+    return {
+      name: product.name,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      sku: product.sku,
+      slug: product.slug,
+      type: this.productTypeLiteral(product),
+      status: product.status,
+      visibility: product.visibility,
+      taxClass: product.taxClass || 'standard',
+      isTaxable: product.isTaxable,
+      isInventoryManaged: product.isInventoryManaged,
+      weight: product.dimensions.weight,
+      weightUnit: product.dimensions.weightUnit,
+      length: product.dimensions.length,
+      width: product.dimensions.width,
+      height: product.dimensions.height,
+      dimensionUnit: product.dimensions.dimensionUnit,
+      metaTitle: product.metaTitle || null,
+      metaDescription: product.metaDescription || null,
+      metaKeywords: product.metaKeywords || null,
+      isFeatured: product.isFeatured,
+      hasVariants: product.hasVariants,
+      organizationId: product.organizationId || null,
+      storeId: product.storeId || null,
+      publishedAt: product.publishedAt?.toISOString() || null,
+      productTypeId: persistedProductTypeId,
+    };
+  }
+
+  private async updateProduct(product: Product, persistedProductTypeId: string | null): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.productRowValues(product, persistedProductTypeId);
+    await query(
+      `UPDATE product SET
           name = $1, description = $2, "shortDescription" = $3, sku = $4, slug = $5,
           type = $6, status = $7, visibility = $8,
           "taxClass" = $9,
@@ -131,42 +192,46 @@ export class ProductRepo implements IProductRepository {
           "organizationId" = $25, "storeId" = $26, "publishedAt" = $27, "updatedAt" = $28,
           "productTypeId" = $29
         WHERE "productId" = $30`,
-        [
-          product.name,
-          product.description,
-          product.shortDescription,
-          product.sku,
-          product.slug,
-          product.isDownloadable ? 'downloadable' : product.isVirtual ? 'virtual' : product.isSubscription ? 'subscription' : 'simple',
-          product.status,
-          product.visibility,
-          product.taxClass || 'standard',
-          product.isTaxable,
-          product.isInventoryManaged,
-          product.dimensions.weight,
-          product.dimensions.weightUnit,
-          product.dimensions.length,
-          product.dimensions.width,
-          product.dimensions.height,
-          product.dimensions.dimensionUnit,
-          product.metaTitle || null,
-          product.metaDescription || null,
-          product.metaKeywords || null,
-          product.isFeatured,
-          false,
-          false,
-          product.hasVariants,
-          product.organizationId || null,
-          product.storeId || null,
-          product.publishedAt?.toISOString() || null,
-          now,
-          persistedProductTypeId,
-          product.productId,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO product (
+      [
+        v.name,
+        v.description,
+        v.shortDescription,
+        v.sku,
+        v.slug,
+        v.type,
+        v.status,
+        v.visibility,
+        v.taxClass,
+        v.isTaxable,
+        v.isInventoryManaged,
+        v.weight,
+        v.weightUnit,
+        v.length,
+        v.width,
+        v.height,
+        v.dimensionUnit,
+        v.metaTitle,
+        v.metaDescription,
+        v.metaKeywords,
+        v.isFeatured,
+        false,
+        false,
+        v.hasVariants,
+        v.organizationId,
+        v.storeId,
+        v.publishedAt,
+        now,
+        v.productTypeId,
+        product.productId,
+      ],
+    );
+  }
+
+  private async insertProduct(product: Product, persistedProductTypeId: string | null): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.productRowValues(product, persistedProductTypeId);
+    await query(
+      `INSERT INTO product (
           "productId", name, description, "shortDescription", sku, slug,
           type, status, visibility,
           "taxClass", "isTaxable", "isInventoryManaged",
@@ -178,50 +243,40 @@ export class ProductRepo implements IProductRepository {
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
           $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31
         )`,
-        [
-          product.productId,
-          product.name,
-          product.description,
-          product.shortDescription,
-          product.sku,
-          product.slug,
-          product.isDownloadable ? 'downloadable' : product.isVirtual ? 'virtual' : product.isSubscription ? 'subscription' : 'simple',
-          product.status,
-          product.visibility,
-          product.taxClass || 'standard',
-          product.isTaxable,
-          product.isInventoryManaged,
-          product.dimensions.weight,
-          product.dimensions.weightUnit,
-          product.dimensions.length,
-          product.dimensions.width,
-          product.dimensions.height,
-          product.dimensions.dimensionUnit,
-          product.metaTitle || null,
-          product.metaDescription || null,
-          product.metaKeywords || null,
-          product.isFeatured,
-          false,
-          false,
-          product.hasVariants,
-          product.organizationId || null,
-          product.storeId || null,
-          product.publishedAt?.toISOString() || null,
-          persistedProductTypeId,
-          now,
-          now,
-        ],
-      );
-    }
-
-    await query(`UPDATE product SET "isVirtual" = $1, "isDownloadable" = $2, "isSubscription" = $3 WHERE "productId" = $4`, [
-      product.isVirtual,
-      product.isDownloadable,
-      product.isSubscription,
-      product.productId,
-    ]);
-
-    return product;
+      [
+        product.productId,
+        v.name,
+        v.description,
+        v.shortDescription,
+        v.sku,
+        v.slug,
+        v.type,
+        v.status,
+        v.visibility,
+        v.taxClass,
+        v.isTaxable,
+        v.isInventoryManaged,
+        v.weight,
+        v.weightUnit,
+        v.length,
+        v.width,
+        v.height,
+        v.dimensionUnit,
+        v.metaTitle,
+        v.metaDescription,
+        v.metaKeywords,
+        v.isFeatured,
+        false,
+        false,
+        v.hasVariants,
+        v.organizationId,
+        v.storeId,
+        v.publishedAt,
+        v.productTypeId,
+        now,
+        now,
+      ],
+    );
   }
 
   private static readonly UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -561,97 +616,108 @@ export class ProductRepo implements IProductRepository {
 
   // Private helper methods
   private buildWhereClause(filters?: ProductFilters): { whereClause: string; params: unknown[] } {
-    const conditions: string[] = ['"deletedAt" IS NULL'];
-    const params: unknown[] = [];
-    let paramIndex = 1;
+    const b = { conditions: ['"deletedAt" IS NULL'], params: [] as unknown[], paramIndex: 1 };
 
-    if (filters?.status) {
-      if (Array.isArray(filters.status)) {
-        conditions.push(`status IN (${filters.status.map(() => `$${paramIndex++}`).join(', ')})`);
-        params.push(...filters.status);
-      } else {
-        conditions.push(`status = $${paramIndex++}`);
-        params.push(filters.status);
-      }
-    }
-    if (filters?.visibility) {
-      if (Array.isArray(filters.visibility)) {
-        conditions.push(`visibility IN (${filters.visibility.map(() => `$${paramIndex++}`).join(', ')})`);
-        params.push(...filters.visibility);
-      } else {
-        conditions.push(`visibility = $${paramIndex++}`);
-        params.push(filters.visibility);
-      }
-    }
+    this.addScalarOrInFilter(b, 'status', filters?.status);
+    this.addScalarOrInFilter(b, 'visibility', filters?.visibility);
+
     if (filters?.categoryId) {
       // Product↔category lives in the productToCategory mapping table
-      conditions.push(
-        `EXISTS (SELECT 1 FROM "productToCategory" ptc WHERE ptc."productId" = product."productId" AND ptc."productCategoryId" = $${paramIndex++})`,
+      b.conditions.push(
+        `EXISTS (SELECT 1 FROM "productToCategory" ptc WHERE ptc."productId" = product."productId" AND ptc."productCategoryId" = $${b.paramIndex++})`,
       );
-      params.push(filters.categoryId);
+      b.params.push(filters.categoryId);
     }
-    if (filters?.organizationId) {
-      conditions.push(`"organizationId" = $${paramIndex++}`);
-      params.push(filters.organizationId);
-    }
-    if (filters?.storeId) {
-      conditions.push(`"storeId" = $${paramIndex++}`);
-      params.push(filters.storeId);
-    }
-    if (filters?.productIds && filters.productIds.length > 0) {
-      const placeholders = filters.productIds.map(() => `$${paramIndex++}`).join(', ');
-      conditions.push(`"productId" IN (${placeholders})`);
-      params.push(...filters.productIds);
-    }
-    if (filters?.excludeProductIds && filters.excludeProductIds.length > 0) {
-      const placeholders = filters.excludeProductIds.map(() => `$${paramIndex++}`).join(', ');
-      conditions.push(`"productId" NOT IN (${placeholders})`);
-      params.push(...filters.excludeProductIds);
-    }
-    if (filters?.brandId) {
-      conditions.push(`"brandId" = $${paramIndex++}`);
-      params.push(filters.brandId);
-    }
-    if (filters?.brandIds && filters.brandIds.length > 0) {
-      const placeholders = filters.brandIds.map(() => `$${paramIndex++}`).join(', ');
-      conditions.push(`"brandId" IN (${placeholders})`);
-      params.push(...filters.brandIds);
-    }
+
+    this.addScalarOrInFilter(b, '"organizationId"', filters?.organizationId);
+    this.addScalarOrInFilter(b, '"storeId"', filters?.storeId);
+    this.addIdListFilter(b, '"productId"', filters?.productIds);
+    this.addIdListFilter(b, '"productId"', filters?.excludeProductIds, true);
+    this.addScalarOrInFilter(b, '"brandId"', filters?.brandId);
+    this.addIdListFilter(b, '"brandId"', filters?.brandIds);
+    this.addSpecialFilters(b, filters);
+
+    return {
+      whereClause: b.conditions.length > 0 ? `WHERE ${b.conditions.join(' AND ')}` : '',
+      params: b.params,
+    };
+  }
+
+  // isFeatured flag, price bounds (via productBasePrice EXISTS), and the
+  // text-search UNION.
+  private addSpecialFilters(b: { conditions: string[]; params: unknown[]; paramIndex: number }, filters?: ProductFilters): void {
     if (filters?.isFeatured !== undefined) {
-      conditions.push(`"isFeatured" = $${paramIndex++}`);
-      params.push(filters.isFeatured);
+      b.conditions.push(`"isFeatured" = $${b.paramIndex++}`);
+      b.params.push(filters.isFeatured);
     }
     // Price bounds live in the pricing-owned productBasePrice table (integer cents)
     if (filters?.priceMinCents !== undefined) {
-      conditions.push(
-        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`,
+      b.conditions.push(
+        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${b.paramIndex++})`,
       );
-      params.push(filters.priceMinCents);
+      b.params.push(filters.priceMinCents);
     }
     if (filters?.priceMaxCents !== undefined) {
-      conditions.push(
-        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`,
+      b.conditions.push(
+        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${b.paramIndex++})`,
       );
-      params.push(filters.priceMaxCents);
+      b.params.push(filters.priceMaxCents);
     }
     if (filters?.search) {
       // UNION inside the IN keeps each arm on its own trigram index — a plain
       // OR across product columns and the productVariant join can't BitmapOr.
-      conditions.push(
-        `"productId" IN (SELECT "productId" FROM product WHERE name ILIKE $${paramIndex} OR description ILIKE $${paramIndex} OR sku ILIKE $${paramIndex} UNION SELECT "productId" FROM "productVariant" WHERE sku ILIKE $${paramIndex} OR barcode ILIKE $${paramIndex})`,
+      b.conditions.push(
+        `"productId" IN (SELECT "productId" FROM product WHERE name ILIKE $${b.paramIndex} OR description ILIKE $${b.paramIndex} OR sku ILIKE $${b.paramIndex} UNION SELECT "productId" FROM "productVariant" WHERE sku ILIKE $${b.paramIndex} OR barcode ILIKE $${b.paramIndex})`,
       );
-      params.push(`%${filters.search}%`);
-      paramIndex++;
+      b.params.push(`%${filters.search}%`);
+      b.paramIndex++;
     }
+  }
 
-    return {
-      whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params,
-    };
+  // Scalar value or IN-list — both produce one condition per filter.
+  private addScalarOrInFilter(
+    b: { conditions: string[]; params: unknown[]; paramIndex: number },
+    column: string,
+    value: string | string[] | undefined,
+  ): void {
+    if (!value || (Array.isArray(value) && value.length === 0)) return;
+    if (Array.isArray(value)) {
+      b.conditions.push(`${column} IN (${value.map(() => `$${b.paramIndex++}`).join(', ')})`);
+      b.params.push(...value);
+    } else {
+      b.conditions.push(`${column} = $${b.paramIndex++}`);
+      b.params.push(value);
+    }
+  }
+
+  private addIdListFilter(
+    b: { conditions: string[]; params: unknown[]; paramIndex: number },
+    column: string,
+    ids: string[] | undefined,
+    negate = false,
+  ): void {
+    if (!ids || ids.length === 0) return;
+    const placeholders = ids.map(() => `$${b.paramIndex++}`).join(', ');
+    b.conditions.push(`${column} ${negate ? 'NOT IN' : 'IN'} (${placeholders})`);
+    b.params.push(...ids);
   }
 
   private mapToProduct(row: DbProduct, images: ProductImage[]): Product {
     return Product.reconstitute({
+      ...this.productIdentityFromRow(row),
+      ...this.productFlagsFromRow(row),
+      ...this.productMetaFromRow(row),
+      dimensions: this.dimensionsFromRow(row),
+      images,
+      publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
+      createdAt: new Date(row.createdAt),
+      updatedAt: new Date(row.updatedAt),
+      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
+    });
+  }
+
+  private productIdentityFromRow(row: DbProduct) {
+    return {
       productId: row.productId,
       name: row.name,
       description: row.description || '',
@@ -664,14 +730,24 @@ export class ProductRepo implements IProductRepository {
       storeId: row.storeId ?? undefined,
       status: row.status as ProductStatus,
       visibility: row.visibility as ProductVisibility,
-      dimensions: Dimensions.create({
-        weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: (row.weightUnit || 'g') as 'kg' | 'lb' | 'oz' | 'g',
-        length: row.length ? parseFloat(row.length) : undefined,
-        width: row.width ? parseFloat(row.width) : undefined,
-        height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: (row.dimensionUnit || 'cm') as 'cm' | 'in' | 'm' | 'mm',
-      }),
+      primaryImageId: row.primaryImageId ?? undefined,
+      externalId: row.externalId ?? undefined,
+    };
+  }
+
+  private dimensionsFromRow(row: DbProduct): Dimensions {
+    return Dimensions.create({
+      weight: row.weight ? parseFloat(row.weight) : undefined,
+      weightUnit: (row.weightUnit || 'g') as 'kg' | 'lb' | 'oz' | 'g',
+      length: row.length ? parseFloat(row.length) : undefined,
+      width: row.width ? parseFloat(row.width) : undefined,
+      height: row.height ? parseFloat(row.height) : undefined,
+      dimensionUnit: (row.dimensionUnit || 'cm') as 'cm' | 'in' | 'm' | 'mm',
+    });
+  }
+
+  private productFlagsFromRow(row: DbProduct) {
+    return {
       isFeatured: Boolean(row.isFeatured),
       isVirtual: Boolean(row.isVirtual),
       isDownloadable: Boolean(row.isDownloadable),
@@ -686,8 +762,11 @@ export class ProductRepo implements IProductRepository {
           ? JSON.parse(row.variantAttributes as string)
           : (row.variantAttributes as Record<string, unknown>)
         : undefined,
-      images,
-      primaryImageId: row.primaryImageId ?? undefined,
+    };
+  }
+
+  private productMetaFromRow(row: DbProduct) {
+    return {
       metaTitle: row.metaTitle ?? undefined,
       metaDescription: row.metaDescription ?? undefined,
       metaKeywords: row.metaKeywords ?? undefined,
@@ -695,14 +774,9 @@ export class ProductRepo implements IProductRepository {
       maxOrderQuantity: row.maxOrderQuantity ?? undefined,
       returnPolicy: row.returnPolicy ?? undefined,
       warranty: row.warranty ?? undefined,
-      externalId: row.externalId ?? undefined,
       tags: [],
       metadata: undefined,
-      publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
-    });
+    };
   }
 
   private mapToVariant(row: DbProductVariant): ProductVariant {

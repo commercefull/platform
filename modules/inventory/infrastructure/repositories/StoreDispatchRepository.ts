@@ -5,6 +5,21 @@ import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { StoreDispatch as DbStoreDispatch, StoreDispatchItem as DbStoreDispatchItem } from '../../../../libs/db/types';
 import { isUuid } from '../../../../libs/uuid';
 
+// JSONB columns arrive pre-parsed or as JSON strings depending on driver
+// config — normalise both to objects; falsy values map to undefined.
+function fromJson<T>(value: unknown): T | undefined {
+  if (!value) return undefined;
+  return (typeof value === 'string' ? JSON.parse(value) : value) as T;
+}
+
+function isoOrNull(date: Date | undefined): string | null {
+  return date ? date.toISOString() : null;
+}
+
+function toDate(value: string | Date | null | undefined): Date | undefined {
+  return value ? new Date(value) : undefined;
+}
+
 export class StoreDispatchRepository implements IStoreDispatchRepository {
   async findById(dispatchId: string): Promise<StoreDispatch | null> {
     const row = await queryOne<DbStoreDispatch>('SELECT * FROM "storeDispatch" WHERE "dispatchId" = $1', [dispatchId]);
@@ -58,9 +73,22 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
     const existing = await queryOne<DbStoreDispatch>('SELECT "dispatchId" FROM "storeDispatch" WHERE "dispatchId" = $1', [
       dispatch.dispatchId,
     ]);
-    const now = new Date().toISOString();
 
-    // Sanitize actor IDs that are stored in UUID columns; persist human names in metadata when not UUIDs
+    if (existing) {
+      await this.updateDispatch(dispatch);
+      await query('DELETE FROM "storeDispatchItem" WHERE "dispatchId" = $1', [dispatch.dispatchId]);
+    } else {
+      await this.insertDispatch(dispatch);
+    }
+
+    await this.insertDispatchItems(dispatch);
+
+    return (await this.findById(dispatch.dispatchId))!;
+  }
+
+  // Sanitize actor IDs that are stored in UUID columns; persist human
+  // names in metadata when not UUIDs
+  private resolveDispatchActors(dispatch: StoreDispatch) {
     const approvedById = isUuid(dispatch.approvedBy) ? dispatch.approvedBy : null;
     const dispatchedById = isUuid(dispatch.dispatchedBy) ? dispatch.dispatchedBy : null;
     const receivedById = isUuid(dispatch.receivedBy) ? dispatch.receivedBy : null;
@@ -76,9 +104,32 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
       },
     } as Record<string, unknown>;
 
-    if (existing) {
-      await query(
-        `UPDATE "storeDispatch" SET
+    return { approvedById, dispatchedById, receivedById, requestedById, metadata };
+  }
+
+  private dispatchRowValues(dispatch: StoreDispatch, actors: ReturnType<StoreDispatchRepository['resolveDispatchActors']>) {
+    return {
+      fromStoreId: dispatch.fromStoreId,
+      toStoreId: dispatch.toStoreId,
+      dispatchNumber: dispatch.dispatchNumber,
+      status: dispatch.status,
+      requestedBy: actors.requestedById,
+      approvedBy: actors.approvedById,
+      dispatchedBy: actors.dispatchedById,
+      receivedBy: actors.receivedById,
+      requestedAt: isoOrNull(dispatch.requestedAt),
+      approvedAt: isoOrNull(dispatch.approvedAt),
+      dispatchedAt: isoOrNull(dispatch.dispatchedAt),
+      receivedAt: isoOrNull(dispatch.receivedAt),
+      notes: dispatch.notes || null,
+      metadata: JSON.stringify(actors.metadata),
+    };
+  }
+
+  private async updateDispatch(dispatch: StoreDispatch): Promise<void> {
+    const v = this.dispatchRowValues(dispatch, this.resolveDispatchActors(dispatch));
+    await query(
+      `UPDATE "storeDispatch" SET
           "fromStoreId" = $1,
           "toStoreId" = $2,
           "dispatchNumber" = $3,
@@ -95,30 +146,31 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           "metadata" = $14,
           "updatedAt" = $15
         WHERE "dispatchId" = $16`,
-        [
-          dispatch.fromStoreId,
-          dispatch.toStoreId,
-          dispatch.dispatchNumber,
-          dispatch.status,
-          requestedById,
-          approvedById,
-          dispatchedById,
-          receivedById,
-          dispatch.requestedAt?.toISOString() || null,
-          dispatch.approvedAt?.toISOString() || null,
-          dispatch.dispatchedAt?.toISOString() || null,
-          dispatch.receivedAt?.toISOString() || null,
-          dispatch.notes || null,
-          JSON.stringify(metadata),
-          now,
-          dispatch.dispatchId,
-        ],
-      );
+      [
+        v.fromStoreId,
+        v.toStoreId,
+        v.dispatchNumber,
+        v.status,
+        v.requestedBy,
+        v.approvedBy,
+        v.dispatchedBy,
+        v.receivedBy,
+        v.requestedAt,
+        v.approvedAt,
+        v.dispatchedAt,
+        v.receivedAt,
+        v.notes,
+        v.metadata,
+        new Date().toISOString(),
+        dispatch.dispatchId,
+      ],
+    );
+  }
 
-      await query('DELETE FROM "storeDispatchItem" WHERE "dispatchId" = $1', [dispatch.dispatchId]);
-    } else {
-      await query(
-        `INSERT INTO "storeDispatch" (
+  private async insertDispatch(dispatch: StoreDispatch): Promise<void> {
+    const v = this.dispatchRowValues(dispatch, this.resolveDispatchActors(dispatch));
+    await query(
+      `INSERT INTO "storeDispatch" (
           "dispatchId", "fromStoreId", "toStoreId", "dispatchNumber", "status",
           "requestedBy", "approvedBy", "dispatchedBy", "receivedBy", "requestedAt",
           "approvedAt", "dispatchedAt", "receivedAt", "notes", "metadata", "createdAt", "updatedAt"
@@ -127,28 +179,30 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
           $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15, $16, $17
         )`,
-        [
-          dispatch.dispatchId,
-          dispatch.fromStoreId,
-          dispatch.toStoreId,
-          dispatch.dispatchNumber,
-          dispatch.status,
-          requestedById,
-          approvedById,
-          dispatchedById,
-          receivedById,
-          dispatch.requestedAt?.toISOString() || null,
-          dispatch.approvedAt?.toISOString() || null,
-          dispatch.dispatchedAt?.toISOString() || null,
-          dispatch.receivedAt?.toISOString() || null,
-          dispatch.notes || null,
-          JSON.stringify(metadata),
-          dispatch.createdAt.toISOString(),
-          now,
-        ],
-      );
-    }
+      [
+        dispatch.dispatchId,
+        v.fromStoreId,
+        v.toStoreId,
+        v.dispatchNumber,
+        v.status,
+        v.requestedBy,
+        v.approvedBy,
+        v.dispatchedBy,
+        v.receivedBy,
+        v.requestedAt,
+        v.approvedAt,
+        v.dispatchedAt,
+        v.receivedAt,
+        v.notes,
+        v.metadata,
+        dispatch.createdAt.toISOString(),
+        new Date().toISOString(),
+      ],
+    );
+  }
 
+  private async insertDispatchItems(dispatch: StoreDispatch): Promise<void> {
+    const now = new Date().toISOString();
     for (const item of dispatch.items) {
       await query(
         `INSERT INTO "storeDispatchItem" (
@@ -174,8 +228,6 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
         ],
       );
     }
-
-    return (await this.findById(dispatch.dispatchId))!;
   }
 
   async delete(dispatchId: string): Promise<void> {
@@ -234,12 +286,10 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
   }
 
   private mapToDispatch(row: DbStoreDispatch, items: StoreDispatchItemProps[]): StoreDispatch {
-    const md: Record<string, unknown> | undefined = row.metadata
-      ? typeof row.metadata === 'string'
-        ? (JSON.parse(row.metadata as string) as Record<string, unknown>)
-        : (row.metadata as Record<string, unknown>)
-      : undefined;
+    const md = fromJson<Record<string, unknown>>(row.metadata);
     const actorNames = (md?.actorNames as Record<string, unknown> | undefined) || {};
+    // UUID columns hold ids; non-UUID human names fall back to metadata
+    const actor = (id: unknown, name: unknown) => (id as unknown as string) ?? (name as string | undefined) ?? undefined;
     return StoreDispatch.reconstitute({
       dispatchId: row.dispatchId,
       fromStoreId: row.fromStoreId,
@@ -247,14 +297,14 @@ export class StoreDispatchRepository implements IStoreDispatchRepository {
       dispatchNumber: row.dispatchNumber,
       status: row.status as StoreDispatch['status'],
       items,
-      requestedBy: (row.requestedBy as unknown as string) ?? (actorNames.requestedByName as string | undefined) ?? undefined,
-      approvedBy: (row.approvedBy as unknown as string) ?? (actorNames.approvedByName as string | undefined) ?? undefined,
-      dispatchedBy: (row.dispatchedBy as unknown as string) ?? (actorNames.dispatchedByName as string | undefined) ?? undefined,
-      receivedBy: (row.receivedBy as unknown as string) ?? (actorNames.receivedByName as string | undefined) ?? undefined,
-      requestedAt: row.requestedAt ? new Date(row.requestedAt) : undefined,
-      approvedAt: row.approvedAt ? new Date(row.approvedAt) : undefined,
-      dispatchedAt: row.dispatchedAt ? new Date(row.dispatchedAt) : undefined,
-      receivedAt: row.receivedAt ? new Date(row.receivedAt) : undefined,
+      requestedBy: actor(row.requestedBy, actorNames.requestedByName),
+      approvedBy: actor(row.approvedBy, actorNames.approvedByName),
+      dispatchedBy: actor(row.dispatchedBy, actorNames.dispatchedByName),
+      receivedBy: actor(row.receivedBy, actorNames.receivedByName),
+      requestedAt: toDate(row.requestedAt),
+      approvedAt: toDate(row.approvedAt),
+      dispatchedAt: toDate(row.dispatchedAt),
+      receivedAt: toDate(row.receivedAt),
       notes: row.notes ?? undefined,
       metadata: md,
       createdAt: new Date(row.createdAt),

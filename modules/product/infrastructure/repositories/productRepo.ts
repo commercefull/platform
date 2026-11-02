@@ -5,6 +5,17 @@ import type { Product as DbProduct } from '../../../../libs/db/types';
 
 function rowToProduct(row: DbProduct): Product {
   return {
+    ...coreProductFields(row),
+    ...orderQuantityFields(row),
+    ...measureFields(row),
+    ...seoFields(row),
+    ...flagFields(row),
+    ...jsonFields(row),
+  };
+}
+
+function coreProductFields(row: DbProduct) {
+  return {
     productId: row.productId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -19,35 +30,60 @@ function rowToProduct(row: DbProduct): Product {
     taxClass: row.taxClass ?? undefined,
     isTaxable: row.isTaxable,
     isInventoryManaged: row.isInventoryManaged,
+  };
+}
+
+function orderQuantityFields(row: DbProduct) {
+  return {
     minOrderQuantity: row.minOrderQuantity ?? undefined,
     maxOrderQuantity: row.maxOrderQuantity ?? undefined,
     orderIncrementQuantity: row.orderIncrementQuantity ?? undefined,
+    warningThreshold: row.warningThreshold ?? undefined,
+  };
+}
+
+function measureFields(row: DbProduct) {
+  return {
     weight: row.weight != null ? Number(row.weight) : undefined,
     weightUnit: row.weightUnit ?? undefined,
     length: row.length != null ? Number(row.length) : undefined,
     width: row.width != null ? Number(row.width) : undefined,
     height: row.height != null ? Number(row.height) : undefined,
     dimensionUnit: row.dimensionUnit ?? undefined,
+  };
+}
+
+function seoFields(row: DbProduct) {
+  return {
     metaTitle: row.metaTitle ?? undefined,
     metaDescription: row.metaDescription ?? undefined,
     metaKeywords: row.metaKeywords ?? undefined,
     hsCode: row.hsCode ?? undefined,
     countryOfOrigin: row.countryOfOrigin ?? undefined,
+  };
+}
+
+function flagFields(row: DbProduct) {
+  return {
     isFeatured: row.isFeatured,
     isNew: row.isNew,
     isBestseller: row.isBestseller,
-    warningThreshold: row.warningThreshold ?? undefined,
     preorderEnabled: row.preorderEnabled,
     preorderReleaseDate: row.preorderReleaseDate ?? undefined,
     preorderAllowance: row.preorderAllowance ?? undefined,
     averageRating: row.averageRating != null ? Number(row.averageRating) : undefined,
     reviewCount: row.reviewCount ?? 0,
-    customFields: (row.customFields ?? undefined) as Record<string, unknown> | undefined,
-    seoData: (row.seoData ?? undefined) as Record<string, unknown> | undefined,
     isVirtual: row.isVirtual,
     isDownloadable: row.isDownloadable,
     isSubscription: row.isSubscription,
     hasVariants: row.hasVariants,
+  };
+}
+
+function jsonFields(row: DbProduct) {
+  return {
+    customFields: (row.customFields ?? undefined) as Record<string, unknown> | undefined,
+    seoData: (row.seoData ?? undefined) as Record<string, unknown> | undefined,
   };
 }
 
@@ -206,103 +242,19 @@ class ProductRepo {
    * Get all products with pagination and filtering
    */
   async findAll(options: ProductFilterOptions = {}): Promise<Product[]> {
-    const {
-      status,
-      visibility,
-      type,
-      isFeatured,
-      isVirtual,
-      hasVariants,
-      priceMinCents,
-      priceMaxCents,
-      organizationId,
-      searchTerm,
-      limit = 50,
-      offset = 0,
-      orderBy = 'createdAt',
-      orderDirection = 'DESC',
-    } = options;
+    const { limit = 50, offset = 0, orderBy = 'createdAt', orderDirection = 'DESC' } = options;
 
-    let sql = `SELECT * FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
-    const params: unknown[] = [];
-    let paramIndex = 1;
-
-    if (status) {
-      if (Array.isArray(status)) {
-        const placeholders = status.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "status" IN (${placeholders})`;
-        params.push(...status);
-      } else {
-        sql += ` AND "status" = $${paramIndex++}`;
-        params.push(status);
-      }
-    }
-
-    if (visibility) {
-      if (Array.isArray(visibility)) {
-        const placeholders = visibility.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "visibility" IN (${placeholders})`;
-        params.push(...visibility);
-      } else {
-        sql += ` AND "visibility" = $${paramIndex++}`;
-        params.push(visibility);
-      }
-    }
-
-    if (type) {
-      if (Array.isArray(type)) {
-        const placeholders = type.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "type" IN (${placeholders})`;
-        params.push(...type);
-      } else {
-        sql += ` AND "type" = $${paramIndex++}`;
-        params.push(type);
-      }
-    }
-
-    if (isFeatured !== undefined) {
-      sql += ` AND "isFeatured" = $${paramIndex++}`;
-      params.push(isFeatured);
-    }
-
-    if (isVirtual !== undefined) {
-      sql += ` AND "isVirtual" = $${paramIndex++}`;
-      params.push(isVirtual);
-    }
-
-    if (hasVariants !== undefined) {
-      sql += ` AND "hasVariants" = $${paramIndex++}`;
-      params.push(hasVariants);
-    }
-
-    if (priceMinCents !== undefined) {
-      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`;
-      params.push(priceMinCents);
-    }
-
-    if (priceMaxCents !== undefined) {
-      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`;
-      params.push(priceMaxCents);
-    }
-
-    if (organizationId) {
-      sql += ` AND "organizationId" = $${paramIndex++}`;
-      params.push(organizationId);
-    }
-
-    if (searchTerm) {
-      sql += ` AND ("name" ILIKE $${paramIndex} OR "description" ILIKE $${paramIndex} OR "sku" ILIKE $${paramIndex})`;
-      params.push(`%${searchTerm}%`);
-      paramIndex++;
-    }
+    const { sql: filterSql, params } = this.buildFilterClauses(options);
 
     // Validate orderBy to prevent SQL injection
     const validOrderColumns = ['createdAt', 'updatedAt', 'name', 'sku', 'status'];
     const safeOrderBy = validOrderColumns.includes(orderBy) ? orderBy : 'createdAt';
     const safeDirection = orderDirection === 'ASC' ? 'ASC' : 'DESC';
 
-    sql += ` ORDER BY "${safeOrderBy}" ${safeDirection}`;
-    sql += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
+    const sql =
+      `SELECT * FROM "${this.tableName}" WHERE "deletedAt" IS NULL${filterSql}` +
+      ` ORDER BY "${safeOrderBy}" ${safeDirection}` +
+      ` LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
     return (await query<Product[]>(sql, params)) || [];
@@ -312,84 +264,78 @@ class ProductRepo {
    * Count products based on filter options
    */
   async count(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'> = {}): Promise<number> {
-    const { status, visibility, type, isFeatured, isVirtual, hasVariants, priceMinCents, priceMaxCents, organizationId, searchTerm } =
-      options;
-
-    let sql = `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL`;
-    const params: unknown[] = [];
-    let paramIndex = 1;
-
-    if (status) {
-      if (Array.isArray(status)) {
-        const placeholders = status.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "status" IN (${placeholders})`;
-        params.push(...status);
-      } else {
-        sql += ` AND "status" = $${paramIndex++}`;
-        params.push(status);
-      }
-    }
-
-    if (visibility) {
-      if (Array.isArray(visibility)) {
-        const placeholders = visibility.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "visibility" IN (${placeholders})`;
-        params.push(...visibility);
-      } else {
-        sql += ` AND "visibility" = $${paramIndex++}`;
-        params.push(visibility);
-      }
-    }
-
-    if (type) {
-      if (Array.isArray(type)) {
-        const placeholders = type.map(() => `$${paramIndex++}`).join(', ');
-        sql += ` AND "type" IN (${placeholders})`;
-        params.push(...type);
-      } else {
-        sql += ` AND "type" = $${paramIndex++}`;
-        params.push(type);
-      }
-    }
-
-    if (isFeatured !== undefined) {
-      sql += ` AND "isFeatured" = $${paramIndex++}`;
-      params.push(isFeatured);
-    }
-
-    if (isVirtual !== undefined) {
-      sql += ` AND "isVirtual" = $${paramIndex++}`;
-      params.push(isVirtual);
-    }
-
-    if (hasVariants !== undefined) {
-      sql += ` AND "hasVariants" = $${paramIndex++}`;
-      params.push(hasVariants);
-    }
-
-    if (priceMinCents !== undefined) {
-      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${paramIndex++})`;
-      params.push(priceMinCents);
-    }
-
-    if (priceMaxCents !== undefined) {
-      sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${paramIndex++})`;
-      params.push(priceMaxCents);
-    }
-
-    if (organizationId) {
-      sql += ` AND "organizationId" = $${paramIndex++}`;
-      params.push(organizationId);
-    }
-
-    if (searchTerm) {
-      sql += ` AND ("name" ILIKE $${paramIndex} OR "description" ILIKE $${paramIndex} OR "sku" ILIKE $${paramIndex})`;
-      params.push(`%${searchTerm}%`);
-      paramIndex++;
-    }
-
-    const result = await queryOne<{ count: string }>(sql, params);
+    const { sql: filterSql, params } = this.buildFilterClauses(options);
+    const result = await queryOne<{ count: string }>(
+      `SELECT COUNT(*) as count FROM "${this.tableName}" WHERE "deletedAt" IS NULL${filterSql}`,
+      params,
+    );
     return result ? parseInt(result.count, 10) : 0;
+  }
+
+  // Shared WHERE-clause builder for findAll/count — both used to duplicate it.
+  private buildFilterClauses(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'>): {
+    sql: string;
+    params: unknown[];
+  } {
+    const b = { sql: '', params: [] as unknown[], paramIndex: 1 };
+
+    this.addScalarOrInClause(b, '"status"', options.status);
+    this.addScalarOrInClause(b, '"visibility"', options.visibility);
+    this.addScalarOrInClause(b, '"type"', options.type);
+    this.addEqualsClause(b, '"isFeatured"', options.isFeatured);
+    this.addEqualsClause(b, '"isVirtual"', options.isVirtual);
+    this.addEqualsClause(b, '"hasVariants"', options.hasVariants);
+    this.addPriceClauses(b, options);
+
+    if (options.organizationId) {
+      b.sql += ` AND "organizationId" = $${b.paramIndex++}`;
+      b.params.push(options.organizationId);
+    }
+
+    if (options.searchTerm) {
+      b.sql += ` AND ("name" ILIKE $${b.paramIndex} OR "description" ILIKE $${b.paramIndex} OR "sku" ILIKE $${b.paramIndex})`;
+      b.params.push(`%${options.searchTerm}%`);
+      b.paramIndex++;
+    }
+
+    return b;
+  }
+
+  private addScalarOrInClause(
+    b: { sql: string; params: unknown[]; paramIndex: number },
+    column: string,
+    value: string | string[] | undefined,
+  ): void {
+    if (!value) return;
+    if (Array.isArray(value)) {
+      const placeholders = value.map(() => `$${b.paramIndex++}`).join(', ');
+      b.sql += ` AND ${column} IN (${placeholders})`;
+      b.params.push(...value);
+    } else {
+      b.sql += ` AND ${column} = $${b.paramIndex++}`;
+      b.params.push(value);
+    }
+  }
+
+  private addEqualsClause(b: { sql: string; params: unknown[]; paramIndex: number }, column: string, value: unknown): void {
+    if (value === undefined) return;
+    b.sql += ` AND ${column} = $${b.paramIndex++}`;
+    b.params.push(value);
+  }
+
+  // Price bounds live in the pricing-owned productBasePrice table (integer cents).
+  private addPriceClauses(
+    b: { sql: string; params: unknown[]; paramIndex: number },
+    options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'>,
+  ): void {
+    if (options.priceMinCents !== undefined) {
+      b.sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${b.paramIndex++})`;
+      b.params.push(options.priceMinCents);
+    }
+    if (options.priceMaxCents !== undefined) {
+      b.sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${b.paramIndex++})`;
+      b.params.push(options.priceMaxCents);
+    }
   }
 
   /**
@@ -437,58 +383,59 @@ class ProductRepo {
       RETURNING *
     `;
 
+    const v = this.createRowValues(data);
     const values = [
-      data.sku,
-      data.name,
-      data.slug,
-      data.description || null,
-      data.shortDescription || null,
-      data.type || ProductType.SIMPLE,
-      data.status || ProductStatus.DRAFT,
-      data.visibility || ProductVisibility.VISIBLE,
-      data.taxClass || 'standard',
-      data.isTaxable !== false,
-      data.isInventoryManaged !== false,
-      data.minOrderQuantity || 1,
-      data.maxOrderQuantity || null,
-      data.orderIncrementQuantity || 1,
-      data.weight || null,
-      data.weightUnit || 'g',
-      data.length || null,
-      data.width || null,
-      data.height || null,
-      data.dimensionUnit || 'cm',
-      data.metaTitle || null,
-      data.metaDescription || null,
-      data.metaKeywords || null,
-      data.hsCode || null,
-      data.countryOfOrigin || null,
-      data.isFeatured || false,
-      data.isNew || false,
-      data.isBestseller || false,
-      data.warningThreshold || null,
-      data.preorderEnabled || false,
-      data.preorderReleaseDate || null,
-      data.preorderAllowance || null,
-      data.customFields ? JSON.stringify(data.customFields) : null,
-      data.seoData ? JSON.stringify(data.seoData) : null,
-      data.relatedProducts || null,
-      data.crossSellProducts || null,
-      data.upSellProducts || null,
-      data.isVirtual || false,
-      data.isDownloadable || false,
-      data.isSubscription || false,
-      data.primaryImageId || null,
-      data.publishedAt || null,
-      data.userId || null,
-      data.organizationId || null,
-      data.returnPolicy || null,
-      data.warranty || null,
-      data.externalId || null,
-      data.hasVariants || false,
-      data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
-      data.createdBy || null,
-      data.updatedBy || null,
+      v.sku,
+      v.name,
+      v.slug,
+      v.description,
+      v.shortDescription,
+      v.type,
+      v.status,
+      v.visibility,
+      v.taxClass,
+      v.isTaxable,
+      v.isInventoryManaged,
+      v.minOrderQuantity,
+      v.maxOrderQuantity,
+      v.orderIncrementQuantity,
+      v.weight,
+      v.weightUnit,
+      v.length,
+      v.width,
+      v.height,
+      v.dimensionUnit,
+      v.metaTitle,
+      v.metaDescription,
+      v.metaKeywords,
+      v.hsCode,
+      v.countryOfOrigin,
+      v.isFeatured,
+      v.isNew,
+      v.isBestseller,
+      v.warningThreshold,
+      v.preorderEnabled,
+      v.preorderReleaseDate,
+      v.preorderAllowance,
+      v.customFields,
+      v.seoData,
+      v.relatedProducts,
+      v.crossSellProducts,
+      v.upSellProducts,
+      v.isVirtual,
+      v.isDownloadable,
+      v.isSubscription,
+      v.primaryImageId,
+      v.publishedAt,
+      v.userId,
+      v.organizationId,
+      v.returnPolicy,
+      v.warranty,
+      v.externalId,
+      v.hasVariants,
+      v.variantAttributes,
+      v.createdBy,
+      v.updatedBy,
     ];
 
     const result = await queryOne<DbProduct>(sql, values);
@@ -498,6 +445,116 @@ class ProductRepo {
     }
 
     return rowToProduct(result);
+  }
+
+  private createRowValues(data: ProductCreateProps) {
+    return {
+      sku: data.sku,
+      name: data.name,
+      slug: data.slug,
+      description: data.description || null,
+      shortDescription: data.shortDescription || null,
+      type: data.type || ProductType.SIMPLE,
+      status: data.status || ProductStatus.DRAFT,
+      visibility: data.visibility || ProductVisibility.VISIBLE,
+      ...this.createInventoryValues(data),
+      ...this.createDimensionValues(data),
+      ...this.createSeoValues(data),
+      ...this.createFlagValues(data),
+      ...this.createPreorderValues(data),
+      ...this.createJsonValues(data),
+      ...this.createTypeValues(data),
+      ...this.createOwnershipValues(data),
+      ...this.createVariantValues(data),
+    };
+  }
+
+  private createInventoryValues(data: ProductCreateProps) {
+    return {
+      taxClass: data.taxClass || 'standard',
+      isTaxable: data.isTaxable !== false,
+      isInventoryManaged: data.isInventoryManaged !== false,
+      minOrderQuantity: data.minOrderQuantity || 1,
+      maxOrderQuantity: data.maxOrderQuantity || null,
+      orderIncrementQuantity: data.orderIncrementQuantity || 1,
+    };
+  }
+
+  private createDimensionValues(data: ProductCreateProps) {
+    return {
+      weight: data.weight || null,
+      weightUnit: data.weightUnit || 'g',
+      length: data.length || null,
+      width: data.width || null,
+      height: data.height || null,
+      dimensionUnit: data.dimensionUnit || 'cm',
+    };
+  }
+
+  private createSeoValues(data: ProductCreateProps) {
+    return {
+      metaTitle: data.metaTitle || null,
+      metaDescription: data.metaDescription || null,
+      metaKeywords: data.metaKeywords || null,
+      hsCode: data.hsCode || null,
+      countryOfOrigin: data.countryOfOrigin || null,
+    };
+  }
+
+  private createFlagValues(data: ProductCreateProps) {
+    return {
+      isFeatured: data.isFeatured || false,
+      isNew: data.isNew || false,
+      isBestseller: data.isBestseller || false,
+      warningThreshold: data.warningThreshold || null,
+    };
+  }
+
+  private createPreorderValues(data: ProductCreateProps) {
+    return {
+      preorderEnabled: data.preorderEnabled || false,
+      preorderReleaseDate: data.preorderReleaseDate || null,
+      preorderAllowance: data.preorderAllowance || null,
+    };
+  }
+
+  private createJsonValues(data: ProductCreateProps) {
+    return {
+      customFields: data.customFields ? JSON.stringify(data.customFields) : null,
+      seoData: data.seoData ? JSON.stringify(data.seoData) : null,
+      relatedProducts: data.relatedProducts || null,
+      crossSellProducts: data.crossSellProducts || null,
+      upSellProducts: data.upSellProducts || null,
+    };
+  }
+
+  private createTypeValues(data: ProductCreateProps) {
+    return {
+      isVirtual: data.isVirtual || false,
+      isDownloadable: data.isDownloadable || false,
+      isSubscription: data.isSubscription || false,
+      primaryImageId: data.primaryImageId || null,
+      publishedAt: data.publishedAt || null,
+    };
+  }
+
+  private createOwnershipValues(data: ProductCreateProps) {
+    return {
+      userId: data.userId || null,
+      organizationId: data.organizationId || null,
+      returnPolicy: data.returnPolicy || null,
+      warranty: data.warranty || null,
+      externalId: data.externalId || null,
+      createdBy: data.createdBy || null,
+      updatedBy: data.updatedBy || null,
+    };
+  }
+
+  private createVariantValues(data: ProductCreateProps) {
+    return {
+      hasVariants: data.hasVariants || false,
+      variantAttributes: data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
+    };
   }
 
   /**

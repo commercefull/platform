@@ -3,6 +3,16 @@ import { AppError } from './errors';
 import { logger } from './logger';
 import { getCorrelationId } from './correlationId';
 
+const MULTER_ERROR_CODES = new Set([
+  'LIMIT_FILE_SIZE',
+  'LIMIT_UNEXPECTED_FILE',
+  'LIMIT_FILE_COUNT',
+  'LIMIT_FIELD_KEY',
+  'LIMIT_FIELD_VALUE',
+  'LIMIT_FIELD_COUNT',
+  'LIMIT_PART_COUNT',
+]);
+
 /**
  * Central Express error middleware.
  *
@@ -16,81 +26,14 @@ import { getCorrelationId } from './correlationId';
  */
 export function errorMiddleware(err: unknown, req: HttpRequest, res: HttpResponse, _next: HttpNext): void {
   const isProduction = process.env.NODE_ENV === 'production';
+  const appError = toAppError(err);
 
-  // Handle multer errors (file upload validation)
-  const multerCode = (err as Record<string, unknown>)?.code as string | undefined;
-  const isMulterError =
-    multerCode === 'LIMIT_FILE_SIZE' ||
-    multerCode === 'LIMIT_UNEXPECTED_FILE' ||
-    multerCode === 'LIMIT_FILE_COUNT' ||
-    multerCode === 'LIMIT_FIELD_KEY' ||
-    multerCode === 'LIMIT_FIELD_VALUE' ||
-    multerCode === 'LIMIT_FIELD_COUNT' ||
-    multerCode === 'LIMIT_PART_COUNT' ||
-    (err instanceof Error && err.message === 'Only image files are allowed');
-
-  const appError =
-    err instanceof AppError
-      ? err
-      : isMulterError
-        ? new AppError(err instanceof Error ? err.message : 'File upload error', 400)
-        : new AppError(
-            err instanceof Error ? err.message : 'Internal Server Error',
-            (err as Record<string, number>)?.status ?? (err as Record<string, number>)?.statusCode ?? 500,
-          );
-
-  const logMeta = {
-    code: appError.code,
-    message: appError.message,
-    path: req.path,
-    method: req.method,
-    statusCode: appError.statusCode,
-    isExpected: appError.isExpected,
-    correlationId: getCorrelationId(),
-    stack: !appError.isExpected ? appError.stack : undefined,
-  };
-
-  // Log at the error's declared severity
-  if (appError.severity === 'error') {
-    logger.error('Unhandled error', logMeta);
-  } else if (appError.severity === 'warn') {
-    logger.warn('Client warning', logMeta);
-  } else {
-    logger.info('Client error', logMeta);
-  }
-
+  logAppError(appError, req);
   res.status(appError.statusCode);
 
-  // API requests → RFC 7807 problem+json (alongside legacy shape for deprecation window)
-  const isApiRequest =
-    req.xhr ||
-    req.headers.accept?.includes('application/json') ||
-    req.path.startsWith('/customer/') ||
-    req.path.startsWith('/business/') ||
-    req.path.startsWith('/acp/');
-
-  if (isApiRequest) {
-    // RFC 7807 problem details shape
-    const problemDetails = {
-      type: `https://docs.commercefull.com/errors/${appError.code}`,
-      title: appError.name.replace(/Error$/, ''),
-      status: appError.statusCode,
-      detail: isProduction && !appError.isExpected ? 'An internal error occurred' : appError.message,
-      instance: req.path,
-      code: appError.code,
-      correlationId: getCorrelationId(),
-      // Legacy fields kept during deprecation window
-      success: false,
-      error: {
-        message: isProduction && !appError.isExpected ? 'An internal error occurred' : appError.message,
-        statusCode: appError.statusCode,
-        code: appError.code,
-        ...(appError.details ? { details: appError.details } : {}),
-      },
-    };
-
+  if (isApiRequest(req)) {
     res.setHeader('Content-Type', 'application/problem+json');
-    res.json(problemDetails);
+    res.json(buildProblemDetails(appError, req, isProduction));
     return;
   }
 
@@ -108,4 +51,76 @@ export function errorMiddleware(err: unknown, req: HttpRequest, res: HttpRespons
     errorMsg: res.locals.errorMsg,
     categories: [],
   });
+}
+
+function isMulterUploadError(err: unknown): boolean {
+  const code = (err as Record<string, unknown>)?.code;
+  return (
+    (typeof code === 'string' && MULTER_ERROR_CODES.has(code)) || (err instanceof Error && err.message === 'Only image files are allowed')
+  );
+}
+
+function toAppError(err: unknown): AppError {
+  if (err instanceof AppError) return err;
+  // Handle multer errors (file upload validation)
+  if (isMulterUploadError(err)) {
+    return new AppError(err instanceof Error ? err.message : 'File upload error', 400);
+  }
+  return new AppError(
+    err instanceof Error ? err.message : 'Internal Server Error',
+    (err as Record<string, number>)?.status ?? (err as Record<string, number>)?.statusCode ?? 500,
+  );
+}
+
+// Log at the error's declared severity
+function logAppError(appError: AppError, req: HttpRequest): void {
+  const logMeta = {
+    code: appError.code,
+    message: appError.message,
+    path: req.path,
+    method: req.method,
+    statusCode: appError.statusCode,
+    isExpected: appError.isExpected,
+    correlationId: getCorrelationId(),
+    stack: !appError.isExpected ? appError.stack : undefined,
+  };
+  if (appError.severity === 'error') {
+    logger.error('Unhandled error', logMeta);
+  } else if (appError.severity === 'warn') {
+    logger.warn('Client warning', logMeta);
+  } else {
+    logger.info('Client error', logMeta);
+  }
+}
+
+// API requests → RFC 7807 problem+json (alongside legacy shape for deprecation window)
+function isApiRequest(req: HttpRequest): boolean {
+  return Boolean(
+    req.xhr ||
+    req.headers.accept?.includes('application/json') ||
+    req.path.startsWith('/customer/') ||
+    req.path.startsWith('/business/') ||
+    req.path.startsWith('/acp/'),
+  );
+}
+
+function buildProblemDetails(appError: AppError, req: HttpRequest, isProduction: boolean) {
+  const safeMessage = isProduction && !appError.isExpected ? 'An internal error occurred' : appError.message;
+  return {
+    type: `https://docs.commercefull.com/errors/${appError.code}`,
+    title: appError.name.replace(/Error$/, ''),
+    status: appError.statusCode,
+    detail: safeMessage,
+    instance: req.path,
+    code: appError.code,
+    correlationId: getCorrelationId(),
+    // Legacy fields kept during deprecation window
+    success: false,
+    error: {
+      message: safeMessage,
+      statusCode: appError.statusCode,
+      code: appError.code,
+      ...(appError.details ? { details: appError.details } : {}),
+    },
+  };
 }

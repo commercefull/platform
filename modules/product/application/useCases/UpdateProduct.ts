@@ -6,7 +6,8 @@
 import { ProductRepository } from '../../domain/repositories/ProductRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
-import type { ProductPricingPort } from '../ports/ProductPricingPort';
+import type { ProductPriceInfo, ProductPricingPort } from '../ports/ProductPricingPort';
+import type { Product } from '../../domain/entities/Product';
 
 // ============================================================================
 // Command
@@ -63,6 +64,8 @@ export interface UpdateProductResponse {
   updatedAt: string;
 }
 
+type ProductUpdates = UpdateProductCommand['updates'];
+
 // ============================================================================
 // Use Case
 // ============================================================================
@@ -81,135 +84,17 @@ export class UpdateProductUseCase {
     }
 
     const updatedFields: string[] = [];
+    const updates = command.updates;
 
-    // Update basic info
-    if (
-      command.updates.name ||
-      command.updates.description !== undefined ||
-      command.updates.shortDescription !== undefined ||
-      command.updates.sku !== undefined
-    ) {
-      product.updateBasicInfo({
-        name: command.updates.name,
-        description: command.updates.description,
-        shortDescription: command.updates.shortDescription,
-        sku: command.updates.sku,
-      });
-      if (command.updates.name) updatedFields.push('name');
-      if (command.updates.description !== undefined) updatedFields.push('description');
-      if (command.updates.shortDescription !== undefined) updatedFields.push('shortDescription');
-      if (command.updates.sku !== undefined) updatedFields.push('sku');
-    }
-
-    // Update slug
-    if (command.updates.slug) {
-      product.updateSeo({ slug: command.updates.slug });
-      updatedFields.push('slug');
-    }
-
-    // Update price — the pricing module owns catalog prices (integer cents)
-    if (
-      command.updates.basePriceCents !== undefined ||
-      command.updates.salePriceCents !== undefined ||
-      command.updates.costPriceCents !== undefined ||
-      command.updates.compareAtPriceCents !== undefined
-    ) {
-      const existing = await this.pricingPort.getBasePrice(product.productId);
-      const priceCents = command.updates.basePriceCents ?? existing?.priceCents;
-      if (priceCents === undefined || !Number.isInteger(priceCents) || priceCents < 0) {
-        throw new ProductValidationError('basePriceCents must be a non-negative integer');
-      }
-      const salePriceCents =
-        command.updates.salePriceCents !== undefined ? command.updates.salePriceCents : (existing?.salePriceCents ?? null);
-      const costPriceCents =
-        command.updates.costPriceCents !== undefined ? command.updates.costPriceCents : (existing?.costPriceCents ?? null);
-      const compareAtPriceCents =
-        command.updates.compareAtPriceCents !== undefined ? command.updates.compareAtPriceCents : (existing?.compareAtPriceCents ?? null);
-      for (const [field, value] of Object.entries({ salePriceCents, costPriceCents, compareAtPriceCents })) {
-        if (value !== null && (!Number.isInteger(value) || value < 0)) {
-          throw new ProductValidationError(`${field} must be a non-negative integer or null`);
-        }
-      }
-      if (salePriceCents !== null && salePriceCents > priceCents) {
-        throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
-      }
-      await this.pricingPort.setBasePrice({
-        productId: product.productId,
-        currencyCode: command.updates.currencyCode ?? existing?.currencyCode ?? 'USD',
-        priceCents,
-        salePriceCents,
-        costPriceCents,
-        compareAtPriceCents,
-        taxRate: null,
-      });
-      updatedFields.push('price');
-    }
-
-    // Update dimensions
-    if (
-      command.updates.weight !== undefined ||
-      command.updates.length !== undefined ||
-      command.updates.width !== undefined ||
-      command.updates.height !== undefined
-    ) {
-      product.updateDimensions({
-        weight: command.updates.weight,
-        weightUnit: command.updates.weightUnit,
-        length: command.updates.length,
-        width: command.updates.width,
-        height: command.updates.height,
-        dimensionUnit: command.updates.dimensionUnit,
-      });
-      updatedFields.push('dimensions');
-    }
-
-    // Update category
-    if (command.updates.categoryId !== undefined) {
-      if (command.updates.categoryId) {
-        product.assignCategory(command.updates.categoryId);
-      } else {
-        product.removeCategory();
-      }
-      updatedFields.push('categoryId');
-    }
-
-    // Update featured status
-    if (command.updates.isFeatured !== undefined) {
-      product.setFeatured(command.updates.isFeatured);
-      updatedFields.push('isFeatured');
-    }
-
-    // Update SEO
-    if (
-      command.updates.metaTitle !== undefined ||
-      command.updates.metaDescription !== undefined ||
-      command.updates.metaKeywords !== undefined
-    ) {
-      product.updateSeo({
-        metaTitle: command.updates.metaTitle,
-        metaDescription: command.updates.metaDescription,
-        metaKeywords: command.updates.metaKeywords,
-      });
-      updatedFields.push('seo');
-    }
-
-    // Update tags
-    if (command.updates.tags) {
-      // Clear existing tags and add new ones
-      for (const tag of product.tags) {
-        product.removeTag(tag);
-      }
-      for (const tag of command.updates.tags) {
-        product.addTag(tag);
-      }
-      updatedFields.push('tags');
-    }
-
-    // Update metadata
-    if (command.updates.metadata) {
-      product.updateMetadata(command.updates.metadata);
-      updatedFields.push('metadata');
-    }
+    this.applyBasicInfo(product, updates, updatedFields);
+    this.applySlug(product, updates, updatedFields);
+    await this.applyPrice(product, updates, updatedFields);
+    this.applyDimensions(product, updates, updatedFields);
+    this.applyCategory(product, updates, updatedFields);
+    this.applyFeatured(product, updates, updatedFields);
+    this.applySeo(product, updates, updatedFields);
+    this.applyTags(product, updates, updatedFields);
+    this.applyMetadata(product, updates, updatedFields);
 
     // Save product
     await this.productRepository.save(product);
@@ -228,5 +113,137 @@ export class UpdateProductUseCase {
       updatedFields,
       updatedAt: product.updatedAt.toISOString(),
     };
+  }
+
+  private applyBasicInfo(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (!updates.name && updates.description === undefined && updates.shortDescription === undefined && updates.sku === undefined) {
+      return;
+    }
+    product.updateBasicInfo({
+      name: updates.name,
+      description: updates.description,
+      shortDescription: updates.shortDescription,
+      sku: updates.sku,
+    });
+    if (updates.name) updatedFields.push('name');
+    if (updates.description !== undefined) updatedFields.push('description');
+    if (updates.shortDescription !== undefined) updatedFields.push('shortDescription');
+    if (updates.sku !== undefined) updatedFields.push('sku');
+  }
+
+  private applySlug(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (!updates.slug) return;
+    product.updateSeo({ slug: updates.slug });
+    updatedFields.push('slug');
+  }
+
+  // Price fields are integer cents — the pricing module owns catalog prices.
+  private async applyPrice(product: Product, updates: ProductUpdates, updatedFields: string[]): Promise<void> {
+    if (
+      updates.basePriceCents === undefined &&
+      updates.salePriceCents === undefined &&
+      updates.costPriceCents === undefined &&
+      updates.compareAtPriceCents === undefined
+    ) {
+      return;
+    }
+    const existing = await this.pricingPort.getBasePrice(product.productId);
+    const values = this.resolvePriceValues(updates, existing);
+    await this.pricingPort.setBasePrice({
+      productId: product.productId,
+      currencyCode: updates.currencyCode ?? existing?.currencyCode ?? 'USD',
+      ...values,
+      taxRate: null,
+    });
+    updatedFields.push('price');
+  }
+
+  private resolvePriceValues(updates: ProductUpdates, existing: ProductPriceInfo | null) {
+    const priceCents = updates.basePriceCents ?? existing?.priceCents;
+    if (priceCents === undefined || !Number.isInteger(priceCents) || priceCents < 0) {
+      throw new ProductValidationError('basePriceCents must be a non-negative integer');
+    }
+    const optionalPrices = {
+      salePriceCents: this.resolveOptionalPrice(updates.salePriceCents, existing?.salePriceCents),
+      costPriceCents: this.resolveOptionalPrice(updates.costPriceCents, existing?.costPriceCents),
+      compareAtPriceCents: this.resolveOptionalPrice(updates.compareAtPriceCents, existing?.compareAtPriceCents),
+    };
+    this.assertOptionalPrices(optionalPrices);
+    if (optionalPrices.salePriceCents !== null && optionalPrices.salePriceCents > priceCents) {
+      throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
+    }
+    return { priceCents, ...optionalPrices };
+  }
+
+  // `undefined` keeps the existing price; `null` clears it; a number replaces it.
+  private resolveOptionalPrice(update: number | null | undefined, existing: number | null | undefined): number | null {
+    return update !== undefined ? update : (existing ?? null);
+  }
+
+  private assertOptionalPrices(prices: Record<string, number | null>): void {
+    for (const [field, value] of Object.entries(prices)) {
+      if (value !== null && (!Number.isInteger(value) || value < 0)) {
+        throw new ProductValidationError(`${field} must be a non-negative integer or null`);
+      }
+    }
+  }
+
+  private applyDimensions(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (updates.weight === undefined && updates.length === undefined && updates.width === undefined && updates.height === undefined) {
+      return;
+    }
+    product.updateDimensions({
+      weight: updates.weight,
+      weightUnit: updates.weightUnit,
+      length: updates.length,
+      width: updates.width,
+      height: updates.height,
+      dimensionUnit: updates.dimensionUnit,
+    });
+    updatedFields.push('dimensions');
+  }
+
+  private applyCategory(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (updates.categoryId === undefined) return;
+    if (updates.categoryId) {
+      product.assignCategory(updates.categoryId);
+    } else {
+      product.removeCategory();
+    }
+    updatedFields.push('categoryId');
+  }
+
+  private applyFeatured(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (updates.isFeatured === undefined) return;
+    product.setFeatured(updates.isFeatured);
+    updatedFields.push('isFeatured');
+  }
+
+  private applySeo(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (updates.metaTitle === undefined && updates.metaDescription === undefined && updates.metaKeywords === undefined) return;
+    product.updateSeo({
+      metaTitle: updates.metaTitle,
+      metaDescription: updates.metaDescription,
+      metaKeywords: updates.metaKeywords,
+    });
+    updatedFields.push('seo');
+  }
+
+  private applyTags(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (!updates.tags) return;
+    // Clear existing tags and add new ones
+    for (const tag of product.tags) {
+      product.removeTag(tag);
+    }
+    for (const tag of updates.tags) {
+      product.addTag(tag);
+    }
+    updatedFields.push('tags');
+  }
+
+  private applyMetadata(product: Product, updates: ProductUpdates, updatedFields: string[]): void {
+    if (!updates.metadata) return;
+    product.updateMetadata(updates.metadata);
+    updatedFields.push('metadata');
   }
 }
