@@ -125,7 +125,7 @@ export default [
     },
   },
   {
-    files: ['**/interface/jobs/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts'],
+    files: ['**/interface/jobs/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts', '**/*.test.ts'],
     rules: {
       'no-console': 'off',
       // Relax complexity rules for tests and scripts
