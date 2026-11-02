@@ -119,44 +119,48 @@ export class ListProductsForContextUseCase {
       visibility: [ProductVisibility.VISIBLE, ProductVisibility.FEATURED],
     };
 
-    // Apply context-based ownership filtering
+    filters.organizationId = await this.resolveOrganizationId(command, systemConfig);
+    this.applyContextFilters(filters, command.context);
+    return filters;
+  }
+
+  /** Context-based ownership filtering. */
+  private async resolveOrganizationId(
+    command: ListProductsForContextCommand,
+    systemConfig: { isMarketplace: boolean; isMultiStore: boolean; isSingleStore: boolean } | null,
+  ): Promise<string | undefined> {
     if (systemConfig?.isMarketplace) {
-      // Marketplace mode: products belong to merchants
-      if (command.context.organizationId) {
-        filters.organizationId = command.context.organizationId;
-      }
-      // In marketplace, we might show products from multiple merchants
-    } else if (systemConfig?.isMultiStore) {
-      // Multi-store mode: products belong to organizations
-      if (command.context.organizationId) {
-        filters.organizationId = command.context.organizationId;
-      } else if (command.context.storeId) {
-        // If storeId is provided, find the organization for that store
-        const store = await this.storeLookupPort.findById(command.context.storeId);
-        if (store?.organizationId) {
-          filters.organizationId = store.organizationId;
-        }
-      }
-    } else {
-      // Single store mode: products belong to the default organization
-      if (!this.organizationLookupPort) {
-        throw new ProductValidationError('Organization lookup port is required for single-store mode.');
-      }
-      const organizations = await this.organizationLookupPort.findAll();
-      const defaultOrg = organizations[0];
-      if (defaultOrg) {
-        filters.organizationId = defaultOrg.id;
-      }
+      // Marketplace mode: products belong to merchants; multiple merchants may show
+      return command.context.organizationId;
     }
 
-    // Apply common filters
-    if (command.context.categoryId) filters.categoryId = command.context.categoryId;
-    if (command.context.isFeatured !== undefined) filters.isFeatured = command.context.isFeatured;
-    if (command.context.search) filters.search = command.context.search;
-    if (command.context.priceMinCents !== undefined) filters.priceMinCents = command.context.priceMinCents;
-    if (command.context.priceMaxCents !== undefined) filters.priceMaxCents = command.context.priceMaxCents;
+    if (systemConfig?.isMultiStore) {
+      // Multi-store mode: products belong to organizations
+      if (command.context.organizationId) {
+        return command.context.organizationId;
+      }
+      // If storeId is provided, find the organization for that store
+      if (command.context.storeId) {
+        const store = await this.storeLookupPort.findById(command.context.storeId);
+        return store?.organizationId;
+      }
+      return undefined;
+    }
 
-    return filters;
+    // Single store mode: products belong to the default organization
+    if (!this.organizationLookupPort) {
+      throw new ProductValidationError('Organization lookup port is required for single-store mode.');
+    }
+    const organizations = await this.organizationLookupPort.findAll();
+    return organizations[0]?.id;
+  }
+
+  private applyContextFilters(filters: ProductFilters, context: ListProductsForContextCommand['context']): void {
+    if (context.categoryId) filters.categoryId = context.categoryId;
+    if (context.isFeatured !== undefined) filters.isFeatured = context.isFeatured;
+    if (context.search) filters.search = context.search;
+    if (context.priceMinCents !== undefined) filters.priceMinCents = context.priceMinCents;
+    if (context.priceMaxCents !== undefined) filters.priceMaxCents = context.priceMaxCents;
   }
 
   private mapToListItem(product: Product, price: ProductPriceInfo | undefined): ProductListItemResponse {

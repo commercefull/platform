@@ -100,69 +100,86 @@ export const getOrderByNumber = async (req: HttpRequest, res: HttpResponse): Pro
  * Create a new order
  * POST /orders
  */
+interface CreateOrderRequestBody {
+  items: unknown[];
+  shippingAddress: unknown;
+  billingAddress?: unknown;
+  basketId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource?: string;
+  currencyCode?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customerName?: string;
+  customerNotes?: string;
+  shippingTotalCents?: number;
+  hasGiftWrapping?: boolean;
+  giftMessage?: string;
+  isGift?: boolean;
+}
+
+/** Returns the first validation error message, or null when the body is acceptable. */
+function validateCreateOrderBody(body: CreateOrderRequestBody): string | null {
+  if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
+    return 'Order must contain at least one item';
+  }
+  if (!body.shippingAddress) {
+    return 'Shipping address is required';
+  }
+  if (!body.customerEmail) {
+    return 'Customer email is required';
+  }
+  return null;
+}
+
+interface ResolvedOrderScope {
+  customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  orderSource: string;
+}
+
+function buildCreateOrderCommand(req: HttpRequest, body: CreateOrderRequestBody, scope: ResolvedOrderScope): CreateOrderCommand {
+  return new CreateOrderCommand({
+    customerId: scope.customerId,
+    customerEmail: body.customerEmail,
+    items: body.items as OrderItemInput[],
+    shippingAddress: body.shippingAddress as AddressInput,
+    billingAddress: body.billingAddress as AddressInput,
+    basketId: body.basketId,
+    storeId: scope.storeId,
+    channelId: scope.channelId,
+    createdByUserId: body.createdByUserId || req.user?.userId || req.user?.id,
+    orderSource: scope.orderSource,
+    currencyCode: body.currencyCode,
+    customerPhone: body.customerPhone,
+    customerName: body.customerName,
+    customerNotes: body.customerNotes,
+    shippingTotalCents: body.shippingTotalCents,
+    hasGiftWrapping: body.hasGiftWrapping,
+    giftMessage: body.giftMessage,
+    isGift: body.isGift,
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
+}
+
 export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId || req.user?.id || req.user?._id || req.user?.id;
-  const body = req.body as {
-    items: unknown[];
-    shippingAddress: unknown;
-    billingAddress?: unknown;
-    basketId?: string;
-    storeId?: string;
-    channelId?: string;
-    createdByUserId?: string;
-    orderSource?: string;
-    currencyCode?: string;
-    customerEmail?: string;
-    customerPhone?: string;
-    customerName?: string;
-    customerNotes?: string;
-    shippingTotalCents?: number;
-    hasGiftWrapping?: boolean;
-    giftMessage?: string;
-    isGift?: boolean;
-  };
-  const {
-    items,
-    shippingAddress,
-    billingAddress,
-    basketId,
-    storeId,
-    channelId,
-    createdByUserId,
-    orderSource,
-    currencyCode,
-    customerEmail,
-    customerPhone,
-    customerName,
-    customerNotes,
-    shippingTotalCents,
-    hasGiftWrapping,
-    giftMessage,
-    isGift,
-  } = body;
+  const body = req.body as CreateOrderRequestBody;
   const _channelCodeHeader = req.get('x-channel-code');
 
-  // Validation
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    respondError(req, res, 'Order must contain at least one item', 400);
+  const bodyError = validateCreateOrderBody(body);
+  if (bodyError) {
+    respondError(req, res, bodyError, 400);
     return;
   }
 
-  if (!shippingAddress) {
-    respondError(req, res, 'Shipping address is required', 400);
-    return;
-  }
-
-  if (!customerEmail) {
-    respondError(req, res, 'Customer email is required', 400);
-    return;
-  }
-
-  const email = customerEmail;
-
-  let resolvedStoreId = storeId || req.user?.storeId;
-  let resolvedChannelId = channelId;
-  let resolvedOrderSource = orderSource || 'web';
+  const resolvedStoreId = body.storeId || req.user?.storeId;
+  const resolvedChannelId = body.channelId;
+  const resolvedOrderSource = body.orderSource || 'web';
 
   // A customer may attribute an order to a store/channel, but only to one
   // that exists, is active, and — when both are given — is assigned.
@@ -178,27 +195,11 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     }
   }
 
-  const command = new CreateOrderCommand({
-    customerId: customerId,
-    customerEmail: email,
-    items: items as OrderItemInput[],
-    shippingAddress: shippingAddress as AddressInput,
-    billingAddress: billingAddress as AddressInput,
-    basketId: basketId,
+  const command = buildCreateOrderCommand(req, body, {
+    customerId,
     storeId: resolvedStoreId,
     channelId: resolvedChannelId,
-    createdByUserId: createdByUserId || req.user?.userId || req.user?.id,
     orderSource: resolvedOrderSource,
-    currencyCode: currencyCode,
-    customerPhone: customerPhone,
-    customerName: customerName,
-    customerNotes: customerNotes,
-    shippingTotalCents: shippingTotalCents,
-    hasGiftWrapping: hasGiftWrapping,
-    giftMessage: giftMessage,
-    isGift: isGift,
-    ipAddress: req.ip,
-    userAgent: req.get('User-Agent'),
   });
 
   const useCase = createOrderUseCase;

@@ -12,36 +12,88 @@ import type {
 } from '../../domain/repositories/OrderReturnRepository';
 import type { OrderReturn as DbOrderReturn } from '../../../../libs/db/types';
 
+/** Columns stored nullable in the DB but optional (undefined) in the domain type. */
+const NULLABLE_RETURN_FIELDS = [
+  'customerId',
+  'approvedAt',
+  'receivedAt',
+  'completedAt',
+  'rmaNumber',
+  'paymentRefundId',
+  'returnShippingAmountCents',
+  'returnShippingLabel',
+  'returnTrackingNumber',
+  'returnTrackingUrl',
+  'returnReason',
+  'returnInstructions',
+  'customerNotes',
+  'adminNotes',
+] as const;
+
 function rowToReturn(row: DbOrderReturn): OrderReturn {
-  return {
+  const ret = {
     orderReturnId: row.orderReturnId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     orderId: row.orderId,
     returnNumber: row.returnNumber,
-    customerId: row.customerId ?? undefined,
     status: row.status,
     returnType: row.returnType,
     requestedAt: row.requestedAt,
-    approvedAt: row.approvedAt ?? undefined,
-    receivedAt: row.receivedAt ?? undefined,
-    completedAt: row.completedAt ?? undefined,
-    rmaNumber: row.rmaNumber ?? undefined,
-    paymentRefundId: row.paymentRefundId ?? undefined,
     returnShippingPaid: row.returnShippingPaid,
-    returnShippingAmountCents: row.returnShippingAmountCents ?? undefined,
-    returnShippingLabel: row.returnShippingLabel ?? undefined,
     returnCarrier: row.returnCarrier,
-    returnTrackingNumber: row.returnTrackingNumber ?? undefined,
-    returnTrackingUrl: row.returnTrackingUrl ?? undefined,
-    returnReason: row.returnReason ?? undefined,
-    returnInstructions: row.returnInstructions ?? undefined,
-    customerNotes: row.customerNotes ?? undefined,
-    adminNotes: row.adminNotes ?? undefined,
     requiresInspection: row.requiresInspection,
     inspectionPassedItems: (row.inspectionPassedItems ?? undefined) as Record<string, unknown> | undefined,
     inspectionFailedItems: (row.inspectionFailedItems ?? undefined) as Record<string, unknown> | undefined,
-  };
+  } as OrderReturn;
+  const mutable = ret as unknown as Record<string, unknown>;
+  for (const field of NULLABLE_RETURN_FIELDS) {
+    mutable[field] = (row as Record<string, unknown>)[field] ?? undefined;
+  }
+  return ret;
+}
+
+const RETURN_INSERT_SQL = `INSERT INTO "orderReturn" (
+  "orderId", "returnNumber", "customerId", "status", "returnType", "requestedAt",
+  "rmaNumber", "paymentRefundId", "returnShippingPaid", "returnShippingAmountCents",
+  "returnShippingLabel", "returnCarrier", "returnTrackingNumber", "returnTrackingUrl",
+  "returnReason", "returnInstructions", "customerNotes", "adminNotes",
+  "requiresInspection", "inspectionPassedItems", "inspectionFailedItems",
+  "createdAt", "updatedAt"
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+)
+RETURNING *`;
+
+/** Falsy → fallback (nullable column default). */
+const dbDefault = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+
+function buildReturnInsertParams(params: OrderReturnCreateParams, returnNumber: string, now: unknown): unknown[] {
+  return [
+    params.orderId,
+    returnNumber,
+    dbDefault(params.customerId),
+    params.status || 'requested',
+    params.returnType,
+    now,
+    dbDefault(params.rmaNumber),
+    dbDefault(params.paymentRefundId),
+    params.returnShippingPaid || false,
+    dbDefault(params.returnShippingAmountCents),
+    dbDefault(params.returnShippingLabel),
+    params.returnCarrier || 'usps',
+    dbDefault(params.returnTrackingNumber),
+    dbDefault(params.returnTrackingUrl),
+    dbDefault(params.returnReason),
+    dbDefault(params.returnInstructions),
+    dbDefault(params.customerNotes),
+    dbDefault(params.adminNotes),
+    params.requiresInspection !== undefined ? params.requiresInspection : true,
+    params.inspectionPassedItems ? JSON.stringify(params.inspectionPassedItems) : null,
+    params.inspectionFailedItems ? JSON.stringify(params.inspectionFailedItems) : null,
+    now,
+    now,
+  ];
 }
 
 class OrderReturnRepo {
@@ -160,44 +212,7 @@ class OrderReturnRepo {
     const now = unixTimestamp();
     const returnNumber = await this.generateReturnNumber();
 
-    const result = await queryOne<DbOrderReturn>(
-      `INSERT INTO "orderReturn" (
-        "orderId", "returnNumber", "customerId", "status", "returnType", "requestedAt",
-        "rmaNumber", "paymentRefundId", "returnShippingPaid", "returnShippingAmountCents",
-        "returnShippingLabel", "returnCarrier", "returnTrackingNumber", "returnTrackingUrl",
-        "returnReason", "returnInstructions", "customerNotes", "adminNotes",
-        "requiresInspection", "inspectionPassedItems", "inspectionFailedItems",
-        "createdAt", "updatedAt"
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
-      )
-      RETURNING *`,
-      [
-        params.orderId,
-        returnNumber,
-        params.customerId || null,
-        params.status || 'requested',
-        params.returnType,
-        now,
-        params.rmaNumber || null,
-        params.paymentRefundId || null,
-        params.returnShippingPaid || false,
-        params.returnShippingAmountCents || null,
-        params.returnShippingLabel || null,
-        params.returnCarrier || 'usps',
-        params.returnTrackingNumber || null,
-        params.returnTrackingUrl || null,
-        params.returnReason || null,
-        params.returnInstructions || null,
-        params.customerNotes || null,
-        params.adminNotes || null,
-        params.requiresInspection !== undefined ? params.requiresInspection : true,
-        params.inspectionPassedItems ? JSON.stringify(params.inspectionPassedItems) : null,
-        params.inspectionFailedItems ? JSON.stringify(params.inspectionFailedItems) : null,
-        now,
-        now,
-      ],
-    );
+    const result = await queryOne<DbOrderReturn>(RETURN_INSERT_SQL, buildReturnInsertParams(params, returnNumber, now));
 
     if (!result) {
       throw new FailedToCreateOrderReturnError();

@@ -82,6 +82,95 @@ function mapAddressFields(addr: Record<string, unknown>) {
   };
 }
 
+/** Parse the JSON-encoded address fields; billing falls back to shipping. */
+function parseCheckoutAddresses(
+  body: HttpRequestBody,
+): { shippingAddress: Record<string, unknown>; billingAddress: Record<string, unknown> } | null {
+  try {
+    const shippingAddress = JSON.parse(body.shippingAddress as string) as Record<string, unknown>;
+    const billingAddress = body.billingAddress
+      ? (JSON.parse(body.billingAddress as string) as Record<string, unknown>)
+      : shippingAddress;
+    return { shippingAddress, billingAddress };
+  } catch {
+    return null;
+  }
+}
+
+/** Guest checkout requires a contact email (billingEmail / guestEmail / address email). */
+function resolveCustomerEmail(
+  req: HttpRequest,
+  body: HttpRequestBody,
+  billingAddress: Record<string, unknown>,
+  shippingAddress: Record<string, unknown>,
+): string | undefined {
+  return (
+    (req.user?.email as string | undefined) ||
+    (body.guestEmail as string | undefined) ||
+    (body.billingEmail as string | undefined) ||
+    (billingAddress.email as string | undefined) ||
+    (shippingAddress.email as string | undefined)
+  );
+}
+
+/** Convert basket items to order items. */
+function toOrderItems(items: unknown[]) {
+  return items.map(item => {
+    const i = item as Record<string, unknown>;
+    return {
+      productId: i.productId as string,
+      productVariantId: i.productVariantId as string | undefined,
+      sku: i.sku as string,
+      name: i.name as string,
+      quantity: i.quantity as number,
+      unitPriceCents: i.unitPriceCents as number,
+      taxRate: i.taxRate as number | undefined,
+      taxAmountCents: i.taxAmountCents as number | undefined,
+      discountAmountCents: i.discountAmountCents as number | undefined,
+    };
+  });
+}
+
+function buildOrderCommand(input: {
+  customerId?: string;
+  customerEmail: string;
+  basket: { basketId: string; currency?: string; items: unknown[] };
+  body: HttpRequestBody;
+  shippingAddress: Record<string, unknown>;
+  billingAddress: Record<string, unknown>;
+  shippingCostCents: number;
+}): CreateOrderCommand {
+  return new CreateOrderCommand({
+    customerId: input.customerId,
+    customerEmail: input.customerEmail,
+    items: toOrderItems(input.basket.items),
+    shippingAddress: mapAddressFields(input.shippingAddress),
+    billingAddress: mapAddressFields(input.billingAddress),
+    basketId: input.basket.basketId,
+    createdByUserId: input.customerId,
+    orderSource: 'web',
+    currencyCode: input.basket.currency || 'USD',
+    customerPhone: input.shippingAddress.phone as string,
+    customerName: `${input.shippingAddress.firstName} ${input.shippingAddress.lastName}`,
+    customerNotes: input.body.specialInstructions as string | undefined,
+    shippingTotalCents: input.shippingCostCents,
+    metadata: input.body.vatNumber ? { vatNumber: String(input.body.vatNumber).trim() } : undefined,
+  });
+}
+
+/** Load the shopper's basket; returns null when missing or empty. */
+async function getNonEmptyBasket(customerId: string | undefined, sessionId: string | undefined) {
+  const basket = await getOrCreateBasketUseCase.execute(new GetOrCreateBasketCommand(customerId, sessionId));
+  return basket && basket.items && basket.items.length > 0 ? basket : null;
+}
+
+/** Remember guest orders on the session so the confirmation page can verify ownership. */
+function rememberGuestOrder(req: HttpRequest, orderId: string): void {
+  if (!req.session) return;
+  const session = req.session as unknown as Record<string, unknown>;
+  session.guestOrderIds = [...((session.guestOrderIds as string[] | undefined) ?? []), orderId];
+}
+
 export const processCheckout = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const customerId = req.user?.customerId;
   const sessionId = req.session?.id;
@@ -92,90 +181,41 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   }
 
   const body = req.body as HttpRequestBody;
-  const {
-    shippingMethodId,
-    _paymentMethod,
-    billingAddress: billingAddressStr,
-    shippingAddress: shippingAddressStr,
-    specialInstructions,
-    vatNumber,
-  } = body;
 
-  // Parse addresses
-  let shippingAddress: Record<string, unknown>;
-  let billingAddress: Record<string, unknown>;
-  try {
-    shippingAddress = JSON.parse(shippingAddressStr as string) as Record<string, unknown>;
-    billingAddress = billingAddressStr ? (JSON.parse(billingAddressStr as string) as Record<string, unknown>) : shippingAddress;
-  } catch {
+  const addresses = parseCheckoutAddresses(body);
+  if (!addresses) {
     jsonResponse(res, 400, { success: false, message: 'Invalid shipping or billing address' });
     return;
   }
 
-  // Guest checkout requires a contact email (billingEmail / guestEmail / address email)
-  const customerEmail =
-    (req.user?.email as string | undefined) ||
-    (body.guestEmail as string | undefined) ||
-    (body.billingEmail as string | undefined) ||
-    (billingAddress.email as string | undefined) ||
-    (shippingAddress.email as string | undefined);
-
+  const customerEmail = resolveCustomerEmail(req, body, addresses.billingAddress, addresses.shippingAddress);
   if (!customerEmail) {
     jsonResponse(res, 400, { success: false, message: 'An email address is required for checkout' });
     return;
   }
 
-  // Get or create basket
-  const basketCommand = new GetOrCreateBasketCommand(customerId, sessionId);
-  const basketUseCase = getOrCreateBasketUseCase;
-  const basket = await basketUseCase.execute(basketCommand);
-
-  if (!basket || !basket.items || basket.items.length === 0) {
+  const basket = await getNonEmptyBasket(customerId, sessionId);
+  if (!basket) {
     jsonResponse(res, 400, { success: false, message: 'Cart is empty' });
     return;
   }
 
   // Get shipping method details
-  const shippingMethod = await getShippingMethodDetailsUseCase.getShippingMethod(shippingMethodId as string);
+  const shippingMethod = await getShippingMethodDetailsUseCase.getShippingMethod(body.shippingMethodId as string);
 
-  // Convert basket items to order items
-  const orderItems = basket.items.map((item: Record<string, unknown>) => ({
-    productId: item.productId as string,
-    productVariantId: item.productVariantId as string | undefined,
-    sku: item.sku as string,
-    name: item.name as string,
-    quantity: item.quantity as number,
-    unitPriceCents: item.unitPriceCents as number,
-    taxRate: item.taxRate as number | undefined,
-    taxAmountCents: item.taxAmountCents as number | undefined,
-    discountAmountCents: item.discountAmountCents as number | undefined,
-  }));
-
-  // Create order with proper constructor arguments
-  const orderCommand = new CreateOrderCommand({
-    customerId: customerId,
-    customerEmail: customerEmail,
-    items: orderItems,
-    shippingAddress: mapAddressFields(shippingAddress),
-    billingAddress: mapAddressFields(billingAddress),
-    basketId: basket.basketId,
-    createdByUserId: customerId,
-    orderSource: 'web',
-    currencyCode: basket.currency || 'USD',
-    customerPhone: shippingAddress.phone as string,
-    customerName: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
-    customerNotes: specialInstructions as string | undefined,
-    shippingTotalCents: Number(shippingMethod?.costCents || 0),
-    metadata: vatNumber ? { vatNumber: String(vatNumber).trim() } : undefined,
+  const orderCommand = buildOrderCommand({
+    customerId,
+    customerEmail,
+    basket,
+    body,
+    shippingAddress: addresses.shippingAddress,
+    billingAddress: addresses.billingAddress,
+    shippingCostCents: Number(shippingMethod?.costCents || 0),
   });
+  const order = await createOrderUseCase.execute(orderCommand);
 
-  const orderUseCase = createOrderUseCase;
-  const order = await orderUseCase.execute(orderCommand);
-
-  // Remember guest orders on the session so the confirmation page can verify ownership
-  if (!customerId && req.session) {
-    const session = req.session as unknown as Record<string, unknown>;
-    session.guestOrderIds = [...((session.guestOrderIds as string[] | undefined) ?? []), order.orderId];
+  if (!customerId) {
+    rememberGuestOrder(req, order.orderId);
   }
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {

@@ -95,33 +95,11 @@ export class CreateSubscriptionUseCase {
     }
 
     try {
-      // 1. Get the subscription plan
-      const plan = await this.subscriptionRepo.getSubscriptionPlan(input.subscriptionPlanId);
-      if (!plan) {
-        return {
-          success: false,
-          message: 'Subscription plan not found',
-          errors: ['plan_not_found'],
-        };
+      const resolved = await this.resolvePlanAndProduct(input);
+      if ('success' in resolved) {
+        return resolved;
       }
-
-      if (!plan.isActive) {
-        return {
-          success: false,
-          message: 'Subscription plan is not active',
-          errors: ['plan_inactive'],
-        };
-      }
-
-      // 2. Get the subscription product
-      const product = await this.subscriptionRepo.getSubscriptionProduct(plan.subscriptionProductId);
-      if (!product || !product.isActive) {
-        return {
-          success: false,
-          message: 'Subscription product is not available',
-          errors: ['product_unavailable'],
-        };
-      }
+      const { plan, product } = resolved;
 
       // 3. Calculate pricing
       const quantity = input.quantity || 1;
@@ -131,26 +109,7 @@ export class CreateSubscriptionUseCase {
       const _totalPrice = subtotalCents + (input.taxAddedCents ?? input.taxAmountCents ?? 0);
 
       // 4. Determine trial period
-      const trialDays = plan.trialDays || product.trialDays || 0;
-      const now = new Date();
-
-      let trialStartAt: Date | undefined;
-      let trialEndAt: Date | undefined;
-      let _currentPeriodStart = now;
-
-      let currentPeriodEnd: Date;
-      let status: 'pending' | 'trialing' | 'active' = 'pending';
-
-      if (trialDays > 0) {
-        trialStartAt = now; // eslint-disable-line @typescript-eslint/no-unused-vars
-        trialEndAt = new Date(now);
-        trialEndAt.setDate(trialEndAt.getDate() + trialDays);
-        currentPeriodEnd = trialEndAt;
-        status = 'trialing';
-      } else {
-        currentPeriodEnd = this.calculatePeriodEnd(now, plan.billingInterval, plan.billingIntervalCount); // eslint-disable-line @typescript-eslint/no-unused-vars
-        status = 'active';
-      }
+      const { trialDays, status } = this.resolveTrialPeriod(plan, product);
 
       // 5. Create the subscription (the repo handles status, trial dates, pricing internally)
       const subscription = await this.subscriptionRepo.createCustomerSubscription({
@@ -195,22 +154,45 @@ export class CreateSubscriptionUseCase {
     }
   }
 
-  private calculatePeriodEnd(start: Date, interval: string, count: number): Date {
-    const end = new Date(start);
-    switch (interval) {
-      case 'day':
-        end.setDate(end.getDate() + count);
-        break;
-      case 'week':
-        end.setDate(end.getDate() + count * 7);
-        break;
-      case 'month':
-        end.setMonth(end.getMonth() + count);
-        break;
-      case 'year':
-        end.setFullYear(end.getFullYear() + count);
-        break;
+  private async resolvePlanAndProduct(
+    input: CreateSubscriptionCommand['input'],
+  ): Promise<{ plan: SubscriptionPlan; product: SubscriptionProduct } | CreateSubscriptionResponse> {
+    // 1. Get the subscription plan
+    const plan = await this.subscriptionRepo.getSubscriptionPlan(input.subscriptionPlanId);
+    if (!plan) {
+      return {
+        success: false,
+        message: 'Subscription plan not found',
+        errors: ['plan_not_found'],
+      };
     }
-    return end;
+
+    if (!plan.isActive) {
+      return {
+        success: false,
+        message: 'Subscription plan is not active',
+        errors: ['plan_inactive'],
+      };
+    }
+
+    // 2. Get the subscription product
+    const product = await this.subscriptionRepo.getSubscriptionProduct(plan.subscriptionProductId);
+    if (!product || !product.isActive) {
+      return {
+        success: false,
+        message: 'Subscription product is not available',
+        errors: ['product_unavailable'],
+      };
+    }
+
+    return { plan, product };
+  }
+
+  private resolveTrialPeriod(
+    plan: SubscriptionPlan,
+    product: SubscriptionProduct,
+  ): { trialDays: number; status: 'pending' | 'trialing' | 'active' } {
+    const trialDays = plan.trialDays || product.trialDays || 0;
+    return { trialDays, status: trialDays > 0 ? 'trialing' : 'active' };
   }
 }

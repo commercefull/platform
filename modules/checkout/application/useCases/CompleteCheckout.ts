@@ -51,29 +51,14 @@ export class CompleteCheckoutUseCase {
 
     // Idempotency: already completed
     if (session.status === 'completed') {
-      return {
-        orderId: session.orderId || '',
-        checkoutId: session.id,
-        total: session.total.amount,
-        currency: session.total.currency,
-        status: 'completed',
-      };
+      return this.toResponse(session);
     }
 
     if (session.status !== 'processing') {
       throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
     }
 
-    // Verify linked order is in the right state
-    if (this.orderPlacementPort && session.orderId) {
-      const order = await this.orderPlacementPort.findOrder(session.orderId);
-      if (!order) {
-        throw new NotFoundError('Linked order not found');
-      }
-      if (order.status !== 'processing' || order.paymentStatus !== 'paid') {
-        throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
-      }
-    }
+    await this.assertOrderPayable(session);
 
     session.complete();
     await this.checkoutRepository.save(session);
@@ -84,27 +69,7 @@ export class CompleteCheckoutUseCase {
       await this.inventoryReservationPort.confirmForOrder(session.orderId);
     }
 
-    // Finalize coupon usage so limited/one-time coupons deplete.
-    // 'AUTO_PROMOTION' is a synthetic marker for auto-applied promotions,
-    // not a redeemable coupon code.
-    if (this.couponRedemptionPort && session.couponCode && session.couponCode !== 'AUTO_PROMOTION' && session.orderId) {
-      try {
-        await this.couponRedemptionPort.redeemCoupon({
-          couponCode: session.couponCode,
-          orderId: session.orderId,
-          customerId: session.customerId,
-          discountAmountCents: session.discountAmount.cents,
-          currencyCode: session.discountAmount.currency,
-        });
-      } catch (error: unknown) {
-        logger.warn('Coupon redemption failed after checkout completion', {
-          checkoutId: session.id,
-          orderId: session.orderId,
-          couponCode: session.couponCode,
-          error: (error as Error).message,
-        });
-      }
-    }
+    await this.finalizeCoupon(session);
 
     eventBus.emit('checkout.completed', {
       checkoutId: session.id,
@@ -117,6 +82,47 @@ export class CompleteCheckoutUseCase {
       totalCents: session.total.cents,
     });
 
+    return this.toResponse(session);
+  }
+
+  /** Verify the linked order is in the right state before completing. */
+  private async assertOrderPayable(session: CheckoutSessionLike): Promise<void> {
+    if (!this.orderPlacementPort || !session.orderId) return;
+    const order = await this.orderPlacementPort.findOrder(session.orderId);
+    if (!order) {
+      throw new NotFoundError('Linked order not found');
+    }
+    if (order.status !== 'processing' || order.paymentStatus !== 'paid') {
+      throw new BadRequestError('Cannot complete checkout: payment has not been confirmed yet');
+    }
+  }
+
+  /**
+   * Finalize coupon usage so limited/one-time coupons deplete.
+   * 'AUTO_PROMOTION' is a synthetic marker for auto-applied promotions,
+   * not a redeemable coupon code.
+   */
+  private async finalizeCoupon(session: CheckoutSessionLike): Promise<void> {
+    if (!this.couponRedemptionPort || !session.couponCode || session.couponCode === 'AUTO_PROMOTION' || !session.orderId) return;
+    try {
+      await this.couponRedemptionPort.redeemCoupon({
+        couponCode: session.couponCode,
+        orderId: session.orderId,
+        customerId: session.customerId,
+        discountAmountCents: session.discountAmount.cents,
+        currencyCode: session.discountAmount.currency,
+      });
+    } catch (error: unknown) {
+      logger.warn('Coupon redemption failed after checkout completion', {
+        checkoutId: session.id,
+        orderId: session.orderId,
+        couponCode: session.couponCode,
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  private toResponse(session: CheckoutSessionLike): CompleteCheckoutResponse {
     return {
       orderId: session.orderId || '',
       checkoutId: session.id,
@@ -125,4 +131,17 @@ export class CompleteCheckoutUseCase {
       status: 'completed',
     };
   }
+}
+
+interface CheckoutSessionLike {
+  id: string;
+  basketId: string;
+  orderId?: string;
+  customerId?: string;
+  storeId?: string;
+  channelId?: string;
+  marketId?: string;
+  couponCode?: string;
+  total: { cents: number; amount: number; currency: string };
+  discountAmount: { cents: number; currency: string };
 }

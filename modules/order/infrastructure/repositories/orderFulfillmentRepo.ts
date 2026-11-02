@@ -21,6 +21,51 @@ import type {
 const toDate = (d: Date | string | null | undefined): Date | undefined => (d == null ? undefined : d instanceof Date ? d : new Date(d));
 const toDateReq = (d: Date | string): Date => (d instanceof Date ? d : new Date(d));
 
+const FULFILLMENT_INSERT_SQL = `INSERT INTO "orderFulfillment" (
+  "orderId", "fulfillmentNumber", "type", "status",
+  "trackingNumber", "trackingUrl", "carrierCode", "carrierName",
+  "shippingMethod", "shippingAddressId", "weight", "weightUnit",
+  "dimensions", "packageCount", "shippedAt", "deliveredAt",
+  "estimatedDeliveryDate", "notes", "fulfilledBy",
+  "createdAt", "updatedAt"
+) VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
+)
+RETURNING *`;
+
+/** Falsy → fallback (nullable column default). */
+const dbDefault = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+
+function buildFulfillmentInsertParams(
+  params: OrderFulfillmentCreateParams,
+  fulfillmentNumber: string,
+  now: unknown,
+): unknown[] {
+  return [
+    params.orderId,
+    fulfillmentNumber,
+    params.type,
+    params.status,
+    dbDefault(params.trackingNumber),
+    dbDefault(params.trackingUrl),
+    dbDefault(params.carrierCode),
+    dbDefault(params.carrierName),
+    dbDefault(params.shippingMethod),
+    dbDefault(params.shippingAddressId),
+    dbDefault(params.weight),
+    params.weightUnit || 'kg',
+    params.dimensions ? JSON.stringify(params.dimensions) : null,
+    params.packageCount || 1,
+    dbDefault(params.shippedAt),
+    dbDefault(params.deliveredAt),
+    dbDefault(params.estimatedDeliveryDate),
+    dbDefault(params.notes),
+    dbDefault(params.fulfilledBy),
+    now,
+    now,
+  ];
+}
+
 function mapToFulfillment(row: DbOrderFulfillment): OrderFulfillment {
   return {
     ...row,
@@ -142,42 +187,7 @@ class OrderFulfillmentRepo {
     const now = unixTimestamp();
     const fulfillmentNumber = await this.generateFulfillmentNumber();
 
-    const result = await queryOne<DbOrderFulfillment>(
-      `INSERT INTO "orderFulfillment" (
-        "orderId", "fulfillmentNumber", "type", "status",
-        "trackingNumber", "trackingUrl", "carrierCode", "carrierName",
-        "shippingMethod", "shippingAddressId", "weight", "weightUnit",
-        "dimensions", "packageCount", "shippedAt", "deliveredAt",
-        "estimatedDeliveryDate", "notes", "fulfilledBy",
-        "createdAt", "updatedAt"
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
-      )
-      RETURNING *`,
-      [
-        params.orderId,
-        fulfillmentNumber,
-        params.type,
-        params.status,
-        params.trackingNumber || null,
-        params.trackingUrl || null,
-        params.carrierCode || null,
-        params.carrierName || null,
-        params.shippingMethod || null,
-        params.shippingAddressId || null,
-        params.weight || null,
-        params.weightUnit || 'kg',
-        params.dimensions ? JSON.stringify(params.dimensions) : null,
-        params.packageCount || 1,
-        params.shippedAt || null,
-        params.deliveredAt || null,
-        params.estimatedDeliveryDate || null,
-        params.notes || null,
-        params.fulfilledBy || null,
-        now,
-        now,
-      ],
-    );
+    const result = await queryOne<DbOrderFulfillment>(FULFILLMENT_INSERT_SQL, buildFulfillmentInsertParams(params, fulfillmentNumber, now));
 
     if (!result) {
       throw new FailedToCreateOrderFulfillmentError();

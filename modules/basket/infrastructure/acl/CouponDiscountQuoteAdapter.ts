@@ -28,20 +28,9 @@ export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
       return { valid: false, error: validation.error };
     }
 
-    if (this.promotionGate && validation.coupon.promotionId) {
-      const eligibility = await this.promotionGate.isEligible(validation.coupon.promotionId, {
-        subtotalCents,
-        currency: context?.currency ?? 'USD',
-        customerId: context?.customerId,
-        storeId: context?.storeId,
-        channelId: context?.channelId,
-        countryCode: context?.countryCode,
-        items: context?.items,
-      });
-
-      if (!eligibility.eligible) {
-        return { valid: false, error: eligibility.reason };
-      }
+    const gateError = await this.checkPromotionGate(validation.coupon.promotionId, subtotalCents, context);
+    if (gateError) {
+      return { valid: false, error: gateError };
     }
 
     return {
@@ -53,5 +42,24 @@ export class CouponDiscountQuoteAdapter implements DiscountQuotePort {
         discountAmountCents: validation.discountAmountCents || 0,
       },
     };
+  }
+
+  /** Returns the ineligibility reason when the linked promotion gate rejects, else null. */
+  private async checkPromotionGate(
+    promotionId: string | undefined,
+    subtotalCents: number,
+    context?: DiscountQuoteContext,
+  ): Promise<string | null> {
+    if (!this.promotionGate || !promotionId) return null;
+    const eligibility = await this.promotionGate.isEligible(promotionId, {
+      subtotalCents,
+      currency: context?.currency ?? 'USD',
+      customerId: context?.customerId,
+      storeId: context?.storeId,
+      channelId: context?.channelId,
+      countryCode: context?.countryCode,
+      items: context?.items,
+    });
+    return eligibility.eligible ? null : (eligibility.reason ?? null);
   }
 }

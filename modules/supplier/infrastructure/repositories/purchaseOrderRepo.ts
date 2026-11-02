@@ -85,6 +85,40 @@ export type SupplierPurchaseOrderItemUpdateParams = Partial<
   >
 >;
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+
+function purchaseOrderInsertValues(poNumber: string, params: SupplierPurchaseOrderCreateParams, now: string): unknown[] {
+  return [
+    poNumber,
+    params.supplierId,
+    params.distributionWarehouseId,
+    fallback(params.status, 'draft'),
+    fallback(params.orderType, 'standard'),
+    fallback(params.priority, 'normal'),
+    fallback(params.orderDate, now),
+    fallback(params.expectedDeliveryDate, null),
+    fallback(params.deliveryDate, null),
+    fallback(params.shippingMethod, null),
+    fallback(params.trackingNumber, null),
+    fallback(params.carrierName, null),
+    fallback(params.paymentTerms, null),
+    fallback(params.currencyCode, 'USD'),
+    fallback(params.subtotalCents, 0),
+    fallback(params.taxCents, 0),
+    fallback(params.shippingCents, 0),
+    fallback(params.discountCents, 0),
+    fallback(params.totalCents, 0),
+    fallback(params.notes, null),
+    fallback(params.supplierNotes, null),
+    params.attachments ? JSON.stringify(params.attachments) : null,
+    now,
+    now,
+  ];
+}
+
 export class SupplierPurchaseOrderRepo {
   /**
    * Generate unique PO number
@@ -199,32 +233,7 @@ export class SupplierPurchaseOrderRepo {
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
       )
       RETURNING *`,
-      [
-        poNumber,
-        params.supplierId,
-        params.distributionWarehouseId,
-        params.status || 'draft',
-        params.orderType || 'standard',
-        params.priority || 'normal',
-        params.orderDate || now,
-        params.expectedDeliveryDate || null,
-        params.deliveryDate || null,
-        params.shippingMethod || null,
-        params.trackingNumber || null,
-        params.carrierName || null,
-        params.paymentTerms || null,
-        params.currencyCode || 'USD',
-        params.subtotalCents || 0,
-        params.taxCents || 0,
-        params.shippingCents || 0,
-        params.discountCents || 0,
-        params.totalCents || 0,
-        params.notes || null,
-        params.supplierNotes || null,
-        params.attachments ? JSON.stringify(params.attachments) : null,
-        now,
-        now,
-      ],
+      purchaseOrderInsertValues(poNumber, params, now),
     );
 
     if (!result) {

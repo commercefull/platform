@@ -1,5 +1,6 @@
 export * from './adminAssortmentController';
 export * from './adminProductController';
+export * from './adminProductCatalogController';
 export {
   listBrands as listAdminBrands,
   viewBrand,

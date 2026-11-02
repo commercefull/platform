@@ -50,40 +50,7 @@ export class EvaluatePromotionsUseCase {
 
       if (promotions.length === 0) return result;
 
-      // Also check for coupon-code-based promotions
-      let couponPromotions: typeof promotions = [];
-      if (context.couponCode) {
-        couponPromotions = promotions.filter(
-          p => (p as unknown as { code?: string }).code?.toUpperCase() === context.couponCode?.toUpperCase(),
-        );
-      }
-
-      // Auto-applied promotions (no code required)
-      const autoPromotions = promotions.filter(p => !(p as unknown as { code?: string }).code);
-
-      // Combine: coupon promotions first, then auto-applied
-      const candidates = [...couponPromotions, ...autoPromotions];
-
-      // Phase 1: filter by validity and rule evaluation
-      const matched: Array<{ promotion: Promotion; rules: PromotionRule[]; actions: PromotionAction[] }> = [];
-
-      for (const promotion of candidates) {
-        // Check basic validity
-        if (!promotion.isActive) continue;
-        if (promotion.status !== 'active') continue;
-        if (promotion.maxUsage && promotion.usageCount >= promotion.maxUsage) continue;
-        if (promotion.minOrderAmountCents && context.subtotalCents < Number(promotion.minOrderAmountCents)) continue;
-
-        // Evaluate rules
-        const rules = await this.promotionRepo.findRulesByPromotionId(promotion.promotionId);
-        const rulesPassed = promotionRulesPass(rules, context);
-        if (!rulesPassed) continue;
-
-        // Get actions
-        const actions = await this.promotionRepo.findActionsByPromotionId(promotion.promotionId);
-
-        matched.push({ promotion, rules, actions });
-      }
+      const matched = await this.matchCandidates(promotions, context);
 
       if (matched.length === 0) return result;
 
@@ -102,29 +69,7 @@ export class EvaluatePromotionsUseCase {
 
       // Phase 3: apply actions for resolved promotions
       for (const entry of resolved) {
-        const promotion = entry.promotion;
-        const actions = entry.actions;
-
-        const promoResult = applyPromotionActions(promotion, actions, context);
-
-        if (promoResult.discountAmountCents > 0 || promoResult.freeShipping || promoResult.freeItems.length > 0) {
-          result.totalDiscountAmountCents += promoResult.discountAmountCents;
-          result.shippingDiscountAmountCents += promoResult.shippingDiscountAmountCents;
-          result.freeShipping = result.freeShipping || promoResult.freeShipping;
-          result.lineItemDiscounts.push(...promoResult.lineItemDiscounts);
-          result.freeItems.push(...promoResult.freeItems);
-          result.appliedPromotions.push({
-            promotionId: promotion.promotionId,
-            name: promotion.name,
-            type: promotion.scope,
-            discountAmountCents: promoResult.discountAmountCents,
-          });
-
-          // Check max discount cap
-          if (promotion.maxDiscountAmountCents && result.totalDiscountAmountCents > Number(promotion.maxDiscountAmountCents)) {
-            result.totalDiscountAmountCents = Number(promotion.maxDiscountAmountCents);
-          }
-        }
+        this.applyResolved(entry.promotion, entry.actions, context, result);
       }
 
       // Ensure total discount doesn't exceed subtotal
@@ -136,5 +81,74 @@ export class EvaluatePromotionsUseCase {
     }
 
     return result;
+  }
+
+  /**
+   * Phase 1: coupon-code promotions first, then auto-applied; filter by basic
+   * validity and rule evaluation.
+   */
+  private async matchCandidates(
+    promotions: Promotion[],
+    context: PromotionEvaluationContext,
+  ): Promise<Array<{ promotion: Promotion; rules: PromotionRule[]; actions: PromotionAction[] }>> {
+    const couponCode = context.couponCode?.toUpperCase();
+    const hasCode = (p: Promotion) => (p as unknown as { code?: string }).code;
+
+    const candidates = [
+      ...promotions.filter(p => (hasCode(p)?.toUpperCase() ?? null) === couponCode && couponCode !== undefined),
+      ...promotions.filter(p => !hasCode(p)),
+    ];
+
+    const matched: Array<{ promotion: Promotion; rules: PromotionRule[]; actions: PromotionAction[] }> = [];
+
+    for (const promotion of candidates) {
+      if (!this.isBasicallyValid(promotion, context)) continue;
+
+      const rules = await this.promotionRepo.findRulesByPromotionId(promotion.promotionId);
+      if (!promotionRulesPass(rules, context)) continue;
+
+      const actions = await this.promotionRepo.findActionsByPromotionId(promotion.promotionId);
+      matched.push({ promotion, rules, actions });
+    }
+
+    return matched;
+  }
+
+  private isBasicallyValid(promotion: Promotion, context: PromotionEvaluationContext): boolean {
+    if (!promotion.isActive) return false;
+    if (promotion.status !== 'active') return false;
+    if (promotion.maxUsage && promotion.usageCount >= promotion.maxUsage) return false;
+    if (promotion.minOrderAmountCents && context.subtotalCents < Number(promotion.minOrderAmountCents)) return false;
+    return true;
+  }
+
+  private applyResolved(
+    promotion: Promotion,
+    actions: PromotionAction[],
+    context: PromotionEvaluationContext,
+    result: PromotionEvaluationResult,
+  ): void {
+    const promoResult = applyPromotionActions(promotion, actions, context);
+
+    if (!(promoResult.discountAmountCents > 0 || promoResult.freeShipping || promoResult.freeItems.length > 0)) {
+      return;
+    }
+
+    result.totalDiscountAmountCents += promoResult.discountAmountCents;
+    result.shippingDiscountAmountCents += promoResult.shippingDiscountAmountCents;
+    result.freeShipping = result.freeShipping || promoResult.freeShipping;
+    result.lineItemDiscounts.push(...promoResult.lineItemDiscounts);
+    result.freeItems.push(...promoResult.freeItems);
+    result.appliedPromotions.push({
+      promotionId: promotion.promotionId,
+      name: promotion.name,
+      type: promotion.scope,
+      discountAmountCents: promoResult.discountAmountCents,
+    });
+
+    // Check max discount cap
+    if (promotion.maxDiscountAmountCents && result.totalDiscountAmountCents > Number(promotion.maxDiscountAmountCents)) {
+      result.totalDiscountAmountCents = Number(promotion.maxDiscountAmountCents);
+    }
   }
 }

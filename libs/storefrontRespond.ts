@@ -12,34 +12,55 @@ const DEFAULT_THEME = 'default';
  * The theme name is resolved by middleware and stored in res.locals.theme.
  * Falls back to 'default' theme, then to 'default' if the themed view is missing.
  */
-export async function storefrontRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
-  const { successMsg, errorMsg } = popFlashMessages(req);
-
-  const themeName = res.locals.theme || DEFAULT_THEME;
-
-  // Build canonical URL from the request
+/**
+ * Build the canonical URL for the current request.
+ */
+function buildCanonicalUrl(req: HttpRequest): string {
   const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
   const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost';
-  const canonicalUrl = `${protocol}://${host}${req.originalUrl || req.url || ''}`;
+  const path = req.originalUrl || req.url || '';
+  return `${protocol}://${host}${path}`;
+}
 
-  const viewData = {
-    user: req.user,
-    session: req.session,
-    categories: res.locals.categories || [],
-    // Store context (set by storeResolutionMiddleware)
+/**
+ * Store context defaults (set by storeResolutionMiddleware).
+ */
+function storeContext(res: HttpResponse) {
+  return {
     store: res.locals.store || null,
     storeId: res.locals.storeId || '',
     storeSlug: res.locals.storeSlug || 'us',
     currency: res.locals.currency || 'USD',
     locale: res.locals.locale || 'en-US',
     region: res.locals.region || 'US',
-    // Theme settings (set by themeMiddleware)
+  };
+}
+
+/**
+ * Theme settings (set by themeMiddleware).
+ */
+function themeContext(res: HttpResponse) {
+  return {
     themeSettings: res.locals.themeSettings || {},
     themeCssVariables: res.locals.themeCssVariables || {},
     themeCustomLogoUrl: res.locals.themeCustomLogoUrl || null,
     themeCustomFaviconUrl: res.locals.themeCustomFaviconUrl || null,
+  };
+}
+
+export async function storefrontRespond(req: HttpRequest, res: HttpResponse, view: string, data: ResponseData) {
+  const { successMsg, errorMsg } = popFlashMessages(req);
+
+  const themeName = res.locals.theme || DEFAULT_THEME;
+
+  const viewData = {
+    user: req.user,
+    session: req.session,
+    categories: res.locals.categories || [],
+    ...storeContext(res),
+    ...themeContext(res),
     // SEO defaults (controllers can override via data)
-    canonicalUrl,
+    canonicalUrl: buildCanonicalUrl(req),
     ogType: 'website',
     twitterCard: 'summary_large_image',
     // Production flag for conditional asset loading

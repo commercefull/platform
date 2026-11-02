@@ -33,6 +33,34 @@ function mapToCategory(row: DbProductCategory): Category {
   };
 }
 
+/** Falsy → fallback (nullable column default). */
+const nullable = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+
+function createCategoryValues(props: CategoryCreateProps, slug: string, path: string, depth: number): unknown[] {
+  return [
+    props.name,
+    slug,
+    nullable(props.description),
+    nullable(props.parentId),
+    path || null,
+    depth,
+    props.position || 0,
+    props.isActive !== false,
+    props.isFeatured || false,
+    nullable(props.imageUrl),
+    nullable(props.bannerUrl),
+    nullable(props.iconUrl),
+    nullable(props.metaTitle),
+    nullable(props.metaDescription),
+    nullable(props.metaKeywords),
+    props.includeInMenu !== false,
+    nullable(props.organizationId),
+    props.isGlobal !== false,
+    nullable(props.customLayout),
+    props.displaySettings ? JSON.stringify(props.displaySettings) : null,
+  ];
+}
+
 class CategoryRepo {
   private readonly tableName = Table.ProductCategory;
 
@@ -83,16 +111,7 @@ class CategoryRepo {
     const slug = props.slug || this.generateSlug(props.name);
 
     // Calculate depth and path based on parent
-    let depth = 0;
-    let path = '';
-
-    if (props.parentId) {
-      const parent = await this.findOne(props.parentId);
-      if (parent) {
-        depth = parent.depth + 1;
-        path = parent.path ? `${parent.path}/${parent.productCategoryId}` : parent.productCategoryId;
-      }
-    }
+    const { depth, path } = await this.resolveHierarchy(props.parentId);
 
     const sql = `
       INSERT INTO "${this.tableName}" (
@@ -106,36 +125,23 @@ class CategoryRepo {
       RETURNING *
     `;
 
-    const values = [
-      props.name,
-      slug,
-      props.description || null,
-      props.parentId || null,
-      path || null,
-      depth,
-      props.position || 0,
-      props.isActive !== false,
-      props.isFeatured || false,
-      props.imageUrl || null,
-      props.bannerUrl || null,
-      props.iconUrl || null,
-      props.metaTitle || null,
-      props.metaDescription || null,
-      props.metaKeywords || null,
-      props.includeInMenu !== false,
-      props.organizationId || null,
-      props.isGlobal !== false,
-      props.customLayout || null,
-      props.displaySettings ? JSON.stringify(props.displaySettings) : null,
-    ];
-
-    const result = await queryOne<DbProductCategory>(sql, values);
+    const result = await queryOne<DbProductCategory>(sql, createCategoryValues(props, slug, path, depth));
 
     if (!result) {
       throw new FailedToCreateProductError();
     }
 
     return mapToCategory(result);
+  }
+
+  private async resolveHierarchy(parentId: string | null | undefined): Promise<{ depth: number; path: string }> {
+    if (!parentId) return { depth: 0, path: '' };
+    const parent = await this.findOne(parentId);
+    if (!parent) return { depth: 0, path: '' };
+    return {
+      depth: parent.depth + 1,
+      path: parent.path ? `${parent.path}/${parent.productCategoryId}` : parent.productCategoryId,
+    };
   }
 
   async update(id: string, props: CategoryUpdateProps): Promise<Category | null> {

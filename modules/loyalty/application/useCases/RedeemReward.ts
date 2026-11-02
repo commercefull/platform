@@ -82,24 +82,8 @@ export class RedeemRewardUseCase {
       throw new LoyaltyRewardNotFoundError(rewardId);
     }
 
-    if (!reward.isActive) {
-      throw new RewardNotAvailableError(rewardId);
-    }
-
-    // Check validity period
     const now = new Date();
-    if (reward.validTo && new Date(reward.validTo) < now) {
-      throw new LoyaltyValidationError('Reward has expired');
-    }
-
-    if (reward.validFrom && new Date(reward.validFrom) > now) {
-      throw new LoyaltyValidationError('Reward is not yet available');
-    }
-
-    // Check quantity
-    if (reward.totalQuantity !== null && reward.remainingQuantity <= 0) {
-      throw new LoyaltyValidationError('Reward is out of stock');
-    }
+    this.assertRewardRedeemable(reward, rewardId, now);
 
     // Get customer's points balance
     const customer = await this.loyaltyRepository.getCustomerLoyalty(customerId);
@@ -178,5 +162,21 @@ export class RedeemRewardUseCase {
       redeemedAt: now.toISOString(),
       expiresAt: redemption.expiresAt?.toISOString(),
     };
+  }
+
+  /** Throws when the reward is inactive, outside its validity window, or out of stock. */
+  private assertRewardRedeemable(reward: RedeemRewardData, rewardId: string, now: Date): void {
+    if (!reward.isActive) {
+      throw new RewardNotAvailableError(rewardId);
+    }
+    if (reward.validTo && new Date(reward.validTo) < now) {
+      throw new LoyaltyValidationError('Reward has expired');
+    }
+    if (reward.validFrom && new Date(reward.validFrom) > now) {
+      throw new LoyaltyValidationError('Reward is not yet available');
+    }
+    if (reward.totalQuantity !== null && reward.remainingQuantity <= 0) {
+      throw new LoyaltyValidationError('Reward is out of stock');
+    }
   }
 }

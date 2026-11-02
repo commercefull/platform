@@ -187,42 +187,49 @@ function resolveStoreSlug(req: HttpRequest): string {
 }
 
 /**
+ * Slug-specific locale defaults — the hard-coded fallback layer beneath
+ * region defaults and store/channel configuration.
+ */
+function slugLocaleDefaults(slug: string): { region?: string; locale?: string; currency?: string } {
+  if (slug === 'uk' || slug === 'enterprise-uk') {
+    return { region: 'GB', locale: 'en-GB', currency: 'GBP' };
+  }
+  if (slug === 'us' || slug.startsWith('enterprise-us-')) {
+    return { region: 'US', locale: 'en-US', currency: 'USD' };
+  }
+  return {};
+}
+
+/**
+ * Store- and channel-level configured locale; channel settings win over
+ * store settings. Returns undefined when nothing is configured.
+ */
+function configuredStoreLocale(store: ResolvedStore | null): string | undefined {
+  const configured = store?.channelSettings?.locale ?? store?.settings?.locale;
+  return typeof configured === 'string' && configured.length > 0 ? configured : undefined;
+}
+
+interface LocaleDefaults {
+  region?: string;
+  locale?: string;
+  currency?: string;
+}
+
+/**
  * Determine region, locale, and currency from the resolved store slug.
  */
 function resolveStoreLocale(slug: string, store: ResolvedStore | null): { region: string; locale: string; currency: string } {
-  let region = store?.countryCode || DEFAULT_REGION;
-  let locale = REGION_DEFAULTS[region]?.locale || DEFAULT_LOCALE;
-  let currency = REGION_DEFAULTS[region]?.currency || DEFAULT_CURRENCY;
+  const slugDefaults: LocaleDefaults = slugLocaleDefaults(slug);
+  const region = slugDefaults.region || store?.countryCode || DEFAULT_REGION;
+  const regionDefaults = REGION_DEFAULTS[region];
 
-  if (slug === 'uk' || slug === 'enterprise-uk') {
-    region = 'GB';
-    locale = 'en-GB';
-    currency = 'GBP';
-  } else if (slug === 'us' || slug.startsWith('enterprise-us-')) {
-    region = 'US';
-    locale = 'en-US';
-    currency = 'USD';
-  } else {
-    const regionDefaults = REGION_DEFAULTS[region];
-    if (regionDefaults) {
-      locale = regionDefaults.locale;
-      currency = regionDefaults.currency;
-    }
-  }
-
-  // Store- and channel-level localization defaults take precedence over
-  // slug/region defaults; channel settings win over store settings.
-  const configuredLocale = store?.channelSettings?.locale ?? store?.settings?.locale;
-  if (typeof configuredLocale === 'string' && configuredLocale.length > 0) {
-    locale = configuredLocale;
-  }
-
-  // Override currency from store if available
-  if (store?.defaultCurrency) {
-    currency = store.defaultCurrency;
-  }
-
-  return { region, locale, currency };
+  // Configured store/channel locale beats slug/region defaults;
+  // store default currency beats everything.
+  return {
+    region,
+    locale: configuredStoreLocale(store) || slugDefaults.locale || regionDefaults?.locale || DEFAULT_LOCALE,
+    currency: store?.defaultCurrency || slugDefaults.currency || regionDefaults?.currency || DEFAULT_CURRENCY,
+  };
 }
 
 /**
@@ -334,33 +341,100 @@ function setDefaultLocals(res: HttpResponse): void {
   res.locals.marketCountries = [];
 }
 
+/**
+ * Load a store by slug: store record plus its default sales-channel
+ * assignment (used for channel-scoped settings and channelId).
+ */
+async function loadStoreBySlug(storeSlug: string): Promise<ResolvedStore | null> {
+  const response = await getStoreUseCase.execute({ slug: storeSlug });
+  if (!response.store) return null;
+  const assignments = response.store.organizationId
+    ? await manageSalesChannelsUseCase.listForStore(response.store.organizationId, response.store.storeId)
+    : [];
+  const defaultAssignment = assignments.find(assignment => assignment.isDefault && assignment.isActive);
+  return {
+    storeId: response.store.storeId,
+    slug: response.store.slug,
+    defaultCurrency: response.store.defaultCurrency,
+    supportedCurrencies: response.store.supportedCurrencies,
+    countryCode: response.store.address?.country as string | undefined,
+    defaultSalesChannelId: defaultAssignment?.salesChannelId,
+    settings: response.store.settings,
+    channelSettings: defaultAssignment?.settings as Record<string, unknown> | undefined,
+  };
+}
+
+interface ResolvedContext {
+  store: ResolvedStore | null;
+  storeSlug: string;
+  market: MarketResponse | null;
+  locale: string;
+  currency: string;
+  region: string;
+}
+
+/**
+ * Attach the resolved store context to res.locals for controllers and views.
+ */
+async function setResolvedLocals(res: HttpResponse, ctx: ResolvedContext): Promise<void> {
+  const { store, storeSlug, market, locale, currency, region } = ctx;
+
+  res.locals.store = store;
+  res.locals.storeId = store?.storeId || '';
+  res.locals.channelId = store?.defaultSalesChannelId || '';
+  res.locals.storeSlug = storeSlug;
+  res.locals.currency = currency;
+  res.locals.locale = locale;
+  res.locals.region = region;
+  res.locals.market = market;
+  res.locals.commerceContext = buildCommerceContext(market, locale, currency, region, store);
+  // Market/locale switchers — only rendered when multiple options exist.
+  res.locals.markets = await listActiveMarkets().catch(() => []);
+  res.locals.marketCurrencies = market ? market.supportedCurrencyCodes : (store?.supportedCurrencies ?? []);
+  res.locals.marketLocales = market ? market.supportedLocaleCodes : [];
+  // Per-country address-field requirements for country-driven address forms.
+  res.locals.addressMetadata = getAddressFieldUiMetadata();
+  res.locals.marketCountries = market ? market.countryCodes : [];
+}
+
+/**
+ * Persist the resolution to the session only for explicit
+ * ?store=/?market=/?locale=/?currency= choices — hostname/geo/default
+ * resolution is deterministic, so writing it would create a session row
+ * for every anonymous visitor.
+ */
+function persistExplicitChoice(req: HttpRequest, ctx: ResolvedContext): void {
+  const session = req.session as unknown as { store?: StoreSession } | undefined;
+  const explicitChoice =
+    typeof req.query.store === 'string' ||
+    typeof req.query.market === 'string' ||
+    typeof req.query.locale === 'string' ||
+    typeof req.query.currency === 'string';
+  if (session && explicitChoice) {
+    session.store = {
+      storeId: ctx.store?.storeId || '',
+      storeSlug: ctx.storeSlug,
+      currency: ctx.currency,
+      locale: ctx.locale,
+      region: ctx.region,
+      marketId: ctx.market?.marketId,
+    };
+  }
+}
+
 export async function resolveStore(req: HttpRequest, res: HttpResponse, next: HttpNext): Promise<void> {
   try {
     const storeSlug = resolveStoreSlug(req);
 
     // Fetch store (30s TTL — same slug is resolved on every storefront request)
-    const store = await storeBySlugCache.getOrSet(storeSlug, async () => {
-      const response = await getStoreUseCase.execute({ slug: storeSlug });
-      if (!response.store) return null;
-      const assignments = response.store.organizationId
-        ? await manageSalesChannelsUseCase.listForStore(response.store.organizationId, response.store.storeId)
-        : [];
-      const defaultAssignment = assignments.find(assignment => assignment.isDefault && assignment.isActive);
-      return {
-        storeId: response.store.storeId,
-        slug: response.store.slug,
-        defaultCurrency: response.store.defaultCurrency,
-        supportedCurrencies: response.store.supportedCurrencies,
-        countryCode: response.store.address?.country as string | undefined,
-        defaultSalesChannelId: defaultAssignment?.salesChannelId,
-        settings: response.store.settings,
-        channelSettings: defaultAssignment?.settings as Record<string, unknown> | undefined,
-      };
-    });
+    const store = await storeBySlugCache.getOrSet(storeSlug, () => loadStoreBySlug(storeSlug));
 
     const market = await resolveMarket(req, store?.storeId);
     const resolved = resolveStoreLocale(storeSlug, store);
-    let { region, locale, currency } = resolved;
+    let { region } = resolved;
+    const { locale: storeLocale, currency: storeCurrency } = resolved;
+    let locale = storeLocale;
+    let currency = storeCurrency;
 
     // A resolved market owns locale/currency — the market's configured
     // defaults plus validated customer overrides replace the slug/region
@@ -371,38 +445,10 @@ export async function resolveStore(req: HttpRequest, res: HttpResponse, next: Ht
       currency = marketLocale.currency;
       if (market.countryCodes.length > 0) region = market.countryCodes[0];
     }
-    const storeId = store?.storeId || '';
 
-    // Attach to res.locals for controllers and views
-    res.locals.store = store;
-    res.locals.storeId = storeId;
-    res.locals.channelId = store?.defaultSalesChannelId || '';
-    res.locals.storeSlug = storeSlug;
-    res.locals.currency = currency;
-    res.locals.locale = locale;
-    res.locals.region = region;
-    res.locals.market = market;
-    res.locals.commerceContext = buildCommerceContext(market, locale, currency, region, store);
-    // Market/locale switchers — only rendered when multiple options exist.
-    res.locals.markets = await listActiveMarkets().catch(() => []);
-    res.locals.marketCurrencies = market ? market.supportedCurrencyCodes : (store?.supportedCurrencies ?? []);
-    res.locals.marketLocales = market ? market.supportedLocaleCodes : [];
-    // Per-country address-field requirements for country-driven address forms.
-    res.locals.addressMetadata = getAddressFieldUiMetadata();
-    res.locals.marketCountries = market ? market.countryCodes : [];
-
-    // Persist to session only for explicit ?store=/?market=/?locale=/?currency=
-    // choices — hostname/geo/default resolution is deterministic, so writing
-    // it would create a session row for every anonymous visitor.
-    const session = req.session as unknown as { store?: StoreSession } | undefined;
-    const explicitChoice =
-      typeof req.query.store === 'string' ||
-      typeof req.query.market === 'string' ||
-      typeof req.query.locale === 'string' ||
-      typeof req.query.currency === 'string';
-    if (session && explicitChoice) {
-      session.store = { storeId, storeSlug, currency, locale, region, marketId: market?.marketId };
-    }
+    const ctx: ResolvedContext = { store, storeSlug, market, locale, currency, region };
+    await setResolvedLocals(res, ctx);
+    persistExplicitChoice(req, ctx);
   } catch {
     // Fall back to defaults on any error — never block the request
     setDefaultLocals(res);

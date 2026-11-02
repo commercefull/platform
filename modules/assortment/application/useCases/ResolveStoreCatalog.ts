@@ -64,29 +64,11 @@ export class ResolveStoreCatalogUseCase {
 
     const assortment = await this.assortmentStoreRepo.findByStoreId(command.storeId);
     const mode = assortment?.mode ?? 'all';
-    // Entries with no channel apply to every channel; channel-scoped entries
-    // apply only when resolving that channel's catalog.
-    const entries = (await this.assortmentStoreRepo.findEntriesByStoreId(command.storeId)).filter(
-      (e: StoreAssortmentEntry) => !e.channelId || e.channelId === command.channelId,
-    );
-
-    const excludedIds = new Set<string>();
-    const hiddenIds = new Set<string>();
-    for (const e of entries.filter(e => e.effect === 'exclude' || e.isHidden)) {
-      for (const id of await this.expandTarget(e.targetType, e.targetId)) {
-        if (e.effect === 'exclude') excludedIds.add(id);
-        if (e.isHidden) hiddenIds.add(id);
-      }
-    }
-    const blocked = new Set([...excludedIds, ...hiddenIds]);
+    const entries = await this.entriesForChannel(command.storeId, command.channelId);
+    const blocked = await this.resolveBlockedIds(entries);
 
     if (mode === 'include') {
-      const includedIds = new Set<string>();
-      for (const e of entries.filter(e => e.effect === 'include')) {
-        for (const id of await this.expandTarget(e.targetType, e.targetId)) {
-          if (!blocked.has(id)) includedIds.add(id);
-        }
-      }
+      const includedIds = await this.resolveIncludedIds(entries, blocked);
       const products = [...includedIds].length ? await this.catalog.findProductsByIds([...includedIds]) : [];
       return {
         storeId: command.storeId,
@@ -98,6 +80,74 @@ export class ResolveStoreCatalogUseCase {
 
     // 'all' / 'exclude': page the catalog, dropping blocked ids. `total` is the
     // pre-filter catalog count minus the number of blocked ids present in it.
+    const { products, total } = await this.listUnblockedCatalogProducts(command, blocked);
+    return {
+      storeId: command.storeId,
+      mode,
+      products,
+      total: Math.max(total - blocked.size, 0),
+    };
+  }
+
+  /**
+   * Resolve the store/channel sellable constraint in filter form.
+   * Returns null when the assortment does not constrain the catalog at all.
+   */
+  async resolveAssortmentFilter(storeId: string, channelId?: string): Promise<AssortmentFilter | null> {
+    const assortment = await this.assortmentStoreRepo.findByStoreId(storeId);
+    const mode = assortment?.mode ?? 'all';
+    const entries = await this.entriesForChannel(storeId, channelId);
+    const blocked = await this.resolveBlockedIds(entries);
+
+    if (mode === 'include') {
+      const includedIds = await this.resolveIncludedIds(entries, blocked);
+      return { includeProductIds: [...includedIds] };
+    }
+
+    if (blocked.size === 0) return null;
+    return { excludeProductIds: [...blocked] };
+  }
+
+  /**
+   * Entries with no channel apply to every channel; channel-scoped entries
+   * apply only when resolving that channel's catalog.
+   */
+  private async entriesForChannel(storeId: string, channelId?: string): Promise<StoreAssortmentEntry[]> {
+    const entries = await this.assortmentStoreRepo.findEntriesByStoreId(storeId);
+    return entries.filter((e: StoreAssortmentEntry) => !e.channelId || e.channelId === channelId);
+  }
+
+  /**
+   * Union of exclude-effect and hidden product ids across the entries.
+   */
+  private async resolveBlockedIds(entries: StoreAssortmentEntry[]): Promise<Set<string>> {
+    const blocked = new Set<string>();
+    for (const e of entries.filter(e => e.effect === 'exclude' || e.isHidden)) {
+      for (const id of await this.expandTarget(e.targetType, e.targetId)) {
+        blocked.add(id);
+      }
+    }
+    return blocked;
+  }
+
+  private async resolveIncludedIds(entries: StoreAssortmentEntry[], blocked: Set<string>): Promise<Set<string>> {
+    const includedIds = new Set<string>();
+    for (const e of entries.filter(e => e.effect === 'include')) {
+      for (const id of await this.expandTarget(e.targetType, e.targetId)) {
+        if (!blocked.has(id)) includedIds.add(id);
+      }
+    }
+    return includedIds;
+  }
+
+  /**
+   * Page the catalog, dropping blocked ids. Returns the accumulated page of
+   * unblocked products and the pre-filter catalog total.
+   */
+  private async listUnblockedCatalogProducts(
+    command: ResolveStoreCatalogCommand,
+    blocked: Set<string>,
+  ): Promise<{ products: CatalogProductRef[]; total: number }> {
     const products: CatalogProductRef[] = [];
     let total = 0;
     let catalogOffset = 0;
@@ -113,47 +163,7 @@ export class ResolveStoreCatalogUseCase {
       catalogOffset += RESOLVE_PAGE;
     }
 
-    return {
-      storeId: command.storeId,
-      mode,
-      products: products.slice(command.offset, command.offset + command.limit),
-      total: Math.max(total - blocked.size, 0),
-    };
-  }
-
-  /**
-   * Resolve the store/channel sellable constraint in filter form.
-   * Returns null when the assortment does not constrain the catalog at all.
-   */
-  async resolveAssortmentFilter(storeId: string, channelId?: string): Promise<AssortmentFilter | null> {
-    const assortment = await this.assortmentStoreRepo.findByStoreId(storeId);
-    const mode = assortment?.mode ?? 'all';
-    const entries = (await this.assortmentStoreRepo.findEntriesByStoreId(storeId)).filter(
-      (e: StoreAssortmentEntry) => !e.channelId || e.channelId === channelId,
-    );
-
-    const excludedIds = new Set<string>();
-    const hiddenIds = new Set<string>();
-    for (const e of entries.filter(e => e.effect === 'exclude' || e.isHidden)) {
-      for (const id of await this.expandTarget(e.targetType, e.targetId)) {
-        if (e.effect === 'exclude') excludedIds.add(id);
-        if (e.isHidden) hiddenIds.add(id);
-      }
-    }
-    const blocked = new Set([...excludedIds, ...hiddenIds]);
-
-    if (mode === 'include') {
-      const includedIds = new Set<string>();
-      for (const e of entries.filter(e => e.effect === 'include')) {
-        for (const id of await this.expandTarget(e.targetType, e.targetId)) {
-          if (!blocked.has(id)) includedIds.add(id);
-        }
-      }
-      return { includeProductIds: [...includedIds] };
-    }
-
-    if (blocked.size === 0) return null;
-    return { excludeProductIds: [...blocked] };
+    return { products: products.slice(command.offset, command.offset + command.limit), total };
   }
 
   private async expandTarget(targetType: string, targetId: string): Promise<string[]> {

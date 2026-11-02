@@ -73,30 +73,8 @@ export class CreateTemplateUseCase {
       throw new ContentValidationError('Name and slug are required');
     }
 
-    // Validate compatible content types if provided
-    if (command.compatibleContentTypes && command.compatibleContentTypes.length > 0) {
-      for (const typeId of command.compatibleContentTypes) {
-        const contentType = await this.contentRepo.findContentTypeById(typeId);
-        if (!contentType) {
-          throw new ContentTypeNotFoundError(typeId);
-        }
-      }
-    }
-
-    const template = await this.contentRepo.createTemplate({
-      name: command.name,
-      slug: command.slug,
-      description: command.description || null,
-      thumbnail: command.thumbnail || null,
-      htmlStructure: command.htmlStructure || null,
-      cssStyles: command.cssStyles || null,
-      jsScripts: command.jsScripts || null,
-      areas: command.areas || null,
-      defaultBlocks: command.defaultBlocks || null,
-      compatibleContentTypes: command.compatibleContentTypes || null,
-      isSystem: command.isSystem || false,
-      isActive: command.isActive !== undefined ? command.isActive : true,
-    });
+    await this.assertCompatibleContentTypes(command);
+    const template = await this.contentRepo.createTemplate(this.toInsertParams(command));
 
     eventBus.emit('content.template.created', {
       templateId: template.contentTemplateId,
@@ -113,6 +91,34 @@ export class CreateTemplateUseCase {
       isSystem: template.isSystem,
       isActive: template.isActive,
       createdAt: template.createdAt,
+    };
+  }
+
+  /** Validate that every referenced content type exists. */
+  private async assertCompatibleContentTypes(command: CreateTemplateCommand): Promise<void> {
+    if (!command.compatibleContentTypes || command.compatibleContentTypes.length === 0) return;
+    for (const typeId of command.compatibleContentTypes) {
+      const contentType = await this.contentRepo.findContentTypeById(typeId);
+      if (!contentType) {
+        throw new ContentTypeNotFoundError(typeId);
+      }
+    }
+  }
+
+  private toInsertParams(command: CreateTemplateCommand): Parameters<typeof this.contentRepo.createTemplate>[0] {
+    return {
+      name: command.name,
+      slug: command.slug,
+      description: command.description || null,
+      thumbnail: command.thumbnail || null,
+      htmlStructure: command.htmlStructure || null,
+      cssStyles: command.cssStyles || null,
+      jsScripts: command.jsScripts || null,
+      areas: command.areas || null,
+      defaultBlocks: command.defaultBlocks || null,
+      compatibleContentTypes: command.compatibleContentTypes || null,
+      isSystem: command.isSystem || false,
+      isActive: command.isActive !== undefined ? command.isActive : true,
     };
   }
 }

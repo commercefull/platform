@@ -77,67 +77,14 @@ export class AdjustStockUseCase {
     }
 
     const previousQuantity = location.quantity;
-    let adjustmentAmount: number;
-
-    switch (input.adjustmentType) {
-      case 'set':
-        adjustmentAmount = input.quantity - previousQuantity;
-        break;
-      case 'increment':
-        adjustmentAmount = input.quantity;
-        break;
-      case 'decrement':
-        adjustmentAmount = Math.max(0, previousQuantity - input.quantity) - previousQuantity;
-        break;
-      default:
-        throw new InventoryValidationError(`Invalid adjustment type: ${input.adjustmentType}`);
-    }
+    const adjustmentAmount = this.computeAdjustmentAmount(input, previousQuantity);
 
     const updatedLocation = await this.stockLocations.adjustQuantity(input.inventoryLocationId, adjustmentAmount, input.reason);
 
-    // Record the movement (type code: explicit override, else derived from direction)
-    const typeCode = input.transactionTypeCode ?? (adjustmentAmount >= 0 ? 'ADJUST_UP' : 'ADJUST_DOWN');
-    const transactionType = await this.stockLocations.findTransactionTypeByCode(typeCode);
-
-    let adjustmentId = this.generateAdjustmentId();
-    if (transactionType) {
-      const recorded = (await this.stockLocations.createTransaction({
-        typeId: transactionType.inventoryTransactionTypeId,
-        distributionWarehouseId: location.distributionWarehouseId,
-        distributionWarehouseBinId: location.distributionWarehouseBinId ?? undefined,
-        productId: location.productId,
-        productVariantId: location.productVariantId ?? undefined,
-        sku: location.sku,
-        quantity: adjustmentAmount,
-        previousQuantity,
-        newQuantity: updatedLocation.quantity,
-        referenceType: input.referenceId ? 'adjustment' : undefined,
-        referenceId: input.referenceId,
-        reason: input.reason,
-        notes: input.notes,
-      })) as { inventoryTransactionId?: string } | null;
-      adjustmentId = recorded?.inventoryTransactionId ?? adjustmentId;
-    }
+    const adjustmentId = await this.recordAdjustment(input, location, adjustmentAmount, previousQuantity, updatedLocation.quantity);
 
     const effectiveNewQuantity = updatedLocation.quantity;
-
-    if (effectiveNewQuantity === 0) {
-      eventBus.emit('inventory.out_of_stock', {
-        productId: location.productId,
-        variantId: location.productVariantId ?? undefined,
-        locationId: location.inventoryLocationId,
-        sku: location.sku,
-      });
-    } else if (effectiveNewQuantity <= (location.minimumStockLevel ?? DEFAULT_LOW_STOCK_THRESHOLD)) {
-      eventBus.emit('inventory.low', {
-        productId: location.productId,
-        variantId: location.productVariantId ?? undefined,
-        locationId: location.inventoryLocationId,
-        sku: location.sku,
-        currentQuantity: effectiveNewQuantity,
-        threshold: location.minimumStockLevel ?? DEFAULT_LOW_STOCK_THRESHOLD,
-      });
-    }
+    this.emitStockEvents(location, effectiveNewQuantity);
 
     return {
       adjustmentId,
@@ -152,6 +99,74 @@ export class AdjustStockUseCase {
       adjustedAt: new Date().toISOString(),
       location: updatedLocation,
     };
+  }
+
+  /** Signed delta implied by the requested adjustment mode. */
+  private computeAdjustmentAmount(input: AdjustStockInput, previousQuantity: number): number {
+    switch (input.adjustmentType) {
+      case 'set':
+        return input.quantity - previousQuantity;
+      case 'increment':
+        return input.quantity;
+      case 'decrement':
+        return Math.max(0, previousQuantity - input.quantity) - previousQuantity;
+      default:
+        throw new InventoryValidationError(`Invalid adjustment type: ${input.adjustmentType}`);
+    }
+  }
+
+  /** Record the movement (type code: explicit override, else derived from direction). */
+  private async recordAdjustment(
+    input: AdjustStockInput,
+    location: InventoryLocation,
+    adjustmentAmount: number,
+    previousQuantity: number,
+    newQuantity: number,
+  ): Promise<string> {
+    const typeCode = input.transactionTypeCode ?? (adjustmentAmount >= 0 ? 'ADJUST_UP' : 'ADJUST_DOWN');
+    const transactionType = await this.stockLocations.findTransactionTypeByCode(typeCode);
+
+    const fallbackId = this.generateAdjustmentId();
+    if (!transactionType) {
+      return fallbackId;
+    }
+
+    const recorded = (await this.stockLocations.createTransaction({
+      typeId: transactionType.inventoryTransactionTypeId,
+      distributionWarehouseId: location.distributionWarehouseId,
+      distributionWarehouseBinId: location.distributionWarehouseBinId ?? undefined,
+      productId: location.productId,
+      productVariantId: location.productVariantId ?? undefined,
+      sku: location.sku,
+      quantity: adjustmentAmount,
+      previousQuantity,
+      newQuantity,
+      referenceType: input.referenceId ? 'adjustment' : undefined,
+      referenceId: input.referenceId,
+      reason: input.reason,
+      notes: input.notes,
+    })) as { inventoryTransactionId?: string } | null;
+    return recorded?.inventoryTransactionId ?? fallbackId;
+  }
+
+  private emitStockEvents(location: InventoryLocation, newQuantity: number): void {
+    if (newQuantity === 0) {
+      eventBus.emit('inventory.out_of_stock', {
+        productId: location.productId,
+        variantId: location.productVariantId ?? undefined,
+        locationId: location.inventoryLocationId,
+        sku: location.sku,
+      });
+    } else if (newQuantity <= (location.minimumStockLevel ?? DEFAULT_LOW_STOCK_THRESHOLD)) {
+      eventBus.emit('inventory.low', {
+        productId: location.productId,
+        variantId: location.productVariantId ?? undefined,
+        locationId: location.inventoryLocationId,
+        sku: location.sku,
+        currentQuantity: newQuantity,
+        threshold: location.minimumStockLevel ?? DEFAULT_LOW_STOCK_THRESHOLD,
+      });
+    }
   }
 
   private generateAdjustmentId(): string {

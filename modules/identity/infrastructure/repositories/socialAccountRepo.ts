@@ -16,6 +16,36 @@ import { FailedToCreateSocialAccountError } from '../../domain/errors/IdentityEr
 
 export type DbSocialAccount = IdentitySocialAccount;
 
+/** Positional update values matching the COALESCE column order in `update`. */
+function updateParams(socialAccountId: string, updates: Partial<CreateSocialAccountInput>): unknown[] {
+  return [
+    socialAccountId,
+    ...basicUpdateValues(updates),
+    updates.scopes ? JSON.stringify(updates.scopes) : null,
+    updates.providerData ? JSON.stringify(updates.providerData) : null,
+    updates.lastLoginIp || null,
+    new Date(),
+  ];
+}
+
+function basicUpdateValues(updates: Partial<CreateSocialAccountInput>): unknown[] {
+  return [
+    updates.userId || null,
+    updates.userType || null,
+    updates.provider || null,
+    updates.providerUserId || null,
+    updates.providerEmail || null,
+    updates.displayName || null,
+    updates.firstName || null,
+    updates.lastName || null,
+    updates.avatarUrl || null,
+    updates.profileUrl || null,
+    updates.accessToken || null,
+    updates.refreshToken || null,
+    updates.tokenExpiresAt || null,
+  ];
+}
+
 export interface CreateSocialAccountInput {
   userId: string;
   userType: UserType;
@@ -169,18 +199,6 @@ export class SocialAccountRepo {
    * Update social account
    */
   async update(socialAccountId: string, updates: Partial<CreateSocialAccountInput>): Promise<SocialAccount | null> {
-    const updateData: Record<string, unknown> = {
-      ...updates,
-      updatedAt: new Date(),
-    };
-
-    if (updates.scopes) {
-      updateData.scopes = JSON.stringify(updates.scopes);
-    }
-    if (updates.providerData) {
-      updateData.providerData = JSON.stringify(updates.providerData);
-    }
-
     const sql = `
       UPDATE "identitySocialAccount" 
       SET 
@@ -205,26 +223,7 @@ export class SocialAccountRepo {
       RETURNING *
     `;
 
-    const record = await queryOne<DbSocialAccount>(sql, [
-      socialAccountId,
-      updates.userId || null,
-      updates.userType || null,
-      updates.provider || null,
-      updates.providerUserId || null,
-      updates.providerEmail || null,
-      updates.displayName || null,
-      updates.firstName || null,
-      updates.lastName || null,
-      updates.avatarUrl || null,
-      updates.profileUrl || null,
-      updates.accessToken || null,
-      updates.refreshToken || null,
-      updates.tokenExpiresAt || null,
-      updates.scopes ? JSON.stringify(updates.scopes) : null,
-      updates.providerData ? JSON.stringify(updates.providerData) : null,
-      updates.lastLoginIp || null,
-      new Date(),
-    ]);
+    const record = await queryOne<DbSocialAccount>(sql, updateParams(socialAccountId, updates));
 
     return record ? this.toEntity(record) : null;
   }

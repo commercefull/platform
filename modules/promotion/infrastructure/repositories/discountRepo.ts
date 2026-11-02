@@ -69,6 +69,39 @@ export interface CreateDiscountItemInput {
   itemType: 'product' | 'variant' | 'category';
 }
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T>(value: T | undefined | null, defaultValue: T): T {
+  return value || defaultValue;
+}
+
+function discountInsertValues(input: CreateProductDiscountInput, now: Date): unknown[] {
+  return [
+    fallback(input.promotionId, null),
+    input.name,
+    fallback(input.description, null),
+    input.discountType,
+    input.discountValue,
+    fallback(input.currencyCode, 'USD'),
+    fallback(input.startDate, now),
+    fallback(input.endDate, null),
+    input.isActive !== false,
+    fallback(input.priority, 0),
+    fallback(input.appliesTo, 'specific_products'),
+    fallback(input.minimumQuantity, 1),
+    fallback(input.maximumQuantity, null),
+    fallback(input.minimumAmountCents, null),
+    fallback(input.maximumDiscountAmountCents, null),
+    fallback(input.stackable, false),
+    input.displayOnProductPage !== false,
+    input.displayInListing !== false,
+    fallback(input.badgeText, null),
+    input.badgeStyle ? JSON.stringify(input.badgeStyle) : null,
+    fallback(input.organizationId, null),
+    now,
+    now,
+  ];
+}
+
 /**
  * Repository for managing product discounts
  */
@@ -89,31 +122,7 @@ class DiscountRepo {
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
       ) RETURNING *`,
-      [
-        input.promotionId || null,
-        input.name,
-        input.description || null,
-        input.discountType,
-        input.discountValue,
-        input.currencyCode || 'USD',
-        input.startDate || now,
-        input.endDate || null,
-        input.isActive !== false,
-        input.priority || 0,
-        input.appliesTo || 'specific_products',
-        input.minimumQuantity || 1,
-        input.maximumQuantity || null,
-        input.minimumAmountCents || null,
-        input.maximumDiscountAmountCents || null,
-        input.stackable || false,
-        input.displayOnProductPage !== false,
-        input.displayInListing !== false,
-        input.badgeText || null,
-        input.badgeStyle ? JSON.stringify(input.badgeStyle) : null,
-        input.organizationId || null,
-        now,
-        now,
-      ],
+      discountInsertValues(input, now),
     );
 
     if (!discount) {

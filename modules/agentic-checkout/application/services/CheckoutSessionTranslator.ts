@@ -75,6 +75,60 @@ export function mapChannelStatus(session: ChannelSession, checkout?: ChannelChec
   }
 }
 
+function buildTotals(checkout: ChannelCheckoutSnapshot | null, basketItems: ChannelBasketItem[]): AcpTotal[] {
+  if (!checkout) {
+    const subtotal = basketItems.reduce((sum, i) => sum + i.lineTotalCents, 0);
+    return [
+      { type: 'subtotal', display_text: 'Subtotal', amount: subtotal },
+      { type: 'total', display_text: 'Total', amount: subtotal },
+    ];
+  }
+
+  const totals: AcpTotal[] = [];
+  if (checkout.discountAmountCents > 0) {
+    totals.push({ type: 'discount', display_text: 'Discount', amount: -checkout.discountAmountCents });
+  }
+  totals.push({ type: 'subtotal', display_text: 'Subtotal', amount: checkout.subtotalCents });
+  totals.push({ type: 'fulfillment', display_text: 'Fulfillment', amount: checkout.shippingAmountCents });
+  totals.push({ type: 'tax', display_text: 'Tax', amount: checkout.taxAmountCents });
+  totals.push({ type: 'total', display_text: 'Total', amount: checkout.totalCents });
+  return totals;
+}
+
+function buildFulfillmentDetails(
+  session: ChannelSession,
+  checkout: ChannelCheckoutSnapshot | null,
+): Record<string, unknown> | undefined {
+  const fd = session.fulfillmentDetails;
+  const sa = checkout?.shippingAddress;
+  if (!fd && !sa) return undefined;
+
+  let address: Record<string, unknown> | undefined;
+  if (sa) {
+    address = {
+      line_one: sa.addressLine1,
+      city: sa.city,
+      country: sa.country,
+      postal_code: sa.postalCode,
+    };
+  } else if (fd?.address) {
+    address = {
+      line_one: fd.address.lineOne,
+      line_two: fd.address.lineTwo,
+      city: fd.address.city,
+      region: fd.address.region,
+      country: fd.address.country,
+      postal_code: fd.address.postalCode,
+    };
+  }
+
+  return {
+    email: fd?.email ?? checkout?.guestEmail,
+    phone: fd?.phone,
+    address,
+  };
+}
+
 export function toAcpSession(params: {
   session: ChannelSession;
   checkout: ChannelCheckoutSnapshot | null;
@@ -83,21 +137,6 @@ export function toAcpSession(params: {
   orderNumber?: string;
 }): AcpCheckoutSession {
   const { session, checkout, basketItems, shippingOptions = [], orderNumber } = params;
-
-  const totals: AcpTotal[] = [];
-  if (checkout) {
-    if (checkout.discountAmountCents > 0) {
-      totals.push({ type: 'discount', display_text: 'Discount', amount: -checkout.discountAmountCents });
-    }
-    totals.push({ type: 'subtotal', display_text: 'Subtotal', amount: checkout.subtotalCents });
-    totals.push({ type: 'fulfillment', display_text: 'Fulfillment', amount: checkout.shippingAmountCents });
-    totals.push({ type: 'tax', display_text: 'Tax', amount: checkout.taxAmountCents });
-    totals.push({ type: 'total', display_text: 'Total', amount: checkout.totalCents });
-  } else {
-    const subtotal = basketItems.reduce((sum, i) => sum + i.lineTotalCents, 0);
-    totals.push({ type: 'subtotal', display_text: 'Subtotal', amount: subtotal });
-    totals.push({ type: 'total', display_text: 'Total', amount: subtotal });
-  }
 
   const selectedMethod = checkout?.shippingMethodId;
   const fulfillmentOptions: AcpFulfillmentOption[] = shippingOptions.map(o => ({
@@ -118,7 +157,7 @@ export function toAcpSession(params: {
       base_amount: item.unitPriceCents,
       total: item.lineTotalCents,
     })),
-    totals,
+    totals: buildTotals(checkout, basketItems),
     capabilities: ACP_CAPABILITIES,
   };
 
@@ -131,30 +170,9 @@ export function toAcpSession(params: {
     };
   }
 
-  const fd = session.fulfillmentDetails;
-  const sa = checkout?.shippingAddress;
-  if (fd || sa) {
-    response.fulfillment_details = {
-      email: fd?.email ?? checkout?.guestEmail,
-      phone: fd?.phone,
-      address: sa
-        ? {
-            line_one: sa.addressLine1,
-            city: sa.city,
-            country: sa.country,
-            postal_code: sa.postalCode,
-          }
-        : fd?.address
-          ? {
-              line_one: fd.address.lineOne,
-              line_two: fd.address.lineTwo,
-              city: fd.address.city,
-              region: fd.address.region,
-              country: fd.address.country,
-              postal_code: fd.address.postalCode,
-            }
-          : undefined,
-    };
+  const fulfillmentDetails = buildFulfillmentDetails(session, checkout);
+  if (fulfillmentDetails) {
+    response.fulfillment_details = fulfillmentDetails;
   }
 
   if (fulfillmentOptions.length > 0) {

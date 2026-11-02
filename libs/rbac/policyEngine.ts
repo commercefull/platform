@@ -31,33 +31,39 @@ function wildcardMatch(pattern: string, value: string): boolean {
  * Evaluate a condition against the permission context.
  * Conditions use '$user.fieldName' syntax to reference user attributes.
  */
+/**
+ * Resolve the context field a condition value refers to.
+ * '$user.fieldName' and '$resource.fieldName' reference context fields;
+ * anything else compares against the condition key directly.
+ */
+function resolveConditionValue(key: string, expected: unknown, ctx: PermissionContext): unknown {
+  if (typeof expected === 'string' && expected.startsWith('$user.')) {
+    return ctx[expected.slice(6)]; // '$user.'.length
+  }
+  if (typeof expected === 'string' && expected.startsWith('$resource.')) {
+    return ctx[expected.slice(10)]; // '$resource.'.length
+  }
+  return ctx[key];
+}
+
+/**
+ * Special case: '$user.storeId' also matches when the resource store
+ * is the user's primary store or one of their accessible stores.
+ */
+function matchesUserStore(ctx: PermissionContext): boolean {
+  const { storeId: userStoreId, storeIds: userStoreIds, resourceStoreId } = ctx;
+  if (!resourceStoreId) return false;
+  return resourceStoreId === userStoreId || Boolean(userStoreIds?.includes(resourceStoreId));
+}
+
 function evaluateCondition(condition: Record<string, unknown>, ctx: PermissionContext): boolean {
   for (const [key, expected] of Object.entries(condition)) {
-    let actual: unknown;
+    const actual = resolveConditionValue(key, expected, ctx);
 
-    if (typeof expected === 'string' && expected.startsWith('$user.')) {
-      const userField = expected.slice(6); // '$user.'.length
-      actual = ctx[userField];
-    } else if (typeof expected === 'string' && expected.startsWith('$resource.')) {
-      const resourceField = expected.slice(10); // '$resource.'.length
-      actual = ctx[resourceField];
-    } else {
-      // Direct value comparison
-      actual = ctx[key];
-    }
-
-    if (actual !== expected && actual !== expected) {
+    if (actual !== expected) {
       // Handle special case: '$user.storeId' should also check storeIds array
-      if (typeof expected === 'string' && expected.startsWith('$user.storeId')) {
-        const userStoreId = ctx.storeId;
-        const userStoreIds = ctx.storeIds;
-        const resourceStoreId = ctx.resourceStoreId;
-        if (resourceStoreId && userStoreId && resourceStoreId === userStoreId) {
-          continue;
-        }
-        if (resourceStoreId && userStoreIds && userStoreIds.includes(resourceStoreId)) {
-          continue;
-        }
+      if (typeof expected === 'string' && expected.startsWith('$user.storeId') && matchesUserStore(ctx)) {
+        continue;
       }
       return false;
     }

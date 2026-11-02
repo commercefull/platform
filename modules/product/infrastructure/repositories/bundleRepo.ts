@@ -148,83 +148,60 @@ export async function saveBundle(
         "sortOrder" = $22, "isActive" = $23, "startDate" = $24, "endDate" = $25,
         "metadata" = $26, "updatedAt" = $27
       WHERE "productBundleId" = $28`,
-      [
-        bundle.name,
-        slug,
-        bundle.description,
-        bundle.bundleType || 'fixed',
-        bundle.pricingType || 'fixed',
-        bundle.fixedPriceCents,
-        bundle.discountPercent,
-        bundle.discountAmountCents,
-        bundle.minPriceCents,
-        bundle.maxPriceCents,
-        bundle.currencyCode || 'USD',
-        bundle.minItems,
-        bundle.maxItems,
-        bundle.minQuantity || 1,
-        bundle.maxQuantity,
-        bundle.requireAllItems !== false,
-        bundle.allowDuplicates || false,
-        bundle.showSavings !== false,
-        bundle.savingsAmountCents,
-        bundle.savingsPercent,
-        bundle.imageUrl,
-        bundle.sortOrder || 0,
-        bundle.isActive !== false,
-        bundle.startDate?.toISOString(),
-        bundle.endDate?.toISOString(),
-        bundle.metadata ? JSON.stringify(bundle.metadata) : null,
-        now,
-        bundle.productBundleId,
-      ],
+      [...bundleFieldValues(bundle, slug, bundle.isActive !== false), now, bundle.productBundleId],
     );
     return (await getBundle(bundle.productBundleId))!;
-  } else {
-    const result = await queryOne<DbProductBundle>(
-      `INSERT INTO "productBundle" (
-        "productId", "name", "slug", "description", "bundleType", "pricingType",
-        "fixedPriceCents", "discountPercent", "discountAmountCents", "minPriceCents", "maxPriceCents",
-        "currencyCode", "minItems", "maxItems", "minQuantity", "maxQuantity",
-        "requireAllItems", "allowDuplicates", "showSavings", "savingsAmountCents",
-        "savingsPercent", "imageUrl", "sortOrder", "isActive", "startDate", "endDate",
-        "metadata", "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
-      RETURNING *`,
-      [
-        bundle.productId,
-        bundle.name,
-        slug,
-        bundle.description,
-        bundle.bundleType || 'fixed',
-        bundle.pricingType || 'fixed',
-        bundle.fixedPriceCents,
-        bundle.discountPercent,
-        bundle.discountAmountCents,
-        bundle.minPriceCents,
-        bundle.maxPriceCents,
-        bundle.currencyCode || 'USD',
-        bundle.minItems,
-        bundle.maxItems,
-        bundle.minQuantity || 1,
-        bundle.maxQuantity,
-        bundle.requireAllItems !== false,
-        bundle.allowDuplicates || false,
-        bundle.showSavings !== false,
-        bundle.savingsAmountCents,
-        bundle.savingsPercent,
-        bundle.imageUrl,
-        bundle.sortOrder || 0,
-        true,
-        bundle.startDate?.toISOString(),
-        bundle.endDate?.toISOString(),
-        bundle.metadata ? JSON.stringify(bundle.metadata) : null,
-        now,
-        now,
-      ],
-    );
-    return mapToBundle(result!);
   }
+
+  const result = await queryOne<DbProductBundle>(
+    `INSERT INTO "productBundle" (
+      "productId", "name", "slug", "description", "bundleType", "pricingType",
+      "fixedPriceCents", "discountPercent", "discountAmountCents", "minPriceCents", "maxPriceCents",
+      "currencyCode", "minItems", "maxItems", "minQuantity", "maxQuantity",
+      "requireAllItems", "allowDuplicates", "showSavings", "savingsAmountCents",
+      "savingsPercent", "imageUrl", "sortOrder", "isActive", "startDate", "endDate",
+      "metadata", "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)
+    RETURNING *`,
+    [bundle.productId, ...bundleFieldValues(bundle, slug, true), now, now],
+  );
+  return mapToBundle(result!);
+}
+
+/** Column values from "name" through "metadata", shared by insert and update. */
+function bundleFieldValues(
+  bundle: Partial<ProductBundle> & { name: string },
+  slug: string,
+  isActive: boolean,
+): unknown[] {
+  return [
+    bundle.name,
+    slug,
+    bundle.description,
+    bundle.bundleType || 'fixed',
+    bundle.pricingType || 'fixed',
+    bundle.fixedPriceCents,
+    bundle.discountPercent,
+    bundle.discountAmountCents,
+    bundle.minPriceCents,
+    bundle.maxPriceCents,
+    bundle.currencyCode || 'USD',
+    bundle.minItems,
+    bundle.maxItems,
+    bundle.minQuantity || 1,
+    bundle.maxQuantity,
+    bundle.requireAllItems !== false,
+    bundle.allowDuplicates || false,
+    bundle.showSavings !== false,
+    bundle.savingsAmountCents,
+    bundle.savingsPercent,
+    bundle.imageUrl,
+    bundle.sortOrder || 0,
+    isActive,
+    bundle.startDate?.toISOString(),
+    bundle.endDate?.toISOString(),
+    bundle.metadata ? JSON.stringify(bundle.metadata) : null,
+  ];
 }
 
 export async function deleteBundle(productBundleId: string): Promise<void> {
@@ -248,53 +225,40 @@ export async function saveBundleItem(
         "isRequired" = $7, "isDefault" = $8, "priceAdjustmentCents" = $9,
         "discountPercent" = $10, "sortOrder" = $11, "metadata" = $12, "updatedAt" = $13
       WHERE "bundleItemId" = $14`,
-      [
-        item.productId,
-        item.productVariantId,
-        item.slotName,
-        item.quantity || 1,
-        item.minQuantity || 1,
-        item.maxQuantity,
-        item.isRequired !== false,
-        item.isDefault || false,
-        item.priceAdjustmentCents || 0,
-        item.discountPercent || null,
-        item.sortOrder || 0,
-        item.metadata ? JSON.stringify(item.metadata) : null,
-        now,
-        item.bundleItemId,
-      ],
+      [...bundleItemFieldValues(item), now, item.bundleItemId],
     );
     return (await getBundleItem(item.bundleItemId))!;
-  } else {
-    const result = await queryOne<DbProductBundleItem>(
-      `INSERT INTO "productBundleItem" (
-        "productBundleId", "productId", "productVariantId", "slotName",
-        "quantity", "minQuantity", "maxQuantity", "isRequired", "isDefault",
-        "priceAdjustmentCents", "discountPercent", "sortOrder", "metadata",
-        "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-      RETURNING *`,
-      [
-        item.productBundleId,
-        item.productId,
-        item.productVariantId,
-        item.slotName,
-        item.quantity || 1,
-        item.minQuantity || 1,
-        item.maxQuantity,
-        item.isRequired !== false,
-        item.isDefault || false,
-        item.priceAdjustmentCents || 0,
-        item.discountPercent || null,
-        item.sortOrder || 0,
-        item.metadata ? JSON.stringify(item.metadata) : null,
-        now,
-        now,
-      ],
-    );
-    return mapToBundleItem(result!);
   }
+
+  const result = await queryOne<DbProductBundleItem>(
+    `INSERT INTO "productBundleItem" (
+      "productBundleId", "productId", "productVariantId", "slotName",
+      "quantity", "minQuantity", "maxQuantity", "isRequired", "isDefault",
+      "priceAdjustmentCents", "discountPercent", "sortOrder", "metadata",
+      "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    RETURNING *`,
+    [item.productBundleId, ...bundleItemFieldValues(item), now, now],
+  );
+  return mapToBundleItem(result!);
+}
+
+/** Column values from "productId" through "metadata", shared by insert and update. */
+function bundleItemFieldValues(item: Partial<BundleItem> & { productId: string }): unknown[] {
+  return [
+    item.productId,
+    item.productVariantId,
+    item.slotName,
+    item.quantity || 1,
+    item.minQuantity || 1,
+    item.maxQuantity,
+    item.isRequired !== false,
+    item.isDefault || false,
+    item.priceAdjustmentCents || 0,
+    item.discountPercent || null,
+    item.sortOrder || 0,
+    item.metadata ? JSON.stringify(item.metadata) : null,
+  ];
 }
 
 export async function deleteBundleItem(bundleItemId: string): Promise<void> {
@@ -311,20 +275,42 @@ export async function calculateBundlePrice(
   const items = await getBundleItems(productBundleId);
 
   if (bundle.pricingType === 'fixed' && bundle.fixedPriceCents) {
-    const fixedPriceCents = toCents(bundle.fixedPriceCents);
-    let individualTotalCents = 0;
-    for (const item of items) {
-      const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId ?? undefined);
-      individualTotalCents += itemPriceCents * (item.quantity ?? 1);
-    }
-    const savingsCents = individualTotalCents - fixedPriceCents;
-    return {
-      priceCents: fixedPriceCents,
-      savingsCents: savingsCents > 0 ? savingsCents : 0,
-      savingsPercent: savingsCents > 0 ? (savingsCents / individualTotalCents) * 100 : 0,
-    };
+    return fixedBundlePrice(bundle, items);
   }
 
+  const { totalCents, originalTotalCents } = await sumItemPrices(items, selectedItems);
+  const finalCents = applyBundleDiscounts(bundle, totalCents);
+
+  const savingsCents = originalTotalCents - finalCents;
+  return {
+    priceCents: Math.max(finalCents, toCents(bundle.minPriceCents)),
+    savingsCents: savingsCents > 0 ? savingsCents : 0,
+    savingsPercent: savingsCents > 0 ? (savingsCents / originalTotalCents) * 100 : 0,
+  };
+}
+
+async function fixedBundlePrice(
+  bundle: ProductBundle,
+  items: BundleItem[],
+): Promise<{ priceCents: number; savingsCents: number; savingsPercent: number }> {
+  const fixedPriceCents = toCents(bundle.fixedPriceCents);
+  let individualTotalCents = 0;
+  for (const item of items) {
+    const itemPriceCents = await getProductPriceCents(item.productId, item.productVariantId ?? undefined);
+    individualTotalCents += itemPriceCents * (item.quantity ?? 1);
+  }
+  const savingsCents = individualTotalCents - fixedPriceCents;
+  return {
+    priceCents: fixedPriceCents,
+    savingsCents: savingsCents > 0 ? savingsCents : 0,
+    savingsPercent: savingsCents > 0 ? (savingsCents / individualTotalCents) * 100 : 0,
+  };
+}
+
+async function sumItemPrices(
+  items: BundleItem[],
+  selectedItems?: { productId: string; productVariantId?: string; quantity: number }[],
+): Promise<{ totalCents: number; originalTotalCents: number }> {
   let totalCents = 0;
   let originalTotalCents = 0;
 
@@ -338,20 +324,18 @@ export async function calculateBundlePrice(
     originalTotalCents += itemPriceCents * quantity;
   }
 
+  return { totalCents, originalTotalCents };
+}
+
+function applyBundleDiscounts(bundle: ProductBundle, totalCents: number): number {
+  let result = totalCents;
   if (bundle.discountPercent) {
-    totalCents = Math.round(totalCents * (1 - Number(bundle.discountPercent) / 100));
+    result = Math.round(result * (1 - Number(bundle.discountPercent) / 100));
   }
   if (bundle.discountAmountCents) {
-    totalCents = totalCents - toCents(bundle.discountAmountCents);
+    result = result - toCents(bundle.discountAmountCents);
   }
-
   const maxPriceCents = toCents(bundle.maxPriceCents);
-  if (maxPriceCents && totalCents > maxPriceCents) totalCents = maxPriceCents;
-
-  const savingsCents = originalTotalCents - totalCents;
-  return {
-    priceCents: Math.max(totalCents, toCents(bundle.minPriceCents)),
-    savingsCents: savingsCents > 0 ? savingsCents : 0,
-    savingsPercent: savingsCents > 0 ? (savingsCents / originalTotalCents) * 100 : 0,
-  };
+  if (maxPriceCents && result > maxPriceCents) result = maxPriceCents;
+  return result;
 }

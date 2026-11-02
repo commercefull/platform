@@ -201,55 +201,53 @@ export const editPromotionForm = async (req: HttpRequest, res: HttpResponse): Pr
 // Update Promotion
 // ============================================================================
 
+interface PromotionFormFields {
+  name?: string;
+  description?: string | null;
+  status?: string;
+  value?: string;
+  minOrderAmount?: string;
+  maxDiscountAmount?: string;
+  currency?: string;
+  usageLimit?: string;
+  usageLimitPerCustomer?: string;
+  startsAt?: string;
+  endsAt?: string;
+  isActive?: string | boolean;
+}
+
+function buildPromotionUpdates(body: PromotionFormFields): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+  const verbatim = (field: keyof PromotionFormFields, key: string): void => {
+    const value = body[field];
+    if (value !== undefined) updates[key] = value;
+  };
+  const convert = <T>(field: keyof PromotionFormFields, key: string, fn: (v: string) => T): void => {
+    const value = body[field] as string | undefined;
+    if (value !== undefined) updates[key] = value ? fn(value) : undefined;
+  };
+
+  verbatim('name', 'name');
+  verbatim('description', 'description');
+  verbatim('status', 'status');
+  const updateCurrency = body.currency || 'USD';
+  if (body.value !== undefined) updates.value = parseFloat(body.value);
+  convert('minOrderAmount', 'minOrderAmountCents', v => toMinorUnits(parseFloat(v), updateCurrency));
+  convert('maxDiscountAmount', 'maxDiscountAmountCents', v => toMinorUnits(parseFloat(v), updateCurrency));
+  convert('usageLimit', 'usageLimit', v => parseInt(v));
+  convert('usageLimitPerCustomer', 'usageLimitPerCustomer', v => parseInt(v));
+  convert('startsAt', 'startsAt', v => new Date(v));
+  convert('endsAt', 'endsAt', v => new Date(v));
+  if (body.isActive !== undefined) updates.isActive = body.isActive === 'true' || body.isActive === true;
+  return updates;
+}
+
 export const updatePromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { promotionId } = req.params;
-  const updates: Record<string, unknown> = {};
 
   // Map form fields to update object
   const body = req.body as HttpRequestBody;
-  const {
-    name,
-    description,
-    status,
-    value,
-    minOrderAmount,
-    maxDiscountAmount,
-    currency,
-    usageLimit,
-    usageLimitPerCustomer,
-    startsAt,
-    endsAt,
-    isActive,
-  } = body as {
-    name?: string;
-    description?: string | null;
-    status?: string;
-    value?: string;
-    minOrderAmount?: string;
-    maxDiscountAmount?: string;
-    currency?: string;
-    usageLimit?: string;
-    usageLimitPerCustomer?: string;
-    startsAt?: string;
-    endsAt?: string;
-    isActive?: string | boolean;
-  };
-
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description;
-  if (status !== undefined) updates.status = status;
-  if (value !== undefined) updates.value = parseFloat(value);
-  const updateCurrency = currency || 'USD';
-  if (minOrderAmount !== undefined)
-    updates.minOrderAmountCents = minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), updateCurrency) : undefined;
-  if (maxDiscountAmount !== undefined)
-    updates.maxDiscountAmountCents = maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), updateCurrency) : undefined;
-  if (usageLimit !== undefined) updates.usageLimit = usageLimit ? parseInt(usageLimit) : undefined;
-  if (usageLimitPerCustomer !== undefined)
-    updates.usageLimitPerCustomer = usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined;
-  if (startsAt !== undefined) updates.startsAt = startsAt ? new Date(startsAt) : undefined;
-  if (endsAt !== undefined) updates.endsAt = endsAt ? new Date(endsAt) : undefined;
-  if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
+  const updates = buildPromotionUpdates(body as PromotionFormFields);
 
   const command = new UpdatePromotionCommand(promotionId, updates);
   await updatePromotionUseCase.execute(command);
@@ -274,82 +272,76 @@ export const deletePromotion = async (req: HttpRequest, res: HttpResponse): Prom
 // Promotion Preview (server-side evaluation via EvaluatePromotionsUseCase)
 // ============================================================================
 
+interface PreviewItem {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPriceCents: number;
+  categoryId?: string;
+  isDigital?: boolean;
+}
+
+interface PreviewBody {
+  items?: PreviewItem[];
+  subtotal?: string;
+  shippingAmount?: string;
+  customerId?: string;
+  customerGroup?: string;
+  isFirstOrder?: string;
+  shippingMethodId?: string;
+  paymentMethodId?: string;
+  couponCode?: string;
+  currency?: string;
+  itemQty?: string;
+  cartTotal?: string;
+}
+
+// Build sample cart items from request (single synthetic item when no list given)
+function previewItems(body: PreviewBody): PreviewItem[] {
+  if (Array.isArray(body.items)) return body.items;
+  return [
+    {
+      productId: 'sample-product',
+      name: 'Sample Product',
+      quantity: parseInt(body.itemQty as string, 10) || 1,
+      unitPriceCents: toMinorUnits(
+        parseFloat(body.cartTotal as string) || parseFloat(body.subtotal as string) || 100,
+        body.currency || 'USD',
+      ),
+    },
+  ];
+}
+
+function buildPreviewContext(body: PreviewBody): PromotionEvaluationContext {
+  const currency = body.currency || 'USD';
+  const items = previewItems(body);
+  return {
+    items: items.map(item => ({
+      productId: item.productId || 'sample-product',
+      name: item.name || 'Sample Product',
+      quantity: item.quantity || 1,
+      unitPriceCents: item.unitPriceCents || 0,
+      categoryId: item.categoryId,
+      isDigital: item.isDigital,
+    })),
+    subtotalCents: body.subtotal
+      ? toMinorUnits(parseFloat(body.subtotal as string), currency)
+      : items.reduce((sum, i) => sum + i.unitPriceCents * i.quantity, 0),
+    shippingAmountCents: toMinorUnits(parseFloat(body.shippingAmount as string) || 0, currency),
+    customerId: body.customerId || undefined,
+    customerGroup: body.customerGroup || undefined,
+    isFirstOrder: body.isFirstOrder === 'true',
+    shippingMethodId: body.shippingMethodId || undefined,
+    paymentMethodId: body.paymentMethodId || undefined,
+    couponCode: body.couponCode || undefined,
+    currency,
+  };
+}
+
 export const previewPromotion = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as HttpRequestBody;
-    const {
-      items: rawItems,
-      subtotal,
-      shippingAmount,
-      customerId,
-      customerGroup,
-      isFirstOrder,
-      shippingMethodId,
-      paymentMethodId,
-      couponCode,
-      currency,
-    } = body as {
-      items?: Array<{
-        productId: string;
-        name: string;
-        quantity: number;
-        unitPriceCents: number;
-        categoryId?: string;
-        isDigital?: boolean;
-      }>;
-      subtotal?: string;
-      shippingAmount?: string;
-      customerId?: string;
-      customerGroup?: string;
-      isFirstOrder?: string;
-      shippingMethodId?: string;
-      paymentMethodId?: string;
-      couponCode?: string;
-      currency?: string;
-    };
-
-    // Build sample cart items from request
-    const items = Array.isArray(rawItems)
-      ? rawItems
-      : [
-          {
-            productId: 'sample-product',
-            name: 'Sample Product',
-            quantity: parseInt(body.itemQty as string, 10) || 1,
-            unitPriceCents: toMinorUnits(parseFloat(body.cartTotal as string) || parseFloat(subtotal as string) || 100, currency || 'USD'),
-          },
-        ];
-
-    const context: PromotionEvaluationContext = {
-      items: items.map(
-        (item: {
-          productId: string;
-          name: string;
-          quantity: number;
-          unitPriceCents: number;
-          categoryId?: string;
-          isDigital?: boolean;
-        }) => ({
-          productId: item.productId || 'sample-product',
-          name: item.name || 'Sample Product',
-          quantity: item.quantity || 1,
-          unitPriceCents: item.unitPriceCents || 0,
-          categoryId: item.categoryId,
-          isDigital: item.isDigital,
-        }),
-      ),
-      subtotalCents: subtotal
-        ? toMinorUnits(parseFloat(subtotal as string), currency || 'USD')
-        : items.reduce((sum: number, i: { unitPriceCents: number; quantity: number }) => sum + i.unitPriceCents * i.quantity, 0),
-      shippingAmountCents: toMinorUnits(parseFloat(shippingAmount as string) || 0, currency || 'USD'),
-      customerId: customerId || undefined,
-      customerGroup: customerGroup || undefined,
-      isFirstOrder: isFirstOrder === 'true',
-      shippingMethodId: shippingMethodId || undefined,
-      paymentMethodId: paymentMethodId || undefined,
-      couponCode: couponCode || undefined,
-      currency: currency || 'USD',
-    };
+    const body = req.body as PreviewBody;
+    const context = buildPreviewContext(body);
 
     const result = await evaluatePromotionsUseCase.execute(context);
 

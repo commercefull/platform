@@ -12,6 +12,52 @@ import {
 } from '../../application/useCases/wired';
 import { AutomationRuleNotFoundError, InvalidAutomationRuleError } from '../../domain/errors/AutomationErrors';
 
+interface CreateRuleBody {
+  name: string;
+  description?: string;
+  triggerType?: string;
+  triggerConfig?: Record<string, unknown>;
+  trigger?: Record<string, unknown>;
+  conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
+  conditionMatchMode?: 'all' | 'any';
+  actions: Array<{ type: string; config?: Record<string, unknown>; channel?: string; delayMs?: number }>;
+  actionExecutionMode?: 'sequential' | 'parallel';
+  priority?: number;
+  organizationId?: string;
+  createdBy?: string;
+}
+
+/**
+ * Normalize the create-rule payload: accepts "trigger" as shorthand for
+ * triggerType/triggerConfig and "channel" as shorthand for action config.
+ */
+function normalizeCreatePayload(body: CreateRuleBody, fallbackUserId: string) {
+  let triggerType = body.triggerType || '';
+  let triggerConfig = body.triggerConfig || {};
+  if (body.trigger) {
+    const evt = body.trigger.event || body.trigger.type || '';
+    if (evt) {
+      triggerType = 'event';
+      triggerConfig = { eventName: String(evt), ...(body.trigger as Record<string, unknown>) };
+    }
+  }
+
+  const actions = (body.actions || []).map(a => ({
+    type: a.type,
+    config: a.config || (a.channel ? { channel: a.channel } : {}),
+    delayMs: a.delayMs,
+  }));
+
+  return {
+    ...body,
+    triggerType,
+    triggerConfig,
+    actions,
+    organizationId: body.organizationId || fallbackUserId,
+    createdBy: body.createdBy || fallbackUserId,
+  };
+}
+
 class AutomationController {
   async listRules(req: HttpRequest, res: HttpResponse): Promise<void> {
     const activeOnly = req.query.activeOnly === 'true';
@@ -33,52 +79,12 @@ class AutomationController {
   }
 
   async createRule(
-    req: HttpRequest<
-      Record<string, never>,
-      Record<string, never>,
-      {
-        name: string;
-        description?: string;
-        triggerType?: string;
-        triggerConfig?: Record<string, unknown>;
-        trigger?: Record<string, unknown>;
-        conditions?: Array<{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string }>;
-        conditionMatchMode?: 'all' | 'any';
-        actions: Array<{ type: string; config?: Record<string, unknown>; channel?: string; delayMs?: number }>;
-        actionExecutionMode?: 'sequential' | 'parallel';
-        priority?: number;
-        organizationId?: string;
-        createdBy?: string;
-      }
-    >,
+    req: HttpRequest<Record<string, never>, Record<string, never>, CreateRuleBody>,
     res: HttpResponse,
   ): Promise<void> {
     try {
-      const body = req.body;
-      // Normalize: accept "trigger" as shorthand for triggerType/triggerConfig
-      let triggerType = body.triggerType || '';
-      let triggerConfig = body.triggerConfig || {};
-      if (body.trigger) {
-        const evt = body.trigger.event || body.trigger.type || '';
-        if (evt) {
-          triggerType = 'event';
-          triggerConfig = { eventName: String(evt), ...(body.trigger as Record<string, unknown>) };
-        }
-      }
-      // Normalize: accept "channel" as shorthand for config
-      const actions = (body.actions || []).map(a => ({
-        type: a.type,
-        config: a.config || (a.channel ? { channel: a.channel } : {}),
-        delayMs: a.delayMs,
-      }));
-      const payload = {
-        ...body,
-        triggerType,
-        triggerConfig,
-        actions,
-        organizationId: body.organizationId || (req.user as { id?: string })?.id || '',
-        createdBy: body.createdBy || (req.user as { id?: string })?.id || '',
-      };
+      const fallbackUserId = (req.user as { id?: string })?.id || '';
+      const payload = normalizeCreatePayload(req.body, fallbackUserId);
       const rule = await createAutomationRuleUseCase.execute(payload as Parameters<typeof createAutomationRuleUseCase.execute>[0]);
       jsonResponse(res, 201, { success: true, data: rule.toJSON() });
     } catch (error) {

@@ -36,6 +36,38 @@ export type SupplierReceivingItemUpdateParams = Partial<
   >
 >;
 
+// `||`/`??`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function nvl<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value ?? defaultValue;
+}
+
+function receivingItemInsertValues(params: SupplierReceivingItemCreateParams, now: string): unknown[] {
+  return [
+    params.supplierReceivingRecordId,
+    fallback(params.supplierPurchaseOrderItemId, null),
+    params.productId,
+    fallback(params.productVariantId, null),
+    params.sku,
+    params.name,
+    fallback(params.expectedQuantity, null),
+    nvl(params.receivedQuantity, nvl(params.expectedQuantity, 0)),
+    fallback(params.rejectedQuantity, 0),
+    fallback(params.distributionWarehouseBinId, null),
+    fallback(params.lotNumber, null),
+    fallback(params.serialNumbers, null),
+    fallback(params.expiryDate, null),
+    fallback(params.status, 'received'),
+    fallback(params.acceptanceStatus, 'pending'),
+    fallback(params.inspectionNotes, null),
+    fallback(params.discrepancyReason, null),
+    now,
+    now,
+  ];
+}
+
 export class SupplierReceivingItemRepo {
   async findById(id: string): Promise<SupplierReceivingItem | null> {
     return await queryOne<DbSupplierReceivingItem>(`SELECT * FROM "supplierReceivingItem" WHERE "supplierReceivingItemId" = $1`, [id]);
@@ -100,7 +132,6 @@ export class SupplierReceivingItemRepo {
 
   async create(params: SupplierReceivingItemCreateParams): Promise<SupplierReceivingItem> {
     const now = unixTimestamp();
-    const receivedQuantity = params.receivedQuantity ?? params.expectedQuantity ?? 0;
 
     const result = await queryOne<DbSupplierReceivingItem>(
       `INSERT INTO "supplierReceivingItem" (
@@ -109,27 +140,7 @@ export class SupplierReceivingItemRepo {
         "serialNumbers", "expiryDate", "status", "acceptanceStatus", "inspectionNotes",
         "discrepancyReason", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *`,
-      [
-        params.supplierReceivingRecordId,
-        params.supplierPurchaseOrderItemId || null,
-        params.productId,
-        params.productVariantId || null,
-        params.sku,
-        params.name,
-        params.expectedQuantity || null,
-        receivedQuantity,
-        params.rejectedQuantity || 0,
-        params.distributionWarehouseBinId || null,
-        params.lotNumber || null,
-        params.serialNumbers || null,
-        params.expiryDate || null,
-        params.status || 'received',
-        params.acceptanceStatus || 'pending',
-        params.inspectionNotes || null,
-        params.discrepancyReason || null,
-        now,
-        now,
-      ],
+      receivingItemInsertValues(params, now),
     );
 
     if (!result) throw new FailedToCreateSupplierEntityError('Failed to create receiving item');

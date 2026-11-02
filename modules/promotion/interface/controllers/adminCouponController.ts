@@ -160,54 +160,61 @@ export const editCouponForm = async (req: HttpRequest, res: HttpResponse): Promi
   });
 };
 
-export const updateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const { couponId } = req.params;
-  const updates: Record<string, unknown> = {};
+interface CouponFormFields {
+  name?: string;
+  description?: string;
+  type?: string;
+  discountAmount?: string;
+  currencyCode?: string;
+  minOrderAmount?: string;
+  maxDiscountAmount?: string;
+  startDate?: string;
+  endDate?: string;
+  isActive?: string;
+  isOneTimeUse?: string;
+  maxUsage?: string;
+  maxUsagePerCustomer?: string;
+}
 
-  const body = req.body as HttpRequestBody;
-  const {
-    name,
-    description,
-    type,
-    discountAmount,
-    currencyCode,
-    minOrderAmount,
-    maxDiscountAmount,
-    startDate,
-    endDate,
-    isActive,
-    isOneTimeUse,
-    maxUsage,
-    maxUsagePerCustomer,
-  } = body as {
-    name?: string;
-    description?: string;
-    type?: string;
-    discountAmount?: string;
-    currencyCode?: string;
-    minOrderAmount?: string;
-    maxDiscountAmount?: string;
-    startDate?: string;
-    endDate?: string;
-    isActive?: string;
-    isOneTimeUse?: string;
-    maxUsage?: string;
-    maxUsagePerCustomer?: string;
+function buildCouponUpdates(body: CouponFormFields): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+  const verbatim = (field: keyof CouponFormFields, key: string): void => {
+    const value = body[field];
+    if (value !== undefined) updates[key] = value;
+  };
+  const orUndefined = (field: keyof CouponFormFields, key: string): void => {
+    const value = body[field];
+    if (value !== undefined) updates[key] = value || undefined;
+  };
+  const convert = <T>(field: keyof CouponFormFields, key: string, fn: (v: string) => T): void => {
+    const value = body[field];
+    if (value !== undefined) updates[key] = value ? fn(value) : undefined;
+  };
+  const boolFlag = (field: keyof CouponFormFields, key: string): void => {
+    const value = body[field];
+    if (value !== undefined) updates[key] = value === 'true';
   };
 
-  if (name !== undefined) updates.name = name;
-  if (description !== undefined) updates.description = description || undefined;
-  if (type !== undefined) updates.type = type;
-  if (discountAmount !== undefined) updates.discountAmount = discountAmount ? parseFloat(discountAmount) : undefined;
-  if (currencyCode !== undefined) updates.currencyCode = currencyCode;
-  if (minOrderAmount !== undefined) updates.minOrderAmount = minOrderAmount ? parseFloat(minOrderAmount) : undefined;
-  if (maxDiscountAmount !== undefined) updates.maxDiscountAmount = maxDiscountAmount ? parseFloat(maxDiscountAmount) : undefined;
-  if (startDate !== undefined) updates.startDate = startDate ? new Date(startDate) : undefined;
-  if (endDate !== undefined) updates.endDate = endDate ? new Date(endDate) : undefined;
-  if (isActive !== undefined) updates.isActive = isActive === 'true';
-  if (isOneTimeUse !== undefined) updates.isOneTimeUse = isOneTimeUse === 'true';
-  if (maxUsage !== undefined) updates.maxUsage = maxUsage ? parseInt(maxUsage) : undefined;
-  if (maxUsagePerCustomer !== undefined) updates.maxUsagePerCustomer = maxUsagePerCustomer ? parseInt(maxUsagePerCustomer) : undefined;
+  verbatim('name', 'name');
+  orUndefined('description', 'description');
+  verbatim('type', 'type');
+  convert('discountAmount', 'discountAmount', parseFloat);
+  verbatim('currencyCode', 'currencyCode');
+  convert('minOrderAmount', 'minOrderAmount', parseFloat);
+  convert('maxDiscountAmount', 'maxDiscountAmount', parseFloat);
+  convert('startDate', 'startDate', v => new Date(v));
+  convert('endDate', 'endDate', v => new Date(v));
+  boolFlag('isActive', 'isActive');
+  boolFlag('isOneTimeUse', 'isOneTimeUse');
+  convert('maxUsage', 'maxUsage', v => parseInt(v));
+  convert('maxUsagePerCustomer', 'maxUsagePerCustomer', v => parseInt(v));
+  return updates;
+}
+
+export const updateCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
+  const { couponId } = req.params;
+  const body = req.body as HttpRequestBody;
+  const updates = buildCouponUpdates(body as CouponFormFields);
 
   const _coupon = await manageCouponsUseCase.update(couponId, updates);
 

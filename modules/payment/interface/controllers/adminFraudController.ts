@@ -185,25 +185,31 @@ function parseConditionsFromForm(conditions: unknown): Record<string, unknown> {
   }
   // If conditions is an array of {attribute, operator, value} from the condition builder
   if (Array.isArray(conditions)) {
-    const result: Record<string, unknown> = {};
-    for (const cond of conditions) {
-      if (cond && typeof cond === 'object') {
-        const c = cond as { attribute?: string; operator?: string; value?: string };
-        if (c.attribute && c.operator) {
-          let value: unknown = c.value;
-          // Try to parse numeric values
-          if (value && typeof value === 'string' && !isNaN(Number(value))) {
-            value = Number(value);
-          }
-          // Handle 'in' operator (comma-separated)
-          if (c.operator === 'in' && typeof value === 'string') {
-            value = value.split(',').map(v => v.trim());
-          }
-          result[c.attribute] = { operator: c.operator, value };
-        }
-      }
-    }
-    return result;
+    return parseConditionArray(conditions);
   }
   return conditions as Record<string, unknown>;
+}
+
+function parseConditionArray(conditions: unknown[]): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const cond of conditions) {
+    if (!cond || typeof cond !== 'object') continue;
+    const c = cond as { attribute?: string; operator?: string; value?: string };
+    if (c.attribute && c.operator) {
+      result[c.attribute] = { operator: c.operator, value: normalizeConditionValue(c.operator, c.value) };
+    }
+  }
+  return result;
+}
+
+function normalizeConditionValue(operator: string, value: unknown): unknown {
+  // Try to parse numeric values
+  if (value && typeof value === 'string' && !isNaN(Number(value))) {
+    return Number(value);
+  }
+  // Handle 'in' operator (comma-separated)
+  if (operator === 'in' && typeof value === 'string') {
+    return value.split(',').map(v => v.trim());
+  }
+  return value;
 }

@@ -20,6 +20,31 @@ import {
   HealthCheckResult,
 } from '../GatewayAdapter';
 
+function buildPaymentIntentBody(request: PaymentRequest): URLSearchParams {
+  const body = new URLSearchParams({
+    amountCents: String(Math.round(request.amountCents * 100)),
+    currency: request.currency.toLowerCase(),
+    'metadata[orderId]': request.orderId,
+    automatic_payment_methods: 'enabled',
+  });
+
+  if (request.customerEmail) body.append('receipt_email', request.customerEmail);
+  if (request.description) body.append('description', request.description);
+  if (request.returnUrl) {
+    body.append('confirmation_method', 'manual');
+  }
+
+  // Delegated/tokenized credentials (e.g. Stripe Shared Payment Tokens from
+  // agentic surfaces) are charged server-side: confirm immediately with the
+  // opaque token as the payment method. Raw PAN data never reaches us.
+  if (request.paymentMethodToken) {
+    body.append('payment_method', request.paymentMethodToken);
+    body.append('confirm', 'true');
+  }
+
+  return body;
+}
+
 const STRIPE_CAPABILITIES: PSPCapabilities = {
   supportsAuthCapture: true,
   supportsPartialCapture: true,
@@ -92,26 +117,7 @@ export class StripeAdapter implements PSPAdapter {
 
   async initiatePayment(request: PaymentRequest, config: PSPConfig): Promise<PaymentResponse> {
     const baseUrl = config.testMode ? 'https://api.stripe.com/v1' : 'https://api.stripe.com/v1';
-    const body = new URLSearchParams({
-      amountCents: String(Math.round(request.amountCents * 100)),
-      currency: request.currency.toLowerCase(),
-      'metadata[orderId]': request.orderId,
-      automatic_payment_methods: 'enabled',
-    });
-
-    if (request.customerEmail) body.append('receipt_email', request.customerEmail);
-    if (request.description) body.append('description', request.description);
-    if (request.returnUrl) {
-      body.append('confirmation_method', 'manual');
-    }
-
-    // Delegated/tokenized credentials (e.g. Stripe Shared Payment Tokens from
-    // agentic surfaces) are charged server-side: confirm immediately with the
-    // opaque token as the payment method. Raw PAN data never reaches us.
-    if (request.paymentMethodToken) {
-      body.append('payment_method', request.paymentMethodToken);
-      body.append('confirm', 'true');
-    }
+    const body = buildPaymentIntentBody(request);
 
     const res = await fetch(`${baseUrl}/payment_intents`, {
       method: 'POST',

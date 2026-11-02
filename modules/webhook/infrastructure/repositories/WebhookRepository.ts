@@ -14,6 +14,27 @@ import { PaginationOptions } from 'libs/types/pagination';
 import type { WebhookEndpoint as DbWebhookEndpoint } from '../../../../libs/db/types';
 import type { WebhookDelivery as DbWebhookDelivery } from '../../../../libs/db/types';
 
+// Field → predicate pairs; parameter position is derived from the value count.
+const DELIVERY_FILTER_FIELDS: { field: keyof WebhookDeliveryFilters; clause: string }[] = [
+  { field: 'webhookEndpointId', clause: '"webhookEndpointId" = $%d' },
+  { field: 'eventType', clause: '"eventType" = $%d' },
+  { field: 'status', clause: '"status" = $%d' },
+  { field: 'since', clause: '"createdAt" >= $%d' },
+];
+
+function deliveryWhereClause(filters?: WebhookDeliveryFilters): { where: string; values: unknown[] } {
+  const conditions: string[] = [];
+  const values: unknown[] = [];
+  for (const { field, clause } of DELIVERY_FILTER_FIELDS) {
+    const value = filters?.[field];
+    if (value) {
+      conditions.push(clause.replace('%d', String(values.length + 1)));
+      values.push(value);
+    }
+  }
+  return { where: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '', values };
+}
+
 class WebhookRepository implements WebhookRepositoryInterface {
   // =========================================================================
   // Endpoint Operations
@@ -192,27 +213,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
     filters?: WebhookDeliveryFilters,
     pagination?: PaginationOptions,
   ): Promise<{ data: WebhookDeliveryProps[]; total: number }> {
-    const conditions: string[] = [];
-    const values: unknown[] = [];
-
-    if (filters?.webhookEndpointId) {
-      conditions.push(`"webhookEndpointId" = $${values.length + 1}`);
-      values.push(filters.webhookEndpointId);
-    }
-    if (filters?.eventType) {
-      conditions.push(`"eventType" = $${values.length + 1}`);
-      values.push(filters.eventType);
-    }
-    if (filters?.status) {
-      conditions.push(`"status" = $${values.length + 1}`);
-      values.push(filters.status);
-    }
-    if (filters?.since) {
-      conditions.push(`"createdAt" >= $${values.length + 1}`);
-      values.push(filters.since);
-    }
-
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const { where, values } = deliveryWhereClause(filters);
     const limit = pagination?.limit ?? 50;
     const offset = pagination?.offset ?? 0;
 

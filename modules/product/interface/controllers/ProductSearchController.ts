@@ -9,66 +9,54 @@ import {
 import type { SearchProductsQuery } from '../../application/useCases/attribute/SearchProducts';
 import type { AttributeFilter } from '../../application/ports/ProductSearchPort';
 
+type QueryBag = Record<string, unknown>;
+
+const optBool = (value: unknown): boolean | undefined =>
+  value === 'true' ? true : value === 'false' ? false : undefined;
+const optInt = (value: unknown): number | undefined => (value ? parseInt(value as string, 10) : undefined);
+
+/** Parse attribute filters from query string. Format: attributes[0][code]=color&attributes[0][value]=red&attributes[0][operator]=eq */
+function parseAttributes(attributes: unknown): unknown[] | undefined {
+  if (!attributes) return undefined;
+  try {
+    return typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as unknown[]);
+  } catch {
+    // If not JSON, try to parse from query params
+    return [];
+  }
+}
+
+function buildSearchQuery(query: QueryBag): SearchProductsQuery {
+  const q = query as QueryBag & { [k: string]: unknown };
+  return {
+    query: (q.q || q.query) as string,
+    categoryId: q.categoryId as string,
+    categoryIds: q.categoryIds ? (q.categoryIds as string).split(',') : undefined,
+    productTypeId: q.productTypeId as string,
+    minPriceCents: optInt(q.minPriceCents),
+    maxPriceCents: optInt(q.maxPriceCents),
+    status: q.status as string,
+    visibility: q.visibility as string,
+    isFeatured: optBool(q.isFeatured),
+    isNew: optBool(q.isNew),
+    isBestseller: optBool(q.isBestseller),
+    hasVariants: optBool(q.hasVariants),
+    inStock: optBool(q.inStock),
+    attributes: parseAttributes(q.attributes) as AttributeFilter[] | undefined,
+    sortBy: q.sortBy as SearchProductsQuery['sortBy'],
+    sortOrder: q.sortOrder as SearchProductsQuery['sortOrder'],
+    page: optInt(q.page) ?? 1,
+    limit: optInt(q.limit) ?? 20,
+  } as SearchProductsQuery;
+}
+
 class ProductSearchController {
   /**
    * GET /products/search
    * Search products with filters and facets
    */
   async search(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const {
-      q,
-      query,
-      categoryId,
-      categoryIds,
-      productTypeId,
-      minPriceCents,
-      maxPriceCents,
-      status,
-      visibility,
-      isFeatured,
-      isNew,
-      isBestseller,
-      hasVariants,
-      inStock,
-      attributes,
-      sortBy,
-      sortOrder,
-      page,
-      limit,
-    } = req.query;
-
-    // Parse attribute filters from query string
-    // Format: attributes[0][code]=color&attributes[0][value]=red&attributes[0][operator]=eq
-    let parsedAttributes: unknown[] | undefined;
-    if (attributes) {
-      try {
-        parsedAttributes = typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as unknown[]);
-      } catch {
-        // If not JSON, try to parse from query params
-        parsedAttributes = [];
-      }
-    }
-
-    const result = await searchProductsUseCase.execute({
-      query: (q || query) as string,
-      categoryId: categoryId as string,
-      categoryIds: categoryIds ? (categoryIds as string).split(',') : undefined,
-      productTypeId: productTypeId as string,
-      minPriceCents: minPriceCents ? parseInt(minPriceCents as string, 10) : undefined,
-      maxPriceCents: maxPriceCents ? parseInt(maxPriceCents as string, 10) : undefined,
-      status: status as string,
-      visibility: visibility as string,
-      isFeatured: isFeatured === 'true' ? true : isFeatured === 'false' ? false : undefined,
-      isNew: isNew === 'true' ? true : isNew === 'false' ? false : undefined,
-      isBestseller: isBestseller === 'true' ? true : isBestseller === 'false' ? false : undefined,
-      hasVariants: hasVariants === 'true' ? true : hasVariants === 'false' ? false : undefined,
-      inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
-      attributes: parsedAttributes as AttributeFilter[] | undefined,
-      sortBy: sortBy as SearchProductsQuery['sortBy'],
-      sortOrder: sortOrder as SearchProductsQuery['sortOrder'],
-      page: page ? parseInt(page as string, 10) : 1,
-      limit: limit ? parseInt(limit as string, 10) : 20,
-    });
+    const result = await searchProductsUseCase.execute(buildSearchQuery(req.query));
 
     if (!result.success) {
       jsonResponse(res, 400, result);

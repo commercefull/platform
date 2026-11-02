@@ -46,75 +46,82 @@ export class CustomerRepo implements ICustomerRepository {
   }
 
   async save(customer: Customer): Promise<Customer> {
-    const now = new Date().toISOString();
-
     const existing = await queryOne<{ customerId: string }>('SELECT "customerId" FROM "customer" WHERE "customerId" = $1', [
       customer.customerId,
     ]);
 
     if (existing) {
-      await query(
-        `UPDATE "customer" SET
-          "email" = $1, "firstName" = $2, "lastName" = $3, "phone" = $4,
-          "dateOfBirth" = $5, "isActive" = $6, "isVerified" = $7,
-          "emailVerified" = $8, "phoneVerified" = $9, "lastLoginAt" = $10,
-          "timezone" = $11, "acceptsMarketing" = $12, "tags" = $13, "note" = $14,
-          "taxExempt" = $15, "updatedAt" = $16, "homeMarketId" = $18
-        WHERE "customerId" = $17`,
-        [
-          customer.email,
-          customer.firstName,
-          customer.lastName,
-          customer.phone || null,
-          customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString() : null,
-          customer.isActive,
-          customer.isVerified,
-          customer.emailVerified,
-          customer.phoneVerified,
-          customer.lastLoginAt ? new Date(customer.lastLoginAt).toISOString() : null,
-          customer.timezone || null,
-          customer.acceptsMarketing,
-          customer.tags ? JSON.stringify(customer.tags) : null,
-          customer.note || null,
-          customer.taxExempt,
-          now,
-          customer.customerId,
-          customer.homeMarketId || null,
-        ],
-      );
+      await this.updateCustomerRow(customer);
     } else {
-      await query(
-        `INSERT INTO "customer" (
-          "customerId", "email", "firstName", "lastName", "password", "phone",
-          "dateOfBirth", "isActive", "isVerified", "emailVerified", "phoneVerified",
-          "timezone", "acceptsMarketing", "tags", "note", "taxExempt", "homeMarketId",
-          "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
-        [
-          customer.customerId,
-          customer.email,
-          customer.firstName,
-          customer.lastName,
-          customer.password || '',
-          customer.phone || null,
-          customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString() : null,
-          customer.isActive,
-          customer.isVerified,
-          customer.emailVerified,
-          customer.phoneVerified,
-          customer.timezone || null,
-          customer.acceptsMarketing,
-          customer.tags ? JSON.stringify(customer.tags) : null,
-          customer.note || null,
-          customer.taxExempt,
-          customer.homeMarketId || null,
-          now,
-          now,
-        ],
-      );
+      await this.insertCustomerRow(customer);
     }
 
     return customer;
+  }
+
+  private async updateCustomerRow(customer: Customer): Promise<void> {
+    await query(
+      `UPDATE "customer" SET
+        "email" = $1, "firstName" = $2, "lastName" = $3, "phone" = $4,
+        "dateOfBirth" = $5, "isActive" = $6, "isVerified" = $7,
+        "emailVerified" = $8, "phoneVerified" = $9, "lastLoginAt" = $10,
+        "timezone" = $11, "acceptsMarketing" = $12, "tags" = $13, "note" = $14,
+        "taxExempt" = $15, "updatedAt" = $16, "homeMarketId" = $18
+      WHERE "customerId" = $17`,
+      [
+        customer.email,
+        customer.firstName,
+        customer.lastName,
+        customer.phone || null,
+        customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString() : null,
+        customer.isActive,
+        customer.isVerified,
+        customer.emailVerified,
+        customer.phoneVerified,
+        customer.lastLoginAt ? new Date(customer.lastLoginAt).toISOString() : null,
+        customer.timezone || null,
+        customer.acceptsMarketing,
+        customer.tags ? JSON.stringify(customer.tags) : null,
+        customer.note || null,
+        customer.taxExempt,
+        new Date().toISOString(),
+        customer.customerId,
+        customer.homeMarketId || null,
+      ],
+    );
+  }
+
+  private async insertCustomerRow(customer: Customer): Promise<void> {
+    const now = new Date().toISOString();
+    await query(
+      `INSERT INTO "customer" (
+        "customerId", "email", "firstName", "lastName", "password", "phone",
+        "dateOfBirth", "isActive", "isVerified", "emailVerified", "phoneVerified",
+        "timezone", "acceptsMarketing", "tags", "note", "taxExempt", "homeMarketId",
+        "createdAt", "updatedAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+      [
+        customer.customerId,
+        customer.email,
+        customer.firstName,
+        customer.lastName,
+        customer.password || '',
+        customer.phone || null,
+        customer.dateOfBirth ? new Date(customer.dateOfBirth).toISOString() : null,
+        customer.isActive,
+        customer.isVerified,
+        customer.emailVerified,
+        customer.phoneVerified,
+        customer.timezone || null,
+        customer.acceptsMarketing,
+        customer.tags ? JSON.stringify(customer.tags) : null,
+        customer.note || null,
+        customer.taxExempt,
+        customer.homeMarketId || null,
+        now,
+        now,
+      ],
+    );
   }
 
   async delete(customerId: string): Promise<void> {

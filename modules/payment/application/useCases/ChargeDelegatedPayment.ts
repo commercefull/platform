@@ -100,26 +100,7 @@ export class ChargeDelegatedPaymentUseCase {
 
     let result;
     try {
-      result = await this.routePayment.execute(
-        new RoutePaymentCommand({
-          organizationId: command.organizationId,
-          orderId: command.orderId,
-          amountCents: command.amountCents,
-          currency: command.currency,
-          customerId: command.customerId,
-          customerEmail: command.customerEmail,
-          customerIp: command.customerIp,
-          paymentMethodToken: command.credential.token,
-          description: `Delegated ${command.credential.credentialType} charge via ${command.credential.provider}`,
-          returnUrl: undefined,
-          cancelUrl: undefined,
-          metadata: {
-            ...command.metadata,
-            delegatedCredentialType: command.credential.credentialType,
-            delegatedProvider: command.credential.provider,
-          },
-        }),
-      );
+      result = await this.routePayment.execute(this.buildRouteCommand(command));
     } catch (err) {
       transaction.fail('delegated_charge_failed', err instanceof Error ? err.message : 'Routed PSP charge failed');
       await this.payments.saveTransaction(transaction);
@@ -139,9 +120,49 @@ export class ChargeDelegatedPaymentUseCase {
     });
     await this.payments.saveTransaction(transaction);
 
-    // Same Published-Language events as the PSP webhook success path:
-    // order.paid → fulfillment/notification/tracking, checkout.payment_captured →
-    // checkout session transitions to 'processing' so CompleteCheckout can finish.
+    await this.publishPaidEvents(command);
+
+    logger.info('Delegated payment charged', {
+      transactionId: command.transactionId,
+      orderId: command.orderId,
+      provider: result.provider,
+    });
+
+    return {
+      transactionId: transaction.transactionId,
+      externalTransactionId: result.externalTransactionId,
+      provider: result.provider,
+      status: 'paid',
+    };
+  }
+
+  private buildRouteCommand(command: ChargeDelegatedPaymentCommand): RoutePaymentCommand {
+    return new RoutePaymentCommand({
+      organizationId: command.organizationId,
+      orderId: command.orderId,
+      amountCents: command.amountCents,
+      currency: command.currency,
+      customerId: command.customerId,
+      customerEmail: command.customerEmail,
+      customerIp: command.customerIp,
+      paymentMethodToken: command.credential.token,
+      description: `Delegated ${command.credential.credentialType} charge via ${command.credential.provider}`,
+      returnUrl: undefined,
+      cancelUrl: undefined,
+      metadata: {
+        ...command.metadata,
+        delegatedCredentialType: command.credential.credentialType,
+        delegatedProvider: command.credential.provider,
+      },
+    });
+  }
+
+  /**
+   * Same Published-Language events as the PSP webhook success path:
+   * order.paid → fulfillment/notification/tracking, checkout.payment_captured →
+   * checkout session transitions to 'processing' so CompleteCheckout can finish.
+   */
+  private async publishPaidEvents(command: ChargeDelegatedPaymentCommand): Promise<void> {
     const checkoutSummary = await this.orderStatusSync.findCheckoutByPaymentIntentId(command.transactionId);
     const orderInfo = await this.orderStatusSync.markOrderPaid(command.orderId);
 
@@ -160,18 +181,5 @@ export class ChargeDelegatedPaymentUseCase {
         paymentIntentId: command.transactionId,
       });
     }
-
-    logger.info('Delegated payment charged', {
-      transactionId: command.transactionId,
-      orderId: command.orderId,
-      provider: result.provider,
-    });
-
-    return {
-      transactionId: transaction.transactionId,
-      externalTransactionId: result.externalTransactionId,
-      provider: result.provider,
-      status: 'paid',
-    };
   }
 }

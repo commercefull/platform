@@ -6,6 +6,18 @@
 import { eventBus } from '../../../libs/events/eventBus';
 import { queryOne } from '../../../libs/db';
 import { analyticsWriteBuffer } from '../infrastructure';
+import {
+  handleProductViewed,
+  handleProductCreated,
+  handleCustomerCreated,
+  handleCustomerUpdated,
+  handleSubscriptionCreated,
+  handleSubscriptionCancelled,
+  handleTicketCreated,
+  handleTicketResolved,
+  handleReviewCreated,
+  handleStockAlertCreated,
+} from './secondaryEventHandlers';
 
 // Analytics writes go through the write buffer: trackEvent rows are flushed
 // as multi-row INSERTs and sales/performance deltas are aggregated by
@@ -19,6 +31,12 @@ const analyticsRepo = analyticsWriteBuffer;
 
 interface EventPayload {
   data: Record<string, unknown>;
+}
+
+function startOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
 }
 
 // Orders don't persist organizationId — resolve it via the store when the
@@ -92,11 +110,49 @@ export function initializeAnalyticsHandlers(): void {
 // Order Event Handlers
 // ============================================================================
 
+function orderRevenueDelta(data: EventPayload['data']) {
+  return {
+    orderCount: 1,
+    itemsSold: (data.itemCount as number) || 0,
+    grossRevenueCents: (data.totalAmountCents as number) || 0,
+    discountTotalCents: (data.discountTotalCents as number) || 0,
+    taxTotalCents: (data.taxTotalCents as number) || 0,
+    shippingRevenueCents: (data.shippingTotalCents as number) || 0,
+    netRevenueCents: ((data.totalAmountCents as number) || 0) - ((data.taxTotalCents as number) || 0),
+  };
+}
+
+function orderCustomerDelta(data: EventPayload['data']) {
+  const isNewCustomer = (data.isFirstOrder as boolean) || false;
+  const isGuest = !data.customerId;
+  return {
+    newCustomers: isNewCustomer ? 1 : 0,
+    returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
+    guestOrders: isGuest ? 1 : 0,
+  };
+}
+
+async function trackOrderCreatedItems(data: EventPayload['data'], today: Date): Promise<void> {
+  if (!data.items || !Array.isArray(data.items)) return;
+  for (const item of data.items as Array<Record<string, unknown>>) {
+    await analyticsRepo.upsertProductPerformance({
+      productId: item.productId as string,
+      productVariantId: item.productVariantId as string | undefined,
+      date: today,
+      channel: (data.channel as string) || 'all',
+      salesChannelId: data.channelId as string | undefined,
+      purchases: 1,
+      quantitySold: (item.quantity as number) || 1,
+      revenueCents: (item.lineTotalCents as number) || (item.unitPriceCents as number) * ((item.quantity as number) || 1),
+      averagePriceCents: item.unitPriceCents as number,
+    });
+  }
+}
+
 async function handleOrderCreated(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
     const organizationId = await resolveOrganizationId(data);
 
     // Track event
@@ -120,44 +176,19 @@ async function handleOrderCreated(payload: unknown): Promise<void> {
     });
 
     // Update daily sales
-    const isNewCustomer = (data.isFirstOrder as boolean) || false;
-    const isGuest = !data.customerId;
-
     await analyticsRepo.upsertSalesDaily({
       date: today,
       organizationId,
       channel: (data.channel as string) || 'all',
       salesChannelId: data.channelId as string | undefined,
       currencyCode: (data.currency as string) || 'USD',
-      orderCount: 1,
-      itemsSold: (data.itemCount as number) || 0,
-      grossRevenueCents: (data.totalAmountCents as number) || 0,
-      discountTotalCents: (data.discountTotalCents as number) || 0,
-      taxTotalCents: (data.taxTotalCents as number) || 0,
-      shippingRevenueCents: (data.shippingTotalCents as number) || 0,
-      netRevenueCents: ((data.totalAmountCents as number) || 0) - ((data.taxTotalCents as number) || 0),
-      newCustomers: isNewCustomer ? 1 : 0,
-      returningCustomers: !isNewCustomer && !isGuest ? 1 : 0,
-      guestOrders: isGuest ? 1 : 0,
+      ...orderRevenueDelta(data),
+      ...orderCustomerDelta(data),
       checkoutCompleted: 1,
     });
 
     // Update product performance for each item
-    if (data.items && Array.isArray(data.items)) {
-      for (const item of data.items as Array<Record<string, unknown>>) {
-        await analyticsRepo.upsertProductPerformance({
-          productId: item.productId as string,
-          productVariantId: item.productVariantId as string | undefined,
-          date: today,
-          channel: (data.channel as string) || 'all',
-          salesChannelId: data.channelId as string | undefined,
-          purchases: 1,
-          quantitySold: (item.quantity as number) || 1,
-          revenueCents: (item.lineTotalCents as number) || (item.unitPriceCents as number) * ((item.quantity as number) || 1),
-          averagePriceCents: item.unitPriceCents as number,
-        });
-      }
-    }
+    await trackOrderCreatedItems(data, today);
   } catch {}
 }
 
@@ -193,8 +224,7 @@ async function handleOrderCancelled(payload: unknown): Promise<void> {
 async function handleOrderRefunded(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'order.refunded',
@@ -220,8 +250,7 @@ async function handleOrderRefunded(payload: unknown): Promise<void> {
 async function handleCartCreated(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'cart.created',
@@ -244,8 +273,7 @@ async function handleCartCreated(payload: unknown): Promise<void> {
 async function handleCartItemAdded(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'cart.item.added',
@@ -272,8 +300,7 @@ async function handleCartItemAdded(payload: unknown): Promise<void> {
 async function handleCartItemRemoved(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'cart.item.removed',
@@ -299,8 +326,7 @@ async function handleCartItemRemoved(payload: unknown): Promise<void> {
 async function handleCartAbandoned(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'cart.abandoned',
@@ -326,8 +352,7 @@ async function handleCartAbandoned(payload: unknown): Promise<void> {
 async function handleCheckoutStarted(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'checkout.started',
@@ -370,8 +395,7 @@ async function handleCheckoutCompleted(payload: unknown): Promise<void> {
 async function handlePaymentSuccess(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'payment.success',
@@ -396,8 +420,7 @@ async function handlePaymentSuccess(payload: unknown): Promise<void> {
 async function handlePaymentFailed(payload: unknown): Promise<void> {
   try {
     const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = startOfToday();
 
     await reportingRepo.trackEvent({
       eventType: 'payment.failed',
@@ -413,197 +436,6 @@ async function handlePaymentFailed(payload: unknown): Promise<void> {
       date: today,
       organizationId: data.organizationId as string | undefined,
       paymentFailedCount: 1,
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Product Event Handlers
-// ============================================================================
-
-async function handleProductViewed(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    await reportingRepo.trackEvent({
-      eventType: 'product.viewed',
-      eventCategory: 'product',
-      eventAction: 'viewed',
-      productId: data.productId as string | undefined,
-      customerId: data.customerId as string | undefined,
-      sessionId: data.sessionId as string | undefined,
-      visitorId: data.visitorId as string | undefined,
-    });
-
-    await analyticsRepo.upsertProductPerformance({
-      productId: data.productId as string,
-      productVariantId: data.productVariantId as string | undefined,
-      date: today,
-      views: 1,
-      uniqueViews: data.isFirstView ? 1 : 0,
-      detailViews: 1,
-      outOfStockViews: data.isOutOfStock ? 1 : 0,
-    });
-  } catch {}
-}
-
-async function handleProductCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'product.created',
-      eventCategory: 'product',
-      eventAction: 'created',
-      productId: data.productId as string | undefined,
-      eventData: { name: data.name, sku: data.sku },
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Customer Event Handlers
-// ============================================================================
-
-async function handleCustomerCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'customer.created',
-      eventCategory: 'customer',
-      eventAction: 'created',
-      customerId: data.customerId as string | undefined,
-      channel: data.channel as string | undefined,
-      eventData: { source: data.source },
-    });
-  } catch {}
-}
-
-async function handleCustomerUpdated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'customer.updated',
-      eventCategory: 'customer',
-      eventAction: 'updated',
-      customerId: data.customerId as string | undefined,
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Subscription Event Handlers
-// ============================================================================
-
-async function handleSubscriptionCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'subscription.created',
-      eventCategory: 'subscription',
-      eventAction: 'created',
-      customerId: data.customerId as string | undefined,
-      eventValueCents: data.monthlyValueCents as number | undefined,
-      eventData: { planId: data.planId },
-    });
-  } catch {}
-}
-
-async function handleSubscriptionCancelled(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'subscription.cancelled',
-      eventCategory: 'subscription',
-      eventAction: 'cancelled',
-      customerId: data.customerId as string | undefined,
-      eventData: { reason: data.reason },
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Support Event Handlers
-// ============================================================================
-
-async function handleTicketCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'ticket.created',
-      eventCategory: 'support',
-      eventAction: 'created',
-      customerId: data.customerId as string | undefined,
-      orderId: data.orderId as string | undefined,
-      eventData: { category: data.category, priority: data.priority },
-    });
-  } catch {}
-}
-
-async function handleTicketResolved(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    await reportingRepo.trackEvent({
-      eventType: 'ticket.resolved',
-      eventCategory: 'support',
-      eventAction: 'resolved',
-      customerId: data.customerId as string | undefined,
-      eventData: { resolutionTime: data.resolutionTimeMinutes },
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Review Event Handlers
-// ============================================================================
-
-async function handleReviewCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    await reportingRepo.trackEvent({
-      eventType: 'review.created',
-      eventCategory: 'review',
-      eventAction: 'created',
-      productId: data.productId as string | undefined,
-      customerId: data.customerId as string | undefined,
-      eventData: { rating: data.rating },
-    });
-
-    await analyticsRepo.upsertProductPerformance({
-      productId: data.productId as string,
-      date: today,
-      reviews: 1,
-      averageRating: data.rating as number,
-    });
-  } catch {}
-}
-
-// ============================================================================
-// Alert Event Handlers
-// ============================================================================
-
-async function handleStockAlertCreated(payload: unknown): Promise<void> {
-  try {
-    const { data } = payload as EventPayload;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    await reportingRepo.trackEvent({
-      eventType: 'alert.stock.created',
-      eventCategory: 'alert',
-      eventAction: 'stock_alert_created',
-      productId: data.productId as string | undefined,
-      customerId: data.customerId as string | undefined,
-    });
-
-    await analyticsRepo.upsertProductPerformance({
-      productId: data.productId as string,
-      date: today,
-      stockAlerts: 1,
     });
   } catch {}
 }

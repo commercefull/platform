@@ -108,18 +108,7 @@ export class ThemeRegistry {
     const theme = this.themes.get(assignment.themeId);
     if (!theme) return null;
 
-    let override: ThemeOverride | undefined;
-    if (assignment.overrideId) {
-      const found = await repository.findOverrideById(assignment.overrideId);
-      if (found && found.isActive) override = found;
-    }
-
-    if (!override) {
-      // Try to find active override by store
-      const found = await repository.findOverrideByStore(storeId);
-      if (found && found.isActive) override = found;
-    }
-
+    const override = await this.resolveActiveOverride(storeId, assignment.overrideId, repository);
     const settings = theme.resolveSettings(override?.settings);
     const cssVariables = theme.toCSSVariables(override?.settings);
 
@@ -128,6 +117,31 @@ export class ThemeRegistry {
       override,
       settings,
       cssVariables,
+      ...ThemeRegistry.overrideFields(override),
+    };
+  }
+
+  private async resolveActiveOverride(
+    storeId: string,
+    overrideId: string | undefined,
+    repository: ThemeRepository,
+  ): Promise<ThemeOverride | undefined> {
+    if (overrideId) {
+      const found = await repository.findOverrideById(overrideId);
+      if (found && found.isActive) return found;
+    }
+    // Fall back to the store's active override
+    const found = await repository.findOverrideByStore(storeId);
+    return found && found.isActive ? found : undefined;
+  }
+
+  private static overrideFields(
+    override: ThemeOverride | undefined,
+  ): Pick<
+    ResolvedTheme,
+    'customCss' | 'customLogoUrl' | 'customFaviconUrl' | 'customBannerUrl' | 'customHeadTags' | 'customBodyAttributes'
+  > {
+    return {
       customCss: override?.customCss,
       customLogoUrl: override?.customLogoUrl,
       customFaviconUrl: override?.customFaviconUrl,

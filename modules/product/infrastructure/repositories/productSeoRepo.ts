@@ -8,6 +8,28 @@ export type ProductSeo = DbProductSeo;
 export type ProductSeoCreateParams = Omit<ProductSeo, 'productSeoId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export type ProductSeoUpdateParams = Partial<Omit<ProductSeo, 'productSeoId' | 'productId' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
 
+function seoInsertValues(params: ProductSeoCreateParams, now: string): unknown[] {
+  const n = (value: unknown, fallback: unknown = null): unknown => value || fallback;
+  return [
+    params.productId,
+    n(params.metaTitle),
+    n(params.metaDescription),
+    n(params.metaKeywords),
+    n(params.ogTitle),
+    n(params.ogDescription),
+    n(params.ogImage),
+    params.twitterCard || 'summary_large_image',
+    n(params.twitterTitle),
+    n(params.twitterDescription),
+    n(params.twitterImage),
+    n(params.canonicalUrl),
+    params.robots || 'index, follow',
+    params.structuredData ? JSON.stringify(params.structuredData) : null,
+    now,
+    now,
+  ];
+}
+
 class ProductSeoRepo {
   async findById(id: string): Promise<ProductSeo | null> {
     return await queryOne<DbProductSeo>(`SELECT * FROM "productSeo" WHERE "productSeoId" = $1 AND "deletedAt" IS NULL`, [id]);
@@ -39,24 +61,7 @@ class ProductSeoRepo {
         "ogImage", "twitterCard", "twitterTitle", "twitterDescription", "twitterImage",
         "canonicalUrl", "robots", "structuredData", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
-      [
-        params.productId,
-        params.metaTitle || null,
-        params.metaDescription || null,
-        params.metaKeywords || null,
-        params.ogTitle || null,
-        params.ogDescription || null,
-        params.ogImage || null,
-        params.twitterCard || 'summary_large_image',
-        params.twitterTitle || null,
-        params.twitterDescription || null,
-        params.twitterImage || null,
-        params.canonicalUrl || null,
-        params.robots || 'index, follow',
-        params.structuredData ? JSON.stringify(params.structuredData) : null,
-        now,
-        now,
-      ],
+      seoInsertValues(params, now),
     );
 
     if (!result) throw new FailedToCreateProductError();

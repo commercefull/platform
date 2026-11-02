@@ -32,30 +32,53 @@ export class IntegrationChannelResolverAdapter implements ChannelResolverPort {
     for (const provider of CHANNEL_PROVIDERS) {
       const integrations = await this.integrationRepository.findByProvider(provider, { status: 'active' });
       for (const integration of integrations) {
-        const credentials = await this.credentialRepository.findActiveByIntegration(integration.integrationId);
-        for (const credential of credentials) {
-          const data = this.decrypt(credential.encryptedData, credential.iv, credential.authTag);
-          if (!data) continue;
-          const storedKey = (data.apiKey ?? data.api_key ?? data.bearerToken) as string | undefined;
-          if (storedKey && this.safeEqual(storedKey, apiKey)) {
-            const storeId = (integration.config?.storeId ?? integration.config?.store_id) as string | undefined;
-            if (!storeId) {
-              logger.error('Channel integration missing config.storeId', { integrationId: integration.integrationId });
-              return null;
-            }
-            return {
-              integrationId: integration.integrationId,
-              organizationId: integration.organizationId,
-              storeId,
-              salesChannelId: (integration.config?.salesChannelId ?? integration.config?.channelId) as string | undefined,
-              surface: (integration.config?.surface as string) ?? integration.provider,
-              currency: integration.config?.currency as string | undefined,
-            };
-          }
+        if (await this.integrationKeyMatches(integration.integrationId, apiKey)) {
+          return this.toChannelContext(integration);
         }
       }
     }
     return null;
+  }
+
+  /**
+   * True when any active credential on the integration stores this API key.
+   */
+  private async integrationKeyMatches(integrationId: string, apiKey: string): Promise<boolean> {
+    const credentials = await this.credentialRepository.findActiveByIntegration(integrationId);
+    for (const credential of credentials) {
+      const data = this.decrypt(credential.encryptedData, credential.iv, credential.authTag);
+      const storedKey = (data?.apiKey ?? data?.api_key ?? data?.bearerToken) as string | undefined;
+      if (storedKey && this.safeEqual(storedKey, apiKey)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Map a matched integration record to a ChannelContext.
+   * Returns null when the integration is missing config.storeId.
+   */
+  private toChannelContext(integration: {
+    integrationId: string;
+    organizationId: string;
+    provider: string;
+    config?: Record<string, unknown>;
+  }): ChannelContext | null {
+    const config = integration.config;
+    const storeId = (config?.storeId ?? config?.store_id) as string | undefined;
+    if (!storeId) {
+      logger.error('Channel integration missing config.storeId', { integrationId: integration.integrationId });
+      return null;
+    }
+    return {
+      integrationId: integration.integrationId,
+      organizationId: integration.organizationId,
+      storeId,
+      salesChannelId: (config?.salesChannelId ?? config?.channelId) as string | undefined,
+      surface: (config?.surface as string) ?? integration.provider,
+      currency: config?.currency as string | undefined,
+    };
   }
 
   async verifySignature(params: {

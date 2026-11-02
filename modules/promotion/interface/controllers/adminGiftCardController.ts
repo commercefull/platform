@@ -42,58 +42,51 @@ export const createGiftCardForm = async (req: HttpRequest, res: HttpResponse): P
   });
 };
 
+interface GiftCardFormFields {
+  type?: 'standard' | 'promotional' | 'reward' | 'refund';
+  initialBalanceCents: string;
+  currency?: string;
+  recipientEmail?: string;
+  recipientName?: string;
+  personalMessage?: string;
+  deliveryDate?: string;
+  deliveryMethod?: string;
+  expiresAt?: string;
+  isReloadable?: string;
+  minReloadAmountCents?: string;
+  maxReloadAmountCents?: string;
+  maxBalanceCents?: string;
+}
+
+function buildGiftCardRestrictions(body: GiftCardFormFields): { [k: string]: number | undefined } | undefined {
+  const { minReloadAmountCents, maxReloadAmountCents, maxBalanceCents } = body;
+  if (!(minReloadAmountCents || maxReloadAmountCents || maxBalanceCents)) {
+    return undefined;
+  }
+  const parse = (v?: string): number | undefined => (v ? parseFloat(v) : undefined);
+  return {
+    minReloadAmountCents: parse(minReloadAmountCents),
+    maxReloadAmountCents: parse(maxReloadAmountCents),
+    maxBalanceCents: parse(maxBalanceCents),
+  };
+}
+
 export const createGiftCard = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   try {
-    const body = req.body as HttpRequestBody;
-    const {
-      type,
-      initialBalanceCents,
-      currency,
-      recipientEmail,
-      recipientName,
-      personalMessage,
-      deliveryDate,
-      deliveryMethod,
-      expiresAt,
-      isReloadable,
-      minReloadAmountCents,
-      maxReloadAmountCents,
-      maxBalanceCents,
-    } = body as {
-      type?: 'standard' | 'promotional' | 'reward' | 'refund';
-      initialBalanceCents: string;
-      currency?: string;
-      recipientEmail?: string;
-      recipientName?: string;
-      personalMessage?: string;
-      deliveryDate?: string;
-      deliveryMethod?: string;
-      expiresAt?: string;
-      isReloadable?: string;
-      minReloadAmountCents?: string;
-      maxReloadAmountCents?: string;
-      maxBalanceCents?: string;
-    };
+    const body = req.body as GiftCardFormFields;
 
     const giftCard = await manageGiftCardsUseCase.createGiftCard({
-      type: type || 'standard',
-      initialBalanceCents: parseFloat(initialBalanceCents),
-      currency: currency || 'USD',
-      recipientEmail: recipientEmail || undefined,
-      recipientName: recipientName || undefined,
-      personalMessage: personalMessage || undefined,
-      deliveryDate: deliveryDate ? new Date(deliveryDate) : undefined,
-      deliveryMethod: (deliveryMethod || 'email') as 'email' | 'sms' | 'print' | 'physical',
-      expiresAt: expiresAt ? new Date(expiresAt) : undefined,
-      isReloadable: isReloadable === 'true',
-      restrictions:
-        minReloadAmountCents || maxReloadAmountCents || maxBalanceCents
-          ? {
-              minReloadAmountCents: minReloadAmountCents ? parseFloat(minReloadAmountCents) : undefined,
-              maxReloadAmountCents: maxReloadAmountCents ? parseFloat(maxReloadAmountCents) : undefined,
-              maxBalanceCents: maxBalanceCents ? parseFloat(maxBalanceCents) : undefined,
-            }
-          : undefined,
+      type: body.type || 'standard',
+      initialBalanceCents: parseFloat(body.initialBalanceCents),
+      currency: body.currency || 'USD',
+      recipientEmail: body.recipientEmail || undefined,
+      recipientName: body.recipientName || undefined,
+      personalMessage: body.personalMessage || undefined,
+      deliveryDate: body.deliveryDate ? new Date(body.deliveryDate) : undefined,
+      deliveryMethod: (body.deliveryMethod || 'email') as 'email' | 'sms' | 'print' | 'physical',
+      expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
+      isReloadable: body.isReloadable === 'true',
+      restrictions: buildGiftCardRestrictions(body),
     });
 
     redirectResponse(res, `/hub/promotions/gift-cards/${giftCard.promotionGiftCardId}?success=Gift card created successfully`);

@@ -56,6 +56,39 @@ export async function getActiveOssRegistration(organizationId: string): Promise<
   return row ? mapToVatRegistration(row) : null;
 }
 
+// `||`-style defaulting kept out of the save params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function isoOpt(value: Date | string | null | undefined): string | undefined {
+  return value instanceof Date ? value.toISOString() : (value ?? undefined);
+}
+
+function vatUpdateValues(
+  data: Partial<VatRegistration> & { organizationId: string; countryCode: string; vatNumber: string },
+): unknown[] {
+  return [
+    data.vatNumber,
+    data.tradingName,
+    data.legalName,
+    fallback(data.registrationType, 'standard'),
+    fallback(data.isVerified, false),
+    isoOpt(data.verifiedAt),
+    data.verificationSource,
+    isoOpt(data.registrationDate),
+    isoOpt(data.deregistrationDate),
+    isoOpt(data.effectiveFrom),
+    isoOpt(data.effectiveUntil),
+    data.annualThresholdCents,
+    fallback(data.thresholdCurrency, 'EUR'),
+    data.currentYearSalesCents,
+    fallback(data.thresholdExceeded, false),
+    data.isActive !== false,
+    data.notes,
+    data.certificateUrl,
+  ];
+}
+
 export async function saveVatRegistration(
   data: Partial<VatRegistration> & {
     organizationId: string;
@@ -76,24 +109,7 @@ export async function saveVatRegistration(
         "isActive" = $16, "notes" = $17, "certificateUrl" = $18, "updatedAt" = $19
       WHERE "vatRegistrationId" = $20`,
       [
-        data.vatNumber,
-        data.tradingName,
-        data.legalName,
-        data.registrationType || 'standard',
-        data.isVerified || false,
-        data.verifiedAt?.toISOString(),
-        data.verificationSource,
-        data.registrationDate?.toISOString(),
-        data.deregistrationDate?.toISOString(),
-        data.effectiveFrom?.toISOString(),
-        data.effectiveUntil?.toISOString(),
-        data.annualThresholdCents,
-        data.thresholdCurrency || 'EUR',
-        data.currentYearSalesCents,
-        data.thresholdExceeded || false,
-        data.isActive !== false,
-        data.notes,
-        data.certificateUrl,
+        ...vatUpdateValues(data),
         now,
         data.vatRegistrationId,
       ],
@@ -115,13 +131,13 @@ export async function saveVatRegistration(
         data.vatNumber,
         data.tradingName,
         data.legalName,
-        data.registrationType || 'standard',
+        fallback(data.registrationType, 'standard'),
         false,
         data.registrationDate?.toISOString(),
         data.effectiveFrom?.toISOString(),
         data.annualThresholdCents,
-        data.thresholdCurrency || 'EUR',
-        data.currentYearSalesCents || 0,
+        fallback(data.thresholdCurrency, 'EUR'),
+        fallback(data.currentYearSalesCents, 0),
         false,
         true,
         data.notes,

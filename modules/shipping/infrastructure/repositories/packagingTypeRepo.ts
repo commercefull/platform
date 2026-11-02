@@ -43,6 +43,37 @@ async function findByMaxWeight(weight: number): Promise<ShippingPackagingType[]>
   );
 }
 
+// `||`/`??`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T>(value: T | undefined | null, defaultValue: T): T {
+  return value || defaultValue;
+}
+function nvl<T>(value: T | undefined | null, defaultValue: T): T {
+  return value ?? defaultValue;
+}
+
+function packagingInsertValues(input: CreateShippingPackagingTypeInput): unknown[] {
+  return [
+    input.name,
+    input.code,
+    fallback(input.description, null),
+    nvl(input.isActive, true),
+    nvl(input.isDefault, false),
+    fallback(input.weight, '0'),
+    fallback(input.length, '0'),
+    fallback(input.width, '0'),
+    fallback(input.height, '0'),
+    fallback(input.volume, '0'),
+    fallback(input.maxWeight, null),
+    fallback(input.maxItems, null),
+    fallback(input.costCents, null),
+    fallback(input.currencyCode, 'USD'),
+    nvl(input.recyclable, false),
+    fallback(input.imageUrl, null),
+    fallback(input.validCarriers, null),
+    fallback(input.createdBy, null),
+  ];
+}
+
 async function create(input: CreateShippingPackagingTypeInput): Promise<ShippingPackagingType> {
   if (input.isDefault) {
     await query(`UPDATE "${TABLE}" SET "isDefault" = false, "updatedAt" = NOW() WHERE "isDefault" = true`);
@@ -54,26 +85,7 @@ async function create(input: CreateShippingPackagingTypeInput): Promise<Shipping
       "height", "volume", "maxWeight", "maxItems", "costCents", "currencyCode", "recyclable",
       "imageUrl", "validCarriers", "createdBy"
     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
-    [
-      input.name,
-      input.code,
-      input.description || null,
-      input.isActive ?? true,
-      input.isDefault ?? false,
-      input.weight || '0',
-      input.length || '0',
-      input.width || '0',
-      input.height || '0',
-      input.volume || '0',
-      input.maxWeight || null,
-      input.maxItems || null,
-      input.costCents || null,
-      input.currencyCode || 'USD',
-      input.recyclable ?? false,
-      input.imageUrl || null,
-      input.validCarriers || null,
-      input.createdBy || null,
-    ],
+    packagingInsertValues(input),
   );
 
   if (!result) throw new FailedToCreateShippingEntityError('Failed to create packaging type');

@@ -121,22 +121,9 @@ export class CalculateShippingRatesUseCase {
 
       // 3. Get rates for each method across all matching zones — one batch
       // query instead of a zone×method loop of individual lookups.
-      const eligibleMethods = methods.filter(method => {
-        const minOrderValueCents = method.minOrderValueCents ? Number(method.minOrderValueCents) : null;
-        const maxOrderValueCents = method.maxOrderValueCents ? Number(method.maxOrderValueCents) : null;
-        const minWeight = method.minWeight ? parseFloat(String(method.minWeight)) : null;
-        const maxWeight = method.maxWeight ? parseFloat(String(method.maxWeight)) : null;
-        const orderWeight = orderDetails.totalWeight ?? 0;
-
-        if (minOrderValueCents !== null && orderDetails.subtotalCents < minOrderValueCents) return false;
-        if (maxOrderValueCents !== null && orderDetails.subtotalCents > maxOrderValueCents) return false;
-        if (minWeight !== null && orderWeight < minWeight) return false;
-        if (maxWeight !== null && orderWeight > maxWeight) return false;
-        return true;
-      });
+      const eligibleMethods = methods.filter(method => this.methodEligible(method, orderDetails));
 
       const zoneIds = zones.map(z => z.shippingZoneId);
-      const zoneRank = new Map(zoneIds.map((id, i) => [id, i]));
       const allRates =
         eligibleMethods.length === 0
           ? []
@@ -145,65 +132,13 @@ export class CalculateShippingRatesUseCase {
               eligibleMethods.map(m => m.shippingMethodId),
             );
 
-      // For each method keep the rate from the earliest matching zone;
-      // rows arrive ordered by priority so the first seen per pair wins.
-      const rateByMethod = new Map<string, ShippingRate>();
-      for (const rate of allRates) {
-        const existing = rateByMethod.get(rate.shippingMethodId);
-        if (!existing || (zoneRank.get(rate.shippingZoneId) ?? Infinity) < (zoneRank.get(existing.shippingZoneId) ?? Infinity)) {
-          rateByMethod.set(rate.shippingMethodId, rate);
-        }
-      }
+      const rateByMethod = this.pickRatePerMethod(zoneIds, allRates);
 
       const rateOptions: ShippingRateOption[] = [];
 
       for (const method of eligibleMethods) {
-        const rate = rateByMethod.get(method.shippingMethodId) ?? null;
-
-        if (rate) {
-          // Evaluate conditions JSON field to filter/adjust the rate
-          const condCtx: ShippingConditionContext = {
-            subtotalCents: orderDetails.subtotalCents,
-            itemCount: orderDetails.itemCount,
-            totalWeight: orderDetails.totalWeight,
-            country: destinationAddress.country,
-            state: destinationAddress.state,
-            postalCode: destinationAddress.postalCode,
-            originCountry: command.originCountry,
-            currency: orderDetails.currency,
-            orderDate: new Date(),
-          };
-
-          const condResult = evaluateConditions(rate.conditions, condCtx);
-          if (!condResult.applicable) {
-            continue;
-          }
-
-          const calculatedAmountCents = calculateRate(rate, orderDetails.subtotalCents, orderDetails.itemCount, orderDetails.totalWeight);
-
-          const adjustedAmountCents = Math.max(0, calculatedAmountCents + condResult.adjustmentCents);
-
-          const estimatedDays = method.estimatedDeliveryDays
-            ? typeof method.estimatedDeliveryDays === 'object'
-              ? ((method.estimatedDeliveryDays as { min?: number }).min ?? null)
-              : (method.estimatedDeliveryDays as number)
-            : method.handlingDays;
-
-          rateOptions.push({
-            shippingMethodId: method.shippingMethodId,
-            shippingMethodName: method.name,
-            shippingMethodCode: method.code,
-            shippingCarrierId: method.shippingCarrierId,
-            rateId: rate.shippingRateId,
-            rateName: rate.name,
-            rateType: rate.rateType,
-            amountCents: adjustedAmountCents,
-            currency: rate.currencyCode,
-            estimatedDeliveryDays: estimatedDays,
-            isFreeShipping: adjustedAmountCents === 0,
-            taxable: rate.taxable,
-          });
-        }
+        const option = this.buildRateOption(method, rateByMethod.get(method.shippingMethodId) ?? null, command);
+        if (option) rateOptions.push(option);
       }
 
       // Sort by amount (cheapest first)
@@ -224,5 +159,96 @@ export class CalculateShippingRatesUseCase {
         errors: ['calculation_failed'],
       };
     }
+  }
+
+  private methodEligible(
+    method: Awaited<ReturnType<Pick<ShippingMethodPort, 'findAll'>['findAll']>>[number],
+    orderDetails: OrderDetails,
+  ): boolean {
+    const minOrderValueCents = method.minOrderValueCents ? Number(method.minOrderValueCents) : null;
+    const maxOrderValueCents = method.maxOrderValueCents ? Number(method.maxOrderValueCents) : null;
+    const minWeight = method.minWeight ? parseFloat(String(method.minWeight)) : null;
+    const maxWeight = method.maxWeight ? parseFloat(String(method.maxWeight)) : null;
+    const orderWeight = orderDetails.totalWeight ?? 0;
+
+    if (minOrderValueCents !== null && orderDetails.subtotalCents < minOrderValueCents) return false;
+    if (maxOrderValueCents !== null && orderDetails.subtotalCents > maxOrderValueCents) return false;
+    if (minWeight !== null && orderWeight < minWeight) return false;
+    if (maxWeight !== null && orderWeight > maxWeight) return false;
+    return true;
+  }
+
+  /**
+   * For each method keep the rate from the earliest matching zone;
+   * rows arrive ordered by priority so the first seen per pair wins.
+   */
+  private pickRatePerMethod(zoneIds: string[], allRates: ShippingRate[]): Map<string, ShippingRate> {
+    const zoneRank = new Map(zoneIds.map((id, i) => [id, i]));
+    const rank = (id: string): number => zoneRank.get(id) ?? Infinity;
+
+    const rateByMethod = new Map<string, ShippingRate>();
+    for (const rate of allRates) {
+      const existing = rateByMethod.get(rate.shippingMethodId);
+      if (!existing || rank(rate.shippingZoneId) < rank(existing.shippingZoneId)) {
+        rateByMethod.set(rate.shippingMethodId, rate);
+      }
+    }
+    return rateByMethod;
+  }
+
+  private buildRateOption(
+    method: Awaited<ReturnType<Pick<ShippingMethodPort, 'findAll'>['findAll']>>[number],
+    rate: ShippingRate | null,
+    command: CalculateShippingRatesCommand,
+  ): ShippingRateOption | null {
+    if (!rate) return null;
+
+    const { destinationAddress, orderDetails } = command;
+
+    // Evaluate conditions JSON field to filter/adjust the rate
+    const condCtx: ShippingConditionContext = {
+      subtotalCents: orderDetails.subtotalCents,
+      itemCount: orderDetails.itemCount,
+      totalWeight: orderDetails.totalWeight,
+      country: destinationAddress.country,
+      state: destinationAddress.state,
+      postalCode: destinationAddress.postalCode,
+      originCountry: command.originCountry,
+      currency: orderDetails.currency,
+      orderDate: new Date(),
+    };
+
+    const condResult = evaluateConditions(rate.conditions, condCtx);
+    if (!condResult.applicable) {
+      return null;
+    }
+
+    const calculatedAmountCents = calculateRate(rate, orderDetails.subtotalCents, orderDetails.itemCount, orderDetails.totalWeight);
+    const adjustedAmountCents = Math.max(0, calculatedAmountCents + condResult.adjustmentCents);
+
+    return {
+      shippingMethodId: method.shippingMethodId,
+      shippingMethodName: method.name,
+      shippingMethodCode: method.code,
+      shippingCarrierId: method.shippingCarrierId,
+      rateId: rate.shippingRateId,
+      rateName: rate.name,
+      rateType: rate.rateType,
+      amountCents: adjustedAmountCents,
+      currency: rate.currencyCode,
+      estimatedDeliveryDays: this.estimatedDays(method),
+      isFreeShipping: adjustedAmountCents === 0,
+      taxable: rate.taxable,
+    };
+  }
+
+  private estimatedDays(
+    method: Awaited<ReturnType<Pick<ShippingMethodPort, 'findAll'>['findAll']>>[number],
+  ): number | null {
+    if (!method.estimatedDeliveryDays) return method.handlingDays;
+    if (typeof method.estimatedDeliveryDays === 'object') {
+      return (method.estimatedDeliveryDays as { min?: number }).min ?? null;
+    }
+    return method.estimatedDeliveryDays as number;
   }
 }

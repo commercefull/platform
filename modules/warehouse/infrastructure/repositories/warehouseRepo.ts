@@ -26,6 +26,48 @@ import type { DistributionWarehouse as DbDistributionWarehouse } from '../../../
 export type { WarehouseCreateParams, WarehouseUpdateParams } from '../../domain/repositories/WarehouseRepository';
 export type Warehouse = WarehouseRecord;
 
+// `||`-style defaulting kept out of the create params to keep complexity low.
+function fallback<T, D>(value: T | undefined | null, defaultValue: D): T | D {
+  return value || defaultValue;
+}
+function jsonOpt(value: unknown): string | null {
+  return value ? JSON.stringify(value) : null;
+}
+
+function warehouseInsertValues(params: WarehouseCreateParams, now: string): unknown[] {
+  return [
+    params.name,
+    params.code,
+    fallback(params.description, null),
+    params.isActive !== undefined ? params.isActive : true,
+    fallback(params.isDefault, false),
+    params.isFulfillmentCenter !== undefined ? params.isFulfillmentCenter : true,
+    params.isReturnCenter !== undefined ? params.isReturnCenter : true,
+    fallback(params.isVirtual, false),
+    fallback(params.organizationId, null),
+    params.addressLine1,
+    fallback(params.addressLine2, null),
+    params.city,
+    params.state,
+    params.postalCode,
+    params.country,
+    fallback(params.latitude, null),
+    fallback(params.longitude, null),
+    fallback(params.email, null),
+    fallback(params.phone, null),
+    fallback(params.contactName, null),
+    fallback(params.timezone, 'UTC'),
+    fallback(params.cutoffTime, '14:00:00'),
+    fallback(params.processingTime, 1),
+    jsonOpt(params.operatingHours),
+    jsonOpt(params.capabilities),
+    fallback(params.shippingMethods, null),
+    fallback(params.createdBy, null),
+    now,
+    now,
+  ];
+}
+
 function rowToWarehouse(row: DbDistributionWarehouse): WarehouseRecord {
   return {
     distributionWarehouseId: row.distributionWarehouseId,
@@ -224,37 +266,7 @@ class WarehouseRepo {
         $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29
       )
       RETURNING *`,
-      [
-        params.name,
-        params.code,
-        params.description || null,
-        params.isActive !== undefined ? params.isActive : true,
-        params.isDefault || false,
-        params.isFulfillmentCenter !== undefined ? params.isFulfillmentCenter : true,
-        params.isReturnCenter !== undefined ? params.isReturnCenter : true,
-        params.isVirtual || false,
-        params.organizationId || null,
-        params.addressLine1,
-        params.addressLine2 || null,
-        params.city,
-        params.state,
-        params.postalCode,
-        params.country,
-        params.latitude || null,
-        params.longitude || null,
-        params.email || null,
-        params.phone || null,
-        params.contactName || null,
-        params.timezone || 'UTC',
-        params.cutoffTime || '14:00:00',
-        params.processingTime || 1,
-        params.operatingHours ? JSON.stringify(params.operatingHours) : null,
-        params.capabilities ? JSON.stringify(params.capabilities) : null,
-        params.shippingMethods || null,
-        params.createdBy || null,
-        now,
-        now,
-      ],
+      warehouseInsertValues(params, now),
     );
 
     if (!result) {

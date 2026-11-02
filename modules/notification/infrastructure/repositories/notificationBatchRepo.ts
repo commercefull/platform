@@ -2,6 +2,20 @@ import { query, queryOne } from '../../../../libs/db';
 import type { NotificationBatch as DbNotificationBatch } from '../../../../libs/db/types';
 import type { NotificationBatch } from '../../domain/repositories/NotificationBatchRepository';
 
+// Map notification types to batch types (orderStatus, promotion, accountAlert)
+const BATCH_TYPE_GROUPS: Record<string, string[]> = {
+  orderStatus: ['order_confirmation', 'order_shipped', 'order_delivered', 'order_cancelled', 'return_initiated', 'refund_processed'],
+  promotion: ['promotion', 'coupon_offer', 'back_in_stock', 'price_drop', 'new_product'],
+  accountAlert: ['account_registration', 'password_reset', 'email_verification', 'review_request', 'abandoned_cart'],
+};
+
+function mapNotificationTypeToBatchType(type: string): string {
+  for (const [batchType, types] of Object.entries(BATCH_TYPE_GROUPS)) {
+    if (types.includes(type)) return batchType;
+  }
+  return type;
+}
+
 function rowToBatch(row: DbNotificationBatch): NotificationBatch {
   return {
     notificationBatchId: row.notificationBatchId,
@@ -25,28 +39,7 @@ async function create(
 ): Promise<NotificationBatch | null> {
   const now = new Date();
   const mappedChannel = params.channel === 'in_app' ? 'inApp' : params.channel;
-  // Map notification types to batch types (orderStatus, promotion, accountAlert)
-  const mappedType =
-    params.type === 'order_confirmation' ||
-    params.type === 'order_shipped' ||
-    params.type === 'order_delivered' ||
-    params.type === 'order_cancelled' ||
-    params.type === 'return_initiated' ||
-    params.type === 'refund_processed'
-      ? 'orderStatus'
-      : params.type === 'promotion' ||
-          params.type === 'coupon_offer' ||
-          params.type === 'back_in_stock' ||
-          params.type === 'price_drop' ||
-          params.type === 'new_product'
-        ? 'promotion'
-        : params.type === 'account_registration' ||
-            params.type === 'password_reset' ||
-            params.type === 'email_verification' ||
-            params.type === 'review_request' ||
-            params.type === 'abandoned_cart'
-          ? 'accountAlert'
-          : params.type;
+  const mappedType = mapNotificationTypeToBatchType(params.type);
   return queryOne<DbNotificationBatch>(
     `INSERT INTO "notificationBatch" (name, type, channel, status, "targetCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, 'draft', $4, 0, 0, $5, $6, $7) RETURNING *`,

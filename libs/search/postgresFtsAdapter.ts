@@ -16,15 +16,13 @@
 import { query } from '../db';
 import { Table } from '../db/types';
 import { logger } from '../logger';
+import { computeFtsFacets } from './postgresFtsFacets';
 import type {
   SearchAdapter,
   SearchQuery,
   SearchResult,
   SearchProductItem,
   SearchFacets,
-  SearchFacetValue,
-  SearchPriceRangeFacet,
-  SearchAttributeFacet,
   SearchAttributeFilter,
   AutocompleteSuggestion,
   MerchandisingContext,
@@ -35,7 +33,6 @@ const PRODUCT_TABLE = Table.Product;
 const CATEGORY_MAP_TABLE = Table.ProductCategoryMap;
 const ATTRIBUTE_VALUE_MAP_TABLE = Table.ProductAttributeValueMap;
 const ATTRIBUTE_TABLE = Table.ProductAttribute;
-const ATTRIBUTE_VALUE_TABLE = Table.ProductAttributeValue;
 const CATEGORY_TABLE = Table.ProductCategory;
 
 // Product-level base price (integer cents) from the pricing-owned store
@@ -77,6 +74,59 @@ const ATTRIBUTE_OPERATOR_CONDITIONS: Record<
   like: (a, i, f) => (f.value ? { sql: `${a}."value" ILIKE $${i}`, values: [`%${f.value}%`] } : null),
 };
 
+/**
+ * Multiply product scores by the configured merchandising boost factors.
+ */
+function applyScoreBoosts(products: SearchProductItem[], merch: MerchandisingContext): void {
+  const featuredBoost = merch.featuredBoost ?? 1;
+  const bestsellerBoost = merch.bestsellerBoost ?? 1;
+  const newBoost = merch.newBoost ?? 1;
+
+  for (const product of products) {
+    if (product.score === undefined) continue;
+    if (product.isFeatured) product.score *= featuredBoost;
+    if (product.isBestseller) product.score *= bestsellerBoost;
+    if (product.isNew) product.score *= newBoost;
+  }
+}
+
+interface MerchandisingBuckets {
+  pinned: SearchProductItem[];
+  boosted: SearchProductItem[];
+  normal: SearchProductItem[];
+  buried: SearchProductItem[];
+}
+
+/**
+ * Separate products into pinned / boosted / normal / buried buckets.
+ * Flags each product with the applied merchandising treatment.
+ */
+function bucketizeMerchandised(
+  products: SearchProductItem[],
+  boostSet: Set<string>,
+  burySet: Set<string>,
+  pinnedMap: Map<string, number>,
+): MerchandisingBuckets {
+  const buckets: MerchandisingBuckets = { pinned: [], boosted: [], normal: [], buried: [] };
+
+  for (const product of products) {
+    if (pinnedMap.has(product.productId)) {
+      product.merchandisingApplied = 'pinned';
+      buckets.pinned.push(product);
+    } else if (boostSet.has(product.productId)) {
+      product.merchandisingApplied = 'boosted';
+      buckets.boosted.push(product);
+    } else if (burySet.has(product.productId)) {
+      product.merchandisingApplied = 'buried';
+      buckets.buried.push(product);
+    } else {
+      buckets.normal.push(product);
+    }
+  }
+
+  return buckets;
+}
+
 export class PostgresFtsAdapter implements SearchAdapter {
   /**
    * Search products using PostgreSQL full-text search
@@ -98,7 +148,7 @@ export class PostgresFtsAdapter implements SearchAdapter {
 
     let facets: SearchFacets | undefined;
     if (searchQuery.includeFacets || (searchQuery.query && !searchQuery.categoryId)) {
-      facets = await this.computeFacets(searchQuery);
+      facets = await computeFtsFacets(searchQuery);
     }
 
     let resultProducts = (products || []) as SearchProductItem[];
@@ -401,192 +451,24 @@ export class PostgresFtsAdapter implements SearchAdapter {
   }
 
   // ===========================================================================
-  // Private: Facets
-  // ===========================================================================
-
-  private async computeFacets(searchQuery: SearchQuery): Promise<SearchFacets> {
-    const [categories, priceRanges, attributes] = await Promise.all([
-      this.getCategoryFacets(searchQuery),
-      this.getPriceRangeFacets(searchQuery),
-      this.getAttributeFacets(searchQuery),
-    ]);
-
-    return { categories, priceRanges, attributes };
-  }
-
-  private async getCategoryFacets(_searchQuery: SearchQuery): Promise<SearchFacetValue[]> {
-    const results = await query<Array<{ id: string; name: string; count: string }>>(`
-      SELECT
-        pc."productCategoryId" as id,
-        pc."name",
-        COUNT(DISTINCT p."productId") as count
-      FROM "${PRODUCT_TABLE}" p
-      JOIN "${CATEGORY_MAP_TABLE}" pcm ON pcm."productId" = p."productId"
-      JOIN "${CATEGORY_TABLE}" pc ON pc."productCategoryId" = pcm."productCategoryId"
-      WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-      GROUP BY pc."productCategoryId", pc."name"
-      ORDER BY count DESC
-      LIMIT 20
-    `);
-
-    return (results || []).map(r => ({
-      id: r.id,
-      name: r.name,
-      count: parseInt(r.count, 10),
-    }));
-  }
-
-  private async getPriceRangeFacets(_searchQuery: SearchQuery): Promise<SearchPriceRangeFacet[]> {
-    const result = await query<Array<{ min_price: number; max_price: number }>>(`
-      SELECT
-        MIN(bp."priceCents") as min_price,
-        MAX(bp."priceCents") as max_price
-      FROM "${PRODUCT_TABLE}" p
-      LEFT JOIN LATERAL (
-        SELECT "priceCents" FROM "productBasePrice"
-        WHERE "productId" = p."productId" AND "productVariantId" IS NULL
-        ORDER BY "priceCents" ASC LIMIT 1
-      ) bp ON true
-      WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-    `);
-
-    if (!result || result.length === 0) return [];
-
-    const { min_price, max_price } = result[0];
-    const range = max_price - min_price;
-    if (range === 0) return [{ min: min_price, max: max_price, count: 0 }];
-    const step = Math.ceil(range / 5);
-
-    const ranges: SearchPriceRangeFacet[] = [];
-    for (let i = 0; i < 5; i++) {
-      const min = min_price + step * i;
-      const max = i === 4 ? max_price : min_price + step * (i + 1);
-
-      const countResult = await query<Array<{ count: string }>>(
-        `SELECT COUNT(*) as count FROM "${PRODUCT_TABLE}" p
-         LEFT JOIN LATERAL (
-           SELECT "priceCents" FROM "productBasePrice"
-           WHERE "productId" = p."productId" AND "productVariantId" IS NULL
-           ORDER BY "priceCents" ASC LIMIT 1
-         ) bp ON true
-         WHERE p."deletedAt" IS NULL AND p."status" = 'active'
-           AND bp."priceCents" >= $1 AND bp."priceCents" <= $2`,
-        [min, max],
-      );
-      const count = parseInt(countResult?.[0]?.count || '0', 10);
-      if (count > 0) ranges.push({ min, max, count });
-    }
-
-    return ranges;
-  }
-
-  private async getAttributeFacets(_searchQuery: SearchQuery): Promise<SearchAttributeFacet[]> {
-    const results = await query<
-      Array<{
-        attributeId: string;
-        attributeCode: string;
-        attributeName: string;
-        type: string;
-        value: string;
-        displayValue: string;
-        count: string;
-      }>
-    >(`
-      SELECT
-        pa."productAttributeId" as "attributeId",
-        pa."code" as "attributeCode",
-        pa."name" as "attributeName",
-        pa."type",
-        pavm."value",
-        COALESCE(pavl."displayValue", pavm."value") as "displayValue",
-        COUNT(DISTINCT pavm."productId") as count
-      FROM "${ATTRIBUTE_TABLE}" pa
-      JOIN "${ATTRIBUTE_VALUE_MAP_TABLE}" pavm ON pavm."attributeId" = pa."productAttributeId"
-      JOIN "${PRODUCT_TABLE}" p ON p."productId" = pavm."productId"
-      LEFT JOIN "${ATTRIBUTE_VALUE_TABLE}" pavl ON pavl."attributeId" = pa."productAttributeId" AND pavl."value" = pavm."value"
-      WHERE pa."isFilterable" = true
-        AND p."deletedAt" IS NULL
-        AND p."status" = 'active'
-      GROUP BY pa."productAttributeId", pa."code", pa."name", pa."type", pavm."value", pavl."displayValue"
-      ORDER BY pa."position" ASC, count DESC
-    `);
-
-    if (!results) return [];
-
-    const attributeMap = new Map<string, SearchAttributeFacet>();
-    for (const row of results) {
-      if (!attributeMap.has(row.attributeId)) {
-        attributeMap.set(row.attributeId, {
-          attributeId: row.attributeId,
-          attributeCode: row.attributeCode,
-          attributeName: row.attributeName,
-          type: row.type,
-          values: [],
-        });
-      }
-      attributeMap.get(row.attributeId)!.values.push({
-        value: row.value,
-        displayValue: row.displayValue,
-        count: parseInt(row.count, 10),
-      });
-    }
-
-    return Array.from(attributeMap.values());
-  }
-
-  // ===========================================================================
   // Private: Merchandising
   // ===========================================================================
 
   private applyMerchandising(products: SearchProductItem[], merch: MerchandisingContext): SearchProductItem[] {
-    const boostSet = new Set(merch.boostProductIds || []);
-    const burySet = new Set(merch.buryProductIds || []);
+    applyScoreBoosts(products, merch);
+
     const pinnedMap = new Map<string, number>((merch.pinnedProducts || []).map(p => [p.productId, p.position]));
-
-    const featuredBoost = merch.featuredBoost ?? 1;
-    const bestsellerBoost = merch.bestsellerBoost ?? 1;
-    const newBoost = merch.newBoost ?? 1;
-
-    // Apply boost factors to score
-    for (const product of products) {
-      if (product.score !== undefined) {
-        if (product.isFeatured) product.score *= featuredBoost;
-        if (product.isBestseller) product.score *= bestsellerBoost;
-        if (product.isNew) product.score *= newBoost;
-      }
-    }
-
-    // Separate pinned, boosted, normal, buried
-    const pinned: SearchProductItem[] = [];
-    const boosted: SearchProductItem[] = [];
-    const normal: SearchProductItem[] = [];
-    const buried: SearchProductItem[] = [];
-
-    for (const product of products) {
-      if (pinnedMap.has(product.productId)) {
-        product.merchandisingApplied = 'pinned';
-        pinned.push(product);
-      } else if (boostSet.has(product.productId)) {
-        product.merchandisingApplied = 'boosted';
-        boosted.push(product);
-      } else if (burySet.has(product.productId)) {
-        product.merchandisingApplied = 'buried';
-        buried.push(product);
-      } else {
-        normal.push(product);
-      }
-    }
+    const buckets = bucketizeMerchandised(products, new Set(merch.boostProductIds || []), new Set(merch.buryProductIds || []), pinnedMap);
 
     // Sort pinned by their position
-    pinned.sort((a, b) => (pinnedMap.get(a.productId) ?? 0) - (pinnedMap.get(b.productId) ?? 0));
+    buckets.pinned.sort((a, b) => (pinnedMap.get(a.productId) ?? 0) - (pinnedMap.get(b.productId) ?? 0));
 
     // Sort boosted/normal by score (if available) then by createdAt
     const sortByScore = (a: SearchProductItem, b: SearchProductItem) => (b.score ?? 0) - (a.score ?? 0);
+    buckets.boosted.sort(sortByScore);
+    buckets.normal.sort(sortByScore);
 
-    boosted.sort(sortByScore);
-    normal.sort(sortByScore);
-
-    return [...pinned, ...boosted, ...normal, ...buried];
+    return [...buckets.pinned, ...buckets.boosted, ...buckets.normal, ...buckets.buried];
   }
 
   // ===========================================================================

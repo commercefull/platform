@@ -84,52 +84,8 @@ export class AuditRepositoryImpl implements AuditRepository {
   }
 
   async findAll(filters?: AuditLogFilters, pagination?: PaginationOptions): Promise<PaginatedResult<AuditLog>> {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
-    let paramIdx = 1;
-
-    if (filters) {
-      if (filters.actorId) {
-        conditions.push(`"actorId" = $${paramIdx++}`);
-        params.push(filters.actorId);
-      }
-      if (filters.actorType) {
-        conditions.push(`"actorType" = $${paramIdx++}`);
-        params.push(filters.actorType);
-      }
-      if (filters.action) {
-        conditions.push(`"action" = $${paramIdx++}`);
-        params.push(filters.action);
-      }
-      if (filters.resourceType) {
-        conditions.push(`"resourceType" = $${paramIdx++}`);
-        params.push(filters.resourceType);
-      }
-      if (filters.resourceId) {
-        conditions.push(`"resourceId" = $${paramIdx++}`);
-        params.push(filters.resourceId);
-      }
-      if (filters.organizationId) {
-        conditions.push(`"organizationId" = $${paramIdx++}`);
-        params.push(filters.organizationId);
-      }
-      if (filters.storeId) {
-        conditions.push(`"storeId" = $${paramIdx++}`);
-        params.push(filters.storeId);
-      }
-      if (filters.correlationId) {
-        conditions.push(`"correlationId" = $${paramIdx++}`);
-        params.push(filters.correlationId);
-      }
-      if (filters.createdAfter) {
-        conditions.push(`"createdAt" >= $${paramIdx++}`);
-        params.push(filters.createdAfter);
-      }
-      if (filters.createdBefore) {
-        conditions.push(`"createdAt" <= $${paramIdx++}`);
-        params.push(filters.createdBefore);
-      }
-    }
+    const { conditions, params } = this.buildFilterClause(filters);
+    const paramIdx = params.length + 1;
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const limit = pagination?.limit ?? 50;
@@ -152,6 +108,37 @@ export class AuditRepositoryImpl implements AuditRepository {
       hasMore: offset + limit < total,
       length: data.length,
     };
+  }
+
+  /**
+   * Translate AuditLogFilters into a parameterized WHERE fragment.
+   * Each entry binds one filter field to one SQL predicate.
+   */
+  private buildFilterClause(filters?: AuditLogFilters): { conditions: string[]; params: unknown[] } {
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    if (!filters) return { conditions, params };
+
+    const clauses: [unknown, string][] = [
+      [filters.actorId, '"actorId" ='],
+      [filters.actorType, '"actorType" ='],
+      [filters.action, '"action" ='],
+      [filters.resourceType, '"resourceType" ='],
+      [filters.resourceId, '"resourceId" ='],
+      [filters.organizationId, '"organizationId" ='],
+      [filters.storeId, '"storeId" ='],
+      [filters.correlationId, '"correlationId" ='],
+      [filters.createdAfter, '"createdAt" >='],
+      [filters.createdBefore, '"createdAt" <='],
+    ];
+
+    for (const [value, clause] of clauses) {
+      if (!value) continue;
+      conditions.push(`${clause} $${params.length + 1}`);
+      params.push(value);
+    }
+
+    return { conditions, params };
   }
 
   async findByActor(actorId: string, pagination?: PaginationOptions): Promise<PaginatedResult<AuditLog>> {

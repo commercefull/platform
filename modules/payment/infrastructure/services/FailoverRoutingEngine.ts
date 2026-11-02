@@ -173,59 +173,16 @@ export class FailoverRoutingEngine {
       const maxAttempts = this.config.maxRetriesPerProvider + 1;
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const start = Date.now();
-        const isRetry = attempt > 0;
+        const outcome = await this.attemptPayment(route, request, attempt);
+        attempts.push(outcome.record);
 
-        try {
-          if (isRetry) {
-            const delay = this.calculateBackoff(attempt);
-            await this.sleep(delay);
-          }
-
-          const response = await route.adapter.initiatePayment(request, route.config);
-          const latencyMs = Date.now() - start;
-
-          attempts.push({
-            provider: route.provider,
-            success: response.success,
-            errorCode: response.errorCode,
-            errorMessage: response.errorMessage,
-            latencyMs,
-            retried: isRetry,
-          });
-
-          if (response.success) {
-            this.recordSuccess(route.provider);
-            return { response, provider: route.provider, attempts };
-          }
-
-          // Non-success response — check if we should retry or failover
-          if (this.isRetryableError(response.errorCode)) {
-            this.recordFailure(route.provider);
-            continue;
-          }
-
-          // Non-retryable error — failover to next provider
-          this.recordFailure(route.provider);
-          break;
-        } catch (err) {
-          const latencyMs = Date.now() - start;
-          attempts.push({
-            provider: route.provider,
-            success: false,
-            errorCode: 'exception',
-            errorMessage: err instanceof Error ? err.message : 'unknown error',
-            latencyMs,
-            retried: isRetry,
-          });
-
-          this.recordFailure(route.provider);
-          logger.warn(`Payment attempt failed for ${route.provider}`, {
-            provider: route.provider,
-            attempt: attempt + 1,
-            error: err instanceof Error ? err.message : 'unknown',
-          });
+        if (outcome.action === 'success') {
+          this.recordSuccess(route.provider);
+          return { response: outcome.response!, provider: route.provider, attempts };
         }
+        this.recordFailure(route.provider);
+        if (outcome.action === 'failover') break;
+        // 'retry' — continue to next attempt
       }
     }
 
@@ -282,6 +239,54 @@ export class FailoverRoutingEngine {
   }
 
   // --- Private helpers ---
+
+  /**
+   * Single payment attempt against one route. Returns the attempt record plus
+   * the routing decision: success, retry this provider, or failover.
+   */
+  private async attemptPayment(
+    route: GatewayRoute,
+    request: PaymentRequest,
+    attempt: number,
+  ): Promise<{ record: AttemptRecord; response?: PaymentResponse; action: 'success' | 'retry' | 'failover' }> {
+    const start = Date.now();
+    const isRetry = attempt > 0;
+
+    try {
+      if (isRetry) {
+        await this.sleep(this.calculateBackoff(attempt));
+      }
+
+      const response = await route.adapter.initiatePayment(request, route.config);
+      const record: AttemptRecord = {
+        provider: route.provider,
+        success: response.success,
+        errorCode: response.errorCode,
+        errorMessage: response.errorMessage,
+        latencyMs: Date.now() - start,
+        retried: isRetry,
+      };
+
+      if (response.success) return { record, response, action: 'success' };
+      // Retryable error → same provider again; non-retryable → failover
+      return { record, response, action: this.isRetryableError(response.errorCode) ? 'retry' : 'failover' };
+    } catch (err) {
+      const record: AttemptRecord = {
+        provider: route.provider,
+        success: false,
+        errorCode: 'exception',
+        errorMessage: err instanceof Error ? err.message : 'unknown error',
+        latencyMs: Date.now() - start,
+        retried: isRetry,
+      };
+      logger.warn(`Payment attempt failed for ${route.provider}`, {
+        provider: route.provider,
+        attempt: attempt + 1,
+        error: err instanceof Error ? err.message : 'unknown',
+      });
+      return { record, action: 'retry' };
+    }
+  }
 
   private ensureBreaker(provider: string): CircuitBreakerState {
     let state = this.circuitBreakers.get(provider);

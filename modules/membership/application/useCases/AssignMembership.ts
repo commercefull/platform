@@ -68,9 +68,7 @@ export class AssignMembershipUseCase {
       throw new MembershipPlanNotFoundError(input.tierId);
     }
 
-    if (!tier.isActive) {
-      throw new MembershipValidationError('This membership tier is not currently available');
-    }
+    this.assertTierAssignable(tier);
 
     // Check if customer already has active membership
     const existingMembership = await this.membershipRepository.findActiveByCustomerId(input.customerId);
@@ -78,30 +76,9 @@ export class AssignMembershipUseCase {
       throw new MembershipAlreadyActiveError(input.customerId);
     }
 
-    // Check tier capacity
-    if (tier.maxMembers && tier.currentMembers && tier.currentMembers >= tier.maxMembers) {
-      throw new MembershipValidationError('This membership tier has reached maximum capacity');
-    }
-
     const membershipId = `mbr_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 9)}`;
     const startDate = input.startDate || new Date();
-
-    // Calculate end date based on billing period
-    let endDate: Date | undefined;
-    if (tier.billingPeriod && tier.billingPeriod !== 'lifetime') {
-      endDate = new Date(startDate);
-      switch (tier.billingPeriod) {
-        case 'monthly':
-          endDate.setMonth(endDate.getMonth() + 1);
-          break;
-        case 'quarterly':
-          endDate.setMonth(endDate.getMonth() + 3);
-          break;
-        case 'yearly':
-          endDate.setFullYear(endDate.getFullYear() + 1);
-          break;
-      }
-    }
+    const endDate = this.computeEndDate(tier, startDate);
 
     const membership = await this.membershipRepository.createMembership({
       membershipId,
@@ -134,5 +111,35 @@ export class AssignMembershipUseCase {
       startDate: membership.startDate.toISOString(),
       endDate: membership.endDate?.toISOString(),
     };
+  }
+
+  /** Throws when the tier is inactive or at capacity. */
+  private assertTierAssignable(tier: MembershipTierRecord): void {
+    if (!tier.isActive) {
+      throw new MembershipValidationError('This membership tier is not currently available');
+    }
+    if (tier.maxMembers && tier.currentMembers && tier.currentMembers >= tier.maxMembers) {
+      throw new MembershipValidationError('This membership tier has reached maximum capacity');
+    }
+  }
+
+  /** Calculate end date based on billing period. */
+  private computeEndDate(tier: MembershipTierRecord, startDate: Date): Date | undefined {
+    if (!tier.billingPeriod || tier.billingPeriod === 'lifetime') {
+      return undefined;
+    }
+    const endDate = new Date(startDate);
+    switch (tier.billingPeriod) {
+      case 'monthly':
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case 'quarterly':
+        endDate.setMonth(endDate.getMonth() + 3);
+        break;
+      case 'yearly':
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+    }
+    return endDate;
   }
 }

@@ -2,202 +2,20 @@ import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
 import { ProductNotFoundError, FailedToCreateProductError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import type { Product as DbProduct } from '../../../../libs/db/types';
-
-function rowToProduct(row: DbProduct): Product {
-  return {
-    ...coreProductFields(row),
-    ...orderQuantityFields(row),
-    ...measureFields(row),
-    ...seoFields(row),
-    ...flagFields(row),
-    ...jsonFields(row),
-  };
-}
-
-function coreProductFields(row: DbProduct) {
-  return {
-    productId: row.productId,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-    sku: row.sku,
-    name: row.name,
-    slug: row.slug,
-    description: row.description ?? undefined,
-    shortDescription: row.shortDescription ?? undefined,
-    type: row.type as ProductType,
-    status: row.status as ProductStatus,
-    visibility: row.visibility as ProductVisibility,
-    taxClass: row.taxClass ?? undefined,
-    isTaxable: row.isTaxable,
-    isInventoryManaged: row.isInventoryManaged,
-  };
-}
-
-function orderQuantityFields(row: DbProduct) {
-  return {
-    minOrderQuantity: row.minOrderQuantity ?? undefined,
-    maxOrderQuantity: row.maxOrderQuantity ?? undefined,
-    orderIncrementQuantity: row.orderIncrementQuantity ?? undefined,
-    warningThreshold: row.warningThreshold ?? undefined,
-  };
-}
-
-function measureFields(row: DbProduct) {
-  return {
-    weight: row.weight != null ? Number(row.weight) : undefined,
-    weightUnit: row.weightUnit ?? undefined,
-    length: row.length != null ? Number(row.length) : undefined,
-    width: row.width != null ? Number(row.width) : undefined,
-    height: row.height != null ? Number(row.height) : undefined,
-    dimensionUnit: row.dimensionUnit ?? undefined,
-  };
-}
-
-function seoFields(row: DbProduct) {
-  return {
-    metaTitle: row.metaTitle ?? undefined,
-    metaDescription: row.metaDescription ?? undefined,
-    metaKeywords: row.metaKeywords ?? undefined,
-    hsCode: row.hsCode ?? undefined,
-    countryOfOrigin: row.countryOfOrigin ?? undefined,
-  };
-}
-
-function flagFields(row: DbProduct) {
-  return {
-    isFeatured: row.isFeatured,
-    isNew: row.isNew,
-    isBestseller: row.isBestseller,
-    preorderEnabled: row.preorderEnabled,
-    preorderReleaseDate: row.preorderReleaseDate ?? undefined,
-    preorderAllowance: row.preorderAllowance ?? undefined,
-    averageRating: row.averageRating != null ? Number(row.averageRating) : undefined,
-    reviewCount: row.reviewCount ?? 0,
-    isVirtual: row.isVirtual,
-    isDownloadable: row.isDownloadable,
-    isSubscription: row.isSubscription,
-    hasVariants: row.hasVariants,
-  };
-}
-
-function jsonFields(row: DbProduct) {
-  return {
-    customFields: (row.customFields ?? undefined) as Record<string, unknown> | undefined,
-    seoData: (row.seoData ?? undefined) as Record<string, unknown> | undefined,
-  };
-}
-
-// Product status and visibility enums to match database schema
-export enum ProductStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DISCONTINUED = 'discontinued',
-  ARCHIVED = 'archived',
-}
-
-export enum ProductVisibility {
-  VISIBLE = 'visible',
-  NOT_VISIBLE = 'not_visible',
-  CATALOG = 'catalog',
-  SEARCH = 'search',
-}
-
-enum ProductType {
-  SIMPLE = 'simple',
-  CONFIGURABLE = 'configurable',
-  GROUPED = 'grouped',
-  VIRTUAL = 'virtual',
-  DOWNLOADABLE = 'downloadable',
-  BUNDLE = 'bundle',
-  SUBSCRIPTION = 'subscription',
-}
-
-// Product interface matching database schema (camelCase)
-export interface Product {
-  productId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  sku: string;
-  name: string;
-  slug: string;
-  description?: string;
-  shortDescription?: string;
-  categoryId?: string; // Primary category ID (from productCategoryMap)
-  type: ProductType;
-  status: ProductStatus;
-  visibility: ProductVisibility;
-  taxClass?: string;
-  isTaxable: boolean;
-  isInventoryManaged: boolean;
-  minOrderQuantity?: number;
-  maxOrderQuantity?: number;
-  orderIncrementQuantity?: number;
-  weight?: number;
-  weightUnit?: string;
-  length?: number;
-  width?: number;
-  height?: number;
-  dimensionUnit?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  hsCode?: string;
-  countryOfOrigin?: string;
-  isFeatured: boolean;
-  isNew: boolean;
-  isBestseller: boolean;
-  warningThreshold?: number;
-  preorderEnabled: boolean;
-  preorderReleaseDate?: Date;
-  preorderAllowance?: number;
-  averageRating?: number;
-  reviewCount: number;
-  customFields?: Record<string, unknown>;
-  seoData?: Record<string, unknown>;
-  relatedProducts?: string[];
-  crossSellProducts?: string[];
-  upSellProducts?: string[];
-  isVirtual: boolean;
-  isDownloadable: boolean;
-  isSubscription: boolean;
-  primaryImageId?: string;
-  publishedAt?: Date;
-  deletedAt?: Date;
-  userId?: string;
-  organizationId?: string;
-  returnPolicy?: string;
-  warranty?: string;
-  externalId?: string;
-  hasVariants: boolean;
-  variantAttributes?: Record<string, unknown>;
-  createdBy?: string;
-  updatedBy?: string;
-}
-
-// Include id alias for compatibility
-
-type ProductCreateProps = Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>;
-
-type ProductUpdateProps = Partial<Omit<Product, 'productId' | 'createdAt' | 'updatedAt'>>;
-
-interface ProductFilterOptions {
-  status?: ProductStatus | ProductStatus[];
-  visibility?: ProductVisibility | ProductVisibility[];
-  type?: ProductType | ProductType[];
-  isFeatured?: boolean;
-  isVirtual?: boolean;
-  hasVariants?: boolean;
-  /** Price bounds are integer cents, matched against the pricing-owned productBasePrice table. */
-  priceMinCents?: number;
-  priceMaxCents?: number;
-  organizationId?: string;
-  searchTerm?: string;
-  limit?: number;
-  offset?: number;
-  orderBy?: string;
-  orderDirection?: 'ASC' | 'DESC';
-}
+import { rowToProduct } from './productTableMappers';
+import { buildFilterClauses } from './productFilterClauses';
+import { createRowValues } from './productCreateValues';
+import {
+  findNew as qFindNew,
+  findBestsellers as qFindBestsellers,
+  findRelated as qFindRelated,
+  updateRating as qUpdateRating,
+  publish as qPublish,
+} from './productListingQueries';
+import { ProductStatus, ProductVisibility } from './productTypes';
+import type { Product, ProductCreateProps, ProductUpdateProps, ProductFilterOptions } from './productTypes';
+export { ProductStatus, ProductVisibility, ProductType } from './productTypes';
+export type { Product, ProductCreateProps, ProductUpdateProps, ProductFilterOptions } from './productTypes';
 
 class ProductRepo {
   private readonly tableName = Table.Product;
@@ -272,70 +90,12 @@ class ProductRepo {
     return result ? parseInt(result.count, 10) : 0;
   }
 
-  // Shared WHERE-clause builder for findAll/count — both used to duplicate it.
+  // Shared WHERE-clause builder for findAll/count — delegated
   private buildFilterClauses(options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'>): {
     sql: string;
     params: unknown[];
   } {
-    const b = { sql: '', params: [] as unknown[], paramIndex: 1 };
-
-    this.addScalarOrInClause(b, '"status"', options.status);
-    this.addScalarOrInClause(b, '"visibility"', options.visibility);
-    this.addScalarOrInClause(b, '"type"', options.type);
-    this.addEqualsClause(b, '"isFeatured"', options.isFeatured);
-    this.addEqualsClause(b, '"isVirtual"', options.isVirtual);
-    this.addEqualsClause(b, '"hasVariants"', options.hasVariants);
-    this.addPriceClauses(b, options);
-
-    if (options.organizationId) {
-      b.sql += ` AND "organizationId" = $${b.paramIndex++}`;
-      b.params.push(options.organizationId);
-    }
-
-    if (options.searchTerm) {
-      b.sql += ` AND ("name" ILIKE $${b.paramIndex} OR "description" ILIKE $${b.paramIndex} OR "sku" ILIKE $${b.paramIndex})`;
-      b.params.push(`%${options.searchTerm}%`);
-      b.paramIndex++;
-    }
-
-    return b;
-  }
-
-  private addScalarOrInClause(
-    b: { sql: string; params: unknown[]; paramIndex: number },
-    column: string,
-    value: string | string[] | undefined,
-  ): void {
-    if (!value) return;
-    if (Array.isArray(value)) {
-      const placeholders = value.map(() => `$${b.paramIndex++}`).join(', ');
-      b.sql += ` AND ${column} IN (${placeholders})`;
-      b.params.push(...value);
-    } else {
-      b.sql += ` AND ${column} = $${b.paramIndex++}`;
-      b.params.push(value);
-    }
-  }
-
-  private addEqualsClause(b: { sql: string; params: unknown[]; paramIndex: number }, column: string, value: unknown): void {
-    if (value === undefined) return;
-    b.sql += ` AND ${column} = $${b.paramIndex++}`;
-    b.params.push(value);
-  }
-
-  // Price bounds live in the pricing-owned productBasePrice table (integer cents).
-  private addPriceClauses(
-    b: { sql: string; params: unknown[]; paramIndex: number },
-    options: Omit<ProductFilterOptions, 'limit' | 'offset' | 'orderBy' | 'orderDirection'>,
-  ): void {
-    if (options.priceMinCents !== undefined) {
-      b.sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${b.paramIndex++})`;
-      b.params.push(options.priceMinCents);
-    }
-    if (options.priceMaxCents !== undefined) {
-      b.sql += ` AND EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = "${this.tableName}"."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${b.paramIndex++})`;
-      b.params.push(options.priceMaxCents);
-    }
+    return buildFilterClauses(options, this.tableName);
   }
 
   /**
@@ -383,7 +143,7 @@ class ProductRepo {
       RETURNING *
     `;
 
-    const v = this.createRowValues(data);
+    const v = createRowValues(data);
     const values = [
       v.sku,
       v.name,
@@ -445,116 +205,6 @@ class ProductRepo {
     }
 
     return rowToProduct(result);
-  }
-
-  private createRowValues(data: ProductCreateProps) {
-    return {
-      sku: data.sku,
-      name: data.name,
-      slug: data.slug,
-      description: data.description || null,
-      shortDescription: data.shortDescription || null,
-      type: data.type || ProductType.SIMPLE,
-      status: data.status || ProductStatus.DRAFT,
-      visibility: data.visibility || ProductVisibility.VISIBLE,
-      ...this.createInventoryValues(data),
-      ...this.createDimensionValues(data),
-      ...this.createSeoValues(data),
-      ...this.createFlagValues(data),
-      ...this.createPreorderValues(data),
-      ...this.createJsonValues(data),
-      ...this.createTypeValues(data),
-      ...this.createOwnershipValues(data),
-      ...this.createVariantValues(data),
-    };
-  }
-
-  private createInventoryValues(data: ProductCreateProps) {
-    return {
-      taxClass: data.taxClass || 'standard',
-      isTaxable: data.isTaxable !== false,
-      isInventoryManaged: data.isInventoryManaged !== false,
-      minOrderQuantity: data.minOrderQuantity || 1,
-      maxOrderQuantity: data.maxOrderQuantity || null,
-      orderIncrementQuantity: data.orderIncrementQuantity || 1,
-    };
-  }
-
-  private createDimensionValues(data: ProductCreateProps) {
-    return {
-      weight: data.weight || null,
-      weightUnit: data.weightUnit || 'g',
-      length: data.length || null,
-      width: data.width || null,
-      height: data.height || null,
-      dimensionUnit: data.dimensionUnit || 'cm',
-    };
-  }
-
-  private createSeoValues(data: ProductCreateProps) {
-    return {
-      metaTitle: data.metaTitle || null,
-      metaDescription: data.metaDescription || null,
-      metaKeywords: data.metaKeywords || null,
-      hsCode: data.hsCode || null,
-      countryOfOrigin: data.countryOfOrigin || null,
-    };
-  }
-
-  private createFlagValues(data: ProductCreateProps) {
-    return {
-      isFeatured: data.isFeatured || false,
-      isNew: data.isNew || false,
-      isBestseller: data.isBestseller || false,
-      warningThreshold: data.warningThreshold || null,
-    };
-  }
-
-  private createPreorderValues(data: ProductCreateProps) {
-    return {
-      preorderEnabled: data.preorderEnabled || false,
-      preorderReleaseDate: data.preorderReleaseDate || null,
-      preorderAllowance: data.preorderAllowance || null,
-    };
-  }
-
-  private createJsonValues(data: ProductCreateProps) {
-    return {
-      customFields: data.customFields ? JSON.stringify(data.customFields) : null,
-      seoData: data.seoData ? JSON.stringify(data.seoData) : null,
-      relatedProducts: data.relatedProducts || null,
-      crossSellProducts: data.crossSellProducts || null,
-      upSellProducts: data.upSellProducts || null,
-    };
-  }
-
-  private createTypeValues(data: ProductCreateProps) {
-    return {
-      isVirtual: data.isVirtual || false,
-      isDownloadable: data.isDownloadable || false,
-      isSubscription: data.isSubscription || false,
-      primaryImageId: data.primaryImageId || null,
-      publishedAt: data.publishedAt || null,
-    };
-  }
-
-  private createOwnershipValues(data: ProductCreateProps) {
-    return {
-      userId: data.userId || null,
-      organizationId: data.organizationId || null,
-      returnPolicy: data.returnPolicy || null,
-      warranty: data.warranty || null,
-      externalId: data.externalId || null,
-      createdBy: data.createdBy || null,
-      updatedBy: data.updatedBy || null,
-    };
-  }
-
-  private createVariantValues(data: ProductCreateProps) {
-    return {
-      hasVariants: data.hasVariants || false,
-      variantAttributes: data.variantAttributes ? JSON.stringify(data.variantAttributes) : null,
-    };
   }
 
   /**
@@ -709,77 +359,21 @@ class ProductRepo {
    * Find new products
    */
   async findNew(limit: number = 10): Promise<Product[]> {
-    const sql = `
-      SELECT * FROM "${this.tableName}"
-      WHERE "isNew" = true 
-        AND "status" = $1 
-        AND "visibility" = $2 
-        AND "deletedAt" IS NULL
-      ORDER BY "createdAt" DESC
-      LIMIT $3
-    `;
-    return ((await query<DbProduct[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
+    return qFindNew(this.tableName, limit);
   }
 
   /**
    * Find bestseller products
    */
   async findBestsellers(limit: number = 10): Promise<Product[]> {
-    const sql = `
-      SELECT * FROM "${this.tableName}"
-      WHERE "isBestseller" = true 
-        AND "status" = $1 
-        AND "visibility" = $2 
-        AND "deletedAt" IS NULL
-      ORDER BY "reviewCount" DESC, "averageRating" DESC
-      LIMIT $3
-    `;
-    return ((await query<DbProduct[]>(sql, [ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
+    return qFindBestsellers(this.tableName, limit);
   }
 
   /**
    * Find related products
    */
   async findRelated(productId: string, limit: number = 10): Promise<Product[]> {
-    const product = await this.findById(productId);
-    if (!product) {
-      return [];
-    }
-
-    // If product has explicit related products, use those
-    if (product.relatedProducts && product.relatedProducts.length > 0) {
-      const placeholders = product.relatedProducts.map((_, i) => `$${i + 1}`).join(', ');
-      const sql = `
-        SELECT * FROM "${this.tableName}"
-        WHERE "productId" IN (${placeholders})
-          AND "status" = $${product.relatedProducts.length + 1}
-          AND "visibility" = $${product.relatedProducts.length + 2}
-          AND "deletedAt" IS NULL
-        LIMIT $${product.relatedProducts.length + 3}
-      `;
-      return (
-        (await query<DbProduct[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
-      ).map(rowToProduct);
-    }
-
-    // Otherwise, find products in the same category
-    if (product.categoryId) {
-      const sql = `
-        SELECT * FROM "${this.tableName}"
-        WHERE "categoryId" = $1
-          AND "productId" != $2
-          AND "status" = $3
-          AND "visibility" = $4
-          AND "deletedAt" IS NULL
-        ORDER BY "isFeatured" DESC, RANDOM()
-        LIMIT $5
-      `;
-      return (
-        (await query<DbProduct[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
-      ).map(rowToProduct);
-    }
-
-    return [];
+    return qFindRelated(this.tableName, id => this.findById(id), productId, limit);
   }
 
   /**
@@ -800,40 +394,14 @@ class ProductRepo {
    * Update product rating
    */
   async updateRating(productId: string, averageRating: number, reviewCount: number): Promise<Product> {
-    const sql = `
-      UPDATE "${this.tableName}"
-      SET "averageRating" = $2, "reviewCount" = $3, "updatedAt" = now()
-      WHERE "productId" = $1 AND "deletedAt" IS NULL
-      RETURNING *
-    `;
-
-    const result = await queryOne<DbProduct>(sql, [productId, averageRating, reviewCount]);
-
-    if (!result) {
-      throw new ProductNotFoundError(productId);
-    }
-
-    return rowToProduct(result);
+    return qUpdateRating(this.tableName, productId, averageRating, reviewCount);
   }
 
   /**
    * Publish a product
    */
   async publish(id: string): Promise<Product> {
-    const sql = `
-      UPDATE "${this.tableName}"
-      SET "status" = $2, "publishedAt" = now(), "updatedAt" = now()
-      WHERE "productId" = $1 AND "deletedAt" IS NULL
-      RETURNING *
-    `;
-
-    const result = await queryOne<DbProduct>(sql, [id, ProductStatus.ACTIVE]);
-
-    if (!result) {
-      throw new ProductNotFoundError(id);
-    }
-
-    return rowToProduct(result);
+    return qPublish(this.tableName, id);
   }
 
   /**

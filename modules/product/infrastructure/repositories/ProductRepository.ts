@@ -5,7 +5,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { logger } from '../../../../libs/logger';
-import { Product as DbProduct, ProductVariant as DbProductVariant, ProductImage as DbProductImage } from '../../../../libs/db/types';
+import { Product as DbProduct, ProductVariant as DbProductVariant } from '../../../../libs/db/types';
 import { ProductRepository as IProductRepository, ProductFilters } from '../../domain/repositories/ProductRepository';
 import { PaginationOptions, PaginatedResult } from 'libs/types/pagination';
 import { Product, ProductImage } from '../../domain/entities/Product';
@@ -13,7 +13,22 @@ import { CatalogFeature } from '../../domain/entities/CatalogFeature';
 import { ProductVariant } from '../../domain/entities/ProductVariant';
 import { ProductStatus } from '../../domain/valueObjects/ProductStatus';
 import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
-import { Dimensions } from '../../domain/valueObjects/Dimensions';
+import { mapToProduct, mapToVariant } from './productRowMappers';
+import { buildWhereClause as buildFilterWhereClause } from './productFilterQueries';
+import { listCatalogFeatureRows as qListCatalogFeatureRows } from './productCatalogFeatureQueries';
+import {
+  findVariantsByProductId as qFindVariantsByProductId,
+  findVariantById as qFindVariantById,
+  findVariantBySku as qFindVariantBySku,
+  saveVariant as qSaveVariant,
+  deleteVariant as qDeleteVariant,
+  getDefaultVariant as qGetDefaultVariant,
+  getProductImages as qGetProductImages,
+  addProductImage as qAddProductImage,
+  updateProductImage as qUpdateProductImage,
+  deleteProductImage as qDeleteProductImage,
+  reorderProductImages as qReorderProductImages,
+} from './productVariantImageQueries';
 
 export class ProductRepo implements IProductRepository {
   async findById(productId: string): Promise<Product | null> {
@@ -398,414 +413,72 @@ export class ProductRepo implements IProductRepository {
   }
 
   async listCatalogFeatureRows(params: { organizationId?: string; afterProductId?: string; limit?: number }): Promise<CatalogFeature[]> {
-    const limit = params.limit ?? 500;
-    const rows = await query<
-      Array<{
-        productId: string;
-        organizationId: string | null;
-        storeId: string | null;
-        status: string;
-        visibility: string;
-        type: string;
-        brandId: string | null;
-        averageRating: string | null;
-        publishedAt: string | null;
-        isFeatured: boolean;
-        isBestseller: boolean;
-        primaryCategoryId: string | null;
-        categoryIds: unknown;
-        collectionIds: unknown;
-        attributeValues: unknown;
-        basePriceCents: number | null;
-      }>
-    >(
-      `SELECT
-         p."productId", p."organizationId", p."storeId", p."status", p."visibility", p."type",
-         p."brandId", p."averageRating", p."publishedAt", p."isFeatured", p."isBestseller",
-         (SELECT ptc."productCategoryId" FROM "productToCategory" ptc
-           WHERE ptc."productId" = p."productId"
-           ORDER BY ptc."isPrimary" DESC, ptc."position" ASC LIMIT 1) AS "primaryCategoryId",
-         COALESCE((SELECT json_agg(x."productCategoryId") FROM (
-           SELECT DISTINCT ptc2."productCategoryId" FROM "productToCategory" ptc2
-           WHERE ptc2."productId" = p."productId") x), '[]'::json) AS "categoryIds",
-         COALESCE((SELECT json_agg(pcm."assortmentCollectionId") FROM "assortmentCollectionMap" pcm
-           WHERE pcm."productId" = p."productId"), '[]'::json) AS "collectionIds",
-         COALESCE((SELECT json_agg(json_build_object('attributeId', avm."attributeId", 'value', avm."value"))
-           FROM "productAttributeValueMap" avm WHERE avm."productId" = p."productId"), '[]'::json) AS "attributeValues",
-         (SELECT bp."priceCents" FROM "productBasePrice" bp
-           WHERE bp."productId" = p."productId" AND bp."productVariantId" IS NULL LIMIT 1) AS "basePriceCents"
-       FROM product p
-       WHERE p."deletedAt" IS NULL
-         AND ($1::uuid IS NULL OR p."organizationId" = $1)
-         AND ($2::uuid IS NULL OR p."productId" > $2)
-       ORDER BY p."productId" ASC
-       LIMIT $3`,
-      [params.organizationId ?? null, params.afterProductId ?? null, limit],
-    );
-
-    return (rows || []).map(row => {
-      const categoryIds = (row.categoryIds as string[]) || [];
-      return {
-        productId: row.productId,
-        organizationId: row.organizationId,
-        storeId: row.storeId,
-        status: row.status,
-        visibility: row.visibility,
-        type: row.type,
-        brandId: row.brandId,
-        primaryCategoryId: row.primaryCategoryId,
-        secondaryCategoryIds: categoryIds.filter(c => c !== row.primaryCategoryId),
-        collectionIds: (row.collectionIds as string[]) || [],
-        attributeValues: (row.attributeValues as CatalogFeature['attributeValues']) || [],
-        basePriceCents: row.basePriceCents !== null ? Number(row.basePriceCents) : null,
-        averageRating: row.averageRating !== null ? Number(row.averageRating) : null,
-        publishedAt: row.publishedAt ? new Date(row.publishedAt) : null,
-        isFeatured: row.isFeatured,
-        isBestseller: row.isBestseller,
-      };
-    });
+    return qListCatalogFeatureRows(params);
   }
 
   async search(queryStr: string, filters?: ProductFilters, pagination?: PaginationOptions): Promise<PaginatedResult<Product>> {
     return this.findAll({ ...filters, search: queryStr }, pagination);
   }
 
-  // Variant methods
+  // Variant methods — delegated to productVariantImageQueries.ts
   async findVariantsByProductId(productId: string): Promise<ProductVariant[]> {
-    const rows = await query<DbProductVariant[]>('SELECT * FROM "productVariant" WHERE "productId" = $1 ORDER BY "position" ASC', [
-      productId,
-    ]);
-    return (rows || []).map(row => this.mapToVariant(row));
+    return qFindVariantsByProductId(productId);
   }
 
   async findVariantById(variantId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
-    return row ? this.mapToVariant(row) : null;
+    return qFindVariantById(variantId);
   }
 
   async findVariantBySku(sku: string): Promise<ProductVariant | null> {
-    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE sku = $1', [sku]);
-    return row ? this.mapToVariant(row) : null;
+    return qFindVariantBySku(sku);
   }
 
   async saveVariant(variant: ProductVariant): Promise<ProductVariant> {
-    const now = new Date().toISOString();
-
-    const existing = await queryOne<DbProductVariant>('SELECT "productVariantId" FROM "productVariant" WHERE "productVariantId" = $1', [
-      variant.variantId,
-    ]);
-
-    if (existing) {
-      await query(
-        `UPDATE "productVariant" SET
-          sku = $1, name = $2,
-          weight = $3, "isDefault" = $4, status = $5,
-          "position" = $6, barcode = $7, "updatedAt" = $8
-        WHERE "productVariantId" = $9`,
-        [
-          variant.sku,
-          variant.name,
-          variant.dimensions.weight,
-          variant.isDefault,
-          variant.isActive ? 'active' : 'inactive',
-          variant.position,
-          variant.barcode,
-          now,
-          variant.variantId,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO "productVariant" (
-          "productVariantId", "productId", sku, name,
-          weight, "isDefault", status, position, barcode,
-          "createdAt", "updatedAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [
-          variant.variantId,
-          variant.productId,
-          variant.sku,
-          variant.name,
-          variant.dimensions.weight,
-          variant.isDefault,
-          variant.isActive ? 'active' : 'inactive',
-          variant.position,
-          variant.barcode,
-          now,
-          now,
-        ],
-      );
-    }
-
-    await query(`UPDATE "productVariant" SET "inventoryPolicy" = $1 WHERE "productVariantId" = $2`, [
-      variant.inventoryPolicy,
-      variant.variantId,
-    ]);
-
-    return variant;
+    return qSaveVariant(variant);
   }
 
   async deleteVariant(variantId: string): Promise<void> {
-    await query('DELETE FROM "productVariant" WHERE "productVariantId" = $1', [variantId]);
+    return qDeleteVariant(variantId);
   }
 
   async getDefaultVariant(productId: string): Promise<ProductVariant | null> {
-    const row = await queryOne<DbProductVariant>('SELECT * FROM "productVariant" WHERE "productId" = $1 AND "isDefault" = true', [
-      productId,
-    ]);
-    return row ? this.mapToVariant(row) : null;
+    return qGetDefaultVariant(productId);
   }
 
-  // Image methods
+  // Image methods — delegated to productVariantImageQueries.ts
   async getProductImages(productId: string): Promise<ProductImage[]> {
-    const rows = await query<DbProductImage[]>('SELECT * FROM "productImage" WHERE "productId" = $1 ORDER BY position ASC', [productId]);
-    return (rows || []).map(row => ({
-      imageId: row.productImageId,
-      url: row.url,
-      altText: row.alt ?? undefined,
-      position: row.position,
-      isPrimary: Boolean(row.isPrimary),
-    }));
+    return qGetProductImages(productId);
   }
 
   async addProductImage(productId: string, image: ProductImage): Promise<void> {
-    const now = new Date().toISOString();
-    await query(
-      `INSERT INTO "productImage" ("productImageId", "productId", url, "alt", position, "isPrimary", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [image.imageId, productId, image.url, image.altText, image.position, image.isPrimary, now, now],
-    );
+    return qAddProductImage(productId, image);
   }
 
   async updateProductImage(imageId: string, updates: { altText?: string; position?: number; isPrimary?: boolean }): Promise<void> {
-    const setClauses: string[] = ['"updatedAt" = $1'];
-    const params: unknown[] = [new Date().toISOString()];
-    let paramIndex = 2;
-
-    if (updates.altText !== undefined) {
-      setClauses.push(`"alt" = $${paramIndex++}`);
-      params.push(updates.altText);
-    }
-    if (updates.position !== undefined) {
-      setClauses.push(`position = $${paramIndex++}`);
-      params.push(updates.position);
-    }
-    if (updates.isPrimary !== undefined) {
-      setClauses.push(`"isPrimary" = $${paramIndex++}`);
-      params.push(updates.isPrimary);
-    }
-
-    params.push(imageId);
-    await query(`UPDATE "productImage" SET ${setClauses.join(', ')} WHERE "productImageId" = $${paramIndex}`, params);
+    return qUpdateProductImage(imageId, updates);
   }
 
   async deleteProductImage(imageId: string): Promise<void> {
-    await query('DELETE FROM "productImage" WHERE "productImageId" = $1', [imageId]);
+    return qDeleteProductImage(imageId);
   }
 
   async reorderProductImages(productId: string, imageIds: string[]): Promise<void> {
-    for (let i = 0; i < imageIds.length; i++) {
-      await query('UPDATE "productImage" SET position = $1, "updatedAt" = $2 WHERE "productImageId" = $3 AND "productId" = $4', [
-        i,
-        new Date().toISOString(),
-        imageIds[i],
-        productId,
-      ]);
-    }
+    return qReorderProductImages(productId, imageIds);
   }
 
   // Private helper methods
+  // Private helper methods — delegated to extracted modules
   private buildWhereClause(filters?: ProductFilters): { whereClause: string; params: unknown[] } {
-    const b = { conditions: ['"deletedAt" IS NULL'], params: [] as unknown[], paramIndex: 1 };
-
-    this.addScalarOrInFilter(b, 'status', filters?.status);
-    this.addScalarOrInFilter(b, 'visibility', filters?.visibility);
-
-    if (filters?.categoryId) {
-      // Product↔category lives in the productToCategory mapping table
-      b.conditions.push(
-        `EXISTS (SELECT 1 FROM "productToCategory" ptc WHERE ptc."productId" = product."productId" AND ptc."productCategoryId" = $${b.paramIndex++})`,
-      );
-      b.params.push(filters.categoryId);
-    }
-
-    this.addScalarOrInFilter(b, '"organizationId"', filters?.organizationId);
-    this.addScalarOrInFilter(b, '"storeId"', filters?.storeId);
-    this.addIdListFilter(b, '"productId"', filters?.productIds);
-    this.addIdListFilter(b, '"productId"', filters?.excludeProductIds, true);
-    this.addScalarOrInFilter(b, '"brandId"', filters?.brandId);
-    this.addIdListFilter(b, '"brandId"', filters?.brandIds);
-    this.addSpecialFilters(b, filters);
-
-    return {
-      whereClause: b.conditions.length > 0 ? `WHERE ${b.conditions.join(' AND ')}` : '',
-      params: b.params,
-    };
-  }
-
-  // isFeatured flag, price bounds (via productBasePrice EXISTS), and the
-  // text-search UNION.
-  private addSpecialFilters(b: { conditions: string[]; params: unknown[]; paramIndex: number }, filters?: ProductFilters): void {
-    if (filters?.isFeatured !== undefined) {
-      b.conditions.push(`"isFeatured" = $${b.paramIndex++}`);
-      b.params.push(filters.isFeatured);
-    }
-    // Price bounds live in the pricing-owned productBasePrice table (integer cents)
-    if (filters?.priceMinCents !== undefined) {
-      b.conditions.push(
-        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" >= $${b.paramIndex++})`,
-      );
-      b.params.push(filters.priceMinCents);
-    }
-    if (filters?.priceMaxCents !== undefined) {
-      b.conditions.push(
-        `EXISTS (SELECT 1 FROM "productBasePrice" bp WHERE bp."productId" = product."productId" AND bp."productVariantId" IS NULL AND bp."priceCents" <= $${b.paramIndex++})`,
-      );
-      b.params.push(filters.priceMaxCents);
-    }
-    if (filters?.search) {
-      // UNION inside the IN keeps each arm on its own trigram index — a plain
-      // OR across product columns and the productVariant join can't BitmapOr.
-      b.conditions.push(
-        `"productId" IN (SELECT "productId" FROM product WHERE name ILIKE $${b.paramIndex} OR description ILIKE $${b.paramIndex} OR sku ILIKE $${b.paramIndex} UNION SELECT "productId" FROM "productVariant" WHERE sku ILIKE $${b.paramIndex} OR barcode ILIKE $${b.paramIndex})`,
-      );
-      b.params.push(`%${filters.search}%`);
-      b.paramIndex++;
-    }
-  }
-
-  // Scalar value or IN-list — both produce one condition per filter.
-  private addScalarOrInFilter(
-    b: { conditions: string[]; params: unknown[]; paramIndex: number },
-    column: string,
-    value: string | string[] | undefined,
-  ): void {
-    if (!value || (Array.isArray(value) && value.length === 0)) return;
-    if (Array.isArray(value)) {
-      b.conditions.push(`${column} IN (${value.map(() => `$${b.paramIndex++}`).join(', ')})`);
-      b.params.push(...value);
-    } else {
-      b.conditions.push(`${column} = $${b.paramIndex++}`);
-      b.params.push(value);
-    }
-  }
-
-  private addIdListFilter(
-    b: { conditions: string[]; params: unknown[]; paramIndex: number },
-    column: string,
-    ids: string[] | undefined,
-    negate = false,
-  ): void {
-    if (!ids || ids.length === 0) return;
-    const placeholders = ids.map(() => `$${b.paramIndex++}`).join(', ');
-    b.conditions.push(`${column} ${negate ? 'NOT IN' : 'IN'} (${placeholders})`);
-    b.params.push(...ids);
+    return buildFilterWhereClause(filters);
   }
 
   private mapToProduct(row: DbProduct, images: ProductImage[]): Product {
-    return Product.reconstitute({
-      ...this.productIdentityFromRow(row),
-      ...this.productFlagsFromRow(row),
-      ...this.productMetaFromRow(row),
-      dimensions: this.dimensionsFromRow(row),
-      images,
-      publishedAt: row.publishedAt ? new Date(row.publishedAt) : undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-      deletedAt: row.deletedAt ? new Date(row.deletedAt) : undefined,
-    });
-  }
-
-  private productIdentityFromRow(row: DbProduct) {
-    return {
-      productId: row.productId,
-      name: row.name,
-      description: row.description || '',
-      shortDescription: row.shortDescription ?? undefined,
-      sku: row.sku,
-      slug: row.slug,
-      productTypeId: row.productTypeId ?? row.type,
-      categoryId: undefined,
-      organizationId: row.organizationId ?? undefined,
-      storeId: row.storeId ?? undefined,
-      status: row.status as ProductStatus,
-      visibility: row.visibility as ProductVisibility,
-      primaryImageId: row.primaryImageId ?? undefined,
-      externalId: row.externalId ?? undefined,
-    };
-  }
-
-  private dimensionsFromRow(row: DbProduct): Dimensions {
-    return Dimensions.create({
-      weight: row.weight ? parseFloat(row.weight) : undefined,
-      weightUnit: (row.weightUnit || 'g') as 'kg' | 'lb' | 'oz' | 'g',
-      length: row.length ? parseFloat(row.length) : undefined,
-      width: row.width ? parseFloat(row.width) : undefined,
-      height: row.height ? parseFloat(row.height) : undefined,
-      dimensionUnit: (row.dimensionUnit || 'cm') as 'cm' | 'in' | 'm' | 'mm',
-    });
-  }
-
-  private productFlagsFromRow(row: DbProduct) {
-    return {
-      isFeatured: Boolean(row.isFeatured),
-      isVirtual: Boolean(row.isVirtual),
-      isDownloadable: Boolean(row.isDownloadable),
-      isSubscription: Boolean(row.isSubscription),
-      isTaxable: Boolean(row.isTaxable),
-      isInventoryManaged:
-        row.isInventoryManaged === null || row.isInventoryManaged === undefined ? undefined : Boolean(row.isInventoryManaged),
-      taxClass: row.taxClass ?? undefined,
-      hasVariants: Boolean(row.hasVariants),
-      variantAttributes: row.variantAttributes
-        ? typeof row.variantAttributes === 'string'
-          ? JSON.parse(row.variantAttributes as string)
-          : (row.variantAttributes as Record<string, unknown>)
-        : undefined,
-    };
-  }
-
-  private productMetaFromRow(row: DbProduct) {
-    return {
-      metaTitle: row.metaTitle ?? undefined,
-      metaDescription: row.metaDescription ?? undefined,
-      metaKeywords: row.metaKeywords ?? undefined,
-      minOrderQuantity: row.minOrderQuantity ?? 1,
-      maxOrderQuantity: row.maxOrderQuantity ?? undefined,
-      returnPolicy: row.returnPolicy ?? undefined,
-      warranty: row.warranty ?? undefined,
-      tags: [],
-      metadata: undefined,
-    };
+    return mapToProduct(row, images);
   }
 
   private mapToVariant(row: DbProductVariant): ProductVariant {
-    return ProductVariant.reconstitute({
-      variantId: row.productVariantId,
-      productId: row.productId,
-      sku: row.sku,
-      name: row.name || '',
-      dimensions: Dimensions.create({
-        weight: row.weight ? parseFloat(row.weight) : undefined,
-        weightUnit: 'g',
-        length: row.length ? parseFloat(row.length) : undefined,
-        width: row.width ? parseFloat(row.width) : undefined,
-        height: row.height ? parseFloat(row.height) : undefined,
-        dimensionUnit: 'cm',
-      }),
-      attributes: [],
-      stockQuantity: 0,
-      lowStockThreshold: 5,
-      inventoryPolicy:
-        ((row as DbProductVariant & { inventoryPolicy?: 'tracked' | 'unlimited' | 'backorderable' }).inventoryPolicy as
-          'tracked' | 'unlimited' | 'backorderable' | undefined) ?? 'tracked',
-      isDefault: Boolean(row.isDefault),
-      isActive: row.status === 'active',
-      position: row.position ?? 0,
-      barcode: row.barcode ?? undefined,
-      createdAt: new Date(row.createdAt),
-      updatedAt: new Date(row.updatedAt),
-    });
+    return mapToVariant(row);
   }
+
 }
 export default new ProductRepo();

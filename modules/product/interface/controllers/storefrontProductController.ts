@@ -111,53 +111,23 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
     inStock,
   } = req.query;
   const storeCtx = getStoreContext(res);
+  const pageNum = parseInt(page as string);
+  const limitNum = parseInt(limit as string);
 
-  // Build filters — scope to current store
-  const filters: Record<string, unknown> = {};
-  if (storeCtx.storeId) {
-    filters.storeId = storeCtx.storeId;
-  }
-  if (category && category !== 'all') {
-    filters.search = category as string;
-  }
-  if (search) {
-    filters.search = search as string;
-  }
-  if (brand) {
-    filters.brandId = brand as string;
-  }
-  if (priceMin) {
-    filters.priceMinCents = Math.round(parseFloat(priceMin as string) * 100);
-  }
-  if (priceMax) {
-    filters.priceMaxCents = Math.round(parseFloat(priceMax as string) * 100);
-  }
-  if (onSale === 'true') {
-    filters.onSale = true;
-  }
-
+  const filters = buildListingFilters(req.query, storeCtx);
   const assortmentOk = applyAssortmentConstraint(res, filters);
-  const command = new ListProductsCommand(filters, parseInt(limit as string), (parseInt(page as string) - 1) * parseInt(limit as string));
+  const command = new ListProductsCommand(filters, limitNum, (pageNum - 1) * limitNum);
 
-  const useCase = listProductsUseCase;
-  const result = assortmentOk ? await useCase.execute(command) : emptyListing(command.limit, command.offset);
-
-  // Fetch available brands for filter sidebar
-  let availableBrands: { brandId: string; name: string; slug: string }[] = [];
-  try {
-    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
-    availableBrands = brandsResult.data.map(b => ({ brandId: b.brandId, name: b.name, slug: b.slug }));
-  } catch {
-    // Brands are optional — continue without them
-  }
+  const result = assortmentOk ? await listProductsUseCase.execute(command) : emptyListing(command.limit, command.offset);
+  const availableBrands = await fetchAvailableBrands();
 
   const pagination = {
-    currentPage: parseInt(page as string),
-    totalPages: Math.ceil(result.total / parseInt(limit as string)),
+    currentPage: pageNum,
+    totalPages: Math.ceil(result.total / limitNum),
     totalProducts: result.total,
-    hasNext: parseInt(page as string) * parseInt(limit as string) < result.total,
-    hasPrev: parseInt(page as string) > 1,
-    nextUrl: `/products?${new URLSearchParams({ ...req.query, page: String(parseInt(page as string) + 1) }).toString()}`,
+    hasNext: pageNum * limitNum < result.total,
+    hasPrev: pageNum > 1,
+    nextUrl: `/products?${new URLSearchParams({ ...req.query, page: String(pageNum + 1) }).toString()}`,
   };
 
   // JSON response mode for AJAX infinite scroll
@@ -177,19 +147,47 @@ export const listProducts = async (req: HttpRequest, res: HttpResponse): Promise
     return;
   }
 
+  const isCategory = category && category !== 'all';
   storefrontRespond(req, res, 'product/plp', {
-    pageName: category && category !== 'all' ? `Category: ${category}` : 'All Products',
+    pageName: isCategory ? `Category: ${category}` : 'All Products',
     products: result.products,
     totalProducts: result.total,
     currentCategory: null,
-    categoryName: category && category !== 'all' ? (category as string) : null,
-    categorySlug: category && category !== 'all' ? (category as string) : null,
+    categoryName: isCategory ? (category as string) : null,
+    categorySlug: isCategory ? (category as string) : null,
     pagination,
     filters: { category, search, sort, order, brand, size, colour, priceMin, priceMax, onSale, inStock },
     availableBrands,
     storeContext: storeCtx,
   });
 };
+
+/** Filters scoped to the current store. */
+function buildListingFilters(
+  query: HttpRequest['query'],
+  storeCtx: ReturnType<typeof getStoreContext>,
+): Record<string, unknown> {
+  const { category, search, brand, priceMin, priceMax, onSale } = query;
+  const filters: Record<string, unknown> = {};
+  if (storeCtx.storeId) filters.storeId = storeCtx.storeId;
+  if (category && category !== 'all') filters.search = category as string;
+  if (search) filters.search = search as string;
+  if (brand) filters.brandId = brand as string;
+  if (priceMin) filters.priceMinCents = Math.round(parseFloat(priceMin as string) * 100);
+  if (priceMax) filters.priceMaxCents = Math.round(parseFloat(priceMax as string) * 100);
+  if (onSale === 'true') filters.onSale = true;
+  return filters;
+}
+
+/** Available brands for the filter sidebar — optional, failures return []. */
+async function fetchAvailableBrands(): Promise<{ brandId: string; name: string; slug: string }[]> {
+  try {
+    const brandsResult = await manageBrandsUseCase.findAll({ organizationId: undefined, status: 'active' });
+    return brandsResult.data.map(b => ({ brandId: b.brandId, name: b.name, slug: b.slug }));
+  } catch {
+    return [];
+  }
+}
 
 // ============================================================================
 // Product Detail (PDP)

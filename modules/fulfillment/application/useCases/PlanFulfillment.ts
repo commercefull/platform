@@ -57,6 +57,27 @@ function storeShipFromAddress(store: FulfillableStore): Record<string, unknown> 
   };
 }
 
+type DefaultWarehouse = NonNullable<Awaited<ReturnType<FulfillmentSourcePort['findDefaultWarehouse']>>>;
+
+function warehouseGroup(warehouse: DefaultWarehouse, items: FulfillmentGroupItem[]): FulfillmentGroup {
+  return {
+    sourceType: 'warehouse',
+    sourceId: warehouse.distributionWarehouseId,
+    sourceName: warehouse.name || 'Warehouse',
+    shipFromAddress: {
+      firstName: warehouse.name || 'Warehouse',
+      lastName: '',
+      addressLine1: warehouse.addressLine1 || '',
+      addressLine2: warehouse.addressLine2 || undefined,
+      city: warehouse.city || '',
+      state: warehouse.state || '',
+      postalCode: warehouse.postalCode || '',
+      countryCode: warehouse.country || '',
+    },
+    items,
+  };
+}
+
 export class PlanFulfillmentUseCase {
   constructor(
     private readonly orderRouter: Pick<OrderRouter, 'determineFulfillmentStore'>,
@@ -80,6 +101,36 @@ export class PlanFulfillmentUseCase {
     const routableStores = stores.map(toRoutableStore);
 
     // Try to find a single store that can fulfill all items
+    const singleStoreGroup = await this.routeAllItemsToOneStore(items, stores, routableStores);
+    if (singleStoreGroup) {
+      return { groups: [singleStoreGroup], isSplit: false };
+    }
+
+    // Split: try to assign each item to the best store with inventory
+    for (const item of items) {
+      const assigned = await this.assignItemToStore(item, stores, routableStores, groups);
+      if (!assigned) {
+        unassigned.push(item);
+      }
+    }
+
+    // Assign unassigned items to fallback warehouse
+    if (unassigned.length > 0 && fallbackWarehouse) {
+      groups.push(warehouseGroup(fallbackWarehouse, unassigned));
+    } else if (unassigned.length > 0) {
+      // No warehouse fallback — items remain unassigned
+      logger.warn(`PlanFulfillment: ${unassigned.length} items could not be assigned to any source`);
+    }
+
+    return { groups, isSplit: groups.length > 1 };
+  }
+
+  /** Route all items to a single store, or null when no store can take them all. */
+  private async routeAllItemsToOneStore(
+    items: FulfillmentGroupItem[],
+    stores: FulfillableStore[],
+    routableStores: ReturnType<typeof toRoutableStore>[],
+  ): Promise<FulfillmentGroup | null> {
     try {
       const routingResult = await this.orderRouter.determineFulfillmentStore(
         {
@@ -92,81 +143,57 @@ export class PlanFulfillmentUseCase {
 
       const selectedStore = stores.find(s => s.storeId === routingResult.storeId);
       if (selectedStore && selectedStore.address) {
-        groups.push({
+        return {
           sourceType: 'store',
           sourceId: selectedStore.storeId,
           sourceName: selectedStore.name,
           shipFromAddress: storeShipFromAddress(selectedStore),
           items,
-        });
-        return { groups, isSplit: false };
+        };
       }
     } catch (err: unknown) {
       logger.info(`PlanFulfillment: single-store routing failed: ${(err as Error).message}`);
     }
+    return null;
+  }
 
-    // Split: try to assign each item to the best store with inventory
-    for (const item of items) {
-      let assigned = false;
-      try {
-        const routingResult = await this.orderRouter.determineFulfillmentStore(
-          {
-            orderId: '_plan',
-            fulfillmentType: 'shipping',
-            items: [{ productId: item.productId, variantId: item.variantId, quantity: item.quantity }],
-          },
-          routableStores,
-        );
-
-        const selectedStore = stores.find(s => s.storeId === routingResult.storeId);
-        if (selectedStore && selectedStore.address) {
-          // Check if we already have a group for this store
-          let group = groups.find(g => g.sourceId === selectedStore.storeId);
-          if (!group) {
-            group = {
-              sourceType: 'store',
-              sourceId: selectedStore.storeId,
-              sourceName: selectedStore.name,
-              shipFromAddress: storeShipFromAddress(selectedStore),
-              items: [],
-            };
-            groups.push(group);
-          }
-          group.items.push(item);
-          assigned = true;
-        }
-      } catch {
-        // This item can't be fulfilled from any store
-      }
-
-      if (!assigned) {
-        unassigned.push(item);
-      }
-    }
-
-    // Assign unassigned items to fallback warehouse
-    if (unassigned.length > 0 && fallbackWarehouse) {
-      groups.push({
-        sourceType: 'warehouse',
-        sourceId: fallbackWarehouse.distributionWarehouseId,
-        sourceName: fallbackWarehouse.name || 'Warehouse',
-        shipFromAddress: {
-          firstName: fallbackWarehouse.name || 'Warehouse',
-          lastName: '',
-          addressLine1: fallbackWarehouse.addressLine1 || '',
-          addressLine2: fallbackWarehouse.addressLine2 || undefined,
-          city: fallbackWarehouse.city || '',
-          state: fallbackWarehouse.state || '',
-          postalCode: fallbackWarehouse.postalCode || '',
-          countryCode: fallbackWarehouse.country || '',
+  /** Assign a single item to its best store's group. Returns false when no store can fulfill it. */
+  private async assignItemToStore(
+    item: FulfillmentGroupItem,
+    stores: FulfillableStore[],
+    routableStores: ReturnType<typeof toRoutableStore>[],
+    groups: FulfillmentGroup[],
+  ): Promise<boolean> {
+    try {
+      const routingResult = await this.orderRouter.determineFulfillmentStore(
+        {
+          orderId: '_plan',
+          fulfillmentType: 'shipping',
+          items: [{ productId: item.productId, variantId: item.variantId, quantity: item.quantity }],
         },
-        items: unassigned,
-      });
-    } else if (unassigned.length > 0) {
-      // No warehouse fallback — items remain unassigned
-      logger.warn(`PlanFulfillment: ${unassigned.length} items could not be assigned to any source`);
-    }
+        routableStores,
+      );
 
-    return { groups, isSplit: groups.length > 1 };
+      const selectedStore = stores.find(s => s.storeId === routingResult.storeId);
+      if (selectedStore && selectedStore.address) {
+        // Check if we already have a group for this store
+        let group = groups.find(g => g.sourceId === selectedStore.storeId);
+        if (!group) {
+          group = {
+            sourceType: 'store',
+            sourceId: selectedStore.storeId,
+            sourceName: selectedStore.name,
+            shipFromAddress: storeShipFromAddress(selectedStore),
+            items: [],
+          };
+          groups.push(group);
+        }
+        group.items.push(item);
+        return true;
+      }
+    } catch {
+      // This item can't be fulfilled from any store
+    }
+    return false;
   }
 }

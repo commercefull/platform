@@ -6,6 +6,33 @@
 import { query, queryOne } from '../../../../libs/db';
 import { PaymentGateway, PaymentMethodConfig, PaymentTransaction, PaymentRefund } from '../../../../libs/db/types';
 import {
+  findRefundById as qFindRefundById,
+  findRefundsByTransactionId as qFindRefundsByTransactionId,
+  createRefund as qCreateRefund,
+  updateRefund as qUpdateRefund,
+} from './paymentRefundQueries';
+import { processPaymentMock, processRefundMock } from './paymentProcessingQueries';
+import type {
+  PaymentGatewayCreateParams,
+  PaymentGatewayUpdateParams,
+  PaymentMethodConfigCreateParams,
+  PaymentMethodConfigUpdateParams,
+  PaymentTransactionCreateParams,
+  PaymentTransactionUpdateParams,
+  PaymentRefundCreateParams,
+  PaymentRefundUpdateParams,
+} from './paymentRepoTypes';
+export type {
+  PaymentGatewayCreateParams,
+  PaymentGatewayUpdateParams,
+  PaymentMethodConfigCreateParams,
+  PaymentMethodConfigUpdateParams,
+  PaymentTransactionCreateParams,
+  PaymentTransactionUpdateParams,
+  PaymentRefundCreateParams,
+  PaymentRefundUpdateParams,
+} from './paymentRepoTypes';
+import {
   FailedToCreatePaymentGatewayError,
   PaymentGatewayNotFoundError,
   FailedToUpdatePaymentGatewayError,
@@ -15,67 +42,19 @@ import {
   FailedToCreatePaymentTransactionError,
   PaymentTransactionNotFoundError,
   FailedToUpdatePaymentTransactionError,
-  FailedToCreatePaymentRefundError,
-  PaymentRefundNotFoundError,
-  FailedToUpdatePaymentRefundError,
 } from '../../domain/errors/PaymentErrors';
 import type {
   PaymentGateway as DbPaymentGateway,
   PaymentMethodConfig as DbPaymentMethodConfig,
-  PaymentRefund as DbPaymentRefund,
   PaymentTransaction as DbPaymentTransaction,
 } from '../../../../libs/db/types';
+
+/** Falsy → fallback (nullable column default). */
+const dbDefault = (value: unknown, fallback: unknown = null): unknown => value || fallback;
 
 // ============================================================================
 // Types
 // ============================================================================
-
-type MakeOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-export type PaymentGatewayCreateParams = Omit<PaymentGateway, 'paymentGatewayId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type PaymentGatewayUpdateParams = Partial<PaymentGatewayCreateParams>;
-
-export type PaymentMethodConfigCreateParams = Omit<PaymentMethodConfig, 'paymentMethodConfigId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
-export type PaymentMethodConfigUpdateParams = Partial<PaymentMethodConfigCreateParams>;
-
-export type PaymentTransactionCreateParams = MakeOptional<
-  Omit<PaymentTransaction, 'paymentTransactionId' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
-  | 'transactionId'
-  | 'authorizationCode'
-  | 'responseCode'
-  | 'responseMessage'
-  | 'errorCode'
-  | 'errorMessage'
-  | 'gatewayResponse'
-  | 'customerId'
-  | 'paymentMethodId'
-  | 'paymentGatewayId'
-  | 'externalTransactionId'
-  | 'currencyCode'
-  | 'paymentMethodDetails'
-  | 'refundedAmountCents'
-  | 'metadata'
-  | 'customerIp'
-  | 'authorizedAt'
-  | 'capturedAt'
->;
-export type PaymentTransactionUpdateParams = Partial<PaymentTransactionCreateParams>;
-
-export type PaymentRefundCreateParams = MakeOptional<
-  Omit<PaymentRefund, 'paymentRefundId' | 'createdAt' | 'updatedAt'>,
-  | 'transactionId'
-  | 'reason'
-  | 'refundId'
-  | 'paymentTransactionId'
-  | 'externalRefundId'
-  | 'currencyCode'
-  | 'gatewayResponse'
-  | 'errorCode'
-  | 'errorMessage'
-  | 'processedAt'
-  | 'metadata'
->;
-export type PaymentRefundUpdateParams = Partial<PaymentRefundCreateParams>;
 
 // ============================================================================
 // Repository
@@ -129,16 +108,16 @@ export class PaymentRepo {
         params.isActive ?? true,
         params.isDefault ?? false,
         params.isTestMode ?? false,
-        params.apiKey || null,
-        params.apiSecret || null,
-        params.publicKey || null,
-        params.webhookSecret || null,
-        params.apiEndpoint || null,
+        dbDefault(params.apiKey),
+        dbDefault(params.apiSecret),
+        dbDefault(params.publicKey),
+        dbDefault(params.webhookSecret),
+        dbDefault(params.apiEndpoint),
         params.supportedPaymentMethods || [],
         params.supportedCurrencies || [],
-        params.processingFees || null,
-        params.checkoutSettings || null,
-        params.metadata || null,
+        dbDefault(params.processingFees),
+        dbDefault(params.checkoutSettings),
+        dbDefault(params.metadata),
         now,
         now,
       ],
@@ -387,23 +366,23 @@ export class PaymentRepo {
         params.amountCents,
         params.currencyCode,
         params.status,
-        params.customerId || null,
-        params.paymentMethodId || null,
-        params.paymentGatewayId || null,
-        params.externalTransactionId || null,
-        params.paymentMethodDetails || null,
-        params.gatewayResponse || null,
-        params.errorCode || null,
-        params.errorMessage || null,
-        params.refundedAmountCents || null,
-        params.metadata || null,
-        params.customerIp || null,
-        params.capturedAt || null,
-        params.settlementCurrencyCode || null,
-        params.settlementAmountCents || null,
-        params.accountingCurrencyCode || null,
-        params.accountingAmountCents || null,
-        params.fxRate || null,
+        dbDefault(params.customerId),
+        dbDefault(params.paymentMethodId),
+        dbDefault(params.paymentGatewayId),
+        dbDefault(params.externalTransactionId),
+        dbDefault(params.paymentMethodDetails),
+        dbDefault(params.gatewayResponse),
+        dbDefault(params.errorCode),
+        dbDefault(params.errorMessage),
+        dbDefault(params.refundedAmountCents),
+        dbDefault(params.metadata),
+        dbDefault(params.customerIp),
+        dbDefault(params.capturedAt),
+        dbDefault(params.settlementCurrencyCode),
+        dbDefault(params.settlementAmountCents),
+        dbDefault(params.accountingCurrencyCode),
+        dbDefault(params.accountingAmountCents),
+        dbDefault(params.fxRate),
         now,
         now,
       ],
@@ -454,168 +433,33 @@ export class PaymentRepo {
   // ============================================================================
 
   async findRefundById(id: string): Promise<PaymentRefund | null> {
-    return queryOne<DbPaymentRefund>(
-      `SELECT * FROM "paymentRefund" 
-       WHERE "paymentRefundId" = $1`,
-      [id],
-    );
+    return qFindRefundById(id);
   }
 
   async findRefundsByTransactionId(transactionId: string): Promise<PaymentRefund[]> {
-    const results = await query<DbPaymentRefund[]>(
-      `SELECT * FROM "paymentRefund" 
-       WHERE "paymentTransactionId" = $1 
-       ORDER BY "createdAt" DESC`,
-      [transactionId],
-    );
-    return results || [];
+    return qFindRefundsByTransactionId(transactionId);
   }
 
   async createRefund(params: PaymentRefundCreateParams): Promise<PaymentRefund> {
-    const now = new Date();
-    const result = await queryOne<DbPaymentRefund>(
-      `INSERT INTO "paymentRefund" 
-       ("orderPaymentId", "orderId", "transactionId", "amountCents", "currencyCode",
-        "reason", "status", "paymentTransactionId", "externalRefundId",
-        "gatewayResponse", "errorCode", "errorMessage", "metadata", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-       RETURNING *`,
-      [
-        params.orderPaymentId,
-        params.orderId,
-        params.transactionId || null,
-        params.amountCents,
-        params.currencyCode,
-        params.reason || null,
-        params.status,
-        params.paymentTransactionId || null,
-        params.externalRefundId || null,
-        params.gatewayResponse || null,
-        params.errorCode || null,
-        params.errorMessage || null,
-        params.metadata || null,
-        now,
-        now,
-      ],
-    );
-
-    if (!result) throw new FailedToCreatePaymentRefundError();
-
-    // Update the transaction's refunded amountCents
-    await query(
-      `UPDATE "paymentTransaction" 
-       SET "refundedAmountCents" = COALESCE("refundedAmountCents", 0) + $1,
-           "status" = CASE
-             WHEN COALESCE("refundedAmountCents", 0) + $1 >= "amountCents" THEN 'refunded'
-             ELSE 'partially_refunded'
-           END,
-           "updatedAt" = $2
-       WHERE "paymentTransactionId" = $3 AND "deletedAt" IS NULL`,
-      [params.amountCents, now, params.paymentTransactionId],
-    );
-
-    return result;
+    return qCreateRefund(params);
   }
 
   async updateRefund(id: string, params: PaymentRefundUpdateParams): Promise<PaymentRefund> {
-    const now = new Date();
-    const updates: string[] = [];
-    const values: unknown[] = [];
-    let paramIndex = 1;
-    const columnMap: Record<string, string> = { currency: 'currencyCode' };
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        updates.push(`"${columnMap[key] ?? key}" = $${paramIndex++}`);
-        values.push(value);
-      }
-    });
-
-    if (updates.length === 0) {
-      const existing = await this.findRefundById(id);
-      if (!existing) throw new PaymentRefundNotFoundError();
-      return existing;
-    }
-
-    updates.push(`"updatedAt" = $${paramIndex++}`);
-    values.push(now);
-    values.push(id);
-
-    const result = await queryOne<DbPaymentRefund>(
-      `UPDATE "paymentRefund" 
-       SET ${updates.join(', ')} 
-       WHERE "paymentRefundId" = $${paramIndex}
-       RETURNING *`,
-      values,
-    );
-
-    if (!result) throw new FailedToUpdatePaymentRefundError();
-    return result;
+    return qUpdateRefund(id, params);
   }
 
   // ============================================================================
   // Payment Processing Methods (mock implementations)
   // ============================================================================
 
-  async processPayment(paymentData: {
-    orderPaymentId: string;
-    orderId: string;
-    customerId?: string;
-    amountCents: number;
-    currency: string;
-    paymentMethodId?: string;
-    paymentGatewayId?: string;
-  }): Promise<{ success: boolean; transactionId?: string; error?: string }> {
-    try {
-      const transaction = await this.createTransaction({
-        orderPaymentId: paymentData.orderPaymentId,
-        orderId: paymentData.orderId,
-        type: 'sale',
-        amountCents: paymentData.amountCents,
-        currencyCode: paymentData.currency,
-        status: 'paid',
-        customerId: paymentData.customerId || null,
-        paymentMethodId: paymentData.paymentMethodId || null,
-        paymentGatewayId: paymentData.paymentGatewayId || null,
-        gatewayResponse: { mock: true },
-        settlementCurrencyCode: null,
-        settlementAmountCents: null,
-        accountingCurrencyCode: null,
-        accountingAmountCents: null,
-        fxRate: null,
-      });
-
-      return { success: true, transactionId: transaction.paymentTransactionId };
-    } catch (error: unknown) {
-      return { success: false, error: (error as Error).message };
-    }
+  processPayment(paymentData: Parameters<typeof processPaymentMock>[1]) {
+    return processPaymentMock(this, paymentData);
   }
 
-  async processRefund(refundData: {
-    orderPaymentId: string;
-    orderId: string;
-    paymentTransactionId: string;
-    amountCents: number;
-    currency: string;
-    reason?: string;
-  }): Promise<{ success: boolean; refundId?: string; error?: string }> {
-    try {
-      const refund = await this.createRefund({
-        orderPaymentId: refundData.orderPaymentId,
-        orderId: refundData.orderId,
-        paymentTransactionId: refundData.paymentTransactionId,
-        amountCents: refundData.amountCents,
-        currencyCode: refundData.currency,
-        reason: refundData.reason || null,
-        status: 'completed',
-        gatewayResponse: { mock: true },
-      });
-
-      return { success: true, refundId: refund.paymentRefundId };
-    } catch (error: unknown) {
-      return { success: false, error: (error as Error).message };
-    }
+  processRefund(refundData: Parameters<typeof processRefundMock>[1]) {
+    return processRefundMock(this, refundData);
   }
+
 }
 
 export default new PaymentRepo();

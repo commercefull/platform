@@ -123,25 +123,27 @@ export const editPaymentGatewayForm = async (req: HttpRequest, res: HttpResponse
   });
 };
 
+const GATEWAY_STRING_FIELDS = ['name', 'provider'] as const;
+const GATEWAY_SECRET_FIELDS = ['apiKey', 'apiSecret', 'publicKey', 'webhookSecret', 'apiEndpoint'] as const;
+const GATEWAY_BOOLEAN_FIELDS = ['isActive', 'isDefault', 'isTestMode'] as const;
+
+function buildGatewayUpdates(body: HttpRequestBody): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+  for (const field of GATEWAY_STRING_FIELDS) {
+    if (body[field] !== undefined) updates[field] = body[field];
+  }
+  for (const field of GATEWAY_BOOLEAN_FIELDS) {
+    if (body[field] !== undefined) updates[field] = body[field] === 'true' || body[field] === true;
+  }
+  for (const field of GATEWAY_SECRET_FIELDS) {
+    if (body[field] !== undefined) updates[field] = body[field] || undefined;
+  }
+  return updates;
+}
+
 export const updatePaymentGateway = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { gatewayId } = req.params;
-  const updates: Record<string, unknown> = {};
-
-  const body = req.body as HttpRequestBody;
-  const { name, provider, isActive, isDefault, isTestMode, apiKey, apiSecret, publicKey, webhookSecret, apiEndpoint } = body;
-
-  if (name !== undefined) updates.name = name;
-  if (provider !== undefined) updates.provider = provider;
-  if (isActive !== undefined) updates.isActive = isActive === 'true' || isActive === true;
-  if (isDefault !== undefined) updates.isDefault = isDefault === 'true' || isDefault === true;
-  if (isTestMode !== undefined) updates.isTestMode = isTestMode === 'true' || isTestMode === true;
-  if (apiKey !== undefined) updates.apiKey = apiKey || undefined;
-  if (apiSecret !== undefined) updates.apiSecret = apiSecret || undefined;
-  if (publicKey !== undefined) updates.publicKey = publicKey || undefined;
-  if (webhookSecret !== undefined) updates.webhookSecret = webhookSecret || undefined;
-  if (apiEndpoint !== undefined) updates.apiEndpoint = apiEndpoint || undefined;
-
-  const _gateway = await managePaymentGatewaysUseCase.update(gatewayId, updates);
+  const _gateway = await managePaymentGatewaysUseCase.update(gatewayId, buildGatewayUpdates(req.body as HttpRequestBody));
 
   redirectResponse(res, `/hub/payments/gateways/${gatewayId}?success=Payment gateway updated successfully`);
 };

@@ -154,40 +154,34 @@ export const editContentPageForm = async (req: HttpRequest, res: HttpResponse): 
   });
 };
 
+const DIRECT_UPDATE_FIELDS = ['title', 'slug', 'contentTypeId', 'status', 'visibility'] as const;
+/** Fields whose empty values collapse to `undefined` (cleared columns). */
+const EMPTYABLE_UPDATE_FIELDS = [
+  'templateId',
+  'summary',
+  'featuredImage',
+  'metaTitle',
+  'metaDescription',
+  'metaKeywords',
+  'accessPassword',
+] as const;
+
+/** Collect only the submitted fields into an updates map. */
+function collectPageUpdates(body: HttpRequestBody): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+  for (const field of DIRECT_UPDATE_FIELDS) {
+    if (body[field] !== undefined) updates[field] = body[field];
+  }
+  for (const field of EMPTYABLE_UPDATE_FIELDS) {
+    if (body[field] !== undefined) updates[field] = body[field] || undefined;
+  }
+  if (body.isHomePage !== undefined) updates.isHomePage = body.isHomePage === 'true';
+  return updates;
+}
+
 export const updateContentPage = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { pageId } = req.params;
-  const updates: Record<string, unknown> = {};
-
-  const body = req.body as HttpRequestBody;
-  const {
-    title,
-    slug,
-    contentTypeId,
-    templateId,
-    summary,
-    featuredImage,
-    metaTitle,
-    metaDescription,
-    metaKeywords,
-    status,
-    visibility,
-    accessPassword,
-    isHomePage,
-  } = body;
-
-  if (title !== undefined) updates.title = title;
-  if (slug !== undefined) updates.slug = slug;
-  if (contentTypeId !== undefined) updates.contentTypeId = contentTypeId;
-  if (templateId !== undefined) updates.templateId = templateId || undefined;
-  if (summary !== undefined) updates.summary = summary || undefined;
-  if (featuredImage !== undefined) updates.featuredImage = featuredImage || undefined;
-  if (metaTitle !== undefined) updates.metaTitle = metaTitle || undefined;
-  if (metaDescription !== undefined) updates.metaDescription = metaDescription || undefined;
-  if (metaKeywords !== undefined) updates.metaKeywords = metaKeywords || undefined;
-  if (status !== undefined) updates.status = status;
-  if (visibility !== undefined) updates.visibility = visibility;
-  if (accessPassword !== undefined) updates.accessPassword = accessPassword || undefined;
-  if (isHomePage !== undefined) updates.isHomePage = isHomePage === 'true';
+  const updates = collectPageUpdates(req.body as HttpRequestBody);
 
   const command = new UpdatePageCommand({
     pageId: pageId,

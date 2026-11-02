@@ -41,6 +41,95 @@ function addId<T>(result: Record<string, unknown>, idField: string): T {
  * Repository for tax-related data manipulation operations only
  * Following the Command Query Responsibility Segregation (CQRS) pattern
  */
+
+// Field-driven UPDATE builders — keeps update methods' complexity low.
+type UpdateField = string | [field: string, transform: (value: unknown) => unknown];
+
+function buildUpdateSets(source: Record<string, unknown>, fields: UpdateField[]): { sets: string[]; params: unknown[] } {
+  const sets: string[] = [];
+  const params: unknown[] = [];
+  for (const f of fields) {
+    const [field, transform] = Array.isArray(f) ? f : [f];
+    const value = source[field];
+    if (value !== undefined) {
+      sets.push(`"${field}" = $${params.length + 2}`);
+      params.push(transform ? transform(value) : value);
+    }
+  }
+  return { sets, params };
+}
+
+const TAX_RATE_UPDATE_FIELDS: UpdateField[] = [
+  'taxCategoryId',
+  'taxZoneId',
+  'name',
+  'rate',
+  'type',
+  'priority',
+  'isCompound',
+  'includeInPrice',
+  'isShippingTaxable',
+  'fixedAmountCents',
+  'minimumAmountCents',
+  'maximumAmountCents',
+  'thresholdCents',
+  'startDate',
+  'endDate',
+  'isActive',
+];
+
+const TAX_EXEMPTION_UPDATE_FIELDS: UpdateField[] = [
+  'taxZoneId',
+  'type',
+  'status',
+  'name',
+  'exemptionNumber',
+  'businessName',
+  'exemptionReason',
+  'documentUrl',
+  'startDate',
+  'expiryDate',
+  'isVerified',
+  'verifiedBy',
+  'verifiedAt',
+  'notes',
+  ['applicableTaxCategoryIds', v => (v ? JSON.stringify(v) : null)],
+  ['minOrderAmountCents', v => v ?? null],
+  ['maxOrderAmountCents', v => v ?? null],
+  'exemptionPercent',
+];
+
+const TAX_CATEGORY_UPDATE_FIELDS: UpdateField[] = ['name', 'code', 'description', 'isDefault', 'sortOrder', 'isActive'];
+
+const TAX_ZONE_UPDATE_FIELDS: UpdateField[] = [
+  'name',
+  'code',
+  'description',
+  'isDefault',
+  ['countries', v => JSON.stringify(v)],
+  ['states', v => JSON.stringify(v)],
+  ['postcodes', v => JSON.stringify(v)],
+  ['cities', v => JSON.stringify(v)],
+  'isActive',
+];
+
+const TAX_SETTINGS_UPDATE_FIELDS: UpdateField[] = [
+  'calculationMethod',
+  'pricesIncludeTax',
+  'displayPricesWithTax',
+  'taxBasedOn',
+  'shippingTaxClass',
+  'displayTaxTotals',
+  'applyTaxToShipping',
+  'applyDiscountBeforeTax',
+  'roundTaxAtSubtotal',
+  'taxDecimalPlaces',
+  'defaultTaxCategory',
+  'defaultTaxZone',
+  'taxProvider',
+  'taxProviderSettings',
+];
+
 export class TaxCommandRepo {
   // Tax Rate command methods
   async createTaxRate(taxRate: Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'>): Promise<TaxRate> {
@@ -91,99 +180,11 @@ export class TaxCommandRepo {
   }
 
   async updateTaxRate(id: string, taxRate: Partial<Omit<TaxRate, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxRate> {
-    const now = unixTimestamp();
-
-    // Use taxRate directly - DB uses camelCase
-
     // Build update fields dynamically
-    const sets: string[] = [];
-    const params: unknown[] = [id];
-    let paramIndex = 2;
-
-    // Use camelCase database field names for updates
-    if (taxRate.taxCategoryId !== undefined) {
-      sets.push(`"taxCategoryId" = $${paramIndex++}`);
-      params.push(taxRate.taxCategoryId);
-    }
-
-    if (taxRate.taxZoneId !== undefined) {
-      sets.push(`"taxZoneId" = $${paramIndex++}`);
-      params.push(taxRate.taxZoneId);
-    }
-
-    if (taxRate.name !== undefined) {
-      sets.push(`"name" = $${paramIndex++}`);
-      params.push(taxRate.name);
-    }
-
-    if (taxRate.rate !== undefined) {
-      sets.push(`"rate" = $${paramIndex++}`);
-      params.push(taxRate.rate);
-    }
-
-    if (taxRate.type !== undefined) {
-      sets.push(`"type" = $${paramIndex++}`);
-      params.push(taxRate.type);
-    }
-
-    if (taxRate.priority !== undefined) {
-      sets.push(`"priority" = $${paramIndex++}`);
-      params.push(taxRate.priority);
-    }
-
-    if (taxRate.isCompound !== undefined) {
-      sets.push(`"isCompound" = $${paramIndex++}`);
-      params.push(taxRate.isCompound);
-    }
-
-    if (taxRate.includeInPrice !== undefined) {
-      sets.push(`"includeInPrice" = $${paramIndex++}`);
-      params.push(taxRate.includeInPrice);
-    }
-
-    if (taxRate.isShippingTaxable !== undefined) {
-      sets.push(`"isShippingTaxable" = $${paramIndex++}`);
-      params.push(taxRate.isShippingTaxable);
-    }
-
-    if (taxRate.fixedAmountCents !== undefined) {
-      sets.push(`"fixedAmountCents" = $${paramIndex++}`);
-      params.push(taxRate.fixedAmountCents);
-    }
-
-    if (taxRate.minimumAmountCents !== undefined) {
-      sets.push(`"minimumAmountCents" = $${paramIndex++}`);
-      params.push(taxRate.minimumAmountCents);
-    }
-
-    if (taxRate.maximumAmountCents !== undefined) {
-      sets.push(`"maximumAmountCents" = $${paramIndex++}`);
-      params.push(taxRate.maximumAmountCents);
-    }
-
-    if (taxRate.thresholdCents !== undefined) {
-      sets.push(`"thresholdCents" = $${paramIndex++}`);
-      params.push(taxRate.thresholdCents);
-    }
-
-    if (taxRate.startDate !== undefined) {
-      sets.push(`"startDate" = $${paramIndex++}`);
-      params.push(taxRate.startDate);
-    }
-
-    if (taxRate.endDate !== undefined) {
-      sets.push(`"endDate" = $${paramIndex++}`);
-      params.push(taxRate.endDate);
-    }
-
-    if (taxRate.isActive !== undefined) {
-      sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(taxRate.isActive);
-    }
+    const { sets, params } = buildUpdateSets(taxRate as Record<string, unknown>, TAX_RATE_UPDATE_FIELDS);
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex}`);
-    params.push(now);
+    sets.push(`"updatedAt" = $${params.length + 2}`);
 
     if (sets.length === 0) {
       throw new TaxValidationError('No fields to update');
@@ -191,7 +192,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_RATE}" SET ${sets.join(', ')} WHERE "taxRateId" = $1 RETURNING *`,
-      params,
+      [id, ...params, unixTimestamp()],
     );
 
     if (!result) {
@@ -234,48 +235,11 @@ export class TaxCommandRepo {
   }
 
   async updateTaxCategory(id: string, category: Partial<Omit<TaxCategory, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxCategory> {
-    const now = unixTimestamp();
-
-    // Use category directly - DB uses camelCase
-
     // Build update fields dynamically
-    const sets: string[] = [];
-    const params: unknown[] = [id];
-    let paramIndex = 2;
-
-    if (category.name !== undefined) {
-      sets.push(`"name" = $${paramIndex++}`);
-      params.push(category.name);
-    }
-
-    if (category.code !== undefined) {
-      sets.push(`"code" = $${paramIndex++}`);
-      params.push(category.code);
-    }
-
-    if (category.description !== undefined) {
-      sets.push(`"description" = $${paramIndex++}`);
-      params.push(category.description);
-    }
-
-    if (category.isDefault !== undefined) {
-      sets.push(`"isDefault" = $${paramIndex++}`);
-      params.push(category.isDefault);
-    }
-
-    if (category.sortOrder !== undefined) {
-      sets.push(`"sortOrder" = $${paramIndex++}`);
-      params.push(category.sortOrder);
-    }
-
-    if (category.isActive !== undefined) {
-      sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(category.isActive);
-    }
+    const { sets, params } = buildUpdateSets(category as Record<string, unknown>, TAX_CATEGORY_UPDATE_FIELDS);
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex}`);
-    params.push(now);
+    sets.push(`"updatedAt" = $${params.length + 2}`);
 
     if (sets.length === 0) {
       throw new TaxValidationError('No fields to update');
@@ -283,7 +247,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_CATEGORY}" SET ${sets.join(', ')} WHERE "taxCategoryId" = $1 RETURNING *`,
-      params,
+      [id, ...params, unixTimestamp()],
     );
 
     if (!result) {
@@ -338,63 +302,11 @@ export class TaxCommandRepo {
   }
 
   async updateTaxZone(id: string, taxZone: Partial<Omit<TaxZone, 'id' | 'createdAt' | 'updatedAt'>>): Promise<TaxZone> {
-    const now = unixTimestamp();
-
-    // Use taxZone directly - DB uses camelCase
-
     // Build update fields dynamically
-    const sets: string[] = [];
-    const params: unknown[] = [id];
-    let paramIndex = 2;
-
-    if (taxZone.name !== undefined) {
-      sets.push(`"name" = $${paramIndex++}`);
-      params.push(taxZone.name);
-    }
-
-    if (taxZone.code !== undefined) {
-      sets.push(`"code" = $${paramIndex++}`);
-      params.push(taxZone.code);
-    }
-
-    if (taxZone.description !== undefined) {
-      sets.push(`"description" = $${paramIndex++}`);
-      params.push(taxZone.description);
-    }
-
-    if (taxZone.isDefault !== undefined) {
-      sets.push(`"isDefault" = $${paramIndex++}`);
-      params.push(taxZone.isDefault);
-    }
-
-    if (taxZone.countries !== undefined) {
-      sets.push(`"countries" = $${paramIndex++}`);
-      params.push(JSON.stringify(taxZone.countries));
-    }
-
-    if (taxZone.states !== undefined) {
-      sets.push(`"states" = $${paramIndex++}`);
-      params.push(JSON.stringify(taxZone.states));
-    }
-
-    if (taxZone.postcodes !== undefined) {
-      sets.push(`"postcodes" = $${paramIndex++}`);
-      params.push(JSON.stringify(taxZone.postcodes));
-    }
-
-    if (taxZone.cities !== undefined) {
-      sets.push(`"cities" = $${paramIndex++}`);
-      params.push(JSON.stringify(taxZone.cities));
-    }
-
-    if (taxZone.isActive !== undefined) {
-      sets.push(`"isActive" = $${paramIndex++}`);
-      params.push(taxZone.isActive);
-    }
+    const { sets, params } = buildUpdateSets(taxZone as Record<string, unknown>, TAX_ZONE_UPDATE_FIELDS);
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex}`);
-    params.push(now);
+    sets.push(`"updatedAt" = $${params.length + 2}`);
 
     if (sets.length === 0) {
       throw new TaxValidationError('No fields to update');
@@ -402,7 +314,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_ZONE}" SET ${sets.join(', ')} WHERE "taxZoneId" = $1 RETURNING *`,
-      params,
+      [id, ...params, unixTimestamp()],
     );
 
     if (!result) {
@@ -474,108 +386,11 @@ export class TaxCommandRepo {
     id: string,
     exemption: Partial<Omit<CustomerTaxExemption, 'id' | 'customerId' | 'createdAt' | 'updatedAt'>>,
   ): Promise<CustomerTaxExemption> {
-    const now = unixTimestamp();
-
-    // Use exemption directly - DB uses camelCase
-
     // Build update fields dynamically
-    const sets: string[] = [];
-    const params: unknown[] = [id];
-    let paramIndex = 2;
-
-    if (exemption.taxZoneId !== undefined) {
-      sets.push(`"taxZoneId" = $${paramIndex++}`);
-      params.push(exemption.taxZoneId);
-    }
-
-    if (exemption.type !== undefined) {
-      sets.push(`"type" = $${paramIndex++}`);
-      params.push(exemption.type);
-    }
-
-    if (exemption.status !== undefined) {
-      sets.push(`"status" = $${paramIndex++}`);
-      params.push(exemption.status);
-    }
-
-    if (exemption.name !== undefined) {
-      sets.push(`"name" = $${paramIndex++}`);
-      params.push(exemption.name);
-    }
-
-    if (exemption.exemptionNumber !== undefined) {
-      sets.push(`"exemptionNumber" = $${paramIndex++}`);
-      params.push(exemption.exemptionNumber);
-    }
-
-    if (exemption.businessName !== undefined) {
-      sets.push(`"businessName" = $${paramIndex++}`);
-      params.push(exemption.businessName);
-    }
-
-    if (exemption.exemptionReason !== undefined) {
-      sets.push(`"exemptionReason" = $${paramIndex++}`);
-      params.push(exemption.exemptionReason);
-    }
-
-    if (exemption.documentUrl !== undefined) {
-      sets.push(`"documentUrl" = $${paramIndex++}`);
-      params.push(exemption.documentUrl);
-    }
-
-    if (exemption.startDate !== undefined) {
-      sets.push(`"startDate" = $${paramIndex++}`);
-      params.push(exemption.startDate);
-    }
-
-    if (exemption.expiryDate !== undefined) {
-      sets.push(`"expiryDate" = $${paramIndex++}`);
-      params.push(exemption.expiryDate);
-    }
-
-    if (exemption.isVerified !== undefined) {
-      sets.push(`"isVerified" = $${paramIndex++}`);
-      params.push(exemption.isVerified);
-    }
-
-    if (exemption.verifiedBy !== undefined) {
-      sets.push(`"verifiedBy" = $${paramIndex++}`);
-      params.push(exemption.verifiedBy);
-    }
-
-    if (exemption.verifiedAt !== undefined) {
-      sets.push(`"verifiedAt" = $${paramIndex++}`);
-      params.push(exemption.verifiedAt);
-    }
-
-    if (exemption.notes !== undefined) {
-      sets.push(`"notes" = $${paramIndex++}`);
-      params.push(exemption.notes);
-    }
-
-    if (exemption.applicableTaxCategoryIds !== undefined) {
-      sets.push(`"applicableTaxCategoryIds" = $${paramIndex++}`);
-      params.push(exemption.applicableTaxCategoryIds ? JSON.stringify(exemption.applicableTaxCategoryIds) : null);
-    }
-
-    if (exemption.minOrderAmountCents !== undefined) {
-      sets.push(`"minOrderAmountCents" = $${paramIndex++}`);
-      params.push(exemption.minOrderAmountCents ?? null);
-    }
-
-    if (exemption.maxOrderAmountCents !== undefined) {
-      sets.push(`"maxOrderAmountCents" = $${paramIndex++}`);
-      params.push(exemption.maxOrderAmountCents ?? null);
-    }
-
-    if (exemption.exemptionPercent !== undefined) {
-      sets.push(`"exemptionPercent" = $${paramIndex++}`);
-      params.push(exemption.exemptionPercent);
-    }
+    const { sets, params } = buildUpdateSets(exemption as Record<string, unknown>, TAX_EXEMPTION_UPDATE_FIELDS);
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex}`);
-    params.push(now);
+    sets.push(`"updatedAt" = $${params.length + 2}`);
 
     if (sets.length === 0) {
       throw new TaxValidationError('No fields to update');
@@ -583,7 +398,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.CUSTOMER_TAX_EXEMPTION}" SET ${sets.join(', ')} WHERE "customerTaxExemptionId" = $1 RETURNING *`,
-      params,
+      [id, ...params, unixTimestamp()],
     );
 
     if (!result) {
@@ -653,88 +468,11 @@ export class TaxCommandRepo {
     id: string,
     settings: Partial<Omit<TaxSettings, 'id' | 'organizationId' | 'createdAt' | 'updatedAt'>>,
   ): Promise<TaxSettings> {
-    const now = unixTimestamp();
-
-    // Use settings directly - DB uses camelCase
-
     // Build update fields dynamically
-    const sets: string[] = [];
-    const params: unknown[] = [id];
-    let paramIndex = 2;
-
-    if (settings.calculationMethod !== undefined) {
-      sets.push(`"calculationMethod" = $${paramIndex++}`);
-      params.push(settings.calculationMethod);
-    }
-
-    if (settings.pricesIncludeTax !== undefined) {
-      sets.push(`"pricesIncludeTax" = $${paramIndex++}`);
-      params.push(settings.pricesIncludeTax);
-    }
-
-    if (settings.displayPricesWithTax !== undefined) {
-      sets.push(`"displayPricesWithTax" = $${paramIndex++}`);
-      params.push(settings.displayPricesWithTax);
-    }
-
-    if (settings.taxBasedOn !== undefined) {
-      sets.push(`"taxBasedOn" = $${paramIndex++}`);
-      params.push(settings.taxBasedOn);
-    }
-
-    if (settings.shippingTaxClass !== undefined) {
-      sets.push(`"shippingTaxClass" = $${paramIndex++}`);
-      params.push(settings.shippingTaxClass);
-    }
-
-    if (settings.displayTaxTotals !== undefined) {
-      sets.push(`"displayTaxTotals" = $${paramIndex++}`);
-      params.push(settings.displayTaxTotals);
-    }
-
-    if (settings.applyTaxToShipping !== undefined) {
-      sets.push(`"applyTaxToShipping" = $${paramIndex++}`);
-      params.push(settings.applyTaxToShipping);
-    }
-
-    if (settings.applyDiscountBeforeTax !== undefined) {
-      sets.push(`"applyDiscountBeforeTax" = $${paramIndex++}`);
-      params.push(settings.applyDiscountBeforeTax);
-    }
-
-    if (settings.roundTaxAtSubtotal !== undefined) {
-      sets.push(`"roundTaxAtSubtotal" = $${paramIndex++}`);
-      params.push(settings.roundTaxAtSubtotal);
-    }
-
-    if (settings.taxDecimalPlaces !== undefined) {
-      sets.push(`"taxDecimalPlaces" = $${paramIndex++}`);
-      params.push(settings.taxDecimalPlaces);
-    }
-
-    if (settings.defaultTaxCategory !== undefined) {
-      sets.push(`"defaultTaxCategory" = $${paramIndex++}`);
-      params.push(settings.defaultTaxCategory);
-    }
-
-    if (settings.defaultTaxZone !== undefined) {
-      sets.push(`"defaultTaxZone" = $${paramIndex++}`);
-      params.push(settings.defaultTaxZone);
-    }
-
-    if (settings.taxProvider !== undefined) {
-      sets.push(`"taxProvider" = $${paramIndex++}`);
-      params.push(settings.taxProvider);
-    }
-
-    if (settings.taxProviderSettings !== undefined) {
-      sets.push(`"taxProviderSettings" = $${paramIndex++}`);
-      params.push(settings.taxProviderSettings);
-    }
+    const { sets, params } = buildUpdateSets(settings as Record<string, unknown>, TAX_SETTINGS_UPDATE_FIELDS);
 
     // Always update the updatedAt timestamp
-    sets.push(`"updatedAt" = $${paramIndex}`);
-    params.push(now);
+    sets.push(`"updatedAt" = $${params.length + 2}`);
 
     if (sets.length === 0) {
       throw new TaxValidationError('No fields to update');
@@ -742,7 +480,7 @@ export class TaxCommandRepo {
 
     const result = await queryOne<Record<string, unknown>>(
       `UPDATE "${TABLES.TAX_SETTINGS}" SET ${sets.join(', ')} WHERE "taxSettingsId" = $1 RETURNING *`,
-      params,
+      [id, ...params, unixTimestamp()],
     );
 
     if (!result) {

@@ -22,6 +22,45 @@ export type ContentMediaFolderUpdateParams = Partial<Omit<ContentMediaFolder, 'c
 // Repository
 // ============================================================================
 
+/** Positional values for the optional metadata columns of a contentMedia row. */
+function mediaMetadataValues(params: ContentMediaCreateParams): unknown[] {
+  return [
+    params.width || null,
+    params.height || null,
+    params.duration || null,
+    params.altText || null,
+    params.caption || null,
+    params.description || null,
+    params.contentMediaFolderId || null,
+  ];
+}
+
+/** Positional values for the external-source columns of a contentMedia row. */
+function mediaExternalValues(params: ContentMediaCreateParams): unknown[] {
+  return [params.tags || null, params.isExternal || false, params.externalService || null, params.externalId || null];
+}
+
+/** Positional insert values for a contentMedia row. */
+function mediaInsertValues(params: ContentMediaCreateParams): unknown[] {
+  const now = unixTimestamp();
+  return [
+    params.title,
+    params.fileName,
+    params.filePath,
+    params.fileType,
+    params.fileSize,
+    ...mediaMetadataValues(params),
+    params.url,
+    params.thumbnailUrl || null,
+    params.sortOrder || 0,
+    ...mediaExternalValues(params),
+    now,
+    now,
+    params.createdBy || null,
+    params.updatedBy || null,
+  ];
+}
+
 export class ContentMediaRepo {
   // Media methods
   async findMediaById(id: string): Promise<ContentMedia | null> {
@@ -67,41 +106,15 @@ export class ContentMediaRepo {
   }
 
   async createMedia(params: ContentMediaCreateParams): Promise<ContentMedia> {
-    const now = unixTimestamp();
-
     const result = await queryOne<DbContentMedia>(
-      `INSERT INTO "contentMedia" 
-      ("title", "fileName", "filePath", "fileType", "fileSize", "width", "height", 
-       "duration", "altText", "caption", "description", "contentMediaFolderId", 
-       "url", "thumbnailUrl", "sortOrder", "tags", "isExternal", "externalService", 
-       "externalId", "createdAt", "updatedAt", "createdBy", "updatedBy") 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23) 
+      `INSERT INTO "contentMedia"
+      ("title", "fileName", "filePath", "fileType", "fileSize", "width", "height",
+       "duration", "altText", "caption", "description", "contentMediaFolderId",
+       "url", "thumbnailUrl", "sortOrder", "tags", "isExternal", "externalService",
+       "externalId", "createdAt", "updatedAt", "createdBy", "updatedBy")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       RETURNING *`,
-      [
-        params.title,
-        params.fileName,
-        params.filePath,
-        params.fileType,
-        params.fileSize,
-        params.width || null,
-        params.height || null,
-        params.duration || null,
-        params.altText || null,
-        params.caption || null,
-        params.description || null,
-        params.contentMediaFolderId || null,
-        params.url,
-        params.thumbnailUrl || null,
-        params.sortOrder || 0,
-        params.tags || null,
-        params.isExternal || false,
-        params.externalService || null,
-        params.externalId || null,
-        now,
-        now,
-        params.createdBy || null,
-        params.updatedBy || null,
-      ],
+      mediaInsertValues(params),
     );
 
     if (!result) {

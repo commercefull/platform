@@ -67,53 +67,40 @@ export const getSupplierByCode = async (req: HttpRequest, res: HttpResponse): Pr
   successResponse(res, supplier);
 };
 
+function opt<T>(value: T | null | undefined): T | undefined {
+  return value ?? undefined;
+}
+
+function buildSupplierCreateParams(body: SupplierCreateParams & { currency?: string }): Record<string, unknown> {
+  return {
+    name: body.name,
+    code: body.code,
+    description: opt(body.description),
+    website: opt(body.website),
+    email: opt(body.email),
+    phone: opt(body.phone),
+    isActive: body.isActive,
+    isApproved: body.isApproved,
+    status: opt(body.status),
+    rating: body.rating != null ? Number(body.rating) : undefined,
+    taxId: opt(body.taxId),
+    paymentTerms: opt(body.paymentTerms),
+    paymentMethod: opt(body.paymentMethod),
+    currency: opt(body.currency),
+    minOrderValueCents: opt(body.minOrderValueCents),
+    leadTime: opt(body.leadTime),
+    notes: opt(body.notes),
+    categories: opt(body.categories),
+    tags: opt(body.tags),
+    customFields: body.customFields as Record<string, unknown> | undefined,
+  };
+}
+
 export const createSupplier = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
-  const {
-    name,
-    code,
-    description,
-    website,
-    email,
-    phone,
-    isActive,
-    isApproved,
-    status,
-    rating,
-    taxId,
-    paymentTerms,
-    paymentMethod,
-    currency,
-    minOrderValueCents,
-    leadTime,
-    notes,
-    categories,
-    tags,
-    customFields,
-  } = req.body as SupplierCreateParams & { currency?: string };
+  const body = req.body as SupplierCreateParams & { currency?: string };
 
   try {
-    const supplier = await manageSupplierDirectoryUseCase.createSupplier({
-      name,
-      code,
-      description: description ?? undefined,
-      website: website ?? undefined,
-      email: email ?? undefined,
-      phone: phone ?? undefined,
-      isActive,
-      isApproved,
-      status: status ?? undefined,
-      rating: rating != null ? Number(rating) : undefined,
-      taxId: taxId ?? undefined,
-      paymentTerms: paymentTerms ?? undefined,
-      paymentMethod: paymentMethod ?? undefined,
-      currency: currency ?? undefined,
-      minOrderValueCents: minOrderValueCents ?? undefined,
-      leadTime: leadTime ?? undefined,
-      notes: notes ?? undefined,
-      categories: categories ?? undefined,
-      tags: tags ?? undefined,
-      customFields: customFields as Record<string, unknown> | undefined,
-    });
+    const supplier = await manageSupplierDirectoryUseCase.createSupplier(buildSupplierCreateParams(body));
     successResponse(res, supplier, 201);
   } catch (error) {
     if (error instanceof SupplierValidationError) {
