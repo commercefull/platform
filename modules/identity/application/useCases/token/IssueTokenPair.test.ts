@@ -33,7 +33,16 @@ describe('IssueTokenPairUseCase', () => {
 
     await useCase.execute(new IssueTokenPairCommand('a@b.com', 'pw'));
 
-    expect(jwt.sign).toHaveBeenCalledWith('subject-1', expect.any(String), 'customer', 'test-secret', '30d', 'refresh');
+    expect(jwt.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subjectId: 'subject-1',
+        email: expect.any(String),
+        userType: 'customer',
+        secret: 'test-secret',
+        expiresIn: '30d',
+        tokenUse: 'refresh',
+      }),
+    );
   });
 
   it('should issue an access/refresh pair and persist the refresh token', async () => {

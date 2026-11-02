@@ -238,11 +238,45 @@ export async function getSubscriptionProducts(activeOnly: boolean = true): Promi
 }
 
 export async function saveSubscriptionProduct(product: Partial<SubscriptionProduct> & { productId: string }): Promise<SubscriptionProduct> {
-  const now = new Date().toISOString();
-
   if (product.subscriptionProductId) {
-    await query(
-      `UPDATE "subscriptionProduct" SET
+    await updateSubscriptionProduct({ ...product, subscriptionProductId: product.subscriptionProductId });
+    return (await getSubscriptionProduct(product.subscriptionProductId))!;
+  }
+  const result = await insertSubscriptionProduct(product);
+  return mapToSubscriptionProduct(result!);
+}
+
+function subscriptionProductRowValues(product: Partial<SubscriptionProduct>) {
+  return {
+    isSubscriptionOnly: product.isSubscriptionOnly || false,
+    allowOneTimePurchase: product.allowOneTimePurchase !== false,
+    minSubscriptionLength: product.minSubscriptionLength,
+    maxSubscriptionLength: product.maxSubscriptionLength,
+    trialDays: product.trialDays || 0,
+    trialRequiresPayment: product.trialRequiresPayment || false,
+    billingAnchor: product.billingAnchor || 'subscription_start',
+    billingAnchorDay: product.billingAnchorDay,
+    prorateOnChange: product.prorateOnChange !== false,
+    allowPause: product.allowPause !== false,
+    maxPauseDays: product.maxPauseDays,
+    maxPausesPerYear: product.maxPausesPerYear,
+    allowSkip: product.allowSkip !== false,
+    maxSkipsPerYear: product.maxSkipsPerYear,
+    allowEarlyCancel: product.allowEarlyCancel !== false,
+    cancelNoticeDays: product.cancelNoticeDays || 0,
+    earlyTerminationFeeCents: product.earlyTerminationFeeCents,
+    autoRenew: product.autoRenew !== false,
+    renewalReminderDays: product.renewalReminderDays || 7,
+    metadata: product.metadata ? JSON.stringify(product.metadata) : null,
+    isActive: product.isActive !== false,
+  };
+}
+
+async function updateSubscriptionProduct(product: Partial<SubscriptionProduct> & { subscriptionProductId: string }): Promise<void> {
+  const now = new Date().toISOString();
+  const v = subscriptionProductRowValues(product);
+  await query(
+    `UPDATE "subscriptionProduct" SET
         "isSubscriptionOnly" = $1, "allowOneTimePurchase" = $2, "minSubscriptionLength" = $3,
         "maxSubscriptionLength" = $4, "trialDays" = $5, "trialRequiresPayment" = $6,
         "billingAnchor" = $7, "billingAnchorDay" = $8, "prorateOnChange" = $9,
@@ -251,36 +285,41 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         "cancelNoticeDays" = $16, "earlyTerminationFeeCents" = $17, "autoRenew" = $18,
         "renewalReminderDays" = $19, "metadata" = $20, "isActive" = $21, "updatedAt" = $22
       WHERE "subscriptionProductId" = $23`,
-      [
-        product.isSubscriptionOnly || false,
-        product.allowOneTimePurchase !== false,
-        product.minSubscriptionLength,
-        product.maxSubscriptionLength,
-        product.trialDays || 0,
-        product.trialRequiresPayment || false,
-        product.billingAnchor || 'subscription_start',
-        product.billingAnchorDay,
-        product.prorateOnChange !== false,
-        product.allowPause !== false,
-        product.maxPauseDays,
-        product.maxPausesPerYear,
-        product.allowSkip !== false,
-        product.maxSkipsPerYear,
-        product.allowEarlyCancel !== false,
-        product.cancelNoticeDays || 0,
-        product.earlyTerminationFeeCents,
-        product.autoRenew !== false,
-        product.renewalReminderDays || 7,
-        product.metadata ? JSON.stringify(product.metadata) : null,
-        product.isActive !== false,
-        now,
-        product.subscriptionProductId,
-      ],
-    );
-    return (await getSubscriptionProduct(product.subscriptionProductId))!;
-  } else {
-    const result = await queryOne<Record<string, unknown>>(
-      `INSERT INTO "subscriptionProduct" (
+    [
+      v.isSubscriptionOnly,
+      v.allowOneTimePurchase,
+      v.minSubscriptionLength,
+      v.maxSubscriptionLength,
+      v.trialDays,
+      v.trialRequiresPayment,
+      v.billingAnchor,
+      v.billingAnchorDay,
+      v.prorateOnChange,
+      v.allowPause,
+      v.maxPauseDays,
+      v.maxPausesPerYear,
+      v.allowSkip,
+      v.maxSkipsPerYear,
+      v.allowEarlyCancel,
+      v.cancelNoticeDays,
+      v.earlyTerminationFeeCents,
+      v.autoRenew,
+      v.renewalReminderDays,
+      v.metadata,
+      v.isActive,
+      now,
+      product.subscriptionProductId,
+    ],
+  );
+}
+
+async function insertSubscriptionProduct(
+  product: Partial<SubscriptionProduct> & { productId: string },
+): Promise<Record<string, unknown> | null> {
+  const now = new Date().toISOString();
+  const v = subscriptionProductRowValues(product);
+  return queryOne<Record<string, unknown>>(
+    `INSERT INTO "subscriptionProduct" (
         "productId", "isSubscriptionOnly", "allowOneTimePurchase", "minSubscriptionLength",
         "maxSubscriptionLength", "trialDays", "trialRequiresPayment", "billingAnchor",
         "billingAnchorDay", "prorateOnChange", "allowPause", "maxPauseDays",
@@ -289,35 +328,33 @@ export async function saveSubscriptionProduct(product: Partial<SubscriptionProdu
         "metadata", "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
       RETURNING *`,
-      [
-        product.productId,
-        product.isSubscriptionOnly || false,
-        product.allowOneTimePurchase !== false,
-        product.minSubscriptionLength,
-        product.maxSubscriptionLength,
-        product.trialDays || 0,
-        product.trialRequiresPayment || false,
-        product.billingAnchor || 'subscription_start',
-        product.billingAnchorDay,
-        product.prorateOnChange !== false,
-        product.allowPause !== false,
-        product.maxPauseDays,
-        product.maxPausesPerYear,
-        product.allowSkip !== false,
-        product.maxSkipsPerYear,
-        product.allowEarlyCancel !== false,
-        product.cancelNoticeDays || 0,
-        product.earlyTerminationFeeCents,
-        product.autoRenew !== false,
-        product.renewalReminderDays || 7,
-        product.metadata ? JSON.stringify(product.metadata) : null,
-        true,
-        now,
-        now,
-      ],
-    );
-    return mapToSubscriptionProduct(result!);
-  }
+    [
+      product.productId,
+      v.isSubscriptionOnly,
+      v.allowOneTimePurchase,
+      v.minSubscriptionLength,
+      v.maxSubscriptionLength,
+      v.trialDays,
+      v.trialRequiresPayment,
+      v.billingAnchor,
+      v.billingAnchorDay,
+      v.prorateOnChange,
+      v.allowPause,
+      v.maxPauseDays,
+      v.maxPausesPerYear,
+      v.allowSkip,
+      v.maxSkipsPerYear,
+      v.allowEarlyCancel,
+      v.cancelNoticeDays,
+      v.earlyTerminationFeeCents,
+      v.autoRenew,
+      v.renewalReminderDays,
+      v.metadata,
+      true,
+      now,
+      now,
+    ],
+  );
 }
 
 export async function deleteSubscriptionProduct(subscriptionProductId: string): Promise<void> {
@@ -351,17 +388,54 @@ export async function getSubscriptionPlans(subscriptionProductId: string, active
   return (rows || []).map(mapToSubscriptionPlan);
 }
 
-export async function saveSubscriptionPlan(
-  plan:
-    | (Partial<SubscriptionPlan> & { subscriptionPlanId: string })
-    | (Partial<SubscriptionPlan> & { subscriptionProductId: string; name: string; priceCents: number }),
-): Promise<SubscriptionPlan> {
-  const now = new Date().toISOString();
-  const slug = plan.slug || plan.name?.toLowerCase().replace(/\s+/g, '-') || '';
+type SubscriptionPlanInput = Partial<SubscriptionPlan> &
+  ({ subscriptionPlanId: string } | { subscriptionProductId: string; name: string; priceCents: number });
 
+export async function saveSubscriptionPlan(plan: SubscriptionPlanInput): Promise<SubscriptionPlan> {
   if (plan.subscriptionPlanId) {
-    await query(
-      `UPDATE "subscriptionPlan" SET
+    await updateSubscriptionPlan({ ...plan, subscriptionPlanId: plan.subscriptionPlanId });
+    return (await getSubscriptionPlan(plan.subscriptionPlanId))!;
+  }
+  const result = await insertSubscriptionPlan(plan);
+  return mapToSubscriptionPlan(result!);
+}
+
+function planSlug(plan: Partial<SubscriptionPlan>): string {
+  return plan.slug || plan.name?.toLowerCase().replace(/\s+/g, '-') || '';
+}
+
+function planRowValues(plan: Partial<SubscriptionPlan>) {
+  return {
+    name: plan.name,
+    slug: planSlug(plan),
+    description: plan.description,
+    billingInterval: plan.billingInterval || 'month',
+    billingIntervalCount: plan.billingIntervalCount || 1,
+    priceCents: plan.priceCents,
+    compareAtPriceCents: plan.compareAtPriceCents,
+    currencyCode: plan.currency || 'USD',
+    setupFeeCents: plan.setupFeeCents || 0,
+    trialDays: plan.trialDays,
+    contractLength: plan.contractLength,
+    isContractRequired: plan.isContractRequired || false,
+    discountPercent: plan.discountPercent || 0,
+    discountAmountCents: plan.discountAmountCents || 0,
+    freeShippingThresholdCents: plan.freeShippingThresholdCents,
+    includesFreeShipping: plan.includesFreeShipping || false,
+    includedProducts: plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
+    features: plan.features ? JSON.stringify(plan.features) : null,
+    metadata: plan.metadata ? JSON.stringify(plan.metadata) : null,
+    sortOrder: plan.sortOrder || 0,
+    isPopular: plan.isPopular || false,
+    isActive: plan.isActive !== false,
+  };
+}
+
+async function updateSubscriptionPlan(plan: Partial<SubscriptionPlan> & { subscriptionPlanId: string }): Promise<void> {
+  const now = new Date().toISOString();
+  const v = planRowValues(plan);
+  await query(
+    `UPDATE "subscriptionPlan" SET
         "name" = COALESCE($1, "name"), "slug" = COALESCE($2, "slug"), "description" = $3,
         "billingInterval" = COALESCE($4, "billingInterval"),
         "billingIntervalCount" = COALESCE($5, "billingIntervalCount"),
@@ -380,37 +454,40 @@ export async function saveSubscriptionPlan(
         "isPopular" = COALESCE($21, "isPopular"),
         "isActive" = COALESCE($22, "isActive"), "updatedAt" = $23
       WHERE "subscriptionPlanId" = $24`,
-      [
-        plan.name,
-        slug,
-        plan.description,
-        plan.billingInterval || 'month',
-        plan.billingIntervalCount || 1,
-        plan.priceCents,
-        plan.compareAtPriceCents,
-        plan.currency || 'USD',
-        plan.setupFeeCents || 0,
-        plan.trialDays,
-        plan.contractLength,
-        plan.isContractRequired || false,
-        plan.discountPercent || 0,
-        plan.discountAmountCents || 0,
-        plan.freeShippingThresholdCents,
-        plan.includesFreeShipping || false,
-        plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
-        plan.features ? JSON.stringify(plan.features) : null,
-        plan.metadata ? JSON.stringify(plan.metadata) : null,
-        plan.sortOrder || 0,
-        plan.isPopular || false,
-        plan.isActive !== false,
-        now,
-        plan.subscriptionPlanId,
-      ],
-    );
-    return (await getSubscriptionPlan(plan.subscriptionPlanId))!;
-  } else {
-    const result = await queryOne<Record<string, unknown>>(
-      `INSERT INTO "subscriptionPlan" (
+    [
+      v.name,
+      v.slug,
+      v.description,
+      v.billingInterval,
+      v.billingIntervalCount,
+      v.priceCents,
+      v.compareAtPriceCents,
+      v.currencyCode,
+      v.setupFeeCents,
+      v.trialDays,
+      v.contractLength,
+      v.isContractRequired,
+      v.discountPercent,
+      v.discountAmountCents,
+      v.freeShippingThresholdCents,
+      v.includesFreeShipping,
+      v.includedProducts,
+      v.features,
+      v.metadata,
+      v.sortOrder,
+      v.isPopular,
+      v.isActive,
+      now,
+      plan.subscriptionPlanId,
+    ],
+  );
+}
+
+async function insertSubscriptionPlan(plan: SubscriptionPlanInput): Promise<Record<string, unknown> | null> {
+  const now = new Date().toISOString();
+  const v = planRowValues(plan);
+  return queryOne<Record<string, unknown>>(
+    `INSERT INTO "subscriptionPlan" (
         "subscriptionProductId", "name", "slug", "description", "billingInterval",
         "billingIntervalCount", "priceCents", "compareAtPriceCents", "currencyCode", "setupFeeCents",
         "trialDays", "contractLength", "isContractRequired", "discountPercent",
@@ -419,36 +496,34 @@ export async function saveSubscriptionPlan(
         "isActive", "createdAt", "updatedAt"
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
       RETURNING *`,
-      [
-        plan.subscriptionProductId,
-        plan.name,
-        slug,
-        plan.description,
-        plan.billingInterval || 'month',
-        plan.billingIntervalCount || 1,
-        plan.priceCents,
-        plan.compareAtPriceCents,
-        plan.currency || 'USD',
-        plan.setupFeeCents || 0,
-        plan.trialDays,
-        plan.contractLength,
-        plan.isContractRequired || false,
-        plan.discountPercent || 0,
-        plan.discountAmountCents || 0,
-        plan.freeShippingThresholdCents,
-        plan.includesFreeShipping || false,
-        plan.includedProducts ? JSON.stringify(plan.includedProducts) : null,
-        plan.features ? JSON.stringify(plan.features) : null,
-        plan.metadata ? JSON.stringify(plan.metadata) : null,
-        plan.sortOrder || 0,
-        plan.isPopular || false,
-        true,
-        now,
-        now,
-      ],
-    );
-    return mapToSubscriptionPlan(result!);
-  }
+    [
+      plan.subscriptionProductId,
+      v.name,
+      v.slug,
+      v.description,
+      v.billingInterval,
+      v.billingIntervalCount,
+      v.priceCents,
+      v.compareAtPriceCents,
+      v.currencyCode,
+      v.setupFeeCents,
+      v.trialDays,
+      v.contractLength,
+      v.isContractRequired,
+      v.discountPercent,
+      v.discountAmountCents,
+      v.freeShippingThresholdCents,
+      v.includesFreeShipping,
+      v.includedProducts,
+      v.features,
+      v.metadata,
+      v.sortOrder,
+      v.isPopular,
+      true,
+      now,
+      now,
+    ],
+  );
 }
 
 export async function deleteSubscriptionPlan(subscriptionPlanId: string): Promise<void> {
@@ -524,7 +599,7 @@ export async function getSubscriptionsDueBilling(beforeDate: Date): Promise<Cust
   return (rows || []).map(mapToCustomerSubscription);
 }
 
-export async function createCustomerSubscription(subscription: {
+interface CustomerSubscriptionInput {
   customerId: string;
   subscriptionPlanId: string;
   subscriptionProductId?: string;
@@ -542,24 +617,54 @@ export async function createCustomerSubscription(subscription: {
   taxAddedCents?: number;
   currencyCode?: string;
   metadata?: Record<string, unknown>;
-}): Promise<CustomerSubscription> {
+}
+
+export async function createCustomerSubscription(subscription: CustomerSubscriptionInput): Promise<CustomerSubscription> {
   const now = new Date();
   const plan = await getSubscriptionPlan(subscription.subscriptionPlanId);
   if (!plan) throw new SubscriptionPlanNotFoundError(subscription.subscriptionPlanId);
 
-  const subscriptionNumber = await generateSubscriptionNumber();
-  const quantity = subscription.quantity || 1;
-  const unitPriceCents = plan.priceCents;
-  const discountAmountCents = plan.discountAmountCents || (unitPriceCents * (plan.discountPercent || 0)) / 100;
-  const totalPriceCents = unitPriceCents * quantity - discountAmountCents;
+  const schedule = subscriptionSchedule(plan, now);
+  const result = await insertCustomerSubscription(subscription, plan, schedule, await generateSubscriptionNumber());
+  return mapToCustomerSubscription(result!);
+}
 
-  // Calculate trial and billing dates
+interface SubscriptionSchedule {
+  trialDays: number;
+  trialStartAt: Date | null;
+  trialEndAt: Date | null;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  nextBillingAt: Date;
+}
+
+// Calculate trial and billing dates
+function subscriptionSchedule(plan: SubscriptionPlan, now: Date): SubscriptionSchedule {
   const trialDays = plan.trialDays || 0;
   const trialStartAt = trialDays > 0 ? now : null;
   const trialEndAt = trialDays > 0 ? new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000) : null;
   const currentPeriodStart = trialEndAt || now;
   const currentPeriodEnd = calculateNextBillingDate(currentPeriodStart, plan.billingInterval, plan.billingIntervalCount);
   const nextBillingAt = trialEndAt || currentPeriodEnd;
+  return { trialDays, trialStartAt, trialEndAt, currentPeriodStart, currentPeriodEnd, nextBillingAt };
+}
+
+function subscriptionPricing(plan: SubscriptionPlan, quantity: number) {
+  const unitPriceCents = plan.priceCents;
+  const discountAmountCents = plan.discountAmountCents || (unitPriceCents * (plan.discountPercent || 0)) / 100;
+  return { unitPriceCents, discountAmountCents, totalPriceCents: unitPriceCents * quantity - discountAmountCents };
+}
+
+async function insertCustomerSubscription(
+  subscription: CustomerSubscriptionInput,
+  plan: SubscriptionPlan,
+  schedule: SubscriptionSchedule,
+  subscriptionNumber: string,
+): Promise<Record<string, unknown> | null> {
+  const now = new Date();
+  const quantity = subscription.quantity || 1;
+  const pricing = subscriptionPricing(plan, quantity);
+  const { trialDays, trialStartAt, trialEndAt, currentPeriodStart, currentPeriodEnd, nextBillingAt } = schedule;
 
   const result = await queryOne<Record<string, unknown>>(
     `INSERT INTO "customerSubscription" (
@@ -579,10 +684,10 @@ export async function createCustomerSubscription(subscription: {
       subscription.productVariantId,
       trialDays > 0 ? 'trialing' : 'active',
       quantity,
-      unitPriceCents,
-      discountAmountCents,
+      pricing.unitPriceCents,
+      pricing.discountAmountCents,
       subscription.taxAmountCents ?? 0,
-      totalPriceCents + (subscription.taxAddedCents ?? subscription.taxAmountCents ?? 0),
+      pricing.totalPriceCents + (subscription.taxAddedCents ?? subscription.taxAmountCents ?? 0),
       subscription.currencyCode ?? plan.currency,
       plan.billingInterval,
       plan.billingIntervalCount,
@@ -604,7 +709,7 @@ export async function createCustomerSubscription(subscription: {
     ],
   );
 
-  return mapToCustomerSubscription(result!);
+  return result;
 }
 
 export async function updateSubscriptionStatus(
@@ -1039,6 +1144,15 @@ function mapToSubscriptionPlan(row: Record<string, unknown>): SubscriptionPlan {
 
 function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscription {
   return {
+    ...subscriptionIdentityFields(row),
+    ...subscriptionPricingFields(row),
+    ...subscriptionDateFields(row),
+    ...subscriptionLifecycleFields(row),
+  };
+}
+
+function subscriptionIdentityFields(row: Record<string, unknown>) {
+  return {
     customerSubscriptionId: row.customerSubscriptionId as string,
     subscriptionNumber: row.subscriptionNumber as string | undefined,
     customerId: row.customerId as string,
@@ -1046,6 +1160,11 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     subscriptionProductId: row.subscriptionProductId as string | undefined,
     productVariantId: row.productVariantId as string | undefined,
     status: row.status as SubscriptionStatus,
+  };
+}
+
+function subscriptionPricingFields(row: Record<string, unknown>) {
+  return {
     quantity: parseInt(row.quantity as string) || 1,
     unitPriceCents: parseFloat(row.unitPriceCents as string) || 0,
     discountAmountCents: parseFloat(row.discountAmountCents as string) || 0,
@@ -1054,36 +1173,46 @@ function mapToCustomerSubscription(row: Record<string, unknown>): CustomerSubscr
     currency: (row.currencyCode as string) || 'USD',
     billingInterval: row.billingInterval as BillingInterval,
     billingIntervalCount: parseInt(row.billingIntervalCount as string) || 1,
+    contractCyclesRemaining: row.contractCyclesRemaining ? parseInt(row.contractCyclesRemaining as string) : undefined,
+    lifetimeValueCents: parseFloat(row.lifetimeValueCents as string) || 0,
+  };
+}
+
+function subscriptionDateFields(row: Record<string, unknown>) {
+  return {
     trialStartAt: row.trialStartAt ? new Date(row.trialStartAt as string) : undefined,
     trialEndAt: row.trialEndAt ? new Date(row.trialEndAt as string) : undefined,
     currentPeriodStart: row.currentPeriodStart ? new Date(row.currentPeriodStart as string) : undefined,
     currentPeriodEnd: row.currentPeriodEnd ? new Date(row.currentPeriodEnd as string) : undefined,
     nextBillingAt: row.nextBillingAt ? new Date(row.nextBillingAt as string) : undefined,
     cancelledAt: row.cancelledAt ? new Date(row.cancelledAt as string) : undefined,
+    pausedAt: row.pausedAt ? new Date(row.pausedAt as string) : undefined,
+    resumeAt: row.resumeAt ? new Date(row.resumeAt as string) : undefined,
+    lastPaymentAt: row.lastPaymentAt ? new Date(row.lastPaymentAt as string) : undefined,
+    lastPaymentFailedAt: row.lastPaymentFailedAt ? new Date(row.lastPaymentFailedAt as string) : undefined,
+    createdAt: new Date(row.createdAt as string),
+    updatedAt: new Date(row.updatedAt as string),
+  };
+}
+
+function subscriptionLifecycleFields(row: Record<string, unknown>) {
+  return {
     cancellationReason: row.cancellationReason as string | undefined,
     cancelledBy: row.cancelledBy as string | undefined,
     cancelAtPeriodEnd: Boolean(row.cancelAtPeriodEnd),
-    pausedAt: row.pausedAt ? new Date(row.pausedAt as string) : undefined,
-    resumeAt: row.resumeAt ? new Date(row.resumeAt as string) : undefined,
     pauseReason: row.pauseReason as string | undefined,
     pauseCount: parseInt(row.pauseCount as string) || 0,
     skipCount: parseInt(row.skipCount as string) || 0,
     billingCycleCount: parseInt(row.billingCycleCount as string) || 0,
-    contractCyclesRemaining: row.contractCyclesRemaining ? parseInt(row.contractCyclesRemaining as string) : undefined,
+    failedPaymentCount: parseInt(row.failedPaymentCount as string) || 0,
     shippingAddressId: row.shippingAddressId as string | undefined,
     billingAddressId: row.billingAddressId as string | undefined,
     paymentMethodId: row.paymentMethodId as string | undefined,
     externalSubscriptionId: row.externalSubscriptionId as string | undefined,
-    lifetimeValueCents: parseFloat(row.lifetimeValueCents as string) || 0,
-    failedPaymentCount: parseInt(row.failedPaymentCount as string) || 0,
-    lastPaymentAt: row.lastPaymentAt ? new Date(row.lastPaymentAt as string) : undefined,
-    lastPaymentFailedAt: row.lastPaymentFailedAt ? new Date(row.lastPaymentFailedAt as string) : undefined,
     customizations: row.customizations as Record<string, unknown> | undefined,
     metadata: row.metadata as Record<string, unknown> | undefined,
     storeId: row.storeId as string | undefined,
     salesChannelId: row.salesChannelId as string | undefined,
-    createdAt: new Date(row.createdAt as string),
-    updatedAt: new Date(row.updatedAt as string),
   };
 }
 

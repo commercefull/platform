@@ -41,62 +41,19 @@ class SearchController {
     }
 
     const adapter = getSearchAdapter();
+    const searchQuery = parseSearchQuery(req);
+    await this.applyMerchandising(searchQuery, req.query.sortBy as string | undefined);
 
-    const {
-      q,
-      query,
-      categoryId,
-      categoryIds,
-      productTypeId,
-      minPriceCents,
-      maxPriceCents,
-      status,
-      visibility,
-      isFeatured,
-      isNew,
-      isBestseller,
-      hasVariants,
-      inStock,
-      attributes,
-      sortBy,
-      sortOrder,
-      page,
-      limit,
-      includeFacets,
-    } = req.query;
-
-    // Parse attribute filters
-    let parsedAttributes: unknown[] | undefined;
-    if (attributes) {
-      try {
-        parsedAttributes = typeof attributes === 'string' ? JSON.parse(attributes) : (attributes as unknown[]);
-      } catch {
-        parsedAttributes = undefined;
-      }
+    try {
+      const result = await adapter.search(searchQuery);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      logger.error('Search request failed', { error: (error as Error).message });
+      res.status(500).json({ success: false, error: 'Search failed' });
     }
+  }
 
-    const searchQuery: SearchQuery = {
-      query: (q || query) as string,
-      categoryId: categoryId as string,
-      categoryIds: categoryIds ? (categoryIds as string).split(',') : undefined,
-      productTypeId: productTypeId as string,
-      minPriceCents: minPriceCents ? parseInt(minPriceCents as string, 10) : undefined,
-      maxPriceCents: maxPriceCents ? parseInt(maxPriceCents as string, 10) : undefined,
-      status: status as string,
-      visibility: visibility as string,
-      isFeatured: isFeatured === 'true' ? true : isFeatured === 'false' ? false : undefined,
-      isNew: isNew === 'true' ? true : isNew === 'false' ? false : undefined,
-      isBestseller: isBestseller === 'true' ? true : isBestseller === 'false' ? false : undefined,
-      hasVariants: hasVariants === 'true' ? true : hasVariants === 'false' ? false : undefined,
-      inStock: inStock === 'true' ? true : inStock === 'false' ? false : undefined,
-      attributes: parsedAttributes as SearchQuery['attributes'],
-      sortBy: sortBy as SearchQuery['sortBy'],
-      sortOrder: sortOrder as SearchQuery['sortOrder'],
-      page: page ? parseInt(page as string, 10) : 1,
-      limit: limit ? parseInt(limit as string, 10) : 20,
-      includeFacets: includeFacets === 'true',
-    };
-
+  private async applyMerchandising(searchQuery: SearchQuery, sortBy: string | undefined): Promise<void> {
     // Load merchandising rules for this search context
     const merchandising = await getMerchandisingRules(searchQuery.query, searchQuery.categoryId);
     if (Object.keys(merchandising).length > 0) {
@@ -110,14 +67,6 @@ class SearchController {
         searchQuery.manualOrdering = manualOrder;
         searchQuery.sortBy = 'manual';
       }
-    }
-
-    try {
-      const result = await adapter.search(searchQuery);
-      res.json({ success: true, data: result });
-    } catch (error) {
-      logger.error('Search request failed', { error: (error as Error).message });
-      res.status(500).json({ success: false, error: 'Search failed' });
     }
   }
 
@@ -254,6 +203,71 @@ class SearchController {
     const result = await adapter.health();
     res.json(result);
   }
+}
+
+function boolParam(value: unknown): boolean | undefined {
+  return value === 'true' ? true : value === 'false' ? false : undefined;
+}
+
+function intParam(value: unknown): number | undefined {
+  return value ? parseInt(value as string, 10) : undefined;
+}
+
+// Parse attribute filters — accepts a JSON string or an already-parsed array.
+function parseAttributes(attributes: unknown): SearchQuery['attributes'] {
+  if (!attributes) return undefined;
+  try {
+    return (typeof attributes === 'string' ? JSON.parse(attributes) : attributes) as SearchQuery['attributes'];
+  } catch {
+    return undefined;
+  }
+}
+
+function parseSearchQuery(req: HttpRequest): SearchQuery {
+  const {
+    q,
+    query,
+    categoryId,
+    categoryIds,
+    productTypeId,
+    minPriceCents,
+    maxPriceCents,
+    status,
+    visibility,
+    isFeatured,
+    isNew,
+    isBestseller,
+    hasVariants,
+    inStock,
+    attributes,
+    sortBy,
+    sortOrder,
+    page,
+    limit,
+    includeFacets,
+  } = req.query;
+
+  return {
+    query: (q || query) as string,
+    categoryId: categoryId as string,
+    categoryIds: categoryIds ? (categoryIds as string).split(',') : undefined,
+    productTypeId: productTypeId as string,
+    minPriceCents: intParam(minPriceCents),
+    maxPriceCents: intParam(maxPriceCents),
+    status: status as string,
+    visibility: visibility as string,
+    isFeatured: boolParam(isFeatured),
+    isNew: boolParam(isNew),
+    isBestseller: boolParam(isBestseller),
+    hasVariants: boolParam(hasVariants),
+    inStock: boolParam(inStock),
+    attributes: parseAttributes(attributes),
+    sortBy: sortBy as SearchQuery['sortBy'],
+    sortOrder: sortOrder as SearchQuery['sortOrder'],
+    page: intParam(page) ?? 1,
+    limit: intParam(limit) ?? 20,
+    includeFacets: includeFacets === 'true',
+  };
 }
 
 export default new SearchController();

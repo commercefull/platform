@@ -317,7 +317,6 @@ export class FulfillmentRepository implements IFulfillmentRepository {
 
   async saveItem(item: FulfillmentItem): Promise<FulfillmentItem> {
     const props = item.toPersistence();
-    const now = new Date().toISOString();
 
     const existing = await queryOne<Pick<DbFulfillmentItem, 'fulfillmentItemId'>>(
       'SELECT "fulfillmentItemId" FROM "fulfillmentItem" WHERE "fulfillmentItemId" = $1',
@@ -325,8 +324,37 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     );
 
     if (existing) {
-      await query(
-        `UPDATE "fulfillmentItem" SET
+      await this.updateItem(props);
+    } else {
+      await this.insertItem(props);
+    }
+
+    const saved = await this.findItem(props.fulfillmentItemId);
+    return saved!;
+  }
+
+  private itemRowValues(props: ReturnType<FulfillmentItem['toPersistence']>) {
+    return {
+      quantityOrdered: props.quantityOrdered,
+      quantityFulfilled: props.quantityFulfilled,
+      quantityPicked: props.quantityPicked || null,
+      quantityPacked: props.quantityPacked || null,
+      warehouseLocation: props.warehouseLocation || null,
+      binLocation: props.binLocation || null,
+      serialNumbers: props.serialNumbers ? JSON.stringify(props.serialNumbers) : null,
+      lotNumbers: props.lotNumbers ? JSON.stringify(props.lotNumbers) : null,
+      isPicked: props.isPicked,
+      isPacked: props.isPacked,
+      pickedAt: props.pickedAt?.toISOString() || null,
+      packedAt: props.packedAt?.toISOString() || null,
+    };
+  }
+
+  private async updateItem(props: ReturnType<FulfillmentItem['toPersistence']>): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.itemRowValues(props);
+    await query(
+      `UPDATE "fulfillmentItem" SET
           "quantityOrdered" = $1,
           "quantityFulfilled" = $2,
           "quantityPicked" = $3,
@@ -341,60 +369,60 @@ export class FulfillmentRepository implements IFulfillmentRepository {
           "packedAt" = $12,
           "updatedAt" = $13
         WHERE "fulfillmentItemId" = $14`,
-        [
-          props.quantityOrdered,
-          props.quantityFulfilled,
-          props.quantityPicked || null,
-          props.quantityPacked || null,
-          props.warehouseLocation || null,
-          props.binLocation || null,
-          props.serialNumbers ? JSON.stringify(props.serialNumbers) : null,
-          props.lotNumbers ? JSON.stringify(props.lotNumbers) : null,
-          props.isPicked,
-          props.isPacked,
-          props.pickedAt?.toISOString() || null,
-          props.packedAt?.toISOString() || null,
-          now,
-          props.fulfillmentItemId,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO "fulfillmentItem" (
+      [
+        v.quantityOrdered,
+        v.quantityFulfilled,
+        v.quantityPicked,
+        v.quantityPacked,
+        v.warehouseLocation,
+        v.binLocation,
+        v.serialNumbers,
+        v.lotNumbers,
+        v.isPicked,
+        v.isPacked,
+        v.pickedAt,
+        v.packedAt,
+        now,
+        props.fulfillmentItemId,
+      ],
+    );
+  }
+
+  private async insertItem(props: ReturnType<FulfillmentItem['toPersistence']>): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.itemRowValues(props);
+    await query(
+      `INSERT INTO "fulfillmentItem" (
           "fulfillmentItemId", "fulfillmentId", "orderItemId", "productId",
           "variantId", sku, name, "quantityOrdered", "quantityFulfilled",
           "quantityPicked", "quantityPacked", "warehouseLocation", "binLocation",
           "serialNumbers", "lotNumbers", "isPicked", "isPacked",
           "pickedAt", "packedAt", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`,
-        [
-          props.fulfillmentItemId,
-          props.fulfillmentId,
-          props.orderItemId,
-          props.productId,
-          props.variantId || null,
-          props.sku,
-          props.name,
-          props.quantityOrdered,
-          props.quantityFulfilled,
-          props.quantityPicked || null,
-          props.quantityPacked || null,
-          props.warehouseLocation || null,
-          props.binLocation || null,
-          props.serialNumbers ? JSON.stringify(props.serialNumbers) : null,
-          props.lotNumbers ? JSON.stringify(props.lotNumbers) : null,
-          props.isPicked,
-          props.isPacked,
-          props.pickedAt?.toISOString() || null,
-          props.packedAt?.toISOString() || null,
-          now,
-          now,
-        ],
-      );
-    }
-
-    const saved = await this.findItem(props.fulfillmentItemId);
-    return saved!;
+      [
+        props.fulfillmentItemId,
+        props.fulfillmentId,
+        props.orderItemId,
+        props.productId,
+        props.variantId || null,
+        props.sku,
+        props.name,
+        v.quantityOrdered,
+        v.quantityFulfilled,
+        v.quantityPicked,
+        v.quantityPacked,
+        v.warehouseLocation,
+        v.binLocation,
+        v.serialNumbers,
+        v.lotNumbers,
+        v.isPicked,
+        v.isPacked,
+        v.pickedAt,
+        v.packedAt,
+        now,
+        now,
+      ],
+    );
   }
 
   async saveItems(items: FulfillmentItem[]): Promise<FulfillmentItem[]> {
@@ -454,73 +482,66 @@ export class FulfillmentRepository implements IFulfillmentRepository {
     whereClause: string;
     params: unknown[];
   } {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
+    const b = { conditions: [] as string[], params: [] as unknown[] };
 
-    if (filters?.orderId) {
-      conditions.push(`"orderId" = $${params.length + 1}`);
-      params.push(filters.orderId);
-    }
-
-    if (filters?.status) {
-      if (Array.isArray(filters.status)) {
-        const placeholders = filters.status.map((_, i) => `$${params.length + i + 1}`);
-        conditions.push(`status IN (${placeholders.join(', ')})`);
-        params.push(...filters.status);
-      } else {
-        conditions.push(`status = $${params.length + 1}`);
-        params.push(filters.status);
-      }
-    }
-
-    if (filters?.sourceType) {
-      conditions.push(`"sourceType" = $${params.length + 1}`);
-      params.push(filters.sourceType);
-    }
-
-    if (filters?.sourceId) {
-      conditions.push(`"sourceId" = $${params.length + 1}`);
-      params.push(filters.sourceId);
-    }
-
-    if (filters?.organizationId) {
-      conditions.push(`"organizationId" = $${params.length + 1}`);
-      params.push(filters.organizationId);
-    }
-
-    if (filters?.supplierId) {
-      conditions.push(`"supplierId" = $${params.length + 1}`);
-      params.push(filters.supplierId);
-    }
-
-    if (filters?.storeId) {
-      conditions.push(`"storeId" = $${params.length + 1}`);
-      params.push(filters.storeId);
-    }
-
-    if (filters?.channelId) {
-      conditions.push(`"channelId" = $${params.length + 1}`);
-      params.push(filters.channelId);
-    }
-
-    if (filters?.fromDate) {
-      conditions.push(`"createdAt" >= $${params.length + 1}`);
-      params.push(filters.fromDate.toISOString());
-    }
-
-    if (filters?.toDate) {
-      conditions.push(`"createdAt" <= $${params.length + 1}`);
-      params.push(filters.toDate.toISOString());
-    }
+    this.addEqualityCondition(b, '"orderId"', filters?.orderId);
+    this.addStatusCondition(b, filters?.status);
+    this.addEqualityCondition(b, '"sourceType"', filters?.sourceType);
+    this.addEqualityCondition(b, '"sourceId"', filters?.sourceId);
+    this.addEqualityCondition(b, '"organizationId"', filters?.organizationId);
+    this.addEqualityCondition(b, '"supplierId"', filters?.supplierId);
+    this.addEqualityCondition(b, '"storeId"', filters?.storeId);
+    this.addEqualityCondition(b, '"channelId"', filters?.channelId);
+    this.addDateConditions(b, filters);
 
     return {
-      whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
-      params,
+      whereClause: b.conditions.length > 0 ? `WHERE ${b.conditions.join(' AND ')}` : '',
+      params: b.params,
     };
+  }
+
+  private addEqualityCondition(b: { conditions: string[]; params: unknown[] }, column: string, value: string | undefined): void {
+    if (!value) return;
+    b.conditions.push(`${column} = $${b.params.length + 1}`);
+    b.params.push(value);
+  }
+
+  private addStatusCondition(b: { conditions: string[]; params: unknown[] }, status: FulfillmentFilters['status']): void {
+    if (!status) return;
+    if (Array.isArray(status)) {
+      const placeholders = status.map((_, i) => `$${b.params.length + i + 1}`);
+      b.conditions.push(`status IN (${placeholders.join(', ')})`);
+      b.params.push(...status);
+    } else {
+      b.conditions.push(`status = $${b.params.length + 1}`);
+      b.params.push(status);
+    }
+  }
+
+  private addDateConditions(b: { conditions: string[]; params: unknown[] }, filters?: FulfillmentFilters): void {
+    if (filters?.fromDate) {
+      b.conditions.push(`"createdAt" >= $${b.params.length + 1}`);
+      b.params.push(filters.fromDate.toISOString());
+    }
+    if (filters?.toDate) {
+      b.conditions.push(`"createdAt" <= $${b.params.length + 1}`);
+      b.params.push(filters.toDate.toISOString());
+    }
   }
 
   private mapToFulfillment(row: DbFulfillment): Fulfillment {
     return Fulfillment.fromPersistence({
+      ...this.fulfillmentIdentityFromRow(row),
+      ...this.fulfillmentCarrierFromRow(row),
+      ...this.fulfillmentParcelFromRow(row),
+      ...this.fulfillmentDatesFromRow(row),
+      createdAt: new Date(row.createdAt ?? new Date()),
+      updatedAt: new Date(row.updatedAt ?? new Date()),
+    });
+  }
+
+  private fulfillmentIdentityFromRow(row: DbFulfillment) {
+    return {
       fulfillmentId: row.fulfillmentId,
       orderId: row.orderId,
       orderNumber: row.orderNumber ?? undefined,
@@ -531,25 +552,26 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       storeId: row.storeId ?? undefined,
       channelId: row.channelId ?? undefined,
       status: row.status as FulfillmentStatus,
+      fulfillmentPartnerId: row.fulfillmentPartnerId ?? undefined,
+    };
+  }
+
+  private fulfillmentCarrierFromRow(row: DbFulfillment) {
+    const emptyAddress = { addressLine1: '', city: '', postalCode: '', countryCode: '' };
+    return {
       carrierId: row.carrierId ?? undefined,
       carrierName: row.carrierName ?? undefined,
       shippingMethodId: row.shippingMethodId ?? undefined,
       shippingMethodName: row.shippingMethodName ?? undefined,
       trackingNumber: row.trackingNumber ?? undefined,
       trackingUrl: row.trackingUrl ?? undefined,
-      shipFromAddress: this.parseJson(row.shipFromAddress, {
-        addressLine1: '',
-        city: '',
-        postalCode: '',
-        countryCode: '',
-      }),
-      shipToAddress: this.parseJson(row.shipToAddress, {
-        addressLine1: '',
-        city: '',
-        postalCode: '',
-        countryCode: '',
-      }),
-      fulfillmentPartnerId: row.fulfillmentPartnerId ?? undefined,
+      shipFromAddress: this.parseJson(row.shipFromAddress, emptyAddress),
+      shipToAddress: this.parseJson(row.shipToAddress, emptyAddress),
+    };
+  }
+
+  private fulfillmentParcelFromRow(row: DbFulfillment) {
+    return {
       weightGrams: row.weightGrams ?? undefined,
       lengthCm: row.lengthCm ?? undefined,
       widthCm: row.widthCm ?? undefined,
@@ -558,6 +580,12 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       insuranceCostCents: row.insuranceCostCents != null ? Number(row.insuranceCostCents) : undefined,
       notes: row.notes ?? undefined,
       internalNotes: row.internalNotes ?? undefined,
+      failureReason: row.failureReason ?? undefined,
+    };
+  }
+
+  private fulfillmentDatesFromRow(row: DbFulfillment) {
+    return {
       assignedAt: row.assignedAt ? new Date(row.assignedAt) : undefined,
       pickingStartedAt: row.pickingStartedAt ? new Date(row.pickingStartedAt) : undefined,
       pickedAt: row.pickedAt ? new Date(row.pickedAt) : undefined,
@@ -567,10 +595,7 @@ export class FulfillmentRepository implements IFulfillmentRepository {
       deliveredAt: row.deliveredAt ? new Date(row.deliveredAt) : undefined,
       cancelledAt: row.cancelledAt ? new Date(row.cancelledAt) : undefined,
       failedAt: row.failedAt ? new Date(row.failedAt) : undefined,
-      failureReason: row.failureReason ?? undefined,
-      createdAt: new Date(row.createdAt ?? new Date()),
-      updatedAt: new Date(row.updatedAt ?? new Date()),
-    });
+    };
   }
 
   private mapToFulfillmentItem(row: DbFulfillmentItem): FulfillmentItem {

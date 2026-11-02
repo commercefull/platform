@@ -51,6 +51,24 @@ export interface OidcProviderProps {
   updatedAt: Date;
 }
 
+interface OidcCreateParams {
+  providerId: string;
+  organizationId: string;
+  name: string;
+  issuerUrl: string;
+  clientId: string;
+  clientSecret: string;
+  scopes?: string[];
+  redirectUri: string;
+  usePkce?: boolean;
+  useDiscovery?: boolean;
+  authorizationEndpoint?: string;
+  tokenEndpoint?: string;
+  userinfoEndpoint?: string;
+  jwksUri?: string;
+  claimMapping?: Partial<OidcClaimMapping>;
+}
+
 export class OidcProvider {
   private props: OidcProviderProps;
 
@@ -58,35 +76,12 @@ export class OidcProvider {
     this.props = props;
   }
 
-  static create(params: {
-    providerId: string;
-    organizationId: string;
-    name: string;
-    issuerUrl: string;
-    clientId: string;
-    clientSecret: string;
-    scopes?: string[];
-    redirectUri: string;
-    usePkce?: boolean;
-    useDiscovery?: boolean;
-    authorizationEndpoint?: string;
-    tokenEndpoint?: string;
-    userinfoEndpoint?: string;
-    jwksUri?: string;
-    claimMapping?: Partial<OidcClaimMapping>;
-  }): OidcProvider {
-    if (!params.organizationId?.trim()) throw new SsoValidationError('Organization ID is required');
-    if (!params.name?.trim()) throw new SsoValidationError('Provider name is required');
-    if (!params.issuerUrl?.trim()) throw new SsoValidationError('Issuer URL is required');
-    if (!params.clientId?.trim()) throw new SsoValidationError('Client ID is required');
-    if (!params.clientSecret?.trim()) throw new SsoValidationError('Client secret is required');
-    if (!params.redirectUri?.trim()) throw new SsoValidationError('Redirect URI is required');
+  static create(params: OidcCreateParams): OidcProvider {
+    this.assertRequiredFields(params);
 
     const useDiscovery = params.useDiscovery ?? true;
     if (!useDiscovery) {
-      if (!params.authorizationEndpoint) throw new SsoValidationError('Authorization endpoint is required when discovery is disabled');
-      if (!params.tokenEndpoint) throw new SsoValidationError('Token endpoint is required when discovery is disabled');
-      if (!params.userinfoEndpoint) throw new SsoValidationError('Userinfo endpoint is required when discovery is disabled');
+      this.assertManualEndpoints(params);
     }
 
     const now = new Date();
@@ -105,17 +100,36 @@ export class OidcProvider {
       tokenEndpoint: params.tokenEndpoint,
       userinfoEndpoint: params.userinfoEndpoint,
       jwksUri: params.jwksUri,
-      claimMapping: {
-        email: params.claimMapping?.email || 'email',
-        firstName: params.claimMapping?.firstName || 'given_name',
-        lastName: params.claimMapping?.lastName || 'family_name',
-        displayName: params.claimMapping?.displayName || 'name',
-        extra: params.claimMapping?.extra,
-      },
+      claimMapping: this.resolveClaimMapping(params.claimMapping),
       isActive: true,
       createdAt: now,
       updatedAt: now,
     });
+  }
+
+  private static assertRequiredFields(params: OidcCreateParams): void {
+    if (!params.organizationId?.trim()) throw new SsoValidationError('Organization ID is required');
+    if (!params.name?.trim()) throw new SsoValidationError('Provider name is required');
+    if (!params.issuerUrl?.trim()) throw new SsoValidationError('Issuer URL is required');
+    if (!params.clientId?.trim()) throw new SsoValidationError('Client ID is required');
+    if (!params.clientSecret?.trim()) throw new SsoValidationError('Client secret is required');
+    if (!params.redirectUri?.trim()) throw new SsoValidationError('Redirect URI is required');
+  }
+
+  private static assertManualEndpoints(params: OidcCreateParams): void {
+    if (!params.authorizationEndpoint) throw new SsoValidationError('Authorization endpoint is required when discovery is disabled');
+    if (!params.tokenEndpoint) throw new SsoValidationError('Token endpoint is required when discovery is disabled');
+    if (!params.userinfoEndpoint) throw new SsoValidationError('Userinfo endpoint is required when discovery is disabled');
+  }
+
+  private static resolveClaimMapping(claimMapping: Partial<OidcClaimMapping> | undefined): OidcClaimMapping {
+    return {
+      email: claimMapping?.email || 'email',
+      firstName: claimMapping?.firstName || 'given_name',
+      lastName: claimMapping?.lastName || 'family_name',
+      displayName: claimMapping?.displayName || 'name',
+      extra: claimMapping?.extra,
+    };
   }
 
   static reconstitute(props: OidcProviderProps): OidcProvider {

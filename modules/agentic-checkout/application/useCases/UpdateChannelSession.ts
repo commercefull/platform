@@ -54,6 +54,13 @@ export class UpdateChannelSessionCommand {
   }
 }
 
+// A persisted session guaranteed to be linked to a checkout and a basket.
+type StoredSession = NonNullable<Awaited<ReturnType<ChannelSessionRepository['findById']>>>;
+type LinkedSession = StoredSession & { checkoutId: string; basketId: string };
+type CheckoutState = Awaited<ReturnType<ChannelCheckoutPort['getCheckout']>>;
+type AcpAddress = NonNullable<NonNullable<UpdateChannelSessionCommandProps['fulfillmentDetails']>['address']>;
+type ResolvedAcpAddress = AcpAddress & { line_one: string; city: string; country: string };
+
 export class UpdateChannelSessionUseCase {
   constructor(
     private readonly channelSessionRepository: ChannelSessionRepository,
@@ -62,6 +69,25 @@ export class UpdateChannelSessionUseCase {
   ) {}
 
   async execute(command: UpdateChannelSessionCommand): Promise<AcpCheckoutSession> {
+    const session = await this.getMutableLinkedSession(command);
+
+    if (command.items) {
+      await this.applyItems(session.storeId, session.basketId, command.items);
+    }
+
+    let checkout = await this.checkout.getCheckout(session.checkoutId);
+    checkout = (await this.applyShippingAddress(session, command)) ?? checkout;
+    checkout = (await this.applyFulfillmentOption(session, command)) ?? checkout;
+    this.applyBuyer(session, command);
+    this.applyAttribution(session, command);
+
+    await this.channelSessionRepository.save(session);
+    return this.buildResponse(session, checkout);
+  }
+
+  // Fetch + validate: session exists for this integration, is mutable, and is
+  // linked to both a checkout and a basket.
+  private async getMutableLinkedSession(command: UpdateChannelSessionCommand): Promise<LinkedSession> {
     const session = await this.channelSessionRepository.findById(command.channelSessionId);
     if (!session || session.integrationId !== command.integrationId) {
       throw new ChannelSessionNotFoundError(command.channelSessionId);
@@ -72,62 +98,72 @@ export class UpdateChannelSessionUseCase {
     if (!session.checkoutId || !session.basketId) {
       throw new ChannelSessionNotFoundError(command.channelSessionId);
     }
+    return session as LinkedSession;
+  }
 
-    if (command.items) {
-      await this.applyItems(session.storeId, session.basketId, command.items);
-    }
-
-    let checkout = await this.checkout.getCheckout(session.checkoutId);
-
+  private async applyShippingAddress(session: LinkedSession, command: UpdateChannelSessionCommand): Promise<CheckoutState> {
     const address = command.fulfillmentDetails?.address;
-    if (address?.line_one && address.city && address.country) {
-      checkout = await this.checkout.setShippingAddress(session.checkoutId, {
-        firstName: command.buyer?.first_name ?? session.buyer?.firstName ?? '',
-        lastName: command.buyer?.last_name ?? session.buyer?.lastName ?? '',
+    if (!address?.line_one || !address.city || !address.country) return null;
+    const resolved: ResolvedAcpAddress = { ...address, line_one: address.line_one, city: address.city, country: address.country };
+
+    const updated = await this.checkout.setShippingAddress(session.checkoutId, this.shippingAddressInput(session, command, resolved));
+    session.setFulfillmentDetails({
+      email: command.fulfillmentDetails?.email,
+      phone: command.fulfillmentDetails?.phone,
+      address: {
         lineOne: address.line_one,
         lineTwo: address.line_two,
         city: address.city,
         region: address.region,
         country: address.country,
-        postalCode: address.postal_code ?? '',
-        phone: command.fulfillmentDetails?.phone ?? session.buyer?.phone,
-      });
-      session.setFulfillmentDetails({
-        email: command.fulfillmentDetails?.email,
-        phone: command.fulfillmentDetails?.phone,
-        address: {
-          lineOne: address.line_one,
-          lineTwo: address.line_two,
-          city: address.city,
-          region: address.region,
-          country: address.country,
-          postalCode: address.postal_code,
-        },
-      });
-    }
+        postalCode: address.postal_code,
+      },
+    });
+    return updated;
+  }
 
-    if (command.fulfillmentOptionId) {
-      checkout = await this.checkout.setShippingMethod(session.checkoutId, command.fulfillmentOptionId);
-    }
+  private shippingAddressInput(
+    session: LinkedSession,
+    command: UpdateChannelSessionCommand,
+    address: ResolvedAcpAddress,
+  ): Parameters<ChannelCheckoutPort['setShippingAddress']>[1] {
+    return {
+      firstName: command.buyer?.first_name ?? session.buyer?.firstName ?? '',
+      lastName: command.buyer?.last_name ?? session.buyer?.lastName ?? '',
+      lineOne: address.line_one,
+      lineTwo: address.line_two,
+      city: address.city,
+      region: address.region,
+      country: address.country,
+      postalCode: address.postal_code ?? '',
+      phone: command.fulfillmentDetails?.phone ?? session.buyer?.phone,
+    };
+  }
 
-    if (command.buyer) {
-      session.setBuyer({
-        firstName: command.buyer.first_name,
-        lastName: command.buyer.last_name,
-        email: command.buyer.email,
-        phone: command.buyer.phone,
-      });
-    }
+  private async applyFulfillmentOption(session: LinkedSession, command: UpdateChannelSessionCommand): Promise<CheckoutState> {
+    if (!command.fulfillmentOptionId) return null;
+    return this.checkout.setShippingMethod(session.checkoutId, command.fulfillmentOptionId);
+  }
 
-    if (command.affiliateAttribution) {
-      session.setAttribution({
-        firstTouch: command.affiliateAttribution.first_touch,
-        lastTouch: command.affiliateAttribution.last_touch,
-      });
-    }
+  private applyBuyer(session: LinkedSession, command: UpdateChannelSessionCommand): void {
+    if (!command.buyer) return;
+    session.setBuyer({
+      firstName: command.buyer.first_name,
+      lastName: command.buyer.last_name,
+      email: command.buyer.email,
+      phone: command.buyer.phone,
+    });
+  }
 
-    await this.channelSessionRepository.save(session);
+  private applyAttribution(session: LinkedSession, command: UpdateChannelSessionCommand): void {
+    if (!command.affiliateAttribution) return;
+    session.setAttribution({
+      firstTouch: command.affiliateAttribution.first_touch,
+      lastTouch: command.affiliateAttribution.last_touch,
+    });
+  }
 
+  private async buildResponse(session: LinkedSession, checkout: CheckoutState): Promise<AcpCheckoutSession> {
     const basket = await this.checkout.getBasket(session.basketId);
     const shippingOptions = checkout?.shippingAddress ? await this.checkout.getShippingOptions(session.checkoutId).catch(() => []) : [];
 

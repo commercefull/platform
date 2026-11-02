@@ -96,65 +96,69 @@ export function auditMiddleware(req: HttpRequest, res: HttpResponse, next: HttpN
 
     // Only audit successful mutations
     if (res.statusCode >= 200 && res.statusCode < 300) {
-      const user = req.user;
-      const actorId = user?.userId || user?.id || 'anonymous';
-      const actorType: ActorType = (user?.type as ActorType) || 'system';
-      const actorEmail = user?.email;
-      const actorName = user?.name;
-
-      const resourceId = config.resourceIdParam
-        ? (req.params[config.resourceIdParam] as string) || (req.params.id as string)
-        : (req.params.id as string) || undefined;
-
-      // Extract resource name from response body if available
-      let resourceName: string | undefined;
-      try {
-        if (typeof body === 'string') {
-          const parsed = JSON.parse(body);
-          resourceName = parsed.name || parsed.productName || parsed.orderNumber || parsed.title;
-        } else if (body && typeof body === 'object') {
-          const obj = body as Record<string, unknown>;
-          resourceName = (obj.name as string) || (obj.productName as string) || (obj.orderNumber as string) || (obj.title as string);
-        }
-      } catch {
-        // Ignore parse errors
-      }
-
-      // Fire-and-forget — audit logging must not block the response
-      recordAuditLogUseCase
-        .execute({
-          actorId,
-          actorType,
-          actorEmail,
-          actorName,
-          action: config.action,
-          resourceType: config.resourceType,
-          resourceId,
-          resourceName,
-          ipAddress: req.ip || req.socket.remoteAddress,
-          userAgent: req.headers['user-agent'],
-          correlationId: (req.headers['x-correlation-id'] as string) || undefined,
-          organizationId: user?.organizationId,
-          storeId: user?.storeId,
-          metadata: {
-            method: req.method,
-            path: req.path,
-            statusCode: res.statusCode,
-            body: sanitizeBody(req.body),
-          },
-        })
-        .catch((err: unknown) => {
-          logger.error('Audit middleware failed to record entry', {
-            action: config.action,
-            error: (err as Error).message,
-          });
-        });
+      recordRequestAudit(req, res, config, body);
     }
 
     return originalSend(body);
   } as typeof res.send;
 
   next();
+}
+
+function resolveActor(req: HttpRequest): { actorId: string; actorType: ActorType; actorEmail?: string; actorName?: string } {
+  const user = req.user;
+  return {
+    actorId: user?.userId || user?.id || 'anonymous',
+    actorType: (user?.type as ActorType) || 'system',
+    actorEmail: user?.email,
+    actorName: user?.name,
+  };
+}
+
+// Extract resource name from response body if available
+function extractResourceName(body: unknown): string | undefined {
+  try {
+    const obj = typeof body === 'string' ? (JSON.parse(body) as Record<string, unknown>) : (body as Record<string, unknown> | null);
+    if (!obj || typeof obj !== 'object') return undefined;
+    return (obj.name as string) || (obj.productName as string) || (obj.orderNumber as string) || (obj.title as string);
+  } catch {
+    // Ignore parse errors
+    return undefined;
+  }
+}
+
+function recordRequestAudit(req: HttpRequest, res: HttpResponse, config: AuditConfig, body: unknown): void {
+  const user = req.user;
+  const resourceId = config.resourceIdParam
+    ? (req.params[config.resourceIdParam] as string) || (req.params.id as string)
+    : (req.params.id as string) || undefined;
+
+  // Fire-and-forget — audit logging must not block the response
+  recordAuditLogUseCase
+    .execute({
+      ...resolveActor(req),
+      action: config.action,
+      resourceType: config.resourceType,
+      resourceId,
+      resourceName: extractResourceName(body),
+      ipAddress: req.ip || req.socket.remoteAddress,
+      userAgent: req.headers['user-agent'],
+      correlationId: (req.headers['x-correlation-id'] as string) || undefined,
+      organizationId: user?.organizationId,
+      storeId: user?.storeId,
+      metadata: {
+        method: req.method,
+        path: req.path,
+        statusCode: res.statusCode,
+        body: sanitizeBody(req.body),
+      },
+    })
+    .catch((err: unknown) => {
+      logger.error('Audit middleware failed to record entry', {
+        action: config.action,
+        error: (err as Error).message,
+      });
+    });
 }
 
 /**

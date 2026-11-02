@@ -111,6 +111,14 @@ interface ReserveStockRepositoryPort {
   attachOrderItem?(orderId: string, productId: string, variantId: string | undefined, orderItemId: string): Promise<void>;
 }
 
+interface ItemReservationContext {
+  orderId: string;
+  storeId?: string;
+  reservationId: string;
+  expiresAt: Date;
+  coveredQuantity: (productId: string, variantId?: string) => number;
+}
+
 export class ReserveStockUseCase {
   constructor(private readonly inventoryRepository: ReserveStockRepositoryPort) {}
 
@@ -126,144 +134,16 @@ export class ReserveStockUseCase {
       existing.filter(r => r.productId === productId && (r.variantId ?? undefined) === variantId).reduce((sum, r) => sum + r.quantity, 0);
 
     const reservationId = this.generateReservationId();
-    const results: ReservationResult[] = [];
-    let allReserved = true;
 
     // Default expiration: 30 minutes
     const expiresAt = input.expiresAt || new Date(Date.now() + 30 * 60 * 1000);
+    const ctx: ItemReservationContext = { orderId: input.orderId, storeId: input.storeId, reservationId, expiresAt, coveredQuantity };
 
+    const results: ReservationResult[] = [];
     for (const item of input.items) {
-      const alreadyReserved = coveredQuantity(item.productId, item.variantId);
-      const needed = Math.max(0, item.quantity - alreadyReserved);
-
-      // Link the reservation rows already covering this line (created by
-      // the event path before the order line existed) to the order item.
-      if (item.orderItemId && alreadyReserved > 0 && this.inventoryRepository.attachOrderItem) {
-        await this.inventoryRepository.attachOrderItem(input.orderId, item.productId, item.variantId, item.orderItemId);
-      }
-
-      // Digital and unlimited-inventory items never consume stock.
-      if (item.isDigital || item.inventoryPolicy === 'unlimited') {
-        results.push({
-          productId: item.productId,
-          variantId: item.variantId,
-          sku: item.sku,
-          requestedQuantity: item.quantity,
-          reservedQuantity: item.quantity,
-          availableQuantity: item.quantity,
-          isFullyReserved: true,
-          locationId: item.locationId,
-        });
-        continue;
-      }
-
-      if (needed === 0) {
-        // Fully covered by existing reservations — do not reserve again.
-        results.push({
-          productId: item.productId,
-          variantId: item.variantId,
-          sku: item.sku,
-          requestedQuantity: item.quantity,
-          reservedQuantity: item.quantity,
-          availableQuantity: item.quantity,
-          isFullyReserved: true,
-          locationId: item.locationId,
-        });
-        continue;
-      }
-
-      // Get current inventory level: explicit location → store warehouse
-      // routing → unscoped product lookup (adapter fallback).
-      let inventory = item.locationId
-        ? await this.inventoryRepository.findByProduct(item.productId, item.variantId, item.locationId)
-        : null;
-      let resolvedLocationId = item.locationId;
-
-      if (!inventory && input.storeId && this.inventoryRepository.findStoreLocations) {
-        const locations = await this.inventoryRepository.findStoreLocations(input.storeId, item.productId, item.variantId);
-        inventory = locations[0] ?? null;
-        resolvedLocationId = inventory?.locationId ?? item.locationId;
-      }
-      if (!inventory) {
-        inventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, item.locationId);
-      }
-
-      const backorderable = item.inventoryPolicy === 'backorderable';
-      if (!inventory) {
-        // No stock record: backorderable items still sell (fulfilled later).
-        const totalReserved = backorderable ? item.quantity : alreadyReserved;
-        results.push({
-          productId: item.productId,
-          variantId: item.variantId,
-          sku: item.sku,
-          requestedQuantity: item.quantity,
-          reservedQuantity: totalReserved,
-          availableQuantity: 0,
-          isFullyReserved: totalReserved >= item.quantity,
-          locationId: resolvedLocationId,
-        });
-        if (totalReserved < item.quantity) allReserved = false;
-        continue;
-      }
-
-      // Calculate available quantity (total - already reserved)
-      let availableQuantity = inventory.quantity - (inventory.reservedQuantity || 0);
-      let reserveQuantity: number;
-
-      if (this.inventoryRepository.reserveStockAtomically) {
-        // Atomic path: the DB row-locks the location and clamps the delta at
-        // remaining available stock (unless the item is backorderable), so
-        // concurrent checkouts cannot oversell.
-        const atomic = await this.inventoryRepository.reserveStockAtomically(inventory.inventoryItemId, needed, backorderable);
-        reserveQuantity = atomic ? atomic.appliedQuantity : 0;
-        if (atomic) availableQuantity = atomic.availableQuantity;
-      } else {
-        reserveQuantity = backorderable ? needed : Math.min(needed, Math.max(0, availableQuantity));
-      }
-
-      if (reserveQuantity > 0) {
-        // Create reservation record
-        await this.inventoryRepository.createReservation({
-          reservationId,
-          orderId: input.orderId,
-          inventoryItemId: inventory.inventoryItemId,
-          productId: item.productId,
-          variantId: item.variantId,
-          sku: item.sku,
-          quantity: reserveQuantity,
-          locationId: resolvedLocationId,
-          orderItemId: item.orderItemId,
-          expiresAt,
-          status: 'active',
-        });
-
-        // Update reserved quantity on inventory (may exceed quantity for
-        // backorders) — skipped on the atomic path, which already applied it.
-        if (!this.inventoryRepository.reserveStockAtomically) {
-          await this.inventoryRepository.updateReservedQuantity(
-            inventory.inventoryItemId,
-            (inventory.reservedQuantity || 0) + reserveQuantity,
-          );
-        }
-      }
-
-      const totalReserved = alreadyReserved + reserveQuantity;
-      const isFullyReserved = totalReserved >= item.quantity;
-      if (!isFullyReserved) {
-        allReserved = false;
-      }
-
-      results.push({
-        productId: item.productId,
-        variantId: item.variantId,
-        sku: item.sku,
-        requestedQuantity: item.quantity,
-        reservedQuantity: totalReserved,
-        availableQuantity,
-        isFullyReserved,
-        locationId: resolvedLocationId,
-      });
+      results.push(await this.reserveOneItem(item, ctx));
     }
+    const allReserved = results.every(r => r.isFullyReserved);
 
     // Emit event
     eventBus.emit('inventory.reserved', {
@@ -280,6 +160,141 @@ export class ReserveStockUseCase {
       allReserved,
       expiresAt: expiresAt.toISOString(),
     };
+  }
+
+  private async reserveOneItem(item: ReserveStockItemInput, ctx: ItemReservationContext): Promise<ReservationResult> {
+    const alreadyReserved = ctx.coveredQuantity(item.productId, item.variantId);
+    const needed = Math.max(0, item.quantity - alreadyReserved);
+
+    // Link the reservation rows already covering this line (created by
+    // the event path before the order line existed) to the order item.
+    if (item.orderItemId && alreadyReserved > 0 && this.inventoryRepository.attachOrderItem) {
+      await this.inventoryRepository.attachOrderItem(ctx.orderId, item.productId, item.variantId, item.orderItemId);
+    }
+
+    // Digital and unlimited-inventory items never consume stock, and lines
+    // fully covered by existing reservations do not reserve again.
+    if (item.isDigital || item.inventoryPolicy === 'unlimited' || needed === 0) {
+      return this.fullyReservedResult(item);
+    }
+
+    const { inventory, resolvedLocationId } = await this.resolveInventory(item, ctx.storeId);
+    const backorderable = item.inventoryPolicy === 'backorderable';
+
+    if (!inventory) {
+      // No stock record: backorderable items still sell (fulfilled later).
+      const totalReserved = backorderable ? item.quantity : alreadyReserved;
+      return {
+        productId: item.productId,
+        variantId: item.variantId,
+        sku: item.sku,
+        requestedQuantity: item.quantity,
+        reservedQuantity: totalReserved,
+        availableQuantity: 0,
+        isFullyReserved: totalReserved >= item.quantity,
+        locationId: resolvedLocationId,
+      };
+    }
+
+    const { reserveQuantity, availableQuantity } = await this.applyReservation(inventory, needed, backorderable);
+
+    if (reserveQuantity > 0) {
+      await this.recordReservation(item, ctx, inventory, resolvedLocationId, reserveQuantity);
+    }
+
+    const totalReserved = alreadyReserved + reserveQuantity;
+    return {
+      productId: item.productId,
+      variantId: item.variantId,
+      sku: item.sku,
+      requestedQuantity: item.quantity,
+      reservedQuantity: totalReserved,
+      availableQuantity,
+      isFullyReserved: totalReserved >= item.quantity,
+      locationId: resolvedLocationId,
+    };
+  }
+
+  private fullyReservedResult(item: ReserveStockItemInput): ReservationResult {
+    return {
+      productId: item.productId,
+      variantId: item.variantId,
+      sku: item.sku,
+      requestedQuantity: item.quantity,
+      reservedQuantity: item.quantity,
+      availableQuantity: item.quantity,
+      isFullyReserved: true,
+      locationId: item.locationId,
+    };
+  }
+
+  // Get current inventory level: explicit location → store warehouse
+  // routing → unscoped product lookup (adapter fallback).
+  private async resolveInventory(
+    item: ReserveStockItemInput,
+    storeId: string | undefined,
+  ): Promise<{ inventory: InventoryRecord | null; resolvedLocationId: string | undefined }> {
+    let inventory = item.locationId ? await this.inventoryRepository.findByProduct(item.productId, item.variantId, item.locationId) : null;
+    let resolvedLocationId = item.locationId;
+
+    if (!inventory && storeId && this.inventoryRepository.findStoreLocations) {
+      const locations = await this.inventoryRepository.findStoreLocations(storeId, item.productId, item.variantId);
+      inventory = locations[0] ?? null;
+      resolvedLocationId = inventory?.locationId ?? item.locationId;
+    }
+    if (!inventory) {
+      inventory = await this.inventoryRepository.findByProduct(item.productId, item.variantId, item.locationId);
+    }
+
+    return { inventory, resolvedLocationId };
+  }
+
+  // Atomic path: the DB row-locks the location and clamps the delta at
+  // remaining available stock (unless the item is backorderable), so
+  // concurrent checkouts cannot oversell.
+  private async applyReservation(
+    inventory: InventoryRecord,
+    needed: number,
+    backorderable: boolean,
+  ): Promise<{ reserveQuantity: number; availableQuantity: number }> {
+    let availableQuantity = inventory.quantity - (inventory.reservedQuantity || 0);
+
+    if (!this.inventoryRepository.reserveStockAtomically) {
+      return { reserveQuantity: backorderable ? needed : Math.min(needed, Math.max(0, availableQuantity)), availableQuantity };
+    }
+
+    const atomic = await this.inventoryRepository.reserveStockAtomically(inventory.inventoryItemId, needed, backorderable);
+    if (atomic) availableQuantity = atomic.availableQuantity;
+    return { reserveQuantity: atomic ? atomic.appliedQuantity : 0, availableQuantity };
+  }
+
+  private async recordReservation(
+    item: ReserveStockItemInput,
+    ctx: ItemReservationContext,
+    inventory: InventoryRecord,
+    resolvedLocationId: string | undefined,
+    reserveQuantity: number,
+  ): Promise<void> {
+    // Create reservation record
+    await this.inventoryRepository.createReservation({
+      reservationId: ctx.reservationId,
+      orderId: ctx.orderId,
+      inventoryItemId: inventory.inventoryItemId,
+      productId: item.productId,
+      variantId: item.variantId,
+      sku: item.sku,
+      quantity: reserveQuantity,
+      locationId: resolvedLocationId,
+      orderItemId: item.orderItemId,
+      expiresAt: ctx.expiresAt,
+      status: 'active',
+    });
+
+    // Update reserved quantity on inventory (may exceed quantity for
+    // backorders) — skipped on the atomic path, which already applied it.
+    if (!this.inventoryRepository.reserveStockAtomically) {
+      await this.inventoryRepository.updateReservedQuantity(inventory.inventoryItemId, (inventory.reservedQuantity || 0) + reserveQuantity);
+    }
   }
 
   private generateReservationId(): string {

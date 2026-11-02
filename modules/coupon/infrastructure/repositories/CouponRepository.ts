@@ -74,17 +74,53 @@ export class CouponRepository {
   }
 
   async save(coupon: Coupon): Promise<Coupon> {
-    const now = new Date().toISOString();
-    const mappedType = coupon.type === 'fixed_amount' ? 'fixedAmount' : coupon.type === 'free_shipping' ? 'freeShipping' : coupon.type;
-
     const existing = await queryOne<{ promotionCouponId: string }>(
       'SELECT "promotionCouponId" FROM "promotionCoupon" WHERE "promotionCouponId" = $1',
       [coupon.couponId],
     );
 
     if (existing) {
-      await query(
-        `UPDATE "promotionCoupon" SET
+      await this.updateCoupon(coupon);
+    } else {
+      await this.insertCoupon(coupon);
+    }
+
+    return coupon;
+  }
+
+  private mappedType(coupon: Coupon): string {
+    if (coupon.type === 'fixed_amount') return 'fixedAmount';
+    if (coupon.type === 'free_shipping') return 'freeShipping';
+    return coupon.type;
+  }
+
+  private couponRowValues(coupon: Coupon, now: string) {
+    return {
+      code: coupon.code,
+      name: coupon.name,
+      description: coupon.description ?? null,
+      type: this.mappedType(coupon),
+      discountAmount: String(coupon.value),
+      currencyCode: coupon.currency ?? 'USD',
+      minOrderAmountCents: coupon.minOrderValueCents ?? null,
+      maxDiscountAmountCents: coupon.maxDiscountAmountCents ?? null,
+      isOneTimeUse: coupon.usageType === 'single_use',
+      maxUsage: coupon.usageLimit ?? null,
+      usageCount: coupon.usageCount,
+      maxUsagePerCustomer: coupon.customerUsageLimit ?? null,
+      isActive: coupon.isActive,
+      startDate: coupon.startsAt?.toISOString() ?? now,
+      endDate: coupon.expiresAt?.toISOString() ?? null,
+      promotionId: coupon.promotionId ?? null,
+      organizationId: coupon.organizationId ?? null,
+    };
+  }
+
+  private async updateCoupon(coupon: Coupon): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.couponRowValues(coupon, now);
+    await query(
+      `UPDATE "promotionCoupon" SET
           code = $1, name = $2, description = $3, type = $4, "discountAmount" = $5,
           "currencyCode" = $6, "minOrderAmountCents" = $7, "maxDiscountAmountCents" = $8,
           "isOneTimeUse" = $9, "maxUsage" = $10, "usageCount" = $11,
@@ -92,66 +128,67 @@ export class CouponRepository {
           "startDate" = $14, "endDate" = $15,
           "updatedAt" = $16, "promotionId" = $18, "organizationId" = $19
         WHERE "promotionCouponId" = $17`,
-        [
-          coupon.code,
-          coupon.name,
-          coupon.description ?? null,
-          mappedType,
-          String(coupon.value),
-          coupon.currency ?? 'USD',
-          coupon.minOrderValueCents ?? null,
-          coupon.maxDiscountAmountCents ?? null,
-          coupon.usageType === 'single_use',
-          coupon.usageLimit ?? null,
-          coupon.usageCount,
-          coupon.customerUsageLimit ?? null,
-          coupon.isActive,
-          coupon.startsAt?.toISOString() ?? now,
-          coupon.expiresAt?.toISOString() ?? null,
-          now,
-          coupon.couponId,
-          coupon.promotionId ?? null,
-          coupon.organizationId ?? null,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO "promotionCoupon" (
+      [
+        v.code,
+        v.name,
+        v.description,
+        v.type,
+        v.discountAmount,
+        v.currencyCode,
+        v.minOrderAmountCents,
+        v.maxDiscountAmountCents,
+        v.isOneTimeUse,
+        v.maxUsage,
+        v.usageCount,
+        v.maxUsagePerCustomer,
+        v.isActive,
+        v.startDate,
+        v.endDate,
+        now,
+        coupon.couponId,
+        v.promotionId,
+        v.organizationId,
+      ],
+    );
+  }
+
+  private async insertCoupon(coupon: Coupon): Promise<void> {
+    const now = new Date().toISOString();
+    const v = this.couponRowValues(coupon, now);
+    await query(
+      `INSERT INTO "promotionCoupon" (
           "promotionCouponId", code, name, description, type, "discountAmount",
           "currencyCode", "minOrderAmountCents", "maxDiscountAmountCents",
           "isOneTimeUse", "maxUsage", "usageCount", "maxUsagePerCustomer",
           "isActive", "startDate", "endDate", "generationMethod", "isReferral", "isPublic",
           "promotionId", "organizationId", "createdAt", "updatedAt"
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
-        [
-          coupon.couponId,
-          coupon.code,
-          coupon.name,
-          coupon.description ?? null,
-          mappedType,
-          String(coupon.value),
-          coupon.currency ?? 'USD',
-          coupon.minOrderValueCents ?? null,
-          coupon.maxDiscountAmountCents ?? null,
-          coupon.usageType === 'single_use',
-          coupon.usageLimit ?? null,
-          coupon.usageCount,
-          coupon.customerUsageLimit ?? null,
-          coupon.isActive,
-          coupon.startsAt?.toISOString() ?? now,
-          coupon.expiresAt?.toISOString() ?? null,
-          'manual',
-          false,
-          false,
-          coupon.promotionId ?? null,
-          coupon.organizationId ?? null,
-          now,
-          now,
-        ],
-      );
-    }
-
-    return coupon;
+      [
+        coupon.couponId,
+        v.code,
+        v.name,
+        v.description,
+        v.type,
+        v.discountAmount,
+        v.currencyCode,
+        v.minOrderAmountCents,
+        v.maxDiscountAmountCents,
+        v.isOneTimeUse,
+        v.maxUsage,
+        v.usageCount,
+        v.maxUsagePerCustomer,
+        v.isActive,
+        v.startDate,
+        v.endDate,
+        'manual',
+        false,
+        false,
+        v.promotionId,
+        v.organizationId,
+        now,
+        now,
+      ],
+    );
   }
 
   async delete(couponId: string): Promise<void> {

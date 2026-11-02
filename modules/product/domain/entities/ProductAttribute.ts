@@ -198,12 +198,9 @@ export class ProductAttribute {
    * Validate a value against this attribute's rules
    */
   validateValue(value: string): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
     // Required check
     if (this.isRequired && (!value || value.trim() === '')) {
-      errors.push(`${this.name} is required`);
-      return { valid: false, errors };
+      return { valid: false, errors: [`${this.name} is required`] };
     }
 
     // Skip further validation if empty and not required
@@ -211,80 +208,85 @@ export class ProductAttribute {
       return { valid: true, errors: [] };
     }
 
-    const rules = this.validationRules || {};
-
-    // Type-specific validation
-    switch (this.type) {
-      case 'number':
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) {
-          errors.push(`${this.name} must be a valid number`);
-        } else {
-          if (rules.minValue !== undefined && numValue < rules.minValue) {
-            errors.push(`${this.name} must be at least ${rules.minValue}`);
-          }
-          if (rules.maxValue !== undefined && numValue > rules.maxValue) {
-            errors.push(`${this.name} must be at most ${rules.maxValue}`);
-          }
-        }
-        break;
-
-      case 'text':
-        if (rules.minLength !== undefined && value.length < rules.minLength) {
-          errors.push(`${this.name} must be at least ${rules.minLength} characters`);
-        }
-        if (rules.maxLength !== undefined && value.length > rules.maxLength) {
-          errors.push(`${this.name} must be at most ${rules.maxLength} characters`);
-        }
-        if (rules.pattern) {
-          const regex = new RegExp(rules.pattern);
-          if (!regex.test(value)) {
-            errors.push(`${this.name} format is invalid`);
-          }
-        }
-        break;
-
-      case 'select':
-      case 'radio':
-        // Validate against predefined values
-        if (this.values.length > 0) {
-          const validValues = this.values.map(v => v.value);
-          if (!validValues.includes(value)) {
-            errors.push(`${this.name} must be one of: ${validValues.join(', ')}`);
-          }
-        }
-        break;
-
-      case 'multiselect':
-      case 'checkbox':
-        // Value should be comma-separated list of valid values
-        const selectedValues = value.split(',').map(v => v.trim());
-        if (this.values.length > 0) {
-          const validValues = this.values.map(v => v.value);
-          for (const selected of selectedValues) {
-            if (!validValues.includes(selected)) {
-              errors.push(`Invalid value "${selected}" for ${this.name}`);
-            }
-          }
-        }
-        break;
-
-      case 'date':
-      case 'datetime':
-        const dateValue = new Date(value);
-        if (isNaN(dateValue.getTime())) {
-          errors.push(`${this.name} must be a valid date`);
-        }
-        break;
-
-      case 'boolean':
-        if (!['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase())) {
-          errors.push(`${this.name} must be a boolean value`);
-        }
-        break;
-    }
-
+    const errors: string[] = [];
+    ProductAttribute.TYPE_VALUE_VALIDATORS[this.type]?.(this, value, errors);
     return { valid: errors.length === 0, errors };
+  }
+
+  // Type-specific validators — keyed dispatch instead of a switch keeps each
+  // check isolated and self-contained.
+  private static readonly TYPE_VALUE_VALIDATORS: Partial<
+    Record<AttributeType, (attr: ProductAttribute, value: string, errors: string[]) => void>
+  > = {
+    number: (attr, value, errors) => attr.validateNumberValue(value, errors),
+    text: (attr, value, errors) => attr.validateTextValue(value, errors),
+    select: (attr, value, errors) => attr.validateSelectValue(value, errors),
+    radio: (attr, value, errors) => attr.validateSelectValue(value, errors),
+    multiselect: (attr, value, errors) => attr.validateMultiValue(value, errors),
+    checkbox: (attr, value, errors) => attr.validateMultiValue(value, errors),
+    date: (attr, value, errors) => attr.validateDateValue(value, errors),
+    datetime: (attr, value, errors) => attr.validateDateValue(value, errors),
+    boolean: (attr, value, errors) => attr.validateBooleanValue(value, errors),
+  };
+
+  private validateNumberValue(value: string, errors: string[]): void {
+    const rules = this.validationRules || {};
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+      errors.push(`${this.name} must be a valid number`);
+      return;
+    }
+    if (rules.minValue !== undefined && numValue < rules.minValue) {
+      errors.push(`${this.name} must be at least ${rules.minValue}`);
+    }
+    if (rules.maxValue !== undefined && numValue > rules.maxValue) {
+      errors.push(`${this.name} must be at most ${rules.maxValue}`);
+    }
+  }
+
+  private validateTextValue(value: string, errors: string[]): void {
+    const rules = this.validationRules || {};
+    if (rules.minLength !== undefined && value.length < rules.minLength) {
+      errors.push(`${this.name} must be at least ${rules.minLength} characters`);
+    }
+    if (rules.maxLength !== undefined && value.length > rules.maxLength) {
+      errors.push(`${this.name} must be at most ${rules.maxLength} characters`);
+    }
+    if (rules.pattern && !new RegExp(rules.pattern).test(value)) {
+      errors.push(`${this.name} format is invalid`);
+    }
+  }
+
+  // Validate against predefined values
+  private validateSelectValue(value: string, errors: string[]): void {
+    if (this.values.length === 0) return;
+    const validValues = this.values.map(v => v.value);
+    if (!validValues.includes(value)) {
+      errors.push(`${this.name} must be one of: ${validValues.join(', ')}`);
+    }
+  }
+
+  // Value should be comma-separated list of valid values
+  private validateMultiValue(value: string, errors: string[]): void {
+    if (this.values.length === 0) return;
+    const validValues = this.values.map(v => v.value);
+    for (const selected of value.split(',').map(v => v.trim())) {
+      if (!validValues.includes(selected)) {
+        errors.push(`Invalid value "${selected}" for ${this.name}`);
+      }
+    }
+  }
+
+  private validateDateValue(value: string, errors: string[]): void {
+    if (isNaN(new Date(value).getTime())) {
+      errors.push(`${this.name} must be a valid date`);
+    }
+  }
+
+  private validateBooleanValue(value: string, errors: string[]): void {
+    if (!['true', 'false', '1', '0', 'yes', 'no'].includes(value.toLowerCase())) {
+      errors.push(`${this.name} must be a boolean value`);
+    }
   }
 
   /**

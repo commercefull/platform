@@ -78,7 +78,69 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
     await unsetAllDefaults();
   }
 
-  const result = await queryOne<MembershipPlanRow>(
+  const result = await insertPlan(input);
+
+  if (!result) {
+    throw new FailedToCreateMembershipError('Failed to create membership plan');
+  }
+
+  return toPlan(result);
+}
+
+function planInsertValues(input: CreateMembershipPlanInput) {
+  return {
+    ...planCoreValues(input),
+    ...planPricingValues(input),
+    ...planJsonValues(input),
+  };
+}
+
+function planCoreValues(input: CreateMembershipPlanInput) {
+  return {
+    name: input.name,
+    code: input.code,
+    description: input.description || null,
+    shortDescription: input.shortDescription || null,
+    isActive: input.isActive ?? true,
+    isPublic: input.isPublic ?? true,
+    isDefault: input.isDefault ?? false,
+    priority: input.priority ?? 0,
+    level: input.level ?? 1,
+    trialDays: input.trialDays ?? 0,
+  };
+}
+
+function planPricingValues(input: CreateMembershipPlanInput) {
+  return {
+    priceCents: input.priceCents,
+    salePriceCents: input.salePriceCents || null,
+    setupFeeCents: input.setupFeeCents ?? 0,
+    currencyCode: input.currency ?? 'USD',
+    billingCycle: input.billingCycle ?? 'monthly',
+    billingPeriod: input.billingPeriod ?? 1,
+    maxMembers: input.maxMembers || null,
+    autoRenew: input.autoRenew ?? true,
+    duration: input.duration || null,
+    gracePeriodsAllowed: input.gracePeriodsAllowed ?? 0,
+    gracePeriodDays: input.gracePeriodDays ?? 0,
+    membershipImage: input.membershipImage || null,
+  };
+}
+
+function planJsonValues(input: CreateMembershipPlanInput) {
+  return {
+    publicDetails: input.publicDetails ? JSON.stringify(input.publicDetails) : null,
+    privateMeta: input.privateMeta ? JSON.stringify(input.privateMeta) : null,
+    visibilityRules: input.visibilityRules ? JSON.stringify(input.visibilityRules) : null,
+    availabilityRules: input.availabilityRules ? JSON.stringify(input.availabilityRules) : null,
+    customFields: input.customFields ? JSON.stringify(input.customFields) : null,
+    createdBy: input.createdBy || null,
+  };
+}
+
+async function insertPlan(input: CreateMembershipPlanInput): Promise<MembershipPlanRow | null> {
+  const v = planInsertValues(input);
+  return queryOne<MembershipPlanRow>(
     `INSERT INTO "${TABLE}" (
       "name", "code", "description", "shortDescription", "isActive", "isPublic", "isDefault",
       "priority", "level", "trialDays", "priceCents", "salePriceCents", "setupFeeCents", "currencyCode",
@@ -90,42 +152,36 @@ export async function create(input: CreateMembershipPlanInput): Promise<Membersh
       $20, $21, $22, $23, $24, $25, $26, $27, $28
     ) RETURNING *`,
     [
-      input.name,
-      input.code,
-      input.description || null,
-      input.shortDescription || null,
-      input.isActive ?? true,
-      input.isPublic ?? true,
-      input.isDefault ?? false,
-      input.priority ?? 0,
-      input.level ?? 1,
-      input.trialDays ?? 0,
-      input.priceCents,
-      input.salePriceCents || null,
-      input.setupFeeCents ?? 0,
-      input.currency ?? 'USD',
-      input.billingCycle ?? 'monthly',
-      input.billingPeriod ?? 1,
-      input.maxMembers || null,
-      input.autoRenew ?? true,
-      input.duration || null,
-      input.gracePeriodsAllowed ?? 0,
-      input.gracePeriodDays ?? 0,
-      input.membershipImage || null,
-      input.publicDetails ? JSON.stringify(input.publicDetails) : null,
-      input.privateMeta ? JSON.stringify(input.privateMeta) : null,
-      input.visibilityRules ? JSON.stringify(input.visibilityRules) : null,
-      input.availabilityRules ? JSON.stringify(input.availabilityRules) : null,
-      input.customFields ? JSON.stringify(input.customFields) : null,
-      input.createdBy || null,
+      v.name,
+      v.code,
+      v.description,
+      v.shortDescription,
+      v.isActive,
+      v.isPublic,
+      v.isDefault,
+      v.priority,
+      v.level,
+      v.trialDays,
+      v.priceCents,
+      v.salePriceCents,
+      v.setupFeeCents,
+      v.currencyCode,
+      v.billingCycle,
+      v.billingPeriod,
+      v.maxMembers,
+      v.autoRenew,
+      v.duration,
+      v.gracePeriodsAllowed,
+      v.gracePeriodDays,
+      v.membershipImage,
+      v.publicDetails,
+      v.privateMeta,
+      v.visibilityRules,
+      v.availabilityRules,
+      v.customFields,
+      v.createdBy,
     ],
   );
-
-  if (!result) {
-    throw new FailedToCreateMembershipError('Failed to create membership plan');
-  }
-
-  return toPlan(result);
 }
 
 /**

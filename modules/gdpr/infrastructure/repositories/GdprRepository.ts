@@ -32,39 +32,8 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
   }
 
   async findAll(filters?: GdprRequestFilters, pagination?: PaginationOptions): Promise<PaginatedResult<GdprDataRequest>> {
-    const conditions: string[] = [];
-    const params: unknown[] = [];
-    let paramIndex = 1;
+    const { whereClause, params } = this.buildFilters(filters);
 
-    if (filters?.customerId) {
-      conditions.push(`"customerId" = $${paramIndex++}`);
-      params.push(filters.customerId);
-    }
-    if (filters?.requestType) {
-      conditions.push(`"requestType" = $${paramIndex++}`);
-      params.push(filters.requestType);
-    }
-    if (filters?.status) {
-      conditions.push(`"status" = $${paramIndex++}`);
-      params.push(filters.status);
-    }
-    if (filters?.isOverdue) {
-      conditions.push(`"deadlineAt" < NOW() AND "status" IN ('pending', 'processing')`);
-    }
-    if (filters?.createdAfter) {
-      conditions.push(`"createdAt" >= $${paramIndex++}`);
-      params.push(filters.createdAfter.toISOString());
-    }
-    if (filters?.createdBefore) {
-      conditions.push(`"createdAt" <= $${paramIndex++}`);
-      params.push(filters.createdBefore.toISOString());
-    }
-    if (filters?.processedBy) {
-      conditions.push(`"processedBy" = $${paramIndex++}`);
-      params.push(filters.processedBy);
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const limit = pagination?.limit || 20;
     const offset = pagination?.offset || 0;
     const orderBy = pagination?.orderBy || 'createdAt';
@@ -76,7 +45,7 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
     const rows = await query<DbGdprDataRequest[]>(
       `SELECT * FROM "gdprDataRequest" ${whereClause} 
        ORDER BY "${orderBy}" ${orderDir.toUpperCase()}
-       LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
       [...params, limit, offset],
     );
 
@@ -88,6 +57,37 @@ export class GdprDataRequestRepo implements GdprDataRequestRepository {
       hasMore: offset + limit < total,
       length: (rows || []).length,
     };
+  }
+
+  private buildFilters(filters?: GdprRequestFilters): { whereClause: string; params: unknown[] } {
+    const b = { conditions: [] as string[], params: [] as unknown[] };
+
+    this.addEquality(b, '"customerId"', filters?.customerId);
+    this.addEquality(b, '"requestType"', filters?.requestType);
+    this.addEquality(b, '"status"', filters?.status);
+    if (filters?.isOverdue) {
+      b.conditions.push(`"deadlineAt" < NOW() AND "status" IN ('pending', 'processing')`);
+    }
+    if (filters?.createdAfter) {
+      b.conditions.push(`"createdAt" >= $${b.params.length + 1}`);
+      b.params.push(filters.createdAfter.toISOString());
+    }
+    if (filters?.createdBefore) {
+      b.conditions.push(`"createdAt" <= $${b.params.length + 1}`);
+      b.params.push(filters.createdBefore.toISOString());
+    }
+    this.addEquality(b, '"processedBy"', filters?.processedBy);
+
+    return {
+      whereClause: b.conditions.length > 0 ? `WHERE ${b.conditions.join(' AND ')}` : '',
+      params: b.params,
+    };
+  }
+
+  private addEquality(b: { conditions: string[]; params: unknown[] }, column: string, value: string | undefined): void {
+    if (!value) return;
+    b.conditions.push(`${column} = $${b.params.length + 1}`);
+    b.params.push(value);
   }
 
   async save(request: GdprDataRequest): Promise<GdprDataRequest> {
