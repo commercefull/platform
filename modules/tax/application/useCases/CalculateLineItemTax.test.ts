@@ -45,15 +45,15 @@ describe('CalculateLineItemTaxUseCase', () => {
     const result = await useCase.execute(command);
 
     expect(result).toEqual({ complex: true });
-    expect(port.calculateComplexTax).toHaveBeenCalledWith(
-      [expect.objectContaining({ product_id: 'p1', quantity: 2, priceCents: 1000 })],
-      expect.objectContaining({ country: 'US' }),
-      expect.objectContaining({ country: 'US' }),
-      2000,
-      0,
-      undefined,
-      undefined,
-    );
+    expect(port.calculateComplexTax).toHaveBeenCalledWith({
+      items: [expect.objectContaining({ product_id: 'p1', quantity: 2, priceCents: 1000 })],
+      shippingAddress: expect.objectContaining({ country: 'US' }),
+      billingAddress: expect.objectContaining({ country: 'US' }),
+      subtotalCents: 2000,
+      shippingAmountCents: 0,
+      customerId: undefined,
+      organizationId: undefined,
+    });
   });
 
   it('should throw TaxValidationError when required fields are missing', async () => {

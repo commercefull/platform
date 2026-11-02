@@ -18,8 +18,8 @@ export class InternalRuleTaxEngine implements TaxEnginePort {
 
   async calculateQuote(context: TaxTransactionContext): Promise<TaxDecision> {
     const response = await this.calculateOrderTax.execute(
-      new CalculateOrderTaxCommand(
-        context.lines.map(line => ({
+      new CalculateOrderTaxCommand({
+        items: context.lines.map(line => ({
           productId: line.productId,
           name: line.name,
           quantity: line.quantity,
@@ -27,22 +27,22 @@ export class InternalRuleTaxEngine implements TaxEnginePort {
           taxCategoryId: line.taxCategoryId,
           taxable: line.taxable,
         })),
-        context.shipToAddress,
-        context.shippingAmountCents ?? 0,
-        context.buyerCustomerId,
-        context.pricesIncludeTax,
-        context.vatNumber,
-        context.sellerOrganizationId,
-        context.shipFromAddress?.country,
-        context.buyerType,
-        context.shipFromAddress,
-        context.billToAddress,
-        context.incoterms,
-        context.transactionTimestamp,
-        context.marketId,
-        context.channelId,
-        context.currencyCode,
-      ),
+        shippingAddress: context.shipToAddress,
+        shippingAmountCents: context.shippingAmountCents ?? 0,
+        customerId: context.buyerCustomerId,
+        pricesIncludeTax: context.pricesIncludeTax,
+        vatNumber: context.vatNumber,
+        organizationId: context.sellerOrganizationId,
+        originCountry: context.shipFromAddress?.country,
+        buyerType: context.buyerType,
+        shipFromAddress: context.shipFromAddress,
+        billToAddress: context.billToAddress,
+        incoterms: context.incoterms,
+        transactionTimestamp: context.transactionTimestamp,
+        marketId: context.marketId,
+        channelId: context.channelId,
+        currencyCode: context.currencyCode,
+      }),
     );
 
     const lineItems: TaxDecisionLine[] = response.lineItems.map(line => ({

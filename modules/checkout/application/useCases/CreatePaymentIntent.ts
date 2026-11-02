@@ -47,34 +47,35 @@ export interface CreatePaymentIntentResponse {
     unitPriceCents: number;
   }>;
 }
+export interface CreatePaymentIntentUseCaseDeps {
+  checkoutRepository: CheckoutRepository;
+  basketSnapshotPort: BasketSnapshotPort;
+  orderPlacementPort: OrderPlacementPort;
+  paymentAuthorizationPort: PaymentAuthorizationPort;
+  fraudScreeningPort?: FraudScreeningPort;
+  inventoryReservationPort?: InventoryReservationPort;
+  taxQuotePort?: TaxQuotePort;
+  promotionQuotePort?: PromotionQuotePort;
+  loyaltyRedemptionPort?: LoyaltyRedemptionPort;
+  storeContextPort?: StoreContextPort;
+}
 
 // ============================================================================
 // Use Case
 // ============================================================================
 
 export class CreatePaymentIntentUseCase {
-  constructor(
-    private readonly checkoutRepository: CheckoutRepository,
-    private readonly basketSnapshotPort: BasketSnapshotPort,
-    private readonly orderPlacementPort: OrderPlacementPort,
-    private readonly paymentAuthorizationPort: PaymentAuthorizationPort,
-    private readonly fraudScreeningPort?: FraudScreeningPort,
-    private readonly inventoryReservationPort?: InventoryReservationPort,
-    private readonly taxQuotePort?: TaxQuotePort,
-    private readonly promotionQuotePort?: PromotionQuotePort,
-    private readonly loyaltyRedemptionPort?: LoyaltyRedemptionPort,
-    private readonly storeContextPort?: StoreContextPort,
-  ) {}
+  constructor(private readonly deps: CreatePaymentIntentUseCaseDeps) {}
 
   async execute(command: CreatePaymentIntentCommand): Promise<CreatePaymentIntentResponse> {
-    const session = await this.checkoutRepository.findById(command.checkoutId);
+    const session = await this.deps.checkoutRepository.findById(command.checkoutId);
     if (!session) {
       throw new CheckoutSessionNotFoundError(command.checkoutId);
     }
 
     // Idempotency: already in pending_payment with a payment intent
     if (session.status === 'pending_payment' && session.paymentIntentId && session.orderId) {
-      const existingOrder = await this.orderPlacementPort.findOrder(session.orderId);
+      const existingOrder = await this.deps.orderPlacementPort.findOrder(session.orderId);
       return {
         orderId: session.orderId,
         orderNumber: existingOrder?.orderNumber || '',
@@ -91,7 +92,7 @@ export class CreatePaymentIntentUseCase {
 
     // Load basket items — the snapshot port performs an authoritative
     // requote, so these prices reflect current pricing rules.
-    const basket = await this.basketSnapshotPort.getSnapshot(session.basketId);
+    const basket = await this.deps.basketSnapshotPort.getSnapshot(session.basketId);
     if (!basket) {
       throw new CheckoutValidationError('Basket not found');
     }
@@ -133,9 +134,9 @@ export class CreatePaymentIntentUseCase {
     // `'AUTO_PROMOTION'` remains as a legacy marker for sessions persisted
     // before structured `appliedPromotions` existed.
     const hasEnginePromotions = session.appliedPromotions.length > 0 || session.couponCode === 'AUTO_PROMOTION';
-    if (this.promotionQuotePort && hasEnginePromotions) {
+    if (this.deps.promotionQuotePort && hasEnginePromotions) {
       try {
-        const promoResult = await this.promotionQuotePort.evaluatePromotions({
+        const promoResult = await this.deps.promotionQuotePort.evaluatePromotions({
           items: basketItems.map(item => ({
             productId: item.productId,
             productVariantId: item.productVariantId,
@@ -179,14 +180,15 @@ export class CreatePaymentIntentUseCase {
     // from the basket requote and shipping-tax changes since the quote taken
     // when the shipping address was set (a shipping method may have been
     // selected afterwards).
-    if (this.taxQuotePort && session.shippingAddress) {
+    if (this.deps.taxQuotePort && session.shippingAddress) {
       let taxAmount = session.taxAmount;
       let taxIncluded = session.taxIncludedInSubtotal;
       let taxAdded = session.taxAddedAmount;
       try {
-        const settings = await this.taxQuotePort.getTaxSettings('default');
-        const storeContext = basket.storeId && this.storeContextPort ? await this.storeContextPort.getStoreContext(basket.storeId) : null;
-        const taxResult = await this.taxQuotePort.calculateTax({
+        const settings = await this.deps.taxQuotePort.getTaxSettings('default');
+        const storeContext =
+          basket.storeId && this.deps.storeContextPort ? await this.deps.storeContextPort.getStoreContext(basket.storeId) : null;
+        const taxResult = await this.deps.taxQuotePort.calculateTax({
           items: basketItems.map(item => ({
             productId: item.productId,
             name: item.name,
@@ -234,7 +236,7 @@ export class CreatePaymentIntentUseCase {
       totalsChanged = true;
     }
     if (totalsChanged) {
-      await this.checkoutRepository.save(session);
+      await this.deps.checkoutRepository.save(session);
     }
 
     // Determine customer email
@@ -342,7 +344,7 @@ export class CreatePaymentIntentUseCase {
     // Create order in PAYMENT_PENDING status — or resume the order a prior
     // attempt already placed (its id was attached to the session). A
     // cancelled order from a failed attempt is superseded by a fresh one.
-    let orderResponse: OrderSnapshot | null = session.orderId ? await this.orderPlacementPort.findOrder(session.orderId) : null;
+    let orderResponse: OrderSnapshot | null = session.orderId ? await this.deps.orderPlacementPort.findOrder(session.orderId) : null;
     if (orderResponse?.status === 'cancelled') {
       orderResponse = null;
     }
@@ -356,7 +358,7 @@ export class CreatePaymentIntentUseCase {
           }
         | undefined;
 
-      orderResponse = await this.orderPlacementPort.createOrder({
+      orderResponse = await this.deps.orderPlacementPort.createOrder({
         customerId: session.customerId,
         customerEmail,
         items: orderItems,
@@ -406,20 +408,20 @@ export class CreatePaymentIntentUseCase {
       // Persist the order linkage immediately — a crash after this point
       // must not re-place the order on retry.
       session.attachOrder(orderResponse.orderId);
-      await this.checkoutRepository.save(session);
+      await this.deps.checkoutRepository.save(session);
     }
 
     // Transition order to PAYMENT_PENDING (skipped when a resumed order is
     // already there — the order state machine rejects same-state moves).
     if (orderResponse.status !== 'pending_payment') {
-      await this.orderPlacementPort.updateOrderStatus(orderResponse.orderId, 'pending_payment' as CheckoutOutcome);
+      await this.deps.orderPlacementPort.updateOrderStatus(orderResponse.orderId, 'pending_payment' as CheckoutOutcome);
     }
 
     // Reserve tracked physical stock while payment is pending. Digital and
     // unlimited items never consume stock; backorderable items always
     // reserve fully. A tracked shortfall cancels the pending order.
-    if (this.inventoryReservationPort) {
-      const reservation = await this.inventoryReservationPort.reserveForOrder({
+    if (this.deps.inventoryReservationPort) {
+      const reservation = await this.deps.inventoryReservationPort.reserveForOrder({
         orderId: orderResponse.orderId,
         storeId: basket.storeId,
         channelId: basket.channelId,
@@ -437,8 +439,8 @@ export class CreatePaymentIntentUseCase {
         const shortfalls = reservation.shortfalls
           .map(s => `${s.productId} (requested ${s.requestedQuantity}, reserved ${s.reservedQuantity})`)
           .join(', ');
-        await this.orderPlacementPort.cancelOrder(orderResponse.orderId, 'insufficient_stock');
-        await this.inventoryReservationPort.releaseForOrder(orderResponse.orderId, 'cancelled');
+        await this.deps.orderPlacementPort.cancelOrder(orderResponse.orderId, 'insufficient_stock');
+        await this.deps.inventoryReservationPort.releaseForOrder(orderResponse.orderId, 'cancelled');
         throw new CheckoutValidationError(`Insufficient stock to fulfill the order: ${shortfalls}`);
       }
     }
@@ -449,9 +451,9 @@ export class CreatePaymentIntentUseCase {
 
     // Fraud screening (Epic G): screen the order before authorizing payment.
     // Blocked orders fail immediately. Review orders are flagged but proceed.
-    if (this.fraudScreeningPort) {
+    if (this.deps.fraudScreeningPort) {
       try {
-        const fraudScreeningResult = await this.fraudScreeningPort.screenOrder({
+        const fraudScreeningResult = await this.deps.fraudScreeningPort.screenOrder({
           checkoutId: session.id,
           orderId: orderResponse.orderId,
           customerId: session.customerId,
@@ -467,8 +469,8 @@ export class CreatePaymentIntentUseCase {
 
         if (fraudScreeningResult.decision === 'blocked') {
           // Mark order as blocked and fail before payment authorization
-          await this.orderPlacementPort.cancelOrder(orderResponse.orderId, 'fraud_blocked');
-          await this.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
+          await this.deps.orderPlacementPort.cancelOrder(orderResponse.orderId, 'fraud_blocked');
+          await this.deps.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
           eventBus.emit('checkout.fraud_blocked', {
             checkoutId: session.id,
             orderId: orderResponse.orderId,
@@ -498,17 +500,17 @@ export class CreatePaymentIntentUseCase {
     // Debit loyalty points for the applied reward once an order exists —
     // idempotent per orderId, so a retried intent does not double-debit.
     // A failed debit cancels the order; restore happens via order.cancelled.
-    if (this.loyaltyRedemptionPort && session.loyaltyRewardId && session.loyaltyPointsRedeemed > 0 && session.customerId) {
+    if (this.deps.loyaltyRedemptionPort && session.loyaltyRewardId && session.loyaltyPointsRedeemed > 0 && session.customerId) {
       try {
-        await this.loyaltyRedemptionPort.redeemPoints({
+        await this.deps.loyaltyRedemptionPort.redeemPoints({
           customerId: session.customerId,
           points: session.loyaltyPointsRedeemed,
           orderId: orderResponse.orderId,
           rewardId: session.loyaltyRewardId,
         });
       } catch (err) {
-        await this.orderPlacementPort.cancelOrder(orderResponse.orderId, 'loyalty_redemption_failed');
-        await this.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
+        await this.deps.orderPlacementPort.cancelOrder(orderResponse.orderId, 'loyalty_redemption_failed');
+        await this.deps.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
         throw new CheckoutValidationError(`Loyalty points could not be redeemed: ${err instanceof Error ? err.message : String(err)}`);
       }
     }
@@ -517,7 +519,7 @@ export class CreatePaymentIntentUseCase {
     try {
       const delegatedCredential = session.metadata?.delegatedPaymentCredential as
         { provider: string; credentialType: string; token: string } | undefined;
-      const paymentResponse = await this.paymentAuthorizationPort.initiatePayment({
+      const paymentResponse = await this.deps.paymentAuthorizationPort.initiatePayment({
         orderId: orderResponse.orderId,
         amountCents: session.total.cents,
         currency: session.total.currency,
@@ -529,14 +531,14 @@ export class CreatePaymentIntentUseCase {
     } catch (err: unknown) {
       // Payment could not be initiated — release the stock reservation so
       // abandoned intents do not hold inventory.
-      await this.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
+      await this.deps.inventoryReservationPort?.releaseForOrder(orderResponse.orderId, 'cancelled');
       const cause = err instanceof Error ? err : new Error(String(err));
       throw Object.assign(new Error((err as Error).message || 'No payment gateway configured'), { cause });
     }
 
     // Persist orderId + paymentIntentId on session
     session.setPaymentIntent(transactionId, orderResponse.orderId);
-    await this.checkoutRepository.save(session);
+    await this.deps.checkoutRepository.save(session);
 
     // Emit checkout.payment_initiated
     eventBus.emit('checkout.payment_initiated', {

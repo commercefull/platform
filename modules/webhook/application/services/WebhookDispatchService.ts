@@ -151,27 +151,27 @@ export class WebhookDispatchService {
       if (response.ok) {
         delivery.recordSuccess(response.status, responseBody, durationMs);
       } else {
-        delivery.recordFailure(
-          `HTTP ${response.status}`,
-          response.status,
+        delivery.recordFailure({
+          errorMessage: `HTTP ${response.status}`,
+          responseStatus: response.status,
           responseBody,
           durationMs,
-          endpoint.retryPolicy.maxRetries,
-          endpoint.retryPolicy.retryIntervalMs,
-          endpoint.retryPolicy.backoffMultiplier,
-        );
+          maxRetries: endpoint.retryPolicy.maxRetries,
+          retryIntervalMs: endpoint.retryPolicy.retryIntervalMs,
+          backoffMultiplier: endpoint.retryPolicy.backoffMultiplier,
+        });
       }
     } catch (error: unknown) {
       const durationMs = Date.now() - startTime;
-      delivery.recordFailure(
-        (error as Error).message || 'Network error',
-        null,
-        null,
+      delivery.recordFailure({
+        errorMessage: (error as Error).message || 'Network error',
+        responseStatus: null,
+        responseBody: null,
         durationMs,
-        endpoint.retryPolicy.maxRetries,
-        endpoint.retryPolicy.retryIntervalMs,
-        endpoint.retryPolicy.backoffMultiplier,
-      );
+        maxRetries: endpoint.retryPolicy.maxRetries,
+        retryIntervalMs: endpoint.retryPolicy.retryIntervalMs,
+        backoffMultiplier: endpoint.retryPolicy.backoffMultiplier,
+      });
     } finally {
       clearTimeout(timeout);
     }

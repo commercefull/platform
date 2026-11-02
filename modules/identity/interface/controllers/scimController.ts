@@ -73,7 +73,14 @@ export class ScimController {
 
       const entries = await this.scimUseCase.listUsers(organizationId);
       const resources: ScimUser[] = entries.map(({ record, user }) =>
-        this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+        this.toScimUser({
+          scimUserId: record.recordId,
+          user,
+          active: record.isActive,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+          externalId: record.externalId,
+        }),
       );
 
       jsonResponse(res, 200, {
@@ -107,7 +114,14 @@ export class ScimController {
       jsonResponse(
         res,
         200,
-        this.toScimUser(record.recordId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+        this.toScimUser({
+          scimUserId: record.recordId,
+          user,
+          active: record.isActive,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+          externalId: record.externalId,
+        }),
       );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
@@ -150,7 +164,14 @@ export class ScimController {
       jsonResponse(
         res,
         201,
-        this.toScimUser(record.scimUserId, user, record.isActive, record.createdAt, record.updatedAt, record.externalId),
+        this.toScimUser({
+          scimUserId: record.scimUserId,
+          user,
+          active: record.isActive,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+          externalId: record.externalId,
+        }),
       );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
@@ -186,7 +207,14 @@ export class ScimController {
       jsonResponse(
         res,
         200,
-        this.toScimUser(updatedRecord.scimUserId, user, active, updatedRecord.createdAt, updatedRecord.updatedAt, updatedRecord.externalId),
+        this.toScimUser({
+          scimUserId: updatedRecord.scimUserId,
+          user,
+          active,
+          createdAt: updatedRecord.createdAt,
+          updatedAt: updatedRecord.updatedAt,
+          externalId: updatedRecord.externalId,
+        }),
       );
     } catch (error) {
       if (error instanceof ScimAuthenticationError) {
@@ -248,14 +276,15 @@ export class ScimController {
     }
   }
 
-  private toScimUser(
-    scimUserId: string,
-    user: { id: string; email: string; name?: string; firstName?: string; lastName?: string; isActive: boolean },
-    active: boolean | null,
-    createdAt: Date | null,
-    updatedAt: Date | null,
-    externalId?: string | null,
-  ): ScimUser {
+  private toScimUser(params: {
+    scimUserId: string;
+    user: { id: string; email: string; name?: string; firstName?: string; lastName?: string; isActive: boolean };
+    active: boolean | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+    externalId?: string | null;
+  }): ScimUser {
+    const { scimUserId, user, active, createdAt, updatedAt, externalId } = params;
     return {
       schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
       id: scimUserId,

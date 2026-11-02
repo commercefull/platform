@@ -85,25 +85,20 @@ export const createContentPage = async (req: HttpRequest, res: HttpResponse): Pr
     isHomePage?: string;
   };
 
-  const command = new CreatePageCommand(
-    title, // 1. title
-    slug, // 2. slug
-    contentTypeId, // 3. contentTypeId
-    templateId || undefined, // 4. templateId
-    status as 'draft' | 'published' | 'scheduled' | 'archived', // 5. status
-    visibility as 'public' | 'private' | 'passwordProtected', // 6. visibility
-    summary || undefined, // 7. summary
-    featuredImage || undefined, // 8. featuredImage
-    undefined, // 9. parentId (not implemented yet)
-    metaTitle || undefined, // 10. metaTitle
-    metaDescription || undefined, // 11. metaDescription
-    metaKeywords || undefined, // 12. metaKeywords
-    undefined, // 13. customFields (not implemented yet)
-    undefined, // 14. publishedAt (handled by status)
-    undefined, // 15. scheduledAt (not implemented yet)
-    isHomePage === 'true', // 16. isHomePage
-    undefined, // 17. createdBy (not implemented yet)
-  );
+  const command = new CreatePageCommand({
+    title: title,
+    slug: slug,
+    contentTypeId: contentTypeId,
+    templateId: templateId || undefined,
+    status: status as 'draft' | 'published' | 'scheduled' | 'archived',
+    visibility: visibility as 'public' | 'private' | 'passwordProtected',
+    summary: summary || undefined,
+    featuredImage: featuredImage || undefined,
+    metaTitle: metaTitle || undefined,
+    metaDescription: metaDescription || undefined,
+    metaKeywords: metaKeywords || undefined,
+    isHomePage: isHomePage === 'true',
+  });
 
   const result = await createPageUseCase.execute(command);
 
@@ -194,23 +189,20 @@ export const updateContentPage = async (req: HttpRequest, res: HttpResponse): Pr
   if (accessPassword !== undefined) updates.accessPassword = accessPassword || undefined;
   if (isHomePage !== undefined) updates.isHomePage = isHomePage === 'true';
 
-  const command = new UpdatePageCommand(
-    pageId,
-    updates.title as string | undefined,
-    updates.slug as string | undefined,
-    updates.templateId as string | undefined,
-    updates.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
-    updates.visibility as 'public' | 'private' | 'passwordProtected' | undefined,
-    updates.summary as string | undefined,
-    updates.featuredImage as string | undefined,
-    updates.metaTitle as string | undefined,
-    updates.metaDescription as string | undefined,
-    updates.metaKeywords as string | undefined,
-    undefined,
-    undefined,
-    undefined,
-    updates.isHomePage as boolean | undefined,
-  );
+  const command = new UpdatePageCommand({
+    pageId: pageId,
+    title: updates.title as string | undefined,
+    slug: updates.slug as string | undefined,
+    templateId: updates.templateId as string | undefined,
+    status: updates.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
+    visibility: updates.visibility as 'public' | 'private' | 'passwordProtected' | undefined,
+    summary: updates.summary as string | undefined,
+    featuredImage: updates.featuredImage as string | undefined,
+    metaTitle: updates.metaTitle as string | undefined,
+    metaDescription: updates.metaDescription as string | undefined,
+    metaKeywords: updates.metaKeywords as string | undefined,
+    isHomePage: updates.isHomePage as boolean | undefined,
+  });
   await updatePageUseCase.execute(command);
 
   redirectResponse(res, `/hub/content/pages/${pageId}?success=Content page updated successfully`);

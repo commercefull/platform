@@ -7,7 +7,7 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     const result = await new CreateCouponUseCase(repository).execute(
-      new CreateCouponCommand('SAVE10', '10% Off', 'percentage', 10, 'admin-1'),
+      new CreateCouponCommand({ code: 'SAVE10', name: '10% Off', type: 'percentage', value: 10, createdBy: 'admin-1' }),
     );
 
     expect(result.couponId).toBe('test-uuid');
@@ -19,7 +19,7 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     const result = await new CreateCouponUseCase(repository).execute(
-      new CreateCouponCommand('save10', '10% Off', 'percentage', 10, 'admin-1'),
+      new CreateCouponCommand({ code: 'save10', name: '10% Off', type: 'percentage', value: 10, createdBy: 'admin-1' }),
     );
 
     expect(result.code).toBe('SAVE10');
@@ -29,7 +29,9 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(createCoupon());
 
     await expect(
-      new CreateCouponUseCase(repository).execute(new CreateCouponCommand('SAVE10', '10% Off', 'percentage', 10, 'admin-1')),
+      new CreateCouponUseCase(repository).execute(
+        new CreateCouponCommand({ code: 'SAVE10', name: '10% Off', type: 'percentage', value: 10, createdBy: 'admin-1' }),
+      ),
     ).rejects.toThrow(CouponCodeAlreadyExistsError);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -38,7 +40,9 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     await expect(
-      new CreateCouponUseCase(repository).execute(new CreateCouponCommand('SAVE10', '', 'percentage', 10, 'admin-1')),
+      new CreateCouponUseCase(repository).execute(
+        new CreateCouponCommand({ code: 'SAVE10', name: '', type: 'percentage', value: 10, createdBy: 'admin-1' }),
+      ),
     ).rejects.toThrow(CouponValidationError);
   });
 
@@ -46,7 +50,9 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     await expect(
-      new CreateCouponUseCase(repository).execute(new CreateCouponCommand('SAVE10', 'Big', 'percentage', 150, 'admin-1')),
+      new CreateCouponUseCase(repository).execute(
+        new CreateCouponCommand({ code: 'SAVE10', name: 'Big', type: 'percentage', value: 150, createdBy: 'admin-1' }),
+      ),
     ).rejects.toThrow(CouponValidationError);
   });
 
@@ -54,7 +60,9 @@ describe('CreateCouponUseCase', () => {
     const repository = createCouponRepository(null);
 
     await expect(
-      new CreateCouponUseCase(repository).execute(new CreateCouponCommand('SAVE10', 'Flat', 'fixed_amount', 10, 'admin-1')),
+      new CreateCouponUseCase(repository).execute(
+        new CreateCouponCommand({ code: 'SAVE10', name: 'Flat', type: 'fixed_amount', value: 10, createdBy: 'admin-1' }),
+      ),
     ).rejects.toThrow(CouponValidationError);
   });
 
@@ -63,7 +71,14 @@ describe('CreateCouponUseCase', () => {
 
     await expect(
       new CreateCouponUseCase(repository).execute(
-        new CreateCouponCommand('SAVE10', 'Multi', 'percentage', 10, 'admin-1', undefined, undefined, undefined, undefined, 'multi_use'),
+        new CreateCouponCommand({
+          code: 'SAVE10',
+          name: 'Multi',
+          type: 'percentage',
+          value: 10,
+          createdBy: 'admin-1',
+          usageType: 'multi_use',
+        }),
       ),
     ).rejects.toThrow(CouponValidationError);
   });

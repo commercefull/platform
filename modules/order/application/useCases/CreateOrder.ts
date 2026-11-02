@@ -60,90 +60,191 @@ export interface AddressInput {
   phone?: string;
   email?: string;
 }
+export interface CreateOrderCommandProps {
+  customerId: string | undefined;
+  customerEmail: string | undefined;
+  items: OrderItemInput[];
+  shippingAddress?: AddressInput;
+  billingAddress?: AddressInput;
+  basketId?: string;
+  storeId?: string;
+  channelId?: string;
+  createdByUserId?: string;
+  orderSource?: string;
+  currencyCode?: string;
+  customerPhone?: string;
+  customerName?: string;
+  customerNotes?: string;
+  /** Shipping total in integer cents. */
+  shippingTotalCents?: number;
+  hasGiftWrapping?: boolean;
+  giftMessage?: string;
+  isGift?: boolean;
+  ipAddress?: string;
+  userAgent?: string;
+  referralSource?: string;
+  metadata?: Record<string, unknown>;
+  /**
+   * Allows orders without customerEmail and shippingAddress.
+   * Used by back-office/POS order creation where walk-in sales
+   * have no customer contact details. Customer-facing callers
+   * must keep this false.
+   */
+  allowGuestOrder?: boolean;
+  /** Authoritative tax total in integer cents (e.g., a checkout tax quote). */
+  taxTotalCents?: number;
+  /**
+   * Portion of taxTotalCents added on top of the grand total — 0 for fully
+   * tax-inclusive quotes; defaults to the full total (exclusive) or zero
+   * (inclusive) when absent.
+   */
+  taxAddedToTotalCents?: number;
+  /** True when taxTotalCents is embedded in item prices (tax-inclusive pricing). */
+  taxIncludedInSubtotal?: boolean;
+  // ---- Global commerce context (resolved at the edge, snapshotted here) ----
+  marketId?: string;
+  localeCode?: string;
+  contractingEntityId?: string;
+  catalogCurrencyCode?: string;
+  displayedCurrencyCode?: string;
+  settlementCurrencyCode?: string;
+  accountingCurrencyCode?: string;
+  /** FX quotes applied during checkout — frozen on the order. */
+  exchangeRateSnapshot?: Array<{ fromCurrency: string; toCurrency: string; rate: number; asOf: string }>;
+  /** Named policy/rule versions active at decision time. */
+  versionSnapshot?: Record<string, string | undefined>;
+  /** Explainable decision records (tax, promotions, compliance). */
+  decisionLog?: unknown[];
+  /** Structured promotion-engine discounts → persisted to `orderDiscount`. */
+  appliedPromotions?: Array<{
+    promotionId?: string;
+    code?: string;
+    name?: string;
+    discountAmountCents: number;
+    targetId?: string;
+    ruleId?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
+  /** Tax engine line breakdown → persisted to `orderTax`. */
+  taxLines?: Array<{
+    orderItemId?: string;
+    taxType?: string;
+    name: string;
+    rate: number;
+    amountCents: number;
+    jurisdiction?: string;
+    taxProvider?: string;
+    isIncludedInPrice?: boolean;
+    taxRuleId?: string;
+    taxRegime?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
+}
 
 export class CreateOrderCommand {
-  constructor(
-    public readonly customerId: string | undefined,
-    public readonly customerEmail: string | undefined,
-    public readonly items: OrderItemInput[],
-    public readonly shippingAddress?: AddressInput,
-    public readonly billingAddress?: AddressInput,
-    public readonly basketId?: string,
-    public readonly storeId?: string,
-    public readonly channelId?: string,
-    public readonly createdByUserId?: string,
-    public readonly orderSource?: string,
-    public readonly currencyCode?: string,
-    public readonly customerPhone?: string,
-    public readonly customerName?: string,
-    public readonly customerNotes?: string,
-    /** Shipping total in integer cents. */
-    public readonly shippingTotalCents?: number,
-    public readonly hasGiftWrapping?: boolean,
-    public readonly giftMessage?: string,
-    public readonly isGift?: boolean,
-    public readonly ipAddress?: string,
-    public readonly userAgent?: string,
-    public readonly referralSource?: string,
-    public readonly metadata?: Record<string, unknown>,
-    /**
-     * Allows orders without customerEmail and shippingAddress.
-     * Used by back-office/POS order creation where walk-in sales
-     * have no customer contact details. Customer-facing callers
-     * must keep this false.
-     */
-    public readonly allowGuestOrder?: boolean,
-    /** Authoritative tax total in integer cents (e.g., a checkout tax quote). */
-    public readonly taxTotalCents?: number,
-    /**
-     * Portion of taxTotalCents added on top of the grand total — 0 for fully
-     * tax-inclusive quotes; defaults to the full total (exclusive) or zero
-     * (inclusive) when absent.
-     */
-    public readonly taxAddedToTotalCents?: number,
-    /** True when taxTotalCents is embedded in item prices (tax-inclusive pricing). */
-    public readonly taxIncludedInSubtotal?: boolean,
-    // ---- Global commerce context (resolved at the edge, snapshotted here) ----
-    public readonly marketId?: string,
-    public readonly localeCode?: string,
-    public readonly contractingEntityId?: string,
-    public readonly catalogCurrencyCode?: string,
-    public readonly displayedCurrencyCode?: string,
-    public readonly settlementCurrencyCode?: string,
-    public readonly accountingCurrencyCode?: string,
-    /** FX quotes applied during checkout — frozen on the order. */
-    public readonly exchangeRateSnapshot?: Array<{ fromCurrency: string; toCurrency: string; rate: number; asOf: string }>,
-    /** Named policy/rule versions active at decision time. */
-    public readonly versionSnapshot?: Record<string, string | undefined>,
-    /** Explainable decision records (tax, promotions, compliance). */
-    public readonly decisionLog?: unknown[],
-    /** Structured promotion-engine discounts → persisted to `orderDiscount`. */
-    public readonly appliedPromotions?: Array<{
-      promotionId?: string;
-      code?: string;
-      name?: string;
-      discountAmountCents: number;
-      targetId?: string;
-      ruleId?: string;
-      policyVersion?: string;
-      decisionInputs?: Record<string, unknown>;
-    }>,
-    /** Tax engine line breakdown → persisted to `orderTax`. */
-    public readonly taxLines?: Array<{
-      orderItemId?: string;
-      taxType?: string;
-      name: string;
-      rate: number;
-      amountCents: number;
-      jurisdiction?: string;
-      taxProvider?: string;
-      isIncludedInPrice?: boolean;
-      taxRuleId?: string;
-      taxRegime?: string;
-      policyVersion?: string;
-      decisionInputs?: Record<string, unknown>;
-    }>,
-  ) {}
+  public readonly customerId: string | undefined;
+  public readonly customerEmail: string | undefined;
+  public readonly items: OrderItemInput[];
+  public readonly shippingAddress?: AddressInput;
+  public readonly billingAddress?: AddressInput;
+  public readonly basketId?: string;
+  public readonly storeId?: string;
+  public readonly channelId?: string;
+  public readonly createdByUserId?: string;
+  public readonly orderSource?: string;
+  public readonly currencyCode?: string;
+  public readonly customerPhone?: string;
+  public readonly customerName?: string;
+  public readonly customerNotes?: string;
+  public readonly shippingTotalCents?: number;
+  public readonly hasGiftWrapping?: boolean;
+  public readonly giftMessage?: string;
+  public readonly isGift?: boolean;
+  public readonly ipAddress?: string;
+  public readonly userAgent?: string;
+  public readonly referralSource?: string;
+  public readonly metadata?: Record<string, unknown>;
+  public readonly allowGuestOrder?: boolean;
+  public readonly taxTotalCents?: number;
+  public readonly taxAddedToTotalCents?: number;
+  public readonly taxIncludedInSubtotal?: boolean;
+  public readonly marketId?: string;
+  public readonly localeCode?: string;
+  public readonly contractingEntityId?: string;
+  public readonly catalogCurrencyCode?: string;
+  public readonly displayedCurrencyCode?: string;
+  public readonly settlementCurrencyCode?: string;
+  public readonly accountingCurrencyCode?: string;
+  public readonly exchangeRateSnapshot?: Array<{ fromCurrency: string; toCurrency: string; rate: number; asOf: string }>;
+  public readonly versionSnapshot?: Record<string, string | undefined>;
+  public readonly decisionLog?: unknown[];
+  public readonly appliedPromotions?: Array<{
+    promotionId?: string;
+    code?: string;
+    name?: string;
+    discountAmountCents: number;
+    targetId?: string;
+    ruleId?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
+  public readonly taxLines?: Array<{
+    orderItemId?: string;
+    taxType?: string;
+    name: string;
+    rate: number;
+    amountCents: number;
+    jurisdiction?: string;
+    taxProvider?: string;
+    isIncludedInPrice?: boolean;
+    taxRuleId?: string;
+    taxRegime?: string;
+    policyVersion?: string;
+    decisionInputs?: Record<string, unknown>;
+  }>;
+
+  constructor(props: CreateOrderCommandProps) {
+    this.customerId = props.customerId;
+    this.customerEmail = props.customerEmail;
+    this.items = props.items;
+    this.shippingAddress = props.shippingAddress;
+    this.billingAddress = props.billingAddress;
+    this.basketId = props.basketId;
+    this.storeId = props.storeId;
+    this.channelId = props.channelId;
+    this.createdByUserId = props.createdByUserId;
+    this.orderSource = props.orderSource;
+    this.currencyCode = props.currencyCode;
+    this.customerPhone = props.customerPhone;
+    this.customerName = props.customerName;
+    this.customerNotes = props.customerNotes;
+    this.shippingTotalCents = props.shippingTotalCents;
+    this.hasGiftWrapping = props.hasGiftWrapping;
+    this.giftMessage = props.giftMessage;
+    this.isGift = props.isGift;
+    this.ipAddress = props.ipAddress;
+    this.userAgent = props.userAgent;
+    this.referralSource = props.referralSource;
+    this.metadata = props.metadata;
+    this.allowGuestOrder = props.allowGuestOrder;
+    this.taxTotalCents = props.taxTotalCents;
+    this.taxAddedToTotalCents = props.taxAddedToTotalCents;
+    this.taxIncludedInSubtotal = props.taxIncludedInSubtotal;
+    this.marketId = props.marketId;
+    this.localeCode = props.localeCode;
+    this.contractingEntityId = props.contractingEntityId;
+    this.catalogCurrencyCode = props.catalogCurrencyCode;
+    this.displayedCurrencyCode = props.displayedCurrencyCode;
+    this.settlementCurrencyCode = props.settlementCurrencyCode;
+    this.accountingCurrencyCode = props.accountingCurrencyCode;
+    this.exchangeRateSnapshot = props.exchangeRateSnapshot;
+    this.versionSnapshot = props.versionSnapshot;
+    this.decisionLog = props.decisionLog;
+    this.appliedPromotions = props.appliedPromotions;
+    this.taxLines = props.taxLines;
+  }
 }
 
 // ============================================================================

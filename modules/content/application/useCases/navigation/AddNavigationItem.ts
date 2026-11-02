@@ -7,24 +7,55 @@ import type { IContentNavigationRepository } from '../../../domain/repositories/
 import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { NavigationMenuNotFoundError, ContentPageNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface AddNavigationItemCommandProps {
+  navigationId: string;
+  title: string;
+  type: 'url' | 'page' | 'category' | 'product' | 'blog';
+  parentId?: string;
+  url?: string;
+  contentPageId?: string;
+  targetId?: string;
+  targetSlug?: string;
+  icon?: string;
+  cssClasses?: string;
+  openInNewTab?: boolean;
+  isActive?: boolean;
+  sortOrder?: number;
+  conditions?: Record<string, unknown>;
+}
 
 export class AddNavigationItemCommand {
-  constructor(
-    public readonly navigationId: string,
-    public readonly title: string,
-    public readonly type: 'url' | 'page' | 'category' | 'product' | 'blog',
-    public readonly parentId?: string,
-    public readonly url?: string,
-    public readonly contentPageId?: string,
-    public readonly targetId?: string,
-    public readonly targetSlug?: string,
-    public readonly icon?: string,
-    public readonly cssClasses?: string,
-    public readonly openInNewTab?: boolean,
-    public readonly isActive?: boolean,
-    public readonly sortOrder?: number,
-    public readonly conditions?: Record<string, unknown>,
-  ) {}
+  public readonly navigationId: string;
+  public readonly title: string;
+  public readonly type: 'url' | 'page' | 'category' | 'product' | 'blog';
+  public readonly parentId?: string;
+  public readonly url?: string;
+  public readonly contentPageId?: string;
+  public readonly targetId?: string;
+  public readonly targetSlug?: string;
+  public readonly icon?: string;
+  public readonly cssClasses?: string;
+  public readonly openInNewTab?: boolean;
+  public readonly isActive?: boolean;
+  public readonly sortOrder?: number;
+  public readonly conditions?: Record<string, unknown>;
+
+  constructor(props: AddNavigationItemCommandProps) {
+    this.navigationId = props.navigationId;
+    this.title = props.title;
+    this.type = props.type;
+    this.parentId = props.parentId;
+    this.url = props.url;
+    this.contentPageId = props.contentPageId;
+    this.targetId = props.targetId;
+    this.targetSlug = props.targetSlug;
+    this.icon = props.icon;
+    this.cssClasses = props.cssClasses;
+    this.openInNewTab = props.openInNewTab;
+    this.isActive = props.isActive;
+    this.sortOrder = props.sortOrder;
+    this.conditions = props.conditions;
+  }
 }
 
 export interface NavigationItemResponse {

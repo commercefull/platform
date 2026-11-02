@@ -6,23 +6,52 @@
 import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface CreateTemplateCommandProps {
+  name: string;
+  slug: string;
+  description?: string;
+  thumbnail?: string;
+  htmlStructure?: string;
+  cssStyles?: string;
+  jsScripts?: string;
+  areas?: Record<string, unknown>;
+  defaultBlocks?: Record<string, unknown>;
+  compatibleContentTypes?: string[];
+  isSystem?: boolean;
+  isActive?: boolean;
+  createdBy?: string;
+}
 
 export class CreateTemplateCommand {
-  constructor(
-    public readonly name: string,
-    public readonly slug: string,
-    public readonly description?: string,
-    public readonly thumbnail?: string,
-    public readonly htmlStructure?: string,
-    public readonly cssStyles?: string,
-    public readonly jsScripts?: string,
-    public readonly areas?: Record<string, unknown>,
-    public readonly defaultBlocks?: Record<string, unknown>,
-    public readonly compatibleContentTypes?: string[],
-    public readonly isSystem?: boolean,
-    public readonly isActive?: boolean,
-    public readonly createdBy?: string,
-  ) {}
+  public readonly name: string;
+  public readonly slug: string;
+  public readonly description?: string;
+  public readonly thumbnail?: string;
+  public readonly htmlStructure?: string;
+  public readonly cssStyles?: string;
+  public readonly jsScripts?: string;
+  public readonly areas?: Record<string, unknown>;
+  public readonly defaultBlocks?: Record<string, unknown>;
+  public readonly compatibleContentTypes?: string[];
+  public readonly isSystem?: boolean;
+  public readonly isActive?: boolean;
+  public readonly createdBy?: string;
+
+  constructor(props: CreateTemplateCommandProps) {
+    this.name = props.name;
+    this.slug = props.slug;
+    this.description = props.description;
+    this.thumbnail = props.thumbnail;
+    this.htmlStructure = props.htmlStructure;
+    this.cssStyles = props.cssStyles;
+    this.jsScripts = props.jsScripts;
+    this.areas = props.areas;
+    this.defaultBlocks = props.defaultBlocks;
+    this.compatibleContentTypes = props.compatibleContentTypes;
+    this.isSystem = props.isSystem;
+    this.isActive = props.isActive;
+    this.createdBy = props.createdBy;
+  }
 }
 
 export interface TemplateResponse {

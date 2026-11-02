@@ -32,16 +32,17 @@ export interface CalculatePriceInput extends PriceContext {
   channelId?: string;
   storeId?: string;
 }
+export interface CalculatePriceUseCaseDeps {
+  currencyCatalog: CurrencyCatalogPort;
+  pricingData: PricingDataQueryPort;
+  pricingRules: PricingRuleQueryPort;
+  membershipBenefits: MembershipBenefitsPort;
+  loyaltyBalance: LoyaltyBalancePort;
+  convertPrice: ConvertPriceUseCase;
+}
 
 export class CalculatePriceUseCase {
-  constructor(
-    private readonly currencyCatalog: CurrencyCatalogPort,
-    private readonly pricingData: PricingDataQueryPort,
-    private readonly pricingRules: PricingRuleQueryPort,
-    private readonly membershipBenefits: MembershipBenefitsPort,
-    private readonly loyaltyBalance: LoyaltyBalancePort,
-    private readonly convertPrice: ConvertPriceUseCase,
-  ) {}
+  constructor(private readonly deps: CalculatePriceUseCaseDeps) {}
 
   async execute(input: CalculatePriceInput): Promise<PricingResult> {
     const { productId, priceListId } = input;
@@ -60,12 +61,12 @@ export class CalculatePriceUseCase {
     // Step 1: Resolve the base price (cents) from the pricing-owned store.
     // Prefer a row in the requested/default currency; fall back to any
     // currency and convert below.
-    const defaultCurrency = await this.currencyCatalog.getDefault();
+    const defaultCurrency = await this.deps.currencyCatalog.getDefault();
     const requestedCurrency = currencyCode || defaultCurrency?.code || 'USD';
 
     const basePrice =
-      (await this.pricingData.findEffectiveBasePrice(productId, variantId, requestedCurrency)) ||
-      (await this.pricingData.findEffectiveBasePrice(productId, variantId));
+      (await this.deps.pricingData.findEffectiveBasePrice(productId, variantId, requestedCurrency)) ||
+      (await this.deps.pricingData.findEffectiveBasePrice(productId, variantId));
 
     if (!basePrice) {
       throw new PricingValidationError(`No base price for product: ${productId}${variantId ? ` variant: ${variantId}` : ''}`);
@@ -87,7 +88,7 @@ export class CalculatePriceUseCase {
     let resolvedFromPriceList = false;
 
     if (resolvedPriceListId) {
-      const priceListItem = await this.pricingData.findPriceListItem(resolvedPriceListId, productId, variantId);
+      const priceListItem = await this.deps.pricingData.findPriceListItem(resolvedPriceListId, productId, variantId);
 
       if (priceListItem) {
         const previousPrice = currentPrice;
@@ -115,7 +116,7 @@ export class CalculatePriceUseCase {
     // no price list already resolved the price in the requested currency.
     const fxAllowed = input.allowDynamicFxConversion !== false;
     if (!resolvedFromPriceList && requestedCurrency !== priceCurrency && fxAllowed) {
-      const { convertedPriceCents, appliedRules: currencyRules } = await this.convertPrice.execute({
+      const { convertedPriceCents, appliedRules: currencyRules } = await this.deps.convertPrice.execute({
         priceCents: currentPrice,
         fromCurrencyCode: priceCurrency,
         toCurrencyCode: requestedCurrency,
@@ -130,7 +131,7 @@ export class CalculatePriceUseCase {
 
     // Step 3: Apply tier pricing (quantity discounts)
     if (quantity > 1) {
-      const tierPrice = await this.pricingData.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
+      const tierPrice = await this.deps.pricingData.findApplicableTier(productId, quantity, variantId, customerGroupIds[0]);
 
       if (tierPrice) {
         const previousPrice = currentPrice;
@@ -149,13 +150,13 @@ export class CalculatePriceUseCase {
     // Step 4: Apply customer-specific pricing
     if (customerId) {
       // Find price lists applicable to this customer
-      const priceLists = await this.pricingData.findPriceListsForCustomer(customerId, customerGroupIds);
+      const priceLists = await this.deps.pricingData.findPriceListsForCustomer(customerId, customerGroupIds);
 
       if (priceLists.length > 0) {
         const priceListIds = priceLists.map(list => list.id);
 
         // Find prices for this product in applicable price lists
-        const customerPrices = await this.pricingData.findPricesForProduct(productId, variantId, priceListIds);
+        const customerPrices = await this.deps.pricingData.findPricesForProduct(productId, variantId, priceListIds);
 
         if (customerPrices.length > 0) {
           // Apply the first applicable price (already sorted by priority)
@@ -187,7 +188,7 @@ export class CalculatePriceUseCase {
     }
 
     // Step 5: Apply dynamic pricing rules
-    const applicableRules = (await this.pricingRules.findActiveRules(productId, categoryIds[0], customerId, customerGroupIds)).filter(
+    const applicableRules = (await this.deps.pricingRules.findActiveRules(productId, categoryIds[0], customerId, customerGroupIds)).filter(
       rule => !excludeRuleIds.includes(rule.id ?? rule.pricingRuleId ?? ''),
     );
 
@@ -217,7 +218,7 @@ export class CalculatePriceUseCase {
     // Step 6: Apply membership benefits if applicable
     if (customerId) {
       try {
-        const membershipBenefits = await this.membershipBenefits.getDiscountBenefits(customerId, {
+        const membershipBenefits = await this.deps.membershipBenefits.getDiscountBenefits(customerId, {
           storeId: context.storeId,
           channelId: context.channelId,
           currencyCode: context.currencyCode,
@@ -250,7 +251,7 @@ export class CalculatePriceUseCase {
     // Step 7: Apply loyalty points discount if applicable
     if (customerId && additionalData.applyLoyaltyDiscount) {
       try {
-        const currentPoints = await this.loyaltyBalance.getCustomerPoints(customerId);
+        const currentPoints = await this.deps.loyaltyBalance.getCustomerPoints(customerId);
 
         // Default points-to-money ratio (e.g., 100 points = $1 → 1 cent/point)
         // This should ideally come from a configuration or settings

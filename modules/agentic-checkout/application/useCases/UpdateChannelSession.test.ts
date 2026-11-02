@@ -30,9 +30,13 @@ describe('UpdateChannelSessionUseCase', () => {
     sessionRepo.findById.mockResolvedValue(createSession());
 
     await useCase.execute(
-      new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, INTEGRATION_ID, undefined, undefined, {
-        email: 'b@x.com',
-        address: { line_one: '1 Main St', city: 'SF', country: 'US', postal_code: '94102' },
+      new UpdateChannelSessionCommand({
+        channelSessionId: CHANNEL_SESSION_ID,
+        integrationId: INTEGRATION_ID,
+        fulfillmentDetails: {
+          email: 'b@x.com',
+          address: { line_one: '1 Main St', city: 'SF', country: 'US', postal_code: '94102' },
+        },
       }),
     );
 
@@ -47,7 +51,13 @@ describe('UpdateChannelSessionUseCase', () => {
     const { useCase, sessionRepo, checkout } = makeUseCase();
     sessionRepo.findById.mockResolvedValue(createSession());
 
-    await useCase.execute(new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, INTEGRATION_ID, undefined, undefined, undefined, 'ship-9'));
+    await useCase.execute(
+      new UpdateChannelSessionCommand({
+        channelSessionId: CHANNEL_SESSION_ID,
+        integrationId: INTEGRATION_ID,
+        fulfillmentOptionId: 'ship-9',
+      }),
+    );
 
     expect(checkout.setShippingMethod).toHaveBeenCalledWith(expect.any(String), 'ship-9');
   });
@@ -85,10 +95,14 @@ describe('UpdateChannelSessionUseCase', () => {
     });
 
     await useCase.execute(
-      new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, INTEGRATION_ID, [
-        { id: PRODUCT_ID, quantity: 3 },
-        { id: 'prod-new', quantity: 1 },
-      ]),
+      new UpdateChannelSessionCommand({
+        channelSessionId: CHANNEL_SESSION_ID,
+        integrationId: INTEGRATION_ID,
+        items: [
+          { id: PRODUCT_ID, quantity: 3 },
+          { id: 'prod-new', quantity: 1 },
+        ],
+      }),
     );
 
     expect(checkout.updateItemQuantity).toHaveBeenCalledWith(BASKET_ID, 'bi-1', 3);
@@ -102,7 +116,13 @@ describe('UpdateChannelSessionUseCase', () => {
     catalog.findProducts.mockResolvedValue([]);
 
     await expect(
-      useCase.execute(new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, INTEGRATION_ID, [{ id: 'bad', quantity: 1 }])),
+      useCase.execute(
+        new UpdateChannelSessionCommand({
+          channelSessionId: CHANNEL_SESSION_ID,
+          integrationId: INTEGRATION_ID,
+          items: [{ id: 'bad', quantity: 1 }],
+        }),
+      ),
     ).rejects.toThrow(ChannelCatalogError);
   });
 
@@ -114,7 +134,13 @@ describe('UpdateChannelSessionUseCase', () => {
     sessionRepo.findById.mockResolvedValue(session);
 
     await expect(
-      useCase.execute(new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, INTEGRATION_ID, [{ id: 'p', quantity: 1 }])),
+      useCase.execute(
+        new UpdateChannelSessionCommand({
+          channelSessionId: CHANNEL_SESSION_ID,
+          integrationId: INTEGRATION_ID,
+          items: [{ id: 'p', quantity: 1 }],
+        }),
+      ),
     ).rejects.toThrow(ChannelSessionNotMutableError);
   });
 
@@ -122,8 +148,8 @@ describe('UpdateChannelSessionUseCase', () => {
     const { useCase, sessionRepo } = makeUseCase();
     sessionRepo.findById.mockResolvedValue(createSession());
 
-    await expect(useCase.execute(new UpdateChannelSessionCommand(CHANNEL_SESSION_ID, 'other-integration'))).rejects.toThrow(
-      ChannelSessionNotFoundError,
-    );
+    await expect(
+      useCase.execute(new UpdateChannelSessionCommand({ channelSessionId: CHANNEL_SESSION_ID, integrationId: 'other-integration' })),
+    ).rejects.toThrow(ChannelSessionNotFoundError);
   });
 });

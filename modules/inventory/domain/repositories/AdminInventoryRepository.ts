@@ -25,6 +25,19 @@ interface InventoryStats {
   outOfStock: number;
 }
 
+export interface AdjustStockLevelParams {
+  inventoryLevelId: string;
+  newQuantity: number;
+  previousQuantity: number;
+  productId: string;
+  locationId: string | undefined;
+  adjustmentType: string;
+  adjustmentQty: number;
+  reason: string;
+  notes: string | null;
+  userId: string;
+}
+
 export interface AdminInventoryRepository {
   findInventoryLevels(params: {
     search?: string;
@@ -39,18 +52,7 @@ export interface AdminInventoryRepository {
   findLowStockItems(limit: number): Promise<Record<string, string>[]>;
   findLowStockReport(): Promise<Record<string, string>[]>;
   findInventoryLevelById(id: string): Promise<Record<string, string> | null>;
-  adjustStockLevel(
-    inventoryLevelId: string,
-    newQuantity: number,
-    previousQuantity: number,
-    productId: string,
-    locationId: string | undefined,
-    adjustmentType: string,
-    adjustmentQty: number,
-    reason: string,
-    notes: string | null,
-    userId: string,
-  ): Promise<void>;
+  adjustStockLevel(params: AdjustStockLevelParams): Promise<void>;
   findTransactionsByLevelId(levelId: string, limit: number, offset: number): Promise<Record<string, string>[]>;
   countTransactionsByLevelId(levelId: string): Promise<number>;
   findLocationsWithStats(): Promise<Record<string, string>[]>;

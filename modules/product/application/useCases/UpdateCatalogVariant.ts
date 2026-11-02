@@ -7,22 +7,41 @@
 import type { CatalogVariantUpdateParams, CatalogVariantWritePort } from '../ports/CatalogVariantPort';
 import type { ProductPricingPort } from '../ports/ProductPricingPort';
 import type { CatalogVariantWithPrice } from './CreateCatalogVariant';
+export interface UpdateCatalogVariantCommandProps {
+  productId: string;
+  variantId: string;
+  variantFields: CatalogVariantUpdateParams;
+  priceCents?: number;
+  salePriceCents?: number;
+  compareAtPriceCents?: number;
+  costPriceCents?: number;
+  currencyCode?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class UpdateCatalogVariantCommand {
-  constructor(
-    public readonly productId: string,
-    public readonly variantId: string,
-    public readonly variantFields: CatalogVariantUpdateParams,
-    public readonly priceCents?: number,
-    public readonly salePriceCents?: number,
-    public readonly compareAtPriceCents?: number,
-    public readonly costPriceCents?: number,
-    public readonly currencyCode?: string,
-  ) {}
+  public readonly productId: string;
+  public readonly variantId: string;
+  public readonly variantFields: CatalogVariantUpdateParams;
+  public readonly priceCents?: number;
+  public readonly salePriceCents?: number;
+  public readonly compareAtPriceCents?: number;
+  public readonly costPriceCents?: number;
+  public readonly currencyCode?: string;
+
+  constructor(props: UpdateCatalogVariantCommandProps) {
+    this.productId = props.productId;
+    this.variantId = props.variantId;
+    this.variantFields = props.variantFields;
+    this.priceCents = props.priceCents;
+    this.salePriceCents = props.salePriceCents;
+    this.compareAtPriceCents = props.compareAtPriceCents;
+    this.costPriceCents = props.costPriceCents;
+    this.currencyCode = props.currencyCode;
+  }
 }
 
 // ============================================================================

@@ -70,14 +70,14 @@ export const paymentResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const command = new InitiatePaymentCommand(
-        args.orderId,
-        args.amountCents,
-        args.currency,
-        args.paymentMethodConfigId,
-        args.customerId,
-        args.customerIp,
-      );
+      const command = new InitiatePaymentCommand({
+        orderId: args.orderId,
+        amountCents: args.amountCents,
+        currency: args.currency,
+        paymentMethodConfigId: args.paymentMethodConfigId,
+        customerId: args.customerId,
+        customerIp: args.customerIp,
+      });
       return initiatePaymentUseCase.execute(command);
     },
 

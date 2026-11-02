@@ -23,7 +23,9 @@ describe('InitiatePaymentUseCase', () => {
   });
 
   it('should initiate payment (happy path)', async () => {
-    const result = await useCase.execute(new InitiatePaymentCommand('o1', 100, 'USD', 'pm-1'));
+    const result = await useCase.execute(
+      new InitiatePaymentCommand({ orderId: 'o1', amountCents: 100, currency: 'USD', paymentMethodConfigId: 'pm-1' }),
+    );
 
     expect(result.transactionId).toBe('txn-uuid');
     expect(result.orderId).toBe('o1');
@@ -32,17 +34,23 @@ describe('InitiatePaymentUseCase', () => {
   });
 
   it('should throw AmountMustBePositiveError for zero amountCents', async () => {
-    await expect(useCase.execute(new InitiatePaymentCommand('o1', 0, 'USD', 'pm-1'))).rejects.toThrow(AmountMustBePositiveError);
+    await expect(
+      useCase.execute(new InitiatePaymentCommand({ orderId: 'o1', amountCents: 0, currency: 'USD', paymentMethodConfigId: 'pm-1' })),
+    ).rejects.toThrow(AmountMustBePositiveError);
   });
 
   it('should throw AmountMustBePositiveError for negative amountCents', async () => {
-    await expect(useCase.execute(new InitiatePaymentCommand('o1', -10, 'USD', 'pm-1'))).rejects.toThrow(AmountMustBePositiveError);
+    await expect(
+      useCase.execute(new InitiatePaymentCommand({ orderId: 'o1', amountCents: -10, currency: 'USD', paymentMethodConfigId: 'pm-1' })),
+    ).rejects.toThrow(AmountMustBePositiveError);
   });
 
   it('should throw NoPaymentGatewayConfiguredError when no gateway', async () => {
     mockRepo.getDefaultGateway.mockResolvedValue(null);
 
-    await expect(useCase.execute(new InitiatePaymentCommand('o1', 100, 'USD', 'pm-1'))).rejects.toThrow(NoPaymentGatewayConfiguredError);
+    await expect(
+      useCase.execute(new InitiatePaymentCommand({ orderId: 'o1', amountCents: 100, currency: 'USD', paymentMethodConfigId: 'pm-1' })),
+    ).rejects.toThrow(NoPaymentGatewayConfiguredError);
   });
 
   it('should return the existing transaction without creating a new one when a live intent exists for the order', async () => {
@@ -57,7 +65,9 @@ describe('InitiatePaymentUseCase', () => {
       } as unknown as PaymentTransaction,
     ]);
 
-    const result = await useCase.execute(new InitiatePaymentCommand('o1', 100, 'USD', 'pm-1'));
+    const result = await useCase.execute(
+      new InitiatePaymentCommand({ orderId: 'o1', amountCents: 100, currency: 'USD', paymentMethodConfigId: 'pm-1' }),
+    );
 
     expect(result.transactionId).toBe('txn-existing');
     expect(mockRepo.saveTransaction).not.toHaveBeenCalled();
@@ -73,7 +83,9 @@ describe('InitiatePaymentUseCase', () => {
       } as unknown as PaymentTransaction,
     ]);
 
-    const result = await useCase.execute(new InitiatePaymentCommand('o1', 100, 'USD', 'pm-1'));
+    const result = await useCase.execute(
+      new InitiatePaymentCommand({ orderId: 'o1', amountCents: 100, currency: 'USD', paymentMethodConfigId: 'pm-1' }),
+    );
 
     expect(result.transactionId).toBe('txn-uuid');
     expect(mockRepo.saveTransaction).toHaveBeenCalled();

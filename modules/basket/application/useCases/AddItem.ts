@@ -14,23 +14,44 @@ import { BasketResponse } from './GetOrCreateBasket';
 import type { ProductPricePort } from '../ports/ProductPricePort';
 import type { ProductDetailsPort } from '../ports/ProductDetailsPort';
 import type { SellabilityPort } from '../ports/SellabilityPort';
+export interface AddItemCommandProps {
+  basketId: string;
+  productId: string;
+  sku: string;
+  name: string;
+  quantity: number;
+  productVariantId?: string;
+  imageUrl?: string;
+  attributes?: Record<string, unknown>;
+  itemType?: 'physical' | 'digital' | 'subscription' | 'service';
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class AddItemCommand {
-  constructor(
-    public readonly basketId: string,
-    public readonly productId: string,
-    public readonly sku: string,
-    public readonly name: string,
-    public readonly quantity: number,
-    public readonly productVariantId?: string,
-    public readonly imageUrl?: string,
-    public readonly attributes?: Record<string, unknown>,
-    public readonly itemType: 'physical' | 'digital' | 'subscription' | 'service' = 'physical',
-  ) {}
+  public readonly basketId: string;
+  public readonly productId: string;
+  public readonly sku: string;
+  public readonly name: string;
+  public readonly quantity: number;
+  public readonly productVariantId?: string;
+  public readonly imageUrl?: string;
+  public readonly attributes?: Record<string, unknown>;
+  public readonly itemType: 'physical' | 'digital' | 'subscription' | 'service';
+
+  constructor(props: AddItemCommandProps) {
+    this.basketId = props.basketId;
+    this.productId = props.productId;
+    this.sku = props.sku;
+    this.name = props.name;
+    this.quantity = props.quantity;
+    this.productVariantId = props.productVariantId;
+    this.imageUrl = props.imageUrl;
+    this.attributes = props.attributes;
+    this.itemType = props.itemType ?? 'physical';
+  }
 }
 
 // ============================================================================

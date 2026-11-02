@@ -40,7 +40,9 @@ describe('CreateProductUseCase', () => {
     const repo = createMockProductRepo();
     const { useCase } = createUseCase(repo);
 
-    const result = await useCase.execute(new CreateProductCommand('Test Product', 'A test product', 'pt-1'));
+    const result = await useCase.execute(
+      new CreateProductCommand({ name: 'Test Product', description: 'A test product', productTypeId: 'pt-1' }),
+    );
 
     expect(result.productId).toBe('p-1');
     expect(result.name).toBe('Test Product');
@@ -64,7 +66,7 @@ describe('CreateProductUseCase', () => {
     });
 
     const result = await useCase.execute(
-      new CreateProductCommand('Test Product', 'A test product', 'pt-1', undefined, undefined, undefined, undefined, undefined, 1999),
+      new CreateProductCommand({ name: 'Test Product', description: 'A test product', productTypeId: 'pt-1', basePriceCents: 1999 }),
     );
 
     expect(pricingPort.setBasePrice).toHaveBeenCalledWith(
@@ -77,14 +79,18 @@ describe('CreateProductUseCase', () => {
     const repo = createMockProductRepo();
     const { useCase } = createUseCase(repo);
 
-    await expect(useCase.execute(new CreateProductCommand('', 'desc', 'pt-1'))).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductCommand({ name: '', description: 'desc', productTypeId: 'pt-1' }))).rejects.toThrow(
+      ProductValidationError,
+    );
   });
 
   it('should throw ProductValidationError when productTypeId is empty', async () => {
     const repo = createMockProductRepo();
     const { useCase } = createUseCase(repo);
 
-    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', ''))).rejects.toThrow(ProductValidationError);
+    await expect(useCase.execute(new CreateProductCommand({ name: 'Test', description: 'desc', productTypeId: '' }))).rejects.toThrow(
+      ProductValidationError,
+    );
   });
 
   it('should throw ProductSkuAlreadyExistsError when SKU exists', async () => {
@@ -93,7 +99,9 @@ describe('CreateProductUseCase', () => {
     repo.findBySku.mockResolvedValue(existingProduct);
     const { useCase } = createUseCase(repo);
 
-    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', 'SKU-1'))).rejects.toThrow(ProductSkuAlreadyExistsError);
+    await expect(
+      useCase.execute(new CreateProductCommand({ name: 'Test', description: 'desc', productTypeId: 'pt-1', sku: 'SKU-1' })),
+    ).rejects.toThrow(ProductSkuAlreadyExistsError);
   });
 
   it('should throw ProductSlugAlreadyExistsError when slug exists', async () => {
@@ -102,8 +110,8 @@ describe('CreateProductUseCase', () => {
     repo.findBySlug.mockResolvedValue(existingProduct);
     const { useCase } = createUseCase(repo);
 
-    await expect(useCase.execute(new CreateProductCommand('Test', 'desc', 'pt-1', undefined, 'test-slug'))).rejects.toThrow(
-      ProductSlugAlreadyExistsError,
-    );
+    await expect(
+      useCase.execute(new CreateProductCommand({ name: 'Test', description: 'desc', productTypeId: 'pt-1', slug: 'test-slug' })),
+    ).rejects.toThrow(ProductSlugAlreadyExistsError);
   });
 });

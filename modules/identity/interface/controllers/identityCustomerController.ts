@@ -92,7 +92,13 @@ export const loginCustomer = async (req: HttpRequest<Record<string, string>, unk
   });
 
   // Generate access token
-  const accessToken = generateAccessToken(subject.id, subject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
+  const accessToken = generateAccessToken({
+    userId: subject.id,
+    userEmail: subject.email,
+    userRole: 'customer',
+    jwtSecret: CUSTOMER_JWT_SECRET,
+    expiresIn: ACCESS_TOKEN_DURATION,
+  });
 
   jsonResponse(res, 200, {
     success: true,
@@ -156,7 +162,13 @@ export const registerCustomer = async (
   // which emits customer.registered (welcome email, segment, tracking).
 
   // Generate access token for immediate login
-  const accessToken = generateAccessToken(newSubject.id, newSubject.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
+  const accessToken = generateAccessToken({
+    userId: newSubject.id,
+    userEmail: newSubject.email,
+    userRole: 'customer',
+    jwtSecret: CUSTOMER_JWT_SECRET,
+    expiresIn: ACCESS_TOKEN_DURATION,
+  });
 
   jsonResponse(res, 201, {
     success: true,

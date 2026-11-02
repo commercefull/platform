@@ -122,13 +122,13 @@ describe('recordAudit helper', () => {
   });
 
   it('should call the use case with provided data', async () => {
-    await recordAudit(
-      'order.refund',
-      'order',
-      { id: 'user-1', type: 'admin', email: 'admin@test.com', organizationId: 'org-1' },
-      { id: 'ord-1', name: 'ORD-100' },
-      { amount: 50 },
-    );
+    await recordAudit({
+      action: 'order.refund',
+      resourceType: 'order',
+      actor: { id: 'user-1', type: 'admin', email: 'admin@test.com', organizationId: 'org-1' },
+      resource: { id: 'ord-1', name: 'ORD-100' },
+      metadata: { amount: 50 },
+    });
 
     expect(recordAuditLogUseCase.execute).toHaveBeenCalledWith(
       expect.objectContaining({

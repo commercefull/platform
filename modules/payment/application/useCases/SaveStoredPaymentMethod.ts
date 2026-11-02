@@ -10,24 +10,47 @@
 import { PaymentRepository, StoredPaymentMethod } from '../../domain/repositories/PaymentRepository';
 
 import { FailedToCreateStoredPaymentMethodError, FailedToRetrieveSavedPaymentMethodError } from '../../domain/errors/PaymentErrors';
+export interface SaveStoredPaymentMethodCommandProps {
+  customerId: string;
+  organizationId: string;
+  type: string;
+  provider: string;
+  providerToken: string;
+  isDefault?: boolean;
+  last4?: string;
+  brand?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class SaveStoredPaymentMethodCommand {
-  constructor(
-    public readonly customerId: string,
-    public readonly organizationId: string,
-    public readonly type: string,
-    public readonly provider: string,
-    public readonly providerToken: string,
-    public readonly isDefault: boolean = false,
-    public readonly last4?: string,
-    public readonly brand?: string,
-    public readonly expiryMonth?: number,
-    public readonly expiryYear?: number,
-  ) {}
+  public readonly customerId: string;
+  public readonly organizationId: string;
+  public readonly type: string;
+  public readonly provider: string;
+  public readonly providerToken: string;
+  public readonly isDefault: boolean;
+  public readonly last4?: string;
+  public readonly brand?: string;
+  public readonly expiryMonth?: number;
+  public readonly expiryYear?: number;
+
+  constructor(props: SaveStoredPaymentMethodCommandProps) {
+    this.customerId = props.customerId;
+    this.organizationId = props.organizationId;
+    this.type = props.type;
+    this.provider = props.provider;
+    this.providerToken = props.providerToken;
+    this.isDefault = props.isDefault ?? false;
+    this.last4 = props.last4;
+    this.brand = props.brand;
+    this.expiryMonth = props.expiryMonth;
+    this.expiryYear = props.expiryYear;
+  }
 }
 
 // ============================================================================

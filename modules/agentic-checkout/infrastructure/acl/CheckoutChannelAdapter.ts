@@ -66,25 +66,26 @@ function mapCheckout(session: CheckoutSession): ChannelCheckoutSnapshot {
     expiresAt: session.expiresAt,
   };
 }
+export interface CheckoutChannelAdapterDeps {
+  getOrCreateBasketUseCase: Pick<GetOrCreateBasketUseCase, 'execute'>;
+  addItemUseCase: Pick<AddItemUseCase, 'execute'>;
+  updateItemQuantityUseCase: Pick<UpdateItemQuantityUseCase, 'execute'>;
+  removeItemUseCase: Pick<RemoveItemUseCase, 'execute'>;
+  basketRepository: Pick<BasketRepository, 'findById'>;
+  initiateCheckoutUseCase: Pick<InitiateCheckoutUseCase, 'execute'>;
+  manageCheckoutSessionUseCase: Pick<ManageCheckoutSessionUseCase, 'findById' | 'save'>;
+  setShippingAddressUseCase: Pick<SetShippingAddressUseCase, 'execute'>;
+  setFulfillmentMethodUseCase: Pick<SetFulfillmentMethodUseCase, 'execute'>;
+  setShippingMethodUseCase: Pick<SetShippingMethodUseCase, 'execute'>;
+  applyCouponUseCase: Pick<ApplyCouponUseCase, 'execute'>;
+  createPaymentIntentUseCase: Pick<CreatePaymentIntentUseCase, 'execute'>;
+  completeCheckoutUseCase: Pick<CompleteCheckoutUseCase, 'execute'>;
+  abandonCheckoutUseCase: Pick<AbandonCheckoutUseCase, 'execute'>;
+  shippingQuotePort: Pick<ShippingQuotePort, 'getShippingOptions'>;
+}
 
 export class CheckoutChannelAdapter implements ChannelCheckoutPort {
-  constructor(
-    private readonly getOrCreateBasketUseCase: Pick<GetOrCreateBasketUseCase, 'execute'>,
-    private readonly addItemUseCase: Pick<AddItemUseCase, 'execute'>,
-    private readonly updateItemQuantityUseCase: Pick<UpdateItemQuantityUseCase, 'execute'>,
-    private readonly removeItemUseCase: Pick<RemoveItemUseCase, 'execute'>,
-    private readonly basketRepository: Pick<BasketRepository, 'findById'>,
-    private readonly initiateCheckoutUseCase: Pick<InitiateCheckoutUseCase, 'execute'>,
-    private readonly manageCheckoutSessionUseCase: Pick<ManageCheckoutSessionUseCase, 'findById' | 'save'>,
-    private readonly setShippingAddressUseCase: Pick<SetShippingAddressUseCase, 'execute'>,
-    private readonly setFulfillmentMethodUseCase: Pick<SetFulfillmentMethodUseCase, 'execute'>,
-    private readonly setShippingMethodUseCase: Pick<SetShippingMethodUseCase, 'execute'>,
-    private readonly applyCouponUseCase: Pick<ApplyCouponUseCase, 'execute'>,
-    private readonly createPaymentIntentUseCase: Pick<CreatePaymentIntentUseCase, 'execute'>,
-    private readonly completeCheckoutUseCase: Pick<CompleteCheckoutUseCase, 'execute'>,
-    private readonly abandonCheckoutUseCase: Pick<AbandonCheckoutUseCase, 'execute'>,
-    private readonly shippingQuotePort: Pick<ShippingQuotePort, 'getShippingOptions'>,
-  ) {}
+  constructor(private readonly deps: CheckoutChannelAdapterDeps) {}
 
   async createBasket(params: {
     sessionId: string;
@@ -92,14 +93,14 @@ export class CheckoutChannelAdapter implements ChannelCheckoutPort {
     salesChannelId?: string;
     currency?: string;
   }): Promise<{ basketId: string }> {
-    const basket = await this.getOrCreateBasketUseCase.execute(
+    const basket = await this.deps.getOrCreateBasketUseCase.execute(
       new GetOrCreateBasketCommand(undefined, params.sessionId, params.currency, params.storeId, params.salesChannelId),
     );
     return { basketId: basket.basketId };
   }
 
   async getBasket(basketId: string) {
-    const basket = await this.basketRepository.findById(basketId);
+    const basket = await this.deps.basketRepository.findById(basketId);
     if (!basket) return null;
     return {
       basketId: basket.basketId,
@@ -120,74 +121,81 @@ export class CheckoutChannelAdapter implements ChannelCheckoutPort {
   }
 
   async addItem(basketId: string, item: ChannelItemInput): Promise<void> {
-    await this.addItemUseCase.execute(
-      new AddItemCommand(basketId, item.productId, item.sku, item.name, item.quantity, item.productVariantId, item.imageUrl),
+    await this.deps.addItemUseCase.execute(
+      new AddItemCommand({
+        basketId: basketId,
+        productId: item.productId,
+        sku: item.sku,
+        name: item.name,
+        quantity: item.quantity,
+        productVariantId: item.productVariantId,
+        imageUrl: item.imageUrl,
+      }),
     );
   }
 
   async updateItemQuantity(basketId: string, basketItemId: string, quantity: number): Promise<void> {
-    await this.updateItemQuantityUseCase.execute(new UpdateItemQuantityCommand(basketId, basketItemId, quantity));
+    await this.deps.updateItemQuantityUseCase.execute(new UpdateItemQuantityCommand(basketId, basketItemId, quantity));
   }
 
   async removeItem(basketId: string, basketItemId: string): Promise<void> {
-    await this.removeItemUseCase.execute(new RemoveItemCommand(basketId, basketItemId));
+    await this.deps.removeItemUseCase.execute(new RemoveItemCommand(basketId, basketItemId));
   }
 
   async initiateCheckout(basketId: string, guestEmail?: string): Promise<ChannelCheckoutSnapshot> {
-    const response = await this.initiateCheckoutUseCase.execute(new InitiateCheckoutCommand(basketId, undefined, guestEmail));
+    const response = await this.deps.initiateCheckoutUseCase.execute(new InitiateCheckoutCommand(basketId, undefined, guestEmail));
     return this.fetch(response.checkoutId);
   }
 
   async getCheckout(checkoutId: string): Promise<ChannelCheckoutSnapshot | null> {
-    const session = await this.manageCheckoutSessionUseCase.findById(checkoutId);
+    const session = await this.deps.manageCheckoutSessionUseCase.findById(checkoutId);
     return session ? mapCheckout(session) : null;
   }
 
   private async fetch(checkoutId: string): Promise<ChannelCheckoutSnapshot> {
-    const session = await this.manageCheckoutSessionUseCase.findById(checkoutId);
+    const session = await this.deps.manageCheckoutSessionUseCase.findById(checkoutId);
     if (!session) throw new ChannelSessionNotFoundError(checkoutId);
     return mapCheckout(session);
   }
 
   async setShippingAddress(checkoutId: string, address: ChannelAddressInput): Promise<ChannelCheckoutSnapshot> {
-    await this.setShippingAddressUseCase.execute(
-      new SetShippingAddressCommand(
-        checkoutId,
-        address.firstName ?? '',
-        address.lastName ?? '',
-        address.lineOne,
-        address.city,
-        address.postalCode,
-        address.country,
-        undefined,
-        address.lineTwo,
-        address.region,
-        address.phone,
-      ),
+    await this.deps.setShippingAddressUseCase.execute(
+      new SetShippingAddressCommand({
+        checkoutId: checkoutId,
+        firstName: address.firstName ?? '',
+        lastName: address.lastName ?? '',
+        addressLine1: address.lineOne,
+        city: address.city,
+        postalCode: address.postalCode,
+        country: address.country,
+        addressLine2: address.lineTwo,
+        region: address.region,
+        phone: address.phone,
+      }),
     );
     return this.fetch(checkoutId);
   }
 
   async setFulfillmentMethod(checkoutId: string, fulfillmentType: string): Promise<ChannelCheckoutSnapshot> {
-    await this.setFulfillmentMethodUseCase.execute(new SetFulfillmentMethodCommand(checkoutId, fulfillmentType as FulfillmentType));
+    await this.deps.setFulfillmentMethodUseCase.execute(new SetFulfillmentMethodCommand(checkoutId, fulfillmentType as FulfillmentType));
     return this.fetch(checkoutId);
   }
 
   async setShippingMethod(checkoutId: string, methodId: string): Promise<ChannelCheckoutSnapshot> {
-    await this.setShippingMethodUseCase.execute(new SetShippingMethodCommand(checkoutId, methodId));
+    await this.deps.setShippingMethodUseCase.execute(new SetShippingMethodCommand(checkoutId, methodId));
     return this.fetch(checkoutId);
   }
 
   async applyCoupon(checkoutId: string, couponCode: string): Promise<ChannelCheckoutSnapshot> {
-    await this.applyCouponUseCase.execute(new ApplyCouponCommand(checkoutId, couponCode));
+    await this.deps.applyCouponUseCase.execute(new ApplyCouponCommand(checkoutId, couponCode));
     return this.fetch(checkoutId);
   }
 
   async getShippingOptions(checkoutId: string): Promise<ChannelShippingOption[]> {
-    const session = await this.manageCheckoutSessionUseCase.findById(checkoutId);
+    const session = await this.deps.manageCheckoutSessionUseCase.findById(checkoutId);
     if (!session?.shippingAddress) return [];
     const sa = session.shippingAddress;
-    const options = await this.shippingQuotePort.getShippingOptions({
+    const options = await this.deps.shippingQuotePort.getShippingOptions({
       basketId: session.basketId,
       shippingAddress: {
         country: sa.country,
@@ -208,7 +216,7 @@ export class CheckoutChannelAdapter implements ChannelCheckoutPort {
   }
 
   async attachDelegatedPayment(checkoutId: string, credential: DelegatedCredential): Promise<void> {
-    const session = await this.manageCheckoutSessionUseCase.findById(checkoutId);
+    const session = await this.deps.manageCheckoutSessionUseCase.findById(checkoutId);
     if (!session) throw new ChannelSessionNotFoundError(checkoutId);
     // The surface's delegated token stands in for a stored payment method;
     // the credential rides session metadata into the payment module.
@@ -220,20 +228,20 @@ export class CheckoutChannelAdapter implements ChannelCheckoutPort {
         token: credential.token,
       },
     });
-    await this.manageCheckoutSessionUseCase.save(session);
+    await this.deps.manageCheckoutSessionUseCase.save(session);
   }
 
   async createPaymentIntent(checkoutId: string): Promise<{ orderId: string; orderNumber: string; paymentIntentId: string }> {
-    const response = await this.createPaymentIntentUseCase.execute(new CreatePaymentIntentCommand(checkoutId));
+    const response = await this.deps.createPaymentIntentUseCase.execute(new CreatePaymentIntentCommand(checkoutId));
     return { orderId: response.orderId, orderNumber: response.orderNumber, paymentIntentId: response.paymentIntent.id };
   }
 
   async completeCheckout(checkoutId: string): Promise<ChannelCompletionResult> {
-    const response = await this.completeCheckoutUseCase.execute(new CompleteCheckoutCommand(checkoutId));
+    const response = await this.deps.completeCheckoutUseCase.execute(new CompleteCheckoutCommand(checkoutId));
     return { orderId: response.orderId, orderNumber: '', paymentIntentId: '' };
   }
 
   async abandonCheckout(checkoutId: string): Promise<void> {
-    await this.abandonCheckoutUseCase.execute(new AbandonCheckoutCommand(checkoutId));
+    await this.deps.abandonCheckoutUseCase.execute(new AbandonCheckoutCommand(checkoutId));
   }
 }

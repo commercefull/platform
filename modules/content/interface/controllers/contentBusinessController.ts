@@ -1069,20 +1069,20 @@ export class ContentController {
 
     try {
       const result = await createTemplateUseCase.execute(
-        new CreateTemplateCommand(
-          name,
-          slug,
-          description,
-          thumbnail,
-          htmlStructure,
-          cssStyles,
-          jsScripts,
-          areas,
-          defaultBlocks,
-          compatibleContentTypes,
-          isSystem,
-          isActive,
-        ),
+        new CreateTemplateCommand({
+          name: name,
+          slug: slug,
+          description: description,
+          thumbnail: thumbnail,
+          htmlStructure: htmlStructure,
+          cssStyles: cssStyles,
+          jsScripts: jsScripts,
+          areas: areas,
+          defaultBlocks: defaultBlocks,
+          compatibleContentTypes: compatibleContentTypes,
+          isSystem: isSystem,
+          isActive: isActive,
+        }),
       );
       jsonResponse(res, 201, { success: true, data: result, message: 'Template created successfully' });
     } catch (error) {
@@ -1315,7 +1315,17 @@ export class ContentController {
 
     try {
       const result = await createCategoryUseCase.execute(
-        new CreateCategoryCommand(name, slug, parentId, description, featuredImage, metaTitle, metaDescription, sortOrder, isActive),
+        new CreateCategoryCommand({
+          name: name,
+          slug: slug,
+          parentId: parentId,
+          description: description,
+          featuredImage: featuredImage,
+          metaTitle: metaTitle,
+          metaDescription: metaDescription,
+          sortOrder: sortOrder,
+          isActive: isActive,
+        }),
       );
       jsonResponse(res, 201, {
         success: true,
@@ -1385,7 +1395,7 @@ export class ContentController {
     const { name, slug, description, location, isActive } = req.body;
 
     try {
-      const result = await createNavigationUseCase.execute(new CreateNavigationCommand(name, slug, description, location, isActive));
+      const result = await createNavigationUseCase.execute(new CreateNavigationCommand({ name, slug, description, location, isActive }));
       jsonResponse(res, 201, {
         success: true,
         data: { ...result, contentNavigationId: result.id },
@@ -1461,22 +1471,22 @@ export class ContentController {
 
     try {
       const result = await addNavigationItemUseCase.execute(
-        new AddNavigationItemCommand(
-          navigationId,
-          title,
-          type as 'url' | 'page' | 'category' | 'product' | 'blog',
-          parentId,
-          url,
-          contentPageId,
-          targetId,
-          targetSlug,
-          icon,
-          cssClasses,
-          openInNewTab,
-          isActive,
-          sortOrder,
-          conditions,
-        ),
+        new AddNavigationItemCommand({
+          navigationId: navigationId,
+          title: title,
+          type: type as 'url' | 'page' | 'category' | 'product' | 'blog',
+          parentId: parentId,
+          url: url,
+          contentPageId: contentPageId,
+          targetId: targetId,
+          targetSlug: targetSlug,
+          icon: icon,
+          cssClasses: cssClasses,
+          openInNewTab: openInNewTab,
+          isActive: isActive,
+          sortOrder: sortOrder,
+          conditions: conditions,
+        }),
       );
       jsonResponse(res, 201, {
         success: true,
@@ -1566,27 +1576,27 @@ export class ContentController {
 
     try {
       const result = await uploadMediaUseCase.execute(
-        new UploadMediaCommand(
-          title,
-          fileName,
-          filePath || '',
-          fileType || 'application/octet-stream',
-          fileSize || 0,
-          url,
-          width,
-          height,
-          duration,
-          altText,
-          caption,
-          description,
-          folderId || undefined,
-          thumbnailUrl,
-          tags,
-          isExternal,
-          externalService,
-          externalId,
-          req.user?.id,
-        ),
+        new UploadMediaCommand({
+          title: title,
+          fileName: fileName,
+          filePath: filePath || '',
+          fileType: fileType || 'application/octet-stream',
+          fileSize: fileSize || 0,
+          url: url,
+          width: width,
+          height: height,
+          duration: duration,
+          altText: altText,
+          caption: caption,
+          description: description,
+          folderId: folderId || undefined,
+          thumbnailUrl: thumbnailUrl,
+          tags: tags,
+          isExternal: isExternal,
+          externalService: externalService,
+          externalId: externalId,
+          uploadedBy: req.user?.id,
+        }),
       );
       jsonResponse(res, 201, {
         success: true,
@@ -1717,15 +1727,15 @@ export class ContentController {
 
     try {
       const result = await createRedirectUseCase.execute(
-        new CreateRedirectCommand(
-          sourceUrl,
-          targetUrl,
-          statusCode ? (Number(statusCode) as 301 | 302 | 303 | 307 | 308) : undefined,
-          isRegex,
-          isActive,
-          notes,
-          req.user?.id,
-        ),
+        new CreateRedirectCommand({
+          sourceUrl: sourceUrl,
+          targetUrl: targetUrl,
+          statusCode: statusCode ? (Number(statusCode) as 301 | 302 | 303 | 307 | 308) : undefined,
+          isRegex: isRegex,
+          isActive: isActive,
+          notes: notes,
+          createdBy: req.user?.id,
+        }),
       );
       jsonResponse(res, 201, {
         success: true,

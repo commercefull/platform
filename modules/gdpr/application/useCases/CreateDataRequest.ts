@@ -12,15 +12,31 @@ import { eventBus } from '../../../../libs/events/eventBus';
 // Command
 // ============================================================================
 
+export interface CreateDataRequestCommandProps {
+  customerId: string;
+  requestType: GdprRequestType;
+  reason?: string;
+  requestedData?: string[];
+  ipAddress?: string;
+  userAgent?: string;
+}
+
 export class CreateDataRequestCommand {
-  constructor(
-    public readonly customerId: string,
-    public readonly requestType: GdprRequestType,
-    public readonly reason?: string,
-    public readonly requestedData?: string[],
-    public readonly ipAddress?: string,
-    public readonly userAgent?: string,
-  ) {}
+  public readonly customerId: string;
+  public readonly requestType: GdprRequestType;
+  public readonly reason?: string;
+  public readonly requestedData?: string[];
+  public readonly ipAddress?: string;
+  public readonly userAgent?: string;
+
+  constructor(props: CreateDataRequestCommandProps) {
+    this.customerId = props.customerId;
+    this.requestType = props.requestType;
+    this.reason = props.reason;
+    this.requestedData = props.requestedData;
+    this.ipAddress = props.ipAddress;
+    this.userAgent = props.userAgent;
+  }
 }
 
 // ============================================================================

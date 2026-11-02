@@ -5,26 +5,57 @@ import type { PSPConfig, PaymentRequest } from '../../infrastructure/services/Ga
 import { eventBus } from '../../../../libs/events/eventBus';
 import { NoProvidersAvailableError, AllProvidersExhaustedError } from '../../domain/errors/PaymentErrors';
 import { logger } from '../../../../libs/logger';
+export interface RoutePaymentCommandProps {
+  organizationId: string;
+  orderId: string;
+  amountCents: number;
+  currency: string;
+  customerId: string | undefined;
+  customerEmail: string | undefined;
+  customerIp: string | undefined;
+  paymentMethodToken: string | undefined;
+  description: string | undefined;
+  returnUrl: string | undefined;
+  cancelUrl: string | undefined;
+  metadata: Record<string, unknown> | undefined;
+  /** Buyer/destination country (ISO-2) — filters routes by supportedCountries. */
+  country?: string;
+  /** Selling market — recorded for market-scoped routing decisions. */
+  marketId?: string;
+}
 
 export class RoutePaymentCommand {
-  constructor(
-    public readonly organizationId: string,
-    public readonly orderId: string,
-    public readonly amountCents: number,
-    public readonly currency: string,
-    public readonly customerId: string | undefined,
-    public readonly customerEmail: string | undefined,
-    public readonly customerIp: string | undefined,
-    public readonly paymentMethodToken: string | undefined,
-    public readonly description: string | undefined,
-    public readonly returnUrl: string | undefined,
-    public readonly cancelUrl: string | undefined,
-    public readonly metadata: Record<string, unknown> | undefined,
-    /** Buyer/destination country (ISO-2) — filters routes by supportedCountries. */
-    public readonly country?: string,
-    /** Selling market — recorded for market-scoped routing decisions. */
-    public readonly marketId?: string,
-  ) {}
+  public readonly organizationId: string;
+  public readonly orderId: string;
+  public readonly amountCents: number;
+  public readonly currency: string;
+  public readonly customerId: string | undefined;
+  public readonly customerEmail: string | undefined;
+  public readonly customerIp: string | undefined;
+  public readonly paymentMethodToken: string | undefined;
+  public readonly description: string | undefined;
+  public readonly returnUrl: string | undefined;
+  public readonly cancelUrl: string | undefined;
+  public readonly metadata: Record<string, unknown> | undefined;
+  public readonly country?: string;
+  public readonly marketId?: string;
+
+  constructor(props: RoutePaymentCommandProps) {
+    this.organizationId = props.organizationId;
+    this.orderId = props.orderId;
+    this.amountCents = props.amountCents;
+    this.currency = props.currency;
+    this.customerId = props.customerId;
+    this.customerEmail = props.customerEmail;
+    this.customerIp = props.customerIp;
+    this.paymentMethodToken = props.paymentMethodToken;
+    this.description = props.description;
+    this.returnUrl = props.returnUrl;
+    this.cancelUrl = props.cancelUrl;
+    this.metadata = props.metadata;
+    this.country = props.country;
+    this.marketId = props.marketId;
+  }
 }
 
 export interface RoutePaymentResponse {

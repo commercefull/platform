@@ -56,18 +56,18 @@ export const completeCheckoutUseCase = new CompleteCheckoutUseCase(
 );
 export const abandonCheckoutUseCase = new AbandonCheckoutUseCase(CheckoutRepo, ports.orderPlacement, ports.inventoryReservation);
 export const setBillingAddressUseCase = new SetBillingAddressUseCase(CheckoutRepo);
-export const createPaymentIntentUseCase = new CreatePaymentIntentUseCase(
-  CheckoutRepo,
-  ports.basketSnapshot,
-  ports.orderPlacement,
-  ports.paymentAuthorization,
-  ports.fraudScreening,
-  ports.inventoryReservation,
-  ports.taxQuote,
-  ports.promotionQuote,
-  ports.loyaltyRedemption,
-  ports.storeContext,
-);
+export const createPaymentIntentUseCase = new CreatePaymentIntentUseCase({
+  checkoutRepository: CheckoutRepo,
+  basketSnapshotPort: ports.basketSnapshot,
+  orderPlacementPort: ports.orderPlacement,
+  paymentAuthorizationPort: ports.paymentAuthorization,
+  fraudScreeningPort: ports.fraudScreening,
+  inventoryReservationPort: ports.inventoryReservation,
+  taxQuotePort: ports.taxQuote,
+  promotionQuotePort: ports.promotionQuote,
+  loyaltyRedemptionPort: ports.loyaltyRedemption,
+  storeContextPort: ports.storeContext,
+});
 export const setPickupLocationUseCase = new SetPickupLocationUseCase(
   CheckoutRepo,
   ports.storeFulfillment,

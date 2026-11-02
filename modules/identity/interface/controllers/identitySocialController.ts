@@ -195,7 +195,13 @@ export async function customerSocialLogin(
   });
 
   // Generate JWT token
-  const jwtToken = generateAccessToken(result.userId, result.email, 'customer', CUSTOMER_JWT_SECRET, ACCESS_TOKEN_DURATION);
+  const jwtToken = generateAccessToken({
+    userId: result.userId,
+    userEmail: result.email,
+    userRole: 'customer',
+    jwtSecret: CUSTOMER_JWT_SECRET,
+    expiresIn: ACCESS_TOKEN_DURATION,
+  });
 
   jsonResponse(res, 200, {
     success: true,
@@ -271,7 +277,13 @@ export async function merchantSocialLogin(
   });
 
   // Generate JWT token
-  const jwtToken = generateAccessToken(result.userId, result.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
+  const jwtToken = generateAccessToken({
+    userId: result.userId,
+    userEmail: result.email,
+    userRole: 'organization',
+    jwtSecret: ORGANIZATION_JWT_SECRET,
+    expiresIn: ACCESS_TOKEN_DURATION,
+  });
 
   jsonResponse(res, 200, {
     success: true,

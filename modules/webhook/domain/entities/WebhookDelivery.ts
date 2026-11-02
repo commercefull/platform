@@ -121,15 +121,16 @@ export class WebhookDeliveryEntity {
     this.touch();
   }
 
-  recordFailure(
-    errorMessage: string,
-    responseStatus: number | null,
-    responseBody: string | null,
-    durationMs: number,
-    maxRetries: number,
-    retryIntervalMs: number,
-    backoffMultiplier: number,
-  ): void {
+  recordFailure(params: {
+    errorMessage: string;
+    responseStatus: number | null;
+    responseBody: string | null;
+    durationMs: number;
+    maxRetries: number;
+    retryIntervalMs: number;
+    backoffMultiplier: number;
+  }): void {
+    const { errorMessage, responseStatus, responseBody, durationMs, maxRetries, retryIntervalMs, backoffMultiplier } = params;
     this.props.attempts += 1;
     this.props.lastAttemptAt = new Date();
     this.props.responseStatus = responseStatus;

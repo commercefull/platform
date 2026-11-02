@@ -123,14 +123,14 @@ export const createRequestSubmit = async (req: HttpRequest, res: HttpResponse): 
       });
     }
 
-    const command = new CreateDataRequestCommand(
-      user.customerId,
-      requestType as GdprRequestType,
-      (reason as string) || '',
-      requestedData as string[] | undefined,
-      req.ip,
-      req.get('User-Agent'),
-    );
+    const command = new CreateDataRequestCommand({
+      customerId: user.customerId,
+      requestType: requestType as GdprRequestType,
+      reason: (reason as string) || '',
+      requestedData: requestedData as string[] | undefined,
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent'),
+    });
 
     const result = await createDataRequestUseCase.execute(command);
 

@@ -15,31 +15,57 @@ import { ProductVisibility } from '../../domain/valueObjects/ProductVisibility';
 import { ProductListItemResponse, ListProductsResponse } from './ListProducts';
 import type { ProductPricingPort, ProductPriceInfo } from '../ports/ProductPricingPort';
 import { toProductPriceDtoOrEmpty } from '../dto/productPriceDto';
+export interface ListProductsForContextCommandProps {
+  context: {
+    organizationId?: string;
+    storeId?: string;
+
+    // Common filters
+    categoryId?: string;
+    isFeatured?: boolean;
+    search?: string;
+    /** Price bounds in integer cents. */
+    priceMinCents?: number;
+    priceMaxCents?: number;
+  };
+  includeInactive?: boolean;
+  limit?: number;
+  offset?: number;
+  orderBy?: string;
+  orderDirection?: 'asc' | 'desc';
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class ListProductsForContextCommand {
-  constructor(
-    public readonly context: {
-      organizationId?: string;
-      storeId?: string;
+  public readonly context: {
+    organizationId?: string;
+    storeId?: string;
 
-      // Common filters
-      categoryId?: string;
-      isFeatured?: boolean;
-      search?: string;
-      /** Price bounds in integer cents. */
-      priceMinCents?: number;
-      priceMaxCents?: number;
-    },
-    public readonly includeInactive: boolean = false,
-    public readonly limit: number = 20,
-    public readonly offset: number = 0,
-    public readonly orderBy: string = 'createdAt',
-    public readonly orderDirection: 'asc' | 'desc' = 'desc',
-  ) {}
+    // Common filters
+    categoryId?: string;
+    isFeatured?: boolean;
+    search?: string;
+    /** Price bounds in integer cents. */
+    priceMinCents?: number;
+    priceMaxCents?: number;
+  };
+  public readonly includeInactive: boolean;
+  public readonly limit: number;
+  public readonly offset: number;
+  public readonly orderBy: string;
+  public readonly orderDirection: 'asc' | 'desc';
+
+  constructor(props: ListProductsForContextCommandProps) {
+    this.context = props.context;
+    this.includeInactive = props.includeInactive ?? false;
+    this.limit = props.limit ?? 20;
+    this.offset = props.offset ?? 0;
+    this.orderBy = props.orderBy ?? 'createdAt';
+    this.orderDirection = props.orderDirection ?? 'desc';
+  }
 }
 
 // ============================================================================

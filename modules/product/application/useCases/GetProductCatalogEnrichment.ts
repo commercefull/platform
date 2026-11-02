@@ -44,36 +44,37 @@ export interface ProductCatalogEnrichmentResponse {
   tags: ProductTag[];
   qa: QaWithAnswers[];
 }
+export interface GetProductCatalogEnrichmentUseCaseDeps {
+  productRepo: ProductLookupPort;
+  productToCategoryRepo: ProductToCategoryPort;
+  productCategoryRepo: ProductCategoryPort;
+  productTagRepo: ProductTagPort;
+  productQaRepo: ProductQaPort;
+  productQaAnswerRepo: ProductQaAnswerPort;
+}
 
 // ============================================================================
 // Use Case
 // ============================================================================
 
 export class GetProductCatalogEnrichmentUseCase {
-  constructor(
-    private readonly productRepo: ProductLookupPort,
-    private readonly productToCategoryRepo: ProductToCategoryPort,
-    private readonly productCategoryRepo: ProductCategoryPort,
-    private readonly productTagRepo: ProductTagPort,
-    private readonly productQaRepo: ProductQaPort,
-    private readonly productQaAnswerRepo: ProductQaAnswerPort,
-  ) {}
+  constructor(private readonly deps: GetProductCatalogEnrichmentUseCaseDeps) {}
 
   async execute(command: GetProductCatalogEnrichmentCommand): Promise<ProductCatalogEnrichmentResponse> {
     if (!command.productId) {
       throw new ProductValidationError('productId is required');
     }
 
-    const product = await this.productRepo.findById(command.productId);
+    const product = await this.deps.productRepo.findById(command.productId);
     if (!product) {
       throw new ProductNotFoundError(command.productId);
     }
 
     // Fetch category mappings and resolve full category objects
-    const categoryMappings = await this.productToCategoryRepo.findByProduct(command.productId);
+    const categoryMappings = await this.deps.productToCategoryRepo.findByProduct(command.productId);
     const categories: ProductCategoryRow[] = [];
     for (const mapping of categoryMappings) {
-      const category = await this.productCategoryRepo.findById(mapping.productCategoryId);
+      const category = await this.deps.productCategoryRepo.findById(mapping.productCategoryId);
       if (category) {
         categories.push(category);
       }
@@ -81,15 +82,18 @@ export class GetProductCatalogEnrichmentUseCase {
 
     // Fetch all active tags — product-level tag associations are stored on the
     // DDD Product entity; the legacy repo does not expose them directly.
-    const tags = await this.productTagRepo.findAll();
+    const tags = await this.deps.productTagRepo.findAll();
 
     // Fetch Q&A questions with their answers
     const qaStatus: ProductQaStatus | undefined = command.approvedQaOnly ? 'answered' : undefined;
-    const questions = await this.productQaRepo.findByProduct(command.productId, qaStatus);
+    const questions = await this.deps.productQaRepo.findByProduct(command.productId, qaStatus);
 
     const qa: QaWithAnswers[] = [];
     for (const question of questions) {
-      const answers = await this.productQaAnswerRepo.findByQuestion(question.productQaId, command.approvedQaOnly ? 'answered' : undefined);
+      const answers = await this.deps.productQaAnswerRepo.findByQuestion(
+        question.productQaId,
+        command.approvedQaOnly ? 'answered' : undefined,
+      );
       qa.push({ ...question, answers });
     }
 

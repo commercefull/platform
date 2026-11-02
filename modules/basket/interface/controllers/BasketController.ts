@@ -260,17 +260,17 @@ export const addItem = async (req: HttpRequest, res: HttpResponse): Promise<void
     return;
   }
 
-  const command = new AddItemCommand(
-    basketId,
-    productId,
-    sku,
-    name,
-    quantity,
-    productVariantId,
-    imageUrl,
-    attributes,
-    itemType || 'physical',
-  );
+  const command = new AddItemCommand({
+    basketId: basketId,
+    productId: productId,
+    sku: sku,
+    name: name,
+    quantity: quantity,
+    productVariantId: productVariantId,
+    imageUrl: imageUrl,
+    attributes: attributes,
+    itemType: itemType || 'physical',
+  });
 
   const basket = await addItemUseCase.execute(command);
 

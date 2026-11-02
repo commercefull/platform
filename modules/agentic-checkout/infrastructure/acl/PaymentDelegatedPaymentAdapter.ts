@@ -14,16 +14,16 @@ export class PaymentDelegatedPaymentAdapter implements DelegatedPaymentPort {
 
   async chargeDelegatedPayment(params: DelegatedChargeRequest): Promise<DelegatedChargeResult> {
     const response = await this.chargeDelegatedPaymentUseCase.execute(
-      new ChargeDelegatedPaymentCommand(
-        params.organizationId,
-        params.orderId,
-        params.transactionId,
-        params.amountCents,
-        params.currency,
-        params.credential,
-        params.customerId,
-        params.customerEmail,
-      ),
+      new ChargeDelegatedPaymentCommand({
+        organizationId: params.organizationId,
+        orderId: params.orderId,
+        transactionId: params.transactionId,
+        amountCents: params.amountCents,
+        currency: params.currency,
+        credential: params.credential,
+        customerId: params.customerId,
+        customerEmail: params.customerEmail,
+      }),
     );
     return {
       externalTransactionId: response.externalTransactionId,

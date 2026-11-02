@@ -155,23 +155,23 @@ function makeDeps() {
 }
 
 function makeAdapter(deps: ReturnType<typeof makeDeps>) {
-  return new CheckoutChannelAdapter(
-    deps.getOrCreateBasket,
-    deps.addItem,
-    deps.updateItemQuantity,
-    deps.removeItem,
-    deps.basketRepo,
-    deps.initiateCheckout,
-    deps.manageCheckoutSession,
-    deps.setShippingAddress,
-    deps.setFulfillmentMethod,
-    deps.setShippingMethod,
-    deps.applyCoupon,
-    deps.createPaymentIntent,
-    deps.completeCheckout,
-    deps.abandonCheckout,
-    deps.shippingQuotes,
-  );
+  return new CheckoutChannelAdapter({
+    getOrCreateBasketUseCase: deps.getOrCreateBasket,
+    addItemUseCase: deps.addItem,
+    updateItemQuantityUseCase: deps.updateItemQuantity,
+    removeItemUseCase: deps.removeItem,
+    basketRepository: deps.basketRepo,
+    initiateCheckoutUseCase: deps.initiateCheckout,
+    manageCheckoutSessionUseCase: deps.manageCheckoutSession,
+    setShippingAddressUseCase: deps.setShippingAddress,
+    setFulfillmentMethodUseCase: deps.setFulfillmentMethod,
+    setShippingMethodUseCase: deps.setShippingMethod,
+    applyCouponUseCase: deps.applyCoupon,
+    createPaymentIntentUseCase: deps.createPaymentIntent,
+    completeCheckoutUseCase: deps.completeCheckout,
+    abandonCheckoutUseCase: deps.abandonCheckout,
+    shippingQuotePort: deps.shippingQuotes,
+  });
 }
 
 describe('CheckoutChannelAdapter', () => {

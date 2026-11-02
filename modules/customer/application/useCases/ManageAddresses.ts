@@ -7,36 +7,73 @@ import { CustomerRepository } from '../../domain/repositories/CustomerRepository
 import { CustomerAddressNotFoundError, CustomerNotFoundError } from '../../domain/errors/CustomerErrors';
 import { CustomerAddress } from '../../../../libs/db/types';
 import type { AddressType } from '../../domain/entities/Customer';
+export interface AddAddressCommandProps {
+  customerId: string;
+  addressLine1: string;
+  city: string;
+  /** Administrative area — optional for countries without states (e.g. BE). */
+  state: string | undefined;
+  /** Postal code — optional for countries without them (e.g. AE, HK). */
+  postalCode: string | undefined;
+  country: string;
+  countryCode: string;
+  addressType: AddressType | undefined;
+  addressLine2?: string;
+  phone?: string;
+  firstName?: string;
+  lastName?: string;
+  company?: string;
+  isDefault?: boolean;
+  /** Locality below city level (e.g. Brazilian bairro, JP district). */
+  dependentLocality?: string;
+  /** Postal sorting code used by some postal systems (e.g. FR cedex). */
+  sortingCode?: string;
+  /** Canonical multi-line street (country-neutral superset of address1/2). */
+  addressLines?: string[];
+}
 
 // ============================================================================
 // Commands
 // ============================================================================
 
 export class AddAddressCommand {
-  constructor(
-    public readonly customerId: string,
-    public readonly addressLine1: string,
-    public readonly city: string,
-    /** Administrative area — optional for countries without states (e.g. BE). */
-    public readonly state: string | undefined,
-    /** Postal code — optional for countries without them (e.g. AE, HK). */
-    public readonly postalCode: string | undefined,
-    public readonly country: string,
-    public readonly countryCode: string,
-    public readonly addressType: AddressType | undefined,
-    public readonly addressLine2?: string,
-    public readonly phone?: string,
-    public readonly firstName?: string,
-    public readonly lastName?: string,
-    public readonly company?: string,
-    public readonly isDefault?: boolean,
-    /** Locality below city level (e.g. Brazilian bairro, JP district). */
-    public readonly dependentLocality?: string,
-    /** Postal sorting code used by some postal systems (e.g. FR cedex). */
-    public readonly sortingCode?: string,
-    /** Canonical multi-line street (country-neutral superset of address1/2). */
-    public readonly addressLines?: string[],
-  ) {}
+  public readonly customerId: string;
+  public readonly addressLine1: string;
+  public readonly city: string;
+  public readonly state: string | undefined;
+  public readonly postalCode: string | undefined;
+  public readonly country: string;
+  public readonly countryCode: string;
+  public readonly addressType: AddressType | undefined;
+  public readonly addressLine2?: string;
+  public readonly phone?: string;
+  public readonly firstName?: string;
+  public readonly lastName?: string;
+  public readonly company?: string;
+  public readonly isDefault?: boolean;
+  public readonly dependentLocality?: string;
+  public readonly sortingCode?: string;
+  public readonly addressLines?: string[];
+
+  constructor(props: AddAddressCommandProps) {
+    this.customerId = props.customerId;
+    this.addressLine1 = props.addressLine1;
+    this.city = props.city;
+    this.state = props.state;
+    this.postalCode = props.postalCode;
+    this.country = props.country;
+    this.countryCode = props.countryCode;
+    this.addressType = props.addressType;
+    this.addressLine2 = props.addressLine2;
+    this.phone = props.phone;
+    this.firstName = props.firstName;
+    this.lastName = props.lastName;
+    this.company = props.company;
+    this.isDefault = props.isDefault;
+    this.dependentLocality = props.dependentLocality;
+    this.sortingCode = props.sortingCode;
+    this.addressLines = props.addressLines;
+  }
 }
 
 export class UpdateAddressCommand {

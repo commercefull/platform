@@ -113,19 +113,19 @@ export const createPromotion = async (req: HttpRequest, res: HttpResponse): Prom
     };
 
     const promotionCurrency = currency || 'USD';
-    const command = new CreatePromotionCommand(
-      name,
-      type,
-      type === 'fixed_amount' ? toMinorUnits(parseFloat(value), promotionCurrency) : parseFloat(value),
-      code,
-      description,
-      minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), promotionCurrency) : undefined,
-      maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), promotionCurrency) : undefined,
-      usageLimit ? parseInt(usageLimit) : undefined,
-      usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined,
-      startsAt ? new Date(startsAt) : undefined,
-      endsAt ? new Date(endsAt) : undefined,
-    );
+    const command = new CreatePromotionCommand({
+      name: name,
+      type: type,
+      value: type === 'fixed_amount' ? toMinorUnits(parseFloat(value), promotionCurrency) : parseFloat(value),
+      code: code,
+      description: description,
+      minOrderAmountCents: minOrderAmount ? toMinorUnits(parseFloat(minOrderAmount), promotionCurrency) : undefined,
+      maxDiscountAmountCents: maxDiscountAmount ? toMinorUnits(parseFloat(maxDiscountAmount), promotionCurrency) : undefined,
+      usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
+      usageLimitPerCustomer: usageLimitPerCustomer ? parseInt(usageLimitPerCustomer) : undefined,
+      startsAt: startsAt ? new Date(startsAt) : undefined,
+      endsAt: endsAt ? new Date(endsAt) : undefined,
+    });
 
     const result = await createPromotionUseCase.execute(command);
 

@@ -7,7 +7,7 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
 
     const result = await new CreateDataRequestUseCase(repository).execute(
-      new CreateDataRequestCommand('customer-1', 'access', 'Want my data'),
+      new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'access', reason: 'Want my data' }),
     );
 
     expect(result.gdprDataRequestId).toBe('test-uuid');
@@ -18,7 +18,9 @@ describe('CreateDataRequestUseCase', () => {
   });
 
   it('should emit gdpr.request.created when the request is created', async () => {
-    await new CreateDataRequestUseCase(createGdprDataRequestRepository()).execute(new CreateDataRequestCommand('customer-1', 'deletion'));
+    await new CreateDataRequestUseCase(createGdprDataRequestRepository()).execute(
+      new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'deletion' }),
+    );
 
     expect(emitMock).toHaveBeenCalledWith(
       'gdpr.request.created',
@@ -29,9 +31,9 @@ describe('CreateDataRequestUseCase', () => {
   it('should throw CustomerIdRequiredError when the customer id is blank', async () => {
     const repository = createGdprDataRequestRepository();
 
-    await expect(new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('   ', 'access'))).rejects.toThrow(
-      CustomerIdRequiredError,
-    );
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand({ customerId: '   ', requestType: 'access' })),
+    ).rejects.toThrow(CustomerIdRequiredError);
     expect(repository.save).not.toHaveBeenCalled();
   });
 
@@ -39,9 +41,9 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
     repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'pending' })]);
 
-    await expect(new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access'))).rejects.toThrow(
-      GdprValidationError,
-    );
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'access' })),
+    ).rejects.toThrow(GdprValidationError);
     expect(repository.save).not.toHaveBeenCalled();
     expect(emitMock).not.toHaveBeenCalled();
   });
@@ -50,7 +52,9 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
     repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'deletion', status: 'pending' })]);
 
-    const result = await new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access'));
+    const result = await new CreateDataRequestUseCase(repository).execute(
+      new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'access' }),
+    );
 
     expect(result.status).toBe('pending');
     expect(repository.save).toHaveBeenCalled();
@@ -60,7 +64,9 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
     repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'completed' })]);
 
-    const result = await new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access'));
+    const result = await new CreateDataRequestUseCase(repository).execute(
+      new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'access' }),
+    );
 
     expect(result.status).toBe('pending');
   });
@@ -69,7 +75,9 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
 
     await expect(
-      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', undefined as unknown as 'access')),
+      new CreateDataRequestUseCase(repository).execute(
+        new CreateDataRequestCommand({ customerId: 'customer-1', requestType: undefined as unknown as 'access' }),
+      ),
     ).rejects.toThrow(GdprValidationError);
     expect(repository.save).not.toHaveBeenCalled();
   });
@@ -78,9 +86,9 @@ describe('CreateDataRequestUseCase', () => {
     const repository = createGdprDataRequestRepository();
     repository.findByCustomerId.mockResolvedValue([createDataRequest({ requestType: 'access', status: 'processing' })]);
 
-    await expect(new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand('customer-1', 'access'))).rejects.toThrow(
-      GdprValidationError,
-    );
+    await expect(
+      new CreateDataRequestUseCase(repository).execute(new CreateDataRequestCommand({ customerId: 'customer-1', requestType: 'access' })),
+    ).rejects.toThrow(GdprValidationError);
     expect(repository.save).not.toHaveBeenCalled();
   });
 });

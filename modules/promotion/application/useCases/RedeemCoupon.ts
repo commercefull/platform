@@ -5,20 +5,35 @@
 
 import type { PromotionCouponUsage, CouponRepository } from '../../domain/repositories/CouponRepository';
 import { ValidateCouponUseCase, ValidateCouponCommand } from './ValidateCoupon';
+export interface RedeemCouponCommandProps {
+  code: string;
+  orderId: string;
+  orderTotalCents: number;
+  discountAmountCents: number;
+  customerId?: string;
+  organizationId?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class RedeemCouponCommand {
-  constructor(
-    public readonly code: string,
-    public readonly orderId: string,
-    public readonly orderTotalCents: number,
-    public readonly discountAmountCents: number,
-    public readonly customerId?: string,
-    public readonly organizationId?: string,
-  ) {}
+  public readonly code: string;
+  public readonly orderId: string;
+  public readonly orderTotalCents: number;
+  public readonly discountAmountCents: number;
+  public readonly customerId?: string;
+  public readonly organizationId?: string;
+
+  constructor(props: RedeemCouponCommandProps) {
+    this.code = props.code;
+    this.orderId = props.orderId;
+    this.orderTotalCents = props.orderTotalCents;
+    this.discountAmountCents = props.discountAmountCents;
+    this.customerId = props.customerId;
+    this.organizationId = props.organizationId;
+  }
 }
 
 // ============================================================================

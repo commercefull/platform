@@ -7,15 +7,31 @@ import type { IContentNavigationRepository } from '../../../domain/repositories/
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
 
+export interface CreateNavigationCommandProps {
+  name: string;
+  slug: string;
+  description?: string;
+  location?: string;
+  isActive?: boolean;
+  createdBy?: string;
+}
+
 export class CreateNavigationCommand {
-  constructor(
-    public readonly name: string,
-    public readonly slug: string,
-    public readonly description?: string,
-    public readonly location?: string,
-    public readonly isActive?: boolean,
-    public readonly createdBy?: string,
-  ) {}
+  public readonly name: string;
+  public readonly slug: string;
+  public readonly description?: string;
+  public readonly location?: string;
+  public readonly isActive?: boolean;
+  public readonly createdBy?: string;
+
+  constructor(props: CreateNavigationCommandProps) {
+    this.name = props.name;
+    this.slug = props.slug;
+    this.description = props.description;
+    this.location = props.location;
+    this.isActive = props.isActive;
+    this.createdBy = props.createdBy;
+  }
 }
 
 export interface NavigationResponse {

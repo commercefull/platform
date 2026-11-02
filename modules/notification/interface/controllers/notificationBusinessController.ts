@@ -256,15 +256,15 @@ export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown
   const normalizedName = name || title || 'Batch notification';
   const useCase = sendNotificationBatchUseCase;
   const result = await useCase.execute(
-    new SendNotificationBatchCommand(
-      normalizedName,
-      channel,
-      type,
-      title,
-      content,
-      normalizedRecipients,
-      scheduledAt ? new Date(scheduledAt) : undefined,
-    ),
+    new SendNotificationBatchCommand({
+      name: normalizedName,
+      channel: channel,
+      type: type,
+      title: title,
+      content: content,
+      recipients: normalizedRecipients,
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : undefined,
+    }),
   );
   successResponse(res, result, 201);
 };
@@ -279,7 +279,7 @@ export const sendBatch = async (req: HttpRequest<Record<string, string>, unknown
 export const listWebhooks = async (req: UserRequest, res: HttpResponse): Promise<void> => {
   const organizationId = req.user?.organizationId || req.user?.id || (req.query.organizationId as string);
   const useCase = manageNotificationWebhookUseCase;
-  const result = await useCase.execute(new ManageNotificationWebhookCommand('list', organizationId));
+  const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'list', organizationId: organizationId }));
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to list webhooks', 400);
     return;
@@ -294,7 +294,9 @@ export const createWebhook = async (req: UserRequest, res: HttpResponse): Promis
   const organizationId = req.user?.organizationId || req.user?.id;
   const { url, secret, events } = req.body as CreateWebhookBody;
   const useCase = manageNotificationWebhookUseCase;
-  const result = await useCase.execute(new ManageNotificationWebhookCommand('create', organizationId, undefined, url, secret, events));
+  const result = await useCase.execute(
+    new ManageNotificationWebhookCommand({ action: 'create', organizationId: organizationId, url: url, secret: secret, events: events }),
+  );
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to create webhook', 400);
     return;
@@ -308,7 +310,7 @@ export const createWebhook = async (req: UserRequest, res: HttpResponse): Promis
 export const deactivateWebhook = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const { webhookId } = req.params;
   const useCase = manageNotificationWebhookUseCase;
-  const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate', undefined, webhookId));
+  const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'deactivate', notificationWebhookId: webhookId }));
   if (!result.success) {
     errorResponse(res, result.error || 'Failed to deactivate webhook', 400);
     return;

@@ -13,27 +13,45 @@ import { ChannelCatalogError, ChannelSessionNotFoundError, ChannelSessionNotMuta
 import { toAcpSession, type AcpCheckoutSession } from '../services/CheckoutSessionTranslator';
 import { eventBus } from '../../../../libs/events/eventBus';
 
+export interface UpdateChannelSessionCommandProps {
+  channelSessionId: string;
+  integrationId: string;
+  items?: Array<{ id: string; quantity: number }>;
+  buyer?: { first_name?: string; last_name?: string; email?: string; phone?: string };
+  fulfillmentDetails?: {
+    email?: string;
+    phone?: string;
+    address?: {
+      line_one?: string;
+      line_two?: string;
+      city?: string;
+      region?: string;
+      country?: string;
+      postal_code?: string;
+    };
+  };
+  fulfillmentOptionId?: string;
+  affiliateAttribution?: { first_touch?: Record<string, unknown>; last_touch?: Record<string, unknown> };
+}
+
 export class UpdateChannelSessionCommand {
-  constructor(
-    public readonly channelSessionId: string,
-    public readonly integrationId: string,
-    public readonly items?: Array<{ id: string; quantity: number }>,
-    public readonly buyer?: { first_name?: string; last_name?: string; email?: string; phone?: string },
-    public readonly fulfillmentDetails?: {
-      email?: string;
-      phone?: string;
-      address?: {
-        line_one?: string;
-        line_two?: string;
-        city?: string;
-        region?: string;
-        country?: string;
-        postal_code?: string;
-      };
-    },
-    public readonly fulfillmentOptionId?: string,
-    public readonly affiliateAttribution?: { first_touch?: Record<string, unknown>; last_touch?: Record<string, unknown> },
-  ) {}
+  public readonly channelSessionId: string;
+  public readonly integrationId: string;
+  public readonly items?: Array<{ id: string; quantity: number }>;
+  public readonly buyer?: { first_name?: string; last_name?: string; email?: string; phone?: string };
+  public readonly fulfillmentDetails?: UpdateChannelSessionCommandProps['fulfillmentDetails'];
+  public readonly fulfillmentOptionId?: string;
+  public readonly affiliateAttribution?: { first_touch?: Record<string, unknown>; last_touch?: Record<string, unknown> };
+
+  constructor(props: UpdateChannelSessionCommandProps) {
+    this.channelSessionId = props.channelSessionId;
+    this.integrationId = props.integrationId;
+    this.items = props.items;
+    this.buyer = props.buyer;
+    this.fulfillmentDetails = props.fulfillmentDetails;
+    this.fulfillmentOptionId = props.fulfillmentOptionId;
+    this.affiliateAttribution = props.affiliateAttribution;
+  }
 }
 
 export class UpdateChannelSessionUseCase {

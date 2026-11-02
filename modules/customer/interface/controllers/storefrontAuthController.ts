@@ -133,7 +133,12 @@ export const signUp = async (req: HttpRequest, res: HttpResponse): Promise<void>
       return redirectResponse(res, '/signup');
     }
 
-    const command = new RegisterCustomerCommand(email as string, firstName as string, lastName as string, password as string);
+    const command = new RegisterCustomerCommand({
+      email: email as string,
+      firstName: firstName as string,
+      lastName: lastName as string,
+      password: password as string,
+    });
 
     const customer = await registerCustomerUseCase.execute(command);
 

@@ -11,19 +11,43 @@ import { GdprValidationError } from '../../domain/errors/GdprErrors';
 // Commands
 // ============================================================================
 
+export interface RecordCookieConsentCommandProps {
+  sessionId: string;
+  preferences: Partial<CookiePreferences>;
+  customerId?: string;
+  browserFingerprint?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  country?: string;
+  region?: string;
+  consentBannerVersion?: string;
+  consentMethod?: 'banner' | 'settings' | 'api';
+}
+
 export class RecordCookieConsentCommand {
-  constructor(
-    public readonly sessionId: string,
-    public readonly preferences: Partial<CookiePreferences>,
-    public readonly customerId?: string,
-    public readonly browserFingerprint?: string,
-    public readonly ipAddress?: string,
-    public readonly userAgent?: string,
-    public readonly country?: string,
-    public readonly region?: string,
-    public readonly consentBannerVersion?: string,
-    public readonly consentMethod?: 'banner' | 'settings' | 'api',
-  ) {}
+  public readonly sessionId: string;
+  public readonly preferences: Partial<CookiePreferences>;
+  public readonly customerId?: string;
+  public readonly browserFingerprint?: string;
+  public readonly ipAddress?: string;
+  public readonly userAgent?: string;
+  public readonly country?: string;
+  public readonly region?: string;
+  public readonly consentBannerVersion?: string;
+  public readonly consentMethod?: 'banner' | 'settings' | 'api';
+
+  constructor(props: RecordCookieConsentCommandProps) {
+    this.sessionId = props.sessionId;
+    this.preferences = props.preferences;
+    this.customerId = props.customerId;
+    this.browserFingerprint = props.browserFingerprint;
+    this.ipAddress = props.ipAddress;
+    this.userAgent = props.userAgent;
+    this.country = props.country;
+    this.region = props.region;
+    this.consentBannerVersion = props.consentBannerVersion;
+    this.consentMethod = props.consentMethod;
+  }
 }
 
 export class UpdateCookieConsentCommand {

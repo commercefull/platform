@@ -45,8 +45,20 @@ describe('ManageAdminInventoryUseCase', () => {
   });
 
   it('should adjust stock level', async () => {
-    await useCase.adjustStockLevel('l1', 50, 40, 'p1', 'loc1', 'increase', 10, 'Restock', null, 'admin');
-    expect(mockRepo.adjustStockLevel).toHaveBeenCalledWith('l1', 50, 40, 'p1', 'loc1', 'increase', 10, 'Restock', null, 'admin');
+    const params = {
+      inventoryLevelId: 'l1',
+      newQuantity: 50,
+      previousQuantity: 40,
+      productId: 'p1',
+      locationId: 'loc1',
+      adjustmentType: 'increase',
+      adjustmentQty: 10,
+      reason: 'Restock',
+      notes: null,
+      userId: 'admin',
+    };
+    await useCase.adjustStockLevel(params);
+    expect(mockRepo.adjustStockLevel).toHaveBeenCalledWith(params);
   });
 
   it('should find transactions by level ID', async () => {

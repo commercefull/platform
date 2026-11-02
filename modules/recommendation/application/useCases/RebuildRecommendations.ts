@@ -85,12 +85,12 @@ export class RebuildRecommendationsUseCase {
     // 4. Similar candidates (same primary-category bucket or same brand)
     const similarRows: RecommendationCandidateInsert[] = [];
     for (const f of eligible) {
-      const ranked = rankSimilarProducts(
-        this.toSimilarityFeatures(f),
-        eligible.map(e => this.toSimilarityFeatures(e)),
-        cfg.similarMinScore,
-        cfg.candidatesTopN,
-      );
+      const ranked = rankSimilarProducts({
+        source: this.toSimilarityFeatures(f),
+        candidates: eligible.map(e => this.toSimilarityFeatures(e)),
+        minScore: cfg.similarMinScore,
+        topN: cfg.candidatesTopN,
+      });
       for (const s of ranked) {
         similarRows.push({
           ...scope,

@@ -8,21 +8,38 @@ import { PaymentTransaction } from '../../domain/entities/PaymentTransaction';
 import { TransactionStatus } from '../../domain/valueObjects/PaymentStatus';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { AmountMustBePositiveError, NoPaymentGatewayConfiguredError } from '../../domain/errors/PaymentErrors';
+export interface InitiatePaymentCommandProps {
+  orderId: string;
+  amountCents: number;
+  currency: string;
+  paymentMethodConfigId: string;
+  customerId?: string;
+  customerIp?: string;
+  metadata?: Record<string, unknown>;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class InitiatePaymentCommand {
-  constructor(
-    public readonly orderId: string,
-    public readonly amountCents: number,
-    public readonly currency: string,
-    public readonly paymentMethodConfigId: string,
-    public readonly customerId?: string,
-    public readonly customerIp?: string,
-    public readonly metadata?: Record<string, unknown>,
-  ) {}
+  public readonly orderId: string;
+  public readonly amountCents: number;
+  public readonly currency: string;
+  public readonly paymentMethodConfigId: string;
+  public readonly customerId?: string;
+  public readonly customerIp?: string;
+  public readonly metadata?: Record<string, unknown>;
+
+  constructor(props: InitiatePaymentCommandProps) {
+    this.orderId = props.orderId;
+    this.amountCents = props.amountCents;
+    this.currency = props.currency;
+    this.paymentMethodConfigId = props.paymentMethodConfigId;
+    this.customerId = props.customerId;
+    this.customerIp = props.customerIp;
+    this.metadata = props.metadata;
+  }
 }
 
 // ============================================================================

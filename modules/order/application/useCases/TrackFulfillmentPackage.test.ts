@@ -15,7 +15,9 @@ describe('TrackFulfillmentPackageUseCase', () => {
   it('should create a new package', async () => {
     repo.createPackage.mockResolvedValue(createOrderFulfillmentPackage({ orderFulfillmentPackageId: 'pk1', trackingNumber: 'TRK123' }));
 
-    const result = await useCase.execute(new TrackFulfillmentPackageCommand('f1', 'PKG-001', 'TRK123'));
+    const result = await useCase.execute(
+      new TrackFulfillmentPackageCommand({ orderFulfillmentId: 'f1', packageNumber: 'PKG-001', trackingNumber: 'TRK123' }),
+    );
 
     expect(result.orderFulfillmentPackageId).toBe('pk1');
     expect(result.trackingNumber).toBe('TRK123');
@@ -26,18 +28,12 @@ describe('TrackFulfillmentPackageUseCase', () => {
     repo.updateTracking.mockResolvedValue(createOrderFulfillmentPackage({ orderFulfillmentPackageId: 'pk1', trackingNumber: 'TRK456' }));
 
     const result = await useCase.execute(
-      new TrackFulfillmentPackageCommand(
-        'f1',
-        'PKG-001',
-        'TRK456',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'pk1',
-      ),
+      new TrackFulfillmentPackageCommand({
+        orderFulfillmentId: 'f1',
+        packageNumber: 'PKG-001',
+        trackingNumber: 'TRK456',
+        orderFulfillmentPackageId: 'pk1',
+      }),
     );
 
     expect(result.orderFulfillmentPackageId).toBe('pk1');
@@ -50,18 +46,12 @@ describe('TrackFulfillmentPackageUseCase', () => {
 
     await expect(
       useCase.execute(
-        new TrackFulfillmentPackageCommand(
-          'f1',
-          'PKG-001',
-          'TRK456',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          'missing',
-        ),
+        new TrackFulfillmentPackageCommand({
+          orderFulfillmentId: 'f1',
+          packageNumber: 'PKG-001',
+          trackingNumber: 'TRK456',
+          orderFulfillmentPackageId: 'missing',
+        }),
       ),
     ).rejects.toThrow(FulfillmentPackageNotFoundError);
   });

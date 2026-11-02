@@ -18,15 +18,14 @@ export class PaymentPaymentAuthorizationAdapter implements PaymentAuthorizationP
 
   async initiatePayment(request: PaymentAuthorizationRequest): Promise<PaymentAuthorizationResult> {
     try {
-      const command = new InitiatePaymentCommand(
-        request.orderId,
-        request.amountCents,
-        request.currency,
-        request.paymentMethodId,
-        request.customerId,
-        undefined,
-        request.delegatedCredential ? { delegatedCredential: request.delegatedCredential } : undefined,
-      );
+      const command = new InitiatePaymentCommand({
+        orderId: request.orderId,
+        amountCents: request.amountCents,
+        currency: request.currency,
+        paymentMethodConfigId: request.paymentMethodId,
+        customerId: request.customerId,
+        metadata: request.delegatedCredential ? { delegatedCredential: request.delegatedCredential } : undefined,
+      });
       const response = await this.initiatePaymentUseCase.execute(command);
       return {
         transactionId: response.transactionId,

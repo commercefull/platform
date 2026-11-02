@@ -152,30 +152,22 @@ export const processCheckout = async (req: HttpRequest, res: HttpResponse): Prom
   }));
 
   // Create order with proper constructor arguments
-  const orderCommand = new CreateOrderCommand(
-    customerId,
-    customerEmail,
-    orderItems,
-    mapAddressFields(shippingAddress),
-    mapAddressFields(billingAddress),
-    basket.basketId,
-    undefined,
-    undefined,
-    customerId,
-    'web',
-    basket.currency || 'USD',
-    shippingAddress.phone as string,
-    `${shippingAddress.firstName} ${shippingAddress.lastName}`,
-    specialInstructions as string | undefined,
-    Number(shippingMethod?.costCents || 0),
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    vatNumber ? { vatNumber: String(vatNumber).trim() } : undefined,
-  );
+  const orderCommand = new CreateOrderCommand({
+    customerId: customerId,
+    customerEmail: customerEmail,
+    items: orderItems,
+    shippingAddress: mapAddressFields(shippingAddress),
+    billingAddress: mapAddressFields(billingAddress),
+    basketId: basket.basketId,
+    createdByUserId: customerId,
+    orderSource: 'web',
+    currencyCode: basket.currency || 'USD',
+    customerPhone: shippingAddress.phone as string,
+    customerName: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+    customerNotes: specialInstructions as string | undefined,
+    shippingTotalCents: Number(shippingMethod?.costCents || 0),
+    metadata: vatNumber ? { vatNumber: String(vatNumber).trim() } : undefined,
+  });
 
   const orderUseCase = createOrderUseCase;
   const order = await orderUseCase.execute(orderCommand);
@@ -271,22 +263,23 @@ async function calculateCheckoutTotals(
     customerAddresses?.[0] || { country: 'US', region: '', postalCode: '', city: '' };
 
   // Calculate tax using the tax service
-  const taxCommand = new CalculateOrderTaxCommand(
-    basketItems?.map((item: Record<string, unknown>) => ({
-      productId: item.productId as string,
-      name: item.name as string,
-      quantity: item.quantity as number,
-      unitPriceCents: item.unitPriceCents as number,
-    })) || [],
-    {
+  const taxCommand = new CalculateOrderTaxCommand({
+    items:
+      basketItems?.map((item: Record<string, unknown>) => ({
+        productId: item.productId as string,
+        name: item.name as string,
+        quantity: item.quantity as number,
+        unitPriceCents: item.unitPriceCents as number,
+      })) || [],
+    shippingAddress: {
       country: (shippingAddress as Record<string, unknown>).country as string,
       region: ((shippingAddress as Record<string, unknown>).state || (shippingAddress as Record<string, unknown>).region) as string,
       postalCode: (shippingAddress as Record<string, unknown>).postalCode as string,
       city: (shippingAddress as Record<string, unknown>).city as string,
     },
-    shippingCostCents,
-    customer?.customerId as string | undefined,
-  );
+    shippingAmountCents: shippingCostCents,
+    customerId: customer?.customerId as string | undefined,
+  });
 
   const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);

@@ -95,14 +95,14 @@ export interface LoyaltyRepository {
   findCustomerPoints(customerId: string): Promise<LoyaltyPoints | null>;
   findCustomerPointsWithTier(customerId: string): Promise<{ points: LoyaltyPoints; tier: LoyaltyTier } | null>;
   initializeCustomerPoints(customerId: string, tierId: string): Promise<LoyaltyPoints>;
-  adjustCustomerPoints(
-    customerId: string,
-    pointsChange: number,
-    action: string,
-    description?: string,
-    orderId?: string,
-    referenceId?: string,
-  ): Promise<LoyaltyPoints>;
+  adjustCustomerPoints(params: {
+    customerId: string;
+    pointsChange: number;
+    action: string;
+    description?: string;
+    orderId?: string;
+    referenceId?: string;
+  }): Promise<LoyaltyPoints>;
   checkAndUpdateTier(customerId: string, lifetimePoints: number): Promise<void>;
   setMemberPoints(loyaltyPointsId: string, currentPoints: number, lifetimePoints?: number): Promise<void>;
 

@@ -30,7 +30,14 @@ describe('UploadMediaUseCase', () => {
 
   it('should upload media (happy path)', async () => {
     const result = await useCase.execute(
-      new UploadMediaCommand('Test Image', 'test.jpg', '/uploads/test.jpg', 'image/jpeg', 1024, 'https://cdn.test.com/test.jpg'),
+      new UploadMediaCommand({
+        title: 'Test Image',
+        fileName: 'test.jpg',
+        filePath: '/uploads/test.jpg',
+        fileType: 'image/jpeg',
+        fileSize: 1024,
+        url: 'https://cdn.test.com/test.jpg',
+      }),
     );
 
     expect(result.id).toBe('m1');
@@ -39,21 +46,34 @@ describe('UploadMediaUseCase', () => {
   });
 
   it('should throw ContentValidationError when title is empty', async () => {
-    await expect(useCase.execute(new UploadMediaCommand('', 'test.jpg', '/path', 'image/jpeg', 1024, 'url'))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(
+      useCase.execute(
+        new UploadMediaCommand({ title: '', fileName: 'test.jpg', filePath: '/path', fileType: 'image/jpeg', fileSize: 1024, url: 'url' }),
+      ),
+    ).rejects.toThrow(ContentValidationError);
   });
 
   it('should throw ContentValidationError when fileName is empty', async () => {
-    await expect(useCase.execute(new UploadMediaCommand('Title', '', '/path', 'image/jpeg', 1024, 'url'))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(
+      useCase.execute(
+        new UploadMediaCommand({ title: 'Title', fileName: '', filePath: '/path', fileType: 'image/jpeg', fileSize: 1024, url: 'url' }),
+      ),
+    ).rejects.toThrow(ContentValidationError);
   });
 
   it('should throw ContentValidationError when url is empty', async () => {
-    await expect(useCase.execute(new UploadMediaCommand('Title', 'file.jpg', '/path', 'image/jpeg', 1024, ''))).rejects.toThrow(
-      ContentValidationError,
-    );
+    await expect(
+      useCase.execute(
+        new UploadMediaCommand({
+          title: 'Title',
+          fileName: 'file.jpg',
+          filePath: '/path',
+          fileType: 'image/jpeg',
+          fileSize: 1024,
+          url: '',
+        }),
+      ),
+    ).rejects.toThrow(ContentValidationError);
   });
 
   it('should throw MediaFolderNotFoundError when folder does not exist', async () => {
@@ -61,21 +81,15 @@ describe('UploadMediaUseCase', () => {
 
     await expect(
       useCase.execute(
-        new UploadMediaCommand(
-          'Title',
-          'file.jpg',
-          '/path',
-          'image/jpeg',
-          1024,
-          'url',
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          'missing-folder',
-        ),
+        new UploadMediaCommand({
+          title: 'Title',
+          fileName: 'file.jpg',
+          filePath: '/path',
+          fileType: 'image/jpeg',
+          fileSize: 1024,
+          url: 'url',
+          folderId: 'missing-folder',
+        }),
       ),
     ).rejects.toThrow(MediaFolderNotFoundError);
   });

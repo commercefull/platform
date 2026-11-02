@@ -34,33 +34,36 @@ export function parseExpirationDate(durationString: string): Date {
   return new Date(expirationTime);
 }
 
+export interface AccessTokenOptions {
+  /** Unique identifier for the user */
+  userId: string;
+  /** User's email address */
+  userEmail: string;
+  /** User's role (customer, merchant, admin) */
+  userRole: 'customer' | 'organization' | 'admin';
+  /** Secret key for signing the token */
+  jwtSecret: string;
+  /** Token expiration duration (e.g., "7d", "24h") */
+  expiresIn: string;
+  /** 'access' (default) or 'refresh'; refresh tokens are rejected by API auth middleware */
+  tokenUse?: JwtTokenUse;
+}
+
 /**
  * Generates a signed JWT access token
- * @param userId - Unique identifier for the user
- * @param userEmail - User's email address
- * @param userRole - User's role (customer, merchant, admin)
- * @param jwtSecret - Secret key for signing the token
- * @param expiresIn - Token expiration duration (e.g., "7d", "24h")
- * @param tokenUse - 'access' (default) or 'refresh'; refresh tokens are rejected by API auth middleware
+ * @param options - Token claims and signing options (see {@link AccessTokenOptions})
  * @returns Signed JWT token string
  */
-export function generateAccessToken(
-  userId: string,
-  userEmail: string,
-  userRole: 'customer' | 'organization' | 'admin',
-  jwtSecret: string,
-  expiresIn: string,
-  tokenUse: JwtTokenUse = 'access',
-): string {
+export function generateAccessToken(options: AccessTokenOptions): string {
   const payload: JwtPayload = {
-    id: userId,
-    email: userEmail,
-    role: userRole,
-    tokenUse,
+    id: options.userId,
+    email: options.userEmail,
+    role: options.userRole,
+    tokenUse: options.tokenUse ?? 'access',
     jti: randomUUID(),
   };
 
-  return jwt.sign(payload, jwtSecret, { expiresIn, algorithm: JWT_ALGORITHM } as SignOptions);
+  return jwt.sign(payload, options.jwtSecret, { expiresIn: options.expiresIn, algorithm: JWT_ALGORITHM } as SignOptions);
 }
 
 /**

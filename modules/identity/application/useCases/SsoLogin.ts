@@ -138,7 +138,13 @@ export class SsoLoginUseCase {
     }
 
     // Issue JWT
-    const accessToken = generateAccessToken(userId, email, 'organization', this.jwtSecret, this.tokenDuration);
+    const accessToken = generateAccessToken({
+      userId,
+      userEmail: email,
+      userRole: 'organization',
+      jwtSecret: this.jwtSecret,
+      expiresIn: this.tokenDuration,
+    });
 
     // Emit event
     eventBus.emit('identity.sso.login', {

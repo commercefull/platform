@@ -46,18 +46,18 @@ export const saveStoredMethod = async (req: HttpRequest, res: HttpResponse): Pro
   }
   const useCase = saveStoredPaymentMethodUseCase;
   const result = await useCase.execute(
-    new SaveStoredPaymentMethodCommand(
-      customerId,
-      organizationId || '',
-      type,
-      provider,
-      providerToken,
-      isDefault ?? false,
-      last4,
-      brand,
-      expiryMonth,
-      expiryYear,
-    ),
+    new SaveStoredPaymentMethodCommand({
+      customerId: customerId,
+      organizationId: organizationId || '',
+      type: type,
+      provider: provider,
+      providerToken: providerToken,
+      isDefault: isDefault ?? false,
+      last4: last4,
+      brand: brand,
+      expiryMonth: expiryMonth,
+      expiryYear: expiryYear,
+    }),
   );
   successResponse(res, result, 201);
 };

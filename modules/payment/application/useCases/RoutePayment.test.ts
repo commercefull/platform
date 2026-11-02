@@ -11,20 +11,20 @@ jest.mock('../../infrastructure/services/GatewayAdapterRegistry', () => ({
 
 const getPSPAdapterMock = jest.mocked(getPSPAdapter);
 
-const command = new RoutePaymentCommand(
-  'org-1',
-  'order-1',
-  5000,
-  'USD',
-  'cust-1',
-  'c@x.com',
-  '1.2.3.4',
-  'tok_1',
-  'test payment',
-  undefined,
-  undefined,
-  undefined,
-);
+const command = new RoutePaymentCommand({
+  organizationId: 'org-1',
+  orderId: 'order-1',
+  amountCents: 5000,
+  currency: 'USD',
+  customerId: 'cust-1',
+  customerEmail: 'c@x.com',
+  customerIp: '1.2.3.4',
+  paymentMethodToken: 'tok_1',
+  description: 'test payment',
+  returnUrl: undefined,
+  cancelUrl: undefined,
+  metadata: undefined,
+});
 
 describe('RoutePaymentUseCase', () => {
   let routingRepo: ReturnType<typeof createPSPRoutingRepository>;

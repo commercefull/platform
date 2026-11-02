@@ -48,24 +48,24 @@ export const couponResolvers = {
       requireBusinessAuth(context);
       const useCase = createCouponUseCase;
       const i = args.input;
-      const command = new CreateCouponCommand(
-        i.code,
-        i.name,
-        i.type as 'percentage' | 'fixed_amount' | 'free_shipping',
-        i.value,
-        i.createdBy,
-        i.description,
-        i.currency,
-        i.minOrderValueCents,
-        i.maxDiscountAmountCents,
-        i.usageType as 'single_use' | 'multi_use' | 'unlimited',
-        i.usageLimit,
-        i.customerUsageLimit,
-        i.startsAt ? new Date(i.startsAt) : undefined,
-        i.expiresAt ? new Date(i.expiresAt) : undefined,
-        i.applicableProducts,
-        i.applicableCategories,
-      );
+      const command = new CreateCouponCommand({
+        code: i.code,
+        name: i.name,
+        type: i.type as 'percentage' | 'fixed_amount' | 'free_shipping',
+        value: i.value,
+        createdBy: i.createdBy,
+        description: i.description,
+        currency: i.currency,
+        minOrderValueCents: i.minOrderValueCents,
+        maxDiscountAmountCents: i.maxDiscountAmountCents,
+        usageType: i.usageType as 'single_use' | 'multi_use' | 'unlimited',
+        usageLimit: i.usageLimit,
+        customerUsageLimit: i.customerUsageLimit,
+        startsAt: i.startsAt ? new Date(i.startsAt) : undefined,
+        expiresAt: i.expiresAt ? new Date(i.expiresAt) : undefined,
+        applicableProducts: i.applicableProducts,
+        applicableCategories: i.applicableCategories,
+      });
       const coupon = await useCase.execute(command);
       return {
         couponId: coupon.couponId,

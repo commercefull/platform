@@ -14,16 +14,16 @@ function pendingTransaction(): PaymentTransaction {
   });
 }
 
-const COMMAND = new ChargeDelegatedPaymentCommand(
-  'org-1',
-  'order-1',
-  'txn-1',
-  5000,
-  'USD',
-  { provider: 'stripe', credentialType: 'spt', token: 'spt_abc' },
-  'cust-1',
-  'c@x.com',
-);
+const COMMAND = new ChargeDelegatedPaymentCommand({
+  organizationId: 'org-1',
+  orderId: 'order-1',
+  transactionId: 'txn-1',
+  amountCents: 5000,
+  currency: 'USD',
+  credential: { provider: 'stripe', credentialType: 'spt', token: 'spt_abc' },
+  customerId: 'cust-1',
+  customerEmail: 'c@x.com',
+});
 
 function makeUseCase() {
   const payments = {

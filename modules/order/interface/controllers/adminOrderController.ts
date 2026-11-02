@@ -285,18 +285,14 @@ export const updatePackageTracking = async (req: HttpRequest, res: HttpResponse)
       commercialInvoiceUrl?: string;
     };
 
-    const command = new TrackFulfillmentPackageCommand(
-      '', // orderFulfillmentId not needed for update path
-      '', // packageNumber not needed for update path
-      trackingNumber || undefined,
-      shippingLabelUrl || undefined,
-      commercialInvoiceUrl || undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      packageId,
-    );
+    const command = new TrackFulfillmentPackageCommand({
+      orderFulfillmentId: '',
+      packageNumber: '',
+      trackingNumber: trackingNumber || undefined,
+      shippingLabelUrl: shippingLabelUrl || undefined,
+      commercialInvoiceUrl: commercialInvoiceUrl || undefined,
+      orderFulfillmentPackageId: packageId,
+    });
     await trackFulfillmentPackageUseCase.execute(command);
 
     req.flash?.('success', 'Tracking updated');

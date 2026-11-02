@@ -45,7 +45,7 @@ export const adminAuthUseCase = new AdminAuthUseCase(identityDataRepository.user
 export const getDashboardDataUseCase = new GetDashboardDataUseCase(dashboardQueryRepository);
 
 // --- Token lifecycle use cases (customer + organization flows) ---------------
-import { IssueTokenPairUseCase } from './useCases/token/IssueTokenPair';
+import { IssueTokenPairUseCase, type JwtTokenPort } from './useCases/token/IssueTokenPair';
 import { RenewAccessTokenUseCase } from './useCases/token/RenewAccessToken';
 import { LogoutSessionUseCase } from './useCases/token/LogoutSession';
 import { CleanupExpiredTokensUseCase } from './useCases/token/CleanupExpiredTokens';
@@ -54,7 +54,18 @@ import { generateAccessToken, verifyAccessToken } from '../utils/jwtHelpers';
 const CUSTOMER_JWT_SECRET = getSecret('CUSTOMER_JWT_SECRET');
 const REFRESH_TOKEN_DURATION = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
-const jwtTokenPort = { sign: generateAccessToken, verify: verifyAccessToken };
+const jwtTokenPort: JwtTokenPort = {
+  sign: options =>
+    generateAccessToken({
+      userId: options.subjectId,
+      userEmail: options.email,
+      userRole: options.userType,
+      jwtSecret: options.secret,
+      expiresIn: options.expiresIn,
+      tokenUse: options.tokenUse,
+    }),
+  verify: verifyAccessToken,
+};
 const tokenRepo = identityDataRepository.tokens;
 
 export const issueCustomerTokenPairUseCase = new IssueTokenPairUseCase(customerCredentialPort, tokenRepo, jwtTokenPort, {

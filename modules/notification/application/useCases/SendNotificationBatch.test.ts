@@ -9,17 +9,17 @@ import { SendNotificationBatchUseCase, SendNotificationBatchCommand } from './Se
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
 
 const command = (overrides: { name?: string; channel?: string; recipients?: { userId: string; userType: string }[] } = {}) =>
-  new SendNotificationBatchCommand(
-    overrides.name ?? 'Promo blast',
-    overrides.channel ?? 'email',
-    'promo',
-    'Sale!',
-    'Check our sale',
-    overrides.recipients ?? [
+  new SendNotificationBatchCommand({
+    name: overrides.name ?? 'Promo blast',
+    channel: overrides.channel ?? 'email',
+    type: 'promo',
+    title: 'Sale!',
+    content: 'Check our sale',
+    recipients: overrides.recipients ?? [
       { userId: 'u-1', userType: 'customer' },
       { userId: 'u-2', userType: 'customer' },
     ],
-  );
+  });
 
 describe('SendNotificationBatchUseCase', () => {
   let useCase: SendNotificationBatchUseCase;

@@ -14,26 +14,51 @@ import type { AppliedPromotion } from '../../domain/entities/CheckoutSession';
 import { CheckoutResponse, mapCheckoutToResponse } from './InitiateCheckout';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { BadRequestError, NotFoundError } from '../../../../libs/errors';
+export interface SetShippingAddressCommandProps {
+  checkoutId: string;
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  city: string;
+  /** Optional for countries without postal codes (e.g. AE, HK). */
+  postalCode: string | undefined;
+  country: string;
+  company?: string;
+  addressLine2?: string;
+  region?: string;
+  phone?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class SetShippingAddressCommand {
-  constructor(
-    public readonly checkoutId: string,
-    public readonly firstName: string,
-    public readonly lastName: string,
-    public readonly addressLine1: string,
-    public readonly city: string,
-    /** Optional for countries without postal codes (e.g. AE, HK). */
-    public readonly postalCode: string | undefined,
-    public readonly country: string,
-    public readonly company?: string,
-    public readonly addressLine2?: string,
-    public readonly region?: string,
-    public readonly phone?: string,
-  ) {}
+  public readonly checkoutId: string;
+  public readonly firstName: string;
+  public readonly lastName: string;
+  public readonly addressLine1: string;
+  public readonly city: string;
+  public readonly postalCode: string | undefined;
+  public readonly country: string;
+  public readonly company?: string;
+  public readonly addressLine2?: string;
+  public readonly region?: string;
+  public readonly phone?: string;
+
+  constructor(props: SetShippingAddressCommandProps) {
+    this.checkoutId = props.checkoutId;
+    this.firstName = props.firstName;
+    this.lastName = props.lastName;
+    this.addressLine1 = props.addressLine1;
+    this.city = props.city;
+    this.postalCode = props.postalCode;
+    this.country = props.country;
+    this.company = props.company;
+    this.addressLine2 = props.addressLine2;
+    this.region = props.region;
+    this.phone = props.phone;
+  }
 }
 
 // ============================================================================

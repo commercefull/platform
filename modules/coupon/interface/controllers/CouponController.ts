@@ -64,28 +64,28 @@ interface RedeemCouponBody {
 export const createCoupon = async (req: HttpRequest, res: HttpResponse): Promise<void> => {
   const body = req.body as CreateCouponBody;
   const useCase = createCouponUseCase;
-  const command = new CreateCouponCommand(
-    body.code,
-    body.name,
-    body.type,
-    body.value,
-    body.createdBy,
-    body.description,
-    body.currency,
-    body.minOrderValueCents,
-    body.maxDiscountAmountCents,
-    body.usageType,
-    body.usageLimit,
-    body.customerUsageLimit,
-    body.startsAt ? new Date(body.startsAt) : undefined,
-    body.expiresAt ? new Date(body.expiresAt) : undefined,
-    body.applicableProducts,
-    body.applicableCategories,
-    body.applicableCustomerGroups,
-    body.excludedProducts,
-    body.excludedCategories,
-    body.metadata,
-  );
+  const command = new CreateCouponCommand({
+    code: body.code,
+    name: body.name,
+    type: body.type,
+    value: body.value,
+    createdBy: body.createdBy,
+    description: body.description,
+    currency: body.currency,
+    minOrderValueCents: body.minOrderValueCents,
+    maxDiscountAmountCents: body.maxDiscountAmountCents,
+    usageType: body.usageType,
+    usageLimit: body.usageLimit,
+    customerUsageLimit: body.customerUsageLimit,
+    startsAt: body.startsAt ? new Date(body.startsAt) : undefined,
+    expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
+    applicableProducts: body.applicableProducts,
+    applicableCategories: body.applicableCategories,
+    applicableCustomerGroups: body.applicableCustomerGroups,
+    excludedProducts: body.excludedProducts,
+    excludedCategories: body.excludedCategories,
+    metadata: body.metadata,
+  });
   const coupon = await useCase.execute(command);
   jsonResponse(res, 201, { success: true, data: coupon });
 };

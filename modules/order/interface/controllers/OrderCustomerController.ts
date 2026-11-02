@@ -178,28 +178,28 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     }
   }
 
-  const command = new CreateOrderCommand(
-    customerId,
-    email,
-    items as OrderItemInput[],
-    shippingAddress as AddressInput,
-    billingAddress as AddressInput,
-    basketId,
-    resolvedStoreId,
-    resolvedChannelId,
-    createdByUserId || req.user?.userId || req.user?.id,
-    resolvedOrderSource,
-    currencyCode,
-    customerPhone,
-    customerName,
-    customerNotes,
-    shippingTotalCents,
-    hasGiftWrapping,
-    giftMessage,
-    isGift,
-    req.ip,
-    req.get('User-Agent'),
-  );
+  const command = new CreateOrderCommand({
+    customerId: customerId,
+    customerEmail: email,
+    items: items as OrderItemInput[],
+    shippingAddress: shippingAddress as AddressInput,
+    billingAddress: billingAddress as AddressInput,
+    basketId: basketId,
+    storeId: resolvedStoreId,
+    channelId: resolvedChannelId,
+    createdByUserId: createdByUserId || req.user?.userId || req.user?.id,
+    orderSource: resolvedOrderSource,
+    currencyCode: currencyCode,
+    customerPhone: customerPhone,
+    customerName: customerName,
+    customerNotes: customerNotes,
+    shippingTotalCents: shippingTotalCents,
+    hasGiftWrapping: hasGiftWrapping,
+    giftMessage: giftMessage,
+    isGift: isGift,
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
 
   const useCase = createOrderUseCase;
   const order = await useCase.execute(command);

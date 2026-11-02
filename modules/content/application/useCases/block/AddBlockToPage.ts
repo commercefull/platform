@@ -6,17 +6,34 @@
 import type { IContentRepository } from '../../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentTypeNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface AddBlockToPageCommandProps {
+  contentPageId: string;
+  blockTypeId: string;
+  title: string;
+  content: Record<string, unknown>;
+  sortOrder?: number;
+  isVisible?: boolean;
+  createdBy?: string;
+}
 
 export class AddBlockToPageCommand {
-  constructor(
-    public readonly contentPageId: string,
-    public readonly blockTypeId: string,
-    public readonly title: string,
-    public readonly content: Record<string, unknown>,
-    public readonly sortOrder?: number,
-    public readonly isVisible?: boolean,
-    public readonly createdBy?: string,
-  ) {}
+  public readonly contentPageId: string;
+  public readonly blockTypeId: string;
+  public readonly title: string;
+  public readonly content: Record<string, unknown>;
+  public readonly sortOrder?: number;
+  public readonly isVisible?: boolean;
+  public readonly createdBy?: string;
+
+  constructor(props: AddBlockToPageCommandProps) {
+    this.contentPageId = props.contentPageId;
+    this.blockTypeId = props.blockTypeId;
+    this.title = props.title;
+    this.content = props.content;
+    this.sortOrder = props.sortOrder;
+    this.isVisible = props.isVisible;
+    this.createdBy = props.createdBy;
+  }
 }
 
 export interface BlockResponse {

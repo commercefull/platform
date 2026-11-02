@@ -107,15 +107,15 @@ export const createPreference = async (req: HttpRequest, res: HttpResponse): Pro
 
   const useCase = manageNotificationPreferenceUseCase;
   const result = await useCase.execute(
-    new ManageNotificationPreferenceCommand(
-      userId,
-      'customer',
-      type,
-      channelPreferences || {},
-      isEnabled ?? true,
-      schedulePreferences || undefined,
-      metadata || undefined,
-    ),
+    new ManageNotificationPreferenceCommand({
+      userId: userId,
+      userType: 'customer',
+      type: type,
+      channelPreferences: channelPreferences || {},
+      isEnabled: isEnabled ?? true,
+      schedulePreferences: schedulePreferences || undefined,
+      metadata: metadata || undefined,
+    }),
   );
 
   successResponse(res, result);

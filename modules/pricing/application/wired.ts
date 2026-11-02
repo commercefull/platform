@@ -72,14 +72,14 @@ const currencyPriceRuleQuery: CurrencyPriceRuleQueryPort = {
 export const getCurrencyUseCase = new GetCurrencyUseCase(currencyCatalog);
 export const getDefaultCurrencyUseCase = new GetDefaultCurrencyUseCase(currencyCatalog);
 export const convertPriceUseCase = new ConvertPriceUseCase(currencyCatalog, currencyPriceRuleQuery);
-export const calculatePriceUseCase = new CalculatePriceUseCase(
-  currencyCatalog,
-  pricingDataQuery,
-  pricingRuleQuery,
-  new MembershipBenefitsAdapter(new MembershipRepo()),
-  new LoyaltyBalanceAdapter(new LoyaltyRepo()),
-  convertPriceUseCase,
-);
+export const calculatePriceUseCase = new CalculatePriceUseCase({
+  currencyCatalog: currencyCatalog,
+  pricingData: pricingDataQuery,
+  pricingRules: pricingRuleQuery,
+  membershipBenefits: new MembershipBenefitsAdapter(new MembershipRepo()),
+  loyaltyBalance: new LoyaltyBalanceAdapter(new LoyaltyRepo()),
+  convertPrice: convertPriceUseCase,
+});
 export const calculatePricesUseCase = new CalculatePricesUseCase(calculatePriceUseCase);
 export const calculateRuleImpactUseCase = new CalculateRuleImpactUseCase(pricingRuleQuery, calculatePriceUseCase);
 export const formatPriceUseCase = new FormatPriceUseCase(currencyCatalog);

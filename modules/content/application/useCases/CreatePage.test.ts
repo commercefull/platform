@@ -34,7 +34,7 @@ describe('CreatePageUseCase', () => {
     );
     const useCase = new CreatePageUseCase(repo);
 
-    const result = await useCase.execute(new CreatePageCommand('About', 'about', 'ct-1'));
+    const result = await useCase.execute(new CreatePageCommand({ title: 'About', slug: 'about', contentTypeId: 'ct-1' }));
 
     expect(result.contentPageId).toBe('p1');
     expect(result.title).toBe('About');
@@ -45,23 +45,29 @@ describe('CreatePageUseCase', () => {
     const repo = makeContentRepo();
     const useCase = new CreatePageUseCase(repo);
 
-    await expect(useCase.execute(new CreatePageCommand('', 'slug', 'ct-1'))).rejects.toThrow(ContentValidationError);
-    await expect(useCase.execute(new CreatePageCommand('Title', '', 'ct-1'))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreatePageCommand({ title: '', slug: 'slug', contentTypeId: 'ct-1' }))).rejects.toThrow(
+      ContentValidationError,
+    );
+    await expect(useCase.execute(new CreatePageCommand({ title: 'Title', slug: '', contentTypeId: 'ct-1' }))).rejects.toThrow(
+      ContentValidationError,
+    );
   });
 
   it('should throw ContentTypeNotFoundError when content type does not exist', async () => {
     const repo = makeContentRepo(r => r.findContentTypeById.mockResolvedValue(null));
     const useCase = new CreatePageUseCase(repo);
 
-    await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'missing'))).rejects.toThrow(ContentTypeNotFoundError);
+    await expect(useCase.execute(new CreatePageCommand({ title: 'Title', slug: 'slug', contentTypeId: 'missing' }))).rejects.toThrow(
+      ContentTypeNotFoundError,
+    );
   });
 
   it('should throw ContentTemplateNotFoundError when template does not exist', async () => {
     const repo = makeContentRepo(r => r.findTemplateById.mockResolvedValue(null));
     const useCase = new CreatePageUseCase(repo);
 
-    await expect(useCase.execute(new CreatePageCommand('Title', 'slug', 'ct-1', 'missing-tmpl'))).rejects.toThrow(
-      ContentTemplateNotFoundError,
-    );
+    await expect(
+      useCase.execute(new CreatePageCommand({ title: 'Title', slug: 'slug', contentTypeId: 'ct-1', templateId: 'missing-tmpl' })),
+    ).rejects.toThrow(ContentTemplateNotFoundError);
   });
 });

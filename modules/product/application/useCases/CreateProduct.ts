@@ -10,46 +10,111 @@ import { eventBus } from '../../../../libs/events/eventBus';
 import type { ProductAttributeSetPort, DynamicAttributePort } from '../../domain/repositories/ProductCatalogPorts';
 import type { ProductPricingPort } from '../ports/ProductPricingPort';
 import { ProductSkuAlreadyExistsError, ProductSlugAlreadyExistsError, ProductValidationError } from '../../domain/errors/ProductErrors';
+export interface CreateProductCommandProps {
+  name: string;
+  description: string;
+  productTypeId: string;
+  sku?: string;
+  slug?: string;
+  shortDescription?: string;
+  categoryId?: string;
+  organizationId?: string;
+  /** Base price in integer cents — written to the pricing-owned store. */
+  basePriceCents?: number;
+  salePriceCents?: number;
+  costPriceCents?: number;
+  compareAtPriceCents?: number;
+  currencyCode?: string;
+  weight?: number;
+  weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
+  length?: number;
+  width?: number;
+  height?: number;
+  dimensionUnit?: 'cm' | 'in' | 'm' | 'mm';
+  isFeatured?: boolean;
+  isVirtual?: boolean;
+  isDownloadable?: boolean;
+  isSubscription?: boolean;
+  isTaxable?: boolean;
+  taxClass?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+  isInventoryManaged?: boolean;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class CreateProductCommand {
-  constructor(
-    public readonly name: string,
-    public readonly description: string,
-    public readonly productTypeId: string,
-    public readonly sku?: string,
-    public readonly slug?: string,
-    public readonly shortDescription?: string,
-    public readonly categoryId?: string,
-    public readonly organizationId?: string,
-    /** Base price in integer cents — written to the pricing-owned store. */
-    public readonly basePriceCents?: number,
-    public readonly salePriceCents?: number,
-    public readonly costPriceCents?: number,
-    public readonly compareAtPriceCents?: number,
-    public readonly currencyCode?: string,
-    public readonly weight?: number,
-    public readonly weightUnit?: 'kg' | 'lb' | 'oz' | 'g',
-    public readonly length?: number,
-    public readonly width?: number,
-    public readonly height?: number,
-    public readonly dimensionUnit?: 'cm' | 'in' | 'm' | 'mm',
-    public readonly isFeatured?: boolean,
-    public readonly isVirtual?: boolean,
-    public readonly isDownloadable?: boolean,
-    public readonly isSubscription?: boolean,
-    public readonly isTaxable?: boolean,
-    public readonly taxClass?: string,
-    public readonly metaTitle?: string,
-    public readonly metaDescription?: string,
-    public readonly metaKeywords?: string,
-    public readonly tags?: string[],
-    public readonly metadata?: Record<string, unknown>,
-    public readonly isInventoryManaged?: boolean,
-  ) {}
+  public readonly name: string;
+  public readonly description: string;
+  public readonly productTypeId: string;
+  public readonly sku?: string;
+  public readonly slug?: string;
+  public readonly shortDescription?: string;
+  public readonly categoryId?: string;
+  public readonly organizationId?: string;
+  public readonly basePriceCents?: number;
+  public readonly salePriceCents?: number;
+  public readonly costPriceCents?: number;
+  public readonly compareAtPriceCents?: number;
+  public readonly currencyCode?: string;
+  public readonly weight?: number;
+  public readonly weightUnit?: 'kg' | 'lb' | 'oz' | 'g';
+  public readonly length?: number;
+  public readonly width?: number;
+  public readonly height?: number;
+  public readonly dimensionUnit?: 'cm' | 'in' | 'm' | 'mm';
+  public readonly isFeatured?: boolean;
+  public readonly isVirtual?: boolean;
+  public readonly isDownloadable?: boolean;
+  public readonly isSubscription?: boolean;
+  public readonly isTaxable?: boolean;
+  public readonly taxClass?: string;
+  public readonly metaTitle?: string;
+  public readonly metaDescription?: string;
+  public readonly metaKeywords?: string;
+  public readonly tags?: string[];
+  public readonly metadata?: Record<string, unknown>;
+  public readonly isInventoryManaged?: boolean;
+
+  constructor(props: CreateProductCommandProps) {
+    this.name = props.name;
+    this.description = props.description;
+    this.productTypeId = props.productTypeId;
+    this.sku = props.sku;
+    this.slug = props.slug;
+    this.shortDescription = props.shortDescription;
+    this.categoryId = props.categoryId;
+    this.organizationId = props.organizationId;
+    this.basePriceCents = props.basePriceCents;
+    this.salePriceCents = props.salePriceCents;
+    this.costPriceCents = props.costPriceCents;
+    this.compareAtPriceCents = props.compareAtPriceCents;
+    this.currencyCode = props.currencyCode;
+    this.weight = props.weight;
+    this.weightUnit = props.weightUnit;
+    this.length = props.length;
+    this.width = props.width;
+    this.height = props.height;
+    this.dimensionUnit = props.dimensionUnit;
+    this.isFeatured = props.isFeatured;
+    this.isVirtual = props.isVirtual;
+    this.isDownloadable = props.isDownloadable;
+    this.isSubscription = props.isSubscription;
+    this.isTaxable = props.isTaxable;
+    this.taxClass = props.taxClass;
+    this.metaTitle = props.metaTitle;
+    this.metaDescription = props.metaDescription;
+    this.metaKeywords = props.metaKeywords;
+    this.tags = props.tags;
+    this.metadata = props.metadata;
+    this.isInventoryManaged = props.isInventoryManaged;
+  }
 }
 
 // ============================================================================

@@ -334,39 +334,39 @@ export const createProduct = async (req: HttpRequest, res: HttpResponse): Promis
     return;
   }
 
-  const command = new CreateProductCommand(
-    name,
-    description || '',
-    resolvedProductTypeId,
-    sku,
-    slug,
-    shortDescription,
-    categoryId,
-    organizationId,
-    basePriceCents,
-    salePriceCents,
-    costPriceCents,
-    compareAtPriceCents,
-    currencyCode,
-    weight,
-    weightUnit,
-    length,
-    width,
-    height,
-    dimensionUnit,
-    isFeatured,
-    isVirtual,
-    isDownloadable,
-    isSubscription,
-    isTaxable,
-    taxClass,
-    metaTitle,
-    metaDescription,
-    metaKeywords,
-    tags,
-    metadata,
-    isInventoryManaged,
-  );
+  const command = new CreateProductCommand({
+    name: name,
+    description: description || '',
+    productTypeId: resolvedProductTypeId,
+    sku: sku,
+    slug: slug,
+    shortDescription: shortDescription,
+    categoryId: categoryId,
+    organizationId: organizationId,
+    basePriceCents: basePriceCents,
+    salePriceCents: salePriceCents,
+    costPriceCents: costPriceCents,
+    compareAtPriceCents: compareAtPriceCents,
+    currencyCode: currencyCode,
+    weight: weight,
+    weightUnit: weightUnit,
+    length: length,
+    width: width,
+    height: height,
+    dimensionUnit: dimensionUnit,
+    isFeatured: isFeatured,
+    isVirtual: isVirtual,
+    isDownloadable: isDownloadable,
+    isSubscription: isSubscription,
+    isTaxable: isTaxable,
+    taxClass: taxClass,
+    metaTitle: metaTitle,
+    metaDescription: metaDescription,
+    metaKeywords: metaKeywords,
+    tags: tags,
+    metadata: metadata,
+    isInventoryManaged: isInventoryManaged,
+  });
 
   const useCase = createProductUseCase;
   const product = await useCase.execute(command);
@@ -540,15 +540,15 @@ export const createProductVariant = async (req: HttpRequest, res: HttpResponse):
 
   try {
     const result = await createCatalogVariantUseCase.execute(
-      new CreateCatalogVariantCommand(
-        productId,
-        { productId, ...variantFields } as CatalogVariantCreateParams,
-        priceCents ?? undefined,
-        salePriceCents ?? undefined,
-        compareAtPriceCents ?? undefined,
-        costPriceCents ?? undefined,
-        currencyCode ?? undefined,
-      ),
+      new CreateCatalogVariantCommand({
+        productId: productId,
+        variantFields: { productId, ...variantFields } as CatalogVariantCreateParams,
+        priceCents: priceCents ?? undefined,
+        salePriceCents: salePriceCents ?? undefined,
+        compareAtPriceCents: compareAtPriceCents ?? undefined,
+        costPriceCents: costPriceCents ?? undefined,
+        currencyCode: currencyCode ?? undefined,
+      }),
     );
     respond(req, res, result, 201);
   } catch (error) {
@@ -563,16 +563,16 @@ export const updateProductVariant = async (req: HttpRequest, res: HttpResponse):
 
   try {
     const result = await updateCatalogVariantUseCase.execute(
-      new UpdateCatalogVariantCommand(
-        req.params.productId ?? '',
-        variantId,
-        variantFields as CatalogVariantUpdateParams,
-        priceCents ?? undefined,
-        salePriceCents ?? undefined,
-        compareAtPriceCents ?? undefined,
-        costPriceCents ?? undefined,
-        currencyCode ?? undefined,
-      ),
+      new UpdateCatalogVariantCommand({
+        productId: req.params.productId ?? '',
+        variantId: variantId,
+        variantFields: variantFields as CatalogVariantUpdateParams,
+        priceCents: priceCents ?? undefined,
+        salePriceCents: salePriceCents ?? undefined,
+        compareAtPriceCents: compareAtPriceCents ?? undefined,
+        costPriceCents: costPriceCents ?? undefined,
+        currencyCode: currencyCode ?? undefined,
+      }),
     );
     respond(req, res, result);
   } catch (error) {

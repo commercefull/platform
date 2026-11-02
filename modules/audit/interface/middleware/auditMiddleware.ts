@@ -180,14 +180,17 @@ function sanitizeBody(body: unknown): Record<string, unknown> | undefined {
  * Manual audit logging helper for use in use cases or controllers
  * where automatic middleware doesn't capture enough context.
  */
-export async function recordAudit(
-  action: AuditAction,
-  resourceType: ResourceType,
-  actor: { id: string; type: ActorType; email?: string; name?: string; organizationId?: string; storeId?: string },
-  resource: { id?: string; name?: string },
-  metadata?: Record<string, unknown>,
-  req?: HttpRequest,
-): Promise<void> {
+export interface RecordAuditParams {
+  action: AuditAction;
+  resourceType: ResourceType;
+  actor: { id: string; type: ActorType; email?: string; name?: string; organizationId?: string; storeId?: string };
+  resource: { id?: string; name?: string };
+  metadata?: Record<string, unknown>;
+  req?: HttpRequest;
+}
+
+export async function recordAudit(params: RecordAuditParams): Promise<void> {
+  const { action, resourceType, actor, resource, metadata, req } = params;
   await recordAuditLogUseCase.execute({
     actorId: actor.id,
     actorType: actor.type,

@@ -71,19 +71,19 @@ export const checkoutResolvers = {
       requireAuth(context);
       const useCase = setShippingAddressUseCase;
       const a = args.address;
-      const command = new SetShippingAddressCommand(
-        args.checkoutId,
-        a.firstName,
-        a.lastName,
-        a.addressLine1,
-        a.city,
-        a.postalCode,
-        a.country,
-        a.company,
-        a.addressLine2,
-        a.region,
-        a.phone,
-      );
+      const command = new SetShippingAddressCommand({
+        checkoutId: args.checkoutId,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        addressLine1: a.addressLine1,
+        city: a.city,
+        postalCode: a.postalCode,
+        country: a.country,
+        company: a.company,
+        addressLine2: a.addressLine2,
+        region: a.region,
+        phone: a.phone,
+      });
       return useCase.execute(command);
     },
 
@@ -110,20 +110,20 @@ export const checkoutResolvers = {
       requireAuth(context);
       const useCase = setBillingAddressUseCase;
       const a = args.address;
-      const command = new SetBillingAddressCommand(
-        args.checkoutId,
-        a.firstName,
-        a.lastName,
-        a.addressLine1,
-        a.city,
-        a.postalCode,
-        a.country,
-        a.company,
-        a.addressLine2,
-        a.region,
-        a.phone,
-        args.sameAsShipping ?? false,
-      );
+      const command = new SetBillingAddressCommand({
+        checkoutId: args.checkoutId,
+        firstName: a.firstName,
+        lastName: a.lastName,
+        addressLine1: a.addressLine1,
+        city: a.city,
+        postalCode: a.postalCode,
+        country: a.country,
+        company: a.company,
+        addressLine2: a.addressLine2,
+        region: a.region,
+        phone: a.phone,
+        sameAsShipping: args.sameAsShipping ?? false,
+      });
       return useCase.execute(command);
     },
 

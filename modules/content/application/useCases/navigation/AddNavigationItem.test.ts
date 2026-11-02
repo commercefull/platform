@@ -23,27 +23,33 @@ describe('AddNavigationItemUseCase', () => {
   });
 
   it('should add a navigation item', async () => {
-    const result = await useCase.execute(new AddNavigationItemCommand('n1', 'Home', 'url', undefined, '/'));
+    const result = await useCase.execute(new AddNavigationItemCommand({ navigationId: 'n1', title: 'Home', type: 'url', url: '/' }));
 
     expect(result.id).toBe('ni1');
     expect(emitMock).toHaveBeenCalledWith('content.navigation.item_added', expect.objectContaining({ itemId: 'ni1' }));
   });
 
   it('should throw ContentValidationError when required fields missing', async () => {
-    await expect(useCase.execute(new AddNavigationItemCommand('', 'Home', 'url'))).rejects.toThrow(ContentValidationError);
-    await expect(useCase.execute(new AddNavigationItemCommand('n1', '', 'url'))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new AddNavigationItemCommand({ navigationId: '', title: 'Home', type: 'url' }))).rejects.toThrow(
+      ContentValidationError,
+    );
+    await expect(useCase.execute(new AddNavigationItemCommand({ navigationId: 'n1', title: '', type: 'url' }))).rejects.toThrow(
+      ContentValidationError,
+    );
   });
 
   it('should throw NavigationMenuNotFoundError when navigation does not exist', async () => {
     mockNavRepo.findNavigationById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new AddNavigationItemCommand('missing', 'Home', 'url', undefined, '/'))).rejects.toThrow(
-      NavigationMenuNotFoundError,
-    );
+    await expect(
+      useCase.execute(new AddNavigationItemCommand({ navigationId: 'missing', title: 'Home', type: 'url', url: '/' })),
+    ).rejects.toThrow(NavigationMenuNotFoundError);
   });
 
   it('should throw ContentValidationError when URL type has no url', async () => {
-    await expect(useCase.execute(new AddNavigationItemCommand('n1', 'Home', 'url'))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new AddNavigationItemCommand({ navigationId: 'n1', title: 'Home', type: 'url' }))).rejects.toThrow(
+      ContentValidationError,
+    );
   });
 
   it('should set depth based on parent item', async () => {
@@ -52,7 +58,9 @@ describe('AddNavigationItemUseCase', () => {
       createContentNavigationItem({ contentNavigationItemId: 'ni2', parentId: 'parent', title: 'Sub', url: '/sub', depth: 2 }),
     );
 
-    const result = await useCase.execute(new AddNavigationItemCommand('n1', 'Sub', 'url', 'parent', '/sub'));
+    const result = await useCase.execute(
+      new AddNavigationItemCommand({ navigationId: 'n1', title: 'Sub', type: 'url', parentId: 'parent', url: '/sub' }),
+    );
 
     expect(result.depth).toBe(2);
   });
@@ -61,7 +69,7 @@ describe('AddNavigationItemUseCase', () => {
     mockContentRepo.findPageById.mockResolvedValue(null);
 
     await expect(
-      useCase.execute(new AddNavigationItemCommand('n1', 'About', 'page', undefined, undefined, 'missing-page')),
+      useCase.execute(new AddNavigationItemCommand({ navigationId: 'n1', title: 'About', type: 'page', contentPageId: 'missing-page' })),
     ).rejects.toThrow(ContentPageNotFoundError);
     expect(mockNavRepo.createNavigationItem).not.toHaveBeenCalled();
   });

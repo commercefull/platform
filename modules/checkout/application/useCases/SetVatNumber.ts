@@ -44,19 +44,19 @@ export class SetVatNumberUseCase {
     if (this.setShippingAddress && session.shippingAddress) {
       const address = session.shippingAddress;
       return this.setShippingAddress.execute(
-        new SetShippingAddressCommand(
-          session.id,
-          address.firstName,
-          address.lastName,
-          address.addressLine1,
-          address.city,
-          address.postalCode,
-          address.country,
-          address.company,
-          address.addressLine2,
-          address.region,
-          address.phone,
-        ),
+        new SetShippingAddressCommand({
+          checkoutId: session.id,
+          firstName: address.firstName,
+          lastName: address.lastName,
+          addressLine1: address.addressLine1,
+          city: address.city,
+          postalCode: address.postalCode,
+          country: address.country,
+          company: address.company,
+          addressLine2: address.addressLine2,
+          region: address.region,
+          phone: address.phone,
+        }),
       );
     }
 

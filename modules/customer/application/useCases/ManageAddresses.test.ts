@@ -25,7 +25,16 @@ describe('ManageAddressesUseCase', () => {
       customerRepository.addAddress.mockResolvedValue(createCustomerAddressRow());
 
       const result = await useCase.addAddress(
-        new AddAddressCommand('cust-1', '123 Main St', 'Springfield', 'IL', '12345', 'United States', 'US', 'shipping'),
+        new AddAddressCommand({
+          customerId: 'cust-1',
+          addressLine1: '123 Main St',
+          city: 'Springfield',
+          state: 'IL',
+          postalCode: '12345',
+          country: 'United States',
+          countryCode: 'US',
+          addressType: 'shipping',
+        }),
       );
 
       expect(result.addressId).toBe('new-addr-id');
@@ -39,7 +48,18 @@ describe('ManageAddressesUseCase', () => {
       customerRepository.findById.mockResolvedValue(null);
 
       await expect(
-        useCase.addAddress(new AddAddressCommand('missing', '123 St', 'City', 'ST', '1', 'US', 'US', 'shipping')),
+        useCase.addAddress(
+          new AddAddressCommand({
+            customerId: 'missing',
+            addressLine1: '123 St',
+            city: 'City',
+            state: 'ST',
+            postalCode: '1',
+            country: 'US',
+            countryCode: 'US',
+            addressType: 'shipping',
+          }),
+        ),
       ).rejects.toThrow(CustomerNotFoundError);
       expect(customerRepository.addAddress).not.toHaveBeenCalled();
     });

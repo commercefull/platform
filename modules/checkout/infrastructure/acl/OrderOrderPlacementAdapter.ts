@@ -31,46 +31,36 @@ export class OrderOrderPlacementAdapter implements OrderPlacementPort {
   ) {}
 
   async createOrder(request: CreateOrderRequest): Promise<OrderSnapshot> {
-    const command = new CreateOrderCommand(
-      request.customerId,
-      request.customerEmail,
-      request.items,
-      request.shippingAddress,
-      request.billingAddress,
-      request.basketId,
-      request.storeId,
-      request.channelId,
-      undefined, // createdByUserId
-      request.source,
-      request.currency,
-      undefined, // customerPhone
-      undefined, // customerName
-      request.notes,
-      request.shippingAmountCents,
-      undefined, // hasGiftWrapping
-      undefined, // giftMessage
-      undefined, // isGift
-      undefined, // ipAddress
-      undefined, // userAgent
-      undefined, // referralSource
-      request.metadata,
-      undefined, // allowGuestOrder
-      request.taxAmountCents,
-      request.taxAddedCents,
-      request.taxIncludedInSubtotal,
-      request.marketId,
-      request.localeCode,
-      request.contractingEntityId,
-      request.catalogCurrencyCode,
-      request.displayedCurrencyCode,
-      request.settlementCurrencyCode,
-      request.accountingCurrencyCode,
-      request.exchangeRateSnapshot,
-      request.versionSnapshot,
-      request.decisionLog,
-      request.appliedPromotions,
-      request.taxLines,
-    );
+    const command = new CreateOrderCommand({
+      customerId: request.customerId,
+      customerEmail: request.customerEmail,
+      items: request.items,
+      shippingAddress: request.shippingAddress,
+      billingAddress: request.billingAddress,
+      basketId: request.basketId,
+      storeId: request.storeId,
+      channelId: request.channelId,
+      orderSource: request.source,
+      currencyCode: request.currency,
+      customerNotes: request.notes,
+      shippingTotalCents: request.shippingAmountCents,
+      metadata: request.metadata,
+      taxTotalCents: request.taxAmountCents,
+      taxAddedToTotalCents: request.taxAddedCents,
+      taxIncludedInSubtotal: request.taxIncludedInSubtotal,
+      marketId: request.marketId,
+      localeCode: request.localeCode,
+      contractingEntityId: request.contractingEntityId,
+      catalogCurrencyCode: request.catalogCurrencyCode,
+      displayedCurrencyCode: request.displayedCurrencyCode,
+      settlementCurrencyCode: request.settlementCurrencyCode,
+      accountingCurrencyCode: request.accountingCurrencyCode,
+      exchangeRateSnapshot: request.exchangeRateSnapshot,
+      versionSnapshot: request.versionSnapshot,
+      decisionLog: request.decisionLog,
+      appliedPromotions: request.appliedPromotions,
+      taxLines: request.taxLines,
+    });
 
     const response = await this.createOrderUseCase.execute(command);
     const order = await this.orderRepository.findById(response.orderId);

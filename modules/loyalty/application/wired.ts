@@ -12,7 +12,12 @@ const customerPointsAdapter: AdjustCustomerPointsPort = {
   findCustomerPoints: customerId => loyaltyDataRepository.points.findCustomerPoints(customerId),
   initializeCustomerPoints: (customerId, tierId) => loyaltyDataRepository.points.initializeCustomerPoints(customerId, tierId),
   adjustCustomerPoints: (customerId, points, reason) =>
-    loyaltyDataRepository.points.adjustCustomerPoints(customerId, points, LoyaltyPointsAction.MANUAL_ADJUSTMENT, reason),
+    loyaltyDataRepository.points.adjustCustomerPoints({
+      customerId,
+      pointsChange: points,
+      action: LoyaltyPointsAction.MANUAL_ADJUSTMENT,
+      description: reason,
+    }),
 };
 
 export const adjustCustomerPointsUseCase = new AdjustCustomerPointsUseCase(customerPointsAdapter);

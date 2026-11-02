@@ -46,15 +46,20 @@ describe('CreateOrderUseCase', () => {
 
   it('should create order (happy path)', async () => {
     const result = await useCase.execute(
-      new CreateOrderCommand('c1', 'test@test.com', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 2, unitPriceCents: 5000 }], {
-        firstName: 'John',
-        lastName: 'Doe',
-        address1: '123 Main',
-        city: 'NYC',
-        state: 'NY',
-        postalCode: '10001',
-        country: 'US',
-        countryCode: 'US',
+      new CreateOrderCommand({
+        customerId: 'c1',
+        customerEmail: 'test@test.com',
+        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 2, unitPriceCents: 5000 }],
+        shippingAddress: {
+          firstName: 'John',
+          lastName: 'Doe',
+          address1: '123 Main',
+          city: 'NYC',
+          state: 'NY',
+          postalCode: '10001',
+          country: 'US',
+          countryCode: 'US',
+        },
       }),
     );
 
@@ -66,15 +71,20 @@ describe('CreateOrderUseCase', () => {
   it('should throw OrderMustContainItemsError for empty items', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand('c1', 'test@test.com', [], {
-          firstName: 'John',
-          lastName: 'Doe',
-          address1: '123 Main',
-          city: 'NYC',
-          state: 'NY',
-          postalCode: '10001',
-          country: 'US',
-          countryCode: 'US',
+        new CreateOrderCommand({
+          customerId: 'c1',
+          customerEmail: 'test@test.com',
+          items: [],
+          shippingAddress: {
+            firstName: 'John',
+            lastName: 'Doe',
+            address1: '123 Main',
+            city: 'NYC',
+            state: 'NY',
+            postalCode: '10001',
+            country: 'US',
+            countryCode: 'US',
+          },
         }),
       ),
     ).rejects.toThrow(OrderMustContainItemsError);
@@ -83,15 +93,20 @@ describe('CreateOrderUseCase', () => {
   it('should throw CustomerEmailRequiredError when email missing', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand('c1', '', [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }], {
-          firstName: 'John',
-          lastName: 'Doe',
-          address1: '123 Main',
-          city: 'NYC',
-          state: 'NY',
-          postalCode: '10001',
-          country: 'US',
-          countryCode: 'US',
+        new CreateOrderCommand({
+          customerId: 'c1',
+          customerEmail: '',
+          items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+          shippingAddress: {
+            firstName: 'John',
+            lastName: 'Doe',
+            address1: '123 Main',
+            city: 'NYC',
+            state: 'NY',
+            postalCode: '10001',
+            country: 'US',
+            countryCode: 'US',
+          },
         }),
       ),
     ).rejects.toThrow(CustomerEmailRequiredError);
@@ -100,43 +115,29 @@ describe('CreateOrderUseCase', () => {
   it('should throw ShippingAddressRequiredError when address is missing', async () => {
     await expect(
       useCase.execute(
-        new CreateOrderCommand(
-          'c1',
-          'test@test.com',
-          [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
-          undefined as unknown as AddressInput,
-        ),
+        new CreateOrderCommand({
+          customerId: 'c1',
+          customerEmail: 'test@test.com',
+          items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+          shippingAddress: undefined as unknown as AddressInput,
+        }),
       ),
     ).rejects.toThrow(ShippingAddressRequiredError);
   });
 
   it('should create a guest order without shipping address when allowGuestOrder is set', async () => {
     const result = await useCase.execute(
-      new CreateOrderCommand(
-        undefined,
-        'pos@example.com',
-        [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
-        undefined,
-        undefined,
-        undefined,
-        'store-1',
-        undefined,
-        'user-1',
-        'pos',
-        'USD',
-        undefined,
-        'Walk-in',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        true,
-      ),
+      new CreateOrderCommand({
+        customerId: undefined,
+        customerEmail: 'pos@example.com',
+        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+        storeId: 'store-1',
+        createdByUserId: 'user-1',
+        orderSource: 'pos',
+        currencyCode: 'USD',
+        customerName: 'Walk-in',
+        allowGuestOrder: true,
+      }),
     );
 
     expect(result.orderId).toBe('o1');
@@ -145,31 +146,15 @@ describe('CreateOrderUseCase', () => {
 
   it('should create a guest order without customer email when allowGuestOrder is set', async () => {
     const result = await useCase.execute(
-      new CreateOrderCommand(
-        undefined,
-        undefined,
-        [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'pos',
-        'USD',
-        undefined,
-        'Walk-in',
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        true,
-      ),
+      new CreateOrderCommand({
+        customerId: undefined,
+        customerEmail: undefined,
+        items: [{ productId: 'p1', sku: 'SKU1', name: 'Widget', quantity: 1, unitPriceCents: 5000 }],
+        orderSource: 'pos',
+        currencyCode: 'USD',
+        customerName: 'Walk-in',
+        allowGuestOrder: true,
+      }),
     );
 
     expect(result.orderId).toBe('o1');

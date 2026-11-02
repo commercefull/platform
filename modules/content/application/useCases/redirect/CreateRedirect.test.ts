@@ -17,22 +17,26 @@ describe('CreateRedirectUseCase', () => {
   });
 
   it('should create a redirect successfully', async () => {
-    const result = await useCase.execute(new CreateRedirectCommand('/old', '/new'));
+    const result = await useCase.execute(new CreateRedirectCommand({ sourceUrl: '/old', targetUrl: '/new' }));
 
     expect(result.id).toBe('r1');
     expect(emitMock).toHaveBeenCalledWith('content.redirect.created', expect.objectContaining({ redirectId: 'r1' }));
   });
 
   it('should throw ContentValidationError when source or target missing', async () => {
-    await expect(useCase.execute(new CreateRedirectCommand('', '/new'))).rejects.toThrow(ContentValidationError);
-    await expect(useCase.execute(new CreateRedirectCommand('/old', ''))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreateRedirectCommand({ sourceUrl: '', targetUrl: '/new' }))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreateRedirectCommand({ sourceUrl: '/old', targetUrl: '' }))).rejects.toThrow(ContentValidationError);
   });
 
   it('should throw ContentValidationError when source equals target', async () => {
-    await expect(useCase.execute(new CreateRedirectCommand('/same', '/same'))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreateRedirectCommand({ sourceUrl: '/same', targetUrl: '/same' }))).rejects.toThrow(
+      ContentValidationError,
+    );
   });
 
   it('should throw ContentValidationError for invalid regex', async () => {
-    await expect(useCase.execute(new CreateRedirectCommand('[invalid', '/new', 301, true))).rejects.toThrow(ContentValidationError);
+    await expect(
+      useCase.execute(new CreateRedirectCommand({ sourceUrl: '[invalid', targetUrl: '/new', statusCode: 301, isRegex: true })),
+    ).rejects.toThrow(ContentValidationError);
   });
 });

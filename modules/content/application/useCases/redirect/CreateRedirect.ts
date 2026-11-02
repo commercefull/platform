@@ -6,17 +6,34 @@
 import type { IContentRedirectRepository } from '../../../domain/repositories/ContentRedirectRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface CreateRedirectCommandProps {
+  sourceUrl: string;
+  targetUrl: string;
+  statusCode?: 301 | 302 | 303 | 307 | 308;
+  isRegex?: boolean;
+  isActive?: boolean;
+  notes?: string;
+  createdBy?: string;
+}
 
 export class CreateRedirectCommand {
-  constructor(
-    public readonly sourceUrl: string,
-    public readonly targetUrl: string,
-    public readonly statusCode?: 301 | 302 | 303 | 307 | 308,
-    public readonly isRegex?: boolean,
-    public readonly isActive?: boolean,
-    public readonly notes?: string,
-    public readonly createdBy?: string,
-  ) {}
+  public readonly sourceUrl: string;
+  public readonly targetUrl: string;
+  public readonly statusCode?: 301 | 302 | 303 | 307 | 308;
+  public readonly isRegex?: boolean;
+  public readonly isActive?: boolean;
+  public readonly notes?: string;
+  public readonly createdBy?: string;
+
+  constructor(props: CreateRedirectCommandProps) {
+    this.sourceUrl = props.sourceUrl;
+    this.targetUrl = props.targetUrl;
+    this.statusCode = props.statusCode;
+    this.isRegex = props.isRegex;
+    this.isActive = props.isActive;
+    this.notes = props.notes;
+    this.createdBy = props.createdBy;
+  }
 }
 
 export interface RedirectResponse {

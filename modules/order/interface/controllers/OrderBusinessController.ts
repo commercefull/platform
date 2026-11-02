@@ -181,31 +181,30 @@ export const createOrder = async (req: HttpRequest, res: HttpResponse): Promise<
     return;
   }
 
-  const command = new CreateOrderCommand(
-    body.customerId,
-    body.customerEmail,
-    body.items,
-    body.shippingAddress,
-    body.billingAddress,
-    body.basketId,
-    body.storeId,
-    body.channelId,
-    req.user?.userId,
-    body.orderSource || 'manual',
-    body.currencyCode,
-    body.customerPhone,
-    body.customerName,
-    body.customerNotes,
-    body.shippingTotalCents,
-    body.hasGiftWrapping,
-    body.giftMessage,
-    body.isGift,
-    req.ip,
-    req.get('User-Agent'),
-    undefined,
-    body.metadata,
-    true, // allowGuestOrder — back-office/POS orders may lack email and address
-  );
+  const command = new CreateOrderCommand({
+    customerId: body.customerId,
+    customerEmail: body.customerEmail,
+    items: body.items,
+    shippingAddress: body.shippingAddress,
+    billingAddress: body.billingAddress,
+    basketId: body.basketId,
+    storeId: body.storeId,
+    channelId: body.channelId,
+    createdByUserId: req.user?.userId,
+    orderSource: body.orderSource || 'manual',
+    currencyCode: body.currencyCode,
+    customerPhone: body.customerPhone,
+    customerName: body.customerName,
+    customerNotes: body.customerNotes,
+    shippingTotalCents: body.shippingTotalCents,
+    hasGiftWrapping: body.hasGiftWrapping,
+    giftMessage: body.giftMessage,
+    isGift: body.isGift,
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+    metadata: body.metadata,
+    allowGuestOrder: true,
+  });
 
   const order = await createOrderUseCase.execute(command);
 
@@ -445,14 +444,14 @@ export const createOrderRefund = async (req: HttpRequest, res: HttpResponse): Pr
   const body = req.body as { orderPaymentId: string; amount: string; reason: string; notes?: string; transactionId?: string };
   const { orderPaymentId, amount, reason, notes, transactionId } = body;
 
-  const command = new CreateOrderRefundCommand(
-    orderPaymentId,
-    Math.round(parseFloat(amount) * 100),
-    reason,
-    notes,
-    transactionId,
-    req.user?.userId,
-  );
+  const command = new CreateOrderRefundCommand({
+    orderPaymentId: orderPaymentId,
+    amountCents: Math.round(parseFloat(amount) * 100),
+    reason: reason,
+    notes: notes,
+    transactionId: transactionId,
+    refundedBy: req.user?.userId,
+  });
   const useCase = createOrderRefundUseCase;
   const result = await useCase.execute(command);
 
@@ -505,17 +504,17 @@ export const createFulfillmentPackage = async (req: HttpRequest, res: HttpRespon
     customsInfo,
   } = body;
 
-  const command = new TrackFulfillmentPackageCommand(
-    orderFulfillmentId,
-    packageNumber,
-    trackingNumber,
-    shippingLabelUrl,
-    commercialInvoiceUrl,
-    weight ? parseFloat(weight) : undefined,
-    dimensions,
-    packageType,
-    customsInfo,
-  );
+  const command = new TrackFulfillmentPackageCommand({
+    orderFulfillmentId: orderFulfillmentId,
+    packageNumber: packageNumber,
+    trackingNumber: trackingNumber,
+    shippingLabelUrl: shippingLabelUrl,
+    commercialInvoiceUrl: commercialInvoiceUrl,
+    weight: weight ? parseFloat(weight) : undefined,
+    dimensions: dimensions,
+    packageType: packageType,
+    customsInfo: customsInfo,
+  });
   const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 
@@ -537,18 +536,14 @@ export const trackFulfillmentPackage = async (req: HttpRequest, res: HttpRespons
   };
   const { orderFulfillmentId, packageNumber, trackingNumber, shippingLabelUrl, commercialInvoiceUrl } = body;
 
-  const command = new TrackFulfillmentPackageCommand(
-    orderFulfillmentId || '',
-    packageNumber || '',
-    trackingNumber,
-    shippingLabelUrl,
-    commercialInvoiceUrl,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    packageId,
-  );
+  const command = new TrackFulfillmentPackageCommand({
+    orderFulfillmentId: orderFulfillmentId || '',
+    packageNumber: packageNumber || '',
+    trackingNumber: trackingNumber,
+    shippingLabelUrl: shippingLabelUrl,
+    commercialInvoiceUrl: commercialInvoiceUrl,
+    orderFulfillmentPackageId: packageId,
+  });
   const useCase = trackFulfillmentPackageUseCase;
   const result = await useCase.execute(command);
 

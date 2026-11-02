@@ -57,18 +57,18 @@ describe('CalculateBasketTaxUseCase', () => {
     const result = await useCase.execute(command);
 
     expect(result).toEqual({ complex: true });
-    expect(calcPort.calculateComplexTax).toHaveBeenCalledWith(
-      [
+    expect(calcPort.calculateComplexTax).toHaveBeenCalledWith({
+      items: [
         { product_id: 'p1', quantity: 2, priceCents: 1000, tax_category_id: undefined },
         { product_id: 'p2', quantity: 1, priceCents: 500, tax_category_id: undefined },
       ],
-      expect.objectContaining({ country: 'US' }),
-      expect.objectContaining({ country: 'US' }),
-      2500,
-      0,
-      'c1',
-      undefined,
-    );
+      shippingAddress: expect.objectContaining({ country: 'US' }),
+      billingAddress: expect.objectContaining({ country: 'US' }),
+      subtotalCents: 2500,
+      shippingAmountCents: 0,
+      customerId: 'c1',
+      organizationId: undefined,
+    });
   });
 
   it('should throw TaxableBasketNotFoundError when the basket does not exist', async () => {

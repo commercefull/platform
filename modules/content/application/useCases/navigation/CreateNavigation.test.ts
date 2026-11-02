@@ -17,14 +17,14 @@ describe('CreateNavigationUseCase', () => {
   });
 
   it('should create a navigation menu', async () => {
-    const result = await useCase.execute(new CreateNavigationCommand('Main Menu', 'main-menu', undefined, 'header'));
+    const result = await useCase.execute(new CreateNavigationCommand({ name: 'Main Menu', slug: 'main-menu', location: 'header' }));
 
     expect(result.id).toBe('n1');
     expect(emitMock).toHaveBeenCalledWith('content.navigation.created', expect.objectContaining({ navigationId: 'n1' }));
   });
 
   it('should throw ContentValidationError when name or slug missing', async () => {
-    await expect(useCase.execute(new CreateNavigationCommand('', 'slug'))).rejects.toThrow(ContentValidationError);
-    await expect(useCase.execute(new CreateNavigationCommand('Name', ''))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreateNavigationCommand({ name: '', slug: 'slug' }))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new CreateNavigationCommand({ name: 'Name', slug: '' }))).rejects.toThrow(ContentValidationError);
   });
 });

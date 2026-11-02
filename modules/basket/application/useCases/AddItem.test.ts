@@ -13,7 +13,7 @@ describe('AddItemUseCase', () => {
 
     await expect(
       new AddItemUseCase(repository, createProductPricePort(), undefined, sellabilityPort).execute(
-        new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+        new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
       ),
     ).rejects.toThrow(BasketValidationError);
     expect(sellabilityPort.isSellable).toHaveBeenCalledWith('store-1', 'product-2', 'channel-1');
@@ -27,7 +27,7 @@ describe('AddItemUseCase', () => {
     };
 
     await new AddItemUseCase(repository, createProductPricePort(), undefined, sellabilityPort).execute(
-      new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+      new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
     );
 
     expect(repository.addItem).toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe('AddItemUseCase', () => {
     const pricePort = createProductPricePort({ unitPriceCents: 3000, currency: 'USD' });
 
     const result = await new AddItemUseCase(repository, pricePort).execute(
-      new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+      new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
     );
 
     const addedItem = repository.addItem.mock.calls[0][1];
@@ -52,7 +52,16 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(createBasket({ storeId: 'store-1', channelId: 'channel-1' }));
     const pricePort = createProductPricePort({ unitPriceCents: 4500, currency: 'USD' });
 
-    await new AddItemUseCase(repository, pricePort).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 2, 'variant-9'));
+    await new AddItemUseCase(repository, pricePort).execute(
+      new AddItemCommand({
+        basketId: BASKET_ID,
+        productId: 'product-2',
+        sku: 'SKU-2',
+        name: 'Gadget',
+        quantity: 2,
+        productVariantId: 'variant-9',
+      }),
+    );
 
     expect(pricePort.getPrice).toHaveBeenCalledWith('product-2', 'variant-9', 'USD', 2, {
       storeId: 'store-1',
@@ -73,7 +82,14 @@ describe('AddItemUseCase', () => {
     };
 
     await new AddItemUseCase(repository, createProductPricePort(), detailsPort).execute(
-      new AddItemCommand(BASKET_ID, 'product-2', 'CLIENT-SKU', 'Client name', 1, undefined, undefined, undefined, 'physical'),
+      new AddItemCommand({
+        basketId: BASKET_ID,
+        productId: 'product-2',
+        sku: 'CLIENT-SKU',
+        name: 'Client name',
+        quantity: 1,
+        itemType: 'physical',
+      }),
     );
 
     const item = repository.addItem.mock.calls[0][1];
@@ -87,7 +103,7 @@ describe('AddItemUseCase', () => {
     const pricePort = createProductPricePort();
 
     const result = await new AddItemUseCase(repository, pricePort).execute(
-      new AddItemCommand(BASKET_ID, 'product-1', 'SKU-1', 'Widget', 3),
+      new AddItemCommand({ basketId: BASKET_ID, productId: 'product-1', sku: 'SKU-1', name: 'Widget', quantity: 3 }),
     );
 
     expect(repository.updateItem).toHaveBeenCalled();
@@ -101,7 +117,14 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(createBasket({ items: [createBasketItem({ productVariantId: 'variant-1' })] }));
 
     await new AddItemUseCase(repository, createProductPricePort()).execute(
-      new AddItemCommand(BASKET_ID, 'product-1', 'SKU-1', 'Widget', 1, 'variant-2'),
+      new AddItemCommand({
+        basketId: BASKET_ID,
+        productId: 'product-1',
+        sku: 'SKU-1',
+        name: 'Widget',
+        quantity: 1,
+        productVariantId: 'variant-2',
+      }),
     );
 
     expect(repository.addItem).toHaveBeenCalled();
@@ -112,7 +135,7 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(createBasket());
 
     await new AddItemUseCase(repository, createProductPricePort()).execute(
-      new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+      new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
     );
 
     expect(emitMock).toHaveBeenCalledWith(
@@ -126,7 +149,7 @@ describe('AddItemUseCase', () => {
 
     await expect(
       new AddItemUseCase(repository, createProductPricePort(null)).execute(
-        new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1),
+        new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
       ),
     ).rejects.toThrow(BasketValidationError);
     expect(repository.addItem).not.toHaveBeenCalled();
@@ -136,7 +159,9 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(createBasket());
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 0)),
+      new AddItemUseCase(repository, createProductPricePort()).execute(
+        new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 0 }),
+      ),
     ).rejects.toThrow(BasketValidationError);
     expect(repository.findById).not.toHaveBeenCalled();
     expect(repository.addItem).not.toHaveBeenCalled();
@@ -146,7 +171,9 @@ describe('AddItemUseCase', () => {
     const repository = createBasketRepository(null);
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand('missing', 'product-1', 'SKU-1', 'Widget', 1)),
+      new AddItemUseCase(repository, createProductPricePort()).execute(
+        new AddItemCommand({ basketId: 'missing', productId: 'product-1', sku: 'SKU-1', name: 'Widget', quantity: 1 }),
+      ),
     ).rejects.toThrow(BasketNotFoundError);
   });
 
@@ -155,7 +182,9 @@ describe('AddItemUseCase', () => {
     repository.findById.mockResolvedValueOnce(createBasket()).mockResolvedValue(null);
 
     await expect(
-      new AddItemUseCase(repository, createProductPricePort()).execute(new AddItemCommand(BASKET_ID, 'product-2', 'SKU-2', 'Gadget', 1)),
+      new AddItemUseCase(repository, createProductPricePort()).execute(
+        new AddItemCommand({ basketId: BASKET_ID, productId: 'product-2', sku: 'SKU-2', name: 'Gadget', quantity: 1 }),
+      ),
     ).rejects.toThrow(BasketNotFoundError);
   });
 });

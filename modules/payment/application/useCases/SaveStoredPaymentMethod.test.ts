@@ -16,7 +16,18 @@ describe('SaveStoredPaymentMethodUseCase', () => {
 
   it('should save a stored payment method and set it as default', async () => {
     const result = await useCase.execute(
-      new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_1', true, '4242', 'visa', 12, 2026),
+      new SaveStoredPaymentMethodCommand({
+        customerId: 'c1',
+        organizationId: 'org1',
+        type: 'card',
+        provider: 'stripe',
+        providerToken: 'tok_1',
+        isDefault: true,
+        last4: '4242',
+        brand: 'visa',
+        expiryMonth: 12,
+        expiryYear: 2026,
+      }),
     );
 
     expect(result.storedPaymentMethodId).toBe('spm1');
@@ -27,15 +38,32 @@ describe('SaveStoredPaymentMethodUseCase', () => {
   it('should throw FailedToCreateStoredPaymentMethodError when creation fails', async () => {
     repo.createStoredMethod.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute(new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_1'))).rejects.toThrow(
-      FailedToCreateStoredPaymentMethodError,
-    );
+    await expect(
+      useCase.execute(
+        new SaveStoredPaymentMethodCommand({
+          customerId: 'c1',
+          organizationId: 'org1',
+          type: 'card',
+          provider: 'stripe',
+          providerToken: 'tok_1',
+        }),
+      ),
+    ).rejects.toThrow(FailedToCreateStoredPaymentMethodError);
   });
 
   it('should not set a default when isDefault is false', async () => {
     repo.createStoredMethod.mockResolvedValueOnce(createStoredPaymentMethod({ storedPaymentMethodId: 'spm2', isDefault: false }));
 
-    await useCase.execute(new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_2', false));
+    await useCase.execute(
+      new SaveStoredPaymentMethodCommand({
+        customerId: 'c1',
+        organizationId: 'org1',
+        type: 'card',
+        provider: 'stripe',
+        providerToken: 'tok_2',
+        isDefault: false,
+      }),
+    );
 
     expect(repo.setDefaultStoredMethod).not.toHaveBeenCalled();
   });
@@ -43,8 +71,16 @@ describe('SaveStoredPaymentMethodUseCase', () => {
   it('should throw FailedToRetrieveSavedPaymentMethodError when the saved method cannot be re-read', async () => {
     repo.findStoredMethodById.mockResolvedValueOnce(null);
 
-    await expect(useCase.execute(new SaveStoredPaymentMethodCommand('c1', 'org1', 'card', 'stripe', 'tok_1'))).rejects.toThrow(
-      FailedToRetrieveSavedPaymentMethodError,
-    );
+    await expect(
+      useCase.execute(
+        new SaveStoredPaymentMethodCommand({
+          customerId: 'c1',
+          organizationId: 'org1',
+          type: 'card',
+          provider: 'stripe',
+          providerToken: 'tok_1',
+        }),
+      ),
+    ).rejects.toThrow(FailedToRetrieveSavedPaymentMethodError);
   });
 });

@@ -174,19 +174,19 @@ export const setShippingAddress = async (
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone } = req.body;
 
-  const command = new SetShippingAddressCommand(
-    checkoutId,
-    firstName,
-    lastName,
-    addressLine1,
-    city,
-    postalCode,
-    country,
-    company,
-    addressLine2,
-    region,
-    phone,
-  );
+  const command = new SetShippingAddressCommand({
+    checkoutId: checkoutId,
+    firstName: firstName,
+    lastName: lastName,
+    addressLine1: addressLine1,
+    city: city,
+    postalCode: postalCode,
+    country: country,
+    company: company,
+    addressLine2: addressLine2,
+    region: region,
+    phone: phone,
+  });
   const useCase = setShippingAddressUseCase;
   const checkout = await useCase.execute(command);
 
@@ -503,20 +503,20 @@ export const setBillingAddress = async (
   const { checkoutId } = req.params;
   const { firstName, lastName, company, addressLine1, addressLine2, city, region, postalCode, country, phone, sameAsShipping } = req.body;
 
-  const command = new SetBillingAddressCommand(
-    checkoutId,
-    firstName,
-    lastName,
-    addressLine1,
-    city,
-    postalCode,
-    country,
-    company,
-    addressLine2,
-    region,
-    phone,
-    sameAsShipping,
-  );
+  const command = new SetBillingAddressCommand({
+    checkoutId: checkoutId,
+    firstName: firstName,
+    lastName: lastName,
+    addressLine1: addressLine1,
+    city: city,
+    postalCode: postalCode,
+    country: country,
+    company: company,
+    addressLine2: addressLine2,
+    region: region,
+    phone: phone,
+    sameAsShipping: sameAsShipping,
+  });
 
   const useCase = setBillingAddressUseCase;
   const checkout = await useCase.execute(command);

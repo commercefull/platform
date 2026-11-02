@@ -26,14 +26,14 @@ export const gdprResolvers = {
     ) => {
       requireCustomerAuth(context);
       const useCase = createDataRequestUseCase;
-      const command = new CreateDataRequestCommand(
-        args.input.customerId,
-        args.input.requestType,
-        args.input.reason,
-        args.input.requestedData,
-        args.input.ipAddress,
-        args.input.userAgent,
-      );
+      const command = new CreateDataRequestCommand({
+        customerId: args.input.customerId,
+        requestType: args.input.requestType,
+        reason: args.input.reason,
+        requestedData: args.input.requestedData,
+        ipAddress: args.input.ipAddress,
+        userAgent: args.input.userAgent,
+      });
       return useCase.execute(command);
     },
 
@@ -81,18 +81,16 @@ export const gdprResolvers = {
       },
     ) => {
       const useCase = manageCookieConsentUseCase;
-      const command = new RecordCookieConsentCommand(
-        args.input.sessionId,
-        args.input.preferences,
-        args.input.customerId,
-        undefined,
-        args.input.ipAddress,
-        args.input.userAgent,
-        args.input.country,
-        args.input.region,
-        undefined,
-        args.input.consentMethod,
-      );
+      const command = new RecordCookieConsentCommand({
+        sessionId: args.input.sessionId,
+        preferences: args.input.preferences,
+        customerId: args.input.customerId,
+        ipAddress: args.input.ipAddress,
+        userAgent: args.input.userAgent,
+        country: args.input.country,
+        region: args.input.region,
+        consentMethod: args.input.consentMethod,
+      });
       return useCase.recordConsent(command);
     },
   },

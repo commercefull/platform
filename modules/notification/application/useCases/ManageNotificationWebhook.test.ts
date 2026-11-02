@@ -14,7 +14,13 @@ describe('ManageNotificationWebhookUseCase', () => {
     webhookRepo.create.mockResolvedValue(createNotificationWebhook());
 
     const result = await useCase.execute(
-      new ManageNotificationWebhookCommand('create', 'org-1', undefined, 'https://example.com/hook', 'sec', ['order.created']),
+      new ManageNotificationWebhookCommand({
+        action: 'create',
+        organizationId: 'org-1',
+        url: 'https://example.com/hook',
+        secret: 'sec',
+        events: ['order.created'],
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -30,7 +36,9 @@ describe('ManageNotificationWebhookUseCase', () => {
   });
 
   it('should return an error when create is missing a url', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('create', 'org-1', undefined, undefined, undefined, ['e']));
+    const result = await useCase.execute(
+      new ManageNotificationWebhookCommand({ action: 'create', organizationId: 'org-1', events: ['e'] }),
+    );
 
     expect(result).toEqual({ success: false, error: 'url is required' });
     expect(webhookRepo.create).not.toHaveBeenCalled();
@@ -38,7 +46,7 @@ describe('ManageNotificationWebhookUseCase', () => {
 
   it('should return an error when create has no events', async () => {
     const result = await useCase.execute(
-      new ManageNotificationWebhookCommand('create', 'org-1', undefined, 'https://x.com', undefined, []),
+      new ManageNotificationWebhookCommand({ action: 'create', organizationId: 'org-1', url: 'https://x.com', events: [] }),
     );
 
     expect(result).toEqual({ success: false, error: 'events are required' });
@@ -48,21 +56,21 @@ describe('ManageNotificationWebhookUseCase', () => {
     webhookRepo.create.mockResolvedValue(null);
 
     const result = await useCase.execute(
-      new ManageNotificationWebhookCommand('create', 'org-1', undefined, 'https://x.com', undefined, ['e']),
+      new ManageNotificationWebhookCommand({ action: 'create', organizationId: 'org-1', url: 'https://x.com', events: ['e'] }),
     );
 
     expect(result).toEqual({ success: false, error: 'Failed to create webhook' });
   });
 
   it('should deactivate a webhook when deactivate has an id', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate', undefined, 'wh-1'));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'deactivate', notificationWebhookId: 'wh-1' }));
 
     expect(result).toEqual({ success: true });
     expect(webhookRepo.deactivate).toHaveBeenCalledWith('wh-1');
   });
 
   it('should return an error when deactivate is missing the webhook id', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('deactivate'));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'deactivate' }));
 
     expect(result).toEqual({ success: false, error: 'notificationWebhookId is required' });
     expect(webhookRepo.deactivate).not.toHaveBeenCalled();
@@ -71,7 +79,7 @@ describe('ManageNotificationWebhookUseCase', () => {
   it('should list mapped webhooks for an organization', async () => {
     webhookRepo.findByMerchant.mockResolvedValue([createNotificationWebhook()]);
 
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('list', 'org-1'));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'list', organizationId: 'org-1' }));
 
     expect(result.success).toBe(true);
     expect(result.webhooks).toHaveLength(1);
@@ -80,7 +88,7 @@ describe('ManageNotificationWebhookUseCase', () => {
   });
 
   it('should return an error when list is missing organizationId', async () => {
-    const result = await useCase.execute(new ManageNotificationWebhookCommand('list'));
+    const result = await useCase.execute(new ManageNotificationWebhookCommand({ action: 'list' }));
 
     expect(result).toEqual({ success: false, error: 'organizationId is required' });
   });

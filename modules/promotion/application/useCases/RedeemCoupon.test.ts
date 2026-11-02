@@ -15,7 +15,9 @@ describe('RedeemCouponUseCase', () => {
   });
 
   it('should record coupon usage when the coupon is valid', async () => {
-    const result = await useCase.execute(new RedeemCouponCommand('SAVE10', 'order-1', 100, 10));
+    const result = await useCase.execute(
+      new RedeemCouponCommand({ code: 'SAVE10', orderId: 'order-1', orderTotalCents: 100, discountAmountCents: 10 }),
+    );
 
     expect(result.success).toBe(true);
     expect(result.usage?.promotionCouponUsageId).toBe('usage-1');
@@ -23,7 +25,9 @@ describe('RedeemCouponUseCase', () => {
   });
 
   it('should return order_id_required when the order id is empty', async () => {
-    const result = await useCase.execute(new RedeemCouponCommand('SAVE10', '', 100, 10));
+    const result = await useCase.execute(
+      new RedeemCouponCommand({ code: 'SAVE10', orderId: '', orderTotalCents: 100, discountAmountCents: 10 }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('order_id_required');
@@ -31,7 +35,9 @@ describe('RedeemCouponUseCase', () => {
   });
 
   it('should return invalid_discount when the discount amount is negative', async () => {
-    const result = await useCase.execute(new RedeemCouponCommand('SAVE10', 'order-1', 100, -5));
+    const result = await useCase.execute(
+      new RedeemCouponCommand({ code: 'SAVE10', orderId: 'order-1', orderTotalCents: 100, discountAmountCents: -5 }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('invalid_discount');
@@ -41,7 +47,9 @@ describe('RedeemCouponUseCase', () => {
   it('should propagate the validation failure when the coupon is not valid', async () => {
     couponRepository.findByCode.mockResolvedValue(null);
 
-    const result = await useCase.execute(new RedeemCouponCommand('MISSING', 'order-1', 100, 10));
+    const result = await useCase.execute(
+      new RedeemCouponCommand({ code: 'MISSING', orderId: 'order-1', orderTotalCents: 100, discountAmountCents: 10 }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('coupon_not_found');
@@ -51,7 +59,9 @@ describe('RedeemCouponUseCase', () => {
   it('should return redemption_failed when recording usage throws', async () => {
     couponRepository.recordUsage.mockRejectedValue(new Error('db error'));
 
-    const result = await useCase.execute(new RedeemCouponCommand('SAVE10', 'order-1', 100, 10));
+    const result = await useCase.execute(
+      new RedeemCouponCommand({ code: 'SAVE10', orderId: 'order-1', orderTotalCents: 100, discountAmountCents: 10 }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.errors).toContain('redemption_failed');

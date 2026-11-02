@@ -13,17 +13,34 @@ import type { NotificationWebhook, NotificationWebhookRepository } from '../../d
 // ============================================================================
 
 export type WebhookAction = 'create' | 'deactivate' | 'list';
+export interface ManageNotificationWebhookCommandProps {
+  action: WebhookAction;
+  organizationId?: string;
+  notificationWebhookId?: string;
+  url?: string;
+  secret?: string;
+  events?: string[];
+  isActive?: boolean;
+}
 
 export class ManageNotificationWebhookCommand {
-  constructor(
-    public readonly action: WebhookAction,
-    public readonly organizationId?: string,
-    public readonly notificationWebhookId?: string,
-    public readonly url?: string,
-    public readonly secret?: string,
-    public readonly events?: string[],
-    public readonly isActive?: boolean,
-  ) {}
+  public readonly action: WebhookAction;
+  public readonly organizationId?: string;
+  public readonly notificationWebhookId?: string;
+  public readonly url?: string;
+  public readonly secret?: string;
+  public readonly events?: string[];
+  public readonly isActive?: boolean;
+
+  constructor(props: ManageNotificationWebhookCommandProps) {
+    this.action = props.action;
+    this.organizationId = props.organizationId;
+    this.notificationWebhookId = props.notificationWebhookId;
+    this.url = props.url;
+    this.secret = props.secret;
+    this.events = props.events;
+    this.isActive = props.isActive;
+  }
 }
 
 // ============================================================================

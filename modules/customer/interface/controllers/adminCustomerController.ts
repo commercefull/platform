@@ -220,22 +220,22 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
     isDefault?: string | boolean;
   };
 
-  const addCommand = new AddAddressCommand(
-    customerId,
-    addressData.addressLine1,
-    addressData.city,
-    addressData.state,
-    addressData.postalCode,
-    addressData.country,
-    addressData.countryCode || 'US',
-    addressData.addressType || 'shipping',
-    addressData.addressLine2,
-    addressData.phone,
-    addressData.firstName,
-    addressData.lastName,
-    addressData.company,
-    addressData.isDefault === 'true' || addressData.isDefault === true,
-  );
+  const addCommand = new AddAddressCommand({
+    customerId: customerId,
+    addressLine1: addressData.addressLine1,
+    city: addressData.city,
+    state: addressData.state,
+    postalCode: addressData.postalCode,
+    country: addressData.country,
+    countryCode: addressData.countryCode || 'US',
+    addressType: addressData.addressType || 'shipping',
+    addressLine2: addressData.addressLine2,
+    phone: addressData.phone,
+    firstName: addressData.firstName,
+    lastName: addressData.lastName,
+    company: addressData.company,
+    isDefault: addressData.isDefault === 'true' || addressData.isDefault === true,
+  });
   await manageAddressesUseCase.addAddress(addCommand);
 
   if (req.xhr || req.headers.accept?.includes('application/json')) {

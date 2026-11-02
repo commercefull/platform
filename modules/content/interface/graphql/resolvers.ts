@@ -10,25 +10,25 @@ export const contentResolvers = {
       requireBusinessAuth(context);
       const useCase = createPageUseCase;
       const i = args.input;
-      const command = new CreatePageCommand(
-        i.title as string,
-        i.slug as string,
-        i.contentTypeId as string,
-        i.templateId as string | undefined,
-        (i.status as 'draft' | 'published' | 'scheduled' | 'archived') || 'draft',
-        (i.visibility as 'public' | 'private' | 'passwordProtected') || 'public',
-        i.summary as string | undefined,
-        i.featuredImage as string | undefined,
-        i.parentId as string | undefined,
-        i.metaTitle as string | undefined,
-        i.metaDescription as string | undefined,
-        i.metaKeywords as string | undefined,
-        i.customFields as Record<string, unknown> | undefined,
-        i.publishedAt as string | undefined,
-        i.scheduledAt as string | undefined,
-        i.isHomePage as boolean | undefined,
-        i.createdBy as string | undefined,
-      );
+      const command = new CreatePageCommand({
+        title: i.title as string,
+        slug: i.slug as string,
+        contentTypeId: i.contentTypeId as string,
+        templateId: i.templateId as string | undefined,
+        status: (i.status as 'draft' | 'published' | 'scheduled' | 'archived') || 'draft',
+        visibility: (i.visibility as 'public' | 'private' | 'passwordProtected') || 'public',
+        summary: i.summary as string | undefined,
+        featuredImage: i.featuredImage as string | undefined,
+        parentId: i.parentId as string | undefined,
+        metaTitle: i.metaTitle as string | undefined,
+        metaDescription: i.metaDescription as string | undefined,
+        metaKeywords: i.metaKeywords as string | undefined,
+        customFields: i.customFields as Record<string, unknown> | undefined,
+        publishedAt: i.publishedAt as string | undefined,
+        scheduledAt: i.scheduledAt as string | undefined,
+        isHomePage: i.isHomePage as boolean | undefined,
+        createdBy: i.createdBy as string | undefined,
+      });
       const result = await useCase.execute(command);
       return {
         ...result,
@@ -41,24 +41,24 @@ export const contentResolvers = {
       requireBusinessAuth(context);
       const useCase = updatePageUseCase;
       const i = args.input;
-      const command = new UpdatePageCommand(
-        i.pageId as string,
-        i.title as string | undefined,
-        i.slug as string | undefined,
-        i.templateId as string | undefined,
-        i.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
-        i.visibility as 'public' | 'private' | 'passwordProtected' | undefined,
-        i.summary as string | undefined,
-        i.featuredImage as string | undefined,
-        i.metaTitle as string | undefined,
-        i.metaDescription as string | undefined,
-        i.metaKeywords as string | undefined,
-        i.customFields as Record<string, unknown> | undefined,
-        i.publishedAt as string | undefined,
-        i.scheduledAt as string | undefined,
-        i.isHomePage as boolean | undefined,
-        i.updatedBy as string | undefined,
-      );
+      const command = new UpdatePageCommand({
+        pageId: i.pageId as string,
+        title: i.title as string | undefined,
+        slug: i.slug as string | undefined,
+        templateId: i.templateId as string | undefined,
+        status: i.status as 'draft' | 'published' | 'scheduled' | 'archived' | undefined,
+        visibility: i.visibility as 'public' | 'private' | 'passwordProtected' | undefined,
+        summary: i.summary as string | undefined,
+        featuredImage: i.featuredImage as string | undefined,
+        metaTitle: i.metaTitle as string | undefined,
+        metaDescription: i.metaDescription as string | undefined,
+        metaKeywords: i.metaKeywords as string | undefined,
+        customFields: i.customFields as Record<string, unknown> | undefined,
+        publishedAt: i.publishedAt as string | undefined,
+        scheduledAt: i.scheduledAt as string | undefined,
+        isHomePage: i.isHomePage as boolean | undefined,
+        updatedBy: i.updatedBy as string | undefined,
+      });
       const result = await useCase.execute(command);
       return {
         ...result,

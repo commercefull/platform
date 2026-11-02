@@ -124,21 +124,8 @@ export function promotionRuleMatches(
     }
 
     case 'itemQuantity': {
-      const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
       const threshold = Number(value);
-      return compareValues(totalQty, operator, threshold);
-    }
-
-    case 'productCategory': {
-      const categories = value as string[];
-      const hasCategory = context.items.some(item => item.categoryId && categories.includes(item.categoryId));
-      return hasCategory;
-    }
-
-    case 'customerGroup': {
-      if (!context.customerGroup) return false;
-      const groups = value as string[];
-      return groups.includes(context.customerGroup);
+      return compareValues(totalQuantity(context.items), operator, threshold);
     }
 
     case 'firstOrder': {
@@ -165,29 +152,42 @@ export function promotionRuleMatches(
       return days.includes(today);
     }
 
-    case 'shippingMethod': {
-      if (!context.shippingMethodId) return false;
-      const methods = value as string[];
-      return methods.includes(context.shippingMethodId);
-    }
+    default:
+      return membershipRuleMatches(condition, value, context);
+  }
+}
 
-    case 'paymentMethod': {
-      if (!context.paymentMethodId) return false;
-      const methods = value as string[];
-      return methods.includes(context.paymentMethodId);
-    }
+/**
+ * Membership-style rule conditions — a context field must be in the rule's
+ * value list (or, for productCategory, any item's categoryId must be).
+ */
+function membershipRuleMatches(condition: RuleCondition, value: unknown, context: PromotionEvaluationContext): boolean {
+  const list = value as string[];
+
+  switch (condition) {
+    case 'productCategory':
+      return context.items.some(item => item.categoryId && list.includes(item.categoryId));
+
+    case 'customerGroup':
+      return Boolean(context.customerGroup && list.includes(context.customerGroup));
+
+    case 'shippingMethod':
+      return Boolean(context.shippingMethodId && list.includes(context.shippingMethodId));
+
+    case 'paymentMethod':
+      return Boolean(context.paymentMethodId && list.includes(context.paymentMethodId));
 
     case 'store':
-      return Boolean(context.storeId && (value as string[]).includes(context.storeId));
+      return Boolean(context.storeId && list.includes(context.storeId));
 
     case 'channel':
-      return Boolean(context.channelId && (value as string[]).includes(context.channelId));
+      return Boolean(context.channelId && list.includes(context.channelId));
 
     case 'country':
-      return Boolean(context.countryCode && (value as string[]).includes(context.countryCode));
+      return Boolean(context.countryCode && list.includes(context.countryCode));
 
     case 'currency':
-      return (value as string[]).includes(context.currency);
+      return list.includes(context.currency);
 
     default:
       return false;
@@ -202,158 +202,195 @@ export function applyPromotionActions(
   actions: PromotionAction[],
   context: PromotionEvaluationContext,
 ): PromotionActionApplication {
-  let discountAmountCents = 0;
-  let shippingDiscountAmountCents = 0;
-  let freeShipping = false;
-  const lineItemDiscounts: LineItemDiscount[] = [];
-  const freeItems: FreeItemAction[] = [];
+  const application: PromotionActionApplication = {
+    discountAmountCents: 0,
+    shippingDiscountAmountCents: 0,
+    freeShipping: false,
+    lineItemDiscounts: [],
+    freeItems: [],
+  };
 
   for (const action of actions) {
-    switch (action.actionType as ActionType) {
-      case 'discountByPercentage': {
-        const percentage = Number(action.value);
-        const targetIds = action.targetIds as string[] | null;
-
-        if (targetIds && targetIds.length > 0) {
-          // Line-item discount for specific products
-          for (const item of context.items) {
-            if (targetIds.includes(item.productId)) {
-              const itemDiscountCents = Math.round(item.unitPriceCents * item.quantity * (percentage / 100));
-              lineItemDiscounts.push({
-                productId: item.productId,
-                discountAmountCents: itemDiscountCents,
-                promotionId: promotion.promotionId,
-                promotionName: promotion.name,
-              });
-              discountAmountCents += itemDiscountCents;
-            }
-          }
-        } else {
-          // Cart-level percentage discount
-          discountAmountCents += Math.round(context.subtotalCents * (percentage / 100));
-        }
-        break;
-      }
-
-      case 'discountByAmount': {
-        const amountCents = Math.round(Number(action.value));
-        const targetIds = action.targetIds as string[] | null;
-
-        if (targetIds && targetIds.length > 0) {
-          for (const item of context.items) {
-            if (targetIds.includes(item.productId)) {
-              const itemDiscountCents = Math.min(amountCents, item.unitPriceCents * item.quantity);
-              lineItemDiscounts.push({
-                productId: item.productId,
-                discountAmountCents: itemDiscountCents,
-                promotionId: promotion.promotionId,
-                promotionName: promotion.name,
-              });
-              discountAmountCents += itemDiscountCents;
-            }
-          }
-        } else {
-          discountAmountCents += Math.min(amountCents, context.subtotalCents);
-        }
-        break;
-      }
-
-      case 'discountShipping': {
-        const shippingDiscountCents = Math.round(Number(action.value));
-        shippingDiscountAmountCents += Math.min(shippingDiscountCents, context.shippingAmountCents);
-        break;
-      }
-
-      case 'freeItem': {
-        const productId = action.value as string;
-        const targetIds = action.targetIds as string[] | null;
-        const quantity = targetIds ? 1 : 1;
-        freeItems.push({
-          productId,
-          quantity,
-          promotionId: promotion.promotionId,
-          promotionName: promotion.name,
-        });
-        break;
-      }
-
-      case 'discountByTier': {
-        const tiers = action.value as Array<{ min: number; max?: number; percentage?: number; amount?: number }>;
-        if (!Array.isArray(tiers) || tiers.length === 0) break;
-
-        // Determine the metric: total quantity by default, or cart total if
-        // the first tier's `min` looks like a monetary threshold (> 100 heuristic
-        // is avoided — instead we check which tier the subtotal falls into).
-        // Tiers are evaluated by quantity first; if no quantity tier matches,
-        // fall back to subtotal-based tiering.
-        const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
-
-        // Try quantity-based tiering first
-        let tier = tiers.find(t => totalQty >= t.min && (t.max === undefined || totalQty <= t.max));
-
-        // Fall back to subtotal-based tiering if no quantity tier matched
-        if (!tier) {
-          tier = tiers.find(t => context.subtotalCents >= t.min && (t.max === undefined || context.subtotalCents <= t.max));
-        }
-
-        if (!tier) break;
-
-        const targetIds = action.targetIds as string[] | null;
-        if (tier.percentage !== undefined) {
-          if (targetIds && targetIds.length > 0) {
-            for (const item of context.items) {
-              if (targetIds.includes(item.productId)) {
-                const itemDiscountCents = Math.round(item.unitPriceCents * item.quantity * (tier.percentage! / 100));
-                lineItemDiscounts.push({
-                  productId: item.productId,
-                  discountAmountCents: itemDiscountCents,
-                  promotionId: promotion.promotionId,
-                  promotionName: promotion.name,
-                });
-                discountAmountCents += itemDiscountCents;
-              }
-            }
-          } else {
-            discountAmountCents += Math.round(context.subtotalCents * (tier.percentage / 100));
-          }
-        } else if (tier.amount !== undefined) {
-          discountAmountCents += Math.min(tier.amount, context.subtotalCents);
-        }
-        break;
-      }
-
-      case 'freeGift': {
-        // freeGift is distinct from freeItem: it supports eligibility conditions
-        // on the gift itself (e.g. "free gift only if cart has > 5 items").
-        const giftConfig = action.value as { productId: string; quantity?: number; minCartTotal?: number; minQuantity?: number };
-        if (!giftConfig || !giftConfig.productId) break;
-
-        // Check gift eligibility conditions
-        const totalQty = context.items.reduce((sum, item) => sum + item.quantity, 0);
-        if (giftConfig.minCartTotal !== undefined && context.subtotalCents < giftConfig.minCartTotal) break;
-        if (giftConfig.minQuantity !== undefined && totalQty < giftConfig.minQuantity) break;
-
-        freeItems.push({
-          productId: giftConfig.productId,
-          quantity: giftConfig.quantity ?? 1,
-          promotionId: promotion.promotionId,
-          promotionName: promotion.name,
-        });
-        break;
-      }
-
-      default:
-        break;
-    }
+    applyPromotionAction(application, promotion, action, context);
   }
 
   // Also handle promotion entity types (buy_x_get_y, free_shipping, bundle)
   // These are handled via the Promotion domain entity type field if present
   if (promotion.scope === 'shipping') {
-    freeShipping = true;
+    application.freeShipping = true;
   }
 
-  return { discountAmountCents, shippingDiscountAmountCents, freeShipping, lineItemDiscounts, freeItems };
+  return application;
+}
+
+function applyPromotionAction(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  action: PromotionAction,
+  context: PromotionEvaluationContext,
+): void {
+  switch (action.actionType as ActionType) {
+    case 'discountByPercentage':
+      applyPercentageDiscount(application, promotion, action, context);
+      break;
+
+    case 'discountByAmount':
+      applyAmountDiscount(application, promotion, action, context);
+      break;
+
+    case 'discountShipping': {
+      const shippingDiscountCents = Math.round(Number(action.value));
+      application.shippingDiscountAmountCents += Math.min(shippingDiscountCents, context.shippingAmountCents);
+      break;
+    }
+
+    case 'freeItem':
+      application.freeItems.push({
+        productId: action.value as string,
+        quantity: 1,
+        promotionId: promotion.promotionId,
+        promotionName: promotion.name,
+      });
+      break;
+
+    case 'discountByTier':
+      applyTierDiscount(application, promotion, action, context);
+      break;
+
+    case 'freeGift':
+      applyFreeGift(application, promotion, action, context);
+      break;
+
+    default:
+      break;
+  }
+}
+
+/**
+ * Line-item discounts for specific products. Returns true when the action is
+ * product-targeted (targetIds non-empty) so callers can decide whether the
+ * cart-level fallback should run instead.
+ */
+function addTargetedLineDiscounts(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  items: PromotionItemContext[],
+  targetIds: string[] | null,
+  discountForItem: (item: PromotionItemContext) => number,
+): boolean {
+  if (!targetIds || targetIds.length === 0) return false;
+
+  for (const item of items) {
+    if (!targetIds.includes(item.productId)) continue;
+
+    const itemDiscountCents = discountForItem(item);
+    application.lineItemDiscounts.push({
+      productId: item.productId,
+      discountAmountCents: itemDiscountCents,
+      promotionId: promotion.promotionId,
+      promotionName: promotion.name,
+    });
+    application.discountAmountCents += itemDiscountCents;
+  }
+  return true;
+}
+
+function applyPercentageDiscount(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  action: PromotionAction,
+  context: PromotionEvaluationContext,
+): void {
+  const percentage = Number(action.value);
+  const applied = addTargetedLineDiscounts(application, promotion, context.items, action.targetIds as string[] | null, item =>
+    Math.round(item.unitPriceCents * item.quantity * (percentage / 100)),
+  );
+
+  // Cart-level percentage discount when the action is not product-targeted
+  if (!applied) {
+    application.discountAmountCents += Math.round(context.subtotalCents * (percentage / 100));
+  }
+}
+
+function applyAmountDiscount(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  action: PromotionAction,
+  context: PromotionEvaluationContext,
+): void {
+  const amountCents = Math.round(Number(action.value));
+  const applied = addTargetedLineDiscounts(application, promotion, context.items, action.targetIds as string[] | null, item =>
+    Math.min(amountCents, item.unitPriceCents * item.quantity),
+  );
+
+  if (!applied) {
+    application.discountAmountCents += Math.min(amountCents, context.subtotalCents);
+  }
+}
+
+function applyTierDiscount(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  action: PromotionAction,
+  context: PromotionEvaluationContext,
+): void {
+  const tiers = action.value as Array<{ min: number; max?: number; percentage?: number; amount?: number }>;
+  if (!Array.isArray(tiers) || tiers.length === 0) return;
+
+  // Determine the metric: total quantity by default, or cart total if
+  // the first tier's `min` looks like a monetary threshold (> 100 heuristic
+  // is avoided — instead we check which tier the subtotal falls into).
+  // Tiers are evaluated by quantity first; if no quantity tier matches,
+  // fall back to subtotal-based tiering.
+  const totalQty = totalQuantity(context.items);
+
+  // Try quantity-based tiering first, then fall back to subtotal-based
+  // tiering if no quantity tier matched
+  const tier =
+    tiers.find(t => totalQty >= t.min && (t.max === undefined || totalQty <= t.max)) ??
+    tiers.find(t => context.subtotalCents >= t.min && (t.max === undefined || context.subtotalCents <= t.max));
+
+  if (!tier) return;
+
+  if (tier.percentage !== undefined) {
+    const percentage = tier.percentage;
+    const applied = addTargetedLineDiscounts(application, promotion, context.items, action.targetIds as string[] | null, item =>
+      Math.round(item.unitPriceCents * item.quantity * (percentage / 100)),
+    );
+
+    if (!applied) {
+      application.discountAmountCents += Math.round(context.subtotalCents * (percentage / 100));
+    }
+  } else if (tier.amount !== undefined) {
+    application.discountAmountCents += Math.min(tier.amount, context.subtotalCents);
+  }
+}
+
+function applyFreeGift(
+  application: PromotionActionApplication,
+  promotion: Promotion,
+  action: PromotionAction,
+  context: PromotionEvaluationContext,
+): void {
+  // freeGift is distinct from freeItem: it supports eligibility conditions
+  // on the gift itself (e.g. "free gift only if cart has > 5 items").
+  const giftConfig = action.value as { productId: string; quantity?: number; minCartTotal?: number; minQuantity?: number };
+  if (!giftConfig || !giftConfig.productId) return;
+
+  // Check gift eligibility conditions
+  if (giftConfig.minCartTotal !== undefined && context.subtotalCents < giftConfig.minCartTotal) return;
+  if (giftConfig.minQuantity !== undefined && totalQuantity(context.items) < giftConfig.minQuantity) return;
+
+  application.freeItems.push({
+    productId: giftConfig.productId,
+    quantity: giftConfig.quantity ?? 1,
+    promotionId: promotion.promotionId,
+    promotionName: promotion.name,
+  });
+}
+
+function totalQuantity(items: PromotionItemContext[]): number {
+  return items.reduce((sum, item) => sum + item.quantity, 0);
 }
 
 /**

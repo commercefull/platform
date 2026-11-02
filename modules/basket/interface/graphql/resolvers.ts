@@ -45,17 +45,16 @@ export const basketResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireAuth(context);
-      const command = new AddItemCommand(
-        args.basketId,
-        args.productId,
-        args.sku,
-        args.name,
-        args.quantity,
-        args.productVariantId,
-        args.imageUrl,
-        undefined,
-        (args.itemType as 'physical' | 'digital' | 'subscription' | 'service') ?? 'physical',
-      );
+      const command = new AddItemCommand({
+        basketId: args.basketId,
+        productId: args.productId,
+        sku: args.sku,
+        name: args.name,
+        quantity: args.quantity,
+        productVariantId: args.productVariantId,
+        imageUrl: args.imageUrl,
+        itemType: (args.itemType as 'physical' | 'digital' | 'subscription' | 'service') ?? 'physical',
+      });
       return addItemUseCase.execute(command);
     },
 

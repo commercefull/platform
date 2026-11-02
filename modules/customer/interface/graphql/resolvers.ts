@@ -39,16 +39,16 @@ export const customerResolvers = {
         preferredLanguage?: string;
       },
     ) => {
-      const command = new RegisterCustomerCommand(
-        args.email,
-        args.firstName,
-        args.lastName,
-        args.password,
-        args.phone,
-        args.dateOfBirth ? new Date(args.dateOfBirth) : undefined,
-        args.preferredCurrency,
-        args.preferredLanguage,
-      );
+      const command = new RegisterCustomerCommand({
+        email: args.email,
+        firstName: args.firstName,
+        lastName: args.lastName,
+        password: args.password,
+        phone: args.phone,
+        dateOfBirth: args.dateOfBirth ? new Date(args.dateOfBirth) : undefined,
+        preferredCurrency: args.preferredCurrency,
+        preferredLanguage: args.preferredLanguage,
+      });
       return registerCustomerUseCase.execute(command);
     },
   },

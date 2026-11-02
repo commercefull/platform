@@ -6,29 +6,70 @@
 import type { IContentMediaRepository } from '../../../domain/repositories/ContentMediaRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { MediaFolderNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface UploadMediaCommandProps {
+  title: string;
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  fileSize: number;
+  url: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+  altText?: string;
+  caption?: string;
+  description?: string;
+  folderId?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  isExternal?: boolean;
+  externalService?: string;
+  externalId?: string;
+  uploadedBy?: string;
+}
 
 export class UploadMediaCommand {
-  constructor(
-    public readonly title: string,
-    public readonly fileName: string,
-    public readonly filePath: string,
-    public readonly fileType: string,
-    public readonly fileSize: number,
-    public readonly url: string,
-    public readonly width?: number,
-    public readonly height?: number,
-    public readonly duration?: number,
-    public readonly altText?: string,
-    public readonly caption?: string,
-    public readonly description?: string,
-    public readonly folderId?: string,
-    public readonly thumbnailUrl?: string,
-    public readonly tags?: string[],
-    public readonly isExternal?: boolean,
-    public readonly externalService?: string,
-    public readonly externalId?: string,
-    public readonly uploadedBy?: string,
-  ) {}
+  public readonly title: string;
+  public readonly fileName: string;
+  public readonly filePath: string;
+  public readonly fileType: string;
+  public readonly fileSize: number;
+  public readonly url: string;
+  public readonly width?: number;
+  public readonly height?: number;
+  public readonly duration?: number;
+  public readonly altText?: string;
+  public readonly caption?: string;
+  public readonly description?: string;
+  public readonly folderId?: string;
+  public readonly thumbnailUrl?: string;
+  public readonly tags?: string[];
+  public readonly isExternal?: boolean;
+  public readonly externalService?: string;
+  public readonly externalId?: string;
+  public readonly uploadedBy?: string;
+
+  constructor(props: UploadMediaCommandProps) {
+    this.title = props.title;
+    this.fileName = props.fileName;
+    this.filePath = props.filePath;
+    this.fileType = props.fileType;
+    this.fileSize = props.fileSize;
+    this.url = props.url;
+    this.width = props.width;
+    this.height = props.height;
+    this.duration = props.duration;
+    this.altText = props.altText;
+    this.caption = props.caption;
+    this.description = props.description;
+    this.folderId = props.folderId;
+    this.thumbnailUrl = props.thumbnailUrl;
+    this.tags = props.tags;
+    this.isExternal = props.isExternal;
+    this.externalService = props.externalService;
+    this.externalId = props.externalId;
+    this.uploadedBy = props.uploadedBy;
+  }
 }
 
 export interface MediaResponse {

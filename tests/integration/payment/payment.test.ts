@@ -64,7 +64,12 @@ describe('Payment Integration Tests', () => {
       let result: Record<string, unknown>;
       try {
         result = (await useCase.execute(
-          new InitiatePaymentCommand('00000000-0000-0000-0000-000000000001', 50, 'USD', 'default'),
+          new InitiatePaymentCommand({
+            orderId: '00000000-0000-0000-0000-000000000001',
+            amountCents: 50,
+            currency: 'USD',
+            paymentMethodConfigId: 'default',
+          }),
         )) as unknown as Record<string, unknown>;
       } catch {
         // No gateway configured in test env — acceptable
@@ -79,9 +84,11 @@ describe('Payment Integration Tests', () => {
 
     it('REQ 2.1.2 — amountCents <= 0 throws correct error', async () => {
       const useCase = new InitiatePaymentUseCase(PaymentRepo);
-      await expect(useCase.execute(new InitiatePaymentCommand('order-id', 0, 'USD', 'default'))).rejects.toThrow(
-        'Amount must be greater than zero',
-      );
+      await expect(
+        useCase.execute(
+          new InitiatePaymentCommand({ orderId: 'order-id', amountCents: 0, currency: 'USD', paymentMethodConfigId: 'default' }),
+        ),
+      ).rejects.toThrow('Amount must be greater than zero');
     });
   });
 

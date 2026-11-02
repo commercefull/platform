@@ -80,17 +80,16 @@ export const addToBasket = async (req: HttpRequest, res: HttpResponse): Promise<
       return redirectResponse(res, '/?error=' + encodeURIComponent('Product not found or unavailable'));
     }
 
-    const addCmd = new AddItemCommand(
-      basket.basketId,
-      product.productId,
-      product.sku || product.productId,
-      product.name,
-      parseInt(quantity as string),
-      variantId as string | undefined,
-      product.primaryImage?.url,
-      undefined,
-      'physical',
-    );
+    const addCmd = new AddItemCommand({
+      basketId: basket.basketId,
+      productId: product.productId,
+      sku: product.sku || product.productId,
+      name: product.name,
+      quantity: parseInt(quantity as string),
+      productVariantId: variantId as string | undefined,
+      imageUrl: product.primaryImage?.url,
+      itemType: 'physical',
+    });
 
     await addItemUseCase.execute(addCmd);
 
@@ -214,17 +213,18 @@ async function calculateBasketTotals(basket: Record<string, unknown>, user: Reco
   };
 
   // Calculate tax using the tax service
-  const taxCommand = new CalculateOrderTaxCommand(
-    basketItems?.map((item: Record<string, unknown>) => ({
-      productId: item.productId as string,
-      name: item.name as string,
-      quantity: item.quantity as number,
-      unitPriceCents: item.unitPriceCents as number,
-    })) || [],
-    defaultAddress,
-    0, // No shipping in basket view
-    user?.customerId as string | undefined,
-  );
+  const taxCommand = new CalculateOrderTaxCommand({
+    items:
+      basketItems?.map((item: Record<string, unknown>) => ({
+        productId: item.productId as string,
+        name: item.name as string,
+        quantity: item.quantity as number,
+        unitPriceCents: item.unitPriceCents as number,
+      })) || [],
+    shippingAddress: defaultAddress,
+    shippingAmountCents: 0,
+    customerId: user?.customerId as string | undefined,
+  });
 
   const taxUseCase = calculateOrderTaxUseCase;
   const taxResult = await taxUseCase.execute(taxCommand);

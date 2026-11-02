@@ -293,7 +293,16 @@ describe('E2E Checkout Full Quote', () => {
     // Step 2: Set shipping address (triggers tax + promo recalc)
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
     const addressResult = await setAddressUseCase.execute(
-      new SetShippingAddressCommand(checkoutId, 'John', 'Doe', '123 Main St', 'New York', '10001', 'US', undefined, undefined, 'NY'),
+      new SetShippingAddressCommand({
+        checkoutId: checkoutId,
+        firstName: 'John',
+        lastName: 'Doe',
+        addressLine1: '123 Main St',
+        city: 'New York',
+        postalCode: '10001',
+        country: 'US',
+        region: 'NY',
+      }),
     );
 
     expect(addressResult.shippingAddress).toBeDefined();
@@ -347,7 +356,13 @@ describe('E2E Checkout Full Quote', () => {
     await checkoutRepo.save(session!);
 
     // Step 6: Create payment intent (with fraud screening)
-    const createPaymentUseCase = new CreatePaymentIntentUseCase(checkoutRepo, basketPort, orderPort, paymentPort, fraudPort);
+    const createPaymentUseCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepo,
+      basketSnapshotPort: basketPort,
+      orderPlacementPort: orderPort,
+      paymentAuthorizationPort: paymentPort,
+      fraudScreeningPort: fraudPort,
+    });
 
     const paymentResult = await createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-1'));
 
@@ -377,7 +392,16 @@ describe('E2E Checkout Full Quote', () => {
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
     await setAddressUseCase.execute(
-      new SetShippingAddressCommand(checkoutId, 'Jane', 'Smith', '456 Oak Ave', 'LA', '90001', 'US', undefined, undefined, 'CA'),
+      new SetShippingAddressCommand({
+        checkoutId: checkoutId,
+        firstName: 'Jane',
+        lastName: 'Smith',
+        addressLine1: '456 Oak Ave',
+        city: 'LA',
+        postalCode: '90001',
+        country: 'US',
+        region: 'CA',
+      }),
     );
 
     const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
@@ -388,7 +412,13 @@ describe('E2E Checkout Full Quote', () => {
     await checkoutRepo.save(session!);
 
     // Create payment intent with blocked fraud verdict
-    const createPaymentUseCase = new CreatePaymentIntentUseCase(checkoutRepo, basketPort, orderPort, paymentPort, fraudPort);
+    const createPaymentUseCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepo,
+      basketSnapshotPort: basketPort,
+      orderPlacementPort: orderPort,
+      paymentAuthorizationPort: paymentPort,
+      fraudScreeningPort: fraudPort,
+    });
 
     await expect(createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-2'))).rejects.toThrow(
       'Order blocked by fraud screening',
@@ -410,7 +440,16 @@ describe('E2E Checkout Full Quote', () => {
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
     await setAddressUseCase.execute(
-      new SetShippingAddressCommand(checkoutId, 'Bob', 'Jones', '789 Pine Rd', 'Chicago', '60601', 'US', undefined, undefined, 'IL'),
+      new SetShippingAddressCommand({
+        checkoutId: checkoutId,
+        firstName: 'Bob',
+        lastName: 'Jones',
+        addressLine1: '789 Pine Rd',
+        city: 'Chicago',
+        postalCode: '60601',
+        country: 'US',
+        region: 'IL',
+      }),
     );
 
     const setShippingUseCase = new SetShippingMethodUseCase(checkoutRepo, shippingPort);
@@ -420,7 +459,13 @@ describe('E2E Checkout Full Quote', () => {
     session!.setPaymentMethod('pm_card_visa');
     await checkoutRepo.save(session!);
 
-    const createPaymentUseCase = new CreatePaymentIntentUseCase(checkoutRepo, basketPort, orderPort, paymentPort, fraudPort);
+    const createPaymentUseCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepo,
+      basketSnapshotPort: basketPort,
+      orderPlacementPort: orderPort,
+      paymentAuthorizationPort: paymentPort,
+      fraudScreeningPort: fraudPort,
+    });
 
     const paymentResult = await createPaymentUseCase.execute(new CreatePaymentIntentCommand(checkoutId, 'cust-3'));
 
@@ -436,7 +481,16 @@ describe('E2E Checkout Full Quote', () => {
 
     const setAddressUseCase = new SetShippingAddressUseCase(checkoutRepo, basketPort, taxPort, promotionPort);
     await setAddressUseCase.execute(
-      new SetShippingAddressCommand(checkoutId, 'Alice', 'Brown', '321 Elm St', 'Seattle', '98101', 'US', undefined, undefined, 'WA'),
+      new SetShippingAddressCommand({
+        checkoutId: checkoutId,
+        firstName: 'Alice',
+        lastName: 'Brown',
+        addressLine1: '321 Elm St',
+        city: 'Seattle',
+        postalCode: '98101',
+        country: 'US',
+        region: 'WA',
+      }),
     );
 
     const applyCouponUseCase = new ApplyCouponUseCase(checkoutRepo, discountPort);

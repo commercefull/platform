@@ -67,18 +67,14 @@ export class CustomerCredentialSubjectAdapter implements CredentialSubjectPort {
     // duplicate checks, transaction, and the customer.registered event.
     // Empty/absent password creates a passwordless (provider-only) account.
     const result = await new RegisterCustomerUseCase(this.customers).execute(
-      new RegisterCustomerCommand(
-        data.email,
-        data.firstName || data.name || '',
-        data.lastName ?? '',
-        data.password || undefined,
-        data.phone,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        { isActive: data.isActive, isVerified: data.isVerified },
-      ),
+      new RegisterCustomerCommand({
+        email: data.email,
+        firstName: data.firstName || data.name || '',
+        lastName: data.lastName ?? '',
+        password: data.password || undefined,
+        phone: data.phone,
+        flags: { isActive: data.isActive, isVerified: data.isVerified },
+      }),
     );
     return {
       id: result.customerId,

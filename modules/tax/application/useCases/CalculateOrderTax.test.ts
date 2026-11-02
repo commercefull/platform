@@ -16,11 +16,11 @@ describe('CalculateOrderTaxUseCase', () => {
 
   it('should calculate tax on items and shipping when rates apply', async () => {
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand(
-        [{ productId: 'p-1', name: 'Widget', quantity: 2, unitPriceCents: 50 }],
-        { country: 'US', state: 'OR' },
-        10,
-      ),
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Widget', quantity: 2, unitPriceCents: 50 }],
+        shippingAddress: { country: 'US', state: 'OR' },
+        shippingAmountCents: 10,
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -32,7 +32,9 @@ describe('CalculateOrderTaxUseCase', () => {
   });
 
   it('should return failure without querying rates when the order has no items', async () => {
-    const result = await useCase.execute(new CalculateOrderTaxCommand([], { country: 'US' }, 10));
+    const result = await useCase.execute(
+      new CalculateOrderTaxCommand({ items: [], shippingAddress: { country: 'US' }, shippingAmountCents: 10 }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.message).toBe('No items to calculate tax for');
@@ -41,7 +43,10 @@ describe('CalculateOrderTaxUseCase', () => {
 
   it('should return failure without querying rates when the shipping country is missing', async () => {
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 50 }], { country: '' }),
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 50 }],
+        shippingAddress: { country: '' },
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -51,8 +56,11 @@ describe('CalculateOrderTaxUseCase', () => {
 
   it('should skip tax when an item is marked non-taxable', async () => {
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Gift Card', quantity: 1, unitPriceCents: 50, taxable: false }], {
-        country: 'US',
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Gift Card', quantity: 1, unitPriceCents: 50, taxable: false }],
+        shippingAddress: {
+          country: 'US',
+        },
       }),
     );
 
@@ -65,12 +73,12 @@ describe('CalculateOrderTaxUseCase', () => {
     taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption()]);
 
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand(
-        [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-        { country: 'US' },
-        0,
-        'cust-1',
-      ),
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+        shippingAddress: { country: 'US' },
+        shippingAmountCents: 0,
+        customerId: 'cust-1',
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -81,7 +89,11 @@ describe('CalculateOrderTaxUseCase', () => {
 
   it('should calculate tax on shipping', async () => {
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }], { country: 'US' }, 20),
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+        shippingAddress: { country: 'US' },
+        shippingAmountCents: 20,
+      }),
     );
 
     expect(result.success).toBe(true);
@@ -92,7 +104,10 @@ describe('CalculateOrderTaxUseCase', () => {
     taxQuery.getTaxRateForAddress.mockRejectedValue(new Error('DB error'));
 
     const result = await useCase.execute(
-      new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }], { country: 'US' }),
+      new CalculateOrderTaxCommand({
+        items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+        shippingAddress: { country: 'US' },
+      }),
     );
 
     expect(result.success).toBe(false);
@@ -105,15 +120,15 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption({ applicableTaxCategoryIds: ['digital-goods'] })]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [
+        new CalculateOrderTaxCommand({
+          items: [
             { productId: 'p-1', name: 'Physical Widget', quantity: 1, unitPriceCents: 100, taxCategoryId: 'physical-goods' },
             { productId: 'p-2', name: 'E-Book', quantity: 1, unitPriceCents: 50, taxCategoryId: 'digital-goods' },
           ],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -129,12 +144,12 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption({ type: 'nonprofit', exemptionPercent: 50 })]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -153,12 +168,12 @@ describe('CalculateOrderTaxUseCase', () => {
       ]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -172,12 +187,12 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption({ status: 'pending', isVerified: false })]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -190,8 +205,11 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.getTaxRateForAddressAndCategory.mockResolvedValue(5);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Book', quantity: 1, unitPriceCents: 100, taxCategoryId: 'books' }], {
-          country: 'US',
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Book', quantity: 1, unitPriceCents: 100, taxCategoryId: 'books' }],
+          shippingAddress: {
+            country: 'US',
+          },
         }),
       );
 
@@ -204,8 +222,11 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.getTaxRateForAddressAndCategory.mockResolvedValue(0);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Book', quantity: 1, unitPriceCents: 100, taxCategoryId: 'books' }], {
-          country: 'US',
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Book', quantity: 1, unitPriceCents: 100, taxCategoryId: 'books' }],
+          shippingAddress: {
+            country: 'US',
+          },
         }),
       );
 
@@ -219,12 +240,12 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption({ minOrderAmountCents: 500 })]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.lineItems[0].taxAmountCents).toBe(10);
@@ -235,12 +256,12 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption({ minOrderAmountCents: 50 })]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+        }),
       );
 
       expect(result.lineItems[0].taxAmountCents).toBe(0);
@@ -251,13 +272,12 @@ describe('CalculateOrderTaxUseCase', () => {
   describe('pricesIncludeTax', () => {
     it('should extract embedded tax instead of adding it when prices include tax', async () => {
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
-          { country: 'US', state: 'OR' },
-          0,
-          undefined,
-          true,
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          shippingAddress: { country: 'US', state: 'OR' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: true,
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -271,13 +291,12 @@ describe('CalculateOrderTaxUseCase', () => {
 
     it('should extract shipping tax too when prices include tax', async () => {
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
-          { country: 'US', state: 'OR' },
-          11,
-          undefined,
-          true,
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          shippingAddress: { country: 'US', state: 'OR' },
+          shippingAmountCents: 11,
+          pricesIncludeTax: true,
+        }),
       );
 
       // items: 10 embedded, shipping: 11 - 10 = 1 embedded
@@ -289,13 +308,13 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.findCustomerTaxExemptions.mockResolvedValue([createCustomerTaxExemption()]);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(
-          [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
-          { country: 'US' },
-          0,
-          'cust-1',
-          true,
-        ),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 110 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          customerId: 'cust-1',
+          pricesIncludeTax: true,
+        }),
       );
 
       expect(result.taxAmountCents).toBe(0);
@@ -304,7 +323,11 @@ describe('CalculateOrderTaxUseCase', () => {
 
     it('should report taxIncludedInSubtotal false for exclusive pricing', async () => {
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }], { country: 'US' }, 0),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -319,7 +342,11 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.getTaxRateInfoForAddress as jest.Mock).mockResolvedValue({ rate: 20, includeInPrice: true });
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 12000 }], { country: 'GB' }, 0),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 12000 }],
+          shippingAddress: { country: 'GB' },
+          shippingAmountCents: 0,
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -334,7 +361,11 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.getTaxRateInfoForAddress as jest.Mock).mockResolvedValue({ rate: 10, includeInPrice: false });
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand([{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }], { country: 'US' }, 0),
+        new CalculateOrderTaxCommand({
+          items: [{ productId: 'p-1', name: 'Widget', quantity: 1, unitPriceCents: 100 }],
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+        }),
       );
 
       expect(result.taxIncludedInSubtotal).toBe(false);
@@ -352,7 +383,15 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.hasActiveVatRegistration as jest.Mock).mockResolvedValue(true);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'DE' }, 500, undefined, true, 'DE123456789', 'org-1', 'FR'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'DE' },
+          shippingAmountCents: 500,
+          pricesIncludeTax: true,
+          vatNumber: 'DE123456789',
+          organizationId: 'org-1',
+          originCountry: 'FR',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -369,7 +408,17 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.getTaxRateInfoForAddress as jest.Mock).mockResolvedValue({ rate: 19, includeInPrice: true });
       taxQuery.getTaxRateForAddress.mockResolvedValue(19);
 
-      const result = await useCase.execute(new CalculateOrderTaxCommand(items, { country: 'DE' }, 0, undefined, true, 'XX', 'org-1', 'FR'));
+      const result = await useCase.execute(
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'DE' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: true,
+          vatNumber: 'XX',
+          organizationId: 'org-1',
+          originCountry: 'FR',
+        }),
+      );
 
       expect(result.reverseChargeApplied).toBeUndefined();
       expect(result.taxAmountCents).toBe(1900); // embedded 19% of 11900
@@ -380,7 +429,15 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.getTaxRateForAddress.mockResolvedValue(19);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'DE' }, 0, undefined, true, 'DE123456789', 'org-1', 'DE'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'DE' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: true,
+          vatNumber: 'DE123456789',
+          organizationId: 'org-1',
+          originCountry: 'DE',
+        }),
       );
 
       expect(taxQuery.validateCustomerVatNumber).not.toHaveBeenCalled();
@@ -395,7 +452,15 @@ describe('CalculateOrderTaxUseCase', () => {
       taxQuery.getTaxRateForAddress.mockResolvedValue(19);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'DE' }, 0, undefined, true, 'DE123456789', 'org-1', 'FR'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'DE' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: true,
+          vatNumber: 'DE123456789',
+          organizationId: 'org-1',
+          originCountry: 'FR',
+        }),
       );
 
       expect(result.reverseChargeApplied).toBeUndefined();
@@ -404,7 +469,15 @@ describe('CalculateOrderTaxUseCase', () => {
 
     it('should not apply reverse charge to non-EU destinations', async () => {
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'US' }, 0, undefined, false, 'DE123456789', 'org-1', 'DE'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: false,
+          vatNumber: 'DE123456789',
+          organizationId: 'org-1',
+          originCountry: 'DE',
+        }),
       );
 
       expect(taxQuery.validateCustomerVatNumber).not.toHaveBeenCalled();
@@ -420,7 +493,14 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.hasNexusCoverage as jest.Mock).mockResolvedValue(false);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'US', region: 'TX' }, 500, undefined, false, undefined, 'org-1', 'US'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'US', region: 'TX' },
+          shippingAmountCents: 500,
+          pricesIncludeTax: false,
+          organizationId: 'org-1',
+          originCountry: 'US',
+        }),
       );
 
       expect(result.success).toBe(true);
@@ -434,7 +514,14 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.hasNexusCoverage as jest.Mock).mockResolvedValue(true);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'US', region: 'CA' }, 0, undefined, false, undefined, 'org-1', 'US'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'US', region: 'CA' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: false,
+          organizationId: 'org-1',
+          originCountry: 'US',
+        }),
       );
 
       expect(result.taxAmountCents).toBe(1000);
@@ -444,7 +531,14 @@ describe('CalculateOrderTaxUseCase', () => {
       (taxQuery.hasNexusCoverage as jest.Mock).mockResolvedValue(null);
 
       const result = await useCase.execute(
-        new CalculateOrderTaxCommand(items, { country: 'US' }, 0, undefined, false, undefined, 'org-1', 'US'),
+        new CalculateOrderTaxCommand({
+          items: items,
+          shippingAddress: { country: 'US' },
+          shippingAmountCents: 0,
+          pricesIncludeTax: false,
+          organizationId: 'org-1',
+          originCountry: 'US',
+        }),
       );
 
       expect(result.taxAmountCents).toBe(1000);

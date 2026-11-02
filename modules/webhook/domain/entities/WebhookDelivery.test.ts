@@ -38,7 +38,15 @@ describe('WebhookDeliveryEntity', () => {
       eventId: 'e1',
       payload: {},
     });
-    d.recordFailure('Timeout', 500, 'Server Error', 100, 5, 1000, 2);
+    d.recordFailure({
+      errorMessage: 'Timeout',
+      responseStatus: 500,
+      responseBody: 'Server Error',
+      durationMs: 100,
+      maxRetries: 5,
+      retryIntervalMs: 1000,
+      backoffMultiplier: 2,
+    });
     expect(d.status).toBe('retrying');
     expect(d.attempts).toBe(1);
     expect(d.errorMessage).toBe('Timeout');
@@ -54,7 +62,15 @@ describe('WebhookDeliveryEntity', () => {
       payload: {},
     });
     for (let i = 0; i < 5; i++) {
-      d.recordFailure('Error', 500, null, 50, 5, 100, 2);
+      d.recordFailure({
+        errorMessage: 'Error',
+        responseStatus: 500,
+        responseBody: null,
+        durationMs: 50,
+        maxRetries: 5,
+        retryIntervalMs: 100,
+        backoffMultiplier: 2,
+      });
     }
     expect(d.status).toBe('failed');
     expect(d.nextRetryAt).toBeNull();

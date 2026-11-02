@@ -40,15 +40,15 @@ interface TaxCalculationPort {
     address: { country: string; region?: string; postalCode?: string },
     customerId?: string,
   ): Promise<LineTaxResult>;
-  calculateComplexTax(
-    items: Array<{ product_id: string; tax_category_id?: string; quantity: number; priceCents: number }>,
-    shippingAddress: { country: string; region?: string; postal_code?: string; city?: string },
-    billingAddress: { country: string; region?: string; postal_code?: string; city?: string },
-    subtotalCents: number,
-    shippingAmountCents: number,
-    customerId?: string,
-    organizationId?: string,
-  ): Promise<unknown>;
+  calculateComplexTax(params: {
+    items: Array<{ product_id: string; tax_category_id?: string; quantity: number; priceCents: number }>;
+    shippingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    billingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    subtotalCents: number;
+    shippingAmountCents: number;
+    customerId?: string;
+    organizationId?: string;
+  }): Promise<unknown>;
 }
 
 export class CalculateLineItemTaxUseCase {
@@ -113,8 +113,8 @@ export class CalculateLineItemTaxUseCase {
       city: shippingAddress.city,
     };
 
-    return this.taxCalculation.calculateComplexTax(
-      [
+    return this.taxCalculation.calculateComplexTax({
+      items: [
         {
           product_id: productId,
           quantity: parsedQuantity,
@@ -122,12 +122,12 @@ export class CalculateLineItemTaxUseCase {
           tax_category_id: undefined,
         },
       ],
-      dbAddress,
-      dbAddress,
-      parsedPriceCents * parsedQuantity,
-      0,
+      shippingAddress: dbAddress,
+      billingAddress: dbAddress,
+      subtotalCents: parsedPriceCents * parsedQuantity,
+      shippingAmountCents: 0,
       customerId,
       organizationId,
-    );
+    });
   }
 }

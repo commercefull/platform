@@ -76,15 +76,15 @@ export const updateCheckoutSession = async (req: HttpRequest, res: HttpResponse)
   echoAcpHeaders(req, res);
   const body = req.body as Record<string, unknown>;
   const response = await updateChannelSessionUseCase.execute(
-    new UpdateChannelSessionCommand(
-      req.params.id,
-      channel(req).integrationId,
-      body.items as Array<{ id: string; quantity: number }> | undefined,
-      body.buyer as UpdateChannelSessionCommand['buyer'],
-      body.fulfillment_details as UpdateChannelSessionCommand['fulfillmentDetails'],
-      body.fulfillment_option_id as string | undefined,
-      body.affiliate_attribution as UpdateChannelSessionCommand['affiliateAttribution'],
-    ),
+    new UpdateChannelSessionCommand({
+      channelSessionId: req.params.id,
+      integrationId: channel(req).integrationId,
+      items: body.items as Array<{ id: string; quantity: number }> | undefined,
+      buyer: body.buyer as UpdateChannelSessionCommand['buyer'],
+      fulfillmentDetails: body.fulfillment_details as UpdateChannelSessionCommand['fulfillmentDetails'],
+      fulfillmentOptionId: body.fulfillment_option_id as string | undefined,
+      affiliateAttribution: body.affiliate_attribution as UpdateChannelSessionCommand['affiliateAttribution'],
+    }),
   );
   jsonResponse(res, 200, response);
 };

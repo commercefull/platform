@@ -9,26 +9,51 @@ import { hashString } from '../../../../libs/hash';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { CustomerRepository } from '../../domain/repositories/CustomerRepository';
 import { CustomerEmailAlreadyExistsError, EmailRequiredError, CustomerValidationError } from '../../domain/errors/CustomerErrors';
+export interface RegisterCustomerCommandProps {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password?: string;
+  phone?: string;
+  dateOfBirth?: Date;
+  preferredCurrency?: string;
+  preferredLanguage?: string;
+  metadata?: Record<string, unknown>;
+  flags?: { isActive?: boolean; isVerified?: boolean };
+  /** Home selling market — stamped from the resolved market context at registration. */
+  homeMarketId?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class RegisterCustomerCommand {
-  constructor(
-    public readonly email: string,
-    public readonly firstName: string,
-    public readonly lastName: string,
-    public readonly password?: string,
-    public readonly phone?: string,
-    public readonly dateOfBirth?: Date,
-    public readonly preferredCurrency?: string,
-    public readonly preferredLanguage?: string,
-    public readonly metadata?: Record<string, unknown>,
-    public readonly flags?: { isActive?: boolean; isVerified?: boolean },
-    /** Home selling market — stamped from the resolved market context at registration. */
-    public readonly homeMarketId?: string,
-  ) {}
+  public readonly email: string;
+  public readonly firstName: string;
+  public readonly lastName: string;
+  public readonly password?: string;
+  public readonly phone?: string;
+  public readonly dateOfBirth?: Date;
+  public readonly preferredCurrency?: string;
+  public readonly preferredLanguage?: string;
+  public readonly metadata?: Record<string, unknown>;
+  public readonly flags?: { isActive?: boolean; isVerified?: boolean };
+  public readonly homeMarketId?: string;
+
+  constructor(props: RegisterCustomerCommandProps) {
+    this.email = props.email;
+    this.firstName = props.firstName;
+    this.lastName = props.lastName;
+    this.password = props.password;
+    this.phone = props.phone;
+    this.dateOfBirth = props.dateOfBirth;
+    this.preferredCurrency = props.preferredCurrency;
+    this.preferredLanguage = props.preferredLanguage;
+    this.metadata = props.metadata;
+    this.flags = props.flags;
+    this.homeMarketId = props.homeMarketId;
+  }
 }
 
 // ============================================================================

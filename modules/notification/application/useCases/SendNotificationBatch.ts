@@ -22,17 +22,34 @@ export interface NotificationRecipient {
   userId: string;
   userType: string;
 }
+export interface SendNotificationBatchCommandProps {
+  name: string;
+  channel: string;
+  type: string;
+  title: string;
+  content: string;
+  recipients: NotificationRecipient[];
+  scheduledAt?: Date;
+}
 
 export class SendNotificationBatchCommand {
-  constructor(
-    public readonly name: string,
-    public readonly channel: string,
-    public readonly type: string,
-    public readonly title: string,
-    public readonly content: string,
-    public readonly recipients: NotificationRecipient[],
-    public readonly scheduledAt?: Date,
-  ) {}
+  public readonly name: string;
+  public readonly channel: string;
+  public readonly type: string;
+  public readonly title: string;
+  public readonly content: string;
+  public readonly recipients: NotificationRecipient[];
+  public readonly scheduledAt?: Date;
+
+  constructor(props: SendNotificationBatchCommandProps) {
+    this.name = props.name;
+    this.channel = props.channel;
+    this.type = props.type;
+    this.title = props.title;
+    this.content = props.content;
+    this.recipients = props.recipients;
+    this.scheduledAt = props.scheduledAt;
+  }
 }
 
 // ============================================================================

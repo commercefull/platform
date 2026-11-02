@@ -18,7 +18,7 @@ describe('UpdatePageUseCase', () => {
   });
 
   it('should update a page successfully', async () => {
-    const result = await useCase.execute(new UpdatePageCommand('p1', 'New', 'new', undefined, 'published'));
+    const result = await useCase.execute(new UpdatePageCommand({ pageId: 'p1', title: 'New', slug: 'new', status: 'published' }));
 
     expect(result.title).toBe('New');
     expect(result.status).toBe('published');
@@ -26,12 +26,12 @@ describe('UpdatePageUseCase', () => {
   });
 
   it('should throw ContentValidationError when pageId is empty', async () => {
-    await expect(useCase.execute(new UpdatePageCommand(''))).rejects.toThrow(ContentValidationError);
+    await expect(useCase.execute(new UpdatePageCommand({ pageId: '' }))).rejects.toThrow(ContentValidationError);
   });
 
   it('should throw ContentPageNotFoundError when page does not exist', async () => {
     mockRepo.findPageById.mockResolvedValue(null);
 
-    await expect(useCase.execute(new UpdatePageCommand('missing'))).rejects.toThrow(ContentPageNotFoundError);
+    await expect(useCase.execute(new UpdatePageCommand({ pageId: 'missing' }))).rejects.toThrow(ContentPageNotFoundError);
   });
 });

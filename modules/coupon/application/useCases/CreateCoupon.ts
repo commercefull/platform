@@ -6,30 +6,73 @@ import { generateUUID } from '../../../../libs/uuid';
 import { Coupon } from '../../domain/entities/Coupon';
 import { CouponRepository } from '../../domain/repositories/CouponRepository';
 import { CouponCodeAlreadyExistsError } from '../../domain/errors/CouponErrors';
+export interface CreateCouponCommandProps {
+  code: string;
+  name: string;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  value: number;
+  createdBy: string;
+  description?: string;
+  currency?: string;
+  minOrderValueCents?: number;
+  maxDiscountAmountCents?: number;
+  usageType?: 'single_use' | 'multi_use' | 'unlimited';
+  usageLimit?: number;
+  customerUsageLimit?: number;
+  startsAt?: Date;
+  expiresAt?: Date;
+  applicableProducts?: string[];
+  applicableCategories?: string[];
+  applicableCustomerGroups?: string[];
+  excludedProducts?: string[];
+  excludedCategories?: string[];
+  metadata?: Record<string, unknown>;
+}
 
 export class CreateCouponCommand {
-  constructor(
-    public readonly code: string,
-    public readonly name: string,
-    public readonly type: 'percentage' | 'fixed_amount' | 'free_shipping',
-    public readonly value: number,
-    public readonly createdBy: string,
-    public readonly description?: string,
-    public readonly currency?: string,
-    public readonly minOrderValueCents?: number,
-    public readonly maxDiscountAmountCents?: number,
-    public readonly usageType?: 'single_use' | 'multi_use' | 'unlimited',
-    public readonly usageLimit?: number,
-    public readonly customerUsageLimit?: number,
-    public readonly startsAt?: Date,
-    public readonly expiresAt?: Date,
-    public readonly applicableProducts?: string[],
-    public readonly applicableCategories?: string[],
-    public readonly applicableCustomerGroups?: string[],
-    public readonly excludedProducts?: string[],
-    public readonly excludedCategories?: string[],
-    public readonly metadata?: Record<string, unknown>,
-  ) {}
+  public readonly code: string;
+  public readonly name: string;
+  public readonly type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  public readonly value: number;
+  public readonly createdBy: string;
+  public readonly description?: string;
+  public readonly currency?: string;
+  public readonly minOrderValueCents?: number;
+  public readonly maxDiscountAmountCents?: number;
+  public readonly usageType?: 'single_use' | 'multi_use' | 'unlimited';
+  public readonly usageLimit?: number;
+  public readonly customerUsageLimit?: number;
+  public readonly startsAt?: Date;
+  public readonly expiresAt?: Date;
+  public readonly applicableProducts?: string[];
+  public readonly applicableCategories?: string[];
+  public readonly applicableCustomerGroups?: string[];
+  public readonly excludedProducts?: string[];
+  public readonly excludedCategories?: string[];
+  public readonly metadata?: Record<string, unknown>;
+
+  constructor(props: CreateCouponCommandProps) {
+    this.code = props.code;
+    this.name = props.name;
+    this.type = props.type;
+    this.value = props.value;
+    this.createdBy = props.createdBy;
+    this.description = props.description;
+    this.currency = props.currency;
+    this.minOrderValueCents = props.minOrderValueCents;
+    this.maxDiscountAmountCents = props.maxDiscountAmountCents;
+    this.usageType = props.usageType;
+    this.usageLimit = props.usageLimit;
+    this.customerUsageLimit = props.customerUsageLimit;
+    this.startsAt = props.startsAt;
+    this.expiresAt = props.expiresAt;
+    this.applicableProducts = props.applicableProducts;
+    this.applicableCategories = props.applicableCategories;
+    this.applicableCustomerGroups = props.applicableCustomerGroups;
+    this.excludedProducts = props.excludedProducts;
+    this.excludedCategories = props.excludedCategories;
+    this.metadata = props.metadata;
+  }
 }
 
 export class CreateCouponUseCase {

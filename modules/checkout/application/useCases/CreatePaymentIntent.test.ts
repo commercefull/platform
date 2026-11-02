@@ -73,7 +73,12 @@ describe('CreatePaymentIntentUseCase', () => {
     orderPlacementPort.createOrder.mockResolvedValue({ orderId: 'o-1', orderNumber: 'ORD-001', status: 'draft', paymentStatus: 'pending' });
     paymentAuthorizationPort.initiatePayment.mockResolvedValue({ transactionId: 'pi_123', status: 'requires_confirmation' });
 
-    useCase = new CreatePaymentIntentUseCase(checkoutRepository, basketSnapshotPort, orderPlacementPort, paymentAuthorizationPort);
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+    });
   });
 
   it('should create the order, initiate payment, persist the intent, and emit checkout.payment_initiated when the session is ready', async () => {
@@ -110,14 +115,13 @@ describe('CreatePaymentIntentUseCase', () => {
       releaseForOrder: jest.fn(),
       confirmForOrder: jest.fn(),
     };
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      undefined,
-      inventoryReservationPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      inventoryReservationPort: inventoryReservationPort,
+    });
     orderPlacementPort.createOrder.mockResolvedValue({
       orderId: 'o-1',
       orderNumber: 'ORD-001',
@@ -141,16 +145,13 @@ describe('CreatePaymentIntentUseCase', () => {
     session.applyCoupon('AUTO_PROMOTION', Money.create(10, 'USD'));
     checkoutRepository.findById.mockResolvedValue(session);
     const promotionQuotePort = { evaluatePromotions: jest.fn().mockResolvedValue({ totalDiscountAmountCents: 0, appliedPromotions: [] }) };
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      undefined,
-      undefined,
-      undefined,
-      promotionQuotePort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      promotionQuotePort: promotionQuotePort,
+    });
 
     const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
@@ -169,16 +170,13 @@ describe('CreatePaymentIntentUseCase', () => {
         .fn()
         .mockResolvedValue({ totalDiscountAmountCents: 1000, appliedPromotions: [{ id: 'pr-1', name: 'Auto', amountCents: 1000 }] }),
     };
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      undefined,
-      undefined,
-      undefined,
-      promotionQuotePort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      promotionQuotePort: promotionQuotePort,
+    });
 
     await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
@@ -275,17 +273,14 @@ describe('CreatePaymentIntentUseCase', () => {
       }),
     );
 
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-      undefined,
-      undefined,
-      undefined,
-      loyaltyRedemptionPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+      loyaltyRedemptionPort: loyaltyRedemptionPort,
+    });
 
     await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'cust-1'));
 
@@ -310,17 +305,14 @@ describe('CreatePaymentIntentUseCase', () => {
       }),
     );
 
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-      undefined,
-      undefined,
-      undefined,
-      loyaltyRedemptionPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+      loyaltyRedemptionPort: loyaltyRedemptionPort,
+    });
 
     await expect(useCase.execute(new CreatePaymentIntentCommand('ck-1', 'cust-1'))).rejects.toThrow('Loyalty points could not be redeemed');
     expect(orderPlacementPort.cancelOrder).toHaveBeenCalledWith('o-1', 'loyalty_redemption_failed');
@@ -393,13 +385,13 @@ describe('CreatePaymentIntentUseCase', () => {
 
   it('should proceed with payment when fraud screening approves', async () => {
     fraudScreeningPort.screenOrder.mockResolvedValue(fraudResult('approved'));
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+    });
 
     const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
@@ -410,13 +402,13 @@ describe('CreatePaymentIntentUseCase', () => {
 
   it('should cancel the order, emit checkout.fraud_blocked, and refuse payment when screening blocks it', async () => {
     fraudScreeningPort.screenOrder.mockResolvedValue(fraudResult('blocked'));
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+    });
 
     await expect(useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'))).rejects.toThrow('Order blocked by fraud screening');
 
@@ -427,13 +419,13 @@ describe('CreatePaymentIntentUseCase', () => {
 
   it('should proceed with payment but emit checkout.fraud_review when screening flags the order', async () => {
     fraudScreeningPort.screenOrder.mockResolvedValue(fraudResult('review'));
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+    });
 
     const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
@@ -444,13 +436,13 @@ describe('CreatePaymentIntentUseCase', () => {
 
   it('should fail open and still initiate payment when the screening service throws', async () => {
     fraudScreeningPort.screenOrder.mockRejectedValue(new Error('Screening service unavailable'));
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      fraudScreeningPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      fraudScreeningPort: fraudScreeningPort,
+    });
 
     const result = await useCase.execute(new CreatePaymentIntentCommand('ck-1', 'c-1'));
 
@@ -508,17 +500,13 @@ describe('CreatePaymentIntentUseCase', () => {
   it('should re-debit loyalty against the same orderId on retry so the port dedupes per order', async () => {
     const loyaltyRedemptionPort = createLoyaltyRedemptionPort();
     loyaltyRedemptionPort.redeemPoints.mockResolvedValue({ transactionId: 'lt-1' });
-    useCase = new CreatePaymentIntentUseCase(
-      checkoutRepository,
-      basketSnapshotPort,
-      orderPlacementPort,
-      paymentAuthorizationPort,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      loyaltyRedemptionPort,
-    );
+    useCase = new CreatePaymentIntentUseCase({
+      checkoutRepository: checkoutRepository,
+      basketSnapshotPort: basketSnapshotPort,
+      orderPlacementPort: orderPlacementPort,
+      paymentAuthorizationPort: paymentAuthorizationPort,
+      loyaltyRedemptionPort: loyaltyRedemptionPort,
+    });
     checkoutRepository.findById.mockResolvedValue(
       readySession({ orderId: 'o-existing', loyaltyRewardId: 'rw-1', loyaltyPointsRedeemed: 500 }),
     );

@@ -6,21 +6,38 @@
 
 import type { NotificationPreferenceRepository } from '../../domain/repositories/NotificationPreferenceRepository';
 import { NotificationValidationError } from '../../domain/errors/NotificationErrors';
+export interface ManageNotificationPreferenceCommandProps {
+  userId: string;
+  userType: string;
+  type: string;
+  channelPreferences: Record<string, boolean>;
+  isEnabled: boolean;
+  schedulePreferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class ManageNotificationPreferenceCommand {
-  constructor(
-    public readonly userId: string,
-    public readonly userType: string,
-    public readonly type: string,
-    public readonly channelPreferences: Record<string, boolean>,
-    public readonly isEnabled: boolean,
-    public readonly schedulePreferences?: Record<string, unknown>,
-    public readonly metadata?: Record<string, unknown>,
-  ) {}
+  public readonly userId: string;
+  public readonly userType: string;
+  public readonly type: string;
+  public readonly channelPreferences: Record<string, boolean>;
+  public readonly isEnabled: boolean;
+  public readonly schedulePreferences?: Record<string, unknown>;
+  public readonly metadata?: Record<string, unknown>;
+
+  constructor(props: ManageNotificationPreferenceCommandProps) {
+    this.userId = props.userId;
+    this.userType = props.userType;
+    this.type = props.type;
+    this.channelPreferences = props.channelPreferences;
+    this.isEnabled = props.isEnabled;
+    this.schedulePreferences = props.schedulePreferences;
+    this.metadata = props.metadata;
+  }
 }
 
 // ============================================================================

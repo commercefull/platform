@@ -260,14 +260,15 @@ export class LoyaltyRepo {
     return result;
   }
 
-  async adjustCustomerPoints(
-    customerId: string,
-    pointsChange: number,
-    action: string,
-    description?: string,
-    orderId?: string,
-    referenceId?: string,
-  ): Promise<LoyaltyPoints> {
+  async adjustCustomerPoints(params: {
+    customerId: string;
+    pointsChange: number;
+    action: string;
+    description?: string;
+    orderId?: string;
+    referenceId?: string;
+  }): Promise<LoyaltyPoints> {
+    const { customerId, pointsChange, action, description, orderId, referenceId } = params;
     const now = new Date();
 
     // Get or create customer points
@@ -548,14 +549,13 @@ export class LoyaltyRepo {
     if (!redemption) throw new FailedToCreateLoyaltyError('Failed to create redemption');
 
     // Deduct points
-    await this.adjustCustomerPoints(
+    await this.adjustCustomerPoints({
       customerId,
-      -reward.pointsCost,
-      LoyaltyPointsAction.REDEMPTION,
-      `Redeemed: ${reward.name}`,
-      undefined,
-      redemption.redemptionId,
-    );
+      pointsChange: -reward.pointsCost,
+      action: LoyaltyPointsAction.REDEMPTION,
+      description: `Redeemed: ${reward.name}`,
+      referenceId: redemption.redemptionId,
+    });
 
     return redemption;
   }
@@ -593,13 +593,13 @@ export class LoyaltyRepo {
     const earnedPoints = Math.floor(basePoints * multiplier);
 
     // Add points
-    return await this.adjustCustomerPoints(
+    return await this.adjustCustomerPoints({
       customerId,
-      earnedPoints,
-      LoyaltyPointsAction.PURCHASE,
-      `Order ${orderId}: Earned ${earnedPoints} points`,
+      pointsChange: earnedPoints,
+      action: LoyaltyPointsAction.PURCHASE,
+      description: `Order ${orderId}: Earned ${earnedPoints} points`,
       orderId,
-    );
+    });
   }
 }
 

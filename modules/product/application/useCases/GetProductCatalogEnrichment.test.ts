@@ -1,4 +1,8 @@
-import { GetProductCatalogEnrichmentUseCase, GetProductCatalogEnrichmentCommand } from './GetProductCatalogEnrichment';
+import {
+  GetProductCatalogEnrichmentUseCase,
+  GetProductCatalogEnrichmentCommand,
+  GetProductCatalogEnrichmentUseCaseDeps,
+} from './GetProductCatalogEnrichment';
 import { ProductNotFoundError, ProductValidationError } from '../../domain/errors/ProductErrors';
 import {
   createProductCategory,
@@ -12,28 +16,35 @@ import {
 
 describe('GetProductCatalogEnrichmentUseCase', () => {
   let useCase: GetProductCatalogEnrichmentUseCase;
-  let mockRepo1: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>;
-  let mockRepo2: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[1]>;
-  let mockRepo3: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[2]>;
-  let mockRepo4: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[3]>;
-  let mockRepo5: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[4]>;
-  let mockRepo6: jest.Mocked<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[5]>;
+  let mockRepo1: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productRepo']>;
+  let mockRepo2: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productToCategoryRepo']>;
+  let mockRepo3: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productCategoryRepo']>;
+  let mockRepo4: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productTagRepo']>;
+  let mockRepo5: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productQaRepo']>;
+  let mockRepo6: jest.Mocked<GetProductCatalogEnrichmentUseCaseDeps['productQaAnswerRepo']>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRepo1 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[0]>();
+    mockRepo1 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productRepo']>();
     mockRepo1.findById.mockResolvedValue(createProductLookup());
-    mockRepo2 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[1]>();
+    mockRepo2 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productToCategoryRepo']>();
     mockRepo2.findByProduct.mockResolvedValue([createProductToCategory({ productCategoryId: 'cat1' })]);
-    mockRepo3 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[2]>();
+    mockRepo3 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productCategoryRepo']>();
     mockRepo3.findById.mockResolvedValue(createProductCategory({ productCategoryId: 'cat1' }));
-    mockRepo4 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[3]>();
+    mockRepo4 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productTagRepo']>();
     mockRepo4.findAll.mockResolvedValue([createProductTag({ name: 'new' })]);
-    mockRepo5 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[4]>();
+    mockRepo5 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productQaRepo']>();
     mockRepo5.findByProduct.mockResolvedValue([createProductQa()]);
-    mockRepo6 = lazyMock<ConstructorParameters<typeof GetProductCatalogEnrichmentUseCase>[5]>();
+    mockRepo6 = lazyMock<GetProductCatalogEnrichmentUseCaseDeps['productQaAnswerRepo']>();
     mockRepo6.findByQuestion.mockResolvedValue([createProductQaAnswer({ answer: 'Yes!' })]);
-    useCase = new GetProductCatalogEnrichmentUseCase(mockRepo1, mockRepo2, mockRepo3, mockRepo4, mockRepo5, mockRepo6);
+    useCase = new GetProductCatalogEnrichmentUseCase({
+      productRepo: mockRepo1,
+      productToCategoryRepo: mockRepo2,
+      productCategoryRepo: mockRepo3,
+      productTagRepo: mockRepo4,
+      productQaRepo: mockRepo5,
+      productQaAnswerRepo: mockRepo6,
+    });
   });
 
   it('should return enriched product (happy path)', async () => {

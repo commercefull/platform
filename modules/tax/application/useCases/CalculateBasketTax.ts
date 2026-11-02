@@ -25,15 +25,15 @@ interface BasketTaxCalculationPort {
     address: { country: string; region?: string; postal_code?: string },
     customerId?: string,
   ): Promise<unknown>;
-  calculateComplexTax(
-    items: Array<{ product_id: string; tax_category_id?: string; quantity: number; priceCents: number }>,
-    shippingAddress: { country: string; region?: string; postal_code?: string; city?: string },
-    billingAddress: { country: string; region?: string; postal_code?: string; city?: string },
-    subtotalCents: number,
-    shippingAmountCents: number,
-    customerId?: string,
-    organizationId?: string,
-  ): Promise<unknown>;
+  calculateComplexTax(params: {
+    items: Array<{ product_id: string; tax_category_id?: string; quantity: number; priceCents: number }>;
+    shippingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    billingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    subtotalCents: number;
+    shippingAmountCents: number;
+    customerId?: string;
+    organizationId?: string;
+  }): Promise<unknown>;
 }
 
 export class CalculateBasketTaxUseCase {
@@ -90,14 +90,14 @@ export class CalculateBasketTaxUseCase {
       tax_category_id: undefined,
     }));
 
-    return this.taxCalculation.calculateComplexTax(
-      dbItems,
-      dbShippingAddr,
-      dbBillingAddr,
-      basket.subtotalCents,
-      0,
+    return this.taxCalculation.calculateComplexTax({
+      items: dbItems,
+      shippingAddress: dbShippingAddr,
+      billingAddress: dbBillingAddr,
+      subtotalCents: basket.subtotalCents,
+      shippingAmountCents: 0,
       customerId,
       organizationId,
-    );
+    });
   }
 }

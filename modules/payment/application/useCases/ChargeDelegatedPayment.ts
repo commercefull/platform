@@ -27,20 +27,43 @@ export interface DelegatedCredential {
   /** Opaque PSP-scoped token — never raw PAN data */
   token: string;
 }
+export interface ChargeDelegatedPaymentCommandProps {
+  organizationId: string;
+  orderId: string;
+  transactionId: string;
+  amountCents: number;
+  currency: string;
+  credential: DelegatedCredential;
+  customerId?: string;
+  customerEmail?: string;
+  customerIp?: string;
+  metadata?: Record<string, unknown>;
+}
 
 export class ChargeDelegatedPaymentCommand {
-  constructor(
-    public readonly organizationId: string,
-    public readonly orderId: string,
-    public readonly transactionId: string,
-    public readonly amountCents: number,
-    public readonly currency: string,
-    public readonly credential: DelegatedCredential,
-    public readonly customerId?: string,
-    public readonly customerEmail?: string,
-    public readonly customerIp?: string,
-    public readonly metadata?: Record<string, unknown>,
-  ) {}
+  public readonly organizationId: string;
+  public readonly orderId: string;
+  public readonly transactionId: string;
+  public readonly amountCents: number;
+  public readonly currency: string;
+  public readonly credential: DelegatedCredential;
+  public readonly customerId?: string;
+  public readonly customerEmail?: string;
+  public readonly customerIp?: string;
+  public readonly metadata?: Record<string, unknown>;
+
+  constructor(props: ChargeDelegatedPaymentCommandProps) {
+    this.organizationId = props.organizationId;
+    this.orderId = props.orderId;
+    this.transactionId = props.transactionId;
+    this.amountCents = props.amountCents;
+    this.currency = props.currency;
+    this.credential = props.credential;
+    this.customerId = props.customerId;
+    this.customerEmail = props.customerEmail;
+    this.customerIp = props.customerIp;
+    this.metadata = props.metadata;
+  }
 }
 
 export interface ChargeDelegatedPaymentResponse {
@@ -78,24 +101,24 @@ export class ChargeDelegatedPaymentUseCase {
     let result;
     try {
       result = await this.routePayment.execute(
-        new RoutePaymentCommand(
-          command.organizationId,
-          command.orderId,
-          command.amountCents,
-          command.currency,
-          command.customerId,
-          command.customerEmail,
-          command.customerIp,
-          command.credential.token,
-          `Delegated ${command.credential.credentialType} charge via ${command.credential.provider}`,
-          undefined,
-          undefined,
-          {
+        new RoutePaymentCommand({
+          organizationId: command.organizationId,
+          orderId: command.orderId,
+          amountCents: command.amountCents,
+          currency: command.currency,
+          customerId: command.customerId,
+          customerEmail: command.customerEmail,
+          customerIp: command.customerIp,
+          paymentMethodToken: command.credential.token,
+          description: `Delegated ${command.credential.credentialType} charge via ${command.credential.provider}`,
+          returnUrl: undefined,
+          cancelUrl: undefined,
+          metadata: {
             ...command.metadata,
             delegatedCredentialType: command.credential.credentialType,
             delegatedProvider: command.credential.provider,
           },
-        ),
+        }),
       );
     } catch (err) {
       transaction.fail('delegated_charge_failed', err instanceof Error ? err.message : 'Routed PSP charge failed');

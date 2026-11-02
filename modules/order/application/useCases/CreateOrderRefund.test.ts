@@ -63,7 +63,9 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    const result = await useCase.execute(new CreateOrderRefundCommand('pay-1', 50, 'partial refund'));
+    const result = await useCase.execute(
+      new CreateOrderRefundCommand({ orderPaymentId: 'pay-1', amountCents: 50, reason: 'partial refund' }),
+    );
 
     expect(result.orderPaymentRefundId).toBe('ref-1');
     expect(result.amountCents).toBe(50);
@@ -74,14 +76,18 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo(null);
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(useCase.execute(new CreateOrderRefundCommand('nonexistent', 50))).rejects.toThrow(OrderPaymentNotFoundError);
+    await expect(useCase.execute(new CreateOrderRefundCommand({ orderPaymentId: 'nonexistent', amountCents: 50 }))).rejects.toThrow(
+      OrderPaymentNotFoundError,
+    );
   });
 
   it('should throw RefundAmountMustBePositiveError for zero amountCents', async () => {
     const queryRepo = createMockQueryRepo();
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(useCase.execute(new CreateOrderRefundCommand('pay-1', 0))).rejects.toThrow(RefundAmountMustBePositiveError);
+    await expect(useCase.execute(new CreateOrderRefundCommand({ orderPaymentId: 'pay-1', amountCents: 0 }))).rejects.toThrow(
+      RefundAmountMustBePositiveError,
+    );
   });
 
   it('should throw RefundExceedsRefundableBalanceError when amountCents exceeds refundable', async () => {
@@ -89,6 +95,8 @@ describe('CreateOrderRefundUseCase', () => {
     const queryRepo = createMockQueryRepo(payment);
     const useCase = new CreateOrderRefundUseCase(queryRepo);
 
-    await expect(useCase.execute(new CreateOrderRefundCommand('pay-1', 50))).rejects.toThrow(RefundExceedsRefundableBalanceError);
+    await expect(useCase.execute(new CreateOrderRefundCommand({ orderPaymentId: 'pay-1', amountCents: 50 }))).rejects.toThrow(
+      RefundExceedsRefundableBalanceError,
+    );
   });
 });

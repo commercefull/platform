@@ -36,7 +36,9 @@ describe('UpdateCatalogVariantUseCase', () => {
   it('should update the variant without touching pricing when no price fields are given', async () => {
     mockVariantRepo.update.mockResolvedValue(createVariantRecord({ name: 'Renamed' }));
 
-    const result = await useCase.execute(new UpdateCatalogVariantCommand('p-1', 'var-1', { name: 'Renamed' }));
+    const result = await useCase.execute(
+      new UpdateCatalogVariantCommand({ productId: 'p-1', variantId: 'var-1', variantFields: { name: 'Renamed' } }),
+    );
 
     expect(result.name).toBe('Renamed');
     expect(mockPricingPort.setBasePrice).not.toHaveBeenCalled();
@@ -67,7 +69,9 @@ describe('UpdateCatalogVariantUseCase', () => {
       updatedAt: new Date(),
     });
 
-    const result = await useCase.execute(new UpdateCatalogVariantCommand('p-1', 'var-1', {}, 2000));
+    const result = await useCase.execute(
+      new UpdateCatalogVariantCommand({ productId: 'p-1', variantId: 'var-1', variantFields: {}, priceCents: 2000 }),
+    );
 
     expect(result.priceCents).toBe(2000);
     // salePriceCents falls back to the existing row, currencyCode preserved

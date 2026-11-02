@@ -5,23 +5,50 @@
 
 import { PromotionRepository, type Promotion } from '../../domain/repositories/PromotionRepository';
 import { PromotionCodeAlreadyExistsError, PromotionValidationError } from '../../domain/errors/PromotionErrors';
+export interface CreatePromotionCommandProps {
+  name: string;
+  type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  value: number;
+  code?: string;
+  description?: string;
+  minOrderAmountCents?: number;
+  maxDiscountAmountCents?: number;
+  usageLimit?: number;
+  usageLimitPerCustomer?: number;
+  startsAt?: Date;
+  endsAt?: Date;
+  organizationId?: string;
+}
 
 // Command
 export class CreatePromotionCommand {
-  constructor(
-    public readonly name: string,
-    public readonly type: 'percentage' | 'fixed_amount' | 'free_shipping',
-    public readonly value: number,
-    public readonly code?: string,
-    public readonly description?: string,
-    public readonly minOrderAmountCents?: number,
-    public readonly maxDiscountAmountCents?: number,
-    public readonly usageLimit?: number,
-    public readonly usageLimitPerCustomer?: number,
-    public readonly startsAt?: Date,
-    public readonly endsAt?: Date,
-    public readonly organizationId?: string,
-  ) {}
+  public readonly name: string;
+  public readonly type: 'percentage' | 'fixed_amount' | 'free_shipping';
+  public readonly value: number;
+  public readonly code?: string;
+  public readonly description?: string;
+  public readonly minOrderAmountCents?: number;
+  public readonly maxDiscountAmountCents?: number;
+  public readonly usageLimit?: number;
+  public readonly usageLimitPerCustomer?: number;
+  public readonly startsAt?: Date;
+  public readonly endsAt?: Date;
+  public readonly organizationId?: string;
+
+  constructor(props: CreatePromotionCommandProps) {
+    this.name = props.name;
+    this.type = props.type;
+    this.value = props.value;
+    this.code = props.code;
+    this.description = props.description;
+    this.minOrderAmountCents = props.minOrderAmountCents;
+    this.maxDiscountAmountCents = props.maxDiscountAmountCents;
+    this.usageLimit = props.usageLimit;
+    this.usageLimitPerCustomer = props.usageLimitPerCustomer;
+    this.startsAt = props.startsAt;
+    this.endsAt = props.endsAt;
+    this.organizationId = props.organizationId;
+  }
 }
 
 // Response

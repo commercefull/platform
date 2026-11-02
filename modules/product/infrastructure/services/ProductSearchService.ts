@@ -121,7 +121,7 @@ class ProductSearchService implements ProductSearchServicePort {
       return this.buildUnionSearchQuery(filters, limit, offset);
     }
     const arm = this.buildFilterArm(filters, 'none', 1);
-    return this.assembleSearchQuery(arm, filters, limit, offset, 'p');
+    return this.assembleSearchQuery({ arm, filters, limit, offset, alias: 'p' });
   }
 
   /**
@@ -345,14 +345,15 @@ class ProductSearchService implements ProductSearchServicePort {
    * `alias` is the relation name ORDER BY columns reference ('p' for a
    * single arm, 't' for the UNION subquery).
    */
-  private assembleSearchQuery(
-    arm: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number },
-    filters: ProductSearchFilters,
-    limit: number,
-    offset: number,
-    alias: 'p' | 't',
-    secondArm?: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number },
-  ): { sql: string; countSql: string; params: unknown[] } {
+  private assembleSearchQuery(options: {
+    arm: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number };
+    filters: ProductSearchFilters;
+    limit: number;
+    offset: number;
+    alias: 'p' | 't';
+    secondArm?: { joins: string[]; conditions: string[]; params: unknown[]; nextParamIndex: number };
+  }): { sql: string; countSql: string; params: unknown[] } {
+    const { arm, filters, limit, offset, alias, secondArm } = options;
     // Build ORDER BY clause
     let orderBy = `${alias}."createdAt" DESC`;
     const sortOrder = filters.sortOrder || 'desc';
@@ -449,7 +450,7 @@ class ProductSearchService implements ProductSearchServicePort {
   ): { sql: string; countSql: string; params: unknown[] } {
     const productArm = this.buildFilterArm(filters, 'product', 1);
     const variantArm = this.buildFilterArm(filters, 'variant', productArm.nextParamIndex);
-    return this.assembleSearchQuery(productArm, filters, limit, offset, 't', variantArm);
+    return this.assembleSearchQuery({ arm: productArm, filters, limit, offset, alias: 't', secondArm: variantArm });
   }
 
   /**

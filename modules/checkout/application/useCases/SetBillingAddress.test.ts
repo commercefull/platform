@@ -3,20 +3,17 @@ import { SetBillingAddressUseCase, SetBillingAddressCommand } from './SetBilling
 import { CheckoutSessionNotFoundError } from '../../domain/errors/CheckoutErrors';
 
 const command = (sameAsShipping = false) =>
-  new SetBillingAddressCommand(
-    'ck-1',
-    'Jane',
-    'Doe',
-    '123 Main St',
-    'Portland',
-    '97201',
-    'US',
-    undefined,
-    undefined,
-    'OR',
-    undefined,
-    sameAsShipping,
-  );
+  new SetBillingAddressCommand({
+    checkoutId: 'ck-1',
+    firstName: 'Jane',
+    lastName: 'Doe',
+    addressLine1: '123 Main St',
+    city: 'Portland',
+    postalCode: '97201',
+    country: 'US',
+    region: 'OR',
+    sameAsShipping: sameAsShipping,
+  });
 
 describe('SetBillingAddressUseCase', () => {
   let useCase: SetBillingAddressUseCase;

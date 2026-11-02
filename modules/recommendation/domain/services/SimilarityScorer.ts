@@ -88,14 +88,17 @@ function similarityScore(
  * primary-category bucket (or the same brand) are scored — keeps the nightly
  * job linear-ish per spec §4 S4.
  */
-export function rankSimilarProducts(
-  source: SimilarityFeatures,
-  candidates: SimilarityFeatures[],
-  minScore: number,
-  topN: number,
-  weights: SimilarityWeights = DEFAULT_SIMILARITY_WEIGHTS,
-  priceBandPct: number = 25,
-): Array<{ productId: string; score: number }> {
+export interface RankSimilarProductsParams {
+  source: SimilarityFeatures;
+  candidates: SimilarityFeatures[];
+  minScore: number;
+  topN: number;
+  weights?: SimilarityWeights;
+  priceBandPct?: number;
+}
+
+export function rankSimilarProducts(params: RankSimilarProductsParams): Array<{ productId: string; score: number }> {
+  const { source, candidates, minScore, topN, weights = DEFAULT_SIMILARITY_WEIGHTS, priceBandPct = 25 } = params;
   return candidates
     .filter(c => c.productId !== source.productId)
     .filter(

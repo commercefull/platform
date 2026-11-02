@@ -125,14 +125,14 @@ export const getReviewStatsUseCase = new GetReviewStatsUseCase(productReviewRepo
 export const voteOnReviewUseCase = new VoteOnReviewUseCase(productReviewVoteRepo);
 
 export const submitProductQaUseCase = new SubmitProductQaUseCase(productRepo, productQaRepo);
-export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmentUseCase(
-  productRepo,
-  productToCategoryRepo,
-  productCategoryRepo,
-  productTagRepo,
-  productQaRepo,
-  productQaAnswerRepo,
-);
+export const getProductCatalogEnrichmentUseCase = new GetProductCatalogEnrichmentUseCase({
+  productRepo: productRepo,
+  productToCategoryRepo: productToCategoryRepo,
+  productCategoryRepo: productCategoryRepo,
+  productTagRepo: productTagRepo,
+  productQaRepo: productQaRepo,
+  productQaAnswerRepo: productQaAnswerRepo,
+});
 export const getProductAttributesUseCase = new GetProductAttributesUseCase(dynamicAttributeRepo);
 export const searchProductsUseCase = new SearchProductsUseCase(productRepo, productPricingPort);
 

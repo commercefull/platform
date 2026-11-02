@@ -12,7 +12,7 @@ describe('ManageCookieConsentUseCase', () => {
     const repository = createConsentRepository(null);
 
     const result = await new ManageCookieConsentUseCase(repository).recordConsent(
-      new RecordCookieConsentCommand('sess-1', { necessary: true, functional: true }),
+      new RecordCookieConsentCommand({ sessionId: 'sess-1', preferences: { necessary: true, functional: true } }),
     );
 
     expect(result.gdprCookieConsentId).toBe('test-uuid');
@@ -24,7 +24,7 @@ describe('ManageCookieConsentUseCase', () => {
     const repository = createConsentRepository(null);
 
     const result = await new ManageCookieConsentUseCase(repository).recordConsent(
-      new RecordCookieConsentCommand('sess-1', { analytics: true }, 'customer-1'),
+      new RecordCookieConsentCommand({ sessionId: 'sess-1', preferences: { analytics: true }, customerId: 'customer-1' }),
     );
 
     expect(result.gdprCookieConsentId).toBe('test-uuid');
@@ -36,7 +36,7 @@ describe('ManageCookieConsentUseCase', () => {
     const repository = createConsentRepository(existing);
 
     const result = await new ManageCookieConsentUseCase(repository).recordConsent(
-      new RecordCookieConsentCommand('sess-1', { functional: true }),
+      new RecordCookieConsentCommand({ sessionId: 'sess-1', preferences: { functional: true } }),
     );
 
     expect(result.gdprCookieConsentId).toBe('existing-1');
@@ -46,9 +46,9 @@ describe('ManageCookieConsentUseCase', () => {
   it('should throw GdprValidationError when the session id is blank', async () => {
     const repository = createConsentRepository(null);
 
-    await expect(new ManageCookieConsentUseCase(repository).recordConsent(new RecordCookieConsentCommand('  ', {}))).rejects.toThrow(
-      GdprValidationError,
-    );
+    await expect(
+      new ManageCookieConsentUseCase(repository).recordConsent(new RecordCookieConsentCommand({ sessionId: '  ', preferences: {} })),
+    ).rejects.toThrow(GdprValidationError);
     expect(repository.save).not.toHaveBeenCalled();
   });
 

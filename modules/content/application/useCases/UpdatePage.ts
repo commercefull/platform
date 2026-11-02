@@ -6,30 +6,65 @@
 import type { IContentRepository } from '../../domain/repositories/ContentRepository';
 import { eventBus } from '../../../../libs/events/eventBus';
 import { ContentPageNotFoundError, ContentValidationError } from '../../domain/errors/ContentErrors';
+export interface UpdatePageCommandProps {
+  pageId: string;
+  title?: string;
+  slug?: string;
+  templateId?: string;
+  status?: 'draft' | 'published' | 'scheduled' | 'archived';
+  visibility?: 'public' | 'private' | 'passwordProtected';
+  summary?: string;
+  featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  customFields?: Record<string, unknown>;
+  publishedAt?: string;
+  scheduledAt?: string;
+  isHomePage?: boolean;
+  updatedBy?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class UpdatePageCommand {
-  constructor(
-    public readonly pageId: string,
-    public readonly title?: string,
-    public readonly slug?: string,
-    public readonly templateId?: string,
-    public readonly status?: 'draft' | 'published' | 'scheduled' | 'archived',
-    public readonly visibility?: 'public' | 'private' | 'passwordProtected',
-    public readonly summary?: string,
-    public readonly featuredImage?: string,
-    public readonly metaTitle?: string,
-    public readonly metaDescription?: string,
-    public readonly metaKeywords?: string,
-    public readonly customFields?: Record<string, unknown>,
-    public readonly publishedAt?: string,
-    public readonly scheduledAt?: string,
-    public readonly isHomePage?: boolean,
-    public readonly updatedBy?: string,
-  ) {}
+  public readonly pageId: string;
+  public readonly title?: string;
+  public readonly slug?: string;
+  public readonly templateId?: string;
+  public readonly status?: 'draft' | 'published' | 'scheduled' | 'archived';
+  public readonly visibility?: 'public' | 'private' | 'passwordProtected';
+  public readonly summary?: string;
+  public readonly featuredImage?: string;
+  public readonly metaTitle?: string;
+  public readonly metaDescription?: string;
+  public readonly metaKeywords?: string;
+  public readonly customFields?: Record<string, unknown>;
+  public readonly publishedAt?: string;
+  public readonly scheduledAt?: string;
+  public readonly isHomePage?: boolean;
+  public readonly updatedBy?: string;
+
+  constructor(props: UpdatePageCommandProps) {
+    this.pageId = props.pageId;
+    this.title = props.title;
+    this.slug = props.slug;
+    this.templateId = props.templateId;
+    this.status = props.status;
+    this.visibility = props.visibility;
+    this.summary = props.summary;
+    this.featuredImage = props.featuredImage;
+    this.metaTitle = props.metaTitle;
+    this.metaDescription = props.metaDescription;
+    this.metaKeywords = props.metaKeywords;
+    this.customFields = props.customFields;
+    this.publishedAt = props.publishedAt;
+    this.scheduledAt = props.scheduledAt;
+    this.isHomePage = props.isHomePage;
+    this.updatedBy = props.updatedBy;
+  }
 }
 
 // ============================================================================

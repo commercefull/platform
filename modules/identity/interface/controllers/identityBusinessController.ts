@@ -102,7 +102,13 @@ export const loginOrganization = async (req: HttpRequest<Record<string, string>,
   });
 
   // Generate access token
-  const accessToken = generateAccessToken(subject.id, subject.email, 'organization', ORGANIZATION_JWT_SECRET, ACCESS_TOKEN_DURATION);
+  const accessToken = generateAccessToken({
+    userId: subject.id,
+    userEmail: subject.email,
+    userRole: 'organization',
+    jwtSecret: ORGANIZATION_JWT_SECRET,
+    expiresIn: ACCESS_TOKEN_DURATION,
+  });
 
   jsonResponse(res, 200, {
     success: true,

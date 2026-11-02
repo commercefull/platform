@@ -26,12 +26,12 @@ export const taxResolvers = {
       context: GraphQLAuthContext,
     ) => {
       requireBusinessAuth(context);
-      const command = new CalculateOrderTaxCommand(
-        args.input.items,
-        args.input.shippingAddress,
-        args.input.shippingAmount ?? 0,
-        args.input.customerId,
-      );
+      const command = new CalculateOrderTaxCommand({
+        items: args.input.items,
+        shippingAddress: args.input.shippingAddress,
+        shippingAmountCents: args.input.shippingAmount ?? 0,
+        customerId: args.input.customerId,
+      });
       return calculateOrderTaxUseCase.execute(command);
     },
 

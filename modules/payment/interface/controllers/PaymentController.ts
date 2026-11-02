@@ -133,7 +133,14 @@ export const initiatePayment = async (req: HttpRequest, res: HttpResponse): Prom
     return;
   }
 
-  const command = new InitiatePaymentCommand(orderId, amountCents, currency, paymentMethodConfigId, customerId, req.ip);
+  const command = new InitiatePaymentCommand({
+    orderId: orderId,
+    amountCents: amountCents,
+    currency: currency,
+    paymentMethodConfigId: paymentMethodConfigId,
+    customerId: customerId,
+    customerIp: req.ip,
+  });
 
   const result = await initiatePaymentUseCase.execute(command);
 

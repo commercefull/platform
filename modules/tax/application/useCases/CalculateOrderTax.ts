@@ -62,36 +62,71 @@ export interface TaxAddress {
   postalCode?: string;
   city?: string;
 }
+export interface CalculateOrderTaxCommandProps {
+  items: OrderLineItem[];
+  shippingAddress: TaxAddress;
+  shippingAmountCents?: number;
+  customerId?: string;
+  pricesIncludeTax?: boolean;
+  /** Customer VAT ID (B2B) — enables intra-EU reverse-charge quoting. */
+  vatNumber?: string;
+  /** Seller organization — enables nexus coverage and VAT registration checks. */
+  organizationId?: string;
+  /** Seller/origin country (store country) — used to detect cross-border EU sales. */
+  originCountry?: string;
+  /** Buyer type — B2B enables reverse-charge treatment where applicable. */
+  buyerType?: 'B2C' | 'B2B';
+  /** Richer ship-from address (warehouse); `country` wins over originCountry when both set. */
+  shipFromAddress?: TaxAddress;
+  /** Billing address — used when no shipping destination exists (digital goods). */
+  billToAddress?: TaxAddress;
+  /** Incoterms for cross-border duty/tax responsibility (DDP/DDU/…). */
+  incoterms?: string;
+  /** When the transaction occurs — drives historical rate lookup + versioning. */
+  transactionTimestamp?: Date;
+  /** Selling market + channel context recorded on the decision. */
+  marketId?: string;
+  channelId?: string;
+  /** Transaction currency (minor units below are in this currency). */
+  currencyCode?: string;
+}
 
 export class CalculateOrderTaxCommand {
-  constructor(
-    public readonly items: OrderLineItem[],
-    public readonly shippingAddress: TaxAddress,
-    public readonly shippingAmountCents: number = 0,
-    public readonly customerId?: string,
-    public readonly pricesIncludeTax: boolean = false,
-    /** Customer VAT ID (B2B) — enables intra-EU reverse-charge quoting. */
-    public readonly vatNumber?: string,
-    /** Seller organization — enables nexus coverage and VAT registration checks. */
-    public readonly organizationId?: string,
-    /** Seller/origin country (store country) — used to detect cross-border EU sales. */
-    public readonly originCountry?: string,
-    /** Buyer type — B2B enables reverse-charge treatment where applicable. */
-    public readonly buyerType?: 'B2C' | 'B2B',
-    /** Richer ship-from address (warehouse); `country` wins over originCountry when both set. */
-    public readonly shipFromAddress?: TaxAddress,
-    /** Billing address — used when no shipping destination exists (digital goods). */
-    public readonly billToAddress?: TaxAddress,
-    /** Incoterms for cross-border duty/tax responsibility (DDP/DDU/…). */
-    public readonly incoterms?: string,
-    /** When the transaction occurs — drives historical rate lookup + versioning. */
-    public readonly transactionTimestamp?: Date,
-    /** Selling market + channel context recorded on the decision. */
-    public readonly marketId?: string,
-    public readonly channelId?: string,
-    /** Transaction currency (minor units below are in this currency). */
-    public readonly currencyCode?: string,
-  ) {}
+  public readonly items: OrderLineItem[];
+  public readonly shippingAddress: TaxAddress;
+  public readonly shippingAmountCents: number;
+  public readonly customerId?: string;
+  public readonly pricesIncludeTax: boolean;
+  public readonly vatNumber?: string;
+  public readonly organizationId?: string;
+  public readonly originCountry?: string;
+  public readonly buyerType?: 'B2C' | 'B2B';
+  public readonly shipFromAddress?: TaxAddress;
+  public readonly billToAddress?: TaxAddress;
+  public readonly incoterms?: string;
+  public readonly transactionTimestamp?: Date;
+  public readonly marketId?: string;
+  public readonly channelId?: string;
+  public readonly currencyCode?: string;
+
+  constructor(props: CalculateOrderTaxCommandProps) {
+    this.items = props.items;
+    this.shippingAddress = props.shippingAddress;
+    this.shippingAmountCents = props.shippingAmountCents ?? 0;
+    this.customerId = props.customerId;
+    this.pricesIncludeTax = props.pricesIncludeTax ?? false;
+    this.vatNumber = props.vatNumber;
+    this.organizationId = props.organizationId;
+    this.originCountry = props.originCountry;
+    this.buyerType = props.buyerType;
+    this.shipFromAddress = props.shipFromAddress;
+    this.billToAddress = props.billToAddress;
+    this.incoterms = props.incoterms;
+    this.transactionTimestamp = props.transactionTimestamp;
+    this.marketId = props.marketId;
+    this.channelId = props.channelId;
+    this.currencyCode = props.currencyCode;
+  }
 }
 
 // ============================================================================

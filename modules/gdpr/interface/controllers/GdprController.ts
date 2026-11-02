@@ -104,14 +104,14 @@ export const createDataRequest: AsyncHandler = async (req, res, _next) => {
     return;
   }
 
-  const command = new CreateDataRequestCommand(
+  const command = new CreateDataRequestCommand({
     customerId,
-    body.requestType as GdprRequestType,
-    body.reason || '',
-    body.requestedData,
-    req.ip,
-    req.get('User-Agent'),
-  );
+    requestType: body.requestType as GdprRequestType,
+    reason: body.reason || '',
+    requestedData: body.requestedData,
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
 
   const result = await createDataRequestUseCase.execute(command);
   jsonResponse(res, 201, { success: true, data: result });
@@ -287,18 +287,18 @@ export const rejectRequest: AsyncHandler = async (req, res, _next) => {
  */
 export const recordCookieConsent: AsyncHandler = async (req, res, _next) => {
   const body = req.body as RecordCookieConsentBody;
-  const command = new RecordCookieConsentCommand(
-    body.sessionId || req.sessionID,
-    body.preferences,
-    req.user?.customerId,
-    body.browserFingerprint,
-    req.ip,
-    req.get('User-Agent'),
-    body.country,
-    body.region,
-    body.consentBannerVersion,
-    body.consentMethod,
-  );
+  const command = new RecordCookieConsentCommand({
+    sessionId: body.sessionId || req.sessionID,
+    preferences: body.preferences,
+    customerId: req.user?.customerId,
+    browserFingerprint: body.browserFingerprint,
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+    country: body.country,
+    region: body.region,
+    consentBannerVersion: body.consentBannerVersion,
+    consentMethod: body.consentMethod,
+  });
 
   const result = await manageCookieConsentUseCase.recordConsent(command);
   jsonResponse(res, 200, { success: true, data: { cookieConsentId: result.gdprCookieConsentId, ...result.preferences } });

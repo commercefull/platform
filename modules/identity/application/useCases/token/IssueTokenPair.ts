@@ -15,14 +15,14 @@ import type { JwtPayload } from 'jsonwebtoken';
 export type TokenSubjectType = 'customer' | 'organization';
 
 export interface JwtTokenPort {
-  sign(
-    subjectId: string,
-    email: string,
-    userType: TokenSubjectType,
-    secret: string,
-    expiresIn: string,
-    tokenUse?: 'access' | 'refresh',
-  ): string;
+  sign(options: {
+    subjectId: string;
+    email: string;
+    userType: TokenSubjectType;
+    secret: string;
+    expiresIn: string;
+    tokenUse?: 'access' | 'refresh';
+  }): string;
   verify(token: string, secret: string): JwtPayload | null;
 }
 
@@ -77,21 +77,21 @@ export class IssueTokenPairUseCase {
       await this.credentialPort.updateLoginTimestamp(subject.id);
     }
 
-    const accessToken = this.jwt.sign(
-      subject.id,
-      subject.email,
-      this.config.userType,
-      this.config.jwtSecret,
-      this.config.accessTokenDuration,
-    );
-    const refreshToken = this.jwt.sign(
-      subject.id,
-      subject.email,
-      this.config.userType,
-      this.config.jwtSecret,
-      this.config.refreshTokenDuration,
-      'refresh',
-    );
+    const accessToken = this.jwt.sign({
+      subjectId: subject.id,
+      email: subject.email,
+      userType: this.config.userType,
+      secret: this.config.jwtSecret,
+      expiresIn: this.config.accessTokenDuration,
+    });
+    const refreshToken = this.jwt.sign({
+      subjectId: subject.id,
+      email: subject.email,
+      userType: this.config.userType,
+      secret: this.config.jwtSecret,
+      expiresIn: this.config.refreshTokenDuration,
+      tokenUse: 'refresh',
+    });
 
     await this.tokenRepo.createRefreshToken({
       token: refreshToken,

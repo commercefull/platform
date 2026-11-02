@@ -63,13 +63,13 @@ export class RenewAccessTokenUseCase {
       throw new AccountNotActiveError();
     }
 
-    const accessToken = this.jwt.sign(
-      subject.id,
-      subject.email,
-      this.config.userType,
-      this.config.jwtSecret,
-      this.config.accessTokenDuration,
-    );
+    const accessToken = this.jwt.sign({
+      subjectId: subject.id,
+      email: subject.email,
+      userType: this.config.userType,
+      secret: this.config.jwtSecret,
+      expiresIn: this.config.accessTokenDuration,
+    });
 
     await this.tokenRepo.markRefreshTokenUsed(command.refreshToken);
 

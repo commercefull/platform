@@ -6,19 +6,40 @@
 import type { IContentCategoryRepository } from '../../../domain/repositories/ContentCategoryRepository';
 import { eventBus } from '../../../../../libs/events/eventBus';
 import { CategoryNotFoundError, ContentValidationError } from '../../../domain/errors/ContentErrors';
+export interface CreateCategoryCommandProps {
+  name: string;
+  slug: string;
+  parentId?: string;
+  description?: string;
+  featuredImage?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
 
 export class CreateCategoryCommand {
-  constructor(
-    public readonly name: string,
-    public readonly slug: string,
-    public readonly parentId?: string,
-    public readonly description?: string,
-    public readonly featuredImage?: string,
-    public readonly metaTitle?: string,
-    public readonly metaDescription?: string,
-    public readonly sortOrder?: number,
-    public readonly isActive?: boolean,
-  ) {}
+  public readonly name: string;
+  public readonly slug: string;
+  public readonly parentId?: string;
+  public readonly description?: string;
+  public readonly featuredImage?: string;
+  public readonly metaTitle?: string;
+  public readonly metaDescription?: string;
+  public readonly sortOrder?: number;
+  public readonly isActive?: boolean;
+
+  constructor(props: CreateCategoryCommandProps) {
+    this.name = props.name;
+    this.slug = props.slug;
+    this.parentId = props.parentId;
+    this.description = props.description;
+    this.featuredImage = props.featuredImage;
+    this.metaTitle = props.metaTitle;
+    this.metaDescription = props.metaDescription;
+    this.sortOrder = props.sortOrder;
+    this.isActive = props.isActive;
+  }
 }
 
 export interface CategoryResponse {

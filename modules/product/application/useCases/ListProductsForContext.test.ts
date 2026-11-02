@@ -42,7 +42,9 @@ describe('ListProductsForContextUseCase', () => {
   it('should list products for context (happy path)', async () => {
     const result = await useCase.execute(
       new ListProductsForContextCommand({
-        organizationId: 'org1',
+        context: {
+          organizationId: 'org1',
+        },
       }),
     );
 
@@ -53,7 +55,9 @@ describe('ListProductsForContextUseCase', () => {
   it('should list products with store context', async () => {
     const result = await useCase.execute(
       new ListProductsForContextCommand({
-        storeId: 's1',
+        context: {
+          storeId: 's1',
+        },
       }),
     );
 
@@ -68,6 +72,6 @@ describe('ListProductsForContextUseCase', () => {
       mockPricingPort,
     );
 
-    await expect(useCaseNoOrg.execute(new ListProductsForContextCommand({}))).rejects.toThrow(ProductValidationError);
+    await expect(useCaseNoOrg.execute(new ListProductsForContextCommand({ context: {} }))).rejects.toThrow(ProductValidationError);
   });
 });

@@ -167,22 +167,22 @@ export const addAddress = async (req: HttpRequest, res: HttpResponse): Promise<v
     isDefault?: boolean;
   };
 
-  const command = new AddAddressCommand(
-    customerId,
-    addressLine1,
-    city,
-    state,
-    postalCode,
-    country,
-    countryCode || country,
-    addressType,
-    addressLine2,
-    phone,
-    firstName,
-    lastName,
-    company,
-    isDefault,
-  );
+  const command = new AddAddressCommand({
+    customerId: customerId,
+    addressLine1: addressLine1,
+    city: city,
+    state: state,
+    postalCode: postalCode,
+    country: country,
+    countryCode: countryCode || country,
+    addressType: addressType,
+    addressLine2: addressLine2,
+    phone: phone,
+    firstName: firstName,
+    lastName: lastName,
+    company: company,
+    isDefault: isDefault,
+  });
 
   const useCase = manageAddressesUseCase;
   const address = await useCase.addAddress(command);
@@ -299,16 +299,16 @@ export const createCustomer = async (req: HttpRequest, res: HttpResponse): Promi
     preferredLanguage?: string;
   };
 
-  const command = new RegisterCustomerCommand(
-    email,
-    firstName,
-    lastName,
-    password,
-    phone,
-    dateOfBirth ? new Date(dateOfBirth) : undefined,
-    preferredCurrency,
-    preferredLanguage,
-  );
+  const command = new RegisterCustomerCommand({
+    email: email,
+    firstName: firstName,
+    lastName: lastName,
+    password: password,
+    phone: phone,
+    dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+    preferredCurrency: preferredCurrency,
+    preferredLanguage: preferredLanguage,
+  });
 
   const useCase = registerCustomerUseCase;
   const result = await useCase.execute(command);
@@ -439,22 +439,22 @@ export const addCustomerAddress = async (req: HttpRequest, res: HttpResponse): P
     isDefault?: boolean;
   };
 
-  const command = new AddAddressCommand(
-    customerId,
-    addressLine1,
-    city,
-    state,
-    postalCode,
-    country,
-    countryCode || country,
-    addressType,
-    addressLine2,
-    phone,
-    firstName,
-    lastName,
-    company,
-    isDefault,
-  );
+  const command = new AddAddressCommand({
+    customerId: customerId,
+    addressLine1: addressLine1,
+    city: city,
+    state: state,
+    postalCode: postalCode,
+    country: country,
+    countryCode: countryCode || country,
+    addressType: addressType,
+    addressLine2: addressLine2,
+    phone: phone,
+    firstName: firstName,
+    lastName: lastName,
+    company: company,
+    isDefault: isDefault,
+  });
 
   const useCase = manageAddressesUseCase;
   const address = await useCase.addAddress(command);

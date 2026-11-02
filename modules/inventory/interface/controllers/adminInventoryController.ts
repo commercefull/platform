@@ -108,18 +108,18 @@ export const adjustStock = async (req: HttpRequest, res: HttpResponse): Promise<
       return;
   }
 
-  await manageAdminInventoryUseCase.adjustStockLevel(
+  await manageAdminInventoryUseCase.adjustStockLevel({
     inventoryLevelId,
     newQuantity,
-    currentQty,
-    inventoryLevel.productId,
-    inventoryLevel.locationId,
+    previousQuantity: currentQty,
+    productId: inventoryLevel.productId,
+    locationId: inventoryLevel.locationId,
     adjustmentType,
     adjustmentQty,
-    reason || 'manual_adjustment',
-    notes || null,
-    userId || '',
-  );
+    reason: reason || 'manual_adjustment',
+    notes: notes || null,
+    userId: userId || '',
+  });
 
   jsonResponse(res, 200, { success: true, message: 'Stock adjusted successfully', newQuantity });
 };

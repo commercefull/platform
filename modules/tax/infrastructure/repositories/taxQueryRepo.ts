@@ -464,31 +464,16 @@ class TaxQueryRepo {
    * Calculate complex tax for items with shipping and billing addresses
    * Enhanced version with more detailed parameters
    */
-  async calculateComplexTax(
-    dbItems: Array<{
-      product_id: string;
-      tax_category_id?: string;
-      quantity: number;
-      priceCents: number;
-      taxable?: boolean;
-    }>,
-    dbShippingAddress: {
-      country: string;
-      region?: string;
-      postal_code?: string;
-      city?: string;
-    },
-    dbBillingAddress: {
-      country: string;
-      region?: string;
-      postal_code?: string;
-      city?: string;
-    },
-    subtotal: number,
-    shippingAmountCents: number = 0,
-    customerId?: string,
-    _organizationId?: string,
-  ): Promise<TaxCalculationResult> {
+  async calculateComplexTax(params: {
+    items: Array<{ product_id: string; tax_category_id?: string; quantity: number; priceCents: number; taxable?: boolean }>;
+    shippingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    billingAddress: { country: string; region?: string; postal_code?: string; city?: string };
+    subtotalCents: number;
+    shippingAmountCents?: number;
+    customerId?: string;
+    organizationId?: string;
+  }): Promise<TaxCalculationResult> {
+    const { items: dbItems, shippingAddress: dbShippingAddress, shippingAmountCents = 0, customerId } = params;
     // Convert DB format back to TS format for internal processing
     const items = dbItems.map(item => ({
       productId: item.product_id,

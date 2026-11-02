@@ -6,6 +6,7 @@
 
 import { query, queryOne } from '../../../../libs/db';
 import { generateUUID } from '../../../../libs/uuid';
+import type { AdjustStockLevelParams } from '../../domain/repositories/AdminInventoryRepository';
 
 // ============================================================================
 // Types
@@ -237,18 +238,9 @@ async function countTransactionsByLevelId(inventoryLevelId: string): Promise<num
   return parseInt(result?.count || '0');
 }
 
-async function adjustStockLevel(
-  inventoryLevelId: string,
-  newQuantity: number,
-  previousQuantity: number,
-  productId: string,
-  locationId: string | undefined,
-  adjustmentType: string,
-  adjustmentQty: number,
-  reason: string,
-  notes: string | null,
-  userId: string,
-): Promise<void> {
+async function adjustStockLevel(params: AdjustStockLevelParams): Promise<void> {
+  const { inventoryLevelId, newQuantity, previousQuantity, productId, locationId, adjustmentType, adjustmentQty, reason, notes, userId } =
+    params;
   const now = new Date();
   const level = await findLevelContext(inventoryLevelId);
 

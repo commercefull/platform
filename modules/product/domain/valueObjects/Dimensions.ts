@@ -6,15 +6,31 @@
 export type WeightUnit = 'kg' | 'lb' | 'oz' | 'g';
 export type DimensionUnit = 'cm' | 'in' | 'm' | 'mm';
 
+interface DimensionsProps {
+  weight: number | null;
+  weightUnit: WeightUnit;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+  dimensionUnit: DimensionUnit;
+}
+
 export class Dimensions {
-  private constructor(
-    private readonly _weight: number | null,
-    private readonly _weightUnit: WeightUnit,
-    private readonly _length: number | null,
-    private readonly _width: number | null,
-    private readonly _height: number | null,
-    private readonly _dimensionUnit: DimensionUnit,
-  ) {}
+  private readonly _weight: number | null;
+  private readonly _weightUnit: WeightUnit;
+  private readonly _length: number | null;
+  private readonly _width: number | null;
+  private readonly _height: number | null;
+  private readonly _dimensionUnit: DimensionUnit;
+
+  private constructor(props: DimensionsProps) {
+    this._weight = props.weight;
+    this._weightUnit = props.weightUnit;
+    this._length = props.length;
+    this._width = props.width;
+    this._height = props.height;
+    this._dimensionUnit = props.dimensionUnit;
+  }
 
   static create(props: {
     weight?: number;
@@ -24,18 +40,18 @@ export class Dimensions {
     height?: number;
     dimensionUnit?: DimensionUnit;
   }): Dimensions {
-    return new Dimensions(
-      props.weight ?? null,
-      props.weightUnit ?? 'kg',
-      props.length ?? null,
-      props.width ?? null,
-      props.height ?? null,
-      props.dimensionUnit ?? 'cm',
-    );
+    return new Dimensions({
+      weight: props.weight ?? null,
+      weightUnit: props.weightUnit ?? 'kg',
+      length: props.length ?? null,
+      width: props.width ?? null,
+      height: props.height ?? null,
+      dimensionUnit: props.dimensionUnit ?? 'cm',
+    });
   }
 
   static empty(): Dimensions {
-    return new Dimensions(null, 'kg', null, null, null, 'cm');
+    return new Dimensions({ weight: null, weightUnit: 'kg', length: null, width: null, height: null, dimensionUnit: 'cm' });
   }
 
   get weight(): number | null {

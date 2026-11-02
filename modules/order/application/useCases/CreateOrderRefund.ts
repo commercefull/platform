@@ -12,21 +12,38 @@ import {
   RefundAmountMustBePositiveError,
   RefundExceedsRefundableBalanceError,
 } from '../../domain/errors/OrderErrors';
+export interface CreateOrderRefundCommandProps {
+  orderPaymentId: string;
+  amountCents: number;
+  reason?: string;
+  notes?: string;
+  transactionId?: string;
+  refundedBy?: string;
+  status?: OrderPaymentRefundStatus;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class CreateOrderRefundCommand {
-  constructor(
-    public readonly orderPaymentId: string,
-    public readonly amountCents: number,
-    public readonly reason?: string,
-    public readonly notes?: string,
-    public readonly transactionId?: string,
-    public readonly refundedBy?: string,
-    public readonly status: OrderPaymentRefundStatus = 'pending',
-  ) {}
+  public readonly orderPaymentId: string;
+  public readonly amountCents: number;
+  public readonly reason?: string;
+  public readonly notes?: string;
+  public readonly transactionId?: string;
+  public readonly refundedBy?: string;
+  public readonly status: OrderPaymentRefundStatus;
+
+  constructor(props: CreateOrderRefundCommandProps) {
+    this.orderPaymentId = props.orderPaymentId;
+    this.amountCents = props.amountCents;
+    this.reason = props.reason;
+    this.notes = props.notes;
+    this.transactionId = props.transactionId;
+    this.refundedBy = props.refundedBy;
+    this.status = props.status ?? 'pending';
+  }
 }
 
 // ============================================================================

@@ -12,25 +12,48 @@ import {
 } from '../../domain/repositories/OrderFulfillmentPackageRepository';
 
 import { FulfillmentPackageNotFoundError } from '../../domain/errors/OrderErrors';
+export interface TrackFulfillmentPackageCommandProps {
+  orderFulfillmentId: string;
+  packageNumber: string;
+  trackingNumber?: string;
+  shippingLabelUrl?: string;
+  commercialInvoiceUrl?: string;
+  weight?: number;
+  dimensions?: Record<string, unknown>;
+  packageType?: string;
+  customsInfo?: Record<string, unknown>;
+  /** If provided, updates an existing package instead of creating a new one */
+  orderFulfillmentPackageId?: string;
+}
 
 // ============================================================================
 // Command
 // ============================================================================
 
 export class TrackFulfillmentPackageCommand {
-  constructor(
-    public readonly orderFulfillmentId: string,
-    public readonly packageNumber: string,
-    public readonly trackingNumber?: string,
-    public readonly shippingLabelUrl?: string,
-    public readonly commercialInvoiceUrl?: string,
-    public readonly weight?: number,
-    public readonly dimensions?: Record<string, unknown>,
-    public readonly packageType?: string,
-    public readonly customsInfo?: Record<string, unknown>,
-    /** If provided, updates an existing package instead of creating a new one */
-    public readonly orderFulfillmentPackageId?: string,
-  ) {}
+  public readonly orderFulfillmentId: string;
+  public readonly packageNumber: string;
+  public readonly trackingNumber?: string;
+  public readonly shippingLabelUrl?: string;
+  public readonly commercialInvoiceUrl?: string;
+  public readonly weight?: number;
+  public readonly dimensions?: Record<string, unknown>;
+  public readonly packageType?: string;
+  public readonly customsInfo?: Record<string, unknown>;
+  public readonly orderFulfillmentPackageId?: string;
+
+  constructor(props: TrackFulfillmentPackageCommandProps) {
+    this.orderFulfillmentId = props.orderFulfillmentId;
+    this.packageNumber = props.packageNumber;
+    this.trackingNumber = props.trackingNumber;
+    this.shippingLabelUrl = props.shippingLabelUrl;
+    this.commercialInvoiceUrl = props.commercialInvoiceUrl;
+    this.weight = props.weight;
+    this.dimensions = props.dimensions;
+    this.packageType = props.packageType;
+    this.customsInfo = props.customsInfo;
+    this.orderFulfillmentPackageId = props.orderFulfillmentPackageId;
+  }
 }
 
 // ============================================================================

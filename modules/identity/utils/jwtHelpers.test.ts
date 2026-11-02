@@ -5,13 +5,26 @@ const SECRET = 'a-test-secret-that-is-at-least-32-chars-long';
 
 describe('jwtHelpers', () => {
   it('should mark tokens as access tokens by default', () => {
-    const token = generateAccessToken('user-1', 'u@test.com', 'customer', SECRET, '1h');
+    const token = generateAccessToken({
+      userId: 'user-1',
+      userEmail: 'u@test.com',
+      userRole: 'customer',
+      jwtSecret: SECRET,
+      expiresIn: '1h',
+    });
 
     expect(verifyAccessToken(token, SECRET)?.tokenUse).toBe('access');
   });
 
   it('should mark refresh tokens with tokenUse refresh when requested', () => {
-    const token = generateAccessToken('user-1', 'u@test.com', 'customer', SECRET, '30d', 'refresh');
+    const token = generateAccessToken({
+      userId: 'user-1',
+      userEmail: 'u@test.com',
+      userRole: 'customer',
+      jwtSecret: SECRET,
+      expiresIn: '30d',
+      tokenUse: 'refresh',
+    });
 
     expect(verifyAccessToken(token, SECRET)?.tokenUse).toBe('refresh');
   });

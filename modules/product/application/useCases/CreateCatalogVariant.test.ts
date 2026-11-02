@@ -50,7 +50,7 @@ describe('CreateCatalogVariantUseCase', () => {
   it('should create the variant without touching pricing when no price fields are given', async () => {
     mockVariantRepo.create.mockResolvedValue(createVariantRecord());
 
-    const result = await useCase.execute(new CreateCatalogVariantCommand('p-1', createParams()));
+    const result = await useCase.execute(new CreateCatalogVariantCommand({ productId: 'p-1', variantFields: createParams() }));
 
     expect(result.id).toBe('var-1');
     expect(mockPricingPort.setBasePrice).not.toHaveBeenCalled();
@@ -72,7 +72,7 @@ describe('CreateCatalogVariantUseCase', () => {
     });
 
     const result = await useCase.execute(
-      new CreateCatalogVariantCommand('p-1', createParams(), 1999, undefined, undefined, undefined, 'USD'),
+      new CreateCatalogVariantCommand({ productId: 'p-1', variantFields: createParams(), priceCents: 1999, currencyCode: 'USD' }),
     );
 
     expect(result.priceCents).toBe(1999);
