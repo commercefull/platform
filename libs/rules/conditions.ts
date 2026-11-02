@@ -75,68 +75,40 @@ export function normalizeConditions(
   return raw.map(normalizeCondition);
 }
 
+// One predicate per operator — receives the resolved context value and
+// the condition itself.
+const OPERATOR_CHECKS: Record<ConditionOperator, (actual: unknown, c: AttributeCondition) => boolean> = {
+  eq: (actual, c) => actual === c.value,
+  neq: (actual, c) => actual !== c.value,
+  gt: (actual, c) => toNumber(actual) > toNumber(c.value),
+  gte: (actual, c) => toNumber(actual) >= toNumber(c.value),
+  lt: (actual, c) => toNumber(actual) < toNumber(c.value),
+  lte: (actual, c) => toNumber(actual) <= toNumber(c.value),
+  in: (actual, c) => Array.isArray(c.value) && c.value.includes(actual),
+  notIn: (actual, c) => Array.isArray(c.value) && !c.value.includes(actual),
+  contains: (actual, c) => contains(actual, c.value),
+  notContains: (actual, c) => !contains(actual, c.value),
+  startsWith: (actual, c) => typeof actual === 'string' && typeof c.value === 'string' && actual.startsWith(c.value),
+  endsWith: (actual, c) => typeof actual === 'string' && typeof c.value === 'string' && actual.endsWith(c.value),
+  isNull: actual => actual === null || actual === undefined,
+  isNotNull: actual => actual !== null && actual !== undefined,
+  regex: (actual, c) => {
+    if (typeof actual !== 'string' || typeof c.value !== 'string') return false;
+    try {
+      return new RegExp(c.value).test(actual);
+    } catch {
+      return false;
+    }
+  },
+};
+
 /**
  * Evaluate a single condition against a resolved context value.
  * Returns `false` if the operator is unknown or types are incompatible.
  */
 export function matchCondition(condition: AttributeCondition, context: ConditionContext): boolean {
-  const actual = context[condition.attribute];
-
-  switch (condition.operator) {
-    case 'eq':
-      return actual === condition.value;
-
-    case 'neq':
-      return actual !== condition.value;
-
-    case 'gt':
-      return toNumber(actual) > toNumber(condition.value);
-
-    case 'gte':
-      return toNumber(actual) >= toNumber(condition.value);
-
-    case 'lt':
-      return toNumber(actual) < toNumber(condition.value);
-
-    case 'lte':
-      return toNumber(actual) <= toNumber(condition.value);
-
-    case 'in':
-      return Array.isArray(condition.value) && condition.value.includes(actual);
-
-    case 'notIn':
-      return Array.isArray(condition.value) && !condition.value.includes(actual);
-
-    case 'contains':
-      return contains(actual, condition.value);
-
-    case 'notContains':
-      return !contains(actual, condition.value);
-
-    case 'startsWith':
-      return typeof actual === 'string' && typeof condition.value === 'string' && actual.startsWith(condition.value);
-
-    case 'endsWith':
-      return typeof actual === 'string' && typeof condition.value === 'string' && actual.endsWith(condition.value);
-
-    case 'isNull':
-      return actual === null || actual === undefined;
-
-    case 'isNotNull':
-      return actual !== null && actual !== undefined;
-
-    case 'regex': {
-      if (typeof actual !== 'string' || typeof condition.value !== 'string') return false;
-      try {
-        return new RegExp(condition.value).test(actual);
-      } catch {
-        return false;
-      }
-    }
-
-    default:
-      return false;
-  }
+  const check = OPERATOR_CHECKS[condition.operator];
+  return check ? check(context[condition.attribute], condition) : false;
 }
 
 /**

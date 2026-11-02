@@ -117,53 +117,57 @@ export function fraudRuleMatches(rule: FraudRule, request: FraudScreeningRequest
   return evaluateLegacyRule(rule, request);
 }
 
+type LegacyConditions = Record<string, unknown>;
+
+// One predicate per legacy rule type — returns true when the rule triggers.
+const LEGACY_RULE_CHECKS: Record<string, (conditions: LegacyConditions, request: FraudScreeningRequest) => boolean> = {
+  amount: (conditions, request) => {
+    if (conditions.minAmount && (request.orderAmountCents ?? 0) < (conditions.minAmount as number)) return false;
+    if (conditions.maxAmount && (request.orderAmountCents ?? 0) > (conditions.maxAmount as number)) return true;
+    return false;
+  },
+
+  location: (conditions, request) => {
+    if ((conditions.highRiskCountries as string[] | undefined)?.includes(request.billingCountry || '')) return true;
+    if ((conditions.highRiskCountries as string[] | undefined)?.includes(request.shippingCountry || '')) return true;
+    if (conditions.requireAddressMatch && request.billingCountry !== request.shippingCountry) return true;
+    return false;
+  },
+
+  velocity: (conditions, request) =>
+    !!(conditions.maxOrdersPerDay && (request.previousOrders ?? 0) >= (conditions.maxOrdersPerDay as number)),
+
+  pattern: (conditions, request) => {
+    if (
+      conditions.firstOrderHighValue &&
+      request.isFirstOrder &&
+      (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 500)
+    )
+      return true;
+    if (
+      conditions.guestCheckoutHighValue &&
+      request.isGuestCheckout &&
+      (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 300)
+    )
+      return true;
+    return false;
+  },
+
+  device: (conditions, request) => {
+    if (conditions.blockProxy && request.deviceFingerprint?.isProxy) return true;
+    if (conditions.blockVpn && request.deviceFingerprint?.isVpn) return true;
+    if (conditions.blockTor && request.deviceFingerprint?.isTor) return true;
+    return false;
+  },
+};
+
 /**
  * Legacy rule-type-specific evaluation (backward compatibility).
  * Mirrors the existing `evaluateRule` in `fraudRepo.ts`.
  */
 function evaluateLegacyRule(rule: FraudRule, request: FraudScreeningRequest): boolean {
-  const conditions = rule.conditions as Record<string, unknown>;
-
-  switch (rule.ruleType) {
-    case 'amount':
-      if (conditions.minAmount && (request.orderAmountCents ?? 0) < (conditions.minAmount as number)) return false;
-      if (conditions.maxAmount && (request.orderAmountCents ?? 0) > (conditions.maxAmount as number)) return true;
-      return false;
-
-    case 'location':
-      if ((conditions.highRiskCountries as string[] | undefined)?.includes(request.billingCountry || '')) return true;
-      if ((conditions.highRiskCountries as string[] | undefined)?.includes(request.shippingCountry || '')) return true;
-      if (conditions.requireAddressMatch && request.billingCountry !== request.shippingCountry) return true;
-      return false;
-
-    case 'velocity':
-      if (conditions.maxOrdersPerDay && (request.previousOrders ?? 0) >= (conditions.maxOrdersPerDay as number)) return true;
-      return false;
-
-    case 'pattern':
-      if (
-        conditions.firstOrderHighValue &&
-        request.isFirstOrder &&
-        (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 500)
-      )
-        return true;
-      if (
-        conditions.guestCheckoutHighValue &&
-        request.isGuestCheckout &&
-        (request.orderAmountCents ?? 0) > ((conditions.threshold as number) || 300)
-      )
-        return true;
-      return false;
-
-    case 'device':
-      if (conditions.blockProxy && request.deviceFingerprint?.isProxy) return true;
-      if (conditions.blockVpn && request.deviceFingerprint?.isVpn) return true;
-      if (conditions.blockTor && request.deviceFingerprint?.isTor) return true;
-      return false;
-
-    default:
-      return false;
-  }
+  const check = LEGACY_RULE_CHECKS[rule.ruleType];
+  return check ? check(rule.conditions as LegacyConditions, request) : false;
 }
 
 /**

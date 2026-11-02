@@ -15,150 +15,124 @@ import { Currency } from '../currency';
 import { getCurrencyDecimals, toMinorUnits } from '../../../../libs/money';
 
 /**
+ * Normalized evaluation context shared by the constraint and
+ * custom-condition checks.
+ */
+interface RuleEvaluationContext {
+  date: Date;
+  quantity: number;
+  cartTotal: number;
+  customerId?: string;
+  customerGroupIds: string[];
+  productIds: string[];
+  additionalData: Record<string, unknown>;
+  context: PriceContext;
+}
+
+// One predicate per custom condition type — returns true when the
+// condition passes. Types absent from the table are skipped (unknown
+// conditions never fail a rule).
+const CONDITION_CHECKS: Record<string, (params: Record<string, unknown>, ctx: RuleEvaluationContext) => boolean> = {
+  date_range: (p, c) =>
+    !(p.startDate && new Date(p.startDate as string) > c.date) && !(p.endDate && new Date(p.endDate as string) < c.date),
+  day_of_week: (p, c) => (p.days as number[]).includes(c.date.getDay()),
+  time_of_day: (p, c) => c.date.getHours() >= (p.startHour as number) && c.date.getHours() < (p.endHour as number),
+  store: (p, c) => !!c.context.storeId && !!(p.storeIds as string[] | undefined)?.includes(c.context.storeId),
+  channel: (p, c) => !!c.context.channelId && !!(p.channelIds as string[] | undefined)?.includes(c.context.channelId),
+  cart_total: (p, c) => compareScalar(c.cartTotal, p),
+  item_quantity: (p, c) => compareScalar(c.quantity, p),
+  category: (p, c) => {
+    const wanted = toIdList(p.value ?? p.categoryIds);
+    return wanted.length === 0 || wanted.some(id => (c.context.categoryIds ?? []).includes(id));
+  },
+  customer_group: (p, c) => {
+    const wanted = toIdList(p.value ?? p.customerGroupIds);
+    return wanted.length === 0 || wanted.some(id => c.customerGroupIds.includes(id));
+  },
+  // Requires additional customer data lookup — for now, just checks the
+  // attribute in additionalData.
+  customer_attribute: (p, c) => {
+    const attrs = c.additionalData.customerAttributes as Record<string, unknown> | undefined;
+    if (!attrs) return false;
+    const attribute = p.attribute as string;
+    return !!attrs[attribute] && attrs[attribute] === p.value;
+  },
+};
+
+/**
  * Evaluate whether a pricing rule's conditions are met given the context.
  */
 export function isRuleApplicable(rule: PricingRule, context: PriceContext): boolean {
   const { customerId, customerGroupIds = [], quantity = 1, cartTotal = 0, productIds = [], additionalData = {} } = context;
 
   // Extract date from context or use current date as default
-  const date = context.date || new Date();
+  const evalCtx: RuleEvaluationContext = {
+    date: context.date || new Date(),
+    quantity,
+    cartTotal,
+    customerId,
+    customerGroupIds,
+    productIds,
+    additionalData,
+    context,
+  };
 
-  // Check date range
-  if (rule.startDate && new Date(rule.startDate) > date) {
+  if (!passesRuleConstraints(rule, evalCtx)) {
     return false;
-  }
-
-  if (rule.endDate && new Date(rule.endDate) < date) {
-    return false;
-  }
-
-  // Check quantity constraints
-  if (rule.minimumQuantity && quantity < rule.minimumQuantity) {
-    return false;
-  }
-
-  if (rule.maximumQuantity && quantity > rule.maximumQuantity) {
-    return false;
-  }
-
-  // Check minimum order amount
-  if (rule.minimumOrderAmountCents && cartTotal < rule.minimumOrderAmountCents) {
-    return false;
-  }
-
-  // Check product constraints
-  if (rule.scope === PricingRuleScope.PRODUCT && rule.productIds) {
-    const matchesProduct = productIds.some(pid => rule.productIds?.includes(pid));
-    if (!matchesProduct) {
-      return false;
-    }
-  }
-
-  // Check customer constraints
-  if (rule.scope === PricingRuleScope.CUSTOMER && rule.customerIds) {
-    if (!customerId || !rule.customerIds.includes(customerId)) {
-      return false;
-    }
-  }
-
-  // Check customer group constraints
-  if (rule.scope === PricingRuleScope.CUSTOMER_GROUP && rule.customerGroupIds) {
-    const matchesGroup = customerGroupIds.some(gid => rule.customerGroupIds?.includes(gid));
-    if (!matchesGroup) {
-      return false;
-    }
   }
 
   // Evaluate custom conditions in the rule
   for (const condition of rule.conditions) {
-    const params = condition.parameters;
-    switch (condition.type) {
-      case 'date_range':
-        if (
-          (params.startDate && new Date(params.startDate as string) > date) ||
-          (params.endDate && new Date(params.endDate as string) < date)
-        ) {
-          return false;
-        }
-        break;
-
-      case 'day_of_week': {
-        const dayOfWeek = date.getDay();
-        if (!(params.days as number[]).includes(dayOfWeek)) {
-          return false;
-        }
-        break;
-      }
-
-      case 'time_of_day': {
-        const hours = date.getHours();
-        if (hours < (params.startHour as number) || hours >= (params.endHour as number)) {
-          return false;
-        }
-        break;
-      }
-
-      case 'store':
-        if (!context.storeId || !(params.storeIds as string[] | undefined)?.includes(context.storeId)) {
-          return false;
-        }
-        break;
-
-      case 'channel':
-        if (!context.channelId || !(params.channelIds as string[] | undefined)?.includes(context.channelId)) {
-          return false;
-        }
-        break;
-
-      case 'cart_total':
-        if (!compareScalar(cartTotal, params)) {
-          return false;
-        }
-        break;
-
-      case 'item_quantity':
-        if (!compareScalar(quantity, params)) {
-          return false;
-        }
-        break;
-
-      case 'category': {
-        const wanted = toIdList(params.value ?? params.categoryIds);
-        if (wanted.length > 0 && !wanted.some(id => (context.categoryIds ?? []).includes(id))) {
-          return false;
-        }
-        break;
-      }
-
-      case 'customer_group': {
-        const wanted = toIdList(params.value ?? params.customerGroupIds);
-        if (wanted.length > 0 && !wanted.some(id => customerGroupIds.includes(id))) {
-          return false;
-        }
-        break;
-      }
-
-      case 'customer_attribute':
-        // This would require additional customer data lookup
-        // For now, just check if the attribute exists in additionalData
-        if (
-          !additionalData.customerAttributes ||
-          !(additionalData.customerAttributes as Record<string, unknown>)[params.attribute as string] ||
-          (additionalData.customerAttributes as Record<string, unknown>)[params.attribute as string] !== params.value
-        ) {
-          return false;
-        }
-        break;
-
-      // Additional condition types can be added here
-
-      default:
-        // Unknown condition type, skip it
-        break;
+    const check = CONDITION_CHECKS[condition.type];
+    if (check && !check(condition.parameters, evalCtx)) {
+      return false;
     }
   }
 
   // All conditions passed
+  return true;
+}
+
+// Static rule fields: schedule window, quantity bounds, order minimum,
+// and scope targeting.
+function passesRuleConstraints(rule: PricingRule, ctx: RuleEvaluationContext): boolean {
+  if (rule.startDate && new Date(rule.startDate) > ctx.date) {
+    return false;
+  }
+
+  if (rule.endDate && new Date(rule.endDate) < ctx.date) {
+    return false;
+  }
+
+  if (rule.minimumQuantity && ctx.quantity < rule.minimumQuantity) {
+    return false;
+  }
+
+  if (rule.maximumQuantity && ctx.quantity > rule.maximumQuantity) {
+    return false;
+  }
+
+  if (rule.minimumOrderAmountCents && ctx.cartTotal < rule.minimumOrderAmountCents) {
+    return false;
+  }
+
+  return passesScopeConstraints(rule, ctx);
+}
+
+// Scope targeting: product / customer / customer-group membership.
+function passesScopeConstraints(rule: PricingRule, ctx: RuleEvaluationContext): boolean {
+  if (rule.scope === PricingRuleScope.PRODUCT && rule.productIds) {
+    return ctx.productIds.some(pid => rule.productIds?.includes(pid));
+  }
+
+  if (rule.scope === PricingRuleScope.CUSTOMER && rule.customerIds) {
+    return !!ctx.customerId && rule.customerIds.includes(ctx.customerId);
+  }
+
+  if (rule.scope === PricingRuleScope.CUSTOMER_GROUP && rule.customerGroupIds) {
+    return ctx.customerGroupIds.some(gid => rule.customerGroupIds?.includes(gid));
+  }
+
   return true;
 }
 

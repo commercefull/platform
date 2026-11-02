@@ -1,51 +1,38 @@
 import type { SegmentCondition } from '../entities/SegmentDefinition';
 import type { CustomerProfile } from '../entities/CustomerProfile';
 
-export function evaluateCondition(condition: SegmentCondition, profile: CustomerProfile): boolean {
-  const value = getFieldValue(condition.field, profile);
+type ConditionOperator = SegmentCondition['operator'];
 
-  switch (condition.operator) {
-    case 'eq':
-      return value === condition.value;
-    case 'neq':
-      return value !== condition.value;
-    case 'gt':
-      return typeof value === 'number' && typeof condition.value === 'number' && value > condition.value;
-    case 'gte':
-      return typeof value === 'number' && typeof condition.value === 'number' && value >= condition.value;
-    case 'lt':
-      return typeof value === 'number' && typeof condition.value === 'number' && value < condition.value;
-    case 'lte':
-      return typeof value === 'number' && typeof condition.value === 'number' && value <= condition.value;
-    case 'in':
-      return Array.isArray(condition.values) && condition.values.includes(value);
-    case 'notIn':
-      return Array.isArray(condition.values) && !condition.values.includes(value);
-    case 'contains':
-      return Array.isArray(value) && condition.value !== undefined && value.includes(condition.value);
-    case 'notContains':
-      return Array.isArray(value) && condition.value !== undefined && !value.includes(condition.value);
-    case 'between':
-      return (
-        typeof value === 'number' &&
-        Array.isArray(condition.values) &&
-        condition.values.length === 2 &&
-        typeof condition.values[0] === 'number' &&
-        typeof condition.values[1] === 'number' &&
-        value >= condition.values[0] &&
-        value <= condition.values[1]
-      );
-    case 'isNull':
-      return value === null || value === undefined;
-    case 'isNotNull':
-      return value !== null && value !== undefined;
-    case 'startsWith':
-      return typeof value === 'string' && typeof condition.value === 'string' && value.startsWith(condition.value);
-    case 'endsWith':
-      return typeof value === 'string' && typeof condition.value === 'string' && value.endsWith(condition.value);
-    default:
-      return false;
-  }
+// One predicate per operator — receives the resolved field value and the
+// condition itself.
+const OPERATORS: Record<ConditionOperator, (value: unknown, c: SegmentCondition) => boolean> = {
+  eq: (value, c) => value === c.value,
+  neq: (value, c) => value !== c.value,
+  gt: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value > c.value,
+  gte: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value >= c.value,
+  lt: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value < c.value,
+  lte: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value <= c.value,
+  in: (value, c) => Array.isArray(c.values) && c.values.includes(value),
+  notIn: (value, c) => Array.isArray(c.values) && !c.values.includes(value),
+  contains: (value, c) => Array.isArray(value) && c.value !== undefined && value.includes(c.value),
+  notContains: (value, c) => Array.isArray(value) && c.value !== undefined && !value.includes(c.value),
+  between: (value, c) =>
+    typeof value === 'number' &&
+    Array.isArray(c.values) &&
+    c.values.length === 2 &&
+    typeof c.values[0] === 'number' &&
+    typeof c.values[1] === 'number' &&
+    value >= c.values[0] &&
+    value <= c.values[1],
+  isNull: value => value === null || value === undefined,
+  isNotNull: value => value !== null && value !== undefined,
+  startsWith: (value, c) => typeof value === 'string' && typeof c.value === 'string' && value.startsWith(c.value),
+  endsWith: (value, c) => typeof value === 'string' && typeof c.value === 'string' && value.endsWith(c.value),
+};
+
+export function evaluateCondition(condition: SegmentCondition, profile: CustomerProfile): boolean {
+  const evaluate = OPERATORS[condition.operator];
+  return evaluate ? evaluate(getFieldValue(condition.field, profile), condition) : false;
 }
 
 export function evaluateConditions(conditions: SegmentCondition[], matchMode: 'all' | 'any', profile: CustomerProfile): boolean {

@@ -1,47 +1,37 @@
 import type { RuleCondition, ConditionMatchMode } from '../entities/AutomationRule';
 
-export function evaluateCondition(condition: RuleCondition, context: Record<string, unknown>): boolean {
-  const value = resolveValue(condition, context);
+type ConditionOperator = RuleCondition['operator'];
 
-  switch (condition.operator) {
-    case 'eq':
-      return value === condition.value;
-    case 'neq':
-      return value !== condition.value;
-    case 'gt':
-      return typeof value === 'number' && typeof condition.value === 'number' && value > condition.value;
-    case 'gte':
-      return typeof value === 'number' && typeof condition.value === 'number' && value >= condition.value;
-    case 'lt':
-      return typeof value === 'number' && typeof condition.value === 'number' && value < condition.value;
-    case 'lte':
-      return typeof value === 'number' && typeof condition.value === 'number' && value <= condition.value;
-    case 'in':
-      return Array.isArray(condition.values) && condition.values.includes(value);
-    case 'notIn':
-      return Array.isArray(condition.values) && !condition.values.includes(value);
-    case 'contains':
-      return Array.isArray(value) && condition.value !== undefined && value.includes(condition.value);
-    case 'notContains':
-      return Array.isArray(value) && condition.value !== undefined && !value.includes(condition.value);
-    case 'startsWith':
-      return typeof value === 'string' && typeof condition.value === 'string' && value.startsWith(condition.value);
-    case 'endsWith':
-      return typeof value === 'string' && typeof condition.value === 'string' && value.endsWith(condition.value);
-    case 'isNull':
-      return value === null || value === undefined;
-    case 'isNotNull':
-      return value !== null && value !== undefined;
-    case 'regex':
-      if (typeof value !== 'string' || typeof condition.value !== 'string') return false;
-      try {
-        return new RegExp(condition.value).test(value);
-      } catch {
-        return false;
-      }
-    default:
+// One predicate per operator — receives the resolved field value and the
+// condition itself.
+const OPERATORS: Record<ConditionOperator, (value: unknown, c: RuleCondition) => boolean> = {
+  eq: (value, c) => value === c.value,
+  neq: (value, c) => value !== c.value,
+  gt: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value > c.value,
+  gte: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value >= c.value,
+  lt: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value < c.value,
+  lte: (value, c) => typeof value === 'number' && typeof c.value === 'number' && value <= c.value,
+  in: (value, c) => Array.isArray(c.values) && c.values.includes(value),
+  notIn: (value, c) => Array.isArray(c.values) && !c.values.includes(value),
+  contains: (value, c) => Array.isArray(value) && c.value !== undefined && value.includes(c.value),
+  notContains: (value, c) => Array.isArray(value) && c.value !== undefined && !value.includes(c.value),
+  startsWith: (value, c) => typeof value === 'string' && typeof c.value === 'string' && value.startsWith(c.value),
+  endsWith: (value, c) => typeof value === 'string' && typeof c.value === 'string' && value.endsWith(c.value),
+  isNull: value => value === null || value === undefined,
+  isNotNull: value => value !== null && value !== undefined,
+  regex: (value, c) => {
+    if (typeof value !== 'string' || typeof c.value !== 'string') return false;
+    try {
+      return new RegExp(c.value).test(value);
+    } catch {
       return false;
-  }
+    }
+  },
+};
+
+export function evaluateCondition(condition: RuleCondition, context: Record<string, unknown>): boolean {
+  const evaluate = OPERATORS[condition.operator];
+  return evaluate ? evaluate(resolveValue(condition, context), condition) : false;
 }
 
 export function evaluateConditions(conditions: RuleCondition[], matchMode: ConditionMatchMode, context: Record<string, unknown>): boolean {
@@ -52,45 +42,32 @@ export function evaluateConditions(conditions: RuleCondition[], matchMode: Condi
   return conditions.some(c => evaluateCondition(c, context));
 }
 
+// Known field paths — each accessor reads one value out of the event context.
+const FIELD_RESOLVERS: Record<string, (context: Record<string, unknown>, c: RuleCondition) => unknown> = {
+  'event.type': ctx => (ctx.event as { type?: string } | undefined)?.type,
+  'event.data.*': ctx => ctx.event,
+  'customer.tier': ctx => (ctx.customer as { tier?: string } | undefined)?.tier,
+  'customer.lifetimeValue': ctx => (ctx.customer as { lifetimeValue?: number } | undefined)?.lifetimeValue,
+  'customer.totalOrders': ctx => (ctx.customer as { totalOrders?: number } | undefined)?.totalOrders,
+  'customer.daysSinceLastOrder': ctx => (ctx.customer as { daysSinceLastOrder?: number } | undefined)?.daysSinceLastOrder,
+  'customer.rfmSegment': ctx => (ctx.customer as { rfmSegment?: string } | undefined)?.rfmSegment,
+  'customer.tags': ctx => (ctx.customer as { tags?: string[] } | undefined)?.tags,
+  'order.totalAmount': ctx => (ctx.order as { totalAmount?: number } | undefined)?.totalAmount,
+  'order.itemCount': ctx => (ctx.order as { itemCount?: number } | undefined)?.itemCount,
+  'order.status': ctx => (ctx.order as { status?: string } | undefined)?.status,
+  'product.price': ctx => (ctx.product as { price?: number } | undefined)?.price,
+  'product.categoryId': ctx => (ctx.product as { categoryId?: string } | undefined)?.categoryId,
+  'product.status': ctx => (ctx.product as { status?: string } | undefined)?.status,
+  custom: (_ctx, c) => c.value,
+};
+
 function resolveValue(condition: RuleCondition, context: Record<string, unknown>): unknown {
   if (condition.dataPath) {
     return resolveDataPath(condition.dataPath, context);
   }
 
-  switch (condition.field) {
-    case 'event.type':
-      return (context.event as { type?: string } | undefined)?.type;
-    case 'event.data.*':
-      return context.event;
-    case 'customer.tier':
-      return (context.customer as { tier?: string } | undefined)?.tier;
-    case 'customer.lifetimeValue':
-      return (context.customer as { lifetimeValue?: number } | undefined)?.lifetimeValue;
-    case 'customer.totalOrders':
-      return (context.customer as { totalOrders?: number } | undefined)?.totalOrders;
-    case 'customer.daysSinceLastOrder':
-      return (context.customer as { daysSinceLastOrder?: number } | undefined)?.daysSinceLastOrder;
-    case 'customer.rfmSegment':
-      return (context.customer as { rfmSegment?: string } | undefined)?.rfmSegment;
-    case 'customer.tags':
-      return (context.customer as { tags?: string[] } | undefined)?.tags;
-    case 'order.totalAmount':
-      return (context.order as { totalAmount?: number } | undefined)?.totalAmount;
-    case 'order.itemCount':
-      return (context.order as { itemCount?: number } | undefined)?.itemCount;
-    case 'order.status':
-      return (context.order as { status?: string } | undefined)?.status;
-    case 'product.price':
-      return (context.product as { price?: number } | undefined)?.price;
-    case 'product.categoryId':
-      return (context.product as { categoryId?: string } | undefined)?.categoryId;
-    case 'product.status':
-      return (context.product as { status?: string } | undefined)?.status;
-    case 'custom':
-      return condition.value;
-    default:
-      return undefined;
-  }
+  const resolve = FIELD_RESOLVERS[condition.field];
+  return resolve ? resolve(context, condition) : undefined;
 }
 
 function resolveDataPath(path: string, context: Record<string, unknown>): unknown {
