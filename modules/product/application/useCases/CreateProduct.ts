@@ -155,20 +155,7 @@ export class CreateProductUseCase {
       throw new ProductValidationError('Product type is required');
     }
 
-    // Check for duplicate SKU
-    if (command.sku) {
-      const existingProduct = await this.productRepository.findBySku(command.sku);
-      if (existingProduct) {
-        throw new ProductSkuAlreadyExistsError(command.sku);
-      }
-    }
-
-    // Check for duplicate slug
-    const slug = command.slug || Product.generateSlug(command.name);
-    const existingBySlug = await this.productRepository.findBySlug(slug);
-    if (existingBySlug) {
-      throw new ProductSlugAlreadyExistsError(slug);
-    }
+    await this.assertUniqueSkuAndSlug(command);
 
     const productId = generateUUID();
 
@@ -207,51 +194,10 @@ export class CreateProductUseCase {
     const savedProduct = await this.productRepository.save(product);
 
     // Persist the base price in the pricing-owned store when provided
-    let savedPrice: { priceCents: number; salePriceCents: number | null } | null = null;
-    if (command.basePriceCents !== undefined) {
-      if (!Number.isInteger(command.basePriceCents) || command.basePriceCents < 0) {
-        throw new ProductValidationError('basePriceCents must be a non-negative integer');
-      }
-      for (const [field, value] of Object.entries({
-        salePriceCents: command.salePriceCents,
-        costPriceCents: command.costPriceCents,
-        compareAtPriceCents: command.compareAtPriceCents,
-      })) {
-        if (value !== undefined && value !== null && (!Number.isInteger(value) || value < 0)) {
-          throw new ProductValidationError(`${field} must be a non-negative integer`);
-        }
-      }
-      if (command.salePriceCents !== undefined && command.salePriceCents !== null && command.salePriceCents > command.basePriceCents) {
-        throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
-      }
-      const row = await this.pricingPort.setBasePrice({
-        productId: savedProduct.productId,
-        currencyCode: command.currencyCode || 'USD',
-        priceCents: command.basePriceCents,
-        salePriceCents: command.salePriceCents ?? null,
-        costPriceCents: command.costPriceCents ?? null,
-        compareAtPriceCents: command.compareAtPriceCents ?? null,
-      });
-      savedPrice = { priceCents: row.priceCents, salePriceCents: row.salePriceCents };
-    }
+    const savedPrice = await this.persistBasePrice(command, savedProduct.productId);
 
     // Auto-assign attributes from the product type's attribute sets
-    try {
-      const attributes = await this.attributeSetRepo.getAttributesForProductType(command.productTypeId);
-      if (attributes.length > 0) {
-        const attrsToSet = attributes
-          .filter(attr => attr.isRequired)
-          .map(attr => ({
-            attributeId: attr.productAttributeId,
-            value: attr.defaultValue || '',
-          }));
-        if (attrsToSet.length > 0) {
-          await this.dynamicAttrRepo.setProductAttributes(savedProduct.productId, attrsToSet);
-        }
-      }
-    } catch {
-      // Auto-assignment is best-effort; don't fail product creation if it errors
-    }
+    await this.autoAssignAttributes(command.productTypeId, savedProduct.productId);
 
     // Emit event
     eventBus.emit('product.created', {
@@ -263,6 +209,77 @@ export class CreateProductUseCase {
     });
 
     return this.mapToResponse(savedProduct, savedPrice);
+  }
+
+  private async assertUniqueSkuAndSlug(command: CreateProductCommand): Promise<void> {
+    // Check for duplicate SKU
+    if (command.sku) {
+      const existingProduct = await this.productRepository.findBySku(command.sku);
+      if (existingProduct) {
+        throw new ProductSkuAlreadyExistsError(command.sku);
+      }
+    }
+
+    // Check for duplicate slug
+    const slug = command.slug || Product.generateSlug(command.name);
+    const existingBySlug = await this.productRepository.findBySlug(slug);
+    if (existingBySlug) {
+      throw new ProductSlugAlreadyExistsError(slug);
+    }
+  }
+
+  private async persistBasePrice(
+    command: CreateProductCommand,
+    productId: string,
+  ): Promise<{ priceCents: number; salePriceCents: number | null } | null> {
+    if (command.basePriceCents === undefined) return null;
+    this.assertPriceValues(command, command.basePriceCents);
+    const row = await this.pricingPort.setBasePrice({
+      productId,
+      currencyCode: command.currencyCode || 'USD',
+      priceCents: command.basePriceCents,
+      salePriceCents: command.salePriceCents ?? null,
+      costPriceCents: command.costPriceCents ?? null,
+      compareAtPriceCents: command.compareAtPriceCents ?? null,
+    });
+    return { priceCents: row.priceCents, salePriceCents: row.salePriceCents };
+  }
+
+  private assertPriceValues(command: CreateProductCommand, basePriceCents: number): void {
+    if (!Number.isInteger(basePriceCents) || basePriceCents < 0) {
+      throw new ProductValidationError('basePriceCents must be a non-negative integer');
+    }
+    for (const [field, value] of Object.entries({
+      salePriceCents: command.salePriceCents,
+      costPriceCents: command.costPriceCents,
+      compareAtPriceCents: command.compareAtPriceCents,
+    })) {
+      if (value !== undefined && value !== null && (!Number.isInteger(value) || value < 0)) {
+        throw new ProductValidationError(`${field} must be a non-negative integer`);
+      }
+    }
+    if (command.salePriceCents !== undefined && command.salePriceCents !== null && command.salePriceCents > basePriceCents) {
+      throw new ProductValidationError('salePriceCents cannot exceed basePriceCents');
+    }
+  }
+
+  private async autoAssignAttributes(productTypeId: string, productId: string): Promise<void> {
+    try {
+      const attributes = await this.attributeSetRepo.getAttributesForProductType(productTypeId);
+      if (attributes.length > 0) {
+        const attrsToSet = attributes
+          .filter(attr => attr.isRequired)
+          .map(attr => ({
+            attributeId: attr.productAttributeId,
+            value: attr.defaultValue || '',
+          }));
+        if (attrsToSet.length > 0) {
+          await this.dynamicAttrRepo.setProductAttributes(productId, attrsToSet);
+        }
+      }
+    } catch {
+      // Auto-assignment is best-effort; don't fail product creation if it errors
+    }
   }
 
   private mapToResponse(product: Product, price: { priceCents: number; salePriceCents: number | null } | null): CreateProductResponse {

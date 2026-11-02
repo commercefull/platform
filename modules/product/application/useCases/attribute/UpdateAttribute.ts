@@ -61,29 +61,7 @@ export class UpdateAttributeUseCase {
         };
       }
 
-      // Build update input
-      const input: ProductAttributeUpdateInput = {};
-
-      if (command.name !== undefined) input.name = command.name;
-      if (command.code !== undefined) input.code = command.code;
-      if (command.description !== undefined) input.description = command.description;
-      if (command.groupId !== undefined) input.groupId = command.groupId;
-      if (command.type !== undefined) input.type = command.type as AttributeType;
-      if (command.inputType !== undefined) input.inputType = command.inputType as AttributeType;
-      if (command.isRequired !== undefined) input.isRequired = command.isRequired;
-      if (command.isUnique !== undefined) input.isUnique = command.isUnique;
-      if (command.isSearchable !== undefined) input.isSearchable = command.isSearchable;
-      if (command.isFilterable !== undefined) input.isFilterable = command.isFilterable;
-      if (command.isComparable !== undefined) input.isComparable = command.isComparable;
-      if (command.isVisibleOnFront !== undefined) input.isVisibleOnFront = command.isVisibleOnFront;
-      if (command.isUsedInProductListing !== undefined) input.isUsedInProductListing = command.isUsedInProductListing;
-      if (command.useForVariants !== undefined) input.useForVariants = command.useForVariants;
-      if (command.useForConfigurations !== undefined) input.useForConfigurations = command.useForConfigurations;
-      if (command.position !== undefined) input.position = command.position;
-      if (command.defaultValue !== undefined) input.defaultValue = command.defaultValue;
-      if (command.validationRules !== undefined) input.validationRules = command.validationRules;
-
-      const updated = await this.attributeRepository.updateAttribute(command.attributeId, input);
+      const updated = await this.attributeRepository.updateAttribute(command.attributeId, this.toUpdateInput(command));
 
       if (!updated) {
         return {
@@ -102,5 +80,33 @@ export class UpdateAttributeUseCase {
         error: `Failed to update attribute: ${(error as Error).message}`,
       };
     }
+  }
+
+  // Build update input from defined command fields only
+  private toUpdateInput(command: UpdateAttributeCommand): ProductAttributeUpdateInput {
+    const input: ProductAttributeUpdateInput = {};
+    const assign = <K extends keyof ProductAttributeUpdateInput>(key: K, value: ProductAttributeUpdateInput[K] | undefined) => {
+      if (value !== undefined) input[key] = value;
+    };
+
+    assign('name', command.name);
+    assign('code', command.code);
+    assign('description', command.description);
+    assign('groupId', command.groupId);
+    assign('type', command.type as AttributeType | undefined);
+    assign('inputType', command.inputType as AttributeType | undefined);
+    assign('isRequired', command.isRequired);
+    assign('isUnique', command.isUnique);
+    assign('isSearchable', command.isSearchable);
+    assign('isFilterable', command.isFilterable);
+    assign('isComparable', command.isComparable);
+    assign('isVisibleOnFront', command.isVisibleOnFront);
+    assign('isUsedInProductListing', command.isUsedInProductListing);
+    assign('useForVariants', command.useForVariants);
+    assign('useForConfigurations', command.useForConfigurations);
+    assign('position', command.position);
+    assign('defaultValue', command.defaultValue);
+    assign('validationRules', command.validationRules);
+    return input;
   }
 }

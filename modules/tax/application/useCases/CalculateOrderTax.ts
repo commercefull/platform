@@ -186,6 +186,31 @@ interface LineTaxContext {
   subtotal: number;
 }
 
+interface QuoteContext {
+  subtotal: number;
+  lineItems: TaxLineItem[];
+  hasAnyExemption: boolean;
+  shippingTax: { amountCents: number; included: boolean };
+  embeddedTaxCents: number;
+  addedTaxCents: number;
+  defaultTaxRate: number;
+  originCountry?: string;
+  destinationCountry: string;
+  reverseChargeApplied: boolean;
+  noNexusObligation: boolean;
+}
+
+function taxQuoteMessage(flags: {
+  reverseChargeApplied: boolean;
+  noNexusObligation: boolean;
+  hasAnyExemption: boolean;
+}): string | undefined {
+  if (flags.reverseChargeApplied) return 'Reverse charge: VAT accounted for by the customer';
+  if (flags.noNexusObligation) return 'No tax collection nexus in the destination jurisdiction';
+  if (flags.hasAnyExemption) return 'Tax exemption applied';
+  return undefined;
+}
+
 // ============================================================================
 // Use Case
 // ============================================================================
@@ -197,49 +222,19 @@ export class CalculateOrderTaxUseCase {
     try {
       // Validate input
       if (!command.items || command.items.length === 0) {
-        return {
-          success: false,
-          subtotalCents: 0,
-          shippingAmountCents: command.shippingAmountCents,
-          taxAmountCents: 0,
-          totalCents: command.shippingAmountCents,
-          taxRate: 0,
-          lineItems: [],
-          taxIncludedInSubtotal: command.pricesIncludeTax,
-          message: 'No items to calculate tax for',
-        };
+        return this.noTaxResponse(command, 'No items to calculate tax for');
       }
 
       // Digital goods / services have no ship-to: fall back to the billing
       // address when no shipping destination was supplied.
-      const destinationAddress =
-        command.shippingAddress?.country || !command.billToAddress ? command.shippingAddress : command.billToAddress;
-
-      if (!destinationAddress?.country) {
-        return {
-          success: false,
-          subtotalCents: 0,
-          shippingAmountCents: command.shippingAmountCents,
-          taxAmountCents: 0,
-          totalCents: command.shippingAmountCents,
-          taxRate: 0,
-          lineItems: [],
-          taxIncludedInSubtotal: command.pricesIncludeTax,
-          message: 'A destination (shipping or billing) country is required for tax calculation',
-        };
+      const destination = this.resolveDestination(command);
+      if (!destination) {
+        return this.noTaxResponse(command, 'A destination (shipping or billing) country is required for tax calculation');
       }
-
-      const address = {
-        country: destinationAddress.country,
-        region: destinationAddress.region || destinationAddress.state,
-        postalCode: destinationAddress.postalCode,
-        city: destinationAddress.city,
-      };
+      const { address, destinationCountry } = destination;
 
       // Origin: per-fulfillment ship-from wins over the store-level originCountry.
       const originCountry = command.shipFromAddress?.country ?? command.originCountry;
-
-      const destinationCountry = destinationAddress.country.toUpperCase();
       const reverseChargeApplied = await this.evaluateReverseCharge(command, destinationCountry, originCountry);
       const noNexusObligation = await this.checkNexusObligation(command, address);
 
@@ -267,57 +262,20 @@ export class CalculateOrderTaxUseCase {
 
       // Calculate tax on shipping (if applicable and not fully exempt)
       const shippingTax = this.computeShippingTax(command, defaultTaxRate, defaultRateInfo, exemptions, subtotal);
-      const embeddedTaxCents = lineTaxes.embeddedTaxCents + (shippingTax.included ? shippingTax.amountCents : 0);
-      const addedTaxCents = lineTaxes.addedTaxCents + (shippingTax.included ? 0 : shippingTax.amountCents);
 
-      // Calculate total tax
-      const totalTaxAmountCents = embeddedTaxCents + addedTaxCents;
-      const taxIncludedInSubtotal = addedTaxCents > 0 ? false : command.pricesIncludeTax || embeddedTaxCents > 0;
-
-      // Grand total: embedded tax is already inside subtotal/shipping; only
-      // the added portion increases the total.
-      const totalCents = subtotal + command.shippingAmountCents + addedTaxCents;
-
-      const taxRegime = this.determineRegime({
-        originCountry,
-        destinationCountry,
-        reverseChargeApplied,
-        noNexusObligation,
-        hasAnyExemption,
-      });
-      const decisionRecord = this.buildDecisionRecord(command, {
-        originCountry,
-        destinationCountry,
-        taxRegime,
-        reverseChargeApplied,
-        noNexusObligation,
-        totalTaxAmountCents,
-        addedTaxCents,
-      });
-
-      return {
-        success: true,
-        subtotalCents: subtotal,
-        shippingAmountCents: command.shippingAmountCents,
-        taxAmountCents: totalTaxAmountCents,
-        totalCents,
-        taxRate: defaultTaxRate,
+      return this.toQuoteResponse(command, {
+        subtotal,
         lineItems,
-        taxIncludedInSubtotal,
-        taxAddedCents: addedTaxCents,
-        reverseChargeApplied: reverseChargeApplied || undefined,
-        vatNumber: reverseChargeApplied ? command.vatNumber : undefined,
-        taxRegime,
-        taxPolicyVersion: TAX_POLICY_VERSION,
-        decisionRecord,
-        message: reverseChargeApplied
-          ? 'Reverse charge: VAT accounted for by the customer'
-          : noNexusObligation
-            ? 'No tax collection nexus in the destination jurisdiction'
-            : hasAnyExemption
-              ? 'Tax exemption applied'
-              : undefined,
-      };
+        hasAnyExemption,
+        shippingTax,
+        embeddedTaxCents: lineTaxes.embeddedTaxCents,
+        addedTaxCents: lineTaxes.addedTaxCents,
+        defaultTaxRate,
+        originCountry,
+        destinationCountry,
+        reverseChargeApplied,
+        noNexusObligation,
+      });
     } catch (error: unknown) {
       // Return a safe fallback with zero tax
       const subtotal = command.items.reduce((sum, item) => sum + item.quantity * item.unitPriceCents, 0);
@@ -340,6 +298,72 @@ export class CalculateOrderTaxUseCase {
         message: (error as Error).message || 'Failed to calculate tax',
       };
     }
+  }
+
+  private resolveDestination(command: CalculateOrderTaxCommand): { address: AddressInput; destinationCountry: string } | null {
+    const destinationAddress = command.shippingAddress?.country || !command.billToAddress ? command.shippingAddress : command.billToAddress;
+    if (!destinationAddress?.country) return null;
+    return {
+      address: {
+        country: destinationAddress.country,
+        region: destinationAddress.region || destinationAddress.state,
+        postalCode: destinationAddress.postalCode,
+        city: destinationAddress.city,
+      },
+      destinationCountry: destinationAddress.country.toUpperCase(),
+    };
+  }
+
+  private noTaxResponse(command: CalculateOrderTaxCommand, message: string): CalculateOrderTaxResponse {
+    return {
+      success: false,
+      subtotalCents: 0,
+      shippingAmountCents: command.shippingAmountCents,
+      taxAmountCents: 0,
+      totalCents: command.shippingAmountCents,
+      taxRate: 0,
+      lineItems: [],
+      taxIncludedInSubtotal: command.pricesIncludeTax,
+      message,
+    };
+  }
+
+  /** Fold item + shipping taxes into totals, classify the regime, and build the quote response. */
+  private toQuoteResponse(command: CalculateOrderTaxCommand, quote: QuoteContext): CalculateOrderTaxResponse {
+    const embeddedTaxCents = quote.embeddedTaxCents + (quote.shippingTax.included ? quote.shippingTax.amountCents : 0);
+    const addedTaxCents = quote.addedTaxCents + (quote.shippingTax.included ? 0 : quote.shippingTax.amountCents);
+    const totalTaxAmountCents = embeddedTaxCents + addedTaxCents;
+    const taxIncludedInSubtotal = addedTaxCents > 0 ? false : command.pricesIncludeTax || embeddedTaxCents > 0;
+    // Grand total: embedded tax is already inside subtotal/shipping; only
+    // the added portion increases the total.
+    const totalCents = quote.subtotal + command.shippingAmountCents + addedTaxCents;
+    const taxRegime = this.determineRegime(quote);
+    const decisionRecord = this.buildDecisionRecord(command, {
+      originCountry: quote.originCountry,
+      destinationCountry: quote.destinationCountry,
+      taxRegime,
+      reverseChargeApplied: quote.reverseChargeApplied,
+      noNexusObligation: quote.noNexusObligation,
+      totalTaxAmountCents,
+      addedTaxCents,
+    });
+    return {
+      success: true,
+      subtotalCents: quote.subtotal,
+      shippingAmountCents: command.shippingAmountCents,
+      taxAmountCents: totalTaxAmountCents,
+      totalCents,
+      taxRate: quote.defaultTaxRate,
+      lineItems: quote.lineItems,
+      taxIncludedInSubtotal,
+      taxAddedCents: addedTaxCents,
+      reverseChargeApplied: quote.reverseChargeApplied || undefined,
+      vatNumber: quote.reverseChargeApplied ? command.vatNumber : undefined,
+      taxRegime,
+      taxPolicyVersion: TAX_POLICY_VERSION,
+      decisionRecord,
+      message: taxQuoteMessage(quote),
+    };
   }
 
   /**

@@ -178,21 +178,25 @@ export class Collection {
     organizationId?: string | null;
   }): void {
     const p = this.props;
-    if (details.name !== undefined) p.name = details.name;
-    if (details.slug !== undefined) p.slug = details.slug;
-    if (details.description !== undefined) p.description = details.description ?? undefined;
-    if (details.imageUrl !== undefined) p.imageUrl = details.imageUrl ?? undefined;
-    if (details.bannerUrl !== undefined) p.bannerUrl = details.bannerUrl ?? undefined;
-    if (details.metaTitle !== undefined) p.metaTitle = details.metaTitle ?? undefined;
-    if (details.metaDescription !== undefined) p.metaDescription = details.metaDescription ?? undefined;
-    if (details.isActive !== undefined) p.isActive = details.isActive;
-    if (details.isFeatured !== undefined) p.isFeatured = details.isFeatured;
-    if (details.isAutomated !== undefined) p.isAutomated = details.isAutomated;
-    if (details.conditions !== undefined) p.conditions = details.conditions ?? undefined;
-    if (details.sortOrder !== undefined) p.sortOrder = details.sortOrder;
-    if (details.publishAt !== undefined) p.publishAt = details.publishAt ?? undefined;
-    if (details.unpublishAt !== undefined) p.unpublishAt = details.unpublishAt ?? undefined;
-    if (details.organizationId !== undefined) p.organizationId = details.organizationId ?? undefined;
+    const assign = (key: keyof typeof details, value: unknown, nullable = false) => {
+      if (value !== undefined) (p as unknown as Record<string, unknown>)[key] = nullable ? (value ?? undefined) : value;
+    };
+
+    assign('name', details.name);
+    assign('slug', details.slug);
+    assign('description', details.description, true);
+    assign('imageUrl', details.imageUrl, true);
+    assign('bannerUrl', details.bannerUrl, true);
+    assign('metaTitle', details.metaTitle, true);
+    assign('metaDescription', details.metaDescription, true);
+    assign('isActive', details.isActive);
+    assign('isFeatured', details.isFeatured);
+    assign('isAutomated', details.isAutomated);
+    assign('conditions', details.conditions, true);
+    assign('sortOrder', details.sortOrder);
+    assign('publishAt', details.publishAt, true);
+    assign('unpublishAt', details.unpublishAt, true);
+    assign('organizationId', details.organizationId, true);
     this.touch();
   }
 

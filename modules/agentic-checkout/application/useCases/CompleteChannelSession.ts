@@ -7,6 +7,7 @@
  */
 
 import type { ChannelSessionRepository } from '../../domain/repositories/ChannelSessionRepository';
+import type { ChannelSession } from '../../domain/entities/ChannelSession';
 import type { ChannelCheckoutPort, DelegatedCredential } from '../ports/ChannelCheckoutPort';
 import type { DelegatedPaymentPort } from '../ports/DelegatedPaymentPort';
 import {
@@ -53,62 +54,14 @@ export class CompleteChannelSessionUseCase {
       throw new ChannelSessionNotMutableError(session.channelSessionId, session.effectiveStatus);
     }
 
-    const credential = command.paymentData?.instrument?.credential;
-    if (!credential?.token || !credential.type) {
-      throw new DelegatedPaymentError('payment_data.instrument.credential with type and token is required');
-    }
-
-    const delegated: DelegatedCredential = {
-      provider: command.paymentData?.handler_id ?? 'default',
-      credentialType: credential.type,
-      token: credential.token,
-    };
-
-    if (command.buyer) {
-      session.setBuyer({
-        firstName: command.buyer.first_name,
-        lastName: command.buyer.last_name,
-        email: command.buyer.email,
-        phone: command.buyer.phone,
-      });
-    }
+    const delegated = this.resolveCredential(command);
+    this.applyBuyer(session, command);
 
     session.markCompleting();
     await this.channelSessionRepository.save(session);
 
     try {
-      // Delegated credential rides session metadata → payment module
-      await this.checkout.attachDelegatedPayment(session.checkoutId, delegated);
-
-      const intent = await this.checkout.createPaymentIntent(session.checkoutId);
-
-      // No client-side confirm exists on agentic surfaces — charge the
-      // delegated token synchronously through the payment module's PSP routing.
-      const snapshot = await this.checkout.getCheckout(session.checkoutId);
-      await this.delegatedPayment.chargeDelegatedPayment({
-        organizationId: session.organizationId,
-        orderId: intent.orderId,
-        transactionId: intent.paymentIntentId,
-        amountCents: snapshot?.totalCents ?? 0,
-        currency: snapshot?.currency ?? 'usd',
-        credential: delegated,
-        customerEmail: session.buyer?.email ?? snapshot?.guestEmail,
-      });
-
-      const result = await this.checkout.completeCheckout(session.checkoutId);
-
-      session.markCompleted(result.orderId, intent.orderNumber);
-      await this.channelSessionRepository.save(session);
-
-      eventBus.emit('agenticCheckout.session_completed', {
-        channelSessionId: session.channelSessionId,
-        integrationId: session.integrationId,
-        storeId: session.storeId,
-        checkoutId: session.checkoutId,
-        orderId: result.orderId,
-        orderNumber: intent.orderNumber,
-        paymentIntentId: intent.paymentIntentId,
-      });
+      await this.runCompletion(session, delegated);
     } catch (err) {
       eventBus.emit('agenticCheckout.session_failed', {
         channelSessionId: session.channelSessionId,
@@ -123,6 +76,64 @@ export class CompleteChannelSessionUseCase {
     }
 
     return this.render(session.checkoutId, session.basketId);
+  }
+
+  private resolveCredential(command: CompleteChannelSessionCommand): DelegatedCredential {
+    const credential = command.paymentData?.instrument?.credential;
+    if (!credential?.token || !credential.type) {
+      throw new DelegatedPaymentError('payment_data.instrument.credential with type and token is required');
+    }
+    return {
+      provider: command.paymentData?.handler_id ?? 'default',
+      credentialType: credential.type,
+      token: credential.token,
+    };
+  }
+
+  private applyBuyer(session: ChannelSession, command: CompleteChannelSessionCommand): void {
+    if (!command.buyer) return;
+    session.setBuyer({
+      firstName: command.buyer.first_name,
+      lastName: command.buyer.last_name,
+      email: command.buyer.email,
+      phone: command.buyer.phone,
+    });
+  }
+
+  private async runCompletion(session: ChannelSession, delegated: DelegatedCredential): Promise<void> {
+    const checkoutId = session.checkoutId!;
+    // Delegated credential rides session metadata → payment module
+    await this.checkout.attachDelegatedPayment(checkoutId, delegated);
+
+    const intent = await this.checkout.createPaymentIntent(checkoutId);
+
+    // No client-side confirm exists on agentic surfaces — charge the
+    // delegated token synchronously through the payment module's PSP routing.
+    const snapshot = await this.checkout.getCheckout(checkoutId);
+    await this.delegatedPayment.chargeDelegatedPayment({
+      organizationId: session.organizationId,
+      orderId: intent.orderId,
+      transactionId: intent.paymentIntentId,
+      amountCents: snapshot?.totalCents ?? 0,
+      currency: snapshot?.currency ?? 'usd',
+      credential: delegated,
+      customerEmail: session.buyer?.email ?? snapshot?.guestEmail,
+    });
+
+    const result = await this.checkout.completeCheckout(checkoutId);
+
+    session.markCompleted(result.orderId, intent.orderNumber);
+    await this.channelSessionRepository.save(session);
+
+    eventBus.emit('agenticCheckout.session_completed', {
+      channelSessionId: session.channelSessionId,
+      integrationId: session.integrationId,
+      storeId: session.storeId,
+      checkoutId: session.checkoutId,
+      orderId: result.orderId,
+      orderNumber: intent.orderNumber,
+      paymentIntentId: intent.paymentIntentId,
+    });
   }
 
   private async render(checkoutId: string, basketId: string | null): Promise<AcpCheckoutSession> {

@@ -7,41 +7,36 @@ export function calculateRate(rate: ShippingRate, orderTotalCents: number, itemC
     return 0;
   }
 
-  let calculatedRateCents = Number(rate.baseRateCents);
-
-  switch (rate.rateType) {
-    case 'flat':
-      break;
-    case 'itemBased':
-      calculatedRateCents += Number(rate.perItemRateCents || 0) * itemCount;
-      break;
-    case 'priceBased':
-      if (rate.rateMatrix) {
-        const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
-        for (const tier of matrix.tiers || []) {
-          // tier.min/tier.max are order totals in cents; tier.rate is a rate in cents
-          if (orderTotalCents >= tier.min && orderTotalCents < tier.max) {
-            calculatedRateCents = tier.rate;
-            break;
-          }
-        }
-      }
-      break;
-    case 'weightBased':
-      if (weight && rate.rateMatrix) {
-        const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
-        for (const tier of matrix.tiers || []) {
-          if (weight >= tier.min && weight < tier.max) {
-            calculatedRateCents = tier.rate;
-            break;
-          }
-        }
-      }
-      break;
-  }
+  let calculatedRateCents = rateByType(rate, orderTotalCents, itemCount, weight);
 
   if (rate.minRateCents) calculatedRateCents = Math.max(calculatedRateCents, Number(rate.minRateCents));
   if (rate.maxRateCents) calculatedRateCents = Math.min(calculatedRateCents, Number(rate.maxRateCents));
 
   return calculatedRateCents;
+}
+
+function rateByType(rate: ShippingRate, orderTotalCents: number, itemCount: number, weight?: number): number {
+  const baseRateCents = Number(rate.baseRateCents);
+  if (rate.rateType === 'itemBased') {
+    return baseRateCents + Number(rate.perItemRateCents || 0) * itemCount;
+  }
+  if (rate.rateType === 'priceBased') {
+    // tier.min/tier.max are order totals in cents; tier.rate is a rate in cents
+    return tierRate(rate, orderTotalCents) ?? baseRateCents;
+  }
+  if (rate.rateType === 'weightBased' && weight) {
+    return tierRate(rate, weight) ?? baseRateCents;
+  }
+  return baseRateCents;
+}
+
+function tierRate(rate: ShippingRate, value: number): number | undefined {
+  if (!rate.rateMatrix) return undefined;
+  const matrix = typeof rate.rateMatrix === 'string' ? JSON.parse(rate.rateMatrix) : rate.rateMatrix;
+  for (const tier of matrix.tiers || []) {
+    if (value >= tier.min && value < tier.max) {
+      return tier.rate;
+    }
+  }
+  return undefined;
 }

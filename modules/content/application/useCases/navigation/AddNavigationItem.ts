@@ -78,37 +78,9 @@ export class AddNavigationItemUseCase {
   ) {}
 
   async execute(command: AddNavigationItemCommand): Promise<NavigationItemResponse> {
-    if (!command.navigationId || !command.title || !command.type) {
-      throw new ContentValidationError('Navigation ID, title, and type are required');
-    }
-
-    // Verify navigation exists
-    const navigation = await this.navigationRepo.findNavigationById(command.navigationId);
-    if (!navigation) {
-      throw new NavigationMenuNotFoundError(command.navigationId);
-    }
-
-    // Verify parent item exists if provided
-    let depth = 0;
-    if (command.parentId) {
-      const parentItem = await this.navigationRepo.findNavigationItemById(command.parentId);
-      if (!parentItem) {
-        throw new ContentValidationError(`Parent navigation item with ID ${command.parentId} not found`);
-      }
-      depth = parentItem.depth + 1;
-    }
-
-    // Validate based on type
-    if (command.type === 'url' && !command.url) {
-      throw new ContentValidationError('URL is required for URL type navigation items');
-    }
-
-    if (command.type === 'page' && command.contentPageId) {
-      const page = await this.contentRepo.findPageById(command.contentPageId);
-      if (!page) {
-        throw new ContentPageNotFoundError(command.contentPageId);
-      }
-    }
+    await this.assertNavigationExists(command);
+    const depth = await this.resolveDepth(command.parentId);
+    await this.assertTargetValid(command);
 
     const item = await this.navigationRepo.createNavigationItem({
       navigationId: command.navigationId,
@@ -147,5 +119,41 @@ export class AddNavigationItemUseCase {
       sortOrder: item.sortOrder,
       depth: item.depth,
     };
+  }
+
+  private async assertNavigationExists(command: AddNavigationItemCommand): Promise<void> {
+    if (!command.navigationId || !command.title || !command.type) {
+      throw new ContentValidationError('Navigation ID, title, and type are required');
+    }
+
+    // Verify navigation exists
+    const navigation = await this.navigationRepo.findNavigationById(command.navigationId);
+    if (!navigation) {
+      throw new NavigationMenuNotFoundError(command.navigationId);
+    }
+  }
+
+  // Validate based on type
+  private async assertTargetValid(command: AddNavigationItemCommand): Promise<void> {
+    if (command.type === 'url' && !command.url) {
+      throw new ContentValidationError('URL is required for URL type navigation items');
+    }
+
+    if (command.type === 'page' && command.contentPageId) {
+      const page = await this.contentRepo.findPageById(command.contentPageId);
+      if (!page) {
+        throw new ContentPageNotFoundError(command.contentPageId);
+      }
+    }
+  }
+
+  // Verify parent item exists if provided and derive the item's depth
+  private async resolveDepth(parentId: string | undefined): Promise<number> {
+    if (!parentId) return 0;
+    const parentItem = await this.navigationRepo.findNavigationItemById(parentId);
+    if (!parentItem) {
+      throw new ContentValidationError(`Parent navigation item with ID ${parentId} not found`);
+    }
+    return parentItem.depth + 1;
   }
 }

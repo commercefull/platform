@@ -129,30 +129,19 @@ export async function getEvents(
   const params: unknown[] = [];
   let paramIndex = 1;
 
-  if (filters.eventType) {
-    whereClause += ` AND "eventType" = $${paramIndex++}`;
-    params.push(filters.eventType);
-  }
-  if (filters.eventCategory) {
-    whereClause += ` AND "eventCategory" = $${paramIndex++}`;
-    params.push(filters.eventCategory);
-  }
-  if (filters.customerId) {
-    whereClause += ` AND "customerId" = $${paramIndex++}`;
-    params.push(filters.customerId);
-  }
-  if (filters.orderId) {
-    whereClause += ` AND "orderId" = $${paramIndex++}`;
-    params.push(filters.orderId);
-  }
-  if (filters.productId) {
-    whereClause += ` AND "productId" = $${paramIndex++}`;
-    params.push(filters.productId);
-  }
-  if (filters.salesChannelId) {
-    whereClause += ` AND "salesChannelId" = $${paramIndex++}`;
-    params.push(filters.salesChannelId);
-  }
+  const addIfTruthy = (clause: string, value: unknown) => {
+    if (!value) return;
+    whereClause += ` AND ${clause} = $${paramIndex++}`;
+    params.push(value);
+  };
+
+  addIfTruthy('"eventType"', filters.eventType);
+  addIfTruthy('"eventCategory"', filters.eventCategory);
+  addIfTruthy('"customerId"', filters.customerId);
+  addIfTruthy('"orderId"', filters.orderId);
+  addIfTruthy('"productId"', filters.productId);
+  addIfTruthy('"salesChannelId"', filters.salesChannelId);
+
   if (filters.startDate) {
     whereClause += ` AND "createdAt" >= $${paramIndex++}`;
     params.push(filters.startDate);
@@ -286,33 +275,45 @@ export async function createSnapshot(
       snapshot.snapshotTime,
       snapshot.snapshotDate,
       snapshot.snapshotHour,
-      snapshot.totalOrders || 0,
-      snapshot.pendingOrders || 0,
-      snapshot.processingOrders || 0,
-      snapshot.shippedOrders || 0,
-      snapshot.deliveredOrders || 0,
-      snapshot.cancelledOrders || 0,
-      snapshot.refundedOrders || 0,
-      snapshot.totalRevenueCents || 0,
-      snapshot.pendingRevenueCents || 0,
-      snapshot.refundedAmountCents || 0,
-      snapshot.totalCustomers || 0,
-      snapshot.activeCustomers || 0,
-      snapshot.newCustomersToday || 0,
-      snapshot.totalProducts || 0,
-      snapshot.activeProducts || 0,
-      snapshot.outOfStockProducts || 0,
-      snapshot.lowStockProducts || 0,
-      snapshot.totalInventoryValueCents || 0,
-      snapshot.totalInventoryUnits || 0,
-      snapshot.openTickets || 0,
-      snapshot.pendingTickets || 0,
-      snapshot.activeSubscriptions || 0,
-      snapshot.monthlyRecurringRevenueCents || 0,
+      ...snapshotOrderValues(snapshot),
+      ...snapshotMetricValues(snapshot),
     ],
   );
 
   return mapToAnalyticsReportSnapshot(result!);
+}
+
+function snapshotOrderValues(snapshot: Partial<AnalyticsReportSnapshot>): unknown[] {
+  return [
+    snapshot.totalOrders || 0,
+    snapshot.pendingOrders || 0,
+    snapshot.processingOrders || 0,
+    snapshot.shippedOrders || 0,
+    snapshot.deliveredOrders || 0,
+    snapshot.cancelledOrders || 0,
+    snapshot.refundedOrders || 0,
+    snapshot.totalRevenueCents || 0,
+    snapshot.pendingRevenueCents || 0,
+    snapshot.refundedAmountCents || 0,
+  ];
+}
+
+function snapshotMetricValues(snapshot: Partial<AnalyticsReportSnapshot>): unknown[] {
+  return [
+    snapshot.totalCustomers || 0,
+    snapshot.activeCustomers || 0,
+    snapshot.newCustomersToday || 0,
+    snapshot.totalProducts || 0,
+    snapshot.activeProducts || 0,
+    snapshot.outOfStockProducts || 0,
+    snapshot.lowStockProducts || 0,
+    snapshot.totalInventoryValueCents || 0,
+    snapshot.totalInventoryUnits || 0,
+    snapshot.openTickets || 0,
+    snapshot.pendingTickets || 0,
+    snapshot.activeSubscriptions || 0,
+    snapshot.monthlyRecurringRevenueCents || 0,
+  ];
 }
 
 export async function getSnapshots(
@@ -513,10 +514,21 @@ export async function getRealTimeMetrics(
 function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsReportEvent {
   return {
     analyticsReportEventId: row.analyticsReportEventId,
-    organizationId: row.organizationId ?? undefined,
     eventType: row.eventType,
     eventCategory: row.eventCategory,
     eventAction: row.eventAction,
+    ...reportEventActorFields(row),
+    ...reportEventDataFields(row),
+    ...reportEventAttributionFields(row),
+    isProcessed: Boolean(row.isProcessed),
+    processedAt: row.processedAt ? new Date(row.processedAt) : undefined,
+    createdAt: new Date(row.createdAt ?? new Date()),
+  };
+}
+
+function reportEventActorFields(row: AnalyticsReportEventRow) {
+  return {
+    organizationId: row.organizationId ?? undefined,
     customerId: row.customerId ?? undefined,
     orderId: row.orderId ?? undefined,
     productId: row.productId ?? undefined,
@@ -525,6 +537,11 @@ function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsRepor
     visitorId: row.visitorId ?? undefined,
     channel: row.channel ?? undefined,
     salesChannelId: row.salesChannelId ?? undefined,
+  };
+}
+
+function reportEventDataFields(row: AnalyticsReportEventRow) {
+  return {
     eventData: (row.eventData as Record<string, unknown>) ?? undefined,
     eventValueCents: row.eventValueCents ? Number(row.eventValueCents) : undefined,
     eventQuantity: row.eventQuantity ?? undefined,
@@ -532,15 +549,17 @@ function mapToAnalyticsReportEvent(row: AnalyticsReportEventRow): AnalyticsRepor
     ipAddress: row.ipAddress ?? undefined,
     userAgent: row.userAgent ?? undefined,
     referrer: row.referrer ?? undefined,
+  };
+}
+
+function reportEventAttributionFields(row: AnalyticsReportEventRow) {
+  return {
     utmSource: row.utmSource ?? undefined,
     utmMedium: row.utmMedium ?? undefined,
     utmCampaign: row.utmCampaign ?? undefined,
     deviceType: row.deviceType ?? undefined,
     country: row.country ?? undefined,
     region: row.region ?? undefined,
-    isProcessed: Boolean(row.isProcessed),
-    processedAt: row.processedAt ? new Date(row.processedAt) : undefined,
-    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 
@@ -552,6 +571,14 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
     snapshotTime: new Date(row.snapshotTime),
     snapshotDate: new Date(row.snapshotDate),
     snapshotHour: row.snapshotHour ?? undefined,
+    ...reportSnapshotOrderFields(row),
+    ...reportSnapshotMetricFields(row),
+    createdAt: new Date(row.createdAt ?? new Date()),
+  };
+}
+
+function reportSnapshotOrderFields(row: AnalyticsReportSnapshotRow) {
+  return {
     totalOrders: row.totalOrders ?? 0,
     pendingOrders: row.pendingOrders ?? 0,
     processingOrders: row.processingOrders ?? 0,
@@ -562,6 +589,11 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
     totalRevenueCents: Number(row.totalRevenueCents ?? 0),
     pendingRevenueCents: Number(row.pendingRevenueCents ?? 0),
     refundedAmountCents: Number(row.refundedAmountCents ?? 0),
+  };
+}
+
+function reportSnapshotMetricFields(row: AnalyticsReportSnapshotRow) {
+  return {
     totalCustomers: row.totalCustomers ?? 0,
     activeCustomers: row.activeCustomers ?? 0,
     newCustomersToday: row.newCustomersToday ?? 0,
@@ -575,7 +607,6 @@ function mapToAnalyticsReportSnapshot(row: AnalyticsReportSnapshotRow): Analytic
     pendingTickets: row.pendingTickets ?? 0,
     activeSubscriptions: row.activeSubscriptions ?? 0,
     monthlyRecurringRevenueCents: Number(row.monthlyRecurringRevenueCents ?? 0),
-    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 

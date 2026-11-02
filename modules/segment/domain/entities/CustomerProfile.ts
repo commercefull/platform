@@ -180,43 +180,12 @@ export class CustomerProfile {
     const f = this.props.totalOrders;
     const m = this.props.lifetimeValueCents;
 
-    let rScore: number, fScore: number, mScore: number;
+    const rScore = scoreUpTo(r, [30, 90, 180, 365]);
+    const fScore = scoreFrom(f, [20, 10, 5, 2]);
+    const mScore = scoreFrom(m, [5000, 2000, 500, 100]);
 
-    if (r <= 30) rScore = 5;
-    else if (r <= 90) rScore = 4;
-    else if (r <= 180) rScore = 3;
-    else if (r <= 365) rScore = 2;
-    else rScore = 1;
-
-    if (f >= 20) fScore = 5;
-    else if (f >= 10) fScore = 4;
-    else if (f >= 5) fScore = 3;
-    else if (f >= 2) fScore = 2;
-    else fScore = 1;
-
-    if (m >= 5000) mScore = 5;
-    else if (m >= 2000) mScore = 4;
-    else if (m >= 500) mScore = 3;
-    else if (m >= 100) mScore = 2;
-    else mScore = 1;
-
-    const _total = rScore * 100 + fScore * 10 + mScore;
     this.props.rfmSegment = `${rScore}${fScore}${mScore}`;
-
-    if (rScore >= 4 && fScore >= 4 && mScore >= 4) {
-      this.props.tier = 'champion';
-    } else if (rScore >= 4 && fScore >= 3) {
-      this.props.tier = 'loyal';
-    } else if (rScore >= 4 && fScore <= 2) {
-      this.props.tier = 'new';
-    } else if (rScore <= 2 && fScore >= 3) {
-      this.props.tier = 'at-risk';
-    } else if (rScore <= 2 && fScore <= 2) {
-      this.props.tier = 'lost';
-    } else {
-      this.props.tier = 'regular';
-    }
-
+    this.props.tier = resolveTier(rScore, fScore, mScore);
     this.props.engagementScore = Math.round(((rScore + fScore + mScore) / 15) * 100) / 100;
     this.props.churnRisk = rScore <= 2 ? Math.round((1 - this.props.engagementScore) * 100) / 100 : 0;
   }
@@ -224,4 +193,29 @@ export class CustomerProfile {
   toJSON(): CustomerProfileProps {
     return { ...this.props };
   }
+}
+
+// Score from a `value <= bound` ladder — first bound met wins, else 1.
+function scoreUpTo(value: number, bounds: number[]): number {
+  for (const [i, bound] of bounds.entries()) {
+    if (value <= bound) return bounds.length + 1 - i;
+  }
+  return 1;
+}
+
+// Score from a `value >= bound` ladder — first bound met wins, else 1.
+function scoreFrom(value: number, bounds: number[]): number {
+  for (const [i, bound] of bounds.entries()) {
+    if (value >= bound) return bounds.length + 1 - i;
+  }
+  return 1;
+}
+
+function resolveTier(rScore: number, fScore: number, mScore: number): CustomerProfileProps['tier'] {
+  if (rScore >= 4 && fScore >= 4 && mScore >= 4) return 'champion';
+  if (rScore >= 4 && fScore >= 3) return 'loyal';
+  if (rScore >= 4 && fScore <= 2) return 'new';
+  if (rScore <= 2 && fScore >= 3) return 'at-risk';
+  if (rScore <= 2 && fScore <= 2) return 'lost';
+  return 'regular';
 }

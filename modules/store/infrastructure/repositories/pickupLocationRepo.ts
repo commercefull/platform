@@ -137,23 +137,26 @@ export async function getLocations(storeId?: string): Promise<PickupLocation[]> 
  */
 export async function updateLocation(pickupLocationId: string, params: UpdatePickupLocationParams): Promise<PickupLocation | null> {
   const updates: Record<string, unknown> = { updatedAt: new Date() };
+  const assign = <T>(key: string, value: T | undefined) => {
+    if (value !== undefined) updates[key] = value;
+  };
 
-  if (params.name !== undefined) updates.name = params.name;
-  if (params.address?.line1 !== undefined) updates.addressLine1 = params.address.line1;
-  if (params.address?.line2 !== undefined) updates.addressLine2 = params.address.line2;
-  if (params.address?.city !== undefined) updates.city = params.address.city;
-  if (params.address?.state !== undefined) updates.state = params.address.state;
-  if (params.address?.postalCode !== undefined) updates.postalCode = params.address.postalCode;
-  if (params.address?.country !== undefined) updates.country = params.address.country;
-  if (params.latitude !== undefined) updates.latitude = params.latitude;
-  if (params.longitude !== undefined) updates.longitude = params.longitude;
+  assign('name', params.name);
+  assign('addressLine1', params.address?.line1);
+  assign('addressLine2', params.address?.line2);
+  assign('city', params.address?.city);
+  assign('state', params.address?.state);
+  assign('postalCode', params.address?.postalCode);
+  assign('country', params.address?.country);
+  assign('latitude', params.latitude);
+  assign('longitude', params.longitude);
+  assign('isActive', params.isActive);
+  assign('contactPhone', params.contactPhone);
+  assign('contactEmail', params.contactEmail);
+  assign('instructions', params.instructions);
+  assign('maxOrdersPerSlot', params.maxOrdersPerSlot);
+  assign('prepareTimeMinutes', params.prepareTimeMinutes);
   if (params.operatingHours !== undefined) updates.operatingHours = JSON.stringify(params.operatingHours);
-  if (params.isActive !== undefined) updates.isActive = params.isActive;
-  if (params.contactPhone !== undefined) updates.contactPhone = params.contactPhone;
-  if (params.contactEmail !== undefined) updates.contactEmail = params.contactEmail;
-  if (params.instructions !== undefined) updates.instructions = params.instructions;
-  if (params.maxOrdersPerSlot !== undefined) updates.maxOrdersPerSlot = params.maxOrdersPerSlot;
-  if (params.prepareTimeMinutes !== undefined) updates.prepareTimeMinutes = params.prepareTimeMinutes;
 
   const setClauses: string[] = [];
   const values: unknown[] = [];
