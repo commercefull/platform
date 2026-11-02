@@ -1,12 +1,6 @@
 import { queryOne, query } from '../../../../libs/db';
 import { Table } from '../../../../libs/db/types';
-import {
-  PricingRule,
-  PricingRuleCreateProps,
-  PricingRuleScope,
-  PricingRuleStatus,
-  PricingRuleUpdateProps,
-} from '../../domain/pricingRule';
+import { PricingRule, PricingRuleCreateProps, PricingRuleScope, PricingRuleStatus, PricingRuleUpdateProps } from '../../domain/pricingRule';
 import { FailedToCreatePricingError, PricingRuleNotFoundError } from '../../domain/errors/PricingErrors';
 import type { PricingRule as DbPricingRule } from '../../../../libs/db/types';
 
@@ -40,11 +34,11 @@ function rowToPricingRule(row: DbPricingRule): PricingRule {
     minimumQuantity: row.minimumQuantity ?? undefined,
     maximumQuantity: row.maximumQuantity ?? undefined,
     minimumOrderAmountCents: row.minimumOrderAmountCents ?? undefined,
+    metadata: (row.metadata as PricingRule['metadata']) ?? undefined,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
-
 
 /**
  * Pricing Rule Repository

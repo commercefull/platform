@@ -38,6 +38,7 @@ function rowToPriceList(row: DbPricingPriceList, links: DbCustomerPriceList[]): 
         : PricingRuleStatus.ACTIVE;
   return {
     id: row.priceListId,
+    priceListId: row.priceListId,
     name: row.name,
     description: row.description ?? undefined,
     customerIds: links.map(l => l.customerId).filter((v): v is string => v !== null),
@@ -60,10 +61,9 @@ class CustomerPriceRepo {
   private async findPriceListLinks(priceListIds: string[]): Promise<DbCustomerPriceList[]> {
     if (priceListIds.length === 0) return [];
     return (
-      (await query<DbCustomerPriceList[]>(
-        `SELECT * FROM "${this.customerPriceListTable}" WHERE "priceListId" = ANY($1)`,
-        [priceListIds],
-      )) || []
+      (await query<DbCustomerPriceList[]>(`SELECT * FROM "${this.customerPriceListTable}" WHERE "priceListId" = ANY($1)`, [
+        priceListIds,
+      ])) || []
     );
   }
 
@@ -121,7 +121,12 @@ class CustomerPriceRepo {
 
     const rows = (await query<DbPricingPriceList[]>(sql, params)) || [];
     const links = await this.findPriceListLinks(rows.map(r => r.priceListId));
-    return rows.map(row => rowToPriceList(row, links.filter(l => l.priceListId === row.priceListId)));
+    return rows.map(row =>
+      rowToPriceList(
+        row,
+        links.filter(l => l.priceListId === row.priceListId),
+      ),
+    );
   }
 
   /**

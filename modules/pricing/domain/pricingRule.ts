@@ -156,6 +156,7 @@ export interface TierPrice {
 
 export interface CustomerPriceList {
   id: string;
+  priceListId?: string; // Alias for id
   name: string;
   description?: string;
   customerIds: string[];
