@@ -3427,16 +3427,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -3480,16 +3470,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -3579,16 +3559,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -3632,16 +3602,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -3733,16 +3693,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -3786,16 +3736,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -3841,16 +3781,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -3894,16 +3824,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -3949,16 +3869,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       },
       "delete": {
@@ -4003,16 +3913,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4035,16 +3935,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4069,16 +3959,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4102,16 +3982,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4134,16 +4004,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4188,16 +4048,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4266,16 +4116,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4343,16 +4183,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       },
       "delete": {
@@ -4396,16 +4226,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4451,16 +4271,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4504,16 +4314,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -4582,16 +4382,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4614,16 +4404,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -4669,16 +4449,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4722,16 +4492,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4777,16 +4537,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       },
       "delete": {
@@ -4831,16 +4581,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -4884,16 +4624,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -4940,16 +4670,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -5016,16 +4736,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -5069,16 +4779,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -5145,16 +4845,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -5177,16 +4867,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -5255,16 +4935,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -5310,16 +4980,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       },
@@ -5386,16 +5046,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
-          }
         }
       }
     },
@@ -5441,16 +5091,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -5543,16 +5183,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContentTypeBody"
-              }
-            }
           }
         }
       }
@@ -12453,16 +12083,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadMediaBody"
-              }
-            }
-          }
         }
       }
     },
@@ -12486,16 +12106,6 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadMediaBody"
-              }
-            }
-          }
         }
       }
     },
@@ -12518,16 +12128,6 @@
           },
           "500": {
             "description": "Internal server error"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadMediaBody"
-              }
-            }
           }
         }
       }
@@ -14670,7 +14270,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -14795,7 +14395,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -14828,7 +14428,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -14861,7 +14461,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -14915,7 +14515,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -14992,7 +14592,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15046,7 +14646,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15079,7 +14679,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15156,7 +14756,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15210,7 +14810,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15243,7 +14843,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15276,7 +14876,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15399,7 +14999,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -15455,7 +15055,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReorderBlocksBody"
+                "$ref": "#/components/schemas/ShipOrderBody"
               }
             }
           }
@@ -31083,6 +30683,65 @@
           }
         }
       },
+      "CreateRuleBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "triggerType": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "triggerConfig": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          },
+          "trigger": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          },
+          "conditions": {
+            "type": "string",
+            "description": "{ field: string; operator: string; value?: unknown; values?: unknown[]; dataPath?: string; }[] | undefined"
+          },
+          "conditionMatchMode": {
+            "type": "string",
+            "description": "\"all\" | \"any\" | undefined"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "{ type: string; config?: Record<string, unknown>; channel?: string; delayMs?: number; }"
+            }
+          },
+          "actionExecutionMode": {
+            "type": "string",
+            "description": "\"sequential\" | \"parallel\" | undefined"
+          },
+          "priority": {
+            "type": "string",
+            "description": "number | undefined"
+          },
+          "organizationId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        },
+        "required": [
+          "name",
+          "actions"
+        ]
+      },
       "GetOrCreateBasketBody": {
         "type": "object",
         "properties": {
@@ -31300,17 +30959,6 @@
           }
         }
       },
-      "PickupLocationBody": {
-        "type": "object",
-        "properties": {
-          "pickupLocationId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "pickupLocationId"
-        ]
-      },
       "ShippingMethodBody": {
         "type": "object",
         "properties": {
@@ -31374,1092 +31022,15 @@
           }
         }
       },
-      "CreateContentTypeBody": {
+      "PickupLocationBody": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "icon": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "allowedBlocks": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "defaultTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "requiredFields": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "metaFields": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "isSystem": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "name",
-          "slug"
-        ]
-      },
-      "UpdateContentTypeBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "icon": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "requiredFields": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "metaFields": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
-      "CreatePageBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "status": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "publishedAt": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "layout": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "contentTypeId": {
-            "type": "string"
-          },
-          "visibility": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "title",
-          "slug",
-          "contentTypeId"
-        ]
-      },
-      "UpdatePageBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "status": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "publishedAt": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "layout": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        }
-      },
-      "CreateBlockBody": {
-        "type": "object",
-        "properties": {
-          "contentPageId": {
-            "type": "string"
-          },
-          "blockTypeId": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "area": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "number"
-          },
-          "content": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown>"
-          },
-          "isVisible": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "contentPageId",
-          "blockTypeId",
-          "sortOrder",
-          "content"
-        ]
-      },
-      "UpdateBlockBody": {
-        "type": "object",
-        "properties": {
-          "blockTypeId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "area": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "content": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "isVisible": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
-      "ReorderBlocksBody": {
-        "type": "object",
-        "properties": {
-          "blockOrders": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "{ id: string; order: number; }"
-            }
-          }
-        },
-        "required": [
-          "blockOrders"
-        ]
-      },
-      "CreateTemplateBody": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "type": {
-            "type": "string"
-          },
-          "supportedChannels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "defaultChannel": {
-            "type": "string"
-          },
-          "subject": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "htmlTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "textTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "pushTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "smsTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "parameters": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "categoryCode": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "previewData": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "type",
-          "supportedChannels",
-          "defaultChannel"
-        ]
-      },
-      "UpdateTemplateBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "type": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "supportedChannels": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "defaultChannel": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "subject": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "htmlTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "textTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "pushTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "smsTemplate": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "parameters": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "categoryCode": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "previewData": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          }
-        }
-      },
-      "DuplicateTemplateBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "slug": {
+          "pickupLocationId": {
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "slug"
-        ]
-      },
-      "SchedulePageBody": {
-        "type": "object",
-        "properties": {
-          "scheduledAt": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "scheduledAt"
-        ]
-      },
-      "DuplicatePageBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "title",
-          "slug"
-        ]
-      },
-      "CreateCategoryBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "featuredImage": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "name",
-          "slug"
-        ]
-      },
-      "UpdateCategoryBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "featuredImage": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
-      "MoveCategoryBody": {
-        "type": "object",
-        "properties": {
-          "newParentId": {
-            "type": "string",
-            "description": "string | null"
-          }
-        },
-        "required": [
-          "newParentId"
-        ]
-      },
-      "CreateNavigationBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "location": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "name",
-          "slug"
-        ]
-      },
-      "UpdateNavigationBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "location": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        }
-      },
-      "AddNavigationItemBody": {
-        "type": "object",
-        "properties": {
-          "parentId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "title": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "contentPageId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "targetId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "targetSlug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "icon": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "cssClasses": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openInNewTab": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "conditions": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          }
-        },
-        "required": [
-          "title",
-          "type"
-        ]
-      },
-      "UpdateNavigationItemBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "type": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "url": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "contentPageId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "icon": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openInNewTab": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          }
-        }
-      },
-      "ReorderNavigationItemsBody": {
-        "type": "object",
-        "properties": {
-          "itemOrders": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "description": "{ id: string; order: number; }"
-            }
-          }
-        },
-        "required": [
-          "itemOrders"
-        ]
-      },
-      "UploadMediaBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "filePath": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "fileType": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "fileSize": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "url": {
-            "type": "string"
-          },
-          "width": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "height": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "duration": {
-            "type": "string",
-            "description": "number | undefined"
-          },
-          "altText": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "caption": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "folderId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "thumbnailUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "tags": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "isExternal": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "externalService": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "externalId": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "title",
-          "fileName",
-          "url"
-        ]
-      },
-      "UpdateMediaBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "altText": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "caption": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "description": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "folderId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "tags": {
-            "type": "string",
-            "description": "string[] | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          }
-        }
-      },
-      "MoveMediaToFolderBody": {
-        "type": "object",
-        "properties": {
-          "mediaIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "folderId": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "mediaIds"
-        ]
-      },
-      "CreateMediaFolderBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "UpdateMediaFolderBody": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "parentId": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          }
-        }
-      },
-      "CreateRedirectBody": {
-        "type": "object",
-        "properties": {
-          "sourceUrl": {
-            "type": "string"
-          },
-          "targetUrl": {
-            "type": "string"
-          },
-          "statusCode": {
-            "type": "string",
-            "description": "string | number | undefined"
-          },
-          "isRegex": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "notes": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        },
-        "required": [
-          "sourceUrl",
-          "targetUrl"
-        ]
-      },
-      "UpdateRedirectBody": {
-        "type": "object",
-        "properties": {
-          "sourceUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "targetUrl": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "statusCode": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isRegex": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isActive": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "notes": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        }
-      },
-      "CreatePageVersionBody": {
-        "type": "object",
-        "properties": {
-          "comment": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        }
-      },
-      "CreatePageTranslationBody": {
-        "type": "object",
-        "properties": {
-          "localeId": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "summary": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "content": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaKeywords": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openGraphTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openGraphDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "featuredImage": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isAutoTranslated": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "translationSource": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isApproved": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isPublished": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "localeId",
-          "title"
-        ]
-      },
-      "UpdatePageTranslationBody": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "slug": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "summary": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "content": {
-            "type": "object",
-            "description": "Record type: Record<string, unknown> | undefined"
-          },
-          "metaTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "metaKeywords": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openGraphTitle": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "openGraphDescription": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "featuredImage": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isAutoTranslated": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "translationSource": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "isApproved": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "isPublished": {
-            "type": "string",
-            "description": "boolean | undefined"
-          },
-          "publishedAt": {
-            "type": "string",
-            "description": "string | undefined"
-          }
-        }
-      },
-      "AssignCategoryBody": {
-        "type": "object",
-        "properties": {
-          "categoryId": {
-            "type": "string"
-          },
-          "isPrimary": {
-            "type": "string",
-            "description": "boolean | undefined"
-          }
-        },
-        "required": [
-          "categoryId"
-        ]
-      },
-      "SetPrimaryCategoryBody": {
-        "type": "object",
-        "properties": {
-          "categorizationId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "categorizationId"
-        ]
-      },
-      "TrackMediaUsageBody": {
-        "type": "object",
-        "properties": {
-          "mediaId": {
-            "type": "string"
-          },
-          "entityType": {
-            "type": "string",
-            "description": "\"contentPage\" | \"contentBlock\" | \"product\" | \"category\" | \"organization\" | \"blog\""
-          },
-          "entityId": {
-            "type": "string"
-          },
-          "field": {
-            "type": "string",
-            "description": "string | undefined"
-          },
-          "sortOrder": {
-            "type": "string",
-            "description": "number | undefined"
-          }
-        },
-        "required": [
-          "mediaId",
-          "entityType",
-          "entityId"
+          "pickupLocationId"
         ]
       },
       "CreateCouponBody": {
@@ -34251,6 +32822,137 @@
           "body"
         ]
       },
+      "CreateTemplateBody": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "type": {
+            "type": "string"
+          },
+          "supportedChannels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defaultChannel": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "htmlTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "textTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "pushTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "smsTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          },
+          "isActive": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "previewData": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "type",
+          "supportedChannels",
+          "defaultChannel"
+        ]
+      },
+      "UpdateTemplateBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "type": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "supportedChannels": {
+            "type": "string",
+            "description": "string[] | undefined"
+          },
+          "defaultChannel": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "subject": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "htmlTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "textTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "pushTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "smsTemplate": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          },
+          "isActive": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "categoryCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "previewData": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          }
+        }
+      },
       "UpdatePreferenceAdminBody": {
         "type": "object",
         "properties": {
@@ -34271,6 +32973,86 @@
             "description": "Record type: Record<string, unknown> | undefined"
           }
         }
+      },
+      "CreateOrderRequestBody": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "unknown"
+            }
+          },
+          "shippingAddress": {
+            "type": "string",
+            "description": "unknown"
+          },
+          "billingAddress": {
+            "type": "string",
+            "description": "unknown"
+          },
+          "basketId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "storeId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "channelId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "createdByUserId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "orderSource": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerEmail": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerPhone": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerName": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerNotes": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "shippingTotalCents": {
+            "type": "string",
+            "description": "number | undefined"
+          },
+          "hasGiftWrapping": {
+            "type": "string",
+            "description": "boolean | undefined"
+          },
+          "giftMessage": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isGift": {
+            "type": "string",
+            "description": "boolean | undefined"
+          }
+        },
+        "required": [
+          "items",
+          "shippingAddress"
+        ]
       },
       "CreateOrganizationBody": {
         "type": "object",
@@ -34874,6 +33656,129 @@
           }
         }
       },
+      "CreateProductFormBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "productTypeId": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "slug": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "shortDescription": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "basePrice": {
+            "type": "string"
+          },
+          "salePrice": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "cost": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "compareAtPrice": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "weight": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "weightUnit": {
+            "type": "string",
+            "description": "\"kg\" | \"lb\" | \"oz\" | \"g\" | undefined"
+          },
+          "length": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "width": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "height": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "dimensionUnit": {
+            "type": "string",
+            "description": "\"cm\" | \"in\" | \"m\" | \"mm\" | undefined"
+          },
+          "isFeatured": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isVirtual": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isDownloadable": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isSubscription": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "isTaxable": {
+            "type": "string",
+            "description": "string | boolean | undefined"
+          },
+          "taxClass": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "metaTitle": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "metaKeywords": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "tags": {
+            "type": "string",
+            "description": "string[] | undefined"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Record type: Record<string, unknown> | undefined"
+          }
+        },
+        "required": [
+          "name",
+          "productTypeId",
+          "basePrice"
+        ]
+      },
       "VariantBody": {
         "type": "object",
         "properties": {
@@ -35069,6 +33974,59 @@
         "type": "object",
         "properties": {
           "attributeSetId": {
+            "type": "string",
+            "description": "string | undefined"
+          }
+        }
+      },
+      "PreviewBody": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "string",
+            "description": "PreviewItem[] | undefined"
+          },
+          "subtotal": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "shippingAmount": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "customerGroup": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "isFirstOrder": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "shippingMethodId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "paymentMethodId": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "couponCode": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "currency": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "itemQty": {
+            "type": "string",
+            "description": "string | undefined"
+          },
+          "cartTotal": {
             "type": "string",
             "description": "string | undefined"
           }
