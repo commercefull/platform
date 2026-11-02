@@ -64,6 +64,7 @@ export class CustomerAddressRepo {
       await this.unsetDefaultShipping(params.customerId);
     }
 
+    const v = this.addressRowValues(params);
     const result = await queryOne<DbCustomerAddress>(
       `INSERT INTO "customerAddress" (
         "customerId", "firstName", "lastName", "company", "addressLine1", "addressLine2",
@@ -74,32 +75,32 @@ export class CustomerAddressRepo {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)
       RETURNING *`,
       [
-        params.customerId,
-        params.firstName || null,
-        params.lastName || null,
-        params.company || null,
-        params.addressLine1,
-        params.addressLine2 || null,
-        params.city,
-        params.state || null,
-        params.postalCode,
-        params.country,
-        params.phone || null,
-        params.email || null,
-        params.isDefault || false,
-        params.isDefaultBilling || false,
-        params.isDefaultShipping || false,
-        params.addressType || 'both',
-        params.isVerified || false,
-        params.verifiedAt || null,
-        params.verificationData ? JSON.stringify(params.verificationData) : null,
-        params.additionalInfo || null,
-        params.latitude || null,
-        params.longitude || null,
-        params.name || null,
-        params.dependentLocality || null,
-        params.sortingCode || null,
-        params.addressLines ? JSON.stringify(params.addressLines) : null,
+        v.customerId,
+        v.firstName,
+        v.lastName,
+        v.company,
+        v.addressLine1,
+        v.addressLine2,
+        v.city,
+        v.state,
+        v.postalCode,
+        v.country,
+        v.phone,
+        v.email,
+        v.isDefault,
+        v.isDefaultBilling,
+        v.isDefaultShipping,
+        v.addressType,
+        v.isVerified,
+        v.verifiedAt,
+        v.verificationData,
+        v.additionalInfo,
+        v.latitude,
+        v.longitude,
+        v.name,
+        v.dependentLocality,
+        v.sortingCode,
+        v.addressLines,
         now,
         now,
       ],
@@ -107,6 +108,51 @@ export class CustomerAddressRepo {
 
     if (!result) throw new FailedToCreateCustomerError('Failed to create customer address');
     return result;
+  }
+
+  private addressRowValues(params: CustomerAddressCreateParams) {
+    return { ...this.addressContactValues(params), ...this.addressFlagValues(params), ...this.addressGeoValues(params) };
+  }
+
+  private addressContactValues(params: CustomerAddressCreateParams) {
+    return {
+      customerId: params.customerId,
+      firstName: params.firstName || null,
+      lastName: params.lastName || null,
+      company: params.company || null,
+      phone: params.phone || null,
+      email: params.email || null,
+      name: params.name || null,
+    };
+  }
+
+  private addressFlagValues(params: CustomerAddressCreateParams) {
+    return {
+      isDefault: params.isDefault || false,
+      isDefaultBilling: params.isDefaultBilling || false,
+      isDefaultShipping: params.isDefaultShipping || false,
+      addressType: params.addressType || 'both',
+      isVerified: params.isVerified || false,
+      verifiedAt: params.verifiedAt || null,
+      verificationData: params.verificationData ? JSON.stringify(params.verificationData) : null,
+    };
+  }
+
+  private addressGeoValues(params: CustomerAddressCreateParams) {
+    return {
+      addressLine1: params.addressLine1,
+      addressLine2: params.addressLine2 || null,
+      city: params.city,
+      state: params.state || null,
+      postalCode: params.postalCode,
+      country: params.country,
+      additionalInfo: params.additionalInfo || null,
+      latitude: params.latitude || null,
+      longitude: params.longitude || null,
+      dependentLocality: params.dependentLocality || null,
+      sortingCode: params.sortingCode || null,
+      addressLines: params.addressLines ? JSON.stringify(params.addressLines) : null,
+    };
   }
 
   async update(id: string, params: CustomerAddressUpdateParams): Promise<CustomerAddress | null> {

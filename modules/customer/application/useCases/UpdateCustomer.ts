@@ -43,6 +43,9 @@ export interface UpdateCustomerResponse {
 // Use Case
 // ============================================================================
 
+type Customer = Awaited<ReturnType<CustomerRepository['findById']>> & object;
+type CustomerUpdates = UpdateCustomerCommand['updates'];
+
 export class UpdateCustomerUseCase {
   constructor(private readonly customerRepository: CustomerRepository) {}
 
@@ -54,41 +57,9 @@ export class UpdateCustomerUseCase {
     }
 
     const updatedFields: string[] = [];
-
-    // Update profile
-    if (
-      command.updates.firstName ||
-      command.updates.lastName ||
-      command.updates.phone !== undefined ||
-      command.updates.dateOfBirth !== undefined
-    ) {
-      if (command.updates.firstName) customer.firstName = command.updates.firstName.trim();
-      if (command.updates.lastName) customer.lastName = command.updates.lastName.trim();
-      if (command.updates.phone !== undefined) customer.phone = command.updates.phone?.trim() || null;
-      if (command.updates.dateOfBirth !== undefined) customer.dateOfBirth = command.updates.dateOfBirth || null;
-      if (command.updates.firstName) updatedFields.push('firstName');
-      if (command.updates.lastName) updatedFields.push('lastName');
-      if (command.updates.phone !== undefined) updatedFields.push('phone');
-      if (command.updates.dateOfBirth !== undefined) updatedFields.push('dateOfBirth');
-    }
-
-    // Update preferences
-    if (command.updates.preferredCurrency || command.updates.preferredLanguage) {
-      if (command.updates.preferredLanguage) customer.timezone = command.updates.preferredLanguage;
-      if (command.updates.preferredCurrency) updatedFields.push('preferredCurrency');
-      if (command.updates.preferredLanguage) updatedFields.push('preferredLanguage');
-    }
-
-    // Update notes
-    if (command.updates.notes !== undefined) {
-      customer.note = command.updates.notes;
-      updatedFields.push('notes');
-    }
-
-    // Update metadata - no direct column, skip for now
-    if (command.updates.metadata) {
-      updatedFields.push('metadata');
-    }
+    this.applyProfile(customer, command.updates, updatedFields);
+    this.applyPreferences(customer, command.updates, updatedFields);
+    this.applyNotesAndMetadata(customer, command.updates, updatedFields);
 
     customer.updatedAt = new Date();
 
@@ -109,5 +80,40 @@ export class UpdateCustomerUseCase {
       updatedFields,
       updatedAt: new Date(customer.updatedAt).toISOString(),
     };
+  }
+
+  private applyProfile(customer: Customer, updates: CustomerUpdates, updatedFields: string[]): void {
+    if (!updates.firstName && !updates.lastName && updates.phone === undefined && updates.dateOfBirth === undefined) return;
+    if (updates.firstName) customer.firstName = updates.firstName.trim();
+    if (updates.lastName) customer.lastName = updates.lastName.trim();
+    if (updates.phone !== undefined) customer.phone = updates.phone?.trim() || null;
+    if (updates.dateOfBirth !== undefined) customer.dateOfBirth = updates.dateOfBirth || null;
+    this.trackField(updatedFields, 'firstName', updates.firstName);
+    this.trackField(updatedFields, 'lastName', updates.lastName);
+    this.trackField(updatedFields, 'phone', updates.phone !== undefined);
+    this.trackField(updatedFields, 'dateOfBirth', updates.dateOfBirth !== undefined);
+  }
+
+  private applyPreferences(customer: Customer, updates: CustomerUpdates, updatedFields: string[]): void {
+    if (!updates.preferredCurrency && !updates.preferredLanguage) return;
+    if (updates.preferredLanguage) customer.timezone = updates.preferredLanguage;
+    this.trackField(updatedFields, 'preferredCurrency', updates.preferredCurrency);
+    this.trackField(updatedFields, 'preferredLanguage', updates.preferredLanguage);
+  }
+
+  private applyNotesAndMetadata(customer: Customer, updates: CustomerUpdates, updatedFields: string[]): void {
+    if (updates.notes !== undefined) {
+      customer.note = updates.notes;
+      updatedFields.push('notes');
+    }
+
+    // Update metadata - no direct column, skip for now
+    if (updates.metadata) {
+      updatedFields.push('metadata');
+    }
+  }
+
+  private trackField(updatedFields: string[], field: string, present: unknown): void {
+    if (present) updatedFields.push(field);
   }
 }

@@ -13,6 +13,9 @@ const PROMOTION_RULE_TABLE = Table.PromotionRule;
 const PROMOTION_ACTION_TABLE = Table.PromotionAction;
 const PROMOTION_USAGE_TABLE = 'promotionUsage';
 
+// Transaction-scoped client passed by withTransaction.
+type Tx = { queryOne<T>(text: string, params: Array<unknown>): Promise<T | null> };
+
 /**
  * Promotion status types
  */
@@ -146,58 +149,37 @@ class PromotionRepo {
     const params: unknown[] = [];
     let paramIndex = 1;
 
-    if (status) {
-      if (Array.isArray(status)) {
-        sql += ` AND "status" IN (${status.map((_, i) => `$${paramIndex + i}`).join(', ')})`;
-        params.push(...status);
-        paramIndex += status.length;
+    const nextIndex = () => `$${paramIndex++}`;
+    const addScalarOrIn = (column: string, value: string | string[] | undefined) => {
+      if (!value) return;
+      if (Array.isArray(value)) {
+        sql += ` AND ${column} IN (${value.map(() => nextIndex()).join(', ')})`;
+        params.push(...value);
       } else {
-        sql += ` AND "status" = $${paramIndex}`;
-        params.push(status);
-        paramIndex++;
+        sql += ` AND ${column} = ${nextIndex()}`;
+        params.push(value);
       }
-    }
+    };
+    const addEquals = (column: string, value: unknown) => {
+      if (value === undefined) return;
+      sql += ` AND ${column} = ${nextIndex()}`;
+      params.push(value);
+    };
 
-    if (scope) {
-      if (Array.isArray(scope)) {
-        sql += ` AND "scope" IN (${scope.map((_, i) => `$${paramIndex + i}`).join(', ')})`;
-        params.push(...scope);
-        paramIndex += scope.length;
-      } else {
-        sql += ` AND "scope" = $${paramIndex}`;
-        params.push(scope);
-        paramIndex++;
-      }
-    }
-
-    if (organizationId) {
-      sql += ` AND "organizationId" = $${paramIndex}`;
-      params.push(organizationId);
-      paramIndex++;
-    }
-
-    if (isActive !== undefined) {
-      sql += ` AND "isActive" = $${paramIndex}`;
-      params.push(isActive);
-      paramIndex++;
-    }
-
-    if (isGlobal !== undefined) {
-      sql += ` AND "isGlobal" = $${paramIndex}`;
-      params.push(isGlobal);
-      paramIndex++;
-    }
+    addScalarOrIn('"status"', status);
+    addScalarOrIn('"scope"', scope);
+    addScalarOrIn('"organizationId"', organizationId);
+    addEquals('"isActive"', isActive);
+    addEquals('"isGlobal"', isGlobal);
 
     if (startBefore) {
-      sql += ` AND "startDate" <= $${paramIndex}`;
+      sql += ` AND "startDate" <= ${nextIndex()}`;
       params.push(startBefore);
-      paramIndex++;
     }
 
     if (endAfter) {
-      sql += ` AND ("endDate" IS NULL OR "endDate" >= $${paramIndex})`;
+      sql += ` AND ("endDate" IS NULL OR "endDate" >= ${nextIndex()})`;
       params.push(endAfter);
-      paramIndex++;
     }
 
     sql += ` ORDER BY "${orderBy}" ${direction} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
@@ -235,8 +217,17 @@ class PromotionRepo {
     const now = new Date();
 
     return withTransaction(async tx => {
-      const promotion = await tx.queryOne<DbPromotion>(
-        `INSERT INTO "${PROMOTION_TABLE}" (
+      const promotion = await this.insertPromotion(tx, input, now);
+      await this.insertPromotionRules(tx, promotion.promotionId, input.rules, now);
+      await this.insertPromotionActions(tx, promotion.promotionId, input.actions, now);
+      return promotion;
+    });
+  }
+
+  private async insertPromotion(tx: Tx, input: CreatePromotionInput, now: Date): Promise<DbPromotion> {
+    const v = this.promotionRowValues(input);
+    const promotion = await tx.queryOne<DbPromotion>(
+      `INSERT INTO "${PROMOTION_TABLE}" (
           "name", "description", "status", "scope", "priority",
           "startDate", "endDate", "isActive", "isExclusive", "stackability", "maxUsage",
           "usageCount", "maxUsagePerCustomer", "minOrderAmountCents", "maxDiscountAmountCents",
@@ -245,78 +236,101 @@ class PromotionRepo {
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
         ) RETURNING *`,
+      [
+        v.name,
+        v.description,
+        v.status,
+        v.scope,
+        v.priority,
+        v.startDate || now,
+        v.endDate,
+        v.isActive,
+        v.isExclusive,
+        v.stackability,
+        v.maxUsage,
+        0, // Initial usage count
+        v.maxUsagePerCustomer,
+        v.minOrderAmountCents,
+        v.maxDiscountAmountCents,
+        v.organizationId,
+        v.isGlobal,
+        v.eligibleCustomerGroups,
+        v.excludedCustomerGroups,
+        now,
+        now,
+      ],
+    );
+
+    if (!promotion) {
+      throw new FailedToCreatePromotionError();
+    }
+    return promotion;
+  }
+
+  private promotionRowValues(input: CreatePromotionInput) {
+    return { ...this.promotionCoreValues(input), ...this.promotionScopeValues(input) };
+  }
+
+  private promotionCoreValues(input: CreatePromotionInput) {
+    return {
+      name: input.name,
+      description: input.description || null,
+      status: input.status || 'active',
+      scope: input.scope,
+      priority: input.priority || 0,
+      startDate: input.startDate,
+      endDate: input.endDate || null,
+      isActive: input.isActive !== false,
+      isExclusive: input.isExclusive || false,
+      stackability: input.stackability || (input.isExclusive ? 'exclusive' : 'stackable'),
+    };
+  }
+
+  private promotionScopeValues(input: CreatePromotionInput) {
+    return {
+      maxUsage: input.maxUsage || null,
+      maxUsagePerCustomer: input.maxUsagePerCustomer || null,
+      minOrderAmountCents: input.minOrderAmountCents || null,
+      maxDiscountAmountCents: input.maxDiscountAmountCents || null,
+      organizationId: input.organizationId || null,
+      isGlobal: input.isGlobal || false,
+      eligibleCustomerGroups: input.eligibleCustomerGroups ? JSON.stringify(input.eligibleCustomerGroups) : null,
+      excludedCustomerGroups: input.excludedCustomerGroups ? JSON.stringify(input.excludedCustomerGroups) : null,
+    };
+  }
+
+  // Insert rules if provided
+  private async insertPromotionRules(tx: Tx, promotionId: string, rules: CreatePromotionInput['rules'], now: Date): Promise<void> {
+    if (!rules || rules.length === 0) return;
+    for (const rule of rules) {
+      await tx.queryOne<DbPromotionRule>(
+        `INSERT INTO "${PROMOTION_RULE_TABLE}" (
+              "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [promotionId, rule.name || null, rule.condition, rule.operator, JSON.stringify(rule.value), rule.isActive !== false, now, now],
+      );
+    }
+  }
+
+  // Insert actions if provided
+  private async insertPromotionActions(tx: Tx, promotionId: string, actions: CreatePromotionInput['actions'], now: Date): Promise<void> {
+    if (!actions || actions.length === 0) return;
+    for (const action of actions) {
+      await tx.queryOne<DbPromotionAction>(
+        `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
+              "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
         [
-          input.name,
-          input.description || null,
-          input.status || 'active',
-          input.scope,
-          input.priority || 0,
-          input.startDate || now,
-          input.endDate || null,
-          input.isActive !== false,
-          input.isExclusive || false,
-          input.stackability || (input.isExclusive ? 'exclusive' : 'stackable'),
-          input.maxUsage || null,
-          0, // Initial usage count
-          input.maxUsagePerCustomer || null,
-          input.minOrderAmountCents || null,
-          input.maxDiscountAmountCents || null,
-          input.organizationId || null,
-          input.isGlobal || false,
-          input.eligibleCustomerGroups ? JSON.stringify(input.eligibleCustomerGroups) : null,
-          input.excludedCustomerGroups ? JSON.stringify(input.excludedCustomerGroups) : null,
+          promotionId,
+          action.type,
+          JSON.stringify(action.value),
+          action.targetType || null,
+          action.targetId ? JSON.stringify([action.targetId]) : null,
           now,
           now,
         ],
       );
-
-      if (!promotion) {
-        throw new FailedToCreatePromotionError();
-      }
-
-      // Insert rules if provided
-      if (input.rules && input.rules.length > 0) {
-        for (const rule of input.rules) {
-          await tx.queryOne<DbPromotionRule>(
-            `INSERT INTO "${PROMOTION_RULE_TABLE}" (
-              "promotionId", "name", "condition", "operator", "value", "isActive", "createdAt", "updatedAt"
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-            [
-              promotion.promotionId,
-              rule.name || null,
-              rule.condition,
-              rule.operator,
-              JSON.stringify(rule.value),
-              rule.isActive !== false,
-              now,
-              now,
-            ],
-          );
-        }
-      }
-
-      // Insert actions if provided
-      if (input.actions && input.actions.length > 0) {
-        for (const action of input.actions) {
-          await tx.queryOne<DbPromotionAction>(
-            `INSERT INTO "${PROMOTION_ACTION_TABLE}" (
-              "promotionId", "actionType", "value", "targetType", "targetIds", "createdAt", "updatedAt"
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-            [
-              promotion.promotionId,
-              action.type,
-              JSON.stringify(action.value),
-              action.targetType || null,
-              action.targetId ? JSON.stringify([action.targetId]) : null,
-              now,
-              now,
-            ],
-          );
-        }
-      }
-
-      return promotion;
-    });
+    }
   }
 
   /**

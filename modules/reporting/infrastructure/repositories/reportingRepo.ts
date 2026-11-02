@@ -239,30 +239,18 @@ export async function updateSchedule(id: string, params: UpdateReportSchedulePar
   const values: unknown[] = [];
   let idx = 1;
 
-  if (params.name !== undefined) {
-    fields.push(`"name" = $${idx++}`);
-    values.push(params.name);
-  }
-  if (params.frequency !== undefined) {
-    fields.push(`"type" = $${idx++}`);
-    values.push(params.frequency);
-  }
-  if (params.parameters !== undefined) {
-    fields.push(`"parameters" = $${idx++}`);
-    values.push(JSON.stringify(params.parameters));
-  }
-  if (params.recipients !== undefined) {
-    fields.push(`"recipients" = $${idx++}`);
-    values.push(JSON.stringify(params.recipients));
-  }
-  if (params.format !== undefined) {
-    fields.push(`"format" = $${idx++}`);
-    values.push(params.format);
-  }
-  if (params.isActive !== undefined) {
-    fields.push(`"isActive" = $${idx++}`);
-    values.push(params.isActive);
-  }
+  const addField = (column: string, value: unknown) => {
+    if (value === undefined) return;
+    fields.push(`"${column}" = $${idx++}`);
+    values.push(value);
+  };
+
+  addField('name', params.name);
+  addField('type', params.frequency);
+  addField('parameters', params.parameters !== undefined ? JSON.stringify(params.parameters) : undefined);
+  addField('recipients', params.recipients !== undefined ? JSON.stringify(params.recipients) : undefined);
+  addField('format', params.format);
+  addField('isActive', params.isActive);
 
   if (fields.length === 0) return findScheduleById(id);
 

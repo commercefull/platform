@@ -192,37 +192,52 @@ export async function upsertSalesDaily(
       "paymentSuccessCount" = "analyticsSalesDaily"."paymentSuccessCount" + EXCLUDED."paymentSuccessCount",
       "paymentFailedCount" = "analyticsSalesDaily"."paymentFailedCount" + EXCLUDED."paymentFailedCount",
       "updatedAt" = $28`,
-    [
-      data.organizationId,
-      data.date,
-      channel,
-      data.salesChannelId ?? null,
-      data.currencyCode || 'USD',
-      data.orderCount || 0,
-      data.itemsSold || 0,
-      data.grossRevenueCents || 0,
-      data.discountTotalCents || 0,
-      data.refundTotalCents || 0,
-      data.netRevenueCents || 0,
-      data.taxTotalCents || 0,
-      data.shippingRevenueCents || 0,
-      data.averageOrderValueCents || 0,
-      data.newCustomers || 0,
-      data.returningCustomers || 0,
-      data.guestOrders || 0,
-      data.cartCreated || 0,
-      data.cartAbandoned || 0,
-      data.checkoutStarted || 0,
-      data.checkoutCompleted || 0,
-      data.conversionRate || 0,
-      data.paymentSuccessCount || 0,
-      data.paymentFailedCount || 0,
-      data.paymentSuccessRate || 0,
-      now,
-      now,
-      now,
-    ],
+    [...salesDailyMetrics(data, channel), now, now, now],
   );
+}
+
+function salesDailyMetrics(data: Partial<SalesDaily> & { date: Date }, channel: string): unknown[] {
+  return [
+    data.organizationId,
+    data.date,
+    channel,
+    data.salesChannelId ?? null,
+    data.currencyCode || 'USD',
+    ...salesRevenueMetrics(data),
+    ...salesOrderMetrics(data),
+    ...salesPaymentMetrics(data),
+  ];
+}
+
+function salesRevenueMetrics(data: Partial<SalesDaily>): unknown[] {
+  return [
+    data.orderCount || 0,
+    data.itemsSold || 0,
+    data.grossRevenueCents || 0,
+    data.discountTotalCents || 0,
+    data.refundTotalCents || 0,
+    data.netRevenueCents || 0,
+    data.taxTotalCents || 0,
+    data.shippingRevenueCents || 0,
+    data.averageOrderValueCents || 0,
+  ];
+}
+
+function salesOrderMetrics(data: Partial<SalesDaily>): unknown[] {
+  return [
+    data.newCustomers || 0,
+    data.returningCustomers || 0,
+    data.guestOrders || 0,
+    data.cartCreated || 0,
+    data.cartAbandoned || 0,
+    data.checkoutStarted || 0,
+    data.checkoutCompleted || 0,
+    data.conversionRate || 0,
+  ];
+}
+
+function salesPaymentMetrics(data: Partial<SalesDaily>): unknown[] {
+  return [data.paymentSuccessCount || 0, data.paymentFailedCount || 0, data.paymentSuccessRate || 0];
 }
 
 // ============================================================================
@@ -339,28 +354,43 @@ export async function upsertProductPerformance(
       data.date,
       channel,
       data.salesChannelId ?? null,
-      data.views || 0,
-      data.uniqueViews || 0,
-      data.detailViews || 0,
-      data.addToCarts || 0,
-      data.removeFromCarts || 0,
-      data.viewToCartRate || 0,
-      data.purchases || 0,
-      data.quantitySold || 0,
-      data.revenueCents || 0,
-      data.averagePriceCents || 0,
-      data.cartToOrderRate || 0,
-      data.returns || 0,
-      data.returnQuantity || 0,
-      data.returnRate || 0,
-      data.reviews || 0,
-      data.averageRating,
-      data.stockAlerts || 0,
-      data.outOfStockViews || 0,
+      ...productViewMetrics(data),
+      ...productOrderMetrics(data),
+      ...productStockMetrics(data),
       now,
       now,
     ],
   );
+}
+
+function productViewMetrics(data: Partial<ProductPerformance>): unknown[] {
+  return [
+    data.views || 0,
+    data.uniqueViews || 0,
+    data.detailViews || 0,
+    data.addToCarts || 0,
+    data.removeFromCarts || 0,
+    data.viewToCartRate || 0,
+  ];
+}
+
+function productOrderMetrics(data: Partial<ProductPerformance>): unknown[] {
+  return [
+    data.purchases || 0,
+    data.quantitySold || 0,
+    data.revenueCents || 0,
+    data.averagePriceCents || 0,
+    data.cartToOrderRate || 0,
+    data.returns || 0,
+    data.returnQuantity || 0,
+    data.returnRate || 0,
+    data.reviews || 0,
+    data.averageRating,
+  ];
+}
+
+function productStockMetrics(data: Partial<ProductPerformance>): unknown[] {
+  return [data.stockAlerts || 0, data.outOfStockViews || 0];
 }
 
 // ============================================================================
@@ -496,12 +526,26 @@ function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPe
     date: new Date(row.date),
     channel: row.channel ?? 'all',
     salesChannelId: row.salesChannelId ?? undefined,
+    ...mapProductViewMetrics(row),
+    ...mapProductOrderMetrics(row),
+    ...mapProductStockMetrics(row),
+    createdAt: new Date(row.createdAt ?? new Date()),
+  };
+}
+
+function mapProductViewMetrics(row: AnalyticsProductPerformanceRow) {
+  return {
     views: row.views ?? 0,
     uniqueViews: row.uniqueViews ?? 0,
     detailViews: row.detailViews ?? 0,
     addToCarts: row.addToCarts ?? 0,
     removeFromCarts: row.removeFromCarts ?? 0,
     viewToCartRate: parseFloat(row.viewToCartRate ?? '0'),
+  };
+}
+
+function mapProductOrderMetrics(row: AnalyticsProductPerformanceRow) {
+  return {
     purchases: row.purchases ?? 0,
     quantitySold: row.quantitySold ?? 0,
     revenueCents: Number(row.revenueCents ?? 0),
@@ -512,10 +556,14 @@ function mapToProductPerformance(row: AnalyticsProductPerformanceRow): ProductPe
     returnRate: parseFloat(row.returnRate ?? '0'),
     reviews: row.reviews ?? 0,
     averageRating: row.averageRating ? parseFloat(row.averageRating) : undefined,
+  };
+}
+
+function mapProductStockMetrics(row: AnalyticsProductPerformanceRow) {
+  return {
     stockAlerts: row.stockAlerts ?? 0,
     outOfStockViews: row.outOfStockViews ?? 0,
     computedAt: row.computedAt ? new Date(row.computedAt) : undefined,
-    createdAt: new Date(row.createdAt ?? new Date()),
   };
 }
 

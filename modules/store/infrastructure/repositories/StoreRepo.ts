@@ -38,8 +38,18 @@ class StoreRepo implements IStoreRepository {
     const existing = await queryOne<Record<string, unknown>>('SELECT "storeId" FROM store WHERE "storeId" = $1', [store.storeId]);
 
     if (existing) {
-      await query(
-        `UPDATE store SET
+      await this.updateStoreRow(store, now);
+    } else {
+      await this.insertStoreRow(store, now);
+    }
+
+    return store;
+  }
+
+  private async updateStoreRow(store: Store, now: string): Promise<void> {
+    const v = this.storeRowValues(store);
+    await query(
+      `UPDATE store SET
           name = $1, slug = $2, description = $3, "storeType" = $4, channel = $5,
           "organizationId" = $6, "storeUrl" = $7, "storeEmail" = $8,
           "storePhone" = $9, logo = $10, banner = $11, "favicon" = $12,
@@ -52,51 +62,54 @@ class StoreRepo implements IStoreRepository {
           "metaKeywords" = $32, "socialLinks" = $33, "openingHours" = $34,
           "customPages" = $35, "customFields" = $36, metadata = $37, "updatedAt" = $38
         WHERE "storeId" = $39`,
-        [
-          store.name,
-          store.slug,
-          store.description,
-          store.storeType,
-          store.channel,
-          store.organizationId,
-          store.storeUrl,
-          store.storeEmail,
-          store.storePhone,
-          store.logo,
-          store.banner,
-          store.favicon,
-          store.primaryColor,
-          store.secondaryColor,
-          store.theme,
-          JSON.stringify(store.colorScheme || {}),
-          JSON.stringify(store.address),
-          store.isActive,
-          store.isVerified,
-          store.isFeatured,
-          store.storeRating,
-          store.reviewCount,
-          store.followerCount,
-          store.productCount,
-          store.orderCount,
-          JSON.stringify(store.storePolicies || {}),
-          store.shippingMethods || [],
-          store.paymentMethods || [],
-          JSON.stringify(store.settings || {}),
-          store.metaTitle,
-          store.metaDescription,
-          store.metaKeywords || [],
-          JSON.stringify(store.socialLinks || {}),
-          JSON.stringify(store.openingHours || {}),
-          JSON.stringify(store.customPages || {}),
-          JSON.stringify(store.customFields || {}),
-          JSON.stringify(store.metadata || {}),
-          now,
-          store.storeId,
-        ],
-      );
-    } else {
-      await query(
-        `INSERT INTO store (
+      [
+        v.name,
+        v.slug,
+        v.description,
+        v.storeType,
+        v.channel,
+        v.organizationId,
+        v.storeUrl,
+        v.storeEmail,
+        v.storePhone,
+        v.logo,
+        v.banner,
+        v.favicon,
+        v.primaryColor,
+        v.secondaryColor,
+        v.theme,
+        v.colorScheme,
+        v.address,
+        v.isActive,
+        v.isVerified,
+        v.isFeatured,
+        v.storeRating,
+        v.reviewCount,
+        v.followerCount,
+        v.productCount,
+        v.orderCount,
+        v.storePolicies,
+        v.shippingMethods,
+        v.paymentMethods,
+        v.settings,
+        v.metaTitle,
+        v.metaDescription,
+        v.metaKeywords,
+        v.socialLinks,
+        v.openingHours,
+        v.customPages,
+        v.customFields,
+        v.metadata,
+        now,
+        store.storeId,
+      ],
+    );
+  }
+
+  private async insertStoreRow(store: Store, now: string): Promise<void> {
+    const v = this.storeRowValues(store);
+    await query(
+      `INSERT INTO store (
           "storeId", name, slug, description, "storeType", channel,
           "organizationId", "storeUrl", "storeEmail", "storePhone",
           logo, banner, "favicon", "primaryColor", "secondaryColor", theme, "colorScheme",
@@ -110,52 +123,105 @@ class StoreRepo implements IStoreRepository {
           $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33,
           $34, $35, $36, $37, $38, $39, $40
         )`,
-        [
-          store.storeId,
-          store.name,
-          store.slug,
-          store.description,
-          store.storeType,
-          store.channel,
-          store.organizationId,
-          store.storeUrl,
-          store.storeEmail,
-          store.storePhone,
-          store.logo,
-          store.banner,
-          store.favicon,
-          store.primaryColor,
-          store.secondaryColor,
-          store.theme,
-          JSON.stringify(store.colorScheme || {}),
-          JSON.stringify(store.address),
-          store.isActive,
-          store.isVerified,
-          store.isFeatured,
-          store.storeRating,
-          store.reviewCount,
-          store.followerCount,
-          store.productCount,
-          store.orderCount,
-          JSON.stringify(store.storePolicies || {}),
-          store.shippingMethods || [],
-          store.paymentMethods || [],
-          JSON.stringify(store.settings || {}),
-          store.metaTitle,
-          store.metaDescription,
-          store.metaKeywords || [],
-          JSON.stringify(store.socialLinks || {}),
-          JSON.stringify(store.openingHours || {}),
-          JSON.stringify(store.customPages || {}),
-          JSON.stringify(store.customFields || {}),
-          JSON.stringify(store.metadata || {}),
-          now,
-          now,
-        ],
-      );
-    }
+      [
+        store.storeId,
+        v.name,
+        v.slug,
+        v.description,
+        v.storeType,
+        v.channel,
+        v.organizationId,
+        v.storeUrl,
+        v.storeEmail,
+        v.storePhone,
+        v.logo,
+        v.banner,
+        v.favicon,
+        v.primaryColor,
+        v.secondaryColor,
+        v.theme,
+        v.colorScheme,
+        v.address,
+        v.isActive,
+        v.isVerified,
+        v.isFeatured,
+        v.storeRating,
+        v.reviewCount,
+        v.followerCount,
+        v.productCount,
+        v.orderCount,
+        v.storePolicies,
+        v.shippingMethods,
+        v.paymentMethods,
+        v.settings,
+        v.metaTitle,
+        v.metaDescription,
+        v.metaKeywords,
+        v.socialLinks,
+        v.openingHours,
+        v.customPages,
+        v.customFields,
+        v.metadata,
+        now,
+        now,
+      ],
+    );
+  }
 
-    return store;
+  private storeRowValues(store: Store) {
+    return { ...this.storeCoreValues(store), ...this.storePolicyValues(store), ...this.storeMetaValues(store) };
+  }
+
+  private storeCoreValues(store: Store) {
+    return {
+      name: store.name,
+      slug: store.slug,
+      description: store.description,
+      storeType: store.storeType,
+      channel: store.channel,
+      organizationId: store.organizationId,
+      storeUrl: store.storeUrl,
+      storeEmail: store.storeEmail,
+      storePhone: store.storePhone,
+      logo: store.logo,
+      banner: store.banner,
+      favicon: store.favicon,
+      primaryColor: store.primaryColor,
+      secondaryColor: store.secondaryColor,
+      theme: store.theme,
+      colorScheme: JSON.stringify(store.colorScheme || {}),
+      address: JSON.stringify(store.address),
+      isActive: store.isActive,
+      isVerified: store.isVerified,
+      isFeatured: store.isFeatured,
+      storeRating: store.storeRating,
+      reviewCount: store.reviewCount,
+      followerCount: store.followerCount,
+      productCount: store.productCount,
+      orderCount: store.orderCount,
+    };
+  }
+
+  private storePolicyValues(store: Store) {
+    return {
+      storePolicies: JSON.stringify(store.storePolicies || {}),
+      shippingMethods: store.shippingMethods || [],
+      paymentMethods: store.paymentMethods || [],
+      settings: JSON.stringify(store.settings || {}),
+    };
+  }
+
+  private storeMetaValues(store: Store) {
+    return {
+      metaTitle: store.metaTitle,
+      metaDescription: store.metaDescription,
+      metaKeywords: store.metaKeywords || [],
+      socialLinks: JSON.stringify(store.socialLinks || {}),
+      openingHours: JSON.stringify(store.openingHours || {}),
+      customPages: JSON.stringify(store.customPages || {}),
+      customFields: JSON.stringify(store.customFields || {}),
+      metadata: JSON.stringify(store.metadata || {}),
+    };
   }
 
   async delete(storeId: string): Promise<void> {
@@ -307,34 +373,24 @@ class StoreRepo implements IStoreRepository {
     const params: unknown[] = [];
     let paramIndex = 1;
 
-    if (filters?.storeType) {
-      conditions.push(`"storeType" = $${paramIndex++}`);
-      params.push(filters.storeType);
-    }
-    if (filters?.organizationId) {
-      conditions.push(`"organizationId" = $${paramIndex++}`);
-      params.push(filters.organizationId);
-    }
-    if (filters?.isHeadquarters !== undefined) {
-      conditions.push(`"isHeadquarters" = $${paramIndex++}`);
-      params.push(filters.isHeadquarters);
-    }
-    if (filters?.parentStoreId) {
-      conditions.push(`"parentStoreId" = $${paramIndex++}`);
-      params.push(filters.parentStoreId);
-    }
-    if (filters?.isActive !== undefined) {
-      conditions.push(`"isActive" = $${paramIndex++}`);
-      params.push(filters.isActive);
-    }
-    if (filters?.isVerified !== undefined) {
-      conditions.push(`"isVerified" = $${paramIndex++}`);
-      params.push(filters.isVerified);
-    }
-    if (filters?.isFeatured !== undefined) {
-      conditions.push(`"isFeatured" = $${paramIndex}`);
-      params.push(filters.isFeatured);
-    }
+    const addIfTruthy = (column: string, value: unknown) => {
+      if (!value) return;
+      conditions.push(`"${column}" = $${paramIndex++}`);
+      params.push(value);
+    };
+    const addIfDefined = (column: string, value: unknown) => {
+      if (value === undefined) return;
+      conditions.push(`"${column}" = $${paramIndex++}`);
+      params.push(value);
+    };
+
+    addIfTruthy('storeType', filters?.storeType);
+    addIfTruthy('organizationId', filters?.organizationId);
+    addIfDefined('isHeadquarters', filters?.isHeadquarters);
+    addIfTruthy('parentStoreId', filters?.parentStoreId);
+    addIfDefined('isActive', filters?.isActive);
+    addIfDefined('isVerified', filters?.isVerified);
+    addIfDefined('isFeatured', filters?.isFeatured);
 
     return {
       whereClause: conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '',
@@ -344,6 +400,7 @@ class StoreRepo implements IStoreRepository {
 
   private mapToStore(row: Record<string, unknown>): Store {
     const str = (v: unknown): string | undefined => (typeof v === 'string' ? v : v != null ? String(v) : undefined);
+    const json = <T>(v: unknown): T | undefined => (typeof v === 'string' ? JSON.parse(v) : (v as T | undefined));
     return Store.reconstitute({
       storeId: str(row.storeId) as string,
       name: str(row.name) as string,
@@ -363,9 +420,8 @@ class StoreRepo implements IStoreRepository {
       primaryColor: str(row.primaryColor),
       secondaryColor: str(row.secondaryColor),
       theme: str(row.theme),
-      colorScheme:
-        typeof row.colorScheme === 'string' ? JSON.parse(row.colorScheme) : (row.colorScheme as Record<string, string> | undefined),
-      address: typeof row.address === 'string' ? JSON.parse(row.address) : (row.address as StoreProps['address']),
+      colorScheme: json<Record<string, string>>(row.colorScheme),
+      address: json<StoreProps['address']>(row.address),
       isActive: Boolean(row.isActive),
       isVerified: Boolean(row.isVerified),
       isFeatured: Boolean(row.isFeatured),
@@ -374,25 +430,18 @@ class StoreRepo implements IStoreRepository {
       followerCount: row.followerCount ? parseInt(row.followerCount as string) : undefined,
       productCount: row.productCount ? parseInt(row.productCount as string) : undefined,
       orderCount: row.orderCount ? parseInt(row.orderCount as string) : undefined,
-      storePolicies:
-        typeof row.storePolicies === 'string' ? JSON.parse(row.storePolicies) : (row.storePolicies as StoreProps['storePolicies']),
-      shippingMethods:
-        typeof row.shippingMethods === 'string' ? JSON.parse(row.shippingMethods) : (row.shippingMethods as string[] | undefined),
-      paymentMethods:
-        typeof row.paymentMethods === 'string' ? JSON.parse(row.paymentMethods) : (row.paymentMethods as string[] | undefined),
-      settings: typeof row.settings === 'string' ? JSON.parse(row.settings) : (row.settings as StoreProps['settings']),
+      storePolicies: json<StoreProps['storePolicies']>(row.storePolicies),
+      shippingMethods: json<string[]>(row.shippingMethods),
+      paymentMethods: json<string[]>(row.paymentMethods),
+      settings: json<StoreProps['settings']>(row.settings),
       metaTitle: str(row.metaTitle),
       metaDescription: str(row.metaDescription),
-      metaKeywords: typeof row.metaKeywords === 'string' ? JSON.parse(row.metaKeywords) : (row.metaKeywords as string[] | undefined),
-      socialLinks:
-        typeof row.socialLinks === 'string' ? JSON.parse(row.socialLinks) : (row.socialLinks as Record<string, string> | undefined),
-      openingHours:
-        typeof row.openingHours === 'string' ? JSON.parse(row.openingHours) : (row.openingHours as Record<string, unknown> | undefined),
-      customPages:
-        typeof row.customPages === 'string' ? JSON.parse(row.customPages) : (row.customPages as Record<string, unknown> | undefined),
-      customFields:
-        typeof row.customFields === 'string' ? JSON.parse(row.customFields) : (row.customFields as Record<string, unknown> | undefined),
-      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata as Record<string, unknown> | undefined),
+      metaKeywords: json<string[]>(row.metaKeywords),
+      socialLinks: json<Record<string, string>>(row.socialLinks),
+      openingHours: json<Record<string, unknown>>(row.openingHours),
+      customPages: json<Record<string, unknown>>(row.customPages),
+      customFields: json<Record<string, unknown>>(row.customFields),
+      metadata: json<Record<string, unknown>>(row.metadata),
       createdAt: new Date(row.createdAt as string),
       updatedAt: new Date(row.updatedAt as string),
     });

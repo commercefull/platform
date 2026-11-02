@@ -54,6 +54,24 @@ export interface SamlProviderProps {
   updatedAt: Date;
 }
 
+interface SamlCreateParams {
+  providerId: string;
+  organizationId: string;
+  name: string;
+  entityId: string;
+  ssoUrl: string;
+  certificate: string;
+  spEntityId: string;
+  acsUrl: string;
+  binding?: SamlBinding;
+  nameIdFormat?: SamlNameIdFormat;
+  signAuthnRequest?: boolean;
+  sloUrl?: string;
+  spPrivateKey?: string;
+  spCertificate?: string;
+  attributeMapping?: Partial<SamlAttributeMapping>;
+}
+
 export class SamlProvider {
   private props: SamlProviderProps;
 
@@ -61,30 +79,8 @@ export class SamlProvider {
     this.props = props;
   }
 
-  static create(params: {
-    providerId: string;
-    organizationId: string;
-    name: string;
-    entityId: string;
-    ssoUrl: string;
-    certificate: string;
-    spEntityId: string;
-    acsUrl: string;
-    binding?: SamlBinding;
-    nameIdFormat?: SamlNameIdFormat;
-    signAuthnRequest?: boolean;
-    sloUrl?: string;
-    spPrivateKey?: string;
-    spCertificate?: string;
-    attributeMapping?: Partial<SamlAttributeMapping>;
-  }): SamlProvider {
-    if (!params.organizationId?.trim()) throw new SsoValidationError('Organization ID is required');
-    if (!params.name?.trim()) throw new SsoValidationError('Provider name is required');
-    if (!params.entityId?.trim()) throw new SsoValidationError('IdP entity ID is required');
-    if (!params.ssoUrl?.trim()) throw new SsoValidationError('IdP SSO URL is required');
-    if (!params.certificate?.trim()) throw new SsoValidationError('IdP certificate is required');
-    if (!params.spEntityId?.trim()) throw new SsoValidationError('SP entity ID is required');
-    if (!params.acsUrl?.trim()) throw new SsoValidationError('ACS URL is required');
+  static create(params: SamlCreateParams): SamlProvider {
+    this.assertRequiredFields(params);
 
     const now = new Date();
     return new SamlProvider({
@@ -102,17 +98,31 @@ export class SamlProvider {
       signAuthnRequest: params.signAuthnRequest ?? false,
       spPrivateKey: params.spPrivateKey,
       spCertificate: params.spCertificate,
-      attributeMapping: {
-        email: params.attributeMapping?.email || 'email',
-        firstName: params.attributeMapping?.firstName || 'givenName',
-        lastName: params.attributeMapping?.lastName || 'surname',
-        displayName: params.attributeMapping?.displayName || 'displayName',
-        extra: params.attributeMapping?.extra,
-      },
+      attributeMapping: this.resolveAttributeMapping(params.attributeMapping),
       isActive: true,
       createdAt: now,
       updatedAt: now,
     });
+  }
+
+  private static assertRequiredFields(params: SamlCreateParams): void {
+    if (!params.organizationId?.trim()) throw new SsoValidationError('Organization ID is required');
+    if (!params.name?.trim()) throw new SsoValidationError('Provider name is required');
+    if (!params.entityId?.trim()) throw new SsoValidationError('IdP entity ID is required');
+    if (!params.ssoUrl?.trim()) throw new SsoValidationError('IdP SSO URL is required');
+    if (!params.certificate?.trim()) throw new SsoValidationError('IdP certificate is required');
+    if (!params.spEntityId?.trim()) throw new SsoValidationError('SP entity ID is required');
+    if (!params.acsUrl?.trim()) throw new SsoValidationError('ACS URL is required');
+  }
+
+  private static resolveAttributeMapping(attributeMapping: Partial<SamlAttributeMapping> | undefined): SamlAttributeMapping {
+    return {
+      email: attributeMapping?.email || 'email',
+      firstName: attributeMapping?.firstName || 'givenName',
+      lastName: attributeMapping?.lastName || 'surname',
+      displayName: attributeMapping?.displayName || 'displayName',
+      extra: attributeMapping?.extra,
+    };
   }
 
   static reconstitute(props: SamlProviderProps): SamlProvider {

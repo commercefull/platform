@@ -87,10 +87,31 @@ export interface MediaResponse {
   createdAt: string;
 }
 
+type MediaCreateInput = Parameters<IContentMediaRepository['createMedia']>[0];
+type MediaRecord = Awaited<ReturnType<IContentMediaRepository['createMedia']>>;
+
 export class UploadMediaUseCase {
   constructor(private readonly mediaRepo: IContentMediaRepository) {}
 
   async execute(command: UploadMediaCommand): Promise<MediaResponse> {
+    this.assertUploadable(command);
+    await this.assertFolderExists(command.folderId);
+
+    const media = await this.mediaRepo.createMedia(this.mediaCreateInput(command));
+
+    eventBus.emit('content.media.uploaded', {
+      mediaId: media.contentMediaId,
+      title: media.title,
+      fileName: media.fileName,
+      fileType: media.fileType,
+      fileSize: media.fileSize,
+      uploadedBy: command.uploadedBy,
+    });
+
+    return this.toMediaResponse(media);
+  }
+
+  private assertUploadable(command: UploadMediaCommand): void {
     if (!command.title || !command.fileName || !command.url) {
       throw new ContentValidationError('Title, fileName, and URL are required');
     }
@@ -101,16 +122,19 @@ export class UploadMediaUseCase {
     if (!allowedTypes.includes(typeCategory) && !command.fileType.startsWith('application/')) {
       throw new ContentValidationError(`File type ${command.fileType} is not allowed`);
     }
+  }
 
-    // Verify folder exists if provided
-    if (command.folderId) {
-      const folder = await this.mediaRepo.findFolderById(command.folderId);
-      if (!folder) {
-        throw new MediaFolderNotFoundError(command.folderId);
-      }
+  // Verify folder exists if provided
+  private async assertFolderExists(folderId: string | undefined): Promise<void> {
+    if (!folderId) return;
+    const folder = await this.mediaRepo.findFolderById(folderId);
+    if (!folder) {
+      throw new MediaFolderNotFoundError(folderId);
     }
+  }
 
-    const media = await this.mediaRepo.createMedia({
+  private mediaCreateInput(command: UploadMediaCommand): MediaCreateInput {
+    return {
       title: command.title,
       fileName: command.fileName,
       filePath: command.filePath,
@@ -132,17 +156,10 @@ export class UploadMediaUseCase {
       externalId: command.externalId ?? null,
       createdBy: command.uploadedBy ?? null,
       updatedBy: null,
-    });
+    };
+  }
 
-    eventBus.emit('content.media.uploaded', {
-      mediaId: media.contentMediaId,
-      title: media.title,
-      fileName: media.fileName,
-      fileType: media.fileType,
-      fileSize: media.fileSize,
-      uploadedBy: command.uploadedBy,
-    });
-
+  private toMediaResponse(media: MediaRecord): MediaResponse {
     return {
       id: media.contentMediaId,
       title: media.title,
