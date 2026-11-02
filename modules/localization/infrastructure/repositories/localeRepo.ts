@@ -4,7 +4,6 @@ import { unixTimestamp } from '../../../../libs/date';
 import { LocaleCodeAlreadyExistsError, FailedToCreateLocaleError } from '../../domain/errors/LocalizationErrors';
 import type { Locale as DbLocale } from '../../../../libs/db/types';
 
-
 // Use Locale type directly from libs/db/types.ts
 export type {};
 

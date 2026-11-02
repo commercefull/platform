@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 export function createTestTicket(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();
   return {

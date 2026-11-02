@@ -4,7 +4,3 @@
  */
 
 export type BundleType = 'fixed' | 'customizable' | 'mix_and_match';
-
-
-
-

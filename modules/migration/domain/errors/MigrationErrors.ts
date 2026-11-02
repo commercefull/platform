@@ -5,4 +5,3 @@ export class ImportJobNotFoundError extends AppError {
     super(`Import job not found: ${importJobId}`, 404, { code: 'migration.job_not_found', severity: 'warn', details: { importJobId } });
   }
 }
-

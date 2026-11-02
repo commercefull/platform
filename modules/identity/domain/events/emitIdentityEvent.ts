@@ -18,9 +18,6 @@ export function emitCustomerLogin(payload: Omit<CustomerLoginEvent, 'timestamp'>
   });
 }
 
-
-
-
 export function emitCustomerTokenRefreshed(payload: Omit<TokenRefreshedEvent, 'timestamp' | 'userType'>): void {
   eventBus.emit('identity.customer.token_refreshed', {
     ...payload,
@@ -40,15 +37,12 @@ export function emitOrganizationLogin(payload: Omit<OrganizationLoginEvent, 'tim
   });
 }
 
-
 export function emitOrganizationRegistered(payload: Omit<OrganizationRegisteredEvent, 'timestamp'>): void {
   eventBus.emit('identity.organization.registered', {
     ...payload,
     timestamp: new Date(),
   });
 }
-
-
 
 export function emitOrganizationTokenRefreshed(payload: Omit<TokenRefreshedEvent, 'timestamp' | 'userType'>): void {
   eventBus.emit('identity.organization.token_refreshed', {
@@ -62,11 +56,6 @@ export function emitOrganizationTokenRefreshed(payload: Omit<TokenRefreshedEvent
 // Session Events
 // ============================================================================
 
-
-
 // ============================================================================
 // Token Events
 // ============================================================================
-
-
-

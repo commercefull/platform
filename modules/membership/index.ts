@@ -13,4 +13,3 @@ export { membershipBusinessRouter } from './interface/routers/membershipBusiness
 export { membershipTypeDefs } from './interface/graphql/typeDefs';
 export { membershipResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

@@ -7,7 +7,6 @@
 import notificationConfigRepository from '../../infrastructure/repositories/NotificationConfigRepository';
 import notificationDataRepository from '../../infrastructure/repositories/NotificationDataRepository';
 
-
 import { GetNotificationDeliveryLogsUseCase } from './GetNotificationDeliveryLogs';
 import { GetTemplateTranslationsUseCase } from './GetTemplateTranslations';
 

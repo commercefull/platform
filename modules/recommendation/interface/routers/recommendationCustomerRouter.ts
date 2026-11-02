@@ -5,11 +5,7 @@
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
 import { optionalCustomerAuth } from '../../../../libs/auth';
-import {
-  getPopular,
-  getProductRecommendations,
-  postProductRecommendations,
-} from '../controllers/RecommendationCustomerController';
+import { getPopular, getProductRecommendations, postProductRecommendations } from '../controllers/RecommendationCustomerController';
 const router = createHttpRouter();
 
 router.use(optionalCustomerAuth);

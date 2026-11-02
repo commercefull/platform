@@ -12,4 +12,3 @@ export { supplierMerchantRouter } from './interface/routers/supplierBusinessRout
 export { supplierTypeDefs } from './interface/graphql/typeDefs';
 export { supplierResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

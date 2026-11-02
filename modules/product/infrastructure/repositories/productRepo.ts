@@ -51,7 +51,6 @@ function rowToProduct(row: DbProduct): Product {
   };
 }
 
-
 // Product status and visibility enums to match database schema
 export enum ProductStatus {
   DRAFT = 'draft',
@@ -701,7 +700,9 @@ class ProductRepo {
           AND "deletedAt" IS NULL
         LIMIT $${product.relatedProducts.length + 3}
       `;
-      return ((await query<DbProduct[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
+      return (
+        (await query<DbProduct[]>(sql, [...product.relatedProducts, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
+      ).map(rowToProduct);
     }
 
     // Otherwise, find products in the same category
@@ -716,7 +717,9 @@ class ProductRepo {
         ORDER BY "isFeatured" DESC, RANDOM()
         LIMIT $5
       `;
-      return ((await query<DbProduct[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []).map(rowToProduct);
+      return (
+        (await query<DbProduct[]>(sql, [product.categoryId, productId, ProductStatus.ACTIVE, ProductVisibility.VISIBLE, limit])) || []
+      ).map(rowToProduct);
     }
 
     return [];

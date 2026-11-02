@@ -70,21 +70,13 @@ router.delete('/assortment/collections/:collectionId', isOrganizationLoggedIn, a
  * List collection visibility publications (store/channel scoping)
  * GET /business/assortment/collections/:collectionId/publications
  */
-router.get(
-  '/assortment/collections/:collectionId/publications',
-  isOrganizationLoggedIn,
-  asyncHandler(listCollectionPublications),
-);
+router.get('/assortment/collections/:collectionId/publications', isOrganizationLoggedIn, asyncHandler(listCollectionPublications));
 
 /**
  * Create or update a collection publication for a store/channel scope
  * POST /business/assortment/collections/:collectionId/publications
  */
-router.post(
-  '/assortment/collections/:collectionId/publications',
-  isOrganizationLoggedIn,
-  asyncHandler(setCollectionPublication),
-);
+router.post('/assortment/collections/:collectionId/publications', isOrganizationLoggedIn, asyncHandler(setCollectionPublication));
 
 /**
  * Remove a collection publication

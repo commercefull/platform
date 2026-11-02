@@ -8,7 +8,6 @@ import { Table, ShippingZone } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import type { ShippingZone as DbShippingZone } from '../../../../libs/db/types';
 
-
 export { ShippingZone };
 
 export type CreateShippingZoneInput = Omit<ShippingZone, 'shippingZoneId' | 'createdAt' | 'updatedAt'>;

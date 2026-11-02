@@ -122,7 +122,6 @@ export function createOrderReturn(overrides: Partial<OrderReturn> = {}): OrderRe
   } as OrderReturn;
 }
 
-
 export function createOrderNote(overrides: Partial<OrderNote> = {}): OrderNote {
   return {
     orderNoteId: 'note-1',

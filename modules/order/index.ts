@@ -20,4 +20,3 @@ export { orderBusinessRouter } from './interface/routers/businessRouter';
 export { orderTypeDefs } from './interface/graphql/typeDefs';
 export { orderResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

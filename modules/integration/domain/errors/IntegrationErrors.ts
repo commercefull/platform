@@ -7,7 +7,6 @@ export class IntegrationNotFoundError extends AppError {
   }
 }
 
-
 export class IntegrationValidationError extends AppError {
   constructor(message: string) {
     super(message, 400, { code: 'INTEGRATION_VALIDATION' });
@@ -28,7 +27,6 @@ export class SubscriptionNotFoundError extends AppError {
     this.name = 'SubscriptionNotFoundError';
   }
 }
-
 
 export class CredentialEncryptionError extends AppError {
   constructor(message: string) {

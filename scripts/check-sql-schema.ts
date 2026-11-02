@@ -200,7 +200,8 @@ function extractSql(src: string): { sql: string; index: number }[] {
 // (or Pick<Omit<DbX>, *Row projection contracts), never domain/hand-rolled types.
 
 const QUERY_HELPERS = '(?:query|queryOne|queryOneOrThrow|txQuery|txQueryOne)';
-const ROW_GENERIC_OK = /^(Db\w*|Pick<Db|Omit<Db|Partial<Db|\w*Row(?:\[\])?$|\w*Db(?:\[\])?$|Record|unknown|\{|Array<\s*(\{|Db|Record|unknown)|void\b|any\b|T\b|U\b)/;
+const ROW_GENERIC_OK =
+  /^(Db\w*|Pick<Db|Omit<Db|Partial<Db|\w*Row(?:\[\])?$|\w*Db(?:\[\])?$|Record|unknown|\{|Array<\s*(\{|Db|Record|unknown)|void\b|any\b|T\b|U\b)/;
 
 function resolveSqlVar(src: string, varName: string, before: number): string | null {
   // Find the last `let|const <name> = <expr>;` assignment before the call and
@@ -224,7 +225,10 @@ function resolveSqlVar(src: string, varName: string, before: number): string | n
 
 function extractFullRowFindings(src: string): { generic: string; index: number }[] {
   const findings: { generic: string; index: number }[] = [];
-  const callRe = new RegExp(`(?<![.\\w$])${QUERY_HELPERS}\\s*(?:<([^;()]*(?:<[^<>]*>)?[^;()]*)>)?\\s*\\(\\s*(\`([^\`]*)\`|([A-Za-z_$][\\w$]*))`, 'g');
+  const callRe = new RegExp(
+    `(?<![.\\w$])${QUERY_HELPERS}\\s*(?:<([^;()]*(?:<[^<>]*>)?[^;()]*)>)?\\s*\\(\\s*(\`([^\`]*)\`|([A-Za-z_$][\\w$]*))`,
+    'g',
+  );
   for (const m of src.matchAll(callRe)) {
     const generic = (m[1] ?? '').trim();
     let sql: string | undefined = m[3];
@@ -287,9 +291,13 @@ if (unique.length) {
   failed = true;
 }
 if (rowFindings.length) {
-  console.error(`\n✗ check-sql-schema: ${rowFindings.length} full-row queries (SELECT */RETURNING *) are not typed with generated Db* row types\n`);
+  console.error(
+    `\n✗ check-sql-schema: ${rowFindings.length} full-row queries (SELECT */RETURNING *) are not typed with generated Db* row types\n`,
+  );
   for (const f of rowFindings) console.error(`  ${f.file}:${f.line}  query<${f.generic}>`);
-  console.error('\nUse `Db{Table}` from libs/db/types for SELECT */RETURNING *; projections use `*Row` or `Pick<Db*, ...>` types. Map rows to domain types before returning.');
+  console.error(
+    '\nUse `Db{Table}` from libs/db/types for SELECT */RETURNING *; projections use `*Row` or `Pick<Db*, ...>` types. Map rows to domain types before returning.',
+  );
   failed = true;
 }
 if (failed) process.exit(1);

@@ -60,10 +60,10 @@ export class NotificationRepo {
   }
 
   async findByUserAndType(userId: string, type: string): Promise<Notification[]> {
-    const results = await query<DbNotification[]>('SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC', [
-      userId,
-      type,
-    ]);
+    const results = await query<DbNotification[]>(
+      'SELECT * FROM notification WHERE "userId" = $1 AND type = $2 ORDER BY "createdAt" DESC',
+      [userId, type],
+    );
     return results || [];
   }
 
@@ -153,11 +153,10 @@ export class NotificationRepo {
 
   async markAsSent(notificationId: string): Promise<Notification | null> {
     const now = new Date();
-    return await queryOne<DbNotification>('UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *', [
-      now,
-      now,
-      notificationId,
-    ]);
+    return await queryOne<DbNotification>(
+      'UPDATE notification SET "sentAt" = $1, "updatedAt" = $2 WHERE "notificationId" = $3 RETURNING *',
+      [now, now, notificationId],
+    );
   }
 
   async delete(notificationId: string): Promise<boolean> {

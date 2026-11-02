@@ -74,4 +74,3 @@ export class MarketNotReadyForLaunchError extends AppError {
     });
   }
 }
-

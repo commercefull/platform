@@ -51,7 +51,7 @@ async function create(
     `INSERT INTO "notificationBatch" (name, type, channel, status, "targetCount", "sentCount", "failedCount", "scheduledAt", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, 'draft', $4, 0, 0, $5, $6, $7) RETURNING *`,
     [params.name, mappedType, mappedChannel, params.targetCount, params.scheduledAt || null, now, now],
-  ).then((row) => (row ? rowToBatch(row) : null));
+  ).then(row => (row ? rowToBatch(row) : null));
 }
 
 async function findById(notificationBatchId: string): Promise<NotificationBatch | null> {
@@ -79,10 +79,10 @@ async function complete(notificationBatchId: string): Promise<void> {
 }
 
 async function findAll(limit: number = 50, offset: number = 0): Promise<NotificationBatch[]> {
-  const rows = await query<DbNotificationBatch[]>(
-    `SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
-    [limit, offset],
-  );
+  const rows = await query<DbNotificationBatch[]>(`SELECT * FROM "notificationBatch" ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`, [
+    limit,
+    offset,
+  ]);
   return (rows || []).map(rowToBatch);
 }
 

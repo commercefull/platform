@@ -3,7 +3,6 @@ import { Table, PromotionCart } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 import type { PromotionCart as DbPromotionCart } from '../../../../libs/db/types';
 
-
 // Use PromotionCart type directly from libs/db/types.ts
 export type { PromotionCart };
 

@@ -15,7 +15,6 @@ import type { PaginatedResult, PaginationOptions } from '../../../../libs/types/
 import { AuditLogWriteError } from '../../domain/errors/AuditErrors';
 import type { AuditLog as DbAuditLog } from '../../../../libs/db/types';
 
-
 function rowToEntity(row: DbAuditLog): AuditLog {
   return AuditLog.reconstitute({
     auditLogId: row.auditLogId,

@@ -79,4 +79,3 @@ export class ReturnRuleService {
     return Math.min(percentFee + result.restockingFeeFlatCents, refundAmountCents);
   }
 }
-

@@ -66,10 +66,9 @@ class WarehouseRepo {
    * Find warehouse by ID
    */
   async findById(warehouseId: string): Promise<Warehouse | null> {
-    const row = await queryOne<DbDistributionWarehouse>(
-      `SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1`,
-      [warehouseId],
-    );
+    const row = await queryOne<DbDistributionWarehouse>(`SELECT * FROM "distributionWarehouse" WHERE "distributionWarehouseId" = $1`, [
+      warehouseId,
+    ]);
     return row ? rowToWarehouse(row) : null;
   }
 
@@ -191,7 +190,7 @@ class WarehouseRepo {
        LIMIT $4`,
       [latitude, longitude, radiusDeg, limit],
     );
-    return (results || []).map((row) => ({ ...rowToWarehouse(row), distance: Number(row.distance) }));
+    return (results || []).map(row => ({ ...rowToWarehouse(row), distance: Number(row.distance) }));
   }
 
   /**

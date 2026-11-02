@@ -1,4 +1,3 @@
-
 // Seeded test IDs from seeds/20240805002001_seedIntegrationTestData.js
 export const SEEDED_CUSTOMER_ID = '00000000-0000-0000-0000-000000001001';
 
@@ -17,10 +16,3 @@ export const testCustomer = {
   isVerified: false,
   note: 'Test customer for integration tests',
 };
-
-
-
-
-
-
-

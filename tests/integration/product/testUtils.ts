@@ -19,24 +19,14 @@ export const SEEDED_ATTRIBUTE_COLOR_ID = '50000000-0000-0000-0000-000000000001';
 export const SEEDED_ATTRIBUTE_SIZE_ID = '50000000-0000-0000-0000-000000000002';
 export const SEEDED_ATTRIBUTE_MATERIAL_ID = '50000000-0000-0000-0000-000000000003';
 
-
-
-
-
-
-
-
-
 export const SEEDED_ATTRIBUTE_OPTION_ID = '60000000-0000-0000-0000-000000000020';
 
 export const SEEDED_ATTRIBUTE_GROUP_BASIC_ID = '70000000-0000-0000-0000-000000000001';
-
 
 // Extended test data — seeds/20240805001059_seedProductTestExtended.js
 export const SEEDED_REVIEW_1_ID = 'a0000000-0000-0000-0000-000000000001';
 
 export const SEEDED_BUNDLE_1_ID = 'c0000000-0000-0000-0000-000000000001';
-
 
 // Common test data for attribute group
 export const testAttributeGroup = {
@@ -64,7 +54,6 @@ export const testAttributeOption = {
   label: 'Test Option Label',
   sortOrder: 1,
 };
-
 
 const testProduct = {
   name: 'Test Product',
@@ -107,9 +96,3 @@ export async function createTestProduct(client: AxiosInstance, adminToken: strin
 
   return null;
 }
-
-
-
-
-
-

@@ -372,9 +372,10 @@ export class SupplierPurchaseOrderRepo {
    * Find item by ID
    */
   async findItemById(supplierPurchaseOrderItemId: string): Promise<SupplierPurchaseOrderItem | null> {
-    return await queryOne<DbSupplierPurchaseOrderItem>(`SELECT * FROM "supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`, [
-      supplierPurchaseOrderItemId,
-    ]);
+    return await queryOne<DbSupplierPurchaseOrderItem>(
+      `SELECT * FROM "supplierPurchaseOrderItem" WHERE "supplierPurchaseOrderItemId" = $1`,
+      [supplierPurchaseOrderItemId],
+    );
   }
 
   /**

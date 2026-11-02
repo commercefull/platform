@@ -25,4 +25,3 @@ export { categoryCustomerRouter } from './interface/routers/categoryCustomerRout
 export { productTypeDefs } from './interface/graphql/typeDefs';
 export { productResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

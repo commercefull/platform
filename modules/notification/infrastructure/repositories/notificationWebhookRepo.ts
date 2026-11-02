@@ -15,10 +15,9 @@ function rowToWebhook(row: DbNotificationWebhook): NotificationWebhook {
 }
 
 async function findActive(event: string): Promise<NotificationWebhook[]> {
-  const rows = await query<DbNotificationWebhook[]>(
-    `SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`,
-    [JSON.stringify([event])],
-  );
+  const rows = await query<DbNotificationWebhook[]>(`SELECT * FROM "notificationWebhook" WHERE "isActive" = true AND events @> $1::jsonb`, [
+    JSON.stringify([event]),
+  ]);
   return (rows || []).map(rowToWebhook);
 }
 
@@ -42,7 +41,7 @@ async function create(
     `INSERT INTO "notificationWebhook" (name, url, secret, events, "isActive", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
     [name, params.url, params.secret || null, JSON.stringify(params.events), params.isActive, now, now],
-  ).then((row) => (row ? rowToWebhook(row) : null));
+  ).then(row => (row ? rowToWebhook(row) : null));
 }
 
 async function deactivate(notificationWebhookId: string): Promise<void> {

@@ -11,9 +11,6 @@ import type { PromotionProductDiscount as DbPromotionProductDiscount } from '../
 import type { PromotionProductDiscountItem as DbPromotionProductDiscountItem } from '../../../../libs/db/types';
 import type { PromotionProductDiscountCustomerGroup as DbPromotionProductDiscountCustomerGroup } from '../../../../libs/db/types';
 
-
-
-
 // Table name constants
 const DISCOUNT_TABLE = Table.PromotionProductDiscount;
 const DISCOUNT_ITEM_TABLE = Table.PromotionProductDiscountItem;

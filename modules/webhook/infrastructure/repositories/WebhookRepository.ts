@@ -14,8 +14,6 @@ import { PaginationOptions } from 'libs/types/pagination';
 import type { WebhookEndpoint as DbWebhookEndpoint } from '../../../../libs/db/types';
 import type { WebhookDelivery as DbWebhookDelivery } from '../../../../libs/db/types';
 
-
-
 class WebhookRepository implements WebhookRepositoryInterface {
   // =========================================================================
   // Endpoint Operations
@@ -323,8 +321,7 @@ class WebhookRepository implements WebhookRepositoryInterface {
     return {
       ...row,
       events: typeof row.events === 'string' ? JSON.parse(row.events as string) : (row.events as string[]) || [],
-      headers:
-        typeof row.headers === 'string' ? JSON.parse(row.headers as string) : (row.headers as Record<string, string> | null),
+      headers: typeof row.headers === 'string' ? JSON.parse(row.headers as string) : (row.headers as Record<string, string> | null),
       retryPolicy:
         typeof row.retryPolicy === 'string'
           ? JSON.parse(row.retryPolicy as string)

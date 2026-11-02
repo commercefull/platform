@@ -5,11 +5,7 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  getCategory,
-  getCategoryChildren,
-  listCategories,
-} from '../controllers/CategoryCustomerController';
+import { getCategory, getCategoryChildren, listCategories } from '../controllers/CategoryCustomerController';
 const router = createHttpRouter();
 
 /**

@@ -1,4 +1,3 @@
-
 // Seeded test data IDs from seeds/20240805001600_seedShippingTestData.js
 export const SEEDED_CARRIER_IDS = {
   UPS: '01936000-0000-7000-8000-000000000001',
@@ -34,7 +33,6 @@ export const SEEDED_PACKAGING_IDS = {
   LARGE_BOX: '01936004-0000-7000-8000-000000000003',
   ENVELOPE: '01936004-0000-7000-8000-000000000004',
 };
-
 
 export function createTestCarrier(overrides: Partial<unknown> = {}) {
   const timestamp = Date.now();

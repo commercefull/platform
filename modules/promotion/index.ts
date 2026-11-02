@@ -15,4 +15,3 @@ export { promotionBusinessRouter } from './interface/routers/businessRouter';
 export { promotionTypeDefs } from './interface/graphql/typeDefs';
 export { promotionResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

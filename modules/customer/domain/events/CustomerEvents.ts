@@ -1,17 +1,3 @@
 /**
  * Customer Domain Events
  */
-
-
-
-
-
-
-
-
-
-
-
-
-
-

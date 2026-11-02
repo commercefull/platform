@@ -148,7 +148,7 @@ export async function softDeleteTaxRate(taxRateId: string): Promise<void> {
 
 export async function findAllTaxZones(): Promise<AdminTaxZone[]> {
   const rows = await query<DbTaxZone[]>(`SELECT * FROM "taxZone" ORDER BY "name"`);
-  return (rows || []).map((row) => ({
+  return (rows || []).map(row => ({
     taxZoneId: row.taxZoneId,
     name: row.name,
     description: row.description ?? undefined,

@@ -4,7 +4,6 @@ import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 import type { StoreCurrencySettings as DbStoreCurrencySettings } from '../../../../libs/db/types';
 
-
 export type RoundingMethod = 'up' | 'down' | 'ceiling' | 'floor' | 'half_up' | 'half_down' | 'half_even';
 export type PriceDisplayFormat = 'symbol' | 'code' | 'symbol_code' | 'name';
 

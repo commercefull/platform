@@ -2,7 +2,6 @@ import { queryOne, query } from '../../../../libs/db';
 import { Table, ProductAttributeValue } from '../../../../libs/db/types';
 import type { ProductAttributeValue as DbProductAttributeValue } from '../../../../libs/db/types';
 
-
 // Use ProductAttributeValue type directly from libs/db/types.ts
 export type { ProductAttributeValue };
 

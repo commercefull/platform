@@ -3,7 +3,6 @@ import { Table, PromotionCategory } from '../../../../libs/db/types';
 import { FailedToCreatePromotionError, PromotionNotFoundError } from '../../domain/errors/PromotionErrors';
 import type { PromotionCategory as DbPromotionCategory } from '../../../../libs/db/types';
 
-
 // Use PromotionCategory type directly from libs/db/types.ts
 export type { PromotionCategory };
 

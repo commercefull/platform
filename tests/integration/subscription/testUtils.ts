@@ -1,4 +1,3 @@
-
 // Seeded test data IDs from seeds/20240805001700_seedSubscriptionTestData.js
 export const SEEDED_SUBSCRIPTION_PRODUCT_IDS = {
   MONTHLY_BOX: '01937000-0000-7000-8000-000000000001',
@@ -19,7 +18,6 @@ export const SEEDED_CUSTOMER_SUBSCRIPTION_IDS = {
   PAUSED_WEEKLY: '01937002-0000-7000-8000-000000000002',
   CANCELLED_ANNUAL: '01937002-0000-7000-8000-000000000003',
 };
-
 
 export function createTestSubscriptionProduct(productId: string, overrides: Partial<unknown> = {}) {
   return {
@@ -68,5 +66,3 @@ export function createTestSubscriptionPlan(subscriptionProductId: string, overri
     ...overrides,
   };
 }
-
-

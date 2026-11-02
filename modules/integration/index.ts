@@ -8,4 +8,3 @@ export * from './domain/entities/IntegrationLog';
 // Interface exports (routers, GraphQL)
 export { integrationBusinessRouter } from './interface/routers/integrationRouter';
 export * from './interface/controllers';
-

@@ -27,9 +27,7 @@ function rowToBenefit(row: DbMembershipPlanBenefit): MembershipPlanBenefit {
 
 class MembershipPlanBenefitRepo {
   async findById(id: string): Promise<MembershipPlanBenefit | null> {
-    const row = await queryOne<DbMembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [
-      id,
-    ]);
+    const row = await queryOne<DbMembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "membershipPlanBenefitId" = $1`, [id]);
     return row ? rowToBenefit(row) : null;
   }
 
@@ -50,10 +48,10 @@ class MembershipPlanBenefitRepo {
   }
 
   async findByPlanAndBenefit(planId: string, benefitId: string): Promise<MembershipPlanBenefit | null> {
-    const row = await queryOne<DbMembershipPlanBenefit>(
-      `SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`,
-      [planId, benefitId],
-    );
+    const row = await queryOne<DbMembershipPlanBenefit>(`SELECT * FROM "membershipPlanBenefit" WHERE "planId" = $1 AND "benefitId" = $2`, [
+      planId,
+      benefitId,
+    ]);
     return row ? rowToBenefit(row) : null;
   }
 

@@ -12,4 +12,3 @@ export { couponCustomerRouter } from './interface/routers/couponCustomerRouter';
 export { couponBusinessRouter } from './interface/routers/couponRouter';
 export { couponTypeDefs } from './interface/graphql/typeDefs';
 export { couponResolvers } from './interface/graphql/resolvers';
-

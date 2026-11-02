@@ -3,7 +3,6 @@ import { Table, ProductAttributeGroup } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductAttributeGroup as DbProductAttributeGroup } from '../../../../libs/db/types';
 
-
 // Use ProductAttributeGroup type directly from libs/db/types.ts
 export type { ProductAttributeGroup };
 

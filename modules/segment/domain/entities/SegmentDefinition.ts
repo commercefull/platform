@@ -57,7 +57,6 @@ export interface SegmentCondition {
 
 export type MatchMode = 'all' | 'any';
 
-
 export interface SegmentDefinitionProps {
   segmentId: string;
   name: string;

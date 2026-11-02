@@ -1,4 +1,3 @@
-
 // Seeded test data IDs from seeds/20240805002100_seedWarehouseTestData.js
 export const SEEDED_WAREHOUSE_IDS = {
   MAIN: '0193b000-0000-7000-8000-000000000001',
@@ -20,7 +19,6 @@ export const SEEDED_BIN_IDS = {
   B1_01: '0193b002-0000-7000-8000-000000000003',
   SHIP_01: '0193b002-0000-7000-8000-000000000004',
 };
-
 
 export function createTestWarehouse(overrides: Partial<unknown> = {}) {
   return {

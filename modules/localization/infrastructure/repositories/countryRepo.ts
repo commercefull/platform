@@ -4,7 +4,6 @@ import { unixTimestamp } from '../../../../libs/date';
 import { CountryCodeAlreadyExistsError, FailedToCreateCountryError } from '../../domain/errors/LocalizationErrors';
 import type { Country as DbCountry } from '../../../../libs/db/types';
 
-
 // Use Country type directly from libs/db/types.ts
 export type {};
 

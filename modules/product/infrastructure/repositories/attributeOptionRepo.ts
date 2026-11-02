@@ -3,7 +3,6 @@ import { Table, ProductAttributeOption } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductAttributeOption as DbProductAttributeOption } from '../../../../libs/db/types';
 
-
 // Use ProductAttributeOption type directly from libs/db/types.ts
 export type { ProductAttributeOption };
 
@@ -12,7 +11,9 @@ type UpdateProps = Partial<CreateProps>;
 
 export class AttributeOptionRepo {
   async findOne(id: string): Promise<ProductAttributeOption | null> {
-    return queryOne<DbProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`, [id]);
+    return queryOne<DbProductAttributeOption>(`SELECT * FROM "${Table.ProductAttributeOption}" WHERE "productAttributeOptionId" = $1`, [
+      id,
+    ]);
   }
 
   async findByValue(attributeId: string, value: string): Promise<ProductAttributeOption | null> {

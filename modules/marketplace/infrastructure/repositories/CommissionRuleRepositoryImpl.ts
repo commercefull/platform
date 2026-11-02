@@ -1,11 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { CommissionRule } from '../../domain/entities/CommissionRule';
-import type {
-  CommissionRuleProps,
-  CommissionScope,
-  CommissionTier,
-  CommissionType,
-} from '../../domain/entities/CommissionRule';
+import type { CommissionRuleProps, CommissionScope, CommissionTier, CommissionType } from '../../domain/entities/CommissionRule';
 import type { CommissionRuleRepository } from '../../domain/repositories/MarketplaceRepository';
 import type { MarketplaceCommissionRule as DbMarketplaceCommissionRule } from '../../../../libs/db/types';
 

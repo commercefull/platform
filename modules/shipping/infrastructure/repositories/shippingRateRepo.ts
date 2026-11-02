@@ -9,7 +9,6 @@ import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingE
 import { calculateRate } from '../../domain/services/calculateRate';
 import type { ShippingRate as DbShippingRate } from '../../../../libs/db/types';
 
-
 export { ShippingRate };
 
 export type CreateShippingRateInput = Omit<ShippingRate, 'shippingRateId' | 'createdAt' | 'updatedAt'>;

@@ -1,13 +1,6 @@
 import { query, queryOne } from '../../../../libs/db';
 import { Vendor } from '../../domain/entities/Vendor';
-import type {
-  VendorAddress,
-  VendorBankInfo,
-  VendorProps,
-  VendorStats,
-  VendorStatus,
-  VendorTier,
-} from '../../domain/entities/Vendor';
+import type { VendorAddress, VendorBankInfo, VendorProps, VendorStats, VendorStatus, VendorTier } from '../../domain/entities/Vendor';
 import type { VendorRepository } from '../../domain/repositories/MarketplaceRepository';
 import type { MarketplaceVendor as DbMarketplaceVendor } from '../../../../libs/db/types';
 

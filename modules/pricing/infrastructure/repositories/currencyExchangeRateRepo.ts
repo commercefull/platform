@@ -4,7 +4,6 @@ import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 import type { CurrencyExchangeRate as DbCurrencyExchangeRate } from '../../../../libs/db/types';
 
-
 export type CurrencyExchangeRateCreateParams = Omit<
   CurrencyExchangeRate,
   'currencyExchangeRateId' | 'createdAt' | 'updatedAt' | 'inverseRate' | 'lastUpdated'

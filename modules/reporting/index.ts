@@ -11,4 +11,3 @@ export { reportingBusinessRouter } from './interface/routers/reportingBusinessRo
 export { reportingTypeDefs } from './interface/graphql/typeDefs';
 export { reportingResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

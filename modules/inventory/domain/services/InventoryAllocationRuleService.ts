@@ -79,4 +79,3 @@ export class InventoryAllocationRuleService {
     return result.allowBackorder;
   }
 }
-

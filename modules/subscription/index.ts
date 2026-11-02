@@ -13,4 +13,3 @@ export { subscriptionBusinessRouter } from './interface/routers/subscriptionBusi
 export { subscriptionTypeDefs } from './interface/graphql/typeDefs';
 export { subscriptionResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

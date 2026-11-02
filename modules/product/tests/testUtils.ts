@@ -188,7 +188,6 @@ export function createProductTypeRow(overrides: Partial<ProductTypeRow> = {}): P
   };
 }
 
-
 import type { ProductReview, ProductReviewMedia, ProductReviewVote, ProductLookupPort } from '../domain/repositories/ProductCatalogPorts';
 
 export function createProductReview(overrides: Partial<ProductReview> = {}): ProductReview {

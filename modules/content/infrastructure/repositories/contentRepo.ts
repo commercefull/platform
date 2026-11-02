@@ -27,13 +27,6 @@ import type { ContentPageTranslation as DbContentPageTranslation } from '../../.
 import type { ContentBlock as DbContentBlock } from '../../../../libs/db/types';
 import type { ContentTemplate as DbContentTemplate } from '../../../../libs/db/types';
 
-
-
-
-
-
-
-
 // Table constants
 const TABLES = {
   CONTENT_TYPE: Table.ContentType,

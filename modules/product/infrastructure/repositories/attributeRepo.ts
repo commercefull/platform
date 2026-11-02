@@ -3,7 +3,6 @@ import { Table, ProductAttribute } from '../../../../libs/db/types';
 import { ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductAttribute as DbProductAttribute } from '../../../../libs/db/types';
 
-
 // Use ProductAttribute type directly from libs/db/types.ts
 export type { ProductAttribute };
 

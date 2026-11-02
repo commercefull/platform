@@ -3,7 +3,6 @@ import { Table, ProductVariant } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductVariant as DbProductVariant } from '../../../../libs/db/types';
 
-
 // Use ProductVariant type directly from libs/db/types.ts
 export type { ProductVariant };
 

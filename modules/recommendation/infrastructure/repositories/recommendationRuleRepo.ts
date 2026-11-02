@@ -50,10 +50,9 @@ class RecommendationRuleRepository implements RuleRepository {
   }
 
   async findById(recommendationRuleId: string): Promise<RecommendationRuleProps | null> {
-    const row = await queryOne<DbRecommendationRule>(
-      `SELECT * FROM "recommendationRule" WHERE "recommendationRuleId" = $1`,
-      [recommendationRuleId],
-    );
+    const row = await queryOne<DbRecommendationRule>(`SELECT * FROM "recommendationRule" WHERE "recommendationRuleId" = $1`, [
+      recommendationRuleId,
+    ]);
     return row ? rowToRule(row) : null;
   }
 

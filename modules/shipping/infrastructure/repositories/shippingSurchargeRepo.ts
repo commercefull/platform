@@ -7,7 +7,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { Table, ShippingSurcharge } from '../../../../libs/db/types';
 import type { ShippingSurcharge as DbShippingSurcharge } from '../../../../libs/db/types';
 
-
 export { ShippingSurcharge };
 
 const TABLE = Table.ShippingSurcharge;

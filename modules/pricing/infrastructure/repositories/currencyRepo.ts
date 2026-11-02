@@ -27,8 +27,6 @@ function rowToCurrencyRegion(row: DbCurrencyRegion): CurrencyRegion {
   };
 }
 
-
-
 /**
  * Currency Repository
  *

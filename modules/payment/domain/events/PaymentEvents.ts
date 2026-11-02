@@ -1,11 +1,3 @@
 /**
  * Payment Domain Events
  */
-
-
-
-
-
-
-
-

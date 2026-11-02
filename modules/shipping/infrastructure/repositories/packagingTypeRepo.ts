@@ -8,7 +8,6 @@ import { Table, ShippingPackagingType } from '../../../../libs/db/types';
 import { FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import type { ShippingPackagingType as DbShippingPackagingType } from '../../../../libs/db/types';
 
-
 export { ShippingPackagingType };
 
 export type CreateShippingPackagingTypeInput = Omit<ShippingPackagingType, 'shippingPackagingTypeId' | 'createdAt' | 'updatedAt'>;

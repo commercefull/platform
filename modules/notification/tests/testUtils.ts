@@ -115,7 +115,6 @@ export function createNotificationDeliveryLog(overrides: Partial<NotificationDel
   } as NotificationDeliveryLog;
 }
 
-
 export function createNotificationPreference(overrides: Partial<NotificationPreference> = {}): NotificationPreference {
   return {
     notificationPreferenceId: 'pref-1',

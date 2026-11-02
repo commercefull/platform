@@ -7,10 +7,6 @@ import type { PromotionRule as DbPromotionRule } from '../../../../libs/db/types
 import type { PromotionAction as DbPromotionAction } from '../../../../libs/db/types';
 import type { PromotionUsage as DbPromotionUsage } from '../../../../libs/db/types';
 
-
-
-
-
 // Table name constants
 const PROMOTION_TABLE = Table.Promotion;
 const PROMOTION_RULE_TABLE = Table.PromotionRule;

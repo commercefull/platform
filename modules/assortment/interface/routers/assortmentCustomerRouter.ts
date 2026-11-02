@@ -6,10 +6,7 @@
 
 import { createHttpRouter } from 'libs/http';
 import { asyncHandler } from '../../../../libs/asyncHandler';
-import {
-  getCollectionBySlug,
-  listCollections,
-} from '../controllers/AssortmentCustomerController';
+import { getCollectionBySlug, listCollections } from '../controllers/AssortmentCustomerController';
 const router = createHttpRouter();
 
 /**

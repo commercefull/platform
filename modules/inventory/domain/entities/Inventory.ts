@@ -63,7 +63,6 @@ export interface InventoryMovement {
   createdAt: Date;
 }
 
-
 export class Inventory {
   private props: InventoryItem;
 

@@ -3,7 +3,6 @@ import { Table, ProductImage } from '../../../../libs/db/types';
 import { ProductImageNotFoundError, ProductValidationError, FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 import type { ProductImage as DbProductImage } from '../../../../libs/db/types';
 
-
 // Use ProductImage type directly from libs/db/types.ts
 export type {};
 
@@ -25,8 +24,9 @@ class ProductImageRepo {
 
   async findByProductId(productId: string): Promise<ProductImage[]> {
     return (
-      (await query<DbProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`, [productId])) ||
-      []
+      (await query<DbProductImage[]>(`SELECT * FROM "${Table.ProductImage}" WHERE "productId" = $1 ORDER BY "position" ASC`, [
+        productId,
+      ])) || []
     );
   }
 

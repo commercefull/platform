@@ -19,7 +19,12 @@ import {
   PaymentRefundNotFoundError,
   FailedToUpdatePaymentRefundError,
 } from '../../domain/errors/PaymentErrors';
-import type { PaymentGateway as DbPaymentGateway, PaymentMethodConfig as DbPaymentMethodConfig, PaymentRefund as DbPaymentRefund, PaymentTransaction as DbPaymentTransaction } from '../../../../libs/db/types';
+import type {
+  PaymentGateway as DbPaymentGateway,
+  PaymentMethodConfig as DbPaymentMethodConfig,
+  PaymentRefund as DbPaymentRefund,
+  PaymentTransaction as DbPaymentTransaction,
+} from '../../../../libs/db/types';
 
 // ============================================================================
 // Types

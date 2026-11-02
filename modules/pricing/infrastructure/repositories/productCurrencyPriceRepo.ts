@@ -4,7 +4,6 @@ import { unixTimestamp } from '../../../../libs/date';
 import { PricingValidationError, FailedToCreatePricingError } from '../../domain/errors/PricingErrors';
 import type { ProductCurrencyPrice as DbProductCurrencyPrice } from '../../../../libs/db/types';
 
-
 /**
  * Currency-specific price override for a product/variant.
  * Monetary amounts are integer cents — pg returns bigint as string,
@@ -45,9 +44,10 @@ export class ProductCurrencyPriceRepo {
    * Find price by ID
    */
   async findById(productCurrencyPriceId: string): Promise<CurrencyPriceEntry | null> {
-    const row = await queryOne<DbProductCurrencyPrice>(`SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`, [
-      productCurrencyPriceId,
-    ]);
+    const row = await queryOne<DbProductCurrencyPrice>(
+      `SELECT * FROM "${Table.ProductCurrencyPrice}" WHERE "productCurrencyPriceId" = $1`,
+      [productCurrencyPriceId],
+    );
     return row ? mapRow(row) : null;
   }
 

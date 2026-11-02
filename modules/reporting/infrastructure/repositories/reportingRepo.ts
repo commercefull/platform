@@ -14,7 +14,10 @@ import type {
   ReportFrequency,
   ReportFormat,
 } from '../../domain/entities/ReportEntities';
-import type { ReportingReportExecution as DbReportingReportExecution, ReportingReportSchedule as DbReportingReportSchedule } from '../../../../libs/db/types';
+import type {
+  ReportingReportExecution as DbReportingReportExecution,
+  ReportingReportSchedule as DbReportingReportSchedule,
+} from '../../../../libs/db/types';
 
 export interface CreateReportScheduleParams {
   organizationId?: string;
@@ -294,4 +297,3 @@ export async function findExecutionById(id: string): Promise<ReportExecutionProp
   const row = await queryOne<DbReportingReportExecution>(`SELECT * FROM "reportingReportExecution" WHERE "reportExecutionId" = $1`, [id]);
   return row ? mapExecutionRow(row) : null;
 }
-

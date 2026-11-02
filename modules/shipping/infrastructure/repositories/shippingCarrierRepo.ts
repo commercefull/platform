@@ -8,7 +8,6 @@ import { Table, ShippingCarrier } from '../../../../libs/db/types';
 import { ShippingCarrierAlreadyExistsError, FailedToCreateShippingEntityError } from '../../domain/errors/ShippingErrors';
 import type { ShippingCarrier as DbShippingCarrier } from '../../../../libs/db/types';
 
-
 // Re-export the type for convenience
 export { ShippingCarrier };
 

@@ -21,7 +21,6 @@ import { PaymentRefund } from '../../domain/entities/PaymentRefund';
 import { TransactionStatus, RefundStatus } from '../../domain/valueObjects/PaymentStatus';
 import type { PaymentSettings as DbPaymentSettings, PaymentWebhook as DbPaymentWebhook } from '../../../../libs/db/types';
 
-
 // Maps repository-facing field names onto the actual storedPaymentMethod schema
 // (e.g. "paymentMethod" -> type, "token" -> providerToken).
 const STORED_METHOD_COLUMNS = `"storedPaymentMethodId", "customerId", "paymentMethod" AS type, provider, token AS "providerToken", "lastFour" AS last4, "cardType" AS brand, NULLIF("expiryMonth", '')::int AS "expiryMonth", NULLIF("expiryYear", '')::int AS "expiryYear", "isDefault", "isExpired", "createdAt", "updatedAt"`;
@@ -450,9 +449,7 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findSettingsByMerchant(organizationId: string): Promise<PaymentSettings | null> {
-    const row = await queryOne<DbPaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [
-      organizationId,
-    ]);
+    const row = await queryOne<DbPaymentSettings>(`SELECT * FROM "paymentSettings" WHERE "organizationId" = $1`, [organizationId]);
     return row ? this.rowToSettings(row) : null;
   }
 
@@ -484,7 +481,7 @@ export class PaymentRepo implements IPaymentRepository {
 
   async findAllSettings(): Promise<PaymentSettings[]> {
     const rows = await query<DbPaymentSettings[]>(`SELECT * FROM "paymentSettings" ORDER BY "createdAt" DESC`);
-    return (rows || []).map((r) => this.rowToSettings(r));
+    return (rows || []).map(r => this.rowToSettings(r));
   }
 
   // ==========================================================================
@@ -529,9 +526,10 @@ export class PaymentRepo implements IPaymentRepository {
   }
 
   async findStoredMethodById(storedPaymentMethodId: string): Promise<StoredPaymentMethod | null> {
-    return queryOne<StoredPaymentMethodRow>(`SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`, [
-      storedPaymentMethodId,
-    ]);
+    return queryOne<StoredPaymentMethodRow>(
+      `SELECT ${STORED_METHOD_COLUMNS} FROM "storedPaymentMethod" WHERE "storedPaymentMethodId" = $1`,
+      [storedPaymentMethodId],
+    );
   }
 
   async createStoredMethod(params: StoredPaymentMethodCreateParams): Promise<StoredPaymentMethod | null> {

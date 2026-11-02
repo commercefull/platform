@@ -2,7 +2,6 @@ import { query, queryOne } from '../../../../libs/db';
 import { ProductAttributeSet as DbProductAttributeSet, Table } from '../../../../libs/db/types';
 import { FailedToCreateProductError } from '../../domain/errors/ProductErrors';
 
-
 export type ProductAttributeSet = DbProductAttributeSet;
 
 export interface ProductAttributeSetWithAttributes extends ProductAttributeSet {

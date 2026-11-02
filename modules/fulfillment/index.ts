@@ -16,4 +16,3 @@ export { fulfillmentLocationRouter } from './interface/routers/fulfillmentLocati
 export { fulfillmentTypeDefs } from './interface/graphql/typeDefs';
 export { fulfillmentResolvers } from './interface/graphql/resolvers';
 export * from './interface/controllers';
-

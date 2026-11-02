@@ -43,9 +43,7 @@ function toSummary(loc: PickupLocation): PickupLocationSummary {
 }
 
 export class StorePickupLocationAdapter implements PickupLocationPort {
-  constructor(
-    private readonly locations: PickupLocationRepoPort,
-  ) {}
+  constructor(private readonly locations: PickupLocationRepoPort) {}
 
   async findById(id: string): Promise<PickupLocationSummary | null> {
     const loc = await this.locations.getLocation(id);
