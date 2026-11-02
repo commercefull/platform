@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/commercefull/platform/compare/v1.7.1...v1.7.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* **pricing:** preserve API field aliases in row mappers ([9be93d7](https://github.com/commercefull/platform/commit/9be93d77ba6a6ea8a71044d4810195d1483e544d))
+
 ## [1.7.1](https://github.com/commercefull/platform/compare/v1.7.0...v1.7.1) (2026-11-02)
 
 ### Bug Fixes
